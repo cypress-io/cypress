@@ -18,20 +18,21 @@ import util from '../lib/util'
 export default class Iframes extends Component {
   _disposers = []
 
+  // TODO: fix AUT iframe layout
   render () {
-    const { width, height, scale, marginLeft, headerHeight, reporterWidth, scriptError } = this.props.state
+    const { width, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
     return (
       <div
         className={cs('iframes-container', { 'has-error': !!scriptError })}
-        style={{ left: reporterWidth, top: headerHeight }}
+        style={{ top: headerHeight }}
       >
         <div
           ref='container'
           className='size-container'
           style={{
             marginLeft,
-            height,
+            // height: height - headerHeight / 2,
             transform: `scale(${scale})`,
             width,
           }}

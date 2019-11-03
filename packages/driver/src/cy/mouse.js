@@ -2,7 +2,7 @@ const $ = require('jquery')
 const _ = require('lodash')
 const $dom = require('../dom')
 const $elements = require('../dom/elements')
-const $Keyboard = require('./keyboard').default
+const Keyboard = require('./keyboard')
 const $selection = require('../dom/selection')
 const debug = require('debug')('cypress:driver:mouse')
 
@@ -39,116 +39,20 @@ const getMouseCoords = (state) => {
   return state('mouseCoords')
 }
 
-const create = (state, focused, Cypress) => {
-  const isFirefox = Cypress.browser.family === 'firefox'
-
-  const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
-    const constructor = el.ownerDocument.defaultView.PointerEvent
-
-    return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
-  }
-  const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
-    // IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
-    // https://dom.spec.whatwg.org/#dom-document-createevent
-    const constructor = el.ownerDocument.defaultView.MouseEvent
-
-    return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
-  }
-
-  const sendPointerup = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
-      return {}
-    }
-
-    return sendPointerEvent(el, evtOptions, 'pointerup', true, true)
-  }
-  const sendPointerdown = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
-      return {}
-    }
-
-    return sendPointerEvent(el, evtOptions, 'pointerdown', true, true)
-  }
-  const sendPointermove = (el, evtOptions) => {
-    return sendPointerEvent(el, evtOptions, 'pointermove', true, true)
-  }
-  const sendPointerover = (el, evtOptions) => {
-    return sendPointerEvent(el, evtOptions, 'pointerover', true, true)
-  }
-  const sendPointerenter = (el, evtOptions) => {
-    return sendPointerEvent(el, evtOptions, 'pointerenter', false, false)
-  }
-  const sendPointerleave = (el, evtOptions) => {
-    return sendPointerEvent(el, evtOptions, 'pointerleave', false, false)
-  }
-  const sendPointerout = (el, evtOptions) => {
-    return sendPointerEvent(el, evtOptions, 'pointerout', true, true)
-  }
-
-  const sendMouseup = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
-      return {}
-    }
-
-    return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
-  }
-  const sendMousedown = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
-      return {}
-    }
-
-    return sendMouseEvent(el, evtOptions, 'mousedown', true, true)
-  }
-  const sendMousemove = (el, evtOptions) => {
-    return sendMouseEvent(el, evtOptions, 'mousemove', true, true)
-  }
-  const sendMouseover = (el, evtOptions) => {
-    return sendMouseEvent(el, evtOptions, 'mouseover', true, true)
-  }
-  const sendMouseenter = (el, evtOptions) => {
-    return sendMouseEvent(el, evtOptions, 'mouseenter', false, false)
-  }
-  const sendMouseleave = (el, evtOptions) => {
-    return sendMouseEvent(el, evtOptions, 'mouseleave', false, false)
-  }
-  const sendMouseout = (el, evtOptions) => {
-    return sendMouseEvent(el, evtOptions, 'mouseout', true, true)
-  }
-  const sendClick = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
-      return {}
-    }
-
-    return sendMouseEvent(el, evtOptions, 'click', true, true)
-  }
-  const sendDblclick = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
-      return {}
-    }
-
-    return sendMouseEvent(el, evtOptions, 'dblclick', true, true)
-  }
-  const sendContextmenu = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
-      return {}
-    }
-
-    return sendMouseEvent(el, evtOptions, 'contextmenu', true, true)
-  }
-  const shouldFireMouseMoveEvents = (targetEl, lastHoveredEl, fromElViewport, coords) => {
+const shouldFireMouseMoveEvents = (targetEl, lastHoveredEl, fromElViewport, coords) => {
   // not the same element, fire mouse move events
-    if (lastHoveredEl !== targetEl) {
-      return true
-    }
-
-    const xy = (obj) => {
-      return _.pick(obj, 'x', 'y')
-    }
-
-    // if we have the same element, but the xy coords are different
-    // then fire mouse move events...
-    return !_.isEqual(xy(fromElViewport), xy(coords))
+  if (lastHoveredEl !== targetEl) {
+    return true
   }
+
+  const xy = (obj) => {
+    return _.pick(obj, 'x', 'y')
+  }
+
+  // if we have the same element, but the xy coords are different
+  // then fire mouse move events...
+  return !_.isEqual(xy(fromElViewport), xy(coords))
+}
 
 const shouldMoveCursorToEndAfterMousedown = (el) => {
   if (!$elements.isElement(el)) {
@@ -170,11 +74,11 @@ const shouldMoveCursorToEndAfterMousedown = (el) => {
   return true
 }
 
-const create = (state, keyboard, focused) => {
+const create = (state, keyboard, focused, Cypress) => {
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
       const _activeModifiers = keyboard.getActiveModifiers(state)
-      const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
+      const modifiersEventOptions = Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
       return _.extend({
@@ -385,8 +289,6 @@ const create = (state, keyboard, focused) => {
     _downEvents (coords, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       const { x, y } = coords
       const el = forceEl || mouse.moveToCoords(coords)
-
-      debug('movetocoordsorforce', coords, el)
 
       const win = $dom.getWindowByElement(el)
 
@@ -689,8 +591,8 @@ const { stopPropagation } = window.MouseEvent.prototype
 
 const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, Constructor) => {
   evtOptions = _.extend({}, evtOptions, { bubbles, cancelable })
-  const _eventModifiers = $Keyboard.fromModifierEventOptions(evtOptions)
-  const modifiers = $Keyboard.modifiersToString(_eventModifiers)
+  const _eventModifiers = Keyboard.fromModifierEventOptions(evtOptions)
+  const modifiers = Keyboard.modifiersToString(_eventModifiers)
 
   const evt = new Constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
 
@@ -712,6 +614,72 @@ const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false,
     el,
     modifiers,
   }
+}
+
+const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
+  const Constructor = el.ownerDocument.defaultView.PointerEvent
+
+  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, Constructor)
+}
+const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
+  // TODO: IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
+  // https://dom.spec.whatwg.org/#dom-document-createevent
+  const Constructor = el.ownerDocument.defaultView.MouseEvent
+
+  return sendEvent(evtName, el, evtOptions, bubbles, cancelable, Constructor)
+}
+
+const sendPointerup = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerup', true, true)
+}
+const sendPointerdown = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerdown', true, true)
+}
+const sendPointermove = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointermove', true, true)
+}
+const sendPointerover = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerover', true, true)
+}
+const sendPointerenter = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerenter', false, false)
+}
+const sendPointerleave = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerleave', false, false)
+}
+const sendPointerout = (el, evtOptions) => {
+  return sendPointerEvent(el, evtOptions, 'pointerout', true, true)
+}
+
+const sendMouseup = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseup', true, true)
+}
+const sendMousedown = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mousedown', true, true)
+}
+const sendMousemove = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mousemove', true, true)
+}
+const sendMouseover = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseover', true, true)
+}
+const sendMouseenter = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseenter', false, false)
+}
+const sendMouseleave = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseleave', false, false)
+}
+const sendMouseout = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'mouseout', true, true)
+}
+const sendClick = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'click', true, true)
+}
+const sendDblclick = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'dblclick', true, true)
+}
+const sendContextmenu = (el, evtOptions) => {
+  return sendMouseEvent(el, evtOptions, 'contextmenu', true, true)
 }
 
 const formatReasonNotFired = (reason) => {

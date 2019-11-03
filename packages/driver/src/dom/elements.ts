@@ -1089,6 +1089,7 @@ export {
   isIframe,
   isTextarea,
   isInputType,
+  isAttrType,
   isFocused,
   isFocusedOrInFocused,
   isInputAllowingImplicitFormSubmission,

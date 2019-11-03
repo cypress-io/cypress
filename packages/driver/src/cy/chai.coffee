@@ -129,7 +129,6 @@ chai.use (chai, u) ->
 
   overrideChaiObjDisplay = ->
     chai.util.objDisplay = (obj) ->
-      console.log('overriden objDisplay')
       str = chai.util.inspect(obj)
       type = Object::toString.call(obj)
       if chai.config.truncateThreshold and str.length >= chai.config.truncateThreshold

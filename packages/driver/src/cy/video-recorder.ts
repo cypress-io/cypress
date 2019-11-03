@@ -1,7 +1,6 @@
+// TODO: record only if set in config
 export function create (state, Cypress) {
-  console.log('videorecorder')
   if (Cypress.browser.family === 'firefox') {
-    console.log('isfirefox')
     window.navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
@@ -16,13 +15,12 @@ export function create (state, Cypress) {
         timeslice: 1000,
       }
 
-      const mediaRecorder = new MediaRecorder(stream, options)
+      const mediaRecorder = new window.MediaRecorder(stream, options)
 
       mediaRecorder.start(200)
 
-      console.log({ mediaRecorder })
       mediaRecorder.addEventListener('dataavailable', (e) => {
-        console.log(e)
+        // console.log(e)
         Cypress.action('recorder:frame', e.data)
       })
     })

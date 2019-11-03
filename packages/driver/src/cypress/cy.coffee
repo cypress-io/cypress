@@ -14,7 +14,7 @@ $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
 $Mouse = require("../cy/mouse")
-$Keyboard = require("../cy/keyboard").default
+$Keyboard = require("../cy/keyboard")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -102,7 +102,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   queue = $CommandQueue.create()
 
 
-  VideoRecorder = $VideoRecorder.create(state, Cypress)
+  # VideoRecorder = $VideoRecorder.create(state, Cypress)
   timeouts = $Timeouts.create(state)
   stability = $Stability.create(Cypress, state)
   retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -111,8 +111,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
-  keyboard = new $Keyboard(state)
-  mouse = $Mouse.create(state, focused, Cypress)
+  keyboard = $Keyboard.create(state)
+  mouse = $Mouse.create(state, keyboard, focused, Cypress)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -198,6 +198,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
+
+      contentWindow.HTMLInputElement.prototype.select = ->
+        $selection.interceptSelect.call(@)
+
 
       cssModificationSpy = (original, args...) ->
         snapshots.onCssModified(@href)

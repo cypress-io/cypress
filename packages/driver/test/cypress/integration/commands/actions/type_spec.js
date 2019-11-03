@@ -416,8 +416,11 @@ describe('src/cy/commands/actions/type', () => {
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const $txt = cy.$$(':text:first')
 
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+
+        cy.spy(cy, 'ensureElementIsNotAnimating')
+
         cy.get(':text:first').type('foo', { animationDistanceThreshold: 1000 }).then(() => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
@@ -431,8 +434,11 @@ describe('src/cy/commands/actions/type', () => {
 
         const $txt = cy.$$(':text:first')
 
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
+
+        cy.spy(cy, 'ensureElementIsNotAnimating')
+
         cy.get(':text:first').type('foo').then(() => {
-          const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($txt)
           const { args } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
@@ -1218,7 +1224,9 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         it('can input decimal', () => {
-          cy.get('#number-without-value').type('2.0').then(($input) => {
+          cy.get('#number-without-value')
+          .type('2.0')
+          .then(($input) => {
             expect($input).to.have.value('2.0')
           })
         })
@@ -1479,8 +1487,14 @@ describe('src/cy/commands/actions/type', () => {
           let keydown = cy.stub()
 
           cy.get('area:first')
-          .then(($el) => $el.on('keydown', keydown))
-          .focus().type('foo')
+          // TODO: look into why using .then here does not retry chained assertions
+          .should(($el) => {
+            $el.on('keydown', keydown)
+          })
+          .should(($el) => {
+            $el.focus()
+          })
+          .type('foo')
           .then(() => expect(keydown).calledThrice)
         })
 
@@ -1923,9 +1937,8 @@ describe('src/cy/commands/actions/type', () => {
           .should(($input) => {
             $input.get(0).setSelectionRange(1, 3)
           })
-          .type('{backspace}').then(($input) => {
-            expect($input).to.have.value('b')
-          })
+          .type('{backspace}')
+          .should('have.value', 'b')
         })
 
         it('sets which and keyCode to 8 and does not fire keypress events', (done) => {
@@ -2643,7 +2656,7 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
-        it('inserts new line into [contenteditable] ', function () {
+        it('inserts new line into [contenteditable] ', () => {
           cy.get('#input-types [contenteditable]:first').invoke('text', 'foo')
           .type('bar{enter}baz{enter}{enter}{enter}quux').then(function ($div) {
             const conditionalNewLines = '\n\n'.repeat(this.multiplierNumNewLines)
@@ -4560,22 +4573,6 @@ describe('src/cy/commands/actions/type', () => {
         })
 
         cy.get('input:text:first').type('foo')
-      })
-
-      it('throws when subject is disabled and force:true', function (done) {
-        cy.timeout(200)
-
-        cy.$$('input:text:first').prop('disabled', true)
-
-        cy.on('fail', (err) => {
-          // get + type logs
-          expect(this.logs.length).eq(2)
-          expect(err.message).to.include('cy.type() failed because it targeted a disabled element.')
-
-          done()
-        })
-
-        cy.get('input:text:first').type('foo', { force: true })
       })
 
       it('throws when submitting within nested forms')

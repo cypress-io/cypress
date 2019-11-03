@@ -17,7 +17,6 @@ $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
 $Keyboard = require("./cy/keyboard")
 $SetterGetter = require("./cypress/setter_getter")
-$Keyboard = require("./cy/keyboard").default
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
@@ -502,7 +501,6 @@ class $Cypress
   minimatch: minimatch
   sinon: sinon
   lolex: lolex
-  Keyboard: $Keyboard
 
   @create = (config) ->
     new $Cypress(config)
