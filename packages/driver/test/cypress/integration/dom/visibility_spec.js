@@ -801,8 +801,67 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css transform', () => {
-      // TODO: why is this skipped?
-      it.skip('is hidden when outside parents transform scale', function () {
+      describe('element visibility by css transform', () => {
+        const add = (el) => {
+          return $(el).appendTo(cy.$$('body'))
+        }
+
+        it('is visible when an element is translated a bit', () => {
+          const el = add(`<div style="transform: translate(10px, 10px)">Translated</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is only skewed', () => {
+          const el = add(`<div style="transform: skew(10deg, 15deg)">Skewed</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is only rotated', () => {
+          const el = add(`<div style="transform: rotate(20deg)">Rotated</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is scaled by non-zero', () => {
+          const el = add(`<div style="transform: scale(2, 3)">Scaled</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is transformed in multiple ways but not scaled to zero', () => {
+          const el = add(`<div style="transform: translate(10px, 15px) skew(30deg) rotate(30deg) scale(4, 1)">Multiple transform</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is hidden when an element is scaled to X axis in 0', () => {
+          const el = add(`<div style="transform: scaleX(0)">ScaleX(0)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is scaled to Y axis in 0', () => {
+          const el = add(`<div style="transform: scaleY(0)">ScaleY(0)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is scaled to Z axis in 0', () => {
+          const el = add(`<div style="transform: scaleZ(0)">ScaleZ(0)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is transformed in multiple ways but scaled to 0 in one axis', () => {
+          const el = add(`<div style="transform: translate(15px, 30px) skew(20deg) rotate(40deg) scale(0, 0)">Multiple 2</div>`)
+
+          expect(el).to.be.hidden
+        })
+      })
+
+      it('is hidden when outside parents transform scale', function () {
         expect(this.$parentWithTransformScaleElOutsideScale.find('span')).to.be.hidden
       })
 

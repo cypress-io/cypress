@@ -61,6 +61,13 @@ const isHidden = (el, name = 'isHidden()') => {
     return true // is hidden
   }
 
+  // when an element is scaled to 0 in one axis
+  // it is not visible to users.
+  // So, it is hidden.
+  if (elIsHiddenByTransfrom($el)) {
+    return true
+  }
+
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
   if (elIsHiddenByAncestors($el)) {
@@ -114,6 +121,53 @@ const elHasVisibilityHidden = ($el) => {
 
 const elHasVisibilityCollapse = ($el) => {
   return $el.css('visibility') === 'collapse'
+}
+
+const elIsHiddenByTransfrom = ($el) => {
+  // We need to see the final calculation of the element.
+  const el = $el[0]
+
+  const style = window.getComputedStyle(el)
+  const transform = style.getPropertyValue('transform')
+
+  if (transform.startsWith('matrix3d')) {
+    const m3d = transform.substring(8).match(/[0-9]+(?:\.[0-9]+)?/g)
+
+    // X Axis
+    if (+m3d[0] === 0 && +m3d[4] === 0 && +m3d[8] === 0) {
+      return true
+    }
+
+    // Y Axis
+    if (+m3d[1] === 0 && +m3d[5] === 0 && +m3d[9] === 0) {
+      return true
+    }
+
+    // Z Axis
+    if (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0) {
+      return true
+    }
+
+    return false
+  }
+
+  if (transform.startsWith('matrix')) {
+    const m = transform.match(/[0-9]+(?:\.[0-9]+)?/g)
+
+    // X Axis
+    if (+m[0] === 0 && +m[2] === 0) {
+      return true
+    }
+
+    // Y Axis
+    if (+m[1] === 0 && +m[3] === 0) {
+      return true
+    }
+
+    return false
+  }
+
+  return false
 }
 
 const elHasDisplayNone = ($el) => {
@@ -270,6 +324,10 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
+  }
+
+  if (elIsHiddenByTransfrom($parent)) {
+    return true
   }
 
   // continue to recursively walk up the chain until we reach body or html
