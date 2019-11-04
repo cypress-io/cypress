@@ -123,6 +123,7 @@ const elHasVisibilityCollapse = ($el) => {
   return $el.css('visibility') === 'collapse'
 }
 
+// This function checks 2 things that can happen: scale and rotate
 const elIsHiddenByTransfrom = ($el) => {
   // We need to see the final calculation of the element.
   const el = $el[0]
@@ -130,41 +131,35 @@ const elIsHiddenByTransfrom = ($el) => {
   const style = window.getComputedStyle(el)
   const transform = style.getPropertyValue('transform')
 
+  // Test scaleZ(0)
+  // width or height of getBoundingClientRect aren't 0 when scaleZ(0).
+  // But it is invisible.
+  // Experiment -> https://codepen.io/sainthkh/pen/LYYQGpm
+  // That's why we're checking transfomation matrix here.
+  //
+  // To understand how this part works,
+  // you need to understand tranformation matrix first.
+  // Matrix is hard to explain with only text. So, check these articles.
+  //
+  // https://www.useragentman.com/blog/2011/01/07/css3-matrix-transform-for-the-mathematically-challenged/
+  // https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+  //
   if (transform.startsWith('matrix3d')) {
     const m3d = transform.substring(8).match(/[0-9]+(?:\.[0-9]+)?/g)
-
-    // X Axis
-    if (+m3d[0] === 0 && +m3d[4] === 0 && +m3d[8] === 0) {
-      return true
-    }
-
-    // Y Axis
-    if (+m3d[1] === 0 && +m3d[5] === 0 && +m3d[9] === 0) {
-      return true
-    }
 
     // Z Axis
     if (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0) {
       return true
     }
-
-    return false
   }
 
-  if (transform.startsWith('matrix')) {
-    const m = transform.match(/[0-9]+(?:\.[0-9]+)?/g)
+  // Other cases
+  if (transform !== 'none') {
+    const { width, height } = el.getBoundingClientRect()
 
-    // X Axis
-    if (+m[0] === 0 && +m[2] === 0) {
+    if (width === 0 || height === 0) {
       return true
     }
-
-    // Y Axis
-    if (+m[1] === 0 && +m[3] === 0) {
-      return true
-    }
-
-    return false
   }
 
   return false

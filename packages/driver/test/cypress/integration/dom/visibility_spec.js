@@ -836,6 +836,12 @@ describe('src/cypress/dom/visibility', () => {
           expect(el).to.be.visible
         })
 
+        it('is visible when an element is rotateZ(90deg)', () => {
+          const el = add(`<div style="transform: rotateZ(90deg)">rotateZ(90deg)</div>`)
+
+          expect(el).to.be.visible
+        })
+
         it('is hidden when an element is scaled to X axis in 0', () => {
           const el = add(`<div style="transform: scaleX(0)">ScaleX(0)</div>`)
 
@@ -858,6 +864,38 @@ describe('src/cypress/dom/visibility', () => {
           const el = add(`<div style="transform: translate(15px, 30px) skew(20deg) rotate(40deg) scale(0, 0)">Multiple 2</div>`)
 
           expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is rotateX(90deg)', () => {
+          const el = add(`<div style="transform: rotateX(90deg)">rotateX(90deg)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is rotateY(90deg)', () => {
+          const el = add(`<div style="transform: rotateX(90deg)">rotateY(90deg)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is rotateX(90deg) rotateY(90deg)', () => {
+          const el = add(`<div style="transform: rotateX(90deg) rotateY(90deg)">rotateX(90deg)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is transformed in multiple ways but rotated to 90 deg in X or Y axis', () => {
+          const el = add(`<div style="transform: rotateX(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+
+          expect(el).to.be.hidden
+
+          const el2 = add(`<div style="transform: rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+
+          expect(el2).to.be.hidden
+
+          const el3 = add(`<div style="transform: rotateX(90deg) rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+
+          expect(el3).to.be.hidden
         })
       })
 
