@@ -691,7 +691,7 @@ jobs:
           command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
-          command: yarn lerna exec --scope cypress "yarn build"
+          command: yarn build --scope cypress
       - run:
           command: ls -la types
           working_directory: cli/build
