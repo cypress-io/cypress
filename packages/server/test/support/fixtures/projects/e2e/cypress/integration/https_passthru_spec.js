@@ -23,6 +23,7 @@ describe('https passthru retries', () => {
       img.onload = () => {
         reject(new Error('onload event fired, but should not have. expected onerror to fire.'))
       }
+
       img.onerror = resolve
     })
   })

@@ -14,7 +14,7 @@ exports['e2e config passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: config_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  config_passing_spec.coffee                                                      (1 of 1)
 
 
   Cypress static methods + props
@@ -23,30 +23,32 @@ exports['e2e config passes 1'] = `
     ✓ .arch
     ✓ .browser
     ✓ .spec
+    .env
+      ✓ doesn't die on <script> tags
 
 
-  5 passing
+  6 passing
 
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        5                          │
-  │ Passing:      5                          │
-  │ Failing:      0                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  0                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     config_passing_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        6                                                                                │
+  │ Passing:      6                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     config_passing_spec.coffee                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing_spec.coffee.mp4      (X second)
 
 
 ====================================================================================================
@@ -54,11 +56,11 @@ exports['e2e config passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ config_passing_spec.coffee                XX:XX        5        5        -        -        - │
+  │ ✔  config_passing_spec.coffee               XX:XX        6        6        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        5        5        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `
@@ -79,7 +81,7 @@ exports['e2e config fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: config_failing_spec.coffee...                                                   (1 of 1) 
+  Running:  config_failing_spec.coffee                                                      (1 of 1)
 
 
   config
@@ -104,35 +106,35 @@ exports['e2e config fails 1'] = `
       at stack trace line
       at stack trace line
       at stack trace line
-      at stack trace line
 
 
 
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        1                          │
-  │ Passing:      0                          │
-  │ Failing:      1                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  1                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     config_failing_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     config_failing_spec.coffee                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/config_failing_spec.coffee/config -- times out looking for a missing element (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/config_failing_spec.coffee/config -- times out      (1280x720)
+     looking for a missing element (failed).png                                                     
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_failing_spec.coffee.mp4      (X second)
 
 
 ====================================================================================================
@@ -140,11 +142,11 @@ exports['e2e config fails 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ config_failing_spec.coffee                XX:XX        1        -        1        -        - │
+  │ ✖  config_failing_spec.coffee               XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

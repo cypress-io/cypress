@@ -52,6 +52,32 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
+
+## We only set top.onerror once since we make it configurable:false
+## but we update cy instance every run (page reload or rerun button)
+curCy = null
+setTopOnError = (cy) ->
+  if curCy
+    curCy = cy
+    return
+  
+  curCy = cy
+
+  onTopError = ->
+    curCy.onUncaughtException.apply(curCy, arguments)
+
+  top.onerror = onTopError
+
+  ## Prevent Mocha from setting top.onerror which would override our handler
+  ## Since the setter will change which event handler gets invoked, we make it a noop
+  Object.defineProperty(top, 'onerror', {
+    set: ->
+    get: -> onTopError
+    configurable: false
+    enumerable: true
+  })
+  
+
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
@@ -83,7 +109,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   location = $Location.create(state)
   focused = $Focused.create(state)
   keyboard = $Keyboard.create(state)
-  mouse = $Mouse.create(state, keyboard)
+  mouse = $Mouse.create(state, keyboard, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -166,9 +192,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.SVGElement.prototype.blur = ->
         focused.interceptBlur(@)
-
-      contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(@)
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
@@ -537,8 +560,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
     if state("runnable")
-      ## make sure we don't ever time out this runnable now
-      timeouts.clearTimeout()
+      ## make sure we reset the runnable's timeout now
+      state("runnable").resetTimeout()
 
     ## if a command fails then after each commands
     ## could also fail unless we clear this out
@@ -680,7 +703,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
-    ensureReceivability: ensures.ensureReceivability
+    ensureNotReadonly: ensures.ensureNotReadonly
+    ensureNotDisabled: ensures.ensureNotDisabled
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
     ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating
@@ -1109,6 +1133,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           args: obj
         })
     })
+  
+  setTopOnError(cy)
 
   ## make cy global in the specWindow
   specWindow.cy = cy

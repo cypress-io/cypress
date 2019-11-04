@@ -22,7 +22,7 @@ if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reload
 
 process.env.NODE_ENV = env
 
-const config: webpack.Configuration = {
+const commonConfig: webpack.Configuration = {
   mode: 'none',
   node: {
     fs: 'empty',
@@ -187,13 +187,12 @@ const config: webpack.Configuration = {
         }),
       ]
     ),
-    ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost' })] : []),
+    ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })] : []),
   ],
 
   cache: true,
-
 }
 
-export default config
+export default commonConfig
 
 export { HtmlWebpackPlugin }

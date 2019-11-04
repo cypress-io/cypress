@@ -19,6 +19,10 @@
 /// <reference path="./jquery/index.d.ts" />
 /// <reference path="./chai-jquery/index.d.ts" />
 
+// jQuery includes dependency "sizzle" that provides types
+// so we include it too in "node_modules/sizzle".
+// This way jQuery can load it using 'reference types="sizzle"' directive
+
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 
@@ -288,7 +292,6 @@ declare namespace Cypress {
       add(name: string, fn: (...args: any[]) => void): void
       add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
       overwrite(name: string, fn: (...args: any[]) => void): void
-      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
     }
 
     /**
@@ -616,7 +619,14 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<Loggable>): Chainable
+    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+
+    /**
+     * Right-click a DOM element.
+     *
+     * @see https://on.cypress.io/rightclick
+     */
+    rightclick(options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
      * Set a debugger and log what the previous command yields.
@@ -2045,10 +2055,25 @@ declare namespace Cypress {
      */
     integrationFolder: string
     /**
+     * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
+     * @default "bundled"
+     */
+    nodeVersion: "system" | "bundled"
+    /**
      * Path to plugins file. (Pass false to disable)
      * @default "cypress/plugins/index.js"
      */
     pluginsFile: string
+    /**
+     * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
+     * @default null
+     */
+    resolvedNodePath: string
+    /**
+     * The version of `node` that is being used to execute plugins.
+     * @example 1.2.3
+     */
+    resolvedNodeVersion: string
     /**
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
@@ -2170,11 +2195,19 @@ declare namespace Cypress {
     height: number
   }
 
+  type Padding =
+    | number
+    | [number]
+    | [number, number]
+    | [number, number, number]
+    | [number, number, number, number]
+
   interface ScreenshotOptions {
     blackout: string[]
     capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
+    padding: Padding
     scale: boolean
     beforeScreenshot(doc: Document): void
     afterScreenshot(doc: Document): void
@@ -2349,6 +2382,11 @@ declare namespace Cypress {
      *    })
      */
     auth: Auth
+
+    /**
+     * Query parameters to append to the `url` of the request.
+     */
+    qs: object
   }
 
   /**
@@ -4364,7 +4402,7 @@ declare namespace Cypress {
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
-  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
     top: number,
     left: number

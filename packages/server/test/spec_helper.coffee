@@ -16,6 +16,7 @@ appData          = require("../lib/util/app_data")
 require("chai")
 .use(require("@cypress/sinon-chai"))
 .use(require("chai-uuid"))
+.use(require("chai-as-promised"))
 
 if process.env.UPDATE
   throw new Error("You're using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
@@ -95,3 +96,10 @@ afterEach ->
   nock.enableNetConnect()
 
   process.env = _.clone(env)
+
+module.exports = {
+  expect: global.expect
+  nock: global.nock
+  proxyquire: global.proxyquire
+  sinon: global.sinon
+}

@@ -1,5 +1,4 @@
 _            = require("lodash")
-exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
 concatStream = require("concat-stream")
@@ -31,6 +30,8 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+XhrServer    = require("./xhr_ws_server")
+templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -85,11 +86,7 @@ class Server
 
     ## since we use absolute paths, configure express-handlebars to not automatically find layouts
     ## https://github.com/cypress-io/cypress/issues/2891
-    app.engine("html", exphbs({
-      defaultLayout: false
-      layoutsDir: []
-      partialsDir: []
-    }))
+    app.engine("html", templateEngine.render)
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
@@ -145,12 +142,13 @@ class Server
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
+      @_xhrServer = XhrServer.create()
 
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
+      @createRoutes(app, config, @_request, getRemoteState, @_xhrServer.getDeferredResponse, project, @_nodeProxy)
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -369,12 +367,11 @@ class Server
       if obj = buffers.getByOriginalUrl(urlStr)
         debug("got previous request buffer for url:", urlStr)
 
-        ## reset the cookies from the existing stream's jar
+        ## reset the cookies from the buffer on the browser
         return runPhase ->
           resolve(
-            request.setJarCookies(obj.jar, automationRequest)
-            .then (c) ->
-              return obj.details
+            Promise.map obj.details.cookies, _.partial(automationRequest, 'set:cookie')
+            .return(obj.details)
           )
 
       redirects = []
@@ -412,14 +409,15 @@ class Server
             _.pick(incomingRes, "headers", "statusCode")
           )
 
-          jar = str.getJar()
+          newUrl ?= urlStr
 
           runPhase =>
-            request.setJarCookies(jar, automationRequest)
-            .then (c) =>
+            ## get the cookies that would be sent with this request so they can be rehydrated
+            automationRequest("get:cookies", {
+              domain: cors.getSuperDomain(newUrl)
+            })
+            .then (cookies) =>
               @_remoteVisitingUrl = false
-
-              newUrl ?= urlStr
 
               statusIs2xxOrAllowedFailure = ->
                 ## is our status code in the 2xx range, or have we disabled failing
@@ -434,7 +432,7 @@ class Server
                 contentType
                 url: newUrl
                 status: incomingRes.statusCode
-                cookies: c
+                cookies
                 statusText: statusCode.getText(incomingRes.statusCode)
                 redirects
                 originalUrl
@@ -484,9 +482,8 @@ class Server
 
                   buffers.set({
                     url: newUrl
-                    jar: jar
                     stream: responseBufferStream
-                    details: details
+                    details
                     originalUrl: originalUrl
                     response: incomingRes
                   })
@@ -635,30 +632,7 @@ class Server
       {hostname} = url.parse("http://#{host}")
 
       onProxyErr = (err, req, res) ->
-        ## by default http-proxy will call socket.end
-        ## with no data, so we need to override the end
-        ## function and write our own response
-        ## https://github.com/nodejitsu/node-http-proxy/blob/master/lib/http-proxy/passes/ws-incoming.js#L159
-        end = socket.end
-        socket.end = ->
-          socket.end = end
-
-          response = [
-            "HTTP/#{req.httpVersion} 502 #{statusCode.getText(502)}"
-            "X-Cypress-Proxy-Error-Message: #{err.message}"
-            "X-Cypress-Proxy-Error-Code: #{err.code}"
-          ].join("\r\n") + "\r\n\r\n"
-
-          proxiedUrl = "#{protocol}//#{hostname}:#{port}"
-
-          debug(
-            "Got ERROR proxying websocket connection to url: '%s' received error: '%s' with code '%s'",
-            proxiedUrl,
-            err.toString()
-            err.code
-          )
-
-          socket.end(response)
+        debug("Got ERROR proxying websocket connection", { err, port, protocol, hostname, req })
 
       proxy.ws(req, socket, head, {
         secure: false
@@ -726,10 +700,11 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onIncomingXhr = @_xhrServer.onIncomingXhr
+    options.onResetXhrServer = @_xhrServer.reset
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
-    # handleListeners(@_server)
 
 module.exports = Server

@@ -9,10 +9,10 @@ $utils = require("../../cypress/utils")
 
 getViewportHeight = (state) ->
   ## TODO this doesn't seem correct
-  Math.min(state("viewportHeight"), $(window).height())
+  Math.min(state("viewportHeight"), window.innerHeight)
 
 getViewportWidth = (state) ->
-  Math.min(state("viewportWidth"), $(window).width())
+  Math.min(state("viewportWidth"), window.innerWidth)
 
 automateScreenshot = (state, options = {}) ->
   { runnable, timeout } = options
@@ -81,6 +81,12 @@ scrollOverrides = (win, doc) ->
       doc.body.style.overflowY = originalBodyOverflowY
     win.scrollTo(originalX, originalY)
 
+validateNumScreenshots = (numScreenshots, automationOptions) ->
+  if numScreenshots < 1
+    $utils.throwErrByPath("screenshot.invalid_height", {
+      log: automationOptions.log
+    })
+
 takeScrollingScreenshots = (scrolls, win, state, automationOptions) ->
   scrollAndTake = ({ y, clip, afterScroll }, index) ->
     win.scrollTo(0, y)
@@ -95,8 +101,7 @@ takeScrollingScreenshots = (scrolls, win, state, automationOptions) ->
 
   Promise
   .mapSeries(scrolls, scrollAndTake)
-  .then (results) ->
-    _.last(results)
+  .then(_.last)
 
 takeFullPageScreenshot = (state, automationOptions) ->
   win = state("window")
@@ -107,6 +112,8 @@ takeFullPageScreenshot = (state, automationOptions) ->
   docHeight = $(doc).height()
   viewportHeight = getViewportHeight(state)
   numScreenshots = Math.ceil(docHeight / viewportHeight)
+
+  validateNumScreenshots(numScreenshots, automationOptions)
 
   scrolls = _.map _.times(numScreenshots), (index) ->
     y = viewportHeight * index
@@ -126,49 +133,78 @@ takeFullPageScreenshot = (state, automationOptions) ->
   takeScrollingScreenshots(scrolls, win, state, automationOptions)
   .finally(resetScrollOverrides)
 
+applyPaddingToElementPositioning = (elPosition, automationOptions) ->
+  if not automationOptions.padding
+    return elPosition
+
+  [ paddingTop, paddingRight, paddingBottom, paddingLeft ] = automationOptions.padding
+
+  return {
+    width: elPosition.width + paddingLeft + paddingRight
+    height: elPosition.height + paddingTop + paddingBottom
+    fromElViewport: {
+      top: elPosition.fromElViewport.top - paddingTop
+      left: elPosition.fromElViewport.left - paddingLeft
+      bottom: elPosition.fromElViewport.bottom + paddingBottom
+    }
+    fromElWindow: {
+      top: elPosition.fromElWindow.top - paddingTop
+    }
+  }
+
 takeElementScreenshot = ($el, state, automationOptions) ->
   win = state("window")
   doc = state("document")
 
   resetScrollOverrides = scrollOverrides(win, doc)
 
-  elPosition = $dom.getElementPositioning($el)
+  elPosition = applyPaddingToElementPositioning(
+    $dom.getElementPositioning($el),
+    automationOptions
+  )
   viewportHeight = getViewportHeight(state)
   viewportWidth = getViewportWidth(state)
   numScreenshots = Math.ceil(elPosition.height / viewportHeight)
 
+  validateNumScreenshots(numScreenshots, automationOptions)
+
   scrolls = _.map _.times(numScreenshots), (index) ->
-    y = elPosition.fromWindow.top + (viewportHeight * index)
+    y = elPosition.fromElWindow.top + (viewportHeight * index)
+    
     afterScroll = ->
-      elPosition = $dom.getElementPositioning($el)
-      x = Math.min(viewportWidth, elPosition.fromViewport.left)
+      elPosition = applyPaddingToElementPositioning(
+        $dom.getElementPositioning($el),
+        automationOptions
+      )
+      x = Math.min(viewportWidth, elPosition.fromElViewport.left)
       width = Math.min(viewportWidth - x, elPosition.width)
 
       if numScreenshots is 1
         return {
           x: x
-          y: elPosition.fromViewport.top
+          y: elPosition.fromElViewport.top
           width: width
           height: elPosition.height
         }
 
       if index + 1 is numScreenshots
-        overlap = (numScreenshots - 1) * viewportHeight + elPosition.fromViewport.top
-        heightLeft = elPosition.fromViewport.bottom - overlap
-        {
+        overlap = (numScreenshots - 1) * viewportHeight + elPosition.fromElViewport.top
+        heightLeft = elPosition.fromElViewport.bottom - overlap
+        
+        return {
           x: x
           y: overlap
           width: width
           height: heightLeft
         }
-      else
-        {
-          x: x
-          y: Math.max(0, elPosition.fromViewport.top)
-          width: width
-          ## TODO: try simplifying to just 'viewportHeight'
-          height: Math.min(viewportHeight, elPosition.fromViewport.top + elPosition.height)
-        }
+        
+      return {
+        x: x
+        y: Math.max(0, elPosition.fromElViewport.top)
+        width: width
+        ## TODO: try simplifying to just 'viewportHeight'
+        height: Math.min(viewportHeight, elPosition.fromElViewport.top + elPosition.height)
+      }
 
     { y, afterScroll }
 
@@ -188,6 +224,7 @@ getBlackout = ({ capture, blackout }) ->
 takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
   {
     capture
+    padding
     clip
     disableTimersAndAnimations
     onBeforeScreenshot
@@ -236,10 +273,11 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       width: getViewportWidth(state)
       height: getViewportHeight(state)
     }
+    padding
     userClip: clip
     viewport: {
-      width: $(window).width()
-      height: $(window).height()
+      width: window.innerWidth
+      height: window.innerHeight
     }
     scaled: getShouldScale(screenshotConfig)
     blackout: getBlackout(screenshotConfig)
@@ -313,7 +351,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       isWin = $dom.isWindow(subject)
 
-      screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "clip", "onBeforeScreenshot", "onAfterScreenshot")
+      screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "padding", "clip", "onBeforeScreenshot", "onAfterScreenshot")
       screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
 
