@@ -1,13 +1,15 @@
-const _ = require('lodash')
-const debug = require('debug')('cypress:server:stream_buffer')
-const stream = require('stream')
+import _ from 'lodash'
+import debugModule from 'debug'
+import stream from 'stream'
+
+const debug = debugModule('cypress:server:stream_buffer')
 
 function streamBuffer (initialSize = 2048) {
-  let buffer = Buffer.allocUnsafe(initialSize)
+  let buffer: Buffer | null = Buffer.allocUnsafe(initialSize)
   let bytesWritten = 0
   let finished = false
 
-  const readers = []
+  const readers: stream.Readable[] = []
 
   const onWrite = (chunk, enc, cb) => {
     if (finished || !chunk || !buffer) {
@@ -53,6 +55,7 @@ function streamBuffer (initialSize = 2048) {
   const writeable = new stream.Writable({
     write: onWrite,
     final: onFinal,
+    // @ts-ignore
     autoDestroy: true,
   })
 
@@ -112,6 +115,7 @@ function streamBuffer (initialSize = 2048) {
 
     const readable = new stream.Readable({
       read: onRead,
+      // @ts-ignore
       autoDestroy: true,
     })
 
