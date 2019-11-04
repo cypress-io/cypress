@@ -2860,15 +2860,23 @@ declare namespace Cypress {
      * invoked after invoking the target function compared to when it’s invoked beforehand.
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
      * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     *
+     * When two arguments are provided, `.increase` asserts that the value of the given object `subject`’s `prop` property is greater after
+     * invoking the target function compared to beforehand.
+     * 
      * @example
      *    let val = 1
      *    function addTwo() { val += 2 }
      *    function getVal() { return val }
      *    cy.wrap(addTwo).should('increase', getVal)
+     * 
+     *    let myObj = { val: 1 }
+     *    function addTwo() { myObj.val += 2 }
+     *    cy.wrap(addTwo).should('increase', myObj, 'val')
      * @see http://chaijs.com/api/bdd/#method_increase
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'increase', value: object, property: string): Chainable<Subject>
+    (chainer: 'increase', value: object, property?: string): Chainable<Subject>
     /**
      * Asserts that the target matches the given regular expression `re`.
      * @example
@@ -3291,7 +3299,7 @@ declare namespace Cypress {
     /**
      * Asserts that the target’s `length` property is not less than or equal to the given number `n`.
      * @example
-     *    cy.wrap([1, 2, 3]).should('not.have.length.let', 2)
+     *    cy.wrap([1, 2, 3]).should('not.have.length.lte', 2)
      *    cy.wrap('foo').should('not.have.length.lte', 2)
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
@@ -3360,15 +3368,23 @@ declare namespace Cypress {
      * invoked after invoking the target function compared to when it’s invoked beforehand.
      * `.increase` also causes all `.by` assertions that follow in the chain to assert how much greater of a number is returned.
      * It’s often best to assert that the return value increased by the expected amount, rather than asserting it increased by any amount.
+     *
+     * When two arguments are provided, `.increase` asserts that the value of the given object `subject`’s `prop` property is greater after
+     * invoking the target function compared to beforehand.
+     * 
      * @example
      *    let val = 1
      *    function addTwo() { val += 2 }
      *    function getVal() { return val }
      *    cy.wrap(() => {}).should('not.increase', getVal)
+     * 
+     *    let myObj = { val: 1 }
+     *    function addTwo() { myObj.val += 2 }
+     *    cy.wrap(() => {}).should('not.increase', myObj, 'val')
      * @see http://chaijs.com/api/bdd/#method_increase
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.increase', value: object, property: string): Chainable<Subject>
+    (chainer: 'not.increase', value: object, property?: string): Chainable<Subject>
     /**
      * Asserts that the target does not match the given regular expression `re`.
      * @example
@@ -3407,7 +3423,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_throw
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'throw', value?: string | RegExp): Chainable<Subject>
+    (chainer: 'not.throw', value?: string | RegExp): Chainable<Subject>
     /**
      * When no arguments are provided, `.throw` invokes the target function and asserts that no error is thrown.
      * When one argument is provided, and it’s a string, `.throw` invokes the target function and asserts that no error is thrown with a message that contains that string.
@@ -3420,7 +3436,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     // tslint:disable-next-line ban-types
-    (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
 
     // sinon-chai
     /**
