@@ -7,7 +7,7 @@ if (!process.env.NEXT_DEV_VERSION) {
 const currentVersion = require('../package.json').version
 
 if (currentVersion === process.env.NEXT_DEV_VERSION) {
-  console.warn('⚠️ NEXT_DEV_VERSION is set to the same value as current package.json version')
+  console.warn('⚠️ NEXT_DEV_VERSION is set to the same value as current package.json version "%s"', currentVersion)
   process.exit(0)
 }
 
