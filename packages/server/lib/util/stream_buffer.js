@@ -10,6 +10,12 @@ function streamBuffer (initialSize = 2048) {
   const readers = []
 
   const onWrite = (chunk, enc, cb) => {
+    if (finished || !chunk || !buffer) {
+      debug('received write after deleting buffer, ignoring %o', { chunkLength: chunk && chunk.length, enc })
+
+      return cb()
+    }
+
     if (chunk.length + bytesWritten > buffer.length) {
       let newBufferLength = buffer.length
 
@@ -55,6 +61,12 @@ function streamBuffer (initialSize = 2048) {
     const readerId = _.uniqueId('reader')
 
     const onRead = function (size) {
+      if (!buffer) {
+        debug('read requested after unpipeAll, ignoring %o', { size })
+
+        return
+      }
+
       // if there are unread bytes in the buffer,
       // send up to bytesWritten back
       if (bytesRead < bytesWritten) {
