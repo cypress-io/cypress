@@ -187,10 +187,15 @@
     "test",
     "testing"
   ],
-  "workspaces": [
-    "cli",
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "cli",
+      "packages/*"
+    ],
+    "nohoist": [
+      "@packages/driver/*"
+    ]
+  },
   "lint-staged": {
     "*.coffee": [
       "yarn stop-only --folder",
