@@ -336,6 +336,20 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
         @expectExitWith(0)
 
+    it "runs project by limiting spec files via config.testFiles string glob pattern", ->
+      cypress.start(["--run-project=#{@todosPath}", "--config=testFiles=#{@todosPath}/tests/test2.coffee"])
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        @expectExitWith(0)
+
+    it "runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns", ->
+      cypress.start(["--run-project=#{@todosPath}", "--config=testFiles=[\"**/test2.coffee\",\"**/test1.js\"]"])
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test1.js"})
+        @expectExitWith(0)
+
     it "does not watch settings or plugins in run mode", ->
       watch = sinon.spy(Watchers.prototype, "watch")
       watchTree = sinon.spy(Watchers.prototype, "watchTree")
