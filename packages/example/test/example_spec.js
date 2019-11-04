@@ -1,15 +1,31 @@
 let example = require('../index')
 let expect = require('chai').expect
-let normalize = require('path').normalize
+const { join, normalize, sep } = require('path')
+const { chain, curry } = require('lodash')
 
-let cwd = process.cwd()
+
+const cwd = process.cwd()
 
 /* global describe, it */
 describe('Cypress Example', function () {
   it('returns path to example_spec', function () {
-    let result = example.getPathToExample()
-    let expected = `${cwd}/cypress/integration/example_spec.js`
+    const expected = normalize(`${cwd}/cypress/integration/examples`)
 
-    expect(normalize(result)).to.eq(normalize(expected))
+    return example.getPathToExamples()
+      .then(expectToAllEqual(expected))
   })
 })
+
+// ---
+function expectToAllEqual(expectedPath) {
+  return (paths) => chain(paths)
+    .map(result => {
+      const pathParts = result.split(sep)
+      return pathParts.slice(0, pathParts.length - 1)
+    })
+    .map(curry(join))
+    .map(curry(normalize))
+    .forEach(p => {
+      expect(p).to.eq(normalize(expectedPath))
+    })
+}
