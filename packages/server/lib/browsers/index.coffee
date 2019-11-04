@@ -44,10 +44,8 @@ getBrowserLauncherByFamily = (family) ->
       require("./electron")
     when "chrome"
       require("./chrome")
-    when "firefox", "firefoxDeveloperEdition", "firefoxNightly"
+    when "firefox"
       require("./firefox")
-    when 'ie'
-      require('./ie.js')
 
 isValidPathToBrowser = (str) ->
   path.basename(str) isnt str
@@ -124,6 +122,7 @@ module.exports = {
         ## or move this functionality into cypress-core-launder
         
         instance = i
+
         ## TODO: normalizing opening and closing / exiting
         ## so that there is a default for each browser but
         ## enable the browser to configure the interface

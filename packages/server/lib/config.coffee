@@ -219,9 +219,7 @@ module.exports = {
     _.includes(names, value)
 
   whitelist: (obj = {}) ->
-    _cfg = _.pick(obj, configKeys.concat(breakingConfigKeys))
-    _cfg.resolved = _.pick(obj.resolved, configKeys.concat(breakingConfigKeys))
-    return _cfg
+    _.pick(obj, configKeys.concat(breakingConfigKeys))
 
   get: (projectRoot, options = {}) ->
     Promise.all([

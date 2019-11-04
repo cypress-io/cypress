@@ -29,13 +29,6 @@ $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 browserInfo = require("./cypress/browser")
 
-# tryCatch = (fn) ->
-#   try
-#     fn()
-#   catch err
-#     debugger
-#     throw err
-
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
   cy: "detachDom getStyles".split(" ")
@@ -189,7 +182,6 @@ class $Cypress
     return null
 
   action: (eventName, args...) ->
-    # tryCatch =>
     ## normalizes all the various ways
     ## other objects communicate intent
     ## and 'action' to Cypress

@@ -286,7 +286,7 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('can force type when element is disabled', function () {
+      it.only('can force type when element is disabled', function () {
         cy.$$('input:text:first').prop('disabled', true)
         cy.get('input:text:first').type('foo', { force: true })
         .should('have.value', 'foo')
