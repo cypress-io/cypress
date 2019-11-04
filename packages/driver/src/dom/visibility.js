@@ -432,6 +432,10 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   }
 
+  if (elIsBackface($el)) {
+    return `This element '${node}' is not visible because it is rotated and its backface is hidden.`
+  }
+
   if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())) {
     parentNode = $elements.stringify($parent, 'short')
     width = elOffsetWidth($parent)
