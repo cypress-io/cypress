@@ -441,6 +441,10 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   }
 
+  if (elIsHiddenByTransfrom($el)) {
+    return `This element '${node}' is not visible because it is hidden by transform.`
+  }
+
   if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())) {
     parentNode = $elements.stringify($parent, 'short')
     width = elOffsetWidth($parent)
