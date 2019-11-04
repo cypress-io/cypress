@@ -12,7 +12,7 @@ We build the NPM package and binary on all major platforms (Linux, Mac, Windows)
 providers. In order to set the version while building we have to set the environment variable
 with the new version on each CI provider *before starting the build*.
 
-Use script command `npm run set-next-ci-version` to do this.
+Use script command `yarn set-next-ci-version` to do this.
 
 ## Building
 
@@ -23,7 +23,7 @@ Use script command `npm run set-next-ci-version` to do this.
 Building a new NPM package is very quick.
 
 - Increment the version in the root `package.json`
-- `cd cli && npm run build`
+- `yarn build --scope cypress`
 
 The steps above:
 
@@ -43,23 +43,23 @@ First, you need to build, zip and upload the application binary to the Cypress s
 
 You can use a single command to do all tasks at once:
 
-```
-npm run binary-deploy
+```shell
+$ yarn binary-deploy
 ```
 
 You can also specify each command separately:
 
-```
-npm run binary-build
-npm run binary-zip
-npm run binary-upload
+```shell
+$ yarn binary-build
+$ yarn binary-zip
+$ yarn binary-upload
 ```
 
 You can pass options to each command to avoid answering questions, for example
 
 ```
-npm run binary-deploy -- --platform darwin --version 0.20.0
-npm run binary-upload -- --platform darwin --version 0.20.0 --zip cypress.zip
+$ yarn binary-deploy --platform darwin --version 0.20.0
+$ yarn binary-upload --platform darwin --version 0.20.0 --zip cypress.zip
 ```
 
 If something goes wrong, see the debug messages using the `DEBUG=cypress:binary ...` environment
@@ -74,7 +74,7 @@ a Docker container), then zip it **from Mac**, then upload it.
 If you are using a Mac you can build the linux binary if you have docker installed.
 
 ```
-npm run binary-build-linux
+yarn binary-build-linux
 ```
 
 ## Publishing
@@ -117,13 +117,13 @@ Once all test projects are reliably working with new changes, publishing can pro
     - Tip: Use [as-a](https://github.com/bahmutov/as-a) to manage environment variables for different situations.
 2. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder
     for `<new target version>`
-    ```
-    npm run move-binaries -- --sha <commit sha> --version <new target version>
+    ```shell
+    $ yarn move-binaries --sha <commit sha> --version <new target version>
     ```
 3. Publish the new NPM package under the dev tag. The unique link to the package file `cypress.tgz`
     is the one already tested above. You can publish to the NPM registry straight from the URL:
     ```
-    npm publish https://cdn.../npm/3.4.0/<long sha>/cypress.tgz --tag dev
+    $ yarn publish https://cdn.../npm/3.4.0/<long sha>/cypress.tgz --tag dev
     ```
 4. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions):
     ```
@@ -137,12 +137,12 @@ Once all test projects are reliably working with new changes, publishing can pro
     ```
 6. Update and publish the changelog and any release-specific documentation changes in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
 7. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
-    ```
-    npm dist-tag add cypress@3.4.0
+    ```shell
+    $ yarn dist-tag add cypress@3.4.0
     ```
 8. Run `binary-release` to update the download server's manifest, set the next CI version, and create an empty version commit:
-    ```
-    npm run binary-release -- --version 3.4.0 --commit`
+    ```shell
+    $ yarn binary-release --version 3.4.0 --commit`
     ```
 9. Tag the current commit with `v3.4.0` and push that tag up.
 10. If needed, push out the updated changes to the docs manifest to `on.cypress.io`.
