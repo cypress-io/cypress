@@ -714,19 +714,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run:
-          name: show current NPM package version
-          command: grep \"version\" package.json
-      - run:
-          name: show next NPM package version to build
-          command: |
-            set -e
-            if [ -z "$NEXT_DEV_VERSION" ]; then
-              echo "env variable NEXT_DEV_VERSION is not set";
-            else
-              echo "env variable NEXT_DEV_VERSION is set to '$NEXT_DEV_VERSION'";
-            fi
-            echo "Generally next dev version should be different from the current version"
+      - run: npm run check-next-dev-version
       - run:
           name: bump NPM version
           command: npm --no-git-tag-version --allow-same-version version ${NEXT_DEV_VERSION:-0.0.0-development}
