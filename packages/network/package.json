@@ -9,7 +9,7 @@
     "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.1",
     "debug": "4.1.1",
     "lodash": "4.17.15",
     "proxy-from-env": "1.0.0"

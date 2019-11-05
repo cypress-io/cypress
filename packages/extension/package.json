@@ -20,7 +20,7 @@
     "watch": "gulp watch"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.1",
     "lodash": "4.17.15"
   },
   "devDependencies": {

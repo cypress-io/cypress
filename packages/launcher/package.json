@@ -19,7 +19,7 @@
     "unit": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.1",
     "debug": "4.1.1",
     "execa": "1.0.0",
     "fs-extra": "8.1.0",
