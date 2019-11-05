@@ -211,6 +211,20 @@ commands:
           packageName: web-config
           packagePath: packages/web-config/package.json
 
+  post-install-comment:
+    description: Post GitHub comment with a blurb on how to install pre-release version
+    steps:
+      - run: ls -la
+      # make sure JSON files with uploaded urls are present
+      - run: ls -la binary-url.json npm-package-url.json
+      - run: cat binary-url.json
+      - run: cat npm-package-url.json
+      - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm npm-package-url.json \
+              --binary binary-url.json
 jobs:
   ## code checkout and NPM installs
   build:
@@ -879,12 +893,6 @@ jobs:
           working_directory: /tmp/testing
           command: $(npm bin)/cypress verify
       - run:
-          name: Post pre-release install comment
-          command: |
-            node scripts/add-install-comment.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json
-      - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
@@ -892,6 +900,15 @@ jobs:
               --binary binary-url.json \
               --provider circle
       - store-npm-logs
+
+  post-pre-release-install-comment:
+    <<: *defaults
+    steps:
+      # needs uploaded NPM and test binary
+      - attach_workspace:
+          at: ~/
+      - run: ls -la
+      - post-install-comment
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
@@ -1175,6 +1192,16 @@ linux-workflow: &linux-workflow
               - issue-1096-firefox-support
         requires:
           - build-binary
+    - post-pre-release-install-comment:
+        context: test-runner:commit-status-checks
+        filters:
+          branches:
+            only:
+              - develop
+              - issue-1096-firefox-support
+        requires:
+          - upload-npm-package
+          - upload-binary
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         filters:
@@ -1318,6 +1345,17 @@ mac-workflow: &mac-workflow
         requires:
           - Mac NPM package
           - Mac binary
+
+    - post-pre-release-install-comment:
+        context: test-runner:commit-status-checks
+        name: Post Mac pre-release install comment
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac NPM package upload
+          - Mac binary upload
 
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
