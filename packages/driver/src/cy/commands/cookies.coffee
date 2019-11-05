@@ -132,7 +132,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
-      automateCookies("get:cookies", { domain: null }, options._log, options.timeout)
+      automateCookies("get:cookies", _.pick(options, 'domain'), options._log, options.timeout)
       .then (resp) ->
         options.cookies = resp
 
