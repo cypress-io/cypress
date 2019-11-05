@@ -214,20 +214,26 @@ validateFile = (file) ->
     validate settings, (errMsg) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
-validateBrowserList = (cfg) ->
-  la(cfg.browsers, "Missing browsers list in the config")
-  la(check.array(cfg.browsers), "Expected a list of browsers", cfg.browsers)
-  la(cfg.browsers.length, "expected at list one browser", cfg.browsers)
+validateBrowserList = (browsers) ->
+  la(browsers, "Missing browsers list in the config", browsers)
+  la(check.array(browsers), "Expected a list of browsers", browsers)
+  la(browsers.length, "Expected at list one browser")
+
+  # Electron browser has path "", but all other browsers
+  # should have an absolute path for launcher to use
+  isEmptyStringOrAbsolutePath = (s) ->
+    check.string(s) && (check.emptyString(s) || path.isAbsolute(s))
 
   isValidBrowser = check.schema({
     name: check.unemptyString,
     family: check.oneOf(["electron", "chrome"]),
     displayName: check.unemptyString,
     version: check.unemptyString,
-    path: path.isAbsolute,
+    path: isEmptyStringOrAbsolutePath,
     majorVersion: check.unemptyString
   })
-  cfg.browsers.forEach (browser) ->
+  browsers.forEach (browser) ->
+    debug("checking browser %o", browser)
     la(isValidBrowser(browser), "invalid browser", browser)
 
 hideSpecialVals = (val, key) ->
@@ -355,6 +361,10 @@ module.exports = {
   updateWithPluginValues: (cfg, overrides = {}) ->
     ## diff the overrides with cfg
     ## including nested objects (env)
+
+    debug("starting config %o", cfg)
+    debug("overrides %o", overrides)
+
     diffs = deepDiff(cfg, overrides, true)
     debug("config diffs %o", diffs)
 
@@ -390,7 +400,12 @@ module.exports = {
     # do not allow user to delete "browsers" list - otherwise how to run tests?
     if Array.isArray(userBrowserList)
       debug("using user supplied list of browsers %o", userBrowserList)
+      @validateBrowserList(userBrowserList)
       resolved.browsers = userBrowserList
+
+    if !resolved.browsers
+      debug("set the initial list of browsers because user has returned null / undefined in %o", resolved)
+      resolved.browsers = cfg.browsers
 
     debug("resolved config with defaults %o", resolved)
 

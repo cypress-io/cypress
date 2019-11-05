@@ -87,6 +87,7 @@ class Project extends EE
       ## we try to load it and it's not there. We must do this here
       ## else initialing the plugins will instantly fail.
       if cfg.pluginsFile
+        debug("scaffolding with plugins file %s", cfg.pluginsFile)
         scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
     .then (cfg) =>
       @_initPlugins(cfg, options)
@@ -94,9 +95,7 @@ class Project extends EE
         debug("plugin config yielded: %o", modifiedCfg)
 
         updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
-        debug("updated config: %o", modifiedCfg)
-
-        config.validateBrowserList(updatedConfig)
+        debug("updated config: %o", updatedConfig)
 
         return updatedConfig
     .then (cfg) =>
@@ -142,6 +141,10 @@ class Project extends EE
     ## prevent tampering with the
     ## internals and breaking cypress
     cfg = config.whitelist(cfg)
+
+    debug("make sure we pass valid list of browsers to the plugins")
+    if cfg.browsers
+      config.validateBrowserList(cfg.browsers)
 
     plugins.init(cfg, {
       onError: (err) ->
@@ -308,8 +311,10 @@ class Project extends EE
     _.pick(@, "spec", "browser")
 
   setBrowsers: (browsers = []) ->
+    debug("getting config before setting browsers %o", browsers)
     @getConfig()
     .then (cfg) ->
+      debug("setting config browsers to %o", browsers)
       cfg.browsers = browsers
 
   getAutomation: ->
