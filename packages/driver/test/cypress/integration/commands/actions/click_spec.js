@@ -242,19 +242,18 @@ describe('src/cy/commands/actions/click', () => {
     it('will not send mouseEvents/focus if pointerdown is defaultPrevented', () => {
       const $btn = cy.$$('#button')
 
-      // let clicked = false
-
-      $btn.get(0).addEventListener('pointerdown', (e) => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake((e) => {
         e.preventDefault()
-
         expect(e.defaultPrevented).to.be.true
       })
 
+      $btn.get(0).addEventListener('pointerdown', onEvent)
+
       attachMouseClickListeners({ $btn })
 
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.get('#button').click().should('not.have.focus')
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('$btn', 'pointerdown pointerup click').each(shouldBeCalledOnce)
       cy.getAll('$btn', 'mousedown mouseup').each(shouldNotBeCalled)
@@ -386,15 +385,15 @@ describe('src/cy/commands/actions/click', () => {
       attachMouseClickListeners({ btn, div, root })
       attachMouseHoverListeners({ btn, div })
 
-      // let clicked = false
-
-      btn.on('mousedown', () => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake(() => {
         div.css(overlayStyle)
       })
 
+      btn.on('mousedown', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.contains('button').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mouseover mouseenter mousedown focus').each(shouldBeCalled)
       cy.getAll('btn', 'click mouseup').each(shouldNotBeCalled)
@@ -411,15 +410,15 @@ describe('src/cy/commands/actions/click', () => {
       attachMouseClickListeners({ btn, div })
       attachMouseHoverListeners({ btn, div })
 
-      // let clicked = false
-
-      btn.on('mouseup', () => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake(() => {
         div.css(overlayStyle)
       })
 
+      btn.on('mouseup', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.contains('button').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mouseover mouseenter mousedown focus click mouseup').each(shouldBeCalled)
       cy.getAll('div', 'mouseover mouseenter').each(shouldBeCalled)
@@ -434,15 +433,15 @@ describe('src/cy/commands/actions/click', () => {
       attachMouseClickListeners({ btn, div })
       attachMouseHoverListeners({ btn, div })
 
-      // let clicked = false
-
-      btn.on('click', () => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake(() => {
         div.css(overlayStyle)
       })
 
+      btn.on('click', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.contains('button').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mouseover mouseenter mousedown focus click mouseup').each(shouldBeCalled)
       cy.getAll('div', 'focus click mouseup mousedown').each(shouldNotBeCalled)
@@ -457,16 +456,17 @@ describe('src/cy/commands/actions/click', () => {
       attachMouseClickListeners({ btn, span })
       attachMouseHoverListeners({ btn, span })
 
-      // let clicked = false
-
-      btn.on('mousedown', () => {
+      const onEvent = cy.stub().callsFake(() => {
         // clicked = true
         btn.html('')
         btn.append(span)
       })
 
+      btn.on('mousedown', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.contains('button').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mousedown focus click mouseup').each(shouldBeCalled)
       cy.getAll('span', 'mouseup').each(shouldBeCalled)
@@ -484,15 +484,13 @@ describe('src/cy/commands/actions/click', () => {
       btn.html('')
       btn.append(span)
 
-      // let clicked = false
-
-      btn.on('mousedown', () => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake(() => {
         span.css({ marginLeft: 50 })
       })
 
+      btn.on('mousedown', onEvent)
+
       cy.get('button:first').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mousedown focus click mouseup').each(shouldBeCalled)
       cy.getAll('span', 'mousedown').each(shouldBeCalled)
@@ -508,19 +506,19 @@ describe('src/cy/commands/actions/click', () => {
       attachMouseClickListeners({ btn, span1, span2 })
       attachMouseHoverListeners({ btn, span1, span2 })
 
-      // let clicked = false
-
       btn.html('')
       btn.append(span1)
 
-      btn.on('mousedown', () => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake(() => {
         btn.html('')
         btn.append(span2)
       })
 
+      btn.on('mousedown', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.get('button:first').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mouseenter mousedown mouseup').each(shouldBeCalled)
       cy.getAll('btn', 'click focus').each(shouldNotBeCalled)
@@ -4331,12 +4329,11 @@ describe('mouse state', () => {
       })
       .appendTo(btn.parent())
 
-      // let clicked = false
-
-      cover.on('mouseup', () => {
+      const onEvent = cy.stub().callsFake(() => {
         cover.hide()
-        // clicked = true
       })
+
+      cover.on('mouseup', onEvent)
 
       attachFocusListeners({ btn, cover })
       attachMouseHoverListeners({ btn, cover })
@@ -4346,8 +4343,9 @@ describe('mouse state', () => {
         btn.attr('disabled', true)
       })
 
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.get('#cover').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('cover', 'mousedown mouseup click mouseout mouseleave').each(shouldBeCalledOnce)
       cy.getAll('cover', 'focus').each(shouldNotBeCalled)
@@ -4372,12 +4370,13 @@ describe('mouse state', () => {
       })
       .appendTo(btn.parent())
 
-      // let clicked = false
-
-      cover.on('mouseover', () => {
+      const onEvent = cy.stub().callsFake(() => {
         cover.hide()
-        // clicked = true
       })
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
+      cover.on('mouseover', onEvent)
 
       attachFocusListeners({ btn, cover })
       attachMouseHoverListeners({ btn, cover })
