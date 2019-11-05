@@ -403,7 +403,7 @@ module.exports = {
       @validateBrowserList(userBrowserList)
       resolved.browsers = userBrowserList
 
-    if !resolved.browsers
+    if !resolved.browsers && cfg.browsers
       debug("set the initial list of browsers because user has returned null / undefined in %o", resolved)
       resolved.browsers = cfg.browsers
 
