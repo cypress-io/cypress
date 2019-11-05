@@ -215,6 +215,7 @@ validateFile = (file) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
 validateBrowserList = (browsers) ->
+  debug("validateBrowserList")
   la(browsers, "Missing browsers list in the config", browsers)
   la(check.array(browsers), "Expected a list of browsers", browsers)
   la(browsers.length, "Expected at list one browser")
@@ -235,6 +236,7 @@ validateBrowserList = (browsers) ->
   browsers.forEach (browser) ->
     debug("checking browser %o", browser)
     la(isValidBrowser(browser), "invalid browser", browser)
+  debug("validateBrowserList list of browsers is valid")
 
 hideSpecialVals = (val, key) ->
   if _.includes(CYPRESS_SPECIAL_ENV_VARS, key)
@@ -362,7 +364,6 @@ module.exports = {
   # marks all properties from "obj" inside "resolvedObj" using
   # {value: obj.val, from: "plugin"}
   setPluginResolvedOn: (resolvedObj, obj) ->
-    la(resolvedObj, "missing resolved object", resolvedObj)
     _.each obj, (val, key) =>
       if _.isObject(val) && !_.isArray(val)
         ## recurse setting overrides
@@ -370,7 +371,6 @@ module.exports = {
         @setPluginResolvedOn(resolvedObj[key], val)
       else
         ## override the resolved value
-        console.log('setting resolved plugin value', key, val)
         resolvedObj[key] = {
           value: val
           from: "plugin"
@@ -379,9 +379,16 @@ module.exports = {
   updateWithPluginValues: (cfg, overrides = {}) ->
     ## diff the overrides with cfg
     ## including nested objects (env)
-
     debug("starting config %o", cfg)
     debug("overrides %o", overrides)
+
+    originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && R.clone(cfg.resolved.browsers)
+    if not originalResolvedBrowsers
+      # have something to resolve with if plugins return nothing
+      originalResolvedBrowsers = {
+        value: cfg.browsers
+        from: "default"
+      }
 
     diffs = deepDiff(cfg, overrides, true)
     debug("config diffs %o", diffs)
@@ -393,34 +400,33 @@ module.exports = {
     ## for each override go through
     ## and change the resolved values of cfg
     ## to point to the plugin
-    @setPluginResolvedOn(cfg.resolved, diffs)
-    debug("resolved config object %o", cfg.resolved)
+    if diffs
+      @setPluginResolvedOn(cfg.resolved, diffs)
+      debug("resolved config object %o", cfg.resolved)
 
     ## merge cfg into overrides
-    merged = _.defaultsDeep({}, diffs, cfg)
+    merged = _.defaultsDeep(diffs, cfg)
     debug("merged config object %o", merged)
 
-    ## Take a special care with some system properties the
-    ## user should be able to modify. For example, if the plugins file
-    ## modifes detected browsers, the _.defaultsDeep merges it back
-    ## and we need to use the user's value
+    # the above _.defaultsDeep combines arrays,
+    # if diffs.browsers = [1] and cfg.browsers = [1, 2]
+    # then the merged result merged.browsers = [1, 2]
+    # which is NOT what we want
+    if Array.isArray(userBrowserList) and userBrowserList.length
+      merged.browsers = userBrowserList
+      merged.resolved.browsers.value = userBrowserList
 
-    # do not allow user to delete "browsers" list - otherwise how to run tests?
-    # if Array.isArray(userBrowserList)
-    #   if Array.isArray(merged.resolved.browsers) and merged.resolved.browsers.length
-    #     debug("have valid resolved browsers list")
-    #   else
-    #     debug("using user supplied list of browsers %o", userBrowserList)
-    #     @validateBrowserList(userBrowserList)
-    #     merged.browsers = userBrowserList
+    if overrides.browsers == null
+      # null breaks everything when merging lists
+      debug("replacing null browsers with original list %o", originalResolvedBrowsers)
+      merged.browsers = cfg.browsers
+      if originalResolvedBrowsers
+        merged.resolved.browsers = originalResolvedBrowsers
 
-    # if !merged.browsers && cfg.browsers
-    #   debug("set the initial list of browsers because user has returned null / undefined in %o", merged)
-    #   merged.browsers = cfg.browsers
+    if merged.browsers
+      @validateBrowserList(merged.browsers)
 
-    # make sure not to insert same browser multiple times
-    debug("merged config with defaults and resolved %o", merged)
-
+    debug("merged plugins config %o", merged)
     return merged
 
   resolveConfigValues: (config, defaults, resolved = {}) ->

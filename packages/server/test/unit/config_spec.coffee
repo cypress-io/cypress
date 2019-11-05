@@ -947,9 +947,28 @@ describe "lib/config", ->
         }
       })
 
+  context "_.defaultsDeep", ->
+    it "merges arrays", ->
+      # sanity checks to confirm how Lodash merges arrays in defaultsDeep
+      diffs = {
+        list: [1]
+      }
+      cfg = {
+        list: [1, 2]
+      }
+      merged = _.defaultsDeep({}, diffs, cfg)
+      expect(merged, "arrays are combined").to.deep.eq({
+        list: [1, 2]
+      })
+
   context ".updateWithPluginValues", ->
     it "is noop when no overrides", ->
       expect(config.updateWithPluginValues({foo: 'bar'}, null)).to.deep.eq({
+        foo: 'bar'
+      })
+
+    it "is noop with empty overrides", ->
+      expect(config.updateWithPluginValues({foo: 'bar'}, {})).to.deep.eq({
         foo: 'bar'
       })
 
@@ -963,6 +982,7 @@ describe "lib/config", ->
           a: "a"
           b: "b"
         }
+        # previously resolved values
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "quux", from: "cli" }
@@ -1020,20 +1040,93 @@ describe "lib/config", ->
       cfg = {
         browsers: [browser],
         resolved: {
-          browsers: [browser]
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
         }
       }
 
+      # if the user has removed an empty object from the plugins
+      # the browsers are gone - the original list will be preserved
       overrides = {}
 
       expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
         browsers: [browser],
         resolved: {
-          browsers: [browser]
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
         }
       })
 
-    it.only "allows user to filter browsers", ->
+    it "restores list of browsers if the user sets it to null", ->
+      browser = {
+        name: "fake browser name",
+        family: "chrome",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browser],
+        resolved: {
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      }
+
+      overrides = {
+        browsers: null
+      }
+
+      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
+        browsers: [browser],
+        resolved: {
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      })
+
+    it "restores list of browsers and sets resolved", ->
+      browser = {
+        name: "fake browser name",
+        family: "chrome",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browser],
+        # note how resolved is empty
+        resolved: {}
+      }
+
+      overrides = {
+        browsers: null
+      }
+
+      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
+        browsers: [browser],
+        resolved: {
+          # gets resolved from default
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      })
+
+    it "allows user to filter browsers", ->
       browserOne = {
         name: "fake browser name",
         family: "chrome",
@@ -1056,7 +1149,7 @@ describe "lib/config", ->
         browsers: [browserOne, browserTwo],
         resolved: {
           browsers: {
-            value: [],
+            value: [browserOne, browserTwo],
             from: "default"
           }
         }
@@ -1067,8 +1160,6 @@ describe "lib/config", ->
       }
 
       updated = config.updateWithPluginValues(cfg, overrides)
-      console.log(updated.resolved.browsers)
-
       expect(updated.resolved, "resolved values").to.deep.eq({
         browsers: {
           value: [browserTwo],
@@ -1076,7 +1167,7 @@ describe "lib/config", ->
         }
       })
 
-      expect(updated).to.deep.eq({
+      expect(updated, "all values").to.deep.eq({
         browsers: [browserTwo],
         resolved: {
           browsers: {
