@@ -1,3 +1,5 @@
 {
-  "env": {"browser": true}
+  "env": {
+    "browser": true
+  }
 }

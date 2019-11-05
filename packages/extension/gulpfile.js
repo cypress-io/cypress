@@ -40,6 +40,7 @@ const background = () => {
   .pipe(gulp.dest('dist'))
 }
 
+/* eslint-disable-next-line no-unused-vars */
 const content = () => {
   return browserify({
     entries: 'app/content.js',
