@@ -104,6 +104,7 @@ Once all test projects are reliably working with new changes, publishing can pro
 
 ### Steps to Publish a New Version
 
+0. Make sure that if there is a new [`cypress-example-kitchensink`][https://github.com/cypress-io/cypress-example-kitchensink/releases] version, the corresponding dependency in `packages/example` has been updated to that new version.
 1. Make sure that you have the correct environment variables set up before proceeding.
     - You'll need Cypress AWS access keys in `aws_credentials_json`, which looks like this:
         ```text
@@ -144,15 +145,17 @@ Once all test projects are reliably working with new changes, publishing can pro
     ```
     npm run binary-release -- --version 3.4.0 --commit`
     ```
-9. Tag the current commit with `v3.4.0` and push that tag up.
-10. If needed, push out the updated changes to the docs manifest to `on.cypress.io`.
-11. If needed, push out an updated kitchen sink.
-12. Close the release in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release).
-13. Bump `version` in `package.json` from `develop` branch and then merge into `master`.
-14. Using [cypress-io/release-automations][release-automations]:
+9. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
+10. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
+11. Close the release in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release).
+12. Bump `version` in `package.json` and commit it to `develop` using a commit message like `release 3.4.0 [skip ci]`
+13. Tag this commit with `v3.4.0` and push that tag up.
+14. Merge `develop` into `master` and push that branch up.
+15. Using [cypress-io/release-automations][release-automations]:
     - Publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases` (see its README for details).
     - Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release` (see its README for details)
 
 Take a break, you deserve it! :sunglasses:
 
 [release-automations]: https://github.com/cypress-io/release-automations
+[cypress-example-kitchensink]: https://github.com/cypress-io/cypress-example-kitchensink

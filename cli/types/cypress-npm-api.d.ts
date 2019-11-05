@@ -43,9 +43,9 @@ declare module 'cypress' {
      */
     reporter: string,
     /**
-     * A String glob pattern of the test files to load.
+     * A String or Array of string glob pattern of the test files to load.
      */
-    testFiles: string
+    testFiles: string | string[]
 
     //
     // timeouts
@@ -290,7 +290,7 @@ declare module 'cypress' {
     })
     ```
    */
-  interface CypressOpenOptions extends CypressCommonOptions  {
+  interface CypressOpenOptions extends CypressCommonOptions {
     /**
      * Specify a filesystem path to a custom browser
      */

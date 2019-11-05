@@ -30,6 +30,7 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+XhrServer    = require("./xhr_ws_server")
 templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
@@ -141,12 +142,13 @@ class Server
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
+      @_xhrServer = XhrServer.create()
 
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
+      @createRoutes(app, config, @_request, getRemoteState, @_xhrServer.getDeferredResponse, project, @_nodeProxy)
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -698,10 +700,11 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onIncomingXhr = @_xhrServer.onIncomingXhr
+    options.onResetXhrServer = @_xhrServer.reset
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
-    # handleListeners(@_server)
 
 module.exports = Server
