@@ -2245,7 +2245,7 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps.table[1]()).to.containSubset({
-            'name': 'Events',
+            'name': 'Mouse Events',
             'data': [
               {
                 'Event Name': 'pointerover',
@@ -2403,7 +2403,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(_.map(consoleProps.table, (x) => x())).to.containSubset([
             {
-              'name': 'Events',
+              'name': 'Mouse Events',
               'data': [
                 {
                   'Event Name': 'pointerdown',
@@ -3460,7 +3460,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(tables).to.containSubset([
             {
-              'name': 'Events',
+              'name': 'Mouse Events',
               'data': [
                 {
                   'Event Name': 'pointerover',

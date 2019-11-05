@@ -4310,39 +4310,38 @@ describe('src/cy/commands/actions/type', () => {
         // https://github.com/cypress-io/cypress/issues/5424
         it('has a table of keys', () => {
           cy.get(':text:first').type('{cmd}{option}foo{enter}b{leftarrow}{del}{enter}')
-          .then(function () {
-            const table = this.lastLog.invoke('consoleProps').table[3]()
+          .then(function ($input) {
+            const table = this.lastLog.invoke('consoleProps').table[2]()
 
             // eslint-disable-next-line
             console.table(table.data, table.columns)
-            expect(table.columns).to.deep.eq([
-              'typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers',
-            ])
 
             expect(table.name).to.eq('Keyboard Events')
             const expectedTable = {
-              1: { typed: '<meta>', which: 91, text: undefined, Events: 'keydown', modifiers: 'meta' },
-              2: { typed: '<alt>', which: 18, Events: ['keydown'], modifiers: 'alt, meta' },
-              3: { typed: 'f', which: 70, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
-              4: { typed: 'o', which: 79, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
-              5: { typed: 'o', which: 79, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
-              6: { typed: '{enter}', which: 13, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
-              7: { typed: 'b', which: 66, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
-              8: { typed: '{leftArrow}', which: 37, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
-              9: { typed: '{del}', which: 46, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
-              10: { typed: '{enter}', which: 13, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
+              1: { Typed: '<meta>', 'Event.which': 91, 'Events Fired': 'keydown', Modifiers: 'meta', 'Event.code': 'MetaLeft', PreventedDefault: null, 'Event.target': $input[0] },
+              2: { Typed: '<alt>', 'Event.which': 18, 'Events Fired': 'keydown', Modifiers: 'alt, meta', 'Event.code': 'AltLeft', PreventedDefault: null, 'Event.target': $input[0] },
+              3: { Typed: 'f', 'Event.which': 70, 'Events Fired': 'keydown, keyup', Modifiers: 'alt, meta', 'Event.code': 'KeyF', PreventedDefault: null, 'Event.target': $input[0] },
+              4: { Typed: 'o', 'Event.which': 79, 'Events Fired': 'keydown, keyup', Modifiers: 'alt, meta', 'Event.code': 'KeyO', PreventedDefault: null, 'Event.target': $input[0] },
+              5: { Typed: 'o', 'Event.which': 79, 'Events Fired': 'keydown, keyup', Modifiers: 'alt, meta', 'Event.code': 'KeyO', PreventedDefault: null, 'Event.target': $input[0] },
+              6: { Typed: '{enter}', 'Event.which': 13, 'Events Fired': 'keydown, keyup', Modifiers: 'alt, meta', 'Event.code': 'Enter', PreventedDefault: null, 'Event.target': $input[0] },
+              7: { Typed: 'b', 'Event.which': 66, 'Events Fired': 'keydown, keyup', Modifiers: 'alt, meta', 'Event.code': 'KeyB', PreventedDefault: null, 'Event.target': $input[0] },
+              8: { Typed: '{leftArrow}', 'Event.which': 37, 'Events Fired': 'keydown, keyup', Modifiers: 'alt, meta', 'Event.code': 'ArrowLeft', PreventedDefault: null, 'Event.target': $input[0] },
+              9: { Typed: '{del}', 'Event.which': 46, 'Events Fired': 'keydown, keyup', Modifiers: 'alt, meta', 'Event.code': 'Delete', PreventedDefault: null, 'Event.target': $input[0] },
+              10: { Typed: '{enter}', 'Event.which': 13, 'Events Fired': 'keydown, keyup, keyup, keyup', Modifiers: 'alt, meta', 'Event.code': 'Enter', PreventedDefault: null, 'Event.target': $input[0] },
             }
 
+            // uncomment for debugging
+            // _.each(table.data, (v, i)=>expect(v).eq(expectedTable[i]))
             expect(table.data).to.deep.eq(expectedTable)
           })
         })
 
         it('has no modifiers when there are none activated', () => {
-          cy.get(':text:first').type('f').then(function () {
-            const table = this.lastLog.invoke('consoleProps').table[3]()
+          cy.get(':text:first').type('f').then(function ($el) {
+            const table = this.lastLog.invoke('consoleProps').table[2]()
 
             expect(table.data).to.deep.eq({
-              1: { typed: 'f', which: 70, keydown: true, keypress: true, textInput: true, input: true, keyup: true },
+              1: { Typed: 'f', 'Event.which': 70, 'Events Fired': 'keydown, keypress, textInput, input, keyup', Modifiers: null, 'Event.code': 'KeyF', PreventedDefault: null, 'Event.target': $el[0] },
             })
           })
         })
@@ -4352,14 +4351,14 @@ describe('src/cy/commands/actions/type', () => {
             return false
           })
 
-          cy.get(':text:first').type('f').then(function () {
-            const table = this.lastLog.invoke('consoleProps').table[3]()
+          cy.get(':text:first').type('f').then(function ($el) {
+            const table = this.lastLog.invoke('consoleProps').table[2]()
 
             // eslint-disable-next-line
             console.table(table.data, table.columns)
 
             expect(table.data).to.deep.eq({
-              1: { typed: 'f', which: 70, keydown: 'preventedDefault', keyup: true },
+              1: { Typed: 'f', 'Event.which': 70, 'PreventedDefault': true, 'Events Fired': 'keydown, keyup', Modifiers: null, 'Event.code': 'KeyF', 'Event.target': $el[0] },
             })
           })
         })
@@ -5284,10 +5283,9 @@ https://on.cypress.io/type`)
 
           $(commandLogEl).find('.command-wrapper').click()
 
-          expect(spyTableName.firstCall).calledWith('Mouse Move Events')
-          expect(spyTableName.secondCall).calledWith('Mouse Click Events')
-          expect(spyTableName.thirdCall).calledWith('Keyboard Events')
-          expect(spyTableData).calledThrice
+          expect(spyTableName.firstCall).calledWith('Mouse Events')
+          expect(spyTableName.secondCall).calledWith('Keyboard Events')
+          expect(spyTableData).calledTwice
         })
       })
     })
