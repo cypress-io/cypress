@@ -134,23 +134,20 @@ describe "e2e cookies", ->
     format,
     baseDomain
   ]) =>
-    httpUrl = "http://#{baseDomain}#{if haveRoot then '' else ":#{httpPort}"}"
-    httpsUrl = "https://#{baseDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
-
     context "with #{format} urls", ->
       [
-        [httpUrl, false],
-        [httpsUrl, true]
-      ].forEach ([
-        baseUrl,
-        https
-      ]) ->
-        [
-          true, false
-        ].forEach (useDefaultPort) ->
-          httpUrl = "http://#{baseDomain}#{if useDefaultPort then '' else ":#{httpPort}"}"
-          httpsUrl = "https://#{baseDomain}#{if useDefaultPort then '' else ":#{httpsPort}"}"
+        true, false
+      ].forEach (useDefaultPort) ->
+        httpUrl = "http://#{baseDomain}#{if useDefaultPort then '' else ":#{httpPort}"}"
+        httpsUrl = "https://#{baseDomain}#{if useDefaultPort then '' else ":#{httpsPort}"}"
 
+        [
+          [httpUrl, false],
+          [httpsUrl, true]
+        ].forEach ([
+          baseUrl,
+          https
+        ]) ->
           e2e.it "passes with baseurl: #{baseUrl}", {
             config: {
               baseUrl
@@ -167,27 +164,28 @@ describe "e2e cookies", ->
             spec: "cookies_spec.coffee"
             snapshot: true
             expectedExitCode: 0
-            originalTitle: "e2e cookies with baseurl"
-            onStdout: (stdout) ->
-              stdout.replace(otherDomain, '<2nd domain>')
-              .replace(baseDomain, '<base domain>')
             onRun: (exec) ->
               if useDefaultPort and not haveRoot
                 console.warn('cannot use default port since not root, skipping')
                 return @skip()
 
-              exec()
+              exec({
+                originalTitle: "e2e cookies with baseurl"
+                onStdout: (stdout) ->
+                  stdout.replace(new RegExp(otherDomain, 'g'), '<2nd domain>')
+                  .replace(new RegExp(baseDomain, 'g'), '<base domain>')
+              })
           }
 
-      e2e.it "passes with no baseurl", {
-        config: {
-          env: {
-            httpUrl
-            httpsUrl
+        e2e.it "passes with no baseurl", {
+          config: {
+            env: {
+              httpUrl
+              httpsUrl
+            }
           }
+          originalTitle: "e2e cookies with no baseurl"
+          spec: "cookies_spec_no_baseurl.coffee"
+          snapshot: true
+          expectedExitCode: 0
         }
-        originalTitle: "e2e cookies with no baseurl"
-        spec: "cookies_spec_no_baseurl.coffee"
-        snapshot: true
-        expectedExitCode: 0
-      }
