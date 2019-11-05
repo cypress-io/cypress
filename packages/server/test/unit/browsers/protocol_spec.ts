@@ -46,7 +46,7 @@ describe('lib/browsers/protocol', function () {
       const p = protocol.getWsTargetFor(12345)
 
       const expectedError = stripIndents`
-        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 5 seconds.
+        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
 
         This usually indicates there was a problem opening the Chrome browser.
 
