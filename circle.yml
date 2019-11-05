@@ -1168,6 +1168,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-1096-firefox-support
         requires:
           - build-npm-package
     - build-binary:
@@ -1179,6 +1180,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-1096-firefox-support
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
@@ -1236,7 +1238,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-        
+
     - lint:
         name: Mac lint
         executor: mac
