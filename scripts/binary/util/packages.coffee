@@ -37,7 +37,7 @@ createCLIExecutable = (command) ->
       msg = "#{commandToExecute} failed with exit code: #{result.code}"
       throw new Error(msg)
 
-npm = createCLIExecutable('npm')
+yarn = createCLIExecutable('yarn')
 npx = createCLIExecutable('npx')
 
 runAllBuildJs = _.partial(npx, ["lerna", "run", "build-js", "--ignore", "cli"])
@@ -120,7 +120,7 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)
   console.log("in %s", packagePath)
   la(check.unemptyString(packageToInstall), "missing package to install")
-  npm(["install", "--force", packageToInstall], packagePath)
+  yarn(["install", "--force", "--ignore-engines", packageToInstall], packagePath)
 
 removeDevDependencies = (packageFolder) ->
   packagePath = pathToPackageJson(packageFolder)
@@ -155,7 +155,7 @@ npmInstallAll = (pathToPackages) ->
 
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
-    npmInstall = _.partial(npm, ["install", "--only=production", "--quiet"])
+    npmInstall = _.partial(yarn, ["install", "--production", "--silent", "--ignore-engines"])
 
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
