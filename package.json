@@ -207,5 +207,8 @@
       "eslint --fix",
       "git add"
     ]
+  },
+  "resolutions": {
+    "**/jquery": "3.1.1"
   }
 }
