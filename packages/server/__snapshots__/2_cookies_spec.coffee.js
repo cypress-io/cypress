@@ -18,13 +18,8 @@ exports['e2e cookies with baseurl'] = `
 
 
   cookies
-    with whitelist
-      ✓ can get all cookies
-      ✓ resets cookies between tests correctly
-      ✓ should be only two left now
-      ✓ handles undefined cookies
     without whitelist
-      ✓ sends cookies to <base domain>:2121
+      ✓ sends set cookies to path
       ✓ handles expired cookies secure
       ✓ issue: #224 sets expired cookies between redirects
       ✓ issue: #1321 failing to set or parse cookie
@@ -86,7 +81,64 @@ Result of cy.getCookies():
     domain: '<base domain>',
     secure: false,
     httpOnly: false } ]
+        ✓ can set cookies on way too many redirects with HTTP intermediary
+Result of cy.getCookies():
+[ { name: 'namefoo8',
+    value: 'valfoo8',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo7',
+    value: 'valfoo7',
+    path: '/',
+    domain: '<2nd domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo6',
+    value: 'valfoo6',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo5',
+    value: 'valfoo5',
+    path: '/',
+    domain: '<2nd domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo4',
+    value: 'valfoo4',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo3',
+    value: 'valfoo3',
+    path: '/',
+    domain: '<2nd domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo2',
+    value: 'valfoo2',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo1',
+    value: 'valfoo1',
+    path: '/',
+    domain: '<2nd domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo0',
+    value: 'valfoo0',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false } ]
         ✓ can set cookies on way too many redirects with HTTPS intermediary
+      in a cy.request
 Result of cy.getCookies():
 [ { name: 'namefoo8',
     value: 'valfoo8',
@@ -143,16 +195,72 @@ Result of cy.getCookies():
     secure: false,
     httpOnly: false } ]
         ✓ can set cookies on way too many redirects with HTTP intermediary
+Result of cy.getCookies():
+[ { name: 'namefoo8',
+    value: 'valfoo8',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo7',
+    value: 'valfoo7',
+    path: '/',
+    domain: '<2nd domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo6',
+    value: 'valfoo6',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo5',
+    value: 'valfoo5',
+    path: '/',
+    domain: '<2nd domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo4',
+    value: 'valfoo4',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo3',
+    value: 'valfoo3',
+    path: '/',
+    domain: '<2nd domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo2',
+    value: 'valfoo2',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo1',
+    value: 'valfoo1',
+    path: '/',
+    domain: '<2nd domain>',
+    secure: false,
+    httpOnly: false },
+  { name: 'namefoo0',
+    value: 'valfoo0',
+    path: '/',
+    domain: '<base domain>',
+    secure: false,
+    httpOnly: false } ]
+        ✓ can set cookies on way too many redirects with HTTPS intermediary
 
 
-  12 passing
+  10 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        12                                                                               │
-  │ Passing:      12                                                                               │
+  │ Tests:        10                                                                               │
+  │ Passing:      10                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -176,9 +284,9 @@ Result of cy.getCookies():
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec.coffee                      XX:XX       12       12        -        -        - │
+  │ ✔  cookies_spec.coffee                      XX:XX       10       10        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       12       12        -        -        -  
+    ✔  All specs passed!                        XX:XX       10       10        -        -        -  
 
 
 `

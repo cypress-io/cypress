@@ -98,7 +98,7 @@ if haveRoot
 
 otherDomain = "quux.bar.net"
 otherUrl = "http://#{otherDomain}#{if haveRoot then '' else ":#{httpPort}"}"
-otherHttpsUrl = "http://#{otherDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
+otherHttpsUrl = "https://#{otherDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
 
 describe "e2e cookies", ->
   e2e.setup({
@@ -129,14 +129,14 @@ describe "e2e cookies", ->
     ["FQDN", "www.bar.foo.com"],
     ["IP", "127.0.0.1"],
   ]
-  # .slice(0,1)
   .forEach ([
     format,
-    baseDomain
+    baseDomain,
   ]) =>
     context "with #{format} urls", ->
       [
-        true, false
+        true,
+        false
       ].forEach (useDefaultPort) ->
         httpUrl = "http://#{baseDomain}#{if useDefaultPort then '' else ":#{httpPort}"}"
         httpsUrl = "https://#{baseDomain}#{if useDefaultPort then '' else ":#{httpsPort}"}"
@@ -153,7 +153,7 @@ describe "e2e cookies", ->
               baseUrl
               env: {
                 baseUrl
-                baseDomain
+                expectedDomain: baseDomain
                 https
                 httpUrl
                 httpsUrl
