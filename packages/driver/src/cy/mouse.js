@@ -114,8 +114,9 @@ const create = (state, keyboard, focused, Cypress) => {
   const sendMouseout = (el, evtOptions) => {
     return sendMouseEvent(el, evtOptions, 'mouseout', true, true)
   }
-  const sendClick = (el, evtOptions) => {
-    if (isFirefox && el.disabled) {
+  const sendClick = (el, evtOptions, opts = {}) => {
+    // send the click event if firefox and force (needed for force check checkbox)
+    if (!opts.force && isFirefox && el.disabled) {
       return {}
     }
 
@@ -528,7 +529,7 @@ const create = (state, keyboard, focused, Cypress) => {
           return 'element was detached'
         }
 
-        if (!mouseUpEvents.pointerupProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el) {
+        if (!mouseDownEvents.pointerdownProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el) {
           return 'mouseup and mousedown not received by same element'
         }
 
@@ -598,6 +599,10 @@ const create = (state, keyboard, focused, Cypress) => {
         mouse.moveToCoords(fromElViewport)
       }
 
+      el = forceEl || el
+
+      // debug(arguments)
+
       const win = $dom.getWindowByElement(el)
 
       const defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)
@@ -607,7 +612,7 @@ const create = (state, keyboard, focused, Cypress) => {
         detail: 1,
       }, mouseEvtOptionsExtend)
 
-      let clickProps = sendClick(el, clickEventOptions)
+      let clickProps = sendClick(el, clickEventOptions, { force: !!forceEl })
 
       return { clickProps }
     },
