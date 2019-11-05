@@ -172,13 +172,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     traversalErr = null
 
     if options.log
-      options._log = Cypress.log()
-      options._log.set({
+      options._log = Cypress.log
         message: message
         $el: if $dom.isElement(subject) then subject else null
         consoleProps: ->
           Subject: subject
-      })
 
     if not _.isString(str)
       $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
