@@ -16,6 +16,10 @@
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
+    "@packages/driver": "*",
+    "@packages/reporter": "*",
+    "@packages/socket": "*",
+    "@packages/web-config": "*",
     "@types/enzyme": "3.9.1",
     "@types/react": "16.8.17",
     "bluebird": "3.5.0",

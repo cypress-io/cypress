@@ -24,6 +24,8 @@
     "ramda": "0.24.1"
   },
   "devDependencies": {
+    "@packages/coffee": "*",
+    "@packages/ts": "*",
     "chai": "3.5.0",
     "mocha": "3.5.3",
     "shelljs": "0.8.3",

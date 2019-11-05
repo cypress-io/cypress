@@ -24,6 +24,7 @@
     "minimist": "1.2.0"
   },
   "devDependencies": {
+    "@packages/coffee": "*",
     "electron": "5.0.10",
     "mocha": "3.5.3"
   },

@@ -21,6 +21,8 @@
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
+    "@packages/coffee": "*",
+    "@packages/socket": "*",
     "browserify": "16.3.0",
     "chai": "3.5.0",
     "coffeeify": "2.1.0",
