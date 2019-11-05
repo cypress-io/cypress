@@ -58,8 +58,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           }
         }
 
-  getAndClear = (log, timeout) ->
-    automateCookies("get:cookies", {}, log, timeout)
+  getAndClear = (log, timeout, options = {}) ->
+    automateCookies("get:cookies", options, log, timeout)
     .then (resp) =>
       ## bail early if we got no cookies!
       return resp if resp and resp.length is 0
@@ -251,7 +251,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
-      getAndClear(options._log, options.timeout)
+      getAndClear(options._log, options.timeout, { domain: options.domain })
       .then (resp) ->
         options.cookies = resp
 
