@@ -18,9 +18,8 @@ import util from '../lib/util'
 export default class Iframes extends Component {
   _disposers = []
 
-  // TODO: fix AUT iframe layout
   render () {
-    const { width, scale, marginLeft, headerHeight, scriptError } = this.props.state
+    const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
     return (
       <div
@@ -32,7 +31,7 @@ export default class Iframes extends Component {
           className='size-container'
           style={{
             marginLeft,
-            // height: height - headerHeight / 2,
+            height,
             transform: `scale(${scale})`,
             width,
           }}

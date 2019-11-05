@@ -299,11 +299,6 @@ describe "src/cy/commands/assertions", ->
 
         cy.noop(false).should("be.true")
 
-      expect(false).ok
-      it "should give proper error", () ->
-        setTimeout(()=>
-        , 10)
-
       it "throws err when not available chainable", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "The chainer: 'dee' was not found. Could not build assertion."
