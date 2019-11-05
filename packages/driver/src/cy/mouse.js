@@ -247,16 +247,16 @@ const create = (state, keyboard, focused) => {
 
       pointerout()
       pointerleave()
-      events.push({ pointerover: pointerover() })
+      events.push({ type: 'pointerover', ...pointerover() })
       pointerenter()
       mouseout()
       mouseleave()
-      events.push({ mouseover: mouseover() })
+      events.push({ type: 'mouseover', ...mouseover() })
       mouseenter()
       state('mouseLastHoveredEl', $elements.isAttachedEl(el) ? el : null)
       state('mouseCoords', { x, y })
-      events.push({ pointermove: pointermove() })
-      events.push({ mousemove: mousemove() })
+      events.push({ type: 'pointermove', ...pointermove() })
+      events.push({ type: 'mousemove', ...mousemove() })
 
       return events
     },

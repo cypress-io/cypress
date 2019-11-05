@@ -4321,16 +4321,16 @@ describe('src/cy/commands/actions/type', () => {
 
             expect(table.name).to.eq('Keyboard Events')
             const expectedTable = {
-              1: { typed: '<meta>', which: 91, keydown: true, modifiers: 'meta' },
-              2: { typed: '<alt>', which: 18, keydown: true, modifiers: 'alt, meta' },
-              3: { typed: 'f', which: 70, keydown: true, keyup: true, modifiers: 'alt, meta' },
-              4: { typed: 'o', which: 79, keydown: true, keyup: true, modifiers: 'alt, meta' },
-              5: { typed: 'o', which: 79, keydown: true, keyup: true, modifiers: 'alt, meta' },
-              6: { typed: '{enter}', which: 13, keydown: true, keyup: true, modifiers: 'alt, meta' },
-              7: { typed: 'b', which: 66, keydown: true, keyup: true, modifiers: 'alt, meta' },
-              8: { typed: '{leftArrow}', which: 37, keydown: true, keyup: true, modifiers: 'alt, meta' },
-              9: { typed: '{del}', which: 46, keydown: true, keyup: true, modifiers: 'alt, meta' },
-              10: { typed: '{enter}', which: 13, keydown: true, keyup: true, modifiers: 'alt, meta' },
+              1: { typed: '<meta>', which: 91, text: undefined, Events: 'keydown', modifiers: 'meta' },
+              2: { typed: '<alt>', which: 18, Events: ['keydown'], modifiers: 'alt, meta' },
+              3: { typed: 'f', which: 70, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
+              4: { typed: 'o', which: 79, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
+              5: { typed: 'o', which: 79, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
+              6: { typed: '{enter}', which: 13, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
+              7: { typed: 'b', which: 66, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
+              8: { typed: '{leftArrow}', which: 37, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
+              9: { typed: '{del}', which: 46, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
+              10: { typed: '{enter}', which: 13, Events: ['keydown', 'keyup'], modifiers: 'alt, meta' },
             }
 
             expect(table.data).to.deep.eq(expectedTable)

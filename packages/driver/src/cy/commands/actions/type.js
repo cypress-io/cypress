@@ -36,33 +36,33 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       const table = {}
 
-      const getRow = (id, key, which) => {
+      const getRow = (id, key, event) => {
         if (table[id]) {
           return table[id]
         }
 
-        const obj = table[id] = {}
         const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers(state))
 
-        if (modifiers) {
-          obj.modifiers = modifiers
-        }
-
-        if (key) {
-          obj.typed = key
-
-          if (which) {
-            obj.which = which
-          }
+        const obj = table[id] = {
+          'Typed': key || null,
+          Modifiers: modifiers || null,
+          'Events Fired': '',
+          PreventedDefault: null,
+          'Event.code': event.code,
+          'Event.which': event.which || null,
+          'Event.target': event.target,
         }
 
         return obj
       }
 
-      updateTable = function (id, key, column, which, value) {
-        const row = getRow(id, key, which)
+      updateTable = function (id, key, event, value) {
+        const row = getRow(id, key, event)
 
-        row[column] = value || 'preventedDefault'
+        row['Events Fired'] += row['Events Fired'] ? `, ${event.type}` : event.type
+        if (!value) {
+          row.PreventedDefault = true
+        }
       }
 
       // transform table object into object with zero based index as keys
@@ -86,11 +86,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             'table': {
               // mouse events tables will take up slots 1 and 2 if they're present
               // this preserves the order of the tables
-              3: () => {
+              2: () => {
                 return {
                   name: 'Keyboard Events',
                   data: getTableData(),
-                  columns: ['typed', 'which', 'keydown', 'keypress', 'textInput', 'input', 'keyup', 'change', 'modifiers'],
                 }
               },
             },
@@ -271,11 +270,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return cy.timeout(totalKeys * options.delay, true, 'type')
         },
 
-        onEvent (...args) {
-          if (updateTable) {
-            return updateTable(...args)
-          }
-        },
+        onEvent: updateTable || _.noop,
 
         // fires only when the 'value'
         // of input/text/contenteditable

@@ -898,7 +898,7 @@ export class Keyboard {
     const formattedKeyString = getFormattedKeyString(keyDetails)
 
     debug('format string', formattedKeyString)
-    options.onEvent(options.id, formattedKeyString, eventType, which, dispatched)
+    options.onEvent(options.id, formattedKeyString, event, dispatched)
 
     return dispatched
   }
