@@ -9,7 +9,6 @@ import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
 import * as $selection from '../dom/selection'
 import $window from '../dom/window'
-// import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/elements'
 
 const debug = Debug('cypress:driver:keyboard')
 
@@ -248,7 +247,6 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
       return false
     }
 
-    // const isDigit = isSingleDigitRe.test(key.key)
     const isNumberInputType = $elements.isInput(el) && $elements.isInputType(el, 'number')
 
     if (isNumberInputType) {
@@ -257,7 +255,6 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
       const curVal = $elements.getNativeProp(el, 'value')
       const bounds = $selection.getSelectionBounds(el)
 
-      debug('selection bounds number input', bounds)
       const potentialValue = $selection.insertSubstring(curVal + needsValue, key.text, [bounds.start + needsValueLength, bounds.end + needsValueLength])
 
       if (!(numberRe.test(potentialValue))) {
@@ -267,7 +264,6 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
         return
       }
 
-      debug('inserting value into text input', potentialValue)
       key.text = (options.prevVal || '') + key.text
       options.prevVal = null
     }

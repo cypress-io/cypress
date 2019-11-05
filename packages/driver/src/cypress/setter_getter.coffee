@@ -24,18 +24,6 @@ create = (state = {}) ->
       obj[key] = value
       ret = value
 
-    ## manually iterate through the
-    ## object and set its key/value on
-    ## state because using _.extend()
-    ## can throw in IE11 because of
-    ## internal copyObject function which
-    ## reads in the existing values. those
-    ## existing values may include references
-    ## to values we no longer have access to.
-    # window.debugger(2, true, true)
-    # _.each obj, (v, k) ->
-    #   state[k] = v
-
     _.extend(state, obj)
 
     return ret

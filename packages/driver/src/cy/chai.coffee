@@ -4,11 +4,11 @@ _ = require("lodash")
 $ = require("jquery")
 chai = require("chai")
 sinonChai = require("@cypress/sinon-chai")
-chaiInspect = require('./chai/inspect')
 
 $dom = require("../dom")
 $utils = require("../cypress/utils")
 $chaiJquery = require("../cypress/chai_jquery")
+chaiInspect = require('./chai/inspect')
 
 ## all words between single quotes which are at
 ## the end of the string
@@ -174,11 +174,6 @@ chai.use (chai, u) ->
       if $dom.isDom(obj)
         ## replace object with our formatted one
         assert._obj = $dom.stringify(obj, "short")
-
-      ## FIXME: (firefox) find a better way to prevent tunneling into Window objects,
-      ##   which leads to cross-origin errors and perf issues.
-      args[3] && args[3].view && args[3].view = null
-      args[4] && args[4].view && args[4].view = null
 
       msg = _origGetmessage.call(@, assert, args)
 
