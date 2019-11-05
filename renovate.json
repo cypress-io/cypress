@@ -18,8 +18,7 @@
     },
     {
       "packageNames": [
-        "bin-up",
-        "check-dependencies",
+        "lerna",
         "check-more-types",
         "console-table",
         "execa-wrap",
