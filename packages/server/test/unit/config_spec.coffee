@@ -893,6 +893,60 @@ describe "lib/config", ->
             }
           })
 
+  context ".setPluginResolvedOn", ->
+    it "resolves an object with single property", ->
+      cfg = {}
+      obj = {
+        foo: "bar"
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg).to.deep.eq({
+        foo: {
+          value: "bar",
+          from: "plugin"
+        }
+      })
+
+    it "resolves an object with multiple properties", ->
+      cfg = {}
+      obj = {
+        foo: "bar",
+        baz: [1, 2, 3]
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg).to.deep.eq({
+        foo: {
+          value: "bar",
+          from: "plugin"
+        },
+        baz: {
+          value: [1, 2, 3],
+          from: "plugin"
+        }
+      })
+
+    it "resolves a nested object", ->
+      # we need at least the structure
+      cfg = {
+        foo: {
+          bar: 1
+        }
+      }
+      obj = {
+        foo: {
+          bar: 42
+        }
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg, "foo.bar gets value").to.deep.eq({
+        foo: {
+          bar: {
+            value: 42,
+            from: "plugin"
+          }
+        }
+      })
+
   context ".updateWithPluginValues", ->
     it "is noop when no overrides", ->
       expect(config.updateWithPluginValues({foo: 'bar'}, null)).to.deep.eq({
@@ -949,6 +1003,85 @@ describe "lib/config", ->
             a: { value: "a", from: "config" }
             b: { value: "bb", from: "plugin" }
             c: { value: "c", from: "plugin" }
+          }
+        }
+      })
+
+    it "restores list of browsers if the user removes it", ->
+      browser = {
+        name: "fake browser name",
+        family: "chrome",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browser],
+        resolved: {
+          browsers: [browser]
+        }
+      }
+
+      overrides = {}
+
+      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
+        browsers: [browser],
+        resolved: {
+          browsers: [browser]
+        }
+      })
+
+    it.only "allows user to filter browsers", ->
+      browserOne = {
+        name: "fake browser name",
+        family: "chrome",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+      browserTwo = {
+        name: "fake electron",
+        family: "electron",
+        displayName: "Electron",
+        version: "x.y.z",
+        # Electron browser is built-in, no external path
+        path: "",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browserOne, browserTwo],
+        resolved: {
+          browsers: {
+            value: [],
+            from: "default"
+          }
+        }
+      }
+
+      overrides = {
+        browsers: [browserTwo]
+      }
+
+      updated = config.updateWithPluginValues(cfg, overrides)
+      console.log(updated.resolved.browsers)
+
+      expect(updated.resolved, "resolved values").to.deep.eq({
+        browsers: {
+          value: [browserTwo],
+          from: 'plugin'
+        }
+      })
+
+      expect(updated).to.deep.eq({
+        browsers: [browserTwo],
+        resolved: {
+          browsers: {
+            value: [browserTwo],
+            from: 'plugin'
           }
         }
       })
@@ -1252,6 +1385,29 @@ describe "lib/config", ->
         expected[folder] = "/_test-output/path/to/project/foo/bar"
 
         expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)
+
+  context ".validateBrowserList", ->
+    it "throws on invalid browser list", ->
+      expect(() -> config.validateBrowserList()).to.throw()
+      expect(() -> config.validateBrowserList({foo: "bar"})).to.throw()
+      expect(() -> config.validateBrowserList([])).to.throw()
+
+    it "throws on invalid browser", ->
+      invalid = {
+        name: "fake browser name"
+      }
+      expect(() -> config.validateBrowserList([invalid])).to.throw()
+
+    it "passes for valid list", ->
+      browser = {
+        name: "fake browser name",
+        family: "chrome",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+      expect(() -> config.validateBrowserList([browser])).to.not.throw()
 
   context ".setNodeBinary", ->
     beforeEach ->

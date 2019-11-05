@@ -226,7 +226,7 @@ validateBrowserList = (browsers) ->
 
   isValidBrowser = check.schema({
     name: check.unemptyString,
-    family: check.oneOf(["electron", "chrome"]),
+    family: check.oneOf(["electron", "chrome", "firefox"]),
     displayName: check.unemptyString,
     version: check.unemptyString,
     path: isEmptyStringOrAbsolutePath,
@@ -358,6 +358,24 @@ module.exports = {
 
     return obj
 
+  # Given an object "resolvedObj" and a list of overrides in "obj"
+  # marks all properties from "obj" inside "resolvedObj" using
+  # {value: obj.val, from: "plugin"}
+  setPluginResolvedOn: (resolvedObj, obj) ->
+    la(resolvedObj, "missing resolved object", resolvedObj)
+    _.each obj, (val, key) =>
+      if _.isObject(val) && !_.isArray(val)
+        ## recurse setting overrides
+        ## inside of this nested objected
+        @setPluginResolvedOn(resolvedObj[key], val)
+      else
+        ## override the resolved value
+        console.log('setting resolved plugin value', key, val)
+        resolvedObj[key] = {
+          value: val
+          from: "plugin"
+        }
+
   updateWithPluginValues: (cfg, overrides = {}) ->
     ## diff the overrides with cfg
     ## including nested objects (env)
@@ -369,28 +387,18 @@ module.exports = {
     debug("config diffs %o", diffs)
 
     userBrowserList = diffs && diffs.browsers && R.clone(diffs.browsers)
-
-    setResolvedOn = (resolvedObj, obj) ->
-      _.each obj, (val, key) ->
-        if _.isObject(val) && !_.isArray(val)
-          ## recurse setting overrides
-          ## inside of this nested objected
-          setResolvedOn(resolvedObj[key], val)
-        else
-          ## override the resolved value
-          resolvedObj[key] = {
-            value: val
-            from: "plugin"
-          }
+    if userBrowserList
+      debug("user browser list %o", userBrowserList)
 
     ## for each override go through
     ## and change the resolved values of cfg
     ## to point to the plugin
-    setResolvedOn(cfg.resolved, diffs)
+    @setPluginResolvedOn(cfg.resolved, diffs)
     debug("resolved config object %o", cfg.resolved)
 
     ## merge cfg into overrides
-    resolved = _.defaultsDeep(diffs, cfg)
+    merged = _.defaultsDeep({}, diffs, cfg)
+    debug("merged config object %o", merged)
 
     ## Take a special care with some system properties the
     ## user should be able to modify. For example, if the plugins file
@@ -398,18 +406,22 @@ module.exports = {
     ## and we need to use the user's value
 
     # do not allow user to delete "browsers" list - otherwise how to run tests?
-    if Array.isArray(userBrowserList)
-      debug("using user supplied list of browsers %o", userBrowserList)
-      @validateBrowserList(userBrowserList)
-      resolved.browsers = userBrowserList
+    # if Array.isArray(userBrowserList)
+    #   if Array.isArray(merged.resolved.browsers) and merged.resolved.browsers.length
+    #     debug("have valid resolved browsers list")
+    #   else
+    #     debug("using user supplied list of browsers %o", userBrowserList)
+    #     @validateBrowserList(userBrowserList)
+    #     merged.browsers = userBrowserList
 
-    if !resolved.browsers && cfg.browsers
-      debug("set the initial list of browsers because user has returned null / undefined in %o", resolved)
-      resolved.browsers = cfg.browsers
+    # if !merged.browsers && cfg.browsers
+    #   debug("set the initial list of browsers because user has returned null / undefined in %o", merged)
+    #   merged.browsers = cfg.browsers
 
-    debug("resolved config with defaults %o", resolved)
+    # make sure not to insert same browser multiple times
+    debug("merged config with defaults and resolved %o", merged)
 
-    return resolved
+    return merged
 
   resolveConfigValues: (config, defaults, resolved = {}) ->
     ## pick out only the keys found in configKeys
