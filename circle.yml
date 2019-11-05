@@ -688,8 +688,8 @@ jobs:
           command: ls -l
       # created file should have filename cypress-<version>.tgz
       - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
-      - run: cp cli/build/cypress-${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
+      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
+      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
       - run: ls -l /tmp/urls
       - store-npm-logs
       - run: pwd
