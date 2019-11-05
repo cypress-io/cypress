@@ -4,6 +4,14 @@ const uri = require('./uri')
 
 let buffers = []
 
+const stripPort = (url) => {
+  try {
+    return uri.removeDefaultPort(url).format()
+  } catch (e) {
+    return url
+  }
+}
+
 module.exports = {
   all () {
     return buffers
@@ -20,8 +28,8 @@ module.exports = {
   },
 
   set (obj = {}) {
-    obj.url = uri.removeDefaultPort(obj.url)
-    obj.originalUrl = uri.removeDefaultPort(obj.originalUrl)
+    obj.url = stripPort(obj.url)
+    obj.originalUrl = stripPort(obj.originalUrl)
 
     return buffers.push(_.pick(obj, 'url', 'originalUrl', 'jar', 'stream', 'response', 'details'))
   },
@@ -41,7 +49,7 @@ module.exports = {
       return b
     }
 
-    return find(uri.removeDefaultPort(str))
+    return find(stripPort(str))
   },
 
   take (str) {
