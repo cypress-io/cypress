@@ -74,7 +74,6 @@ onServer = (app) ->
 
     res.header("Set-Cookie", [
       "namefoo#{n}=valfoo#{n}"
-      "namebar#{n}=valbar#{n}"
     ])
 
     console.log('to', a, 'from', b)
@@ -97,8 +96,9 @@ if haveRoot
   httpPort = 80
   httpsPort = 443
 
-otherUrl = "http://quux.bar.net#{if haveRoot then '' else ":#{httpPort}"}"
-otherHttpsUrl = "http://quux.bar.net#{if haveRoot then '' else ":#{httpsPort}"}"
+otherDomain = "quux.bar.net"
+otherUrl = "http://#{otherDomain}#{if haveRoot then '' else ":#{httpPort}"}"
+otherHttpsUrl = "http://#{otherDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
 
 describe "e2e cookies", ->
   e2e.setup({
@@ -118,45 +118,76 @@ describe "e2e cookies", ->
     }
   })
 
+  ## this is a big chunky test that runs cookies_spec with all combinations of these:
+  ## - cookies on `localhost`, fully-qualified-domain-name, and IP address domains
+  ## - `https` baseurls, `http` baseurls, and no baseurls set
+  ## - both default port 80/443 and custom ports (if you are running as root)
+  ## - all browsers
+  ## all snapshots are combined to ensure that there is no difference in any of these situations
   [
-    ["https localhost", true, "localhost", "localhost"],
-    ["http localhost", false, "localhost", "localhost"],
-    ["https FQDN", true, "www.bar.foo.com", ".foo.com"],
-    ["http FQDN", false, "www.bar.foo.com", ".foo.com"],
+    ["localhost", "localhost"],
+    ["FQDN", "www.bar.foo.com"],
+    ["IP", "127.0.0.1"],
   ]
-  # .slice(3,4)
-  .forEach ([protocol, https, baseDomain, expectedDomain]) =>
+  # .slice(0,1)
+  .forEach ([
+    format,
+    baseDomain
+  ]) =>
     httpUrl = "http://#{baseDomain}#{if haveRoot then '' else ":#{httpPort}"}"
     httpsUrl = "https://#{baseDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
 
-    baseUrl = if https then httpsUrl else httpUrl
+    context "with #{format} urls", ->
+      [
+        [httpUrl, false],
+        [httpsUrl, true]
+      ].forEach ([
+        baseUrl,
+        https
+      ]) ->
+        [
+          true, false
+        ].forEach (useDefaultPort) ->
+          httpUrl = "http://#{baseDomain}#{if useDefaultPort then '' else ":#{httpPort}"}"
+          httpsUrl = "https://#{baseDomain}#{if useDefaultPort then '' else ":#{httpsPort}"}"
 
-    e2e.it "passes with #{protocol} baseurl", {
-      config: {
-        baseUrl
-        env: {
-          baseUrl
-          expectedDomain
-          https
-          httpUrl
-          httpsUrl
-          otherUrl
-          otherHttpsUrl
+          e2e.it "passes with baseurl: #{baseUrl}", {
+            config: {
+              baseUrl
+              env: {
+                baseUrl
+                baseDomain
+                https
+                httpUrl
+                httpsUrl
+                otherUrl
+                otherHttpsUrl
+              }
+            }
+            spec: "cookies_spec.coffee"
+            snapshot: true
+            expectedExitCode: 0
+            originalTitle: "e2e cookies with baseurl"
+            onStdout: (stdout) ->
+              stdout.replace(otherDomain, '<2nd domain>')
+              .replace(baseDomain, '<base domain>')
+            onRun: (exec) ->
+              if useDefaultPort and not haveRoot
+                console.warn('cannot use default port since not root, skipping')
+                return @skip()
+
+              exec()
+          }
+
+      e2e.it "passes with no baseurl", {
+        config: {
+          env: {
+            httpUrl
+            httpsUrl
+          }
         }
+        originalTitle: "e2e cookies with no baseurl"
+        spec: "cookies_spec_no_baseurl.coffee"
+        snapshot: true
+        expectedExitCode: 0
       }
-      spec: "cookies_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    }
-
-  e2e.it "passes with no baseurl", {
-    config: {
-      env: {
-        noBaseUrl: true
-        expectedDomain: 'localhost'
-      }
-    }
-    spec: "cookies_spec.coffee"
-    snapshot: true
-    expectedExitCode: 0
-  }

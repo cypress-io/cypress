@@ -1,21 +1,7 @@
-{ _ } = Cypress
-
-baseDomain = Cypress.env('baseDomain')
 httpUrl = Cypress.env('httpUrl')
 httpsUrl = Cypress.env('httpsUrl')
-otherUrl = Cypress.env('otherUrl')
-otherHttpsUrl = Cypress.env('otherHttpsUrl')
 
 describe "cookies", ->
-  before ->
-    if Cypress.env('noBaseUrl')
-      return
-
-    ## assert we're running on expected baseurl
-    expect(Cypress.env('baseUrl')).to.be.a('string')
-    .and.have.length.gt(0)
-    .and.eq(Cypress.config('baseUrl'))
-
   beforeEach ->
     cy.wrap({foo: "bar"})
 
@@ -29,7 +15,7 @@ describe "cookies", ->
       cy
         .clearCookie("foo1")
         .setCookie("foo", "bar").then (c) ->
-          expect(c.domain).to.eq(baseDomain)
+          expect(c.domain).to.eq("localhost")
           expect(c.httpOnly).to.eq(false)
           expect(c.name).to.eq("foo")
           expect(c.value).to.eq("bar")
@@ -45,7 +31,7 @@ describe "cookies", ->
           .then (cookies) ->
             c = cookies[0]
 
-            expect(c.domain).to.eq(baseDomain)
+            expect(c.domain).to.eq("localhost")
             expect(c.httpOnly).to.eq(false)
             expect(c.name).to.eq("foo")
             expect(c.value).to.eq("bar")
@@ -60,7 +46,7 @@ describe "cookies", ->
           .should("be.null")
         .setCookie("wtf", "bob", {httpOnly: true, path: "/foo", secure: true})
         .getCookie("wtf").then (c) ->
-          expect(c.domain).to.eq(baseDomain)
+          expect(c.domain).to.eq("localhost")
           expect(c.httpOnly).to.eq(true)
           expect(c.name).to.eq("wtf")
           expect(c.value).to.eq("bob")
@@ -92,7 +78,7 @@ describe "cookies", ->
       cy.getCookies().should("have.length", 2)
 
     it "handles undefined cookies", ->
-      cy.visit("/cookieWithNoName")
+      cy.visit("#{httpUrl}/cookieWithNoName")
 
   context "without whitelist", ->
     before ->
@@ -104,31 +90,31 @@ describe "cookies", ->
       cy
         .clearCookies()
         .setCookie("asdf", "jkl")
-        .request("/requestCookies")
+        .request("#{httpUrl}/requestCookies")
           .its("body").should("deep.eq", { asdf: "jkl" })
 
     it "handles expired cookies secure", ->
       cy
-        .visit("/set")
+        .visit("#{httpUrl}/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("/expirationMaxAge")
+        .visit("#{httpUrl}/expirationMaxAge")
         .getCookie("shouldExpire").should("not.exist")
-        .visit("/set")
+        .visit("#{httpUrl}/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("/expirationExpires")
+        .visit("#{httpUrl}/expirationExpires")
         .getCookie("shouldExpire").should("not.exist")
 
     it "issue: #224 sets expired cookies between redirects", ->
       cy
-        .visit("/set")
+        .visit("#{httpUrl}/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("/expirationRedirect")
+        .visit("#{httpUrl}/expirationRedirect")
         .url().should("include", "/logout")
         .getCookie("shouldExpire").should("not.exist")
 
-        .visit("/set")
+        .visit("#{httpUrl}/set")
         .getCookie("shouldExpire").should("exist")
-        .request("/expirationRedirect")
+        .request("#{httpUrl}/expirationRedirect")
         .getCookie("shouldExpire").should("not.exist")
 
     it "issue: #1321 failing to set or parse cookie", ->
@@ -152,43 +138,3 @@ describe "cookies", ->
 
     it "issue: #2724 does not fail on invalid cookies", ->
       cy.request("#{httpsUrl}/invalidCookies")
-
-    ## https://github.com/cypress-io/cypress/issues/5453
-    it "can set and clear cookie", ->
-      cy.setCookie('foo', 'bar')
-      cy.clearCookie('foo')
-      cy.getCookie('foo').should('be.null')
-
-    [
-      'visit',
-      # 'request'
-    ].forEach (cmd) ->
-      context "in a cy.#{cmd}", ->
-        [
-          ['HTTPS', otherHttpsUrl],
-          ['HTTP', otherUrl]
-        ].forEach ([protocol, altUrl]) =>
-          it "can set cookies on way too many redirects with #{protocol} intermediary", ->
-            n = 8
-
-            altDomain = (new Cypress.Location(altUrl)).getHostName()
-
-            cy[cmd]("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
-
-            cy.getCookies({ domain: null }).then (cookies) ->
-              ## reverse them so they'll be in the order they were set
-              cookies = _.reverse(_.sortBy(cookies, _.property('name')))
-
-              cy.task('console:log', "Result of cy.getCookies():")
-              cy.task('console:log', cookies)
-              .then ->
-                cookies.forEach (cookie, i) ->
-                  if i % 2 == 0
-                    expect(cookie.domain, "#{i}th domain").to.eq(baseDomain)
-                  else
-                    expect(cookie.domain, "#{i}th domain").to.eq(altDomain)
-                  expect(cookie.name).to.eq("namefoo#{n-i}")
-                  expect(cookie.value).to.eq("valfoo#{n-i}")
-                  expect(cookie.path).to.eq("/")
-                  expect(cookie.secure).to.eq(false)
-                  expect(cookie.httpOnly).to.eq(false)
