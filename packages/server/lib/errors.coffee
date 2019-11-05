@@ -858,6 +858,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg2.stack}
       """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
