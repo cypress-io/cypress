@@ -478,6 +478,9 @@ module.exports = (options = {}) ->
       currentUrl = options.url
 
       options.followRedirect = (incomingRes) ->
+        if followRedirect and not followRedirect(incomingRes)
+          return false
+
         newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 
         ## and when we know we should follow the redirect
