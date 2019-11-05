@@ -321,7 +321,6 @@ $ yarn lerna add --scope cypress --scope @packages/server my-new-dep1
 | Task               | Purpose                                                                                        |
 | :----------------- | :--------------------------------------------------------------------------------------------- |
 | `build`            | Build all packages                                                                             |
-| `build-prod`       | Build all packages and assets for production (if makes sense)                                  |
 | `start`            | Open Cypress in dev and global mode                                                            |
 | `watch`            | Run `yarn watch` in every package; piping the output back to the terminal                      |
 | `clean`            | Run `yarn clean` in every package; used to remove build artifacts from all packages            |
