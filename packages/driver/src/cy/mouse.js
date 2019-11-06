@@ -406,12 +406,12 @@ const create = (state, keyboard, focused, Cypress) => {
       }, mouseEvtOptionsExtend)
 
       // TODO: pointer events should have fractional coordinates, not rounded
-      let pointerdownProps = sendPointerdown(
+      let pointerdown = sendPointerdown(
         el,
         pointerEvtOptions
       )
 
-      const pointerdownPrevented = pointerdownProps.preventedDefault
+      const pointerdownPrevented = pointerdown.preventedDefault
       const elIsDetached = $elements.isDetachedEl(el)
 
       if (pointerdownPrevented || elIsDetached) {
@@ -422,31 +422,37 @@ const create = (state, keyboard, focused, Cypress) => {
         }
 
         return {
-          pointerdownProps,
-          mousedownProps: {
-            skipped: formatReasonNotFired(reason),
+          targetEl: el,
+          events: {
+            pointerdown,
+            mousedown: {
+              skipped: formatReasonNotFired(reason),
+            },
           },
         }
       }
 
-      let mousedownProps = sendMousedown(el, mouseEvtOptions)
+      let mousedown = sendMousedown(el, mouseEvtOptions)
 
       return {
-        pointerdownProps,
-        mousedownProps,
+        targetEl: el,
+        events: {
+          pointerdown,
+          mousedown,
+        },
       }
     },
 
     down (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       const $previouslyFocused = focused.getFocused()
 
-      const mouseDownEvents = mouse._downEvents(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse._downEvents(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       // el we just send pointerdown
-      const el = mouseDownEvents.pointerdownProps.el
+      const el = mouseDownPhase.targetEl
 
-      if (mouseDownEvents.pointerdownProps.preventedDefault || mouseDownEvents.mousedownProps.preventedDefault || !$elements.isAttachedEl(el)) {
-        return mouseDownEvents
+      if (mouseDownPhase.events.pointerdown.preventedDefault || mouseDownPhase.events.mousedown.preventedDefault || !$elements.isAttachedEl(el)) {
+        return mouseDownPhase
       }
 
       //# retrieve the first focusable $el in our parent chain
@@ -473,7 +479,7 @@ const create = (state, keyboard, focused, Cypress) => {
         $selection.moveSelectionToEnd($dom.getDocumentFromElement($elToFocus[0]), { onlyIfEmptySelection: true })
       }
 
-      return mouseDownEvents
+      return mouseDownPhase
     },
 
     /**
@@ -506,42 +512,41 @@ const create = (state, keyboard, focused, Cypress) => {
     * el2 = moveToCoordsOrNoop(coords)
     * sendMouseup(el2)
     * el3 = moveToCoordsOrNoop(coords)
-    * if (notDetached(el1) && el1 === el2)
-    *   sendClick(el3)
+    * if (notDetached(el1))
+    *   sendClick(ancestorOf(el1, el2))
     */
     click (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       debug('mouse.click', { fromElViewport, forceEl })
 
-      const mouseDownEvents = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
+      const skipMouseupEvent = mouseDownPhase.events.pointerdown.skipped || mouseDownPhase.events.pointerdown.preventedDefault
 
-      const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      // Only send click event if the same element received both pointerdown and pointerup, and it's not detached.
-      const getSkipClickEventAndReason = () => {
+      const getElementToClick = () => {
         // Never skip the click event when force:true
         if (forceEl) {
-          return false
+          return { elToClick: forceEl }
         }
 
-        if ($elements.isDetachedEl(mouseDownEvents.pointerdownProps.el)) {
-          return 'element was detached'
+        // Only send click event if mousedown element is not detached.
+        if ($elements.isDetachedEl(mouseDownPhase.targetEl)) {
+          return { skipClickEventReason: 'element was detached' }
         }
 
-        if (!mouseDownEvents.pointerdownProps.el || mouseDownEvents.pointerdownProps.el !== mouseUpEvents.pointerupProps.el) {
-          return 'mouseup and mousedown not received by same element'
-        }
+        const commonAncestor = mouseUpPhase.targetEl &&
+        mouseDownPhase.targetEl &&
+        $elements.getFirstCommonAncestor(mouseUpPhase.targetEl, mouseDownPhase.targetEl)
 
-        // No reason to skip the click event
-        return false
+        return { elToClick: commonAncestor }
       }
 
-      const skipClickEvent = getSkipClickEventAndReason()
+      const { skipClickEventReason, elToClick } = getElementToClick()
 
-      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, mouseDownEvents.pointerdownProps.el, forceEl, skipClickEvent, mouseEvtOptionsExtend)
+      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, elToClick, forceEl, skipClickEventReason, mouseEvtOptionsExtend)
 
-      return _.extend({}, mouseDownEvents, mouseUpEvents, mouseClickEvents)
+      return _.extend({}, mouseDownPhase.events, mouseUpPhase.events, mouseClickEvents)
     },
 
     /**
@@ -567,29 +572,35 @@ const create = (state, keyboard, focused, Cypress) => {
 
       const el = forceEl || mouse.moveToCoords(fromElViewport)
 
-      let pointerupProps = sendPointerup(el, pointerEvtOptions)
+      let pointerup = sendPointerup(el, pointerEvtOptions)
 
       if (skipMouseEvent || $elements.isDetachedEl($(el))) {
         return {
-          pointerupProps,
-          mouseupProps: {
-            skipped: formatReasonNotFired('Previous event cancelled'),
+          targetEl: el,
+          events: {
+            pointerup,
+            mouseup: {
+              skipped: formatReasonNotFired('Previous event cancelled'),
+            },
           },
         }
       }
 
-      let mouseupProps = sendMouseup(el, mouseEvtOptions)
+      let mouseup = sendMouseup(el, mouseEvtOptions)
 
       return {
-        pointerupProps,
-        mouseupProps,
+        targetEl: el,
+        events: {
+          pointerup,
+          mouseup,
+        },
       }
     },
 
     _mouseClickEvents (fromElViewport, el, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
       if (skipClickEvent) {
         return {
-          clickProps: {
+          click: {
             skipped: formatReasonNotFired(skipClickEvent),
           },
         }
@@ -612,9 +623,9 @@ const create = (state, keyboard, focused, Cypress) => {
         detail: 1,
       }, mouseEvtOptionsExtend)
 
-      let clickProps = sendClick(el, clickEventOptions, { force: !!forceEl })
+      let click = sendClick(el, clickEventOptions, { force: !!forceEl })
 
-      return { clickProps }
+      return { click }
     },
 
     _contextmenuEvent (fromElViewport, forceEl, mouseEvtOptionsExtend) {
@@ -630,9 +641,9 @@ const create = (state, keyboard, focused, Cypress) => {
         which: 3,
       }, mouseEvtOptionsExtend)
 
-      let contextmenuProps = sendContextmenu(el, mouseEvtOptions)
+      let contextmenu = sendContextmenu(el, mouseEvtOptions)
 
-      return { contextmenuProps }
+      return { contextmenu }
     },
 
     dblclick (fromElViewport, forceEl, mouseEvtOptionsExtend = {}) {
@@ -653,9 +664,9 @@ const create = (state, keyboard, focused, Cypress) => {
         detail: 2,
       }, mouseEvtOptionsExtend)
 
-      let dblclickProps = sendDblclick(el, dblclickEvtProps)
+      let dblclick = sendDblclick(el, dblclickEvtProps)
 
-      return { clickEvents1, clickEvents2, dblclickProps }
+      return { clickEvents1, clickEvents2, dblclick }
     },
 
     rightclick (fromElViewport, forceEl) {
@@ -670,15 +681,14 @@ const create = (state, keyboard, focused, Cypress) => {
         which: 3,
       }
 
-      const mouseDownEvents = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const contextmenuEvent = mouse._contextmenuEvent(fromElViewport, forceEl)
 
-      const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
+      const skipMouseupEvent = mouseDownPhase.events.pointerdown.skipped || mouseDownPhase.events.pointerdown.preventedDefault
+      const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
-
-      const clickEvents = _.extend({}, mouseDownEvents, mouseUpEvents)
+      const clickEvents = _.extend({}, mouseDownPhase.events, mouseUpPhase.events)
 
       return _.extend({}, { clickEvents, contextmenuEvent })
     },
