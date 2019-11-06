@@ -70,9 +70,8 @@ chai.use((chai, u) => {
           }
 
           break
-
         default:
-          null
+          break
       }
 
       // always rethrow the error!
@@ -257,7 +256,7 @@ chai.use((chai, u) => {
           obj = $(obj)
         }
 
-        return this.assert(
+        this.assert(
           obj.is(selector) || !!obj.find(selector).length,
           'expected #{this} to contain #{exp}',
           'expected #{this} not to contain #{exp}',
@@ -371,7 +370,7 @@ chai.use((chai, u) => {
             e1.type = 'existence'
 
             const getLongExistsMessage = function (obj) {
-            // if we expected not for an element to exist
+              // if we expected not for an element to exist
               if (isAttached) {
                 return `Expected ${node} not to exist in the DOM, but it was continuously found.`
               }
