@@ -365,6 +365,8 @@ jobs:
   win-build:
     <<: *defaults
     parameters:
+      executor:
+        type: executor
       arch:
         type: string
     environment:
