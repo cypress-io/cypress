@@ -343,6 +343,19 @@ jobs:
     steps:
       - build
 
+  win-build:
+    <<: *defaults
+    executor: win/vs2019
+    parameters:
+      arch:
+        type: string
+    environment:
+      TARGET_ARCH: << parameters.arch >>
+    steps:
+      - win-prebuild
+      - build:
+          shell: bash.exe
+
   lint:
     <<: *defaults
     steps:
@@ -1012,22 +1025,9 @@ jobs:
           command: DEBUG=cypress:cli $(npm bin)/cypress run
       - store-npm-logs
 
-  win-build:
-    <<: *defaults
-    executor: win/vs2019
-    parameters:
-      arch:
-        type: string
-    environment:
-      TARGET_ARCH: << parameters.arch >>
-    steps:
-      - win-prebuild
-      - build:
-          shell: bash.exe
-
 linux-workflow: &linux-workflow
   jobs:
-    - build-posix:
+    - posix-build:
         name: build
     - lint:
         name: Linux lint
@@ -1204,7 +1204,7 @@ linux-workflow: &linux-workflow
 
 mac-workflow: &mac-workflow
   jobs:
-    - build-posix:
+    - posix-build:
         name: Mac build
         executor: mac
         filters:
