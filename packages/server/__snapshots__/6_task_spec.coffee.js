@@ -86,7 +86,7 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
   2 failing
 
   1)  throws when task returns undefined:
-     CypressError: \`cy.task('returns:undefined')\` failed with the following error:
+     \`cy.task('returns:undefined')\` failed with the following error:
 
 The task 'returns:undefined' returned undefined. You must return a promise, a value, or null to indicate that the task was handled.
 
@@ -99,19 +99,9 @@ Fix this in your plugins file here:
 
 https://on.cypress.io/api/task
       at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
 
   2)  includes stack trace in error:
-     CypressError: \`cy.task('errors')\` failed with the following error:
+     \`cy.task('errors')\` failed with the following error:
 
 > Error: Error thrown in task handler
     at stack trace line
@@ -129,16 +119,6 @@ https://on.cypress.io/api/task
     at stack trace line
     at stack trace line
     at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 

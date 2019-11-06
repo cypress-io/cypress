@@ -97,7 +97,7 @@ exports['e2e requests fails when network immediately fails 1'] = `
   1 failing
 
   1) when network connection cannot be established fails:
-     CypressError: \`cy.request()\` failed trying to load:
+     \`cy.request()\` failed trying to load:
 
 http://localhost:16795/
 
@@ -141,18 +141,6 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 
 https://on.cypress.io/request
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
@@ -228,7 +216,7 @@ exports['e2e requests fails on status code 1'] = `
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
-     CypressError: \`cy.request()\` failed on:
+     \`cy.request()\` failed on:
 
 http://localhost:2294/statusCode?code=503
 
@@ -271,16 +259,6 @@ Body: Service Unavailable
 
 https://on.cypress.io/request
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
@@ -356,7 +334,7 @@ exports['e2e requests prints long http props on fail 1'] = `
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
-     CypressError: \`cy.request()\` failed on:
+     \`cy.request()\` failed on:
 
 http://localhost:2294/myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong
 
@@ -408,16 +386,6 @@ Body: <!DOCTYPE html>
 
 https://on.cypress.io/request
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 

@@ -23,15 +23,12 @@ exports['e2e uncaught errors / failing1'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught ReferenceError: foo is not defined
-
-This error originated from your test code, not from Cypress.
-
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+     foo is not defined
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -108,15 +105,12 @@ exports['e2e uncaught errors / failing2'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught ReferenceError: foo is not defined
-
-This error originated from your test code, not from Cypress.
-
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+     foo is not defined
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+      at stack trace line
       at stack trace line
       at stack trace line
       at stack trace line
@@ -196,7 +190,7 @@ exports['e2e uncaught errors / failing3'] = `
   1 failing
 
   1) foo bar:
-     Uncaught ReferenceError: foo is not defined
+     foo is not defined
 
 This error originated from your test code, not from Cypress.
 
@@ -278,7 +272,7 @@ exports['e2e uncaught errors / failing4'] = `
   1 failing
 
   1) foo "before all" hook for "does not run":
-     Uncaught ReferenceError: foo is not defined
+     foo is not defined
 
 This error originated from your test code, not from Cypress.
 
@@ -366,19 +360,19 @@ exports['e2e uncaught errors / failing5'] = `
   4 failing
 
   1) foo baz fails:
-     ReferenceError: foo is not defined
+     foo is not defined
       at stack trace line
 
   2) foo bar fails:
-     ReferenceError: foo is not defined
+     foo is not defined
       at stack trace line
 
   3) foo quux fails:
-     ReferenceError: foo is not defined
+     foo is not defined
       at stack trace line
 
   4) foo quux2 fails:
-     ReferenceError: foo is not defined
+     foo is not defined
       at stack trace line
 
 

@@ -92,8 +92,8 @@ exports['e2e config fails 1'] = `
   1 failing
 
   1) config times out looking for a missing element:
-     AssertionError: Timed out retrying: Expected to find element: \`#bar\`, but never found it.
-  
+     Timed out retrying: Expected to find element: \`#bar\`, but never found it.
+      at stack trace line
 
 
 

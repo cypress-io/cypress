@@ -36,7 +36,7 @@ exports['e2e js error handling / fails'] = `
   5 failing
 
   1) s1 without an afterEach hook t1:
-     Uncaught ReferenceError: foo is not defined
+     foo is not defined
 
 This error originated from your application code, not from Cypress.
 
@@ -46,12 +46,10 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-      at stack trace line
-      at stack trace line
       at stack trace line
 
   2) s1 without an afterEach hook t2:
-     Uncaught ReferenceError: bar is not defined
+     bar is not defined
 
 This error originated from your application code, not from Cypress.
 
@@ -61,14 +59,10 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
   3) s1 with an afterEach hook t4:
-     Uncaught ReferenceError: foo is not defined
+     foo is not defined
 
 This error originated from your application code, not from Cypress.
 
@@ -79,15 +73,13 @@ This behavior is configurable, and you can choose to turn this off by listening 
 https://on.cypress.io/uncaught-exception-from-application
 
       at stack trace line
-      at stack trace line
-      at stack trace line
 
   4) s1 with an afterEach hook t5:
-     Error: baz
+     baz
       at stack trace line
 
   5) s1 cross origin script errors explains where script errored:
-     Uncaught Error: Script error.
+     Script error.
 
 Cypress detected that an uncaught error was thrown from a cross origin script.
 
@@ -107,9 +99,6 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 

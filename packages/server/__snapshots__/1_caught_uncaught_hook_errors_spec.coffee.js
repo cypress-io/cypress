@@ -40,19 +40,19 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
   3 failing
 
   1) s1a "before each" hook for "t2a":
-     AssertionError: Timed out retrying: Expected to find element: \`.does-not-exist\`, but never found it.
+     Timed out retrying: Expected to find element: \`.does-not-exist\`, but never found it.
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1a'
-  
+      at stack trace line
 
   2) s3a "before all" hook for "t8a":
-     Error: s3a before hook failed
+     s3a before hook failed
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 's3a'
       at stack trace line
 
   3) s4a "before all" hook for "t10a":
-     Error: s4a before hook failed
+     s4a before hook failed
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 's4a'
       at stack trace line
@@ -140,7 +140,7 @@ exports['e2e caught and uncaught hooks errors failing2 1'] = `
   1 failing
 
   1) s1b "before each" hook for "t2b":
-     Uncaught ReferenceError: foo is not defined
+     foo is not defined
 
 This error originated from your application code, not from Cypress.
 
@@ -225,7 +225,7 @@ exports['e2e caught and uncaught hooks errors failing3 1'] = `
   1 failing
 
   1)  "before each" hook for "t1c":
-     Uncaught ReferenceError: foo is not defined
+     foo is not defined
 
 This error originated from your application code, not from Cypress.
 
@@ -316,7 +316,7 @@ exports['e2e caught and uncaught hooks errors failing4 1'] = `
   1 failing
 
   1) uncaught hook error should continue to fire all mocha events s1 "before each" hook for "does not run":
-     Uncaught ReferenceError: foo is not defined
+     foo is not defined
 
 This error originated from your application code, not from Cypress.
 
