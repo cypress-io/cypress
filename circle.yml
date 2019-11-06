@@ -327,6 +327,8 @@ commands:
       - print-env
       - save_cache:
           key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
+          paths:
+            - C:\Program Files\nodejs
 
 jobs:
   ## code checkout and NPM installs
