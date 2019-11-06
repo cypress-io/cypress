@@ -22,6 +22,12 @@ defaults: &defaults
 orbs:
   win: circleci/windows@1.0.0
 
+## due to a bug in Circle CI, this cannot be defined as a real "executor"
+win-executor: &win-executor
+  executor:
+    name: win/vs2019
+    shell: bash.exe
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -351,7 +357,7 @@ jobs:
 
   win-build:
     <<: *defaults
-    executor: win/vs2019
+    <<: *win-executor
     parameters:
       arch:
         type: string
@@ -1035,7 +1041,6 @@ linux-workflow: &linux-workflow
     - posix-build:
         name: build
     - lint:
-        name: Linux lint
         requires:
           - build
     - lint-types:
@@ -1210,7 +1215,7 @@ linux-workflow: &linux-workflow
 mac-workflow: &mac-workflow
   jobs:
     - posix-build:
-        name: Mac build
+        name: mac-build
         executor: mac
         filters:
           branches:
@@ -1218,10 +1223,10 @@ mac-workflow: &mac-workflow
               - develop
 
     - lint:
-        name: Mac lint
+        name: mac-lint
         executor: mac
         requires:
-          - Mac build
+          - mac-build
         filters:
           branches:
             only:
@@ -1230,17 +1235,17 @@ mac-workflow: &mac-workflow
     # maybe run unit tests?
 
     - build-npm-package:
-        name: Mac NPM package
+        name: mac-build-npm-package
         executor: mac
         requires:
-          - Mac build
+          - mac-build
         filters:
           branches:
             only:
               - develop
 
     - upload-npm-package:
-        name: Mac NPM package upload
+        name: mac-upload-npm-package
         context: test-runner:upload
         executor: mac
         filters:
@@ -1248,10 +1253,10 @@ mac-workflow: &mac-workflow
             only:
               - develop
         requires:
-          - Mac NPM package
+          - mac-build-npm-package
 
     - build-binary:
-        name: Mac binary
+        name: mac-build-binary
         context: org-global
         executor: mac
         filters:
@@ -1259,10 +1264,10 @@ mac-workflow: &mac-workflow
             only:
               - develop
         requires:
-          - Mac build
+          - mac-build
 
     - upload-binary:
-        name: Mac binary upload
+        name: mac-upload-binary
         executor: mac
         context: test-runner:upload
         filters:
@@ -1270,52 +1275,52 @@ mac-workflow: &mac-workflow
             only:
               - develop
         requires:
-          - Mac binary
+          - mac-build-binary
 
     - test-kitchensink:
-        name: Test Mac Kitchensink
+        name: mac-test-kitchensink
         executor: mac
         filters:
           branches:
             only:
               - develop
         requires:
-          - Mac build
+          - mac-build
 
     - test-binary-against-kitchensink:
-        name: Test Mac binary against kitchensink
+        name: mac-test-binary-against-kitchensink
         executor: mac
         filters:
           branches:
             only:
               - develop
         requires:
-          - Mac NPM package
-          - Mac binary
+          - mac-build-npm-package
+          - mac-build-binary
 
     - test-binary-against-staging:
         context: test-runner:record-tests
-        name: Test Mac binary against staging
+        name: mac-test-binary-against-staging
         executor: mac
         filters:
           branches:
             only:
               - develop
         requires:
-          - Mac NPM package
-          - Mac binary
+          - mac-build-npm-package
+          - mac-build-binary
 
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
-        name: Test Mac binary against other projects
+        name: mac-test-binary-and-npm-against-other-projects
         executor: mac
         filters:
           branches:
             only:
               - develop
         requires:
-          - Mac NPM package upload
-          - Mac binary upload
+          - mac-upload-npm-package
+          - mac-upload-binary
 
 win-ia32-workflow: &win-ia32-workflow
   jobs:
@@ -1324,51 +1329,49 @@ win-ia32-workflow: &win-ia32-workflow
       arch: "32"
   - build-npm-package:
       name: 'win-ia32-build-npm-package'
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-ia32-build
   - upload-npm-package:
       name: 'win-ia32-upload-npm-package'
       context: test-runner:upload
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-ia32-build-npm-package
   - build-binary:
       name: 'win-ia32-build-binary'
       context: org-global
-      executor:
-        name: win/vs2019
-        shell: bash.exe
+      <<: *win-executor
       requires:
         - win-ia32-build
   - upload-binary:
       name: 'win-ia32-upload-binary'
-      executor: win/vs2019
+      <<: *win-executor
       context: test-runner:upload
       requires:
         - win-ia32-build-binary
   - test-kitchensink:
       name: 'win-ia32-test-kitchensink'
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-ia32-build
   - test-binary-against-kitchensink:
       name: 'win-ia32-test-binary-against-kitchensink'
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-ia32-build-npm-package
         - win-ia32-build-binary
   - test-binary-against-staging:
       name: 'win-ia32-test-binary-against-staging'
       context: test-runner:record-tests
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-ia32-build-npm-package
         - win-ia32-build-binary
   - test-binary-and-npm-against-other-projects:
       context: test-runner:trigger-test-jobs
       name: 'win-ia32-test-binary-and-npm-against-other-projects'
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-ia32-upload-npm-package
         - win-ia32-upload-binary
@@ -1380,51 +1383,49 @@ win-x64-workflow: &win-x64-workflow
       arch: "64"
   - build-npm-package:
       name: 'win-x64-build-npm-package'
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-x64-build
   - upload-npm-package:
       name: 'win-x64-upload-npm-package'
       context: test-runner:upload
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-x64-build-npm-package
   - build-binary:
       name: 'win-x64-build-binary'
       context: org-global
-      executor:
-        name: win/vs2019
-        shell: bash.exe
+      <<: *win-executor
       requires:
         - win-x64-build
   - upload-binary:
       name: 'win-x64-upload-binary'
-      executor: win/vs2019
+      <<: *win-executor
       context: test-runner:upload
       requires:
         - win-x64-build-binary
   - test-kitchensink:
       name: 'win-x64-test-kitchensink'
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-x64-build
   - test-binary-against-kitchensink:
       name: 'win-x64-test-binary-against-kitchensink'
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-x64-build-npm-package
         - win-x64-build-binary
   - test-binary-against-staging:
       name: 'win-x64-test-binary-against-staging'
       context: test-runner:record-tests
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-x64-build-npm-package
         - win-x64-build-binary
   - test-binary-and-npm-against-other-projects:
       context: test-runner:trigger-test-jobs
       name: 'win-x64-test-binary-and-npm-against-other-projects'
-      executor: win/vs2019
+      <<: *win-executor
       requires:
         - win-x64-upload-npm-package
         - win-x64-upload-binary
