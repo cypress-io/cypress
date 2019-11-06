@@ -258,9 +258,7 @@ const getCodeFrame = (sourceCode, { line, column, source: file }) => {
 }
 
 const getSourceDetails = (generatedDetails) => {
-  // stack-utils removes the // in http:// for some reason, so put it back
-  const file = generatedDetails.file.replace(/(https?):/, '$1://')
-  const sourceDetails = $sourceMapUtils.getSourcePosition(file, generatedDetails)
+  const sourceDetails = $sourceMapUtils.getSourcePosition(generatedDetails.file, generatedDetails)
 
   if (!sourceDetails) return generatedDetails
 
@@ -275,12 +273,13 @@ const getSourceDetails = (generatedDetails) => {
 }
 
 const getCodeFrameFromStack = (stack, lineIndex) => {
+  if (!stack) return null
+
   const generatedStackLineDetails = getStackLineDetails(stack, lineIndex)
 
   if (!generatedStackLineDetails) return null
 
-  // stack-utils removes the // in http:// for some reason, so put it back
-  const file = generatedStackLineDetails.file.replace(':', '://')
+  const { file } = generatedStackLineDetails
   const stackLineDetails = $sourceMapUtils.getSourcePosition(file, generatedStackLineDetails)
 
   if (!stackLineDetails) return null
@@ -357,8 +356,14 @@ const getCleanedStackLines = (stackUtil, stack) => {
 const getStackLineDetails = (stack, lineIndex = 0) => {
   const stackUtil = new StackUtils()
   const line = getCleanedStackLines(stackUtil, stack)[lineIndex]
+  const details = stackUtil.parseLine(line)
 
-  return stackUtil.parseLine(line)
+  if (!details) return null
+
+  // stackUtils.clean removes the // in http:// for some reason, so put it back
+  return _.extend(details, {
+    file: details.file.replace(':', '://'),
+  })
 }
 
 const stackLineRegex = /^(\s*)at /
@@ -404,7 +409,6 @@ const backslackRegex = /\\/g
 
 const getSourceDetailsForLine = (stackUtil, line) => {
   const whitespace = getWhitespace(line)
-
   const generatedDetails = stackUtil.parseLine(line)
 
   // if it couldn't be parsed, it's a message line
@@ -427,7 +431,8 @@ const getSourceDetailsForLine = (stackUtil, line) => {
     relativeFile: (sourceDetails.file || '').replace(`${cwd}/`, ''),
     absoluteFile: sourceDetails.file,
     line: sourceDetails.line,
-    column: sourceDetails.column,
+    // adding 1 to column makes more sense when opening in editor
+    column: sourceDetails.column + 1,
     whitespace,
   }
 }
