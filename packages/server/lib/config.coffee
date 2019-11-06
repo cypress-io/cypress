@@ -95,6 +95,8 @@ CONFIG_DEFAULTS = {
   hosts:                         null
   morgan:                        true
   baseUrl:                       null
+  # will be replaced by detected list of browsers
+  browsers:                      []
   socketId:                      null
   projectId:                     null
   userAgent:                     null
@@ -366,6 +368,7 @@ module.exports = {
     obj = _.clone(config)
 
     obj.resolved = @resolveConfigValues(config, defaults, resolved)
+    debug("resolved config is %o", obj.resolved.browsers)
 
     return obj
 
@@ -438,11 +441,14 @@ module.exports = {
     debug("merged plugins config %o", merged)
     return merged
 
+  # combines the default configuration object with values specified in the
+  # configuration file like "cypress.json". Values in configuration file
+  # overwrite the defaults.
   resolveConfigValues: (config, defaults, resolved = {}) ->
-    ## pick out only the keys found in configKeys
+    ## pick out only known configuration keys
     _
     .chain(config)
-    .pick(configKeys)
+    .pick(configKeys.concat(systemConfigKeys))
     .mapValues (val, key) ->
       source = (s) ->
         {
@@ -456,10 +462,12 @@ module.exports = {
             r
           else
             source(r)
-        when not _.isEqual(config[key], defaults[key])
-          source("config")
-        else
+        # "browsers" list is special, since it is dynamic by default
+        # and can only be ovewritten via plugins file
+        when _.isEqual(config[key], defaults[key]) or key == "browsers"
           source("default")
+        else
+          source("config")
     .value()
 
   # instead of the built-in Node process, specify a path to 3rd party Node
