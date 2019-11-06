@@ -86,8 +86,7 @@ onServer = (app) ->
 haveRoot = !process.env.USE_HIGH_PORTS && process.geteuid() == 0
 
 if not haveRoot
-  console.warn('(e2e tests warning) You are not running as root; therefore, 2_cookies_spec')
-  console.warn('  cannot cover the case where the default (80/443) HTTP(s) port is used.')
+  console.warn('(e2e tests warning) You are not running as root; therefore, 2_cookies_spec cannot cover the case where the default (80/443) HTTP(s) port is used. Alternate ports (2121/2323) will be used instead.')
 
 httpPort = 2121
 httpsPort = 2323
@@ -123,7 +122,7 @@ describe "e2e cookies", ->
   ## - `https` baseurls, `http` baseurls, and no baseurls set
   ## - both default port 80/443 and custom ports (if you are running as root)
   ## - all browsers
-  ## all snapshots are combined to ensure that there is no difference in any of these situations
+  ## snapshots are combined to ensure that there is no difference in any of these situations
   [
     ["localhost", "localhost"],
     ["FQDN", "www.bar.foo.com"],
@@ -134,58 +133,50 @@ describe "e2e cookies", ->
     baseDomain,
   ]) =>
     context "with #{format} urls", ->
+      httpUrl = "http://#{baseDomain}#{if haveRoot then '' else ":#{httpPort}"}"
+      httpsUrl = "https://#{baseDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
+
       [
-        true,
-        false
-      ].forEach (useDefaultPort) ->
-        httpUrl = "http://#{baseDomain}#{if useDefaultPort then '' else ":#{httpPort}"}"
-        httpsUrl = "https://#{baseDomain}#{if useDefaultPort then '' else ":#{httpsPort}"}"
-
-        [
-          [httpUrl, false],
-          [httpsUrl, true]
-        ].forEach ([
-          baseUrl,
-          https
-        ]) ->
-          e2e.it "passes with baseurl: #{baseUrl}", {
-            config: {
-              baseUrl
-              env: {
-                baseUrl
-                expectedDomain: baseDomain
-                https
-                httpUrl
-                httpsUrl
-                otherUrl
-                otherHttpsUrl
-              }
-            }
-            spec: "cookies_spec.coffee"
-            snapshot: true
-            expectedExitCode: 0
-            onRun: (exec) ->
-              if useDefaultPort and not haveRoot
-                console.warn('cannot use default port since not root, skipping')
-                return @skip()
-
-              exec({
-                originalTitle: "e2e cookies with baseurl"
-                onStdout: (stdout) ->
-                  stdout.replace(new RegExp(otherDomain, 'g'), '<2nd domain>')
-                  .replace(new RegExp(baseDomain, 'g'), '<base domain>')
-              })
-          }
-
-        e2e.it "passes with no baseurl", {
+        [httpUrl, false],
+        [httpsUrl, true]
+      ].forEach ([
+        baseUrl,
+        https
+      ]) ->
+        e2e.it "passes with baseurl: #{baseUrl}", {
           config: {
+            baseUrl
             env: {
+              baseUrl
+              expectedDomain: baseDomain
+              https
               httpUrl
               httpsUrl
+              otherUrl
+              otherHttpsUrl
             }
           }
-          originalTitle: "e2e cookies with no baseurl"
-          spec: "cookies_spec_no_baseurl.coffee"
+          spec: "cookies_spec.coffee"
           snapshot: true
           expectedExitCode: 0
+          onRun: (exec) =>
+            exec({
+              originalTitle: "e2e cookies with baseurl"
+              onStdout: (stdout) ->
+                stdout.replace(new RegExp(otherDomain, 'g'), '<2nd domain>')
+                .replace(new RegExp(baseDomain, 'g'), '<base domain>')
+            })
         }
+
+      e2e.it "passes with no baseurl", {
+        config: {
+          env: {
+            httpUrl
+            httpsUrl
+          }
+        }
+        originalTitle: "e2e cookies with no baseurl"
+        spec: "cookies_spec_no_baseurl.coffee"
+        snapshot: true
+        expectedExitCode: 0
+      }

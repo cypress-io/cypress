@@ -178,8 +178,6 @@ describe "cookies", ->
 
             altDomain = (new Cypress.Location(altUrl)).getHostName()
 
-            cy.clearCookies({ domain: null })
-
             cy[cmd]("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
 
             cy.getCookies({ domain: null }).then (cookies) ->
@@ -191,9 +189,9 @@ describe "cookies", ->
               .then ->
                 cookies.forEach (cookie, i) ->
                   if i % 2 == 0
-                    expect(cookie.domain, "#{i}th domain").to.eq(expectedDomain)
+                    expect(cookie.domain, "#{cookie.name} domain").to.eq(expectedDomain)
                   else
-                    expect(cookie.domain, "#{i}th domain").to.eq(altDomain)
+                    expect(cookie.domain, "#{cookie.name} domain").to.eq(altDomain)
                   expect(cookie.name).to.eq("namefoo#{n-i}")
                   expect(cookie.value).to.eq("valfoo#{n-i}")
                   expect(cookie.path).to.eq("/")
