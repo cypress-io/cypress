@@ -1318,46 +1318,34 @@ mac-workflow: &mac-workflow
           - Mac NPM package upload
           - Mac binary upload
 
-win-build-npm-package: &win-build-npm-package
-  executor: win/vs2019
-  requires:
-    - win-build
-
-win-upload-npm-package: &win-upload-npm-package
-  context: test-runner:upload
-  executor: win/vs2019
-  requires:
-    - win-build-npm-package
-
-win-build-binary: &win-build-binary
-  context: org-global
-  executor: win/vs2019
-  requires:
-    - win-build
-
-win-upload-binary: &win-upload-binary
-  executor: win/vs2019
-  context: test-runner:upload
-  requires:
-    - win-build-binary
-
 win-ia32-workflow: &win-ia32-workflow
   jobs:
   - win-build:
       name: 'win-ia32-build'
       arch: "32"
   - build-npm-package:
-      <<: *win-build-npm-package
       name: 'win-ia32-build-npm-package'
+      executor: win/vs2019
+      requires:
+        - win-ia32-build
   - upload-npm-package:
-      <<: *win-upload-npm-package
       name: 'win-ia32-upload-npm-package'
+      context: test-runner:upload
+      executor: win/vs2019
+      requires:
+        - win-ia32-build-npm-package
   - build-binary:
-      <<: *win-build-binary
       name: 'win-ia32-build-binary'
+      context: org-global
+      executor: win/vs2019
+      requires:
+        - win-ia32-build
   - upload-binary:
-      <<: *win-upload-binary
       name: 'win-ia32-upload-binary'
+      executor: win/vs2019
+      context: test-runner:upload
+      requires:
+        - win-ia32-build-binary
 
 win-x64-workflow: &win-x64-workflow
   jobs:
@@ -1365,17 +1353,28 @@ win-x64-workflow: &win-x64-workflow
       name: 'win-x64-build'
       arch: "64"
   - build-npm-package:
-      <<: *win-build-npm-package
       name: 'win-x64-build-npm-package'
+      executor: win/vs2019
+      requires:
+        - win-x64-build
   - upload-npm-package:
-      <<: *win-upload-npm-package
       name: 'win-x64-upload-npm-package'
+      context: test-runner:upload
+      executor: win/vs2019
+      requires:
+        - win-x64-build-npm-package
   - build-binary:
-      <<: *win-build-binary
       name: 'win-x64-build-binary'
+      context: org-global
+      executor: win/vs2019
+      requires:
+        - win-x64-build
   - upload-binary:
-      <<: *win-upload-binary
       name: 'win-x64-upload-binary'
+      executor: win/vs2019
+      context: test-runner:upload
+      requires:
+        - win-x64-build-binary
 
 workflows:
   linux:
