@@ -1231,7 +1231,7 @@ win-ia32-workflow: &win-ia32-workflow
       <<: *win-executor
       <<: *develop-only
       name: 'win-ia32-build'
-      arch: "32"
+      arch: x86
   - build-npm-package:
       <<: *win-executor
       name: 'win-ia32-build-npm-package'
@@ -1287,7 +1287,7 @@ win-x64-workflow: &win-x64-workflow
       <<: *win-executor
       <<: *develop-only
       name: 'win-x64-build'
-      arch: "64"
+      arch: x64
   - build-npm-package:
       <<: *win-executor
       name: 'win-x64-build-npm-package'
