@@ -79,6 +79,19 @@ const displayObject = (key, nestedObj, hasComma) => {
   return displayNestedObj(key, obj, hasComma)
 }
 
+/**
+ * Formats an objects to avoid "[object Object]" situation
+ */
+const stringify = (obj) => {
+  const s = `${obj.value}`
+
+  if (s === '[object Object]') {
+    return JSON.stringify(obj.value, null, 2)
+  }
+
+  return s
+}
+
 const getSpan = (key, obj, hasComma, isArray) => {
   return (
     <div key={key} className='line'>
@@ -87,7 +100,7 @@ const getSpan = (key, obj, hasComma, isArray) => {
       <Tooltip title={obj.from || ''} placement='right' className='cy-tooltip'>
         <span className={obj.from}>
           {getString(obj.value)}
-          {`${obj.value}`}
+          {stringify(obj)}
           {getString(obj.value)}
         </span>
       </Tooltip>

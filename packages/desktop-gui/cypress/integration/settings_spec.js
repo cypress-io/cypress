@@ -77,6 +77,15 @@ describe('Settings', () => {
         cy.contains('Your project\'s configuration is displayed')
       })
 
+      it('displays browser information', () => {
+        cy.contains('.config-vars .key', 'browsers').should('be.visible')
+        // and the browser objects (or any other objects in the config)
+        // should be displayed fully
+        cy.get('.config-vars').invoke('text')
+        .should('contain', '"name": "chrome"')
+        .and('not.contain', '[object')
+      })
+
       it('displays legend in table', () => {
         cy.get('table>tbody>tr').should('have.length', 6)
       })
