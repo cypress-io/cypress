@@ -304,8 +304,6 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
       - run:
           name: Install Node
-          environment:
-            nodejs_version: "12.0.0"
           command: |
             version_slug=node-v$nodejs_version-win-$TARGET_ARCH
             if [[ -e "/c/Program Files/nodejs/__cypress" ]]; then
@@ -326,7 +324,7 @@ commands:
             rm -rf ./node.zip ./node
       - print-env
       - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
+          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.CIRCLE_JOB }}
           paths:
             - C:\Program Files\nodejs
 
