@@ -215,18 +215,26 @@ commands:
           packagePath: packages/web-config/package.json
 
   build:
+    parameters:
+      shell:
+        type: string
+        default: /bin/bash
     steps:
       - checkout
       - run:
+          shell: << parameters.shell >>
           name: Print working folder
           command: echo $PWD
       - run:
+          shell: << parameters.shell >>
           name: print global NPM cache path
           command: echo $(npm -g bin)
       - run:
+          shell: << parameters.shell >>
           name: print Node version
           command: node -v
       - run:
+          shell: << parameters.shell >>
           name: print NPM version
           command: npm -v
       - run: npm run check-node-version
@@ -244,20 +252,29 @@ commands:
       - restore-caches
 
       # show what is already cached globally
-      - run: ls $(npm -g bin)
-      - run: ls $(npm -g bin)/../lib/node_modules
+      - run:
+          shell: << parameters.shell >>
+          command: ls $(npm -g bin)
+      - run:
+          shell: << parameters.shell >>
+          command: ls $(npm -g bin)/../lib/node_modules
 
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
       # Install sub packages dependencies and build all sub packages via postinstall script
       # try several times, because flaky NPM installs ...
-      - run: npm install || npm install
       - run:
+          shell: << parameters.shell >>
+          command: npm install || npm install
+      - run:
+          shell: << parameters.shell >>
           name: Top level packages
           command: npm ls --depth=0 || true
 
       # Prune so we do not save removed dependencies to cache
-      - run: npm run all prune
+      - run:
+          shell: << parameters.shell >>
+          command: npm run all prune
 
       - save-caches
       - store-npm-logs
@@ -321,7 +338,7 @@ commands:
 
 jobs:
   ## code checkout and NPM installs
-  build:
+  posix-build:
     <<: *defaults
     steps:
       - build
@@ -1005,11 +1022,13 @@ jobs:
       TARGET_ARCH: << parameters.arch >>
     steps:
       - win-prebuild
-      - build
+      - build:
+          shell: bash.exe
 
 linux-workflow: &linux-workflow
   jobs:
-    - build
+    - build-posix:
+        name: build
     - lint:
         name: Linux lint
         requires:
@@ -1185,7 +1204,7 @@ linux-workflow: &linux-workflow
 
 mac-workflow: &mac-workflow
   jobs:
-    - build:
+    - build-posix:
         name: Mac build
         executor: mac
         filters:
