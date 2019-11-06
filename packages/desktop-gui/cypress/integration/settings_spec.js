@@ -116,16 +116,18 @@ describe('Settings', () => {
       })
 
       it('displays "array" values for blacklistHosts', () => {
-        cy.get('.nested-arr')
+        cy.contains('.key', 'blacklistHosts')
+        .parent().should('have.class', 'nested-arr')
         .parent()
+        // check if the text shows an array (using []) and not indices 0 or 1
         .should('contain', '[')
         .and('contain', ']')
         .and('not.contain', '0')
         .and('not.contain', '1')
+        // and that it contains the right data from the config fixture
         .find('.line .config').should(($lines) => {
           expect($lines).to.have.length(2)
           expect($lines).to.contain('www.google-analytics.com')
-
           expect($lines).to.contain('hotjar.com')
         })
       })
