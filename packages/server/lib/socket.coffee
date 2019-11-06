@@ -288,8 +288,7 @@ class Socket
         ## cb is always the last argument
         cb = args.pop()
 
-        if eventName isnt 'debug:command'
-          debug("backend:request %o", { eventName, args })
+        debug("backend:request %o", { eventName, args })
 
         backendRequest = ->
           switch eventName
@@ -311,8 +310,6 @@ class Socket
               files.readFile(config.projectRoot, args[0], args[1])
             when "write:file"
               files.writeFile(config.projectRoot, args[0], args[1], args[2])
-            when "debug:command"
-              debug('command ran in driver: cy.%s %o', args[0].name, _.pick(args[0], 'args'))
             when "exec"
               exec.run(config.projectRoot, args[0])
             when "task"
