@@ -15,6 +15,12 @@ function _getDelayMsForRetry (i) {
   if (i < 18) {
     return 500
   }
+
+  if (i < 33) { // after 5 seconds, begin logging and retrying
+    errors.warning('CDP_RETRYING_CONNECTION', i)
+
+    return 1000
+  }
 }
 
 function _connectAsync (opts) {
