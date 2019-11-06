@@ -8,7 +8,7 @@ const $actionability = require('../../actionability')
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
     // get event name either from the keyname, or from the sole object key name
-    const eventName = (typeof key === 'string') ? key.slice(0, -5) : val.type
+    const eventName = (typeof key === 'string') ? key : val.type
 
     if (val.skipped) {
       const reason = val.skipped
@@ -236,10 +236,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         defaultOptions: { multiple: true },
         positionOrX,
         onReady (fromElViewport, forceEl) {
-          const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromElViewport, forceEl)
+          const { clickEvents1, clickEvents2, dblclick } = mouse.dblclick(fromElViewport, forceEl)
 
           return {
-            dblclickProps,
+            dblclick,
             clickEvents: [clickEvents1, clickEvents2],
           }
         },
@@ -253,7 +253,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                   formatMouseEvents(domEvents.clickEvents[0]),
                   formatMouseEvents(domEvents.clickEvents[1]),
                   formatMouseEvents({
-                    dblclickProps: domEvents.dblclickProps,
+                    dblclick: domEvents.dblclick,
                   })
                 ),
               }
