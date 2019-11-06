@@ -308,6 +308,7 @@ module.exports = {
     _
     .chain(@whitelist(options))
     .omit("env")
+    .omit("browsers")
     .each (val, key) ->
       resolved[key] = "cli"
       config[key] = val
