@@ -1336,7 +1336,8 @@ win-ia32-workflow: &win-ia32-workflow
   - build-binary:
       name: 'win-ia32-build-binary'
       context: org-global
-      executor: win/vs2019
+      executor:
+        name: win/vs2019
         shell: bash.exe
       requires:
         - win-ia32-build
@@ -1391,7 +1392,8 @@ win-x64-workflow: &win-x64-workflow
   - build-binary:
       name: 'win-x64-build-binary'
       context: org-global
-      executor: win/vs2019
+      executor:
+        name: win/vs2019
         shell: bash.exe
       requires:
         - win-x64-build
