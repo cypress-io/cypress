@@ -141,7 +141,11 @@ deploy = {
     options ?= @parseOptions(process.argv)
     debug("parsed build options %o", options)
 
-    askMissingOptions(['version', 'platform'])(options)
+    if !options.platform
+      debug("assuming platform is process.platform")
+      options.platform = process.platform
+
+    askMissingOptions(['version'])(options)
     .then ->
       debug("building binary: platform %s version %s", options.platform, options.version)
       build(options.platform, options.version, options)
