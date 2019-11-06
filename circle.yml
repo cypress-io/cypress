@@ -667,7 +667,6 @@ jobs:
 
   build-binary:
     <<: *defaults
-    shell: bash
     steps:
       - run:
           name: Check environment variables before code sign (if on Mac)
@@ -1338,6 +1337,7 @@ win-ia32-workflow: &win-ia32-workflow
       name: 'win-ia32-build-binary'
       context: org-global
       executor: win/vs2019
+        shell: bash.exe
       requires:
         - win-ia32-build
   - upload-binary:
@@ -1392,6 +1392,7 @@ win-x64-workflow: &win-x64-workflow
       name: 'win-x64-build-binary'
       context: org-global
       executor: win/vs2019
+        shell: bash.exe
       requires:
         - win-x64-build
   - upload-binary:
