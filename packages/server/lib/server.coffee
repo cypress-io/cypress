@@ -126,6 +126,7 @@ class Server
     e
 
   open: (config = {}, project, onWarning) ->
+    debug("server open")
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>

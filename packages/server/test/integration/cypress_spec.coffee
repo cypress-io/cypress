@@ -12,6 +12,7 @@ commitInfo = require("@cypress/commit-info")
 Fixtures   = require("../support/helpers/fixtures")
 snapshot   = require("snap-shot-it")
 stripAnsi  = require("strip-ansi")
+debug      = require("debug")("test")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
@@ -75,7 +76,9 @@ ELECTRON_BROWSER = {
   name: "electron"
   family: "electron"
   displayName: "Electron"
-  path: ""
+  path: "",
+  version: "99.101.1234",
+  majorVersion: "99"
 }
 
 previousCwd = process.cwd()
@@ -129,6 +132,9 @@ describe "lib/cypress", ->
     sinon.spy(errors, "logException")
     sinon.spy(console, "log")
 
+    # to make sure our Electron browser mock object passes validation during tests
+    process.versions.chrome = ELECTRON_BROWSER.version
+
     @expectExitWith = (code) =>
       expect(process.exit).to.be.calledWith(code)
 
@@ -145,6 +151,18 @@ describe "lib/cypress", ->
     ## make sure every project
     ## we spawn is closed down
     openProject.close()
+
+  context "test browsers", ->
+    # sanity checks to make sure the browser objects we pass during tests
+    # all pass the internal validation function
+    it "has valid browsers", ->
+      config.validateBrowserList(TYPICAL_BROWSERS)
+
+    it "has valid electron browser", ->
+      config.validateBrowserList([ELECTRON_BROWSER])
+
+    it "returns list of valid browsers", ->
+      browserUtils.getBrowsers().then(config.validateBrowserList)
 
   context "--get-key", ->
     it "writes out key and exits on success", ->
@@ -1494,14 +1512,16 @@ describe "lib/cypress", ->
           "--config-file=#{@filename}"
         ])
         .then =>
+          debug("cypress started with config %s", @filename)
           options = Events.start.firstCall.args[0]
+          debug("first call arguments %o", Events.start.firstCall.args)
           Events.handleEvent(options, {}, {}, 123, "open:project", @pristinePath)
         .then =>
-          expect(@open).to.be.called
+          expect(@open, "open was called").to.be.called
 
           fs.readJsonAsync(path.join(@pristinePath, @filename))
           .then (json) =>
-            expect(json).to.deep.equal({})
+            expect(json, "json file is empty").to.deep.equal({})
 
   context "--cwd", ->
     beforeEach ->

@@ -215,28 +215,37 @@ validateFile = (file) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
 validateBrowserList = (browsers) ->
-  debug("validateBrowserList")
-  la(browsers, "Missing browsers list in the config", browsers)
-  la(check.array(browsers), "Expected a list of browsers", browsers)
-  la(browsers.length, "Expected at list one browser")
+  # use try / catch inside to make sure we report the error
+  # and don't swallow it during integration testing
+  # otherwise I had situations where a test was failing in a very weird
+  # ways because an error was thrown here but the test continued
+  try
+    debug("validateBrowserList")
+    la(browsers, "Missing browsers list in the config", browsers)
+    la(check.array(browsers), "Expected a list of browsers", browsers)
+    la(browsers.length, "Expected at list one browser")
 
-  # Electron browser has path "", but all other browsers
-  # should have an absolute path for launcher to use
-  isEmptyStringOrAbsolutePath = (s) ->
-    check.string(s) && (check.emptyString(s) || path.isAbsolute(s))
+    # Electron browser has path "", but all other browsers
+    # should have an absolute path for launcher to use
+    isEmptyStringOrAbsolutePath = (s) ->
+      check.string(s) && (check.emptyString(s) || path.isAbsolute(s))
 
-  isValidBrowser = check.schema({
-    name: check.unemptyString,
-    family: check.oneOf(["electron", "chrome", "firefox"]),
-    displayName: check.unemptyString,
-    version: check.unemptyString,
-    path: isEmptyStringOrAbsolutePath,
-    majorVersion: check.unemptyString
-  })
-  browsers.forEach (browser) ->
-    debug("checking browser %o", browser)
-    la(isValidBrowser(browser), "invalid browser", browser)
-  debug("validateBrowserList list of browsers is valid")
+    isValidBrowser = check.schema({
+      name: check.unemptyString,
+      family: check.oneOf(["electron", "chrome", "firefox"]),
+      displayName: check.unemptyString,
+      version: check.unemptyString,
+      path: isEmptyStringOrAbsolutePath,
+      majorVersion: check.unemptyString
+    })
+    browsers.forEach (browser) ->
+      debug("checking browser %o", browser)
+      la(isValidBrowser(browser), "invalid browser", browser)
+    debug("validateBrowserList list of browsers is valid")
+  catch e
+    debug("validate browser list failed with %s", e.message)
+    throw e
+
 
 hideSpecialVals = (val, key) ->
   if _.includes(CYPRESS_SPECIAL_ENV_VARS, key)
