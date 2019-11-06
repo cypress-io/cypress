@@ -326,8 +326,7 @@ jobs:
       TARGET_ARCH: << parameters.arch >>
     steps:
       - win-prebuild
-      - build:
-          shell: bash.exe
+      - build
 
   lint:
     <<: *defaults
