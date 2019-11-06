@@ -670,8 +670,8 @@ jobs:
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
-          command: npm run binary-build -- --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
-      - run: npm run binary-zip -- --platform $PLATFORM
+          command: npm run binary-build -- --version ${NEXT_DEV_VERSION:-0.0.0-development}
+      - run: npm run binary-zip
       # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
       - store-npm-logs

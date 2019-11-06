@@ -153,6 +153,11 @@ deploy = {
   zip: (options) ->
     console.log('#zip')
     if !options then options = @parseOptions(process.argv)
+
+    if !options.platform
+      debug("assuming platform is process.platform")
+      options.platform = process.platform
+
     askMissingOptions(['platform'])(options)
     .then (options) ->
       zipDir = meta.zipDir(options.platform)
