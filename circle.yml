@@ -305,19 +305,24 @@ commands:
             echo $HOME
             echo $PATH
       - run:
-          name: Install NVM and Node
+          name: Install Node
           environment:
             nodejs_version: "12.0.0"
           command: |
             set -ev
-            choco install nvm
-            nvm arch $TARGET_ARCH
-            nvm install $nodejs_version $TARGET_ARCH
-            nvm use $nodejs_version $TARGET_ARCH
+            echo "Installing Node $nodejs_version $TARGET_ARCH from nodejs.org"
+            # remove default Node install
+            rm -rf "/c/Program Files/nodejs"
+            # replace it with ours :)
+            mkdir "/c/Program Files/nodejs"
+            choco install wget
+            wget https://nodejs.org/dist/v12.13.0/node-v12.13.0-win-$TARGET_ARCH.zip -O node.zip
+            unzip node.zip -d ./node
+            mv ./node/node-v$nodejs_version-win-$TARGET_ARCH/* "/c/Program Files/nodejs"
       - persist_to_workspace:
-          root: ~/
+          root: C:\Program Files
           paths:
-            - cypress
+            - nodejs
 
 jobs:
   ## code checkout and NPM installs
