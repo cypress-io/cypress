@@ -1346,6 +1346,31 @@ win-ia32-workflow: &win-ia32-workflow
       context: test-runner:upload
       requires:
         - win-ia32-build-binary
+  - test-kitchensink:
+      name: 'win-ia32-test-kitchensink'
+      executor: win/vs2019
+      requires:
+        - win-ia32-build
+  - test-binary-against-kitchensink:
+      name: 'win-ia32-test-binary-against-kitchensink'
+      executor: win/vs2019
+      requires:
+        - win-ia32-build-npm-package
+        - win-ia32-build-binary
+  - test-binary-against-staging:
+      name: 'win-ia32-test-binary-against-staging'
+      context: test-runner:record-tests
+      executor: win/vs2019
+      requires:
+        - win-ia32-build-npm-package
+        - win-ia32-build-binary
+  - test-binary-and-npm-against-other-projects:
+      context: test-runner:trigger-test-jobs
+      name: 'win-ia32-test-binary-and-npm-against-other-projects'
+      executor: win/vs2019
+      requires:
+        - win-ia32-upload-npm-package
+        - win-ia32-upload-binary
 
 win-x64-workflow: &win-x64-workflow
   jobs:
@@ -1375,6 +1400,31 @@ win-x64-workflow: &win-x64-workflow
       context: test-runner:upload
       requires:
         - win-x64-build-binary
+  - test-kitchensink:
+      name: 'win-x64-test-kitchensink'
+      executor: win/vs2019
+      requires:
+        - win-x64-build
+  - test-binary-against-kitchensink:
+      name: 'win-x64-test-binary-against-kitchensink'
+      executor: win/vs2019
+      requires:
+        - win-x64-build-npm-package
+        - win-x64-build-binary
+  - test-binary-against-staging:
+      name: 'win-x64-test-binary-against-staging'
+      context: test-runner:record-tests
+      executor: win/vs2019
+      requires:
+        - win-x64-build-npm-package
+        - win-x64-build-binary
+  - test-binary-and-npm-against-other-projects:
+      context: test-runner:trigger-test-jobs
+      name: 'win-x64-test-binary-and-npm-against-other-projects'
+      executor: win/vs2019
+      requires:
+        - win-x64-upload-npm-package
+        - win-x64-upload-binary
 
 workflows:
   linux:
