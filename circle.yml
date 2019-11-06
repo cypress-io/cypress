@@ -261,7 +261,7 @@ commands:
           command: npx shx ls "$(npm -g bin)"
       - run:
           shell: << parameters.shell >>
-          command: npx shx ls "$(npm -g bin)/../lib/node_modules || true"
+          command: npx shx ls "$(npm -g bin)/../lib/node_modules"  || true
 
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
