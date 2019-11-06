@@ -1320,72 +1320,46 @@ mac-workflow: &mac-workflow
 
 win-workflow: &win-workflow
   jobs:
-    - win-build:
-        name: win-build-ia32
-        arch: "32"
-
+    # win-build is defined in ia32/x64
     - build-npm-package:
-        name: win-build-npm-package-ia32
+        name: win-build-npm-package
         executor: win/vs2019
         requires:
-          - win-build-ia32
+          - win-build
 
     - upload-npm-package:
-        name: win-upload-npm-package-ia32
+        name: win-upload-npm-package
         context: test-runner:upload
         executor: win/vs2019
         requires:
-          - win-build-npm-package-ia32
+          - win-build-npm-package
 
     - build-binary:
-        name: win-build-binary-ia32
+        name: win-build-binary
         context: org-global
         executor: win/vs2019
         requires:
-          - win-build-ia32
+          - win-build
 
     - upload-binary:
-        name: win-upload-binary-ia32
+        name: win-upload-binary
         executor: win/vs2019
         context: test-runner:upload
         requires:
-          - win-build-binary-ia32
-
-    - win-build:
-        name: win-build-x64
-        arch: "64"
-
-    - build-npm-package:
-        name: win-build-npm-package-x64
-        executor: win/vs2019
-        requires:
-          - win-build-x64
-
-    - upload-npm-package:
-        name: win-upload-npm-package-x64
-        context: test-runner:upload
-        executor: win/vs2019
-        requires:
-          - win-build-npm-package-x64
-
-    - build-binary:
-        name: win-build-binary-x64
-        context: org-global
-        executor: win/vs2019
-        requires:
-          - win-build-x64
-
-    - upload-binary:
-        name: win-upload-binary-x64
-        executor: win/vs2019
-        context: test-runner:upload
-        requires:
-          - win-build-binary-x64
+          - win-build-binary
 
 workflows:
   linux:
     <<: *linux-workflow
   mac:
     <<: *mac-workflow
-  win:
+  win-ia32:
     <<: *win-workflow
+    jobs:
+    - win-build:
+        arch: "32"
+  win-x64:
+    <<: *win-workflow
+    jobs:
+    - win-build:
+        arch: "64"
