@@ -20,37 +20,25 @@ if (isMac() && process.env.CIRCLECI) {
   return
 }
 
-// if we're windows + in appveyor...
-if (isWindows() && process.env.APPVEYOR) {
+// if we're windows + in CI...
+if (isWindows() && process.env.CIRCLECI) {
   // check to ensure that the cpuArch + nodeArch are in sync
-  const cpuArch = process.env.Platform
+
+  const { CIRCLE_JOB } = process.env
+
   const nodeArch = os.arch()
+  const realArch = CIRCLE_JOB.split('-')[1]
 
   const getErrMsg = (expectedArch) => {
-    return `Appveyor CPU arch is set to: '${cpuArch}' but the node version that is being used is running: '${nodeArch}'. Expected it to equal: '${expectedArch}'`
+    return `Installed node CPU arch is set to: '${realArch}' but the correct version for this job is: '${realArch}'`
   }
 
-  // if we're in the x86 CPU architecture check
-  // to ensure that os.arch() is ia32
-
-  // eslint-disable-next-line default-case
-  switch (cpuArch) {
-    case 'x86':
-      assert.equal(
-        os.arch(),
-        'ia32',
-        getErrMsg('ia32')
-      )
-
-      break
-    case 'x64':
-      assert.equal(
-        os.arch(),
-        'x64',
-        getErrMsg('x64')
-      )
-
-      break
+  if (realArch === 'ia32') {
+    assert.equal(nodeArch, 'ia32', getErrMsg('ia32'))
+  } else if (realArch === 'x64') {
+    assert.equal(nodeArch, 'x64', getErrMsg('x64'))
+  } else {
+    throw new Error("cannot determine expected architecture, failing")
   }
 }
 
