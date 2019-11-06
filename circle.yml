@@ -294,6 +294,13 @@ commands:
     description: windows-specific prebuild steps
     steps:
       - run:
+          name: Print Windows Environment info
+          command: |
+            set -ev
+            echo ~
+            echo $HOME
+            echo $PATH
+      - run:
           name: Install NVM and Node
           environment:
             nodejs_version: "12.0.0"
@@ -787,6 +794,7 @@ jobs:
       - run:
           name: list NPM package contents
           working_directory: cli/build
+          # will fail on windows
           command: npm run size || true
       - run:
           name: pack NPM package
