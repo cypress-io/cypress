@@ -229,27 +229,19 @@ commands:
           packagePath: packages/web-config/package.json
 
   build:
-    parameters:
-      shell:
-        type: string
-        default: /bin/bash
     steps:
       - checkout
       - run:
-          shell: << parameters.shell >>
           name: Print working folder
           command: echo $PWD
       - run:
-          shell: << parameters.shell >>
-          name: print global NPM cache path
+          name: Print global NPM cache path
           command: echo $(npm -g bin)
       - run:
-          shell: << parameters.shell >>
-          name: print Node version
+          name: Print Node version
           command: node -v
       - run:
-          shell: << parameters.shell >>
-          name: print NPM version
+          name: Print NPM version
           command: npm -v
       - run: npm run check-node-version
 
@@ -259,7 +251,6 @@ commands:
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
       - run:
-          shell: << parameters.shell >>
           command: npm run check-terminal
 
       ## busted on windows
@@ -271,10 +262,9 @@ commands:
 
       # show what is already cached globally
       - run:
-          shell: << parameters.shell >>
+          name: "List globally installed modules"
           command: npx shx ls "$(npm -g bin)"
       - run:
-          shell: << parameters.shell >>
           command: npx shx ls "$(npm -g bin)/../lib/node_modules"  || true
 
       # Install the root packages
@@ -282,16 +272,13 @@ commands:
       # Install sub packages dependencies and build all sub packages via postinstall script
       # try several times, because flaky NPM installs ...
       - run:
-          shell: << parameters.shell >>
           command: npm install || npm install
       - run:
-          shell: << parameters.shell >>
-          name: Top level packages
+          name: List top level packages
           command: npm ls --depth=0 || true
 
       # Prune so we do not save removed dependencies to cache
       - run:
-          shell: << parameters.shell >>
           command: npm run all prune
 
       - save-caches
@@ -310,7 +297,6 @@ commands:
           name: Install NVM and Node
           environment:
             nodejs_version: "12.0.0"
-          shell: bash.exe
           command: |
             set -ev
             choco install nvm
@@ -321,40 +307,6 @@ commands:
           root: ~/
           paths:
             - cypress
-
-  win-test:
-    description: windows-specific test steps
-    steps:
-      - run:
-          shell: bash.exe
-          command: |
-            set -ev
-            # Output useful info for debugging.
-            # beware of echo-ing environment variables that may have batch syntax (e.g. commit messages)
-            node --version
-            npm --version
-            7z
-            pushd packages/launcher
-            echo "Testing launcher..."
-            node index.js
-            popd
-            # make sure mocha runs
-            echo "Testing Mocha..."
-            npm run test-mocha
-            # make sure our snapshots are compared correctly
-            # - npm run test-mocha-snapshot
-            # the other larger tests
-            echo Building Windows NPM package $NEXT_DEV_VERSION
-            npm --no-git-tag-version version $NEXT_DEV_VERSION
-            cd cli
-            echo "Running npm install for cli"
-            npm install
-            echo "Building cli"
-            npm run build
-            cd build
-            npm pack
-            cd ../..
-            node ./scripts/win-appveyor-build.js
 
 jobs:
   ## code checkout and NPM installs
@@ -1204,53 +1156,45 @@ mac-workflow: &mac-workflow
         name: mac-build
         executor: mac
     - lint:
-        <<: *develop-only
         name: mac-lint
         executor: mac
         requires:
           - mac-build
     - build-npm-package:
-        <<: *develop-only
         name: mac-build-npm-package
         executor: mac
         requires:
           - mac-build
     - upload-npm-package:
-        <<: *develop-only
         name: mac-upload-npm-package
         context: test-runner:upload
         executor: mac
         requires:
           - mac-build-npm-package
     - build-binary:
-        <<: *develop-only
         name: mac-build-binary
         context: org-global
         executor: mac
         requires:
           - mac-build
     - upload-binary:
-        <<: *develop-only
         name: mac-upload-binary
         executor: mac
         context: test-runner:upload
         requires:
           - mac-build-binary
     - test-kitchensink:
-        <<: *develop-only
         name: mac-test-kitchensink
         executor: mac
         requires:
           - mac-build
     - test-binary-against-kitchensink:
-        <<: *develop-only
         name: mac-test-binary-against-kitchensink
         executor: mac
         requires:
           - mac-build-npm-package
           - mac-build-binary
     - test-binary-against-staging:
-        <<: *develop-only
         context: test-runner:record-tests
         name: mac-test-binary-against-staging
         executor: mac
@@ -1258,7 +1202,6 @@ mac-workflow: &mac-workflow
           - mac-build-npm-package
           - mac-build-binary
     - test-binary-and-npm-against-other-projects:
-        <<: *develop-only
         context: test-runner:trigger-test-jobs
         name: mac-test-binary-and-npm-against-other-projects
         executor: mac
