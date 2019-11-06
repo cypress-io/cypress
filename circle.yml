@@ -316,7 +316,7 @@ commands:
             # replace it with ours :)
             mkdir "/c/Program Files/nodejs"
             choco install wget
-            wget https://nodejs.org/dist/v12.13.0/node-v$nodejs_version-win-$TARGET_ARCH.zip -O node.zip
+            wget https://nodejs.org/dist/v$nodejs_version/node-v$nodejs_version-win-$TARGET_ARCH.zip -O node.zip
             unzip node.zip -d ./node
             mv ./node/node-v$nodejs_version-win-$TARGET_ARCH/* "/c/Program Files/nodejs"
       - persist_to_workspace:
