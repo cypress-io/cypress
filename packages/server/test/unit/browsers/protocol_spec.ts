@@ -9,11 +9,14 @@ import humanInterval from 'human-interval'
 import protocol from '../../../lib/browsers/protocol'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
+import stripAnsi from 'strip-ansi'
 import { stripIndents } from 'common-tags'
 
 describe('lib/browsers/protocol', function () {
   context('._getDelayMsForRetry', function () {
-    it('retries as expected for up to 5 seconds', function () {
+    it('retries as expected for up to 20 seconds', function () {
+      const log = sinon.spy(console, 'log')
+
       let delays = []
       let delay: number
       let i = 0
@@ -23,7 +26,13 @@ describe('lib/browsers/protocol', function () {
         i++
       }
 
-      expect(_.sum(delays)).to.eq(humanInterval('5 seconds'))
+      expect(_.sum(delays)).to.eq(humanInterval('20 seconds'))
+
+      log.getCalls().forEach((log, i) => {
+        const line = stripAnsi(log.args[0])
+
+        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/32)`)
+      })
 
       snapshot(delays)
     })
@@ -37,7 +46,7 @@ describe('lib/browsers/protocol', function () {
       const p = protocol.getWsTargetFor(12345)
 
       const expectedError = stripIndents`
-        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 5 seconds.
+        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
 
         This usually indicates there was a problem opening the Chrome browser.
 
