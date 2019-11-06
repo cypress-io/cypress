@@ -787,7 +787,7 @@ jobs:
       - run:
           name: list NPM package contents
           working_directory: cli/build
-          command: npm run size
+          command: npm run size || true
       - run:
           name: pack NPM package
           working_directory: cli/build
