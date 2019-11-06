@@ -43,7 +43,7 @@ const formatMouseEvents = (events) => {
       const reason = val.skipped
 
       return {
-        'Event Name': key.slice(0, -5),
+        'Event Name': key,
         'Target Element': reason,
         'Prevented Default?': null,
         'Stopped Propagation?': null,
@@ -52,7 +52,7 @@ const formatMouseEvents = (events) => {
     }
 
     return {
-      'Event Name': key.slice(0, -5),
+      'Event Name': key,
       'Target Element': val.el,
       'Prevented Default?': val.preventedDefault,
       'Stopped Propagation?': val.stoppedPropagation,
@@ -265,10 +265,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         defaultOptions: { multiple: true },
         positionOrX,
         onReady (fromElViewport, forceEl) {
-          const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromElViewport, forceEl)
+          const { clickEvents1, clickEvents2, dblclick } = mouse.dblclick(fromElViewport, forceEl)
 
           return {
-            dblclickProps,
+            dblclick,
             clickEvents: [clickEvents1, clickEvents2],
           }
         },
@@ -281,8 +281,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
               return {
                 name: 'Mouse Click Events',
                 data: _.concat(
-                  formatMouseEvents(domEvents.clickEvents[0], formatMouseEvents),
-                  formatMouseEvents(domEvents.clickEvents[1], formatMouseEvents)
+                  formatMouseEvents(domEvents.clickEvents[0]),
+                  formatMouseEvents(domEvents.clickEvents[1])
                 ),
               }
             },
@@ -290,7 +290,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
               return {
                 name: 'Mouse Double Click Event',
                 data: formatMouseEvents({
-                  dblclickProps: domEvents.dblclickProps,
+                  dblclick: domEvents.dblclick,
                 }),
               }
             },
