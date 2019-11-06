@@ -4318,23 +4318,23 @@ describe('src/cy/commands/actions/type', () => {
 
             expect(table.name).to.eq('Keyboard Events')
             const expectedTable = {
-              1: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{meta}', 'Events Fired': 'keydown', 'Active Modifiers': 'meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              2: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              1: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keydown', 'Active Modifiers': 'meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              2: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               3: { 'Details': '{ code: KeyF, which: 70 }', Typed: 'f', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               4: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               5: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               6: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               7: { 'Details': '{ code: KeyB, which: 66 }', Typed: 'b', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              8: { 'Details': '{ code: ArrowLeft, which: 37 }', Typed: '{leftArrow}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              8: { 'Details': '{ code: ArrowLeft, which: 37 }', Typed: '{leftarrow}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               9: { 'Details': '{ code: Delete, which: 46 }', Typed: '{del}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               10: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              11: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{meta}', 'Events Fired': 'keyup', 'Active Modifiers': 'alt', 'Prevented Default': null, 'Target Element': $input[0] },
-              12: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+              11: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keyup', 'Active Modifiers': 'alt', 'Prevented Default': null, 'Target Element': $input[0] },
+              12: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
             }
 
             // uncomment for debugging
             // _.each(table.data, (v, i) => expect(v).containSubset(expectedTable[i]))
-            expect(table.data).to.containSubset(expectedTable)
+            expect(table.data).to.deep.eq(expectedTable)
           })
         })
 
