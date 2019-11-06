@@ -356,8 +356,8 @@ jobs:
       - build
 
   win-build:
-    <<: *defaults
     <<: *win-executor
+    <<: *defaults
     parameters:
       arch:
         type: string
