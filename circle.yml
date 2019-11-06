@@ -293,13 +293,13 @@ commands:
     description: windows-specific prebuild steps
     steps:
       - run:
+          name: Install NVM and Node
           environment:
             nodejs_version: "12.0.0"
           shell: bash.exe
           command: |
             set -ev
             choco install nvm
-            echo 'Running $TARGET_ARCH-bit node install'
             nvm arch $TARGET_ARCH
             nvm install $nodejs_version $TARGET_ARCH
             nvm use $nodejs_version $TARGET_ARCH
