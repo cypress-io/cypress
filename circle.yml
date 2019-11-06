@@ -1,5 +1,11 @@
 version: 2.1
 
+develop-only: &develop-only
+  filters:
+    branches:
+      only:
+        - develop
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -356,7 +362,6 @@ jobs:
       - build
 
   win-build:
-    <<: *win-executor
     <<: *defaults
     parameters:
       arch:
@@ -1126,77 +1131,53 @@ linux-workflow: &linux-workflow
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
+        <<: *develop-only
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - build
     - test-kitchensink:
         requires:
           - build
     - test-kitchensink-against-staging:
+        <<: *develop-only
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - build
     - build-npm-package:
         requires:
           - build
     - upload-npm-package:
+        <<: *develop-only
         context: test-runner:upload
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - build-npm-package
     - build-binary:
         requires:
           - build
     - upload-binary:
+        <<: *develop-only
         context: test-runner:upload
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
+        <<: *develop-only
         context: test-runner:trigger-test-jobs
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - upload-npm-package
           - upload-binary
     - test-npm-module-and-verify-binary:
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *develop-only
         requires:
           - build-npm-package
           - build-binary
     - test-binary-against-staging:
+        <<: *develop-only
         context: test-runner:record-tests
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - build-npm-package
           - build-binary
     - test-binary-against-kitchensink:
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *develop-only
         requires:
           - build-npm-package
           - build-binary
@@ -1215,217 +1196,182 @@ linux-workflow: &linux-workflow
 mac-workflow: &mac-workflow
   jobs:
     - posix-build:
+        <<: *develop-only
         name: mac-build
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
-
     - lint:
+        <<: *develop-only
         name: mac-lint
         executor: mac
         requires:
           - mac-build
-        filters:
-          branches:
-            only:
-              - develop
-
-    # maybe run unit tests?
-
     - build-npm-package:
+        <<: *develop-only
         name: mac-build-npm-package
         executor: mac
         requires:
           - mac-build
-        filters:
-          branches:
-            only:
-              - develop
-
     - upload-npm-package:
+        <<: *develop-only
         name: mac-upload-npm-package
         context: test-runner:upload
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - mac-build-npm-package
-
     - build-binary:
+        <<: *develop-only
         name: mac-build-binary
         context: org-global
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - mac-build
-
     - upload-binary:
+        <<: *develop-only
         name: mac-upload-binary
         executor: mac
         context: test-runner:upload
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - mac-build-binary
-
     - test-kitchensink:
+        <<: *develop-only
         name: mac-test-kitchensink
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - mac-build
-
     - test-binary-against-kitchensink:
+        <<: *develop-only
         name: mac-test-binary-against-kitchensink
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - mac-build-npm-package
           - mac-build-binary
-
     - test-binary-against-staging:
+        <<: *develop-only
         context: test-runner:record-tests
         name: mac-test-binary-against-staging
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - mac-build-npm-package
           - mac-build-binary
-
     - test-binary-and-npm-against-other-projects:
+        <<: *develop-only
         context: test-runner:trigger-test-jobs
         name: mac-test-binary-and-npm-against-other-projects
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
         requires:
           - mac-upload-npm-package
           - mac-upload-binary
 
 win-ia32-workflow: &win-ia32-workflow
+  triggers:
+    <<: *develop-only
   jobs:
   - win-build:
+      <<: *win-executor
       name: 'win-ia32-build'
       arch: "32"
   - build-npm-package:
-      name: 'win-ia32-build-npm-package'
       <<: *win-executor
+      name: 'win-ia32-build-npm-package'
       requires:
         - win-ia32-build
   - upload-npm-package:
+      <<: *win-executor
       name: 'win-ia32-upload-npm-package'
       context: test-runner:upload
-      <<: *win-executor
       requires:
         - win-ia32-build-npm-package
   - build-binary:
+      <<: *win-executor
       name: 'win-ia32-build-binary'
       context: org-global
-      <<: *win-executor
       requires:
         - win-ia32-build
   - upload-binary:
-      name: 'win-ia32-upload-binary'
       <<: *win-executor
+      name: 'win-ia32-upload-binary'
       context: test-runner:upload
       requires:
         - win-ia32-build-binary
   - test-kitchensink:
-      name: 'win-ia32-test-kitchensink'
       <<: *win-executor
+      name: 'win-ia32-test-kitchensink'
       requires:
         - win-ia32-build
   - test-binary-against-kitchensink:
-      name: 'win-ia32-test-binary-against-kitchensink'
       <<: *win-executor
+      name: 'win-ia32-test-binary-against-kitchensink'
       requires:
         - win-ia32-build-npm-package
         - win-ia32-build-binary
   - test-binary-against-staging:
+      <<: *win-executor
       name: 'win-ia32-test-binary-against-staging'
       context: test-runner:record-tests
-      <<: *win-executor
       requires:
         - win-ia32-build-npm-package
         - win-ia32-build-binary
   - test-binary-and-npm-against-other-projects:
+      <<: *win-executor
       context: test-runner:trigger-test-jobs
       name: 'win-ia32-test-binary-and-npm-against-other-projects'
-      <<: *win-executor
       requires:
         - win-ia32-upload-npm-package
         - win-ia32-upload-binary
 
 win-x64-workflow: &win-x64-workflow
+  triggers:
+    <<: *develop-only
   jobs:
   - win-build:
+      <<: *win-executor
       name: 'win-x64-build'
       arch: "64"
   - build-npm-package:
-      name: 'win-x64-build-npm-package'
       <<: *win-executor
+      name: 'win-x64-build-npm-package'
       requires:
         - win-x64-build
   - upload-npm-package:
+      <<: *win-executor
       name: 'win-x64-upload-npm-package'
       context: test-runner:upload
-      <<: *win-executor
       requires:
         - win-x64-build-npm-package
   - build-binary:
+      <<: *win-executor
       name: 'win-x64-build-binary'
       context: org-global
-      <<: *win-executor
       requires:
         - win-x64-build
   - upload-binary:
-      name: 'win-x64-upload-binary'
       <<: *win-executor
+      name: 'win-x64-upload-binary'
       context: test-runner:upload
       requires:
         - win-x64-build-binary
   - test-kitchensink:
-      name: 'win-x64-test-kitchensink'
       <<: *win-executor
+      name: 'win-x64-test-kitchensink'
       requires:
         - win-x64-build
   - test-binary-against-kitchensink:
-      name: 'win-x64-test-binary-against-kitchensink'
       <<: *win-executor
+      name: 'win-x64-test-binary-against-kitchensink'
       requires:
         - win-x64-build-npm-package
         - win-x64-build-binary
   - test-binary-against-staging:
+      <<: *win-executor
       name: 'win-x64-test-binary-against-staging'
       context: test-runner:record-tests
-      <<: *win-executor
       requires:
         - win-x64-build-npm-package
         - win-x64-build-binary
   - test-binary-and-npm-against-other-projects:
+      <<: *win-executor
       context: test-runner:trigger-test-jobs
       name: 'win-x64-test-binary-and-npm-against-other-projects'
-      <<: *win-executor
       requires:
         - win-x64-upload-npm-package
         - win-x64-upload-binary
