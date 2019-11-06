@@ -62,6 +62,22 @@ executors:
       PLATFORM: mac
 
 commands:
+  print-env:
+    steps:
+      - run:
+          name: Print Environment info
+          command: |
+            set -ev
+            which node
+            node -v
+            which npm
+            npm -v
+            echo ~
+            echo $HOME
+            echo $PATH
+            echo Global NPM bin path: $(npm -g bin)
+            echo
+
   run-e2e-tests:
     parameters:
       browser:
@@ -231,18 +247,7 @@ commands:
   build:
     steps:
       - checkout
-      - run:
-          name: Print working folder
-          command: echo $PWD
-      - run:
-          name: Print global NPM cache path
-          command: echo $(npm -g bin)
-      - run:
-          name: Print Node version
-          command: node -v
-      - run:
-          name: Print NPM version
-          command: npm -v
+      - print-env
       - run: npm run check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -293,17 +298,7 @@ commands:
   win-prebuild:
     description: windows-specific prebuild steps
     steps:
-      - run:
-          name: Print Windows Environment info
-          command: |
-            set -ev
-            which node
-            node -v
-            which npm
-            npm -v
-            echo ~
-            echo $HOME
-            echo $PATH
+      - print-env
       - run:
           name: Install Node
           environment:
@@ -319,6 +314,7 @@ commands:
             wget https://nodejs.org/dist/v$nodejs_version/node-v$nodejs_version-win-$TARGET_ARCH.zip -O node.zip
             unzip node.zip -d ./node
             mv ./node/node-v$nodejs_version-win-$TARGET_ARCH/* "/c/Program Files/nodejs"
+      - print-env
       - persist_to_workspace:
           root: C:\Program Files
           paths:
