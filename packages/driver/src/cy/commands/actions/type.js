@@ -43,14 +43,20 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         const modifiers = $Keyboard.modifiersToString(keyboard.getActiveModifiers(state))
 
+        const formatEventDetails = (obj) => {
+          return `{ ${(Object.keys(obj)
+          .filter((v) => Boolean(obj[v]))
+          .map((v) => `${v}: ${obj[v]}`))
+          .join(', ')
+          } }`
+        }
         const obj = table[id] = {
           'Typed': key || null,
-          Modifiers: modifiers || null,
+          'Target Element': event.target,
           'Events Fired': '',
-          PreventedDefault: null,
-          'Event.code': event.code,
-          'Event.which': event.which || null,
-          'Event.target': event.target,
+          'Details': formatEventDetails({ code: event.code, which: event.which }),
+          'Prevented Default': null,
+          'Active Modifiers': modifiers || null,
         }
 
         return obj
@@ -61,7 +67,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         row['Events Fired'] += row['Events Fired'] ? `, ${event.type}` : event.type
         if (!value) {
-          row.PreventedDefault = true
+          row['Prevented Default'] = true
         }
       }
 

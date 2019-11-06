@@ -7,27 +7,27 @@ const $actionability = require('../../actionability')
 
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
-    // get event name either from the keyname, or from the sole object key name
+    // get event type either from the keyname, or from the sole object key name
     const eventName = (typeof key === 'string') ? key : val.type
 
     if (val.skipped) {
       const reason = val.skipped
 
       return {
-        'Event Name': eventName,
+        'Event Type': eventName,
         'Target Element': reason,
-        'Prevented Default?': null,
-        'Stopped Propagation?': null,
-        'Modifiers': null,
+        'Prevented Default': null,
+        'Stopped Propagation': null,
+        'Active Modifiers': null,
       }
     }
 
     return {
-      'Event Name': eventName,
+      'Event Type': eventName,
       'Target Element': val.el,
-      'Prevented Default?': val.preventedDefault,
-      'Stopped Propagation?': val.stoppedPropagation,
-      'Modifiers': val.modifiers ? val.modifiers : null,
+      'Prevented Default': val.preventedDefault || null,
+      'Stopped Propagation': val.stoppedPropagation || null,
+      'Active Modifiers': val.modifiers || null,
     }
   })
 }

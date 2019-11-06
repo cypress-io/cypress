@@ -159,7 +159,7 @@ const getFormattedKeyString = (details: KeyDetails) => {
   foundKeyString = keyToModifierMap[details.key]
 
   if (foundKeyString) {
-    return `<${foundKeyString}>`
+    return `{${foundKeyString}}`
   }
 
   return details.key
@@ -747,6 +747,8 @@ export class Keyboard {
     .then(() => {
       if (options.release !== false) {
         return Promise.map(modifierKeys, (key) => {
+          options.id = _.uniqueId('char')
+
           return this.simulatedKeyup(getActiveEl(doc), key, options)
         })
       }
