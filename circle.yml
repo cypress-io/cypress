@@ -299,6 +299,8 @@ commands:
           command: |
             set -ev
             choco install nvm
+            echo 'Running $TARGET_ARCH-bit node install'
+            nvm arch $TARGET_ARCH
             nvm install $nodejs_version $TARGET_ARCH
             nvm use $nodejs_version $TARGET_ARCH
       - persist_to_workspace:
@@ -1320,7 +1322,7 @@ win-workflow: &win-workflow
   jobs:
     - win-build:
         name: win-build-ia32
-        arch: ia32
+        arch: "32"
 
     - build-npm-package:
         name: win-build-npm-package-ia32
@@ -1351,7 +1353,7 @@ win-workflow: &win-workflow
 
     - win-build:
         name: win-build-x64
-        arch: x64
+        arch: "64"
 
     - build-npm-package:
         name: win-build-npm-package-x64
