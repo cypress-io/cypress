@@ -12,7 +12,6 @@ SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
 
 httpRe = /^http/
 
-debugger
 firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
@@ -144,7 +143,6 @@ automation = {
 
   query: (data) ->
     code = "var s; (s = document.getElementById('#{data.element}')) && s.textContent"
-    code2 = 'console.log("foooooooooooooooooooooooo")'
 
     queryTab = (tab) ->
       Promise.try ->

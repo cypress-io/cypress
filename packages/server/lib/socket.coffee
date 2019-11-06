@@ -258,8 +258,8 @@ class Socket
         open.opn(p)
         .then -> cb()
 
-      socket.on "recorder:frame", (data) ->
-        console.log('recorderframe', data)
+      # socket.on "recorder:frame", (data) ->
+      #   console.log(data)
 
       socket.on "reload:browser", (url, browser) ->
         options.onReloadBrowser(url, browser)
