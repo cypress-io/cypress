@@ -1,6 +1,7 @@
 version: 2.1
 
 develop-only: &develop-only
+## NOTE: to test all jobs against your PR, just comment out the next 4 lines
   filters:
     branches:
       only:
@@ -1265,8 +1266,8 @@ mac-workflow: &mac-workflow
 win-ia32-workflow: &win-ia32-workflow
   jobs:
   - win-build:
-      <<: *develop-only
       <<: *win-executor
+      <<: *develop-only
       name: 'win-ia32-build'
       arch: "32"
   - build-npm-package:
@@ -1321,8 +1322,8 @@ win-ia32-workflow: &win-ia32-workflow
 win-x64-workflow: &win-x64-workflow
   jobs:
   - win-build:
-      <<: *develop-only
       <<: *win-executor
+      <<: *develop-only
       name: 'win-x64-build'
       arch: "64"
   - build-npm-package:
