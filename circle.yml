@@ -1263,10 +1263,9 @@ mac-workflow: &mac-workflow
           - mac-upload-binary
 
 win-ia32-workflow: &win-ia32-workflow
-  triggers:
-    - <<: *develop-only
   jobs:
   - win-build:
+      <<: *develop-only
       <<: *win-executor
       name: 'win-ia32-build'
       arch: "32"
@@ -1320,10 +1319,9 @@ win-ia32-workflow: &win-ia32-workflow
         - win-ia32-upload-binary
 
 win-x64-workflow: &win-x64-workflow
-  triggers:
-    - <<: *develop-only
   jobs:
   - win-build:
+      <<: *develop-only
       <<: *win-executor
       name: 'win-x64-build'
       arch: "64"
