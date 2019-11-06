@@ -8,7 +8,6 @@ if (isLinux) {
   assert.ok(process.env.COLUMNS === '100', `process.env.COLUMNS=${process.env.COLUMNS} must be set to 100 for snapshots to pass`)
 }
 
-
 /* eslint-disable no-console */
 console.log('stdout.isTTY?', process.stdout.isTTY)
 console.log('stderr.isTTY?', process.stderr.isTTY)
