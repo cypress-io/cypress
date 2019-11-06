@@ -254,10 +254,10 @@ commands:
       # show what is already cached globally
       - run:
           shell: << parameters.shell >>
-          command: ls "$(npm -g bin)"
+          command: ls $(npm -g bin) || true
       - run:
           shell: << parameters.shell >>
-          command: ls "$(npm -g bin)/../lib/node_modules"
+          command: ls $(npm -g bin)/../lib/node_modules || true
 
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
