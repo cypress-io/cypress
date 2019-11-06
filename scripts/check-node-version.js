@@ -29,14 +29,14 @@ if (isWindows() && process.env.CIRCLECI) {
   const nodeArch = os.arch()
   const realArch = CIRCLE_JOB.split('-')[1]
 
-  const getErrMsg = (expectedArch) => {
+  const getErrMsg = () => {
     return `Installed node CPU arch is set to: '${realArch}' but the correct version for this job is: '${realArch}'`
   }
 
   if (realArch === 'ia32') {
-    assert.equal(nodeArch, 'ia32', getErrMsg('ia32'))
+    assert.equal(nodeArch, 'ia32', getErrMsg())
   } else if (realArch === 'x64') {
-    assert.equal(nodeArch, 'x64', getErrMsg('x64'))
+    assert.equal(nodeArch, 'x64', getErrMsg())
   } else {
     throw new Error("cannot determine expected architecture, failing")
   }
