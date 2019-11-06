@@ -35,8 +35,8 @@ win-executor: &win-executor
   executor:
     name: win/vs2019
     shell: bash.exe # default is powershell, which just won't work with the scripts we use on linux/darwin
-    environment:
-      PLATFORM: win32
+  environment:
+    PLATFORM: win32
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
