@@ -248,10 +248,10 @@ commands:
           shell: << parameters.shell >>
           command: npm run check-terminal
 
-      - run:
-          shell: << parameters.shell >>
-          ## busted on windows, use this lil shim to make it only run on posix
-          command: "node -e 'process.platform === \"win32\" ? console.log(\\'skipping on windows\\') && process.exit(0) : process.exit(1)' || npm run stop-only-all"
+      ## busted on windows
+      # - run:
+      #     shell: << parameters.shell >>
+      #     command: "npm run stop-only-all"
 
       - restore-caches
 
