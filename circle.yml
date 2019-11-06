@@ -667,7 +667,7 @@ jobs:
 
   build-binary:
     <<: *defaults
-    # shell: /bin/bash --login
+    shell: bash
     steps:
       - run:
           name: Check environment variables before code sign (if on Mac)
