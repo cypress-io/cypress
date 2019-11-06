@@ -70,6 +70,7 @@ commands:
             set -ev
             which node
             node -v
+            echo Node arch: $(node -p process.arch)
             which npm
             npm -v
             echo ~
