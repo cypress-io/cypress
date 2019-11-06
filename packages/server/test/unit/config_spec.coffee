@@ -765,7 +765,8 @@ describe "lib/config", ->
             projectId:                  { value: null, from: "default" },
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
-            blacklistHosts:             { value: null, from: "default" }
+            blacklistHosts:             { value: null, from: "default" },
+            browsers:                   { value: [], from: "default" },
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "json", from: "cli" },
             reporterOptions:            { value: null, from: "default" },
@@ -833,6 +834,7 @@ describe "lib/config", ->
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
+            browsers:                   { value: [], from: "default" }
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "spec", from: "default" },
             reporterOptions:            { value: null, from: "default" },

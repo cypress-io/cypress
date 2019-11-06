@@ -144,7 +144,10 @@ class Project extends EE
 
     debug("make sure we pass valid list of browsers to the plugins")
     if cfg.browsers
-      config.validateBrowserList(cfg.browsers)
+      ## often tests use an empty default list of browsers
+      ## so let's not throw an error there
+      if Array.isArray(cfg.browsers) and cfg.browsers.length
+        config.validateBrowserList(cfg.browsers)
 
     plugins.init(cfg, {
       onError: (err) ->
