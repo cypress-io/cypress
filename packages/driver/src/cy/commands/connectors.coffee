@@ -139,17 +139,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     return invokeBaseFn(options or { log: true }, subject, str, args...)
 
   invokeFn = (subject, optionsOrStr, args...) ->
-    optionsPassed = not _.isString(optionsOrStr)
+    optionsPassed = _.isObject(optionsOrStr) and !_.isFunction(optionsOrStr)
     options = null 
     str = null
 
     if not optionsPassed
       str = optionsOrStr
       options = { log: true }
-    else if args.length > 0
+    else
       options = optionsOrStr
-      str = args[0]
-      args = args.slice(1)
+      if args.length > 0
+        str = args[0]
+        args = args.slice(1)
 
     return invokeBaseFn(options, subject, str, args...)
 
@@ -178,8 +179,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         consoleProps: ->
           Subject: subject
 
+    if not str
+      $utils.throwErrByPath("invoke_its.null_or_undefined_property_name", {
+        onFail: options._log
+        args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
+      })
+
     if not _.isString(str)
-      $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
+      $utils.throwErrByPath("invoke_its.invalid_prop_name_arg", {
+        onFail: options._log
+        args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
+      })
+
+    if not _.isObject(options) or _.isFunction(options)
+      $utils.throwErrByPath("invoke_its.invalid_options_arg", {
         onFail: options._log
         args: { cmd: name }
       })
