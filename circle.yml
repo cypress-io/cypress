@@ -300,11 +300,18 @@ commands:
     description: windows-specific prebuild steps
     steps:
       - print-env
+      - restore_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
       - run:
           name: Install Node
           environment:
             nodejs_version: "12.0.0"
           command: |
+            version_slug=node-v$nodejs_version-win-$TARGET_ARCH
+            if [[ -e "/c/Program Files/nodejs/__cypress" ]]; then
+              echo "Cached Node install found."
+              exit 0
+            fi
             set -ev
             echo "Installing Node $nodejs_version $TARGET_ARCH from nodejs.org"
             # remove default Node install
@@ -312,14 +319,13 @@ commands:
             # replace it with ours :)
             mkdir "/c/Program Files/nodejs"
             choco install wget
-            wget https://nodejs.org/dist/v$nodejs_version/node-v$nodejs_version-win-$TARGET_ARCH.zip -O node.zip
+            wget https://nodejs.org/dist/v$nodejs_version/$version_slug.zip -O node.zip
             unzip node.zip -d ./node
-            mv ./node/node-v$nodejs_version-win-$TARGET_ARCH/* "/c/Program Files/nodejs"
+            mv ./node/$version_slug/* "/c/Program Files/nodejs"
+            touch "/c/Program Files/nodejs/__cypress"
       - print-env
-      - persist_to_workspace:
-          root: C:\Program Files
-          paths:
-            - nodejs
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
 
 jobs:
   ## code checkout and NPM installs
