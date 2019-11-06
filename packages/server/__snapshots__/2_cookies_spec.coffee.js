@@ -7,14 +7,14 @@ exports['e2e cookies with baseurl'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cookies_spec.coffee)                                                      │
-  │ Searched:   cypress/integration/cookies_spec.coffee                                            │
+  │ Specs:      1 found (cookies_spec_baseurl.coffee)                                              │
+  │ Searched:   cypress/integration/cookies_spec_baseurl.coffee                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  cookies_spec.coffee                                                             (1 of 1)
+  Running:  cookies_spec_baseurl.coffee                                                     (1 of 1)
 
 
   cookies
@@ -267,14 +267,14 @@ Result of cy.getCookies():
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cookies_spec.coffee                                                              │
+  │ Spec Ran:     cookies_spec_baseurl.coffee                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec.coffee.mp4             (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_baseurl.coffee.mp4     (X second)
 
 
 ====================================================================================================
@@ -284,7 +284,7 @@ Result of cy.getCookies():
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec.coffee                      XX:XX       10       10        -        -        - │
+  │ ✔  cookies_spec_baseurl.coffee              XX:XX       10       10        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX       10       10        -        -        -  
 

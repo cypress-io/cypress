@@ -156,7 +156,7 @@ describe "e2e cookies", ->
               otherHttpsUrl
             }
           }
-          spec: "cookies_spec.coffee"
+          spec: "cookies_spec_baseurl.coffee"
           snapshot: true
           expectedExitCode: 0
           onRun: (exec) =>
