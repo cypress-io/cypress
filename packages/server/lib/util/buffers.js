@@ -4,9 +4,9 @@ const uri = require('./uri')
 
 let buffers = []
 
-const stripPort = (url) => {
+const addDefaultPort = (url) => {
   try {
-    return uri.removeDefaultPort(url).format()
+    return uri.addDefaultPort(url).format()
   } catch (e) {
     return url
   }
@@ -28,28 +28,26 @@ module.exports = {
   },
 
   set (obj = {}) {
-    obj.url = stripPort(obj.url)
-    obj.originalUrl = stripPort(obj.originalUrl)
+    obj.url = addDefaultPort(obj.url)
+    obj.originalUrl = addDefaultPort(obj.originalUrl)
+
+    debug('setting buffer %o', _.pick(obj, 'url'))
 
     return buffers.push(_.pick(obj, 'url', 'originalUrl', 'jar', 'stream', 'response', 'details'))
   },
 
   getByOriginalUrl (str) {
-    return _.find(buffers, { originalUrl: str })
+    const b = _.find(buffers, { originalUrl: addDefaultPort(str) })
+
+    if (b) {
+      debug('found request buffer by original url %o', { str, buffer: _.pick(b, 'url', 'originalUrl', 'details'), bufferCount: buffers.length })
+    }
+
+    return b
   },
 
   get (str) {
-    const find = (str) => {
-      return _.find(buffers, { url: str })
-    }
-
-    const b = find(str)
-
-    if (b) {
-      return b
-    }
-
-    return find(stripPort(str))
+    return _.find(buffers, { url: addDefaultPort(str) })
   },
 
   take (str) {
