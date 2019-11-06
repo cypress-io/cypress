@@ -297,6 +297,10 @@ commands:
           name: Print Windows Environment info
           command: |
             set -ev
+            which node
+            node -v
+            which npm
+            npm -v
             echo ~
             echo $HOME
             echo $PATH
