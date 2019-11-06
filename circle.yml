@@ -323,6 +323,7 @@ commands:
             unzip node.zip -d ./node
             mv ./node/$version_slug/* "/c/Program Files/nodejs"
             touch "/c/Program Files/nodejs/__cypress"
+            rm -rf ./node.zip ./node
       - print-env
       - save_cache:
           key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
