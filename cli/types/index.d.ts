@@ -674,7 +674,6 @@ declare namespace Cypress {
     ```
      */
     rightclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
-         
 
     /**
      * Set a debugger and log what the previous command yields.
