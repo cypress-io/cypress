@@ -1299,11 +1299,15 @@ module.exports = {
           recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }
 
+        // user code might have modified list of allowed browsers
+        // but be defensive about it
+        const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
+
         // all these operations are independent and should be run in parallel to
         // speed the initial booting time
         return Promise.all([
           system.info(),
-          browserUtils.ensureAndGetByNameOrPath(browserName),
+          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers),
           this.findSpecs(config, specPattern),
           trashAssets(config),
           removeOldProfiles(),
