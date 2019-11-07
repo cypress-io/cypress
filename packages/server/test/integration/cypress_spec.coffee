@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+R          = require("ramda")
 _          = require("lodash")
 os         = require("os")
 cp         = require("child_process")
@@ -847,13 +848,20 @@ describe "lib/cypress", ->
           .then =>
             args = browserUtils.launch.firstCall.args
 
-            expect(args[0]).to.eq(_.find(TYPICAL_BROWSERS, { name: "chrome" }))
+            # when we work with the browsers we set a few extra flags
+            chrome = _.find(TYPICAL_BROWSERS, { name: "chrome" })
+            launchedChrome = R.merge(chrome, {
+              isHeadless: false,
+              isHeaded: true
+            })
+
+            expect(args[0], "found and used Chrome").to.deep.eq(launchedChrome)
 
             browserArgs = args[2]
 
-            expect(browserArgs).to.have.length(7)
+            expect(browserArgs, "two arguments to Chrome").to.have.length(7)
 
-            expect(browserArgs.slice(0, 4)).to.deep.eq([
+            expect(browserArgs.slice(0, 4), "arguments to Chrome").to.deep.eq([
               "chrome", "foo", "bar", "baz"
             ])
 
