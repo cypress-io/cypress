@@ -57,6 +57,7 @@ class Project extends EE
 
   open: (options = {}) ->
     debug("opening project instance %s", @projectRoot)
+    debug("project open options %o", options)
     @server = Server()
 
     _.defaults options, {
@@ -565,7 +566,7 @@ class Project extends EE
         )
 
   @getProjectStatus = (clientProject) ->
-    debug("get project status for", clientProject.id, clientProject.path)
+    debug("get project status for client id %s at path %s", clientProject.id, clientProject.path)
 
     if not clientProject.id
       debug("no project id")

@@ -437,6 +437,7 @@ module.exports = {
         merged.resolved.browsers = originalResolvedBrowsers
 
     if merged.browsers
+      debug("merged browsers are %o", merged.browsers)
       @validateBrowserList(merged.browsers)
 
     debug("merged plugins config %o", merged)
