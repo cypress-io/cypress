@@ -284,12 +284,14 @@ module.exports = {
       })
 
   set: (obj = {}) ->
+    debug("setting config object")
     {projectRoot, projectName, config, envFile, options} = obj
 
     ## just force config to be an object
     ## so we dont have to do as much
     ## work in our tests
     config ?= {}
+    debug("config is %o", config)
 
     ## flatten the object's properties
     ## into the master config object

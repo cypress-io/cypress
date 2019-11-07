@@ -36,6 +36,7 @@ cleanup = ->
   instance = null
 
 getBrowserLauncherByFamily = (family) ->
+  debug("getBrowserLauncherByFamily for %s", family)
   if not isBrowserFamily(family)
     debug("unknown browser family", family)
 
@@ -93,7 +94,9 @@ module.exports = {
   close: kill
 
   getAllBrowsersWith: (nameOrPath) ->
+    debug("getAllBrowsersWith")
     if nameOrPath
+      debug("by name or path %s", nameOrPath)
       return ensureAndGetByNameOrPath(nameOrPath, true)
     utils.getBrowsers()
 
