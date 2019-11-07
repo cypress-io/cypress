@@ -15,11 +15,13 @@ $Commands = require("./cypress/commands")
 $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
+$Keyboard = require("./cy/keyboard")
 $SetterGetter = require("./cypress/setter_getter")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
+$Mouse = require("./cy/mouse")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
 $Screenshot = require("./cypress/screenshot")
@@ -466,10 +468,12 @@ class $Cypress
   Commands: $Commands
   dom: $dom
   errorMessages: $errorMessages
+  Keyboard: $Keyboard
   Location: $Location
   Log: $Log
   LocalStorage: $LocalStorage
   Mocha: $Mocha
+  Mouse: $Mouse
   Runner: $Runner
   Server: $Server
   Screenshot: $Screenshot

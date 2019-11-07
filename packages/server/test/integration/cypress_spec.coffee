@@ -39,6 +39,7 @@ Watchers   = require("#{root}lib/watchers")
 browsers   = require("#{root}lib/browsers")
 videoCapture = require("#{root}lib/video_capture")
 browserUtils = require("#{root}lib/browsers/utils")
+chromeBrowser = require("#{root}lib/browsers/chrome")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
 system        = require("#{root}lib/util/system")
@@ -333,6 +334,20 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        @expectExitWith(0)
+
+    it "runs project by limiting spec files via config.testFiles string glob pattern", ->
+      cypress.start(["--run-project=#{@todosPath}", "--config=testFiles=#{@todosPath}/tests/test2.coffee"])
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        @expectExitWith(0)
+
+    it "runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns", ->
+      cypress.start(["--run-project=#{@todosPath}", "--config=testFiles=[\"**/test2.coffee\",\"**/test1.js\"]"])
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test1.js"})
         @expectExitWith(0)
 
     it "does not watch settings or plugins in run mode", ->
@@ -764,8 +779,12 @@ describe "lib/cypress", ->
 
         ee = new EE()
         ee.kill = ->
+          # ughh, would be nice to test logic inside the launcher
+          # that cleans up after the browser exit
+          # like calling client.close() if available to let the
+          # browser free any resources
           ee.emit("exit")
-        ee.close = ->
+        ee.destroy = ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
@@ -774,7 +793,7 @@ describe "lib/cypress", ->
           debugger: {
             on: sinon.stub()
             attach: sinon.stub()
-            sendCommand: sinon.stub().callsArg(2)
+            sendCommand: sinon.stub().resolves()
           }
           setUserAgent: sinon.stub()
           session: {
@@ -789,6 +808,20 @@ describe "lib/cypress", ->
 
       context "before:browser:launch", ->
         it "chrome", ->
+          # during testing, do not try to connect to the remote interface or
+          # use the Chrome remote interface client
+          criClient = {
+            ensureMinimumProtocolVersion: sinon.stub().resolves()
+            close: sinon.stub().resolves()
+          }
+          sinon.stub(chromeBrowser, "_connectToChromeRemoteInterface").resolves(criClient)
+          # the "returns(resolves)" stub is due to curried method
+          # it accepts URL to visit and then waits for actual CRI client reference
+          # and only then navigates to that URL
+          sinon.stub(chromeBrowser, "_navigateUsingCRI").resolves()
+
+          sinon.stub(chromeBrowser, "_setAutomation").returns()
+
           cypress.start([
             "--run-project=#{@pluginBrowser}"
             "--browser=chrome"
@@ -807,6 +840,10 @@ describe "lib/cypress", ->
             ])
 
             @expectExitWith(0)
+
+            expect(chromeBrowser._navigateUsingCRI).to.have.been.calledOnce
+            expect(chromeBrowser._setAutomation).to.have.been.calledOnce
+            expect(chromeBrowser._connectToChromeRemoteInterface).to.have.been.calledOnce
 
         it "electron", ->
           writeVideoFrame = sinon.stub()

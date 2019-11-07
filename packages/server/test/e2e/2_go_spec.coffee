@@ -15,13 +15,11 @@ describe "e2e go", ->
     }
   })
 
-  it "passes", ->
-    ## this tests that history changes work as intended
-    ## there have been regressions in electron which would
-    ## otherwise cause these tests to fail
-
-    e2e.exec(@, {
-      spec: "go_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  ## this tests that history changes work as intended
+  ## there have been regressions in electron which would
+  ## otherwise cause these tests to fail
+  e2e.it "passes", {
+    spec: "go_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }

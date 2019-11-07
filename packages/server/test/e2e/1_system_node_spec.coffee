@@ -23,6 +23,7 @@ describe "e2e system node", ->
             }
           }
           spec: "spec.js"
+          sanitizeScreenshotDimensions: true
           snapshot: true
           expectedExitCode: 0
         })

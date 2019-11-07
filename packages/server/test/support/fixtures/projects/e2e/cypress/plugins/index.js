@@ -1,8 +1,9 @@
+require('@packages/ts/register')
+
 const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
-
 const performance = require('../../../../test/support/helpers/performance')
 
 module.exports = (on) => {

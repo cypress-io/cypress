@@ -10,6 +10,7 @@ describe "e2e issue 2891", ->
     e2e.exec(@, {
       project: Fixtures.projectPath("default-layout")
       spec: "default_layout_spec.js"
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 0
     })

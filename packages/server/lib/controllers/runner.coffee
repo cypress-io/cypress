@@ -22,6 +22,8 @@ module.exports = {
     debug("serving runner index.html with config %o",
       _.pick(config, "version", "platform", "arch", "projectName")
     )
+    # log the env object's keys without values to avoid leaking sensitive info
+    debug("env object has the following keys: %s", _.keys(config.env).join(", "))
 
     ## base64 before embedding so user-supplied contents can't break out of <script>
     ## https://github.com/cypress-io/cypress/issues/4952

@@ -14,7 +14,7 @@ exports['e2e issue 674 fails 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: issue_674_spec.coffee...                                                        (1 of 1) 
+  Running:  issue_674_spec.coffee                                                           (1 of 1)
 
 
   issue 674
@@ -42,29 +42,31 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
   (Results)
 
-  ┌─────────────────────────────────────┐
-  │ Tests:        1                     │
-  │ Passing:      0                     │
-  │ Failing:      1                     │
-  │ Pending:      0                     │
-  │ Skipped:      0                     │
-  │ Screenshots:  2                     │
-  │ Video:        true                  │
-  │ Duration:     X seconds             │
-  │ Spec Ran:     issue_674_spec.coffee │
-  └─────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     issue_674_spec.coffee                                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang when both beforeEach and afterEach fail -- after each hook (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang     (1280x720)
+      when both beforeEach and afterEach fail -- before each hook (failed).png                      
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_674_spec.coffee/issue 674 -- doesn't hang     (1280x720)
+      when both beforeEach and afterEach fail -- after each hook (failed).png                       
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_674_spec.coffee.mp4           (X second)
 
 
 ====================================================================================================
@@ -72,11 +74,11 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ issue_674_spec.coffee                     XX:XX        1        -        1        -        - │
+  │ ✖  issue_674_spec.coffee                    XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
