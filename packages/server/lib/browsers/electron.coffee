@@ -70,13 +70,7 @@ module.exports = {
           ## close child on parent close
           _win.on "close", ->
             if not child.isDestroyed()
-              child.close()
-
-            ## give the child up to 1 second to close, then destroy it
-            setTimeout ->
-              if not child.isDestroyed()
-                child.destroy()
-            , 1000
+              child.destroy()
     }
 
     _.defaultsDeep({}, options, defaults)
