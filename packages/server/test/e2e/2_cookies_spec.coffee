@@ -162,9 +162,6 @@ describe "e2e cookies", ->
           onRun: (exec) =>
             exec({
               originalTitle: "e2e cookies with baseurl"
-              onStdout: (stdout) ->
-                stdout.replace(new RegExp(otherDomain, 'g'), '<2nd domain>')
-                .replace(new RegExp(baseDomain, 'g'), '<base domain>')
             })
         }
 
