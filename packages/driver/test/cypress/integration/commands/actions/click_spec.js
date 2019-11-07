@@ -1675,7 +1675,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('relative coordinate arguments', () => {
-      it('can specify x and y', (done) => {
+      it('can specify x and y', () => {
         const $btn = $('<button>button covered</button>')
         .attr('id', 'button-covered-in-span')
         .css({ height: 100, width: 100 })
@@ -1685,14 +1685,20 @@ describe('src/cy/commands/actions/click', () => {
         .css({ position: 'absolute', left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: 'inline-block', backgroundColor: 'yellow' })
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
+        cy.on('log:changed', (log, attr) => {
+          if (log.name === 'click' && attr._emittedAttrs.coords) {
+            expect(attr._emittedAttrs.coords).property('x')
+            expect(attr._emittedAttrs.coords).property('y')
+          }
         })
+
+        const clicked = cy.stub()
 
         $span.on('click', clicked)
         $btn.on('click', clicked)
 
         cy.get('#button-covered-in-span').click(75, 78)
+        .then(() => expect(clicked).calledTwice)
       })
 
       it('can pass options along with x, y', (done) => {

@@ -203,7 +203,7 @@ const getBottomRightCoordinates = (rect) => {
 const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   const positionProps = getElementPositioning($el)
 
-  const { fromElViewport, fromElWindow } = positionProps
+  const { fromElViewport, fromElWindow, fromAutWindow } = positionProps
 
   fromElViewport.left += x
   fromElViewport.top += y
@@ -211,14 +211,21 @@ const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   fromElWindow.left += x
   fromElWindow.top += y
 
+  fromAutWindow.left += x
+  fromAutWindow.top += y
+
   const viewportTargetCoords = getTopLeftCoordinates(fromElViewport)
   const windowTargetCoords = getTopLeftCoordinates(fromElWindow)
+  const AUTwindowTargetCoords = getTopLeftCoordinates(fromAutWindow)
 
   fromElViewport.x = viewportTargetCoords.x
   fromElViewport.y = viewportTargetCoords.y
 
   fromElWindow.x = windowTargetCoords.x
   fromElWindow.y = windowTargetCoords.y
+
+  fromAutWindow.x = AUTwindowTargetCoords.x
+  fromAutWindow.y = AUTwindowTargetCoords.y
 
   return positionProps
 }
