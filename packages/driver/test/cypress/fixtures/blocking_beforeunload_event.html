@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+
+<script>
+  window.addEventListener('beforeunload', function (e) {
+    // difference with onbeforeunload is:
+    // According to the specification, to show the confirmation dialog an event handler should call preventDefault() on the event.
+    // @see https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeunload_event
+    e.preventDefault();
+    e.returnValue = 'Dialog';
+    return;
+  })
+</script>
