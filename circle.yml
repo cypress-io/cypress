@@ -335,7 +335,7 @@ commands:
           name: Ensure /tmp is valid
           command: |
             set -e
-            node -e "process.exit(process.platform === 'win32')" || MKLINK /J %TEMP% "C:\tmp"
+            node -e "process.exit(process.platform === 'win32')" || cmd.exe /c mklink /J %TEMP% "C:\tmp"
 
 jobs:
   ## code checkout and NPM installs
