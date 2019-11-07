@@ -31,6 +31,9 @@ describe "cookies", ->
       ## setcookie sets on the superdomain by default
       setCookieDomain = ".#{baseUrlLocation.getSuperDomain()}"
 
+      if ['localhost', '127.0.0.1'].includes(expectedDomain)
+        setCookieDomain = expectedDomain
+
       cy
         .clearCookie("foo1")
         .setCookie("foo", "bar").then (c) ->

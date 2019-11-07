@@ -122,12 +122,5 @@ module.exports = (on) => {
       return performance.track('fast_visit_spec percentiles', data)
       .return(null)
     },
-
-    'console:log' (...msg) {
-      // eslint-disable-next-line no-console
-      console.log(...msg)
-
-      return null
-    },
   })
 }
