@@ -643,7 +643,7 @@ declare namespace Cypress {
     cy.get('button').dblclick(15, 40)
     ```
      */
-    rightclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
