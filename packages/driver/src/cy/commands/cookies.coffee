@@ -143,7 +143,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         return resp
 
-    setCookie: (name, value, options = {}) ->
+    setCookie: (name, value, userOptions = {}) ->
+      options = _.clone(userOptions)
       _.defaults options, {
         name: name
         value: value
