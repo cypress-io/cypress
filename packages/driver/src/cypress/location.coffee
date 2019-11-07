@@ -148,7 +148,7 @@ class $Location
     ## In the case of a url like /?foo=..
     ## It's split into ?foo=, "", "" which is not a valid
     ## So if after we split a url, there are any empty strings consider it invalid
-    ## if these checks would pass that would be great :|
+    ## Adding this text to see if that cla message goes away
     ## https://github.com/cypress-io/cypress/issues/5090
     containEmptyString = url.some (part) -> part is ""
     if not containEmptyString
