@@ -216,7 +216,7 @@ const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
 
   const viewportTargetCoords = getTopLeftCoordinates(fromElViewport)
   const windowTargetCoords = getTopLeftCoordinates(fromElWindow)
-  const AUTwindowTargetCoords = getTopLeftCoordinates(fromAutWindow)
+  const autWindowTargetCoords = getTopLeftCoordinates(fromAutWindow)
 
   fromElViewport.x = viewportTargetCoords.x
   fromElViewport.y = viewportTargetCoords.y
@@ -224,8 +224,8 @@ const getElementCoordinatesByPositionRelativeToXY = ($el, x, y) => {
   fromElWindow.x = windowTargetCoords.x
   fromElWindow.y = windowTargetCoords.y
 
-  fromAutWindow.x = AUTwindowTargetCoords.x
-  fromAutWindow.y = AUTwindowTargetCoords.y
+  fromAutWindow.x = autWindowTargetCoords.x
+  fromAutWindow.y = autWindowTargetCoords.y
 
   return positionProps
 }
