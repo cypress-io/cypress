@@ -14,13 +14,7 @@ exports['e2e issue 2891 passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: issue_1669_spec.js...                                                           (1 of 1) 
-
-Warning: Cypress can only record videos when using the built in 'electron' browser.
-
-You have set the browser to: 'chrome'
-
-A video will not be recorded when using this browser.
+  Running:  issue_1669_spec.js                                                              (1 of 1)
 
 
   issue-1669 undefined err.stack in beforeEach hook
@@ -31,32 +25,53 @@ A video will not be recorded when using this browser.
   1 failing
 
   1) issue-1669 undefined err.stack in beforeEach hook "before each" hook for "cy.setCookie should fail with correct error":
-     Failed to parse or set cookie named "foo".
+     CypressError: cy.setCookie() must be passed an RFC-6265-compliant cookie value. You passed:
+
+\`   bar\`
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'issue-1669 undefined err.st...'
-  
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
+      at stack trace line
 
 
 
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        1                  │
-  │ Passing:      0                  │
-  │ Failing:      1                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  1                  │
-  │ Video:        false              │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     issue_1669_spec.js │
-  └──────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     issue_1669_spec.js                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/issue_1669_spec.js/issue-1669 undefined err.stack in beforeEach hook -- cy.setCookie should fail with correct error -- before each hook (failed).png (YYYYxZZZZ)
+  -  /XXX/XXX/XXX/cypress/screenshots/issue_1669_spec.js/issue-1669 undefined err.sta     (1280x720)
+     ck in beforeEach hook -- cy.setCookie should fail with correct error -- before e               
+     ach hook (failed).png                                                                          
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_1669_spec.js.mp4              (X second)
 
 
 ====================================================================================================
@@ -64,11 +79,11 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ issue_1669_spec.js                        XX:XX        1        -        1        -        - │
+  │ ✖  issue_1669_spec.js                       XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
