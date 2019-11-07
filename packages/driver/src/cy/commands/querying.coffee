@@ -47,7 +47,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getFocused = ->
         focused = cy.getFocused()
         log(focused)
-        
+
         return focused
 
       do resolveFocused = (failedByNonAssertion = false) ->
@@ -68,7 +68,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     get: (selector, options = {}) ->
       ctx = @
-
+      
+      if options is null or Array.isArray(options) or typeof options isnt 'object' then return $utils.throwErrByPath "get.invalid_options", {
+          args: { options  }
+      }
       _.defaults(options, {
         retry: true
         withinSubject: cy.state("withinSubject")
@@ -78,13 +81,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       consoleProps = {}
-
       start = (aliasType) ->
         return if options.log is false
 
         options._log ?= Cypress.log
           message: selector
-          referencesAlias: aliasObj?.alias
+          referencesAlias: if aliasObj?.alias then {name: aliasObj.alias}
           aliasType: aliasType
           consoleProps: -> consoleProps
 
@@ -126,9 +128,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         options._log.set(obj)
 
-      ## we always want to strip everything after the first '.'
-      ## since we support alias propertys like '1' or 'all'
-      if aliasObj = cy.getAlias(selector.split(".")[0])
+      ## We want to strip everything after the last '.'
+      ## only when it is potentially a number or 'all'
+      if _.indexOf(selector, ".") == -1 ||
+      selector.slice(1) in _.keys(cy.state("aliases"))
+        toSelect = selector
+      else
+         allParts = _.split(selector, '.')
+         toSelect = _.join(_.dropRight(allParts, 1), '.')
+
+      if aliasObj = cy.getAlias(toSelect)
         {subject, alias, command} = aliasObj
 
         return do resolveAlias = ->
@@ -176,7 +185,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
             ## if this is a route command
             when command.get("name") is "route"
-              alias = _.compact([alias, selector.split(".")[1]]).join(".")
+              if !(_.indexOf(selector, ".") == -1 ||
+              selector.slice(1) in _.keys(cy.state("aliases")))
+                allParts = _.split(selector, ".")
+                index = _.last(allParts)
+                alias = _.join([alias, index], ".")
               requests = cy.getRequestsByAlias(alias) ? null
               log(requests, "route")
               return requests
@@ -205,8 +218,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## and catch any sizzle errors!
         try
           $el = cy.$$(selector, options.withinSubject)
+          ## jQuery v3 has removed its deprecated properties like ".selector"
+          ## https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
+          ## but our error messages use this property to actually show the missing element
+          ## so let's put it back
+          $el.selector ?= selector
         catch e
-          e.onFail = -> options._log.error(e)
+          e.onFail = -> if options.log is false then e else options._log.error(e)
           throw e
 
         ## if that didnt find anything and we have a within subject
@@ -269,13 +287,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         subject = null
 
       switch
+        ## .contains(filter, text)
         when _.isRegExp(text)
           text = text
           filter = filter
+        ## .contains(text, options)
         when _.isObject(text)
           options = text
           text = filter
           filter = ""
+        ## .contains(text)
         when _.isUndefined(text)
           text = filter
           filter = ""

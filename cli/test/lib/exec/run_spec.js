@@ -1,6 +1,6 @@
 require('../../spec_helper')
 
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 const util = require(`${lib}/util`)
 const run = require(`${lib}/exec/run`)
@@ -18,6 +18,7 @@ describe('exec run', function () {
       const args = run.processRunOptions({
         browser: 'test browser',
       })
+
       snapshot(args)
     })
 
@@ -25,6 +26,15 @@ describe('exec run', function () {
       const args = run.processRunOptions({
         record: 'my record id',
       })
+
+      snapshot(args)
+    })
+
+    it('passes --config-file false option', () => {
+      const args = run.processRunOptions({
+        configFile: false,
+      })
+
       snapshot(args)
     })
 
@@ -33,6 +43,7 @@ describe('exec run', function () {
         record: 'foo',
         browser: 'test browser',
       })
+
       snapshot(args)
     })
   })
@@ -68,6 +79,24 @@ describe('exec run', function () {
       return run.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--config', 'watchForFileChanges=false,baseUrl=localhost'])
+      })
+    })
+
+    it('spawns with --config-file false', function () {
+      return run.start({ configFile: false })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(
+          ['--run-project', process.cwd(), '--config-file', false]
+        )
+      })
+    })
+
+    it('spawns with --config-file set', function () {
+      return run.start({ configFile: 'special-cypress.json' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(
+          ['--run-project', process.cwd(), '--config-file', 'special-cypress.json']
+        )
       })
     })
 

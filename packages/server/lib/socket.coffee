@@ -1,6 +1,5 @@
 _             = require("lodash")
 path          = require("path")
-uuid          = require("node-uuid")
 debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
@@ -125,6 +124,7 @@ class Socket
       destroyUpgrade: false
       serveClient: false
       cookie: cookie
+      parser: socketIo.circularParser
     })
 
   startListening: (server, automation, config, options) ->
@@ -132,6 +132,8 @@ class Socket
 
     _.defaults options,
       socketId: null
+      onIncomingXhr: ->
+      onResetXhrServer: ->
       onSetRunnables: ->
       onMocha: ->
       onConnect: ->
@@ -298,6 +300,10 @@ class Socket
               options.onResolveUrl(url, headers, automationRequest, resolveOpts)
             when "http:request"
               options.onRequest(headers, automationRequest, args[0])
+            when "reset:xhr:server"
+              options.onResetXhrServer()
+            when "incoming:xhr"
+              options.onIncomingXhr(args[0], args[1])
             when "get:fixture"
               fixture.get(config.fixturesFolder, args[0], args[1])
             when "read:file"
@@ -332,6 +338,9 @@ class Socket
         ## we only use the 'ack' here in tests
         cb() if cb
 
+      socket.on "external:open", (url) ->
+        require("electron").shell.openExternal(url)
+
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
           @toRunner(event, data)
@@ -339,6 +348,7 @@ class Socket
       runnerEvents.forEach (event) =>
         socket.on event, (data) =>
           @toReporter(event, data)
+
 
   end: ->
     @ended = true

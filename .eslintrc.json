@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    "@cypress/dev"
+  ],
+  "extends": [
+    "plugin:@cypress/dev/general"
+  ],
+  "rules": {}
+}

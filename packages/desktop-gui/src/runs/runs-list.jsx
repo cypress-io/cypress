@@ -4,6 +4,7 @@ import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
+import { configFileFormatted } from '../lib/config-file-formatted'
 import authStore from '../auth/auth-store'
 import RunsStore from './runs-store'
 import errors from '../lib/errors'
@@ -191,7 +192,6 @@ class RunsList extends Component {
 
     // OR there are no runs to show
     if (!this.runsStore.runs.length) {
-
       // AND they've never setup CI
       if (!project.id) {
         return this._projectNotSetup()
@@ -200,7 +200,6 @@ class RunsList extends Component {
       }
 
       return this._empty()
-
     }
     //--------End Run States----------//
 
@@ -211,11 +210,12 @@ class RunsList extends Component {
           <h5>Runs
             {this._lastUpdated()}
             <button
+              aria-label='Refresh'
               className='btn btn-link btn-sm'
               disabled={this.runsStore.isLoading}
               onClick={this._getRuns}
             >
-              <i className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
+              <i aria-hidden="true" className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
           </h5>
           <div>
@@ -327,7 +327,7 @@ class RunsList extends Component {
           </h4>
           <h5>
             <span className='pull-left'>
-              1. Check <code>cypress.json</code> into source control.
+              1. Check {configFileFormatted(this.props.project.configFile)} into source control.
             </span>
             <a onClick={this._openProjectIdGuide} className='pull-right'>
               <i className='fa fa-question-circle'></i>{' '}

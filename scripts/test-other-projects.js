@@ -2,12 +2,12 @@ require('@packages/coffee/register')
 
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const { getNameAndBinary, getJustVersion } = require('./utils')
+const { getNameAndBinary, getJustVersion, getShortCommit } = require('./utils')
 const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
 const minimist = require('minimist')
-const { getInstallJson } = require('commit-message-install')
+const { getInstallJson } = require('@cypress/commit-message-install')
 
 /* eslint-disable no-console */
 
@@ -16,11 +16,13 @@ const { npm, binary } = getNameAndBinary(process.argv)
 la(is.unemptyString(npm), 'missing npm url')
 la(is.unemptyString(binary), 'missing binary url')
 const platform = os.platform()
+const arch = os.arch()
 
 console.log('bumping versions for other projects')
-console.log('npm:', npm)
-console.log('binary:', binary)
-console.log('platform:', platform)
+console.log(' npm:', npm)
+console.log(' binary:', binary)
+console.log(' platform:', platform)
+console.log(' arch:', arch)
 
 const cliOptions = minimist(process.argv, {
   string: 'provider',
@@ -28,24 +30,6 @@ const cliOptions = minimist(process.argv, {
     provider: 'p',
   },
 })
-
-const shorten = (s) => {
-  return s.substr(0, 7)
-}
-
-const getShortCommit = () => {
-  const sha =
-    process.env.APPVEYOR_REPO_COMMIT ||
-    process.env.CIRCLE_SHA1 ||
-    process.env.BUILDKITE_COMMIT
-
-  if (sha) {
-    return {
-      sha,
-      short: shorten(sha),
-    }
-  }
-}
 
 /**
  * Returns given string surrounded by ```json + ``` quotes
@@ -75,49 +59,80 @@ const shortNpmVersion = getJustVersion(npm)
 
 console.log('short NPM version', shortNpmVersion)
 
-let subject = `Testing new ${platform} Cypress version ${shortNpmVersion}`
+let subject = `Testing new ${platform} ${arch} Cypress version ${shortNpmVersion}`
 const commitInfo = getShortCommit()
 
 if (commitInfo) {
   subject += ` ${commitInfo.short}`
 }
 
-// instructions for installing this binary
-// using https://github.com/bahmutov/commit-message-install
+// instructions for installing this binary,
+// see "@cypress/commit-message-install"
 const env = {
   CYPRESS_INSTALL_BINARY: binary,
 }
-const commitMessageInstructions = getInstallJson(
-  npm,
-  env,
-  platform,
-  shortNpmVersion, // use as version as branch name on test projects
-  commitInfo && commitInfo.sha
-)
-const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
-const footer = 'Use tool `commit-message-install` to install from above block'
-let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
 
-if (process.env.CIRCLE_BUILD_URL) {
-  message += '\n'
-  message += stripIndent`
-    CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
-  `
+const getStatusAndMessage = (projectRepoName) => {
+  // also pass "status" object that points back at this repo and this commit
+  // so that other projects can report their test success as GitHub commit status check
+  let status = null
+  const commit = commitInfo && commitInfo.sha
+
+  if (commit && is.commitId(commit)) {
+    // commit is full 40 character hex string
+    const platform = os.platform()
+    const arch = os.arch()
+
+    status = {
+      owner: 'cypress-io',
+      repo: 'cypress',
+      sha: commit,
+      platform,
+      arch,
+      context: `[${platform}-${arch}] ${projectRepoName}`,
+    }
+  }
+
+  const commitMessageInstructions = getInstallJson({
+    packages: npm,
+    env,
+    platform,
+    arch,
+    branch: shortNpmVersion, // use as version as branch name on test projects
+    commit,
+    status,
+  })
+  const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
+  const footer =
+    'Use tool `@cypress/commit-message-install` to install from above block'
+  let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
+
+  if (process.env.CIRCLE_BUILD_URL) {
+    message += '\n'
+    message += stripIndent`
+      CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
+    `
+  }
+
+  if (process.env.APPVEYOR) {
+    const account = process.env.APPVEYOR_ACCOUNT_NAME
+    const slug = process.env.APPVEYOR_PROJECT_SLUG
+    const build = process.env.APPVEYOR_BUILD_NUMBER
+
+    message += '\n'
+    message += stripIndent`
+      AppVeyor: ${account}/${slug} ${build}
+    `
+  }
+
+  console.log('commit message:')
+  console.log(message)
+
+  return {
+    status,
+    message,
+  }
 }
-
-if (process.env.APPVEYOR) {
-  const account = process.env.APPVEYOR_ACCOUNT_NAME
-  const slug = process.env.APPVEYOR_PROJECT_SLUG
-  const build = process.env.APPVEYOR_BUILD_NUMBER
-
-  message += '\n'
-  message += stripIndent`
-    AppVeyor: ${account}/${slug} ${build}
-  `
-}
-
-console.log('commit message')
-console.log(message)
 
 const onError = (e) => {
   console.error('could not bump test projects')
@@ -126,5 +141,10 @@ const onError = (e) => {
 }
 
 bump
-.runTestProjects(message, cliOptions.provider, shortNpmVersion)
+.runTestProjects(
+  getStatusAndMessage,
+  cliOptions.provider,
+  shortNpmVersion,
+  platform
+)
 .catch(onError)

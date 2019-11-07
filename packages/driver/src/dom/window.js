@@ -1,6 +1,10 @@
 const $jquery = require('./jquery')
 const $document = require('./document')
 
+/**
+ * @param {HTMLElement} el
+ * @returns {Window}
+ */
 const getWindowByElement = function (el) {
   if (isWindow(el)) {
     return el

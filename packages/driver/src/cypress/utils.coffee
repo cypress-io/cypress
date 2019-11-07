@@ -1,5 +1,6 @@
 $ = require("jquery")
 _ = require("lodash")
+methods = require("methods")
 moment = require("moment")
 Promise = require("bluebird")
 
@@ -21,6 +22,30 @@ defaultOptions = {
   waitForAnimations: true
   animationDistanceThreshold: 5
 }
+
+USER_FRIENDLY_TYPE_DETECTORS = _.map([
+  [_.isUndefined, "undefined"]
+  [_.isNull, "null"]
+  [_.isBoolean, "boolean"]
+  [_.isNumber, "number"]
+  [_.isString, "string"]
+  [_.isRegExp, "regexp"]
+  [_.isSymbol, "symbol"]
+  [_.isElement, "element"]
+  [_.isError, "error"]
+  [_.isSet, "set"]
+  [_.isWeakSet, "set"]
+  [_.isMap, "map"]
+  [_.isWeakMap, "map"]
+  [_.isFunction, "function"]
+  [_.isArrayLikeObject, "array"]
+  [_.isBuffer, "buffer"]
+  [_.isDate, "date"]
+  [_.isObject, "object"]
+  [_.stubTrue, "unknown"]
+], ([ fn, type]) ->
+  return [fn, _.constant(type)]
+)
 
 module.exports = {
   warning: (msg) ->
@@ -94,6 +119,7 @@ module.exports = {
       err = @cypressErr(err)
 
     onFail = options.onFail
+    errProps = options.errProps
     ## assume onFail is a command if
     ## onFail is present and isnt a function
     if onFail and not _.isFunction(onFail)
@@ -105,6 +131,7 @@ module.exports = {
         command.error(err)
 
     err.onFail = onFail if onFail
+    if errProps then _.extend(err, errProps)
 
     throw err
 
@@ -115,6 +142,11 @@ module.exports = {
       err = @internalErr e
 
     @throwErr(err, options)
+
+  warnByPath: (errPath, options = {}) ->
+    err = @errMessageByPath errPath, options.args
+
+    @warning(err)
 
   internalErr: (err) ->
     err = new Error(err)
@@ -220,6 +252,9 @@ module.exports = {
       else
         "" + value
 
+  ## give us some user-friendly "types"
+  stringifyFriendlyTypeof: _.cond(USER_FRIENDLY_TYPE_DETECTORS)
+
   stringify: (values) ->
     ## if we already have an array
     ## then nest it again so that
@@ -289,6 +324,9 @@ module.exports = {
       args.length is 3 and
         _.every(args, _.isFunction)
 
+  isValidHttpMethod: (str) ->
+    _.isString(str) and _.includes(methods, str.toLowerCase())
+
   addTwentyYears: ->
     moment().add(20, "years").unix()
 
@@ -332,4 +370,20 @@ module.exports = {
           values
 
     run(0)
+
+  memoize: (func, cacheInstance = new Map()) ->
+    memoized = (args...) ->
+      key = args[0]
+      cache = memoized.cache
+
+      return cache.get(key) if cache.has(key)
+
+      result = func.apply(this, args)
+      memoized.cache = cache.set(key, result) || cache
+
+      return result
+
+    memoized.cache = cacheInstance
+
+    return memoized
 }

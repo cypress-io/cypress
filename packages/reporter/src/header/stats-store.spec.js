@@ -103,6 +103,7 @@ describe('stats store', () => {
         numFailed: 2,
         numPending: 3,
       })
+
       instance.reset()
       expect(instance.numPassed).to.equal(0)
       expect(instance.numFailed).to.equal(0)

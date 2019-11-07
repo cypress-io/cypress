@@ -13,10 +13,9 @@ xhrs        = require("./controllers/xhrs")
 client      = require("./controllers/client")
 files       = require("./controllers/files")
 proxy       = require("./controllers/proxy")
-driver      = require("./controllers/driver")
 staticCtrl  = require("./controllers/static")
 
-module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
+module.exports = (app, config, request, getRemoteState, getDeferredResponse, project, nodeProxy) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
@@ -34,9 +33,6 @@ module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
   app.get "/__cypress/runner/*", (req, res) ->
     runner.handle(req, res)
 
-  app.get "/__cypress/driver/*", (req, res) ->
-    driver.handle(req, res)
-
   app.get "/__cypress/static/*", (req, res) ->
     staticCtrl.handle(req, res)
 
@@ -49,7 +45,7 @@ module.exports = (app, config, request, getRemoteState, project, nodeProxy) ->
     files.handleIframe(req, res, config, getRemoteState)
 
   app.all "/__cypress/xhrs/*", (req, res, next) ->
-    xhrs.handle(req, res, config, next)
+    xhrs.handle(req, res, getDeferredResponse, config, next)
 
   app.get "/__root/*", (req, res, next) ->
     file = path.join(config.projectRoot, req.params[0])

@@ -1,54 +1,92 @@
-import { detectBrowserLinux } from './linux'
-import { detectBrowserDarwin } from './darwin'
-import { detectBrowserWindows } from './windows'
-import { log } from './log'
-import { Browser, NotInstalledError } from './types'
-import { browsers } from './browsers'
-import * as Bluebird from 'bluebird'
-import { merge, pick, tap, uniqBy, prop } from 'ramda'
-import * as _ from 'lodash'
+import Bluebird from 'bluebird'
+import { compact, extend, find } from 'lodash'
 import * as os from 'os'
+import { flatten, merge, pick, props, tap, uniqBy } from 'ramda'
+import { browsers } from './browsers'
+import * as darwinHelper from './darwin'
+import { notDetectedAtPathErr } from './errors'
+import * as linuxHelper from './linux'
+import { log } from './log'
+import {
+  Browser,
+  FoundBrowser,
+  NotDetectedAtPathError,
+  NotInstalledError,
+} from './types'
+import * as windowsHelper from './windows'
 
-const setMajorVersion = (obj: Browser) => {
-  if (obj.version) {
-    obj.majorVersion = obj.version.split('.')[0]
+const setMajorVersion = (browser: FoundBrowser) => {
+  if (browser.version) {
+    browser.majorVersion = browser.version.split('.')[0]
     log(
       'browser %s version %s major version %s',
-      obj.name,
-      obj.version,
-      obj.majorVersion
+      browser.name,
+      browser.version,
+      browser.majorVersion
     )
   }
-  return obj
+
+  return browser
 }
 
-type BrowserDetector = (browser: Browser) => Promise<Object>
-type Detectors = {
-  [index: string]: BrowserDetector
-}
-const detectors: Detectors = {
-  darwin: detectBrowserDarwin,
-  linux: detectBrowserLinux,
-  win32: detectBrowserWindows
+type PlatformHelper = {
+  detect: (browser: Browser) => Promise<FoundBrowser>
+  getVersionString: (path: string) => Promise<string>
 }
 
-function lookup(platform: NodeJS.Platform, obj: Browser): Promise<Object> {
-  log('looking up %s on %s platform', obj.name, platform)
-  const detector = detectors[platform]
-  if (!detector) {
-    throw new Error(`Cannot lookup browser ${obj.name} on ${platform}`)
+type Helpers = {
+  [index: string]: PlatformHelper
+}
+
+const helpers: Helpers = {
+  darwin: darwinHelper,
+  linux: linuxHelper,
+  win32: windowsHelper,
+}
+
+function getHelper (platform?: NodeJS.Platform): PlatformHelper {
+  return helpers[platform || os.platform()]
+}
+
+function lookup (
+  platform: NodeJS.Platform,
+  browser: Browser
+): Promise<FoundBrowser> {
+  log('looking up %s on %s platform', browser.name, platform)
+  const helper = getHelper(platform)
+
+  if (!helper) {
+    throw new Error(`Cannot lookup browser ${browser.name} on ${platform}`)
   }
-  return detector(obj)
+
+  return helper.detect(browser)
 }
 
-function checkOneBrowser(browser: Browser) {
+/**
+ * Try to detect a single browser definition, which may dispatch multiple `checkOneBrowser` calls,
+ * one for each binary. If Windows is detected, only one `checkOneBrowser` will be called, because
+ * we don't use the `binary` field on Windows.
+ */
+function checkBrowser (browser: Browser): Bluebird<(boolean | FoundBrowser)[]> {
+  if (Array.isArray(browser.binary) && os.platform() !== 'win32') {
+    return Bluebird.map(browser.binary, (binary: string) => {
+      return checkOneBrowser(extend({}, browser, { binary }))
+    })
+  }
+
+  return Bluebird.map([browser], checkOneBrowser)
+}
+
+function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   const platform = os.platform()
   const pickBrowserProps = pick([
     'name',
+    'family',
     'displayName',
     'type',
     'version',
-    'path'
+    'path',
+    'custom',
   ])
 
   const logBrowser = (props: any) => {
@@ -58,29 +96,81 @@ function checkOneBrowser(browser: Browser) {
   const failed = (err: NotInstalledError) => {
     if (err.notInstalled) {
       log('browser %s not installed', browser.name)
+
       return false
     }
+
     throw err
   }
 
   log('checking one browser %s', browser.name)
+
   return lookup(platform, browser)
-    .then(merge(browser))
-    .then(pickBrowserProps)
-    .then(tap(logBrowser))
-    .then(setMajorVersion)
-    .catch(failed)
+  .then(merge(browser))
+  .then(pickBrowserProps)
+  .then(tap(logBrowser))
+  .then(setMajorVersion)
+  .catch(failed)
 }
 
 /** returns list of detected browsers */
-function detectBrowsers(): Bluebird<Browser[]> {
+export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   // we can detect same browser under different aliases
-  // tell them apart by the full version property
-  // @ts-ignore
-  const removeDuplicates = uniqBy(prop('version'))
-  return Bluebird.mapSeries(browsers, checkOneBrowser)
-    .then(_.compact)
-    .then(removeDuplicates) as Bluebird<Browser[]>
+  // tell them apart by the name and the version property
+  if (!goalBrowsers) {
+    goalBrowsers = browsers
+  }
+
+  const removeDuplicates = uniqBy((browser: FoundBrowser) => {
+    return props(['name', 'version'], browser)
+  })
+  const compactFalse = (browsers: any[]) => compact(browsers) as FoundBrowser[]
+
+  return Bluebird.mapSeries(goalBrowsers, checkBrowser)
+  .then(flatten)
+  .then(compactFalse)
+  .then(removeDuplicates)
 }
 
-export default detectBrowsers
+export const detectByPath = (
+  path: string,
+  goalBrowsers?: Browser[]
+): Promise<FoundBrowser> => {
+  if (!goalBrowsers) {
+    goalBrowsers = browsers
+  }
+
+  const helper = getHelper()
+
+  const detectBrowserByVersionString = (stdout: string): FoundBrowser => {
+    const browser = find(goalBrowsers, (goalBrowser: Browser) => {
+      return goalBrowser.versionRegex.test(stdout)
+    })
+
+    if (!browser) {
+      throw notDetectedAtPathErr(stdout)
+    }
+
+    const regexExec = browser.versionRegex.exec(stdout) as Array<string>
+
+    return extend({}, browser, {
+      displayName: `Custom ${browser.displayName}`,
+      info: `Loaded from ${path}`,
+      custom: true,
+      path,
+      version: regexExec[1],
+      majorVersion: regexExec[1].split('.', 2)[0],
+    })
+  }
+
+  return helper
+  .getVersionString(path)
+  .then(detectBrowserByVersionString)
+  .catch((err: NotDetectedAtPathError) => {
+    if (err.notDetectedAtPath) {
+      throw err
+    }
+
+    throw notDetectedAtPathErr(err.message)
+  })
+}

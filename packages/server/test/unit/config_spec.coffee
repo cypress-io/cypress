@@ -4,7 +4,9 @@ _        = require("lodash")
 path     = require("path")
 R        = require("ramda")
 config   = require("#{root}lib/config")
+errors   = require("#{root}lib/errors")
 configUtil = require("#{root}lib/util/config")
+findSystemNode = require("#{root}lib/util/find_system_node")
 scaffold = require("#{root}lib/scaffold")
 settings = require("#{root}lib/util/settings")
 
@@ -16,6 +18,27 @@ describe "lib/config", ->
 
   afterEach ->
     process.env = @env
+
+  context "environment name check", ->
+    it "throws an error for unknown CYPRESS_ENV", ->
+      sinon.stub(errors, "throw").withArgs("INVALID_CYPRESS_ENV", "foo-bar")
+      process.env.CYPRESS_ENV = "foo-bar"
+      cfg = {
+        projectRoot: "/foo/bar/"
+      }
+      options = {}
+      config.mergeDefaults(cfg, options)
+      expect(errors.throw).have.been.calledOnce
+
+    it "allows known CYPRESS_ENV", ->
+      sinon.stub(errors, "throw")
+      process.env.CYPRESS_ENV = "test"
+      cfg = {
+        projectRoot: "/foo/bar/"
+      }
+      options = {}
+      config.mergeDefaults(cfg, options)
+      expect(errors.throw).not.to.be.called
 
   context ".get", ->
     beforeEach ->
@@ -92,7 +115,7 @@ describe "lib/config", ->
         it "fails if not a number", ->
           @setup({animationDistanceThreshold: {foo: "bar"}})
           @expectValidationFails("be a number")
-          @expectValidationFails("the value was: {\"foo\":\"bar\"}")
+          @expectValidationFails("the value was: \`{\"foo\":\"bar\"}\`")
 
       context "baseUrl", ->
         it "passes if begins with http://", ->
@@ -119,7 +142,7 @@ describe "lib/config", ->
         it "fails if not a boolean", ->
           @setup({chromeWebSecurity: 42})
           @expectValidationFails("be a boolean")
-          @expectValidationFails("the value was: 42")
+          @expectValidationFails("the value was: `42`")
 
       context "modifyObstructiveCode", ->
         it "passes if a boolean", ->
@@ -129,7 +152,7 @@ describe "lib/config", ->
         it "fails if not a boolean", ->
           @setup({modifyObstructiveCode: 42})
           @expectValidationFails("be a boolean")
-          @expectValidationFails("the value was: 42")
+          @expectValidationFails("the value was: `42`")
 
       context "defaultCommandTimeout", ->
         it "passes if a number", ->
@@ -139,7 +162,7 @@ describe "lib/config", ->
         it "fails if not a number", ->
           @setup({defaultCommandTimeout: "foo"})
           @expectValidationFails("be a number")
-          @expectValidationFails("the value was: \"foo\"")
+          @expectValidationFails("the value was: `\"foo\"`")
 
       context "env", ->
         it "passes if an object", ->
@@ -176,7 +199,7 @@ describe "lib/config", ->
         it "fails if not a string", ->
           @setup({fileServerFolder: true})
           @expectValidationFails("be a string")
-          @expectValidationFails("the value was: true")
+          @expectValidationFails("the value was: `true`")
 
       context "fixturesFolder", ->
         it "passes if a string", ->
@@ -202,12 +225,12 @@ describe "lib/config", ->
 
         it "fails if not a string or array", ->
           @setup({ignoreTestFiles: 5})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
 
         it "fails if not an array of strings", ->
           @setup({ignoreTestFiles: [5]})
-          @expectValidationFails("be a string or an array of string")
-          @expectValidationFails("the value was: [5]")
+          @expectValidationFails("be a string or an array of strings")
+          @expectValidationFails("the value was: `[5]`")
 
       context "integrationFolder", ->
         it "passes if a string", ->
@@ -299,9 +322,18 @@ describe "lib/config", ->
           @setup({testFiles: "**/*.coffee"})
           @expectValidationPasses()
 
-        it "fails if not a string", ->
+        it "passes if an array of strings", ->
+          @setup({testFiles: ["**/*.coffee", "**/*.jsx"]})
+          @expectValidationPasses()
+
+        it "fails if not a string or array", ->
           @setup({testFiles: 42})
-          @expectValidationFails("be a string")
+          @expectValidationFails("be a string or an array of strings")
+
+        it "fails if not an array of strings", ->
+          @setup({testFiles: [5]})
+          @expectValidationFails("be a string or an array of strings")
+          @expectValidationFails("the value was: `[5]`")
 
       context "supportFile", ->
         it "passes if a string", ->
@@ -412,12 +444,12 @@ describe "lib/config", ->
 
         it "fails if not a string or array", ->
           @setup({blacklistHosts: 5})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
 
         it "fails if not an array of strings", ->
           @setup({blacklistHosts: [5]})
-          @expectValidationFails("be a string or an array of string")
-          @expectValidationFails("the value was: [5]")
+          @expectValidationFails("be a string or an array of strings")
+          @expectValidationFails("the value was: `[5]`")
 
   context ".getConfigKeys", ->
     beforeEach ->
@@ -497,6 +529,9 @@ describe "lib/config", ->
     it "port=null", ->
       @defaults "port", null
 
+    it "projectId=null", ->
+      @defaults("projectId", null)
+
     it "autoOpen=false", ->
       @defaults "autoOpen", false
 
@@ -509,9 +544,34 @@ describe "lib/config", ->
     it "namespace=__cypress", ->
       @defaults "namespace", "__cypress"
 
+    it "baseUrl=http://localhost:8000/app/", ->
+      @defaults "baseUrl", "http://localhost:8000/app/", {
+        baseUrl: "http://localhost:8000/app///"
+      }
+
+    it "baseUrl=http://localhost:8000/app/", ->
+      @defaults "baseUrl", "http://localhost:8000/app/", {
+        baseUrl: "http://localhost:8000/app//"
+      }
+
     it "baseUrl=http://localhost:8000/app", ->
       @defaults "baseUrl", "http://localhost:8000/app", {
-        baseUrl: "http://localhost:8000/app//"
+        baseUrl: "http://localhost:8000/app"
+      }
+
+    it "baseUrl=http://localhost:8000/", ->
+      @defaults "baseUrl", "http://localhost:8000/", {
+        baseUrl: "http://localhost:8000//"
+      }
+
+    it "baseUrl=http://localhost:8000/", ->
+      @defaults "baseUrl", "http://localhost:8000/", {
+        baseUrl: "http://localhost:8000/"
+      }
+
+    it "baseUrl=http://localhost:8000", ->
+      @defaults "baseUrl", "http://localhost:8000", {
+        baseUrl: "http://localhost:8000"
       }
 
     it "javascripts=[]", ->
@@ -702,6 +762,7 @@ describe "lib/config", ->
         .then (cfg) ->
           expect(cfg.resolved).to.deep.eq({
             env:                        { }
+            projectId:                  { value: null, from: "default" },
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
@@ -732,13 +793,20 @@ describe "lib/config", ->
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
+            ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            testFiles:                  { value: "**/*.*", from: "default" }
+            testFiles:                  { value: "**/*.*", from: "default" },
+            nodeVersion:                { value: "default", from: "default" },
           })
 
       it "sets config, envFile and env", ->
-        sinon.stub(config, "getProcessEnvVars").returns({quux: "quux"})
+        sinon.stub(config, "getProcessEnvVars").returns({
+          quux: "quux"
+          RECORD_KEY: "foobarbazquux",
+          CI_KEY: "justanothercikey",
+          PROJECT_ID: "projectId123"
+        })
 
         obj = {
           projectRoot: "/foo/bar"
@@ -761,6 +829,7 @@ describe "lib/config", ->
         config.mergeDefaults(obj, options)
         .then (cfg) ->
           expect(cfg.resolved).to.deep.eq({
+            projectId:                  { value: "projectId123", from: "env" },
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
@@ -791,9 +860,11 @@ describe "lib/config", ->
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
+            ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            testFiles:                  { value: "**/*.*", from: "default" }
+            testFiles:                  { value: "**/*.*", from: "default" },
+            nodeVersion:                { value: "default", from: "default" },
             env: {
               foo: {
                 value: "foo"
@@ -811,6 +882,14 @@ describe "lib/config", ->
                 value: "quux"
                 from: "env"
               }
+              RECORD_KEY: {
+                value: "fooba...zquux",
+                from: "env"
+              }
+              CI_KEY: {
+                value: "justa...cikey",
+                from: "env"
+              }
             }
           })
 
@@ -824,6 +903,7 @@ describe "lib/config", ->
       cfg = {
         foo: "bar"
         baz: "quux"
+        quux: "foo"
         lol: 1234
         env: {
           a: "a"
@@ -832,6 +912,7 @@ describe "lib/config", ->
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "quux", from: "cli" }
+          quux: { value: "foo", from: "default" }
           lol: { value: 1234,  from: "env" }
           env: {
             a: { value: "a", from: "config" }
@@ -842,6 +923,7 @@ describe "lib/config", ->
 
       overrides = {
         baz: "baz"
+        quux: ["bar", "quux"]
         env: {
           b: "bb"
           c: "c"
@@ -852,6 +934,7 @@ describe "lib/config", ->
         foo: "bar"
         baz: "baz"
         lol: 1234
+        quux: ["bar", "quux"]
         env: {
           a: "a"
           b: "bb"
@@ -860,6 +943,7 @@ describe "lib/config", ->
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "baz", from: "plugin" }
+          quux: { value: ["bar", "quux"], from: "plugin" }
           lol: { value: 1234,  from: "env" }
           env: {
             a: { value: "a", from: "config" }
@@ -871,7 +955,10 @@ describe "lib/config", ->
 
   context ".parseEnv", ->
     it "merges together env from config, env from file, env from process, and env from CLI", ->
-      sinon.stub(config, "getProcessEnvVars").returns({version: "0.12.1", user: "bob"})
+      sinon.stub(config, "getProcessEnvVars").returns({
+        version: "0.12.1",
+        user: "bob",
+      })
 
       obj = {
         env: {
@@ -904,7 +991,6 @@ describe "lib/config", ->
 
   context ".getProcessEnvVars", ->
     ["cypress_", "CYPRESS_"].forEach (key) ->
-
       it "reduces key: #{key}", ->
         obj = {
           cypress_host: "http://localhost:8888"
@@ -919,14 +1005,18 @@ describe "lib/config", ->
           version: "0.12.0"
         })
 
-    it "does not merge CYPRESS_ENV", ->
+    it "does not merge reserved environment variables", ->
       obj = {
         CYPRESS_ENV: "production"
         CYPRESS_FOO: "bar"
+        CYPRESS_CRASH_REPORTS: "0"
+        CYPRESS_PROJECT_ID: "abc123"
       }
 
       expect(config.getProcessEnvVars(obj)).to.deep.eq({
         FOO: "bar"
+        PROJECT_ID: "abc123"
+        CRASH_REPORTS: 0
       })
 
   context ".setUrls", ->
@@ -1162,6 +1252,57 @@ describe "lib/config", ->
         expected[folder] = "/_test-output/path/to/project/foo/bar"
 
         expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)
+
+  context ".setNodeBinary", ->
+    beforeEach ->
+      @findSystemNode = sinon.stub(findSystemNode, "findNodePathAndVersion")
+      @nodeVersion = process.versions.node
+
+    it "sets current Node ver if nodeVersion != system", ->
+      config.setNodeBinary({
+        nodeVersion: undefined
+      })
+      .then (obj) =>
+        expect(@findSystemNode).to.not.be.called
+        expect(obj).to.deep.eq({
+          nodeVersion: undefined,
+          resolvedNodeVersion: @nodeVersion
+        })
+
+    it "sets found Node ver if nodeVersion = system and findNodePathAndVersion resolves", ->
+      @findSystemNode.resolves({
+        path: '/foo/bar/node',
+        version: '1.2.3'
+      })
+
+      config.setNodeBinary({
+        nodeVersion: "system"
+      })
+      .then (obj) =>
+        expect(@findSystemNode).to.be.calledOnce
+        expect(obj).to.deep.eq({
+          nodeVersion: "system",
+          resolvedNodeVersion: "1.2.3",
+          resolvedNodePath: "/foo/bar/node"
+        })
+
+    it "sets current Node ver and warns if nodeVersion = system and findNodePathAndVersion rejects", ->
+      err = new Error()
+      onWarning = sinon.stub()
+
+      @findSystemNode.rejects(err)
+
+      config.setNodeBinary({
+        nodeVersion: "system"
+      }, onWarning)
+      .then (obj) =>
+        expect(@findSystemNode).to.be.calledOnce
+        expect(onWarning).to.be.calledOnce
+        expect(obj).to.deep.eq({
+          nodeVersion: "system",
+          resolvedNodeVersion: @nodeVersion,
+        })
+        expect(obj.resolvedNodePath).to.be.undefined
 
 describe "lib/util/config", ->
 

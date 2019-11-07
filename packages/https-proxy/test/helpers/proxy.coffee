@@ -1,3 +1,4 @@
+{ allowDestroy } = require("@packages/network")
 http       = require("http")
 path       = require("path")
 httpsProxy = require("../../lib/proxy")
@@ -15,7 +16,7 @@ pipe = (req, res) ->
 onConnect = (req, socket, head, proxy) ->
   proxy.connect(req, socket, head, {
     onDirectConnection: (req, socket, head) ->
-      req.url is "localhost:8444"
+      ["localhost:8444", "localhost:12344"].includes(req.url)
   })
 
 onRequest = (req, res) ->
@@ -27,6 +28,8 @@ module.exports = {
 
   start: (port) ->
     prx = http.createServer()
+
+    allowDestroy(prx)
 
     dir = path.join(process.cwd(), "ca")
 
@@ -61,7 +64,7 @@ module.exports = {
 
   stop: ->
     new Promise (resolve) ->
-      prx.close(resolve)
+      prx.destroy(resolve)
     .then ->
       prx.proxy.close()
 }

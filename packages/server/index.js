@@ -1,10 +1,10 @@
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
-// if we are running in electron
-// we must hack around busted timers
-if (process.versions.electron) {
-  require('./timers/parent').fix()
+if (process.env.CY_NET_PROFILE && process.env.CYPRESS_ENV) {
+  const netProfiler = require('./lib/util/net_profiler')()
+
+  process.stdout.write(`Network profiler writing to ${netProfiler.logPath}\n`)
 }
 
 process.env.UV_THREADPOOL_SIZE = 128
@@ -17,5 +17,11 @@ require('@packages/coffee/register')
 
 require && require.extensions && delete require.extensions['.litcoffee']
 require && require.extensions && delete require.extensions['.coffee.md']
+
+// warn when deprecated callback apis are used in electron
+// https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
+process.enablePromiseAPIs = process.env.CYPRESS_ENV !== 'production'
+
+require('./lib/util/suppress_unauthorized_warning').suppress()
 
 module.exports = require('./lib/cypress').start(process.argv)

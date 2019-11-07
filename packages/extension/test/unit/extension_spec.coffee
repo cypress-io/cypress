@@ -1,13 +1,16 @@
 require("../spec_helper")
 
+exec      = require("child_process").exec
 fs        = require("fs-extra")
+EE        = require("events")
+eol       = require("eol")
 path      = require("path")
 Promise   = require("bluebird")
-eol       = require("eol")
 extension = require("../../index")
-cwd       = process.cwd()
 
+cwd = process.cwd()
 fs = Promise.promisifyAll(fs)
+exec = Promise.promisify(exec)
 
 describe "Extension", ->
   context ".getCookieUrl", ->
@@ -45,7 +48,7 @@ describe "Extension", ->
     beforeEach ->
       @src = path.join(cwd, "test", "helpers", "background.js")
 
-      @sandbox.stub(extension, "getPathToExtension")
+      sinon.stub(extension, "getPathToExtension")
       .withArgs("background.js").returns(@src)
 
     it "rewrites the background.js source", ->
@@ -87,3 +90,12 @@ describe "Extension", ->
           fs.readFileAsync(@src, "utf8")
         .then (str2) ->
           expect(str).to.eq(str2)
+
+  context "manifest", ->
+    it "has a key that resolves to the static extension ID", ->
+      fs.readJsonAsync(path.join(cwd, "app/manifest.json"))
+      .then (manifest) ->
+        cmd = "echo \"#{manifest.key}\" | openssl base64 -d -A | shasum -a 256 | head -c32 | tr 0-9a-f a-p"
+        exec(cmd)
+        .then (stdout) ->
+          expect(stdout).to.eq("caljajdfkjjjdehjdoimjkkakekklcck")

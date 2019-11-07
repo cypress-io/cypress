@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+chokidar = require("chokidar")
 browsers = require("#{root}lib/browsers")
 Project = require("#{root}lib/project")
 openProject = require("#{root}lib/open_project")
@@ -11,13 +12,18 @@ describe "lib/open_project", ->
       reset: sinon.stub()
       use: sinon.stub()
     }
+    @config = {
+      integrationFolder: "/user/foo/cypress/integration"
+      testFiles: "**/*.*"
+      ignoreTestFiles: "**/*.nope"
+    }
 
     sinon.stub(browsers, "get").resolves()
     sinon.stub(browsers, "open")
-    sinon.stub(Project.prototype, "open")
+    sinon.stub(Project.prototype, "open").resolves()
     sinon.stub(Project.prototype, "reset").resolves()
     sinon.stub(Project.prototype, "getSpecUrl").resolves()
-    sinon.stub(Project.prototype, "getConfig").resolves({})
+    sinon.stub(Project.prototype, "getConfig").resolves(@config)
     sinon.stub(Project.prototype, "getAutomation").returns(@automation)
     sinon.stub(preprocessor, "removeFile")
 
@@ -64,3 +70,39 @@ describe "lib/open_project", ->
       .then =>
         expect(@browser.isHeaded).to.be.true
         expect(@browser.isHeadless).to.be.false
+
+  context "#getSpecChanges", ->
+    beforeEach ->
+      @watcherStub = {
+        on: sinon.stub()
+      }
+      sinon.stub(chokidar, "watch").returns(@watcherStub)
+
+    it "watches spec files", ->
+      openProject.getSpecChanges({}).then =>
+        expect(chokidar.watch).to.be.calledWith(@config.testFiles, {
+          cwd: @config.integrationFolder
+          ignored: @config.ignoreTestFiles
+          ignoreInitial: true
+        })
+
+    it "calls onChange callback when file is added", ->
+      onChange = sinon.spy()
+      @watcherStub.on.withArgs("add").yields()
+      openProject.getSpecChanges({ onChange }).then =>
+        expect(onChange).to.be.called
+
+    it "calls onChange callback when file is removed", ->
+      onChange = sinon.spy()
+      @watcherStub.on.withArgs("unlink").yields()
+      openProject.getSpecChanges({ onChange }).then =>
+        expect(onChange).to.be.called
+
+    it "only calls onChange once if there are multiple changes in a row", ->
+      onChange = sinon.spy()
+      @watcherStub.on.withArgs("unlink").yields()
+      @watcherStub.on.withArgs("add").yields()
+      @watcherStub.on.withArgs("unlink").yields()
+      @watcherStub.on.withArgs("add").yields()
+      openProject.getSpecChanges({ onChange }).then =>
+        expect(onChange).to.be.calledOnce

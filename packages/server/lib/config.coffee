@@ -4,16 +4,26 @@ Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
+findSystemNode = require("./util/find_system_node")
 fs       = require("./util/fs")
+keys     = require("./util/keys")
 origin   = require("./util/origin")
 coerce   = require("./util/coerce")
 settings = require("./util/settings")
 v        = require("./util/validation")
-debug      = require("debug")("cypress:server:config")
+debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 
-## cypress followed by _
-cypressEnvRe = /^(cypress_)/i
+CYPRESS_ENV_PREFIX = "CYPRESS_"
+CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
+CYPRESS_RESERVED_ENV_VARS = [
+  "CYPRESS_ENV"
+]
+CYPRESS_SPECIAL_ENV_VARS = [
+  "CI_KEY"
+  "RECORD_KEY"
+]
+
 dashesOrUnderscoresRe = /^(_-)+/
 oneOrMoreSpacesRe = /\s+/
 everythingAfterFirstEqualRe = /=(.+)/
@@ -22,7 +32,14 @@ toWords = (str) ->
   str.trim().split(oneOrMoreSpacesRe)
 
 isCypressEnvLike = (key) ->
-  cypressEnvRe.test(key) and key isnt "CYPRESS_ENV"
+  _.chain(key)
+  .invoke('toUpperCase')
+  .startsWith(CYPRESS_ENV_PREFIX)
+  .value() and
+    not _.includes(CYPRESS_RESERVED_ENV_VARS, key)
+
+removeEnvPrefix = (key) ->
+  key.slice(CYPRESS_ENV_PREFIX_LENGTH)
 
 folders = toWords """
   fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
@@ -33,25 +50,28 @@ folders = toWords """
 configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
+  blacklistHosts
   chromeWebSecurity
   modifyObstructiveCode           integrationFolder
   env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
   port                            supportFolder
-  reporter                        videosFolder
+  projectId                       videosFolder
+  reporter
   reporterOptions
+  ignoreTestFiles
   testFiles                       defaultCommandTimeout
   trashAssetsBeforeRuns           execTimeout
-  blacklistHosts                  pageLoadTimeout
-  userAgent                       requestTimeout
-  viewportWidth                   responseTimeout
-  viewportHeight                  taskTimeout
-  video
+  userAgent                       pageLoadTimeout
+  viewportWidth                   requestTimeout
+  viewportHeight                  responseTimeout
+  video                           taskTimeout
   videoCompression
   videoUploadOnPasses
   watchForFileChanges
-  waitForAnimations
+  waitForAnimations               resolvedNodeVersion
+  nodeVersion                     resolvedNodePath
 """
 
 breakingConfigKeys = toWords """
@@ -60,12 +80,13 @@ breakingConfigKeys = toWords """
   trashAssetsBeforeHeadlessRuns
 """
 
-defaults = {
+CONFIG_DEFAULTS = {
   port:                          null
   hosts:                         null
   morgan:                        true
   baseUrl:                       null
   socketId:                      null
+  projectId:                     null
   userAgent:                     null
   isTextTerminal:                false
   reporter:                      "spec"
@@ -93,7 +114,7 @@ defaults = {
   animationDistanceThreshold:    5
   numTestsKeptInMemory:          50
   watchForFileChanges:           true
-  trashAssetsBeforeRuns: true
+  trashAssetsBeforeRuns:         true
   autoOpen:                      false
   viewportWidth:                 1000
   viewportHeight:                660
@@ -104,7 +125,9 @@ defaults = {
   integrationFolder:             "cypress/integration"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
-  pluginsFile:                    "cypress/plugins"
+  pluginsFile:                   "cypress/plugins"
+  nodeVersion:                   "default"
+  configFile:                    "cypress.json"
 
   ## deprecated
   javascripts:                   []
@@ -116,6 +139,7 @@ validationRules = {
   blacklistHosts: v.isStringOrArrayOfStrings
   modifyObstructiveCode: v.isBoolean
   chromeWebSecurity: v.isBoolean
+  configFile: v.isStringOrFalse
   defaultCommandTimeout: v.isNumber
   env: v.isPlainObject
   execTimeout: v.isNumber
@@ -130,7 +154,7 @@ validationRules = {
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
-  testFiles: v.isString
+  testFiles: v.isStringOrArrayOfStrings
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber
   trashAssetsBeforeRuns: v.isBoolean
@@ -143,6 +167,7 @@ validationRules = {
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
+  nodeVersion: v.isOneOf("default", "bundled", "system")
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -169,7 +194,7 @@ validate = (cfg, onErr) ->
     ## does this key have a validation rule?
     if validationFn = validationRules[key]
       ## and is the value different from the default?
-      if value isnt defaults[key]
+      if value isnt CONFIG_DEFAULTS[key]
         result = validationFn(key, value)
         if result isnt true
           onErr(result)
@@ -179,15 +204,26 @@ validateFile = (file) ->
     validate settings, (errMsg) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
+hideSpecialVals = (val, key) ->
+  if _.includes(CYPRESS_SPECIAL_ENV_VARS, key)
+    return keys.hide(val)
+
+  return val
+
 module.exports = {
   getConfigKeys: -> configKeys
+
+  isValidCypressEnvValue: (value) ->
+    # names of config environments, see "config/app.yml"
+    names = ["development", "test", "staging", "production"]
+    _.includes(names, value)
 
   whitelist: (obj = {}) ->
     _.pick(obj, configKeys.concat(breakingConfigKeys))
 
   get: (projectRoot, options = {}) ->
     Promise.all([
-      settings.read(projectRoot).then(validateFile("cypress.json"))
+      settings.read(projectRoot, options).then(validateFile("cypress.json"))
       settings.readEnv(projectRoot).then(validateFile("cypress.env.json"))
     ])
     .spread (settings, envFile) =>
@@ -218,7 +254,7 @@ module.exports = {
   mergeDefaults: (config = {}, options = {}) ->
     resolved = {}
 
-    _.extend config, _.pick(options, "morgan", "isTextTerminal", "socketId", "report", "browsers")
+    _.extend config, _.pick(options, "configFile", "morgan", "isTextTerminal", "socketId", "report", "browsers")
 
     _
     .chain(@whitelist(options))
@@ -230,15 +266,22 @@ module.exports = {
     .value()
 
     if url = config.baseUrl
-      ## always strip trailing slashes
-      config.baseUrl = _.trimEnd(url, "/")
+      ## replace multiple slashes at the end of string to single slash
+      ## so http://localhost/// will be http://localhost/
+      ## https://regexr.com/48rvt
+      config.baseUrl = url.replace(/\/\/+$/, "/")
 
-    _.defaults(config, defaults)
+    _.defaults(config, CONFIG_DEFAULTS)
 
     ## split out our own app wide env from user env variables
     ## and delete envFile
     config.env = @parseEnv(config, options.env, resolved)
+
     config.cypressEnv = process.env["CYPRESS_ENV"]
+    debug("using CYPRESS_ENV %s", config.cypressEnv)
+    if not @isValidCypressEnvValue(config.cypressEnv)
+      errors.throw("INVALID_CYPRESS_ENV", config.cypressEnv)
+
     delete config.envFile
 
     ## when headless
@@ -250,12 +293,12 @@ module.exports = {
       ## to zero
       config.numTestsKeptInMemory = 0
 
-    config = @setResolvedConfigValues(config, defaults, resolved)
+    config = @setResolvedConfigValues(config, CONFIG_DEFAULTS, resolved)
 
     if config.port
       config = @setUrls(config)
 
-    config = @setAbsolutePaths(config, defaults)
+    config = @setAbsolutePaths(config, CONFIG_DEFAULTS)
 
     config = @setParentTestsPaths(config)
 
@@ -270,6 +313,7 @@ module.exports = {
     @setSupportFileAndFolder(config)
     .then(@setPluginsFile)
     .then(@setScaffoldPaths)
+    .then(_.partialRight(@setNodeBinary, options.onWarning))
 
   setResolvedConfigValues: (config, defaults, resolved) ->
     obj = _.clone(config)
@@ -285,7 +329,7 @@ module.exports = {
 
     setResolvedOn = (resolvedObj, obj) ->
       _.each obj, (val, key) ->
-        if _.isObject(val)
+        if _.isObject(val) && !_.isArray(val)
           ## recurse setting overrides
           ## inside of this nested objected
           setResolvedOn(resolvedObj[key], val)
@@ -328,6 +372,21 @@ module.exports = {
           source("default")
     .value()
 
+  # instead of the built-in Node process, specify a path to 3rd party Node
+  setNodeBinary: Promise.method (obj, onWarning) ->
+    if obj.nodeVersion != 'system'
+      obj.resolvedNodeVersion = process.versions.node
+      return obj
+
+    findSystemNode.findNodePathAndVersion()
+    .then ({ path, version }) ->
+      obj.resolvedNodePath = path
+      obj.resolvedNodeVersion = version
+    .catch (err) ->
+      onWarning(errors.get('COULD_NOT_FIND_SYSTEM_NODE', process.versions.node))
+      obj.resolvedNodeVersion = process.versions.node
+    .return(obj)
+
   setScaffoldPaths: (obj) ->
     obj = _.clone(obj)
 
@@ -368,12 +427,12 @@ module.exports = {
         return fs.pathExists(obj.supportFile)
         .then (found) ->
           if not found
-            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile)
+            errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile, obj.configFile || CONFIG_DEFAULTS.configFile)
           debug("switching to found file %s", obj.supportFile)
     .catch({code: "MODULE_NOT_FOUND"}, ->
       debug("support file %s does not exist", sf)
       ## supportFile doesn't exist on disk
-      if sf is path.resolve(obj.projectRoot, defaults.supportFile)
+      if sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
         debug("support file is default, check if #{path.dirname(sf)} exists")
         return fs.pathExists(sf)
         .then (found) ->
@@ -389,7 +448,7 @@ module.exports = {
       else
         debug("support file is not default")
         ## they have it explicitly set, so it should be there
-        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf))
+        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || CONFIG_DEFAULTS.configFile)
     )
     .then ->
       if obj.supportFile
@@ -412,8 +471,9 @@ module.exports = {
   ##   * and the pluginsFile is NOT set to the default
   ##     - throw an error, because it should be there if the user
   ##       explicitly set it
-  setPluginsFile: (obj) ->
-    return Promise.resolve(obj) if not obj.pluginsFile
+  setPluginsFile: Promise.method (obj) ->
+    if not obj.pluginsFile
+      return obj
 
     obj = _.clone(obj)
 
@@ -429,7 +489,7 @@ module.exports = {
       debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
       debug("plugins file does not exist")
-      if pluginsFile is path.resolve(obj.projectRoot, defaults.pluginsFile)
+      if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
         debug("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
         fs.pathExists(pluginsFile)
         .then (found) ->
@@ -487,11 +547,12 @@ module.exports = {
     else
       proxyUrl
 
-    _.extend obj,
+    _.extend(obj, {
       proxyUrl:    proxyUrl
       browserUrl:  rootUrl + obj.clientRoute
       reporterUrl: rootUrl + obj.reporterRoute
       xhrUrl:      obj.namespace + obj.xhrRoute
+    })
 
     return obj
 
@@ -511,13 +572,13 @@ module.exports = {
     envCLI  = envCLI ? {}
 
     matchesConfigKey = (key) ->
-      if _.has(cfg, key)
+      if _.has(CONFIG_DEFAULTS, key)
         return key
 
       key = key.toLowerCase().replace(dashesOrUnderscoresRe, "")
       key = _.camelCase(key)
 
-      if _.has(cfg, key)
+      if _.has(CONFIG_DEFAULTS, key)
         return key
 
     configFromEnv = _.reduce envProc, (memo, val, key) ->
@@ -535,7 +596,10 @@ module.exports = {
       memo
     , []
 
-    envProc = _.omit(envProc, configFromEnv)
+    envProc = _.chain(envProc)
+    .omit(configFromEnv)
+    .mapValues(hideSpecialVals)
+    .value()
 
     resolveFrom("config",  envCfg)
     resolveFrom("envFile", envFile)
@@ -549,12 +613,9 @@ module.exports = {
     _.extend envCfg, envFile, envProc, envCLI
 
   getProcessEnvVars: (obj = {}) ->
-    normalize = (key) ->
-      key.replace(cypressEnvRe, "")
-
     _.reduce obj, (memo, value, key) ->
       if isCypressEnvLike(key)
-        memo[normalize(key)] = coerce(value)
+        memo[removeEnvPrefix(key)] = coerce(value)
       memo
     , {}
 

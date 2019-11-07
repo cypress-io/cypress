@@ -153,7 +153,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         }).then( ->
 
           ## TODO:
-          ## 1. test cancellation
+          ## 1. test cancelation
           ## 2. test passing optionEls to each directly
           ## 3. update other tests using this Promise.each pattern
           ## 4. test that force is always true

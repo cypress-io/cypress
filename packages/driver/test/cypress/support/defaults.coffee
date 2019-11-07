@@ -12,6 +12,9 @@ beforeEach ->
   ## get consistent passes and failures when running
   ## from CI and when running in GUI mode
   Cypress.config("isInteractive", true)
+  ## necessary or else snapshots will not be taken
+  ## and we can't test them
+  Cypress.config("numTestsKeptInMemory", 1)
 
   ## remove all event listeners
   ## from the window

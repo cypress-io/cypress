@@ -3,9 +3,11 @@ strip   = require("strip-ansi")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
-pluralize = require("pluralize")
 
 twoOrMoreNewLinesRe = /\n{2,}/
+
+isProduction = ->
+  process.env["CYPRESS_ENV"] is "production"
 
 listItems = (paths) ->
   _
@@ -24,6 +26,15 @@ displayFlags = (obj, mapper) ->
   .compact()
   .join("\n")
   .value()
+
+displayRetriesRemaining = (tries) ->
+  times = if tries is 1 then 'time' else 'times'
+
+  lastTryNewLine = if tries is 1 then "\n" else ""
+
+  chalk.gray(
+    "We will try connecting to it #{tries} more #{times}...#{lastTryNewLine}"
+  )
 
 warnIfExplicitCiBuildId = (ciBuildId) ->
   if not ciBuildId
@@ -82,14 +93,21 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1}
       """
-    when "BROWSER_NOT_FOUND"
+    when "BROWSER_NOT_FOUND_BY_NAME"
       """
-      Can't run because you've entered an invalid browser.
+      Can't run because you've entered an invalid browser name.
 
       Browser: '#{arg1}' was not found on your system.
 
       Available browsers found are: #{arg2}
       """
+    when "BROWSER_NOT_FOUND_BY_PATH"
+      msg = """
+      We could not identify a known browser at the path you provided: `#{arg1}`
+
+      The output from the command we ran was:
+      """
+      return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
       Warning: Cypress can only record videos when running headlessly.
@@ -120,7 +138,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We encountered an unexpected error talking to our servers.
 
-      We will retry #{arg1.tries} more #{pluralize('time', arg1.tries)} in #{arg1.delay}...
+      We will retry #{arg1.tries} more #{if arg1.tries is 1 then 'time' else 'times'} in #{arg1.delay}...
 
       The server's response was:
 
@@ -156,6 +174,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The server's response was:
 
       #{arg1.response}
+      """
+    when "DASHBOARD_UNKNOWN_CREATE_RUN_WARNING"
+      """
+      Warning from Cypress Dashboard: #{arg1.message}
+
+      Details:
+      #{JSON.stringify(arg1.props, null, 2)}
       """
     when "DASHBOARD_STALE_RUN"
       """
@@ -324,7 +349,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       You passed the --record flag but this project has not been setup to record.
 
-      This project is missing the 'projectId' inside of 'cypress.json'.
+      This project is missing the 'projectId' inside of '#{arg1}'.
 
       We cannot uniquely identify this project without this id.
 
@@ -420,13 +445,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DASHBOARD_RECORD_KEY_NOT_VALID"
       """
-      We failed trying to authenticate this project: #{chalk.blue(arg2)}
-
-      Your Record Key is invalid: #{chalk.yellow(arg1)}
+      Your Record Key #{chalk.yellow(arg1)} is not valid with this project: #{chalk.blue(arg2)}
 
       It may have been recently revoked by you or another user.
 
-      Please log into the Dashboard to see the updated token.
+      Please log into the Dashboard to see the valid record keys.
 
       https://on.cypress.io/dashboard/projects/#{arg2}
       """
@@ -434,7 +457,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We could not find a project with the ID: #{chalk.yellow(arg1)}
 
-      This projectId came from your cypress.json file or an environment variable.
+      This projectId came from your '#{arg2}' file or an environment variable.
 
       Please log into the Dashboard and find your project.
 
@@ -445,7 +468,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       https://on.cypress.io/dashboard
       """
     when "NO_PROJECT_ID"
-      "Can't find 'projectId' in the 'cypress.json' file for this project: " + chalk.blue(arg1)
+      "Can't find 'projectId' in the '#{arg1}' file for this project: " + chalk.blue(arg2)
     when "NO_PROJECT_FOUND_AT_PROJECT_ROOT"
       "Can't find project at the path: " + chalk.blue(arg1)
     when "CANNOT_FETCH_PROJECT_TOKEN"
@@ -453,7 +476,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "CANNOT_CREATE_PROJECT_TOKEN"
       "Can't create project's secret key."
     when "PORT_IN_USE_SHORT"
-      "Port '#{arg1}' is already in use."
+      "Port #{arg1} is already in use."
     when "PORT_IN_USE_LONG"
       """
       Can't run project because port is currently in use: #{chalk.blue(arg1)}
@@ -461,16 +484,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       #{chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")}
       """
     when "ERROR_READING_FILE"
+      filePath = "`#{arg1}`"
+      err = "`#{arg2}`"
       """
-      Error reading from: #{chalk.blue(arg1)}
+      Error reading from: #{chalk.blue(filePath)}
 
-      #{chalk.yellow(arg2)}
+      #{chalk.yellow(err)}
       """
     when "ERROR_WRITING_FILE"
+      filePath = "`#{arg1}`"
+      err = "`#{arg2}`"
       """
-      Error writing to: #{chalk.blue(arg1)}
+      Error writing to: #{chalk.blue(filePath)}
 
-      #{chalk.yellow(arg2)}
+      #{chalk.yellow(err)}
       """
     when "NO_SPECS_FOUND"
       ## no glob provided, searched all specs
@@ -511,58 +538,54 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       https://on.cypress.io/renderer-process-crashed
       """
-    when "NO_CURRENTLY_OPEN_PROJECT"
-      "Can't find open project."
     when "AUTOMATION_SERVER_DISCONNECTED"
       "The automation client disconnected. Cannot continue running tests."
     when "SUPPORT_FILE_NOT_FOUND"
       """
       The support file is missing or invalid.
 
-      Your supportFile is set to '#{arg1}', but either the file is missing or it's invalid. The supportFile must be a .js or .coffee file or, if you're using a preprocessor plugin, it must be supported by that plugin.
+      Your `supportFile` is set to `#{arg1}`, but either the file is missing or it's invalid. The `supportFile` must be a `.js` or `.coffee` file or, if you're using a preprocessor plugin, it must be supported by that plugin.
 
-      Correct your cypress.json, create the appropriate file, or set supportFile to false if a support file is not necessary for your project.
+      Correct your `#{arg2}`, create the appropriate file, or set `supportFile` to `false` if a support file is not necessary for your project.
 
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
     when "PLUGINS_FILE_ERROR"
-      """
+      msg = """
       The plugins file is missing or invalid.
 
-      Your pluginsFile is set to '#{arg1}', but either the file is missing, it contains a syntax error, or threw an error when required. The pluginsFile must be a .js or .coffee file.
+      Your `pluginsFile` is set to `#{arg1}`, but either the file is missing, it contains a syntax error, or threw an error when required. The `pluginsFile` must be a `.js` or `.coffee` file.
 
-      Please fix this, or set 'pluginsFile' to 'false' if a plugins file is not necessary for your project.
-
-      #{if arg2 then "The following error was thrown:" else ""}
-
-      #{if arg2 then chalk.yellow(arg2) else ""}
+      Please fix this, or set `pluginsFile` to `false` if a plugins file is not necessary for your project.
       """.trim()
-    when "PLUGINS_DIDNT_EXPORT_FUNCTION"
-      """
-      The pluginsFile must export a function.
 
-      We loaded the pluginsFile from: #{arg1}
+      if arg2
+        return {msg: msg, details: arg2}
+
+      return msg
+    when "PLUGINS_DIDNT_EXPORT_FUNCTION"
+      msg = """
+      The `pluginsFile` must export a function.
+
+      We loaded the `pluginsFile` from: `#{arg1}`
 
       It exported:
+      """
 
-      #{JSON.stringify(arg2)}
-      """
+      return {msg: msg, details: JSON.stringify(arg2)}
     when "PLUGINS_FUNCTION_ERROR"
-      """
+      msg = """
       The function exported by the plugins file threw an error.
 
-      We invoked the function exported by '#{arg1}', but it threw an error.
-
-      The following error was thrown:
-
-      #{chalk.yellow(arg2)}
+      We invoked the function exported by `#{arg1}`, but it threw an error.
       """.trim()
+
+      return {msg: msg, details: arg2}
     when "PLUGINS_ERROR"
-      """
+      msg = """
       The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
-
-      #{chalk.yellow(arg1)}
       """.trim()
+      return {msg: msg, details: arg1}
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO
@@ -583,8 +606,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       Fix the error in your code and re-run your tests.
       """
     when "SETTINGS_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
       """
-      We found an invalid value in the file: '#{chalk.blue(arg1)}'
+      We found an invalid value in the file: #{chalk.blue(filePath)}
 
       #{chalk.yellow(arg2)}
       """
@@ -596,18 +620,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED"
       """
-      In Cypress v3.0.0 we removed the configuration option: #{chalk.yellow('screenshotOnHeadlessFailure')}
+      In Cypress v3.0.0 we removed the configuration option #{chalk.yellow('\`screenshotOnHeadlessFailure\`')}
 
       You now configure this behavior in your test code.
 
       Example:
 
-        // cypress/support/index.js
-        Cypress.Screenshot.defaults({
-          screenshotOnRunFailure: false
-        })
+      ```
+      // cypress/support/index.js
+      Cypress.Screenshot.defaults({
+        screenshotOnRunFailure: false
+      })
+      ```
 
-      https://on.cypress.io/screenshot-api
+      Learn more at https://on.cypress.io/screenshot-api
       """
     when "RENAMED_CONFIG_OPTION"
       """
@@ -617,20 +643,36 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CANNOT_CONNECT_BASE_URL"
       """
-      Cypress could not verify that the server set as your 'baseUrl' is running:
-
-        > #{chalk.blue(arg1)}
-
-      Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+      Cypress failed to verify that your server is running.
 
       Please start this server and then run Cypress again.
       """
     when "CANNOT_CONNECT_BASE_URL_WARNING"
       """
-      Cypress could not verify that the server set as your 'baseUrl' is running: #{arg1}
+      Cypress could not verify that this server is running:
 
-      Your tests likely make requests to this 'baseUrl' and these tests will fail if you don't boot your server.
+        > #{chalk.blue(arg1)}
+
+      This server has been configured as your `baseUrl`, and tests will likely fail if it is not running.
       """
+    when "CANNOT_CONNECT_BASE_URL_RETRYING"
+      switch arg1.attempt
+        when 1
+          """
+          Cypress could not verify that this server is running:
+
+            > #{chalk.blue(arg1.baseUrl)}
+
+          We are verifying this server because it has been configured as your `baseUrl`.
+
+          Cypress automatically waits until your server is accessible before running tests.
+
+          #{displayRetriesRemaining(arg1.remaining)}
+          """
+        else
+          """
+          #{displayRetriesRemaining(arg1.remaining)}
+          """
     when "INVALID_REPORTER_NAME"
       """
       Could not load reporter by name: #{chalk.yellow(arg1.name)}
@@ -645,11 +687,21 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Learn more at https://on.cypress.io/reporters
       """
-    when "PROJECT_DOES_NOT_EXIST"
+    when "CONFIG_FILE_NOT_FOUND"
       """
-      Could not find any tests to run.
+      Could not find a Cypress configuration file, exiting.
 
-      We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
+      We looked but did not find a #{chalk.blue(arg1)} file in this folder: #{chalk.blue(arg2)}
+      """
+    when "INVOKED_BINARY_OUTSIDE_NPM_MODULE"
+      """
+      It looks like you are running the Cypress binary directly.
+
+      This is not the recommended approach, and Cypress may not work correctly.
+
+      Please install the 'cypress' NPM package and follow the instructions here:
+
+      https://on.cypress.io/installing-cypress
       """
     when "DUPLICATE_TASK_KEY"
       """
@@ -657,7 +709,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
 
       To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
@@ -665,7 +717,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your free plan this month. #{arg1.usedTestsMessage}
 
       Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
@@ -673,7 +725,31 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
       """
-      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedMessage}
+      You've exceeded the limit of private test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
+
+      To upgrade your account, please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
+
+      #{arg1.link}
+      """
+    when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your free plan this month. #{arg1.usedTestsMessage}
+
+      Your plan is now in a grace period, which means your tests will still be recorded until #{arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
+
+      #{arg1.link}
+      """
+    when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+      """
+      You've exceeded the limit of test recordings under your current billing plan this month. #{arg1.usedTestsMessage}
 
       To upgrade your account, please visit your billing to upgrade to another billing plan.
 
@@ -711,18 +787,103 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1.link}
       """
+    when "FIXTURE_NOT_FOUND"
+      """
+      A fixture file could not be found at any of the following paths:
+
+       > #{arg1}
+       > #{arg1}{{extension}}
+
+      Cypress looked for these file extensions at the provided path:
+
+       > #{arg2.join(', ')}
+
+      Provide a path to an existing fixture file.
+      """
+    when "AUTH_COULD_NOT_LAUNCH_BROWSER"
+      """
+      Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
+
+      ```
+      #{arg1}
+      ```
+      """
+    when "AUTH_BROWSER_LAUNCHED"
+      """
+      Check your browser to continue logging in.
+      """
+    when "BAD_POLICY_WARNING"
+      """
+      Cypress detected policy settings on your computer that may cause issues.
+
+      The following policies were detected that may prevent Cypress from automating Chrome:
+
+       > #{arg1.join('\n > ')}
+
+      For more information, see https://on.cypress.io/bad-browser-policy
+      """
+    when "BAD_POLICY_WARNING_TOOLTIP"
+      """
+      Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
+      """
+    when "COULD_NOT_FIND_SYSTEM_NODE"
+      """
+      `nodeVersion` is set to `system`, but Cypress could not find a usable Node executable on your PATH.
+
+      Make sure that your Node executable exists and can be run by the current user.
+
+      Cypress will use the built-in Node version (v#{arg1}) instead.
+      """
+    when "INVALID_CYPRESS_ENV"
+      """
+      We have detected unknown or unsupported CYPRESS_ENV value
+
+        #{chalk.yellow(arg1)}
+
+      Please do not modify CYPRESS_ENV value.
+      """
+    when "CDP_VERSION_TOO_OLD"
+      """
+      A minimum CDP version of v#{arg1} is required, but the current browser has #{if arg2.major != 0 then "v#{arg2.major}.#{arg2.minor}" else 'an older version'}.
+      """
+    when "CDP_COULD_NOT_CONNECT"
+      """
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+
+      This usually indicates there was a problem opening the Chrome browser.
+
+      The CDP port requested was #{chalk.yellow(arg1)}.
+
+      Error details:
+
+      #{arg2.stack}
+      """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
+
+  if _.isObject(msg)
+    details = msg.details
+    msg = msg.msg
+
   msg = trimMultipleNewLines(msg)
+
   err = new Error(msg)
   err.isCypressErr = true
   err.type = type
+  err.details = details
+
   err
 
 warning = (type, arg1, arg2) ->
   err = get(type, arg1, arg2)
   log(err, "magenta")
+
+  return null
 
 throwErr = (type, arg1, arg2) ->
   throw get(type, arg1, arg2)
@@ -750,24 +911,34 @@ clone = (err, options = {}) ->
   obj
 
 log = (err, color = "red") ->
-  Promise.try ->
-    console.log chalk[color](err.message)
+  console.log chalk[color](err.message)
 
-    ## bail if this error came from known
-    ## list of Cypress errors
-    return if isCypressErr(err)
+  if err.details
+    console.log("\n", chalk["yellow"](err.details))
 
-    console.log chalk[color](err.stack)
+  ## bail if this error came from known
+  ## list of Cypress errors
+  return if isCypressErr(err)
 
-    if process.env["CYPRESS_ENV"] is "production"
-      ## log this error to raygun since its not
-      ## a known error
-      require("./logger").createException(err).catch(->)
+  console.log chalk[color](err.stack)
+
+  return err
+
+logException = Promise.method (err) ->
+  ## TODO: remove context here
+  if @log(err) and isProduction()
+    ## log this exception since
+    ## its not a known error
+    return require("./logger")
+    .createException(err)
+    .catch(->)
 
 module.exports = {
   get,
 
   log,
+
+  logException,
 
   clone,
 

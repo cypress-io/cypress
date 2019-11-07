@@ -3,7 +3,7 @@ import _ from 'lodash'
 import React from 'react'
 import sinon from 'sinon'
 
-import Command, { Aliases, AliasesReferences, Message } from './command'
+import Command, { Message } from './command'
 
 const longText = Array(110).join('-')
 const withMarkdown = '**this** is _markdown_'
@@ -175,78 +175,6 @@ describe('<Command />', () => {
     })
   })
 
-  context('aliases', () => {
-    context('message', () => {
-      let aliases
-
-      beforeEach(() => {
-        aliases = shallow(<Command model={model({ referencesAlias: ['barAlias', 'bazAlias'], aliasType: 'dom' })} />).find(AliasesReferences).shallow()
-      })
-
-      it('renders the aliases for each one it references', () => {
-        expect(aliases.find('.command-alias').length).to.equal(2)
-      })
-
-      it('renders the aliases with the right class', () => {
-        expect(aliases.find('.command-alias').first()).to.have.className('dom')
-      })
-
-      it('renders the aliases in the right format', () => {
-        expect(aliases.find('.command-alias').first()).to.have.text('@barAlias')
-        expect(aliases.find('.command-alias').last()).to.have.text('@bazAlias')
-      })
-
-      it('renders tooltip for each alias it references', () => {
-        expect(aliases.find('Tooltip').length).to.equal(2)
-      })
-
-      it('renders the right tooltip title for each alias it references', () => {
-        const tooltips = aliases.find('Tooltip')
-
-        expect(tooltips.first()).to.have.prop('title', 'Found an alias for: \'barAlias\'')
-        expect(tooltips.last()).to.have.prop('title', 'Found an alias for: \'bazAlias\'')
-      })
-    })
-
-    context('controls', () => {
-      let aliases
-
-      describe('any case / when there is a single alias', () => {
-        beforeEach(() => {
-          aliases = shallow(<Command model={model({ alias: 'fooAlias', aliasType: 'dom' })} />).find(Aliases).shallow()
-        })
-
-        it('renders the alias', () => {
-          expect(aliases.find('.command-alias').first()).to.have.text('fooAlias')
-        })
-
-        it('renders the alias with the alias type as a class', () => {
-          expect(aliases.find('.command-alias')).to.have.className('dom')
-        })
-
-        it('renders a tooltip for the alias', () => {
-          expect(aliases.find('Tooltip').first().find('.command-alias')).to.exist
-        })
-
-        it('renders the alias tooltip with the right title', () => {
-          expect(aliases.find('Tooltip').first()).to.have.prop('title', 'The message aliased as: \'fooAlias\'')
-        })
-      })
-
-      describe('when there are multiple aliases', () => {
-        beforeEach(() => {
-          aliases = shallow(<Command model={model({ alias: ['fooAlias', 'barAlias'], aliasType: 'dom' })} />).find(Aliases).shallow()
-        })
-
-        it('renders all the aliases', () => {
-          expect(aliases.find('.command-alias').length).to.equal(2)
-          expect(aliases.find('.command-alias').first()).to.have.text('fooAlias')
-          expect(aliases.find('.command-alias').last()).to.have.text('barAlias')
-        })
-      })
-    })
-  })
-
   context('clicking', () => {
     let appState
     let events
@@ -265,6 +193,7 @@ describe('<Command />', () => {
           runnablesStore={runnablesStore}
         />
       )
+
       component.find('FlashOnClick').simulate('click')
     })
 
@@ -364,7 +293,7 @@ describe('<Command />', () => {
     let runnablesStore
     let command
 
-    before(() => {
+    beforeEach(() => {
       clock = sinon.useFakeTimers()
     })
 
@@ -376,10 +305,6 @@ describe('<Command />', () => {
         events={events}
         runnablesStore={runnablesStore}
       />)
-    })
-
-    after(() => {
-      clock.restore()
     })
 
     describe('on mouse over', () => {
@@ -487,6 +412,18 @@ describe('<Command />', () => {
       const component = shallow(<Command model={model()} />)
 
       expect(component).not.to.have.className('command-is-duplicate')
+    })
+
+    it('num duplicates renders with has-alias class if command is an alias', () => {
+      const component = shallow(<Command model={model({ alias: 'foo' })} />)
+
+      expect(component.find('.num-duplicates')).to.have.className('has-alias')
+    })
+
+    it('num duplicates renders without has-alias class if command is not an alias', () => {
+      const component = shallow(<Command model={model()} />)
+
+      expect(component.find('.num-duplicates')).not.to.have.className('has-alias')
     })
 
     it('displays number of duplicates', () => {

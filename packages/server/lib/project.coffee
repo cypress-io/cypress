@@ -25,6 +25,7 @@ savedState  = require("./saved_state")
 Automation  = require("./automation")
 preprocessor = require("./plugins/preprocessor")
 fs          = require("./util/fs")
+keys        = require("./util/keys")
 settings    = require("./util/settings")
 specsUtil   = require("./util/specs")
 
@@ -62,14 +63,20 @@ class Project extends EE
       report:       false
       onFocusTests: ->
       onError: ->
+      onWarning: ->
       onSettingsChanged: false
     }
+
+    debug("project options %o", options)
+    @options = options
 
     if process.env.CYPRESS_MEMORY
       logMemory = ->
         console.log("memory info", process.memoryUsage())
 
       @memoryCheck = setInterval(logMemory, 1000)
+
+    @onWarning = options.onWarning
 
     @getConfig(options)
     .tap (cfg) =>
@@ -88,7 +95,7 @@ class Project extends EE
 
         return config.updateWithPluginValues(cfg, modifiedCfg)
     .then (cfg) =>
-      @server.open(cfg, @)
+      @server.open(cfg, @, options.onWarning)
       .spread (port, warning) =>
         ## if we didnt have a cfg.port
         ## then get the port once we
@@ -177,11 +184,11 @@ class Project extends EE
       fs.pathExists(supportFile)
       .then (found) =>
         if not found
-          errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile)
+          errors.throw("SUPPORT_FILE_NOT_FOUND", supportFile, settings.configFile(cfg))
 
   watchPluginsFile: (cfg, options) ->
     debug("attempt watch plugins file: #{cfg.pluginsFile}")
-    if not cfg.pluginsFile
+    if not cfg.pluginsFile or options.isTextTerminal
       return Promise.resolve()
 
     fs.pathExists(cfg.pluginsFile)
@@ -201,9 +208,9 @@ class Project extends EE
             options.onError(err)
       })
 
-  watchSettings: (onSettingsChanged) ->
+  watchSettings: (onSettingsChanged, options) ->
     ## bail if we havent been told to
-    ## watch anything
+    ## watch anything (like in run mode)
     return if not onSettingsChanged
 
     debug("watch settings files")
@@ -220,11 +227,13 @@ class Project extends EE
         onSettingsChanged.call(@)
     }
 
-    @watchers.watch(settings.pathToCypressJson(@projectRoot), obj)
+    if options.configFile != false
+      @watchers.watch(settings.pathToConfigFile(@projectRoot, options), obj)
+
     @watchers.watch(settings.pathToCypressEnvJson(@projectRoot), obj)
 
   watchSettingsAndStartWebsockets: (options = {}, cfg = {}) ->
-    @watchSettings(options.onSettingsChanged)
+    @watchSettings(options.onSettingsChanged, options)
 
     { reporter, projectRoot } = cfg
 
@@ -309,7 +318,9 @@ class Project extends EE
   ## returns project config (user settings + defaults + cypress.json)
   ## with additional object "state" which are transient things like
   ## window width and height, DevTools open or not, etc.
-  getConfig: (options = {}) =>
+  getConfig: (options={}) =>
+    options ?= @options
+
     if @cfg
       return Promise.resolve(@cfg)
 
@@ -434,12 +445,12 @@ class Project extends EE
   getProjectId: ->
     @verifyExistence()
     .then =>
-      settings.read(@projectRoot)
-    .then (settings) =>
-      if settings and id = settings.projectId
+      settings.read(@projectRoot, @options)
+    .then (readSettings) =>
+      if readSettings and id = readSettings.projectId
         return id
 
-      errors.throw("NO_PROJECT_ID", @projectRoot)
+      errors.throw("NO_PROJECT_ID", settings.configFile(@options), @projectRoot)
 
   verifyExistence: ->
     fs
@@ -482,6 +493,8 @@ class Project extends EE
   @getPathsAndIds = ->
     cache.getProjectRoots()
     .map (projectRoot) ->
+      ## this assumes that the configFile for a cached project is 'cypress.json'
+      ## https://git.io/JeGyF
       Promise.props({
         path: projectRoot
         id: settings.id(projectRoot)
@@ -515,7 +528,8 @@ class Project extends EE
     debug("get project statuses for #{clientProjects.length} projects")
     user.ensureAuthToken()
     .then (authToken) ->
-      debug("got auth token #{authToken}")
+      debug("got auth token: %o", { authToken: keys.hide(authToken) })
+
       api.getProjects(authToken).then (projects = []) ->
         debug("got #{projects.length} projects")
         projectsIndex = _.keyBy(projects, "id")
@@ -545,13 +559,19 @@ class Project extends EE
       return Promise.resolve(Project._mergeState(clientProject, "VALID"))
 
     user.ensureAuthToken().then (authToken) ->
-      debug("got auth token #{authToken}")
+      debug("got auth token: %o", { authToken: keys.hide(authToken) })
+
       Project._getProject(clientProject, authToken)
 
   @remove = (path) ->
     cache.removeProject(path)
 
-  @add = (path) ->
+  @add = (path, options) ->
+    ## don't cache a project if a non-default configFile is set
+    ## https://git.io/JeGyF
+    if settings.configFile(options) isnt 'cypress.json'
+      return Promise.resolve({ path })
+
     cache.insertProject(path)
     .then =>
       @id(path)
@@ -563,9 +583,9 @@ class Project extends EE
   @id = (path) ->
     Project(path).getProjectId()
 
-  @ensureExists = (path) ->
-    ## do we have a cypress.json for this project?
-    settings.exists(path)
+  @ensureExists = (path, options) ->
+    ## is there a configFile? is the root writable?
+    settings.exists(path, options)
 
   @config = (path) ->
     Project(path).getConfig()

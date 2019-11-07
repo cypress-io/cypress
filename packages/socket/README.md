@@ -2,10 +2,19 @@
 
 This is a shared lib for holding both the `socket.io` server and client.
 
-## Usage
+## Installing
+
+The sockets's dependencies can be installed with:
+
+```bash
+cd packages/socket
+npm install
+```
+
+## Using
 
 ```javascript
-var socket = require("packages/core-socket")
+const socket = require("packages/socket")
 
 // returns
 {
@@ -19,15 +28,15 @@ var socket = require("packages/core-socket")
 ```
 
 ```javascript
-var socket = require("packages/core-socket")
+const socket = require("packages/socket")
 
 // server usage
-var srv = require("http").createServer()
-var io = socket.server(srv)
+const srv = require("http").createServer()
+const io = socket.server(srv)
 io.on("connection", function(){})
 
 // client usage
-var client = socket.client("http://localhost:2020")
+const client = socket.client("http://localhost:2020")
 client.on("connect", function(){})
 client.on("event", function(){})
 client.on("disconnect", function(){})
@@ -35,15 +44,6 @@ client.on("disconnect", function(){})
 // path usage
 socket.getPathToClientSource()
 // returns your/path/to/node_modules/socket.io-client/socket.io.js0
-```
-
-## Install
-
-The sockets's dependencies can be installed with:
-
-```bash
-cd packages/socket
-npm install
 ```
 
 ## Testing

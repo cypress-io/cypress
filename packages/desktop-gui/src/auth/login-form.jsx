@@ -1,9 +1,13 @@
 import cs from 'classnames'
+import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
 import authApi from './auth-api'
+import authStore from './auth-store'
 import ipc from '../lib/ipc'
+import MarkdownRenderer from '../lib/markdown-renderer'
 
+@observer
 class LoginForm extends Component {
   static defaultProps = {
     onSuccess () {},
@@ -15,6 +19,8 @@ class LoginForm extends Component {
   }
 
   render () {
+    const { message } = authStore
+
     return (
       <div className='login-content'>
         {this._error()}
@@ -25,30 +31,55 @@ class LoginForm extends Component {
           onClick={this._login}
           disabled={this.state.isLoggingIn}
         >
-          {this._buttonContent()}
+          {this._buttonContent(message)}
         </button>
+        {
+          message && <p className={`message ${message.type}`} onClick={this._selectUrl}>
+            <MarkdownRenderer markdown={message.message}/>
+          </p>
+        }
         <p className='terms'>By logging in, you agree to the <a onClick={this._openTerms}>Terms of Use</a> and <a onClick={this._openPrivacy}>Privacy Policy</a>.</p>
       </div>
     )
   }
 
-  _buttonContent () {
+  _selectUrl () {
+    const selection = window.getSelection()
+
+    if (selection.rangeCount > 0) {
+      selection.removeAllRanges()
+    }
+
+    const range = document.createRange()
+
+    range.selectNodeContents(document.querySelector('.login-content .message pre'))
+    selection.addRange(range)
+  }
+
+  _buttonContent (message) {
     if (this.state.isLoggingIn) {
+      if (message && message.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
+        return (
+          <span>
+            <i className='fa fa-exclamation-triangle'></i>{' '}
+            Could not open browser.
+          </span>
+        )
+      }
+
       return (
         <span>
           <i className='fa fa-spinner fa-spin'></i>{' '}
-          Logging in...
+          {message && message.browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
         </span>
       )
     }
 
     return (
       <span>
-        <i className='fa fa-github'></i>{' '}
-          Log In with GitHub
+        Log In to Dashboard
       </span>
     )
-
   }
 
   _error () {
@@ -87,9 +118,6 @@ class LoginForm extends Component {
     authApi.login()
     .then(() => {
       this.props.onSuccess()
-    })
-    .catch({ windowClosed: true }, () => {
-      this.setState({ isLoggingIn: false })
     })
     .catch((error) => {
       this.setState({

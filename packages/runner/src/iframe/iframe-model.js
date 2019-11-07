@@ -156,7 +156,7 @@ export default class IframeModel {
 
       this._updateViewport(this.originalState)
       this._updateUrl(this.originalState.url)
-      this.restoreDom(this.originalState)
+      this.restoreDom(this.originalState.snapshot)
       this._clearMessage()
 
       this.originalState = null
@@ -208,17 +208,16 @@ export default class IframeModel {
   }
 
   _storeOriginalState () {
-    const originalState = this.detachDom()
+    const finalSnapshot = this.detachDom()
 
-    if (!originalState) return
+    if (!finalSnapshot) return
 
-    const { body, htmlAttrs, headStyles, bodyStyles } = originalState
+    const { body, htmlAttrs } = finalSnapshot
 
     this.originalState = {
       body,
       htmlAttrs,
-      headStyles,
-      bodyStyles,
+      snapshot: finalSnapshot,
       url: this.state.url,
       viewportWidth: this.state.width,
       viewportHeight: this.state.height,

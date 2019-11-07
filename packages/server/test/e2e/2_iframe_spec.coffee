@@ -37,18 +37,6 @@ onServer = (app) ->
       </html>
     """)
 
-  app.get "/gzip_500", (req, res) ->
-    buf = fs.readFileSync(Fixtures.path("server/gzip-bad.html.gz"))
-
-    res.set({
-      "content-type": "text/html"
-      "content-encoding": "gzip"
-    })
-    .send(buf)
-
-  app.get "/req", (req, res) ->
-    res.send("<html>outer content<a href='/page/does-not-exist'>link</a><iframe src='http://err.foo.com:1616/gzip_500'></iframe></html>")
-
   app.get "/origin", (req, res) ->
     res.send("<html>outer content<iframe src='http://www.bar.com/simple'></iframe></html>")
 
@@ -78,15 +66,14 @@ describe "e2e iframes", ->
     }
   })
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "iframe_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-      config: {
-        hosts: {
-          "*.foo.com": "127.0.0.1"
-          "*.bar.com": "127.0.0.1"
-        }
+  e2e.it "passes", {
+    spec: "iframe_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+    config: {
+      hosts: {
+        "*.foo.com": "127.0.0.1"
+        "*.bar.com": "127.0.0.1"
       }
-    })
+    }
+  }

@@ -2,20 +2,22 @@ import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action } from 'mobx'
-import io from '@packages/socket'
+
+import { client, circularParser } from '@packages/socket/lib/browser'
 
 import automation from './automation'
 import logger from './logger'
 
 import $Cypress, { $ } from '@packages/driver'
 
-const channel = io.connect({
+const ws = client.connect({
   path: '/__socket.io',
   transports: ['websocket'],
+  parser: circularParser,
 })
 
-channel.on('connect', () => {
-  channel.emit('runner:connected')
+ws.on('connect', () => {
+  ws.emit('runner:connected')
 })
 
 const driverToReporterEvents = 'paused'.split(' ')
@@ -42,18 +44,18 @@ const eventManager = {
       return this._reRun(state)
     }
 
-    channel.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
+    ws.emit('is:automation:client:connected', connectionInfo, action('automationEnsured', (isConnected) => {
       state.automation = isConnected ? automation.CONNECTED : automation.MISSING
-      channel.on('automation:disconnected', action('automationDisconnected', () => {
+      ws.on('automation:disconnected', action('automationDisconnected', () => {
         state.automation = automation.DISCONNECTED
       }))
     }))
 
-    channel.on('change:to:url', (url) => {
+    ws.on('change:to:url', (url) => {
       window.location.href = url
     })
 
-    channel.on('automation:push:message', (msg, data = {}) => {
+    ws.on('automation:push:message', (msg, data = {}) => {
       if (!Cypress) return
 
       switch (msg) {
@@ -66,7 +68,7 @@ const eventManager = {
     })
 
     _.each(socketRerunEvents, (event) => {
-      channel.on(event, rerun)
+      ws.on(event, rerun)
     })
 
     reporterBus.on('runner:console:error', (testId) => {
@@ -139,6 +141,10 @@ const eventManager = {
       this.saveState(state)
     })
 
+    reporterBus.on('external:open', (url) => {
+      ws.emit('external:open', url)
+    })
+
     const $window = $(window)
 
     $window.on('hashchange', rerun)
@@ -166,7 +172,7 @@ const eventManager = {
 
   start (config) {
     if (config.socketId) {
-      channel.emit('app:connect', config.socketId)
+      ws.emit('app:connect', config.socketId)
     }
   },
 
@@ -178,7 +184,7 @@ const eventManager = {
 
     this._addListeners()
 
-    channel.emit('watch:test:file', specPath)
+    ws.emit('watch:test:file', specPath)
   },
 
   initialize ($autIframe, config) {
@@ -186,7 +192,7 @@ const eventManager = {
 
     // get the current runnable in case we reran mid-test due to a visit
     // to a new domain
-    channel.emit('get:existing:run:state', (state = {}) => {
+    ws.emit('get:existing:run:state', (state = {}) => {
       const runnables = Cypress.normalizeAll(state.tests)
       const run = () => {
         this._runDriver(state)
@@ -210,7 +216,7 @@ const eventManager = {
       }
 
       if (config.isTextTerminal && !state.currentId) {
-        channel.emit('set:runnables', runnables, run)
+        ws.emit('set:runnables', runnables, run)
       } else {
         run()
       }
@@ -219,12 +225,12 @@ const eventManager = {
 
   _addListeners () {
     Cypress.on('message', (msg, data, cb) => {
-      channel.emit('client:request', msg, data, cb)
+      ws.emit('client:request', msg, data, cb)
     })
 
     _.each(driverToSocketEvents, (event) => {
       Cypress.on(event, (...args) => {
-        return channel.emit(event, ...args)
+        return ws.emit(event, ...args)
       })
     })
 
@@ -311,7 +317,7 @@ const eventManager = {
 
   stop () {
     localBus.removeAllListeners()
-    channel.off()
+    ws.off()
   },
 
   _reRun (state) {
@@ -351,11 +357,11 @@ const eventManager = {
   },
 
   notifyRunningSpec (specFile) {
-    channel.emit('spec:changed', specFile)
+    ws.emit('spec:changed', specFile)
   },
 
   focusTests () {
-    channel.emit('focus:tests')
+    ws.emit('focus:tests')
   },
 
   snapshotUnpinned () {
@@ -373,7 +379,7 @@ const eventManager = {
   },
 
   launchBrowser (browser) {
-    channel.emit('reload:browser', window.location.toString(), browser && browser.name)
+    ws.emit('reload:browser', window.location.toString(), browser && browser.name)
   },
 
   // clear all the cypress specific cookies
@@ -392,7 +398,7 @@ const eventManager = {
   },
 
   saveState (state) {
-    channel.emit('save:app:state', state)
+    ws.emit('save:app:state', state)
   },
 }
 

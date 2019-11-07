@@ -9,7 +9,7 @@ export default ({ onReload }) => (
         <i className='fa fa-refresh'></i> Reload the Browser
       </button>
       <div className='helper-line'>
-        <a href='https://on.cypress.io/guides/browser-management' target='_blank' rel='noopener noreferrer'>
+        <a href='https://on.cypress.io/launching-browsers' target='_blank'>
           <i className='fa fa-question-circle'></i>
           Why am I seeing this message?
         </a>

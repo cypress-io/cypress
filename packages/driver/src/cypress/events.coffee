@@ -1,5 +1,4 @@
 # _ = require("lodash")
-# Backbone = require("backbone")
 
 ## adds a custom lightweight event bus
 ## to the Cypress class

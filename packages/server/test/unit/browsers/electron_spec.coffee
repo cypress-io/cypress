@@ -34,6 +34,11 @@ describe "lib/browsers/electron", ->
             remove: sinon.stub()
           }
         }
+        "debugger": {
+          attach: sinon.stub().returns()
+          sendCommand: sinon.stub().resolves()
+          on: sinon.stub().returns()
+        }
       }
     })
 
@@ -343,7 +348,7 @@ describe "lib/browsers/electron", ->
     it "sets proxy rules for webContents", ->
       webContents = {
         session: {
-          setProxy: sinon.stub().yieldsAsync()
+          setProxy: sinon.stub().callsArg(1)
         }
       }
 
@@ -351,4 +356,5 @@ describe "lib/browsers/electron", ->
       .then ->
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: "proxy rules"
+          proxyBypassRules: "<-loopback>"
         })

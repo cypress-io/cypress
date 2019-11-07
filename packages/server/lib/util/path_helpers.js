@@ -34,7 +34,6 @@ const checkIfResolveChangedRootFolder = (resolved, initial) => {
   !resolved.startsWith(initial)
 }
 
-
 // real folder path found could be different due to symlinks
 // For example, folder /tmp/foo on Mac is really /private/tmp/foo
 const getRealFolderPath = function (folder) {
@@ -78,8 +77,8 @@ module.exports = {
         //# which makes it an absolute path
         return path.join(config.integrationFolder, spec)
 
-      // ## commented out until we implement unit testing
-      // when isUnitTestRe.test(spec)
+        // ## commented out until we implement unit testing
+        // when isUnitTestRe.test(spec)
 
         //# strip off the unit part
         // spec = path.relative("unit", spec)
