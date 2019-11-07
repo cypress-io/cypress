@@ -43,11 +43,8 @@ isValidVisitMethod = (method) ->
 
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
-    args: {
-      configFile: Cypress.config("configFile")
-      ms
-    }
     onFail: log
+    args: { ms }
   })
 
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
@@ -224,7 +221,6 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
       $utils.throwErrByPath("navigation.cross_origin", {
         onFail: options._log
         args: {
-          configFile: Cypress.config("configFile")
           message: err.message
           originPolicy: originPolicy
         }
@@ -308,14 +304,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         when not resp.isOkStatusCode
           err = new Error
           err.gotResponse = true
-          _.extend(err, resp);
+          _.extend(err, resp)
+
           throw err
 
         when not resp.isHtml
           ## throw invalid contentType error
           err = new Error
           err.invalidContentType = true
-          _.extend(err, resp);
+          _.extend(err, resp)
+
           throw err
 
         else
@@ -551,12 +549,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       url = $Location.normalize(url)
+
       if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
+
       if qs = options.qs
         url = $Location.mergeUrlWithParams(url, qs)
 
       cleanup = null
+
       ## clear the current timeout
       cy.clearTimeout("visit")
 
@@ -626,6 +627,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           remoteUrl = $Location.fullyQualifyUrl(url)
 
         remote = $Location.create(remoteUrl ? url)
+
         ## reset auth options if we have them
         if a = remote.authObj
           options.auth = a
@@ -773,6 +775,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
                   when err.invalidContentType
                     "visit.loading_invalid_content_type"
+
                 $utils.throwErrByPath(msg, {
                   onFail: options._log
                   args: args
