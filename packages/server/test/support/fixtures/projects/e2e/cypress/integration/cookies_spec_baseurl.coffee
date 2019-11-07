@@ -99,7 +99,7 @@ describe "cookies", ->
     it "handles undefined cookies", ->
       cy.visit("/cookieWithNoName")
 
-  context.only "without whitelist", ->
+  context "without whitelist", ->
     before ->
       Cypress.Cookies.defaults({
         whitelist: []
@@ -178,22 +178,85 @@ describe "cookies", ->
 
             altDomain = (new Cypress.Location(altUrl)).getHostName()
 
+            expectedGetCookiesArray = [
+              {
+                "name": "namefoo8",
+                "value": "valfoo8",
+                "path": "/",
+                "domain": expectedDomain,
+                "secure": false,
+                "httpOnly": false
+              },
+              {
+                "name": "namefoo7",
+                "value": "valfoo7",
+                "path": "/",
+                "domain": altDomain,
+                "secure": false,
+                "httpOnly": false
+              },
+              {
+                "name": "namefoo6",
+                "value": "valfoo6",
+                "path": "/",
+                "domain": expectedDomain,
+                "secure": false,
+                "httpOnly": false
+              },
+              {
+                "name": "namefoo5",
+                "value": "valfoo5",
+                "path": "/",
+                "domain": altDomain,
+                "secure": false,
+                "httpOnly": false
+              },
+              {
+                "name": "namefoo4",
+                "value": "valfoo4",
+                "path": "/",
+                "domain": expectedDomain,
+                "secure": false,
+                "httpOnly": false
+              },
+              {
+                "name": "namefoo3",
+                "value": "valfoo3",
+                "path": "/",
+                "domain": altDomain,
+                "secure": false,
+                "httpOnly": false
+              },
+              {
+                "name": "namefoo2",
+                "value": "valfoo2",
+                "path": "/",
+                "domain": expectedDomain,
+                "secure": false,
+                "httpOnly": false
+              },
+              {
+                "name": "namefoo1",
+                "value": "valfoo1",
+                "path": "/",
+                "domain": altDomain,
+                "secure": false,
+                "httpOnly": false
+              },
+              {
+                "name": "namefoo0",
+                "value": "valfoo0",
+                "path": "/",
+                "domain": expectedDomain,
+                "secure": false,
+                "httpOnly": false
+              }
+            ]
+
             cy[cmd]("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
 
             cy.getCookies({ domain: null }).then (cookies) ->
               ## reverse them so they'll be in the order they were set
               cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 
-              cy.task('console:log', "Result of cy.getCookies():")
-              cy.task('console:log', cookies)
-              .then ->
-                cookies.forEach (cookie, i) ->
-                  if i % 2 == 0
-                    expect(cookie.domain, "#{cookie.name} domain").to.eq(expectedDomain)
-                  else
-                    expect(cookie.domain, "#{cookie.name} domain").to.eq(altDomain)
-                  expect(cookie.name).to.eq("namefoo#{n-i}")
-                  expect(cookie.value).to.eq("valfoo#{n-i}")
-                  expect(cookie.path).to.eq("/")
-                  expect(cookie.secure).to.eq(false)
-                  expect(cookie.httpOnly).to.eq(false)
+              expect(cookies).to.deep.eq(expectedGetCookiesArray)
