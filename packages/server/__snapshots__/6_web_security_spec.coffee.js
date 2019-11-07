@@ -194,15 +194,11 @@ exports['e2e web security / when disabled / passes'] = `
   │ Spec Ran:     web_security_spec.coffee                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-Warning: We failed processing this video.
 
-This error will not alter the exit code.
+  (Video)
 
-Error: ffmpeg exited with code 1: pipe:0: End of file
-
-    at stack trace line
-    at stack trace line
-    at stack trace line
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.coffee.mp4        (X second)
 
 
 ====================================================================================================
