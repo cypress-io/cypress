@@ -321,7 +321,6 @@ describe('util', () => {
 
   context('.printNodeOptions', () => {
     describe('NODE_OPTIONS is not set', () => {
-
       it('does nothing if debug is not enabled', () => {
         const log = sinon.spy()
 
