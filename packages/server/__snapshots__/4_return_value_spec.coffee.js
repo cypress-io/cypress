@@ -24,7 +24,7 @@ exports['e2e return value failing1 1'] = `
   2 failing
 
   1)  errors when invoking commands and return a different value:
-     CypressError: Cypress detected that you invoked one or more cy commands but returned a different value.
+     Cypress detected that you invoked one or more cy commands but returned a different value.
 
 The return value was:
 
@@ -53,7 +53,7 @@ https://on.cypress.io/returning-value-and-commands-in-test
       at stack trace line
 
   2)  errors when invoking commands in custom command and returning differnet value:
-     CypressError: Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
+     Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
 
 The custom command was:
 

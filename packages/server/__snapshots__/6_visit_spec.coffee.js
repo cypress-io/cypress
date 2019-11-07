@@ -100,7 +100,7 @@ exports['e2e visit / low response timeout / fails when network connection immedi
   1 failing
 
   1) when network connection cannot be established fails:
-     CypressError: \`cy.visit()\` failed trying to load:
+     \`cy.visit()\` failed trying to load:
 
 http://localhost:16795/
 
@@ -121,18 +121,6 @@ The stack trace for this error is:
 Error: connect ECONNREFUSED 127.0.0.1:16795
     at stack trace line
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
@@ -208,7 +196,7 @@ exports['e2e visit / low response timeout / fails when server responds with 500'
   1 failing
 
   1) when server response is 500 fails:
-     CypressError: \`cy.visit()\` failed trying to load:
+     \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/fail
 
@@ -219,18 +207,6 @@ The response we received from your web server was:
 This was considered a failure because the status code was not \`2xx\`.
 
 If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
@@ -306,7 +282,7 @@ exports['e2e visit / low response timeout / fails when file server responds with
   1 failing
 
   1) when file server response is 404 fails:
-     CypressError: \`cy.visit()\` failed trying to load:
+     \`cy.visit()\` failed trying to load:
 
 /static/does-not-exist.html
 
@@ -317,18 +293,6 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
@@ -404,7 +368,7 @@ exports['e2e visit / low response timeout / fails when content type isnt html'] 
   1 failing
 
   1) when content type is plain/text fails:
-     CypressError: \`cy.visit()\` failed trying to load:
+     \`cy.visit()\` failed trying to load:
 
 /static/hello.txt
 
@@ -417,18 +381,6 @@ This was considered a failure because responses must have \`content-type: 'text/
 However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
 \`cy.request()\` will automatically get and set cookies and enable you to parse responses.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
@@ -505,7 +457,7 @@ exports['e2e visit / normal response timeouts / fails when visit times out'] = `
   2 failing
 
   1) when visit times out fails timeout exceeds pageLoadTimeout:
-     CypressError: Timed out after waiting \`1000ms\` for your remote page to load.
+     Timed out after waiting \`1000ms\` for your remote page to load.
 
 Your page did not fire its \`load\` event within \`1000ms\`.
 
@@ -515,22 +467,9 @@ Browsers will not fire the \`load\` event until all stylesheets and scripts are 
 
 When this \`load\` event occurs, Cypress will continue running commands.
       at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
 
   2) when visit times out fails timeout exceeds timeout option:
-     CypressError: Timed out after waiting \`500ms\` for your remote page to load.
+     Timed out after waiting \`500ms\` for your remote page to load.
 
 Your page did not fire its \`load\` event within \`500ms\`.
 
@@ -539,19 +478,6 @@ You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
 When this \`load\` event occurs, Cypress will continue running commands.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
@@ -631,7 +557,7 @@ exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when re
   3 failing
 
   1) response timeouts result in an error handles no response errors on the initial visit:
-     CypressError: \`cy.visit()\` failed trying to load:
+     \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/response_never_finishes
 
@@ -660,22 +586,10 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
-     CypressError: \`cy.visit()\` failed trying to load:
+     \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/response_never_finishes
 
@@ -705,21 +619,9 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
 
       at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
-     CypressError: \`cy.visit()\` failed trying to load:
+     \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/timeout?ms=1000
 
@@ -748,18 +650,6 @@ Error: ESOCKETTIMEDOUT
     at stack trace line
     at stack trace line
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
