@@ -45,7 +45,6 @@ class PermissionMessage extends Component {
     }
 
     return this._noResult()
-
   }
 
   _button () {
@@ -101,7 +100,6 @@ class PermissionMessage extends Component {
         {this._button()}
       </div>
     )
-
   }
 
   _noResult () {

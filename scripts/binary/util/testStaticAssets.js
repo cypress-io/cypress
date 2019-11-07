@@ -110,7 +110,6 @@ const testPackageStaticAssets = async (options = {}) => {
   la(!!foundAssets.length, stripIndent`
   expected assets to be found in ${chalk.green(opts.assetGlob)}
   `)
-
 }
 
 module.exports = {
@@ -119,7 +118,6 @@ module.exports = {
 }
 
 function includesCount (string, subString) {
-
   string += ''
   subString += ''
   if (subString.length <= 0) return (string.length + 1)
@@ -152,5 +150,4 @@ const includesString = (fileStr, options) => {
   const passed = count >= atLeast
 
   return [passed, count, atLeast]
-
 }
