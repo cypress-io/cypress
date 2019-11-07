@@ -8,12 +8,11 @@ describe "e2e images", ->
     }
   })
 
-  it "passes", ->
-    ## this tests that images are correctly proxied and that we are not
-    ## accidentally modifying their bytes in the stream
+  ## this tests that images are correctly proxied and that we are not
+  ## accidentally modifying their bytes in the stream
 
-    e2e.exec(@, {
-      spec: "images_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  e2e.it "passes", {
+    spec: "images_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }

@@ -62,55 +62,48 @@ describe "e2e visit", ->
       }
     })
 
-    it "passes", ->
-      ## this tests that hashes are applied during a visit
-      ## which forces the browser to scroll to the div
-      ## additionally this tests that jquery.js is not truncated
-      ## due to __cypress.initial cookies not being cleared by
-      ## the hash.html response
+    ## this tests that hashes are applied during a visit
+    ## which forces the browser to scroll to the div
+    ## additionally this tests that jquery.js is not truncated
+    ## due to __cypress.initial cookies not being cleared by
+    ## the hash.html response
 
-      ## additionally this tests that xhr request headers + body
-      ## can reach the backend without being modified or changed
-      ## by the cypress proxy in any way
+    ## additionally this tests that xhr request headers + body
+    ## can reach the backend without being modified or changed
+    ## by the cypress proxy in any way
+    e2e.it "passes", {
+      spec: "visit_spec.coffee"
+      snapshot: true
+      expectedExitCode: 0
+    }
 
-      e2e.exec(@, {
-        spec: "visit_spec.coffee"
-        snapshot: true
-        expectedExitCode: 0
-      })
+    e2e.it "fails when network connection immediately fails", {
+      spec: "visit_http_network_error_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+    }
 
-    it "fails when network connection immediately fails", ->
-      e2e.exec(@, {
-        spec: "visit_http_network_error_failing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 1
-      })
+    e2e.it "fails when server responds with 500", {
+      spec: "visit_http_500_response_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+    }
 
-    it "fails when server responds with 500", ->
-      e2e.exec(@, {
-        spec: "visit_http_500_response_failing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 1
-      })
+    e2e.it "fails when file server responds with 404", {
+      spec: "visit_file_404_response_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+    }
 
-    it "fails when file server responds with 404", ->
-      e2e.exec(@, {
-        spec: "visit_file_404_response_failing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 1
-      })
+    e2e.it "fails when content type isnt html", {
+      spec: "visit_non_html_content_type_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+    }
 
-    it "fails when content type isnt html", ->
-      e2e.exec(@, {
-        spec: "visit_non_html_content_type_failing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 1
-      })
-
-    it "calls onBeforeLoad when overwriting cy.visit", ->
-      e2e.exec(@, {
-        spec: "issue_2196_spec.coffee"
-      })
+    e2e.it "calls onBeforeLoad when overwriting cy.visit", {
+      spec: "issue_2196_spec.coffee"
+    }
 
   context "low responseTimeout, normal pageLoadTimeout", ->
     e2e.setup({
@@ -124,12 +117,11 @@ describe "e2e visit", ->
       }
     })
 
-    it "fails when response never ends", ->
-      e2e.exec(@, {
-        spec: "visit_response_never_ends_failing_spec.js",
-        snapshot: true,
-        expectedExitCode: 3
-      })
+    e2e.it "fails when response never ends", {
+      spec: "visit_response_never_ends_failing_spec.js",
+      snapshot: true,
+      expectedExitCode: 3
+    }
 
   context "normal response timeouts", ->
     e2e.setup({
@@ -143,9 +135,8 @@ describe "e2e visit", ->
       }
     })
 
-    it "fails when visit times out", ->
-      e2e.exec(@, {
-        spec: "visit_http_timeout_failing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 2
-      })
+    e2e.it "fails when visit times out", {
+      spec: "visit_http_timeout_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 2
+    }

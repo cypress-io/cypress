@@ -12,7 +12,7 @@ describe('browser detection', () => {
   // using DEBUG=... flag
   const checkBrowsers = (browsers) => {
     log('detected browsers %j', browsers)
-    expect(browsers).to.be.an.array
+    expect(browsers).to.be.an('array')
 
     const mainProps = project(['name', 'version'], browsers)
 

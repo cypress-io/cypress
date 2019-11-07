@@ -55,15 +55,12 @@ const transformRequires = async function (buildResourcePath) {
       shouldWriteFile = true
 
       return replaceString
-
     })
 
     if (shouldWriteFile) {
       debug('writing to file:', chalk.red(item))
       await fs.writeFile(item, newFile)
-
     }
-
   })
 
   return replaceCount

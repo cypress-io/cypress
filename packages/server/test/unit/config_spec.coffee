@@ -3,11 +3,12 @@ require("../spec_helper")
 _        = require("lodash")
 path     = require("path")
 R        = require("ramda")
-config      = require("#{root}lib/config")
-errors      = require("#{root}lib/errors")
-configUtil  = require("#{root}lib/util/config")
-scaffold    = require("#{root}lib/scaffold")
-settings    = require("#{root}lib/util/settings")
+config   = require("#{root}lib/config")
+errors   = require("#{root}lib/errors")
+configUtil = require("#{root}lib/util/config")
+findSystemNode = require("#{root}lib/util/find_system_node")
+scaffold = require("#{root}lib/scaffold")
+settings = require("#{root}lib/util/settings")
 
 describe "lib/config", ->
   beforeEach ->
@@ -224,11 +225,11 @@ describe "lib/config", ->
 
         it "fails if not a string or array", ->
           @setup({ignoreTestFiles: 5})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
 
         it "fails if not an array of strings", ->
           @setup({ignoreTestFiles: [5]})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
 
       context "integrationFolder", ->
@@ -321,9 +322,18 @@ describe "lib/config", ->
           @setup({testFiles: "**/*.coffee"})
           @expectValidationPasses()
 
-        it "fails if not a string", ->
+        it "passes if an array of strings", ->
+          @setup({testFiles: ["**/*.coffee", "**/*.jsx"]})
+          @expectValidationPasses()
+
+        it "fails if not a string or array", ->
           @setup({testFiles: 42})
-          @expectValidationFails("be a string")
+          @expectValidationFails("be a string or an array of strings")
+
+        it "fails if not an array of strings", ->
+          @setup({testFiles: [5]})
+          @expectValidationFails("be a string or an array of strings")
+          @expectValidationFails("the value was: `[5]`")
 
       context "supportFile", ->
         it "passes if a string", ->
@@ -434,11 +444,11 @@ describe "lib/config", ->
 
         it "fails if not a string or array", ->
           @setup({blacklistHosts: 5})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
 
         it "fails if not an array of strings", ->
           @setup({blacklistHosts: [5]})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
 
   context ".getConfigKeys", ->
@@ -786,7 +796,8 @@ describe "lib/config", ->
             ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            testFiles:                  { value: "**/*.*", from: "default" }
+            testFiles:                  { value: "**/*.*", from: "default" },
+            nodeVersion:                { value: "default", from: "default" },
           })
 
       it "sets config, envFile and env", ->
@@ -852,7 +863,8 @@ describe "lib/config", ->
             ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            testFiles:                  { value: "**/*.*", from: "default" }
+            testFiles:                  { value: "**/*.*", from: "default" },
+            nodeVersion:                { value: "default", from: "default" },
             env: {
               foo: {
                 value: "foo"
@@ -1240,6 +1252,57 @@ describe "lib/config", ->
         expected[folder] = "/_test-output/path/to/project/foo/bar"
 
         expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)
+
+  context ".setNodeBinary", ->
+    beforeEach ->
+      @findSystemNode = sinon.stub(findSystemNode, "findNodePathAndVersion")
+      @nodeVersion = process.versions.node
+
+    it "sets current Node ver if nodeVersion != system", ->
+      config.setNodeBinary({
+        nodeVersion: undefined
+      })
+      .then (obj) =>
+        expect(@findSystemNode).to.not.be.called
+        expect(obj).to.deep.eq({
+          nodeVersion: undefined,
+          resolvedNodeVersion: @nodeVersion
+        })
+
+    it "sets found Node ver if nodeVersion = system and findNodePathAndVersion resolves", ->
+      @findSystemNode.resolves({
+        path: '/foo/bar/node',
+        version: '1.2.3'
+      })
+
+      config.setNodeBinary({
+        nodeVersion: "system"
+      })
+      .then (obj) =>
+        expect(@findSystemNode).to.be.calledOnce
+        expect(obj).to.deep.eq({
+          nodeVersion: "system",
+          resolvedNodeVersion: "1.2.3",
+          resolvedNodePath: "/foo/bar/node"
+        })
+
+    it "sets current Node ver and warns if nodeVersion = system and findNodePathAndVersion rejects", ->
+      err = new Error()
+      onWarning = sinon.stub()
+
+      @findSystemNode.rejects(err)
+
+      config.setNodeBinary({
+        nodeVersion: "system"
+      }, onWarning)
+      .then (obj) =>
+        expect(@findSystemNode).to.be.calledOnce
+        expect(onWarning).to.be.calledOnce
+        expect(obj).to.deep.eq({
+          nodeVersion: "system",
+          resolvedNodeVersion: @nodeVersion,
+        })
+        expect(obj.resolvedNodePath).to.be.undefined
 
 describe "lib/util/config", ->
 

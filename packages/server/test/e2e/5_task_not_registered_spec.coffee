@@ -8,6 +8,7 @@ describe "e2e task", ->
     e2e.exec(@, {
       project: Fixtures.projectPath("task-not-registered")
       spec: "task_not_registered_spec.coffee"
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 1
     })

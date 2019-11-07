@@ -60,7 +60,6 @@ class Dropdown extends Component {
         {this._buttonContent()}
       </span>
     )
-
   }
 
   _buttonContent () {

@@ -76,6 +76,33 @@ describe "xhrs", ->
   it "works prior to visit", ->
     cy.server()
 
+  ## https://github.com/cypress-io/cypress/issues/5431
+  it "can stub a 100kb response", (done) ->
+    body = 'X'.repeat(100 * 1024)
+
+    cy.server()
+    cy.route({
+      method: 'POST'
+      url: '/foo'
+      response: {
+        'bar': body
+      }
+    })
+
+    cy.visit("/index.html")
+    .then (win) ->
+      xhr = new win.XMLHttpRequest
+      xhr.open("POST", "/foo")
+      xhr.send()
+
+      finish = ->
+        expect(xhr.status).to.eq(200)
+        expect(xhr.responseText).to.include(body)
+        done()
+
+      xhr.onload = finish
+      xhr.onerror = finish
+
   describe "server with 1 visit", ->
     before ->
       cy.visit("/xhr.html")

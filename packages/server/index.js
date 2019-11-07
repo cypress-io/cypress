@@ -22,4 +22,6 @@ require && require.extensions && delete require.extensions['.coffee.md']
 // https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
 process.enablePromiseAPIs = process.env.CYPRESS_ENV !== 'production'
 
+require('./lib/util/suppress_unauthorized_warning').suppress()
+
 module.exports = require('./lib/cypress').start(process.argv)
