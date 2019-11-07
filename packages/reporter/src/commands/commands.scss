@@ -377,6 +377,13 @@
     }
   }
 
+  .command-name-log {
+    .command-message {
+      white-space: initial;
+      word-wrap: break-word;
+    }
+  }
+
   .command-controls {
     i {
       padding: 2px;
@@ -389,7 +396,7 @@
       line-height: 1.75;
       margin-left: 5px;
 
-      
+
     }
 
     i:hover {
