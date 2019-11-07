@@ -27,7 +27,7 @@ exports['e2e web security / when enabled / fails'] = `
   3 failing
 
   1) web security fails when clicking <a> to another origin:
-     CypressError: Cypress detected a cross origin error happened on page load:
+     Cypress detected a cross origin error happened on page load:
 
   > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
@@ -50,15 +50,10 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
   2) web security fails when submitted a form and being redirected to another origin:
-     CypressError: Cypress detected a cross origin error happened on page load:
+     Cypress detected a cross origin error happened on page load:
 
   > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
@@ -81,15 +76,10 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
   3) web security fails when using a javascript redirect to another origin:
-     CypressError: Cypress detected a cross origin error happened on page load:
+     Cypress detected a cross origin error happened on page load:
 
   > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
@@ -112,11 +102,6 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
       at stack trace line
 
 
@@ -209,11 +194,15 @@ exports['e2e web security / when disabled / passes'] = `
   │ Spec Ran:     web_security_spec.coffee                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
+Warning: We failed processing this video.
 
-  (Video)
+This error will not alter the exit code.
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.coffee.mp4        (X second)
+Error: ffmpeg exited with code 1: pipe:0: End of file
+
+    at stack trace line
+    at stack trace line
+    at stack trace line
 
 
 ====================================================================================================
