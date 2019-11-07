@@ -305,12 +305,12 @@ commands:
       - run:
           name: Install Node
           command: |
+            set -ev
             version_slug=node-v$nodejs_version-win-$TARGET_ARCH
             if [[ -e "/c/Program Files/nodejs/__cypress" ]]; then
               echo "Cached Node install found."
               exit 0
             fi
-            set -ev
             echo "Installing Node $nodejs_version $TARGET_ARCH from nodejs.org"
             # remove default Node install
             rm -rf "/c/Program Files/nodejs"
@@ -327,6 +327,15 @@ commands:
           key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.CIRCLE_JOB }}
           paths:
             - C:\Program Files\nodejs
+
+  ensure-tempdir:
+    description: make sure that /tmp and %TEMP% are the same on windows
+    steps:
+      - run:
+          name: Ensure /tmp is valid
+          command: |
+            set -e
+            node -e "process.exit(process.platform === 'win32')" || MKLINK /J %TEMP% "C:\tmp"
 
 jobs:
   ## code checkout and NPM installs
@@ -724,6 +733,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - ensure-tempdir
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
@@ -857,6 +867,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
+      - ensure-tempdir
       - run: ls -la
       # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
@@ -925,6 +936,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - ensure-tempdir
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
@@ -951,6 +963,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - ensure-tempdir
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
