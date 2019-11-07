@@ -43,9 +43,12 @@
       "description": "The reporter options used. Supported options depend on the reporter. See https://on.cypress.io/reporters#Reporter-Options"
     },
     "testFiles": {
-      "type": "string",
+      "type": [
+        "string",
+        "array"
+      ],
       "default": "**/*.*",
-      "description": "A String glob pattern of the test files to load"
+      "description": "A String or Array of string glob patterns of the test files to load. See https://on.cypress.io/configuration#Global"
     },
     "watchForFileChanges": {
       "type": "boolean",
@@ -199,6 +202,14 @@
       "type": "string",
       "default": null,
       "description": "A 6 character string use to identify this project in the Cypress Dashboard. See https://on.cypress.io/dashboard-service#Identification"
+    },
+    "nodeVersion": {
+      "enum": [
+        "system",
+        "bundled"
+      ],
+      "default": "bundled",
+      "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
     }
   }
 }

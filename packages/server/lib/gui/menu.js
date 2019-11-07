@@ -194,7 +194,6 @@ module.exports = {
                 }
 
                 return 'Ctrl+Shift+I'
-
               })(),
               click: (item, focusedWindow) => {
                 if (focusedWindow) {

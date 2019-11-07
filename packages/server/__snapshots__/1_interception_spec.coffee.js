@@ -14,7 +14,7 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: character_encoding_spec.js...                                                   (1 of 1) 
+  Running:  character_encoding_spec.js                                                      (1 of 1)
 
 
   character encoding tests
@@ -45,23 +45,23 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        16                         │
-  │ Passing:      16                         │
-  │ Failing:      0                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  0                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     character_encoding_spec.js │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        16                                                                               │
+  │ Passing:      16                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     character_encoding_spec.js                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/character_encoding_spec.js.mp4      (X second)
 
 
 ====================================================================================================
@@ -69,11 +69,11 @@ exports['e2e interception spec character encodings does not mangle non-UTF-8 tex
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ character_encoding_spec.js                XX:XX       16       16        -        -        - │
+  │ ✔  character_encoding_spec.js               XX:XX       16       16        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX       16       16        -        -        -  
+    ✔  All specs passed!                        XX:XX       16       16        -        -        -  
 
 
 `

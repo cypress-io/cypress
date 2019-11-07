@@ -14,7 +14,7 @@ exports['e2e promises failing1 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: promises_spec.coffee...                                                         (1 of 1) 
+  Running:  promises_spec.coffee                                                            (1 of 1)
 
 
   1) catches regular promise errors
@@ -36,29 +36,31 @@ exports['e2e promises failing1 1'] = `
 
   (Results)
 
-  ┌────────────────────────────────────┐
-  │ Tests:        2                    │
-  │ Passing:      0                    │
-  │ Failing:      2                    │
-  │ Pending:      0                    │
-  │ Skipped:      0                    │
-  │ Screenshots:  2                    │
-  │ Video:        true                 │
-  │ Duration:     X seconds            │
-  │ Spec Ran:     promises_spec.coffee │
-  └────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      2                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     promises_spec.coffee                                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/promises_spec.coffee/catches regular promise errors (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/promises_spec.coffee/catches promise errors and calls done with err even when async (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.coffee/catches regular promise er     (1280x720)
+     rors (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.coffee/catches promise errors and     (1280x720)
+      calls done with err even when async (failed).png                                              
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/promises_spec.coffee.mp4            (X second)
 
 
 ====================================================================================================
@@ -66,11 +68,11 @@ exports['e2e promises failing1 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ promises_spec.coffee                      XX:XX        2        -        2        -        - │
+  │ ✖  promises_spec.coffee                     XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 
 
 `
