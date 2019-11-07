@@ -1627,6 +1627,16 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
+        // https://github.com/cypress-io/cypress/issues/5622
+        it('collapses selection to end on {rightarrow} with modifiers', () => {
+          cy.$$('[contenteditable]:first').get(0).innerHTML = '<div>bar</div>'
+
+          cy.get('[contenteditable]:first')
+          .type('{selectall}foo{selectall}{ctrl}Hello{selectall}{rightarrow} world').then(($div) => {
+            expect(trimInnerText($div)).to.eql('Hello world')
+          })
+        })
+
         it('can remove a placeholder <br>', () => {
           cy.$$('[contenteditable]:first').get(0).innerHTML = '<div><br></div>'
 
@@ -2819,6 +2829,12 @@ describe('src/cy/commands/actions/type', () => {
 
             done()
           })
+        })
+
+        // https://github.com/cypress-io/cypress/issues/5622
+        it('still inserts text with non-shift modifiers', () => {
+          cy.get('input:first').type('{ctrl}{meta}foobar')
+          .should('have.value', 'foobar')
         })
 
         it('does not maintain modifiers for subsequent click commands', (done) => {
@@ -4320,14 +4336,14 @@ describe('src/cy/commands/actions/type', () => {
             const expectedTable = {
               1: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keydown', 'Active Modifiers': 'meta', 'Prevented Default': null, 'Target Element': $input[0] },
               2: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              3: { 'Details': '{ code: KeyF, which: 70 }', Typed: 'f', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              4: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              5: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              6: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              7: { 'Details': '{ code: KeyB, which: 66 }', Typed: 'b', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              3: { 'Details': '{ code: KeyF, which: 70 }', Typed: 'f', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              4: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              5: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              6: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': 'keydown, keypress, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              7: { 'Details': '{ code: KeyB, which: 66 }', Typed: 'b', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               8: { 'Details': '{ code: ArrowLeft, which: 37 }', Typed: '{leftarrow}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              9: { 'Details': '{ code: Delete, which: 46 }', Typed: '{del}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-              10: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              9: { 'Details': '{ code: Delete, which: 46 }', Typed: '{del}', 'Events Fired': 'keydown, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+              10: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': 'keydown, keypress, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
               11: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keyup', 'Active Modifiers': 'alt', 'Prevented Default': null, 'Target Element': $input[0] },
               12: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
             }
@@ -4335,6 +4351,7 @@ describe('src/cy/commands/actions/type', () => {
             // uncomment for debugging
             // _.each(table.data, (v, i) => expect(v).containSubset(expectedTable[i]))
             expect(table.data).to.deep.eq(expectedTable)
+            expect($input.val()).eq('foo')
           })
         })
 
