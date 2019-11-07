@@ -1500,7 +1500,16 @@ describe "lib/config", ->
         path: "/path/to/browser",
         majorVersion: "x"
       }
-      expect(() -> config.validateBrowserList([browser])).to.not.throw()
+      alias = {
+        "name": "chrome",
+        "family": "chrome",
+        "displayName": "Chrome",
+        "version": "73.0.3683.103",
+        "path": "google-chrome",
+        "majorVersion": "73"
+      }
+      validate = -> config.validateBrowserList([browser, alias])
+      expect(validate).to.not.throw()
 
   context ".setNodeBinary", ->
     beforeEach ->

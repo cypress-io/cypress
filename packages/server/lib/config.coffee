@@ -227,17 +227,14 @@ validateBrowserList = (browsers) ->
     la(check.array(browsers), "Expected a list of browsers", browsers)
     la(browsers.length, "Expected at list one browser")
 
-    # Electron browser has path "", but all other browsers
-    # should have an absolute path for launcher to use
-    isEmptyStringOrAbsolutePath = (s) ->
-      check.string(s) && (check.emptyString(s) || path.isAbsolute(s))
-
     isValidBrowser = check.schema({
       name: check.unemptyString,
       family: check.oneOf(["electron", "chrome", "firefox"]),
       displayName: check.unemptyString,
       version: check.unemptyString,
-      path: isEmptyStringOrAbsolutePath,
+      # Electron browser has path "", but all other browsers
+      # should have an absolute path or an alias
+      path: check.string,
       majorVersion: check.unemptyString
     })
     browsers.forEach (browser) ->
