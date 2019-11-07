@@ -1016,6 +1016,15 @@ describe('src/cy/commands/assertions', () => {
     it('removes quotation marks in objects', function () {
       expect({ foo: 'bar' }).to.deep.eq({ foo: 'bar' })
     })
+
+    it('formats keys properly for "have.all.keys"', function () {
+      const person = {
+        name: 'Joe',
+        age: 20,
+      }
+
+      expect(person).to.have.all.keys('name', 'age')
+    })
   })
 
   context('chai overrides', () => {

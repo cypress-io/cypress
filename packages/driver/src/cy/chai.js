@@ -9,13 +9,8 @@ const $dom = require('../dom')
 const $utils = require('../cypress/utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 
-// all words between single quotes which are at
-// the end of the string
-const allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
-
-// grab all words between single quotes except
-// when the single quote word is the LAST word
-const allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
+// all words between single quotes
+const allPropertyWordsBetweenSingleQuotes = /('.*?')/g
 
 const allBetweenFourStars = /\*\*.*\*\*/
 const allNumberStrings = /'([0-9]+)'/g
@@ -99,7 +94,6 @@ chai.use((chai, u) => {
         value = value
         .replace(allWordsBetweenCurlyBraces, '**$1**')
         .replace(allEscapedSingleQuotes, '__quote__')
-        .replace(allButLastWordsBetweenSingleQuotes, '**$1**$2')
         .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
         // when a value has ** in it, **** are sometimes created after the process above.
         // remove them with this.
