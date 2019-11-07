@@ -18,6 +18,13 @@ debug("using ffmpeg from %s", ffmpegPath)
 
 ffmpeg.setFfmpegPath(ffmpegPath)
 
+deferredPromise = ->
+  resolve = reject = null
+  promise = new Promise (_resolve, _reject) ->
+    resolve = _resolve
+    reject = _reject
+  { promise, resolve, reject }
+
 module.exports = {
   getMsFromDuration: (duration) ->
     utils.timemarkToSeconds(duration) * 1000
@@ -49,7 +56,7 @@ module.exports = {
 
   start: (name, options = {}) ->
     pt         = stream.PassThrough()
-    ended      = Promise.pending()
+    ended      = deferredPromise()
     done       = false
     errored    = false
     written    = false

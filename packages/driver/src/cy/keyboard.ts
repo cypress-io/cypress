@@ -52,6 +52,7 @@ interface KeyDetails {
   shiftKeyCode?: number
   simulatedDefault?: SimulatedDefault
   simulatedDefaultOnly?: boolean
+  originalSequence?: string
   events: {
     [key in KeyEventType]?: boolean;
   }
@@ -153,16 +154,16 @@ const getFormattedKeyString = (details: KeyDetails) => {
   let foundKeyString = _.findKey(keyboardMappings, { key: details.key })
 
   if (foundKeyString) {
-    return `{${foundKeyString}}`
+    return `{${details.originalSequence}}`
   }
 
   foundKeyString = keyToModifierMap[details.key]
 
   if (foundKeyString) {
-    return `<${foundKeyString}>`
+    return `{${details.originalSequence}}`
   }
 
-  return details.key
+  return details.originalSequence
 }
 
 const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
@@ -205,6 +206,8 @@ const getKeyDetails = (onKeyNotFound) => {
       if (getTextLength(details.key) === 1) {
         details.text = details.key
       }
+
+      details.originalSequence = key
 
       return details
     }
@@ -747,6 +750,8 @@ export class Keyboard {
     .then(() => {
       if (options.release !== false) {
         return Promise.map(modifierKeys, (key) => {
+          options.id = _.uniqueId('char')
+
           return this.simulatedKeyup(getActiveEl(doc), key, options)
         })
       }
@@ -898,7 +903,7 @@ export class Keyboard {
     const formattedKeyString = getFormattedKeyString(keyDetails)
 
     debug('format string', formattedKeyString)
-    options.onEvent(options.id, formattedKeyString, eventType, which, dispatched)
+    options.onEvent(options.id, formattedKeyString, event, dispatched)
 
     return dispatched
   }
