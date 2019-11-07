@@ -11,6 +11,15 @@ plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 
+## additional events that are nice to know about to be logged
+## https://electronjs.org/docs/api/browser-window#instance-events
+ELECTRON_DEBUG_EVENTS = [
+  'close'
+  'responsive',
+  'session-end'
+  'unresponsive'
+]
+
 tryToCall = (win, method) ->
   try
     if not win.isDestroyed()
@@ -61,7 +70,7 @@ module.exports = {
           ## close child on parent close
           _win.on "close", ->
             if not child.isDestroyed()
-              child.close()
+              child.destroy()
     }
 
     _.defaultsDeep({}, options, defaults)
@@ -98,6 +107,10 @@ module.exports = {
   _launch: (win, url, options) ->
     if options.show
       menu.set({withDevTools: true})
+
+    ELECTRON_DEBUG_EVENTS.forEach (e) ->
+      win.on e, ->
+        debug("%s fired on the BrowserWindow %o", e, { browserWindowUrl: url })
 
     Promise.try =>
       @_attachDebugger(win.webContents)
@@ -226,7 +239,7 @@ module.exports = {
 
         return _.extend events, {
           browserWindow:      win
-          kill:               -> tryToCall(win, "close")
+          kill:               -> tryToCall(win, "destroy")
           removeAllListeners: -> tryToCall(win, "removeAllListeners")
         }
 }
