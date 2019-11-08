@@ -848,7 +848,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CDP_COULD_NOT_CONNECT"
       """
-      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 5 seconds.
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
 
       This usually indicates there was a problem opening the Chrome browser.
 
@@ -857,6 +857,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       Error details:
 
       #{arg2.stack}
+      """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
 
 get = (type, arg1, arg2) ->
