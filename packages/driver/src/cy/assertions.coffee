@@ -25,7 +25,7 @@ functionHadArguments = (current) ->
 isAssertionType = (cmd) ->
   cmd and cmd.is("assertion")
 
-isDomSubjectAndMatchesValue = (value, subject) ->
+isDomSubjectAndMatchesValue = (value, subject) -> 
   allElsAreTheSame = ->
     els1 = $dom.getElements(value)
     els2 = $dom.getElements(subject)
@@ -65,7 +65,7 @@ create = (state, queue, retryFn) ->
     assertions = []
     ## We could probably make this a lot neater
     ## Not completely sure how though...
-    if isNestedCommand
+    if isNestedCommand && not _.isUndefined(state("withinQueue"))
       for cmd in state("withinQueue").get()
         if cmd is current 
           continue
