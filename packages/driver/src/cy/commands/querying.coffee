@@ -68,7 +68,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     get: (selector, options = {}) ->
       ctx = @
-
+      
+      if options is null or Array.isArray(options) or typeof options isnt 'object' then return $utils.throwErrByPath "get.invalid_options", {
+          args: { options  }
+      }
       _.defaults(options, {
         retry: true
         withinSubject: cy.state("withinSubject")
@@ -78,7 +81,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       consoleProps = {}
-
       start = (aliasType) ->
         return if options.log is false
 
@@ -216,6 +218,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## and catch any sizzle errors!
         try
           $el = cy.$$(selector, options.withinSubject)
+          ## jQuery v3 has removed its deprecated properties like ".selector"
+          ## https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
+          ## but our error messages use this property to actually show the missing element
+          ## so let's put it back
+          $el.selector ?= selector
         catch e
           e.onFail = -> if options.log is false then e else options._log.error(e)
           throw e
@@ -426,11 +433,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## once its done
       prevWithinSubject = cy.state("withinSubject")
       cy.state("withinSubject", subject)
+      ## instead of just inserting these command into the queue and letting them run that way
+      ## we are going to run them ourselves in a separate queue
+      finishWithin = () ->
+        { commands } = cy.state("withinQueue")
+        ##we want to run each command in the queue
+        ## and once the command is done move onto the next
+        ## this should also block the within command from finishing
+        console.log("Running commands")
+        for cmd in commands
+          res = cy.runCommandFromWithin(cmd)
+          await res
 
       fn.call(ctx, subject)
 
       cleanup = ->
         cy.removeListener("command:start", setWithinSubject)
+        cy.removeListener("command:enqueued", finishWithin)
 
       ## we need a mechanism to know when we should remove
       ## our withinSubject so we dont accidentally keep it
@@ -466,5 +485,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           cy.state("withinSubject", null)
 
+      await finishWithin()
+      cy.state("withinQueue", null)
       return subject
   })

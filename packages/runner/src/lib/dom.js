@@ -16,10 +16,8 @@ const resetStyles = `
   padding: 0 !important;
 `
 
-function addHitBoxLayer (coords, body) {
-  if (body == null) {
-    body = $('body')
-  }
+function addHitBoxLayer (coords, $body) {
+  $body = $body || $('body')
 
   const height = 10
   const width = 10
@@ -45,8 +43,11 @@ function addHitBoxLayer (coords, body) {
     box-shadow: 0 0 5px #333;
     z-index: 2147483647;
   `)
-  const box = $(`<div class="__cypress-highlight" style="${boxStyles}" />`)
-  const wrapper = $(`<div style="${styles(resetStyles)} position: relative" />`).appendTo(box)
+
+  const $box = $(`<div class="__cypress-highlight" style="${boxStyles}" />`)
+
+  const wrapper = $(`<div style="${styles(resetStyles)} position: relative" />`).appendTo($box)
+
   const dotStyles = styles(`
     ${resetStyles}
     position: absolute;
@@ -61,17 +62,18 @@ function addHitBoxLayer (coords, body) {
 
   $(`<div style="${dotStyles}">`).appendTo(wrapper)
 
-  return box.appendTo(body)
+  return $box.appendTo($body)
 }
 
-function addElementBoxModelLayers ($el, body) {
-  if (body == null) {
-    body = $('body')
-  }
+function addElementBoxModelLayers ($el, $body) {
+  $body = $body || $('body')
 
   const dimensions = getElementDimensions($el)
 
-  const container = $('<div class="__cypress-highlight">')
+  const $container = $('<div class="__cypress-highlight">')
+  .css({
+    opacity: 0.7,
+  })
 
   const layers = {
     Content: '#9FC4E7',
@@ -113,16 +115,21 @@ function addElementBoxModelLayers ($el, body) {
       obj.left -= dimensions.marginLeft
     }
 
+    if (attr === 'Padding') {
+      obj.top += dimensions.borderTop
+      obj.left += dimensions.borderLeft
+    }
+
     // bail if the dimensions of this layer match the previous one
     // so we dont create unnecessary layers
-    if (dimensionsMatchPreviousLayer(obj, container)) return
+    if (dimensionsMatchPreviousLayer(obj, $container)) return
 
-    return createLayer($el, attr, color, container, obj)
+    return createLayer($el, attr, color, $container, obj)
   })
 
-  container.appendTo(body)
+  $container.appendTo($body)
 
-  container.children().each((index, el) => {
+  $container.children().each((index, el) => {
     const $el = $(el)
     const top = $el.data('top')
     const left = $el.data('left')
@@ -134,7 +141,7 @@ function addElementBoxModelLayers ($el, body) {
     })
   })
 
-  return container
+  return $container
 }
 
 function getOrCreateSelectorHelperDom ($body) {
@@ -220,7 +227,6 @@ function createLayer ($el, attr, color, container, dimensions) {
     position: 'absolute',
     zIndex: getZIndex($el),
     backgroundColor: color,
-    opacity: 0.6,
   }
 
   return $('<div>')
@@ -234,15 +240,15 @@ function createLayer ($el, attr, color, container, dimensions) {
 function dimensionsMatchPreviousLayer (obj, container) {
   // since we're prepending to the container that
   // means the previous layer is actually the first child element
-  const previousLayer = container.children().first()
+  const previousLayer = container.children().first().get(0)
 
   // bail if there is no previous layer
-  if (!previousLayer.length) {
+  if (!previousLayer) {
     return
   }
 
-  return obj.width === previousLayer.width() &&
-  obj.height === previousLayer.height()
+  return obj.width === previousLayer.offsetWidth &&
+  obj.height === previousLayer.offsetHeight
 }
 
 function getDimensionsFor (dimensions, attr, dimension) {
@@ -255,14 +261,17 @@ function getZIndex (el) {
   }
 
   return _.toNumber(el.css('zIndex'))
-
 }
 
 function getElementDimensions ($el) {
-  const dimensions = {
+  const el = $el.get(0)
+
+  const { offsetHeight, offsetWidth } = el
+
+  const box = {
     offset: $el.offset(), // offset disregards margin but takes into account border + padding
-    height: $el.height(), // we want to use height here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
-    width: $el.width(),
+    // dont use jquery here for width/height because it uses getBoundingClientRect() which returns scaled values.
+    // TODO: switch back to using jquery when upgrading to jquery 3.4+
     paddingTop: getPadding($el, 'top'),
     paddingRight: getPadding($el, 'right'),
     paddingBottom: getPadding($el, 'bottom'),
@@ -277,6 +286,14 @@ function getElementDimensions ($el) {
     marginLeft: getMargin($el, 'left'),
   }
 
+  // NOTE: offsetWidth/height always give us content + padding + border, so subtract them
+  // to get the true "clientHeight" and "clientWidth".
+  // we CANNOT just use "clientHeight" and "clientWidth" because those always return 0
+  // for inline elements >_<
+  //
+  box.width = offsetWidth - (box.paddingLeft + box.paddingRight + box.borderLeft + box.borderRight)
+  box.height = offsetHeight - (box.paddingTop + box.paddingBottom + box.borderTop + box.borderBottom)
+
   // innerHeight: Get the current computed height for the first
   // element in the set of matched elements, including padding but not border.
 
@@ -284,21 +301,24 @@ function getElementDimensions ($el) {
   // element in the set of matched elements, including padding, border,
   // and optionally margin. Returns a number (without 'px') representation
   // of the value or null if called on an empty set of elements.
+  box.heightWithPadding = box.height + box.paddingTop + box.paddingBottom
 
-  dimensions.heightWithPadding = $el.innerHeight()
-  dimensions.heightWithBorder = $el.innerHeight() + getTotalFor(['borderTop', 'borderBottom'], dimensions)
-  dimensions.heightWithMargin = $el.outerHeight(true)
+  box.heightWithBorder = box.heightWithPadding + box.borderTop + box.borderBottom
 
-  dimensions.widthWithPadding = $el.innerWidth()
-  dimensions.widthWithBorder = $el.innerWidth() + getTotalFor(['borderRight', 'borderLeft'], dimensions)
-  dimensions.widthWithMargin = $el.outerWidth(true)
+  box.heightWithMargin = box.heightWithBorder + box.marginTop + box.marginBottom
 
-  return dimensions
+  box.widthWithPadding = box.width + box.paddingLeft + box.paddingRight
+
+  box.widthWithBorder = box.widthWithPadding + box.borderLeft + box.borderRight
+
+  box.widthWithMargin = box.widthWithBorder + box.marginLeft + box.marginRight
+
+  return box
 }
 
-function getNumAttrValue (el, attr) {
+function getNumAttrValue ($el, attr) {
   // nuke anything thats not a number or a negative symbol
-  const num = _.toNumber(el.css(attr).replace(/[^0-9\.-]+/, ''))
+  const num = _.toNumber($el.css(attr).replace(/[^0-9\.-]+/, ''))
 
   if (!_.isFinite(num)) {
     throw new Error('Element attr did not return a valid number')
@@ -307,28 +327,22 @@ function getNumAttrValue (el, attr) {
   return num
 }
 
-function getPadding (el, dir) {
-  return getNumAttrValue(el, `padding-${dir}`)
+function getPadding ($el, dir) {
+  return getNumAttrValue($el, `padding-${dir}`)
 }
 
-function getBorder (el, dir) {
-  return getNumAttrValue(el, `border-${dir}-width`)
+function getBorder ($el, dir) {
+  return getNumAttrValue($el, `border-${dir}-width`)
 }
 
-function getMargin (el, dir) {
-  return getNumAttrValue(el, `margin-${dir}`)
+function getMargin ($el, dir) {
+  return getNumAttrValue($el, `margin-${dir}`)
 }
 
-function getTotalFor (directions, dimensions) {
-  return _.reduce(directions, (memo, direction) => {
-    return memo + dimensions[direction]
-  }, 0)
-}
-
-function getOuterSize (el) {
+function getOuterSize ($el) {
   return {
-    width: el.outerWidth(true),
-    height: el.outerHeight(true),
+    width: $el.outerWidth(true),
+    height: $el.outerHeight(true),
   }
 }
 
@@ -338,8 +352,8 @@ function isInViewport (win, el) {
   return (
     rect.top >= 0 &&
     rect.left >= 0 &&
-    rect.bottom <= $(win).height() &&
-    rect.right <= $(win).width()
+    rect.bottom <= win.innerHeight &&
+    rect.right <= win.innerWidth
   )
 }
 
@@ -351,17 +365,17 @@ function scrollIntoView (win, el) {
 
 const sizzleRe = /sizzle/i
 
-function getElementsForSelector ({ root, selector, method, cypressDom }) {
+function getElementsForSelector ({ $root, selector, method, cypressDom }) {
   let $el = null
 
   try {
     if (method === 'contains') {
-      $el = root.find(cypressDom.getContainsSelector(selector))
+      $el = $root.find(cypressDom.getContainsSelector(selector))
       if ($el.length) {
         $el = cypressDom.getFirstDeepestElement($el)
       }
     } else {
-      $el = root.find(selector)
+      $el = $root.find(selector)
     }
   } catch (err) {
     // if not a sizzle error, ignore it and let $el be null

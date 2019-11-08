@@ -29,6 +29,9 @@ class $CommandQueue
   names: ->
     @invokeMap("get", "name")
 
+  remove: (index, amountToRemove) ->
+    @commands.splice(index, amountToRemove)
+
   splice: (start, end, obj) ->
     cmd = @add(obj)
     @commands.splice(start, end, cmd)
@@ -40,10 +43,9 @@ class $CommandQueue
       prev.set("next", cmd)
       cmd.set("prev", prev)
 
-    if next
+    if next and not _.isUndefined(next.get("parentCommand"))
       next.set("prev", cmd)
       cmd.set("next", next)
-
     return cmd
 
   slice: ->

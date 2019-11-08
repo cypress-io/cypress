@@ -42,7 +42,6 @@ const wrap = (ipc, events, ids, args) => {
     }
 
     return '__cypress_unhandled__'
-
   }
 
   util.wrapChildPromise(ipc, invoke, ids, [arg])

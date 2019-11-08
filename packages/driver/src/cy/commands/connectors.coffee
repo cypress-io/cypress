@@ -68,7 +68,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     invokedCyCommand = false
 
-    enqueuedCommand = ->
+    enqueuedCommand = (obj) ->
+      ## Do the same thing here as with within?
       invokedCyCommand = true
 
     state("onInjectCommand", returnFalseIfThenable)
@@ -395,12 +396,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           ## find the new subject and splice it out
           ## with our existing subject
+          ## But only if the new subject is defined
+          ## Otherwise keep the current subject as it is
+          ## https://github.com/cypress-io/cypress/issues/4921
           index = _.indexOf(args, newSubject)
-          if index > -1
-            args.splice(index, 1, subject)
-
+          if not _.isUndefined(newSubject) and index > -1 
+              args.splice(index, 1, subject)
           cy.removeListener("next:subject:prepared", checkSubject)
-
         cy.on("next:subject:prepared", checkSubject)
 
       endEarly = false

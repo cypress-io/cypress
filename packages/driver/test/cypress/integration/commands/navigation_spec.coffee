@@ -149,6 +149,7 @@ describe "src/cy/commands/navigation", ->
             expect(win.foo).to.be.undefined
 
       it "throws when reload times out", (done) ->
+        cy.timeout(1000)
         locReload = cy.spy(Cypress.utils, "locReload")
 
         cy
@@ -326,6 +327,7 @@ describe "src/cy/commands/navigation", ->
         cy.go(0)
 
       it "throws when go times out", (done) ->
+        cy.timeout(1000)
         cy
           .visit("/timeout?ms=100")
           .visit("/fixtures/jquery.html")
@@ -360,19 +362,19 @@ describe "src/cy/commands/navigation", ->
 
     describe ".log", ->
       beforeEach ->
-        @logs = []
+        cy.visit("/fixtures/generic.html").then ->
+          @logs = []
 
-        cy.on "log:added", (attrs, log) =>
-          if attrs.name is "go"
-            @lastLog = log
+          cy.on "log:added", (attrs, log) =>
+            if attrs.name is "go"
+              @lastLog = log
 
-          @logs.push(log)
+            @logs.push(log)
 
-        return null
+          return null
 
       it "logs go", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             lastLog = @lastLog
@@ -382,14 +384,12 @@ describe "src/cy/commands/navigation", ->
 
       it "can turn off logging", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back", {log: false}).then ->
             expect(@lastLog).to.be.undefined
 
       it "does not log 'Page Load' events", ->
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
@@ -399,7 +399,6 @@ describe "src/cy/commands/navigation", ->
         beforeunload = false
 
         cy
-          .visit("/fixtures/generic.html")
           .visit("/fixtures/jquery.html")
           .window().then (win) ->
             cy.on "window:before:unload", =>

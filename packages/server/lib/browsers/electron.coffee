@@ -1,10 +1,12 @@
 _             = require("lodash")
 EE            = require("events")
+net           = require("net")
 Promise       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers:electron")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
 appData       = require("../util/app_data")
+{ CdpAutomation } = require("./cdp_automation")
 plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
@@ -18,6 +20,14 @@ tryToCall = (win, method) ->
         method()
   catch err
     debug("got error calling window method:", err.stack)
+
+getAutomation = (win) ->
+  sendDebuggerCommand = (message, data) ->
+    ## wrap in bluebird
+    tryToCall win, Promise.method ->
+      win.webContents.debugger.sendCommand(message, data)
+
+  CdpAutomation(sendDebuggerCommand)
 
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
@@ -56,6 +66,8 @@ module.exports = {
 
     _.defaultsDeep({}, options, defaults)
 
+  _getAutomation: getAutomation
+
   _render: (url, projectRoot, options = {}) ->
     win = Windows.create(projectRoot, options)
 
@@ -87,11 +99,9 @@ module.exports = {
     if options.show
       menu.set({withDevTools: true})
 
-    Promise
-    .try =>
-      if options.show is false
-        @_attachDebugger(win.webContents)
-
+    Promise.try =>
+      @_attachDebugger(win.webContents)
+    .then =>
       if ua = options.userAgent
         @_setUserAgent(win.webContents, ua)
 
@@ -105,6 +115,9 @@ module.exports = {
       )
     .then ->
       win.loadURL(url)
+    .then =>
+      ## enabling can only happen once the window has loaded
+      @_enableDebugger(win.webContents)
     .return(win)
 
   _attachDebugger: (webContents) ->
@@ -114,6 +127,8 @@ module.exports = {
     catch err
       debug("debugger attached failed %o", { err })
 
+    webContents.debugger.sendCommand('Browser.getVersion')
+
     webContents.debugger.on "detach", (event, reason) ->
       debug("debugger detached due to %o", { reason })
 
@@ -121,7 +136,12 @@ module.exports = {
       if method is "Console.messageAdded"
         debug("console message: %o", params.message)
 
-    webContents.debugger.sendCommand("Console.enable")
+  _enableDebugger: (webContents) ->
+    debug("debugger: enable Console and Network")
+    Promise.join(
+      webContents.debugger.sendCommand("Console.enable"),
+      webContents.debugger.sendCommand("Network.enable")
+    )
 
   _getPartition: (options) ->
     if options.isTextTerminal
@@ -135,8 +155,8 @@ module.exports = {
 
   _clearCache: (webContents) ->
     debug("clearing cache")
-    new Promise (resolve) ->
-      webContents.session.clearCache(resolve)
+    Promise.fromCallback (cb) =>
+      webContents.session.clearCache(cb)
 
   _setUserAgent: (webContents, userAgent) ->
     debug("setting user agent to:", userAgent)
@@ -145,14 +165,14 @@ module.exports = {
     webContents.session.setUserAgent(userAgent)
 
   _setProxy: (webContents, proxyServer) ->
-    new Promise (resolve) ->
+    Promise.fromCallback (cb) =>
       webContents.session.setProxy({
         proxyRules: proxyServer
-        ## this should really only be necessary when 
+        ## this should really only be necessary when
         ## running Chromium versions >= 72
         ## https://github.com/cypress-io/cypress/issues/1872
         proxyBypassRules: "<-loopback>"
-      }, resolve)
+      }, cb)
 
   open: (browser, url, options = {}, automation) ->
     { projectRoot, isTextTerminal } = options
@@ -195,32 +215,7 @@ module.exports = {
         ## https://github.com/cypress-io/cypress/issues/1939
         tryToCall(win, "focusOnWebView")
 
-        a = Windows.automation(win)
-
-        invoke = (method, data) =>
-          tryToCall win, ->
-            a[method](data)
-
-        automation.use({
-          onRequest: (message, data) ->
-            switch message
-              when "get:cookies"
-                invoke("getCookies", data)
-              when "get:cookie"
-                invoke("getCookie", data)
-              when "set:cookie"
-                invoke("setCookie", data)
-              when "clear:cookies"
-                invoke("clearCookies", data)
-              when "clear:cookie"
-                invoke("clearCookie", data)
-              when "is:automation:client:connected"
-                invoke("isAutomationConnected", data)
-              when "take:screenshot"
-                invoke("takeScreenshot")
-              else
-                throw new Error("No automation handler registered for: '#{message}'")
-        })
+        automation.use(getAutomation(win))
 
         events = new EE
 

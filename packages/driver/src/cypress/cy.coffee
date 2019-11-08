@@ -52,6 +52,32 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
+
+## We only set top.onerror once since we make it configurable:false
+## but we update cy instance every run (page reload or rerun button)
+curCy = null
+setTopOnError = (cy) ->
+  if curCy
+    curCy = cy
+    return
+  
+  curCy = cy
+
+  onTopError = ->
+    curCy.onUncaughtException.apply(curCy, arguments)
+
+  top.onerror = onTopError
+
+  ## Prevent Mocha from setting top.onerror which would override our handler
+  ## Since the setter will change which event handler gets invoked, we make it a noop
+  Object.defineProperty(top, 'onerror', {
+    set: ->
+    get: -> onTopError
+    configurable: false
+    enumerable: true
+  })
+  
+
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
@@ -83,7 +109,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   location = $Location.create(state)
   focused = $Focused.create(state)
   keyboard = $Keyboard.create(state)
-  mouse = $Mouse.create(state, keyboard)
+  mouse = $Mouse.create(state, keyboard, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -167,9 +193,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.SVGElement.prototype.blur = ->
         focused.interceptBlur(@)
 
-      contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(@)
-
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
 
@@ -197,21 +220,33 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## first command. this was due to nestedIndex being undefined at that
     ## time. so we have to ensure to check that its any kind of number (even 0)
     ## in order to know to splice into the existing array.
-    nestedIndex = state("nestedIndex")
 
+    nestedIndex = state("nestedIndex")
     ## if this is a number then we know
     ## we're about to splice this into our commands
     ## and need to reset next + increment the index
     if _.isNumber(nestedIndex)
+      parentCommand = state("currentCommand")
       state("nestedIndex", nestedIndex += 1)
-
     ## we look at whether or not nestedIndex is a number, because if it
     ## is then we need to splice inside of our commands, else just push
-    ## it onto the end of the queu
+    ## it onto the end of the queue
     index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
+    ## if we're dealing with nestedCommands
+    ## then add the parentCommand to the obj
+    if not _.isUndefined(parentCommand) 
+      obj.parentCommand = parentCommand
+      if obj.type is "parent" then obj.type = "child"
 
-    queue.splice(index, 0, obj)
-
+    ## If we are dealing with a within commmand,
+    ## We want to create its own queue, and run the commands from there
+    ## That way they run within the context of the within, instead of running outside of the within
+    if state("withinQueue")
+        state("withinQueue").splice(state("withinQueue").length, 0, obj)
+    else if not _.isUndefined(parentCommand) and parentCommand.get("name") is "within"
+        state("withinQueue", $CommandQueue.create())
+        state("withinQueue").splice(state("withinQueue").length, 0, obj)
+    else queue.splice(index, 0, obj)
     Cypress.action("cy:command:enqueued", obj)
 
   getCommandsUntilFirstParentOrValidSubject = (command, memo = []) ->
@@ -395,9 +430,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       runnable = state("runnable")
 
       Cypress.action("cy:command:start", command)
+      state("currentCommand", command)
 
       runCommand(command)
       .then ->
+        ## If the command has a parentCommand (meaning that is a nested command...)
+        ## then remove that command from the queue
+        ## TODO: We will have to test chained commands...but hopefully that should just work??
+
         ## each successful command invocation should
         ## always reset the timeout for the current runnable
         ## unless it already has a state.  if it has a state
@@ -411,9 +451,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## in between different hooks like before + beforeEach
         ## else run will be called again and index would start
         ## over at 0
+        ## However, we should only mutate the index if we aren't removing a command
+        ## Since every nested command will get removed here...
+        ## Unsure if this is the best place for this
+        ##if command.get("parentCommand")
+        ##queue.remove(state("index"), 1)
         state("index", index += 1)
-
         Cypress.action("cy:command:end", command)
+        state("currentCommand", null)
 
         if fn = state("onPaused")
           new Promise (resolve) ->
@@ -510,7 +555,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ensures.ensureSubjectByType(subject, prevSubject, name)
 
     args.unshift(subject)
-
     Cypress.action("cy:next:subject:prepared", subject, args)
 
     args
@@ -537,8 +581,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
     if state("runnable")
-      ## make sure we don't ever time out this runnable now
-      timeouts.clearTimeout()
+      ## make sure we reset the runnable's timeout now
+      state("runnable").resetTimeout()
 
     ## if a command fails then after each commands
     ## could also fail unless we clear this out
@@ -680,7 +724,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
-    ensureReceivability: ensures.ensureReceivability
+    ensureNotReadonly: ensures.ensureNotReadonly
+    ensureNotDisabled: ensures.ensureNotDisabled
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
     ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating
@@ -862,7 +907,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       Promise.resolve(
         commandFns[name].apply(cy, args)
       )
-
+    runCommandFromWithin: (obj) ->
+      ## instead of removing the commands from the queue
+      ## after they are done running, should we do it here?
+      ## Worried about the behaviour with other nested commands
+      new Promise( (resolve) ->
+        Cypress.action("cy:command:start", obj)
+        runCommand(obj)
+        .then ->
+          Cypress.action("cy:command:end", obj)
+          resolve(obj)
+      )
+      
     replayCommandsFrom: (current) ->
       ## reset each chainerId to the
       ## current value
@@ -1109,6 +1165,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           args: obj
         })
     })
+  
+  setTopOnError(cy)
 
   ## make cy global in the specWindow
   specWindow.cy = cy

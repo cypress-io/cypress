@@ -3,21 +3,52 @@ require("../spec_helper")
 _       = require("lodash")
 http    = require("http")
 Request = require("#{root}lib/request")
+snapshot = require("snap-shot-it")
 
 request = Request({timeout: 100})
 
+testAttachingCookiesWith = (fn) ->
+  set = sinon.spy(request, 'setCookiesOnBrowser')
+  get = sinon.spy(request, 'setRequestCookieHeader')
+
+  nock("http://localhost:1234")
+  .get("/")
+  .reply(302, "", {
+    'set-cookie': 'foo=bar'
+    location: "/B"
+  })
+  .get("/B")
+  .reply(302, "", {
+    'set-cookie': 'bar=baz'
+    location: "/B"
+  })
+  .get("/B")
+  .reply(200, "", {
+    'set-cookie': 'quuz=quux'
+  })
+
+  fn()
+  .then ->
+    snapshot({
+      setCalls: set.getCalls().map (call) ->
+        {
+          currentUrl: call.args[1],
+          setCookie: call.args[0].headers['set-cookie']
+        }
+      getCalls: get.getCalls().map (call) ->
+        {
+          newUrl: _.get(call, 'args.1')
+        }
+    })
+
 describe "lib/request", ->
+  beforeEach ->
+    @fn = sinon.stub()
+    @fn.withArgs('set:cookie').resolves({})
+    @fn.withArgs('get:cookies').resolves([])
+
   it "is defined", ->
     expect(request).to.be.an("object")
-
-  context "#reduceCookieToArray", ->
-    it "converts object to array of key values", ->
-      obj = {
-        foo: "bar"
-        baz: "quux"
-      }
-
-      expect(request.reduceCookieToArray(obj)).to.deep.eq(["foo=bar", "baz=quux"])
 
   context "#getDelayForRetry", ->
     it "divides by 10 when delay >= 1000 and err.code = ECONNREFUSED", ->
@@ -103,15 +134,6 @@ describe "lib/request", ->
       opts = request.setDefaults({ delaysRemaining })
 
       expect(opts.delaysRemaining).to.eq(delaysRemaining)
-
-  context "#createCookieString", ->
-    it "joins array by '; '", ->
-      obj = {
-        foo: "bar"
-        baz: "quux"
-      }
-
-      expect(request.createCookieString(obj)).to.eq("foo=bar; baz=quux")
 
   context "#normalizeResponse", ->
     beforeEach ->
@@ -264,9 +286,6 @@ describe "lib/request", ->
           expect(@hits).to.eq(5)
 
   context "#sendPromise", ->
-    beforeEach ->
-      @fn = sinon.stub()
-
     it "sets strictSSL=false", ->
       init = sinon.spy(request.rp.Request.prototype, "init")
 
@@ -335,6 +354,8 @@ describe "lib/request", ->
         ])
 
     it "includes redirects", ->
+      @fn.resolves()
+
       nock("http://www.github.com")
       .get("/dashboard")
       .reply(301, null, {
@@ -623,6 +644,9 @@ describe "lib/request", ->
           expect(resp.status).to.eq(200)
 
     context "followRedirect", ->
+      beforeEach ->
+        @fn.resolves()
+
       it "by default follow redirects", ->
         nock("http://localhost:8080")
         .get("/dashboard")
@@ -733,6 +757,12 @@ describe "lib/request", ->
           expect(resp.status).to.eq(200)
           expect(resp).not.to.have.property("redirectedToUrl")
 
+      it "gets + attaches the cookies at each redirect", ->
+        testAttachingCookiesWith =>
+          request.sendPromise({}, @fn, {
+            url: "http://localhost:1234/"
+          })
+
     context "form=true", ->
       beforeEach ->
         nock("http://localhost:8080")
@@ -817,7 +847,7 @@ describe "lib/request", ->
         .then ->
           throw new Error("should have failed")
         .catch (err) ->
-          expect(err.message).to.eq "TypeError: The header content contains invalid characters"
+          expect(err.message).to.eq "TypeError [ERR_INVALID_CHAR]: Invalid character in header content [\"x-text\"]"
 
       it "handles weird content in the body just fine", ->
         request.sendPromise({}, @fn, {
@@ -830,9 +860,6 @@ describe "lib/request", ->
         })
 
   context "#sendStream", ->
-    beforeEach ->
-      @fn = sinon.stub()
-
     it "allows overriding user-agent in headers", ->
       nock("http://localhost:8080")
         .matchHeader("user-agent", "custom-agent")
@@ -857,3 +884,16 @@ describe "lib/request", ->
         beginFn()
         expect(request.create).to.be.calledOnce
         expect(request.create).to.be.calledWith(options)
+
+    it "gets + attaches the cookies at each redirect", ->
+      testAttachingCookiesWith =>
+        request.sendStream({}, @fn, {
+          url: "http://localhost:1234/"
+          followRedirect: _.stubTrue
+        })
+        .then (fn) =>
+          req = fn()
+
+          new Promise (resolve, reject) =>
+            req.on('response', resolve)
+            req.on('error', reject)
