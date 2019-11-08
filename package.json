@@ -17,6 +17,7 @@
     "bump": "node ./scripts/binary.js bump",
     "check-deps": "node ./scripts/check-deps.js --verbose",
     "check-deps-pre": "node ./scripts/check-deps.js --verbose --prescript",
+    "check-next-dev-version": "node scripts/check-next-dev-version.js",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "clean-deps": "npm run all clean-deps && rm -rf node_modules",
