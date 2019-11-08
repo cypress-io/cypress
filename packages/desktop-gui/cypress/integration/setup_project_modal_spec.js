@@ -460,6 +460,7 @@ describe('Set Up Project', function () {
       })
 
       it('shows setup', () => {
+        cy.get('.login-content > .btn').click()
         cy.contains('h4', 'Set up project')
       })
     })
