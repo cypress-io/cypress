@@ -13,6 +13,7 @@ describe('webpack preprocessor - e2e', () => {
   let filePath
 
   beforeEach(() => {
+    preprocessor.__reset()
     fs.removeSync(path.join(__dirname, '_test-output'))
 
     const originalFilePath = path.join(__dirname, '..', 'fixtures', 'example_spec.js')

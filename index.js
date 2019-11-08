@@ -5,7 +5,7 @@ const debug = require('debug')('cypress:webpack')
 const createDeferred = require('./deferred')
 const stubbableRequire = require('./stubbable-require')
 
-const bundles = {}
+let bundles = {}
 
 // we don't automatically load the rules, so that the babel dependencies are
 // not required if a user passes in their own configuration
@@ -199,5 +199,10 @@ Object.defineProperty(preprocessor, 'defaultOptions', {
     }
   },
 })
+
+// for testing purposes
+preprocessor.__reset = () => {
+  bundles = {}
+}
 
 module.exports = preprocessor
