@@ -13,12 +13,13 @@ describe('webpack preprocessor - e2e', () => {
   let filePath
 
   beforeEach(() => {
-    preprocessor.__reset()
-    fs.removeSync(path.join(__dirname, '_test-output'))
-
     const originalFilePath = path.join(__dirname, '..', 'fixtures', 'example_spec.js')
 
     filePath = path.join(__dirname, '..', '_test-output', 'example_spec.js')
+
+    preprocessor.__reset()
+    fs.removeSync(path.join(__dirname, '_test-output'))
+    fs.outputFileSync(filePath, '')
     fs.copyFileSync(originalFilePath, filePath)
 
     file = Object.assign(new EventEmitter(), {
