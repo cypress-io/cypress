@@ -32,4 +32,27 @@ describe('webpack preprocessor - e2e', () => {
       snapshot(fs.readFileSync(outputPath).toString())
     })
   })
+
+  it('allows attaching catch later on syntax error without triggering unhandled rejection', (done) => {
+    process.on('unhandledRejection', (err) => {
+      // eslint-disable-next-line no-console
+      console.error('Unhandled Rejection:', err.stack)
+      done('Should not have trigger unhandled rejection')
+    })
+
+    file.shouldWatch = true
+
+    preprocessor()(file).then(() => {
+      fs.outputFileSync(filePath, '{')
+
+      setTimeout(() => {
+        preprocessor()(file)
+        .catch((err) => {
+          expect(err.stack).to.include('Unexpected token')
+          file.emit('close')
+          done()
+        })
+      }, 1000)
+    })
+  })
 })
