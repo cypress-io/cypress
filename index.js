@@ -148,12 +148,20 @@ const preprocessor = (options = {}) => {
       // we overwrite the latest bundle, so that a new call to this function
       // returns a promise that resolves when the bundling is finished
       latestBundle = createDeferred()
-      bundles[filePath] = latestBundle.promise.tap(() => {
+      bundles[filePath] = latestBundle.promise
+
+      bundles[filePath].tap(() => {
         debug('- compile finished for', filePath)
         // when the bundling is finished, emit 'rerun' to let Cypress
         // know to rerun the spec
         file.emit('rerun')
       })
+      // we suppress unhandled rejections so they don't bubble up to the
+      // unhandledRejection handler and crash the process. Cypress will
+      // eventually take care of the rejection when the file is requested.
+      // note that this does not work if attached to latestBundle.promise
+      // for some reason. it only works when attached after .tap  ¯\_(ツ)_/¯
+      .suppressUnhandledRejections()
     }
 
     // when we should watch, we hook into the 'compile' hook so we know when
