@@ -218,10 +218,6 @@ const getKeyDetails = (onKeyNotFound) => {
   }
 }
 
-const hasModifierBesidesShift = (modifiers: KeyboardModifiers) => {
-  return _.some(_.omit(modifiers, ['shift']))
-}
-
 /**
  * @example '{foo}' => 'foo'
  */
@@ -928,10 +924,11 @@ export class Keyboard {
       details.text = details.shiftText
     }
 
-    // If any modifier besides shift is pressed, no text.
-    if (hasModifierBesidesShift(modifiers)) {
-      details.text = ''
-    }
+    // TODO: Re-think skipping text insert if non-shift modifers
+    // @see https://github.com/cypress-io/cypress/issues/5622
+    // if (hasModifierBesidesShift(modifiers)) {
+    //   details.text = ''
+    // }
 
     return details
   }
@@ -1053,10 +1050,7 @@ export class Keyboard {
     debug('getSimulatedDefaultForKey', key.key)
     if (key.simulatedDefault) return key.simulatedDefault
 
-    let nonShiftModifierPressed = hasModifierBesidesShift(this.getActiveModifiers())
-
-    debug({ nonShiftModifierPressed, key })
-    if (!nonShiftModifierPressed && simulatedDefaultKeyMap[key.key]) {
+    if (simulatedDefaultKeyMap[key.key]) {
       return simulatedDefaultKeyMap[key.key]
     }
 
