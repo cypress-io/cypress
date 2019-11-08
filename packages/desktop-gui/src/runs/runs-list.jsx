@@ -290,6 +290,8 @@ class RunsList extends Component {
   _projectNotSetup (isValid = true) {
     return (
       <ProjectNotSetup
+        isAuthenticated={authStore.isAuthenticated}
+        isShowingLogin={authStore.isShowingLogin}
         project={this.props.project}
         isValid={isValid}
         onSetup={this._setProjectDetails}
