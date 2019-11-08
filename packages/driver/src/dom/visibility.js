@@ -116,7 +116,8 @@ const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
 }
 
-// This is a simplified version of backface culling ().
+const numberRegex = /-?[0-9]+(?:\.[0-9]+)?/g
+// This is a simplified version of backface culling.
 // https://en.wikipedia.org/wiki/Back-face_culling
 //
 // We defined view normal vector, (0, 0, -1), - eye to screen.
@@ -127,23 +128,20 @@ const elIsBackface = ($el) => {
   const style = getComputedStyle(el)
   const backface = style.getPropertyValue('backface-visibility')
   const backfaceInvisible = backface === 'hidden'
+  const transform = style.getPropertyValue('transform')
 
-  if (backfaceInvisible) {
-    const transform = style.getPropertyValue('transform')
-
-    if (transform.startsWith('matrix3d')) {
-      const m3d = transform.substring(8).match(/-?[0-9]+(?:\.[0-9]+)?/g)
-      const defaultNormal = [0, 0, -1]
-      const elNormal = findNormal(m3d)
-      // Simplified dot product.
-      // [0] and [1] are always 0
-      const dot = defaultNormal[2] * elNormal[2]
-
-      return dot >= 0
-    }
+  if (!backfaceInvisible || !transform.startsWith('matrix3d')) {
+    return false
   }
 
-  return false
+  const m3d = transform.substring(8).match(numberRegex)
+  const defaultNormal = [0, 0, -1]
+  const elNormal = findNormal(m3d)
+  // Simplified dot product.
+  // [0] and [1] are always 0
+  const dot = defaultNormal[2] * elNormal[2]
+
+  return dot >= 0
 }
 
 const findNormal = (m) => {
