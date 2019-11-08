@@ -12,7 +12,7 @@ BlackHoleStream = require("black-hole-stream")
 fs         = require("./util/fs")
 
 ## extra verbose logs for logging individual frames
-debugFrames = require("debug")("cypress:server:video:frames")
+debugFrames = require("debug")("cypress-verbose:server:video:frames")
 
 debug("using ffmpeg from %s", ffmpegPath)
 
