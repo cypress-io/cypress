@@ -5,6 +5,7 @@ Fixtures = require("../support/helpers/fixtures")
 
 pluginExtension = Fixtures.projectPath("plugin-extension")
 pluginConfig = Fixtures.projectPath("plugin-config")
+pluginFilterBrowsers = Fixtures.projectPath("plugin-filter-browsers")
 workingPreprocessor = Fixtures.projectPath("working-preprocessor")
 pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
 pluginsAbsolutePath = Fixtures.projectPath("plugins-absolute-path")
@@ -40,6 +41,21 @@ describe "e2e plugins", ->
       sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 0
+    })
+
+  it "can filter browsers from config", ->
+    e2e.exec(@, {
+      project: pluginFilterBrowsers
+      # the test project filters available browsers
+      # and returns a list with JUST Electron browser
+      # and we ask to run in Chrome
+      # thus the test should fail
+      browser: "chrome"
+      expectedExitCode: 1
+      snapshot: true
+      # we are interested in the actual filtered available browser name
+      # which should be "electron"
+      normalizeAvailableBrowsers: false
     })
 
   e2e.it "works with user extensions", {

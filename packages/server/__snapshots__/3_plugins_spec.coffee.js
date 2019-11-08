@@ -374,3 +374,12 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
 
 `
+
+exports['e2e plugins can filter browsers from config 1'] = `
+Can't run because you've entered an invalid browser name.
+
+Browser: 'chrome' was not found on your system.
+
+Available browsers found are: electron
+
+`
