@@ -67,8 +67,8 @@
     "babel-loader": "^8.0.2"
   },
   "dependencies": {
-    "bluebird": "3.5.0",
-    "debug": "3.1.0"
+    "bluebird": "3.7.1",
+    "debug": "4.1.1"
   },
   "release": {
     "verifyConditions": "condition-circle",
