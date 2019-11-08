@@ -8,7 +8,7 @@ import authStore from './auth-store'
 import ipc from '../lib/ipc'
 
 const close = () => {
-  authStore.setShowingLogin(false)
+  authStore.closeLogin()
 }
 
 // LoginContent is a separate component so that it pings the api

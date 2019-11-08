@@ -820,12 +820,53 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css backface-visibility', () => {
+      describe('element visibility by backface-visibility and rotation', () => {
+        const add = (el) => {
+          return $(el).appendTo(cy.$$('body'))
+        }
+
+        it('is visible when there is no transform', () => {
+          const el = add('<div>No transform</div>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is rotated < 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(45deg)">rotateX(45deg)</div>')
+
+          expect(el).to.be.visible
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-45deg)">rotateY(-45deg)</div>')
+
+          expect(el2).to.be.visible
+        })
+
+        it('is invisible when an element is rotated > 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(135deg)">rotateX(135deg)</div>')
+
+          expect(el).to.be.hidden
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-135deg)">rotateY(-135deg)</div>')
+
+          expect(el2).to.be.hidden
+        })
+
+        it('is invisible when an element is rotated in 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(90deg)">rotateX(90deg)</div>')
+
+          expect(el).to.be.hidden
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-90deg)">rotateY(-90deg)</div>')
+
+          expect(el2).to.be.hidden
+        })
+      })
+
       it('is visible when backface not visible', function () {
         expect(this.$parentsWithBackfaceVisibilityHidden.find('#front')).to.be.visible
       })
 
-      // TODO: why is this skipped?
-      it.skip('is hidden when backface visible', function () {
+      it('is hidden when backface visible', function () {
         expect(this.$parentsWithBackfaceVisibilityHidden.find('#back')).to.be.hidden
       })
     })
