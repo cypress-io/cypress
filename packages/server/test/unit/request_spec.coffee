@@ -14,17 +14,17 @@ testAttachingCookiesWith = (fn) ->
   nock("http://localhost:1234")
   .get("/")
   .reply(302, "", {
-    'set-cookie': 'foo=bar'
-    location: "/B"
+    'set-cookie': 'one=1'
+    location: "/second"
   })
-  .get("/B")
+  .get("/second")
   .reply(302, "", {
-    'set-cookie': 'bar=baz'
-    location: "/B"
+    'set-cookie': 'two=2'
+    location: "/third"
   })
-  .get("/B")
+  .get("/third")
   .reply(200, "", {
-    'set-cookie': 'quuz=quux'
+    'set-cookie': 'three=3'
   })
 
   fn()
