@@ -20,6 +20,10 @@ const allEscapedSingleQuotes = /\\'/g
 const allQuoteMarkers = /__quote__/g
 const allWordsBetweenCurlyBraces = /(#{.+?})/g
 const allQuadStars = /\*\*\*\*/g
+const leadingWhitespaces = /\*\*'\s*/g
+const trailingWhitespaces = /\s*'\*\*/g
+const whitespace = /\s/g
+const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/g
 
 let assertProto = null
 let matchProto = null
@@ -79,6 +83,20 @@ chai.use((chai, u) => {
   // except escaped quotes, empty strings and number strings.
   const removeOrKeepSingleQuotesBetweenStars = (message) => {
     return message.replace(allBetweenFourStars, (match) => {
+      if (valueHasLeadingOrTrailingWhitespaces.test(match)) {
+        // Above we used \s+, but below we use \s*.
+        // It's because of the strings like '   love' that have empty spaces on one side only.
+        match = match
+        .replace(leadingWhitespaces, (match) => {
+          return match.replace(`**'`, '**__quote__')
+          .replace(whitespace, '&nbsp;')
+        })
+        .replace(trailingWhitespaces, (match) => {
+          return match.replace(`'**`, '__quote__**')
+          .replace(whitespace, '&nbsp;')
+        })
+      }
+
       return match
       .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
       .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')

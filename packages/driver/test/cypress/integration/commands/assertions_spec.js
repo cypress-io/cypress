@@ -1058,6 +1058,26 @@ describe('src/cy/commands/assertions', () => {
         done
       )
     })
+
+    describe('formats strings with spaces', (done) => {
+      const tester = (message, done) => {
+        const nbspedMsg = message
+        .replace(/^\s+/, (match) => {
+          return match.replace(/\s/g, '&nbsp;')
+        })
+        .replace(/\s+$/, (match) => {
+          return match.replace(/\s/g, '&nbsp;')
+        })
+
+        expectMarkdown(() => expect(message).to.eq(message), `expected **'${nbspedMsg}'** to equal **'${nbspedMsg}'**`, done)
+      }
+
+      [' 37:46 ', '   test      ', '  love'].forEach((v) => {
+        it(v, (done) => {
+          tester(v, done)
+        })
+      })
+    })
   })
 
   context('chai overrides', () => {
