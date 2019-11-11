@@ -446,7 +446,7 @@ module.exports = (options = {}) ->
           cookie.domain = parsedUrl.hostname
           cookie.hostOnly = true
 
-        return if not tough.domainMatch(cookie.domain, parsedUrl.hostname)
+        return if not tough.domainMatch(parsedUrl.hostname, cookie.domain)
 
         expiry = cookie.expiryTime()
         if isFinite(expiry)
