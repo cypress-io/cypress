@@ -13,7 +13,9 @@ const restoreContains = () => {
   return $expr.contains = $contains
 }
 
-module.exports = (Commands, Cypress, cy) => {
+const whitespaces = /\s+/g
+
+module.exports = function (Commands, Cypress, cy, state, config) {
   // restore initially when a run starts
   restoreContains()
 
@@ -32,7 +34,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log()
       }
 
-      const log = ($el) => {
+      const log = function ($el) {
         if (options.log === false) {
           return
         }
@@ -40,17 +42,20 @@ module.exports = (Commands, Cypress, cy) => {
         options._log.set({
           $el,
           consoleProps () {
-            const ret = $el ? $dom.getElements($el) : '--nothing--'
+            const ret = $el ?
+              $dom.getElements($el)
+              :
+              '--nothing--'
 
             return {
               Yielded: ret,
-              Elements: $el != null ? $el.length : 0,
+              Elements: ($el != null ? $el.length : undefined) != null ? ($el != null ? $el.length : undefined) : 0,
             }
           },
         })
       }
 
-      const getFocused = () => {
+      const getFocused = function () {
         const focused = cy.getFocused()
 
         log(focused)
@@ -58,7 +63,7 @@ module.exports = (Commands, Cypress, cy) => {
         return focused
       }
 
-      const resolveFocused = () => {
+      const resolveFocused = (failedByNonAssertion) => {
         return Promise
         .try(getFocused)
         .then(($el) => {
@@ -78,10 +83,11 @@ module.exports = (Commands, Cypress, cy) => {
         })
       }
 
-      return resolveFocused()
+      return resolveFocused(false)
     },
 
     get (selector, options = {}) {
+      let aliasObj; let allParts; let resolveElements; let toSelect
       const ctx = this
 
       if ((options === null) || Array.isArray(options) || (typeof options !== 'object')) {
@@ -98,26 +104,23 @@ module.exports = (Commands, Cypress, cy) => {
         verify: true,
       })
 
-      let aliasObj
       const consoleProps = {}
-      const start = (aliasType) => {
+      const start = function (aliasType) {
         if (options.log === false) {
           return
         }
 
-        if (options._log == null) {
-          options._log = Cypress.log({
-            message: selector,
-            referencesAlias: (aliasObj != null && aliasObj.alias) ? { name: aliasObj.alias } : undefined,
-            aliasType,
-            consoleProps: () => {
-              return consoleProps
-            },
-          })
-        }
+        options._log = options._log != null ? options._log : Cypress.log({
+          message: selector,
+          referencesAlias: (aliasObj != null ? aliasObj.alias : undefined) ? { name: aliasObj.alias } : undefined,
+          aliasType,
+          consoleProps () {
+            return consoleProps
+          },
+        })
       }
 
-      const log = (value, aliasType = 'dom') => {
+      const log = function (value, aliasType = 'dom') {
         if (options.log === false) {
           return
         }
@@ -135,7 +138,7 @@ module.exports = (Commands, Cypress, cy) => {
           })
         }
 
-        obj.consoleProps = () => {
+        obj.consoleProps = function () {
           const key = aliasObj ? 'Alias' : 'Selector'
 
           consoleProps[key] = selector
@@ -170,9 +173,6 @@ module.exports = (Commands, Cypress, cy) => {
         options._log.set(obj)
       }
 
-      let allParts
-      let toSelect
-
       // We want to strip everything after the last '.'
       // only when it is potentially a number or 'all'
       if ((_.indexOf(selector, '.') === -1) ||
@@ -187,12 +187,12 @@ module.exports = (Commands, Cypress, cy) => {
       if (aliasObj) {
         let { subject, alias, command } = aliasObj
 
-        const resolveAlias = () => {
+        const resolveAlias = function () {
           // if this is a DOM element
           if ($dom.isElement(subject)) {
             let replayFrom = false
 
-            const replay = () => {
+            const replay = function () {
               cy.replayCommandsFrom(command)
 
               // its important to return undefined
@@ -272,7 +272,7 @@ module.exports = (Commands, Cypress, cy) => {
 
       start('dom')
 
-      const setEl = ($el) => {
+      const setEl = function ($el) {
         if (options.log === false) {
           return
         }
@@ -283,7 +283,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log.set({ $el })
       }
 
-      const getElements = () => {
+      const getElements = function () {
         // attempt to query for the elements by withinSubject context
         // and catch any sizzle errors!
         let $el
@@ -298,7 +298,7 @@ module.exports = (Commands, Cypress, cy) => {
             $el.selector = selector
           }
         } catch (e) {
-          e.onFail = () => {
+          e.onFail = function () {
             if (options.log === false) {
               return e
             }
@@ -341,7 +341,7 @@ module.exports = (Commands, Cypress, cy) => {
         }
       }
 
-      const resolveElements = () => {
+      resolveElements = () => {
         return Promise.try(getElements).then(($el) => {
           if (options.verify === false) {
             return $el
@@ -363,7 +363,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({ message: '' })
       }
 
-      const log = ($el) => {
+      const log = function ($el) {
         if (options.log) {
           options._log.set({ $el })
         }
@@ -393,16 +393,13 @@ module.exports = (Commands, Cypress, cy) => {
         subject = null
       }
 
-      if (_.isRegExp(text)) {
-        // .contains(filter, text)
+      if (_.isRegExp(text)) { // .contains(filter, text)
         // Do nothing
-      } else if (_.isObject(text)) {
-        // .contains(text, options)
+      } else if (_.isObject(text)) { // .contains(text, options)
         options = text
         text = filter
         filter = ''
-      } else if (_.isUndefined(text)) {
-        // .contains(text)
+      } else if (_.isUndefined(text)) { // .contains(text)
         text = filter
         filter = ''
       }
@@ -417,7 +414,7 @@ module.exports = (Commands, Cypress, cy) => {
         $utils.throwErrByPath('contains.empty_string')
       }
 
-      const getPhrase = () => {
+      const getPhrase = function (type, negated) {
         if (filter && subject) {
           const node = $dom.stringify(subject, 'short')
 
@@ -437,15 +434,18 @@ module.exports = (Commands, Cypress, cy) => {
         return ''
       }
 
-      const getErr = (err) => {
+      const getErr = function (err) {
         const { type, negated } = err
 
-        if (type === 'existence') {
-          if (negated) {
-            return `Expected not to find content: '${text}' ${getPhrase()}but continuously found it.`
-          }
+        switch (type) {
+          case 'existence':
+            if (negated) {
+              return `Expected not to find content: '${text}' ${getPhrase(type, negated)}but continuously found it.`
+            }
 
-          return `Expected to find content: '${text}' ${getPhrase()}but never did.`
+            return `Expected to find content: '${text}' ${getPhrase(type, negated)}but never did.`
+          default:
+            break
         }
       }
 
@@ -460,13 +460,13 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: _.compact([filter, text]),
           type: subject ? 'child' : 'parent',
-          consoleProps: () => {
+          consoleProps () {
             return consoleProps
           },
         })
       }
 
-      const setEl = ($el) => {
+      const setEl = function ($el) {
         if (options.log === false) {
           return
         }
@@ -477,10 +477,31 @@ module.exports = (Commands, Cypress, cy) => {
         options._log.set({ $el })
       }
 
+      // When multiple space characters are considered as a single whitespace in all tags except <pre>.
+      const normalizeWhitespaces = (elem) => {
+        let testText = elem.textContent || elem.innerText || $.text(elem)
+
+        if (elem.tagName === 'PRE') {
+          return testText
+        }
+
+        return testText.replace(whitespaces, ' ')
+      }
+
       if (_.isRegExp(text)) {
         // taken from jquery's normal contains method
         $expr.contains = (elem) => {
-          return text.test(elem.textContent || elem.innerText || $.text(elem))
+          const testText = normalizeWhitespaces(elem)
+
+          return text.test(testText)
+        }
+      }
+
+      if (_.isString(text)) {
+        $expr.contains = (elem) => {
+          const testText = normalizeWhitespaces(elem)
+
+          return testText.includes(text)
         }
       }
 
@@ -488,7 +509,22 @@ module.exports = (Commands, Cypress, cy) => {
       // and any submit inputs with the attributeContainsWord selector
       const selector = $dom.getContainsSelector(text, filter)
 
-      const resolveElements = () => {
+      // eslint-disable-next-line no-unused-vars
+      const checkToAutomaticallyRetry = function (count, $el) {
+        // we should automatically retry querying
+        // if we did not have any upcoming assertions
+        // and our $el's length was 0, because that means
+        // the element didnt exist in the DOM and the user
+        // did not explicitly request that it does not exist
+        if ((count !== 0) || ($el && $el.length)) {
+          return
+        }
+
+        // throw here to cause the .catch to trigger
+        throw new Error()
+      }
+
+      const resolveElements = function () {
         const getOpts = _.extend(_.clone(options), {
           // error: getErr(text, phrase)
           withinSubject: subject || cy.state('withinSubject') || cy.$$('body'),
@@ -581,7 +617,7 @@ module.exports = (Commands, Cypress, cy) => {
       // so when each command starts, check to see if this
       // is the command which references our 'next' and
       // if so, remove the within subject
-      const setWithinSubject = (obj) => {
+      const setWithinSubject = function (obj) {
         if (obj !== next) {
           return
         }

@@ -1817,20 +1817,70 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    // NOTE: not sure why this is skipped... last edit was 3 years ago...
-    // @bkucera maybe take a look at this
-    describe.skip('handles whitespace', () => {
+    describe('handles whitespace', () => {
       it('finds el with new lines', () => {
         const btn = $(`\
-<button id="whitespace">
+<button id="whitespace1">
 White
 space
 </button>\
 `).appendTo(cy.$$('body'))
 
+        cy.get('#whitespace1').contains('White space')
         cy.contains('White space').then(($btn) => {
           expect($btn.get(0)).to.eq(btn.get(0))
         })
+      })
+
+      it('finds el with new lines + spaces', () => {
+        const btn = $(`\
+<button id="whitespace2">
+White       
+space
+</button>\
+`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace2').contains('White space')
+        cy.contains('White space').then(($btn) => {
+          expect($btn.get(0)).to.eq(btn.get(0))
+        })
+      })
+
+      it('finds el with multiple spaces', () => {
+        const btn = $(`\
+<button id="whitespace3">
+White   space
+</button>\
+`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace3').contains('White space')
+        cy.contains('White space').then(($btn) => {
+          expect($btn.get(0)).to.eq(btn.get(0))
+        })
+      })
+
+      it('finds el with regex', () => {
+        const btn = $(`\
+<button id="whitespace4">
+White   space
+</button>\
+`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace4').contains('White space')
+        cy.contains(/White space/).then(($btn) => {
+          expect($btn.get(0)).to.eq(btn.get(0))
+        })
+      })
+
+      it('does not normalize text in pre tag', () => {
+        $(`\
+<pre id="whitespace5">
+White
+space
+</pre>\
+`).appendTo(cy.$$('body'))
+
+        cy.contains('White space').should('not.match', 'pre')
       })
     })
 
