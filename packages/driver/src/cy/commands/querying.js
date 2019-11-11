@@ -404,7 +404,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         filter = ''
       }
 
-      _.defaults(options, { log: true })
+      _.defaults(options, { log: true, matchCase: true })
 
       if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
         $utils.throwErrByPath('contains.invalid_argument')
@@ -489,9 +489,15 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       if (_.isRegExp(text)) {
+        if (!options.matchCase) {
+          if (!text.flags.includes('i')) {
+            text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
+          }
+        }
+
         // taken from jquery's normal contains method
         $expr.contains = (elem) => {
-          const testText = normalizeWhitespaces(elem)
+          let testText = normalizeWhitespaces(elem)
 
           return text.test(testText)
         }
@@ -499,7 +505,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       if (_.isString(text)) {
         $expr.contains = (elem) => {
-          const testText = normalizeWhitespaces(elem)
+          let testText = normalizeWhitespaces(elem)
+
+          if (!options.matchCase) {
+            testText = testText.toLowerCase()
+            text = text.toLowerCase()
+          }
 
           return testText.includes(text)
         }

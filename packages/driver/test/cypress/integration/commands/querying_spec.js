@@ -1884,6 +1884,32 @@ space
       })
     })
 
+    describe('case sensitivity', () => {
+      beforeEach(() => {
+        $('<button id="test-button">Test</button>').appendTo(cy.$$('body'))
+      })
+
+      it('is case sensitive when matchCase is undefined', () => {
+        cy.get('#test-button').contains('Test')
+      })
+
+      it('is case insensitive when matchCase is false', () => {
+        cy.get('#test-button').contains('test', {
+          matchCase: false,
+        })
+
+        cy.get('#test-button').contains(/Test/, {
+          matchCase: false,
+        })
+      })
+
+      it('does not crash when matchCase: false is used with regex flag, i', () => {
+        cy.get('#test-button').contains(/Test/i, {
+          matchCase: false,
+        })
+      })
+    })
+
     describe('subject contains text nodes', () => {
       it('searches for content within subject', () => {
         const badge = cy.$$('#edge-case-contains .badge:contains(5)')
