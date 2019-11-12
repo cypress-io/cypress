@@ -6,8 +6,8 @@ Promise = require("bluebird")
 client  = require("./client")
 { getCookieUrl } = require('../lib/util')
 
-COOKIE_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'storeId']
-GET_ALL_PROPS = COOKIE_PROPS.concat(['session'])
+COOKIE_PROPS = ['url', 'name', 'path', 'secure', 'domain']
+GET_ALL_PROPS = COOKIE_PROPS.concat(['session', 'storeId'])
 SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
 
 httpRe = /^http/
@@ -110,11 +110,12 @@ automation = {
   setCookie: (props = {}, fn) ->
     ## only get the url if its not already set
     props.url ?= @getUrl(props)
+    props = pick(props, SET_PROPS)
+    if props.domain is 'localhost'
+      delete props.domain
     Promise.try ->
-      browser.cookies.set(props)
+      browser.cookies.set()
     .then (details) ->
-      if (err = browser.runtime.lastError)
-        reject(err)
       ## the cookie callback could be null such as the
       ## case when expirationDate is before now
       return fn(details or null)

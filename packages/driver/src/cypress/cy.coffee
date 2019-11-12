@@ -25,7 +25,7 @@ $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
 $Snapshots = require("../cy/snapshots")
 $CommandQueue = require("./command_queue")
-$VideoRecorder = require('../cy/video-recorder')
+# $VideoRecorder = require('../cy/video-recorder')
 
 crossOriginScriptRe = /^script error/i
 
