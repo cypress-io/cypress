@@ -1,9 +1,21 @@
 import cs from 'classnames'
-import React, { Component } from 'react'
+import React, { Component, CSSProperties, ReactNode } from 'react'
 
 import { onEnterOrSpace } from '../lib/util'
 
-class Collapsible extends Component {
+interface Props {
+  isOpen?: boolean
+  headerClass?: string
+  headerStyle?: CSSProperties
+  header?: ReactNode
+  contentClass?: string
+}
+
+interface State {
+  isOpen: boolean
+}
+
+class Collapsible extends Component<Props, State> {
   static defaultProps = {
     isOpen: false,
     headerClass: '',
@@ -11,13 +23,13 @@ class Collapsible extends Component {
     contentClass: '',
   }
 
-  constructor (props) {
+  constructor (props: Props) {
     super(props)
 
-    this.state = { isOpen: props.isOpen }
+    this.state = { isOpen: props.isOpen || false }
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate (prevProps: Props) {
     if (this.props.isOpen != null && this.props.isOpen !== prevProps.isOpen) {
       this.setState({ isOpen: this.props.isOpen })
     }
@@ -33,7 +45,7 @@ class Collapsible extends Component {
           onKeyPress={onEnterOrSpace(this._toggleOpen)}
           role='button'
           style={this.props.headerStyle}
-          tabIndex='0'
+          tabIndex={0}
         >
           <i className='collapsible-indicator fa-fw fa'></i>
           {this.props.header}
