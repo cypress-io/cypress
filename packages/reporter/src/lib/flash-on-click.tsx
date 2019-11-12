@@ -1,11 +1,18 @@
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
-import React, { Children, cloneElement, Component } from 'react'
+import React, { Children, cloneElement, Component, MouseEvent, ReactElement, ReactNode } from 'react'
+// @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
+interface Props {
+  message: string
+  onClick: ((e: MouseEvent) => void)
+  shouldShowMessage?: (() => boolean)
+}
+
 @observer
-class FlashOnClick extends Component {
+class FlashOnClick extends Component<Props> {
   static propTypes = {
     message: PropTypes.string.isRequired,
     onClick: PropTypes.func.isRequired,
@@ -19,18 +26,20 @@ class FlashOnClick extends Component {
   @observable _show = false
 
   render () {
-    const child = Children.only(this.props.children)
+    const child = Children.only<ReactNode>(this.props.children)
 
     return (
       <Tooltip placement='top' title={this.props.message} visible={this._show}>
-        {cloneElement(child, { onClick: this._onClick })}
+        {cloneElement(child as ReactElement, { onClick: this._onClick })}
       </Tooltip>
     )
   }
 
-  @action _onClick = (e) => {
-    this.props.onClick(e)
-    if (!this.props.shouldShowMessage()) return
+  @action _onClick = (e: MouseEvent) => {
+    const { onClick, shouldShowMessage } = this.props
+
+    onClick(e)
+    if (shouldShowMessage && !shouldShowMessage()) return
 
     this._show = true
     setTimeout(action('hide:console:message', () => {
