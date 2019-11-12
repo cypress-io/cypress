@@ -68,127 +68,6 @@ commands:
       - store_artifacts:
           path: ~/.npm/_logs
 
-  # for caching node modules use project environment variable
-  # like CACHE_VERSION=15
-  save-cache:
-    description: |
-      Shorter command to save node_modules for a package
-      Warning! Only works with "packages/<name>/node_modules"
-    parameters:
-      packageName:
-        description: Name of the package to save, for example "server" or "desktop-gui"
-        type: string
-    steps:
-      - save_cache:
-          name: Saving cache for << parameters.packageName >>
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "yarn.lock" }}
-          paths:
-            - packages/<< parameters.packageName >>/node_modules
-
-  save-caches:
-    description: save each node_modules folder per package
-    steps:
-      # TODO switch to "save-cache" when it allows custom paths
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-cli-{{ checksum "cli/package.json" }}
-          paths:
-            - cli/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
-          paths:
-            - node_modules
-      - save-cache:
-          packageName: coffee
-      - save-cache:
-          packageName: desktop-gui
-      - save-cache:
-          packageName: driver
-      - save-cache:
-          packageName: example
-      # TODO switch to "save-cache" custom command when it allows passing list of paths
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
-          paths:
-            - packages/electron/node_modules
-            - ~/.cache/electron
-            - ~/.electron
-      - save-cache:
-          packageName: extension
-      - save-cache:
-          packageName: https-proxy
-      - save-cache:
-          packageName: launcher
-      - save-cache:
-          packageName: network
-      - save-cache:
-          packageName: reporter
-      - save-cache:
-          packageName: runner
-      - save-cache:
-          packageName: server
-      - save-cache:
-          packageName: socket
-      - save-cache:
-          packageName: static
-      - save-cache:
-          packageName: ts
-      - save-cache:
-          packageName: web-config
-
-  restore-cache:
-    description: |
-      Shorter command to restore node_modules for a package.
-      Since it does not list paths to restore, can restore any cache,
-      as long the key is the same as the saved one.
-    parameters:
-      packageName:
-        description: Name of the package to restore, for example "server" or "desktop-gui"
-        type: string
-    steps:
-      - restore_cache:
-          name: Restoring cache for << parameters.packageName >>
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "yarn.lock" }}
-
-  restore-caches:
-    description: need to restore a separate cache for each package.json
-    steps:
-      - restore-cache:
-          packageName: cli
-      - restore-cache:
-          packageName: root
-      - restore-cache:
-          packageName: coffee
-      - restore-cache:
-          packageName: desktop-gui
-      - restore-cache:
-          packageName: driver
-      - restore-cache:
-          packageName: example
-      - restore-cache:
-          packageName: electron
-      - restore-cache:
-          packageName: extension
-      - restore-cache:
-          packageName: https-proxy
-      - restore-cache:
-          packageName: launcher
-      - restore-cache:
-          packageName: network
-      - restore-cache:
-          packageName: reporter
-      - restore-cache:
-          packageName: runner
-      - restore-cache:
-          packageName: server
-      - restore-cache:
-          packageName: socket
-      - restore-cache:
-          packageName: static
-      - restore-cache:
-          packageName: ts
-      - restore-cache:
-          packageName: web-config
-
 jobs:
   ## code checkout and yarn installs
   build:
@@ -218,7 +97,9 @@ jobs:
 
       - run: yarn stop-only-all
 
-      - restore-caches
+      - restore_cache:
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "yarn.lock" }}
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -230,7 +111,12 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
 
-      - save-caches
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+            - ~/.cache/electron
+            - ~/.electron
       - store-npm-logs
 
       ## save entire folder as artifact for other jobs to run without reinstalling
