@@ -36,7 +36,7 @@ describe('Err model', () => {
   })
 
   context('#update', () => {
-    let err
+    let err: Err
 
     beforeEach(() => {
       err = new Err({ name: 'BadError', message: 'Something went wrong' })
