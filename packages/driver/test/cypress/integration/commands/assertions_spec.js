@@ -976,6 +976,110 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
+  context('format quotation marks', () => {
+    const expectMarkdown = (test, message, done) => {
+      cy.then(() => {
+        test()
+      })
+
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'assert') {
+          cy.removeAllListeners('log:added')
+
+          expect(log.get('message')).to.eq(message)
+
+          done()
+        }
+      })
+    }
+
+    it('preserves quotation marks in number strings', (done) => {
+      expectMarkdown(() => {
+        try {
+          expect(25).to.eq('25')
+        } catch (error) {} /* eslint-disable-line no-empty */
+      },
+      `expected **25** to equal **'25'**`,
+      done)
+    })
+
+    it('preserves quotation marks in empty string', (done) => {
+      expectMarkdown(() => {
+        try {
+          expect(42).to.eq('')
+        } catch (error) {} /* eslint-disable-line no-empty */
+      },
+      `expected **42** to equal **''**`,
+      done)
+    })
+
+    it('preserves quotation marks if escaped', (done) => {
+      expectMarkdown(
+        () => expect(`\'cypress\'`).to.eq(`\'cypress\'`),
+        // ****'cypress'**** -> ** for emphasizing result string  + ** for emphasizing the entire result.
+        `expected **'cypress'** to equal ****'cypress'****`,
+        done
+      )
+    })
+
+    it('removes quotation marks in DOM elements', (done) => {
+      expectMarkdown(
+        () => {
+          cy.get('body').then(($body) => {
+            expect($body).to.contain('div')
+          })
+        },
+        `expected **<body>** to contain **div**`,
+        done
+      )
+    })
+
+    it('removes quotation marks in strings', (done) => {
+      expectMarkdown(() => expect('cypress').to.eq('cypress'), `expected **cypress** to equal **cypress**`, done)
+    })
+
+    it('removes quotation marks in objects', (done) => {
+      expectMarkdown(
+        () => expect({ foo: 'bar' }).to.deep.eq({ foo: 'bar' }),
+        `expected **{ foo: bar }** to deeply equal **{ foo: bar }**`,
+        done
+      )
+    })
+
+    it('formats keys properly for "have.all.keys"', (done) => {
+      const person = {
+        name: 'Joe',
+        age: 20,
+      }
+
+      expectMarkdown(
+        () => expect(person).to.have.all.keys('name', 'age'),
+        `expected **{ name: Joe, age: 20 }** to have keys **name**, and **age**`,
+        done
+      )
+    })
+
+    describe('formats strings with spaces', (done) => {
+      const tester = (message, done) => {
+        const nbspedMsg = message
+        .replace(/^\s+/, (match) => {
+          return match.replace(/\s/g, '&nbsp;')
+        })
+        .replace(/\s+$/, (match) => {
+          return match.replace(/\s/g, '&nbsp;')
+        })
+
+        expectMarkdown(() => expect(message).to.eq(message), `expected **'${nbspedMsg}'** to equal **'${nbspedMsg}'**`, done)
+      }
+
+      [' 37:46 ', '   test      ', '  love'].forEach((v) => {
+        it(v, (done) => {
+          tester(v, done)
+        })
+      })
+    })
+  })
+
   context('chai overrides', () => {
     beforeEach(function () {
       this.$body = cy.$$('body')
