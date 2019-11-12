@@ -1,29 +1,37 @@
 import _ from 'lodash'
 import { observable } from 'mobx'
 
-const defaults = {
+interface IAppState {
+  isPaused: boolean;
+  isRunning: boolean;
+  nextCommandName: string | null | undefined;
+  pinnedSnapshotId: any;
+  [key: string]: any;
+}
+
+const defaults: IAppState = {
   isPaused: false,
   isRunning: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
 }
 
-class AppState {
+class AppState implements IAppState {
   @observable autoScrollingEnabled = true
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
-  @observable nextCommandName = defaults.nextCommandName
+  @observable nextCommandName: string | null | undefined = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
 
-  isStopped = false
-  _resetAutoScrollingEnabledTo = true
+  isStopped = false;
+  _resetAutoScrollingEnabledTo = true;
 
   startRunning () {
     this.isRunning = true
     this.isStopped = false
   }
 
-  pause (nextCommandName) {
+  pause (nextCommandName?: string) {
     this.isPaused = true
     this.nextCommandName = nextCommandName
   }
@@ -42,7 +50,7 @@ class AppState {
     this._resetAutoScrolling()
   }
 
-  temporarilySetAutoScrolling (isEnabled) {
+  temporarilySetAutoScrolling (isEnabled?: boolean | null) {
     if (isEnabled != null) {
       this.autoScrollingEnabled = isEnabled
     }
@@ -52,7 +60,7 @@ class AppState {
     this.setAutoScrolling(!this.autoScrollingEnabled)
   }
 
-  setAutoScrolling (isEnabled) {
+  setAutoScrolling (isEnabled?: boolean | null) {
     if (isEnabled != null) {
       this._resetAutoScrollingEnabledTo = isEnabled
       this.autoScrollingEnabled = isEnabled
@@ -60,8 +68,11 @@ class AppState {
   }
 
   reset () {
-    _.each(defaults, (value, key) => {
-      this[key] = value
+    // this[key] causes index signature error. That's why this var is created.
+    const state: IAppState = this
+
+    _.each(defaults, (value: any, key: string) => {
+      state[key] = value
     })
 
     this._resetAutoScrolling()
