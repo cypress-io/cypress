@@ -132,7 +132,7 @@
     "husky": "2.4.1",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
-    "js-codemod": "cpojer/js-codemod#b1cb55d8",
+    "js-codemod": "cpojer/js-codemod",
     "jscodemods": "cypress-io/jscodemods#01b546e",
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
@@ -171,7 +171,7 @@
     "wait-on": "3.3.0"
   },
   "engines": {
-    "node": "12.0.0",
+    "node": ">=12.0.0",
     "yarn": ">=1.12.1"
   },
   "productName": "Cypress",
