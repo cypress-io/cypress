@@ -85,8 +85,6 @@ module.exports = {
   launch: launcher.launch
 
   getBrowsers: ->
-    ## TODO: accept an options object which
-    ## turns off getting electron browser?
     debug("getBrowsers")
     launcher.detect()
     .then (browsers = []) ->
