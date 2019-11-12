@@ -784,7 +784,7 @@ describe "lib/cypress", ->
           # like calling client.close() if available to let the
           # browser free any resources
           ee.emit("exit")
-        ee.close = ->
+        ee.destroy = ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
