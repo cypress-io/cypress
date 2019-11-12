@@ -22,7 +22,7 @@ const openRecordKeyGuide = (e) => {
 }
 
 const showLogin = () => {
-  authStore.setShowingLogin(true)
+  authStore.openLogin()
 }
 
 @observer

@@ -551,6 +551,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - run: npm run check-next-dev-version
       - run:
           name: bump NPM version
           command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}

@@ -1,15 +1,23 @@
-const _ = require('lodash')
-const debug = require('debug')('cypress:server:stream_buffer')
-const stream = require('stream')
+import _ from 'lodash'
+import debugModule from 'debug'
+import stream from 'stream'
+
+const debug = debugModule('cypress:server:stream_buffer')
 
 function streamBuffer (initialSize = 2048) {
-  let buffer = Buffer.allocUnsafe(initialSize)
+  let buffer: Buffer | null = Buffer.allocUnsafe(initialSize)
   let bytesWritten = 0
   let finished = false
 
-  const readers = []
+  const readers: stream.Readable[] = []
 
   const onWrite = (chunk, enc, cb) => {
+    if (finished || !chunk || !buffer) {
+      debug('received write after deleting buffer, ignoring %o', { chunkLength: chunk && chunk.length, enc })
+
+      return cb()
+    }
+
     if (chunk.length + bytesWritten > buffer.length) {
       let newBufferLength = buffer.length
 
@@ -47,6 +55,7 @@ function streamBuffer (initialSize = 2048) {
   const writeable = new stream.Writable({
     write: onWrite,
     final: onFinal,
+    // @ts-ignore
     autoDestroy: true,
   })
 
@@ -55,6 +64,12 @@ function streamBuffer (initialSize = 2048) {
     const readerId = _.uniqueId('reader')
 
     const onRead = function (size) {
+      if (!buffer) {
+        debug('read requested after unpipeAll, ignoring %o', { size })
+
+        return
+      }
+
       // if there are unread bytes in the buffer,
       // send up to bytesWritten back
       if (bytesRead < bytesWritten) {
@@ -100,6 +115,7 @@ function streamBuffer (initialSize = 2048) {
 
     const readable = new stream.Readable({
       read: onRead,
+      // @ts-ignore
       autoDestroy: true,
     })
 

@@ -53,6 +53,7 @@ install:
   - node --version
   - node --print process.arch
   - yarn --version
+  - yarn check-next-dev-version
   # prints all public variables relevant to the build
   - print-env Platform
   - yarn check-node-version
