@@ -32,15 +32,13 @@ describe('test errors', function () {
         column: 2,
       }],
       docsUrl: 'https://on.cypress.io/type',
-      codeFrames: [
-        {
-          file: 'users.spec.js',
-          line: 5,
-          column: 6,
-          language: 'javascript',
-          frame: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\')\n.then(() => { })',
-        },
-      ],
+      codeFrame: {
+        file: 'users.spec.js',
+        line: 5,
+        column: 6,
+        language: 'javascript',
+        frame: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\')\n.then(() => { })',
+      },
     }
 
     this.setError = function (err) {
@@ -166,7 +164,7 @@ describe('test errors', function () {
     })
 
     it('does not show code frame when not included on error', function () {
-      this.commandErr.codeFrames = []
+      this.commandErr.codeFrame = undefined
       this.setError(this.commandErr)
 
       cy
@@ -183,7 +181,7 @@ describe('test errors', function () {
     })
 
     it('falls back to text language class', function () {
-      this.commandErr.codeFrames[0].language = null
+      this.commandErr.codeFrame.language = null
       this.setError(this.commandErr)
 
       cy

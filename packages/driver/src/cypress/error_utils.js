@@ -7,7 +7,7 @@ const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
 const $sourceMapUtils = require('./source_map_utils')
 
-const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrames'.split(' ')
+const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 
 const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
@@ -273,16 +273,16 @@ const getSourceDetails = (generatedDetails) => {
 }
 
 const getCodeFrameFromStack = (stack, lineIndex) => {
-  if (!stack) return null
+  if (!stack) return
 
   const generatedStackLineDetails = getStackLineDetails(stack, lineIndex)
 
-  if (!generatedStackLineDetails) return null
+  if (!generatedStackLineDetails) return
 
   const { file } = generatedStackLineDetails
   const stackLineDetails = $sourceMapUtils.getSourcePosition(file, generatedStackLineDetails)
 
-  if (!stackLineDetails) return null
+  if (!stackLineDetails) return
 
   return getCodeFrame($sourceMapUtils.getSourceContents(file), stackLineDetails)
 }
@@ -303,13 +303,9 @@ const combineMessageAndStack = (err, stack = '') => {
 }
 
 const addCodeFrameToErr = ({ err, stack, lineIndex = 0 }) => {
-  if (err.codeFrames) return err
+  if (err.codeFrame) return err
 
-  const codeFrame = getCodeFrameFromStack(stack, lineIndex)
-
-  if (codeFrame) {
-    err.codeFrames = [codeFrame]
-  }
+  err.codeFrame = getCodeFrameFromStack(stack, lineIndex)
 
   return err
 }

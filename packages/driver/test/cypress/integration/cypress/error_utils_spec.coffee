@@ -466,9 +466,9 @@ describe "driver/src/cypress/error_utils", ->
         at Context.<anonymous> (http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js:5:21)
       """ })
 
-      expect(err.codeFrames).to.be.an("array")
+      expect(err.codeFrame).to.be.an("object")
 
-      { frame, file, line, column } = err.codeFrames[0]
+      { frame, file, line, column } = err.codeFrame
 
       expect(frame).to.contain("  1 | it('is a failing test', () => {")
       expect(frame).to.contain("  2 |   cy.get('.not-there'")
@@ -484,7 +484,7 @@ describe "driver/src/cypress/error_utils", ->
         at Context.<anonymous> (http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js:5:21)
       """ })
 
-      expect(err.codeFrames).to.be.undefined
+      expect(err.codeFrame).to.be.undefined
 
   context ".escapeErrMarkdown", ->
     it "accepts non-strings", ->

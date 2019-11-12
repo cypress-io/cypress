@@ -56,6 +56,7 @@ const formattedMessage = (message) => {
 
 const TestError = observer(({ model, onOpenFile }) => {
   const { err } = model
+  const { codeFrame } = err
 
   if (!err.displayMessage) return null
 
@@ -90,13 +91,13 @@ const TestError = observer(({ model, onOpenFile }) => {
           </Collapsible> :
           null
         }
-        {_.map(err.codeFrames, (codeFrame) => (
+        {codeFrame &&
           <ErrorCodeFrame
             key={`${codeFrame.file}:${codeFrame.column}:${codeFrame.line}`}
             codeFrame={codeFrame}
             onOpenFile={onOpenFile}
           />
-        ))}
+        }
       </div>
     </div>
   )

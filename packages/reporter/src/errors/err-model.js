@@ -9,7 +9,7 @@ export default class Err {
   @observable mdMessage = ''
   @observable docsUrl = ''
   @observable templateType = ''
-  @observable.ref codeFrames = []
+  @observable.ref codeFrame
 
   constructor (props) {
     this.update(props)
@@ -36,6 +36,6 @@ export default class Err {
     this.parsedStack = props.parsedStack
     this.docsUrl = props.docsUrl
     this.templateType = props.templateType
-    this.codeFrames = props.codeFrames
+    this.codeFrame = props.codeFrame
   }
 }
