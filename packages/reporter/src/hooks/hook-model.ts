@@ -1,16 +1,30 @@
 import _ from 'lodash'
 import { observable, computed } from 'mobx'
 
+export interface CommandError {
+  displayMessage: string
+}
+
+export interface Command {
+  alias?: string
+  hasDuplicates?: boolean
+  isMatchingEvent?: ((command?: Command) => boolean)
+  err?: CommandError
+  number?: number
+  event?: boolean
+  addDuplicate?: ((command: Command) => void)
+}
+
 export default class Hook {
-  @observable id
-  @observable name
-  @observable commands = []
+  @observable id: string
+  @observable name: string
+  @observable commands: Array<Command> = []
   @observable failed = false
 
-  _aliasesWithDuplicatesCache = null
-  _currentNumber = 1
+  private _aliasesWithDuplicatesCache: Array<string | null> | null = null
+  private _currentNumber = 1
 
-  constructor (props) {
+  constructor (props: { name: string }) {
     this.id = _.uniqueId('h')
     this.name = props.name
   }
@@ -19,8 +33,8 @@ export default class Hook {
     // Consecutive duplicates only appear once in command array, but hasDuplicates is true
     // Non-consecutive duplicates appear multiple times in command array, but hasDuplicates is false
     // This returns aliases that have consecutive or non-consecutive duplicates
-    let consecutiveDuplicateAliases = []
-    const aliases = this.commands.map((command) => {
+    let consecutiveDuplicateAliases: Array<string | null> = []
+    const aliases: Array<string | null> = this.commands.map((command) => {
       if (command.alias) {
         if (command.hasDuplicates) {
           consecutiveDuplicateAliases.push(command.alias)
@@ -28,6 +42,8 @@ export default class Hook {
 
         return command.alias
       }
+
+      return null
     })
 
     const nonConsecutiveDuplicateAliases = aliases.filter((alias, i) => {
@@ -46,7 +62,7 @@ export default class Hook {
     return this._aliasesWithDuplicatesCache
   }
 
-  addCommand (command) {
+  addCommand (command: Command) {
     if (!command.event) {
       command.number = this._currentNumber
       this._currentNumber++
@@ -54,17 +70,20 @@ export default class Hook {
 
     const lastCommand = _.last(this.commands)
 
-    if (lastCommand && lastCommand.isMatchingEvent(command)) {
+    if (lastCommand &&
+      lastCommand.isMatchingEvent &&
+      lastCommand.isMatchingEvent(command) &&
+      lastCommand.addDuplicate) {
       lastCommand.addDuplicate(command)
     } else {
       this.commands.push(command)
     }
   }
 
-  commandMatchingErr (errToMatch) {
+  commandMatchingErr (errToMatch: CommandError) {
     return _(this.commands)
     .filter(({ err }) => {
-      return err.displayMessage === errToMatch.displayMessage
+      return err && err.displayMessage === errToMatch.displayMessage
     })
     .last()
   }

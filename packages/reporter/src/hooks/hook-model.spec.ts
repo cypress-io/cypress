@@ -1,8 +1,8 @@
 import sinon from 'sinon'
-import Hook from './hook-model'
+import Hook, { Command } from './hook-model'
 
 describe('Hook model', () => {
-  let hook
+  let hook: Hook
 
   beforeEach(() => {
     hook = new Hook({ name: 'before' })
@@ -26,35 +26,35 @@ describe('Hook model', () => {
     })
 
     it('numbers commands incrementally when not events', () => {
-      const command1 = { event: false, isMatchingEvent: () => {
+      const command1: Command = { event: false, isMatchingEvent: () => {
         return false
       } }
 
       hook.addCommand(command1)
       expect(command1.number).to.equal(1)
 
-      const command2 = { event: false }
+      const command2: Command = { event: false }
 
       hook.addCommand(command2)
       expect(command2.number).to.equal(2)
     })
 
     it('does not number event commands', () => {
-      const command1 = { event: false, isMatchingEvent: () => {
+      const command1: Command = { event: false, isMatchingEvent: () => {
         return false
       } }
 
       hook.addCommand(command1)
       expect(command1.number).to.equal(1)
 
-      const command2 = { event: true, isMatchingEvent: () => {
+      const command2: Command = { event: true, isMatchingEvent: () => {
         return false
       } }
 
       hook.addCommand(command2)
       expect(command2.number).to.be.undefined
 
-      const command3 = { event: false }
+      const command3: Command = { event: false }
 
       hook.addCommand(command3)
       expect(command3.number).to.equal(2)
@@ -62,13 +62,13 @@ describe('Hook model', () => {
 
     it('adds command as duplicate if it matches the last command', () => {
       const addDuplicate = sinon.spy()
-      const command1 = { event: true, isMatchingEvent: () => {
+      const command1: Command = { event: true, isMatchingEvent: () => {
         return true
       }, addDuplicate }
 
       hook.addCommand(command1)
 
-      const command2 = { event: true }
+      const command2: Command = { event: true }
 
       hook.addCommand(command2)
 
@@ -110,7 +110,7 @@ describe('Hook model', () => {
   })
 
   context('#aliasesWithDuplicates', () => {
-    const addCommand = (alias, hasDuplicates = false) => {
+    const addCommand = (alias: string, hasDuplicates = false) => {
       return hook.addCommand({
         isMatchingEvent: () => {
           return false
