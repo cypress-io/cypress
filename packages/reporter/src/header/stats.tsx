@@ -6,7 +6,11 @@ import { IStatsStore } from './stats-store'
 const count = (num: number) => num > 0 ? num : '--'
 const formatDuration = (duration: number) => duration > 0 ? (duration / 1000).toFixed(2) : '0'
 
-const Stats = observer(({ stats }: { stats: IStatsStore }) => (
+interface Props {
+  stats: IStatsStore
+}
+
+const Stats = observer(({ stats }: Props) => (
   <ul aria-label='Stats' className='stats'>
     <li className='passed'>
       <i aria-hidden="true" className='fa fa-check'></i>

@@ -6,12 +6,18 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import defaultEvents from '../lib/events'
+import { IAppState } from '../lib/app-state'
 
 const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null
 )
 
-const Controls = observer(({ events = defaultEvents, appState }) => {
+interface Props {
+  events?: any
+  appState: IAppState
+}
+
+const Controls = observer(({ events = defaultEvents, appState }: Props) => {
   const emit = (event: string) => () => events.emit(event)
   const toggleAutoScrolling = () => {
     appState.toggleAutoScrolling()
