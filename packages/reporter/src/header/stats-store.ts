@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
-interface IStatsStore {
+export interface IStatsStore {
   numPassed: number
   numFailed: number
   numPending: number

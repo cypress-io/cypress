@@ -3,14 +3,15 @@ import React from 'react'
 import { shallow } from 'enzyme'
 
 import Stats from './stats'
+import { IStatsStore } from './stats-store'
 
-const statsStub = (props) => {
+const statsStub = (props?: Partial<IStatsStore>) => {
   return _.extend({
     numPassed: 0,
     numFailed: 0,
     numPending: 0,
     duration: 0,
-  }, props)
+  }, props) as IStatsStore
 }
 
 describe('<Stats />', () => {
