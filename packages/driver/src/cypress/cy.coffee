@@ -134,6 +134,20 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     Cypress.action("app:navigation:changed", "page navigation event (#{event})")
 
   contentWindowListeners = (contentWindow) ->
+    ## noop if listeners are already added for
+    ## this content window
+    if $Listeners.isBound(contentWindow)
+      return
+
+    readyStateChanges = []
+
+    onBeforeUnload = ->
+      stability.isStable(false, "beforeunload")
+
+      Cookies.setInitial()
+
+      timers.reset()
+    
     $Listeners.bindTo(contentWindow, {
       onError: ->
         ## use a function callback here instead of direct
@@ -142,12 +156,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         cy.onUncaughtException.apply(cy, arguments)
       onSubmit: (e) ->
         Cypress.action("app:form:submitted", e)
+      onNavigationEvent: (eventName, isSync) ->
+        readyStateChanges.push({
+          eventName,
+          isSync,
+        })
+
+
+        if readyStateChanges.length is 1 and eventName is "complete"
+          return onBeforeUnload()
+        
       onBeforeUnload: (e) ->
-        stability.isStable(false, "beforeunload")
-
-        Cookies.setInitial()
-
-        timers.reset()
+        onBeforeUnload()
 
         Cypress.action("app:window:before:unload", e)
 

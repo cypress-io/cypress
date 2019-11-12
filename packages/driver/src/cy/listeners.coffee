@@ -10,19 +10,19 @@ removeAllListeners = ->
   listenersAdded = false
 
   for event in events
-    [win, event, cb] = event
+    [target, event, cb] = event
 
-    win.removeEventListener(event, cb)
+    target.removeEventListener(event, cb)
 
   ## reset all the events
   events = []
 
   return null
 
-addListener = (win, event, cb) ->
-  events.push([win, event, cb])
+addListener = (target, event, cb) ->
+  events.push([target, event, cb])
 
-  win.addEventListener(event, cb)
+  target.addEventListener(event, cb)
 
 eventHasReturnValue = (e) ->
   val = e.returnValue
@@ -35,9 +35,10 @@ eventHasReturnValue = (e) ->
   return true
 
 module.exports = {
+  isBound: (contentWindow) ->
+    return Boolean(listenersAdded)
+  
   bindTo: (contentWindow, callbacks = {}) ->
-    return if listenersAdded
-
     removeAllListeners()
 
     listenersAdded = true
@@ -45,6 +46,21 @@ module.exports = {
     ## set onerror global handler
     contentWindow.onerror = callbacks.onError
 
+    onNavigationEvent = ({ type }) ->
+      { stack } = new Error()
+
+      ## this is a synchronous call if onNavigationEvent
+      ## frame is in the stack more than once
+      isSync = _.count(stack, 'onNavigationEvent') >= 2
+
+      ## if readystatechange event then use the actual
+      ## readyState property, else use the event type
+      eventName = if type is 'readystatechange' then contentWindow.document.readyState else type
+
+      callbacks.onNavigationEvent(eventName, isSync)
+
+    addListener(contentWindow.document, "readystatechange", onNavigationEvent)
+    
     addListener contentWindow, "beforeunload", (e) ->
       ## bail if we've canceled this event (from another source)
       ## or we've set a returnValue on the original event
