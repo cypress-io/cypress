@@ -2,10 +2,10 @@ import _ from 'lodash'
 import { observable } from 'mobx'
 
 interface DefaultAppState {
-  isPaused: boolean;
-  isRunning: boolean;
-  nextCommandName: string | null | undefined;
-  pinnedSnapshotId: any;
+  isPaused: boolean
+  isRunning: boolean
+  nextCommandName: string | null | undefined
+  pinnedSnapshotId: any
 }
 
 const defaults: DefaultAppState = {
@@ -16,8 +16,8 @@ const defaults: DefaultAppState = {
 }
 
 export interface IAppState extends DefaultAppState {
-  autoScrollingEnabled: boolean;
-  [key: string]: any;
+  autoScrollingEnabled: boolean
+  [key: string]: any
 }
 
 class AppState implements IAppState {
@@ -29,6 +29,7 @@ class AppState implements IAppState {
 
   isStopped = false;
   _resetAutoScrollingEnabledTo = true;
+  [key: string]: any
 
   startRunning () {
     this.isRunning = true
@@ -72,11 +73,8 @@ class AppState implements IAppState {
   }
 
   reset () {
-    // this[key] causes index signature error. That's why this var is created.
-    const state: IAppState = this
-
     _.each(defaults, (value: any, key: string) => {
-      state[key] = value
+      this[key] = value
     })
 
     this._resetAutoScrolling()

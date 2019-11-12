@@ -3,6 +3,7 @@
     "plugin:@cypress/dev/react",
     "plugin:@cypress/dev/tests"
   ],
+  "parser": "@typescript-eslint/parser",
   "settings": {
     "react": {
       "version": "16.8"
