@@ -1,7 +1,7 @@
-import Suite from './suite-model'
+import Suite, { Children } from './suite-model'
 
-const suiteWithChildren = (children) => {
-  const suite = new Suite({ id: 1, title: '' })
+const suiteWithChildren = (children: Array<Children>) => {
+  const suite = new Suite({ id: 1, title: '' }, 0)
 
   suite.children = children
 

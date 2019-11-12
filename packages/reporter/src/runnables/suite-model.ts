@@ -1,12 +1,18 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
-import Runnable from '../runnables/runnable-model'
+import Runnable from './runnable-model'
+
+type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
+
+export interface Children {
+  state: TestState
+}
 
 export default class Suite extends Runnable {
-  @observable children = []
+  @observable children: Array<Children> = []
   type = 'suite'
 
-  @computed get state () {
+  @computed get state (): TestState {
     if (this._anyChildrenFailed) {
       return 'failed'
     }
