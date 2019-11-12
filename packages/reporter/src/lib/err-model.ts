@@ -1,9 +1,9 @@
 import { computed, observable } from 'mobx'
 
 export interface ErrProps {
-  name?: string;
-  message?: string;
-  stack?: string;
+  name?: string
+  message?: string
+  stack?: string
 }
 
 export default class Err {

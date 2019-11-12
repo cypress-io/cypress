@@ -1,19 +1,9 @@
 import _ from 'lodash'
 import { observable, computed } from 'mobx'
 
-export interface CommandError {
-  displayMessage: string
-}
-
-export interface Command {
-  alias?: string
-  hasDuplicates?: boolean
-  isMatchingEvent?: ((command?: Command) => boolean)
-  err?: CommandError
-  number?: number
-  event?: boolean
-  addDuplicate?: ((command: Command) => void)
-}
+import { Alias } from '../instruments/instrument-model'
+import Err from '../lib/err-model'
+import Command from '../commands/command-model'
 
 export default class Hook {
   @observable id: string
@@ -21,7 +11,7 @@ export default class Hook {
   @observable commands: Array<Command> = []
   @observable failed = false
 
-  private _aliasesWithDuplicatesCache: Array<string | null> | null = null
+  private _aliasesWithDuplicatesCache: Array<Alias> | null = null
   private _currentNumber = 1
 
   constructor (props: { name: string }) {
@@ -33,8 +23,8 @@ export default class Hook {
     // Consecutive duplicates only appear once in command array, but hasDuplicates is true
     // Non-consecutive duplicates appear multiple times in command array, but hasDuplicates is false
     // This returns aliases that have consecutive or non-consecutive duplicates
-    let consecutiveDuplicateAliases: Array<string | null> = []
-    const aliases: Array<string | null> = this.commands.map((command) => {
+    let consecutiveDuplicateAliases: Array<Alias> = []
+    const aliases: Array<Alias> = this.commands.map((command) => {
       if (command.alias) {
         if (command.hasDuplicates) {
           consecutiveDuplicateAliases.push(command.alias)
@@ -80,7 +70,7 @@ export default class Hook {
     }
   }
 
-  commandMatchingErr (errToMatch: CommandError) {
+  commandMatchingErr (errToMatch: Err) {
     return _(this.commands)
     .filter(({ err }) => {
       return err && err.displayMessage === errToMatch.displayMessage

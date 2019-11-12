@@ -1,5 +1,8 @@
 import sinon from 'sinon'
-import Hook, { Command } from './hook-model'
+import Hook from './hook-model'
+
+import Command from '../commands/command-model'
+import Err from '../lib/err-model'
 
 describe('Hook model', () => {
   let hook: Hook
@@ -16,61 +19,66 @@ describe('Hook model', () => {
 
   context('#addCommand', () => {
     it('adds the command to its command collection', () => {
-      hook.addCommand({ isMatchingEvent: () => {
+      const command1: Partial<Command> = { isMatchingEvent: () => {
         return false
-      } })
+      } }
+
+      hook.addCommand(command1 as Command)
 
       expect(hook.commands.length).to.equal(1)
-      hook.addCommand({})
+
+      const command2: Partial<Command> = {}
+
+      hook.addCommand(command2 as Command)
       expect(hook.commands.length).to.equal(2)
     })
 
     it('numbers commands incrementally when not events', () => {
-      const command1: Command = { event: false, isMatchingEvent: () => {
+      const command1: Partial<Command> = { event: false, isMatchingEvent: () => {
         return false
       } }
 
-      hook.addCommand(command1)
+      hook.addCommand(command1 as Command)
       expect(command1.number).to.equal(1)
 
-      const command2: Command = { event: false }
+      const command2: Partial<Command> = { event: false }
 
-      hook.addCommand(command2)
+      hook.addCommand(command2 as Command)
       expect(command2.number).to.equal(2)
     })
 
     it('does not number event commands', () => {
-      const command1: Command = { event: false, isMatchingEvent: () => {
+      const command1: Partial<Command> = { event: false, isMatchingEvent: () => {
         return false
       } }
 
-      hook.addCommand(command1)
+      hook.addCommand(command1 as Command)
       expect(command1.number).to.equal(1)
 
-      const command2: Command = { event: true, isMatchingEvent: () => {
+      const command2: Partial<Command> = { event: true, isMatchingEvent: () => {
         return false
       } }
 
-      hook.addCommand(command2)
+      hook.addCommand(command2 as Command)
       expect(command2.number).to.be.undefined
 
-      const command3: Command = { event: false }
+      const command3: Partial<Command> = { event: false }
 
-      hook.addCommand(command3)
+      hook.addCommand(command3 as Command)
       expect(command3.number).to.equal(2)
     })
 
     it('adds command as duplicate if it matches the last command', () => {
       const addDuplicate = sinon.spy()
-      const command1: Command = { event: true, isMatchingEvent: () => {
+      const command1: Partial<Command> = { event: true, isMatchingEvent: () => {
         return true
       }, addDuplicate }
 
-      hook.addCommand(command1)
+      hook.addCommand(command1 as Command)
 
-      const command2: Command = { event: true }
+      const command2: Partial<Command> = { event: true }
 
-      hook.addCommand(command2)
+      hook.addCommand(command2 as Command)
 
       expect(addDuplicate).to.be.calledWith(command2)
     })
@@ -78,46 +86,64 @@ describe('Hook model', () => {
 
   context('#commandMatchingErr', () => {
     it('returns last command to match the error', () => {
-      const matchesButIsntLast = { err: { displayMessage: 'matching error message' }, isMatchingEvent: () => {
-        return false
-      } }
+      const matchesButIsntLast: Partial<Command> = {
+        err: { displayMessage: 'matching error message' } as Err,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
-      hook.addCommand(matchesButIsntLast)
-      const doesntMatch = { err: { displayMessage: 'other error message' }, isMatchingEvent: () => {
-        return false
-      } }
+      hook.addCommand(matchesButIsntLast as Command)
 
-      hook.addCommand(doesntMatch)
-      const matches = { err: { displayMessage: 'matching error message' } }
+      const doesntMatch: Partial<Command> = {
+        err: { displayMessage: 'other error message' } as Err,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
-      hook.addCommand(matches)
+      hook.addCommand(doesntMatch as Command)
 
-      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' })).to.eql(matches)
+      const matches: Partial<Command> = {
+        err: { displayMessage: 'matching error message' } as Err,
+      }
+
+      hook.addCommand(matches as Command)
+
+      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' } as Err)).to.eql(matches)
     })
 
     it('returns undefined when no match', () => {
-      const noMatch1 = { err: { displayMessage: 'some error message' }, isMatchingEvent: () => {
-        return false
-      } }
+      const noMatch1: Partial<Command> = {
+        err: { displayMessage: 'some error message' } as Err,
+        isMatchingEvent: () => {
+          return false
+        },
+      }
 
-      hook.addCommand(noMatch1)
-      const noMatch2 = { err: { displayMessage: 'other error message' } }
+      hook.addCommand(noMatch1 as Command)
 
-      hook.addCommand(noMatch2)
+      const noMatch2: Partial<Command> = {
+        err: { displayMessage: 'other error message' } as Err,
+      }
 
-      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' })).to.be.undefined
+      hook.addCommand(noMatch2 as Command)
+
+      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' } as Err)).to.be.undefined
     })
   })
 
   context('#aliasesWithDuplicates', () => {
     const addCommand = (alias: string, hasDuplicates = false) => {
-      return hook.addCommand({
+      const command: Partial<Command> = {
         isMatchingEvent: () => {
           return false
         },
         alias,
         hasDuplicates,
-      })
+      }
+
+      return hook.addCommand(command as Command)
     }
 
     it('returns duplicates marked with hasDuplicates and those that appear mulitple times in the commands array', () => {

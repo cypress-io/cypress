@@ -1,6 +1,6 @@
 import { observable } from 'mobx'
 
-type Alias = string | Array<string> | null
+export type Alias = string | Array<string> | null
 
 export interface LogProps {
   id?: string
