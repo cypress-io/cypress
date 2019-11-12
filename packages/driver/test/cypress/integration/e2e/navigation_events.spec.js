@@ -114,6 +114,12 @@ describe('e2e/navigation events', () => {
         { eventName: 'complete', isSync: false },
       ]
 
+      // 1. initial visit,
+      // 2. win.location.href = '...'
+      const onBeforeLoad = cy.stub()
+
+      cy.on('window:before:load', onBeforeLoad)
+
       onNavigationStateChanges((eventName, win) => {
         if (eventName === 'loading') {
           // this should lazily trigger
@@ -129,6 +135,8 @@ describe('e2e/navigation events', () => {
       .url().should('include', '/timeout?ms=0')
       .then(() => {
         expect(navigationEvents).to.deep.eq(expectedEvents)
+
+        expect(onBeforeLoad).to.be.calledTwice
       })
     })
   })
