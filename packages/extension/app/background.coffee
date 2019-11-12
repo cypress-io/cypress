@@ -146,7 +146,6 @@ automation = {
 
     queryTab = (tab) ->
       Promise.try ->
-        browser.tabs.executeScript(tab.id, {code: code2})
         browser.tabs.executeScript(tab.id, {code: code})
       .then (results) ->
         if not results or results[0] isnt data.string
