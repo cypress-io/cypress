@@ -91,6 +91,8 @@ defaultArgs = [
   "--disable-breakpad"
   "--password-store=basic"
   "--use-mock-keychain"
+
+  "--headless"
 ]
 
 getRemoteDebuggingPort = Promise.method () ->
