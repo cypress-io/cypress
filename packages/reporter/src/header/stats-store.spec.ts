@@ -9,8 +9,8 @@ describe('stats store', () => {
 
   context('#start', () => {
     describe('when running', () => {
-      let clock
-      let instance
+      let clock: sinon.SinonFakeTimers
+      let instance: StatsStore
 
       beforeEach(() => {
         clock = sinon.useFakeTimers(new Date('2016-07-18').getTime())
@@ -34,7 +34,11 @@ describe('stats store', () => {
       })
 
       it('does nothing after first call', () => {
-        instance.start({ numPassed: 3 })
+        instance.start({
+          startTime: '2016-07-18',
+          numPassed: 3,
+        })
+
         expect(instance.numPassed).to.equal(1)
       })
 
@@ -90,7 +94,7 @@ describe('stats store', () => {
   })
 
   context('#reset', () => {
-    let instance
+    let instance: StatsStore
 
     beforeEach(() => {
       instance = new StatsStore()
