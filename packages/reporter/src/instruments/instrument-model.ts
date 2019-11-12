@@ -1,17 +1,31 @@
 import { observable } from 'mobx'
 
-export default class Log {
-  @observable.ref alias = null
-  @observable aliasType = null
-  @observable displayName
-  @observable id
-  @observable name
-  @observable message
-  @observable type
-  @observable state
-  @observable.ref referencesAlias = null
+type Alias = string | Array<string> | null
 
-  constructor (props) {
+export interface LogProps {
+  id?: string
+  alias: Alias
+  aliasType?: string | null
+  displayName?: string
+  name?: string
+  message?: string
+  type?: string
+  state?: string
+  referencesAlias?: Alias
+}
+
+export default class Log {
+  @observable.ref alias?: Alias = null
+  @observable aliasType?: string | null = null
+  @observable displayName?: string
+  @observable id?: string
+  @observable name?: string
+  @observable message?: string
+  @observable type?: string
+  @observable state?: string
+  @observable.ref referencesAlias?: Alias = null
+
+  constructor (props: LogProps) {
     this.id = props.id
     this.alias = props.alias
     this.aliasType = props.aliasType
@@ -23,7 +37,7 @@ export default class Log {
     this.referencesAlias = props.referencesAlias
   }
 
-  update (props) {
+  update (props: LogProps) {
     this.alias = props.alias
     this.aliasType = props.aliasType
     this.displayName = props.displayName

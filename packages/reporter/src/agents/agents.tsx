@@ -4,22 +4,34 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Collapsible from '../collapsible/collapsible'
 
-const Agent = observer(({ model }) => (
+import { AgentProps as AgentModelProps } from './agent-model'
+
+interface AgentProps {
+  model: AgentModelProps
+}
+
+const Agent = observer(({ model }: AgentProps) => (
   <tr className={cs({ 'no-calls': !model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
-    <td>{[].concat(model.alias).join(', ')}</td>
+    <td>{([] as Array<string>).concat(model.alias || []).join(', ')}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
   </tr>
 ))
 
-const AgentsList = observer(({ model }) => (
+interface AgentsProps {
+  model: {
+    agents: Array<AgentModelProps>
+  }
+}
+
+const AgentsList = observer(({ model }: AgentsProps) => (
   <tbody>
     {_.map(model.agents, (agent) => <Agent key={agent.id} model={agent} />)}
   </tbody>
 ))
 
-const Agents = observer(({ model }) => (
+const Agents = observer(({ model }: AgentsProps) => (
   <div
     className={cs('runnable-agents-region', {
       'no-agents': !model.agents.length,

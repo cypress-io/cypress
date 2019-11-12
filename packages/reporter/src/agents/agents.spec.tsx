@@ -3,18 +3,19 @@ import React from 'react'
 import { shallow } from 'enzyme'
 
 import Agents, { Agent, AgentsList } from './agents'
+import { AgentProps as AgentModelProps } from './agent-model'
 
-const agentModel = (props) => {
+const agentModel = (props?: Partial<AgentModelProps>) => {
   return _.extend({
     id: _.uniqueId('a'),
     name: 'agent',
     callCount: 0,
     type: 'spy',
     functionName: 'foo',
-  }, props)
+  }, props) as AgentModelProps
 }
 
-const model = (props) => {
+const model = (props?: { agents: Array<AgentModelProps> }) => {
   return _.extend({
     agents: [agentModel(), agentModel()],
   }, props)
@@ -28,7 +29,7 @@ describe('<Agents />', () => {
   })
 
   it('renders with no-agents class if there are no agents', () => {
-    const component = shallow(<Agents model={model({ agents: [] })} />)
+    const component = shallow(<Agents model={model({ agents: ([] as Array<AgentModelProps>) })} />)
 
     expect(component).to.have.className('no-agents')
   })
