@@ -4,13 +4,13 @@ type Alias = string | Array<string> | null
 
 export interface LogProps {
   id?: string
-  alias: Alias
+  alias?: Alias
   aliasType?: string | null
   displayName?: string
   name?: string
   message?: string
   type?: string
-  state?: string
+  state?: string | null
   referencesAlias?: Alias
 }
 
@@ -22,7 +22,7 @@ export default class Log {
   @observable name?: string
   @observable message?: string
   @observable type?: string
-  @observable state?: string
+  @observable state?: string | null
   @observable.ref referencesAlias?: Alias = null
 
   constructor (props: LogProps) {

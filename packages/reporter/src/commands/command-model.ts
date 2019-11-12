@@ -1,22 +1,36 @@
 import { action, computed, observable } from 'mobx'
 
 import Err from '../lib/err-model'
-import Instrument from '../instruments/instrument-model'
+import Instrument, { LogProps } from '../instruments/instrument-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
+interface RenderProps {
+  message?: string
+}
+
+export interface CommandProps extends LogProps {
+  err?: Err
+  event?: boolean
+  number?: number
+  numElements?: number
+  renderProps?: RenderProps
+  visible?: boolean
+}
+
 export default class Command extends Instrument {
-  @observable.struct renderProps = {}
+  @observable.struct renderProps: RenderProps = {}
   @observable err = new Err({})
-  @observable event = false
+  @observable event?: boolean = false
   @observable isLongRunning = false
-  @observable number
-  @observable numElements
-  @observable visible = true
-  @observable duplicates = []
+  @observable number?: number
+  @observable numElements?: number
+  @observable visible?: boolean = true
+  @observable duplicates: Array<Command> = []
   @observable isDuplicate = false
 
-  _prevState = null
+  private _prevState: string | null | undefined = null
+  private _pendingTimeout: NodeJS.Timeout | undefined
 
   @computed get displayMessage () {
     return this.renderProps.message || this.message
@@ -31,7 +45,7 @@ export default class Command extends Instrument {
     return this.numDuplicates > 1
   }
 
-  constructor (props) {
+  constructor (props: CommandProps) {
     super(props)
 
     this.err.update(props.err)
@@ -44,7 +58,7 @@ export default class Command extends Instrument {
     this._checkLongRunning()
   }
 
-  update (props) {
+  update (props: CommandProps) {
     super.update(props)
 
     this.err.update(props.err)
@@ -56,16 +70,16 @@ export default class Command extends Instrument {
     this._checkLongRunning()
   }
 
-  isMatchingEvent (command) {
+  isMatchingEvent (command: Command) {
     return command.event && this.matches(command)
   }
 
-  addDuplicate (command) {
+  addDuplicate (command: Command) {
     command.isDuplicate = true
     this.duplicates.push(command)
   }
 
-  matches (command) {
+  matches (command: Command) {
     return (
       command.type === this.type &&
       command.name === this.name &&
@@ -83,7 +97,7 @@ export default class Command extends Instrument {
     }
 
     if (this._becameNonPending()) {
-      clearTimeout(this._pendingTimeout)
+      clearTimeout(this._pendingTimeout as NodeJS.Timeout)
       action('became:inactive', () => {
         return this.isLongRunning = false
       })()

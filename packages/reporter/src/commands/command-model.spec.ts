@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import sinon from 'sinon'
 
-import Command from './command-model'
+import Command, { CommandProps } from './command-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
-const model = (props) => {
+const model = (props?: Partial<CommandProps>) => {
   return _.extend({
     renderProps: {},
     err: {},
@@ -14,11 +14,11 @@ const model = (props) => {
     numElements: 1,
     state: 'pending',
     visible: true,
-  }, props)
+  }, props) as CommandProps
 }
 
 describe('Command model', () => {
-  let clock
+  let clock: sinon.SinonFakeTimers
 
   beforeEach(() => {
     clock = sinon.useFakeTimers()
@@ -30,7 +30,7 @@ describe('Command model', () => {
 
   context('.isLongRunning', () => {
     describe('when model is pending on initialization and LONG_RUNNING_THRESHOLD passes', () => {
-      let command
+      let command: Command
 
       beforeEach(() => {
         command = new Command(model())
@@ -50,7 +50,7 @@ describe('Command model', () => {
   })
 
   describe('when model is not pending on initialization, is updated to pending, and LONG_RUNNING_THRESHOLD passes', () => {
-    let command
+    let command: Command
 
     beforeEach(() => {
       command = new Command(model({ state: null }))
