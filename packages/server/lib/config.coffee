@@ -235,7 +235,7 @@ validateBrowserList = (browsers) ->
       # Electron browser has path "", but all other browsers
       # should have an absolute path or an alias
       path: check.string,
-      majorVersion: check.unemptyString
+      majorVersion: R.anyPass([check.unemptyString, check.positive])
     })
     browsers.forEach (browser) ->
       debug("checking browser %o", browser)

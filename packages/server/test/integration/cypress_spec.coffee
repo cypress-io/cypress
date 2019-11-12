@@ -162,7 +162,18 @@ describe "lib/cypress", ->
     it "has valid electron browser", ->
       config.validateBrowserList([ELECTRON_BROWSER])
 
-    it "returns list of valid browsers", ->
+    it "allows browser major to be a number", ->
+      browser = {
+        name: 'Edge Beta',
+        family: 'chrome',
+        displayName: 'Edge Beta',
+        version: '80.0.328.2',
+        path: '/some/path',
+        majorVersion: 80
+      }
+      config.validateBrowserList([browser])
+
+    it "validates returned list", ->
       browserUtils.getBrowsers().then(config.validateBrowserList)
 
   context "--get-key", ->
