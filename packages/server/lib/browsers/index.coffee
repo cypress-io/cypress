@@ -102,7 +102,6 @@ module.exports = {
   getAllBrowsersWith: (nameOrPath) ->
     debug("getAllBrowsersWith %o", { nameOrPath })
     if nameOrPath
-      debug("by name or path %s", nameOrPath)
       return ensureAndGetByNameOrPath(nameOrPath, true)
     utils.getBrowsers()
 
