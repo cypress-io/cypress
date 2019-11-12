@@ -1,4 +1,4 @@
-/* global Partial, Omit */
+/* global Partial */
 import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
@@ -16,7 +16,7 @@ const appStateStub = (props?: Partial<IAppState>) => {
     isRunning: true,
     nextCommandName: null,
     toggleAutoScrolling: sinon.spy(),
-  }, props)
+  }, props) as IAppState
 }
 
 describe('<Controls />', () => {
@@ -113,7 +113,7 @@ describe('<Controls />', () => {
   })
 
   describe('when paused with next command', () => {
-    let appState: Omit<IAppState, 'pinnedSnapshotId'>
+    let appState: IAppState
 
     beforeEach(() => {
       appState = appStateStub({ isPaused: true, nextCommandName: 'next command' })
@@ -173,7 +173,7 @@ describe('<Controls />', () => {
   })
 
   describe('when not running', () => {
-    let appState: Omit<IAppState, 'pinnedSnapshotId'>
+    let appState: IAppState
 
     beforeEach(() => {
       appState = appStateStub({ isRunning: false })
