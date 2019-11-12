@@ -2,16 +2,17 @@ import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
+// @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import events from '../lib/events'
+import defaultEvents from '../lib/events'
 
-const ifThen = (condition, component) => (
+const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null
 )
 
-const Controls = observer(({ events, appState }) => {
-  const emit = (event) => () => events.emit(event)
+const Controls = observer(({ events = defaultEvents, appState }) => {
+  const emit = (event: string) => () => events.emit(event)
   const toggleAutoScrolling = () => {
     appState.toggleAutoScrolling()
     events.emit('save:state')
@@ -67,9 +68,5 @@ const Controls = observer(({ events, appState }) => {
     </div>
   )
 })
-
-Controls.defaultProps = {
-  events,
-}
 
 export default Controls

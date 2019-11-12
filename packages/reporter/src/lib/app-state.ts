@@ -1,26 +1,30 @@
 import _ from 'lodash'
 import { observable } from 'mobx'
 
-interface IAppState {
+interface DefaultAppState {
   isPaused: boolean;
   isRunning: boolean;
   nextCommandName: string | null | undefined;
   pinnedSnapshotId: any;
-  [key: string]: any;
 }
 
-const defaults: IAppState = {
+const defaults: DefaultAppState = {
   isPaused: false,
   isRunning: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
 }
 
+export interface IAppState extends DefaultAppState {
+  autoScrollingEnabled: boolean;
+  [key: string]: any;
+}
+
 class AppState implements IAppState {
   @observable autoScrollingEnabled = true
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
-  @observable nextCommandName: string | null | undefined = defaults.nextCommandName
+  @observable nextCommandName = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
 
   isStopped = false;

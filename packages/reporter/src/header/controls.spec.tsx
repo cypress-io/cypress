@@ -1,13 +1,15 @@
+/* global Partial, Omit */
 import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Controls from './controls'
+import { IAppState } from '../lib/app-state'
 
 const eventsStub = () => ({ emit: sinon.spy() })
 
-const appStateStub = (props) => {
+const appStateStub = (props?: Partial<IAppState>) => {
   return _.extend({
     autoScrollingEnabled: true,
     isPaused: false,
@@ -111,7 +113,7 @@ describe('<Controls />', () => {
   })
 
   describe('when paused with next command', () => {
-    let appState
+    let appState: Omit<IAppState, 'pinnedSnapshotId'>
 
     beforeEach(() => {
       appState = appStateStub({ isPaused: true, nextCommandName: 'next command' })
@@ -171,7 +173,7 @@ describe('<Controls />', () => {
   })
 
   describe('when not running', () => {
-    let appState
+    let appState: Omit<IAppState, 'pinnedSnapshotId'>
 
     beforeEach(() => {
       appState = appStateStub({ isRunning: false })
