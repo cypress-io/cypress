@@ -132,7 +132,7 @@
     "husky": "2.4.1",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",
-    "js-codemod": "cpojer/js-codemod",
+    "js-codemod": "cpojer/js-codemod#b1cb55d8",
     "jscodemods": "cypress-io/jscodemods#01b546e",
     "jscodeshift": "0.6.3",
     "konfig": "0.2.1",
