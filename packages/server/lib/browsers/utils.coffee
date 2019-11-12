@@ -91,13 +91,14 @@ module.exports = {
       debug("found %s", pluralize("browser", browsers.length, true))
 
       version = process.versions.chrome or ""
+      majorVersion = parseInt(version.split(".")[0]) if version
       electronBrowser = {
         name: "electron"
         family: "electron"
         displayName: "Electron"
         version: version
         path: ""
-        majorVersion: version.split(".")[0]
+        majorVersion: majorVersion
         info: "Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
       }
 
