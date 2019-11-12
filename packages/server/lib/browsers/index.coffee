@@ -100,7 +100,7 @@ module.exports = {
   close: kill
 
   getAllBrowsersWith: (nameOrPath) ->
-    debug("getAllBrowsersWith")
+    debug("getAllBrowsersWith %o", { nameOrPath })
     if nameOrPath
       debug("by name or path %s", nameOrPath)
       return ensureAndGetByNameOrPath(nameOrPath, true)
