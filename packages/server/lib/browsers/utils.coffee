@@ -1,5 +1,5 @@
 path     = require("path")
-debug    = require("debug")("cypress:server:browsers")
+debug    = require("debug")("cypress:server:browsers:utils")
 Promise  = require("bluebird")
 getPort  = require("get-port")
 launcher = require("@packages/launcher")
