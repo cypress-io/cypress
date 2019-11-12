@@ -105,10 +105,10 @@ chai.use (chai, u) ->
 
     Object.defineProperty(chai.Assertion::, "exist", {get: existProto})
 
-  overrideChaiAsserts = (specWindow, assertFn) ->
+  overrideChaiAsserts = (specWindow, config, assertFn) ->
     _this = @
 
-    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, assertFn)
+    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, config, assertFn)
 
     chaiUtils.getMessage = (assert, args) ->
       obj = assert._obj
@@ -255,7 +255,7 @@ chai.use (chai, u) ->
             e1.message = getLongExistsMessage(obj)
             throw e1
 
-  createPatchedAssert = (specWindow, assertFn) ->
+  createPatchedAssert = (specWindow, config, assertFn) ->
     return (args...) ->
       passed    = chaiUtils.test(@, args)
       value     = chaiUtils.flag(@, "object")
@@ -281,6 +281,7 @@ chai.use (chai, u) ->
         err = $errUtils.enhanceStack({
           err,
           stack: stack,
+          projectRoot: config("projectRoot"),
         })
 
         throw err
@@ -319,12 +320,12 @@ chai.use (chai, u) ->
       assert
     }
 
-  create = (specWindow, assertFn) ->
+  create = (specWindow, config, assertFn) ->
     # restoreOverrides()
     restoreAsserts()
 
     # overrideChai()
-    overrideChaiAsserts(specWindow, assertFn)
+    overrideChaiAsserts(specWindow, config, assertFn)
 
     return setSpecWindowGlobals(specWindow)
 

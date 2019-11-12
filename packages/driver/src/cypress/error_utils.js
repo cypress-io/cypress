@@ -405,9 +405,7 @@ const reconstructStack = (parsedStack) => {
   }).join('\n')
 }
 
-const backslackRegex = /\\/g
-
-const getSourceDetailsForLine = (stackUtil, line) => {
+const getSourceDetailsForLine = (stackUtil, projectRoot, line) => {
   const whitespace = getWhitespace(line)
   const generatedDetails = stackUtil.parseLine(line)
 
@@ -419,17 +417,12 @@ const getSourceDetailsForLine = (stackUtil, line) => {
     }
   }
 
-  // TODO: need to do a better job with cwd
-  // currently getting absolute path like 'http:localhost:52463/__cypress/tests?p=cypress/integration/features/source_map_spec.js:31:8'
-  // but need that to be absolute system path or translate it somewhere along the line
-
   const sourceDetails = getSourceDetails(generatedDetails)
-  const cwd = process.cwd().replace(backslackRegex, '/')
 
   return {
     function: sourceDetails.function,
-    relativeFile: (sourceDetails.file || '').replace(`${cwd}/`, ''),
-    absoluteFile: sourceDetails.file,
+    relativeFile: sourceDetails.file,
+    absoluteFile: path.join(projectRoot, sourceDetails.file),
     line: sourceDetails.line,
     // adding 1 to column makes more sense when opening in editor
     column: sourceDetails.column + 1,
@@ -437,11 +430,11 @@ const getSourceDetailsForLine = (stackUtil, line) => {
   }
 }
 
-const getSourceStack = (stack) => {
+const getSourceStack = (stack, projectRoot) => {
   if (!_.isString(stack)) return {}
 
-  const getSourceDetails = _.partial(getSourceDetailsForLine, new StackUtils())
-  const parsed = _.map(stack.split('\n'), getSourceDetails)
+  const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, new StackUtils(), projectRoot)
+  const parsed = _.map(stack.split('\n'), getSourceDetailsWithStackUtil)
 
   return {
     parsed,
@@ -449,10 +442,10 @@ const getSourceStack = (stack) => {
   }
 }
 
-const enhanceStack = ({ err, stack }) => {
+const enhanceStack = ({ err, stack, projectRoot }) => {
   err.stack = combineMessageAndStack(err, stack)
 
-  const { sourceMapped, parsed } = getSourceStack(err.stack)
+  const { sourceMapped, parsed } = getSourceStack(err.stack, projectRoot)
 
   err.sourceMappedStack = sourceMapped
   err.parsedStack = parsed

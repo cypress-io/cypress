@@ -62,7 +62,7 @@ setTopOnError = (cy) ->
   if curCy
     curCy = cy
     return
-  
+
   curCy = cy
 
   onTopError = ->
@@ -78,7 +78,7 @@ setTopOnError = (cy) ->
     configurable: false
     enumerable: true
   })
-  
+
 
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
@@ -116,7 +116,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   mouse = $Mouse.create(state, keyboard, focused)
   timers = $Timers.create()
 
-  { expect } = $Chai.create(specWindow, assertions.assert)
+  { expect } = $Chai.create(specWindow, config, assertions.assert)
 
   xhrs = $Xhrs.create(state)
   aliases = $Aliases.create(state)
@@ -624,6 +624,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     err = $errUtils.enhanceStack({
       err,
       stack: stack or err.stack,
+      projectRoot: config("projectRoot")
     })
     err = $errUtils.processErr(err, config)
 
@@ -1187,7 +1188,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           args: obj
         })
     })
-  
+
   setTopOnError(cy)
 
   ## make cy global in the specWindow
