@@ -79,7 +79,7 @@ ELECTRON_BROWSER = {
   displayName: "Electron"
   path: "",
   version: "99.101.1234",
-  majorVersion: "99"
+  majorVersion: 99
 }
 
 previousCwd = process.cwd()
