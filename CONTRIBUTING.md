@@ -31,25 +31,25 @@ Thanks for taking the time to contribute! :smile:
   - [Tests](#tests)
   - [Packages](#packages)
 - [Committing Code](#committing-code)
-  - [Branches](#branches)
-  - [Pull Requests](#pull-requests)
-  - [Testing](#testing)
-  - [Dependencies](#dependencies)
+ - [Branches](#branches)
+ - [Pull Requests](#pull-requests)
+ - [Testing](#testing)
+ - [Dependencies](#dependencies)
 - [Deployment](#deployment)
 
 ## CI status
 
-| Build status                                                                                                                                                                                                        | Description                                                                                |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------- |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions)     | [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions)     |
+| Build status | Description |
+| :--- | :--- |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions) | [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions) |
 | [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-ci-environments.svg?style=svg&circle-token=66a4d36c3966cbe476f13e7dfbe3af0693db3fb9)](https://circleci.com/gh/cypress-io/cypress-test-ci-environments) | [cypress-test-ci-environments](https://github.com/cypress-io/cypress-test-ci-environments) |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-module-api.svg?style=svg&circle-token=317f79ae796e0ffd6cc7dd90859c0f67e5a306e7)](https://circleci.com/gh/cypress-io/cypress-test-module-api)           | [cypress-test-module-api](https://github.com/cypress-io/cypress-test-module-api)           |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-nested-projects.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-test-nested-projects)                                                       | [cypress-test-nested-projects](https://github.com/cypress-io/cypress-test-nested-projects) |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-on.svg?style=svg&circle-token=51ba85f5720654ee58212f45f6b9afc56d55d52a)](https://circleci.com/gh/cypress-io/cypress-on)                                     | [cypress-on](https://github.com/cypress-io/cypress-on)                                     |
-| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions)     | [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos)     |
-| [![CircleCI](https://circleci.com/gh/cypress-io/docsearch-scraper.svg?style=svg&circle-token=8087137233788ec1eab4f79d4451392ca53183b2)](https://circleci.com/gh/cypress-io/docsearch-scraper)                       | [docsearch-scraper](https://github.com/cypress-io/docsearch-scraper)                       |
-| [![Docker Build Status](https://img.shields.io/docker/build/cypress/base.svg)](https://hub.docker.com/r/cypress/base/)                                                                                              | [cypress-docker-images](https://github.com/cypress-io/cypress-docker-images)               |
-| [![Build status](https://ci.appveyor.com/api/projects/status/ln8tg3dv42nk916c?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress)                                                                        | Windows CI                                                                                 |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-module-api.svg?style=svg&circle-token=317f79ae796e0ffd6cc7dd90859c0f67e5a306e7)](https://circleci.com/gh/cypress-io/cypress-test-module-api) | [cypress-test-module-api](https://github.com/cypress-io/cypress-test-module-api) |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-nested-projects.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-test-nested-projects) | [cypress-test-nested-projects](https://github.com/cypress-io/cypress-test-nested-projects) |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-on.svg?style=svg&circle-token=51ba85f5720654ee58212f45f6b9afc56d55d52a)](https://circleci.com/gh/cypress-io/cypress-on) | [cypress-on](https://github.com/cypress-io/cypress-on) |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions) | [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos) |
+| [![CircleCI](https://circleci.com/gh/cypress-io/docsearch-scraper.svg?style=svg&circle-token=8087137233788ec1eab4f79d4451392ca53183b2)](https://circleci.com/gh/cypress-io/docsearch-scraper) | [docsearch-scraper](https://github.com/cypress-io/docsearch-scraper) |
+| [![Docker Build Status](https://img.shields.io/docker/build/cypress/base.svg)](https://hub.docker.com/r/cypress/base/) | [cypress-docker-images](https://github.com/cypress-io/cypress-docker-images) |
+| [![Build status](https://ci.appveyor.com/api/projects/status/ln8tg3dv42nk916c?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress) | Windows CI |
 
 ## Code of Conduct
 
@@ -241,24 +241,24 @@ This repository is made up of various packages. They are discrete modules with d
 
 Here is a list of the core packages in this repository with a short description, located within the [`packages`](./packages) directory:
 
- | Folder Name                           | Package Name            | Purpose                                                                      |
- | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
- | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
- | [coffee](./packages/coffee)           | `@packages/coffee`      | A centralized version of CoffeeScript used for other packages.               |
- | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI.                              |
- | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
- | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
- | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
- | [extension](./packages/extension)     | `@packages/extension`   | The Cypress Chrome browser extension                                         |
- | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
- | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
- | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
- | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
- | [runner](./packages/runner)           | `@packages/runner`      | The runner is the minimal "chrome" around the user's application under test. |
- | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
- | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
- | [static](./packages/static)           | `@packages/static`      | Serves static assets used in the Cypress GUI.                                |
- | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
+ | Folder Name | Package Name | Purpose |
+ | :--- | :--- | :--- |
+ | [cli](./cli) | `cypress` | The command-line tool that is packaged as an `npm` module. |
+ | [coffee](./packages/coffee) | `@packages/coffee` | A centralized version of CoffeeScript used for other packages. |
+ | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI. |
+ | [driver](./packages/driver) | `@packages/driver` | The code that is used to drive the behavior of the API commands. |
+ | [electron](./packages/electron) | `@packages/electron` | The Cypress implementation of Electron. |
+ | [example](./packages/example) | `@packages/example` | Our example kitchen-sink application. |
+ | [extension](./packages/extension) | `@packages/extension` | The Cypress Chrome browser extension |
+ | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic. |
+ | [launcher](./packages/launcher) | `@packages/launcher` | Finds and launches browsers installed on your system. |
+ | [reporter](./packages/reporter) | `@packages/reporter` | The reporter shows the running results of the tests (The Command Log UI). |
+ | [root](./packages/root) | `@packages/root` | Dummy package pointing at the root of the repository. |
+ | [runner](./packages/runner) | `@packages/runner` | The runner is the minimal "chrome" around the user's application under test. |
+ | [server](./packages/server) | `@packages/server` | The <3 of Cypress. This orchestrates everything. The backend node process. |
+ | [socket](./packages/socket) | `@packages/socket` | A wrapper around socket.io to provide common libraries. |
+ | [static](./packages/static) | `@packages/static` | Serves static assets used in the Cypress GUI. |
+ | [ts](./packages/ts) | `@packages/ts` | A centralized version of typescript. |
 
 We try to tag all issues with a `pkg/` tag describing the appropriate package the work is required in. For example, the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label is tagged on issues that require work in the `driver` package.
 
@@ -318,18 +318,18 @@ $ yarn lerna add --scope cypress --scope @packages/server my-new-dep1
 
 ##### Common Top Level Tasks
 
-| Task               | Purpose                                                                                        |
-| :----------------- | :--------------------------------------------------------------------------------------------- |
-| `build`            | Build all packages                                                                             |
-| `start`            | Open Cypress in dev and global mode                                                            |
-| `watch`            | Run `yarn watch` in every package; piping the output back to the terminal                      |
-| `clean`            | Run `yarn clean` in every package; used to remove build artifacts from all packages            |
-| `clean-deps`       | Remove all dependencies installed (in root and in every package)                               |
-| `test`             | Runs `yarn test` in every package except those without a `test` script                         |
-| `test-unit`        | Runs `yarn test-unit` in every package except those without a `test-unit` script               |
+| Task | Purpose |
+| :--- | :--- |
+| `build` | Build all packages |
+| `start` | Open Cypress in dev and global mode |
+| `watch` | Run `yarn watch` in every package; piping the output back to the terminal |
+| `clean` | Run `yarn clean` in every package; used to remove build artifacts from all packages |
+| `clean-deps` | Remove all dependencies installed (in root and in every package) |
+| `test` | Runs `yarn test` in every package except those without a `test` script |
+| `test-unit` | Runs `yarn test-unit` in every package except those without a `test-unit` script |
 | `test-integration` | Runs `yarn test-integration` in every package except those without a `test-integration` script |
-| `test-e2e`         | Runs `yarn test-e2e` in every package except those without a `test-e2e` script                 |
-| `test-watch`       | Runs `yarn test-watch` in every package except those without a `test-watch` script             |
+| `test-e2e` | Runs `yarn test-e2e` in every package except those without a `test-e2e` script |
+| `test-watch` | Runs `yarn test-watch` in every package except those without a `test-watch` script |
 
 When run as-is, top level tasks will run across all packages. However, most scripts can be provided one or more scopes. Providing a scope will execute tasks within the provided packages. Scope values are based on **package names** and not the directory structure.
 
@@ -354,19 +354,19 @@ Each package is responsible for building itself and testing itself and can do so
 
 > In order to simplify top level tasks, if a package does not need a script, it is still included and simply exits 0 (`exit 0`).
 
-| Task               | Purpose                                                                                                                                                  |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `build`            | Build the package                                                                                                                                        |
-| `build-prod`       | Build all assets for production (if makes sense)                                                                                                         |
-| `start`            | Run a server for serving files                                                                                                                           |
-| `watch`            | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file. |
-| `clean`            | Remove any assets created by `build-dev` or `build-prod`                                                                                                 |
-| `clean-deps`       | Remove any dependencies installed (usually by `yarn`)                                                                                                    |
-| `test`             | Runs all tests once (this usually means running unit tests; via `yarn test-unit`)                                                                        |
-| `test-unit`        | Run all unit tests within the package; `exit 0` if N/A                                                                                                   |
-| `test-integration` | Run all integration tests within the package; `exit 0` if N/A                                                                                            |
-| `test-e2e`         | Run all e2e tests within the package; `exit 0` if N/A                                                                                                    |
-| `test-watch`       | Run all unit tests in the package in watch mode                                                                                                          |
+| Task | Purpose |
+| :--- | :--- |
+| `build` | Build the package |
+| `build-prod` | Build all assets for production (if makes sense) |
+| `start` | Run a server for serving files |
+| `watch` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file. |
+| `clean` | Remove any assets created by `build-dev` or `build-prod` |
+| `clean-deps` | Remove any dependencies installed (usually by `yarn`) |
+| `test` | Runs all tests once (this usually means running unit tests; via `yarn test-unit`) |
+| `test-unit` | Run all unit tests within the package; `exit 0` if N/A |
+| `test-integration` | Run all integration tests within the package; `exit 0` if N/A |
+| `test-e2e` | Run all e2e tests within the package; `exit 0` if N/A |
+| `test-watch` | Run all unit tests in the package in watch mode |
 
 #### Debugging
 
@@ -443,7 +443,7 @@ Error: Missing binding /cypress/packages/desktop-gui/node_modules/node-sass/vend
 Node Sass could not find a binding for your current environment: Linux 64-bit with Node.js 6.x
 
 Found bindings for the following environments:
-  - OS X 64-bit with Node.js 6.x
+ - OS X 64-bit with Node.js 6.x
 
 This usually happens because your environment has changed since running `npm install`.
 Run `npm rebuild node-sass` to build the binding for your current environment.
