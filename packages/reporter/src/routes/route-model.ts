@@ -1,13 +1,20 @@
 import { observable } from 'mobx'
 import Instrument from '../instruments/instrument-model'
 
-export default class Route extends Instrument {
-  @observable isStubbed
-  @observable method
-  @observable numResponses = 0
-  @observable url
+interface RouteProps {
+  isStubbed: boolean
+  method: string
+  numResponses: number
+  url: string
+}
 
-  constructor (props) {
+export default class Route extends Instrument {
+  @observable isStubbed: boolean
+  @observable method: string
+  @observable numResponses: number = 0
+  @observable url: string
+
+  constructor (props: RouteProps) {
     super(props)
 
     this.isStubbed = props.isStubbed
@@ -16,7 +23,7 @@ export default class Route extends Instrument {
     this.url = props.url
   }
 
-  update (props) {
+  update (props: RouteProps) {
     super.update(props)
 
     this.isStubbed = props.isStubbed
