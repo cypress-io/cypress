@@ -323,19 +323,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         else
           resp
 
-  Cypress.on "window:before:load", (contentWindow) ->
-    ## TODO: just use a closure here
-    current = state("current")
-
-    return if not current
-
-    runnable = state("runnable")
-
-    return if not runnable
-
-    options = _.last(current.get("args"))
-    options?.onBeforeLoad?.call(runnable.ctx, contentWindow)
-
   Commands.addAll({
     reload: (args...) ->
       throwArgsErr = =>
@@ -587,11 +574,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           else
             cy.once(event, resolve)
 
+          onBeforeLoad = (contentWindow) ->
+            options.onBeforeLoad?.call(runnable.ctx, contentWindow)
+
+          cy.once("window:before:load", onBeforeLoad)
+
           cleanup = ->
             if event is "hashchange"
               win.removeEventListener("hashchange", resolve)
             else
               cy.removeListener(event, resolve)
+
+            cy.removeListener("window:before:load", onBeforeLoad)
 
             knownCommandCausedInstability = false
 
