@@ -192,7 +192,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       You cannot parallelize a run that has been complete for that long.
 
       #{displayFlags(arg1, {
-        tag: "--tag"
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -209,7 +209,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
       #{displayFlags(arg1, {
-        tag: "--tag"
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -224,7 +224,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
-        tag: "--tag"
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -241,7 +241,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
-        tag: "--tag",
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -318,7 +318,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
-        tag: "--tag",
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel"
       })}
