@@ -37,6 +37,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## thens can return more "thenables" which are not resolved
   ## until they're 'really' resolved, so naturally this API
   ## supports nesting promises
+  ## So....The big change that I want to make is
+  ## If a command has childCommands that are not chained
+  ## I.E commands within a function
+  ## Those commands should be a seperate queue and the command should return the result of that queue...
+
   thenFn = (subject, options, fn) ->
     ctx = @
 
@@ -60,7 +65,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     ## name could be invoke or its!
     name = state("current").get("name")
-
+    queue = cy.queue
+    console.log(queue)
     cleanup = ->
       state("onInjectCommand", undefined)
       cy.removeListener("command:enqueued", enqueuedCommand)
@@ -68,14 +74,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     invokedCyCommand = false
 
-    enqueuedCommand = (obj) ->
-      ## Do the same thing here as with within?
+    enqueuedCommand = () ->
       invokedCyCommand = true
+      { commands } = cy.state("current").get("queue")
+      for cmd in commands
+        res = cy.runCommandInQueue(cmd)
+        await res
 
     state("onInjectCommand", returnFalseIfThenable)
 
     cy.once("command:enqueued", enqueuedCommand)
-
     ## this code helps juggle subjects forward
     ## the same way that promises work
     current = state("current")
@@ -85,6 +93,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## if the next command is chained to us then when it eventually
     ## runs we need to reset the subject to be the return value of the
     ## previous command so the subject is continuously juggled forward
+
     if next and next.get("chainerId") is current.get("chainerId")
       checkSubject = (newSubject, args) ->
         return if state("current") isnt next
@@ -97,13 +106,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## find the new subject and splice it out
         ## with our existing subject
         index = _.indexOf(args, newSubject)
+        console.log(index)
+        console.log(state("current"))
         if index > -1
           args.splice(index, 1, s)
+        
 
         cy.removeListener("next:subject:prepared", checkSubject)
-
       cy.on("next:subject:prepared", checkSubject)
-
     getRet = ->
       ret = fn.apply(ctx, args)
 
@@ -115,7 +125,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onFail: options._log
           args: { value: $utils.stringify(ret) }
         })
-
+      console.log(ret)
       return ret
 
     Promise
@@ -396,13 +406,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           ## find the new subject and splice it out
           ## with our existing subject
-          ## But only if the new subject is defined
-          ## Otherwise keep the current subject as it is
-          ## https://github.com/cypress-io/cypress/issues/4921
           index = _.indexOf(args, newSubject)
-          if not _.isUndefined(newSubject) and index > -1 
-              args.splice(index, 1, subject)
+          console.log(newSubject)
+          if not _.isUndefined(newSubject) && index > -1
+            args.splice(index, 1, subject)
+
           cy.removeListener("next:subject:prepared", checkSubject)
+
         cy.on("next:subject:prepared", checkSubject)
 
       endEarly = false

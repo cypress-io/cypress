@@ -241,11 +241,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## If we are dealing with a within commmand,
     ## We want to create its own queue, and run the commands from there
     ## That way they run within the context of the within, instead of running outside of the within
-    if state("withinQueue")
-        state("withinQueue").splice(state("withinQueue").length, 0, obj)
-    else if not _.isUndefined(parentCommand) and parentCommand.get("name") is "within"
-        state("withinQueue", $CommandQueue.create())
-        state("withinQueue").splice(state("withinQueue").length, 0, obj)
+
+    ## I think we want to change this from a state object to an object we pass to the parent
+    if not _.isUndefined(parentCommand) && (nestedQueue = parentCommand.get('queue'))
+        console.log(nestedQueue)
+        nestedQueue.splice(nestedQueue.length, 0, obj)
+        parentCommand.set({ queue: nestedQueue })
+        console.log(parentCommand)
+    else if not _.isUndefined(parentCommand)
+        nestedQueue = $CommandQueue.create()
+        nestedQueue.splice(nestedQueue.length, 0, obj)
+        parentCommand.set({ queue: nestedQueue })
+        console.log(parentCommand)
     else queue.splice(index, 0, obj)
     Cypress.action("cy:command:enqueued", obj)
 
@@ -909,12 +916,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       Promise.resolve(
         commandFns[name].apply(cy, args)
       )
-    runCommandFromWithin: (obj) ->
+    runCommandInQueue: (obj) ->
       ## instead of removing the commands from the queue
       ## after they are done running, should we do it here?
       ## Worried about the behaviour with other nested commands
       new Promise( (resolve) ->
         Cypress.action("cy:command:start", obj)
+        console.log(obj)
         runCommand(obj)
         .then ->
           Cypress.action("cy:command:end", obj)

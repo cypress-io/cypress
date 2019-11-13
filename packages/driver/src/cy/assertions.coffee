@@ -61,13 +61,17 @@ create = (state, queue, retryFn) ->
     current = state("current")
     index   = state("index") + 1
     chainerId = current.attributes.chainerId
-    isNestedCommand = not _.isUndefined(current.attributes.parentCommand) 
+    parentCommand = current.attributes.parentCommand
+    isNestedCommand = not _.isUndefined(parentCommand)
     assertions = []
     ## We could probably make this a lot neater
     ## Not completely sure how though...
     ## could we just do state("withinQueue") to cover both undefined and null
-    if isNestedCommand && not _.isUndefined(state("withinQueue")) && state("withinQueue")
-      for cmd in state("withinQueue").get()
+    if isNestedCommand
+      console.log(parentCommand)
+      console.log(parentCommand.get("queue"))
+      for cmd in parentCommand.get("queue").commands
+        console.log(cmd)
         if cmd is current 
           continue
         if cmd.is("utility")

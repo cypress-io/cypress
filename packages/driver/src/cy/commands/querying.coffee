@@ -436,13 +436,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## instead of just inserting these command into the queue and letting them run that way
       ## we are going to run them ourselves in a separate queue
       finishWithin = () ->
-        { commands } = cy.state("withinQueue")
+        console.log(cy.state("current").get("queue"))
+        { commands } = cy.state("current").get("queue")
+
         ##we want to run each command in the queue
         ## and once the command is done move onto the next
         ## this should also block the within command from finishing
         console.log("Running commands")
+        console.log(commands)
         for cmd in commands
-          res = cy.runCommandFromWithin(cmd)
+          res = cy.runCommandInQueue(cmd)
           await res
 
       fn.call(ctx, subject)
@@ -486,6 +489,5 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           cy.state("withinSubject", null)
 
       await finishWithin()
-      cy.state("withinQueue", null)
       return subject
   })
