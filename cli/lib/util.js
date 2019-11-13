@@ -175,8 +175,57 @@ const dequote = (str) => {
   return str
 }
 
+const parseOpts = (opts) => {
+  opts = _.pick(
+    opts,
+    'project',
+    'spec',
+    'reporter',
+    'reporterOptions',
+    'path',
+    'destination',
+    'port',
+    'env',
+    'cypressVersion',
+    'config',
+    'record',
+    'key',
+    'configFile',
+    'browser',
+    'detached',
+    'headed',
+    'global',
+    'dev',
+    'force',
+    'exit',
+    'cachePath',
+    'cacheList',
+    'cacheClear',
+    'parallel',
+    'group',
+    'ciBuildId'
+  )
+
+  if (opts.exit) {
+    opts = _.omit(opts, 'exit')
+  }
+
+  // some options might be quoted - which leads to unexpected results
+  // remove double quotes from certain options
+  const removeQuotes = {
+    group: util.dequote,
+    ciBuildId: util.dequote,
+  }
+  const cleanOpts = R.evolve(removeQuotes, opts)
+
+  debug('parsed cli options %o', cleanOpts)
+
+  return cleanOpts
+}
+
 const util = {
   normalizeModuleOptions,
+  parseOpts,
   isValidCypressEnvValue,
   printNodeOptions,
 
