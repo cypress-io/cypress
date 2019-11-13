@@ -65,7 +65,8 @@ create = (state, queue, retryFn) ->
     assertions = []
     ## We could probably make this a lot neater
     ## Not completely sure how though...
-    if isNestedCommand && not _.isUndefined(state("withinQueue"))
+    ## could we just do state("withinQueue") to cover both undefined and null
+    if isNestedCommand && not _.isUndefined(state("withinQueue")) && state("withinQueue")
       for cmd in state("withinQueue").get()
         if cmd is current 
           continue
