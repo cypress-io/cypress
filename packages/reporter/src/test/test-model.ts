@@ -3,22 +3,36 @@ import { action, autorun, computed, observable, observe } from 'mobx'
 
 import Err from '../lib/err-model'
 import Hook from '../hooks/hook-model'
-import Runnable from '../runnables/runnable-model'
+import Runnable, { RunnableProps } from '../runnables/runnable-model'
+import Command from '../commands/command-model'
+import Agent from '../agents/agent-model'
+import Route from '../routes/route-model'
+
+export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
+
+interface TestProps extends RunnableProps {
+  state?: TestState
+  err?: Err
+  hookName?: string
+  isOpen?: boolean
+}
 
 export default class Test extends Runnable {
-  @observable agents = []
-  @observable commands = []
+  @observable agents: Array<Agent> = []
+  @observable commands: Array<Command> = []
   @observable err = new Err({})
-  @observable hooks = []
+  @observable hooks: Array<Hook> = []
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
-  @observable isActive = null
+  @observable isActive: boolean | null = null
   @observable isLongRunning = false
   @observable isOpen = false
-  @observable routes = []
-  @observable _state = null
+  @observable routes: Array<Route> = []
+  @observable _state?: TestState | null = null
   type = 'test'
 
-  constructor (props, level) {
+  private callbackAfterUpdate: (() => void) | null = null
+
+  constructor (props: TestProps, level: number) {
     super(props, level)
 
     this._state = props.state
@@ -49,15 +63,15 @@ export default class Test extends Runnable {
     return this._state || (this.isActive ? 'active' : 'processing')
   }
 
-  addAgent (agent) {
+  addAgent (agent: Agent) {
     this.agents.push(agent)
   }
 
-  addRoute (route) {
+  addRoute (route: Route) {
     this.routes.push(route)
   }
 
-  addCommand (command, hookName) {
+  addCommand (command: Command, hookName: string) {
     const hook = this._findOrCreateHook(hookName)
 
     this.commands.push(command)
@@ -68,7 +82,7 @@ export default class Test extends Runnable {
     this.isActive = true
   }
 
-  update ({ state, err, hookName, isOpen }, cb) {
+  update ({ state, err, hookName, isOpen }: TestProps, cb?: (() => void)) {
     let hadChanges = false
 
     const disposer = observe(this, (change) => {
@@ -116,7 +130,7 @@ export default class Test extends Runnable {
     }
   }
 
-  finish (props) {
+  finish (props: TestProps) {
     this.update(props)
     this.isActive = false
   }
@@ -130,7 +144,7 @@ export default class Test extends Runnable {
     .last()
   }
 
-  _findOrCreateHook (name) {
+  _findOrCreateHook (name: string) {
     const hook = _.find(this.hooks, { name })
 
     if (hook) return hook

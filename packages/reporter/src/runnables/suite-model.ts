@@ -1,8 +1,7 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 import Runnable from './runnable-model'
-
-type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
+import { TestState } from '../test/test-model'
 
 export interface Children {
   state: TestState
