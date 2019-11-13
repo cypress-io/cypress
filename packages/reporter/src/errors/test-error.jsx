@@ -38,9 +38,7 @@ const Stack = ({ err, onClick }) => {
       </a>
     )
 
-    stackLine = [whitespace, `at ${fn} (`, link, ')']
-
-    return makeLine(key, stackLine)
+    return makeLine(key, [whitespace, `at ${fn} (`, link, ')'])
   })
 }
 

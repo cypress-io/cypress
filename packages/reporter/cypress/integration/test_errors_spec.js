@@ -33,9 +33,10 @@ describe('test errors', function () {
       }],
       docsUrl: 'https://on.cypress.io/type',
       codeFrame: {
-        file: 'users.spec.js',
-        line: 5,
-        column: 6,
+        relativeFile: 'my/app.js',
+        absoluteFile: '/me/dev/my/app.js',
+        line: 2,
+        column: 7,
         language: 'javascript',
         frame: 'cy.get(\'.as - table\')\n.find(\'tbody>tr\').eq(12)\n.find(\'td\').first()\n.find(\'button\').as(\'firstBtn\')\n.then(() => { })',
       },
