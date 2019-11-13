@@ -1,12 +1,31 @@
-import sinon from 'sinon'
+import sinon, { SinonSpy, SinonStub } from 'sinon'
 
 import events from './events'
+import { AppState } from './app-state'
+import { RunnablesStore } from '../runnables/runnables-store'
+import { Scroller } from './scroller'
+import { StatsStore } from '../header/stats-store'
 
-const runnerStub = () => {
+interface RunnerStub {
+  on: SinonSpy
+  emit: SinonSpy
+}
+
+const runnerStub = (): RunnerStub => {
   return {
     on: sinon.stub(),
     emit: sinon.spy(),
   }
+}
+
+type AppStateStub = AppState & {
+  startRunning: SinonSpy
+  pause: SinonSpy
+  reset: SinonSpy
+  resume: SinonSpy
+  end: SinonSpy
+  temporarilySetAutoScrolling: SinonSpy
+  stop: SinonSpy
 }
 
 const appStateStub = () => {
@@ -18,7 +37,18 @@ const appStateStub = () => {
     end: sinon.spy(),
     temporarilySetAutoScrolling: sinon.spy(),
     stop: sinon.spy(),
-  }
+  } as AppStateStub
+}
+
+type RunnablesStoreStub = RunnablesStore & {
+  addLog: SinonSpy
+  reset: SinonSpy
+  runnableStarted: SinonSpy
+  runnableFinished: SinonSpy
+  setInitialScrollTop: SinonStub
+  setRunnables: SinonSpy
+  testById: SinonStub
+  updateLog: SinonSpy
 }
 
 const runnablesStoreStub = () => {
@@ -31,13 +61,27 @@ const runnablesStoreStub = () => {
     setRunnables: sinon.spy(),
     testById: sinon.stub(),
     updateLog: sinon.spy(),
-  }
+  } as RunnablesStoreStub
+}
+
+type ScrollerStub = Scroller & {
+  getScrollTop: SinonStub
 }
 
 const scrollerStub = () => {
   return {
     getScrollTop: sinon.stub(),
-  }
+  } as ScrollerStub
+}
+
+type StatsStoreStub = StatsStore & {
+  incrementCount: SinonSpy
+  pause: SinonSpy
+  reset: SinonSpy
+  resume: SinonSpy
+  start: SinonSpy
+  startRunning: SinonSpy
+  end: SinonSpy
 }
 
 const statsStoreStub = () => {
@@ -49,15 +93,15 @@ const statsStoreStub = () => {
     start: sinon.spy(),
     startRunning: sinon.spy(),
     end: sinon.spy(),
-  }
+  } as StatsStoreStub
 }
 
 describe('events', () => {
-  let appState
-  let runnablesStore
-  let scroller
-  let statsStore
-  let runner
+  let appState: AppStateStub
+  let runnablesStore: RunnablesStoreStub
+  let scroller: ScrollerStub
+  let statsStore: StatsStoreStub
+  let runner: RunnerStub
 
   beforeEach(() => {
     events.__off()

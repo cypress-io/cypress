@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
+import { TestState } from '../test/test-model'
 
 export interface IStatsStore {
   numPassed: number
@@ -9,6 +10,13 @@ export interface IStatsStore {
   _startTime: number | null
   _currentTime: number | null
   [key: string]: any
+}
+
+export interface StatsStoreStartInfo {
+  startTime: string
+  numPassed?: number
+  numFailed?: number
+  numPending?: number
 }
 
 const defaults: IStatsStore = {
@@ -41,12 +49,7 @@ class StatsStore implements IStatsStore {
     return this._currentTime - this._startTime
   }
 
-  start ({ startTime, numPassed = 0, numFailed = 0, numPending = 0 }: {
-    startTime: string
-    numPassed?: number
-    numFailed?: number
-    numPending?: number
-  }) {
+  start ({ startTime, numPassed = 0, numFailed = 0, numPending = 0 }: StatsStoreStartInfo) {
     if (this._startTime) return
 
     this.numPassed = numPassed
@@ -71,7 +74,7 @@ class StatsStore implements IStatsStore {
     this._currentTime = Date.now()
   }
 
-  incrementCount (type: string) {
+  incrementCount (type: TestState) {
     const countKey = `num${_.capitalize(type)}`
 
     this[countKey] = this[countKey] + 1

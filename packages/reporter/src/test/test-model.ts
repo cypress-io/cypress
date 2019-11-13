@@ -13,7 +13,7 @@ export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing
 export type UpdateTestCallback = () => void
 
 export interface TestProps extends RunnableProps {
-  state?: TestState
+  state: TestState
   err?: Err
   hookName?: string
   isOpen?: boolean

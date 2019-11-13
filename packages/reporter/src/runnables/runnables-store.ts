@@ -29,8 +29,8 @@ export type LogProps = AgentProps | CommandProps | RouteProps
 type Log = Agent | Command | Route
 
 export interface RootRunnable {
-  tests: Array<TestProps>
-  suites: Array<SuiteProps>
+  tests?: Array<TestProps>
+  suites?: Array<SuiteProps>
 }
 
 type RunnableType = 'test' | 'suite'
@@ -71,8 +71,8 @@ class RunnablesStore {
   }
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {
-    return this._createRunnables<TestProps>('test', runnableProps.tests, level).concat(
-      this._createRunnables<SuiteProps>('suite', runnableProps.suites, level)
+    return this._createRunnables<TestProps>('test', runnableProps.tests || [], level).concat(
+      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], level)
     )
   }
 
