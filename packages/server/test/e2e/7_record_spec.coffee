@@ -402,10 +402,10 @@ describe "e2e record", ->
       req: "postRunRequest@2.2.0",
       resSchema: "postRunResponse@2.2.0"
       res: (req, res) ->
-        { group, tag, ciBuildId } = req.body
+        { group, tags, ciBuildId } = req.body
 
         expect(group).to.eq("prod-e2e")
-        expect(tag).to.eq("nightly")
+        expect(tags).to.eq(["nightly"])
         expect(ciBuildId).to.eq("ciBuildId123")
 
         ## if this is the first response
