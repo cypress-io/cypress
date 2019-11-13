@@ -7,7 +7,7 @@ e2e = require("../support/helpers/e2e")
 fs = require("../../lib/util/fs")
 Fixtures = require("../support/helpers/fixtures")
 
-postRunResponseWithWarnings = jsonSchemas.getExample("postRunResponse")("2.1.0")
+postRunResponseWithWarnings = jsonSchemas.getExample("postRunResponse")("2.2.0")
 postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
 
@@ -152,8 +152,8 @@ defaultRoutes = [
   {
     method: "post"
     url: "/runs"
-    req: "postRunRequest@2.1.0",
-    resSchema: "postRunResponse@2.1.0"
+    req: "postRunRequest@2.2.0",
+    resSchema: "postRunResponse@2.2.0"
     res: postRunResponse
   }, {
     method: "post"
@@ -399,8 +399,8 @@ describe "e2e record", ->
     routes[0] = {
       method: "post"
       url: "/runs"
-      req: "postRunRequest@2.1.0",
-      resSchema: "postRunResponse@2.1.0"
+      req: "postRunRequest@2.2.0",
+      resSchema: "postRunResponse@2.2.0"
       res: (req, res) ->
         { group, tag, ciBuildId } = req.body
 
@@ -601,7 +601,7 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
           res: (req, res) -> res.sendStatus(401)
         }
       ]
@@ -622,7 +622,7 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
           res: (req, res) -> res.sendStatus(404)
         }
       ]
@@ -642,7 +642,7 @@ describe "e2e record", ->
       routes = [{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.sendStatus(500)
       }]
 
@@ -813,7 +813,7 @@ describe "e2e record", ->
       routes = [{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(422).json({
           code: "RUN_GROUP_NAME_NOT_UNIQUE"
           message: "Run group name cannot be used again without passing the parallel flag."
@@ -848,7 +848,7 @@ describe "e2e record", ->
       routes = [{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(422).json({
           code: "SOMETHING_UNKNOWN"
           message: "An unknown message here from the server."
@@ -880,7 +880,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           code: "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           payload: {
@@ -904,7 +904,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           code: "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
           payload: {
@@ -928,7 +928,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           code: "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
           payload: {
@@ -950,7 +950,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           code: "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
           payload: {
@@ -972,7 +972,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           error: "Something went wrong"
         })
@@ -992,8 +992,8 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponse
         }, {
           method: "post"
@@ -1029,8 +1029,8 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponse
         }, {
           method: "post"
@@ -1072,8 +1072,8 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponse
         }, {
           method: "post"
@@ -1135,8 +1135,8 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponse
         }, {
           method: "post"
@@ -1201,7 +1201,7 @@ describe "e2e record", ->
       routes[0] = {
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) ->
           count += 1
 
@@ -1280,8 +1280,8 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
@@ -1314,8 +1314,8 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
@@ -1348,8 +1348,8 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
@@ -1381,8 +1381,8 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
@@ -1414,8 +1414,8 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
@@ -1448,8 +1448,8 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
@@ -1482,8 +1482,8 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
-          resSchema: "postRunResponse@2.1.0"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponseWithWarnings
         }
 
