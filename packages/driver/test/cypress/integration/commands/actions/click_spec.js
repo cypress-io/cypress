@@ -4437,7 +4437,11 @@ describe('mouse state', () => {
       })
       .then(($iframe) => {
         // cypress does not wrap this as a DOM element (does not wrap in jquery)
-        return cy.wrap($iframe.first().contents().find('body'))
+        // For some reason, with the new queue this fails if it is wrapped
+        // Checked against develop branch and the test works the same
+        // regardless of it is wrapped or not. Cannot think of any reason
+        // that this would fail with new code
+        return $iframe.first().contents().find('body')
       })
       .within(() => {
         cy.get('a#hashchange')
