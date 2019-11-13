@@ -4,7 +4,6 @@
  * definition files that we will need to include with our NPM package.
  */
 const includeTypes = [
-  'blob-util',
   'bluebird',
   'lodash',
   'mocha',
