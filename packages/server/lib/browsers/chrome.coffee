@@ -216,7 +216,7 @@ module.exports = {
   _setAutomation
 
   _writeExtension: (browser, options) ->
-    if options.isHeadless
+    if browser.isHeadless
       debug('chrome is running headlessly, not installing extension')
       return
 
@@ -280,6 +280,9 @@ module.exports = {
     Promise
     .try =>
       args = @_getArgs(options)
+
+      if browser.isHeadless
+        args.push("--headless")
 
       getRemoteDebuggingPort()
       .then (port) ->
