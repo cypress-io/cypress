@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { useState } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
-const display = (obj) => {
+const Display = ({ data: obj }) => {
   const keys = _.keys(obj)
   const lastKey = _.last(keys)
 
@@ -41,32 +41,60 @@ const displayNestedObj = (key, value, hasComma) => (
       <span className='key'>{key}</span>
       <span className='colon'>:</span>{' '}
       {'{'}
-      {display(value)}
+      <Display data={value} />
     </span>
     <span className='line'>{'}'}{getComma(hasComma)}</span>
     <br />
   </span>
 )
 
-const displayNestedArr = (key, value, hasComma) => (
-  <span key={key}>
-    <span className='nested nested-arr'>
-      <span className='key'>{key}</span>
-      <span className='colon'>:</span>{' '}
-      {'['}
-      {display(value)}
-    </span>
-    <span className='line'>{']'}{getComma(hasComma)}</span>
-    <br />
-  </span>
+const SeeDetailsButton = ({ children, onClick }) => (
+  <button style={{
+    background: 'none',
+    lineHeight: 1,
+  }} onClick={onClick}>{children}</button>
 )
+
+const DisplayNestedArr = ({ configKey: key, value, hasComma }) => {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <span key={key}>
+      {(!open && _.some(value, ({ value }) => _.isObject(value))) && (
+        <span className='nested nested-arr'>
+          <span className='key'>{key}</span>
+          <span className='colon'>:</span>
+          <SeeDetailsButton onClick={() => setOpen(true)}>see more...</SeeDetailsButton>
+          {getComma(hasComma)}
+        </span>
+      )}
+      {(open || !_.some(value, ({ value }) => _.isObject(value))) && (
+        <>
+          <span className='nested nested-arr'>
+            <span className='key'>{key}</span>
+            <span className='colon'>:</span>
+            <SeeDetailsButton onClick={() => setOpen(false)}>see less...</SeeDetailsButton>
+            {' ['}
+            <Display data={value} />
+          </span>
+          <span className='line'>{']'}
+            {getComma(hasComma)}
+          </span>
+        </>
+      )}
+      <br />
+    </span>
+  )
+}
 
 const displayArray = (key, nestedArr, hasComma) => {
   const arr = _.map(nestedArr.value, (value) => {
     return { value, from: nestedArr.from, isArray: true }
   })
 
-  return displayNestedArr(key, arr, hasComma)
+  return (
+    <DisplayNestedArr configKey={key} value={arr} hasComma={hasComma} />
+  )
 }
 
 const displayObject = (key, nestedObj, hasComma) => {
@@ -166,7 +194,7 @@ const Configuration = observer(({ project }) => (
     </table>
     <pre className='config-vars'>
       {'{'}
-      {display(project.resolvedConfig)}
+      <Display data={project.resolvedConfig} />
       {'}'}
     </pre>
   </div>

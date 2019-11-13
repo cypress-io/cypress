@@ -77,13 +77,19 @@ describe('Settings', () => {
         cy.contains('Your project\'s configuration is displayed')
       })
 
-      it('displays browser information', () => {
+      it('displays browser information (collapsed by default)', () => {
         cy.contains('.config-vars .key', 'browsers').should('be.visible')
         // and the browser objects (or any other objects in the config)
         // should be displayed fully
+        cy.get('button').contains('see more...').as('toggleButton')
+        cy.get('@toggleButton').click()
         cy.get('.config-vars').invoke('text')
         .should('contain', '"name": "chrome"')
         .and('not.contain', '[object')
+
+        cy.get('button').contains('see less...').click()
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', '"name": "chrome"')
       })
 
       it('displays legend in table', () => {
