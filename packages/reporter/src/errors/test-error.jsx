@@ -10,32 +10,26 @@ const md = new Markdown('zero')
 
 md.enable(['backticks', 'emphasis', 'escape'])
 
-const StackWithLinks = ({ stack, onClick }) => {
-  if (!stack) return null
-
-  // TODO: fall back better if there's no parsed stack
+const Stack = ({ err, onClick }) => {
+  if (!err.parsedStack) return err.stack
 
   const makeLine = (key, content) => (
     <div key={key}>{content}</div>
   )
 
-  return _.map(stack, (stackLine, index) => {
+  return _.map(err.parsedStack, (stackLine, index) => {
     const key = `${relativeFile}${index}`
 
     if (stackLine.message != null) {
       return makeLine(key, stackLine.message)
     }
 
-    const { relativeFile, absoluteFile, line, column, function: fn, whitespace } = stackLine
+    const { relativeFile, line, column, function: fn, whitespace } = stackLine
 
     const onLinkClick = (e) => {
       e.preventDefault()
 
-      onClick({
-        file: absoluteFile,
-        line,
-        column,
-      })
+      onClick(stackLine)
     }
 
     const link = (
@@ -84,19 +78,12 @@ const TestError = observer(({ model, onOpenFile }) => {
             headerClass='runnable-err-stack-expander'
             contentClass='runnable-err-stack-trace'
           >
-            <StackWithLinks
-              stack={err.parsedStack}
-              onClick={onOpenFile}
-            />
+            <Stack err={err} onClick={onOpenFile} />
           </Collapsible> :
           null
         }
         {codeFrame &&
-          <ErrorCodeFrame
-            key={`${codeFrame.file}:${codeFrame.column}:${codeFrame.line}`}
-            codeFrame={codeFrame}
-            onOpenFile={onOpenFile}
-          />
+          <ErrorCodeFrame codeFrame={codeFrame} onOpenFile={onOpenFile} />
         }
       </div>
     </div>

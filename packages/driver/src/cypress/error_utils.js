@@ -1,11 +1,8 @@
 const _ = require('lodash')
-const { codeFrameColumns } = require('@babel/code-frame')
-const StackUtils = require('stack-utils')
-const path = require('path')
 
 const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
-const $sourceMapUtils = require('./source_map_utils')
+const $stackUtils = require('./stack_utils')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 
@@ -235,81 +232,6 @@ const getErrStack = (err) => {
   return err.stack
 }
 
-const getLanguageFromExtension = (filePath) => {
-  return (path.extname(filePath) || '').toLowerCase().replace('.', '') || null
-}
-
-const getCodeFrame = (sourceCode, { line, column, source: file }) => {
-  // add 1 to column because it looks better in code frame
-  // since column is 0-based
-  column++
-  const location = { start: { line, column } }
-  const frame = codeFrameColumns(sourceCode, location)
-
-  if (!frame) return null
-
-  return {
-    line,
-    column,
-    file,
-    frame,
-    language: getLanguageFromExtension(file),
-  }
-}
-
-const getSourceDetails = (generatedDetails) => {
-  const sourceDetails = $sourceMapUtils.getSourcePosition(generatedDetails.file, generatedDetails)
-
-  if (!sourceDetails) return generatedDetails
-
-  const { line, column, source } = sourceDetails
-
-  return {
-    line,
-    column,
-    file: source,
-    function: generatedDetails.function,
-  }
-}
-
-const getCodeFrameFromStack = (stack, lineIndex) => {
-  if (!stack) return
-
-  const generatedStackLineDetails = getStackLineDetails(stack, lineIndex)
-
-  if (!generatedStackLineDetails) return
-
-  const { file } = generatedStackLineDetails
-  const stackLineDetails = $sourceMapUtils.getSourcePosition(file, generatedStackLineDetails)
-
-  if (!stackLineDetails) return
-
-  return getCodeFrame($sourceMapUtils.getSourceContents(file), stackLineDetails)
-}
-
-// stacks from command failures and assertion failures have the right message
-// but the stack points to cypress internals. here we combine the message
-// with the invocation stack, which points to the user's code
-const combineMessageAndStack = (err, stack = '') => {
-  if (!err || !err.message) return stack
-
-  // eslint-disable-next-line no-unused-vars
-  const [__, stackLines] = splitStack(stack)
-  const relevantStackLines = _.reject(stackLines, (line) => {
-    return line.indexOf('__getSpecFrameStack') > -1
-  })
-
-  return [err.message].concat(relevantStackLines).join('\n')
-}
-
-const addCodeFrameToErr = ({ err, stack, lineIndex = 0 }) => {
-  if (err.codeFrame) return err
-
-  err.codeFrame = getCodeFrameFromStack(stack, lineIndex)
-
-  return err
-}
-
 const escapeErrMarkdown = (text) => {
   if (!_.isString(text)) {
     return text
@@ -345,106 +267,14 @@ const getObjValueByPath = (obj, keyPath) => {
   return val
 }
 
-const getCleanedStackLines = (stackUtil, stack) => {
-  return stackUtil.clean(stack).split('\n')
-}
-
-const getStackLineDetails = (stack, lineIndex = 0) => {
-  const stackUtil = new StackUtils()
-  const line = getCleanedStackLines(stackUtil, stack)[lineIndex]
-  const details = stackUtil.parseLine(line)
-
-  if (!details) return null
-
-  // stackUtils.clean removes the // in http:// for some reason, so put it back
-  return _.extend(details, {
-    file: details.file.replace(':', '://'),
-  })
-}
-
-const stackLineRegex = /^(\s*)at /
-
-const getWhitespace = (line) => {
-  if (!line) return ''
-
-  // eslint-disable-next-line no-unused-vars
-  const [__, whitespace] = line.match(stackLineRegex) || []
-
-  return whitespace || ''
-}
-
-// returns tuple of [message, stack]
-const splitStack = (stack) => {
-  const lines = stack.split('\n')
-
-  return _.reduce(lines, (memo, line) => {
-    if (memo.messageEnded || stackLineRegex.test(line)) {
-      memo.messageEnded = true
-      memo[1].push(line)
-    } else {
-      memo[0].push(line)
-    }
-
-    return memo
-  }, [[], []])
-}
-
-const reconstructStack = (parsedStack) => {
-  return _.map(parsedStack, (parsedLine) => {
-    if (parsedLine.message != null) {
-      return `${parsedLine.whitespace}${parsedLine.message}`
-    }
-
-    const { whitespace, relativeFile, function: fn, line, column } = parsedLine
-
-    return `${whitespace}at ${fn || '<unknown>'} (${relativeFile || '<unknown>'}:${line}:${column})`
-  }).join('\n')
-}
-
-const getSourceDetailsForLine = (stackUtil, projectRoot, line) => {
-  const whitespace = getWhitespace(line)
-  const generatedDetails = stackUtil.parseLine(line)
-
-  // if it couldn't be parsed, it's a message line
-  if (!generatedDetails) {
-    return {
-      message: line,
-      whitespace,
-    }
-  }
-
-  const sourceDetails = getSourceDetails(generatedDetails)
-
-  return {
-    function: sourceDetails.function,
-    relativeFile: sourceDetails.file,
-    absoluteFile: path.join(projectRoot, sourceDetails.file),
-    line: sourceDetails.line,
-    // adding 1 to column makes more sense when opening in editor
-    column: sourceDetails.column + 1,
-    whitespace,
-  }
-}
-
-const getSourceStack = (stack, projectRoot) => {
-  if (!_.isString(stack)) return {}
-
-  const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, new StackUtils(), projectRoot)
-  const parsed = _.map(stack.split('\n'), getSourceDetailsWithStackUtil)
-
-  return {
-    parsed,
-    sourceMapped: reconstructStack(parsed),
-  }
-}
-
 const enhanceStack = ({ err, stack, projectRoot }) => {
-  err.stack = combineMessageAndStack(err, stack)
+  err.stack = $stackUtils.combineMessageAndStack(err, stack)
 
-  const { sourceMapped, parsed } = getSourceStack(err.stack, projectRoot)
+  const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)
 
   err.sourceMappedStack = sourceMapped
   err.parsedStack = parsed
+  err.codeFrame = $stackUtils.getCodeFrame(err)
 
   return err
 }
@@ -479,11 +309,8 @@ module.exports = {
   getErrMessage,
   errMsgByPath,
   getErrStack,
-  addCodeFrameToErr,
   enhanceStack,
   escapeErrMarkdown,
   getObjValueByPath,
-  getStackLineDetails,
   processErr,
-  getSourceStack,
 }

@@ -135,8 +135,12 @@ class Test extends Component {
     }
   }
 
-  _openFile = (fileDetails) => {
-    events.emit('open:file', fileDetails)
+  _openFile = ({ absoluteFile: file, line, column }) => {
+    events.emit('open:file', {
+      file,
+      line,
+      column,
+    })
   }
 }
 

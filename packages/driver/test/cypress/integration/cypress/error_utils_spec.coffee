@@ -1,53 +1,34 @@
-$errUtils = require("../../../../src/cypress/error_utils.js")
+$errUtils = require("../../../../src/cypress/error_utils")
+$stackUtils = require("../../../../src/cypress/stack_utils")
 $errorMessages = require("../../../../src/cypress/error_messages")
-$sourceMapUtils = require("../../../../src/cypress/source_map_utils.js")
 
 describe "driver/src/cypress/error_utils", ->
-  context.skip ".modifyErrMsg", ->
-    it "modifies errs that are objects", ->
-      errObj1 = {
-        name: 'FooError',
-        message: 'simple foo message'
-      }
+  context ".modifyErrMsg", ->
+    originalErr = {
+      name: 'FooError',
+      message: 'simple foo message'
+    }
+    newErrMsg = 'new message'
+    modifier = (msg1, msg2) ->
+      return "#{msg2} #{msg1}"
 
-      errObj2 = {
-        name: 'BarError',
-        message: 'simple bar message'
-      }
+    it "returns new error object with message modified by callback", ->
+      err = $errUtils.modifyErrMsg(originalErr, newErrMsg, modifier)
 
-      appendMsg1 = $errUtils.modifyErrMsg(errObj1, errObj2, (msg1, msg2) ->
-        return "#{msg2} #{msg1}"
-      )
+      expect(err.name).to.eq("FooError")
+      expect(err.message).to.eq("new message simple foo message")
 
-      expect(appendMsg1.name).to.eq("FooError")
-      expect(appendMsg1.message).to.eq("simple bar message simple foo message")
+    it "replaces stack error message", ->
+      originalErr.stack = "#{originalErr.message}\nline 2\nline 3"
+      err = $errUtils.modifyErrMsg(originalErr, newErrMsg, modifier)
+      expect(err.stack).to.equal("new message simple foo message\nline 2\nline 3")
 
-    it "modifies err that is objects with err that is string", ->
-      errObj1 = $errUtils.cypressErr('simple foo message')
-
-      errStr2 = 'simple bar message'
-
-      $errUtils.modifyErrMsg(errObj1, errStr2, (msg1, msg2) ->
-        return "#{msg2} #{msg1}"
-      )
-
-      expect(errObj1.name).to.eq("CypressError")
-      expect(errObj1.message).to.eq("simple bar message simple foo message")
-      expect(errObj1.stack).to.include("CypressError: simple bar message simple foo message")
-
-    it "modifies errs that are strings", ->
-      errStr1 = 'simple foo message'
-      errStr2 = 'simple bar message'
-
-      appendMsg1 = $errUtils.modifyErrMsg(errStr1, errStr2, (msg1, msg2) ->
-        return "#{msg2} #{msg1}"
-      )
-
-      expect(appendMsg1).to.eq("simple bar message simple foo message")
-
-    it.skip "modifies errs that are functions that return objs", ->
-
-    it.skip "modifies errs that are functions that return strings", ->
+    it "keeps other properties in place from original error", ->
+      originalErr.actual = "foo"
+      originalErr.expected = "bar"
+      err = $errUtils.modifyErrMsg(originalErr, newErrMsg, modifier)
+      expect(err.actual).to.equal("foo")
+      expect(err.expected).to.equal("bar")
 
   context ".makeErrFromObj", ->
     it "copies properties, message, stack", ->
@@ -447,45 +428,6 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(msg).to.eq("click simple error message")
 
-  context ".addCodeFrameToErr", ->
-    beforeEach ->
-      @err = {}
-      sourceCode = """it('is a failing test', () => {
-        cy.get('.not-there')
-      })
-      """
-      cy.stub($sourceMapUtils, "getSourceContents").returns(sourceCode)
-
-    it "adds code frame if provided stack yields one", ->
-      cy.stub($sourceMapUtils, "getSourcePosition").returns({
-        source: "http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js"
-        line: 3
-        column: 5
-      })
-      err = $errUtils.addCodeFrameToErr({ err: @err, stack: """Error
-        at Context.<anonymous> (http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js:5:21)
-      """ })
-
-      expect(err.codeFrame).to.be.an("object")
-
-      { frame, file, line, column } = err.codeFrame
-
-      expect(frame).to.contain("  1 | it('is a failing test', () => {")
-      expect(frame).to.contain("  2 |   cy.get('.not-there'")
-      expect(frame).to.contain("> 3 | }")
-      expect(file).to.equal("http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js")
-      expect(line).to.equal(3)
-      expect(column).to.eq(6)
-
-    it "does not add code frame if stack does not yield one", ->
-      cy.stub($sourceMapUtils, "getSourcePosition").returns(null)
-
-      err = $errUtils.addCodeFrameToErr({ err: @err, stack: """Error
-        at Context.<anonymous> (http://localhost:12345/__cypress/tests?p=cypress/integration/features/source_map_spec.js:5:21)
-      """ })
-
-      expect(err.codeFrame).to.be.undefined
-
   context ".escapeErrMarkdown", ->
     it "accepts non-strings", ->
       text = 3
@@ -531,106 +473,30 @@ describe "driver/src/cypress/error_utils", ->
       objVal = $errUtils.getObjValueByPath @obj, "bar.baz.nope"
       expect(objVal).to.be.undefined
 
-  context ".getStackLineDetails", ->
-    it "pulls detailed information from stack line", ->
-      stack = """Error: foo
-      at baz (cypress/integration/cypress/error_utils_spec.coffee:100:10)
-      at bar (cypress/integration/cypress/error_utils_spec.coffee:102:12)
-      at foo (cypress/integration/cypress/error_utils_spec.coffee:104:14)
-      """
+  context ".enhanceErr", ->
+    err = {}
+    stack = "the stack"
+    sourceStack = {
+      sourceMapped: "source mapped stack"
+      parsed: []
+    }
+    codeFrame = {}
 
-      expect($errUtils.getStackLineDetails(stack, 0)).to.eql({
-        file: "cypress/integration/cypress/error_utils_spec.coffee"
-        function: "baz"
-        line: 100
-        column: 10
-      })
-      expect($errUtils.getStackLineDetails(stack, 1)).to.eql({
-        file: "cypress/integration/cypress/error_utils_spec.coffee"
-        function: "bar"
-        line: 102
-        column: 12
-      })
-
-  context ".getSourceStack", ->
     beforeEach ->
-      cwd = "/Users/me/dev/app"
+      cy.stub($stackUtils, "combineMessageAndStack").returns("new stack")
+      cy.stub($stackUtils, "getSourceStack").returns(sourceStack)
+      cy.stub($stackUtils, "getCodeFrame").returns(codeFrame)
 
-      cy.stub(process, "cwd").returns(cwd)
-      cy.stub($sourceMapUtils, "getSourcePosition").returns({
-        source: "#{cwd}/some_other_file.ts"
-        line: 2
-        column: 1
-      })
-      $sourceMapUtils.getSourcePosition.onCall(1).returns({
-        source: 'tests?p=cypress/integration/features/source_map_spec.coffee'
-        line: 4
-        column: 3
-      })
+      @result = $errUtils.enhanceStack({ err, stack })
 
-      @generatedStack = """Error: spec iframe stack
-      #{"    "}at foo.bar (source_map_spec.js:12:4)
-      #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.js:6:4)
-      """
+    it "combines error message and stack", ->
+      expect(@result.stack).to.equal("new stack")
 
-    it "receives generated stack and returns object with source stack and parsed source stack", ->
-      sourceStack = $errUtils.getSourceStack(@generatedStack)
+    it "attaches source mapped stack", ->
+      expect(@result.sourceMappedStack).to.equal(sourceStack.sourceMapped)
 
-      expect(sourceStack.sourceMapped).to.equal("""Error: spec iframe stack
-        #{"    "}at foo.bar (some_other_file.ts:2:2)
-        #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:4)
-      """)
-      expect(sourceStack.parsed).to.eql([
-        {
-          message: "Error: spec iframe stack"
-          whitespace: ""
-        }
-        {
-          function: "foo.bar",
-          relativeFile: "some_other_file.ts"
-          absoluteFile: "/Users/me/dev/app/some_other_file.ts"
-          line: 2,
-          column: 2,
-          whitespace: "    ",
-        }
-        {
-          function: "Context.<anonymous>",
-          relativeFile: "tests?p=cypress/integration/features/source_map_spec.coffee"
-          absoluteFile: "tests?p=cypress/integration/features/source_map_spec.coffee"
-          line: 4,
-          column: 4,
-          whitespace: "    ",
-        }
-      ])
+    it "attaches parsed stack", ->
+      expect(@result.parsedStack).to.equal(sourceStack.parsed)
 
-    it "works when first line is the error message", ->
-      sourceStack = $errUtils.getSourceStack(@generatedStack)
-
-      expect(sourceStack.sourceMapped).to.equal("""Error: spec iframe stack
-        #{"    "}at foo.bar (some_other_file.ts:2:2)
-        #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:4)
-      """)
-
-    it "works when first line is not the error message", ->
-      @generatedStack = @generatedStack.split("\n").slice(1).join("\n")
-      sourceStack = $errUtils.getSourceStack(@generatedStack)
-
-      expect(sourceStack.sourceMapped).to.equal("""    at foo.bar (some_other_file.ts:2:2)
-        #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:4)
-      """)
-
-    it "works when first several lines are the error message", ->
-      @generatedStack = "Some\nmore\nlines\n\n#{@generatedStack}"
-      sourceStack = $errUtils.getSourceStack(@generatedStack)
-
-      expect(sourceStack.sourceMapped).to.equal("""Some
-        more
-        lines
-
-        Error: spec iframe stack
-        #{"    "}at foo.bar (some_other_file.ts:2:2)
-        #{"    "}at Context.<anonymous> (tests?p=cypress/integration/features/source_map_spec.coffee:4:4)
-      """)
-
-    it "returns empty object if there's no stack", ->
-      expect($errUtils.getSourceStack()).to.eql({})
+    it "attaches code frame", ->
+      expect(@result.codeFrame).to.equal(codeFrame)

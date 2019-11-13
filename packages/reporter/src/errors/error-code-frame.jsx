@@ -9,7 +9,7 @@ class ErrorCodeFrame extends Component {
   }
 
   render () {
-    const { file, line, column, frame } = this.props.codeFrame
+    const { relativeFile, line, column, frame } = this.props.codeFrame
 
     const language = this.props.codeFrame.language || 'text'
     // since we pull out 2 lines above the highlighted code, it will always
@@ -18,7 +18,7 @@ class ErrorCodeFrame extends Component {
 
     return (
       <div className='test-error-code-frame'>
-        <div className='runnable-err-code-frame-file-path' onClick={this._openFile}>{file}:{line}:{column}</div>
+        <div className='runnable-err-code-frame-file-path' onClick={this._openFile}>{relativeFile}:{line}:{column}</div>
         <pre ref='codeFrame' data-line={highlightLine}>
           <code className={`language-${language}`}>{frame}</code>
         </pre>

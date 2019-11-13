@@ -493,8 +493,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## highlight it in red or insert a new command
       errors.commandRunningFailed(err)
 
-      err = $errUtils.addCodeFrameToErr({ err, stack: err.stack })
-
       fail(err, state("runnable"))
     )
     .finally(cleanup)
@@ -616,11 +614,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     stack = getInvocationStack(err)
 
-    err = $errUtils.addCodeFrameToErr({
-      err,
-      stack: stack or err.stack,
-      lineIndex: 1
-    })
     err = $errUtils.enhanceStack({
       err,
       stack: stack or err.stack,
@@ -1172,8 +1165,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           return ret
 
         catch err
-          err = $errUtils.addCodeFrameToErr({ err, stack: err.stack })
-
           ## if our runnable.fn throw synchronously
           ## then it didnt fail from a cypress command
           ## but we should still teardown and handle
