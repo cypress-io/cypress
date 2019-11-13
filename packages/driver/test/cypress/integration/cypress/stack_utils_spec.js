@@ -113,13 +113,13 @@ and this line
 
     beforeEach(() => {
       cy.stub($sourceMapUtils, 'getSourcePosition').returns({
-        source: 'some_other_file.ts',
+        file: 'some_other_file.ts',
         line: 2,
         column: 1,
       })
 
       $sourceMapUtils.getSourcePosition.onCall(1).returns({
-        source: 'cypress/integration/features/source_map_spec.coffee',
+        file: 'cypress/integration/features/source_map_spec.coffee',
         line: 4,
         column: 3,
       })
