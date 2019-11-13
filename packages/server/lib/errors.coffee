@@ -118,7 +118,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
       """
-      Warning: Cypress can only record videos when using the built in 'electron' browser.
+      Warning: Cypress can only record videos when using an Electron or Chrome-family browser.
 
       You have set the browser to: '#{arg1}'
 

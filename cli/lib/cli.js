@@ -132,7 +132,7 @@ const descriptions = {
   global: 'force Cypress into global mode as if its globally installed',
   configFile: 'path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.',
   version: 'prints Cypress version',
-  headed: 'displays the Electron browser instead of running headlessly',
+  headed: 'displays the browser instead of running headlessly',
   dev: 'runs cypress in development and bypasses binary check',
   forceInstall: 'force install the Cypress binary',
   exit: 'keep the browser open after tests finish',

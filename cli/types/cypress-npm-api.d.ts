@@ -238,7 +238,7 @@ declare module 'cypress' {
      */
     group: string
     /**
-     * Display the Electron browser instead of running headlessly
+     * Display the browser instead of running headlessly
      */
     headed: boolean
     /**
