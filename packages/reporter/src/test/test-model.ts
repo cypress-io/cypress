@@ -4,17 +4,29 @@ import { action, autorun, computed, observable, observe } from 'mobx'
 import Err from '../lib/err-model'
 import Hook from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
-import Command from '../commands/command-model'
-import Agent from '../agents/agent-model'
-import Route from '../routes/route-model'
+import Command, { CommandProps } from '../commands/command-model'
+import Agent, { AgentProps } from '../agents/agent-model'
+import Route, { RouteProps } from '../routes/route-model'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
-interface TestProps extends RunnableProps {
+export type UpdateTestCallback = () => void
+
+export interface TestProps extends RunnableProps {
   state?: TestState
   err?: Err
   hookName?: string
   isOpen?: boolean
+  agents?: Array<AgentProps>
+  commands?: Array<CommandProps>
+  routes?: Array<RouteProps>
+}
+
+interface UpdatableProps {
+  state?: TestProps['state']
+  err?: TestProps['err']
+  hookName?: TestProps['hookName']
+  isOpen?: TestProps['isOpen']
 }
 
 export default class Test extends Runnable {
@@ -82,7 +94,7 @@ export default class Test extends Runnable {
     this.isActive = true
   }
 
-  update ({ state, err, hookName, isOpen }: TestProps, cb?: (() => void)) {
+  update ({ state, err, hookName, isOpen }: UpdatableProps, cb?: UpdateTestCallback) {
     let hadChanges = false
 
     const disposer = observe(this, (change) => {
@@ -130,7 +142,7 @@ export default class Test extends Runnable {
     }
   }
 
-  finish (props: TestProps) {
+  finish (props: UpdatableProps) {
     this.update(props)
     this.isActive = false
   }

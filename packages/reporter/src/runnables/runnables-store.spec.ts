@@ -1,35 +1,48 @@
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 
-import runnablesStore, { RunnablesStore } from './runnables-store'
+import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from './runnables-store'
+import { SuiteProps } from './suite-model'
+
+import { AppState } from '../lib/app-state'
+import { Scroller } from '../lib/scroller'
+import { TestProps } from '../test/test-model'
+import { AgentProps } from '../agents/agent-model'
+import { CommandProps } from '../commands/command-model'
+import { RouteProps } from '../routes/route-model'
 
 const appStateStub = () => {
   return {
     isRunning: true,
     autoScrollingEnabled: true,
-  }
+  } as AppState
+}
+
+type ScrollerStub = Scroller & {
+  setScrollTop: SinonSpy
+  scrollToEnd: SinonSpy
 }
 
 const scrollerStub = () => {
   return {
     setScrollTop: sinon.spy(),
     scrollToEnd: sinon.spy(),
-  }
+  } as ScrollerStub
 }
 
-const createTest = (id) => {
-  return { id, title: `test ${id}` }
+const createTest = (id: number) => {
+  return { id, title: `test ${id}` } as TestProps
 }
-const createSuite = (id, tests, suites) => {
-  return { id, title: `suite ${id}`, tests, suites }
+const createSuite = (id: number, tests: Array<TestProps>, suites: Array<SuiteProps>) => {
+  return { id, title: `suite ${id}`, tests, suites } as SuiteProps
 }
-const createAgent = (id, testId) => {
-  return { id, testId, instrument: 'agent' }
+const createAgent = (id: number, testId: number) => {
+  return { id, testId, instrument: 'agent' } as AgentProps
 }
-const createCommand = (id, testId) => {
-  return { id, testId, instrument: 'command' }
+const createCommand = (id: number, testId: number) => {
+  return { id, testId, instrument: 'command' } as CommandProps
 }
-const createRoute = (id, testId) => {
-  return { id, testId, instrument: 'route' }
+const createRoute = (id: number, testId: number) => {
+  return { id, testId, instrument: 'route' } as RouteProps
 }
 
 const createRootRunnable = () => {
@@ -41,16 +54,16 @@ const createRootRunnable = () => {
       ]),
       createSuite(2, [createTest(6)], []),
     ],
-  }
+  } as RootRunnable
 }
 
 describe('runnables store', () => {
-  let instance
-  let appState
-  let scroller
+  let instance: RunnablesStore
+  let appState: AppState
+  let scroller: Scroller
 
   beforeEach(() => {
-    global.requestAnimationFrame = (cb) => {
+    global.requestAnimationFrame = (cb: (() => void)) => {
       return cb()
     }
 
@@ -99,7 +112,7 @@ describe('runnables store', () => {
     })
 
     it('sets .isReady flag', () => {
-      instance.setRunnables({})
+      instance.setRunnables({} as RootRunnable)
       expect(instance.isReady).to.be.true
     })
 
@@ -137,32 +150,32 @@ describe('runnables store', () => {
 
     it('sets scrollTop when app is running and initial scrollTop has been set', () => {
       instance.setInitialScrollTop(234)
-      instance.setRunnables({})
+      instance.setRunnables({} as RootRunnable)
       expect(scroller.setScrollTop).to.have.been.calledWith(234)
     })
 
     it('does nothing when app is running and initial scrollTop has not been set', () => {
-      instance.setRunnables({})
+      instance.setRunnables({} as RootRunnable)
       expect(scroller.setScrollTop).not.to.have.been.called
     })
 
     it('sets scrolls to end when app is not running and auto-scrolling is enabled', () => {
       appState.isRunning = false
-      instance.setRunnables({})
+      instance.setRunnables({} as RootRunnable)
       expect(scroller.scrollToEnd).to.have.been.called
     })
 
     it('does nothing when app is not running and auto-scrolling is disabled', () => {
       appState.isRunning = false
       appState.autoScrollingEnabled = false
-      instance.setRunnables({})
+      instance.setRunnables({} as RootRunnable)
       expect(scroller.scrollToEnd).not.to.have.been.called
     })
 
     it('does nothing when app is stopped and auto-scrolling is enabled', () => {
       appState.isRunning = false
       appState.isStopped = true
-      instance.setRunnables({})
+      instance.setRunnables({} as RootRunnable)
       expect(scroller.scrollToEnd).not.to.have.been.called
     })
   })
@@ -193,16 +206,16 @@ describe('runnables store', () => {
 
   context('#updateLog', () => {
     it('updates the log', () => {
-      instance.setRunnables({ tests: [createTest(1)] })
+      instance.setRunnables({ tests: [createTest(1)] } as RootRunnable)
       instance.addLog(createCommand(1, 1))
-      instance.updateLog({ id: 1, name: 'new name' })
+      instance.updateLog({ id: 1, name: 'new name' } as LogProps)
       expect(instance.testById(1).commands[0].name).to.equal('new name')
     })
   })
 
   context('#reset', () => {
     it('resets flags to default values', () => {
-      instance.setRunnables({ tests: [createTest(1)] })
+      instance.setRunnables({ tests: [createTest(1)] } as RootRunnable)
       instance.attemptingShowSnapshot = true
       instance.showingSnapshot = true
       instance.reset()
@@ -215,13 +228,13 @@ describe('runnables store', () => {
     })
 
     it('resets runnables', () => {
-      instance.setRunnables({ tests: [createTest(1)] })
+      instance.setRunnables({ tests: [createTest(1)] } as RootRunnable)
       instance.reset()
       expect(instance.runnables.length).to.equal(0)
     })
 
     it('resets tests', () => {
-      instance.setRunnables({ tests: [createTest(1)] })
+      instance.setRunnables({ tests: [createTest(1)] } as RootRunnable)
       instance.reset()
       expect(instance.testById(1)).to.be.undefined
     })

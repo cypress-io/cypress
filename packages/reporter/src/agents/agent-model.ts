@@ -1,7 +1,7 @@
 import { observable } from 'mobx'
-import Instrument, { LogProps } from '../instruments/instrument-model'
+import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 
-export interface AgentProps extends LogProps {
+export interface AgentProps extends InstrumentProps {
   callCount: number
   functionName: string
 }

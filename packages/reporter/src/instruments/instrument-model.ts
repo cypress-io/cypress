@@ -2,8 +2,8 @@ import { observable } from 'mobx'
 
 export type Alias = string | Array<string> | null
 
-export interface LogProps {
-  id?: string
+export interface InstrumentProps {
+  id: number
   alias?: Alias
   aliasType?: string | null
   displayName?: string
@@ -12,20 +12,22 @@ export interface LogProps {
   type?: string
   state?: string | null
   referencesAlias?: Alias
+  instrument?: 'agent' | 'command' | 'route'
+  testId: number
 }
 
 export default class Log {
   @observable.ref alias?: Alias = null
   @observable aliasType?: string | null = null
   @observable displayName?: string
-  @observable id?: string
+  @observable id?: number
   @observable name?: string
   @observable message?: string
   @observable type?: string
   @observable state?: string | null
   @observable.ref referencesAlias?: Alias = null
 
-  constructor (props: LogProps) {
+  constructor (props: InstrumentProps) {
     this.id = props.id
     this.alias = props.alias
     this.aliasType = props.aliasType
@@ -37,7 +39,7 @@ export default class Log {
     this.referencesAlias = props.referencesAlias
   }
 
-  update (props: LogProps) {
+  update (props: InstrumentProps) {
     this.alias = props.alias
     this.aliasType = props.aliasType
     this.displayName = props.displayName

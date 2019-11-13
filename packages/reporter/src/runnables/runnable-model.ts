@@ -1,12 +1,12 @@
 import { observable } from 'mobx'
 
 export interface RunnableProps {
-  id?: number
+  id: number
   title?: string
 }
 
 export default class Runnable {
-  @observable id?: number
+  @observable id: number
   @observable shouldRender: boolean = false
   @observable title?: string
   @observable level: number

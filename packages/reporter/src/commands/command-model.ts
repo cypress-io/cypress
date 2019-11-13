@@ -1,7 +1,7 @@
 import { action, computed, observable } from 'mobx'
 
 import Err from '../lib/err-model'
-import Instrument, { LogProps } from '../instruments/instrument-model'
+import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
@@ -9,13 +9,14 @@ interface RenderProps {
   message?: string
 }
 
-export interface CommandProps extends LogProps {
+export interface CommandProps extends InstrumentProps {
   err?: Err
   event?: boolean
   number?: number
   numElements?: number
   renderProps?: RenderProps
   visible?: boolean
+  hookName: string
 }
 
 export default class Command extends Instrument {

@@ -17,7 +17,7 @@ type UserScrollCallback = () => void
 
 const PADDING = 100
 
-class Scroller {
+export class Scroller {
   private _container: Element | null = null
   private _userScrollCount = 0
   private _userScroll = true

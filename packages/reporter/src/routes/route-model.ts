@@ -1,7 +1,7 @@
 import { observable } from 'mobx'
-import Instrument, { LogProps } from '../instruments/instrument-model'
+import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 
-interface RouteProps extends LogProps {
+export interface RouteProps extends InstrumentProps {
   isStubbed: boolean
   method: string
   numResponses: number

@@ -55,7 +55,7 @@ describe('Command model', () => {
     beforeEach(() => {
       command = new Command(model({ state: null }))
       clock.tick(300)
-      command.update({ state: 'pending' })
+      command.update({ state: 'pending' } as CommandProps)
     })
 
     it('sets isLongRunning to true if model is still pending', () => {
