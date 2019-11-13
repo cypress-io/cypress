@@ -729,8 +729,7 @@ export class Keyboard {
     })
     .then(() => {
       if (options.release !== false) {
-        // reverse the modifiers so we keyup in LIFO order
-        return Promise.map(modifierKeys.reverse(), (key) => {
+        return Promise.map(modifierKeys, (key) => {
           options.id = _.uniqueId('char')
 
           return this.simulatedKeyup(getActiveEl(doc), key, options)
