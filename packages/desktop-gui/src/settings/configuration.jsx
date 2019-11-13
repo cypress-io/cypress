@@ -1,156 +1,68 @@
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React, { useState } from 'react'
+import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
+import { ObjectInspector, ObjectRootLabel, ObjectName } from 'react-inspector'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
-const Display = ({ data: obj }) => {
-  const keys = _.keys(obj)
-  const lastKey = _.last(keys)
-
-  return _.map(obj, (value, key) => {
-    const hasComma = lastKey !== key
-
-    if (value.from == null) {
-      return displayNestedObj(key, value, hasComma)
-    }
-
-    if (value.isArray) {
-      return getSpan(key, value, hasComma, true)
-    }
-
-    if (_.isObject(value.value)) {
-      const realValue = value.value.toJS ? value.value.toJS() : value.value
-
-      if (_.isArray(realValue)) {
-        return displayArray(key, value, hasComma)
+const formatData = (data) => {
+  if (Array.isArray(data)) {
+    return _.map(data, (v) => {
+      if (_.isObject(v) && (v.name || v.displayName)) {
+        return _.defaultTo(v.displayName, v.name)
       }
 
-      return displayObject(key, value, hasComma)
-    }
-
-    return getSpan(key, value, hasComma)
-  })
-}
-
-const displayNestedObj = (key, value, hasComma) => (
-  <span key={key}>
-    <span className='nested nested-obj'>
-      <span className='key'>{key}</span>
-      <span className='colon'>:</span>{' '}
-      {'{'}
-      <Display data={value} />
-    </span>
-    <span className='line'>{'}'}{getComma(hasComma)}</span>
-    <br />
-  </span>
-)
-
-const SeeDetailsButton = ({ children, onClick }) => (
-  <button style={{
-    background: 'none',
-    lineHeight: 1,
-  }} onClick={onClick}>{children}</button>
-)
-
-const DisplayNestedArr = ({ configKey: key, value, hasComma }) => {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <span key={key}>
-      {(!open && _.some(value, ({ value }) => _.isObject(value))) && (
-        <span className='nested nested-arr'>
-          <span className='key'>{key}</span>
-          <span className='colon'>:</span>
-          <SeeDetailsButton onClick={() => setOpen(true)}>see more...</SeeDetailsButton>
-          {getComma(hasComma)}
-        </span>
-      )}
-      {(open || !_.some(value, ({ value }) => _.isObject(value))) && (
-        <>
-          <span className='nested nested-arr'>
-            <span className='key'>{key}</span>
-            <span className='colon'>:</span>
-            <SeeDetailsButton onClick={() => setOpen(false)}>see less...</SeeDetailsButton>
-            {' ['}
-            <Display data={value} />
-          </span>
-          <span className='line'>{']'}
-            {getComma(hasComma)}
-          </span>
-        </>
-      )}
-      <br />
-    </span>
-  )
-}
-
-const displayArray = (key, nestedArr, hasComma) => {
-  const arr = _.map(nestedArr.value, (value) => {
-    return { value, from: nestedArr.from, isArray: true }
-  })
-
-  return (
-    <DisplayNestedArr configKey={key} value={arr} hasComma={hasComma} />
-  )
-}
-
-const displayObject = (key, nestedObj, hasComma) => {
-  const obj = _.reduce(nestedObj.value, (obj, value, key) => {
-    return _.extend(obj, {
-      [key]: { value, from: nestedObj.from },
-    })
-  }, {})
-
-  return displayNestedObj(key, obj, hasComma)
-}
-
-/**
- * Formats an objects to avoid "[object Object]" situation
- */
-const stringify = (obj) => {
-  const s = `${obj.value}`
-
-  if (s === '[object Object]') {
-    return JSON.stringify(obj.value, null, 2)
+      return String(v)
+    }).join(', ')
   }
 
-  return s
-}
+  if (_.isObject(data)) {
+    return _.defaultTo(_.defaultTo(data.displayName, data.name), String(Object.keys(data).join(', ')))
+  }
 
-const getSpan = (key, obj, hasComma, isArray) => {
+  return String(data)
+}
+const ObjectLabel = ({ name, data, from, isNonenumerable }) => {
+  const formattedData = formatData(data)
+
   return (
-    <div key={key} className='line'>
-      {getKey(key, isArray)}
-      {getColon(isArray)}
-      <Tooltip title={obj.from || ''} placement='right' className='cy-tooltip'>
-        <span className={obj.from}>
-          {getString(obj.value)}
-          {stringify(obj)}
-          {getString(obj.value)}
+    <span className="line" key={name}>
+      <ObjectName name={name} dimmed={isNonenumerable} />
+      <span>:</span>
+      <Tooltip title={from} placement='right' className='cy-tooltip'>
+        <span className={from}>
+          <span>{formattedData}</span>
         </span>
       </Tooltip>
-      {getComma(hasComma)}
-    </div>
+    </span>
   )
 }
 
-const getKey = (key, isArray) => {
-  return isArray ? '' : <span className='key'>{key}</span>
+ObjectLabel.defaultProps = {
+  data: 'undefined',
+  from: 'default',
 }
 
-const getColon = (isArray) => {
-  return isArray ? '' : <span className="colon">:{' '}</span>
-}
+const Display = ({ data: obj }) => {
+  const renderNode = ({ depth, name, data, isNonenumerable, expanded }) => {
+    const from = obj[name] ? obj[name].from : undefined
 
-const getString = (val) => {
-  return _.isString(val) ? '\'' : ''
-}
+    return depth === 0
+      ? <ObjectRootLabel name={'config'} data="{}" />
+      : <ObjectLabel name={name} data={data} isNonenumerable={isNonenumerable} from={from} />
+  }
 
-const getComma = (hasComma) => {
-  return hasComma ? <span className='comma'>,</span> : ''
+  const data = _.reduce(obj, (acc, value, key) => Object.assign(acc, {
+    [key]: value.value,
+  }), {})
+
+  return (
+    <div className="config-vars">
+      <ObjectInspector data={data} expandLevel={1} nodeRenderer={renderNode} />
+    </div>
+  )
 }
 
 const openHelp = (e) => {
@@ -192,11 +104,7 @@ const Configuration = observer(({ project }) => (
         </tr>
       </tbody>
     </table>
-    <pre className='config-vars'>
-      {'{'}
-      <Display data={project.resolvedConfig} />
-      {'}'}
-    </pre>
+    <Display data={project.resolvedConfig} />
   </div>
 ))
 

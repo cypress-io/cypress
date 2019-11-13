@@ -78,31 +78,15 @@ describe('Settings', () => {
       })
 
       it('displays browser information (collapsed by default)', () => {
-        cy.contains('.config-vars .key', 'browsers').should('be.visible')
+        cy.contains('.config-vars', 'browsers').should('be.visible')
         // and the browser objects (or any other objects in the config)
         // should be displayed fully
-        cy.get('button').contains('see more...').as('toggleButton')
-        cy.get('@toggleButton').click()
-        cy.get('.config-vars').invoke('text')
-        .should('contain', '"name": "chrome"')
-        .and('not.contain', '[object')
-
-        cy.get('button').contains('see less...').click()
         cy.get('.config-vars').invoke('text')
         .should('not.contain', '"name": "chrome"')
       })
 
       it('displays legend in table', () => {
         cy.get('table>tbody>tr').should('have.length', 6)
-      })
-
-      it('wraps config line in proper classes', () => {
-        cy.get('.line').first().within(() => {
-          cy.contains('animationDistanceThreshold').should('have.class', 'key')
-          cy.contains(':').should('have.class', 'colon')
-          cy.contains('5').should('have.class', 'default')
-          cy.contains(',').should('have.class', 'comma')
-        })
       })
 
       it('displays "true" values', () => {
@@ -114,28 +98,13 @@ describe('Settings', () => {
       })
 
       it('displays "object" values for env and hosts', () => {
-        cy.get('.nested-obj').eq(0)
-        .contains('fixturesFolder')
+        cy.get('.line').contains('www.google-analytics.com, hotjar.com')
 
-        cy.get('.nested-obj').eq(1)
-        .contains('*.foobar.com')
+        cy.get('.line').contains('*.foobar.com, *.bazqux.com')
       })
 
       it('displays "array" values for blacklistHosts', () => {
-        cy.contains('.key', 'blacklistHosts')
-        .parent().should('have.class', 'nested-arr')
-        .parent()
-        // check if the text shows an array (using []) and not indices 0 or 1
-        .should('contain', '[')
-        .and('contain', ']')
-        .and('not.contain', '0')
-        .and('not.contain', '1')
-        // and that it contains the right data from the config fixture
-        .find('.line .config').should(($lines) => {
-          expect($lines).to.have.length(2)
-          expect($lines).to.contain('www.google-analytics.com')
-          expect($lines).to.contain('hotjar.com')
-        })
+        cy.contains('.line', 'blacklistHosts').contains('www.google-analytics.com, hotjar.com')
       })
 
       it('opens help link on click', () => {

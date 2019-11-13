@@ -71,8 +71,12 @@
     background-color: #252831;
     color: #eee;
     margin: 0;
-    padding: 10px;
     font-family: $font-mono;
+
+    > ol {
+      padding: 10px 12px !important;
+      background: #fff !important;
+    }
 
     .envFile:hover, .env:hover, .config:hover, .cli:hover, .plugin:hover, .default:hover {
       border-bottom: 1px dotted #777;
@@ -82,29 +86,9 @@
       margin-bottom: 0;
     }
 
-    .key {
-      color: #ccc;
-    }
-
-    .comma, .colon, {
-      color: #ccc;
-    }
-
-    .line {
-      margin-left: 15px;
-      color: #eee;
-    }
-
-    .nested {
-      margin-left: 15px;
-
-      .line {
-        margin-left: 30px;
-      }
-    }
   }
 
-  .envFile, .env, .config, .cli, .plugin, .default {
+  .envFile, .env, .config, .cli, .plugins, .default {
     font-family: $font-mono;
 
     padding: 2px;
@@ -130,7 +114,7 @@
     color: #A21313;
   }
 
-  .plugin {
+  .plugins {
     background-color: #f0e7fc;
     color: #134aa2;
   }
