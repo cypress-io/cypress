@@ -1,5 +1,5 @@
 /**
- * This tests various failure scenarios where a code frame is displayed
+ * This tests various failure scenarios where a an error and code frame is displayed
  * It does this by having a test fail and then a subsequent test run that
  * tests the appearance of the command log
  * Because of this, the test order is important
@@ -7,9 +7,6 @@
  * tests, because each failure has a verification test (e.g. 11 fail, 11 pass)
  * Each test is nested inside a `describe` because otherwise the subsequent
  * test will not be run
- * Also, the testing of line numbers is brittle because changes in this file
- * can affect the line number that's being tested, but it's an important
- * thing to test
  */
 describe('various failures', () => {
   let counter = 0
@@ -34,6 +31,11 @@ describe('various failures', () => {
         .contains(`SHOULD FAIL - ${testName}`)
         .closest('.runnable-wrapper')
         .within(() => {
+          cy.get('.runnable-err-stack-trace')
+          .should('include.text', stackMessage)
+          .invoke('text')
+          .should('match', regex)
+
           cy
           .get('.test-error-code-frame .runnable-err-code-frame-file-path')
           .invoke('text')
@@ -43,13 +45,6 @@ describe('various failures', () => {
           // it's cut off due to the code frame only showing 2 lines before
           // and after the highlighted, so we prefer the `codeFrameText`
           cy.get('.test-error-code-frame pre span').should('include.text', codeFrameText || testName)
-
-          if (!stackMessage) return
-
-          cy.get('.runnable-err-stack-trace')
-          .should('include.text', stackMessage)
-          .invoke('text')
-          .should('match', regex)
         })
       })
     })
