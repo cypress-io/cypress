@@ -54,10 +54,30 @@ const shouldFireMouseMoveEvents = (targetEl, lastHoveredEl, fromElViewport, coor
   return !_.isEqual(xy(fromElViewport), xy(coords))
 }
 
+const shouldMoveCursorToEndAfterMousedown = (el) => {
+  if (!$elements.isElement(el)) {
+    return false
+  }
+
+  if (!($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el))) {
+    return false
+  }
+
+  if (!$elements.isFocused(el)) {
+    return false
+  }
+
+  if ($elements.isNeedSingleValueChangeInputElement(el)) {
+    return false
+  }
+
+  return true
+}
+
 const create = (state, keyboard, focused) => {
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = keyboard.getActiveModifiers()
+      const _activeModifiers = keyboard.getActiveModifiers(state)
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
@@ -163,7 +183,7 @@ const create = (state, keyboard, focused) => {
 
         const elsToSendMouseleave = []
 
-        while (curParent && curParent !== commonAncestor) {
+        while (curParent && curParent.ownerDocument && curParent !== commonAncestor) {
           elsToSendMouseleave.push(curParent)
           curParent = curParent.parentNode
         }
@@ -227,16 +247,16 @@ const create = (state, keyboard, focused) => {
 
       pointerout()
       pointerleave()
-      events.push({ pointerover: pointerover() })
+      events.push({ type: 'pointerover', ...pointerover() })
       pointerenter()
       mouseout()
       mouseleave()
-      events.push({ mouseover: mouseover() })
+      events.push({ type: 'mouseover', ...mouseover() })
       mouseenter()
       state('mouseLastHoveredEl', $elements.isAttachedEl(el) ? el : null)
       state('mouseCoords', { x, y })
-      events.push({ pointermove: pointermove() })
-      events.push({ mousemove: mousemove() })
+      events.push({ type: 'pointermove', ...pointermove() })
+      events.push({ type: 'mousemove', ...mousemove() })
 
       return events
     },
@@ -290,12 +310,12 @@ const create = (state, keyboard, focused) => {
       }, mouseEvtOptionsExtend)
 
       // TODO: pointer events should have fractional coordinates, not rounded
-      let pointerdownProps = sendPointerdown(
+      let pointerdown = sendPointerdown(
         el,
         pointerEvtOptions
       )
 
-      const pointerdownPrevented = pointerdownProps.preventedDefault
+      const pointerdownPrevented = pointerdown.preventedDefault
       const elIsDetached = $elements.isDetachedEl(el)
 
       if (pointerdownPrevented || elIsDetached) {
@@ -306,37 +326,37 @@ const create = (state, keyboard, focused) => {
         }
 
         return {
-          pointerdownProps,
-          mousedownProps: {
-            skipped: formatReasonNotFired(reason),
+          targetEl: el,
+          events: {
+            pointerdown,
+            mousedown: {
+              skipped: formatReasonNotFired(reason),
+            },
           },
         }
       }
 
-      let mousedownProps = sendMousedown(el, mouseEvtOptions)
+      let mousedown = sendMousedown(el, mouseEvtOptions)
 
       return {
-        pointerdownProps,
-        mousedownProps,
+        targetEl: el,
+        events: {
+          pointerdown,
+          mousedown,
+        },
       }
     },
 
     down (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       const $previouslyFocused = focused.getFocused()
 
-      const mouseDownEvents = mouse._downEvents(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse._downEvents(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       // el we just send pointerdown
-      const el = mouseDownEvents.pointerdownProps.el
+      const el = mouseDownPhase.targetEl
 
-      if (mouseDownEvents.pointerdownProps.preventedDefault || mouseDownEvents.mousedownProps.preventedDefault || !$elements.isAttachedEl(el)) {
-        return mouseDownEvents
-      }
-
-      if ($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el)) {
-        if (!$elements.isNeedSingleValueChangeInputElement(el)) {
-          $selection.moveSelectionToEnd(el)
-        }
+      if (mouseDownPhase.events.pointerdown.preventedDefault || mouseDownPhase.events.mousedown.preventedDefault || !$elements.isAttachedEl(el)) {
+        return mouseDownPhase
       }
 
       //# retrieve the first focusable $el in our parent chain
@@ -358,7 +378,12 @@ const create = (state, keyboard, focused) => {
         }
       }
 
-      return mouseDownEvents
+      if (shouldMoveCursorToEndAfterMousedown($elToFocus[0])) {
+        debug('moveSelectionToEnd due to click')
+        $selection.moveSelectionToEnd($dom.getDocumentFromElement($elToFocus[0]), { onlyIfEmptySelection: true })
+      }
+
+      return mouseDownPhase
     },
 
     /**
@@ -392,22 +417,40 @@ const create = (state, keyboard, focused) => {
     * sendMouseup(el2)
     * el3 = moveToCoordsOrNoop(coords)
     * if (notDetached(el1))
-    * sendClick(el3)
+    *   sendClick(ancestorOf(el1, el2))
     */
     click (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
       debug('mouse.click', { fromElViewport, forceEl })
 
-      const mouseDownEvents = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
+      const skipMouseupEvent = mouseDownPhase.events.pointerdown.skipped || mouseDownPhase.events.pointerdown.preventedDefault
 
-      const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      const skipClickEvent = $elements.isDetachedEl(mouseDownEvents.pointerdownProps.el)
+      const getElementToClick = () => {
+        // Never skip the click event when force:true
+        if (forceEl) {
+          return { elToClick: forceEl }
+        }
 
-      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend)
+        // Only send click event if mousedown element is not detached.
+        if ($elements.isDetachedEl(mouseDownPhase.targetEl)) {
+          return { skipClickEventReason: 'element was detached' }
+        }
 
-      return _.extend({}, mouseDownEvents, mouseUpEvents, mouseClickEvents)
+        const commonAncestor = mouseUpPhase.targetEl &&
+        mouseDownPhase.targetEl &&
+        $elements.getFirstCommonAncestor(mouseUpPhase.targetEl, mouseDownPhase.targetEl)
+
+        return { elToClick: commonAncestor }
+      }
+
+      const { skipClickEventReason, elToClick } = getElementToClick()
+
+      const mouseClickEvents = mouse._mouseClickEvents(fromElViewport, elToClick, forceEl, skipClickEventReason, mouseEvtOptionsExtend)
+
+      return _.extend({}, mouseDownPhase.events, mouseUpPhase.events, mouseClickEvents)
     },
 
     /**
@@ -433,27 +476,43 @@ const create = (state, keyboard, focused) => {
 
       const el = forceEl || mouse.moveToCoords(fromElViewport)
 
-      let pointerupProps = sendPointerup(el, pointerEvtOptions)
+      let pointerup = sendPointerup(el, pointerEvtOptions)
 
       if (skipMouseEvent || $elements.isDetachedEl($(el))) {
         return {
-          pointerupProps,
-          mouseupProps: {
-            skipped: formatReasonNotFired('Previous event cancelled'),
+          targetEl: el,
+          events: {
+            pointerup,
+            mouseup: {
+              skipped: formatReasonNotFired('Previous event cancelled'),
+            },
           },
         }
       }
 
-      let mouseupProps = sendMouseup(el, mouseEvtOptions)
+      let mouseup = sendMouseup(el, mouseEvtOptions)
 
       return {
-        pointerupProps,
-        mouseupProps,
+        targetEl: el,
+        events: {
+          pointerup,
+          mouseup,
+        },
       }
     },
 
-    _mouseClickEvents (fromElViewport, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
-      const el = forceEl || mouse.moveToCoords(fromElViewport)
+    _mouseClickEvents (fromElViewport, el, forceEl, skipClickEvent, mouseEvtOptionsExtend = {}) {
+      if (skipClickEvent) {
+        return {
+          click: {
+            skipped: formatReasonNotFired(skipClickEvent),
+          },
+        }
+      }
+
+      if (!forceEl) {
+        mouse.moveToCoords(fromElViewport)
+      }
 
       const win = $dom.getWindowByElement(el)
 
@@ -464,17 +523,9 @@ const create = (state, keyboard, focused) => {
         detail: 1,
       }, mouseEvtOptionsExtend)
 
-      if (skipClickEvent) {
-        return {
-          clickProps: {
-            skipped: formatReasonNotFired('Element was detached'),
-          },
-        }
-      }
+      let click = sendClick(el, clickEventOptions)
 
-      let clickProps = sendClick(el, clickEventOptions)
-
-      return { clickProps }
+      return { click }
     },
 
     _contextmenuEvent (fromElViewport, forceEl, mouseEvtOptionsExtend) {
@@ -490,9 +541,9 @@ const create = (state, keyboard, focused) => {
         which: 3,
       }, mouseEvtOptionsExtend)
 
-      let contextmenuProps = sendContextmenu(el, mouseEvtOptions)
+      let contextmenu = sendContextmenu(el, mouseEvtOptions)
 
-      return { contextmenuProps }
+      return { contextmenu }
     },
 
     dblclick (fromElViewport, forceEl, mouseEvtOptionsExtend = {}) {
@@ -513,9 +564,9 @@ const create = (state, keyboard, focused) => {
         detail: 2,
       }, mouseEvtOptionsExtend)
 
-      let dblclickProps = sendDblclick(el, dblclickEvtProps)
+      let dblclick = sendDblclick(el, dblclickEvtProps)
 
-      return { clickEvents1, clickEvents2, dblclickProps }
+      return { clickEvents1, clickEvents2, dblclick }
     },
 
     rightclick (fromElViewport, forceEl) {
@@ -530,15 +581,14 @@ const create = (state, keyboard, focused) => {
         which: 3,
       }
 
-      const mouseDownEvents = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
       const contextmenuEvent = mouse._contextmenuEvent(fromElViewport, forceEl)
 
-      const skipMouseupEvent = mouseDownEvents.pointerdownProps.skipped || mouseDownEvents.pointerdownProps.preventedDefault
+      const skipMouseupEvent = mouseDownPhase.events.pointerdown.skipped || mouseDownPhase.events.pointerdown.preventedDefault
+      const mouseUpPhase = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
 
-      const mouseUpEvents = mouse.up(fromElViewport, forceEl, skipMouseupEvent, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
-
-      const clickEvents = _.extend({}, mouseDownEvents, mouseUpEvents)
+      const clickEvents = _.extend({}, mouseDownPhase.events, mouseUpPhase.events)
 
       return _.extend({}, { clickEvents, contextmenuEvent })
     },

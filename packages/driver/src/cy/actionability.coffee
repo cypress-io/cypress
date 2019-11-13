@@ -1,6 +1,7 @@
 _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
+debug = require('debug')('cypress:driver:actionability')
 
 $dom = require("../dom")
 $utils = require("../cypress/utils")
@@ -49,8 +50,10 @@ ensureElIsNotCovered = (cy, win, $el, fromElViewport, options, log, onScroll) ->
     ## figure out the deepest element we are about to interact
     ## with at these coordinates
     $elAtCoords = getElementAtPointFromViewport(fromElViewport)
-
+    debug('elAtCoords', $elAtCoords)
+    debug('el has pointer-events none?')
     cy.ensureElDoesNotHaveCSS($el, 'pointer-events', 'none', log)
+    debug('is descendent of elAtCoords?')
     cy.ensureDescendents($el, $elAtCoords, log)
 
     return $elAtCoords
@@ -65,6 +68,8 @@ ensureElIsNotCovered = (cy, win, $el, fromElViewport, options, log, onScroll) ->
       ## from underneath this fixed position element until we can't
       ## anymore
       $fixed = getFixedOrStickyEl($elAtCoords)
+      
+      debug('elAtCoords is fixed', !!$fixed)
 
       ## if we dont have a fixed position
       ## then just bail, cuz we need to retry async
@@ -161,7 +166,10 @@ ensureElIsNotCovered = (cy, win, $el, fromElViewport, options, log, onScroll) ->
 
                 ## and possibly recursively scroll past it
                 ## if we haven't see it before
-                possiblyScrollMultipleTimes($fixed)
+                return possiblyScrollMultipleTimes($fixed)
+              
+              ## getElementAtPoint was falsey, so target element is no longer in the viewport
+              throw err
           else
             scrollContainers(scrollables)
 
@@ -216,6 +224,7 @@ verify = (cy, $el, options, callbacks) ->
       visibility: true,
       notDisabled: true,
       notCovered: true,
+      notAnimating: true,
       notReadonly: false,
       custom: false
     }
@@ -271,7 +280,7 @@ verify = (cy, $el, options, callbacks) ->
 
       ## if force is true OR waitForAnimations is false
       ## then do not perform these additional ensures...
-      if (force isnt true) and (options.waitForAnimations isnt false)
+      if (options.ensure.notAnimating) and (force isnt true) and (options.waitForAnimations isnt false)
         ## store the coords that were absolute
         ## from the window or from the viewport for sticky elements
         ## (see https://github.com/cypress-io/cypress/pull/1478)

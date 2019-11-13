@@ -419,7 +419,7 @@ module.exports = (options = {}) ->
     setRequestCookieHeader: (req, reqUrl, automationFn) ->
       automationFn('get:cookies', { url: reqUrl })
       .then (cookies) ->
-        debug('getting cookies from browser %o', { reqUrl, cookies })
+        debug('got cookies from browser %o', { reqUrl, cookies })
         header = cookies.map (cookie) ->
           "#{cookie.name}=#{cookie.value}"
         .join("; ") || undefined
@@ -435,7 +435,7 @@ module.exports = (options = {}) ->
         cookies = [cookies]
 
       parsedUrl = url.parse(resUrl)
-      debug('setting cookies on browser %o', { url: parsedUrl, cookies })
+      debug('setting cookies on browser %o', { url: parsedUrl.href, cookies })
 
       Promise.map cookies, (cookie) ->
         cookie = tough.Cookie.parse(cookie, { loose: true })
@@ -475,24 +475,24 @@ module.exports = (options = {}) ->
 
       followRedirect = options.followRedirect
 
-      options.followRedirect = (incomingRes) ->
-        req = @
+      currentUrl = options.url
 
-        newUrl = url.resolve(options.url, incomingRes.headers.location)
+      options.followRedirect = (incomingRes) ->
+        if followRedirect and not followRedirect(incomingRes)
+          return false
+
+        newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 
         ## and when we know we should follow the redirect
         ## we need to override the init method and
         ## first set the received cookies on the browser
         ## and then grab the cookies for the new url
-        req.init = _.wrap req.init, (orig, opts) =>
-          options.onBeforeReqInit ->
-            self.setCookiesOnBrowser(incomingRes, options.url, automationFn)
-            .then (cookies) ->
-              self.setRequestCookieHeader(req, newUrl, automationFn)
-            .then (cookieHeader) ->
-              orig.call(req, opts)
-
-        followRedirect.call(req, incomingRes)
+        self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+        .then (cookies) =>
+          self.setRequestCookieHeader(@, newUrl, automationFn)
+        .then =>
+          currentUrl = newUrl
+          true
 
       @setRequestCookieHeader(options, options.url, automationFn)
       .then =>
@@ -552,31 +552,26 @@ module.exports = (options = {}) ->
           requestResponses.push(pick(response))
 
         if options.followRedirect
+          currentUrl = options.url
+
           options.followRedirect = (incomingRes) ->
-            newUrl = url.resolve(options.url, incomingRes.headers.location)
+            newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 
             ## normalize the url
             redirects.push([incomingRes.statusCode, newUrl].join(": "))
 
             push(incomingRes)
 
-            req = @
-
             ## and when we know we should follow the redirect
             ## we need to override the init method and
             ## first set the new cookies on the browser
             ## and then grab the cookies for the new url
-            req.init = _.wrap req.init, (orig, opts) =>
-              self.setCookiesOnBrowser(incomingRes, options.url, automationFn)
-              .then ->
-                self.setRequestCookieHeader(req, newUrl, automationFn)
-              .then ->
-                orig.call(req, opts)
-
-            ## cause the redirect to happen
-            ## but swallow up the incomingRes
-            ## so we can build an array of responses
-            return true
+            self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+            .then =>
+              self.setRequestCookieHeader(@, newUrl, automationFn)
+            .then =>
+              currentUrl = newUrl
+              true
 
         @create(options, true)
         .then(@normalizeResponse.bind(@, push))
@@ -596,7 +591,7 @@ module.exports = (options = {}) ->
             ## the current url
             resp.redirectedToUrl = url.resolve(options.url, loc)
 
-          @setCookiesOnBrowser(resp, options.url, automationFn)
+          @setCookiesOnBrowser(resp, currentUrl, automationFn)
           .return(resp)
 
       if c = options.cookies

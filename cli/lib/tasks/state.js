@@ -54,6 +54,18 @@ const getVersionDir = (version = util.pkgVersion()) => {
   return path.join(getCacheDir(), version)
 }
 
+/**
+ * When executing "npm postinstall" hook, the working directory is set to
+ * "<current folder>/node_modules/cypress", which can be surprising when using relative paths.
+ */
+const isInstallingFromPostinstallHook = () => {
+  // individual folders
+  const cwdFolders = process.cwd().split(path.sep)
+  const length = cwdFolders.length
+
+  return cwdFolders[length - 2] === 'node_modules' && cwdFolders[length - 1] === 'cypress'
+}
+
 const getCacheDir = () => {
   let cache_directory = util.getCacheDir()
 
@@ -61,7 +73,16 @@ const getCacheDir = () => {
     const envVarCacheDir = untildify(util.getEnv('CYPRESS_CACHE_FOLDER'))
 
     debug('using environment variable CYPRESS_CACHE_FOLDER %s', envVarCacheDir)
-    cache_directory = path.resolve(envVarCacheDir)
+
+    if (!path.isAbsolute(envVarCacheDir) && isInstallingFromPostinstallHook()) {
+      const packageRootFolder = path.join('..', '..', envVarCacheDir)
+
+      cache_directory = path.resolve(packageRootFolder)
+      debug('installing from postinstall hook, original root folder is %s', packageRootFolder)
+      debug('and resolved cache directory is %s', cache_directory)
+    } else {
+      cache_directory = path.resolve(envVarCacheDir)
+    }
   }
 
   return cache_directory

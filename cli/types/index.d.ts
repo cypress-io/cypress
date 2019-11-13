@@ -620,13 +620,60 @@ declare namespace Cypress {
      * @see https://on.cypress.io/dblclick
      */
     dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
-
+    /**
+     * Double-click a DOM element at specific corner / side.
+     *
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/dblclick
+     * @example
+     *    cy.get('button').dblclick('topRight')
+     */
+    dblclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Double-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/dblclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').dblclick(15, 40)
+    ```
+     */
+    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
      * @see https://on.cypress.io/rightclick
      */
     rightclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific corner / side.
+     *
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').rightclick('topRight')
+     */
+    rightclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/rightclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').rightclick(15, 40)
+    ```
+     */
+    rightclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
      * Set a debugger and log what the previous command yields.

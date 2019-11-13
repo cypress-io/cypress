@@ -260,6 +260,26 @@ describe('lib/tasks/state', function () {
       expect(ret).to.eql(path.resolve('local-cache/folder'))
     })
 
+    it('CYPRESS_CACHE_FOLDER resolves from relative path during postinstall', () => {
+      process.env.CYPRESS_CACHE_FOLDER = './local-cache/folder'
+      // simulates current folder when running "npm postinstall" hook
+      sinon.stub(process, 'cwd').returns('/my/project/folder/node_modules/cypress')
+      const ret = state.getCacheDir()
+
+      debug('returned cache dir %s', ret)
+      expect(ret).to.eql(path.resolve('/my/project/folder/local-cache/folder'))
+    })
+
+    it('CYPRESS_CACHE_FOLDER resolves from absolute path during postinstall', () => {
+      process.env.CYPRESS_CACHE_FOLDER = '/cache/folder/Cypress'
+      // simulates current folder when running "npm postinstall" hook
+      sinon.stub(process, 'cwd').returns('/my/project/folder/node_modules/cypress')
+      const ret = state.getCacheDir()
+
+      debug('returned cache dir %s', ret)
+      expect(ret).to.eql(path.resolve('/cache/folder/Cypress'))
+    })
+
     it('resolves ~ with user home folder', () => {
       const homeDir = os.homedir()
 

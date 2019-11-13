@@ -61,6 +61,10 @@ const isHidden = (el, name = 'isHidden()') => {
     return true // is hidden
   }
 
+  if (elIsBackface($el)) {
+    return true
+  }
+
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
   if (elIsHiddenByAncestors($el)) {
@@ -110,6 +114,40 @@ const elHasVisibilityHiddenOrCollapse = ($el) => {
 
 const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
+}
+
+const numberRegex = /-?[0-9]+(?:\.[0-9]+)?/g
+// This is a simplified version of backface culling.
+// https://en.wikipedia.org/wiki/Back-face_culling
+//
+// We defined view normal vector, (0, 0, -1), - eye to screen.
+// and default normal vector, (0, 0, 1)
+// When dot product of them are >= 0, item is visible.
+const elIsBackface = ($el) => {
+  const el = $el[0]
+  const style = getComputedStyle(el)
+  const backface = style.getPropertyValue('backface-visibility')
+  const backfaceInvisible = backface === 'hidden'
+  const transform = style.getPropertyValue('transform')
+
+  if (!backfaceInvisible || !transform.startsWith('matrix3d')) {
+    return false
+  }
+
+  const m3d = transform.substring(8).match(numberRegex)
+  const defaultNormal = [0, 0, -1]
+  const elNormal = findNormal(m3d)
+  // Simplified dot product.
+  // [0] and [1] are always 0
+  const dot = defaultNormal[2] * elNormal[2]
+
+  return dot >= 0
+}
+
+const findNormal = (m) => {
+  const length = Math.sqrt(+m[8] * +m[8] + +m[9] * +m[9] + +m[10] * +m[10])
+
+  return [+m[8] / length, +m[9] / length, +m[10] / length]
 }
 
 const elHasVisibilityCollapse = ($el) => {
@@ -262,7 +300,7 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
   // in case there is no body
   // or if parent is the document which can
   // happen if we already have an <html> element
-  if ($parent.is('body,html') || $document.isDocument($parent)) {
+  if (!$parent.length || $parent.is('body,html') || $document.isDocument($parent)) {
     return false
   }
 
@@ -270,6 +308,10 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
+  }
+
+  if (elIsBackface($parent)) {
+    return true
   }
 
   // continue to recursively walk up the chain until we reach body or html
@@ -386,6 +428,10 @@ const getReasonIsHidden = function ($el) {
 
   if (elHasNoOffsetWidthOrHeight($el)) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
+  }
+
+  if (elIsBackface($el)) {
+    return `This element '${node}' is not visible because it is rotated and its backface is hidden.`
   }
 
   if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())) {

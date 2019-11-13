@@ -848,9 +848,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Please do not modify CYPRESS_ENV value.
       """
+    when "CDP_VERSION_TOO_OLD"
+      """
+      A minimum CDP version of v#{arg1} is required, but the current browser has #{if arg2.major != 0 then "v#{arg2.major}.#{arg2.minor}" else 'an older version'}.
+      """
     when "CDP_COULD_NOT_CONNECT"
       """
-      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 5 seconds.
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
 
       This usually indicates there was a problem opening the Chrome browser.
 
@@ -859,6 +863,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       Error details:
 
       #{arg2.stack}
+      """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
 
 get = (type, arg1, arg2) ->
