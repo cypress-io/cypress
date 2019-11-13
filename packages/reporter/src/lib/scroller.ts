@@ -13,10 +13,17 @@
  - element distance from top of container
 */
 
+type UserScrollCallback = () => void
+
 const PADDING = 100
 
 class Scroller {
-  setContainer (container, onUserScroll) {
+  private _container: Element | null = null
+  private _userScrollCount = 0
+  private _userScroll = true
+  private _countUserScrollsTimeout: NodeJS.Timeout | null = null
+
+  setContainer (container: Element, onUserScroll?: UserScrollCallback) {
     this._container = container
 
     this._userScroll = true
@@ -25,7 +32,9 @@ class Scroller {
     this._listenToScrolls(onUserScroll)
   }
 
-  _listenToScrolls (onUserScroll) {
+  _listenToScrolls (onUserScroll?: UserScrollCallback) {
+    if (!this._container) return
+
     this._container.addEventListener('scroll', () => {
       if (!this._userScroll) {
         // programmatic scroll
@@ -38,8 +47,11 @@ class Scroller {
       // or more scroll events within 50ms to count it as a user intending to scroll
       this._userScrollCount++
       if (this._userScrollCount >= 3) {
-        onUserScroll()
-        clearTimeout(this._countUserScrollsTimeout)
+        if (onUserScroll) {
+          onUserScroll()
+        }
+
+        clearTimeout(this._countUserScrollsTimeout as NodeJS.Timeout)
         this._countUserScrollsTimeout = null
         this._userScrollCount = 0
 
@@ -55,7 +67,7 @@ class Scroller {
     })
   }
 
-  scrollIntoView (element) {
+  scrollIntoView (element: HTMLElement) {
     if (!this._container) {
       throw new Error('A container must be set on the scroller with `scroller.setContainer(container)` before trying to scroll an element into view')
     }
@@ -77,29 +89,36 @@ class Scroller {
     this._container.scrollTop = scrollTopGoal
   }
 
-  _isFullyVisible (element) {
+  _isFullyVisible (element: HTMLElement) {
+    if (!this._container) return false
+
     return element.offsetTop - this._container.scrollTop > 0
            && this._container.scrollTop > this._aboveBottom(element)
   }
 
-  _aboveBottom (element) {
+  _aboveBottom (element: HTMLElement) {
     // add padding, since commands expanding and collapsing can mess with
     // the offset, causing the running command to be half cut off
     // https://github.com/cypress-io/cypress/issues/228
-    return element.offsetTop + element.clientHeight - this._container.clientHeight + PADDING
+
+    const containerHeight = this._container ? this._container.clientHeight : 0
+
+    return element.offsetTop + element.clientHeight - containerHeight + PADDING
   }
 
   getScrollTop () {
     return this._container ? this._container.scrollTop : 0
   }
 
-  setScrollTop (scrollTop) {
+  setScrollTop (scrollTop?: number | null) {
     if (this._container && scrollTop != null) {
       this._container.scrollTop = scrollTop
     }
   }
 
   scrollToEnd () {
+    if (!this._container) return
+
     this.setScrollTop(this._container.scrollHeight - this._container.clientHeight)
   }
 
@@ -108,7 +127,7 @@ class Scroller {
     this._container = null
     this._userScroll = true
     this._userScrollCount = 0
-    clearTimeout(this._countUserScrollsTimeout)
+    clearTimeout(this._countUserScrollsTimeout as NodeJS.Timeout)
     this._countUserScrollsTimeout = null
   }
 }

@@ -1,26 +1,42 @@
 import _ from 'lodash'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 
 import scroller from './scroller'
 
-const getContainer = (props) => {
+interface ContainerProps {
+  clientHeight?: number
+  scrollHeight?: number
+  scrollTop?: number
+  addEventListener?: SinonSpy
+}
+
+type TestContainer = Element & {
+  addEventListener?: SinonSpy
+}
+
+const getContainer = (props?: ContainerProps): TestContainer => {
   return _.extend({
     clientHeight: 400,
     scrollHeight: 900,
     scrollTop: 0,
     addEventListener: sinon.spy(),
-  }, props)
+  }, props) as any
 }
 
-const getElement = (props) => {
+interface ElementProps {
+  clientHeight?: number
+  offsetTop?: number
+}
+
+const getElement = (props?: ElementProps): HTMLElement => {
   return _.extend({
     clientHeight: 20,
     offsetTop: 150,
-  }, props)
+  }, props) as any
 }
 
 describe('scroller', () => {
-  let clock
+  let clock: sinon.SinonFakeTimers
 
   beforeEach(() => {
     clock = sinon.useFakeTimers()
@@ -32,7 +48,7 @@ describe('scroller', () => {
 
   it('throws an error if attempting to scroll an element before setting a container', () => {
     expect(() => {
-      return scroller.scrollIntoView({})
+      return scroller.scrollIntoView({} as HTMLElement)
     }).to.throw(/container must be set/)
   })
 
