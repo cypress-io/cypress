@@ -615,7 +615,7 @@ const browserCanBeRecorded = (browser) => {
     return true
   }
 
-  if (browser.family === 'chrome' && browser.isHeaded) {
+  if (browser.family === 'chrome') {
     return true
   }
 

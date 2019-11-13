@@ -91,8 +91,6 @@ defaultArgs = [
   "--disable-breakpad"
   "--password-store=basic"
   "--use-mock-keychain"
-
-  "--headless"
 ]
 
 getRemoteDebuggingPort = Promise.method () ->
@@ -217,11 +215,15 @@ module.exports = {
 
   _setAutomation
 
-  _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
+  _writeExtension: (browser, options) ->
+    if options.isHeadless
+      debug('chrome is running headlessly, not installing extension')
+      return
+
     ## get the string bytes for the final extension file
-    extension.setHostAndPath(proxyUrl, socketIoRoute)
+    extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
     .then (str) ->
-      extensionDest = utils.getExtensionDir(browser, isTextTerminal)
+      extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
       extensionBg   = path.join(extensionDest, "background.js")
 
       ## copy the extension src to the extension dist
@@ -265,6 +267,9 @@ module.exports = {
     if majorVersion >= CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK
       args.push("--proxy-bypass-list=<-loopback>")
 
+    if options.isHeadless
+      args.push("--headless")
+
     args
 
   open: (browser, url, options = {}, automation) ->
@@ -289,12 +294,7 @@ module.exports = {
         ])
     .spread (cacheDir, args, port) =>
       Promise.all([
-        @_writeExtension(
-          browser,
-          isTextTerminal,
-          options.proxyUrl,
-          options.socketIoRoute
-        ),
+        @_writeExtension(browser, options),
         _removeRootExtension(),
         _disableRestorePagesPrompt(userDir),
       ])
