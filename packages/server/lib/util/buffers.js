@@ -4,6 +4,14 @@ const uri = require('./uri')
 
 let buffers = []
 
+const stripPort = (url) => {
+  try {
+    return uri.removeDefaultPort(url).format()
+  } catch (e) {
+    return url
+  }
+}
+
 module.exports = {
   all () {
     return buffers
@@ -20,35 +28,26 @@ module.exports = {
   },
 
   set (obj = {}) {
+    obj.url = stripPort(obj.url)
+    obj.originalUrl = stripPort(obj.originalUrl)
+
+    debug('setting buffer %o', _.pick(obj, 'url'))
+
     return buffers.push(_.pick(obj, 'url', 'originalUrl', 'jar', 'stream', 'response', 'details'))
   },
 
   getByOriginalUrl (str) {
-    return _.find(buffers, { originalUrl: str })
+    const b = _.find(buffers, { originalUrl: stripPort(str) })
+
+    if (b) {
+      debug('found request buffer by original url %o', { str, buffer: _.pick(b, 'url', 'originalUrl', 'details'), bufferCount: buffers.length })
+    }
+
+    return b
   },
 
   get (str) {
-    const find = (str) => {
-      return _.find(buffers, { url: str })
-    }
-
-    const b = find(str)
-
-    if (b) {
-      return b
-    }
-
-    let parsed = uri.parse(str)
-
-    //# if we're on https and we have a port
-    //# then attempt to find the buffer by
-    //# slicing off the port since our buffer
-    //# was likely stored without a port
-    if ((parsed.protocol === 'https:') && parsed.port) {
-      parsed = uri.removePort(parsed)
-
-      return find(parsed.format())
-    }
+    return _.find(buffers, { url: stripPort(str) })
   },
 
   take (str) {
