@@ -484,6 +484,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## since this failed this means that a
       ## specific command failed and we should
       ## highlight it in red or insert a new command
+
+      err.name = err.name || 'CypressError'
       errors.commandRunningFailed(err)
 
       fail(err, state("runnable"))
