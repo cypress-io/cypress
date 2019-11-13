@@ -53,7 +53,17 @@ const getSourcePosition = (filePath, position) => {
 
   const { consumer } = sourceMapConsumers[filePath]
 
-  return consumer.originalPositionFor(position)
+  const sourcePosition = consumer.originalPositionFor(position)
+
+  const { source: file, line, column } = sourcePosition
+
+  if (!file || line == null || column == null) return
+
+  return {
+    file,
+    line,
+    column,
+  }
 }
 
 const base64toJson = (base64) => {

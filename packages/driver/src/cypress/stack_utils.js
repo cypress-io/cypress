@@ -83,12 +83,12 @@ const getSourceDetails = (generatedDetails) => {
 
   if (!sourceDetails) return generatedDetails
 
-  const { line, column, source } = sourceDetails
+  const { line, column, file } = sourceDetails
 
   return {
     line,
     column,
-    file: source,
+    file,
     function: generatedDetails.function,
   }
 }
