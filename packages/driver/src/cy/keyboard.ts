@@ -718,6 +718,7 @@ export class Keyboard {
       }
     )
 
+    // we will only press each modifier once, so only find unique modifiers
     const modifierKeys = _.uniqBy(_.filter(keyDetailsArr, isModifier), (v) => v.key)
 
     return Promise
@@ -728,6 +729,7 @@ export class Keyboard {
     })
     .then(() => {
       if (options.release !== false) {
+        // reverse the modifiers so we keyup in LIFO order
         return Promise.map(modifierKeys.reverse(), (key) => {
           options.id = _.uniqueId('char')
 
@@ -938,9 +940,11 @@ export class Keyboard {
       const didFlag = this.flagModifier(_key)
 
       if (!didFlag) {
+        // we've already pressed this modifier, so ignore it and don't fire keydown or keyup
         _key.events.keydown = false
       }
 
+      // don't fire keyup for modifier keys, this will happen after all other keys are typed
       _key.events.keyup = false
     }
 
