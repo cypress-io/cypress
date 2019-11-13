@@ -712,30 +712,13 @@ export class Keyboard {
           }
 
           this.typeSimulatedKey(activeEl, key, options)
-          debug('returning null')
 
           return null
         }
       }
     )
 
-    const modifierKeys = _.filter(keyDetailsArr, isModifier)
-
-    if (options.simulated && !options.delay) {
-      _.each(typeKeyFns, (fn) => {
-        return fn()
-      })
-
-      if (options.release !== false) {
-        _.each(modifierKeys, (key) => {
-          return this.simulatedKeyup(getActiveEl(doc), key, options)
-        })
-      }
-
-      options.onAfterType()
-
-      return
-    }
+    const modifierKeys = _.uniqBy(_.filter(keyDetailsArr, isModifier), (v) => v.key)
 
     return Promise
     .each(typeKeyFns, (fn) => {
@@ -745,7 +728,7 @@ export class Keyboard {
     })
     .then(() => {
       if (options.release !== false) {
-        return Promise.map(modifierKeys, (key) => {
+        return Promise.map(modifierKeys.reverse(), (key) => {
           options.id = _.uniqueId('char')
 
           return this.simulatedKeyup(getActiveEl(doc), key, options)
@@ -898,7 +881,6 @@ export class Keyboard {
     debug(`dispatched [${eventType}] on ${el}`)
     const formattedKeyString = getFormattedKeyString(keyDetails)
 
-    debug('format string', formattedKeyString)
     options.onEvent(options.id, formattedKeyString, event, dispatched)
 
     return dispatched
@@ -956,7 +938,7 @@ export class Keyboard {
       const didFlag = this.flagModifier(_key)
 
       if (!didFlag) {
-        return null
+        _key.events.keydown = false
       }
 
       _key.events.keyup = false
