@@ -1,0 +1,25 @@
+{
+    "recommendations": [
+        "alefragnani.bookmarks",
+        "msjsdiag.debugger-for-chrome",
+        "kisstkondoros.vscode-codemetrics",
+        "yorkxin.coffeescript-support",
+        "drknoxy.eslint-disable-snippets",
+        "eamodio.gitlens",
+        "ms-vsliveshare.vsliveshare",
+        "karigari.chat",
+        "lostintangent.vsls-pomodoro",
+        "lostintangent.vsls-whiteboard",
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-emoji",
+        "eg2.vscode-npm-script",
+        "christian-kohler.npm-intellisense",
+        "buenon.scratchpads",
+        "jasonnutter.search-node-modules",
+        "asvetliakov.snapshot-tools",
+        "fabiospampinato.vscode-terminals",
+        "chrisbreiding.test-utils",
+        "britesnow.vscode-toggle-quotes",
+        "pflannery.vscode-versionlens"
+    ]
+}
