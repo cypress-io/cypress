@@ -55,6 +55,18 @@ describe "redirects + requests", ->
         expect(resp.status).to.eq(200)
         expect(resp.body).to.eq("<html>home</html>")
 
+  ## https://github.com/cypress-io/cypress/issues/5654
+  it "can turn off following redirects that set a cookie", ->
+    Cypress.config('baseUrl', 'http://localhost:2294')
+
+    cy
+      .request({
+        url: "/redirectWithCookie"
+        followRedirect: false
+      })
+      .then (resp) ->
+        expect(resp.status).to.eq(302)
+
   it "can turn off automatically following redirects", ->
     cy
       .request({
