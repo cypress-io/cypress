@@ -125,36 +125,9 @@ Common situations why this would fail:
 The stack trace for this error is:
 
 RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+    [stack trace lines]
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-
-
-
+      [stack trace lines]
 
   (Results)
 
@@ -266,21 +239,7 @@ Headers: {
 }
 Body: Service Unavailable
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-
-
-
+      [stack trace lines]
 
   (Results)
 
@@ -401,21 +360,7 @@ Body: <!DOCTYPE html>
 <pre>Cannot GET /myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong</pre>
 </body>
 </html>
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-
-
-
+      [stack trace lines]
 
   (Results)
 

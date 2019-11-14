@@ -242,7 +242,7 @@ exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom repor
      Error: fail1
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
-      at stack trace line
+      [stack trace lines]
 
   2) simple failing hook spec
        afterEach hooks
@@ -250,7 +250,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
      Error: fail2
 
 Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
-      at stack trace line
+      [stack trace lines]
 
   3) simple failing hook spec
        after hooks
@@ -258,10 +258,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
      Error: fail3
 
 Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
-      at stack trace line
-
-
-
+      [stack trace lines]
 
 [mochawesome] Report saved to mochawesome-reports/mochawesome.html
 
@@ -422,7 +419,7 @@ exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom repor
      Error: fail1
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
-      at stack trace line
+      [stack trace lines]
 
   2) simple failing hook spec
        afterEach hooks
@@ -430,7 +427,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
      Error: fail2
 
 Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
-      at stack trace line
+      [stack trace lines]
 
   3) simple failing hook spec
        after hooks
@@ -438,9 +435,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
      Error: fail3
 
 Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
-      at stack trace line
-
-
+      [stack trace lines]
 
 [mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
@@ -602,7 +597,7 @@ exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom repor
      Error: fail1
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
-      at stack trace line
+      [stack trace lines]
 
   2) simple failing hook spec
        afterEach hooks
@@ -610,7 +605,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
      Error: fail2
 
 Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
-      at stack trace line
+      [stack trace lines]
 
   3) simple failing hook spec
        after hooks
@@ -618,9 +613,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
      Error: fail3
 
 Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
-      at stack trace line
-
-
+      [stack trace lines]
 
 [mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
@@ -685,35 +678,7 @@ We searched for the reporter in these paths:
 The error we received was:
 
 Error: this reporter threw an error
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+    [stack trace lines]
 
 Learn more at https://on.cypress.io/reporters
 
