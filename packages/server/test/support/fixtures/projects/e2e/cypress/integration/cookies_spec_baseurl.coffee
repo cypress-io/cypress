@@ -201,4 +201,6 @@ describe "cookies", ->
               ## reverse them so they'll be in the order they were set
               cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 
+              # console.log({cookies, expectedGetCookiesArray})
+
               expect(cookies).to.deep.eq(expectedGetCookiesArray)

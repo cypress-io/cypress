@@ -164,6 +164,7 @@ describe "e2e cookies", ->
             exec({
               originalTitle: "e2e cookies with baseurl"
             })
+          # exit: false
         }
 
       e2e.it "passes with no baseurl", {

@@ -110,9 +110,11 @@ automation = {
   setCookie: (props = {}, fn) ->
     ## only get the url if its not already set
     props.url ?= @getUrl(props)
-    props = pick(props, SET_PROPS)
+    if props.hostOnly
+      delete props.domain
     if props.domain is 'localhost'
       delete props.domain
+    props = pick(props, SET_PROPS)
     Promise.try ->
       browser.cookies.set(props)
     .then (details) ->
