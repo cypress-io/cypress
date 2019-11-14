@@ -31,11 +31,15 @@ exports['e2e cookies with baseurl'] = `
       ✓ issue: #2724 does not fail on invalid cookies
       ✓ can set and clear cookie
       in a cy.visit
-        ✓ can set cookies on way too many redirects with HTTP intermediary
-        ✓ can set cookies on way too many redirects with HTTPS intermediary
+        when redirected to a HTTP URL
+          ✓ can set cookies on lots of redirects, ending with same domain
+        when redirected to a HTTPS URL
+          ✓ can set cookies on lots of redirects, ending with same domain
       in a cy.request
-        ✓ can set cookies on way too many redirects with HTTP intermediary
-        ✓ can set cookies on way too many redirects with HTTPS intermediary
+        when redirected to a HTTP URL
+          ✓ can set cookies on lots of redirects, ending with same domain
+        when redirected to a HTTPS URL
+          ✓ can set cookies on lots of redirects, ending with same domain
 
 
   14 passing

@@ -176,30 +176,33 @@ describe "cookies", ->
           ['HTTP', otherUrl]
           ['HTTPS', otherHttpsUrl],
         ].forEach ([protocol, altUrl]) =>
-          it "can set cookies on way too many redirects with #{protocol} intermediary", ->
-            n = 8
+          context "when redirected to a #{protocol} URL", ->
+            [
+              ['same domain', 8]
+              # ['different domain', 7]
+            ].forEach ([title, n]) ->
+              it "can set cookies on lots of redirects, ending with #{title}", ->
+                altDomain = (new Cypress.Location(altUrl)).getHostName()
 
-            altDomain = (new Cypress.Location(altUrl)).getHostName()
+                expectedGetCookiesArray = []
 
-            expectedGetCookiesArray = []
+                _.times n + 1, (i) =>
+                  ['foo', 'bar'].forEach (tag) ->
+                    expectedGetCookiesArray.push({
+                      "name": "name#{tag}#{i}",
+                      "value": "val#{tag}#{i}",
+                      "path": "/",
+                      "domain": if i % 2 == 0 then expectedDomain else altDomain,
+                      "secure": false,
+                      "httpOnly": false
+                    })
 
-            _.times n + 1, (i) =>
-              ['foo', 'bar'].forEach (tag) ->
-                expectedGetCookiesArray.push({
-                  "name": "name#{tag}#{i}",
-                  "value": "val#{tag}#{i}",
-                  "path": "/",
-                  "domain": if i % 2 == 0 then expectedDomain else altDomain,
-                  "secure": false,
-                  "httpOnly": false
-                })
+                expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
 
-            expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
+                cy[cmd]("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
 
-            cy[cmd]("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
+                cy.getCookies({ domain: null }).then (cookies) ->
+                  ## reverse them so they'll be in the order they were set
+                  cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 
-            cy.getCookies({ domain: null }).then (cookies) ->
-              ## reverse them so they'll be in the order they were set
-              cookies = _.reverse(_.sortBy(cookies, _.property('name')))
-
-              expect(cookies).to.deep.eq(expectedGetCookiesArray)
+                  expect(cookies).to.deep.eq(expectedGetCookiesArray)
