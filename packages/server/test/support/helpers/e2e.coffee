@@ -35,12 +35,12 @@ pathUpToProjectName = Fixtures.projectPath("")
 
 DEFAULT_BROWSERS = ['electron', 'chrome']
 
-stackTraceLinesRe = /^(\s+)at\s(.+)/gm
+stackTraceLinesRe = /^(\s*).*?(@|at).*\.(js|coffee|ts|html)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n)/gm
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
 replaceStackTraceLines = (str) ->
-  str.replace(stackTraceLinesRe, "$1at stack trace line")
+  str.replace(stackTraceLinesRe, "$1[stack trace lines]\n\n")
 
 replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
@@ -119,9 +119,7 @@ normalizeStdout = (str, options = {}) ->
     ## screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
 
-  return str.split("\n")
-    .map(replaceStackTraceLines)
-    .join("\n")
+  return replaceStackTraceLines(str)
 
 ensurePort = (port) ->
   if port is 5566
