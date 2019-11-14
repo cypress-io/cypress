@@ -184,14 +184,15 @@ describe "cookies", ->
             expectedGetCookiesArray = []
 
             _.times n + 1, (i) =>
-              expectedGetCookiesArray.push({
-                "name": "namefoo#{i}",
-                "value": "valfoo#{i}",
-                "path": "/",
-                "domain": if i % 2 == 0 then expectedDomain else altDomain,
-                "secure": false,
-                "httpOnly": false
-              })
+              ['foo', 'bar'].forEach (tag) ->
+                expectedGetCookiesArray.push({
+                  "name": "name#{tag}#{i}",
+                  "value": "val#{tag}#{i}",
+                  "path": "/",
+                  "domain": if i % 2 == 0 then expectedDomain else altDomain,
+                  "secure": false,
+                  "httpOnly": false
+                })
 
             expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
 
