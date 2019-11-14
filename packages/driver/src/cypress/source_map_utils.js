@@ -40,7 +40,15 @@ const extractSourceMap = (file, fileContents) => {
 const getSourceContents = (filePath, sourceFile) => {
   if (!sourceMapConsumers[filePath]) return null
 
-  return sourceMapConsumers[filePath].sourceContentFor(sourceFile)
+  try {
+    return sourceMapConsumers[filePath].sourceContentFor(sourceFile)
+  } catch (err) {
+    // ignore the sourceFile not being in the source map. there's nothing we
+    // can do about it and we don't want to thrown an exception
+    if (err && err.message.indexOf('not in the SourceMap') > -1) return
+
+    throw err
+  }
 }
 
 const getSourcePosition = (filePath, position) => {
