@@ -8,6 +8,8 @@
  * Each test is nested inside a `describe` because otherwise the subsequent
  * test will not be run
  */
+import outsideError from '../../../todos/throws-error'
+
 describe('various failures', () => {
   let counter = 0
 
@@ -17,12 +19,14 @@ describe('various failures', () => {
     })
   }
 
-  const verify = (testName, { column, codeFrameText, stackMessage, support = false }) => {
+  const verify = (testName, { column, codeFrameText, stackMessage, support = false, regex }) => {
     // test only the column number because the line number is brittle
     // since any changes to this file can affect it
-    const regex = support ?
-      new RegExp(`cypress\/support\/index\.js:\\d+:${column}`) :
-      new RegExp(`cypress\/integration\/various_failures_spec\.js:\\d+:${column}`)
+    if (!regex) {
+      regex = support ?
+        new RegExp(`cypress\/support\/index\.js:\\d+:${column}`) :
+        new RegExp(`cypress\/integration\/various_failures_spec\.js:\\d+:${column}`)
+    }
 
     describe(`v-${counter}`, () => {
       it(`✓ SHOULD PASS - ${testName}`, () => {
@@ -69,6 +73,19 @@ describe('various failures', () => {
   verify('exception', {
     column: 10,
     stackMessage: 'bar is not a function',
+  })
+
+  // -----
+
+  failure('exception in file outside project', () => {
+    outsideError()
+  })
+
+  verify('exception in file outside project', {
+    column: 9,
+    stackMessage: 'An outside error',
+    regex: /todos\/throws\-error\.js:5:9/,
+    codeFrameText: `thrownewError('An outside error')`,
   })
 
   // -----

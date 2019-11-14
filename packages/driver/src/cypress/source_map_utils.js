@@ -13,15 +13,12 @@ const initialize = (file, sourceMapBase64) => {
     'lib/mappings.wasm': require('source-map/lib/mappings.wasm'),
   })
 
-  const sourceMap = base64toJson(sourceMapBase64)
+  const sourceMap = base64toJs(sourceMapBase64)
 
   return Promise.resolve(new SourceMapConsumer(sourceMap)).then((consumer) => {
-    const data = sourceMapConsumers[file.fullyQualifiedUrl] = {
-      consumer,
-      file,
-    }
+    sourceMapConsumers[file.fullyQualifiedUrl] = consumer
 
-    return data
+    return consumer
   })
 }
 
@@ -40,21 +37,16 @@ const extractSourceMap = (file, fileContents) => {
   return initialize(file, sourceMapBase64)
 }
 
-const getSourceContents = (filePath) => {
+const getSourceContents = (filePath, sourceFile) => {
   if (!sourceMapConsumers[filePath]) return null
 
-  const { consumer, file } = sourceMapConsumers[filePath]
-
-  return consumer.sourceContentFor(file.relative)
+  return sourceMapConsumers[filePath].sourceContentFor(sourceFile)
 }
 
 const getSourcePosition = (filePath, position) => {
   if (!sourceMapConsumers[filePath]) return null
 
-  const { consumer } = sourceMapConsumers[filePath]
-
-  const sourcePosition = consumer.originalPositionFor(position)
-
+  const sourcePosition = sourceMapConsumers[filePath].originalPositionFor(position)
   const { source: file, line, column } = sourcePosition
 
   if (!file || line == null || column == null) return
@@ -66,7 +58,7 @@ const getSourcePosition = (filePath, position) => {
   }
 }
 
-const base64toJson = (base64) => {
+const base64toJs = (base64) => {
   const mapString = atob(base64)
 
   try {

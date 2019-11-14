@@ -66,7 +66,9 @@ const getCodeFrame = (err) => {
 
   if (!firstStackLine) return
 
-  return getCodeFrameFromSource($sourceMapUtils.getSourceContents(firstStackLine.fileUrl), firstStackLine)
+  const { fileUrl, relativeFile } = firstStackLine
+
+  return getCodeFrameFromSource($sourceMapUtils.getSourceContents(fileUrl, relativeFile), firstStackLine)
 }
 
 const getWhitespace = (line) => {

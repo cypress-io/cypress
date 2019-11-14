@@ -6,5 +6,5 @@ describe "e2e reporters", ->
   it "displays code frame for errors", ->
     e2e.exec(@, {
       spec: "various_failures_spec.js"
-      expectedExitCode: 26
+      expectedExitCode: 27
     })
