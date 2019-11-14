@@ -144,7 +144,7 @@ describe "e2e cookies", ->
         baseUrl,
         https
       ]) ->
-        e2e.it.only "passes with baseurl: #{baseUrl}", {
+        e2e.it "passes with baseurl: #{baseUrl}", {
           config: {
             baseUrl
             env: {
@@ -164,7 +164,6 @@ describe "e2e cookies", ->
             exec({
               originalTitle: "e2e cookies with baseurl"
             })
-          exit: false
         }
 
       e2e.it "passes with no baseurl", {
