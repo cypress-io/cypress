@@ -76,9 +76,18 @@
     > ol {
       padding: 10px 12px !important;
       background: #fff !important;
+
+      > li > div {
+        display: none;
+      }
     }
 
-    .envFile:hover, .env:hover, .config:hover, .cli:hover, .plugin:hover, .default:hover {
+    .key-value-pair-value {
+      margin-left: 4px;
+      line-height: 20px;
+    }
+
+    .key-value-pair-value:hover {
       border-bottom: 1px dotted #777;
     }
 
@@ -90,7 +99,6 @@
 
   .envFile, .env, .config, .cli, .plugins, .default {
     font-family: $font-mono;
-
     padding: 2px;
   }
 

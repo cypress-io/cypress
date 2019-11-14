@@ -135,6 +135,16 @@ describe('Settings', () => {
         .should('contain', 'baseUrl:"http://localhost:8080"')
       })
 
+      it('displays undefined and null without quotations', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', '"undefined"')
+        .should('not.contain', '"null"')
+      })
+
+      it('does not show the root config label', () => {
+        cy.get('.config-vars').find('> ol > li > div').should('have.css', 'display', 'none')
+      })
+
       it('displays legend in table', () => {
         cy.get('table>tbody>tr').should('have.length', 6)
       })

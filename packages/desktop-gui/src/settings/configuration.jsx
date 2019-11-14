@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import cn from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
@@ -22,7 +23,9 @@ const formatData = (data) => {
     return _.defaultTo(_.defaultTo(data.displayName, data.name), String(Object.keys(data).join(', ')))
   }
 
-  if (_.isString(data)) {
+  const excludedFromQuotations = ['null', 'undefined']
+
+  if (_.isString(data) && !excludedFromQuotations.includes(data)) {
     return `"${data}"`
   }
 
@@ -38,7 +41,7 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
         <>
           <span>:</span>
           <Tooltip title={from} placement='right' className='cy-tooltip'>
-            <span className={from}>
+            <span className={cn(from, 'key-value-pair-value')}>
               <span>{formattedData}</span>
             </span>
           </Tooltip>
@@ -67,9 +70,7 @@ const Display = ({ data: obj }) => {
   const computeFromValue = createComputeFromValue(obj)
   const renderNode = ({ depth, name, data, isNonenumerable, expanded, path }) => {
     if (depth === 0) {
-      return (
-        <span>config</span>
-      )
+      return null
     }
 
     const from = computeFromValue(name, path)
