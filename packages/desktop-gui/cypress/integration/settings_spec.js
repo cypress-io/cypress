@@ -77,12 +77,62 @@ describe('Settings', () => {
         cy.contains('Your project\'s configuration is displayed')
       })
 
-      it('displays browser information (collapsed by default)', () => {
+      it('displays browser information which is collapsed by default', () => {
         cy.contains('.config-vars', 'browsers').should('be.visible')
-        // and the browser objects (or any other objects in the config)
-        // should be displayed fully
         cy.get('.config-vars').invoke('text')
-        .should('not.contain', '"name": "chrome"')
+        .should('not.contain', '0:Chrome')
+
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', '0:Chrome')
+      })
+
+      it('removes the summary list of values once a key is expanded', () => {
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', 'Chrome, Chromium')
+
+        cy.get('.config-vars').invoke('text')
+        .should('contain', '0:Chrome')
+      })
+
+      it('applies the same color treatment to expanded key values as the root key', () => {
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').as('config-vars')
+        .contains('span', 'Chrome').parent('span').should('have.class', 'plugins')
+
+        cy.get('@config-vars')
+        .contains('span', 'Chromium').parent('span').should('have.class', 'plugins')
+
+        cy.get('@config-vars')
+        .contains('span', 'Canary').parent('span').should('have.class', 'plugins')
+
+        cy.get('@config-vars')
+        .contains('span', 'Electron').parent('span').should('have.class', 'plugins')
+
+        cy.contains('span', 'blacklistHosts').parents('div').first().find('span').first().click()
+        cy.get('@config-vars')
+        .contains('span', 'www.google-analytics.com').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', 'hotjar.com').parent('span').should('have.class', 'config')
+
+        cy.contains('span', 'hosts').parents('div').first().find('span').first().click()
+        cy.get('@config-vars')
+        .contains('span', '127.0.0.1').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', '127.0.0.2').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', 'Electron').parents('div').first().find('span').first().click()
+
+        cy.get('@config-vars').contains('span', 'electron').parents('li').eq(1).find('.line .plugins').should('have.length', 6)
+      })
+
+      it('displays string values as quoted strings', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('contain', 'baseUrl:"http://localhost:8080"')
       })
 
       it('displays legend in table', () => {

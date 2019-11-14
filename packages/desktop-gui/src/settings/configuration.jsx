@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
-import { ObjectInspector, ObjectRootLabel, ObjectName } from 'react-inspector'
+import { ObjectInspector, ObjectName } from 'react-inspector'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
@@ -22,36 +22,67 @@ const formatData = (data) => {
     return _.defaultTo(_.defaultTo(data.displayName, data.name), String(Object.keys(data).join(', ')))
   }
 
+  if (_.isString(data)) {
+    return `"${data}"`
+  }
+
   return String(data)
 }
-const ObjectLabel = ({ name, data, from, isNonenumerable }) => {
+const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
   const formattedData = formatData(data)
 
   return (
     <span className="line" key={name}>
       <ObjectName name={name} dimmed={isNonenumerable} />
-      <span>:</span>
-      <Tooltip title={from} placement='right' className='cy-tooltip'>
-        <span className={from}>
-          <span>{formattedData}</span>
-        </span>
-      </Tooltip>
+      {!expanded && (
+        <>
+          <span>:</span>
+          <Tooltip title={from} placement='right' className='cy-tooltip'>
+            <span className={from}>
+              <span>{formattedData}</span>
+            </span>
+          </Tooltip>
+        </>
+      )}
     </span>
   )
 }
 
 ObjectLabel.defaultProps = {
   data: 'undefined',
-  from: 'default',
+}
+
+const createComputeFromValue = (obj) => {
+  return (name, path) => {
+    const pathParts = path.split('.')
+    const pathDepth = pathParts.length
+
+    const rootKey = pathDepth <= 2 ? name : pathParts[1]
+
+    return obj[rootKey] ? obj[rootKey].from : undefined
+  }
 }
 
 const Display = ({ data: obj }) => {
-  const renderNode = ({ depth, name, data, isNonenumerable, expanded }) => {
-    const from = obj[name] ? obj[name].from : undefined
+  const computeFromValue = createComputeFromValue(obj)
+  const renderNode = ({ depth, name, data, isNonenumerable, expanded, path }) => {
+    if (depth === 0) {
+      return (
+        <span>config</span>
+      )
+    }
 
-    return depth === 0
-      ? <ObjectRootLabel name={'config'} data="{}" />
-      : <ObjectLabel name={name} data={data} isNonenumerable={isNonenumerable} from={from} />
+    const from = computeFromValue(name, path)
+
+    return (
+      <ObjectLabel
+        name={name}
+        data={data}
+        expanded={expanded}
+        from={from}
+        isNonenumerable={isNonenumerable}
+      />
+    )
   }
 
   const data = _.reduce(obj, (acc, value, key) => Object.assign(acc, {
