@@ -34,6 +34,9 @@ Cypress could not associate this error to any specific test.
 We dynamically generated a new test to display this failure.
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -113,6 +116,9 @@ Cypress could not associate this error to any specific test.
 We dynamically generated a new test to display this failure.
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -189,6 +195,9 @@ This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
+
+
+
 
   (Results)
 
@@ -270,6 +279,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
 Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
       [stack trace lines]
+
+
+
 
   (Results)
 
@@ -361,6 +373,9 @@ exports['e2e uncaught errors / failing5'] = `
   4) foo quux2 fails:
      ReferenceError: foo is not defined
       [stack trace lines]
+
+
+
 
   (Results)
 

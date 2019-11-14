@@ -33,6 +33,9 @@ Fix this in your plugins file here:
 https://on.cypress.io/api/task
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

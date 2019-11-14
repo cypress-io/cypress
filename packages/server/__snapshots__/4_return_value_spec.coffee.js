@@ -59,6 +59,9 @@ In previous versions of Cypress we automatically detected this and forced the cy
 https://on.cypress.io/returning-value-and-commands-in-custom-command
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

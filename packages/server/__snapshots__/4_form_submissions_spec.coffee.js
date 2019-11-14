@@ -168,6 +168,9 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
      AssertionError: expected '<form>' to contain 'form success!'
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

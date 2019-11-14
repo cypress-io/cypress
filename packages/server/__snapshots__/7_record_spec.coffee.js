@@ -80,6 +80,9 @@ Fix the error in your code and re-run your tests.
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -175,6 +178,9 @@ Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
       [stack trace lines]
+
+
+
 
   (Results)
 
@@ -998,6 +1004,9 @@ Fix the error in your code and re-run your tests.
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -1053,6 +1062,9 @@ Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
       [stack trace lines]
+
+
+
 
   (Results)
 

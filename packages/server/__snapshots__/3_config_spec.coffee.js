@@ -95,6 +95,9 @@ exports['e2e config fails 1'] = `
      CypressError: Timed out retrying: Expected to find element: '#bar', but never found it.
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

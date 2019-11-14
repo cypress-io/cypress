@@ -37,6 +37,9 @@ Because this error occurred during a 'before each' hook we are skipping the rema
 Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'issue 674'
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

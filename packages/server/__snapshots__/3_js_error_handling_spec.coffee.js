@@ -97,6 +97,9 @@ This behavior is configurable, and you can choose to turn this off by listening 
 https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

@@ -21,6 +21,7 @@ The following error was thrown by a plugin. We've stopped running your tests bec
 Error: Async error from plugins file
     [stack trace lines]
 
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -324,6 +325,9 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   1)  failure screenshot - rename:
      Error: test error
       [stack trace lines]
+
+
+
 
   (Results)
 

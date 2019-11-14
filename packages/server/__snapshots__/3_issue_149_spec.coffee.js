@@ -27,6 +27,9 @@ exports['e2e issue 149 failing 1'] = `
      Error: this should fail here
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

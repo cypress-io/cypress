@@ -104,6 +104,9 @@ https://on.cypress.io/cross-origin-violation
 
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐

@@ -35,12 +35,12 @@ pathUpToProjectName = Fixtures.projectPath("")
 
 DEFAULT_BROWSERS = ['electron', 'chrome']
 
-stackTraceLinesRe = /^(\s*).*?(@|at).*\.(js|coffee|ts|html)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n)/gm
+stackTraceLinesRe = /(\n\s*).*?(@|at).*\.(js|coffee|ts|html)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
 replaceStackTraceLines = (str) ->
-  str.replace(stackTraceLinesRe, "$1[stack trace lines]\n\n")
+  str.replace(stackTraceLinesRe, "$1[stack trace lines]$5")
 
 replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string

@@ -260,6 +260,9 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
       [stack trace lines]
 
+
+
+
 [mochawesome] Report saved to mochawesome-reports/mochawesome.html
 
 
@@ -436,6 +439,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
 Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
       [stack trace lines]
+
+
 
 [mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
@@ -614,6 +619,8 @@ Because this error occurred during a 'after each' hook we are skipping the remai
 
 Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
       [stack trace lines]
+
+
 
 [mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 

@@ -123,6 +123,9 @@ Error: connect ECONNREFUSED 127.0.0.1:16795
 
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -206,6 +209,9 @@ This was considered a failure because the status code was not '2xx'.
 If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
       [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -288,6 +294,9 @@ The internal Cypress web server responded with:
 
   > 404: Not Found
       [stack trace lines]
+
+
+
 
   (Results)
 
@@ -373,6 +382,9 @@ However, you can likely use cy.request() instead of cy.visit().
 
 cy.request() will automatically get and set cookies and enable you to parse responses.
       [stack trace lines]
+
+
+
 
   (Results)
 
@@ -467,6 +479,9 @@ Browsers will not fire the 'load' event until all stylesheets and scripts are do
 
 When this 'load' event occurs, Cypress will continue running commands.
       [stack trace lines]
+
+
+
 
   (Results)
 
@@ -612,6 +627,9 @@ Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
       [stack trace lines]
+
+
+
 
   (Results)
 

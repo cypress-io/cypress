@@ -106,6 +106,9 @@ https://on.cypress.io/api/task
 > Error: Error thrown in task handler
     [stack trace lines]
 
+
+
+
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
