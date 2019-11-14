@@ -66,7 +66,7 @@ const createComputeFromValue = (obj) => {
   }
 }
 
-const Display = ({ data: obj }) => {
+const ConfigDisplay = ({ data: obj }) => {
   const computeFromValue = createComputeFromValue(obj)
   const renderNode = ({ depth, name, data, isNonenumerable, expanded, path }) => {
     if (depth === 0) {
@@ -92,7 +92,9 @@ const Display = ({ data: obj }) => {
 
   return (
     <div className="config-vars">
+      <span>{'{'}</span>
       <ObjectInspector data={data} expandLevel={1} nodeRenderer={renderNode} />
+      <span>{'}'}</span>
     </div>
   )
 }
@@ -136,7 +138,7 @@ const Configuration = observer(({ project }) => (
         </tr>
       </tbody>
     </table>
-    <Display data={project.resolvedConfig} />
+    <ConfigDisplay data={project.resolvedConfig} />
   </div>
 ))
 

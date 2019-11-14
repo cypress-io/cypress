@@ -68,13 +68,16 @@
     font-size: 13px;
     border: 1px solid #ddd;
     border-radius: 3px;
-    background-color: #252831;
+    background: #fff;
     color: #eee;
     margin: 0;
+    padding: 8px 12px;
     font-family: $font-mono;
+    > span {
+      color: #000;
+    }
 
     > ol {
-      padding: 10px 12px !important;
       background: #fff !important;
 
       > li > div {
@@ -83,8 +86,9 @@
     }
 
     .key-value-pair-value {
-      margin-left: 4px;
-      line-height: 20px;
+      margin: 4px;
+      display: inline-block;
+      line-height: 10px;
     }
 
     .key-value-pair-value:hover {
