@@ -114,7 +114,7 @@ automation = {
     if props.domain is 'localhost'
       delete props.domain
     Promise.try ->
-      browser.cookies.set()
+      browser.cookies.set(props)
     .then (details) ->
       ## the cookie callback could be null such as the
       ## case when expirationDate is before now
