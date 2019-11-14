@@ -181,80 +181,19 @@ describe "cookies", ->
 
             altDomain = (new Cypress.Location(altUrl)).getHostName()
 
-            expectedGetCookiesArray = [
-              {
-                "name": "namefoo8",
-                "value": "valfoo8",
+            expectedGetCookiesArray = []
+
+            _.times n + 1, (i) =>
+              expectedGetCookiesArray.push({
+                "name": "namefoo#{i}",
+                "value": "valfoo#{i}",
                 "path": "/",
-                "domain": expectedDomain,
+                "domain": if i % 2 == 0 then expectedDomain else altDomain,
                 "secure": false,
                 "httpOnly": false
-              },
-              {
-                "name": "namefoo7",
-                "value": "valfoo7",
-                "path": "/",
-                "domain": altDomain,
-                "secure": false,
-                "httpOnly": false
-              },
-              {
-                "name": "namefoo6",
-                "value": "valfoo6",
-                "path": "/",
-                "domain": expectedDomain,
-                "secure": false,
-                "httpOnly": false
-              },
-              {
-                "name": "namefoo5",
-                "value": "valfoo5",
-                "path": "/",
-                "domain": altDomain,
-                "secure": false,
-                "httpOnly": false
-              },
-              {
-                "name": "namefoo4",
-                "value": "valfoo4",
-                "path": "/",
-                "domain": expectedDomain,
-                "secure": false,
-                "httpOnly": false
-              },
-              {
-                "name": "namefoo3",
-                "value": "valfoo3",
-                "path": "/",
-                "domain": altDomain,
-                "secure": false,
-                "httpOnly": false
-              },
-              {
-                "name": "namefoo2",
-                "value": "valfoo2",
-                "path": "/",
-                "domain": expectedDomain,
-                "secure": false,
-                "httpOnly": false
-              },
-              {
-                "name": "namefoo1",
-                "value": "valfoo1",
-                "path": "/",
-                "domain": altDomain,
-                "secure": false,
-                "httpOnly": false
-              },
-              {
-                "name": "namefoo0",
-                "value": "valfoo0",
-                "path": "/",
-                "domain": expectedDomain,
-                "secure": false,
-                "httpOnly": false
-              }
-            ]
+              })
+
+            expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
 
             cy[cmd]("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
 
