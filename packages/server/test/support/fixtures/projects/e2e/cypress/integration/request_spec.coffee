@@ -57,11 +57,9 @@ describe "redirects + requests", ->
 
   ## https://github.com/cypress-io/cypress/issues/5654
   it "can turn off following redirects that set a cookie", ->
-    Cypress.config('baseUrl', 'http://localhost:2294')
-
     cy
       .request({
-        url: "/redirectWithCookie"
+        url: "http://localhost:2294/redirectWithCookie"
         followRedirect: false
       })
       .then (resp) ->
