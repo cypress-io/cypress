@@ -149,6 +149,7 @@
     "@packages/static": "*",
     "@packages/ts": "*",
     "@types/chai-as-promised": "7.1.2",
+    "@types/node": "8.10.55",
     "babel-plugin-add-module-exports": "1.0.2",
     "babelify": "10.0.0",
     "body-parser": "1.19.0",
