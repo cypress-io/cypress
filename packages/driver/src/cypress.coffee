@@ -29,7 +29,6 @@ $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
 $errUtils = require("./cypress/error_utils")
 $scriptUtils = require("./cypress/script_utils")
-$sourceMapUtils = require("./cypress/source_map_utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
