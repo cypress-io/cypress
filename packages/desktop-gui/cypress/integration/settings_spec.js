@@ -84,7 +84,7 @@ describe('Settings', () => {
 
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
         cy.get('.config-vars').invoke('text')
-        .should('not.contain', '0:Chrome')
+        .should('contain', '0:Chrome')
       })
 
       it('removes the summary list of values once a key is expanded', () => {
