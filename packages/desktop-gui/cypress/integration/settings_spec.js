@@ -78,7 +78,7 @@ describe('Settings', () => {
       })
 
       it('displays browser information which is collapsed by default', () => {
-        cy.contains('.config-vars', 'browsers').should('be.visible')
+        cy.contains('.config-vars', 'browsers')
         cy.get('.config-vars').invoke('text')
         .should('not.contain', '0:Chrome')
 
