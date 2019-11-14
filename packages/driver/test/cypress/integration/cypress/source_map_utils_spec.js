@@ -46,22 +46,21 @@ describe('driver/src/cypress/source_map_utils', () => {
     it('initializes and returns source map consumer and file', () => {
       cy.spy(SourceMapConsumer, 'initialize')
 
-      return extractSourceMap(file1, fileContents).then((result) => {
+      return extractSourceMap(file1, fileContents).then((consumer) => {
         expect(SourceMapConsumer.initialize).to.be.called
-        expect(result.consumer).to.be.an.instanceof(SourceMapConsumer)
-        expect(result.file).to.eql(file1)
+        expect(consumer).to.be.an.instanceof(SourceMapConsumer)
       })
     })
 
     it('resolves null if there is no source map embedded', () => {
-      return extractSourceMap(file2, testContent).then((result) => {
-        expect(result).to.be.null
+      return extractSourceMap(file2, testContent).then((consumer) => {
+        expect(consumer).to.be.null
       })
     })
 
     it('resolves null if it is not an inline map', () => {
-      return extractSourceMap(file2, `${testContent}\n\/\/# sourceMappingURL=foo.map`).then((result) => {
-        expect(result).to.be.null
+      return extractSourceMap(file2, `${testContent}\n\/\/# sourceMappingURL=foo.map`).then((consumer) => {
+        expect(consumer).to.be.null
       })
     })
   })
@@ -75,17 +74,17 @@ describe('driver/src/cypress/source_map_utils', () => {
     })
 
     it('provides source contents for given file', () => {
-      const contents = getSourceContents(file1.fullyQualifiedUrl)
+      const contents = getSourceContents(file1.fullyQualifiedUrl, file1.relative)
 
       expect(contents).to.equal(testContent)
     })
 
     it('returns null if no source map consumer can be found', () => {
-      expect(getSourceContents('does/not/exist')).to.be.null
+      expect(getSourceContents('does/not/exist', file1.relative)).to.be.null
     })
 
     it('returns null if file does not have source map', () => {
-      expect(getSourceContents(file2.fullyQualifiedUrl)).to.be.null
+      expect(getSourceContents(file2.fullyQualifiedUrl, file1.relative)).to.be.null
     })
   })
 
