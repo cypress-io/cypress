@@ -178,8 +178,8 @@ describe "cookies", ->
         ].forEach ([protocol, altUrl]) =>
           context "when redirected to a #{protocol} URL", ->
             [
+              ['different domain', 7]
               ['same domain', 8]
-              # ['different domain', 7]
             ].forEach ([title, n]) ->
               it "can set cookies on lots of redirects, ending with #{title}", ->
                 altDomain = (new Cypress.Location(altUrl)).getHostName()
@@ -192,12 +192,16 @@ describe "cookies", ->
                       "name": "name#{tag}#{i}",
                       "value": "val#{tag}#{i}",
                       "path": "/",
-                      "domain": if i % 2 == 0 then expectedDomain else altDomain,
+                      "domain": if i % 2 == 8 - n then expectedDomain else altDomain,
                       "secure": false,
                       "httpOnly": false
                     })
 
                 expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
+
+                # sanity check
+                cy.clearCookies({ domain: null })
+                cy.getCookies({ domain: null }).should('have.length', 0)
 
                 cy[cmd]("/setCascadingCookies?n=#{n}&a=#{altUrl}&b=#{Cypress.env('baseUrl')}")
 

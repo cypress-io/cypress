@@ -32,13 +32,17 @@ exports['e2e cookies with baseurl'] = `
       ✓ can set and clear cookie
       in a cy.visit
         when redirected to a HTTP URL
+          ✓ can set cookies on lots of redirects, ending with different domain
           ✓ can set cookies on lots of redirects, ending with same domain
         when redirected to a HTTPS URL
+          ✓ can set cookies on lots of redirects, ending with different domain
           ✓ can set cookies on lots of redirects, ending with same domain
       in a cy.request
         when redirected to a HTTP URL
+          ✓ can set cookies on lots of redirects, ending with different domain
           ✓ can set cookies on lots of redirects, ending with same domain
         when redirected to a HTTPS URL
+          ✓ can set cookies on lots of redirects, ending with different domain
           ✓ can set cookies on lots of redirects, ending with same domain
 
 
