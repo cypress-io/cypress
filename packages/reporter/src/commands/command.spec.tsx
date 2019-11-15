@@ -1,16 +1,20 @@
-import { shallow } from 'enzyme'
+import { shallow, ShallowWrapper } from 'enzyme'
 import _ from 'lodash'
 import React from 'react'
-import sinon from 'sinon'
+import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
 
 import Command, { Message } from './command'
+import CommandModel from './command-model'
+import { AppState } from '../lib/app-state'
+import { Events } from '../lib/events'
+import { RunnablesStore } from '../runnables/runnables-store'
 
 const longText = Array(110).join('-')
 const withMarkdown = '**this** is _markdown_'
 const fromMarkdown = '<strong>this</strong> is <em>markdown</em>'
 
-const model = (props) => {
-  return _.extend({
+const model = (props?: Partial<CommandModel>) => {
+  return _.extend<CommandModel>({
     event: false,
     id: 'c1',
     displayMessage: 'The message',
@@ -25,16 +29,21 @@ const model = (props) => {
   }, props)
 }
 
-const appStateStub = (props) => {
-  return _.extend({
+const appStateStub = (props?: Partial<AppState>) => {
+  return _.extend<AppState>({
     pinnedSnapshotId: null,
   }, props)
 }
-const eventsStub = () => ({ emit: sinon.spy() })
+
+type EventsStub = Events & {
+  emit: SinonSpy
+}
+
+const eventsStub = () => ({ emit: sinon.spy() } as EventsStub)
 const runnablesStoreStub = () => ({
   attemptingShowSnapshot: false,
   showingSnapshot: false,
-})
+} as RunnablesStore)
 
 describe('<Command />', () => {
   context('class names', () => {
@@ -176,10 +185,10 @@ describe('<Command />', () => {
   })
 
   context('clicking', () => {
-    let appState
-    let events
-    let component
-    let runnablesStore
+    let appState: AppState
+    let events: Events
+    let component: ShallowWrapper<Command>
+    let runnablesStore: RunnablesStore
 
     beforeEach(() => {
       appState = appStateStub()
@@ -211,7 +220,7 @@ describe('<Command />', () => {
 
     describe('clicking pin button again', () => {
       beforeEach(() => {
-        events.emit.resetHistory()
+        (events.emit as any).resetHistory()
         component.find('FlashOnClick').simulate('click')
       })
 
@@ -288,10 +297,10 @@ describe('<Command />', () => {
   })
 
   context('snapshots', () => {
-    let clock
-    let events
-    let runnablesStore
-    let command
+    let clock: SinonFakeTimers
+    let events: Events
+    let runnablesStore: RunnablesStore
+    let command: ShallowWrapper<Command>
 
     beforeEach(() => {
       clock = sinon.useFakeTimers()

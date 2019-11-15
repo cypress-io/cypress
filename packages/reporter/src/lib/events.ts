@@ -15,7 +15,7 @@ interface InitEvent {
   scroller: Scroller
 }
 
-interface Events {
+export interface Events {
   appState: AppState | null
   runnablesStore: RunnablesStore | null
   statsStore: StatsStore | null

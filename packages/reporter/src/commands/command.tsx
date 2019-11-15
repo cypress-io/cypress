@@ -3,20 +3,24 @@ import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, MouseEvent } from 'react'
+// @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import appState from '../lib/app-state'
-import events from '../lib/events'
+import appState, { AppState } from '../lib/app-state'
+import events, { Events } from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
-import runnablesStore from '../runnables/runnables-store'
+import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
+import { Alias, AliasObject } from '../instruments/instrument-model'
+
+import { default as CommandModel } from './command-model'
 
 const md = new Markdown()
 
-const displayName = (model) => model.displayName || model.name
-const nameClassName = (name) => name.replace(/(\s+)/g, '-')
-const formattedMessage = (message) => message ? md.renderInline(message) : ''
-const visibleMessage = (model) => {
+const displayName = (model: CommandModel) => model.displayName || model.name
+const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
+const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
+const visibleMessage = (model: CommandModel) => {
   if (model.visible) return ''
 
   return model.numElements > 1 ?
@@ -24,7 +28,7 @@ const visibleMessage = (model) => {
     'This element is not visible.'
 }
 
-const shouldShowCount = (aliasesWithDuplicates, aliasName, model) => {
+const shouldShowCount = (aliasesWithDuplicates: Array<Alias>, aliasName: Alias, model: CommandModel) => {
   if (model.aliasType !== 'route') {
     return false
   }
@@ -51,9 +55,14 @@ const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }) => 
   )
 })
 
-const AliasesReferences = observer(({ model, aliasesWithDuplicates }) => (
+interface AliasesReferencesProps {
+  model: CommandModel
+  aliasesWithDuplicates?: Array<Alias>
+}
+
+const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => (
   <span>
-    {_.map([].concat(model.referencesAlias), (aliasObj) => (
+    {_.map(([] as Array<AliasObject>).concat((model.referencesAlias as AliasObject)), (aliasObj) => (
       <span className="command-alias-container" key={aliasObj.name + aliasObj.cardinal}>
         <AliasReference aliasObj={aliasObj} model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
       </span>
@@ -87,9 +96,18 @@ const Message = observer(({ model }) => (
   </span>
 ))
 
+interface Props {
+  model: CommandModel
+  aliasesWithDuplicates?: Array<Alias>
+  appState: AppState
+  events: Events
+  runnablesStore: RunnablesStore
+}
+
 @observer
-class Command extends Component {
+class Command extends Component<Props> {
   @observable isOpen = false
+  private _showTimeout: NodeJS.Timeout | null = null
 
   static defaultProps = {
     appState,
@@ -203,7 +221,7 @@ class Command extends Component {
     return !this.props.appState.isRunning && this._isPinned()
   }
 
-  @action _toggleOpen = (e) => {
+  @action _toggleOpen = (e: MouseEvent) => {
     e.stopPropagation()
 
     this.isOpen = !this.isOpen
@@ -242,7 +260,7 @@ class Command extends Component {
   // over many commands, unless you're hovered for
   // 50ms, it won't show the snapshot at all. so we
   // optimize for both snapshot showing + restoring
-  _snapshot (show) {
+  _snapshot (show: boolean) {
     const { model, runnablesStore } = this.props
 
     if (show) {
@@ -254,7 +272,7 @@ class Command extends Component {
       }, 50)
     } else {
       runnablesStore.attemptingShowSnapshot = false
-      clearTimeout(this._showTimeout)
+      clearTimeout(this._showTimeout as NodeJS.Timeout)
 
       setTimeout(() => {
         // if we are currently showing a snapshot but

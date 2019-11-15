@@ -7,13 +7,14 @@ const LONG_RUNNING_THRESHOLD = 1000
 
 interface RenderProps {
   message?: string
+  indicator?: string
 }
 
 export interface CommandProps extends InstrumentProps {
   err?: Err
   event?: boolean
   number?: number
-  numElements?: number
+  numElements: number
   renderProps?: RenderProps
   visible?: boolean
   hookName: string
@@ -25,7 +26,7 @@ export default class Command extends Instrument {
   @observable event?: boolean = false
   @observable isLongRunning = false
   @observable number?: number
-  @observable numElements?: number
+  @observable numElements: number
   @observable visible?: boolean = true
   @observable duplicates: Array<Command> = []
   @observable isDuplicate = false

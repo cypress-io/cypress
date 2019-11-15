@@ -1,6 +1,12 @@
 import { observable } from 'mobx'
 
-export type Alias = string | Array<string> | null
+export interface AliasObject {
+  name: string
+  cardinal?: number
+  ordinal?: string
+}
+
+export type Alias = string | Array<string> | null | AliasObject
 
 export interface InstrumentProps {
   id: number
