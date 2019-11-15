@@ -339,6 +339,11 @@ describe('cli', () => {
       this.exec('run --dev bang --tag foo bar baz -P ./ --spec fizz buzz --headed false')
       expect(run.start).to.be.calledWithMatch({ tag: 'foo,bar,baz', spec: 'fizz,buzz' })
     })
+
+    it('removes stray double quotes from --ci-build-id and --group', () => {
+      this.exec('run --ci-build-id "123" --group "staging"')
+      expect(run.start).to.be.calledWith({ ciBuildId: '123', group: 'staging' })
+    })
   })
 
   context('cypress open', () => {

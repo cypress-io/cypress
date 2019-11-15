@@ -497,4 +497,54 @@ describe('util', () => {
       })
     })
   })
+
+  context('parseOpts', () => {
+    it('passes normal options and strips unknown ones', () => {
+      const result = util.parseOpts({
+        unknownOptions: true,
+        group: 'my group name',
+        ciBuildId: 'my ci build id',
+      })
+
+      expect(result).to.deep.equal({
+        group: 'my group name',
+        ciBuildId: 'my ci build id',
+      })
+    })
+
+    it('removes leftover double quotes', () => {
+      const result = util.parseOpts({
+        group: '"my group name"',
+        ciBuildId: '"my ci build id"',
+      })
+
+      expect(result).to.deep.equal({
+        group: 'my group name',
+        ciBuildId: 'my ci build id',
+      })
+    })
+
+    it('leaves unbalanced double quotes', () => {
+      const result = util.parseOpts({
+        group: 'my group name"',
+        ciBuildId: '"my ci build id',
+      })
+
+      expect(result).to.deep.equal({
+        group: 'my group name"',
+        ciBuildId: '"my ci build id',
+      })
+    })
+
+    it('works with unspecified options', () => {
+      const result = util.parseOpts({
+        // notice that "group" option is missing
+        ciBuildId: '"my ci build id"',
+      })
+
+      expect(result).to.deep.equal({
+        ciBuildId: 'my ci build id',
+      })
+    })
+  })
 })
