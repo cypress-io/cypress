@@ -91,7 +91,7 @@ module.exports = {
       debug("found %s", pluralize("browser", browsers.length, true))
 
       version = process.versions.chrome or ""
-      majorVersion = parseInt(version.split(".")[0]) if version
+      majorVersion = parseFloat(version.split(".")[0]) if version
       electronBrowser = {
         name: "electron"
         family: "electron"

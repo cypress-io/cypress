@@ -33,7 +33,7 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
     )
 
     if (browser.majorVersion) {
-      browser.majorVersion = parseInt(browser.majorVersion)
+      browser.majorVersion = parseFloat(browser.majorVersion)
     }
   }
 
