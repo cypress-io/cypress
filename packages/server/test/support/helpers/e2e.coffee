@@ -219,6 +219,7 @@ localItFn = (title, options = {}) ->
     skip: false,
     browser: process.env.BROWSER
     generateTestsForDefaultBrowsers: true
+    useSeparateBrowserSnapshots: false
     onRun: (execFn, browser, ctx) ->
       execFn()
   })
@@ -248,6 +249,9 @@ localItFn = (title, options = {}) ->
     testTitle = "#{title} [#{browser}]"
 
     mochaItFn testTitle, ->
+      if options.useSeparateBrowserSnapshots
+        title = testTitle
+
       originalTitle = @test.parent.titlePath().concat(title).join(" / ")
 
       ctx = @
