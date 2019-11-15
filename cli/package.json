@@ -34,7 +34,7 @@
     "cachedir": "2.2.0",
     "chalk": "3.0.0",
     "check-more-types": "2.24.0",
-    "commander": "2.20.0",
+    "commander": "4.0.1",
     "common-tags": "1.8.0",
     "debug": "4.1.1",
     "execa": "0.10.0",
