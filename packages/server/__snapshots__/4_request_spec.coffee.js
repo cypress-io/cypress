@@ -21,6 +21,7 @@ exports['e2e requests / passes'] = `
     ✓ gets and sets cookies from cy.request
     ✓ visits idempotant
     ✓ automatically follows redirects
+    ✓ can turn off following redirects that set a cookie
     ✓ can turn off automatically following redirects
     ✓ follows all redirects even when they change methods
     ✓ can submit json body
@@ -32,14 +33,14 @@ exports['e2e requests / passes'] = `
     ✓ issue #375: does not duplicate request cookies on 302 redirect
 
 
-  12 passing
+  13 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        12                                                                               │
-  │ Passing:      12                                                                               │
+  │ Tests:        13                                                                               │
+  │ Passing:      13                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -63,9 +64,9 @@ exports['e2e requests / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  request_spec.coffee                      XX:XX       12       12        -        -        - │
+  │ ✔  request_spec.coffee                      XX:XX       13       13        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       12       12        -        -        -  
+    ✔  All specs passed!                        XX:XX       13       13        -        -        -  
 
 
 `
