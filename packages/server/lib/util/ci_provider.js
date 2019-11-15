@@ -486,7 +486,7 @@ const _providerCommitParams = function () {
       authorName: env.BUILD_SOURCEVERSIONAUTHOR,
     },
     travis: {
-      sha: env.TRAVIS_COMMIT,
+      sha: env.TRAVIS_PULL_REQUEST_SHA || env.TRAVIS_COMMIT,
       // for PRs, TRAVIS_BRANCH is the base branch being merged into
       branch: env.TRAVIS_PULL_REQUEST_BRANCH || env.TRAVIS_BRANCH,
       // authorName: ???
