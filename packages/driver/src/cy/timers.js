@@ -19,7 +19,7 @@ const create = () => {
 
   const invoke = (contentWindow, fnOrCode, params = []) => {
     if (_.isFunction(fnOrCode)) {
-      return fnOrCode(...params)
+      return fnOrCode.apply(contentWindow, params)
     }
 
     return contentWindow.eval(fnOrCode)
