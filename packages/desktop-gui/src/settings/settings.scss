@@ -77,11 +77,29 @@
       color: #000;
     }
 
+    li[aria-expanded=true] {
+      margin-top: 0; 
+      padding-top: 2px !important;
+
+      &>div {
+        margin-bottom: 5px;
+      }
+    }
+
     > ol {
       background: #fff !important;
 
-      > li > div {
-        display: none;
+      > li {
+        margin-top: -5px !important;
+        padding-top: 0 !important;
+
+        > div {
+          display: none;
+        }
+      }
+
+      & > li > ol {
+        padding-top: 5px;
       }
     }
 
@@ -89,6 +107,7 @@
       margin: 4px;
       display: inline-block;
       line-height: 10px;
+      border-bottom: 1px solid transparent;
     }
 
     .key-value-pair-value:hover {
@@ -98,7 +117,6 @@
     p {
       margin-bottom: 0;
     }
-
   }
 
   .envFile, .env, .config, .cli, .plugins, .default {
