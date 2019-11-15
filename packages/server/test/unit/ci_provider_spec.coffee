@@ -374,6 +374,35 @@ describe "lib/util/ci_provider", ->
       defaultBranch: "droneRepoBranch"
     })
 
+  it "github actions", ->
+    resetEnv = mockedEnv({
+      GITHUB_ACTIONS: "true"
+
+      GITHUB_WORKFLOW: "ciGitHubWorkflowName"
+      GITHUB_ACTION: "ciGitHubActionId"
+      GITHUB_EVENT_NAME: "ciEventName"
+
+      GITHUB_SHA: "ciCommitSha"
+      GITHUB_REF: "ciCommitRef"
+
+      # only for forked repos
+      GITHUB_HEAD_REF: "ciHeadRef"
+      GITHUB_BASE_REF: "ciBaseRef"
+    }, {clear: true})
+
+    expectsName("githubActions")
+    expectsCiParams({
+      githubAction: "ciGitHubActionId"
+      githubEventName: "ciEventName"
+      githubWorkflow: "ciGitHubWorkflowName"
+    })
+    expectsCommitParams({
+      sha: "ciCommitSha"
+      defaultBranch: "ciBaseRef"
+      remoteBranch: "ciHeadRef"
+      branch: "ciCommitRef"
+    })
+
   it "gitlab", ->
     resetEnv = mockedEnv({
       GITLAB_CI: "true"
@@ -431,6 +460,7 @@ describe "lib/util/ci_provider", ->
     }, {clear: true})
 
     expectsName("gitlab")
+
   it "goCD", ->
     resetEnv = mockedEnv({
       GO_SERVER_URL: "https://127.0.0.1:8154/go",
