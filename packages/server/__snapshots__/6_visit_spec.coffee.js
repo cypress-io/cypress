@@ -119,22 +119,9 @@ Common situations why this would fail:
 The stack trace for this error is:
 
 Error: connect ECONNREFUSED 127.0.0.1:16795
-    at stack trace line
+    [stack trace lines]
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -220,20 +207,7 @@ The response we received from your web server was:
 This was considered a failure because the status code was not '2xx'.
 
 If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -319,20 +293,7 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -420,20 +381,7 @@ This was considered a failure because responses must have content-type: 'text/ht
 However, you can likely use cy.request() instead of cy.visit().
 
 cy.request() will automatically get and set cookies and enable you to parse responses.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -518,21 +466,7 @@ You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait lon
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
 When this 'load' event occurs, Cypress will continue running commands.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   2) when visit times out fails timeout exceeds timeout option:
      CypressError: Timed out after waiting '500ms' for your remote page to load.
@@ -544,21 +478,7 @@ You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait lon
 Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
 
 When this 'load' event occurs, Cypress will continue running commands.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -656,30 +576,9 @@ Common situations why this would fail:
 The stack trace for this error is:
 
 Error: ESOCKETTIMEDOUT
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+    [stack trace lines]
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
      CypressError: cy.visit() failed trying to load:
@@ -701,30 +600,9 @@ Common situations why this would fail:
 The stack trace for this error is:
 
 Error: ESOCKETTIMEDOUT
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+    [stack trace lines]
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
      CypressError: cy.visit() failed trying to load:
@@ -746,30 +624,9 @@ Common situations why this would fail:
 The stack trace for this error is:
 
 Error: ESOCKETTIMEDOUT
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+    [stack trace lines]
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

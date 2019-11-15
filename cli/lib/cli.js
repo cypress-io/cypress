@@ -70,47 +70,7 @@ const parseVariableOpts = (fnArgs, args) => {
     }
   }
 
-  return parseOpts(opts)
-}
-
-const parseOpts = (opts) => {
-  opts = _.pick(
-    opts,
-    'project',
-    'spec',
-    'reporter',
-    'reporterOptions',
-    'path',
-    'destination',
-    'port',
-    'env',
-    'cypressVersion',
-    'config',
-    'record',
-    'key',
-    'configFile',
-    'browser',
-    'detached',
-    'headed',
-    'global',
-    'dev',
-    'force',
-    'exit',
-    'cachePath',
-    'cacheList',
-    'cacheClear',
-    'parallel',
-    'group',
-    'ciBuildId'
-  )
-
-  if (opts.exit) {
-    opts = _.omit(opts, 'exit')
-  }
-
-  debug('parsed cli options', opts)
-
-  return opts
+  return util.parseOpts(opts)
 }
 
 const descriptions = {
@@ -272,7 +232,7 @@ module.exports = {
     .action((opts) => {
       debug('opening Cypress')
       require('./exec/open')
-      .start(parseOpts(opts))
+      .start(util.parseOpts(opts))
       .catch(util.logErrorExit1)
     })
 
@@ -285,7 +245,7 @@ module.exports = {
     .option('-f, --force', text('forceInstall'))
     .action((opts) => {
       require('./tasks/install')
-      .start(parseOpts(opts))
+      .start(util.parseOpts(opts))
       .catch(util.logErrorExit1)
     })
 
@@ -298,7 +258,7 @@ module.exports = {
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       const defaultOpts = { force: true, welcomeMessage: false }
-      const parsedOpts = parseOpts(opts)
+      const parsedOpts = util.parseOpts(opts)
       const options = _.extend(parsedOpts, defaultOpts)
 
       require('./tasks/verify')
