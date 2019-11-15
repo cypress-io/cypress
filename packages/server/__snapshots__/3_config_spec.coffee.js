@@ -93,19 +93,7 @@ exports['e2e config fails 1'] = `
 
   1) config times out looking for a missing element:
      CypressError: Timed out retrying: Expected to find element: '#bar', but never found it.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
