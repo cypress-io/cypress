@@ -77,37 +77,18 @@
       color: #000;
     }
 
-    li[aria-expanded=true] {
-      margin-top: 0; 
-      padding-top: 2px !important;
-
-      &>div {
-        margin-bottom: 5px;
-      }
-    }
-
-    > ol {
-      background: #fff !important;
-
-      > li {
-        margin-top: -5px !important;
-        padding-top: 0 !important;
-
-        > div {
-          display: none;
-        }
-      }
-
-      & > li > ol {
-        padding-top: 5px;
+    ol[role="tree"] {
+        > li > div{
+        display: none;
       }
     }
 
     .key-value-pair-value {
-      margin: 4px;
+      margin-left: 2px;
       display: inline-block;
-      line-height: 10px;
-      border-bottom: 1px solid transparent;
+      line-height: 1;
+      padding: 2px;
+      border-bottom: 1px solid transparent
     }
 
     .key-value-pair-value:hover {

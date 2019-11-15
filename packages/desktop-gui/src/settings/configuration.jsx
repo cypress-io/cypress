@@ -37,15 +37,18 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
   return (
     <span className="line" key={name}>
       <ObjectName name={name} dimmed={isNonenumerable} />
+      <span>:</span>
       {!expanded && (
         <>
-          <span>:</span>
           <Tooltip title={from} placement='right' className='cy-tooltip'>
             <span className={cn(from, 'key-value-pair-value')}>
               <span>{formattedData}</span>
             </span>
           </Tooltip>
         </>
+      )}
+      {expanded && Array.isArray(data) && (
+        <span> Array ({data.length})</span>
       )}
     </span>
   )

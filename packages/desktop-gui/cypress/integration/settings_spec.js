@@ -96,6 +96,15 @@ describe('Settings', () => {
         .should('contain', '0:Chrome')
       })
 
+      it('distinguishes between Arrays and Objects when expanded', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', 'browsers: Array (4)')
+
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('contain', 'browsers: Array (4)')
+      })
+
       it('applies the same color treatment to expanded key values as the root key', () => {
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
         cy.get('.config-vars').as('config-vars')
