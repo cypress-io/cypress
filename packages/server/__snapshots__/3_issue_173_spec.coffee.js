@@ -25,19 +25,7 @@ exports['e2e issue 173 failing 1'] = `
 
   1)  fails:
      CypressError: Timed out retrying: Expected to find element: 'element_does_not_exist', but never found it.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
