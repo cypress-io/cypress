@@ -178,8 +178,8 @@ describe "lib/util/args", ->
 
     it "rejects values which have an cooresponding underscore'd key", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
-        "--project=foo/bar",
         "--config=#{JSON.stringify({foo: 'bar'})}"
+        "--project=foo/bar",
       ])
 
   context ".toObject", ->
@@ -211,9 +211,9 @@ describe "lib/util/args", ->
 
       ## make sure it works with both --env=foo=bar and --config foo=bar
       @obj = @setup(
+        "--config",
         "--get-key",
         "--env=foo=bar,baz=quux,bar=foo=quz",
-        "--config",
         "requestTimeout=1234,blacklistHosts=#{s(@blacklistHosts)},hosts=#{s(@hosts)}"
         "--reporter-options=foo=bar"
         "--spec=foo,bar,baz",
@@ -228,9 +228,9 @@ describe "lib/util/args", ->
       expect(@obj).to.deep.eq({
         cwd
         _: []
+        config: @config
         getKey: true
         invokedFromCli: false
-        config: @config
         spec: @specs
       })
 
@@ -248,10 +248,10 @@ describe "lib/util/args", ->
       args = argsUtil.toArray(@obj)
 
       expect(args).to.deep.eq([
+        "--config=#{mergedConfig}"
         "--cwd=#{cwd}"
         "--getKey=true"
         "--spec=#{JSON.stringify(@specs)}",
-        "--config=#{mergedConfig}"
       ])
 
       expect(argsUtil.toObject(args)).to.deep.eq({
