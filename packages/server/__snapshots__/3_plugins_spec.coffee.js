@@ -383,3 +383,10 @@ Browser: 'chrome' was not found on your system.
 Available browsers found are: electron
 
 `
+
+exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+
+Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+
+`

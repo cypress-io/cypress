@@ -10,6 +10,7 @@ workingPreprocessor = Fixtures.projectPath("working-preprocessor")
 pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
 pluginsAbsolutePath = Fixtures.projectPath("plugins-absolute-path")
 pluginAfterScreenshot = Fixtures.projectPath("plugin-after-screenshot")
+pluginReturnsBadConfig = Fixtures.projectPath("plugin-returns-bad-config")
 
 describe "e2e plugins", ->
   e2e.setup()
@@ -41,6 +42,14 @@ describe "e2e plugins", ->
       sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 0
+    })
+
+  it "catches invalid viewportWidth returned from plugins", ->
+    # the test project returns config object with a bad value
+    e2e.exec(@, {
+      project: pluginReturnsBadConfig
+      expectedExitCode: 1
+      snapshot: true
     })
 
   it "can filter browsers from config", ->

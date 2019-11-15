@@ -394,6 +394,15 @@ module.exports = {
     debug("starting config %o", cfg)
     debug("overrides %o", overrides)
 
+    # make sure every option returned from the plugins file
+    # passes our validation functions
+    validate overrides, (errMsg) ->
+      if cfg.pluginsFile and cfg.projectRoot
+        relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
+        errors.throw("PLUGINS_CONFIG_VALIDATION_ERROR", relativePluginsPath, errMsg)
+      else
+        errors.throw("CONFIG_VALIDATION_ERROR", errMsg)
+
     originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && R.clone(cfg.resolved.browsers)
     if not originalResolvedBrowsers
       # have something to resolve with if plugins return nothing
