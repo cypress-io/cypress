@@ -86,6 +86,7 @@ const CI_PROVIDERS = {
   'codeshipPro': isCodeshipPro,
   'concourse': isConcourse,
   'drone': 'DRONE',
+  githubActions: 'GITHUB_ACTIONS',
   'gitlab': isGitlab,
   'goCD': 'GO_JOB_NAME',
   'googleCloud': isGoogleCloud,
@@ -197,6 +198,12 @@ const _providerCiParams = () => {
       'DRONE_BUILD_LINK',
       'DRONE_BUILD_NUMBER',
       'DRONE_PULL_REQUEST',
+    ]),
+    // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
+    githubActions: extract([
+      'GITHUB_WORKFLOW',
+      'GITHUB_ACTION',
+      'GITHUB_EVENT_NAME',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
@@ -417,6 +424,12 @@ const _providerCommitParams = function () {
       authorEmail: env.DRONE_COMMIT_AUTHOR_EMAIL,
       // remoteOrigin: ???
       defaultBranch: env.DRONE_REPO_BRANCH,
+    },
+    githubActions: {
+      sha: env.GITHUB_SHA,
+      branch: env.GITHUB_REF,
+      defaultBranch: env.GITHUB_BASE_REF,
+      remoteBranch: env.GITHUB_HEAD_REF,
     },
     gitlab: {
       sha: env.CI_COMMIT_SHA,

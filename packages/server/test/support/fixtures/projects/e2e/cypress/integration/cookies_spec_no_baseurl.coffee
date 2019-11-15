@@ -1,3 +1,6 @@
+httpUrl = Cypress.env('httpUrl')
+httpsUrl = Cypress.env('httpsUrl')
+
 describe "cookies", ->
   beforeEach ->
     cy.wrap({foo: "bar"})
@@ -75,7 +78,7 @@ describe "cookies", ->
       cy.getCookies().should("have.length", 2)
 
     it "handles undefined cookies", ->
-      cy.visit("http://localhost:2121/cookieWithNoName")
+      cy.visit("#{httpUrl}/cookieWithNoName")
 
   context "without whitelist", ->
     before ->
@@ -87,31 +90,31 @@ describe "cookies", ->
       cy
         .clearCookies()
         .setCookie("asdf", "jkl")
-        .request("http://localhost:2121/requestCookies")
+        .request("#{httpUrl}/requestCookies")
           .its("body").should("deep.eq", { asdf: "jkl" })
 
     it "handles expired cookies secure", ->
       cy
-        .visit("http://localhost:2121/set")
+        .visit("#{httpUrl}/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("http://localhost:2121/expirationMaxAge")
+        .visit("#{httpUrl}/expirationMaxAge")
         .getCookie("shouldExpire").should("not.exist")
-        .visit("http://localhost:2121/set")
+        .visit("#{httpUrl}/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("http://localhost:2121/expirationExpires")
+        .visit("#{httpUrl}/expirationExpires")
         .getCookie("shouldExpire").should("not.exist")
 
     it "issue: #224 sets expired cookies between redirects", ->
       cy
-        .visit("http://localhost:2121/set")
+        .visit("#{httpUrl}/set")
         .getCookie("shouldExpire").should("exist")
-        .visit("http://localhost:2121/expirationRedirect")
+        .visit("#{httpUrl}/expirationRedirect")
         .url().should("include", "/logout")
         .getCookie("shouldExpire").should("not.exist")
 
-        .visit("http://localhost:2121/set")
+        .visit("#{httpUrl}/set")
         .getCookie("shouldExpire").should("exist")
-        .request("http://localhost:2121/expirationRedirect")
+        .request("#{httpUrl}/expirationRedirect")
         .getCookie("shouldExpire").should("not.exist")
 
     it "issue: #1321 failing to set or parse cookie", ->
@@ -119,19 +122,19 @@ describe "cookies", ->
       ## with a secure flag, and then expired without the secure
       ## flag.
       cy
-        .visit("https://localhost:2323/setOneHourFromNowAndSecure")
+        .visit("#{httpsUrl}/setOneHourFromNowAndSecure")
         .getCookies().should("have.length", 1)
 
         ## secure cookies should have been attached
-        .request("https://localhost:2323/requestCookies")
+        .request("#{httpsUrl}/requestCookies")
           .its("body").should("deep.eq", { shouldExpire: "oneHour" })
 
         ## secure cookies should not have been attached
-        .request("http://localhost:2121/requestCookies")
+        .request("#{httpUrl}/requestCookies")
           .its("body").should("deep.eq", {})
 
-        .visit("https://localhost:2323/expirationMaxAge")
+        .visit("#{httpsUrl}/expirationMaxAge")
         .getCookies().should("be.empty")
 
     it "issue: #2724 does not fail on invalid cookies", ->
-      cy.request('https://localhost:2323/invalidCookies')
+      cy.request("#{httpsUrl}/invalidCookies")

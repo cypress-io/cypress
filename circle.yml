@@ -714,9 +714,10 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - run: npm run check-next-dev-version
       - run:
           name: bump NPM version
-          command: npm --no-git-tag-version version ${NEXT_DEV_VERSION:-0.0.0-development}
+          command: npm --no-git-tag-version --allow-same-version version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
           working_directory: cli
@@ -1121,7 +1122,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-        
+
     - lint:
         name: Mac lint
         executor: mac
