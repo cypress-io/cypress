@@ -343,11 +343,15 @@ class Socket
         require("electron").shell.openExternal(url)
 
       socket.on "open:file", (fileDetails) ->
-        ## TODO: can we open to specific line & column
-        # require("electron").shell.openItem(fileDetails.file)
-        openEditor([].concat(fileDetails), {
-          editor: 'vscode',
-        })
+        switch fileDetails.where
+          when "computer"
+            require("electron").shell.showItemInFolder(fileDetails.file)
+          when "editor"
+            openEditor([].concat(fileDetails), {
+              editor: 'vscode',
+            })
+            ## this opens in default opener
+            # require("electron").shell.openItem(fileDetails.file)
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
@@ -356,7 +360,6 @@ class Socket
       runnerEvents.forEach (event) =>
         socket.on event, (data) =>
           @toReporter(event, data)
-
 
   end: ->
     @ended = true

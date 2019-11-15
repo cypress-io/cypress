@@ -87,24 +87,51 @@ describe('test errors', function () {
     it('turns files into links', function () {
       this.setError(this.commandErr)
 
-      cy.get('.runnable-err-stack-trace a')
+      cy.get('.runnable-err-stack-trace .runnable-err-file-path')
       .should('have.length', 2)
       .first()
       .should('have.text', 'my/app.js:2:7')
 
       cy.contains('View stack trace').click()
-      cy.get('.runnable-err-stack-trace a').eq(1)
+      cy.get('.runnable-err-stack-trace .runnable-err-file-path').eq(1)
       .should('have.text', 'cypress/integration/foo_spec.js:5:2')
     })
 
-    it('opens the file when clicked', function () {
+    it('shows tooltip when hovered over', function () {
+      this.setError(this.commandErr)
+
+      cy.contains('View stack trace').click()
+      cy.get('.runnable-err-stack-trace .runnable-err-file-path').first().trigger('mouseover')
+      cy.get('.err-file-options').should('be.visible')
+    })
+
+    it('opens the file on computer when clicked', function () {
       cy.spy(this.runner, 'emit')
 
       this.setError(this.commandErr)
 
       cy.contains('View stack trace').click()
-      cy.get('.runnable-err-stack-trace a').first().click().then(() => {
+      cy.get('.runnable-err-stack-trace .runnable-err-file-path').first().trigger('mouseover')
+      cy.contains('Open on Computer').click().then(() => {
         expect(this.runner.emit).to.be.calledWith('open:file', {
+          where: 'computer',
+          file: '/me/dev/my/app.js',
+          line: 2,
+          column: 7,
+        })
+      })
+    })
+
+    it('opens the file on computer when clicked', function () {
+      cy.spy(this.runner, 'emit')
+
+      this.setError(this.commandErr)
+
+      cy.contains('View stack trace').click()
+      cy.get('.runnable-err-stack-trace .runnable-err-file-path').first().trigger('mouseover')
+      cy.contains('Open in Editor').click().then(() => {
+        expect(this.runner.emit).to.be.calledWith('open:file', {
+          where: 'editor',
           file: '/me/dev/my/app.js',
           line: 2,
           column: 7,
@@ -188,6 +215,48 @@ describe('test errors', function () {
       cy
       .get('.test-error-code-frame pre')
       .should('have.class', 'language-text')
+    })
+
+    it('shows tooltip when file path hovered over', function () {
+      this.setError(this.commandErr)
+
+      cy.contains('View stack trace').click()
+      cy.get('.test-error-code-frame .runnable-err-file-path > span').trigger('mouseover')
+      cy.get('.err-file-options').should('be.visible')
+    })
+
+    it('opens the file on computer when clicked', function () {
+      cy.spy(this.runner, 'emit')
+
+      this.setError(this.commandErr)
+
+      cy.contains('View stack trace').click()
+      cy.get('.test-error-code-frame .runnable-err-file-path > span').trigger('mouseover')
+      cy.contains('Open on Computer').click().then(() => {
+        expect(this.runner.emit).to.be.calledWith('open:file', {
+          where: 'computer',
+          file: '/me/dev/my/app.js',
+          line: 2,
+          column: 7,
+        })
+      })
+    })
+
+    it('opens the file on computer when clicked', function () {
+      cy.spy(this.runner, 'emit')
+
+      this.setError(this.commandErr)
+
+      cy.contains('View stack trace').click()
+      cy.get('.test-error-code-frame .runnable-err-file-path > span').trigger('mouseover')
+      cy.contains('Open in Editor').click().then(() => {
+        expect(this.runner.emit).to.be.calledWith('open:file', {
+          where: 'editor',
+          file: '/me/dev/my/app.js',
+          line: 2,
+          column: 7,
+        })
+      })
     })
   })
 })

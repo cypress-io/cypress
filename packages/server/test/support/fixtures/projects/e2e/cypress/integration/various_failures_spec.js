@@ -41,7 +41,7 @@ describe('various failures', () => {
           .should('match', regex)
 
           cy
-          .get('.test-error-code-frame .runnable-err-code-frame-file-path')
+          .get('.test-error-code-frame .runnable-err-file-path')
           .invoke('text')
           .should('match', regex)
 

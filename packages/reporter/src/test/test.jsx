@@ -135,8 +135,9 @@ class Test extends Component {
     }
   }
 
-  _openFile = ({ absoluteFile: file, line, column }) => {
+  _openFile = ({ absoluteFile: file, line, column }, where) => {
     events.emit('open:file', {
+      where,
       file,
       line,
       column,
