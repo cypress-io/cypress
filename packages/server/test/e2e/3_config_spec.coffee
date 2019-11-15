@@ -1,4 +1,7 @@
 e2e = require("../support/helpers/e2e")
+Fixtures = require("../support/helpers/fixtures")
+
+configWithInvalidViewport = Fixtures.projectPath("config-with-invalid-viewport")
 
 describe "e2e config", ->
   e2e.setup({
@@ -32,4 +35,13 @@ describe "e2e config", ->
       spec: "config_failing_spec.coffee"
       snapshot: true
       expectedExitCode: 1
+    })
+
+  it "catches invalid viewportWidth in the configuration file", ->
+    # the test project has cypress.json with a bad setting
+    # which should show an error and exit
+    e2e.exec(@, {
+      project: configWithInvalidViewport
+      expectedExitCode: 1
+      snapshot: true
     })

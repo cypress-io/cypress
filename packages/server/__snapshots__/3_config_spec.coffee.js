@@ -150,3 +150,10 @@ exports['e2e config fails 1'] = `
 
 
 `
+
+exports['e2e config catches invalid viewportWidth in the configuration file 1'] = `
+We found an invalid value in the file: \`cypress.json\`
+
+Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+
+`
