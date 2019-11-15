@@ -35,7 +35,7 @@ pathUpToProjectName = Fixtures.projectPath("")
 
 DEFAULT_BROWSERS = ['electron', 'chrome']
 
-stackTraceLinesRe = /(\n\s*).*?(@|at).*\.(js|coffee|ts|html)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
+stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
