@@ -28,7 +28,7 @@ const visibleMessage = (model: CommandModel) => {
     'This element is not visible.'
 }
 
-const shouldShowCount = (aliasesWithDuplicates: Array<Alias>, aliasName: Alias, model: CommandModel) => {
+const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: Alias, model: CommandModel) => {
   if (model.aliasType !== 'route') {
     return false
   }
@@ -36,7 +36,13 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias>, aliasName: Alias, 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
 
-const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }) => {
+interface AliasReferenceProps {
+  aliasObj: AliasObject
+  model: CommandModel
+  aliasesWithDuplicates: Array<Alias> | null
+}
+
+const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }: AliasReferenceProps) => {
   if (shouldShowCount(aliasesWithDuplicates, aliasObj.name, model)) {
     return (
       <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`}>
@@ -57,7 +63,7 @@ const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }) => 
 
 interface AliasesReferencesProps {
   model: CommandModel
-  aliasesWithDuplicates?: Array<Alias>
+  aliasesWithDuplicates: Array<Alias> | null
 }
 
 const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesReferencesProps) => (
@@ -70,12 +76,17 @@ const AliasesReferences = observer(({ model, aliasesWithDuplicates }: AliasesRef
   </span>
 ))
 
-const Aliases = observer(({ model, aliasesWithDuplicates }) => {
+interface AliasesProps {
+  model: CommandModel
+  aliasesWithDuplicates: Array<Alias> | null
+}
+
+const Aliases = observer(({ model, aliasesWithDuplicates }: AliasesProps) => {
   if (!model.alias) return null
 
   return (
     <span>
-      {_.map([].concat(model.alias), (alias) => (
+      {_.map(([] as Array<Alias>).concat(model.alias), (alias) => (
         <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`}>
           <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': shouldShowCount(aliasesWithDuplicates, alias, model) })}>
             {alias}
@@ -98,7 +109,7 @@ const Message = observer(({ model }) => (
 
 interface Props {
   model: CommandModel
-  aliasesWithDuplicates?: Array<Alias>
+  aliasesWithDuplicates: Array<Alias> | null
   appState: AppState
   events: Events
   runnablesStore: RunnablesStore
@@ -201,6 +212,7 @@ class Command extends Component<Props> {
             appState={appState}
             events={events}
             runnablesStore={runnablesStore}
+            aliasesWithDuplicates={null}
           />
         ))}
       </ul>

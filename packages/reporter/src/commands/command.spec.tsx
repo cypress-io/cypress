@@ -48,91 +48,91 @@ const runnablesStoreStub = () => ({
 describe('<Command />', () => {
   context('class names', () => {
     it('renders with the type class', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-type-parent')
     })
 
     it('renders with the name class, whitespace converted to dashes', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-name-The-name')
     })
 
     it('renders with the state class', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-state-passed')
     })
 
     it('renders with the is-event class when an event', () => {
-      const component = shallow(<Command model={model({ event: true })} />)
+      const component = shallow(<Command model={model({ event: true })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-is-event')
     })
 
     it('renders with the is-invisible class when not visible', () => {
-      const component = shallow(<Command model={model({ visible: false })} />)
+      const component = shallow(<Command model={model({ visible: false })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-is-invisible')
     })
 
     it('renders with the has-num-elements class when it has numElements', () => {
-      const component = shallow(<Command model={model({ numElements: 1 })} />)
+      const component = shallow(<Command model={model({ numElements: 1 })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-has-num-elements')
     })
 
     it('renders with the no-elements class when numElements is 0', () => {
-      const component = shallow(<Command model={model({ numElements: 0 })} />)
+      const component = shallow(<Command model={model({ numElements: 0 })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('no-elements')
     })
 
     it('renders with the multiple-elements class when numElements is more than 1', () => {
-      const component = shallow(<Command model={model({ numElements: 2 })} />)
+      const component = shallow(<Command model={model({ numElements: 2 })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('multiple-elements')
     })
 
     it('renders with the other-pinned class when another command is pinned', () => {
-      const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c2' })} />)
+      const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c2' })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-other-pinned')
     })
 
     it('does not render with the other-pinned class when no command is pinned', () => {
-      const component = shallow(<Command model={model()} appState={appStateStub()} />)
+      const component = shallow(<Command model={model()} appState={appStateStub()} aliasesWithDuplicates={null} />)
 
       expect(component).not.to.have.className('command-other-pinned')
     })
 
     it('does not render with the other-pinned class when it itself is pinned', () => {
-      const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c1' })} />)
+      const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c1' })} aliasesWithDuplicates={null} />)
 
       expect(component).not.to.have.className('command-other-pinned')
     })
 
     it('renders with the is-pinned class when it itself is pinned', () => {
-      const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c1' })} />)
+      const component = shallow(<Command model={model()} appState={appStateStub({ pinnedSnapshotId: 'c1' })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-is-pinned')
     })
 
     it('renders with the with-indicator class when it has a renderProps indicator', () => {
-      const component = shallow(<Command model={model({ renderProps: { indicator: 'bad' } })} />)
+      const component = shallow(<Command model={model({ renderProps: { indicator: 'bad' } })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-with-indicator')
     })
 
     it('renders with the scaled class when it has a renderProps message over 100 chars long', () => {
-      const component = shallow(<Command model={model({ displayMessage: longText })} />)
+      const component = shallow(<Command model={model({ displayMessage: longText })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-scaled')
     })
 
     it('does not render with the scaled class when it has a renderProps message less than 100 chars long', () => {
-      const component = shallow(<Command model={model({ renderProps: { message: 'is short' } })} />)
+      const component = shallow(<Command model={model({ renderProps: { message: 'is short' } })} aliasesWithDuplicates={null} />)
 
       expect(component).not.to.have.className('command-scaled')
     })
@@ -140,19 +140,19 @@ describe('<Command />', () => {
 
   context('name', () => {
     it('renders the name', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component.find('.command-method')).to.have.text('The name')
     })
 
     it('renders the display name if specified', () => {
-      const component = shallow(<Command model={model({ displayName: 'The displayed name' })} />)
+      const component = shallow(<Command model={model({ displayName: 'The displayed name' })} aliasesWithDuplicates={null} />)
 
       expect(component.find('.command-method')).to.have.text('The displayed name')
     })
 
     it('renders the name or display name in parentheses if an event', () => {
-      const component = shallow(<Command model={model({ event: true })} />)
+      const component = shallow(<Command model={model({ event: true })} aliasesWithDuplicates={null} />)
 
       expect(component.find('.command-method')).to.have.text('(The name)')
     })
@@ -160,25 +160,25 @@ describe('<Command />', () => {
 
   context('message', () => {
     it('renders the displayMessage', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain('The message')
     })
 
     it('does not truncate the message when over 100 chars', () => {
-      const component = shallow(<Command model={model({ displayMessage: longText })} />)
+      const component = shallow(<Command model={model({ displayMessage: longText })} aliasesWithDuplicates={null} />)
 
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(longText)
     })
 
     it('renders markdown', () => {
-      const component = shallow(<Command model={model({ displayMessage: withMarkdown })} />)
+      const component = shallow(<Command model={model({ displayMessage: withMarkdown })} aliasesWithDuplicates={null} />)
 
       expect(component.find(Message).first().shallow().find('.command-message-text').html()).to.contain(fromMarkdown)
     })
 
     it('includes the renderProps indicator as a class name when specified', () => {
-      const component = shallow(<Command model={model({ renderProps: { indicator: 'bad' } })} />)
+      const component = shallow(<Command model={model({ renderProps: { indicator: 'bad' } })} aliasesWithDuplicates={null} />)
 
       expect(component.find(Message).first().shallow().find('.bad')).to.exist
     })
@@ -200,6 +200,7 @@ describe('<Command />', () => {
           events={events}
           appState={appState}
           runnablesStore={runnablesStore}
+          aliasesWithDuplicates={null}
         />
       )
 
@@ -244,13 +245,13 @@ describe('<Command />', () => {
 
   context('invisible indicator', () => {
     it('renders a tooltip for the invisible indicator', () => {
-      const component = shallow(<Command model={model({ visible: false })} />)
+      const component = shallow(<Command model={model({ visible: false })} aliasesWithDuplicates={null} />)
 
       expect(component.find('Tooltip').first().find('.command-invisible')).to.exist
     })
 
     it('renders the invisible indicator tooltip with the right title', () => {
-      const component = shallow(<Command model={model({ visible: false })} />)
+      const component = shallow(<Command model={model({ visible: false })} aliasesWithDuplicates={null} />)
 
       expect(component.find('Tooltip').first()).to.have.prop('title', 'This element is not visible.')
     })
@@ -258,19 +259,19 @@ describe('<Command />', () => {
 
   context('elements', () => {
     it('renders the number of elements', () => {
-      const component = shallow(<Command model={model({ numElements: 3 })} />)
+      const component = shallow(<Command model={model({ numElements: 3 })} aliasesWithDuplicates={null} />)
 
       expect(component.find('.num-elements')).to.have.text('3')
     })
 
     it('renders a tooltip for the number of elements', () => {
-      const component = shallow(<Command model={model({ numElements: 3 })} />)
+      const component = shallow(<Command model={model({ numElements: 3 })} aliasesWithDuplicates={null} />)
 
       expect(component.find('Tooltip').at(1).find('.num-elements')).to.exist
     })
 
     it('renders the number of elements tooltip with the right title', () => {
-      const component = shallow(<Command model={model({ numElements: 3 })} />)
+      const component = shallow(<Command model={model({ numElements: 3 })} aliasesWithDuplicates={null} />)
 
       expect(component.find('Tooltip').at(1)).to.have.prop('title', '3 matched elements')
     })
@@ -278,19 +279,19 @@ describe('<Command />', () => {
 
   context('other contents', () => {
     it('renders a <FlashOnClick /> around the contents', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component.find('FlashOnClick')).to.exist
     })
 
     it('the <FlashOnClick /> has a pinned snapshot and console print message', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component.find('FlashOnClick')).to.have.prop('message', 'Printed output to your console')
     })
 
     it('renders the number', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component.find('.command-number')).to.have.text('1')
     })
@@ -313,6 +314,7 @@ describe('<Command />', () => {
         model={model()}
         events={events}
         runnablesStore={runnablesStore}
+        aliasesWithDuplicates={null}
       />)
     })
 
@@ -400,49 +402,49 @@ describe('<Command />', () => {
     const withDuplicates = { hasDuplicates: true, numDuplicates: 5 }
 
     it('renders with command-has-duplicates class if it has duplicates', () => {
-      const component = shallow(<Command model={model(withDuplicates)} />)
+      const component = shallow(<Command model={model(withDuplicates)} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-has-duplicates')
     })
 
     it('renders without command-has-duplicates class if no duplicates', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component).not.to.have.className('command-has-duplicates')
     })
 
     it('renders with command-is-duplicate class if it is a duplicate', () => {
-      const component = shallow(<Command model={model({ isDuplicate: true })} />)
+      const component = shallow(<Command model={model({ isDuplicate: true })} aliasesWithDuplicates={null} />)
 
       expect(component).to.have.className('command-is-duplicate')
     })
 
     it('renders without command-is-duplicate class if it is not a duplicate', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component).not.to.have.className('command-is-duplicate')
     })
 
     it('num duplicates renders with has-alias class if command is an alias', () => {
-      const component = shallow(<Command model={model({ alias: 'foo' })} />)
+      const component = shallow(<Command model={model({ alias: 'foo' })} aliasesWithDuplicates={null} />)
 
       expect(component.find('.num-duplicates')).to.have.className('has-alias')
     })
 
     it('num duplicates renders without has-alias class if command is not an alias', () => {
-      const component = shallow(<Command model={model()} />)
+      const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component.find('.num-duplicates')).not.to.have.className('has-alias')
     })
 
     it('displays number of duplicates', () => {
-      const component = shallow(<Command model={model({ hasDuplicates: true, numDuplicates: 5 })} />)
+      const component = shallow(<Command model={model({ hasDuplicates: true, numDuplicates: 5 })} aliasesWithDuplicates={null} />)
 
       expect(component.find('.num-duplicates')).to.have.text('5')
     })
 
     it('opens after clicking expander', () => {
-      const component = shallow(<Command model={model(withDuplicates)} />)
+      const component = shallow(<Command model={model(withDuplicates)} aliasesWithDuplicates={null} />)
 
       component.find('.command-expander').simulate('click', { stopPropagation: () => {} })
       expect(component).to.have.className('command-is-open')
