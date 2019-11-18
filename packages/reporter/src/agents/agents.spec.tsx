@@ -2,20 +2,20 @@ import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
 
-import Agents, { Agent, AgentsList } from './agents'
-import { AgentProps as AgentModelProps } from './agent-model'
+import Agents, { Agent, AgentsList, AgentsModel } from './agents'
+import AgentModel from './agent-model'
 
-const agentModel = (props?: Partial<AgentModelProps>) => {
-  return _.extend({
+const agentModel = (props?: Partial<AgentModel>) => {
+  return _.extend<AgentModel>({
     id: _.uniqueId('a'),
     name: 'agent',
     callCount: 0,
     type: 'spy',
     functionName: 'foo',
-  }, props) as AgentModelProps
+  }, props)
 }
 
-const model = (props?: { agents: Array<AgentModelProps> }) => {
+const model = (props?: AgentsModel) => {
   return _.extend({
     agents: [agentModel(), agentModel()],
   }, props)
@@ -29,7 +29,7 @@ describe('<Agents />', () => {
   })
 
   it('renders with no-agents class if there are no agents', () => {
-    const component = shallow(<Agents model={model({ agents: ([] as Array<AgentModelProps>) })} />)
+    const component = shallow(<Agents model={model({ agents: [] })} />)
 
     expect(component).to.have.className('no-agents')
   })
