@@ -2,13 +2,13 @@ import _ from 'lodash'
 import { action, observable } from 'mobx'
 
 import appState, { AppState } from '../lib/app-state'
-import Agent, { AgentProps } from '../agents/agent-model'
-import Command, { CommandProps } from '../commands/command-model'
-import Route, { RouteProps } from '../routes/route-model'
+import AgentModel, { AgentProps } from '../agents/agent-model'
+import CommandModel, { CommandProps } from '../commands/command-model'
+import RouteModel, { RouteProps } from '../routes/route-model'
 import scroller, { Scroller } from '../lib/scroller'
-import Suite, { SuiteProps } from './suite-model'
-import Test, { TestProps, UpdateTestCallback } from '../test/test-model'
-import Runnable from './runnable-model'
+import SuiteModel, { SuiteProps } from './suite-model'
+import TestModel, { TestProps, UpdateTestCallback } from '../test/test-model'
+import RunnableModel from './runnable-model'
 
 const defaults = {
   hasSingleTest: false,
@@ -26,7 +26,7 @@ interface Props {
 
 export type LogProps = AgentProps | CommandProps | RouteProps
 
-type Log = Agent | Command | Route
+type Log = AgentModel | CommandModel | RouteModel
 
 export interface RootRunnable {
   tests?: Array<TestProps>
@@ -46,9 +46,9 @@ class RunnablesStore {
   private scroller: Scroller
   [key: string]: any
 
-  _tests: Record<string, Test> = {}
+  _tests: Record<string, TestModel> = {}
   _logs: Record<string, Log> = {}
-  _runnablesQueue: Array<Runnable> = []
+  _runnablesQueue: Array<RunnableModel> = []
 
   attemptingShowSnapshot = defaults.attemptingShowSnapshot
   showingSnapshot = defaults.showingSnapshot
@@ -87,7 +87,7 @@ class RunnablesStore {
   }
 
   _createSuite (props: SuiteProps, level: number) {
-    const suite = new Suite(props, level)
+    const suite = new SuiteModel(props, level)
 
     this._runnablesQueue.push(suite)
     suite.children = this._createRunnableChildren(props, ++level)
@@ -96,7 +96,7 @@ class RunnablesStore {
   }
 
   _createTest (props: TestProps, level: number) {
-    const test = new Test(props, level)
+    const test = new TestModel(props, level)
 
     this._runnablesQueue.push(test)
     this._tests[test.id] = test
@@ -151,13 +151,13 @@ class RunnablesStore {
     })
   }
 
-  runnableStarted ({ id }: TestProps) {
+  runnableStarted ({ id }: TestModel) {
     this._withTest(id, (test) => {
       return test.start()
     })
   }
 
-  runnableFinished (props: TestProps) {
+  runnableFinished (props: TestModel) {
     this._withTest(props.id, (test) => {
       return test.finish(props)
     })
@@ -170,7 +170,7 @@ class RunnablesStore {
   addLog (log: LogProps) {
     switch (log.instrument) {
       case 'command': {
-        const command = new Command(log as CommandProps)
+        const command = new CommandModel(log as CommandProps)
 
         this._logs[log.id] = command
         this._withTest(log.testId, (test) => {
@@ -180,7 +180,7 @@ class RunnablesStore {
         break
       }
       case 'agent': {
-        const agent = new Agent(log as AgentProps)
+        const agent = new AgentModel(log as AgentProps)
 
         this._logs[log.id] = agent
         this._withTest(log.testId, (test) => {
@@ -190,7 +190,7 @@ class RunnablesStore {
         break
       }
       case 'route': {
-        const route = new Route(log as RouteProps)
+        const route = new RouteModel(log as RouteProps)
 
         this._logs[log.id] = route
         this._withTest(log.testId, (test) => {
@@ -204,7 +204,7 @@ class RunnablesStore {
     }
   }
 
-  _withTest (id: number, cb: ((test: Test) => void)) {
+  _withTest (id: number, cb: ((test: TestModel) => void)) {
     // we get events for suites and tests, but only tests change during a run,
     // so if the id isn't found in this._tests, we ignore it b/c it's a suite
     const test = this._tests[id]

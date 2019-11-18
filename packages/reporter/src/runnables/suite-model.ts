@@ -9,7 +9,7 @@ export interface SuiteProps extends RunnableProps {
 }
 
 export default class Suite extends Runnable {
-  @observable children: Array<TestModel> = []
+  @observable children: Array<TestModel | Suite> = []
   type = 'suite'
 
   @computed get state (): TestState {

@@ -5,7 +5,7 @@ import { SuiteProps } from './suite-model'
 
 import { AppState } from '../lib/app-state'
 import { Scroller } from '../lib/scroller'
-import { TestProps } from '../test/test-model'
+import TestModel, { TestProps } from '../test/test-model'
 import { AgentProps } from '../agents/agent-model'
 import { CommandProps } from '../commands/command-model'
 import { RouteProps } from '../routes/route-model'
@@ -94,9 +94,9 @@ describe('runnables store', () => {
     it('adds logs to tests when specified', () => {
       const rootRunnable = createRootRunnable()
 
-      rootRunnable.tests[0].agents = [createAgent(1, 1), createAgent(2, 1), createAgent(3, 1)]
-      rootRunnable.tests[0].commands = [createCommand(1, 1)]
-      rootRunnable.tests[0].routes = [createRoute(1, 1), createRoute(2, 1)]
+      rootRunnable.tests![0].agents = [createAgent(1, 1), createAgent(2, 1), createAgent(3, 1)]
+      rootRunnable.tests![0].commands = [createCommand(1, 1)]
+      rootRunnable.tests![0].routes = [createRoute(1, 1), createRoute(2, 1)]
       instance.setRunnables(rootRunnable)
       expect(instance.runnables[0].agents.length).to.equal(3)
       expect(instance.runnables[0].commands.length).to.equal(1)
@@ -112,7 +112,7 @@ describe('runnables store', () => {
     })
 
     it('sets .isReady flag', () => {
-      instance.setRunnables({} as RootRunnable)
+      instance.setRunnables({})
       expect(instance.isReady).to.be.true
     })
 
@@ -150,32 +150,32 @@ describe('runnables store', () => {
 
     it('sets scrollTop when app is running and initial scrollTop has been set', () => {
       instance.setInitialScrollTop(234)
-      instance.setRunnables({} as RootRunnable)
+      instance.setRunnables({})
       expect(scroller.setScrollTop).to.have.been.calledWith(234)
     })
 
     it('does nothing when app is running and initial scrollTop has not been set', () => {
-      instance.setRunnables({} as RootRunnable)
+      instance.setRunnables({})
       expect(scroller.setScrollTop).not.to.have.been.called
     })
 
     it('sets scrolls to end when app is not running and auto-scrolling is enabled', () => {
       appState.isRunning = false
-      instance.setRunnables({} as RootRunnable)
+      instance.setRunnables({})
       expect(scroller.scrollToEnd).to.have.been.called
     })
 
     it('does nothing when app is not running and auto-scrolling is disabled', () => {
       appState.isRunning = false
       appState.autoScrollingEnabled = false
-      instance.setRunnables({} as RootRunnable)
+      instance.setRunnables({})
       expect(scroller.scrollToEnd).not.to.have.been.called
     })
 
     it('does nothing when app is stopped and auto-scrolling is enabled', () => {
       appState.isRunning = false
       appState.isStopped = true
-      instance.setRunnables({} as RootRunnable)
+      instance.setRunnables({})
       expect(scroller.scrollToEnd).not.to.have.been.called
     })
   })
@@ -183,7 +183,7 @@ describe('runnables store', () => {
   context('#runnableStarted', () => {
     it('starts the test with the given id', () => {
       instance.setRunnables({ tests: [createTest(1)], suites: [] })
-      instance.runnableStarted({ id: 1 })
+      instance.runnableStarted({ id: 1 } as TestModel)
       expect(instance.runnables[0].isActive).to.be.true
     })
   })
@@ -191,8 +191,8 @@ describe('runnables store', () => {
   context('#runnableFinished', () => {
     it('finishes the test with the given id', () => {
       instance.setRunnables({ tests: [createTest(1)], suites: [] })
-      instance.runnableStarted({ id: 1 })
-      instance.runnableFinished({ id: 1 })
+      instance.runnableStarted({ id: 1 } as TestModel)
+      instance.runnableFinished({ id: 1 } as TestModel)
       expect(instance.runnables[0].isActive).to.be.false
     })
   })
@@ -206,7 +206,7 @@ describe('runnables store', () => {
 
   context('#updateLog', () => {
     it('updates the log', () => {
-      instance.setRunnables({ tests: [createTest(1)] } as RootRunnable)
+      instance.setRunnables({ tests: [createTest(1)] })
       instance.addLog(createCommand(1, 1))
       instance.updateLog({ id: 1, name: 'new name' } as LogProps)
       expect(instance.testById(1).commands[0].name).to.equal('new name')
@@ -215,7 +215,7 @@ describe('runnables store', () => {
 
   context('#reset', () => {
     it('resets flags to default values', () => {
-      instance.setRunnables({ tests: [createTest(1)] } as RootRunnable)
+      instance.setRunnables({ tests: [createTest(1)] })
       instance.attemptingShowSnapshot = true
       instance.showingSnapshot = true
       instance.reset()
@@ -228,13 +228,13 @@ describe('runnables store', () => {
     })
 
     it('resets runnables', () => {
-      instance.setRunnables({ tests: [createTest(1)] } as RootRunnable)
+      instance.setRunnables({ tests: [createTest(1)] })
       instance.reset()
       expect(instance.runnables.length).to.equal(0)
     })
 
     it('resets tests', () => {
-      instance.setRunnables({ tests: [createTest(1)] } as RootRunnable)
+      instance.setRunnables({ tests: [createTest(1)] })
       instance.reset()
       expect(instance.testById(1)).to.be.undefined
     })
