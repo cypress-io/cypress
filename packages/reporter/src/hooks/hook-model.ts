@@ -3,12 +3,12 @@ import { observable, computed } from 'mobx'
 
 import { Alias } from '../instruments/instrument-model'
 import Err from '../lib/err-model'
-import Command from '../commands/command-model'
+import CommandModel from '../commands/command-model'
 
 export default class Hook {
   @observable id: string
   @observable name: string
-  @observable commands: Array<Command> = []
+  @observable commands: Array<CommandModel> = []
   @observable failed = false
 
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
@@ -52,7 +52,7 @@ export default class Hook {
     return this._aliasesWithDuplicatesCache
   }
 
-  addCommand (command: Command) {
+  addCommand (command: CommandModel) {
     if (!command.event) {
       command.number = this._currentNumber
       this._currentNumber++

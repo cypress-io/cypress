@@ -9,8 +9,8 @@ const commandModel = () => {
   return { id: _.uniqueId('c') }
 }
 
-const hookModel = (props?: HookModel) => {
-  return _.extend({
+const hookModel = (props?: Partial<HookModel>) => {
+  return _.extend<HookModel>({
     id: _.uniqueId('h'),
     name: 'before',
     failed: false,
@@ -18,8 +18,8 @@ const hookModel = (props?: HookModel) => {
   }, props)
 }
 
-const model = (props?: HooksModel) => {
-  return _.extend({
+const model = (props?: Partial<HooksModel>) => {
+  return _.extend<HooksModel>({
     hooks: [hookModel(), hookModel(), hookModel()],
   }, props)
 }
@@ -39,7 +39,7 @@ describe('<Hooks />', () => {
     })
 
     it('renders with hook-failed class when failed', () => {
-      const component = shallow(<Hook model={hookModel({ failed: true } as HookModel)} />)
+      const component = shallow(<Hook model={hookModel({ failed: true })} />)
 
       expect(component).to.have.className('hook-failed')
     })
