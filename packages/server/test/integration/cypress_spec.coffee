@@ -44,6 +44,7 @@ browserUtils = require("#{root}lib/browsers/utils")
 chromeBrowser = require("#{root}lib/browsers/chrome")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
+v             = require("#{root}lib/util/validation")
 system        = require("#{root}lib/util/system")
 appData       = require("#{root}lib/util/app_data")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
@@ -157,10 +158,10 @@ describe "lib/cypress", ->
     # sanity checks to make sure the browser objects we pass during tests
     # all pass the internal validation function
     it "has valid browsers", ->
-      config.validateBrowserList(TYPICAL_BROWSERS)
+      expect(v.isValidBrowserList("browsers", TYPICAL_BROWSERS)).to.be.true
 
     it "has valid electron browser", ->
-      config.validateBrowserList([ELECTRON_BROWSER])
+      expect(v.isValidBrowserList("browsers", [ELECTRON_BROWSER])).to.be.true
 
     it "allows browser major to be a number", ->
       browser = {
@@ -171,10 +172,11 @@ describe "lib/cypress", ->
         path: '/some/path',
         majorVersion: 80
       }
-      config.validateBrowserList([browser])
+      expect(v.isValidBrowserList("browsers", [browser])).to.be.true
 
     it "validates returned list", ->
-      browserUtils.getBrowsers().then(config.validateBrowserList)
+      browserUtils.getBrowsers().then (list) ->
+        expect(v.isValidBrowserList("browsers", list)).to.be.true
 
   context "--get-key", ->
     it "writes out key and exits on success", ->
