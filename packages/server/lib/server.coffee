@@ -360,26 +360,6 @@ class Server
         _.invoke(reqStream, "abort")
         _.invoke(currentPromisePhase, "cancel")
 
-      ## if we have a buffer for this url
-      ## then just respond with its details
-      ## so we are idempotant and do not make
-      ## another request
-      if obj = buffers.getByOriginalUrl(urlStr)
-        debug("got previous request buffer for url:", urlStr)
-
-        ## reset the cookies from the buffer on the browser
-        return runPhase ->
-          resolve(
-            Promise.map obj.details.cookies, (cookie) ->
-              ## prevent prepending a . to the cookie domain if top-level
-              ## navigation occurs as a result of a cy.visit
-              if _.isUndefined(cookie.hostOnly) && !cookie.domain?.startsWith('.')
-                cookie.hostOnly = true
-
-              automationRequest('set:cookie', cookie)
-            .return(obj.details)
-          )
-
       redirects = []
       newUrl = null
 

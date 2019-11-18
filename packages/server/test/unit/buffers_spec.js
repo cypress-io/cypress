@@ -33,18 +33,6 @@ describe('lib/util/buffers', () => {
     })
   })
 
-  context('#getByOriginalUrl', () => {
-    it('returns buffer by originalUrl', () => {
-      const obj = { originalUrl: 'foo' }
-
-      buffers.set(obj)
-
-      const buffer = buffers.getByOriginalUrl('foo')
-
-      expect(buffer.originalUrl).to.eq(obj.originalUrl)
-    })
-  })
-
   context('#take', () => {
     it('removes the found buffer', () => {
       const obj = { url: 'https://www.google.com/' }

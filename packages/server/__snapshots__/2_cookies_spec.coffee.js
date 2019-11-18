@@ -46,14 +46,14 @@ exports['e2e cookies with baseurl'] = `
           ✓ can set cookies on lots of redirects, ending with same domain
 
 
-  14 passing
+  18 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        14                                                                               │
-  │ Passing:      14                                                                               │
+  │ Tests:        18                                                                               │
+  │ Passing:      18                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -77,9 +77,9 @@ exports['e2e cookies with baseurl'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec_baseurl.coffee              XX:XX       14       14        -        -        - │
+  │ ✔  cookies_spec_baseurl.coffee              XX:XX       18       18        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       14       14        -        -        -  
+    ✔  All specs passed!                        XX:XX       18       18        -        -        -  
 
 
 `

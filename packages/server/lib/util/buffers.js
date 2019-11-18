@@ -37,14 +37,6 @@ module.exports = {
     buffer = obj
   },
 
-  getByOriginalUrl (str) {
-    if (buffer && buffer.originalUrl === stripPort(str)) {
-      debug('found request buffer by original url %o', { str, buffer: _.pick(buffer, 'url', 'originalUrl', 'details') })
-
-      return buffer
-    }
-  },
-
   get (str) {
     if (buffer && buffer.url === stripPort(str)) {
       return buffer
