@@ -1029,7 +1029,7 @@ describe "lib/config", ->
         }
       })
 
-    it "restores list of browsers if the user removes it", ->
+    it "keeps the list of browsers if the plugins returns empty object", ->
       browser = {
         name: "fake browser name",
         family: "chrome",
@@ -1049,8 +1049,6 @@ describe "lib/config", ->
         }
       }
 
-      # if the user has removed an empty object from the plugins
-      # the browsers are gone - the original list will be preserved
       overrides = {}
 
       expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
@@ -1063,7 +1061,7 @@ describe "lib/config", ->
         }
       })
 
-    it "restores list of browsers if the user sets it to null", ->
+    it "catches browsers=null returned from plugins", ->
       browser = {
         name: "fake browser name",
         family: "chrome",
@@ -1087,46 +1085,9 @@ describe "lib/config", ->
         browsers: null
       }
 
-      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
-        browsers: [browser],
-        resolved: {
-          browsers: {
-            value: [browser],
-            from: "default"
-          }
-        }
-      })
-
-    it "restores list of browsers and sets resolved", ->
-      browser = {
-        name: "fake browser name",
-        family: "chrome",
-        displayName: "My browser",
-        version: "x.y.z",
-        path: "/path/to/browser",
-        majorVersion: "x"
-      }
-
-      cfg = {
-        browsers: [browser],
-        # note how resolved is empty
-        resolved: {}
-      }
-
-      overrides = {
-        browsers: null
-      }
-
-      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
-        browsers: [browser],
-        resolved: {
-          # gets resolved from default
-          browsers: {
-            value: [browser],
-            from: "default"
-          }
-        }
-      })
+      sinon.stub(errors, "throw")
+      config.updateWithPluginValues(cfg, overrides)
+      expect(errors.throw).to.have.been.calledWith("CONFIG_VALIDATION_ERROR")
 
     it "allows user to filter browsers", ->
       browserOne = {
