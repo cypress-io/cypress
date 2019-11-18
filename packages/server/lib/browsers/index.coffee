@@ -55,7 +55,7 @@ ensureAndGetByNameOrPath = (nameOrPath, returnAll = false, browsers = null) ->
 
   findBrowsers
   .then (browsers = []) ->
-    debug("searching for browser '%s' among %s",
+    debug("searching for browser %o", { nameOrPath, knownBrowsers: browsers })
       nameOrPath, pluralize("browser", browsers.length, true))
 
     ## try to find the browser by name with the highest version property
