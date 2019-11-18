@@ -5,8 +5,8 @@ Thanks for taking the time to contribute! :smile:
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
 - Join the [Cypress Gitter chat](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
-- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
-- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/.github/CONTRIBUTING.md#adding-examples).
+- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/.github/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
 **Want to dive deeper into how Cypress works? There are several ways you can help with the development of Cypress:**
@@ -53,7 +53,7 @@ Build status | Description
 
 ## Code of Conduct
 
-All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+All contributors are expecting to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Opening Issues
 
@@ -225,7 +225,7 @@ Some issues are resolved by the community, by giving some guidance or a workarou
 ## Writing Documentation
 
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/.github/CONTRIBUTING.md).
 
 ## Writing code
 
@@ -501,7 +501,7 @@ After a PR has been opened for a dependency update, our `cypress-bot` will comme
 
 ## Deployment
 
-We will try to review and merge pull requests quickly. After merging we will try releasing a new version. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](DEPLOY.md)
+We will try to review and merge pull requests quickly. After merging we will try releasing a new version. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](./DEPLOY.md)
 
 ## Known problems
 
