@@ -3,7 +3,7 @@ import React from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import defaultEvents from '../lib/events'
+import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'
 
 import Controls from './controls'
@@ -12,7 +12,7 @@ import { StatsStore } from './stats-store'
 
 interface Props {
   appState: AppState
-  events?: any
+  events?: Events
   statsStore: StatsStore
 }
 

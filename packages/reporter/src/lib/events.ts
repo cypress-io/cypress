@@ -27,7 +27,7 @@ export interface Events {
   scroller: Scroller
 
   init: ((args: InitEvent) => void)
-  listen: ((runner: any) => void)
+  listen: ((runner: Runner) => void)
   emit: ((event: string | symbol, ...args: any) => void)
   __off: (() => void)
 }

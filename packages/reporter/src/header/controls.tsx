@@ -5,7 +5,7 @@ import React from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import defaultEvents from '../lib/events'
+import defaultEvents, { Events } from '../lib/events'
 import { AppState } from '../lib/app-state'
 
 const ifThen = (condition: boolean, component: React.ReactNode) => (
@@ -13,7 +13,7 @@ const ifThen = (condition: boolean, component: React.ReactNode) => (
 )
 
 interface Props {
-  events?: any
+  events?: Events
   appState: AppState
 }
 

@@ -38,7 +38,7 @@ type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
 
 class RunnablesStore {
   @observable isReady = defaults.isReady
-  @observable runnables: Array<any> = []
+  @observable runnables: Array<TestModel | SuiteModel> = []
   hasTests: boolean = false
   hasSingleTest: boolean = false
 

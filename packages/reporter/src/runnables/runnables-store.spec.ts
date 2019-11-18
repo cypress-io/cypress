@@ -1,7 +1,7 @@
 import sinon, { SinonSpy } from 'sinon'
 
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from './runnables-store'
-import { SuiteProps } from './suite-model'
+import SuiteModel, { SuiteProps } from './suite-model'
 
 import { AppState } from '../lib/app-state'
 import { Scroller } from '../lib/scroller'
@@ -81,8 +81,8 @@ describe('runnables store', () => {
       instance.setRunnables(createRootRunnable())
       expect(instance.runnables.length).to.equal(3)
       expect(instance.runnables[0].title).to.equal('test 1')
-      expect(instance.runnables[1].children.length).to.equal(4)
-      expect(instance.runnables[2].children.length).to.equal(1)
+      expect((instance.runnables[1] as SuiteModel).children.length).to.equal(4)
+      expect((instance.runnables[2] as SuiteModel).children.length).to.equal(1)
     })
 
     it('sets the appropriate types', () => {
@@ -98,17 +98,17 @@ describe('runnables store', () => {
       rootRunnable.tests![0].commands = [createCommand(1, 1)]
       rootRunnable.tests![0].routes = [createRoute(1, 1), createRoute(2, 1)]
       instance.setRunnables(rootRunnable)
-      expect(instance.runnables[0].agents.length).to.equal(3)
-      expect(instance.runnables[0].commands.length).to.equal(1)
-      expect(instance.runnables[0].routes.length).to.equal(2)
+      expect((instance.runnables[0] as TestModel).agents.length).to.equal(3)
+      expect((instance.runnables[0] as TestModel).commands.length).to.equal(1)
+      expect((instance.runnables[0] as TestModel).routes.length).to.equal(2)
     })
 
     it('sets the appropriate nesting levels', () => {
       instance.setRunnables(createRootRunnable())
       expect(instance.runnables[0].level).to.equal(0)
       expect(instance.runnables[1].level).to.equal(0)
-      expect(instance.runnables[1].children[0].level).to.equal(1)
-      expect(instance.runnables[1].children[2].children[0].level).to.equal(2)
+      expect((instance.runnables[1] as SuiteModel).children[0].level).to.equal(1)
+      expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].level).to.equal(2)
     })
 
     it('sets .isReady flag', () => {
@@ -145,7 +145,7 @@ describe('runnables store', () => {
       instance.setRunnables({ tests: [], suites: [createSuite(1, [], []), createSuite(2, [createTest(1)], [])] })
       expect(instance.runnables[0].shouldRender).to.be.true
       expect(instance.runnables[1].shouldRender).to.be.true
-      expect(instance.runnables[1].children[0].shouldRender).to.be.true
+      expect((instance.runnables[1] as SuiteModel).children[0].shouldRender).to.be.true
     })
 
     it('sets scrollTop when app is running and initial scrollTop has been set', () => {
@@ -184,7 +184,7 @@ describe('runnables store', () => {
     it('starts the test with the given id', () => {
       instance.setRunnables({ tests: [createTest(1)], suites: [] })
       instance.runnableStarted({ id: 1 } as TestModel)
-      expect(instance.runnables[0].isActive).to.be.true
+      expect((instance.runnables[0] as TestModel).isActive).to.be.true
     })
   })
 
@@ -193,7 +193,7 @@ describe('runnables store', () => {
       instance.setRunnables({ tests: [createTest(1)], suites: [] })
       instance.runnableStarted({ id: 1 } as TestModel)
       instance.runnableFinished({ id: 1 } as TestModel)
-      expect(instance.runnables[0].isActive).to.be.false
+      expect((instance.runnables[0] as TestModel).isActive).to.be.false
     })
   })
 

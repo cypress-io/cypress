@@ -2,12 +2,17 @@
 import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 
 import Controls from './controls'
 import { AppState } from '../lib/app-state'
+import { Events } from '../lib/events'
 
-const eventsStub = () => ({ emit: sinon.spy() })
+type EventsStub = Events & {
+  emit: SinonSpy
+}
+
+const eventsStub = () => ({ emit: sinon.spy() } as EventsStub)
 
 const appStateStub = (props?: Partial<AppState>) => {
   return _.extend<AppState>({
