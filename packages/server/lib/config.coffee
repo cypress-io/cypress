@@ -149,7 +149,7 @@ validationRules = {
   animationDistanceThreshold: v.isNumber
   baseUrl: v.isFullyQualifiedUrl
   blacklistHosts: v.isStringOrArrayOfStrings
-  browsers: v.validateBrowserList
+  browsers: v.isValidBrowserList
   chromeWebSecurity: v.isBoolean
   configFile: v.isStringOrFalse
   defaultCommandTimeout: v.isNumber

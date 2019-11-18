@@ -75,3 +75,15 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
     }
   ]
 }
+
+exports['undefined browsers'] = `
+Missing browsers list
+`
+
+exports['empty list of browsers'] = `
+Expected at list one browser
+`
+
+exports['browsers list with a string'] = `
+Found an error while validating the \`browsers\` list. Expected \`name\` to be a non-empty string. Instead the value was: \`"foo"\`
+`

@@ -87,7 +87,7 @@ const isValidBrowser = (browser) => {
 /**
  * Validates the list of browsers.
  */
-const validateBrowserList = (key, browsers) => {
+const isValidBrowserList = (key, browsers) => {
   debug('browsers %o', browsers)
   if (!browsers) {
     return 'Missing browsers list'
@@ -117,7 +117,7 @@ const validateBrowserList = (key, browsers) => {
 module.exports = {
   isValidBrowser,
 
-  validateBrowserList,
+  isValidBrowserList,
 
   isNumber (key, value) {
     if (value == null || isNumber(value)) {

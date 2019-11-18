@@ -3,6 +3,12 @@ snapshot = require("snap-shot-it")
 v = require("#{root}lib/util/validation")
 
 describe "lib/util/validation", ->
+  context "#isValidBrowserList", ->
+    it "does not allow empty or not browsers", ->
+      snapshot("undefined browsers", v.isValidBrowserList("browsers"))
+      snapshot("empty list of browsers", v.isValidBrowserList("browsers", []))
+      snapshot("browsers list with a string", v.isValidBrowserList("browsers", ["foo"]))
+
   context "#isValidBrowser", ->
     it "passes valid browsers and forms error messages for invalid ones", ->
       browsers = [
