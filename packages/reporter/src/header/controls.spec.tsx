@@ -5,18 +5,18 @@ import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Controls from './controls'
-import { IAppState } from '../lib/app-state'
+import { AppState } from '../lib/app-state'
 
 const eventsStub = () => ({ emit: sinon.spy() })
 
-const appStateStub = (props?: Partial<IAppState>) => {
-  return _.extend({
+const appStateStub = (props?: Partial<AppState>) => {
+  return _.extend<AppState>({
     autoScrollingEnabled: true,
     isPaused: false,
     isRunning: true,
     nextCommandName: null,
     toggleAutoScrolling: sinon.spy(),
-  }, props) as IAppState
+  }, props)
 }
 
 describe('<Controls />', () => {
@@ -113,7 +113,7 @@ describe('<Controls />', () => {
   })
 
   describe('when paused with next command', () => {
-    let appState: IAppState
+    let appState: AppState
 
     beforeEach(() => {
       appState = appStateStub({ isPaused: true, nextCommandName: 'next command' })
@@ -173,7 +173,7 @@ describe('<Controls />', () => {
   })
 
   describe('when not running', () => {
-    let appState: IAppState
+    let appState: AppState
 
     beforeEach(() => {
       appState = appStateStub({ isRunning: false })

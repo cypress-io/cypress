@@ -4,14 +4,14 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import defaultEvents from '../lib/events'
-import { IAppState } from '../lib/app-state'
+import { AppState } from '../lib/app-state'
 
 import Controls from './controls'
 import Stats from './stats'
 import { IStatsStore } from './stats-store'
 
 interface Props {
-  appState: IAppState
+  appState: AppState
   events?: any
   statsStore: IStatsStore
 }

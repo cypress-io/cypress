@@ -6,7 +6,7 @@ import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import defaultEvents from '../lib/events'
-import { IAppState } from '../lib/app-state'
+import { AppState } from '../lib/app-state'
 
 const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null
@@ -14,7 +14,7 @@ const ifThen = (condition: boolean, component: React.ReactNode) => (
 
 interface Props {
   events?: any
-  appState: IAppState
+  appState: AppState
 }
 
 const Controls = observer(({ events = defaultEvents, appState }: Props) => {

@@ -15,12 +15,7 @@ const defaults: DefaultAppState = {
   pinnedSnapshotId: null,
 }
 
-export interface IAppState extends DefaultAppState {
-  autoScrollingEnabled: boolean
-  [key: string]: any
-}
-
-class AppState implements IAppState {
+class AppState {
   @observable autoScrollingEnabled = true
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
