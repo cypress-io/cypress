@@ -1,18 +1,29 @@
 import _ from 'lodash'
 import { shallow } from 'enzyme'
 import React from 'react'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 
-import { Reporter } from './main'
+import { Reporter, ReporterProps } from './main'
 import Header from './header/header'
 import Runnables from './runnables/runnables'
+import { Events } from './lib/events'
+import { AppState } from './lib/app-state'
 
 const runnablesStore = {}
 const scroller = {}
 const statsStore = {}
 const error = { title: 'Some error', message: '' }
-const getProps = (props) => {
-  return _.extend({
+
+type AppStateStub = AppState & {
+  setAutoScrolling: SinonSpy
+}
+
+type ReporterPropsStub = ReporterProps & {
+  appState: AppStateStub
+}
+
+const getProps = (props?: Partial<ReporterPropsStub>) => {
+  return _.extend<ReporterPropsStub>({
     autoScrollingEnabled: true,
     error,
     runner: { emit: () => {}, on: () => {} },
@@ -26,10 +37,15 @@ const getProps = (props) => {
   }, props)
 }
 
+type EventsStub = Events & {
+  init: SinonSpy
+  listen: SinonSpy
+}
+
 const eventsStub = () => ({
   init: sinon.spy(),
   listen: sinon.spy(),
-})
+} as EventsStub)
 
 describe('<Reporter />', () => {
   it('initializes the events with the app state, runnables store, scroller, and stats store', () => {
@@ -47,7 +63,7 @@ describe('<Reporter />', () => {
 
   it('sets appState.autoScrollingEnabled', () => {
     const props = getProps({
-      appState: { setAutoScrolling: sinon.spy() },
+      appState: { setAutoScrolling: sinon.spy() } as AppStateStub,
       autoScrollingEnabled: false,
     })
 

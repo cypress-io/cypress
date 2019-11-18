@@ -15,6 +15,11 @@ interface InitEvent {
   scroller: Scroller
 }
 
+export interface Runner {
+  emit: ((event: string, payload?: any) => void)
+  on: ((event: string, action: ((...args: any) => void)) => void)
+}
+
 export interface Events {
   appState: AppState | null
   runnablesStore: RunnablesStore | null
@@ -50,7 +55,7 @@ const events: Events = {
     this.scroller = scroller
   },
 
-  listen (runner) {
+  listen (runner: Runner) {
     const { appState, runnablesStore, scroller, statsStore } = this
 
     runner.on('runnables:ready', action('runnables:ready', (rootRunnable: RootRunnable = {}) => {

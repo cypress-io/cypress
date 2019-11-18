@@ -4,20 +4,34 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
+// @ts-ignore
 import EQ from 'css-element-queries/src/ElementQueries'
 
-import appState from './lib/app-state'
-import events from './lib/events'
-import runnablesStore from './runnables/runnables-store'
-import scroller from './lib/scroller'
-import statsStore from './header/stats-store'
+import { Error } from './errors/an-error'
+import appState, { AppState } from './lib/app-state'
+import events, { Runner, Events } from './lib/events'
+import runnablesStore, { RunnablesStore } from './runnables/runnables-store'
+import scroller, { Scroller } from './lib/scroller'
+import statsStore, { StatsStore } from './header/stats-store'
 import shortcuts from './lib/shortcuts'
 
 import Header from './header/header'
 import Runnables from './runnables/runnables'
 
+export interface ReporterProps {
+  appState: AppState
+  autoScrollingEnabled?: boolean
+  runnablesStore: RunnablesStore
+  runner: Runner
+  scroller: Scroller
+  statsStore: StatsStore
+  events: Events
+  error?: Error
+  specPath: string
+}
+
 @observer
-class Reporter extends Component {
+class Reporter extends Component<ReporterProps> {
   static propTypes = {
     autoScrollingEnabled: PropTypes.bool,
     error: PropTypes.shape({
@@ -81,6 +95,14 @@ class Reporter extends Component {
   }
   componentWillUnmount () {
     shortcuts.stop()
+  }
+}
+
+declare global {
+  interface Window {
+    Cypress: any
+    state: AppState
+    render: ((props: ReporterProps) => void)
   }
 }
 
