@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import sinon from 'sinon'
+import sinon, { SinonFakeTimers } from 'sinon'
 
 import Command, { CommandProps } from './command-model'
 
@@ -18,7 +18,7 @@ const model = (props?: Partial<CommandProps>) => {
 }
 
 describe('Command model', () => {
-  let clock: sinon.SinonFakeTimers
+  let clock: SinonFakeTimers
 
   beforeEach(() => {
     clock = sinon.useFakeTimers()

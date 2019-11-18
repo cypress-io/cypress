@@ -1,4 +1,4 @@
-import sinon from 'sinon'
+import sinon, { SinonFakeTimers } from 'sinon'
 
 import statsStore, { StatsStore } from './stats-store'
 
@@ -9,7 +9,7 @@ describe('stats store', () => {
 
   context('#start', () => {
     describe('when running', () => {
-      let clock: sinon.SinonFakeTimers
+      let clock: SinonFakeTimers
       let instance: StatsStore
 
       beforeEach(() => {

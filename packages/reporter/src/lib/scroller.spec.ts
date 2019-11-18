@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import sinon, { SinonSpy } from 'sinon'
+import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
 
 import scroller from './scroller'
 
@@ -36,7 +36,7 @@ const getElement = (props?: ElementProps): HTMLElement => {
 }
 
 describe('scroller', () => {
-  let clock: sinon.SinonFakeTimers
+  let clock: SinonFakeTimers
 
   beforeEach(() => {
     clock = sinon.useFakeTimers()

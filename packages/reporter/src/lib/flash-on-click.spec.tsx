@@ -1,6 +1,6 @@
 import { shallow, ShallowWrapper } from 'enzyme'
 import React from 'react'
-import sinon from 'sinon'
+import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
 
 import FlashOnClick from './flash-on-click'
 
@@ -26,8 +26,8 @@ describe('<FlashOnClick />', () => {
   })
 
   describe('clicking content', () => {
-    let clock: sinon.SinonFakeTimers
-    let onClick: sinon.SinonSpyStatic
+    let clock: SinonFakeTimers
+    let onClick: SinonSpy
     let component: ShallowWrapper<any, {}, FlashOnClick>
 
     beforeEach(() => {
