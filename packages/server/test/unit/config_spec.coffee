@@ -1479,38 +1479,6 @@ describe "lib/config", ->
 
         expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)
 
-  context ".validateBrowserList", ->
-    it "throws on invalid browser list", ->
-      expect(() -> config.validateBrowserList()).to.throw()
-      expect(() -> config.validateBrowserList({foo: "bar"})).to.throw()
-      expect(() -> config.validateBrowserList([])).to.throw()
-
-    it "throws on invalid browser", ->
-      invalid = {
-        name: "fake browser name"
-      }
-      expect(() -> config.validateBrowserList([invalid])).to.throw()
-
-    it "passes for valid list", ->
-      browser = {
-        name: "fake browser name",
-        family: "chrome",
-        displayName: "My browser",
-        version: "x.y.z",
-        path: "/path/to/browser",
-        majorVersion: "x"
-      }
-      alias = {
-        "name": "chrome",
-        "family": "chrome",
-        "displayName": "Chrome",
-        "version": "73.0.3683.103",
-        "path": "google-chrome",
-        "majorVersion": "73"
-      }
-      validate = -> config.validateBrowserList([browser, alias])
-      expect(validate).to.not.throw()
-
   context ".setNodeBinary", ->
     beforeEach ->
       @findSystemNode = sinon.stub(findSystemNode, "findNodePathAndVersion")
