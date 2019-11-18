@@ -1,13 +1,14 @@
 import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 
 import Runnable, { Suite } from './runnable-and-suite'
 import Test from '../test/test'
+import SuiteModel from './suite-model'
 
-const model = (props) => {
-  return _.extend({
+const model = (props?: Partial<SuiteModel>) => {
+  return _.extend<SuiteModel>({
     state: 'passed',
     type: 'suite',
     shouldRender: true,
@@ -41,7 +42,7 @@ describe('<Runnable />', () => {
   })
 
   context('hovering', () => {
-    let stopPropagation
+    let stopPropagation: SinonSpy
 
     beforeEach(() => {
       stopPropagation = sinon.spy()
@@ -103,7 +104,7 @@ describe('<Runnable />', () => {
     })
 
     it('renders a runnable for each child', () => {
-      const component = shallow(<Suite model={model({ children: [{ id: 1 }, { id: 2 }] })} />)
+      const component = shallow(<Suite model={model({ children: [{ id: 1 }, { id: 2 }] } as SuiteModel)} />)
 
       expect(component.find(Runnable).length).to.equal(2)
     })

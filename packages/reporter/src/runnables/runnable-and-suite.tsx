@@ -2,14 +2,21 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, MouseEvent } from 'react'
 
 import { indent } from '../lib/util'
 
 import Test from '../test/test'
 import Collapsible from '../collapsible/collapsible'
 
-const Suite = observer(({ model }) => {
+import SuiteModel from './suite-model'
+import TestModel from '../test/test-model'
+
+interface SuiteProps {
+  model: SuiteModel
+}
+
+const Suite = observer(({ model }: SuiteProps) => {
   if (!model.shouldRender) return null
 
   return (
@@ -27,8 +34,12 @@ const Suite = observer(({ model }) => {
   )
 })
 
+export interface RunnableProps {
+  model: TestModel | SuiteModel
+}
+
 @observer
-class Runnable extends Component {
+class Runnable extends Component<RunnableProps> {
   @observable isHovering = false
 
   render () {
@@ -42,12 +53,12 @@ class Runnable extends Component {
         onMouseOver={this._hover(true)}
         onMouseOut={this._hover(false)}
       >
-        {model.type === 'test' ? <Test model={model} /> : <Suite model={model} />}
+        {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
       </li>
     )
   }
 
-  _hover = (shouldHover) => action('runnable:hover', (e) => {
+  _hover = (shouldHover: boolean) => action('runnable:hover', (e: MouseEvent) => {
     e.stopPropagation()
     this.isHovering = shouldHover
   })

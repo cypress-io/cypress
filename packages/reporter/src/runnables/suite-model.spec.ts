@@ -1,9 +1,10 @@
-import Suite, { Children } from './suite-model'
+import Suite from './suite-model'
+import TestModel from '../test/test-model'
 
-const suiteWithChildren = (children: Array<Children>) => {
+const suiteWithChildren = (children: Array<Partial<TestModel>>) => {
   const suite = new Suite({ id: 1, title: '' }, 0)
 
-  suite.children = children
+  suite.children = children as Array<TestModel>
 
   return suite
 }
