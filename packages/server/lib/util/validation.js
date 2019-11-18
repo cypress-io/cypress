@@ -50,6 +50,10 @@ const { isArray } = _
 const isNumber = _.isFinite
 const { isString } = _
 
+/**
+ * Validates a single browser object.
+ * @returns {string|true} Returns `true` if the object is matching browser object schema. Returns an error message if it does not.
+ */
 const isValidBrowser = (browser) => {
   if (!is.unemptyString(browser.name)) {
     return errMsg('name', browser, 'a non-empty string')
@@ -111,6 +115,8 @@ const validateBrowserList = (key, browsers) => {
 }
 
 module.exports = {
+  isValidBrowser,
+
   validateBrowserList,
 
   isNumber (key, value) {
