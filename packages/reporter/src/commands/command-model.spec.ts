@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import sinon, { SinonFakeTimers } from 'sinon'
 
-import Command, { CommandProps } from './command-model'
+import CommandModel, { CommandProps as CommandModelProps } from './command-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
-const model = (props?: Partial<CommandProps>) => {
-  return _.extend({
+const commandProps = (props?: Partial<CommandModelProps>) => {
+  return _.extend<CommandModelProps>({
     renderProps: {},
     err: {},
     event: false,
@@ -14,7 +14,7 @@ const model = (props?: Partial<CommandProps>) => {
     numElements: 1,
     state: 'pending',
     visible: true,
-  }, props) as CommandProps
+  }, props)
 }
 
 describe('Command model', () => {
@@ -30,10 +30,10 @@ describe('Command model', () => {
 
   context('.isLongRunning', () => {
     describe('when model is pending on initialization and LONG_RUNNING_THRESHOLD passes', () => {
-      let command: Command
+      let command: CommandModel
 
       beforeEach(() => {
-        command = new Command(model())
+        command = new CommandModel(commandProps())
       })
 
       it('sets isLongRunning to true if model is still pending', () => {
@@ -50,12 +50,12 @@ describe('Command model', () => {
   })
 
   describe('when model is not pending on initialization, is updated to pending, and LONG_RUNNING_THRESHOLD passes', () => {
-    let command: Command
+    let command: CommandModel
 
     beforeEach(() => {
-      command = new Command(model({ state: null }))
+      command = new CommandModel(commandProps({ state: null }))
       clock.tick(300)
-      command.update({ state: 'pending' } as CommandProps)
+      command.update({ state: 'pending' } as CommandModelProps)
     })
 
     it('sets isLongRunning to true if model is still pending', () => {

@@ -13,7 +13,7 @@ import FlashOnClick from '../lib/flash-on-click'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
-import { default as CommandModel } from './command-model'
+import CommandModel from './command-model'
 
 const md = new Markdown()
 
