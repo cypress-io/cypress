@@ -5,7 +5,6 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
-import events from '../lib/events'
 import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore from '../runnables/runnables-store'
 import scroller from '../lib/scroller'
@@ -27,7 +26,6 @@ const NoCommands = observer(() => (
 class Test extends Component {
   static defaultProps = {
     appState,
-    events,
     runnablesStore,
     scroller,
   }
@@ -110,7 +108,7 @@ class Test extends Component {
         <div className='runnable-commands-region'>
           {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
         </div>
-        <TestError events={events} model={model} onOpenFile={this._openFile} />
+        <TestError model={model} />
       </div>
     )
   }
@@ -133,15 +131,6 @@ class Test extends Component {
     } else {
       this.isOpen = !this.isOpen
     }
-  }
-
-  _openFile = ({ absoluteFile: file, line, column }, where) => {
-    events.emit('open:file', {
-      where,
-      file,
-      line,
-      column,
-    })
   }
 }
 

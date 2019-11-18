@@ -5,6 +5,7 @@ import Markdown from 'markdown-it'
 
 import ErrorCodeFrame from '../errors/error-code-frame'
 import ErrorStack from '../errors/error-stack'
+import events from '../lib/events'
 
 const md = new Markdown('zero')
 
@@ -14,15 +15,20 @@ const formattedMessage = (message) => {
   return message ? md.renderInline(message) : ''
 }
 
-const TestError = observer(({ model, onOpenFile }) => {
+const openFile = (where) => ({ absoluteFile: file, line, column }) => {
+  events.emit('open:file', {
+    where,
+    file,
+    line,
+    column,
+  })
+}
+
+const TestError = observer(({ model }) => {
   const { err } = model
   const { codeFrame } = err
 
   if (!err.displayMessage) return null
-
-  const openFile = (where) => (fileDetails) => {
-    onOpenFile(fileDetails, where)
-  }
 
   return (
     <div className='runnable-err-wrapper'>
