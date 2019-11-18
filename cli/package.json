@@ -30,7 +30,7 @@
     "@cypress/xvfb": "1.2.4",
     "@types/sizzle": "2.3.2",
     "arch": "2.1.1",
-    "bluebird": "3.5.0",
+    "bluebird": "3.7.1",
     "cachedir": "2.3.0",
     "chalk": "3.0.0",
     "check-more-types": "2.24.0",
