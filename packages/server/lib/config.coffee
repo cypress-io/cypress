@@ -149,7 +149,7 @@ validationRules = {
   animationDistanceThreshold: v.isNumber
   baseUrl: v.isFullyQualifiedUrl
   blacklistHosts: v.isStringOrArrayOfStrings
-  modifyObstructiveCode: v.isBoolean
+  browsers: v.validateBrowserList
   chromeWebSecurity: v.isBoolean
   configFile: v.isStringOrFalse
   defaultCommandTimeout: v.isNumber
@@ -159,6 +159,8 @@ validationRules = {
   fixturesFolder: v.isStringOrFalse
   ignoreTestFiles: v.isStringOrArrayOfStrings
   integrationFolder: v.isString
+  modifyObstructiveCode: v.isBoolean
+  nodeVersion: v.isOneOf("default", "bundled", "system")
   numTestsKeptInMemory: v.isNumber
   pageLoadTimeout: v.isNumber
   pluginsFile: v.isStringOrFalse
@@ -166,20 +168,19 @@ validationRules = {
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
-  testFiles: v.isStringOrArrayOfStrings
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber
+  testFiles: v.isStringOrArrayOfStrings
   trashAssetsBeforeRuns: v.isBoolean
   userAgent: v.isString
-  videoCompression: v.isNumberOrFalse
   video: v.isBoolean
-  videoUploadOnPasses: v.isBoolean
+  videoCompression: v.isNumberOrFalse
   videosFolder: v.isString
+  videoUploadOnPasses: v.isBoolean
   viewportHeight: v.isNumber
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
-  nodeVersion: v.isOneOf("default", "bundled", "system")
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -216,36 +217,6 @@ validateFile = (file) ->
     validate settings, (errMsg) ->
       errors.throw("SETTINGS_VALIDATION_ERROR", file, errMsg)
 
-validateBrowserList = (browsers) ->
-  # use try / catch inside to make sure we report the error
-  # and don't swallow it during integration testing
-  # otherwise I had situations where a test was failing in a very weird
-  # ways because an error was thrown here but the test continued
-  try
-    debug("validateBrowserList")
-    la(browsers, "Missing browsers list in the config", browsers)
-    la(check.array(browsers), "Expected a list of browsers", browsers)
-    la(browsers.length, "Expected at list one browser")
-
-    isValidBrowser = check.schema({
-      name: check.unemptyString,
-      family: check.oneOf(["electron", "chrome", "firefox"]),
-      displayName: check.unemptyString,
-      version: check.unemptyString,
-      # Electron browser has path "", but all other browsers
-      # should have an absolute path or an alias
-      path: check.string,
-      majorVersion: R.anyPass([check.unemptyString, check.positive])
-    })
-    browsers.forEach (browser) ->
-      debug("checking browser %o", browser)
-      la(isValidBrowser(browser), "invalid browser", browser)
-    debug("validateBrowserList list of browsers is valid")
-  catch e
-    debug("validate browser list failed with %s", e.message)
-    throw e
-
-
 hideSpecialVals = (val, key) ->
   if _.includes(CYPRESS_SPECIAL_ENV_VARS, key)
     return keys.hide(val)
@@ -253,8 +224,6 @@ hideSpecialVals = (val, key) ->
   return val
 
 module.exports = {
-  validateBrowserList
-
   getConfigKeys: -> configKeys
 
   isValidCypressEnvValue: (value) ->
@@ -443,10 +412,6 @@ module.exports = {
       merged.browsers = cfg.browsers
       if originalResolvedBrowsers
         merged.resolved.browsers = originalResolvedBrowsers
-
-    if merged.browsers
-      debug("merged browsers are %o", merged.browsers)
-      @validateBrowserList(merged.browsers)
 
     debug("merged plugins config %o", merged)
     return merged

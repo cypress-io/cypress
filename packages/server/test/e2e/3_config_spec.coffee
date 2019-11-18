@@ -2,6 +2,7 @@ e2e = require("../support/helpers/e2e")
 Fixtures = require("../support/helpers/fixtures")
 
 configWithInvalidViewport = Fixtures.projectPath("config-with-invalid-viewport")
+configWithInvalidBrowser = Fixtures.projectPath("config-with-invalid-browser")
 
 describe "e2e config", ->
   e2e.setup({
@@ -42,6 +43,15 @@ describe "e2e config", ->
     # which should show an error and exit
     e2e.exec(@, {
       project: configWithInvalidViewport
+      expectedExitCode: 1
+      snapshot: true
+    })
+
+  it.only "catches invalid browser in the configuration file", ->
+    # the test project has cypress.json with a bad browser
+    # which should show an error and exit
+    e2e.exec(@, {
+      project: configWithInvalidBrowser
       expectedExitCode: 1
       snapshot: true
     })
