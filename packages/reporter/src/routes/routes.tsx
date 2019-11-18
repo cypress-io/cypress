@@ -2,11 +2,17 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
+// @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
 import Collapsible from '../collapsible/collapsible'
+import RouteModel from './route-model'
 
-const Route = observer(({ model }) => (
+export interface RouteProps {
+  model: RouteModel
+}
+
+const Route = observer(({ model }: RouteProps) => (
   <tr className={cs({ 'no-responses': !model.numResponses })}>
     <td>{model.method}</td>
     <td>{model.url}</td>
@@ -20,13 +26,25 @@ const Route = observer(({ model }) => (
   </tr>
 ))
 
-const RoutesList = observer(({ model }) => (
+export interface RouteListModel {
+  routes: Array<RouteModel>
+}
+
+export interface RouteListProps {
+  model: RouteListModel
+}
+
+const RoutesList = observer(({ model }: RouteListProps) => (
   <tbody>
     {_.map(model.routes, (route) => <Route key={route.id} model={route} />)}
   </tbody>
 ))
 
-const Routes = observer(({ model }) => (
+export interface RoutesProps {
+  model: RouteListModel
+}
+
+const Routes = observer(({ model }: RoutesProps) => (
   <div
     className={cs('runnable-routes-region', {
       'no-routes': !model.routes.length,

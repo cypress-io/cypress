@@ -2,9 +2,10 @@ import _ from 'lodash'
 import { shallow } from 'enzyme'
 import React from 'react'
 
-import Routes, { RoutesList, Route } from './routes'
+import Routes, { RoutesList, Route, RouteListModel } from './routes'
+import RouteModel from './route-model'
 
-const routeModel = (props) => {
+const routeModel = (props?: RouteModel) => {
   return _.extend({
     id: _.uniqueId('r'),
     name: 'route',
@@ -16,7 +17,7 @@ const routeModel = (props) => {
   }, props)
 }
 
-const model = (props) => {
+const model = (props?: RouteListModel) => {
   return _.extend({
     routes: [routeModel(), routeModel()],
   }, props)
@@ -63,7 +64,7 @@ describe('<Routes />', () => {
 
   context('<Route />', () => {
     it('renders without no-responses class if numResponses is non-zero', () => {
-      const component = shallow(<Route model={routeModel({ numResponses: 1 })} />)
+      const component = shallow(<Route model={routeModel({ numResponses: 1 } as RouteModel)} />)
 
       expect(component).not.to.have.className('no-responses')
     })
@@ -87,13 +88,13 @@ describe('<Routes />', () => {
     })
 
     it('renders isStubbed as Yes if stubbed', () => {
-      const component = shallow(<Route model={routeModel({ isStubbed: true })} />)
+      const component = shallow(<Route model={routeModel({ isStubbed: true } as RouteModel)} />)
 
       expect(component.find('td').at(2)).to.have.text('Yes')
     })
 
     it('renders isStubbed as No if not stubbed', () => {
-      const component = shallow(<Route model={routeModel({ isStubbed: false })} />)
+      const component = shallow(<Route model={routeModel({ isStubbed: false } as RouteModel)} />)
 
       expect(component.find('td').at(2)).to.have.text('No')
     })
@@ -111,7 +112,7 @@ describe('<Routes />', () => {
     })
 
     it('renders the numResponses if non-zero', () => {
-      const component = shallow(<Route model={routeModel({ numResponses: 1 })} />)
+      const component = shallow(<Route model={routeModel({ numResponses: 1 } as RouteModel)} />)
 
       expect(component.find('.response-count')).to.have.text('1')
     })
