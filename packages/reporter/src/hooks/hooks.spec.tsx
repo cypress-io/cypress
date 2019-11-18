@@ -2,13 +2,14 @@ import { shallow } from 'enzyme'
 import _ from 'lodash'
 import React from 'react'
 
-import Hooks, { Hook, HookHeader } from './hooks'
+import HookModel from './hook-model'
+import Hooks, { Hook, HookHeader, HooksModel } from './hooks'
 
 const commandModel = () => {
   return { id: _.uniqueId('c') }
 }
 
-const hookModel = (props) => {
+const hookModel = (props?: HookModel) => {
   return _.extend({
     id: _.uniqueId('h'),
     name: 'before',
@@ -17,7 +18,7 @@ const hookModel = (props) => {
   }, props)
 }
 
-const model = (props) => {
+const model = (props?: HooksModel) => {
   return _.extend({
     hooks: [hookModel(), hookModel(), hookModel()],
   }, props)
@@ -38,7 +39,7 @@ describe('<Hooks />', () => {
     })
 
     it('renders with hook-failed class when failed', () => {
-      const component = shallow(<Hook model={hookModel({ failed: true })} />)
+      const component = shallow(<Hook model={hookModel({ failed: true } as HookModel)} />)
 
       expect(component).to.have.className('hook-failed')
     })

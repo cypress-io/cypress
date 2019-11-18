@@ -4,14 +4,23 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
+import HookModel from './hook-model'
 
-const HookHeader = ({ name }) => (
+export interface HookHeaderProps {
+  name: string
+}
+
+const HookHeader = ({ name }: HookHeaderProps) => (
   <span>
     {name} <span className='hook-failed-message'>(failed)</span>
   </span>
 )
 
-const Hook = observer(({ model }) => (
+export interface HookProps {
+  model: HookModel
+}
+
+const Hook = observer(({ model }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed })}>
     <Collapsible
       header={<HookHeader name={model.name} />}
@@ -25,7 +34,15 @@ const Hook = observer(({ model }) => (
   </li>
 ))
 
-const Hooks = observer(({ model }) => (
+export interface HooksModel {
+  hooks: Array<HookModel>
+}
+
+export interface HooksProps {
+  model: HooksModel
+}
+
+const Hooks = observer(({ model }: HooksProps) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => <Hook key={hook.id} model={hook} />)}
   </ul>
