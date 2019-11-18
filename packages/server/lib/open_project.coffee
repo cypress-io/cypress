@@ -111,7 +111,7 @@ create = ->
               spec.relative
             )
 
-            browsers.open(browser, options, automation)
+            browsers.open(browser, options, automation, config)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null

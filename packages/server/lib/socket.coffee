@@ -146,6 +146,7 @@ class Socket
       checkForAppErrors: ->
       onSavedStateChanged: ->
       onTestFileChange: ->
+      onCaptureExtensionVideoFrame: ->
 
     automationClient = null
 
@@ -235,6 +236,9 @@ class Socket
         socket.join("runner")
 
         ## TODO: what to do about runner disconnections?
+
+      socket.on 'capture:extensionVideoFrame', (data) ->
+        options.onCaptureExtensionVideoFrame(data)
 
       socket.on "spec:changed", (spec) ->
         options.onSpecChanged(spec)

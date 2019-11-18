@@ -12,7 +12,7 @@ export function create (state, Cypress) {
       const options = {
         // videoBitsPerSecond: 2500000,
         mimeType: 'video/webm',
-        timeslice: 1000,
+        // timeslice: 1000,
       }
 
       const mediaRecorder = new window.MediaRecorder(stream, options)

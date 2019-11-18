@@ -118,7 +118,7 @@ defaultPreferences = {
 module.exports = {
   send: firefoxUtil.send,
 
-  open: (browserName, url, options = {}) ->
+  open: (browserName, url, options = {}, config) ->
     preferences = _.extend({}, defaultPreferences)
     extensions = []
 
@@ -156,7 +156,7 @@ module.exports = {
     .then ->
       Promise.all([
         utils.ensureCleanCache(browserName)
-        utils.writeExtension(options.browser, options.visTextTerminal, options.proxyUrl, options.socketIoRoute)
+        utils.writeExtension(options.browser, options.visTextTerminal, options.proxyUrl, options.socketIoRoute, config)
         utils.ensureCleanCache(browserName)
       ])
     .spread (cacheDir, extensionDest, profileDir) ->

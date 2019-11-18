@@ -4,7 +4,8 @@ pick    = require("lodash/pick")
 once    = require("lodash/once")
 Promise = require("bluebird")
 client  = require("./client")
-{ getCookieUrl } = require('../lib/util')
+{ getCookieUrl, startRecording } = require('../lib/util')
+
 
 COOKIE_PROPS = ['url', 'name', 'path', 'secure', 'domain']
 GET_ALL_PROPS = COOKIE_PROPS.concat(['session', 'storeId'])
@@ -16,7 +17,7 @@ firstOrNull = (cookies) ->
   ## normalize into null when empty array
   cookies[0] ? null
 
-connect = (host, path) ->
+connect = (host, path, config) ->
   listenToCookieChanges = once ->
     browser.cookies.onChanged.addListener (info) ->
       if info.cause isnt "overwrite"
@@ -65,6 +66,11 @@ connect = (host, path) ->
     listenToCookieChanges()
 
     ws.emit("automation:client:connected")
+
+  
+  if config.video && config.browser.family is 'firefox'
+    startRecording (data) ->
+      ws.emit 'capture:extensionVideoFrame', data
 
   return ws
 
@@ -180,8 +186,7 @@ automation = {
     .then (win) ->
       browser.tabs.captureVisibleTab win.id, {format: "png"}
     .then(fn)
-    .catch ->
-      throw browser.runtime.lastError
+    
 }
 
 module.exports = automation
