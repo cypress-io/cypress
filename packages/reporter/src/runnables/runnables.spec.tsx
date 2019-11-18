@@ -1,28 +1,39 @@
 import _ from 'lodash'
 import React from 'react'
 import { mount, shallow } from 'enzyme'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 
 import Runnables, { RunnablesList } from './runnables'
 import AnError from '../errors/an-error'
+import { AppState } from '../lib/app-state'
+import { RunnablesStore } from './runnables-store'
+import { Scroller } from '../lib/scroller'
 
-const appStateStub = (props) => {
-  return _.extend({
-    isRunning: true,
-    temporarilySetAutoScrolling: sinon.spy(),
-  }, props)
+type AppStateStub = AppState & {
+  temporarilySetAutoScrolling: SinonSpy
 }
 
-const runnablesStoreStub = (props) => {
-  return _.extend({
+const appStateStub = (props?: Partial<AppState>) => {
+  return _.extend<AppState>({
+    isRunning: true,
+    temporarilySetAutoScrolling: sinon.spy(),
+  }, props) as AppStateStub
+}
+
+const runnablesStoreStub = (props?: Partial<RunnablesStore>) => {
+  return _.extend<RunnablesStore>({
     isReady: true,
     runnables: [],
   }, props)
 }
 
+type ScrollerStub = Scroller & {
+  setContainer: SinonSpy
+}
+
 const scrollerStub = () => ({
   setContainer: sinon.spy(),
-})
+} as ScrollerStub)
 
 describe('<Runnables />', () => {
   it('renders <RunnablesList /> when there are runnables', () => {

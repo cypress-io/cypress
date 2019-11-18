@@ -3,10 +3,13 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import AnError from '../errors/an-error'
+import AnError, { Error } from '../errors/an-error'
 import Runnable from './runnable-and-suite'
+import { RunnablesStore } from './runnables-store'
+import { Scroller } from '../lib/scroller'
+import { AppState } from '../lib/app-state'
 
-const noTestsError = (specPath) => ({
+const noTestsError = (specPath: string) => ({
   title: 'No tests found in your file:',
   link: 'https://on.cypress.io/no-tests-found-in-your-file',
   callout: specPath,
@@ -21,7 +24,7 @@ const RunnablesList = observer(({ runnables }) => (
   </div>
 ))
 
-function content ({ isReady, runnables }, specPath, error) {
+function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
   if (!isReady) return null
 
   // show error if there are no tests, but only if there
@@ -33,8 +36,16 @@ function content ({ isReady, runnables }, specPath, error) {
   return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
 }
 
+interface RunnablesProps {
+  error?: Error
+  runnablesStore: RunnablesStore
+  specPath: string
+  scroller: Scroller
+  appState?: AppState
+}
+
 @observer
-class Runnables extends Component {
+class Runnables extends Component<RunnablesProps> {
   render () {
     const { error, runnablesStore, specPath } = this.props
 
@@ -46,9 +57,11 @@ class Runnables extends Component {
   }
 
   componentDidMount () {
-    this.props.scroller.setContainer(this.refs.container, action('user:scroll:detected', () => {
-      if (this.props.appState.isRunning) {
-        this.props.appState.temporarilySetAutoScrolling(false)
+    const { scroller, appState } = this.props
+
+    scroller.setContainer(this.refs.container as Element, action('user:scroll:detected', () => {
+      if (appState && appState.isRunning) {
+        appState.temporarilySetAutoScrolling(false)
       }
     }))
   }
