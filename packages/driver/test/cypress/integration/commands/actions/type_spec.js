@@ -1486,14 +1486,14 @@ describe('src/cy/commands/actions/type', () => {
 
           let keydown = cy.stub()
 
+          cy.$$('area:first').on('keydown', keydown)
+
           cy.get('area:first')
           // TODO: look into why using .then here does not retry chained assertions
           .should(($el) => {
-            $el.on('keydown', keydown)
-          })
-          .should(($el) => {
             $el.focus()
           })
+          .should('be.focused')
           .type('foo')
           .then(() => expect(keydown).calledThrice)
         })

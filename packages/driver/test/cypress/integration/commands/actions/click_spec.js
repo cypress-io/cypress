@@ -38,8 +38,8 @@ const attachContextmenuListeners = attachListeners(['contextmenu'])
 const overlayStyle = { position: 'fixed', top: 0, width: '100%', height: '100%', opacity: 0.5 }
 const getMidPoint = (el) => {
   const box = el.getBoundingClientRect()
-  const midX = box.left + box.width / 2
-  const midY = box.top + box.height / 2
+  const midX = Math.ceil(box.left + box.width / 2 + el.ownerDocument.defaultView.scrollX)
+  const midY = Math.ceil(box.top + box.height / 2 + el.ownerDocument.defaultView.scrollY)
 
   return { x: midX, y: midY }
 }
@@ -3428,6 +3428,9 @@ describe('src/cy/commands/actions/click', () => {
 
     it('rightclick remove el on mouseover', () => {
       const el = cy.$$('button:first')
+      .css({
+        transform: 'translateY(-50px)',
+      })
       const el2 = cy.$$('div#tabindex')
 
       el.on('mouseover', () => el.get(0).remove())
@@ -3438,7 +3441,7 @@ describe('src/cy/commands/actions/click', () => {
       attachContextmenuListeners({ el, el2 })
 
       cy.get('button:first').rightclick().should('not.exist')
-      cy.wrap(el2).should('have.focus')
+      cy.get('div#tabindex').should('have.focus')
 
       cy.getAll('el', 'pointerover mouseover').each(shouldBeCalledOnce)
       cy.getAll('el', 'pointerdown mousedown pointerup mouseup contextmenu').each(shouldNotBeCalled)
@@ -3600,11 +3603,10 @@ describe('src/cy/commands/actions/click', () => {
           this.log = log
         })
 
-        const midpoint = getMidPoint(cy.$$('button')[0])
-
         cy.get('button').first().rightclick().then(function () {
           const { lastLog } = this
 
+          const midpoint = getMidPoint(cy.$$('button')[0])
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.containSubset({
@@ -4151,19 +4153,20 @@ describe('mouse state', () => {
       attachMouseHoverListeners({ btn })
       attachMouseClickListeners({ btn })
 
-      btn.on('pointerover', () => {
+      const onAction = cy.stub().callsFake(() => {
         btn.attr('disabled', true)
       })
 
+      btn.on('pointerover', onAction)
+
       cy.get('#btn').click()
+      // cy.wrap(onAction).should('calledOnce')
 
-      cy.getAll('btn', 'pointerover pointerenter pointerdown pointerup').each((stub) => {
-        expect(stub).to.be.calledOnce
-      })
+      cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalledOnce)
+      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalledOnce)
 
-      cy.getAll('btn', 'mouseover mouseenter mousedown mouseup click').each((stub) => {
-        expect(stub).to.not.be.called
-      })
+      cy.getAll('btn', 'mouseover mouseenter').each(isFirefox ? shouldBeCalled : shouldNotBeCalled)
+      cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
     })
 
     it('handles disabled attr added on mousedown', () => {
@@ -4185,13 +4188,10 @@ describe('mouse state', () => {
 
       cy.get('#btn').click()
 
-      cy.getAll('btn', 'pointerdown mousedown pointerup').each((stub) => {
-        expect(stub).to.be.calledOnce
-      })
+      cy.getAll('btn', 'pointerdown mousedown').each(shouldBeCalledOnce)
+      cy.getAll('btn', 'pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalledOnce)
 
-      cy.getAll('btn', 'mouseup click').each((stub) => {
-        expect(stub).to.not.be.calledOnce
-      })
+      cy.getAll('btn', 'mouseup click').each(shouldNotBeCalled)
     })
 
     it('can click new element after mousemove sequence', () => {
@@ -4221,13 +4221,9 @@ describe('mouse state', () => {
 
       cy.get('#cover').click()
 
-      cy.getAll('cover', 'pointerdown mousedown pointerup mouseup click').each((stub) => {
-        expect(stub).to.not.be.called
-      })
+      cy.getAll('cover', 'pointerdown mousedown pointerup mouseup click').each(shouldNotBeCalled)
 
-      cy.getAll('btn', 'pointerdown mousedown mouseup pointerup click').each((stub) => {
-        expect(stub).to.be.calledOnce
-      })
+      cy.getAll('btn', 'pointerdown mousedown mouseup pointerup click').each(shouldBeCalledOnce)
     })
 
     it('can click new element after mousemove sequence [disabled]', () => {
@@ -4266,14 +4262,10 @@ describe('mouse state', () => {
 
       cy.get('#cover').click()
 
-      cy.getAll('btn', 'mousedown mouseup click').each((stub) => {
-        expect(stub).to.not.be.called
-      })
+      cy.getAll('btn', 'mousedown mouseup click').each(shouldNotBeCalled)
 
-      // on disabled inputs, pointer events are still fired
-      cy.getAll('btn', 'pointerdown pointerup').each((stub) => {
-        expect(stub).to.be.called
-      })
+      // on disabled inputs, pointer events are still fired in chrome, not in firefox
+      cy.getAll('btn', 'pointerdown pointerup').each(isFirefox ? shouldNotBeCalled : shouldBeCalled)
     })
 
     it('can target new element after mousedown sequence', () => {

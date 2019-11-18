@@ -286,6 +286,7 @@ verify = (cy, $el, options, callbacks) ->
         ## (see https://github.com/cypress-io/cypress/pull/1478)
 
         sticky = !!getStickyEl($el)
+        debug('push coordsHistory:', {fromElWindow: coords.fromElWindow})
         coordsHistory.push(if sticky then coords.fromElViewport else coords.fromElWindow)
 
         ## then we ensure the element isnt animating
