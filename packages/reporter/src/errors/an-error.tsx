@@ -4,7 +4,18 @@ import React from 'react'
 
 const md = new Markdown({ html: true })
 
-const AnError = observer(({ error }) => (
+export interface Error {
+  title: string
+  link?: string | null
+  callout?: string | null
+  message: string
+}
+
+export interface AnErrorProps {
+  error: Error
+}
+
+const AnError = observer(({ error }: AnErrorProps) => (
   <div className='error'>
     <h2>
       <i className='fa fa-warning'></i> {error.title}

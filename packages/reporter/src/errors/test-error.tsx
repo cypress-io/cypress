@@ -1,8 +1,15 @@
-import React from 'react'
+import React, { MouseEvent } from 'react'
 import FlashOnClick from '../lib/flash-on-click'
+import { Events } from '../lib/events'
+import TestModel from '../test/test-model'
 
-function TestError (props) {
-  function _onErrorClick (e) {
+interface Props {
+  events: Events
+  model: TestModel
+}
+
+function TestError (props: Props) {
+  function _onErrorClick (e: MouseEvent) {
     e.stopPropagation()
 
     props.events.emit('show:error', props.model.id)
