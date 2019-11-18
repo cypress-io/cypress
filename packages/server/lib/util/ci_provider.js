@@ -330,6 +330,7 @@ const _providerCiParams = () => {
       'TRAVIS_BUILD_NUMBER',
       'TRAVIS_PULL_REQUEST',
       'TRAVIS_PULL_REQUEST_BRANCH',
+      'TRAVIS_PULL_REQUEST_SHA',
     ]),
     wercker: null,
   }
