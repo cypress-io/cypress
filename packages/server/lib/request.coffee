@@ -435,18 +435,25 @@ module.exports = (options = {}) ->
         cookies = [cookies]
 
       parsedUrl = url.parse(resUrl)
-      debug('setting cookies on browser %o', { url: parsedUrl.href, cookies })
+      defaultDomain = parsedUrl.hostname
 
-      Promise.map cookies, (cookie) ->
-        cookie = tough.Cookie.parse(cookie, { loose: true })
+      debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
+
+      Promise.map cookies, (cyCookie) ->
+        cookie = tough.Cookie.parse(cyCookie, { loose: true })
+
+        debug('parsing cookie %o', { cyCookie, toughCookie: cookie })
+
         cookie.name = cookie.key
 
         if not cookie.domain
           ## take the domain from the URL
-          cookie.domain = parsedUrl.hostname
+          cookie.domain = defaultDomain
           cookie.hostOnly = true
 
-        return if not tough.domainMatch(cookie.domain, parsedUrl.hostname)
+        if not tough.domainMatch(cookie.domain, defaultDomain)
+          debug('domain match failed:', { defaultDomain })
+          return
 
         expiry = cookie.expiryTime()
         if isFinite(expiry)
