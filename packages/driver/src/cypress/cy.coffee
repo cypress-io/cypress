@@ -590,6 +590,25 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   fail = (err, runnable) ->
     stopped = true
 
+    stack = err.stack or ''
+
+    ## preserve message
+    ## and toString
+    msg = err.message
+    str = err.toString()
+
+    ## Firefox stack does not include toString'd error, so normalize
+    ## things by prepending it
+    if !_.includes(stack, str)
+      stack = "#{str}\n#{stack}"
+
+    ## set message
+    err.message = msg
+
+    ## reset stack by replacing the original first line
+    ## with the new one
+    err.stack = stack.replace(str, err.toString())
+
     ## store the error on state now
     state("error", err)
 
