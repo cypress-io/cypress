@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import { IStatsStore } from './stats-store'
+import { StatsStore } from './stats-store'
 
 const count = (num: number) => num > 0 ? num : '--'
 const formatDuration = (duration: number) => duration > 0 ? (duration / 1000).toFixed(2) : '0'
 
 interface Props {
-  stats: IStatsStore
+  stats: StatsStore
 }
 
 const Stats = observer(({ stats }: Props) => (

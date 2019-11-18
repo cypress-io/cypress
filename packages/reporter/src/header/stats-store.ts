@@ -2,16 +2,6 @@ import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 import { TestState } from '../test/test-model'
 
-export interface IStatsStore {
-  numPassed: number
-  numFailed: number
-  numPending: number
-
-  _startTime: number | null
-  _currentTime: number | null
-  [key: string]: any
-}
-
 export interface StatsStoreStartInfo {
   startTime: string
   numPassed?: number
@@ -19,7 +9,7 @@ export interface StatsStoreStartInfo {
   numPending?: number
 }
 
-const defaults: IStatsStore = {
+const defaults = {
   numPassed: 0,
   numFailed: 0,
   numPending: 0,
@@ -28,13 +18,13 @@ const defaults: IStatsStore = {
   _currentTime: null,
 }
 
-class StatsStore implements IStatsStore {
-  @observable numPassed = defaults.numPassed
-  @observable numFailed = defaults.numFailed
-  @observable numPending = defaults.numPending
+class StatsStore {
+  @observable numPassed: number = defaults.numPassed
+  @observable numFailed: number = defaults.numFailed
+  @observable numPending: number = defaults.numPending
 
-  @observable _startTime = defaults._startTime
-  @observable _currentTime = defaults._startTime;
+  @observable _startTime: number | null = defaults._startTime
+  @observable _currentTime: number | null = defaults._startTime;
   [key: string]: any
 
   private _interval: NodeJS.Timeout | undefined;

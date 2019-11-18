@@ -8,12 +8,12 @@ import { AppState } from '../lib/app-state'
 
 import Controls from './controls'
 import Stats from './stats'
-import { IStatsStore } from './stats-store'
+import { StatsStore } from './stats-store'
 
 interface Props {
   appState: AppState
   events?: any
-  statsStore: IStatsStore
+  statsStore: StatsStore
 }
 
 const Header = observer(({ appState, events = defaultEvents, statsStore }: Props) => (
