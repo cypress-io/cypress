@@ -15,17 +15,16 @@ export type UpdateTestCallback = () => void
 export interface TestProps extends RunnableProps {
   state: TestState
   err?: Err
-  hookName?: string
   isOpen?: boolean
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
 }
 
-interface UpdatableProps {
+export interface UpdatableTestProps {
   state?: TestProps['state']
   err?: TestProps['err']
-  hookName?: TestProps['hookName']
+  hookName?: string
   isOpen?: TestProps['isOpen']
 }
 
@@ -94,7 +93,7 @@ export default class Test extends Runnable {
     this.isActive = true
   }
 
-  update ({ state, err, hookName, isOpen }: UpdatableProps, cb?: UpdateTestCallback) {
+  update ({ state, err, hookName, isOpen }: UpdatableTestProps, cb?: UpdateTestCallback) {
     let hadChanges = false
 
     const disposer = observe(this, (change) => {
@@ -142,7 +141,7 @@ export default class Test extends Runnable {
     }
   }
 
-  finish (props: UpdatableProps) {
+  finish (props: UpdatableTestProps) {
     this.update(props)
     this.isActive = false
   }

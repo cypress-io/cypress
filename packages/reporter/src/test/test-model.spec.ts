@@ -3,25 +3,25 @@ import Agent from '../agents/agent-model'
 import Route from '../routes/route-model'
 import Err from '../lib/err-model'
 
-import Test, { TestProps } from './test-model'
+import TestModel, { TestProps } from './test-model'
 
 describe('Test model', () => {
   context('.state', () => {
     it('is the "state" when it exists', () => {
-      const test = new Test({ state: 'passed' } as TestProps, 0)
+      const test = new TestModel({ state: 'passed' } as TestProps, 0)
 
       expect(test.state).to.equal('passed')
     })
 
     it('is active when there is no state and isActive is true', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.isActive = true
       expect(test.state).to.equal('active')
     })
 
     it('is processing when there is no state and isActive is falsey', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       expect(test.state).to.equal('processing')
     })
@@ -29,20 +29,20 @@ describe('Test model', () => {
 
   context('.isLongRunning', () => {
     it('start out not long running', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       expect(test.isLongRunning).to.be.false
     })
 
     it('is not long running if active but without a long running command', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.start()
       expect(test.isLongRunning).to.be.false
     })
 
     it('becomes long running if active and has a long running command', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.start()
       test.addCommand({ isLongRunning: true } as Command, '')
@@ -50,7 +50,7 @@ describe('Test model', () => {
     })
 
     it('becomes not long running if it becomes inactive', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.start()
       test.addCommand({ isLongRunning: true } as Command, '')
@@ -61,7 +61,7 @@ describe('Test model', () => {
 
   context('#addAgent', () => {
     it('adds the agent to the agents collection', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.addAgent({} as Agent)
       expect(test.agents.length).to.equal(1)
@@ -70,7 +70,7 @@ describe('Test model', () => {
 
   context('#addRoute', () => {
     it('adds the route to the routes collection', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.addRoute({} as Route)
       expect(test.routes.length).to.equal(1)
@@ -79,14 +79,14 @@ describe('Test model', () => {
 
   context('#addCommand', () => {
     it('adds the command to the commands collection', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.addCommand({} as Command, '')
       expect(test.commands.length).to.equal(1)
     })
 
     it('creates a hook and adds the command to it if it does not exist', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.addCommand({} as Command, 'some hook')
       expect(test.hooks.length).to.equal(1)
@@ -94,7 +94,7 @@ describe('Test model', () => {
     })
 
     it('adds the command to an existing hook if it already exists', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
       const command: Partial<Command> = { isMatchingEvent: () => {
         return false
       } }
@@ -111,7 +111,7 @@ describe('Test model', () => {
 
   context('#start', () => {
     it('sets the test as active', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.start()
       expect(test.isActive).to.be.true
@@ -120,28 +120,28 @@ describe('Test model', () => {
 
   context('#finish', () => {
     it('sets the test as inactive', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.finish({})
       expect(test.isActive).to.be.false
     })
 
     it('updates the state of the test', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.finish({ state: 'failed' })
       expect(test.state).to.equal('failed')
     })
 
     it('updates the test err', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.finish({ err: { name: 'SomeError' } as Err })
       expect(test.err.name).to.equal('SomeError')
     })
 
     it('sets the hook to failed if it exists', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       test.addCommand({} as Command, 'some hook')
       test.finish({ hookName: 'some hook' })
@@ -149,7 +149,7 @@ describe('Test model', () => {
     })
 
     it('does not throw error if hook does not exist', () => {
-      const test = new Test({} as TestProps, 0)
+      const test = new TestModel({} as TestProps, 0)
 
       expect(() => {
         test.finish({ hookName: 'some hook' })
@@ -159,7 +159,7 @@ describe('Test model', () => {
 
   context('#commandMatchingErr', () => {
     it('returns last command matching the error', () => {
-      const test = new Test({ err: { name: 'SomeError' } as Err } as TestProps, 0)
+      const test = new TestModel({ err: { name: 'SomeError' } as Err } as TestProps, 0)
 
       test.addCommand(new Command({ err: { name: 'SomeError' } as Err } as CommandProps), 'some hook')
       test.addCommand(new Command({ err: {} as Err } as CommandProps), 'some hook')
@@ -170,7 +170,7 @@ describe('Test model', () => {
     })
 
     it('returns undefined if there are no commands with errors', () => {
-      const test = new Test({ err: { name: 'SomeError' } as Err } as TestProps, 0)
+      const test = new TestModel({ err: { name: 'SomeError' } as Err } as TestProps, 0)
 
       test.addCommand(new Command({} as CommandProps), 'some hook')
       test.addCommand(new Command({} as CommandProps), 'some hook')

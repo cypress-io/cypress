@@ -4,7 +4,7 @@ import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
-import { TestProps, UpdateTestCallback } from '../test/test-model'
+import TestModel, { TestProps, UpdateTestCallback } from '../test/test-model'
 
 const localBus = new EventEmitter()
 
@@ -91,11 +91,11 @@ const events: Events = {
       }
     }))
 
-    runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestProps) => {
+    runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestModel) => {
       runnablesStore.runnableStarted(runnable)
     }))
 
-    runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
+    runner.on('test:after:run', action('test:after:run', (runnable: TestModel) => {
       runnablesStore.runnableFinished(runnable)
       statsStore.incrementCount(runnable.state)
     }))
