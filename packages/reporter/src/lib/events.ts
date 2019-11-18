@@ -1,9 +1,9 @@
 import { EventEmitter } from 'events'
 import { action } from 'mobx'
-import { AppState } from './app-state'
-import { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
-import { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
-import { Scroller } from './scroller'
+import appState, { AppState } from './app-state'
+import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
+import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
+import scroller, { Scroller } from './scroller'
 import { TestProps, UpdateTestCallback } from '../test/test-model'
 
 const localBus = new EventEmitter()
@@ -21,10 +21,10 @@ export interface Runner {
 }
 
 export interface Events {
-  appState: AppState | null
-  runnablesStore: RunnablesStore | null
-  statsStore: StatsStore | null
-  scroller: Scroller | null
+  appState: AppState
+  runnablesStore: RunnablesStore
+  statsStore: StatsStore
+  scroller: Scroller
 
   init: ((args: InitEvent) => void)
   listen: ((runner: any) => void)
@@ -43,10 +43,10 @@ type CollectRunStateCallback = (arg: {
 }) => void
 
 const events: Events = {
-  appState: null,
-  runnablesStore: null,
-  statsStore: null,
-  scroller: null,
+  appState,
+  runnablesStore,
+  statsStore,
+  scroller,
 
   init ({ appState, runnablesStore, statsStore, scroller }: InitEvent) {
     this.appState = appState
@@ -59,75 +59,75 @@ const events: Events = {
     const { appState, runnablesStore, scroller, statsStore } = this
 
     runner.on('runnables:ready', action('runnables:ready', (rootRunnable: RootRunnable = {}) => {
-      runnablesStore!.setRunnables(rootRunnable)
+      runnablesStore.setRunnables(rootRunnable)
     }))
 
     runner.on('reporter:log:add', action('log:add', (log: LogProps) => {
-      runnablesStore!.addLog(log)
+      runnablesStore.addLog(log)
     }))
 
     runner.on('reporter:log:state:changed', action('log:update', (log: LogProps) => {
-      runnablesStore!.updateLog(log)
+      runnablesStore.updateLog(log)
     }))
 
     runner.on('reporter:restart:test:run', action('restart:test:run', () => {
-      appState!.reset()
-      runnablesStore!.reset()
-      statsStore!.reset()
+      appState.reset()
+      runnablesStore.reset()
+      statsStore.reset()
       runner.emit('reporter:restarted')
     }))
 
     runner.on('run:start', action('run:start', () => {
-      if (runnablesStore!.hasTests) {
-        appState!.startRunning()
+      if (runnablesStore.hasTests) {
+        appState.startRunning()
       }
     }))
 
     runner.on('reporter:start', action('start', (startInfo: StartInfo) => {
-      appState!.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
-      runnablesStore!.setInitialScrollTop(startInfo.scrollTop)
-      if (runnablesStore!.hasTests) {
-        statsStore!.start(startInfo)
+      appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
+      runnablesStore.setInitialScrollTop(startInfo.scrollTop)
+      if (runnablesStore.hasTests) {
+        statsStore.start(startInfo)
       }
     }))
 
     runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestProps) => {
-      runnablesStore!.runnableStarted(runnable)
+      runnablesStore.runnableStarted(runnable)
     }))
 
     runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
-      runnablesStore!.runnableFinished(runnable)
-      statsStore!.incrementCount(runnable.state)
+      runnablesStore.runnableFinished(runnable)
+      statsStore.incrementCount(runnable.state)
     }))
 
     runner.on('test:set:state', action('test:set:state', (runnable: TestProps, cb: UpdateTestCallback) => {
-      runnablesStore!.updateTest(runnable, cb)
+      runnablesStore.updateTest(runnable, cb)
     }))
 
     runner.on('paused', action('paused', (nextCommandName: string) => {
-      appState!.pause(nextCommandName)
-      statsStore!.pause()
+      appState.pause(nextCommandName)
+      statsStore.pause()
     }))
 
     runner.on('run:end', action('run:end', () => {
-      appState!.end()
-      statsStore!.end()
+      appState.end()
+      statsStore.end()
     }))
 
     runner.on('reporter:collect:run:state', (cb: CollectRunStateCallback) => {
       cb({
-        autoScrollingEnabled: appState!.autoScrollingEnabled,
-        scrollTop: scroller!.getScrollTop(),
+        autoScrollingEnabled: appState.autoScrollingEnabled,
+        scrollTop: scroller.getScrollTop(),
       })
     })
 
     runner.on('reporter:snapshot:unpinned', action('snapshot:unpinned', () => {
-      appState!.pinnedSnapshotId = null
+      appState.pinnedSnapshotId = null
     }))
 
     localBus.on('resume', action('resume', () => {
-      appState!.resume()
-      statsStore!.resume()
+      appState.resume()
+      statsStore.resume()
       runner.emit('runner:resume')
     }))
 
@@ -136,7 +136,7 @@ const events: Events = {
     }))
 
     localBus.on('stop', action('stop', () => {
-      appState!.stop()
+      appState.stop()
       runner.emit('runner:stop')
     }))
 
@@ -149,7 +149,7 @@ const events: Events = {
     })
 
     localBus.on('show:error', (testId: number) => {
-      const test = runnablesStore!.testById(testId)
+      const test = runnablesStore.testById(testId)
 
       if (test.err.isCommandErr) {
         const command = test.commandMatchingErr()
@@ -184,7 +184,7 @@ const events: Events = {
 
     localBus.on('save:state', () => {
       runner.emit('save:state', {
-        autoScrollingEnabled: appState!.autoScrollingEnabled,
+        autoScrollingEnabled: appState.autoScrollingEnabled,
       })
     })
 
