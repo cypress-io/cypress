@@ -1,21 +1,24 @@
 import _ from 'lodash'
 import React from 'react'
-import { mount, shallow } from 'enzyme'
-import sinon from 'sinon'
+import { mount, shallow, ReactWrapper } from 'enzyme'
+import sinon, { SinonSpy } from 'sinon'
 
 import Hooks from '../hooks/hooks'
 
 import Test, { NoCommands } from './test'
+import TestModel from './test-model'
+import { Scroller } from '../lib/scroller'
+import { AppState } from '../lib/app-state'
 
-const appStateStub = (props) => {
-  return _.extend({
+const appStateStub = (props?: Partial<AppState>) => {
+  return _.extend<AppState>({
     autoScrollingEnabled: true,
     isRunning: true,
   }, props)
 }
 
-const model = (props) => {
-  return _.extend({
+const model = (props?: Partial<TestModel>) => {
+  return _.extend<TestModel>({
     commands: [],
     err: {},
     id: 't1',
@@ -28,9 +31,13 @@ const model = (props) => {
   }, props)
 }
 
+type ScrollerStub = Scroller & {
+  scrollIntoView: SinonSpy
+}
+
 const scrollerStub = () => ({
   scrollIntoView: sinon.spy(),
-})
+} as ScrollerStub)
 
 describe('<Test />', () => {
   it('does not render when it should not render', () => {
@@ -103,7 +110,7 @@ describe('<Test />', () => {
     })
 
     it('renders <Hooks /> if there are commands', () => {
-      const component = shallow(<Test model={model({ commands: [{ id: 1 }], state: 'failed' })} />)
+      const component = shallow(<Test model={model({ commands: [{ id: 1 }], state: 'failed' } as TestModel)} />)
 
       expect(component.find(Hooks)).to.exist
     })
@@ -124,7 +131,7 @@ describe('<Test />', () => {
   })
 
   context('scrolling into view', () => {
-    let scroller
+    let scroller: Scroller
 
     beforeEach(() => {
       scroller = scrollerStub()
@@ -193,9 +200,9 @@ describe('<Test />', () => {
     })
 
     context('on update', () => {
-      let appState
-      let testModel
-      let component
+      let appState: AppState
+      let testModel: TestModel
+      let component: ReactWrapper<Test>
 
       beforeEach(() => {
         appState = appStateStub({ autoScrollingEnabled: false, isRunning: false })
@@ -209,28 +216,28 @@ describe('<Test />', () => {
         appState.isRunning = true
         testModel.isActive = true
         testModel.shouldRender = true
-        component.instance().componentDidUpdate()
+        component.instance()!.componentDidUpdate!({}, {})
         expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container'))
       })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {
         appState.isRunning = true
         testModel.isActive = true
-        component.instance().componentDidUpdate()
+        component.instance()!.componentDidUpdate!({}, {})
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
 
       it('does not scroll into view if app is not running', () => {
         appState.autoScrollingEnabled = true
         testModel.isActive = true
-        component.instance().componentDidUpdate()
+        component.instance()!.componentDidUpdate!({}, {})
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
 
       it('does not scroll into view if model.isActive is null', () => {
         appState.autoScrollingEnabled = true
         appState.isRunning = true
-        component.instance().componentDidUpdate()
+        component.instance()!.componentDidUpdate!({}, {})
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
     })

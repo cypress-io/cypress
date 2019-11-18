@@ -2,18 +2,21 @@ import cs from 'classnames'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+// @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import appState from '../lib/app-state'
-import events from '../lib/events'
+import appState, { AppState } from '../lib/app-state'
+import events, { Events } from '../lib/events'
 import { indent, onEnterOrSpace } from '../lib/util'
-import runnablesStore from '../runnables/runnables-store'
-import scroller from '../lib/scroller'
+import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
+import scroller, { Scroller } from '../lib/scroller'
 
 import Hooks from '../hooks/hooks'
 import Agents from '../agents/agents'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
+
+import TestModel from './test-model'
 
 const NoCommands = observer(() => (
   <ul className='hooks-container'>
@@ -23,8 +26,16 @@ const NoCommands = observer(() => (
   </ul>
 ))
 
+interface Props {
+  appState: AppState
+  events: Events
+  runnablesStore: RunnablesStore
+  scroller: Scroller
+  model: TestModel
+}
+
 @observer
-class Test extends Component {
+class Test extends Component<Props> {
   static defaultProps = {
     appState,
     events,
@@ -32,7 +43,7 @@ class Test extends Component {
     scroller,
   }
 
-  @observable isOpen = null
+  @observable isOpen: boolean | null = null
 
   componentDidMount () {
     this._scrollIntoView()
@@ -53,7 +64,7 @@ class Test extends Component {
     const { isActive, shouldRender } = model
 
     if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive != null) {
-      scroller.scrollIntoView(this.refs.container)
+      scroller.scrollIntoView(this.refs.container as HTMLElement)
     }
   }
 
@@ -76,7 +87,7 @@ class Test extends Component {
             className='runnable-title'
             onKeyPress={onEnterOrSpace(this._toggleOpen)}
             role='button'
-            tabIndex='0'
+            tabIndex={0}
           >
             {model.title}
             <span className="visually-hidden">{model.state}</span>

@@ -42,7 +42,7 @@ export default class Test extends Runnable {
   @observable _state?: TestState | null = null
   type = 'test'
 
-  private callbackAfterUpdate: (() => void) | null = null
+  callbackAfterUpdate: (() => void) | null = null
 
   constructor (props: TestProps, level: number) {
     super(props, level)

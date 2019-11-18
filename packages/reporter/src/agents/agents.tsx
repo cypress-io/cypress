@@ -4,25 +4,28 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Collapsible from '../collapsible/collapsible'
 
-import { AgentProps as AgentModelProps } from './agent-model'
+import AgentModel from './agent-model'
+import { Alias } from '../instruments/instrument-model'
 
-interface AgentProps {
-  model: AgentModelProps
+export interface AgentProps {
+  model: AgentModel
 }
 
 const Agent = observer(({ model }: AgentProps) => (
   <tr className={cs({ 'no-calls': !model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
-    <td>{([] as Array<string>).concat(model.alias || []).join(', ')}</td>
+    <td>{([] as Array<Alias>).concat(model.alias || []).join(', ')}</td>
     <td className='call-count'>{model.callCount || '-'}</td>
   </tr>
 ))
 
-interface AgentsProps {
-  model: {
-    agents: Array<AgentModelProps>
-  }
+export interface AgentsModel {
+  agents: Array<AgentModel>
+}
+
+export interface AgentsProps {
+  model: AgentsModel
 }
 
 const AgentsList = observer(({ model }: AgentsProps) => (
