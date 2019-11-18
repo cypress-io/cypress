@@ -88,7 +88,7 @@ module.exports = {
     debug("getBrowsers")
     launcher.detect()
     .then (browsers = []) ->
-      debug("found %s", pluralize("browser", browsers.length, true))
+      debug("found browsers %o", { browsers })
 
       version = process.versions.chrome or ""
       majorVersion = parseInt(version.split(".")[0]) if version

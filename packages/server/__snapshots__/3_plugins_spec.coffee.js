@@ -19,9 +19,7 @@ exports['e2e plugins fails 1'] = `
 The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
 Error: Async error from plugins file
-    at stack trace line
-    at stack trace line
-    at stack trace line
+    [stack trace lines]
 
 
   (Results)
@@ -326,7 +324,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
   1)  failure screenshot - rename:
      Error: test error
-      at stack trace line
+      [stack trace lines]
 
 
 
