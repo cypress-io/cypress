@@ -47,7 +47,7 @@ describe "e2e config", ->
       snapshot: true
     })
 
-  it.only "catches invalid browser in the configuration file", ->
+  it "catches invalid browser in the configuration file", ->
     # the test project has cypress.json with a bad browser
     # which should show an error and exit
     e2e.exec(@, {

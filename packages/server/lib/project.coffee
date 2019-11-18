@@ -143,13 +143,6 @@ class Project extends EE
     ## internals and breaking cypress
     cfg = config.whitelist(cfg)
 
-    debug("make sure we pass valid list of browsers to the plugins")
-    if cfg.browsers
-      ## often tests use an empty default list of browsers
-      ## so let's not throw an error there
-      if Array.isArray(cfg.browsers) and cfg.browsers.length
-        config.validateBrowserList(cfg.browsers)
-
     plugins.init(cfg, {
       onError: (err) ->
         debug('got plugins error', err.stack)
