@@ -1,7 +1,9 @@
 import execa from 'execa'
 import webpack from 'webpack'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
+// @ts-ignore
 import sassGlobImporter = require('node-sass-globbing')
+// @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
@@ -111,7 +113,7 @@ const commonConfig: webpack.Configuration = {
             loader: require.resolve('sass-loader'),
             options: {
               sourceMap: true,
-              importer (...args) {
+              importer (...args: any[]) {
                 args[0] = args[0].replace(/\\/g, '/')
                 args[1] = args[1].replace(/\\/g, '/')
 

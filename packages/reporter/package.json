@@ -2,7 +2,7 @@
   "name": "@packages/reporter",
   "version": "0.0.0",
   "private": true,
-  "main": "src/main.jsx",
+  "main": "src/main.tsx",
   "scripts": {
     "prebuild": "npm run check-deps-pre",
     "build": "webpack",
