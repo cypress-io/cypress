@@ -37,7 +37,7 @@ cleanup = ->
   instance = null
 
 getBrowserLauncherByFamily = (family) ->
-  debug("getBrowserLauncherByFamily for %s", family)
+  debug("getBrowserLauncherByFamily %o", { family })
   if not isBrowserFamily(family)
     debug("unknown browser family", family)
 
