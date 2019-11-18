@@ -12,6 +12,7 @@ pluginsAbsolutePath = Fixtures.projectPath("plugins-absolute-path")
 pluginAfterScreenshot = Fixtures.projectPath("plugin-after-screenshot")
 pluginReturnsBadConfig = Fixtures.projectPath("plugin-returns-bad-config")
 pluginReturnsEmptyBrowsersList = Fixtures.projectPath("plugin-returns-empty-browsers-list")
+pluginReturnsInvalidBrowser = Fixtures.projectPath("plugin-returns-invalid-browser")
 
 describe "e2e plugins", ->
   e2e.setup()
@@ -53,9 +54,16 @@ describe "e2e plugins", ->
       snapshot: true
     })
 
-  it.only "catches invalid browsers list returned from plugins", ->
+  it "catches invalid browsers list returned from plugins", ->
     e2e.exec(@, {
       project: pluginReturnsEmptyBrowsersList
+      expectedExitCode: 1
+      snapshot: true
+    })
+
+  it "catches invalid browser returned from plugins", ->
+    e2e.exec(@, {
+      project: pluginReturnsInvalidBrowser
       expectedExitCode: 1
       snapshot: true
     })
