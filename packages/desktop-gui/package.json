@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
-    "@cypress/json-schemas": "5.32.2",
+    "@cypress/json-schemas": "5.33.0",
     "@cypress/react-tooltip": "0.5.3",
     "@packages/web-config": "*",
     "bluebird": "3.5.3",
