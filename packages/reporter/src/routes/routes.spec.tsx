@@ -5,8 +5,8 @@ import React from 'react'
 import Routes, { RoutesList, Route, RouteListModel } from './routes'
 import RouteModel from './route-model'
 
-const routeModel = (props?: RouteModel) => {
-  return _.extend({
+const routeModel = (props?: Partial<RouteModel>) => {
+  return _.extend<RouteModel>({
     id: _.uniqueId('r'),
     name: 'route',
     numResponses: 0,
@@ -64,7 +64,7 @@ describe('<Routes />', () => {
 
   context('<Route />', () => {
     it('renders without no-responses class if numResponses is non-zero', () => {
-      const component = shallow(<Route model={routeModel({ numResponses: 1 } as RouteModel)} />)
+      const component = shallow(<Route model={routeModel({ numResponses: 1 })} />)
 
       expect(component).not.to.have.className('no-responses')
     })
@@ -88,13 +88,13 @@ describe('<Routes />', () => {
     })
 
     it('renders isStubbed as Yes if stubbed', () => {
-      const component = shallow(<Route model={routeModel({ isStubbed: true } as RouteModel)} />)
+      const component = shallow(<Route model={routeModel({ isStubbed: true })} />)
 
       expect(component.find('td').at(2)).to.have.text('Yes')
     })
 
     it('renders isStubbed as No if not stubbed', () => {
-      const component = shallow(<Route model={routeModel({ isStubbed: false } as RouteModel)} />)
+      const component = shallow(<Route model={routeModel({ isStubbed: false })} />)
 
       expect(component.find('td').at(2)).to.have.text('No')
     })
@@ -112,7 +112,7 @@ describe('<Routes />', () => {
     })
 
     it('renders the numResponses if non-zero', () => {
-      const component = shallow(<Route model={routeModel({ numResponses: 1 } as RouteModel)} />)
+      const component = shallow(<Route model={routeModel({ numResponses: 1 })} />)
 
       expect(component.find('.response-count')).to.have.text('1')
     })
