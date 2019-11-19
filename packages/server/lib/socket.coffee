@@ -237,8 +237,8 @@ class Socket
 
         ## TODO: what to do about runner disconnections?
 
-      socket.on 'capture:extension:video:frame', (data) ->
-        options.onCaptureExtensionVideoFrame(data)
+      # socket.on 'capture:extension:video:frame', (data) ->
+      #   options.onCaptureExtensionVideoFrame(data)
 
       socket.on "spec:changed", (spec) ->
         options.onSpecChanged(spec)
@@ -262,8 +262,8 @@ class Socket
         open.opn(p)
         .then -> cb()
 
-      # socket.on "recorder:frame", (data) ->
-      #   console.log(data)
+      socket.on "recorder:frame", (data) ->
+        options.onCaptureExtensionVideoFrame(data)
 
       socket.on "reload:browser", (url, browser) ->
         options.onReloadBrowser(url, browser)

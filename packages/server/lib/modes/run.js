@@ -472,8 +472,7 @@ const getFirefoxProps = (isHeaded, project, writeVideoFrame) => {
   .tap((props) => {
     if (isHeaded && writeVideoFrame) {
       const onScreencastFrame = (data) => {
-        // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
-        // writeVideoFrame(Buffer.from(data, 'base64'))
+        writeVideoFrame(data)
       }
 
       project.on('capture:extension:video:frame', onScreencastFrame)

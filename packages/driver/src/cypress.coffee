@@ -187,8 +187,8 @@ class $Cypress
     ## and 'action' to Cypress
     switch eventName
 
-      # when "recorder:frame"
-      #   @emit('recorder:frame', args[0])
+      when "recorder:frame"
+        @emit('recorder:frame', args[0])
 
       when "cypress:stop"
         @emit("stop")

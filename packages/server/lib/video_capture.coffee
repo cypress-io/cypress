@@ -10,6 +10,7 @@ Promise    = require("bluebird")
 ffmpegPath = require("@ffmpeg-installer/ffmpeg").path
 BlackHoleStream = require("black-hole-stream")
 fs         = require("./util/fs")
+streamBuffers = require('stream-buffers')
 
 ## extra verbose logs for logging individual frames
 debugFrames = require("debug")("cypress-verbose:server:video:frames")
@@ -56,6 +57,11 @@ module.exports = {
 
   start: (name, options = {}) ->
     pt         = stream.PassThrough()
+    ffstream   = new streamBuffers.ReadableStreamBuffer({
+      ## IDK what to set here
+      frequency: 10,      ## in milliseconds.
+      chunkSize: 2048     ## in bytes.
+    })
     ended      = deferredPromise()
     done       = false
     errored    = false
@@ -79,6 +85,7 @@ module.exports = {
         logErrors = false
 
       pt.end()
+      ffstream.stop()
 
       ## return the ended promise which will eventually
       ## get resolve or rejected
@@ -90,6 +97,13 @@ module.exports = {
       ## events can linger beyond
       ## finishing the actual video
       return if done
+
+
+      ## push video buffer into the readable stream
+      debug('push video buffer to stream', data)
+      ffstream.put(data)
+      
+      return
 
       ## we have written at least 1 byte
       written = true
@@ -110,11 +124,13 @@ module.exports = {
     startCapturing = ->
       new Promise (resolve) ->
         cmd = ffmpeg({
-          source: pt
+          # source: pt
+          source: ffstream
           priority: 20
         })
-        .inputFormat("image2pipe")
-        .inputOptions("-use_wallclock_as_timestamps 1")
+        .inputFormat('webm')
+        # .inputFormat("image2pipe")
+        # .inputOptions("-use_wallclock_as_timestamps 1")
         .videoCodec("libx264")
         .outputOptions("-preset ultrafast")
         .on "start", (command) ->

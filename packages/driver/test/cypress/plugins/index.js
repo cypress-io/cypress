@@ -11,7 +11,7 @@ const webpackOptions = require('@packages/runner/webpack.config.ts').default
 
 module.exports = (on, config) => {
   /* eslint-disable no-console */
-  console.log(config)
+  // console.log(config)
 
   on('file:preprocessor', webpack({ webpackOptions }))
 

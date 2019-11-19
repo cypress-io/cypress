@@ -25,7 +25,7 @@ $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
 $Snapshots = require("../cy/snapshots")
 $CommandQueue = require("./command_queue")
-# $VideoRecorder = require('../cy/video-recorder')
+$VideoRecorder = require('../cy/video-recorder')
 
 crossOriginScriptRe = /^script error/i
 
@@ -102,7 +102,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   queue = $CommandQueue.create()
 
 
-  # VideoRecorder = $VideoRecorder.create(state, Cypress)
+  VideoRecorder = $VideoRecorder.create(state, Cypress)
   timeouts = $Timeouts.create(state)
   stability = $Stability.create(Cypress, state)
   retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)

@@ -67,10 +67,9 @@ connect = (host, path, onScreencastFrame) ->
 
     ws.emit("automation:client:connected")
 
-  
-  if onScreencastFrame
-    startRecording (data) ->
-      ws.emit('capture:extension:video:frame', data)
+  # if onScreencastFrame
+  #   startRecording (data) ->
+  #     ws.emit('capture:extension:video:frame', data)
 
   return ws
 

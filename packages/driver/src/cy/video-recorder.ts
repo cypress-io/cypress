@@ -12,15 +12,13 @@ export function create (state, Cypress) {
       const options = {
         // videoBitsPerSecond: 2500000,
         mimeType: 'video/webm',
-        // timeslice: 1000,
       }
 
       const mediaRecorder = new window.MediaRecorder(stream, options)
 
-      mediaRecorder.start(200)
+      mediaRecorder.start(100)
 
       mediaRecorder.addEventListener('dataavailable', (e) => {
-        // console.log(e)
         Cypress.action('recorder:frame', e.data)
       })
     })

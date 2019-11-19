@@ -15,7 +15,7 @@ describe "src/cy/commands/actions/check", ->
     $(doc.body).empty().html(@body)
 
   context "#check", ->
-    it "does not change the subject", ->
+    it.only "does not change the subject", ->
       inputs = $("[name=colors]")
 
       cy.get("[name=colors]").check().then ($inputs) ->
