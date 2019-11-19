@@ -62,11 +62,10 @@ create = ->
           options.userAgent         = cfg.userAgent
           options.proxyServer       = cfg.proxyUrl
           options.socketIoRoute     = cfg.socketIoRoute
+          options.isTextTerminal    = cfg.isTextTerminal
           options.chromeWebSecurity = cfg.chromeWebSecurity
 
           options.url = url
-
-          options.isTextTerminal = cfg.isTextTerminal
 
           ## if we don't have the isHeaded property
           ## then we're in interactive mode and we
@@ -111,7 +110,7 @@ create = ->
               spec.relative
             )
 
-            browsers.open(browser, options, automation, config)
+            browsers.open(browser, options, automation)
 
     getSpecChanges: (options = {}) ->
       currentSpecs = null
@@ -204,11 +203,11 @@ create = ->
       if !_.isUndefined(args.configFile)
         options.configFile = args.configFile
 
-      options = _.extend {}, args.config, options
+      options = _.extend({}, args.config, options)
 
       ## open the project and return
       ## the config for the project instance
-      debug("opening project %s", path)
+      debug("opening project %o", { path })
 
       openProject.open(options)
       .return(@)

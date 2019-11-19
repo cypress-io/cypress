@@ -237,7 +237,7 @@ class Socket
 
         ## TODO: what to do about runner disconnections?
 
-      socket.on 'capture:extensionVideoFrame', (data) ->
+      socket.on 'capture:extension:video:frame', (data) ->
         options.onCaptureExtensionVideoFrame(data)
 
       socket.on "spec:changed", (spec) ->
@@ -326,7 +326,8 @@ class Socket
                 "You requested a backend event we cannot handle: #{eventName}"
               )
 
-        Promise.try(backendRequest)
+        Promise
+        .try(backendRequest)
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->

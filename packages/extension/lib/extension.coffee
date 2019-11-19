@@ -17,7 +17,7 @@ module.exports = {
   getPathToRoot: ->
     path.join(__dirname, "..")
 
-  setHostAndPath: (host, path, config) ->
+  setHostAndPath: (host, path, onScreencastFrame) ->
     src = @getPathToExtension("background.js")
 
     fs.readFileAsync(src, "utf8")
@@ -25,7 +25,7 @@ module.exports = {
       str
       .replace("CHANGE_ME_HOST", host)
       .replace("CHANGE_ME_PATH", path)
-      .replace("CHANGE_ME_CONFIG", JSON.stringify(config))
+      .replace("'CHANGE_ME_SCREENCAST_FRAME'", onScreencastFrame)
 
   getCookieUrl
 

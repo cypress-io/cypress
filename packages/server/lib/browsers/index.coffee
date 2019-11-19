@@ -99,7 +99,7 @@ module.exports = {
       return ensureAndGetByNameOrPath(nameOrPath, true)
     utils.getBrowsers()
 
-  open: (browser, options = {}, automation, config) ->
+  open: (browser, options = {}, automation) ->
     kill(true)
     .then ->
       _.defaults(options, {
@@ -115,7 +115,7 @@ module.exports = {
 
       debug("opening browser %o", browser)
 
-      browserLauncher.open(browser, url, options, automation, config)
+      browserLauncher.open(browser, url, options, automation)
       .then (i) ->
         debug("browser opened")
         ## TODO: bind to process.exit here

@@ -57,17 +57,19 @@ class Project extends EE
 
   open: (options = {}) ->
     debug("opening project instance %s", @projectRoot)
+
     @server = Server()
 
     _.defaults options, {
-      report:       false
-      onFocusTests: ->
+      report: false
       onError: ->
       onWarning: ->
+      onFocusTests: ->
       onSettingsChanged: false
     }
 
     debug("project options %o", options)
+    
     @options = options
 
     if process.env.CYPRESS_MEMORY
@@ -268,6 +270,10 @@ class Project extends EE
 
       onSavedStateChanged: options.onSavedStateChanged
 
+      onCaptureExtensionVideoFrame: (data) =>
+        ## TODO: move this to browser automation middleware
+        @emit("capture:extension:video:frame", data)
+      
       onConnect: (id) =>
         @emit("socket:connected", id)
 

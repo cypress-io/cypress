@@ -87,11 +87,11 @@ module.exports = {
 
   launch: launcher.launch
 
-  writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute, config) ->
+  writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute, onScreencastFrame) ->
     debug('writing extension')
     # debug('writing extension to chrome browser')
     ## get the string bytes for the final extension file
-    extension.setHostAndPath(proxyUrl, socketIoRoute, _.pick(config, ['browser', 'video']))
+    extension.setHostAndPath(proxyUrl, socketIoRoute, onScreencastFrame)
     .then (str) ->
       extensionDest = getExtensionDir(browser, isTextTerminal)
       extensionBg   = path.join(extensionDest, "background.js")

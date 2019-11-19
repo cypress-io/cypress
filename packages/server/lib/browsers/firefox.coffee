@@ -118,13 +118,14 @@ defaultPreferences = {
 module.exports = {
   send: firefoxUtil.send,
 
-  open: (browserName, url, options = {}, config) ->
-    preferences = _.extend({}, defaultPreferences)
+  open: (browserName, url, options = {}) ->
     extensions = []
+    preferences = _.extend({}, defaultPreferences)
 
     debug('firefox open', options)
+
     if ps = options.proxyServer
-      {hostname, port, protocol} = urlUtil.parse(ps)
+      { hostname, port, protocol } = urlUtil.parse(ps)
       port ?= if protocol is "https:" then 443 else 80
       port = parseFloat(port)
 
@@ -151,12 +152,13 @@ module.exports = {
 
         if _.isPlainObject(result.preferences)
           preferences = result.preferences
+
         if _.isArray(result.extensions)
           extensions = result.extensions
     .then ->
       Promise.all([
         utils.ensureCleanCache(browserName)
-        utils.writeExtension(options.browser, options.visTextTerminal, options.proxyUrl, options.socketIoRoute, config)
+        utils.writeExtension(options.browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute, options.onScreencastFrame)
         utils.ensureCleanCache(browserName)
       ])
     .spread (cacheDir, extensionDest, profileDir) ->

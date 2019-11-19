@@ -449,19 +449,19 @@ const getProjectId = Promise.method((project, id) => {
 const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   la(browsers.isBrowserFamily(browser.family), 'invalid browser family in', browser)
 
-  if (browser.family === 'electron') {
-    return getElectronProps(browser.isHeaded, project, writeVideoFrame)
-  }
+  switch (browser.family) {
+    case 'electron':
+      return getElectronProps(browser.isHeaded, project, writeVideoFrame)
 
-  if (browser.family === 'chrome') {
-    return getChromeProps(browser.isHeaded, project, writeVideoFrame)
-  }
+    case 'chrome':
+      return getChromeProps(browser.isHeaded, project, writeVideoFrame)
 
-  if (browser.family === 'firefox') {
-    return getFirefoxProps(browser.isHeaded, project, writeVideoFrame)
-  }
+    case 'firefox':
+      return getFirefoxProps(browser.isHeaded, project, writeVideoFrame)
 
-  return {}
+    default:
+      return {}
+  }
 }
 
 const getFirefoxProps = (isHeaded, project, writeVideoFrame) => {
@@ -471,10 +471,14 @@ const getFirefoxProps = (isHeaded, project, writeVideoFrame) => {
   .chain({})
   .tap((props) => {
     if (isHeaded && writeVideoFrame) {
-      props.onCaptureExtensionVideoFrame = (e) => {
+      const onScreencastFrame = (data) => {
         // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
-        writeVideoFrame(Buffer.from(e.data, 'base64'))
+        // writeVideoFrame(Buffer.from(data, 'base64'))
       }
+
+      project.on('capture:extension:video:frame', onScreencastFrame)
+
+      props.onScreencastFrame = true
     }
   })
   .value()
@@ -489,7 +493,7 @@ const getChromeProps = (isHeaded, project, writeVideoFrame) => {
   .chain({})
   .tap((props) => {
     if (isHeaded && writeVideoFrame) {
-      props.screencastFrame = (e) => {
+      props.onScreencastFrame = (e) => {
         // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
         writeVideoFrame(Buffer.from(e.data, 'base64'))
       }
@@ -568,6 +572,7 @@ const openProjectCreate = (projectRoot, socketId, options) => {
     onWarning,
     onError (err) {
       console.log('')
+
       if (err.details) {
         console.log(err.message)
         console.log('')
@@ -636,6 +641,10 @@ const browserCanBeRecorded = (browser) => {
   }
 
   if (browser.family === 'chrome' && browser.isHeaded) {
+    return true
+  }
+
+  if (browser.family === 'firefox' && browser.isHeaded) {
     return true
   }
 
