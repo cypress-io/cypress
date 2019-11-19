@@ -13,7 +13,7 @@ scaffold     = require("#{root}lib/scaffold")
 Server       = require("#{root}lib/server")
 Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
-savedState   = require("#{root}lib/saved_state")
+{ savedState } = require("#{root}lib/saved_state")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 plugins      = require("#{root}lib/plugins")
 fs           = require("#{root}lib/util/fs")
@@ -215,7 +215,7 @@ describe "lib/project", ->
     it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->
         expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
-    
+
     # TODO: skip this for now
     it.skip "passes watchers to Socket.startListening", ->
       options = {}

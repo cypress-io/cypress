@@ -6,7 +6,7 @@ Promise = require("bluebird")
 appData = require("../util/app_data")
 cwd = require("../cwd")
 plugins = require("../plugins")
-savedState = require("../util/saved_state")
+{ toHashName } = require("../saved_state")
 
 errorMessage = (err = {}) ->
   (err.stack ? err.annotated ? err.message ? err.toString())
@@ -36,7 +36,7 @@ clientSideError = (err) ->
   """
 
 getOutputPath = (config, filePath) ->
-  appData.projectsPath(savedState.toHashName(config.projectRoot), "bundles", filePath)
+  appData.projectsPath(toHashName(config.projectRoot), "bundles", filePath)
 
 baseEmitter = new EE()
 fileObjects = {}

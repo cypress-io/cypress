@@ -8,7 +8,7 @@ Windows       = require("../gui/windows")
 appData       = require("../util/app_data")
 { CdpAutomation } = require("./cdp_automation")
 plugins       = require("../plugins")
-savedState    = require("../saved_state")
+{ savedState } = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 
 tryToCall = (win, method) ->

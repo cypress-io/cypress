@@ -4,7 +4,7 @@ EE = require("events")
 Fixtures = require("../../support/helpers/fixtures")
 path = require("path")
 appData = require("#{root}../lib/util/app_data")
-{ toHashName } = require("#{root}../lib/util/saved_state")
+{ toHashName } = require("#{root}../lib/saved_state")
 
 plugins = require("#{root}../lib/plugins")
 preprocessor = require("#{root}../lib/plugins/preprocessor")

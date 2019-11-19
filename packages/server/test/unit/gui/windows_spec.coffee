@@ -8,7 +8,7 @@ BrowserWindow = require("electron").BrowserWindow
 cyDesktop     = require("@packages/desktop-gui")
 user          = require("#{root}../lib/user")
 Windows       = require("#{root}../lib/gui/windows")
-savedState    = require("#{root}../lib/saved_state")
+{ savedState } = require("#{root}../lib/saved_state")
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36"
 

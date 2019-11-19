@@ -9,7 +9,7 @@ menu = require("#{root}../lib/gui/menu")
 plugins = require("#{root}../lib/plugins")
 Windows = require("#{root}../lib/gui/windows")
 electron = require("#{root}../lib/browsers/electron")
-savedState = require("#{root}../lib/saved_state")
+{ savedState } = require("#{root}../lib/saved_state")
 Automation = require("#{root}../lib/automation")
 
 describe "lib/browsers/electron", ->

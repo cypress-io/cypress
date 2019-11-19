@@ -44,7 +44,7 @@ openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
 system        = require("#{root}lib/util/system")
 appData       = require("#{root}lib/util/app_data")
-formStatePath = require("#{root}lib/util/saved_state").formStatePath
+{ formStatePath } = require("#{root}lib/saved_state")
 
 TYPICAL_BROWSERS = [
   {

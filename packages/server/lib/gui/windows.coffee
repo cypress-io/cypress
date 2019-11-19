@@ -8,7 +8,7 @@ BrowserWindow = require("electron").BrowserWindow
 debug         = require("debug")("cypress:server:windows")
 cwd           = require("../cwd")
 user          = require("../user")
-savedState    = require("../saved_state")
+{ savedState } = require("../saved_state")
 
 windows               = {}
 recentlyCreatedWindow = false

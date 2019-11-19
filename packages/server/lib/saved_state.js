@@ -1,8 +1,14 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:saved_state')
-const FileUtil = require('./util/file')
+const md5 = require('md5')
+const path = require('path')
+const Promise = require('bluebird')
+const sanitize = require('sanitize-filename')
+
 const appData = require('./util/app_data')
-const savedStateUtil = require('./util/saved_state')
+const cwd = require('./cwd')
+const FileUtil = require('./util/file')
+const fs = require('./util/fs')
 
 const stateFiles = {}
 
@@ -21,6 +27,59 @@ isBrowserDevToolsOpen
 reporterWidth
 showedOnBoardingModal\
 `.trim().split(/\s+/)
+
+const toHashName = function (projectRoot) {
+  if (!projectRoot) {
+    throw new Error('Missing project path')
+  }
+
+  if (!path.isAbsolute(projectRoot)) {
+    throw new Error(`Expected project absolute path, not just a name ${projectRoot}`)
+  }
+
+  const name = sanitize(path.basename(projectRoot))
+  const hash = md5(projectRoot)
+
+  return `${name}-${hash}`
+}
+
+const formStatePath = (projectRoot) => {
+  return Promise.try(() => {
+    debug('making saved state from %s', cwd())
+
+    if (projectRoot) {
+      debug('for project path %s', projectRoot)
+
+      return projectRoot
+    }
+
+    debug('missing project path, looking for project here')
+
+    const cypressJsonPath = cwd('cypress.json')
+
+    return fs.pathExistsAsync(cypressJsonPath)
+    .then((found) => {
+      if (found) {
+        debug('found cypress file %s', cypressJsonPath)
+        projectRoot = cwd()
+      }
+
+      return projectRoot
+    })
+  }).then((projectRoot) => {
+    const fileName = 'state.json'
+
+    if (projectRoot) {
+      debug(`state path for project ${projectRoot}`)
+
+      return path.join(toHashName(projectRoot), fileName)
+    }
+
+    debug('state path for global mode')
+
+    return path.join('__global__', fileName)
+  })
+}
 
 const normalizeAndWhitelistSet = (set, key, value) => {
   const valueObject = (() => {
@@ -47,14 +106,14 @@ const normalizeAndWhitelistSet = (set, key, value) => {
   return set(_.pick(valueObject, whitelist))
 }
 
-module.exports = (projectRoot, isTextTerminal) => {
+const savedState = (projectRoot, isTextTerminal) => {
   if (isTextTerminal) {
     debug('noop saved state')
 
     return Promise.resolve(FileUtil.noopFile)
   }
 
-  return savedStateUtil.formStatePath(projectRoot)
+  return formStatePath(projectRoot)
   .then((statePath) => {
     const fullStatePath = appData.projectsPath(statePath)
 
@@ -74,4 +133,10 @@ module.exports = (projectRoot, isTextTerminal) => {
 
     return stateFile
   })
+}
+
+module.exports = {
+  formStatePath,
+  savedState,
+  toHashName,
 }
