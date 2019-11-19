@@ -1,4 +1,4 @@
-/* global a, b, c, findThings, isBad, isAwesome, hi */
+/* global a, b, c, findThings, isBad, isAwesome, hi, you */
 
 function f () {
   if (a.subject(a)) {
@@ -7,7 +7,8 @@ function f () {
 
     b.doSomething(x)
   } else if (!c.isGood) {
-    // Comment should be reserved 2
+    // Multi line comment
+    // should be reserved
     c.checkThisOut();
     findThings()
   } else if (!isBad) {
@@ -15,8 +16,10 @@ function f () {
   } else if (isAwesome) {
     a.subject(a);
   } else if (!hi) {
-    return 3;
-  } else {
+    // This should be reserved, too
+    return 3
+  } else if (!you) // This comment is preserved
+  {} else {
     b.goToNext();
   }
 }

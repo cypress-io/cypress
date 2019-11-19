@@ -43,6 +43,14 @@ function generateTest (j, test) {
 }
 
 function generateContent (j, consequent) {
+  if (consequent.length === 1 && consequent[0].type === 'BreakStatement') {
+    const block = j.blockStatement([])
+
+    block.comments = consequent[0].comments
+
+    return block
+  }
+
   return j.blockStatement(consequent.filter((c) => c.type !== 'BreakStatement'))
 }
 
@@ -73,15 +81,17 @@ function generateIfStatement (j, cases) {
 
 function addComment (content, comments) {
   if (content.body.length > 0) {
-    content.body[0].comments = [...(comments || []), ...(content.comments || [])]
+    content.body[0].comments = [...(comments || []), ...(content.body[0].comments || [])]
   } else {
-    content.comments = (comments || []).map((co) => {
+    const newComments = (comments || []).map((co) => {
       return {
         ...co,
         leading: false,
         trailing: false,
       }
     })
+
+    content.comments = [...newComments, ...(content.comments || [])]
   }
 
   return content

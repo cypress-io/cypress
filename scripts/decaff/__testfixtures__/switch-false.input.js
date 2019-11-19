@@ -1,4 +1,4 @@
-/* global a, b, c, findThings, isBad, isAwesome, hi */
+/* global a, b, c, findThings, isBad, isAwesome, hi, you */
 
 function f () {
   switch (false) {
@@ -8,7 +8,8 @@ function f () {
 
       b.doSomething(x)
       break
-    // Comment should be reserved 2
+    // Multi line comment
+    // should be reserved
     case c.isGood:
       c.checkThisOut()
       findThings()
@@ -20,7 +21,11 @@ function f () {
       a.subject(a)
       break
     case hi:
+      // This should be reserved, too
       return 3
+    case you:
+      // This comment is preserved
+      break
     default:
       b.goToNext()
       break
