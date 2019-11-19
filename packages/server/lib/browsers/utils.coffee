@@ -1,10 +1,12 @@
 path     = require("path")
+debug    = require("debug")("cypress:server:browsers:utils")
 Promise  = require("bluebird")
 getPort  = require("get-port")
 launcher = require("@packages/launcher")
 fs       = require("../util/fs")
 extension = require("@packages/extension")
 appData  = require("../util/app_data")
+pluralize = require("pluralize")
 profileCleaner = require("../util/profile_cleaner")
 debug = require('debug')('cypress:server:browsers')
 PATH_TO_BROWSERS = appData.path("browsers")
@@ -105,20 +107,24 @@ module.exports = {
       .return(extensionDest)
 
   getBrowsers: ->
-    ## TODO: accept an options object which
-    ## turns off getting electron browser?
+    debug("getBrowsers")
     launcher.detect()
     .then (browsers = []) ->
-      version = process.versions.chrome or ""
+      debug("found browsers %o", { browsers })
 
-      ## the internal version of Electron, which won't be detected by `launcher`
-      browsers.concat({
+      version = process.versions.chrome or ""
+      majorVersion = parseInt(version.split(".")[0]) if version
+      electronBrowser = {
         name: "electron"
         family: "electron"
         displayName: "Electron"
         version: version
         path: ""
-        majorVersion: version.split(".")[0]
+        majorVersion: majorVersion
         info: "Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
-      })
+      }
+
+      ## the internal version of Electron, which won't be detected by `launcher`
+      debug("adding Electron browser with version %s", version)
+      browsers.concat(electronBrowser)
 }

@@ -90,17 +90,26 @@ replaceUploadingResults = (orig, match..., offset, string) ->
   return ret
 
 normalizeStdout = (str, options = {}) ->
+  normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true})
+
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
   str = str
   ## /Users/jane/........../ -> //foo/bar/.projects/
   ## (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join("/foo/bar/.projects")
-  .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+
+  if normalizeOptions.normalizeAvailableBrowsers
+    # usually we are not interested in the browsers detected on this particular system
+    # but some tests might filter / change the list of browsers
+    # in that case the test should pass "normalizeAvailableBrowsers:false" as options
+    str = str.replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+
+  str = str
   .replace(browserNameVersionRe, replaceBrowserName)
   ## numbers in parenths
   .replace(/\s\(\d+([ms]|ms)\)/g, "")
-   ## 12:35 -> XX:XX
+  ## 12:35 -> XX:XX
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   ## Cypress: 2.1.0 -> Cypress: 1.2.3

@@ -789,6 +789,7 @@ describe "lib/util/ci_provider", ->
     })
 
   it "travis", ->
+    ## normal non-PR build
     resetEnv = mockedEnv({
       TRAVIS: "true"
 
@@ -799,8 +800,9 @@ describe "lib/util/ci_provider", ->
       TRAVIS_EVENT_TYPE: "travisEventType"
       TRAVIS_COMMIT_RANGE: "travisCommitRange"
       TRAVIS_BUILD_NUMBER: "travisBuildNumber"
-      TRAVIS_PULL_REQUEST: "travisPullRequest"
-      TRAVIS_PULL_REQUEST_BRANCH: "travisPullRequestBranch"
+      TRAVIS_PULL_REQUEST: ""
+      TRAVIS_PULL_REQUEST_BRANCH: ""
+      TRAVIS_PULL_REQUEST_SHA: ""
 
       TRAVIS_COMMIT: "travisCommit"
       TRAVIS_BRANCH: "travisBranch"
@@ -816,12 +818,13 @@ describe "lib/util/ci_provider", ->
       travisEventType: "travisEventType"
       travisCommitRange: "travisCommitRange"
       travisBuildNumber: "travisBuildNumber"
-      travisPullRequest: "travisPullRequest"
-      travisPullRequestBranch: "travisPullRequestBranch"
+      travisPullRequest: ""
+      travisPullRequestBranch: ""
+      travisPullRequestSha: ""
     })
     expectsCommitParams({
       sha: "travisCommit"
-      branch: "travisPullRequestBranch"
+      branch: "travisBranch"
       message: "travisCommitMessage"
     })
 
@@ -832,6 +835,24 @@ describe "lib/util/ci_provider", ->
 
     expectsCommitParams({
       branch: "travisBranch"
+    })
+
+    ## Pull Request build
+    resetEnv = mockedEnv({
+      TRAVIS: "true"
+      TRAVIS_PULL_REQUEST: "travisPullRequest"
+      TRAVIS_PULL_REQUEST_BRANCH: "travisPullRequestBranch"
+      TRAVIS_PULL_REQUEST_SHA: "travisPullRequestSha" 
+
+      TRAVIS_COMMIT: "travisCommit"
+      TRAVIS_BRANCH: "travisBranch"
+      TRAVIS_COMMIT_MESSAGE: "travisCommitMessage"
+    }, {clear: true})
+
+    expectsCommitParams({
+      sha: "travisPullRequestSha"
+      branch: "travisPullRequestBranch"
+      message: "travisCommitMessage"
     })
 
   it "wercker", ->
