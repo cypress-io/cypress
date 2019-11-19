@@ -26,6 +26,14 @@
       "version": "48.0",
       "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",
       "majorVersion": "48"
+    },
+    {
+      "name": "firefox",
+      "displayName": "Firefox",
+      "family": "firefox",
+      "version": "63.90283",
+      "path": "/Users/bmann/Downloads/firefox/Firefox.app/Contents/MacOS/Firefox",
+      "majorVersion": "63"
     }
   ],
   "clientRoute": "/__/",

@@ -148,10 +148,11 @@
     display: inline-block;
   }
 
-  .chrome > i { color: #1aa15f; }
-  .canary > i { color: #e4b721; }
-  .chromium > i { color: #829ac3; }
-  .electron > i { color: #777; }
+  // not sure if we want the colors here
+  // .chrome > i { color: #1aa15f; }
+  // .canary > i { color: #e4b721; }
+  // .chromium > i { color: #829ac3; }
+  // .electron > i { color: #777; }
 
   .dropdown-menu {
     left: auto;

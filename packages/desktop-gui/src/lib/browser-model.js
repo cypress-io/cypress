@@ -25,6 +25,14 @@ export default class Browser {
   }
 
   @computed get icon () {
-    return 'chrome'
+    if (this.family === 'chrome') {
+      return 'chrome'
+    }
+
+    if (this.family === 'firefox') {
+      return 'firefox'
+    }
+
+    return 'globe'
   }
 }

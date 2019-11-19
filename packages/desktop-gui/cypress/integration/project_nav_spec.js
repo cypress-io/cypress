@@ -343,28 +343,33 @@ describe('Project Nav', function () {
     describe('custom browser available', function () {
       beforeEach(function () {
         this.config.browsers.push({
-          name: 'chromium',
-          family: 'chrome',
+          name: 'foo browser',
+          family: 'foo',
           custom: true,
-          displayName: 'Custom Chromium',
+          displayName: 'Custom Foo',
           version: '72.0.3626.96',
           majorVersion: '72',
-          path: '/usr/bin/chromium-x',
-          info: 'Loaded from /usr/bin/chromium-x',
+          path: '/usr/bin/foo-x',
+          info: 'Loaded from /usr/bin/foo-x',
         })
 
         this.openProject.resolve(this.config)
       })
 
+      it('displays generic icon', () => {
+        cy.get('.browsers-list>a').first()
+        .should('contain', 'Custom Foo')
+      })
+
       it('pre-selects the custom browser', () => {
         cy.get('.browsers-list>a').first()
-        .should('contain', 'Custom Chromium')
+        .should('contain', 'Custom Foo')
       })
 
       it('pre-selects the custom browser if chosenBrowser saved locally', function () {
         localStorage.setItem('chosenBrowser', 'electron')
         cy.get('.browsers-list>a').first()
-        .should('contain', 'Custom Chromium')
+        .should('contain', 'Custom Foo')
 
         cy.wrap(localStorage.getItem('chosenBrowser')).should('equal', 'electron')
       })
