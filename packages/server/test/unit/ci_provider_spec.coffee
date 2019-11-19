@@ -842,7 +842,7 @@ describe "lib/util/ci_provider", ->
       TRAVIS: "true"
       TRAVIS_PULL_REQUEST: "travisPullRequest"
       TRAVIS_PULL_REQUEST_BRANCH: "travisPullRequestBranch"
-      TRAVIS_PULL_REQUEST_SHA: "travisPullRequestSha" 
+      TRAVIS_PULL_REQUEST_SHA: "travisPullRequestSha"
 
       TRAVIS_COMMIT: "travisCommit"
       TRAVIS_BRANCH: "travisBranch"
