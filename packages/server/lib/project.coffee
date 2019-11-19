@@ -57,7 +57,7 @@ class Project extends EE
 
   open: (options = {}) ->
     debug("opening project instance %s", @projectRoot)
-
+    debug("project open options %o", options)
     @server = Server()
 
     _.defaults options, {
@@ -69,7 +69,7 @@ class Project extends EE
     }
 
     debug("project options %o", options)
-    
+
     @options = options
 
     if process.env.CYPRESS_MEMORY
@@ -89,13 +89,17 @@ class Project extends EE
       ## we try to load it and it's not there. We must do this here
       ## else initialing the plugins will instantly fail.
       if cfg.pluginsFile
+        debug("scaffolding with plugins file %s", cfg.pluginsFile)
         scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
     .then (cfg) =>
       @_initPlugins(cfg, options)
       .then (modifiedCfg) ->
-        debug("plugin config yielded:", modifiedCfg)
+        debug("plugin config yielded: %o", modifiedCfg)
 
-        return config.updateWithPluginValues(cfg, modifiedCfg)
+        updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+        debug("updated config: %o", updatedConfig)
+
+        return updatedConfig
     .then (cfg) =>
       @server.open(cfg, @, options.onWarning)
       .spread (port, warning) =>
@@ -273,7 +277,7 @@ class Project extends EE
       onCaptureExtensionVideoFrame: (data) =>
         ## TODO: move this to browser automation middleware
         @emit("capture:extension:video:frame", data)
-      
+
       onConnect: (id) =>
         @emit("socket:connected", id)
 
@@ -309,8 +313,10 @@ class Project extends EE
     _.pick(@, "spec", "browser")
 
   setBrowsers: (browsers = []) ->
+    debug("getting config before setting browsers %o", browsers)
     @getConfig()
     .then (cfg) ->
+      debug("setting config browsers to %o", browsers)
       cfg.browsers = browsers
 
   getAutomation: ->
@@ -558,7 +564,7 @@ class Project extends EE
         )
 
   @getProjectStatus = (clientProject) ->
-    debug("get project status for", clientProject.id, clientProject.path)
+    debug("get project status for client id %s at path %s", clientProject.id, clientProject.path)
 
     if not clientProject.id
       debug("no project id")
