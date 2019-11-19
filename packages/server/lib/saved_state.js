@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-console,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:saved_state')
 const FileUtil = require('./util/file')
@@ -33,7 +22,7 @@ reporterWidth
 showedOnBoardingModal\
 `.trim().split(/\s+/)
 
-const normalizeAndWhitelistSet = function (set, key, value) {
+const normalizeAndWhitelistSet = (set, key, value) => {
   const valueObject = (() => {
     if (_.isString(key)) {
       const tmp = {}
@@ -51,13 +40,14 @@ const normalizeAndWhitelistSet = function (set, key, value) {
   })
 
   if (invalidKeys.length) {
+    // eslint-disable-next-line no-console
     console.error(`WARNING: attempted to save state for non-whitelisted key(s): ${invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.coffee`)
   }
 
   return set(_.pick(valueObject, whitelist))
 }
 
-module.exports = function (projectRoot, isTextTerminal) {
+module.exports = (projectRoot, isTextTerminal) => {
   if (isTextTerminal) {
     debug('noop saved state')
 
