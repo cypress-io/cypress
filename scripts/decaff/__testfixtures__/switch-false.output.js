@@ -2,20 +2,22 @@
 
 function f () {
   if (a.subject(a)) {
-    let x = 30
+    // Comment should be reserved
+    let x = 30;
 
     b.doSomething(x)
   } else if (!c.isGood) {
-    c.checkThisOut()
+    // Comment should be reserved 2
+    c.checkThisOut();
     findThings()
   } else if (!isBad) {
-    c.neverCheck()
+    c.neverCheck();
   } else if (isAwesome) {
-    a.subject(a)
+    a.subject(a);
   } else if (!hi) {
-    return 3
+    return 3;
   } else {
-    b.goToNext()
+    b.goToNext();
   }
 }
 

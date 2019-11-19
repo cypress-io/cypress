@@ -12,11 +12,12 @@ module.exports = (fileInfo, api) => {
     const { node } = nodePath
 
     const cases = node.cases.map((c) => {
-      const { test, consequent } = c
+      const { test, consequent, comments } = c
 
       return {
         test: generateTest(j, test),
         content: generateContent(j, consequent),
+        comments,
       }
     })
 
@@ -52,16 +53,36 @@ function generateIfStatement (j, cases) {
   let ifStatement = null
 
   if (defaultCase) {
-    ifStatement = defaultCase.content
+    const content = addComment(defaultCase.content, defaultCase.comments)
+
+    ifStatement = content
   }
 
   nonDefaultCases.reverse().forEach((c) => {
+    const content = addComment(c.content, c.comments)
+
     ifStatement = j.ifStatement(
       c.test,
-      c.content,
+      content,
       ifStatement
     )
   })
 
   return ifStatement
+}
+
+function addComment (content, comments) {
+  if (content.body.length > 0) {
+    content.body[0].comments = [...(comments || []), ...(content.comments || [])]
+  } else {
+    content.comments = (comments || []).map((co) => {
+      return {
+        ...co,
+        leading: false,
+        trailing: false,
+      }
+    })
+  }
+
+  return content
 }
