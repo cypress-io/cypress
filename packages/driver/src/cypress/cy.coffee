@@ -236,14 +236,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## then add the parentCommand to the obj
     if not _.isUndefined(parentCommand) 
       obj.parentCommand = parentCommand
+      console.log(obj)
+      console.log(obj.type)
       if obj.type is "parent"
          obj.type = "child"
 
-    ## If we are dealing with a within commmand,
-    ## We want to create its own queue, and run the commands from there
-    ## That way they run within the context of the within, instead of running outside of the within
-
-    ## I think we want to change this from a state object to an object we pass to the parent
     if not _.isUndefined(parentCommand) && (nestedQueue = parentCommand.get('queue'))
         nestedQueue.splice(nestedQueue.length, 0, obj)
         parentCommand.set({ queue: nestedQueue })
@@ -268,10 +265,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   runQueuedCommands = (command) ->
     { commands } = command.get("queue")
     subjects = []
+    state("queuedIndex", 0)
     for cmd in commands
       res = cy.runCommandInQueue(cmd)
       await res
       subjects.push(res)
+      state("queuedIndex", state("queuedIndex")+1)
     return Promise.all(subjects)
       .catch (err) ->
         console.log("something went wrong", err)
@@ -282,7 +281,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## prior to ever making it through our first
     ## command
     return if stopped
-    console.log(command)
     state("current", command)
     state("chainerId", command.get("chainerId"))
 
@@ -404,8 +402,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state("recentlyReady", null)
 
       state("subject", subject)
-      console.log("finishing current command")
-      console.log(command)
       return subject
 
   run = ->
@@ -419,7 +415,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       index = state("index") ? state("index", 0)
 
       command = queue.at(index)
-      console.log(queue)
       ## if the command should be skipped
       ## just bail and increment index
       ## and set the subject
@@ -453,7 +448,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       ## store the current runnable
       runnable = state("runnable")
-      console.log("running command", command)
       Cypress.action("cy:command:start", command)
       state("currentCommand", command)
 
@@ -905,7 +899,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         if not state("promise")
           if state("returnedCustomPromise")
             warnMixingPromisesAndCommands()
-          console.log("kicking off command queue")
           run()
 
         return chain
@@ -919,7 +912,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         if _.isFunction(onInjectCommand)
           return if onInjectCommand.call(cy, name, args...) is false
-        console.log(type)
         enqueue({
           name
           args
@@ -939,12 +931,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## after they are done running, should we do it here?
       ## Worried about the behaviour with other nested commands
       new Promise((resolve) ->
-        console.log('running command')
-        console.log(obj)
         Cypress.action("cy:command:start", obj)
         runCommand(obj)
         .then ->
-          console.log("finished command")
           Cypress.action("cy:command:end", obj)
           resolve(obj)
       )
@@ -959,8 +948,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         ## clone the command to prevent
         ## mutating its properties
-        console.log("replaying commands?")
-        console.log(command)
         enqueue(command.clone())
 
       ## - starting with the aliased command

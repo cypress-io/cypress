@@ -64,24 +64,15 @@ create = (state, queue, retryFn) ->
     parentCommand = current.attributes.parentCommand
     isNestedCommand = not _.isUndefined(parentCommand)
     assertions = []
-    ## We could probably make this a lot neater
-    ## Not completely sure how though...
-    ## could we just do state("withinQueue") to cover both undefined and null
-    console.log(current)
-    console.log(isNestedCommand)
+    
     if isNestedCommand
-      console.log(parentCommand)
-      console.log(parentCommand.get("queue"))
-      for cmd in parentCommand.get("queue").commands
-        console.log(cmd)
-        if cmd is current 
-          continue
+      nestedIndex = state("queuedIndex")+1
+      for cmd in parentCommand.get("queue").slice(nestedIndex).get()
         if cmd.is("utility")
           continue
+
         if cmd.is("assertion") and cmd.attributes.chainerId is chainerId
            assertions.push(cmd)
-        if cmd.is("child")
-          continue
         else 
           break
     else
@@ -103,6 +94,7 @@ create = (state, queue, retryFn) ->
 
   injectAssertion = (cmd) ->
     return (subject) ->
+      console.log(cmd)
       ## set assertions to itself or empty array
       if not cmd.get("assertions")
         cmd.set("assertions", [])
@@ -128,6 +120,7 @@ create = (state, queue, retryFn) ->
 
   verifyUpcomingAssertions = (subject, options = {}, callbacks = {}) ->
     cmds = getUpcomingAssertions()
+    console.log("For command ", state("current"))
     console.log("Upcoming assertions are")
     console.log(cmds)
     state("upcomingAssertions", cmds)
