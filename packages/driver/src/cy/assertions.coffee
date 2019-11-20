@@ -67,6 +67,8 @@ create = (state, queue, retryFn) ->
     ## We could probably make this a lot neater
     ## Not completely sure how though...
     ## could we just do state("withinQueue") to cover both undefined and null
+    console.log(current)
+    console.log(isNestedCommand)
     if isNestedCommand
       console.log(parentCommand)
       console.log(parentCommand.get("queue"))
@@ -78,7 +80,10 @@ create = (state, queue, retryFn) ->
           continue
         if cmd.is("assertion") and cmd.attributes.chainerId is chainerId
            assertions.push(cmd)
-        else break
+        if cmd.is("child")
+          continue
+        else 
+          break
     else
       for cmd in queue.slice(index).get()
         ## don't break on utilities, just skip over them
