@@ -30,6 +30,7 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+XhrServer    = require("./xhr_ws_server")
 templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
@@ -125,6 +126,7 @@ class Server
     e
 
   open: (config = {}, project, onWarning) ->
+    debug("server open")
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -141,12 +143,13 @@ class Server
       ## and set the responseTimeout
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
+      @_xhrServer = XhrServer.create()
 
       getRemoteState = => @_getRemoteState()
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
+      @createRoutes(app, config, @_request, getRemoteState, @_xhrServer.getDeferredResponse, project, @_nodeProxy)
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -368,7 +371,13 @@ class Server
         ## reset the cookies from the buffer on the browser
         return runPhase ->
           resolve(
-            Promise.map obj.details.cookies, _.partial(automationRequest, 'set:cookie')
+            Promise.map obj.details.cookies, (cookie) ->
+              ## prevent prepending a . to the cookie domain if top-level
+              ## navigation occurs as a result of a cy.visit
+              if _.isUndefined(cookie.hostOnly) && !cookie.domain?.startsWith('.')
+                cookie.hostOnly = true
+
+              automationRequest('set:cookie', cookie)
             .return(obj.details)
           )
 
@@ -698,10 +707,11 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onIncomingXhr = @_xhrServer.onIncomingXhr
+    options.onResetXhrServer = @_xhrServer.reset
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
-    # handleListeners(@_server)
 
 module.exports = Server
