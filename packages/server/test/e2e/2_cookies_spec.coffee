@@ -12,6 +12,9 @@ onServer = (app) ->
   app.get "/requestCookies", (req, res) ->
     res.send(req.cookies)
 
+  app.get "/requestCookiesHtml", (req, res) ->
+    res.type('html').send(req.cookies)
+
   app.get "/set", (req, res) ->
     res.cookie("shouldExpire", "endOfsession")
 
@@ -82,6 +85,14 @@ onServer = (app) ->
       res.redirect("#{a}/setCascadingCookies?n=#{n-1}&a=#{b}&b=#{a}")
 
     res.send("<html>finished setting cookies</html>")
+
+  app.get "/setDomainCookie", (req, res) ->
+    res.setHeader("Set-Cookie", "domaincookie=foo; Domain=#{req.query.domain}")
+
+    if req.query.redirect
+      return res.redirect(req.query.redirect).end()
+
+    return res.type('html').end()
 
 haveRoot = !process.env.USE_HIGH_PORTS && process.geteuid() == 0
 
