@@ -523,6 +523,7 @@ module.exports = e2e = {
         .defaults({
           FAKE_CWD_PATH: "/XXX/XXX/XXX"
           DEBUG_COLORS: "1"
+          NO_COLOR: "1"
           ## prevent any Compression progress
           ## messages from showing up
           VIDEO_COMPRESSION_THROTTLE: 120000
