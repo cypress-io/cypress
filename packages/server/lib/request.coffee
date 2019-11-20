@@ -106,9 +106,10 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
     onElse,
   } = options
 
-  debug("received status code on request %o", {
+  debug("received status code & headers on request %o", {
     requestId,
-    statusCode: res.statusCode
+    statusCode: res.statusCode,
+    headers: _.pick(res.headers, 'content-type', 'set-cookie', 'location')
   })
 
   ## is this a retryable status code failure?
