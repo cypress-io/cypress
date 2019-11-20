@@ -215,7 +215,7 @@ describe "lib/project", ->
     it.skip "watches cypress.json", ->
       @server.open().bind(@).then ->
         expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
-    
+
     # TODO: skip this for now
     it.skip "passes watchers to Socket.startListening", ->
       options = {}
