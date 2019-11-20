@@ -16,5 +16,7 @@ module.exports = {
     './scripts/decaff/remove-comment-sharp.js',
     './scripts/decaff/switch-false.js',
     './scripts/decaff/empty-catch.js',
+    './scripts/decaff/no-cond-assing.js',
+    './scripts/decaff/arrow-comment.js',
   ],
 }
