@@ -114,7 +114,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.on("next:subject:prepared", checkSubject)
     getQueuedRet = ->
       { commands } = cy.state("current").get("queue")
-      return Promise.all(commands.map (cmd) -> cy.runCommandInQueue(cmd))
+      results = []
+      for cmds in commands
+        res = cy.runCommandInQueue(cmds)
+        await res
+        results.push(res)
+      return Promise.all(results)
     getRet = ->
       ret = fn.apply(ctx, args)
       if cy.isCy(ret)
