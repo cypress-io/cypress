@@ -551,9 +551,9 @@ module.exports = (options = {}) ->
         push = (response) ->
           requestResponses.push(pick(response))
 
-        if options.followRedirect
-          currentUrl = options.url
+        currentUrl = options.url
 
+        if options.followRedirect
           options.followRedirect = (incomingRes) ->
             newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 

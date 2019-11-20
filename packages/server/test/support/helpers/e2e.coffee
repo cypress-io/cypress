@@ -35,12 +35,16 @@ pathUpToProjectName = Fixtures.projectPath("")
 
 DEFAULT_BROWSERS = ['electron', 'chrome']
 
-stackTraceLinesRe = /^(\s+)at\s(.+)/gm
+stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
+## this captures an entire stack trace and replaces it with [stack trace lines]
+## so that the stdout can contain stack traces of different lengths
+## '@' will be present in firefox stack trace lines
+## 'at' will be present in chrome stack trace lines
 replaceStackTraceLines = (str) ->
-  str.replace(stackTraceLinesRe, "$1at stack trace line")
+  str.replace(stackTraceLinesRe, "$1[stack trace lines]$5")
 
 replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
@@ -86,17 +90,26 @@ replaceUploadingResults = (orig, match..., offset, string) ->
   return ret
 
 normalizeStdout = (str, options = {}) ->
+  normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true})
+
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
   str = str
   ## /Users/jane/........../ -> //foo/bar/.projects/
   ## (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join("/foo/bar/.projects")
-  .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+
+  if normalizeOptions.normalizeAvailableBrowsers
+    # usually we are not interested in the browsers detected on this particular system
+    # but some tests might filter / change the list of browsers
+    # in that case the test should pass "normalizeAvailableBrowsers:false" as options
+    str = str.replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+
+  str = str
   .replace(browserNameVersionRe, replaceBrowserName)
   ## numbers in parenths
   .replace(/\s\(\d+([ms]|ms)\)/g, "")
-   ## 12:35 -> XX:XX
+  ## 12:35 -> XX:XX
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   ## Cypress: 2.1.0 -> Cypress: 1.2.3
@@ -119,9 +132,7 @@ normalizeStdout = (str, options = {}) ->
     ## screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
 
-  return str.split("\n")
-    .map(replaceStackTraceLines)
-    .join("\n")
+  return replaceStackTraceLines(str)
 
 ensurePort = (port) ->
   if port is 5566

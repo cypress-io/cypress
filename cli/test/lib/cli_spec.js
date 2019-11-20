@@ -313,6 +313,11 @@ describe('cli', () => {
       snapshot(logger.warn.getCall(0).args[0])
       done()
     })
+
+    it('removes stray double quotes', () => {
+      this.exec('run --ci-build-id "123" --group "staging"')
+      expect(run.start).to.be.calledWith({ ciBuildId: '123', group: 'staging' })
+    })
   })
 
   context('cypress open', () => {

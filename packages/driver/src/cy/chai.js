@@ -9,20 +9,21 @@ const $dom = require('../dom')
 const $utils = require('../cypress/utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 
-// all words between single quotes which are at
-// the end of the string
-const allPropertyWordsBetweenSingleQuotes = /('.*?')$/g
-
-// grab all words between single quotes except
-// when the single quote word is the LAST word
-const allButLastWordsBetweenSingleQuotes = /('.*?')(.+)/g
+// all words between single quotes
+const allPropertyWordsBetweenSingleQuotes = /('.*?')/g
 
 const allBetweenFourStars = /\*\*.*\*\*/
+const allNumberStrings = /'([0-9]+)'/g
+const allEmptyStrings = /''/g
 const allSingleQuotes = /'/g
 const allEscapedSingleQuotes = /\\'/g
 const allQuoteMarkers = /__quote__/g
 const allWordsBetweenCurlyBraces = /(#{.+?})/g
 const allQuadStars = /\*\*\*\*/g
+const leadingWhitespaces = /\*\*'\s*/g
+const trailingWhitespaces = /\s*'\*\*/g
+const whitespace = /\s/g
+const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/g
 
 let assertProto = null
 let matchProto = null
@@ -78,17 +79,32 @@ chai.use((chai, u) => {
   existProto = Object.getOwnPropertyDescriptor(chai.Assertion.prototype, 'exist').get;
   ({ getMessage } = chaiUtils)
 
-  // remove any single quotes between our **, preserving escaped quotes
-  // and if an empty string, put the quotes back
+  // remove any single quotes between our **,
+  // except escaped quotes, empty strings and number strings.
   const removeOrKeepSingleQuotesBetweenStars = (message) => {
     return message.replace(allBetweenFourStars, (match) => {
+      if (valueHasLeadingOrTrailingWhitespaces.test(match)) {
+        // Above we used \s+, but below we use \s*.
+        // It's because of the strings like '   love' that have empty spaces on one side only.
+        match = match
+        .replace(leadingWhitespaces, (match) => {
+          return match.replace(`**'`, '**__quote__')
+          .replace(whitespace, '&nbsp;')
+        })
+        .replace(trailingWhitespaces, (match) => {
+          return match.replace(`'**`, '__quote__**')
+          .replace(whitespace, '&nbsp;')
+        })
+      }
+
       return match
       .replace(allEscapedSingleQuotes, '__quote__') // preserve escaped quotes
+      .replace(allNumberStrings, '__quote__$1__quote__') // preserve number strings (e.g. '42')
+      .replace(allEmptyStrings, '__quote____quote__') // preserve empty strings (e.g. '')
       .replace(allSingleQuotes, '')
       .replace(allQuoteMarkers, '\'') // put escaped quotes back
-      .replace(allQuadStars, '**\'\'**')
     })
-  } // fix empty strings that end up as ****
+  }
 
   const replaceArgMessages = (args, str) => {
     return _.reduce(args, (memo, value, index) => {
@@ -96,8 +112,10 @@ chai.use((chai, u) => {
         value = value
         .replace(allWordsBetweenCurlyBraces, '**$1**')
         .replace(allEscapedSingleQuotes, '__quote__')
-        .replace(allButLastWordsBetweenSingleQuotes, '**$1**$2')
         .replace(allPropertyWordsBetweenSingleQuotes, '**$1**')
+        // when a value has ** in it, **** are sometimes created after the process above.
+        // remove them with this.
+        .replace(allQuadStars, '**')
 
         memo.push(value)
       } else {

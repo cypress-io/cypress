@@ -74,14 +74,14 @@ describe('linux browser detection', () => {
         name: 'test-browser-name',
         version: '100.1.2.3',
         path: 'test-browser',
-        majorVersion: '100',
+        majorVersion: 100,
       },
       {
         displayName: 'Foo Browser',
         name: 'foo-browser',
         version: '100.1.2.3',
         path: 'foo-browser',
-        majorVersion: '100',
+        majorVersion: 100,
       },
     ]
 
@@ -107,7 +107,7 @@ describe('linux browser detection', () => {
         name: 'foo-browser',
         version: '100.1.2.3',
         path: 'foo-browser',
-        majorVersion: '100',
+        majorVersion: 100,
       },
     ]
 
@@ -130,7 +130,7 @@ describe('linux browser detection', () => {
             info: 'Loaded from /foo/bar/browser',
             custom: true,
             version: '9001.1.2.3',
-            majorVersion: '9001',
+            majorVersion: 9001,
             path: '/foo/bar/browser',
           })
         )
@@ -168,7 +168,7 @@ describe('linux browser detection', () => {
             info: 'Loaded from /Applications/My Shiny New Browser.app',
             custom: true,
             version: '100.1.2.3',
-            majorVersion: '100',
+            majorVersion: 100,
             path: '/Applications/My Shiny New Browser.app',
           })
         )
