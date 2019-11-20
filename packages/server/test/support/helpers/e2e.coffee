@@ -10,10 +10,10 @@ morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
+stripAnsi    = require("strip-ansi")
 debug        = require("debug")("cypress:support:e2e")
 httpsProxy   = require("@packages/https-proxy")
 Fixtures     = require("./fixtures")
-{ shouldShowStderrLine } = require("#{root}../../../cli/lib/exec/spawn.js")
 fs           = require("#{root}../lib/util/fs")
 allowDestroy = require("#{root}../lib/util/server_destroy")
 user         = require("#{root}../lib/user")
@@ -94,8 +94,10 @@ replaceUploadingResults = (orig, match..., offset, string) ->
 
   return ret
 
-normalizeStdout = (str, options = {}) ->
+normalizeOutput = (str, options = {}) ->
   normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true})
+
+  str = stripAnsi(str)
 
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
@@ -142,13 +144,6 @@ normalizeStdout = (str, options = {}) ->
 ensurePort = (port) ->
   if port is 5566
     throw new Error('Specified port cannot be on 5566 because it conflicts with --inspect-brk=5566')
-
-normalizeStderr = (str) ->
-  ## use the logic from the CLI that normalizes stderr
-  str
-  .split('\n')
-  .filter(_.unary(shouldShowStderrLine))
-  .join('\n')
 
 startServer = (obj) ->
   { onServer, port, https } = obj
@@ -289,7 +284,7 @@ localItFn.skip = (title, options) ->
   localItFn(title, options)
 
 module.exports = e2e = {
-  normalizeStdout,
+  normalizeOutput,
 
   it: localItFn
 
@@ -300,7 +295,7 @@ module.exports = e2e = {
     index = args.length - 1
 
     ## normalize the stdout of it
-    args[index] = normalizeStdout(args[index])
+    args[index] = normalizeOutput(args[index])
 
     snapshot.apply(null, args)
 
@@ -374,8 +369,11 @@ module.exports = e2e = {
       browser: 'electron'
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
+      onStdout: _.identity
+      onStderr: _.identity
       originalTitle: null
       sanitizeScreenshotDimensions: false
+      useCli: true
     })
 
     ctx.timeout(options.timeout)
@@ -476,19 +474,15 @@ module.exports = e2e = {
 
     stdout = ""
     stderr = ""
+    combinedOut = ""
 
     exit = (code) ->
       if (expected = options.expectedExitCode)?
         expect(code).to.eq(expected, "expected exit code")
 
-      ## snapshot the stdout!
+      ## snapshot the combined stdout and stderr!
       if options.snapshot
-        ## callbacks for normalizing stdout and stderr
-        options.onStdout?(stdout)
-        options.onStderr?(stderr)
-
-        ## if we have browser in the stdout make
-        ## sure its legit
+        ## if we have browser in the stdout do some extra assertions
         if matches = browserNameVersionRe.exec(stdout)
           [str, key, customBrowserPath, browserName, version, headless] = matches
 
@@ -506,12 +500,12 @@ module.exports = e2e = {
           else
             expect(headless).to.include("(headless)")
 
-        str = normalizeStdout(stdout, options)
+        combinedOut = normalizeOutput(combinedOut, options)
 
         if options.originalTitle
-          snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+          snapshot(options.originalTitle, combinedOut, { allowSharedSnapshot: true })
         else
-          snapshot(str)
+          snapshot(combinedOut)
 
       return {
         code:   code
@@ -548,9 +542,15 @@ module.exports = e2e = {
       sp.stderr.pipe(process.stderr)
 
       sp.stdout.on "data", (buf) ->
-        stdout += buf.toString()
+        line = options.onStdout(buf.toString())
+        stdout += line
+        combinedOut += line
+
       sp.stderr.on "data", (buf) ->
-        stderr += buf.toString()
+        line = options.onStderr(buf.toString())
+        stderr += line
+        combinedOut += "[e2e stderr]: #{line}"
+
       sp.on("error", reject)
       sp.on("exit", resolve)
     .tap(copy)
