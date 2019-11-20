@@ -2,9 +2,15 @@ _             = require("lodash")
 path          = require("path")
 Promise       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers")
+pluralize     = require("pluralize")
 utils         = require("./utils")
 errors        = require("../errors")
 fs            = require("../util/fs")
+la            = require("lazy-ass")
+check         = require("check-more-types")
+
+# returns true if the passed string is a known browser family name
+isBrowserFamily = check.oneOf(["electron", "chrome"])
 
 instance = null
 
@@ -31,6 +37,10 @@ cleanup = ->
   instance = null
 
 getBrowserLauncherByFamily = (family) ->
+  debug("getBrowserLauncherByFamily %o", { family })
+  if not isBrowserFamily(family)
+    debug("unknown browser family", family)
+
   switch family
     when "electron"
       require("./electron")
@@ -40,9 +50,13 @@ getBrowserLauncherByFamily = (family) ->
 isValidPathToBrowser = (str) ->
   path.basename(str) isnt str
 
-ensureAndGetByNameOrPath = (nameOrPath, returnAll = false) ->
-  utils.getBrowsers(nameOrPath)
+ensureAndGetByNameOrPath = (nameOrPath, returnAll = false, browsers = null) ->
+  findBrowsers = if Array.isArray(browsers) then Promise.resolve(browsers) else utils.getBrowsers()
+
+  findBrowsers
   .then (browsers = []) ->
+    debug("searching for browser %o", { nameOrPath, knownBrowsers: browsers })
+
     ## try to find the browser by name with the highest version property
     sortedBrowsers = _.sortBy(browsers, ['version'])
     if browser = _.findLast(sortedBrowsers, { name: nameOrPath })
@@ -74,6 +88,8 @@ process.once "exit", kill
 module.exports = {
   ensureAndGetByNameOrPath
 
+  isBrowserFamily
+
   removeOldProfiles: utils.removeOldProfiles
 
   get: utils.getBrowsers
@@ -83,6 +99,7 @@ module.exports = {
   close: kill
 
   getAllBrowsersWith: (nameOrPath) ->
+    debug("getAllBrowsersWith %o", { nameOrPath })
     if nameOrPath
       return ensureAndGetByNameOrPath(nameOrPath, true)
     utils.getBrowsers()

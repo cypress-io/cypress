@@ -176,7 +176,6 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
   debug('downloaded file lacks checksum or size to verify')
 
   return Promise.resolve()
-
 }
 
 // downloads from given url

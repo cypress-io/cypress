@@ -19,6 +19,8 @@ expectToEqDetails = (actual, expected) ->
   expect(actual).to.deep.eq(expected)
 
 describe "Server", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     sinon.stub(Server.prototype, "reset")
 
@@ -1122,11 +1124,11 @@ describe "Server", ->
             origin: "https://s3.amazonaws.com"
             strategy: "http"
             visiting: false
-            domainName: "amazonaws.com"
+            domainName: "s3.amazonaws.com"
             fileServer: null
             props: {
-              domain: "amazonaws"
-              tld: "com"
+              domain: ""
+              tld: "s3.amazonaws.com"
               port: "443"
             }
           })
@@ -1197,10 +1199,10 @@ describe "Server", ->
               strategy: "http"
               visiting: false
               fileServer: null
-              domainName: "amazonaws.com"
+              domainName: "s3.amazonaws.com"
               props: {
-                domain: "amazonaws"
-                tld: "com"
+                domain: ""
+                tld: "s3.amazonaws.com"
                 port: "443"
               }
             })

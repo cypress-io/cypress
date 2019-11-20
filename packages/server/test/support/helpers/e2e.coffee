@@ -34,7 +34,9 @@ Promise.config({
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
-stackTraceLinesRe = /^(\s+)at\s(.+)/gm
+DEFAULT_BROWSERS = ['electron', 'chrome']
+
+stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 snapshotIndexRe = /(\d)$/
@@ -42,8 +44,12 @@ snapshotIndexRe = /(\d)$/
 makeStderrSnapshotKey= (key) ->
   key.replace(snapshotIndexRe, 'stderr $1')
 
+## this captures an entire stack trace and replaces it with [stack trace lines]
+## so that the stdout can contain stack traces of different lengths
+## '@' will be present in firefox stack trace lines
+## 'at' will be present in chrome stack trace lines
 replaceStackTraceLines = (str) ->
-  str.replace(stackTraceLinesRe, "$1at stack trace line")
+  str.replace(stackTraceLinesRe, "$1[stack trace lines]$5")
 
 replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
@@ -60,18 +66,23 @@ replaceDurationSeconds = (str, p1, p2, p3, p4) ->
 
 replaceDurationFromReporter = (str, p1, p2, p3) ->
   ## duration='1589'
-
   p1 + _.padEnd("X", p2.length, "X") + p3
 
 replaceNodeVersion = (str, p1, p2, p3) ->
-  ## Node Version: 1.2.3
-
-  return p1 + _.padEnd("X", p2.length, "X") + ' (/foo/bar/node)' + ' '.repeat(p3.length - 16)
+  return _.padEnd("#{p1}X (/foo/bar/node)", (p1.length + p2.length + p3.length))
 
 replaceDurationInTables = (str, p1, p2) ->
   ## when swapping out the duration, ensure we pad the
   ## full length of the duration so it doesn't shift content
   _.padStart("XX:XX", p1.length + p2.length)
+
+replaceParenTime = (str, p1) ->
+  ## could be (1 second) or (10 seconds)
+  ## need to account for shortest and longest
+  return _.padStart("(X second)", p1.length)
+
+replaceScreenshotDims = (str, p1) ->
+  return _.padStart("(YxX)", p1.length)
 
 replaceUploadingResults = (orig, match..., offset, string) ->
   results = match[1].split('\n').map((res) ->
@@ -84,32 +95,53 @@ replaceUploadingResults = (orig, match..., offset, string) ->
   return ret
 
 normalizeStdout = (str, options = {}) ->
+  normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true})
+
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
   str = str
-  .split(pathUpToProjectName)
-    .join("/foo/bar/.projects")
-  .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+  ## /Users/jane/........../ -> //foo/bar/.projects/
+  ## (Required when paths are printed outside of our own formatting)
+  .split(pathUpToProjectName).join("/foo/bar/.projects")
+
+  if normalizeOptions.normalizeAvailableBrowsers
+    # usually we are not interested in the browsers detected on this particular system
+    # but some tests might filter / change the list of browsers
+    # in that case the test should pass "normalizeAvailableBrowsers:false" as options
+    str = str.replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+
+  str = str
   .replace(browserNameVersionRe, replaceBrowserName)
-  .replace(/\s\(\d+([ms]|ms)\)/g, "") ## numbers in parenths
-  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) ## durations in tables
+  ## numbers in parenths
+  .replace(/\s\(\d+([ms]|ms)\)/g, "")
+  ## 12:35 -> XX:XX
+  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
-  .replace(/(.+)(\/.+\.mp4)/g, "$1/abc123.mp4") ## replace dynamic video names
-  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$11.2.3") ## replace Cypress: 2.1.0
-  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion) ## replace Node Version: 1.2.3
+  ## Cypress: 2.1.0 -> Cypress: 1.2.3
+  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3")
+  ## Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
+  ## 15 seconds -> X second
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
-  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) ## replace duration='1589'
-  .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, "(X seconds)")
+  ## duration='1589' -> duration='XXXX'
+  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
+  ## (15 seconds) -> (XX seconds)
+  .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
   .replace(/\r/g, "")
-  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) ## replaces multiple lines of uploading results (since order not guaranteed)
-  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3") ## fix "Require stacks" for CI
+  ## replaces multiple lines of uploading results (since order not guaranteed)
+  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
+  ## fix "Require stacks" for CI
+  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3")
 
-  if options.browser isnt undefined and options.browser isnt 'electron'
-    str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, "(YYYYxZZZZ)") ## screenshot dimensions
+  if options.sanitizeScreenshotDimensions
+    ## screenshot dimensions
+    str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
 
-  return str.split("\n")
-    .map(replaceStackTraceLines)
-    .join("\n")
+  return replaceStackTraceLines(str)
+
+ensurePort = (port) ->
+  if port is 5566
+    throw new Error('Specified port cannot be on 5566 because it conflicts with --inspect-brk=5566')
 
 normalizeStderr = (str) ->
   ## use the logic from the CLI that normalizes stderr
@@ -120,6 +152,8 @@ normalizeStderr = (str) ->
 
 startServer = (obj) ->
   { onServer, port, https } = obj
+
+  ensurePort(port)
 
   app = express()
 
@@ -170,8 +204,94 @@ copy = ->
       )
     )
 
-module.exports = {
-  normalizeStdout
+getMochaItFn = (only, skip, browser, specifiedBrowser) ->
+  ## if we've been told to skip this test
+  ## or if we specified a particular browser and this
+  ## doesn't match the one we're currently trying to run...
+  if skip or (specifiedBrowser and specifiedBrowser isnt browser)
+    ## then skip this test
+    return it.skip
+
+  if only
+    return it.only
+
+  return it
+
+getBrowsers = (generateTestsForDefaultBrowsers, browser, defaultBrowsers) ->
+  ## if we're generating tests for default browsers
+  if generateTestsForDefaultBrowsers
+    ## then return an array of default browsers
+    return defaultBrowsers
+
+  ## but if we haven't been told to generate tests for default browsers
+  ## and weren't provided a specified browser then throw
+  if not browser
+    throw new Error('A browser must be specified when { generateTestsForDefaultBrowsers: false }.')
+
+  ## otherwise return the specified browser
+  return [browser]
+
+localItFn = (title, options = {}) ->
+  options = _
+  .chain(options)
+  .clone()
+  .defaults({
+    only: false,
+    skip: false,
+    browser: process.env.BROWSER
+    generateTestsForDefaultBrowsers: true
+    onRun: (execFn, browser, ctx) ->
+      execFn()
+  })
+  .value()
+
+  { only, skip, browser, generateTestsForDefaultBrowsers, onRun, spec, expectedExitCode } = options
+
+  if not title
+    throw new Error('e2e.it(...) must be passed a title as the first argument')
+
+  ## LOGIC FOR AUTOGENERATING DYNAMIC TESTS
+  ## - if generateTestsForDefaultBrowsers
+  ##   - create multiple tests for each default browser
+  ##   - if browser is specified in options:
+  ##     ...skip the tests for each default browser if that browser
+  ##     ...does not match the specified one (used in CI)
+  ## - else only generate a single test with the specified browser
+
+  ## run the tests for all the default browsers, or if a browser
+  ## has been specified, only run it for that
+  specifiedBrowser = browser
+  browsersToTest = getBrowsers(generateTestsForDefaultBrowsers, browser, DEFAULT_BROWSERS)
+
+  browserToTest = (browser) ->
+    mochaItFn = getMochaItFn(only, skip, browser, specifiedBrowser)
+
+    testTitle = "#{title} [#{browser}]"
+
+    mochaItFn testTitle, ->
+      originalTitle = @test.parent.titlePath().concat(title).join(" / ")
+
+      ctx = @
+
+      execFn = (overrides = {}) ->
+        e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+
+      onRun(execFn, browser, ctx)
+
+  return _.each(browsersToTest, browserToTest)
+
+localItFn.only = (title, options) ->
+  options.only = true
+  localItFn(title, options)
+
+localItFn.skip = (title, options) ->
+  options.skip = true
+  localItFn(title, options)
+
+module.exports = e2e = {
+  normalizeStdout,
+
+  it: localItFn
 
   snapshot: (args...) ->
     args = _.compact(args)
@@ -251,9 +371,11 @@ module.exports = {
 
   options: (ctx, options = {}) ->
     _.defaults(options, {
-      browser: process.env.BROWSER
+      browser: 'electron'
       project: e2ePath
       timeout: if options.exit is false then 3000000 else 120000
+      originalTitle: null
+      sanitizeScreenshotDimensions: false
     })
 
     ctx.timeout(options.timeout)
@@ -281,6 +403,7 @@ module.exports = {
       args.push("--spec=#{options.spec}")
 
     if options.port
+      ensurePort(options.port)
       args.push("--port=#{options.port}")
 
     if options.headed
@@ -374,13 +497,12 @@ module.exports = {
           else
             expect(headless).to.include("(headless)")
 
-        ## snapshot stdout, stderr
-        normalizedStdout = normalizeStdout(stdout, options)
-        { key } = snapshot(normalizedStdout)
+        str = normalizeStdout(stdout, options)
 
-        normalizedStderr = normalizeStderr(stderr)
-        stderrKey = makeStderrSnapshotKey(key)
-        snapshot(stderrKey, normalizedStderr)
+        if options.originalTitle
+          snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+        else
+          snapshot(str)
 
       return {
         code:   code
@@ -393,14 +515,14 @@ module.exports = {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
-          ## FYI: color will already be disabled
+          ## FYI: color will be disabled
           ## because we are piping the child process
           COLUMNS: 100
           LINES: 24
         })
         .defaults({
+          FAKE_CWD_PATH: "/XXX/XXX/XXX"
           DEBUG_COLORS: "1"
-
           ## prevent any Compression progress
           ## messages from showing up
           VIDEO_COMPRESSION_THROTTLE: 120000

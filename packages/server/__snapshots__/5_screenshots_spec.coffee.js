@@ -1,4 +1,4 @@
-exports['e2e screenshots passes 1'] = `
+exports['e2e screenshots / passes'] = `
 
 ====================================================================================================
 
@@ -14,7 +14,7 @@ exports['e2e screenshots passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: screenshots_spec.js...                                                          (1 of 1) 
+  Running:  screenshots_spec.js                                                             (1 of 1)
 
 
   taking screenshots
@@ -33,6 +33,8 @@ exports['e2e screenshots passes 1'] = `
     2) ensures unique paths when there's a non-named screenshot and a failure
     ✓ properly resizes the AUT iframe
     - does not take a screenshot for a pending test
+    ✓ adds padding to element screenshot when specified
+    ✓ does not add padding to non-element screenshot
     clipping
       ✓ can clip app screenshots
       ✓ can clip runner screenshots
@@ -48,88 +50,106 @@ exports['e2e screenshots passes 1'] = `
       ✓ takes another screenshot
 
 
-  18 passing
+  20 passing
   1 pending
   5 failing
 
   1) taking screenshots generates pngs on failure:
      Error: fail whale
-      at stack trace line
+      [stack trace lines]
 
   2) taking screenshots ensures unique paths when there's a non-named screenshot and a failure:
      Error: failing on purpose
-      at stack trace line
+      [stack trace lines]
 
   3) taking screenshots before hooks "before all" hook for "empty test 1":
      Error: before hook failing
 
 Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'before hooks'
-      at stack trace line
+      [stack trace lines]
 
   4) taking screenshots each hooks "before each" hook for "empty test 2":
      Error: before each hook failed
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'each hooks'
-      at stack trace line
+      [stack trace lines]
 
   5) taking screenshots each hooks "after each" hook for "empty test 2":
      Error: after each hook failed
 
 Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'each hooks'
-      at stack trace line
+      [stack trace lines]
 
 
 
 
   (Results)
 
-  ┌───────────────────────────────────┐
-  │ Tests:        23                  │
-  │ Passing:      18                  │
-  │ Failing:      4                   │
-  │ Pending:      1                   │
-  │ Skipped:      0                   │
-  │ Screenshots:  26                  │
-  │ Video:        true                │
-  │ Duration:     X seconds           │
-  │ Spec Ran:     screenshots_spec.js │
-  └───────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        25                                                                               │
+  │ Passing:      20                                                                               │
+  │ Failing:      4                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  28                                                                               │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     screenshots_spec.js                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/black.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/red.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/foo/bar/baz.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- generates pngs on failure (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/color-check.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/crop-check.png (600x400)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/fullPage.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/fullPage-same.png (600x500)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/pathological.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/element.png (400x300)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- retries each screenshot for up to  XX:XX.png (200x1300)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensures unique paths for non-named screenshots.png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensures unique paths for non-named screenshots (1).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensures unique paths for non-named screenshots (2).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure.png (1000x660)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensures unique paths when there's a non-named screenshot and a failure (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/aut-resize.png (1000x2000)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/app-clip.png (100x50)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/runner-clip.png (120x60)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/fullPage-clip.png (140x70)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/element-clip.png (160x80)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- before hooks -- empty test 1 -- before all hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- each hooks -- empty test 2 -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- each hooks -- empty test 2 -- after each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png (1000x660)
-  - /foo/bar/.projects/e2e/cypress/screenshots/screenshots_spec.js/taking screenshots -- really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png (1000x660)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/black.png                       (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/red.png                         (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/foo/bar/baz.png                 (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- gener     (1280x720)
+     ates pngs on failure (failed).png                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/color-check.png                 (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/crop-check.png                   (600x400)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage.png                     (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage-same.png                (600x500)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/pathological.png                (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element.png                      (400x300)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- retri     (200x1300)
+     es each screenshot for up to  XX:XX.png                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
+     es unique paths for non-named screenshots.png                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
+     es unique paths for non-named screenshots (1).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
+     es unique paths for non-named screenshots (2).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1000x660)
+     es unique paths when there's a non-named screenshot and a failure.png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
+     es unique paths when there's a non-named screenshot and a failure (failed).png                 
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/aut-resize.png                 (1000x2000)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element-padding.png              (420x320)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/non-element-padding.png          (600x200)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/app-clip.png                      (100x50)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/runner-clip.png                   (120x60)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/fullPage-clip.png                 (140x70)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element-clip.png                  (160x80)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- befor     (1280x720)
+     e hooks -- empty test 1 -- before all hook (failed).png                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- each      (1280x720)
+     hooks -- empty test 2 -- before each hook (failed).png                                         
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- each      (1280x720)
+     hooks -- empty test 2 -- after each hook (failed).png                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- reall     (1000x660)
+     y long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- reall     (1000x660)
+     y long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png                                                      
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/screenshots_spec.js.mp4             (X second)
 
 
 ====================================================================================================
@@ -137,11 +157,11 @@ Because this error occurred during a 'after each' hook we are skipping the remai
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ screenshots_spec.js                       XX:XX       23       18        4        1        - │
+  │ ✖  screenshots_spec.js                      XX:XX       25       20        4        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX       23       18        4        1        -  
+    ✖  1 of 1 failed (100%)                     XX:XX       25       20        4        1        -  
 
 
 `

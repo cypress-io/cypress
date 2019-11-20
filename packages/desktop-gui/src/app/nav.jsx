@@ -118,7 +118,6 @@ export default class Nav extends Component {
         Log Out
       </span>
     )
-
   }
 
   _select = (item) => {
@@ -128,7 +127,7 @@ export default class Nav extends Component {
   }
 
   _showLogin () {
-    authStore.setShowingLogin(true)
+    authStore.openLogin()
   }
 
   _openDocs (e) {

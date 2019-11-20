@@ -1,4 +1,4 @@
-exports['e2e spec_isolation failing 1'] = {
+exports['e2e spec isolation fails'] = {
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -35,6 +35,14 @@ exports['e2e spec_isolation failing 1'] = {
       "hooks": [
         {
           "hookId": "h1",
+          "hookName": "before all",
+          "title": [
+            "\"before all\" hook"
+          ],
+          "body": "function () {\n  if (Cypress.browser.family === 'chrome') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+        },
+        {
+          "hookId": "h2",
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
@@ -42,7 +50,7 @@ exports['e2e spec_isolation failing 1'] = {
           "body": "function() {\n      throw new Error(\"fail1\");\n    }"
         },
         {
-          "hookId": "h2",
+          "hookId": "h3",
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
@@ -50,7 +58,7 @@ exports['e2e spec_isolation failing 1'] = {
           "body": "function() {\n      throw new Error(\"fail2\");\n    }"
         },
         {
-          "hookId": "h3",
+          "hookId": "h4",
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
@@ -68,19 +76,26 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "failed",
           "body": "function() {}",
-          "stack": "Error: fail1\n\nBecause this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'\n    at stack trace line",
+          "stack": "Error: fail1\n\nBecause this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'\n    [stack trace lines]",
           "error": "fail1\n\nBecause this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'",
           "timings": {
             "lifecycle": 100,
-            "before each": [
+            "before all": [
               {
                 "hookId": "h1",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
+            ],
+            "before each": [
+              {
+                "hookId": "h2",
+                "fnDuration": 400,
+                "afterFnDuration": 200
+              }
             ]
           },
-          "failedFromHookId": "h1",
+          "failedFromHookId": "h2",
           "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
@@ -111,7 +126,7 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "failed",
           "body": "function() {}",
-          "stack": "Error: fail2\n\nBecause this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'\n    at stack trace line",
+          "stack": "Error: fail2\n\nBecause this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'\n    [stack trace lines]",
           "error": "fail2\n\nBecause this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'",
           "timings": {
             "lifecycle": 100,
@@ -121,13 +136,13 @@ exports['e2e spec_isolation failing 1'] = {
             },
             "after each": [
               {
-                "hookId": "h2",
+                "hookId": "h3",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
             ]
           },
-          "failedFromHookId": "h2",
+          "failedFromHookId": "h3",
           "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
@@ -181,7 +196,7 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "failed",
           "body": "function() {}",
-          "stack": "Error: fail3\n\nBecause this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'\n    at stack trace line",
+          "stack": "Error: fail3\n\nBecause this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'\n    [stack trace lines]",
           "error": "fail3\n\nBecause this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'",
           "timings": {
             "lifecycle": 100,
@@ -191,20 +206,20 @@ exports['e2e spec_isolation failing 1'] = {
             },
             "after all": [
               {
-                "hookId": "h3",
+                "hookId": "h4",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
             ]
           },
-          "failedFromHookId": "h3",
+          "failedFromHookId": "h4",
           "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
           "wallClockDuration": 1234,
           "videoTimestamp": 9999
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
       "screenshots": [
         {
           "screenshotId": "some-random-id",
@@ -264,7 +279,16 @@ exports['e2e spec_isolation failing 1'] = {
         "end": "2018-02-01T20:14:19.323Z",
         "duration": 1234
       },
-      "hooks": [],
+      "hooks": [
+        {
+          "hookId": "h1",
+          "hookName": "before all",
+          "title": [
+            "\"before all\" hook"
+          ],
+          "body": "function () {\n  if (Cypress.browser.family === 'chrome') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+        }
+      ],
       "tests": [
         {
           "testId": "r3",
@@ -274,10 +298,17 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "stack": "CypressError: Timed out retrying: expected true to be false\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line\n    at stack trace line",
+          "stack": "CypressError: Timed out retrying: expected true to be false\n    [stack trace lines]",
           "error": "Timed out retrying: expected true to be false",
           "timings": {
             "lifecycle": 100,
+            "before all": [
+              {
+                "hookId": "h1",
+                "fnDuration": 400,
+                "afterFnDuration": 200
+              }
+            ],
             "test": {
               "fnDuration": 400,
               "afterFnDuration": 200
@@ -296,7 +327,7 @@ exports['e2e spec_isolation failing 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    throw new Error(\"fails2\");\n  }",
-          "stack": "Error: fails2\n    at stack trace line",
+          "stack": "Error: fails2\n    [stack trace lines]",
           "error": "fails2",
           "timings": {
             "lifecycle": 100,
@@ -312,7 +343,7 @@ exports['e2e spec_isolation failing 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4",
       "screenshots": [
         {
           "screenshotId": "some-random-id",
@@ -370,10 +401,18 @@ exports['e2e spec_isolation failing 1'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n  if (Cypress.browser.family === 'chrome') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
         },
         {
           "hookId": "h2",
+          "hookName": "before all",
+          "title": [
+            "\"before all\" hook"
+          ],
+          "body": "function() {\n    return cy.wait(100);\n  }"
+        },
+        {
+          "hookId": "h3",
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
@@ -381,7 +420,7 @@ exports['e2e spec_isolation failing 1'] = {
           "body": "function() {\n    return cy.wait(200);\n  }"
         },
         {
-          "hookId": "h3",
+          "hookId": "h4",
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
@@ -389,7 +428,7 @@ exports['e2e spec_isolation failing 1'] = {
           "body": "function() {\n    return cy.wait(200);\n  }"
         },
         {
-          "hookId": "h4",
+          "hookId": "h5",
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
@@ -415,11 +454,16 @@ exports['e2e spec_isolation failing 1'] = {
                 "hookId": "h1",
                 "fnDuration": 400,
                 "afterFnDuration": 200
+              },
+              {
+                "hookId": "h2",
+                "fnDuration": 400,
+                "afterFnDuration": 200
               }
             ],
             "before each": [
               {
-                "hookId": "h2",
+                "hookId": "h3",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
@@ -430,7 +474,7 @@ exports['e2e spec_isolation failing 1'] = {
             },
             "after each": [
               {
-                "hookId": "h3",
+                "hookId": "h4",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
@@ -455,7 +499,7 @@ exports['e2e spec_isolation failing 1'] = {
             "lifecycle": 100,
             "before each": [
               {
-                "hookId": "h2",
+                "hookId": "h3",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
@@ -466,7 +510,7 @@ exports['e2e spec_isolation failing 1'] = {
             },
             "after each": [
               {
-                "hookId": "h3",
+                "hookId": "h4",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
@@ -491,7 +535,7 @@ exports['e2e spec_isolation failing 1'] = {
             "lifecycle": 100,
             "before each": [
               {
-                "hookId": "h2",
+                "hookId": "h3",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
@@ -502,14 +546,14 @@ exports['e2e spec_isolation failing 1'] = {
             },
             "after each": [
               {
-                "hookId": "h3",
+                "hookId": "h4",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
             ],
             "after all": [
               {
-                "hookId": "h4",
+                "hookId": "h5",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
@@ -522,7 +566,7 @@ exports['e2e spec_isolation failing 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_hooks_spec.coffee.mp4",
       "screenshots": [],
       "spec": {
         "name": "simple_hooks_spec.coffee",
@@ -557,6 +601,14 @@ exports['e2e spec_isolation failing 1'] = {
       "hooks": [
         {
           "hookId": "h1",
+          "hookName": "before all",
+          "title": [
+            "\"before all\" hook"
+          ],
+          "body": "function () {\n  if (Cypress.browser.family === 'chrome') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+        },
+        {
+          "hookId": "h2",
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
@@ -577,9 +629,16 @@ exports['e2e spec_isolation failing 1'] = {
           "error": null,
           "timings": {
             "lifecycle": 100,
-            "before each": [
+            "before all": [
               {
                 "hookId": "h1",
+                "fnDuration": 400,
+                "afterFnDuration": 200
+              }
+            ],
+            "before each": [
+              {
+                "hookId": "h2",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
@@ -596,7 +655,7 @@ exports['e2e spec_isolation failing 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/abc123.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_passing_spec.coffee.mp4",
       "screenshots": [],
       "spec": {
         "name": "simple_passing_spec.coffee",

@@ -605,6 +605,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Fix the error in your code and re-run your tests.
       """
+    # happens when there is an error in configuration file like "cypress.json"
     when "SETTINGS_VALIDATION_ERROR"
       filePath = "`#{arg1}`"
       """
@@ -612,6 +613,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg2)}
       """
+    # happens when there is an invalid config value returnes from the
+    # project's plugins file like "cypress/plugins.index.js"
+    when "PLUGINS_CONFIG_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
+      """
+      An invalid configuration value returned from the plugins file: #{chalk.blue(filePath)}
+
+      #{chalk.yellow(arg2)}
+      """
+    # general configuration error not-specific to configuration or plugins files
     when "CONFIG_VALIDATION_ERROR"
       """
       We found an invalid configuration value:
@@ -841,6 +852,26 @@ getMsgByType = (type, arg1 = {}, arg2) ->
         #{chalk.yellow(arg1)}
 
       Please do not modify CYPRESS_ENV value.
+      """
+    when "CDP_VERSION_TOO_OLD"
+      """
+      A minimum CDP version of v#{arg1} is required, but the current browser has #{if arg2.major != 0 then "v#{arg2.major}.#{arg2.minor}" else 'an older version'}.
+      """
+    when "CDP_COULD_NOT_CONNECT"
+      """
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+
+      This usually indicates there was a problem opening the Chrome browser.
+
+      The CDP port requested was #{chalk.yellow(arg1)}.
+
+      Error details:
+
+      #{arg2.stack}
+      """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
 
 get = (type, arg1, arg2) ->

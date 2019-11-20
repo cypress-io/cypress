@@ -97,7 +97,6 @@ describe('driver/src/cy/snapshots_css', () => {
     })
 
     it('returns same id after css has been modified until a new window', () => {
-
       cy.state('document').styleSheets[0].insertRule('.qux { color: orange; }')
       snapshotCss.onCssModified('http://localhost:3500/fixtures/generic_styles.css')
       const ids1 = snapshotCss.getStyleIds()
