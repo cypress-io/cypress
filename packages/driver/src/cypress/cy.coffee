@@ -207,6 +207,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
   enqueue = (obj) ->
+    if obj.type is "inner"
+      console.log("Adding an inner command")
+      console.log(obj)
     ## if we have a nestedIndex it means we're processing
     ## nested commands and need to splice them into the
     ## index past the current index as opposed to
@@ -236,7 +239,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## then add the parentCommand to the obj
     if not _.isUndefined(parentCommand) 
       obj.parentCommand = parentCommand
-      if obj.type is "parent" then obj.type = "child"
+      obj.type = "inner"
 
     ## If we are dealing with a within commmand,
     ## We want to create its own queue, and run the commands from there
@@ -244,15 +247,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## I think we want to change this from a state object to an object we pass to the parent
     if not _.isUndefined(parentCommand) && (nestedQueue = parentCommand.get('queue'))
-        console.log(nestedQueue)
         nestedQueue.splice(nestedQueue.length, 0, obj)
         parentCommand.set({ queue: nestedQueue })
-        console.log(parentCommand)
     else if not _.isUndefined(parentCommand)
         nestedQueue = $CommandQueue.create()
         nestedQueue.splice(nestedQueue.length, 0, obj)
         parentCommand.set({ queue: nestedQueue })
-        console.log(parentCommand)
     else queue.splice(index, 0, obj)
     Cypress.action("cy:command:enqueued", obj)
 
@@ -274,7 +274,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## prior to ever making it through our first
     ## command
     return if stopped
-
+    console.log(command)
     state("current", command)
     state("chainerId", command.get("chainerId"))
 
@@ -435,7 +435,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       ## store the current runnable
       runnable = state("runnable")
-
+      console.log("running command", command)
+      console.log("we shouldn't be running our inner commands here")
       Cypress.action("cy:command:start", command)
       state("currentCommand", command)
 
@@ -887,7 +888,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         if not state("promise")
           if state("returnedCustomPromise")
             warnMixingPromisesAndCommands()
-
+          console.log("kicking off command queue")
           run()
 
         return chain
@@ -901,7 +902,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         if _.isFunction(onInjectCommand)
           return if onInjectCommand.call(cy, name, args...) is false
-
+        console.log(type)
         enqueue({
           name
           args
@@ -920,11 +921,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## instead of removing the commands from the queue
       ## after they are done running, should we do it here?
       ## Worried about the behaviour with other nested commands
-      new Promise( (resolve) ->
-        Cypress.action("cy:command:start", obj)
+      new Promise((resolve) ->
+        console.log('running command')
         console.log(obj)
+        Cypress.action("cy:command:start", obj)
         runCommand(obj)
         .then ->
+          console.log("finished command")
           Cypress.action("cy:command:end", obj)
           resolve(obj)
       )
@@ -939,6 +942,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
         ## clone the command to prevent
         ## mutating its properties
+        console.log("replaying commands?")
+        console.log(command)
         enqueue(command.clone())
 
       ## - starting with the aliased command

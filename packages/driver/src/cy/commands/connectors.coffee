@@ -62,28 +62,27 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     args = remoteSubject or subject
     args = if subject?._spreadArray then args else [args]
+    queuedSubjects = null
 
     ## name could be invoke or its!
     name = state("current").get("name")
-    queue = cy.queue
-    console.log(queue)
+
     cleanup = ->
       state("onInjectCommand", undefined)
       cy.removeListener("command:enqueued", enqueuedCommand)
+      cy.removeListener("command:start", enqueuedCommand)
       return null
 
     invokedCyCommand = false
 
     enqueuedCommand = () ->
       invokedCyCommand = true
-      { commands } = cy.state("current").get("queue")
-      for cmd in commands
-        res = cy.runCommandInQueue(cmd)
-        await res
 
     state("onInjectCommand", returnFalseIfThenable)
-
+    commandStart = (cmd) -> 
+      console.log("started command", cmd)
     cy.once("command:enqueued", enqueuedCommand)
+    cy.on("command:start", commandStart)
     ## this code helps juggle subjects forward
     ## the same way that promises work
     current = state("current")
@@ -106,26 +105,31 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## find the new subject and splice it out
         ## with our existing subject
         index = _.indexOf(args, newSubject)
-        console.log(index)
-        console.log(state("current"))
+
         if index > -1
           args.splice(index, 1, s)
         
 
         cy.removeListener("next:subject:prepared", checkSubject)
       cy.on("next:subject:prepared", checkSubject)
+    getQueuedRet = ->
+      { commands } = cy.state("current").get("queue")
+      return Promise.all(commands.map (cmd) -> cy.runCommandInQueue(cmd))
     getRet = ->
       ret = fn.apply(ctx, args)
-
       if cy.isCy(ret)
         ret = undefined
-
       if ret? and invokedCyCommand and not ret.then
         $utils.throwErrByPath("then.callback_mixes_sync_and_async", {
           onFail: options._log
           args: { value: $utils.stringify(ret) }
         })
-      console.log(ret)
+      ## if this then, has cypress commands within the function
+      ## run them here and wait for the result
+      if not _.isUndefined(cy.state("current").get("queue"))
+         ## we grab the last subject, because cypress shuffles subjects down for us
+         [..., results] = await getQueuedRet()
+         ret = results.get("subject")
       return ret
 
     Promise
