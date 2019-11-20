@@ -10,7 +10,6 @@ morgan       = require("morgan")
 express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
-stripAnsi    = require("strip-ansi")
 debug        = require("debug")("cypress:support:e2e")
 httpsProxy   = require("@packages/https-proxy")
 Fixtures     = require("./fixtures")
@@ -96,8 +95,6 @@ replaceUploadingResults = (orig, match..., offset, string) ->
 
 normalizeOutput = (str, options = {}) ->
   normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true})
-
-  str = stripAnsi(str)
 
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected

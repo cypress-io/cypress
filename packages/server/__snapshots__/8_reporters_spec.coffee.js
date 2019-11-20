@@ -147,7 +147,7 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  simple_passing_spec.coffee                                                      (1 of 1)
-[mochawesome] Generating report files...
+[[90mmochawesome[39m] Generating report files...
 
 
 
@@ -158,7 +158,7 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
   1 passing
 
 
-[mochawesome] Report saved to mochawesome-reports/mochawesome.html
+[[90mmochawesome[39m] Report saved to mochawesome-reports/mochawesome.html
 
 
 
@@ -214,7 +214,7 @@ exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom repor
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  simple_failing_hook_spec.coffee                                                 (1 of 1)
-[mochawesome] Generating report files...
+[[90mmochawesome[39m] Generating report files...
 
 
 
@@ -263,7 +263,7 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 
 
 
-[mochawesome] Report saved to mochawesome-reports/mochawesome.html
+[[90mmochawesome[39m] Report saved to mochawesome-reports/mochawesome.html
 
 
 
@@ -339,9 +339,9 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
 
   1 passing
 
-[mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
+[[90mmochawesome[39m] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
-[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+[[90mmochawesome[39m] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
   (Results)
@@ -442,9 +442,9 @@ Because this error occurred during a 'after all' hook we are skipping the remain
 
 
 
-[mochawesome] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
+[[90mmochawesome[39m] Report JSON saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.json
 
-[mochawesome] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
+[[90mmochawesome[39m] Report HTML saved to /foo/bar/.projects/e2e/mochawesome-report/mochawesome.html
 
 
   (Results)
