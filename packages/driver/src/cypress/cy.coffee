@@ -207,9 +207,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
   enqueue = (obj) ->
-    if obj.type is "inner"
-      console.log("Adding an inner command")
-      console.log(obj)
     ## if we have a nestedIndex it means we're processing
     ## nested commands and need to splice them into the
     ## index past the current index as opposed to
@@ -267,6 +264,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       return memo
 
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
+  runQueuedCommands = (command) ->
+    { commands } = command.get("queue")
+    subjects = []
+    for cmd in commands
+      res = cy.runCommandInQueue(cmd)
+      await res
+      subjects.push(res)
+    return Promise.all(subjects)
 
   runCommand = (command) ->
     ## bail here prior to creating a new promise
@@ -305,16 +310,18 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## new commands
       if noArgsAreAFunction(args)
         Cypress.once("command:enqueued", commandEnqueued)
-
+      ## this is where we should do the queue
       ## run the command's fn with runnable's context
       try
         ret = command.get("fn").apply(state("ctx"), args)
+        if not _.isUndefined(command.get("queue"))
+           subjects = await runQueuedCommands(command)
+           [..., result] = subjects
       catch err
         throw err
       finally
         ## always remove this listener
         Cypress.removeListener("command:enqueued", commandEnqueued)
-
       state("commandIntermediateValue", ret)
 
       ## we cannot pass our cypress instance or our chainer
@@ -322,6 +329,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## which is never resolved
       switch
         when isCy(ret)
+          if not _.isUndefined(result)
+             return result.get("subject")
           null
         when enqueuedCmd and isPromiseLike(ret)
           $utils.throwErrByPath(
@@ -352,8 +361,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             }
           )
         else
+          console.log("returning ret")
           ret
     .then (subject) ->
+      console.log(subject)
       state("commandIntermediateValue", undefined)
 
       ## we may be given a regular array here so
@@ -387,7 +398,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       state("recentlyReady", null)
 
       state("subject", subject)
-
+      console.log("finishing current command")
+      console.log(command)
       return subject
 
   run = ->
@@ -401,7 +413,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       index = state("index") ? state("index", 0)
 
       command = queue.at(index)
-
+      console.log(queue)
       ## if the command should be skipped
       ## just bail and increment index
       ## and set the subject
@@ -436,7 +448,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## store the current runnable
       runnable = state("runnable")
       console.log("running command", command)
-      console.log("we shouldn't be running our inner commands here")
       Cypress.action("cy:command:start", command)
       state("currentCommand", command)
 

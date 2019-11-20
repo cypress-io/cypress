@@ -79,10 +79,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       invokedCyCommand = true
 
     state("onInjectCommand", returnFalseIfThenable)
-    commandStart = (cmd) -> 
-      console.log("started command", cmd)
+
     cy.once("command:enqueued", enqueuedCommand)
-    cy.on("command:start", commandStart)
     ## this code helps juggle subjects forward
     ## the same way that promises work
     current = state("current")
@@ -112,14 +110,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         cy.removeListener("next:subject:prepared", checkSubject)
       cy.on("next:subject:prepared", checkSubject)
-    getQueuedRet = ->
-      { commands } = cy.state("current").get("queue")
-      results = []
-      for cmds in commands
-        res = cy.runCommandInQueue(cmds)
-        await res
-        results.push(res)
-      return Promise.all(results)
+
     getRet = ->
       ret = fn.apply(ctx, args)
       if cy.isCy(ret)
@@ -129,12 +120,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onFail: options._log
           args: { value: $utils.stringify(ret) }
         })
-      ## if this then, has cypress commands within the function
-      ## run them here and wait for the result
-      if not _.isUndefined(cy.state("current").get("queue"))
-         ## we grab the last subject, because cypress shuffles subjects down for us
-         [..., results] = await getQueuedRet()
-         ret = results.get("subject")
+
       return ret
 
     Promise

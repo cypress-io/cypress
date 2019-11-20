@@ -435,6 +435,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.state("withinSubject", subject)
       ## instead of just inserting these command into the queue and letting them run that way
       ## we are going to run them ourselves in a separate queue
+      ###
       finishWithin = () ->
         console.log(cy.state("current").get("queue"))
         { commands } = cy.state("current").get("queue")
@@ -447,12 +448,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         for cmd in commands
           res = cy.runCommandInQueue(cmd)
           await res
-
+      ###
       fn.call(ctx, subject)
 
       cleanup = ->
         cy.removeListener("command:start", setWithinSubject)
-        cy.removeListener("command:enqueued", finishWithin)
+        ##cy.removeListener("command:enqueued", finishWithin)
 
       ## we need a mechanism to know when we should remove
       ## our withinSubject so we dont accidentally keep it
@@ -488,6 +489,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           cy.state("withinSubject", null)
 
-      await finishWithin()
+      ##await finishWithin()
       return subject
   })
