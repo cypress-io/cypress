@@ -1,5 +1,3 @@
-/* global a, b, c, findThings, isBad, isAwesome, hi, you */
-
 function f () {
   switch (false) {
     // Comment should be reserved

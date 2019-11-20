@@ -2,6 +2,7 @@
   "parser": "espree",
   "rules": {
     "no-empty": "off",
+    "no-undef": "off",
     "semi": "off",
     "brace-style": "off",
     "no-case-declarations": "off"
