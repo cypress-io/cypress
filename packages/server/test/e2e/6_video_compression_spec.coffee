@@ -5,9 +5,8 @@ glob = require("../../lib/util/glob")
 videoCapture = require("../../lib/video_capture")
 Fixtures = require("../support/helpers/fixtures")
 
-## TODO: changed for debugging purposes
-NUM_TESTS = 1
-MS_PER_TEST = 200
+NUM_TESTS = 40
+MS_PER_TEST = 500
 EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
 
 describe "e2e video compression", ->

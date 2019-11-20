@@ -655,20 +655,20 @@ const browserCanBeRecorded = (browser) => {
   return false
 }
 
-const createVideoRecording = function (videoName) {
+const createVideoRecording = function (videoName, options = {}) {
   const outputDir = path.dirname(videoName)
 
   return fs
   .ensureDirAsync(outputDir)
   .then(() => {
     return videoCapture
-    .start(videoName, {
+    .start(videoName, _.extend({}, options, {
       onError (err) {
         // catch video recording failures and log them out
         // but don't let this affect the run at all
         return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
       },
-    })
+    }))
   })
 }
 
@@ -716,7 +716,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const videoName = videoPath('.mp4')
   const compressedVideoName = videoPath('-compressed.mp4')
 
-  return this.createVideoRecording(videoName)
+  return this.createVideoRecording(videoName, { webmInput: browser.family === 'firefox' })
   .then((props = {}) => {
     return {
       videoName,
