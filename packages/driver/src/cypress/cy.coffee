@@ -272,6 +272,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       await res
       subjects.push(res)
     return Promise.all(subjects)
+      .catch (err) ->
+        console.log("something went wrong", err)
 
   runCommand = (command) ->
     ## bail here prior to creating a new promise
@@ -361,10 +363,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             }
           )
         else
-          console.log("returning ret")
+          ## if we are supposed to return ret...check to see that
+          ## return the correct subject
+          ## If the subject is the original...it should work as is
+          if not _.isUndefined(result)
+            return Promise.resolve(result.get("subject"))
           ret
     .then (subject) ->
-      console.log(subject)
       state("commandIntermediateValue", undefined)
 
       ## we may be given a regular array here so
