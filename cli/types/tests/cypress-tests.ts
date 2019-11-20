@@ -98,6 +98,10 @@ cy.wrap({ foo: [1, 2, 3] })
     s
   })
 
+cy.wrap(['foo', 'bar']).its(1)
+
+cy.wrap([()=>{}, ()=>{}]).invoke(1)
+
 cy.wrap({ foo: ['bar', 'baz'] })
   .its('foo')
   .then(([first, second]) => {
