@@ -1,0 +1,14 @@
+{
+  "name": "@packages/ui-components",
+  "devDependencies": {
+    "@cypress/eslint-plugin-dev": "5.0.0",
+    "classnames": "2.2.6",
+    "cypress-react-unit-test": "2.4.3",
+    "eslint-plugin-cypress": "2.7.0",
+    "lodash": "4.17.15",
+    "node-sass": "4.13.0",
+    "prop-types": "15.7.2",
+    "react": "16.12.0",
+    "react-dom": "16.12.0"
+  }
+}

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
-import Dropdown from '../dropdown/dropdown'
+import { Dropdown } from '@packages/ui-components'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
 import projectsApi from '../projects/projects-api'

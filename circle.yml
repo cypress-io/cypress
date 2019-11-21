@@ -134,6 +134,8 @@ commands:
       - save-cache:
           packageName: ts
       - save-cache:
+          packageName: ui-components
+      - save-cache:
           packageName: web-config
 
   restore-cache:
@@ -207,6 +209,9 @@ commands:
       - restore-cache:
           packageName: ts
           packagePath: packages/ts/package.json
+      - restore-cache:
+          packageName: ui-components
+          packagePath: packages/ui-components/package.json
       - restore-cache:
           packageName: web-config
           packagePath: packages/web-config/package.json
@@ -555,6 +560,23 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             npm run cypress:run -- --record --parallel --group reporter
           working_directory: packages/reporter
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  "ui-components-integration-tests":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group ui-components
+          working_directory: packages/ui-components
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1020,6 +1042,7 @@ linux-workflow: &linux-workflow
     - reporter-integration-tests:
         requires:
           - build
+    - ui-components-integration-tests
     - run-launcher:
         requires:
           - build
@@ -1121,7 +1144,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-        
+
     - lint:
         name: Mac lint
         executor: mac
