@@ -5,7 +5,7 @@ interface DefaultAppState {
   isPaused: boolean
   isRunning: boolean
   nextCommandName: string | null | undefined
-  pinnedSnapshotId: number | null
+  pinnedSnapshotId: number | string | null
 }
 
 const defaults: DefaultAppState = {
