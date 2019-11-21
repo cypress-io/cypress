@@ -200,7 +200,10 @@ module.exports = {
 
         progressed = utils.timemarkToSeconds(progress.timemark)
 
-        onProgress(progressed / total)
+        percent = progressed / total
+        if percent < 1
+          onProgress(percent)
+
 
       .on "error", (err, stdout, stderr) ->
         debug("compression errored: %o", { error: err.message, stdout, stderr })
