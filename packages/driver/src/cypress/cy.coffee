@@ -264,8 +264,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     { commands } = command.get("queue")
     subjects = []
     state("queuedIndex", 0)
+    console.log(queue)
     for cmd in commands
-      if cmd.type isnt "assertion"
+      if cmd.get("type") isnt "assertion"
         res = cy.runCommandInQueue(cmd)
         await res
         subjects.push(res)
