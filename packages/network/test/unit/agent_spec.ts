@@ -301,6 +301,17 @@ describe('lib/agent', function () {
           return proxy.destroyAsync()
         })
       })
+
+      it('does not warn when making a request to an IP address', function () {
+        const warningStub = sinon.stub(process, 'emitWarning')
+
+        return this.request({
+          url: `https://127.0.0.1:${HTTPS_PORT}/get`,
+        })
+        .then(() => {
+          expect(warningStub).to.not.be.called
+        })
+      })
     })
 
     context('HttpAgent', function () {
