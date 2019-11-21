@@ -265,14 +265,12 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     subjects = []
     state("queuedIndex", 0)
     for cmd in commands
-      if not cmd.type is "assertion"
+      if cmd.type isnt "assertion"
         res = cy.runCommandInQueue(cmd)
         await res
         subjects.push(res)
       state("queuedIndex", state("queuedIndex")+1)
     return Promise.all(subjects)
-      .catch (err) ->
-        console.log("something went wrong", err)
 
   runCommand = (command) ->
     ## bail here prior to creating a new promise
