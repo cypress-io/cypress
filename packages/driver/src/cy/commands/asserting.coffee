@@ -79,6 +79,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     chainers = chainers.split(".")
     lastChainer = _.last(chainers)
+    console.log(chainers)
 
     ## backup the original assertion subject
     originalObj = exp._obj
@@ -95,6 +96,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       exp.isCheckingExistence = true
 
     applyChainer = (memo, value) ->
+      console.log(memo)
+      console.log(value)
       if value is lastChainer
         if _.isFunction(memo[value])
           try
