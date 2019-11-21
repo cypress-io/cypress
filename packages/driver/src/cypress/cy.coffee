@@ -234,10 +234,15 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     index = if _.isNumber(nestedIndex) then nestedIndex else queue.length
     ## if we're dealing with nestedCommands
     ## then add the parentCommand to the obj
-    if not _.isUndefined(parentCommand) 
-      obj.parentCommand = parentCommand
-      if obj.type is "parent"
-         obj.type = "child"
+    if not _.isUndefined(parentCommand)
+      if not _.isFunction(obj.get)
+        obj.parentCommand = parentCommand
+        if obj.type is "parent"
+          obj.type = "child"
+      else
+        obj.set({ parentCommand })
+        if obj.get("type") is "parent"
+           obj.set({ type: "child" })
 
     if not _.isUndefined(parentCommand) && (nestedQueue = parentCommand.get('queue'))
         nestedQueue.splice(nestedQueue.length, 0, obj)
@@ -939,18 +944,20 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     replayCommandsFrom: (current) ->
       ## reset each chainerId to the
       ## current value
+      console.log("Replaying commands from ", current)
       chainerId = state("chainerId")
-
+      console.log(chainerId)
       insert = (command) ->
         command.set("chainerId", chainerId)
 
         ## clone the command to prevent
         ## mutating its properties
+        console.log("calling enqueue for ", command)
         enqueue(command.clone())
+        console.log(queue)
 
-      ## - starting with the aliased command
-      ## - walk up to each prev command
-      ## - until you reach a parent command
+      ## - starting with the aliased command: click
+      ## - walk up to each prev command: first, as, then, get
       ## - or until the subject is in the DOM
       ## - from that command walk down inserting
       ##   every command which changed the subject
@@ -958,10 +965,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ##   inserted if the previous command should
       ##   be replayed
 
-      commands = getCommandsUntilFirstParentOrValidSubject(current)
+      ## In this case, every command that changed the subject would be get, first
 
+      commands = getCommandsUntilFirstParentOrValidSubject(current)
+      console.log(commands)
       if commands
         initialCommand = commands.shift()
+        console.log("inital command: ", initialCommand)
 
         commandsToInsert = _.reduce(commands, (memo, command, index) ->
           push = ->
@@ -986,7 +996,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           return memo
 
         , [initialCommand])
-
+        console.log("inserting these commands: ", commandsToInsert)
         for c in commandsToInsert
           insert(c)
 

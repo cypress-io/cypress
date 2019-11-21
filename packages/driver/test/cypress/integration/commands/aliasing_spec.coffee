@@ -230,20 +230,25 @@ describe "src/cy/commands/aliasing", ->
             currentLength = cy.queue.length
 
             cy.get("@list").then ->
-              ## should only add the .get() and the .then()
-              expect(cy.queue.length).to.eq(currentLength + 2)
+              ## commands within thens are not added to the queue anymore
+              expect(cy.queue.length).to.eq(currentLength)
+              ## this is a dumb assertion
+              ## not sure if we need/should be testing anything with the new queue stuff
+              expect(cy.queue.last().get("queue").length).to.eq(2)
 
     describe "subject not in document", ->
       it "inserts into the queue", ->
         existingNames = cy.queue.names()
-
+        ## with new queue logic, the queues are much more simpler
+        ## As what should be in the queue is exactly as shown unless
+        ## its inside an within, each, or then
         cy
           .get("#list li").eq(0).as("firstLi").then ($li) ->
             $li.remove()
           .get("@firstLi").then ->
             expect(cy.queue.names()).to.deep.eq(
               existingNames.concat(
-                ["get", "eq", "as", "then", "get", "get", "eq", "then"]
+                ["get", "eq", "as", "then", "get", "then"]
               )
             )
 
@@ -268,7 +273,7 @@ describe "src/cy/commands/aliasing", ->
           .get("@firstLi").then ->
             expect(cy.queue.names()).to.deep.eq(
               existingNames.concat(
-                ["get", "noop", "get", "eq", "as", "then", "get", "get", "eq", "then"]
+                ["get", "noop", "get", "eq", "as", "then", "get", "then"]
               )
             )
 
@@ -318,7 +323,7 @@ describe "src/cy/commands/aliasing", ->
           .then ->
             expect(cy.queue.names()).to.deep.eq(
               existingNames.concat(
-                ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "should", "then"]
+                ["get", "then", "as", "first", "click", "as", "then", "get",  "should", "then", "get", "should", "then"]
               )
             )
           .get("@firstItem")
@@ -326,7 +331,7 @@ describe "src/cy/commands/aliasing", ->
           .then ->
             expect(cy.queue.names()).to.deep.eq(
               existingNames.concat(
-                ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "get", "first", "should", "then"]
+                ["get", "then", "as", "first", "click", "as", "then", "get", "should", "then", "get", "should", "then"]
               )
             )
 
@@ -344,7 +349,7 @@ describe "src/cy/commands/aliasing", ->
           .then ->
             expect(cy.queue.names()).to.deep.eq(
               existingNames.concat(
-                ["get", "eq", "should", "as", "then", "get", "get", "eq", "should", "then"]
+                ["get", "eq", "should", "as", "then", "get", "then"]
               )
             )
             done()
