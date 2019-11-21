@@ -8,6 +8,7 @@ import AnError from '../errors/an-error'
 import { AppState } from '../lib/app-state'
 import { RunnablesStore } from './runnables-store'
 import { Scroller } from '../lib/scroller'
+import TestModel from '../test/test-model'
 
 type AppStateStub = AppState & {
   temporarilySetAutoScrolling: SinonSpy
@@ -39,7 +40,7 @@ describe('<Runnables />', () => {
   it('renders <RunnablesList /> when there are runnables', () => {
     const component = shallow(
       <Runnables
-        runnablesStore={runnablesStoreStub({ runnables: [{ id: 1 }] })}
+        runnablesStore={runnablesStoreStub({ runnables: [{ id: 1 }] as TestModel[] })}
         scroller={scrollerStub()}
         specPath=''
       />

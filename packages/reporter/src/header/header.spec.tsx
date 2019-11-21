@@ -1,13 +1,18 @@
 import React from 'react'
 import { shallow } from 'enzyme'
-import sinon from 'sinon'
+import sinon, { SinonSpy } from 'sinon'
 
 import appState from '../lib/app-state'
 
 import Header from './header'
 import statsStore from './stats-store'
+import { Events } from '../lib/events'
 
-const eventsStub = () => ({ emit: sinon.spy() })
+type EventsStub = Events & {
+  emit: SinonSpy
+}
+
+const eventsStub = () => ({ emit: sinon.spy() } as EventsStub)
 
 describe('<Header />', () => {
   it('renders the focus tests button', () => {
