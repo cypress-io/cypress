@@ -636,9 +636,14 @@ create = (specWindow, mocha, Cypress, cy) ->
   specWindow.onerror = ->
     err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
 
+        
+
     ## err will not be returned if cy can associate this
     ## uncaught exception to an existing runnable
     return true if not err
+        
+    # if !_.includes(err.stack, err.message)
+    #   err.stack = err.message + '\n' + err.stack
 
     todoMsg = ->
       if not Cypress.config("isTextTerminal")

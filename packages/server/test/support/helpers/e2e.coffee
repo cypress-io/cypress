@@ -43,8 +43,15 @@ availableBrowsersRe = /(Available browsers found are: )(.+)/g
 ## so that the stdout can contain stack traces of different lengths
 ## '@' will be present in firefox stack trace lines
 ## 'at' will be present in chrome stack trace lines
-replaceStackTraceLines = (str) ->
-  str.replace(stackTraceLinesRe, "$1[stack trace lines]$5")
+replaceStackTraceLines = (str, browser) ->
+  str.replace(stackTraceLinesRe, (match, parts...) ->
+    pre = parts[0]
+    post = parts[4]
+    if browser is 'firefox'
+      pre += pre.slice(1).repeat(2)
+      # post = '\n\n'
+      post = post.slice(-1)
+    return "#{pre}[stack trace lines]#{post}")
 
 replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
@@ -132,7 +139,7 @@ normalizeStdout = (str, options = {}) ->
     ## screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
 
-  return replaceStackTraceLines(str)
+  return replaceStackTraceLines(str, options.browser)
 
 ensurePort = (port) ->
   if port is 5566

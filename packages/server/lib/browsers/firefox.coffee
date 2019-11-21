@@ -180,6 +180,8 @@ module.exports = {
         "-marionette"
         "-new-instance"
         "-foreground"
+        "-height", "794"
+        "-width", "1280"
       ]
 
       debug("launch in firefox: %s, %s", url, args)
