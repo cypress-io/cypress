@@ -31,7 +31,7 @@
 //     // console.log(capture)
 //   }).timeout(20000)
 
-//   it.only('ffmpeg test', async () => {
+//   it('ffmpeg test', async () => {
 //     const vid = new stream.PassThrough()
 //     // const vid = new stream.Duplex()
 
