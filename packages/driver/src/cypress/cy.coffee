@@ -236,8 +236,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## then add the parentCommand to the obj
     if not _.isUndefined(parentCommand) 
       obj.parentCommand = parentCommand
-      console.log(obj)
-      console.log(obj.type)
       if obj.type is "parent"
          obj.type = "child"
 
@@ -267,9 +265,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     subjects = []
     state("queuedIndex", 0)
     for cmd in commands
-      res = cy.runCommandInQueue(cmd)
-      await res
-      subjects.push(res)
+      if not cmd.type is "assertion"
+        res = cy.runCommandInQueue(cmd)
+        await res
+        subjects.push(res)
       state("queuedIndex", state("queuedIndex")+1)
     return Promise.all(subjects)
       .catch (err) ->
