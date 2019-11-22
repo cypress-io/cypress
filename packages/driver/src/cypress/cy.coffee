@@ -1100,9 +1100,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             arguments[0] = done = (err) ->
               ## TODO: handle no longer error
               ## when ended early
-              ## if we're not stopped then stop
+              doneEarly()
               if not stopped
-                 doneEarly()
                  originalDone(err)
 
               ## return null else we there are situations
