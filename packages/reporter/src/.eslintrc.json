@@ -3,6 +3,9 @@
     "plugin:@cypress/dev/react",
     "plugin:@cypress/dev/tests"
   ],
+  "rules": {
+    "arrow-body-style": "off"
+  },
   "settings": {
     "react": {
       "version": "16.12"
