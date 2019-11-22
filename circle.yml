@@ -1042,7 +1042,9 @@ linux-workflow: &linux-workflow
     - reporter-integration-tests:
         requires:
           - build
-    - ui-components-integration-tests
+    - ui-components-integration-tests:
+        requires:
+          - build
     - run-launcher:
         requires:
           - build
