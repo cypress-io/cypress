@@ -265,11 +265,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       return memo
 
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
+
   runQueuedCommands = (command) ->
     { commands } = command.get("queue")
     subjects = []
     state("queuedIndex", 0)
-    console.log(queue)
     for cmd in commands
       if cmd.get("type") isnt "assertion"
         res = cy.runCommandInQueue(cmd)
@@ -370,7 +370,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## If the subject is the original...it should work as is
           if not _.isUndefined(result)
             return Promise.resolve(result.get("subject"))
-          ret
+          return ret
     .then (subject) ->
       state("commandIntermediateValue", undefined)
 
@@ -453,7 +453,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       runnable = state("runnable")
       Cypress.action("cy:command:start", command)
       state("currentCommand", command)
-
       runCommand(command)
       .then ->
         ## If the command has a parentCommand (meaning that is a nested command...)
@@ -591,7 +590,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## Cypress or when we yield a (done) callback
     ## and could arbitrarily call it whenever we want
     p = state("promise")
-
     ## if our outer promise is pending
     ## then cancel outer and inner
     ## and set canceled to be true
@@ -944,17 +942,13 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     replayCommandsFrom: (current) ->
       ## reset each chainerId to the
       ## current value
-      console.log("Replaying commands from ", current)
       chainerId = state("chainerId")
-      console.log(chainerId)
       insert = (command) ->
         command.set("chainerId", chainerId)
 
         ## clone the command to prevent
         ## mutating its properties
-        console.log("calling enqueue for ", command)
         enqueue(command.clone())
-        console.log(queue)
 
       ## - starting with the aliased command: click
       ## - walk up to each prev command: first, as, then, get
@@ -968,10 +962,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## In this case, every command that changed the subject would be get, first
 
       commands = getCommandsUntilFirstParentOrValidSubject(current)
-      console.log(commands)
       if commands
         initialCommand = commands.shift()
-        console.log("inital command: ", initialCommand)
 
         commandsToInsert = _.reduce(commands, (memo, command, index) ->
           push = ->
@@ -996,7 +988,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           return memo
 
         , [initialCommand])
-        console.log("inserting these commands: ", commandsToInsert)
         for c in commandsToInsert
           insert(c)
 
@@ -1103,14 +1094,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## to change the semantics around how we
           ## attach the run queue
           if fn.length
+
             originalDone = arguments[0]
 
             arguments[0] = done = (err) ->
               ## TODO: handle no longer error
               ## when ended early
-              doneEarly()
-
-              originalDone(err)
+              ## if we're not stopped then stop
+              if not stopped
+                 doneEarly()
+                 originalDone(err)
 
               ## return null else we there are situations
               ## where returning a regular bluebird promise
