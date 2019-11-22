@@ -1,5 +1,6 @@
 {
   "extends": [
-    "plugin:cypress/recommended"
+    "plugin:cypress/recommended",
+    "plugin:@cypress/dev/react"
   ]
 }
