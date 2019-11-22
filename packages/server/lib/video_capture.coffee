@@ -96,6 +96,11 @@ module.exports = {
 
       debugFrames("writing video frame")
 
+      # # wStream.write(data)
+      # pt.write(data)
+
+      # return
+
       if wantsWrite
         if not wantsWrite = pt.write(data)
           pt.once "drain", ->
@@ -148,15 +153,15 @@ module.exports = {
         if options.webmInput
           cmd
           .inputFormat('webm')
-          .videoFilters("scale=trunc(iw/2)*2:trunc(ih/2)*2")
+          .withFpsInput(18)
+          # .videoFilters("scale=trunc(iw/2)*2:trunc(ih/2)*2")
           ## same as above
-          # .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
+          .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
 
         else
           cmd
           .inputFormat("image2pipe")
           .inputOptions("-use_wallclock_as_timestamps 1")
-      
         cmd.save(name)
 
     startCapturing()
@@ -181,6 +186,7 @@ module.exports = {
         "-preset fast"
         "-crf #{videoCompression}"
       ])
+      # .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
       .on "start", (command) ->
         debug("compression started %o", { command })
 

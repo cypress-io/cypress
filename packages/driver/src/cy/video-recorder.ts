@@ -5,7 +5,13 @@ export function create (state, Cypress) {
       audio: false,
       video: {
         // mediaSource: browser supported by user pref
+        // @ts-ignore
         mediaSource: 'browser',
+        frameRate: {
+          exact: 30,
+          // ideal: 30,
+          // max: 30,
+        },
       },
     })
     .then((stream) => {
@@ -14,9 +20,10 @@ export function create (state, Cypress) {
         mimeType: 'video/webm',
       }
 
+      // @ts-ignore
       const mediaRecorder = new window.MediaRecorder(stream, options)
 
-      mediaRecorder.start(100)
+      mediaRecorder.start(200)
 
       mediaRecorder.addEventListener('dataavailable', (e) => {
         Cypress.action('recorder:frame', e.data)
