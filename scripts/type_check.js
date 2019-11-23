@@ -14,26 +14,28 @@ program
 .action((...args) => {
   const projects = []
   const packageRoot = path.join(__dirname, '../packages')
-  const getPackagePath = (name) => path.join(packageRoot, name)
+  const getPackagePath = (name) => {
+    return name === 'cli'
+      ? path.join(__dirname, '../cli/types')
+      : path.join(packageRoot, name)
+  }
+  const addProject = (name) => {
+    return projects.push({
+      name,
+      path: getPackagePath(name),
+    })
+  }
 
   if (program.project) {
-    program.project.split(',').forEach((p) => {
-      projects.push({
-        name: p,
-        path: getPackagePath(p),
-      })
-    })
+    program.project.split(',').forEach((p) => addProject(p))
   } else {
+    addProject('cli')
+
     fs.readdirSync(packageRoot).forEach((file) => {
       const packagePath = getPackagePath(file)
 
-      if (fs.lstatSync(packagePath).isDirectory()) {
-        if (fs.existsSync(path.join(packagePath, 'tsconfig.json'))) {
-          projects.push({
-            name: file,
-            path: packagePath,
-          })
-        }
+      if (fs.lstatSync(packagePath).isDirectory() && fs.existsSync(path.join(packagePath, 'tsconfig.json'))) {
+        addProject(file)
       }
     })
   }
