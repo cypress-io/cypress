@@ -40,6 +40,12 @@ program
     })
   }
 
+  const options = ['--noEmit', '--pretty']
+
+  if (program.skipLibCheck) {
+    options.push('--skipLibCheck')
+  }
+
   const tasks = new Listr(projects.map((proj) => {
     return {
       title: proj.name,
@@ -47,7 +53,7 @@ program
         const cwd = proj.path
         const tsc = require.resolve('typescript/bin/tsc')
 
-        return execa(tsc, ['--noEmit', '--pretty'], {
+        return execa(tsc, options, {
           cwd,
         }).catch((err) => {
           throw {
