@@ -48,9 +48,8 @@ cy.login(Cypress.env('username'), Cypress.env('password'))
 
 // "myLabel" property has been added to "interface cy"
 // thus it is NOT of the command chain.
-// $ExpectError
-//@ts-ignore
-cy.get('.element').myLabel
+// Ignored in favor of type_check.js
+// cy.get('.element').myLabel
 
 // $ExpectType number
 cy.chainerProp
