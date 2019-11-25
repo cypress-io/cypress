@@ -719,7 +719,11 @@ export class Keyboard {
     )
 
     // we will only press each modifier once, so only find unique modifiers
-    const modifierKeys = _.uniqBy(_.filter(keyDetailsArr, isModifier), (v) => v.key)
+    const modifierKeys = _
+    .chain(keyDetailsArr)
+    .filter(isModifier)
+    .uniqBy('key')
+    .value()
 
     return Promise
     .each(typeKeyFns, (fn) => {
