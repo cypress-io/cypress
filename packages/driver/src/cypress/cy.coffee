@@ -267,6 +267,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo)
 
   runQueuedCommands = (command) ->
+    return if stopped
     { commands } = command.get("queue")
     subjects = []
     state("queuedIndex", 0)
@@ -539,7 +540,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     cancel = ->
       promise.cancel()
       inner.cancel()
-
+      console.log(promise.isCancelled())
+      console.log(inner.isCancelled())
       ## notify the world
       Cypress.action("cy:canceled")
 
@@ -602,6 +604,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   cleanup = ->
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
+    console.log("cleaning")
     if state("runnable")
       ## make sure we reset the runnable's timeout now
       state("runnable").resetTimeout()
@@ -612,6 +615,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## reset the nestedIndex back to null
     state("nestedIndex", null)
+
+    state("queuedIndex", null)
 
     ## also reset recentlyReady back to null
     state("recentlyReady", null)
@@ -910,7 +915,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         ## dont enqueue / inject any new commands if
         ## onInjectCommand returns false
         onInjectCommand = state("onInjectCommand")
-
         if _.isFunction(onInjectCommand)
           return if onInjectCommand.call(cy, name, args...) is false
         enqueue({
@@ -931,6 +935,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## instead of removing the commands from the queue
       ## after they are done running, should we do it here?
       ## Worried about the behaviour with other nested commands
+      return if stopped
       new Promise((resolve) ->
         Cypress.action("cy:command:start", obj)
         runCommand(obj)
@@ -1101,8 +1106,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               ## TODO: handle no longer error
               ## when ended early
               doneEarly()
-              if not stopped
-                 originalDone(err)
+              originalDone(err)
 
               ## return null else we there are situations
               ## where returning a regular bluebird promise

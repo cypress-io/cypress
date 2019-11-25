@@ -68,6 +68,7 @@ export default {
     runner.on('run:end', action('run:end', () => {
       appState.end()
       statsStore.end()
+      runner.emit('runner:stop')
     }))
 
     runner.on('reporter:collect:run:state', (cb) => {
