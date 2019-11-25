@@ -79,6 +79,7 @@
     "@types/chai-enzyme": "0.6.7",
     "@types/classnames": "2.2.9",
     "@types/debug": "4.1.4",
+    "@types/enzyme": "3.9.1",
     "@types/execa": "0.7.2",
     "@types/fs-extra": "8.0.0",
     "@types/glob": "7.1.1",
