@@ -605,7 +605,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   cleanup = ->
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
-    console.log("cleaning")
+    console.error("cleaning")
+    console.error(state("canceled"))
     if state("runnable")
       ## make sure we reset the runnable's timeout now
       state("runnable").resetTimeout()
@@ -831,8 +832,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       }
 
       ## reset state back to empty object
+      console.error(state("canceled"))
       state.reset()
-
+      console.error("resetting state")
       ## and then restore these backed up props
       state(backup)
 
@@ -929,7 +931,6 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         return true
 
     now: (name, args...) ->
-      return if stopped
       Promise.resolve(
         commandFns[name].apply(cy, args)
       )
@@ -1108,10 +1109,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             arguments[0] = done = (err) ->
               ## TODO: handle no longer error
               ## when ended early
-              console.log(runnable)
-              doneEarly()
-              originalDone(err)
-
+              ## If we are canceled or we don't have a runnable
+              ## that means that this test is already over. 
+              ## So don't try to end it again
+              if not state("canceled") and not _.isUndefined(runnable)
+                doneEarly()
+                originalDone(err)
+                state("runnable", undefined)
+                runnable = undefined
               ## return null else we there are situations
               ## where returning a regular bluebird promise
               ## results in a warning about promise being created
