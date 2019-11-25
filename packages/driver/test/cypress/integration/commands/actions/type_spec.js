@@ -2858,8 +2858,8 @@ describe('src/cy/commands/actions/type', () => {
               ['keyup', 'a'],
               ['keydown', 'b'],
               ['keyup', 'b'],
-              ['keyup', 'Meta'],
               ['keyup', 'Control'],
+              ['keyup', 'Meta'],
             ])
           })
         })
