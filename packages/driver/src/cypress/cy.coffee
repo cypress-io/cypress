@@ -504,7 +504,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       .then(next)
       .then(resolve)
       .catch(reject)
-
+      console.log(inner)
       ## can't use onCancel argument here because
       ## its called asynchronously
 
@@ -542,6 +542,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       inner.cancel()
       console.log(promise.isCancelled())
       console.log(inner.isCancelled())
+      console.log(state())
       ## notify the world
       Cypress.action("cy:canceled")
 
@@ -928,6 +929,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         return true
 
     now: (name, args...) ->
+      return if stopped
       Promise.resolve(
         commandFns[name].apply(cy, args)
       )
@@ -1062,6 +1064,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       snapshots.getStyles(args...)
 
     setRunnable: (runnable, hookName) ->
+      console.log(runnable)
       ## when we're setting a new runnable
       ## prepare to run again!
       stopped = false
@@ -1105,6 +1108,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
             arguments[0] = done = (err) ->
               ## TODO: handle no longer error
               ## when ended early
+              console.log(runnable)
               doneEarly()
               originalDone(err)
 
