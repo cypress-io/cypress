@@ -11,6 +11,7 @@ program.usage('[options]')
 program
 .option('-p, --project <projects>', 'projects to check types (separated by commas)')
 .option('--skip-lib-check', 'skip type checking of all declaration files (*.d.ts)')
+.option('--ignore-progress', 'do not show progress')
 .action((...args) => {
   const projects = []
   const packageRoot = path.join(__dirname, '../packages')
@@ -66,6 +67,7 @@ program
   }), {
     concurrent: 4,
     exitOnError: false,
+    renderer: program.ignoreProgress ? 'silent' : 'default',
   })
 
   tasks.run().catch((err) => {
