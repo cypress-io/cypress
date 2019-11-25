@@ -92,14 +92,14 @@ module.exports = {
     str = err.toString()
 
     ## append message
-    newMsg = msg + "\n\n" + message
+    msg += "\n\n" + message
 
     ## set message
-    err.message = newMsg
+    err.message = msg
 
     ## reset stack by replacing the original first line
     ## with the new one
-    err.stack = str.split('\n')[0] ##+ stack.replace(str, err.toString())
+    err.stack = stack.replace(str, err.toString())
 
     return err
 
