@@ -70,7 +70,12 @@ program
     renderer: program.ignoreProgress ? 'silent' : 'default',
   })
 
-  tasks.run().catch((err) => {
+  tasks.run()
+  .then(() => {
+    log('')
+    log('Type check passed successfully.')
+  })
+  .catch((err) => {
     process.exitCode = 1
 
     err.errors.forEach((e) => {
