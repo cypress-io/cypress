@@ -7,24 +7,18 @@
 // TypeScript Version: 2.9
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference path="./cy-blob-util.d.ts" />
-/// <reference path="./cy-bluebird.d.ts" />
-/// <reference path="./cy-moment.d.ts" />
-/// <reference path="./cy-minimatch.d.ts" />
-/// <reference path="./cy-chai.d.ts" />
-/// <reference path="./lodash/index.d.ts" />
-/// <reference path="./sinon/index.d.ts" />
-/// <reference path="./sinon-chai/index.d.ts" />
-/// <reference path="./mocha/index.d.ts" />
-/// <reference path="./jquery/index.d.ts" />
-/// <reference path="./chai-jquery/index.d.ts" />
+/// <reference types="blob-util" />
+/// <reference types="lodash" />
+/// <reference types="sinon" />
+/// <reference types="sinon-chai" />
+/// <reference types="mocha" />
+/// <reference types="jquery" />
+/// <reference types="chai" />
+/// <reference types="chai-jquery" />
 
 // jQuery includes dependency "sizzle" that provides types
 // so we include it too in "node_modules/sizzle".
 // This way jQuery can load it using 'reference types="sizzle"' directive
-
-// "moment" types are with "node_modules/moment"
-/// <reference types="moment" />
 
 // load ambient declaration for "cypress" NPM module
 // hmm, how to load it better?
@@ -33,6 +27,15 @@
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
 declare const assert: Chai.AssertStatic
+
+// Cypress extension of chai
+declare namespace Chai {
+  interface Include {
+    html(html: string): Assertion
+    text(text: string): Assertion
+    value(text: string): Assertion
+  }
+}
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
@@ -110,13 +113,13 @@ declare namespace Cypress {
      * @example
      *    Cypress.Blob.method()
      */
-    Blob: BlobUtil.BlobUtilStatic
+    Blob: typeof import('blob-util')
     /**
      * Cypress automatically includes minimatch and exposes it as Cypress.minimatch.
      *
      * @see https://on.cypress.io/minimatch
      */
-    minimatch: typeof Minimatch.minimatch
+    minimatch: typeof import('minimatch')
     /**
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
@@ -125,7 +128,7 @@ declare namespace Cypress {
      * @example
      *    const todaysDate = Cypress.moment().format("MMM DD, YYYY")
      */
-    moment: Moment.MomentStatic
+    moment: typeof import('moment')
     /**
      * Cypress automatically includes Bluebird and exposes it as Cypress.Promise.
      *
@@ -134,7 +137,7 @@ declare namespace Cypress {
      * @example
      *   new Cypress.Promise((resolve, reject) => { ... })
      */
-    Promise: Bluebird.BluebirdStatic
+    Promise: typeof import('bluebird')
     /**
      * Cypress version string. i.e. "1.1.2"
      * @see https://on.cypress.io/version
