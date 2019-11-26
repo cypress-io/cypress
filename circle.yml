@@ -572,6 +572,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
+          command: npm run build
+          working_directory: packages/ui-components
+      - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \

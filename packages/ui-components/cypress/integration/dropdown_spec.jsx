@@ -1,17 +1,7 @@
 import React from 'react'
 
-import { Dropdown } from '../../index'
-
-const injectStyles = () => {
-  cy.task('render:scss', 'dropdown.scss').then((css) => {
-    cy.get('head').then(($head) => {
-      $head.append(`<style>${css}</style>`)
-    })
-  })
-}
-
 describe('<Dropdown />', () => {
-  let mount
+  let render
 
   beforeEach(() => {
     const defaultProps = {
@@ -22,17 +12,16 @@ describe('<Dropdown />', () => {
       onSelect: () => {},
     }
 
-    mount = (props = {}) => {
-      cy.mount(<Dropdown {...Object.assign({}, defaultProps, props)} />)
-
-      injectStyles()
+    render = (props = {}) => {
+      cy.visit('dist/index.html')
+      cy.window().invoke('renderDropdown', Object.assign({}, defaultProps, props))
     }
 
     cy.viewport(400, 600)
   })
 
   it('displays chosen option and hides others', () => {
-    mount()
+    render()
 
     cy.contains('First').should('be.visible')
     cy.contains('Second').should('not.be.visible')
@@ -40,7 +29,7 @@ describe('<Dropdown />', () => {
   })
 
   it('shows others after clicking chosen option', () => {
-    mount()
+    render()
 
     cy.contains('First').click()
     cy.contains('Second').should('be.visible')
@@ -50,7 +39,7 @@ describe('<Dropdown />', () => {
   it('calls onSelect after clicking option', () => {
     const onSelect = cy.stub()
 
-    mount({ onSelect })
+    render({ onSelect })
 
     cy.contains('First').click()
     cy.contains('Second').click().then(() => {
@@ -59,13 +48,13 @@ describe('<Dropdown />', () => {
   })
 
   it('applies className to container', () => {
-    mount({ className: 'custom-class' })
+    render({ className: 'custom-class' })
 
     cy.get('.dropdown').should('have.class', 'custom-class')
   })
 
   it('renders item as specified by renderItem prop', () => {
-    mount({ renderItem: ({ name }) => <span>{name}</span> })
+    render({ renderItem: ({ name }) => <span>{name}</span> })
 
     cy.contains('First').children().should('match', 'span')
     cy.contains('Second').should('match', 'span')
@@ -73,19 +62,19 @@ describe('<Dropdown />', () => {
   })
 
   it('renders caret if there are items', () => {
-    mount()
+    render()
 
     cy.get('.dropdown-caret')
   })
 
   it('does not render caret if there are no items', () => {
-    mount({ others: [] })
+    render({ others: [] })
 
     cy.get('.dropdown-caret').should('not.exist')
   })
 
   it('disables if disabled specified and does not render options or caret', () => {
-    mount({ disabled: true })
+    render({ disabled: true })
 
     cy.contains('First').should('have.class', 'disabled').click({ force: true })
     cy.get('.dropdown li').should('not.exist')
@@ -93,10 +82,7 @@ describe('<Dropdown />', () => {
   })
 
   it('closes dropdown when clicking outside of it', () => {
-    // need to pass in AUT document or else it will use spec iframe document
-    cy.document().then((doc) => {
-      mount({ document: doc })
-    })
+    render()
 
     cy.contains('First').click()
     cy.get('body').click()

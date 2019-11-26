@@ -45,7 +45,7 @@ const getCommonConfig = () => {
       colors: true,
       modules: true,
       maxModules: 20,
-      excludeModules: /main.scss/,
+      excludeModules: /(main|test-entry).scss/,
       timings: true,
     },
 
