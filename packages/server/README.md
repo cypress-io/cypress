@@ -68,12 +68,7 @@ npm run test-watch ./test/unit/api_spec.coffee
 
 To run an individual e2e test:
 
-You have to run `packages/runner` in order to be able to execute the e2e tests.
-
-```bash
-cd ..\runner
-npm run watch
-```
+You must build all packages before running the E2E tests. Run `npm run build` or `npm run watch` in the project root to accomplish this.
 
 ```bash
 ## runs tests that match "base_url"
