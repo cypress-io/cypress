@@ -13,6 +13,8 @@
  - element distance from top of container
 */
 
+import { TimeoutID } from './types'
+
 type UserScrollCallback = () => void
 
 const PADDING = 100
@@ -21,7 +23,7 @@ export class Scroller {
   private _container: Element | null = null
   private _userScrollCount = 0
   private _userScroll = true
-  private _countUserScrollsTimeout?: number
+  private _countUserScrollsTimeout?: TimeoutID
 
   setContainer (container: Element, onUserScroll?: UserScrollCallback) {
     this._container = container
@@ -51,7 +53,7 @@ export class Scroller {
           onUserScroll()
         }
 
-        clearTimeout(this._countUserScrollsTimeout)
+        clearTimeout(this._countUserScrollsTimeout as TimeoutID)
         this._countUserScrollsTimeout = undefined
         this._userScrollCount = 0
 
@@ -60,7 +62,7 @@ export class Scroller {
 
       if (this._countUserScrollsTimeout) return
 
-      this._countUserScrollsTimeout = window.setTimeout(() => {
+      this._countUserScrollsTimeout = setTimeout(() => {
         this._countUserScrollsTimeout = undefined
         this._userScrollCount = 0
       }, 50)

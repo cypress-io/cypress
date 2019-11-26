@@ -2,6 +2,7 @@ import { action, computed, observable } from 'mobx'
 
 import Err from '../lib/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
+import { TimeoutID } from '../lib/types'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
@@ -32,7 +33,7 @@ export default class Command extends Instrument {
   @observable isDuplicate = false
 
   private _prevState: string | null | undefined = null
-  private _pendingTimeout: number | undefined
+  private _pendingTimeout?: TimeoutID = undefined
 
   @computed get displayMessage () {
     return this.renderProps.message || this.message
@@ -99,7 +100,7 @@ export default class Command extends Instrument {
     }
 
     if (this._becameNonPending()) {
-      clearTimeout(this._pendingTimeout)
+      clearTimeout(this._pendingTimeout as TimeoutID)
       action('became:inactive', () => {
         return this.isLongRunning = false
       })()
@@ -109,7 +110,7 @@ export default class Command extends Instrument {
   }
 
   _startTimingPending () {
-    this._pendingTimeout = window.setTimeout(action('became:long:running', () => {
+    this._pendingTimeout = setTimeout(action('became:long:running', () => {
       if (this._isPending()) {
         this.isLongRunning = true
       }

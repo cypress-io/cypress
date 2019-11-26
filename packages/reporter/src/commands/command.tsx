@@ -10,6 +10,7 @@ import Tooltip from '@cypress/react-tooltip'
 import appState, { AppState } from '../lib/app-state'
 import events, { Events } from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
+import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
@@ -118,7 +119,7 @@ interface Props {
 @observer
 class Command extends Component<Props> {
   @observable isOpen = false
-  private _showTimeout?: number
+  private _showTimeout?: TimeoutID
 
   static defaultProps = {
     appState,
@@ -278,13 +279,13 @@ class Command extends Component<Props> {
     if (show) {
       runnablesStore.attemptingShowSnapshot = true
 
-      this._showTimeout = window.setTimeout(() => {
+      this._showTimeout = setTimeout(() => {
         runnablesStore.showingSnapshot = true
         this.props.events.emit('show:snapshot', model.id)
       }, 50)
     } else {
       runnablesStore.attemptingShowSnapshot = false
-      clearTimeout(this._showTimeout)
+      clearTimeout(this._showTimeout as TimeoutID)
 
       setTimeout(() => {
         // if we are currently showing a snapshot but

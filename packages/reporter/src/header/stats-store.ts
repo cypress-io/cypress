@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 import { TestState } from '../test/test-model'
+import { IntervalID } from '../lib/types'
 
 export interface StatsStoreStartInfo {
   startTime: string
@@ -27,7 +28,7 @@ class StatsStore {
   @observable _currentTime: number | null = defaults._startTime;
   [key: string]: any
 
-  private _interval?: number;
+  private _interval?: IntervalID;
 
   @computed get duration () {
     if (!this._startTime) return 0
@@ -53,11 +54,11 @@ class StatsStore {
   }
 
   _startTimer () {
-    this._interval = window.setInterval(action('duration:interval', this._updateCurrentTime.bind(this)), 100)
+    this._interval = setInterval(action('duration:interval', this._updateCurrentTime.bind(this)), 100)
   }
 
   _stopTimer () {
-    clearInterval(this._interval)
+    clearInterval(this._interval as IntervalID)
   }
 
   _updateCurrentTime () {
