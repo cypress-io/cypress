@@ -284,6 +284,12 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.command>> -- --browser <<parameters.browser>>
       - store-npm-logs
+      - store_artifacts:
+          name: screenshots
+          path: /tmp/<<parameters.repo>>/cypress/screenshots
+      - store_artifacts:
+          name: videos
+          path: /tmp/<<parameters.repo>>/cypress/videos
 
 jobs:
   ## code checkout and NPM installs
