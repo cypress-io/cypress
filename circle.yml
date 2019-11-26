@@ -1,5 +1,16 @@
 version: 2.1
 
+defaultEnvironment: &defaultEnvironment
+  ## set specific timezone
+  TZ: "/usr/share/zoneinfo/America/New_York"
+
+  ## store artifacts here
+  CIRCLE_ARTIFACTS: /tmp/artifacts
+
+  ## set so that e2e tests are consistent
+  COLUMNS: 100
+  LINES: 24
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -9,15 +20,7 @@ defaults: &defaults
       default: cy-doc
   executor: <<parameters.executor>>
   environment:
-    ## set specific timezone
-    TZ: "/usr/share/zoneinfo/America/New_York"
-
-    ## store artifacts here
-    CIRCLE_ARTIFACTS: /tmp/artifacts
-
-    ## set so that e2e tests are consistent
-    COLUMNS: 100
-    LINES: 24
+    <<: *defaultEnvironment
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -225,6 +228,49 @@ commands:
             node scripts/add-install-comment.js \
               --npm npm-package-url.json \
               --binary binary-url.json
+
+  test-binary-against-repo:
+    description: |
+      Takes the built binary and NPM package, clones given example repo
+      and runs the new version of Cypress against it.
+    parameters:
+      repo:
+        description: Name of the repo like "cypress-example-kitchensink"
+        type: string
+      browser:
+        description: Name of the browser to use
+        type: enum
+        enum: ["electron", "chrome", "firefox"]
+        default: "electron"
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run:
+          name: Cloning project <<parameters.repo>>
+          command: git clone --depth 1 https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+      - run:
+          command: npm install
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/<<parameters.repo>>
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm run build --if-present
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm start --if-present
+          background: true
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm run e2e -- --browser <<parameters.browser>>
+      - store-npm-logs
+
 jobs:
   ## code checkout and NPM installs
   build:
@@ -966,64 +1012,22 @@ jobs:
   "test-binary-against-kitchensink":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning kitchensink project
-          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
-      - run:
-          command: npm install
-          working_directory: /tmp/kitchensink
-      - run:
-          name: Install Cypress
-          working_directory: /tmp/kitchensink
-          # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm run build
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm start
-          background: true
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm run e2e
-      - store-npm-logs
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
 
   "test-binary-against-kitchensink-firefox":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning kitchensink project
-          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
-      - run:
-          command: npm install
-          working_directory: /tmp/kitchensink
-      - run:
-          name: Install Cypress
-          working_directory: /tmp/kitchensink
-          # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm run build
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm start
-          background: true
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm run e2e -- --browser firefox
-      - store-npm-logs
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: firefox
+
+  "test-binary-against-kitchensink-chrome":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: chrome
 
   test-binary-as-specific-user:
     <<: *defaults
@@ -1270,6 +1274,15 @@ linux-workflow: &linux-workflow
           - build-npm-package
           - build-binary
     - test-binary-against-kitchensink-firefox:
+        filters:
+          branches:
+            only:
+              - develop
+              - issue-1096-firefox-support
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-kitchensink-chrome:
         filters:
           branches:
             only:
