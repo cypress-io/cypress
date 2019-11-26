@@ -106,9 +106,10 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
     onElse,
   } = options
 
-  debug("received status code on request %o", {
+  debug("received status code & headers on request %o", {
     requestId,
-    statusCode: res.statusCode
+    statusCode: res.statusCode,
+    headers: _.pick(res.headers, 'content-type', 'set-cookie', 'location')
   })
 
   ## is this a retryable status code failure?
@@ -451,7 +452,7 @@ module.exports = (options = {}) ->
           cookie.domain = defaultDomain
           cookie.hostOnly = true
 
-        if not tough.domainMatch(cookie.domain, defaultDomain)
+        if not tough.domainMatch(defaultDomain, cookie.domain)
           debug('domain match failed:', { defaultDomain })
           return
 
@@ -558,9 +559,9 @@ module.exports = (options = {}) ->
         push = (response) ->
           requestResponses.push(pick(response))
 
-        if options.followRedirect
-          currentUrl = options.url
+        currentUrl = options.url
 
+        if options.followRedirect
           options.followRedirect = (incomingRes) ->
             newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 

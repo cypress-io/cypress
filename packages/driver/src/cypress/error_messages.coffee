@@ -409,7 +409,7 @@ module.exports = {
 
       cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')
       """
-    invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
+    invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string or a number as the first argument."
     invalid_num_of_args:
       """
       #{cmd('{{cmd}}')} only accepts a single argument.
