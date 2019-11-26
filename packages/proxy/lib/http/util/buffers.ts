@@ -8,7 +8,6 @@ const debug = debugModule('cypress:proxy:http:util:buffers')
 
 export type HttpBuffer = {
   details: object
-  jar: any
   originalUrl: string
   response: Response
   stream: Readable
@@ -24,54 +23,43 @@ const stripPort = (url) => {
 }
 
 export class HttpBuffers {
-  buffers: HttpBuffer[] = []
-
-  all (): HttpBuffer[] {
-    return this.buffers
-  }
-
-  keys (): string[] {
-    return _.map(this.buffers, 'url')
-  }
+  buffer: Optional<HttpBuffer> = undefined
 
   reset (): void {
     debug('resetting buffers')
 
-    this.buffers = []
+    delete this.buffer
   }
 
-  set (obj: HttpBuffer) {
+  set (obj) {
+    obj = _.cloneDeep(obj)
     obj.url = stripPort(obj.url)
     obj.originalUrl = stripPort(obj.originalUrl)
 
-    debug('setting buffer %o', _.pick(obj, 'url'))
-
-    return this.buffers.push(_.pick(obj, 'url', 'originalUrl', 'jar', 'stream', 'response', 'details'))
-  }
-
-  getByOriginalUrl (str): Optional<HttpBuffer> {
-    const b = _.find(this.buffers, { originalUrl: stripPort(str) })
-
-    if (b) {
-      debug('found request buffer by original url %o', { str, buffer: _.pick(b, 'url', 'originalUrl', 'details'), bufferCount: this.buffers.length })
+    if (this.buffer) {
+      debug('warning: overwriting existing buffer...', { buffer: _.pick(this.buffer, 'url') })
     }
 
-    return b
+    debug('setting buffer %o', _.pick(obj, 'url'))
+
+    this.buffer = obj
   }
 
   get (str): Optional<HttpBuffer> {
-    return _.find(this.buffers, { url: stripPort(str) })
+    if (this.buffer && this.buffer.url === stripPort(str)) {
+      return this.buffer
+    }
   }
 
   take (str): Optional<HttpBuffer> {
-    const buffer = this.get(str)
+    const foundBuffer = this.get(str)
 
-    if (buffer) {
-      this.buffers = _.without(this.buffers, buffer)
+    if (foundBuffer) {
+      delete this.buffer
 
-      debug('found request buffer %o', { buffer: _.pick(buffer, 'url', 'originalUrl'), bufferCount: this.buffers.length })
+      debug('found request buffer %o', { buffer: _.pick(foundBuffer, 'url') })
+
+      return foundBuffer
     }
-
-    return buffer
   }
 }

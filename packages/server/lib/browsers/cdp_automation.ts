@@ -2,7 +2,10 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import cdp from 'devtools-protocol'
 import { cors } from '@packages/network'
+import debugModule from 'debug'
 import tough from 'tough-cookie'
+
+const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
 interface CyCookie {
   name: string
@@ -83,12 +86,16 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     return cookie
   }
 
-  const getAllCookies = (data) => {
+  const getAllCookies = (filter) => {
     return sendDebuggerCommandFn('Network.getAllCookies')
     .then((result: cdp.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        return cookieMatches(cookie, data)
+        const matches = cookieMatches(cookie, filter)
+
+        debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
+
+        return matches
       })
     })
   }
