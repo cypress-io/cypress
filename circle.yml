@@ -994,6 +994,37 @@ jobs:
           command: npm run e2e
       - store-npm-logs
 
+  "test-binary-against-kitchensink-firefox":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run:
+          name: Cloning kitchensink project
+          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
+      - run:
+          command: npm install
+          working_directory: /tmp/kitchensink
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/kitchensink
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm run build
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm start
+          background: true
+      - run:
+          working_directory: /tmp/kitchensink
+          command: npm run e2e -- --browser firefox
+      - store-npm-logs
+
   test-binary-as-specific-user:
     <<: *defaults
     steps:
@@ -1234,6 +1265,16 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - issue-1096-firefox-support
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-kitchensink-firefox:
+        filters:
+          branches:
+            only:
+              - develop
+              - issue-1096-firefox-support
         requires:
           - build-npm-package
           - build-binary
