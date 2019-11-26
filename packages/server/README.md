@@ -80,4 +80,6 @@ npm run watch
 npm run test-e2e -- --spec base_url
 ```
 
+When running e2e tests, some test projects output verbose logs. To see them run the test with `DEBUG=cypress:e2e` environment variable.
+
 To update snapshots, see `snap-shot-it` instructions: https://github.com/bahmutov/snap-shot-it#advanced-use

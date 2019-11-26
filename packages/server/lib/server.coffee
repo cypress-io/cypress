@@ -126,6 +126,7 @@ class Server
     e
 
   open: (config = {}, project, onWarning) ->
+    debug("server open")
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -370,7 +371,13 @@ class Server
         ## reset the cookies from the buffer on the browser
         return runPhase ->
           resolve(
-            Promise.map obj.details.cookies, _.partial(automationRequest, 'set:cookie')
+            Promise.map obj.details.cookies, (cookie) ->
+              ## prevent prepending a . to the cookie domain if top-level
+              ## navigation occurs as a result of a cy.visit
+              if _.isUndefined(cookie.hostOnly) && !cookie.domain?.startsWith('.')
+                cookie.hostOnly = true
+
+              automationRequest('set:cookie', cookie)
             .return(obj.details)
           )
 

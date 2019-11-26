@@ -1,10 +1,12 @@
 _        = require("lodash")
+R        = require("ramda")
+la       = require("lazy-ass")
 path     = require("path")
+check    = require("check-more-types")
 Promise  = require("bluebird")
 deepDiff = require("return-deep-diff")
 errors   = require("./errors")
 scaffold = require("./scaffold")
-findSystemNode = require("./util/find_system_node")
 fs       = require("./util/fs")
 keys     = require("./util/keys")
 origin   = require("./util/origin")
@@ -13,6 +15,7 @@ settings = require("./util/settings")
 v        = require("./util/validation")
 debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
+findSystemNode = require("./util/find_system_node")
 
 CYPRESS_ENV_PREFIX = "CYPRESS_"
 CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
@@ -47,6 +50,7 @@ folders = toWords """
   videosFolder
 """
 
+# Public configuration properties, like "cypress.json" fields
 configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
   baseUrl                         fixturesFolder
@@ -74,10 +78,16 @@ configKeys = toWords """
   nodeVersion                     resolvedNodePath
 """
 
+# Deprecated and retired public configuration properties
 breakingConfigKeys = toWords """
   videoRecording
   screenshotOnHeadlessFailure
   trashAssetsBeforeHeadlessRuns
+"""
+
+# Internal configuration properties the user should be able to overwrite
+systemConfigKeys = toWords """
+  browsers
 """
 
 CONFIG_DEFAULTS = {
@@ -85,6 +95,8 @@ CONFIG_DEFAULTS = {
   hosts:                         null
   morgan:                        true
   baseUrl:                       null
+  # will be replaced by detected list of browsers
+  browsers:                      []
   socketId:                      null
   projectId:                     null
   userAgent:                     null
@@ -137,7 +149,7 @@ validationRules = {
   animationDistanceThreshold: v.isNumber
   baseUrl: v.isFullyQualifiedUrl
   blacklistHosts: v.isStringOrArrayOfStrings
-  modifyObstructiveCode: v.isBoolean
+  browsers: v.isValidBrowserList
   chromeWebSecurity: v.isBoolean
   configFile: v.isStringOrFalse
   defaultCommandTimeout: v.isNumber
@@ -147,6 +159,8 @@ validationRules = {
   fixturesFolder: v.isStringOrFalse
   ignoreTestFiles: v.isStringOrArrayOfStrings
   integrationFolder: v.isString
+  modifyObstructiveCode: v.isBoolean
+  nodeVersion: v.isOneOf("default", "bundled", "system")
   numTestsKeptInMemory: v.isNumber
   pageLoadTimeout: v.isNumber
   pluginsFile: v.isStringOrFalse
@@ -154,20 +168,19 @@ validationRules = {
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
-  testFiles: v.isStringOrArrayOfStrings
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber
+  testFiles: v.isStringOrArrayOfStrings
   trashAssetsBeforeRuns: v.isBoolean
   userAgent: v.isString
-  videoCompression: v.isNumberOrFalse
   video: v.isBoolean
-  videoUploadOnPasses: v.isBoolean
+  videoCompression: v.isNumberOrFalse
   videosFolder: v.isString
+  videoUploadOnPasses: v.isBoolean
   viewportHeight: v.isNumber
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
-  nodeVersion: v.isOneOf("default", "bundled", "system")
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -219,7 +232,8 @@ module.exports = {
     _.includes(names, value)
 
   whitelist: (obj = {}) ->
-    _.pick(obj, configKeys.concat(breakingConfigKeys))
+    propertyNames = configKeys.concat(breakingConfigKeys).concat(systemConfigKeys)
+    _.pick(obj, propertyNames)
 
   get: (projectRoot, options = {}) ->
     Promise.all([
@@ -236,12 +250,14 @@ module.exports = {
       })
 
   set: (obj = {}) ->
+    debug("setting config object")
     {projectRoot, projectName, config, envFile, options} = obj
 
     ## just force config to be an object
     ## so we dont have to do as much
     ## work in our tests
     config ?= {}
+    debug("config is %o", config)
 
     ## flatten the object's properties
     ## into the master config object
@@ -255,10 +271,12 @@ module.exports = {
     resolved = {}
 
     _.extend config, _.pick(options, "configFile", "morgan", "isTextTerminal", "socketId", "report", "browsers")
+    debug("merged config with options, got %o", config)
 
     _
     .chain(@whitelist(options))
     .omit("env")
+    .omit("browsers")
     .each (val, key) ->
       resolved[key] = "cli"
       config[key] = val
@@ -319,40 +337,93 @@ module.exports = {
     obj = _.clone(config)
 
     obj.resolved = @resolveConfigValues(config, defaults, resolved)
+    debug("resolved config is %o", obj.resolved.browsers)
 
     return obj
+
+  # Given an object "resolvedObj" and a list of overrides in "obj"
+  # marks all properties from "obj" inside "resolvedObj" using
+  # {value: obj.val, from: "plugin"}
+  setPluginResolvedOn: (resolvedObj, obj) ->
+    _.each obj, (val, key) =>
+      if _.isObject(val) && !_.isArray(val)
+        ## recurse setting overrides
+        ## inside of this nested objected
+        @setPluginResolvedOn(resolvedObj[key], val)
+      else
+        ## override the resolved value
+        resolvedObj[key] = {
+          value: val
+          from: "plugin"
+        }
 
   updateWithPluginValues: (cfg, overrides = {}) ->
     ## diff the overrides with cfg
     ## including nested objects (env)
-    diffs = deepDiff(cfg, overrides, true)
+    debug("starting config %o", cfg)
+    debug("overrides %o", overrides)
 
-    setResolvedOn = (resolvedObj, obj) ->
-      _.each obj, (val, key) ->
-        if _.isObject(val) && !_.isArray(val)
-          ## recurse setting overrides
-          ## inside of this nested objected
-          setResolvedOn(resolvedObj[key], val)
-        else
-          ## override the resolved value
-          resolvedObj[key] = {
-            value: val
-            from: "plugin"
-          }
+    # make sure every option returned from the plugins file
+    # passes our validation functions
+    validate overrides, (errMsg) ->
+      if cfg.pluginsFile and cfg.projectRoot
+        relativePluginsPath = path.relative(cfg.projectRoot, cfg.pluginsFile)
+        errors.throw("PLUGINS_CONFIG_VALIDATION_ERROR", relativePluginsPath, errMsg)
+      else
+        errors.throw("CONFIG_VALIDATION_ERROR", errMsg)
+
+    originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && R.clone(cfg.resolved.browsers)
+    if not originalResolvedBrowsers
+      # have something to resolve with if plugins return nothing
+      originalResolvedBrowsers = {
+        value: cfg.browsers
+        from: "default"
+      }
+
+    diffs = deepDiff(cfg, overrides, true)
+    debug("config diffs %o", diffs)
+
+    userBrowserList = diffs && diffs.browsers && R.clone(diffs.browsers)
+    if userBrowserList
+      debug("user browser list %o", userBrowserList)
 
     ## for each override go through
     ## and change the resolved values of cfg
     ## to point to the plugin
-    setResolvedOn(cfg.resolved, diffs)
+    if diffs
+      @setPluginResolvedOn(cfg.resolved, diffs)
+      debug("resolved config object %o", cfg.resolved)
 
     ## merge cfg into overrides
-    _.defaultsDeep(diffs, cfg)
+    merged = _.defaultsDeep(diffs, cfg)
+    debug("merged config object %o", merged)
 
+    # the above _.defaultsDeep combines arrays,
+    # if diffs.browsers = [1] and cfg.browsers = [1, 2]
+    # then the merged result merged.browsers = [1, 2]
+    # which is NOT what we want
+    if Array.isArray(userBrowserList) and userBrowserList.length
+      merged.browsers = userBrowserList
+      merged.resolved.browsers.value = userBrowserList
+
+    if overrides.browsers == null
+      # null breaks everything when merging lists
+      debug("replacing null browsers with original list %o", originalResolvedBrowsers)
+      merged.browsers = cfg.browsers
+      if originalResolvedBrowsers
+        merged.resolved.browsers = originalResolvedBrowsers
+
+    debug("merged plugins config %o", merged)
+    return merged
+
+  # combines the default configuration object with values specified in the
+  # configuration file like "cypress.json". Values in configuration file
+  # overwrite the defaults.
   resolveConfigValues: (config, defaults, resolved = {}) ->
-    ## pick out only the keys found in configKeys
+    ## pick out only known configuration keys
     _
     .chain(config)
-    .pick(configKeys)
+    .pick(configKeys.concat(systemConfigKeys))
     .mapValues (val, key) ->
       source = (s) ->
         {
@@ -366,10 +437,12 @@ module.exports = {
             r
           else
             source(r)
-        when not _.isEqual(config[key], defaults[key])
-          source("config")
-        else
+        # "browsers" list is special, since it is dynamic by default
+        # and can only be ovewritten via plugins file
+        when _.isEqual(config[key], defaults[key]) or key == "browsers"
           source("default")
+        else
+          source("config")
     .value()
 
   # instead of the built-in Node process, specify a path to 3rd party Node

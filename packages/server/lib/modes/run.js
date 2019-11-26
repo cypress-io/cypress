@@ -13,7 +13,7 @@ const recordMode = require('./record')
 const errors = require('../errors')
 const Project = require('../project')
 const Reporter = require('../reporter')
-const browsers = require('../browsers')
+const browserUtils = require('../browsers')
 const openProject = require('../open_project')
 const videoCapture = require('../video_capture')
 const fs = require('../util/fs')
@@ -447,7 +447,7 @@ const getProjectId = Promise.method((project, id) => {
 })
 
 const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
-  la(browsers.isBrowserFamily(browser.family), 'invalid browser family in', browser)
+  la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
 
   if (browser.family === 'electron') {
     return getElectronProps(browser.isHeaded, project, writeVideoFrame)
@@ -534,17 +534,19 @@ const onWarning = (err) => {
   console.log(chalk.yellow(err.message))
 }
 
-const openProjectCreate = (projectRoot, socketId, options) => {
+const openProjectCreate = (projectRoot, socketId, args) => {
   // now open the project to boot the server
   // putting our web client app in headless mode
   // - NO  display server logs (via morgan)
   // - YES display reporter results (via mocha reporter)
-  return openProject
-  .create(projectRoot, options, {
+  const options = {
     socketId,
     morgan: false,
     report: true,
-    isTextTerminal: options.isTextTerminal,
+    isTextTerminal: args.isTextTerminal,
+    // pass the list of browsers we have detected when opening a project
+    // to give user's plugins file a chance to change it
+    browsers: args.browsers,
     onWarning,
     onError (err) {
       console.log('')
@@ -558,7 +560,10 @@ const openProjectCreate = (projectRoot, socketId, options) => {
 
       return openProject.emit('exitEarlyWithErr', err.message)
     },
-  })
+  }
+
+  return openProject
+  .create(projectRoot, args, options)
   .catch({ portInUse: true }, (err) => {
     // TODO: this needs to move to emit exitEarly
     // so we record the failure in CI
@@ -587,7 +592,7 @@ const createAndOpenProject = function (socketId, options) {
 }
 
 const removeOldProfiles = () => {
-  return browsers.removeOldProfiles()
+  return browserUtils.removeOldProfiles()
   .catch((err) => {
     // dont make removing old browsers profiles break the build
     return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
@@ -1275,89 +1280,101 @@ module.exports = {
 
     // ensure the project exists
     // and open up the project
-    return createAndOpenProject(socketId, options)
-    .then(({ project, projectId, config }) => {
-      debug('project created and opened with config %o', config)
+    return browserUtils.getAllBrowsersWith()
+    .then((browsers) => {
+      debug('found all system browsers %o', browsers)
+      options.browsers = browsers
 
-      // if we have a project id and a key but record hasnt been given
-      recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
-      recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
+      return createAndOpenProject(socketId, options)
+      .then(({ project, projectId, config }) => {
+        debug('project created and opened with config %o', config)
 
-      if (record) {
-        recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
-        recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
-        recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
-      }
-
-      return Promise.all([
-        system.info(),
-        browsers.ensureAndGetByNameOrPath(browserName),
-        this.findSpecs(config, specPattern),
-        trashAssets(config),
-        removeOldProfiles(),
-      ])
-      .spread((sys = {}, browser = {}, specs = []) => {
-        // return only what is return to the specPattern
-        if (specPattern) {
-          specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
-        }
-
-        if (!specs.length) {
-          errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
-        }
-
-        if (browser.family === 'chrome') {
-          chromePolicyCheck.run(onWarning)
-        }
-
-        const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
-          return this.runSpecs({
-            beforeSpecRun,
-            afterSpecRun,
-            projectRoot,
-            specPattern,
-            socketId,
-            parallel,
-            browser,
-            project,
-            runUrl,
-            group,
-            config,
-            specs,
-            sys,
-            videosFolder: config.videosFolder,
-            video: config.video,
-            videoCompression: config.videoCompression,
-            videoUploadOnPasses: config.videoUploadOnPasses,
-            exit: options.exit,
-            headed: options.headed,
-            outputPath: options.outputPath,
-          })
-          .tap(renderSummaryTable(runUrl))
-        }
+        // if we have a project id and a key but record hasnt been given
+        recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
+        recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
 
         if (record) {
-          const { projectName } = config
-
-          return recordMode.createRunAndRecordSpecs({
-            key,
-            sys,
-            specs,
-            group,
-            browser,
-            parallel,
-            ciBuildId,
-            projectId,
-            projectRoot,
-            projectName,
-            specPattern,
-            runAllSpecs,
-          })
+          recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
+          recordMode.throwIfIncorrectCiBuildIdUsage(ciBuildId, parallel, group)
+          recordMode.throwIfIndeterminateCiBuildId(ciBuildId, parallel, group)
         }
 
-        // not recording, can't be parallel
-        return runAllSpecs({
-          parallel: false,
+        // user code might have modified list of allowed browsers
+        // but be defensive about it
+        const userBrowsers = _.get(config, 'resolved.browsers.value', browsers)
+
+        // all these operations are independent and should be run in parallel to
+        // speed the initial booting time
+        return Promise.all([
+          system.info(),
+          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers),
+          this.findSpecs(config, specPattern),
+          trashAssets(config),
+          removeOldProfiles(),
+        ])
+        .spread((sys = {}, browser = {}, specs = []) => {
+        // return only what is return to the specPattern
+          if (specPattern) {
+            specPattern = specsUtil.getPatternRelativeToProjectRoot(specPattern, projectRoot)
+          }
+
+          if (!specs.length) {
+            errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
+          }
+
+          if (browser.family === 'chrome') {
+            chromePolicyCheck.run(onWarning)
+          }
+
+          const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
+            return this.runSpecs({
+              beforeSpecRun,
+              afterSpecRun,
+              projectRoot,
+              specPattern,
+              socketId,
+              parallel,
+              browser,
+              project,
+              runUrl,
+              group,
+              config,
+              specs,
+              sys,
+              videosFolder: config.videosFolder,
+              video: config.video,
+              videoCompression: config.videoCompression,
+              videoUploadOnPasses: config.videoUploadOnPasses,
+              exit: options.exit,
+              headed: options.headed,
+              outputPath: options.outputPath,
+            })
+            .tap(renderSummaryTable(runUrl))
+          }
+
+          if (record) {
+            const { projectName } = config
+
+            return recordMode.createRunAndRecordSpecs({
+              key,
+              sys,
+              specs,
+              group,
+              browser,
+              parallel,
+              ciBuildId,
+              projectId,
+              projectRoot,
+              projectName,
+              specPattern,
+              runAllSpecs,
+            })
+          }
+
+          // not recording, can't be parallel
+          return runAllSpecs({
+            parallel: false,
+          })
         })
       })
     })

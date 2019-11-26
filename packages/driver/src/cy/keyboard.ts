@@ -52,6 +52,7 @@ interface KeyDetails {
   shiftKeyCode?: number
   simulatedDefault?: SimulatedDefault
   simulatedDefaultOnly?: boolean
+  originalSequence?: string
   events: {
     [key in KeyEventType]?: boolean;
   }
@@ -153,16 +154,16 @@ const getFormattedKeyString = (details: KeyDetails) => {
   let foundKeyString = _.findKey(keyboardMappings, { key: details.key })
 
   if (foundKeyString) {
-    return `{${foundKeyString}}`
+    return `{${details.originalSequence}}`
   }
 
   foundKeyString = keyToModifierMap[details.key]
 
   if (foundKeyString) {
-    return `<${foundKeyString}>`
+    return `{${details.originalSequence}}`
   }
 
-  return details.key
+  return details.originalSequence
 }
 
 const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
@@ -206,6 +207,8 @@ const getKeyDetails = (onKeyNotFound) => {
         details.text = details.key
       }
 
+      details.originalSequence = key
+
       return details
     }
 
@@ -213,10 +216,6 @@ const getKeyDetails = (onKeyNotFound) => {
 
     throw new Error('this can never happen')
   }
-}
-
-const hasModifierBesidesShift = (modifiers: KeyboardModifiers) => {
-  return _.some(_.omit(modifiers, ['shift']))
 }
 
 /**
@@ -713,30 +712,18 @@ export class Keyboard {
           }
 
           this.typeSimulatedKey(activeEl, key, options)
-          debug('returning null')
 
           return null
         }
       }
     )
 
-    const modifierKeys = _.filter(keyDetailsArr, isModifier)
-
-    if (options.simulated && !options.delay) {
-      _.each(typeKeyFns, (fn) => {
-        return fn()
-      })
-
-      if (options.release !== false) {
-        _.each(modifierKeys, (key) => {
-          return this.simulatedKeyup(getActiveEl(doc), key, options)
-        })
-      }
-
-      options.onAfterType()
-
-      return
-    }
+    // we will only press each modifier once, so only find unique modifiers
+    const modifierKeys = _
+    .chain(keyDetailsArr)
+    .filter(isModifier)
+    .uniqBy('key')
+    .value()
 
     return Promise
     .each(typeKeyFns, (fn) => {
@@ -747,6 +734,8 @@ export class Keyboard {
     .then(() => {
       if (options.release !== false) {
         return Promise.map(modifierKeys, (key) => {
+          options.id = _.uniqueId('char')
+
           return this.simulatedKeyup(getActiveEl(doc), key, options)
         })
       }
@@ -897,8 +886,7 @@ export class Keyboard {
     debug(`dispatched [${eventType}] on ${el}`)
     const formattedKeyString = getFormattedKeyString(keyDetails)
 
-    debug('format string', formattedKeyString)
-    options.onEvent(options.id, formattedKeyString, eventType, which, dispatched)
+    options.onEvent(options.id, formattedKeyString, event, dispatched)
 
     return dispatched
   }
@@ -923,10 +911,11 @@ export class Keyboard {
       details.text = details.shiftText
     }
 
-    // If any modifier besides shift is pressed, no text.
-    if (hasModifierBesidesShift(modifiers)) {
-      details.text = ''
-    }
+    // TODO: Re-think skipping text insert if non-shift modifers
+    // @see https://github.com/cypress-io/cypress/issues/5622
+    // if (hasModifierBesidesShift(modifiers)) {
+    //   details.text = ''
+    // }
 
     return details
   }
@@ -954,9 +943,11 @@ export class Keyboard {
       const didFlag = this.flagModifier(_key)
 
       if (!didFlag) {
-        return null
+        // we've already pressed this modifier, so ignore it and don't fire keydown or keyup
+        _key.events.keydown = false
       }
 
+      // don't fire keyup for modifier keys, this will happen after all other keys are typed
       _key.events.keyup = false
     }
 
@@ -1048,10 +1039,7 @@ export class Keyboard {
     debug('getSimulatedDefaultForKey', key.key)
     if (key.simulatedDefault) return key.simulatedDefault
 
-    let nonShiftModifierPressed = hasModifierBesidesShift(this.getActiveModifiers())
-
-    debug({ nonShiftModifierPressed, key })
-    if (!nonShiftModifierPressed && simulatedDefaultKeyMap[key.key]) {
+    if (simulatedDefaultKeyMap[key.key]) {
       return simulatedDefaultKeyMap[key.key]
     }
 
