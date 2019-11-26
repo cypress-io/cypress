@@ -185,7 +185,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
       })
 
-    if not _.isString(str)
+    if not _.isString(str) and not _.isNumber(str)
       $utils.throwErrByPath("invoke_its.invalid_prop_name_arg", {
         onFail: options._log
         args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
@@ -326,7 +326,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       actualSubject = remoteSubject or subject
 
-      paths = str.split(".")
+      if _.isString(str)
+        paths = str.split(".")
+      else
+        paths = [str]
 
       prop = traverseObjectAtPath(actualSubject, paths)
 

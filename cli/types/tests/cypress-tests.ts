@@ -92,11 +92,29 @@ namespace CypressLocalStorageTest {
   }
 }
 
-cy.wrap({ foo: [1, 2, 3] })
-  .its('foo')
-  .each((s: number) => {
+namespace CypressItsTests {
+  cy.wrap({ foo: [1, 2, 3] })
+    .its('foo')
+    .each((s: number) => {
+      s
+    })
+
+  cy.wrap({foo: 'bar'}).its('foo') // $ExpectType Chainable<string>
+  cy.wrap([1, 2]).its(1) // $ExpectType Chainable<number>
+  cy.wrap(['foo', 'bar']).its(1) // $ExpectType Chainable<string>
+  .then((s: string) => {
     s
   })
+}
+
+namespace CypressInvokeTests {
+  const returnsString = () => 'foo'
+  const returnsNumber = () => 42
+
+  // unfortunately could not define more precise type
+  // in this case it should have been "number", but so far no luck
+  cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<any>
+}
 
 cy.wrap({ foo: ['bar', 'baz'] })
   .its('foo')

@@ -337,6 +337,14 @@ describe "src/cy/commands/connectors", ->
           cy.noop(@obj).invoke("foo").then (str) ->
             expect(str).to.eq "foo"
 
+        it "works with numerical indexes", ->
+          i = 0
+          fn = ->
+            i++
+            return i == 5
+
+          cy.noop([_.noop, fn]).invoke(1).should('be.true')
+
         it "forwards any additional arguments", ->
           cy.noop(@obj).invoke("bar", 1, 2).then (num) ->
             expect(num).to.eq 3
@@ -496,32 +504,32 @@ describe "src/cy/commands/connectors", ->
               
             cy.wrap({ foo: -> "foo"}).invoke({})
 
-          it "throws when function name is not of type string but of type number", (done) ->
+          it "throws when function name is not of type string but of type boolean", (done) ->
             cy.on "fail", (err) =>
                 lastLog = @lastLog
-                expect(err.message).to.include "cy.invoke() only accepts a string as the functionName argument."
+                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
                 expect(lastLog.get("error").message).to.include(err.message)
                 done()
               
-            cy.wrap({ foo: -> "foo"}).invoke({}, 123)
+            cy.wrap({ foo: -> "foo"}).invoke({}, true)
 
           it "throws when function name is not of type string but of type function", (done) ->
             cy.on "fail", (err) =>
                 lastLog = @lastLog
-                expect(err.message).to.include "cy.invoke() only accepts a string as the functionName argument."
+                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
                 expect(lastLog.get("error").message).to.include(err.message)
                 done()
               
             cy.wrap({ foo: -> "foo"}).invoke(() -> {})
 
-          it "throws when first parameter is neither of type object nor of type string", (done) ->
+          it "throws when first parameter is neither of type object nor of type string nor of type number", (done) ->
             cy.on "fail", (err) =>
                 lastLog = @lastLog
-                expect(err.message).to.include "cy.invoke() only accepts a string as the functionName argument."
+                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
                 expect(lastLog.get("error").message).to.include(err.message)
                 done()
               
-            cy.wrap({ foo: -> "foo"}).invoke(13, "show")
+            cy.wrap({ foo: -> "foo"}).invoke(true, "show")
 
         describe ".log", ->
           beforeEach ->
@@ -793,6 +801,9 @@ describe "src/cy/commands/connectors", ->
       it "proxies to #invokeFn", ->
         fn = -> "bar"
         cy.wrap({foo: fn}).its("foo").should("eq", fn)
+
+      it "works with numerical indexes", ->
+        cy.wrap(['foo', 'bar']).its(1).should('eq', 'bar')
 
       it "reduces into dot separated values", ->
         obj = {
@@ -1305,11 +1316,11 @@ describe "src/cy/commands/connectors", ->
         it "throws when property name is not of type string", (done) ->
           cy.on "fail", (err) =>
               lastLog = @lastLog
-              expect(err.message).to.include "cy.its() only accepts a string as the propertyName argument."
+              expect(err.message).to.include "cy.its() only accepts a string or a number as the propertyName argument."
               expect(lastLog.get("error").message).to.include(err.message)
               done()
             
-          cy.wrap({ foo: "foo"}).its(123)
+          cy.wrap({ foo: "foo"}).its(true)
 
         it "resets traversalErr and throws the right assertion", (done) ->
           cy.timeout(200)
