@@ -160,7 +160,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       consoleProps: ->
         Subject: subject
 
-    if not _.isString(str)
+    if not _.isString(str) and not _.isNumber(str)
       $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
         onFail: options._log
         args: { cmd: name }
@@ -295,7 +295,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       actualSubject = remoteSubject or subject
 
-      paths = str.split(".")
+      if _.isString(str)
+        paths = str.split(".")
+      else
+        paths = [str]
 
       prop = traverseObjectAtPath(actualSubject, paths)
 

@@ -35,12 +35,16 @@ pathUpToProjectName = Fixtures.projectPath("")
 
 DEFAULT_BROWSERS = ['electron', 'chrome']
 
-stackTraceLinesRe = /^(\s+)at\s(.+)/gm
+stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
+## this captures an entire stack trace and replaces it with [stack trace lines]
+## so that the stdout can contain stack traces of different lengths
+## '@' will be present in firefox stack trace lines
+## 'at' will be present in chrome stack trace lines
 replaceStackTraceLines = (str) ->
-  str.replace(stackTraceLinesRe, "$1at stack trace line")
+  str.replace(stackTraceLinesRe, "$1[stack trace lines]$5")
 
 replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
@@ -73,7 +77,7 @@ replaceParenTime = (str, p1) ->
   return _.padStart("(X second)", p1.length)
 
 replaceScreenshotDims = (str, p1) ->
-  return _.padStart("(YxX)", p1.length) 
+  return _.padStart("(YxX)", p1.length)
 
 replaceUploadingResults = (orig, match..., offset, string) ->
   results = match[1].split('\n').map((res) ->
@@ -86,47 +90,54 @@ replaceUploadingResults = (orig, match..., offset, string) ->
   return ret
 
 normalizeStdout = (str, options = {}) ->
+  normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true})
+
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
   str = str
-  ## /Users/jane/........../ -> //foo/bar/.projects/  
+  ## /Users/jane/........../ -> //foo/bar/.projects/
   ## (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join("/foo/bar/.projects")
-  .replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+
+  if normalizeOptions.normalizeAvailableBrowsers
+    # usually we are not interested in the browsers detected on this particular system
+    # but some tests might filter / change the list of browsers
+    # in that case the test should pass "normalizeAvailableBrowsers:false" as options
+    str = str.replace(availableBrowsersRe, "$1browser1, browser2, browser3")
+
+  str = str
   .replace(browserNameVersionRe, replaceBrowserName)
   ## numbers in parenths
-  .replace(/\s\(\d+([ms]|ms)\)/g, "") 
-   ## 12:35 -> XX:XX
+  .replace(/\s\(\d+([ms]|ms)\)/g, "")
+  ## 12:35 -> XX:XX
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
   ## Cypress: 2.1.0 -> Cypress: 1.2.3
-  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3") 
+  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$1" + "1.2.3")
   ## Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
-  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion) 
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
   ## 15 seconds -> X second
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
   ## duration='1589' -> duration='XXXX'
-  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) 
+  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
   ## (15 seconds) -> (XX seconds)
   .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
   .replace(/\r/g, "")
   ## replaces multiple lines of uploading results (since order not guaranteed)
-  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) 
+  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
   ## fix "Require stacks" for CI
-  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3") 
+  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3")
 
   if options.sanitizeScreenshotDimensions
     ## screenshot dimensions
-    str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims) 
+    str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
 
-  return str.split("\n")
-    .map(replaceStackTraceLines)
-    .join("\n")
+  return replaceStackTraceLines(str)
 
 ensurePort = (port) ->
   if port is 5566
     throw new Error('Specified port cannot be on 5566 because it conflicts with --inspect-brk=5566')
-    
+
 startServer = (obj) ->
   { onServer, port, https } = obj
 
@@ -182,7 +193,7 @@ copy = ->
     )
 
 getMochaItFn = (only, skip, browser, specifiedBrowser) ->
-  ## if we've been told to skip this test 
+  ## if we've been told to skip this test
   ## or if we specified a particular browser and this
   ## doesn't match the one we're currently trying to run...
   if skip or (specifiedBrowser and specifiedBrowser isnt browser)
@@ -193,13 +204,13 @@ getMochaItFn = (only, skip, browser, specifiedBrowser) ->
     return it.only
 
   return it
-  
+
 getBrowsers = (generateTestsForDefaultBrowsers, browser, defaultBrowsers) ->
   ## if we're generating tests for default browsers
   if generateTestsForDefaultBrowsers
     ## then return an array of default browsers
     return defaultBrowsers
-  
+
   ## but if we haven't been told to generate tests for default browsers
   ## and weren't provided a specified browser then throw
   if not browser
@@ -226,7 +237,7 @@ localItFn = (title, options = {}) ->
 
   if not title
     throw new Error('e2e.it(...) must be passed a title as the first argument')
-  
+
   ## LOGIC FOR AUTOGENERATING DYNAMIC TESTS
   ## - if generateTestsForDefaultBrowsers
   ##   - create multiple tests for each default browser
@@ -234,7 +245,7 @@ localItFn = (title, options = {}) ->
   ##     ...skip the tests for each default browser if that browser
   ##     ...does not match the specified one (used in CI)
   ## - else only generate a single test with the specified browser
-  
+
   ## run the tests for all the default browsers, or if a browser
   ## has been specified, only run it for that
   specifiedBrowser = browser
@@ -242,7 +253,7 @@ localItFn = (title, options = {}) ->
 
   browserToTest = (browser) ->
     mochaItFn = getMochaItFn(only, skip, browser, specifiedBrowser)
-    
+
     testTitle = "#{title} [#{browser}]"
 
     mochaItFn testTitle, ->
@@ -251,9 +262,7 @@ localItFn = (title, options = {}) ->
       ctx = @
 
       execFn = (overrides = {}) ->
-        e2e.exec(ctx, _.extend({}, options, overrides, {
-          browser, originalTitle
-        }))
+        e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
 
       onRun(execFn, browser, ctx)
 

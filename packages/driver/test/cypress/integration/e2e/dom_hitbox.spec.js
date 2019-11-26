@@ -49,7 +49,36 @@ describe('rect highlight', () => {
     // TODO: assert covers element bounding-box
     ensureCorrectHighlightPositions(null)
   })
+
+  it('correct target position during click', () => {
+    clickAndPin('#button')
+    ensureCorrectHighlightPositions('#button')
+    ensureCorrectTargetPosition('#button')
+  })
+
+  it('correct target position during click with offset coords', () => {
+    clickAndPin('#button', 5, 10)
+    ensureCorrectHighlightPositions('#button')
+    ensureCorrectTargetPosition('#button')
+  })
 })
+
+const ensureCorrectTargetPosition = (sel) => {
+  return cy.wrap(null, { timeout: 400 }).should(() => {
+    const target = cy.$$('div[data-highlight-hitbox]')[0].getBoundingClientRect()
+
+    const dims = {
+      left: target.left + target.width / 2,
+      right: target.left + target.width / 2,
+      top: target.top + target.height / 2,
+      bottom: target.top + target.height / 2,
+      width: 1,
+      height: 1,
+    }
+
+    expectToBeInside(dims, cy.$$(sel)[0].getBoundingClientRect(), 'border-box to match selector bounding-box')
+  })
+}
 
 const ensureCorrectHighlightPositions = (sel) => {
   return cy.wrap(null, { timeout: 400 }).should(() => {
@@ -72,6 +101,12 @@ const getAndPin = (sel) => {
   cy.get(sel)
 
   clickCommandLog(sel)
+}
+
+const clickAndPin = (sel, ...args) => {
+  cy.get(sel).click(...args)
+
+  clickCommandLog('click')
 }
 
 const expectToBeEqual = (rect1, rect2, mes = 'rect to be equal to rect') => {
