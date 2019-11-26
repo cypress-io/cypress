@@ -68,45 +68,40 @@
     font-size: 13px;
     border: 1px solid #ddd;
     border-radius: 3px;
-    background-color: #252831;
+    background: #fff;
     color: #eee;
     margin: 0;
-    padding: 10px;
+    padding: 8px 12px;
     font-family: $font-mono;
+    > span {
+      color: #000;
+    }
 
-    .envFile:hover, .env:hover, .config:hover, .cli:hover, .plugin:hover, .default:hover {
+    ol[role="tree"] {
+        > li > div{
+        display: none;
+      }
+    }
+
+    .key-value-pair-value {
+      margin-left: 2px;
+      display: inline-block;
+      line-height: 1;
+      padding: 2px;
+      border-bottom: 1px solid transparent
+    }
+
+    .key-value-pair-value:hover {
       border-bottom: 1px dotted #777;
     }
 
     p {
       margin-bottom: 0;
     }
-
-    .key {
-      color: #ccc;
-    }
-
-    .comma, .colon, {
-      color: #ccc;
-    }
-
-    .line {
-      margin-left: 15px;
-      color: #eee;
-    }
-
-    .nested {
-      margin-left: 15px;
-
-      .line {
-        margin-left: 30px;
-      }
-    }
   }
 
-  .envFile, .env, .config, .cli, .plugin, .default {
+  .envFile, .env, .config, .cli, .plugins, .default {
     font-family: $font-mono;
-
     padding: 2px;
   }
 
@@ -130,7 +125,7 @@
     color: #A21313;
   }
 
-  .plugin {
+  .plugins {
     background-color: #f0e7fc;
     color: #134aa2;
   }

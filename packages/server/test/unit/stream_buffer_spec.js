@@ -221,4 +221,23 @@ describe('lib/util/stream_buffer', () => {
 
     pt.end()
   })
+
+  it('silently discards writes after it has been destroyed, with no consumers', function (done) {
+    const sb = streamBuffer()
+
+    sb.write('foo')
+    sb.unpipeAll()
+    sb.write('bar', done)
+  })
+
+  it('silently discards writes after it has been destroyed, with a consumer', function (done) {
+    const sb = streamBuffer()
+    const pt = stream.PassThrough()
+
+    sb.createReadStream().pipe(pt)
+
+    sb.write('foo')
+    sb.unpipeAll()
+    sb.write('bar', done)
+  })
 })

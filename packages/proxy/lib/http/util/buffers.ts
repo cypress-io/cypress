@@ -15,6 +15,14 @@ export type HttpBuffer = {
   url: string
 }
 
+const stripPort = (url) => {
+  try {
+    return uri.removeDefaultPort(url).format()
+  } catch (e) {
+    return url
+  }
+}
+
 export class HttpBuffers {
   buffers: HttpBuffer[] = []
 
@@ -33,37 +41,26 @@ export class HttpBuffers {
   }
 
   set (obj: HttpBuffer) {
+    obj.url = stripPort(obj.url)
+    obj.originalUrl = stripPort(obj.originalUrl)
+
+    debug('setting buffer %o', _.pick(obj, 'url'))
+
     return this.buffers.push(_.pick(obj, 'url', 'originalUrl', 'jar', 'stream', 'response', 'details'))
   }
 
   getByOriginalUrl (str): Optional<HttpBuffer> {
-    return _.find(this.buffers, { originalUrl: str })
+    const b = _.find(this.buffers, { originalUrl: stripPort(str) })
+
+    if (b) {
+      debug('found request buffer by original url %o', { str, buffer: _.pick(b, 'url', 'originalUrl', 'details'), bufferCount: this.buffers.length })
+    }
+
+    return b
   }
 
   get (str): Optional<HttpBuffer> {
-    const find = (str) => {
-      return _.find(this.buffers, { url: str })
-    }
-
-    const b = find(str)
-
-    if (b) {
-      return b
-    }
-
-    let parsed = uri.parse(str)
-
-    // if we're on https and we have a port
-    // then attempt to find the buffer by
-    // slicing off the port since our buffer
-    // was likely stored without a port
-    if ((parsed.protocol === 'https:') && parsed.port) {
-      parsed = uri.removePort(parsed)
-
-      return find(parsed.format())
-    }
-
-    return undefined
+    return _.find(this.buffers, { url: stripPort(str) })
   }
 
   take (str): Optional<HttpBuffer> {

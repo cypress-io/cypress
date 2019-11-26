@@ -1,4 +1,5 @@
 _ = require("lodash")
+cookieParser = require("strict-cookie-parser")
 Promise = require("bluebird")
 
 $dom = require("../../dom")
@@ -17,13 +18,8 @@ mergeDefaults = (obj) ->
   ## we always want to be able to see and influence cookies
   ## on our superdomain
   { superDomain } = $Location.create(window.location.href)
-  # { hostname } = $Location.create(window.location.href)
 
   merge = (o) ->
-    ## we are hostOnly if we dont have an
-    ## explicit domain
-    # o.hostOnly = !o.domain
-
     ## and if the user did not provide a domain
     ## then we know to set the default to be origin
     _.defaults o, {domain: superDomain}
@@ -32,6 +28,10 @@ mergeDefaults = (obj) ->
     _.map(obj, merge)
   else
     merge(obj)
+
+validateCookieName = (cmd, name, onFail) ->
+  if cookieParser.isCookieName(name) isnt true
+    Cypress.utils.throwErrByPath("cookies.invalid_name", { args: { cmd, name }, onFail })
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   automateCookies = (event, obj = {}, log, timeout) ->
@@ -58,8 +58,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           }
         }
 
-  getAndClear = (log, timeout) ->
-    automateCookies("get:cookies", {}, log, timeout)
+  getAndClear = (log, timeout, options = {}) ->
+    automateCookies("get:cookies", options, log, timeout)
     .then (resp) =>
       ## bail early if we got no cookies!
       return resp if resp and resp.length is 0
@@ -99,8 +99,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
+      onFail = options._log
+
       if not _.isString(name)
-        $utils.throwErrByPath("getCookie.invalid_argument", { onFail: options._log })
+        $utils.throwErrByPath("getCookie.invalid_argument", { onFail })
+
+      validateCookieName('getCookie', name, onFail)
 
       automateCookies("get:cookie", {name: name}, options._log, options.timeout)
       .then (resp) ->
@@ -128,13 +132,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
-      automateCookies("get:cookies", {}, options._log, options.timeout)
+      automateCookies("get:cookies", _.pick(options, 'domain'), options._log, options.timeout)
       .then (resp) ->
         options.cookies = resp
 
         return resp
 
-    setCookie: (name, value, options = {}) ->
+    setCookie: (name, value, userOptions = {}) ->
+      options = _.clone(userOptions)
       _.defaults options, {
         name: name
         value: value
@@ -161,14 +166,29 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
+      onFail = options._log
+
       if not _.isString(name) or not _.isString(value)
-        $utils.throwErrByPath("setCookie.invalid_arguments", { onFail: options._log })
+        Cypress.utils.throwErrByPath("setCookie.invalid_arguments", { onFail })
+
+      validateCookieName('setCookie', name, onFail)
+
+      if cookieParser.parseCookieValue(value) == null
+        Cypress.utils.throwErrByPath("setCookie.invalid_value", { args: { value }, onFail })
 
       automateCookies("set:cookie", cookie, options._log, options.timeout)
       .then (resp) ->
         options.cookie = resp
 
         return resp
+      .catch (err) ->
+        Cypress.utils.throwErrByPath("setCookie.backend_error", {
+          args: {
+            browserDisplayName: Cypress.browser.displayName,
+            errStack: err.stack
+          }
+          onFail
+        })
 
     clearCookie: (name, options = {}) ->
       _.defaults options, {
@@ -193,8 +213,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
+      onFail = options._log
+
       if not _.isString(name)
-        $utils.throwErrByPath("clearCookie.invalid_argument", { onFail: options._log })
+        $utils.throwErrByPath("clearCookie.invalid_argument", { onFail })
+
+      validateCookieName('clearCookie', name, onFail)
 
       ## TODO: prevent clearing a cypress namespace
       automateCookies("clear:cookie", {name: name}, options._log, options.timeout)
@@ -228,7 +252,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
         })
 
-      getAndClear(options._log, options.timeout)
+      getAndClear(options._log, options.timeout, { domain: options.domain })
       .then (resp) ->
         options.cookies = resp
 

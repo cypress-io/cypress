@@ -667,6 +667,23 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.deep.eq({test: "We’ll"})
 
+      context "deferred", ->
+        it "closes connection if no stub is received before a reset", ->
+          p = @rp({
+            url: "http://localhost:2020/__cypress/xhrs/users/1"
+            json: true
+            headers: {
+              "x-cypress-id": "foo1"
+              "x-cypress-responsedeferred": true
+            }
+          })
+
+          setTimeout =>
+            @server._xhrServer.reset()
+          , 100
+
+          expect(p).to.be.rejectedWith('Error: socket hang up')
+
       context "fixture", ->
         beforeEach ->
           Fixtures.scaffold("todos")

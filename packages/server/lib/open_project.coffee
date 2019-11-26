@@ -11,7 +11,7 @@ browsers  = require("./browsers")
 specsUtil = require("./util/specs")
 preprocessor = require("./plugins/preprocessor")
 
-create = ->
+moduleFactory = ->
   openProject     = null
   relaunchBrowser = null
   specsWatcher    = null
@@ -192,6 +192,9 @@ create = ->
       @closeOpenProjectAndBrowsers()
 
     create: (path, args = {}, options = {}) ->
+      debug("open_project create %s", path)
+      debug("and options %o", options)
+
       ## store the currently open project
       openProject = Project(path)
 
@@ -209,10 +212,11 @@ create = ->
       ## open the project and return
       ## the config for the project instance
       debug("opening project %s", path)
+      debug("and options %o", options)
 
       openProject.open(options)
       .return(@)
   }
 
-module.exports = create()
-module.exports.Factory = create
+module.exports = moduleFactory()
+module.exports.Factory = moduleFactory

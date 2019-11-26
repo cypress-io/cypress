@@ -1,5 +1,4 @@
 _            = require("lodash")
-exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
 stream       = require("stream")
@@ -33,6 +32,8 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+XhrServer    = require("./xhr_ws_server")
+templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -87,11 +88,7 @@ class Server
 
     ## since we use absolute paths, configure express-handlebars to not automatically find layouts
     ## https://github.com/cypress-io/cypress/issues/2891
-    app.engine("html", exphbs({
-      defaultLayout: false
-      layoutsDir: []
-      partialsDir: []
-    }))
+    app.engine("html", templateEngine.render)
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
@@ -131,6 +128,7 @@ class Server
     e
 
   open: (config = {}, project, onWarning) ->
+    debug("server open")
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -143,6 +141,7 @@ class Server
       ## TODO: might not be needed anymore
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
+      @_xhrServer = XhrServer.create()
 
       getRemoteState = => @_getRemoteState()
 
@@ -150,7 +149,7 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_networkProxy)
+      @createRoutes(app, config, @_request, getRemoteState, @_xhrServer.getDeferredResponse, project, @_networkProxy)
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -372,7 +371,13 @@ class Server
         ## reset the cookies from the buffer on the browser
         return runPhase ->
           resolve(
-            Promise.map obj.details.cookies, _.partial(automationRequest, 'set:cookie')
+            Promise.map obj.details.cookies, (cookie) ->
+              ## prevent prepending a . to the cookie domain if top-level
+              ## navigation occurs as a result of a cy.visit
+              if _.isUndefined(cookie.hostOnly) && !cookie.domain?.startsWith('.')
+                cookie.hostOnly = true
+
+              automationRequest('set:cookie', cookie)
             .return(obj.details)
           )
 
@@ -697,10 +702,11 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onIncomingXhr = @_xhrServer.onIncomingXhr
+    options.onResetXhrServer = @_xhrServer.reset
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
-    # handleListeners(@_server)
 
 module.exports = Server

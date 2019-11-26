@@ -1,4 +1,4 @@
-exports['e2e web security when enabled fails 1'] = `
+exports['e2e web security / when enabled / fails'] = `
 
 ====================================================================================================
 
@@ -29,10 +29,10 @@ exports['e2e web security when enabled fails 1'] = `
   1) web security fails when clicking <a> to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:5566" from accessing a cross-origin frame.
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
-  > http://localhost:5566
+  > http://localhost:4466
 
 A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -50,21 +50,15 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   2) web security fails when submitted a form and being redirected to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:5566" from accessing a cross-origin frame.
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
-  > http://localhost:5566
+  > http://localhost:4466
 
 A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -82,21 +76,15 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   3) web security fails when using a javascript redirect to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:5566" from accessing a cross-origin frame.
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
-  > http://localhost:5566
+  > http://localhost:4466
 
 A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
 
@@ -114,13 +102,7 @@ Alternatively you can also disable Chrome Web Security which will turn off this 
 
 https://on.cypress.io/cross-origin-violation
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

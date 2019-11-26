@@ -5,58 +5,29 @@ const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
 const $actionability = require('../../actionability')
 
-const formatMoveEventsTable = (events) => {
-  return {
-    name: `Mouse Move Events${events ? '' : ' (skipped)'}`,
-    data: _.map(events, (obj) => {
-      const key = _.keys(obj)[0]
-      const val = obj[_.keys(obj)[0]]
-
-      if (val.skipped) {
-        const reason = val.skipped
-
-        // no modifiers can be present
-        // on move events
-        return {
-          'Event Name': key,
-          'Target Element': reason,
-          'Prevented Default?': null,
-          'Stopped Propagation?': null,
-        }
-      }
-
-      // no modifiers can be present
-      // on move events
-      return {
-        'Event Name': key,
-        'Target Element': val.el,
-        'Prevented Default?': val.preventedDefault,
-        'Stopped Propagation?': val.stoppedPropagation,
-      }
-    }),
-  }
-}
-
 const formatMouseEvents = (events) => {
   return _.map(events, (val, key) => {
+    // get event type either from the keyname, or from the sole object key name
+    const eventName = (typeof key === 'string') ? key : val.type
+
     if (val.skipped) {
       const reason = val.skipped
 
       return {
-        'Event Name': key.slice(0, -5),
+        'Event Type': eventName,
         'Target Element': reason,
-        'Prevented Default?': null,
-        'Stopped Propagation?': null,
-        'Modifiers': null,
+        'Prevented Default': null,
+        'Stopped Propagation': null,
+        'Active Modifiers': null,
       }
     }
 
     return {
-      'Event Name': key.slice(0, -5),
+      'Event Type': eventName,
       'Target Element': val.el,
-      'Prevented Default?': val.preventedDefault,
-      'Stopped Propagation?': val.stoppedPropagation,
-      'Modifiers': val.modifiers ? val.modifiers : null,
+      'Prevented Default': val.preventedDefault || null,
+      'Stopped Propagation': val.stoppedPropagation || null,
+      'Active Modifiers': val.modifiers || null,
     }
   })
 }
@@ -64,7 +35,7 @@ const formatMouseEvents = (events) => {
 module.exports = (Commands, Cypress, cy, state, config) => {
   const { mouse } = cy.devices
 
-  const mouseAction = (eventName, { subject, positionOrX, y, options, onReady, onTable }) => {
+  const mouseAction = (eventName, { subject, positionOrX, y, options, onReady, onTable, defaultOptions }) => {
     let position
     let x
 
@@ -82,6 +53,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       errorOnSelect: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
+      ...defaultOptions,
     })
 
     // throw if we're trying to click multiple elements
@@ -98,7 +70,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       if (options.log) {
         // figure out the options which actually change the behavior of clicks
-        deltaOptions = $utils.filterOutOptions(options)
+        deltaOptions = $utils.filterOutOptions(options, defaultOptions)
 
         options._log = Cypress.log({
           message: deltaOptions,
@@ -242,12 +214,12 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         onTable (domEvents) {
           return {
             1: () => {
-              return formatMoveEventsTable(domEvents.moveEvents.events)
-            },
-            2: () => {
               return {
-                name: 'Mouse Click Events',
-                data: formatMouseEvents(domEvents.clickEvents),
+                name: 'Mouse Events',
+                data: _.concat(
+                  formatMouseEvents(domEvents.moveEvents.events),
+                  formatMouseEvents(domEvents.clickEvents),
+                ),
               }
             },
           }
@@ -256,42 +228,34 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     },
 
     dblclick (subject, positionOrX, y, options = {}) {
-      // TODO: 4.0 make this false by default
-      options.multiple = true
-
       return mouseAction('dblclick', {
         y,
         subject,
         options,
+        // TODO: 4.0 make this false by default
+        defaultOptions: { multiple: true },
         positionOrX,
         onReady (fromElViewport, forceEl) {
-          const { clickEvents1, clickEvents2, dblclickProps } = mouse.dblclick(fromElViewport, forceEl)
+          const { clickEvents1, clickEvents2, dblclick } = mouse.dblclick(fromElViewport, forceEl)
 
           return {
-            dblclickProps,
+            dblclick,
             clickEvents: [clickEvents1, clickEvents2],
           }
         },
         onTable (domEvents) {
           return {
             1: () => {
-              return formatMoveEventsTable(domEvents.moveEvents.events)
-            },
-            2: () => {
               return {
-                name: 'Mouse Click Events',
+                name: 'Mouse Events',
                 data: _.concat(
-                  formatMouseEvents(domEvents.clickEvents[0], formatMouseEvents),
-                  formatMouseEvents(domEvents.clickEvents[1], formatMouseEvents)
+                  formatMouseEvents(domEvents.moveEvents.events),
+                  formatMouseEvents(domEvents.clickEvents[0]),
+                  formatMouseEvents(domEvents.clickEvents[1]),
+                  formatMouseEvents({
+                    dblclick: domEvents.dblclick,
+                  })
                 ),
-              }
-            },
-            3: () => {
-              return {
-                name: 'Mouse Double Click Event',
-                data: formatMouseEvents({
-                  dblclickProps: domEvents.dblclickProps,
-                }),
               }
             },
           }
@@ -316,20 +280,16 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         onTable (domEvents) {
           return {
             1: () => {
-              return formatMoveEventsTable(domEvents.moveEvents.events)
-            },
-            2: () => {
               return {
-                name: 'Mouse Click Events',
-                data: formatMouseEvents(domEvents.clickEvents, formatMouseEvents),
+                name: 'Mouse Events',
+                data: _.concat(
+                  formatMouseEvents(domEvents.moveEvents.events),
+                  formatMouseEvents(domEvents.clickEvents),
+                  formatMouseEvents(domEvents.contextmenuEvent)
+                ),
               }
             },
-            3: () => {
-              return {
-                name: 'Mouse Right Click Event',
-                data: formatMouseEvents(domEvents.contextmenuEvent),
-              }
-            },
+
           }
         },
       })
