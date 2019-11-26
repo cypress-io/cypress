@@ -226,10 +226,6 @@ export class Http {
     this.buffers.reset()
   }
 
-  getBuffer (urlStr) {
-    return this.buffers.getByOriginalUrl(urlStr)
-  }
-
   setBuffer (buffer) {
     return this.buffers.set(buffer)
   }

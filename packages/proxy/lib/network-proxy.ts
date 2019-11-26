@@ -16,10 +16,6 @@ export class NetworkProxy {
     this.http.handle(req, res)
   }
 
-  getHttpBuffer (urlStr) {
-    return this.http.getBuffer(urlStr)
-  }
-
   setHttpBuffer (buffer) {
     this.http.setBuffer(buffer)
   }
