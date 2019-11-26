@@ -39,6 +39,8 @@ stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
 
+currentOptions = {}
+
 ## this captures an entire stack trace and replaces it with [stack trace lines]
 ## so that the stdout can contain stack traces of different lengths
 ## '@' will be present in firefox stack trace lines
