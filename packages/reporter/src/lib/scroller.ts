@@ -21,7 +21,7 @@ export class Scroller {
   private _container: Element | null = null
   private _userScrollCount = 0
   private _userScroll = true
-  private _countUserScrollsTimeout: NodeJS.Timeout | null = null
+  private _countUserScrollsTimeout?: number
 
   setContainer (container: Element, onUserScroll?: UserScrollCallback) {
     this._container = container
@@ -51,8 +51,8 @@ export class Scroller {
           onUserScroll()
         }
 
-        clearTimeout(this._countUserScrollsTimeout as NodeJS.Timeout)
-        this._countUserScrollsTimeout = null
+        clearTimeout(this._countUserScrollsTimeout)
+        this._countUserScrollsTimeout = undefined
         this._userScrollCount = 0
 
         return
@@ -60,8 +60,8 @@ export class Scroller {
 
       if (this._countUserScrollsTimeout) return
 
-      this._countUserScrollsTimeout = setTimeout(() => {
-        this._countUserScrollsTimeout = null
+      this._countUserScrollsTimeout = window.setTimeout(() => {
+        this._countUserScrollsTimeout = undefined
         this._userScrollCount = 0
       }, 50)
     })
@@ -127,8 +127,8 @@ export class Scroller {
     this._container = null
     this._userScroll = true
     this._userScrollCount = 0
-    clearTimeout(this._countUserScrollsTimeout as NodeJS.Timeout)
-    this._countUserScrollsTimeout = null
+    clearTimeout(this._countUserScrollsTimeout)
+    this._countUserScrollsTimeout = undefined
   }
 }
 

@@ -118,7 +118,7 @@ interface Props {
 @observer
 class Command extends Component<Props> {
   @observable isOpen = false
-  private _showTimeout: NodeJS.Timeout | null = null
+  private _showTimeout?: number
 
   static defaultProps = {
     appState,
@@ -278,13 +278,13 @@ class Command extends Component<Props> {
     if (show) {
       runnablesStore.attemptingShowSnapshot = true
 
-      this._showTimeout = setTimeout(() => {
+      this._showTimeout = window.setTimeout(() => {
         runnablesStore.showingSnapshot = true
         this.props.events.emit('show:snapshot', model.id)
       }, 50)
     } else {
       runnablesStore.attemptingShowSnapshot = false
-      clearTimeout(this._showTimeout as NodeJS.Timeout)
+      clearTimeout(this._showTimeout)
 
       setTimeout(() => {
         // if we are currently showing a snapshot but

@@ -27,7 +27,7 @@ class StatsStore {
   @observable _currentTime: number | null = defaults._startTime;
   [key: string]: any
 
-  private _interval: NodeJS.Timeout | undefined;
+  private _interval?: number;
 
   @computed get duration () {
     if (!this._startTime) return 0
@@ -53,11 +53,11 @@ class StatsStore {
   }
 
   _startTimer () {
-    this._interval = setInterval(action('duration:interval', this._updateCurrentTime.bind(this)), 100)
+    this._interval = window.setInterval(action('duration:interval', this._updateCurrentTime.bind(this)), 100)
   }
 
   _stopTimer () {
-    clearInterval(this._interval as NodeJS.Timeout)
+    clearInterval(this._interval)
   }
 
   _updateCurrentTime () {

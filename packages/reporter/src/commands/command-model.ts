@@ -32,7 +32,7 @@ export default class Command extends Instrument {
   @observable isDuplicate = false
 
   private _prevState: string | null | undefined = null
-  private _pendingTimeout: NodeJS.Timeout | undefined
+  private _pendingTimeout: number | undefined
 
   @computed get displayMessage () {
     return this.renderProps.message || this.message
@@ -99,7 +99,7 @@ export default class Command extends Instrument {
     }
 
     if (this._becameNonPending()) {
-      clearTimeout(this._pendingTimeout as NodeJS.Timeout)
+      clearTimeout(this._pendingTimeout)
       action('became:inactive', () => {
         return this.isLongRunning = false
       })()
@@ -109,7 +109,7 @@ export default class Command extends Instrument {
   }
 
   _startTimingPending () {
-    this._pendingTimeout = setTimeout(action('became:long:running', () => {
+    this._pendingTimeout = window.setTimeout(action('became:long:running', () => {
       if (this._isPending()) {
         this.isLongRunning = true
       }
