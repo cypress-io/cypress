@@ -48,8 +48,11 @@ replaceStackTraceLines = (str, browser) ->
     pre = parts[0]
     post = parts[4]
     if browser is 'firefox'
-      pre += pre.slice(1).repeat(2)
-      # post = '\n\n'
+      if pre is '\n'
+        pre = '\n    '
+      else
+        pre += pre.slice(1).repeat(2)
+
       post = post.slice(-1)
     return "#{pre}[stack trace lines]#{post}")
 
@@ -96,8 +99,8 @@ replaceUploadingResults = (orig, match..., offset, string) ->
 
   return ret
 
-normalizeStdout = (str, options = {}) ->
-  normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true})
+normalizeStdout = (str) ->
+  options = _.defaults({}, currentOptions, {normalizeAvailableBrowsers: true})
 
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
@@ -106,7 +109,7 @@ normalizeStdout = (str, options = {}) ->
   ## (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join("/foo/bar/.projects")
 
-  if normalizeOptions.normalizeAvailableBrowsers
+  if options.normalizeAvailableBrowsers
     # usually we are not interested in the browsers detected on this particular system
     # but some tests might filter / change the list of browsers
     # in that case the test should pass "normalizeAvailableBrowsers:false" as options
@@ -226,8 +229,10 @@ getBrowsers = (generateTestsForDefaultBrowsers, browser, defaultBrowsers) ->
   ## otherwise return the specified browser
   return [browser]
 
+currentOptions = {}
+
 localItFn = (title, options = {}) ->
-  options = _
+  options = currentOptions = _
   .chain(options)
   .clone()
   .defaults({
@@ -492,7 +497,7 @@ module.exports = e2e = {
           else
             expect(headless).to.include("(headless)")
 
-        str = normalizeStdout(stdout, options)
+        str = normalizeStdout(stdout)
 
         if options.originalTitle
           snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
