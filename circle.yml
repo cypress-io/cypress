@@ -279,7 +279,7 @@ commands:
           steps:
             - run:
                 name: Wait-on <<parameters.wait-on>>
-                command: npx wait-on <<parameters.wait-on>> --timeout 60
+                command: npx wait-on <<parameters.wait-on>> --timeout 120000
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.command>> -- --browser <<parameters.browser>>
