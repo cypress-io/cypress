@@ -84,7 +84,7 @@ module.exports = {
     ## because the browser has a cached
     ## dynamic stack getter that will
     ## not be evaluated later
-    stack = err.stack
+    stack = err.stack or ''
 
     ## preserve message
     ## and toString

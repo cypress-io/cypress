@@ -447,6 +447,12 @@ describe('Set Up Project', function () {
       cy.get('.modal').contains('Log In to Dashboard')
     })
 
+    it('closes login modal', () => {
+      cy.get('.modal').contains('Log In to Dashboard')
+      cy.get('.close').click()
+      cy.get('.btn').contains('Set up project').click()
+    })
+
     describe('when login succeeds', function () {
       beforeEach(function () {
         cy.stub(this.ipc, 'beginAuth').resolves(this.user)
@@ -454,6 +460,7 @@ describe('Set Up Project', function () {
       })
 
       it('shows setup', () => {
+        cy.get('.login-content > .btn').click()
         cy.contains('h4', 'Set up project')
       })
     })
