@@ -242,6 +242,10 @@ commands:
         type: enum
         enum: ["electron", "chrome", "firefox"]
         default: "electron"
+      command:
+        description: Test command to run to start Cypress tests
+        type: string
+        default: "npm run e2e"
     steps:
       - attach_workspace:
           at: ~/
@@ -268,7 +272,7 @@ commands:
           background: true
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: npm run e2e -- --browser <<parameters.browser>>
+          command: <<parameters.command>> -- --browser <<parameters.browser>>
       - store-npm-logs
 
 jobs:
@@ -1042,6 +1046,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-documentation
           browser: firefox
+          command: "npm run cypress:run"
 
   test-binary-as-specific-user:
     <<: *defaults
