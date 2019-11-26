@@ -229,10 +229,9 @@ getBrowsers = (generateTestsForDefaultBrowsers, browser, defaultBrowsers) ->
   ## otherwise return the specified browser
   return [browser]
 
-currentOptions = {}
 
 localItFn = (title, options = {}) ->
-  options = currentOptions = _
+  options = _
   .chain(options)
   .clone()
   .defaults({
@@ -389,6 +388,8 @@ module.exports = e2e = {
 
       ## normalize the path to the spec
       options.spec = specs.join(',')
+
+    currentOptions = options
 
     return options
 
