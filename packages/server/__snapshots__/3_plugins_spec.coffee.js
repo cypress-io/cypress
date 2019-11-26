@@ -372,3 +372,33 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 
 
 `
+
+exports['e2e plugins can filter browsers from config 1'] = `
+Can't run because you've entered an invalid browser name.
+
+Browser: 'chrome' was not found on your system.
+
+Available browsers found are: electron
+
+`
+
+exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+
+Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+
+`
+
+exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+
+Expected at list one browser
+
+`
+
+exports['e2e plugins catches invalid browser returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+
+Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chrome"}\`
+
+`

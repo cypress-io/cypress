@@ -330,6 +330,7 @@ const _providerCiParams = () => {
       'TRAVIS_BUILD_NUMBER',
       'TRAVIS_PULL_REQUEST',
       'TRAVIS_PULL_REQUEST_BRANCH',
+      'TRAVIS_PULL_REQUEST_SHA',
     ]),
     wercker: null,
   }
@@ -486,7 +487,7 @@ const _providerCommitParams = function () {
       authorName: env.BUILD_SOURCEVERSIONAUTHOR,
     },
     travis: {
-      sha: env.TRAVIS_COMMIT,
+      sha: env.TRAVIS_PULL_REQUEST_SHA || env.TRAVIS_COMMIT,
       // for PRs, TRAVIS_BRANCH is the base branch being merged into
       branch: env.TRAVIS_PULL_REQUEST_BRANCH || env.TRAVIS_BRANCH,
       // authorName: ???
