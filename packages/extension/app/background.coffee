@@ -59,6 +59,8 @@ connect = (host, path, onScreencastFrame) ->
         invoke("focus", id)
       when "take:screenshot"
         invoke("takeScreenshot", id)
+      when "clear:localStorage"
+        invoke("clearLocalStorage", id, data)
       else
         fail(id, {message: "No handler registered for: '#{msg}'"})
 
@@ -75,6 +77,11 @@ connect = (host, path, onScreencastFrame) ->
 
 automation = {
   connect
+
+  clearLocalStorage: ({ urls }) ->
+    browser.browsingData.removeLocalStorage({
+      hostnames: urls
+    })
 
   getUrl: getCookieUrl
 

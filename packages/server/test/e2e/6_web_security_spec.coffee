@@ -79,8 +79,9 @@ describe "e2e web security", ->
       }
     })
 
-    e2e.it "passes", {
+    e2e.it.only "passes", {
       spec: "web_security_spec.coffee"
       snapshot: true
       expectedExitCode: 0
+      exit: false
     }
