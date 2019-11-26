@@ -11,6 +11,7 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "charset": "1.0.1",
+    "common-tags": "1.8.0",
     "debug": "4.1.1",
     "grapheme-splitter": "1.0.4",
     "iconv-lite": "0.5.0",
