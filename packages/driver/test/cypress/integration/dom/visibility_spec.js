@@ -930,6 +930,17 @@ This element '<div#coveredUpPosFixed>' is not visible because it has CSS propert
 `)
       })
 
+      it('needs scroll', function () {
+        const el = cy.$$('body').append(`
+          <div style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; overflow-x: hidden; overflow-y: auto;">
+            <div style="height: 800px">Big Element</div>
+            <button id="needsScroll">MyButton</button>
+          </div>
+        `)
+
+        this.reasonIs(el.find('#needsScroll'), `This element \'<button#needsScroll>\' is not visible because its ancestor has 'position: fixed' CSS property and it is overflowed by other elements. How about scrolling to the element with cy.scrollIntoView()?`)
+      })
+
       it('cannot determine why element is not visible', function () {
         this.reasonIs(this.$btnOpacity, 'Cypress could not determine why this element \'<button>\' is not visible.')
       })
