@@ -712,30 +712,18 @@ export class Keyboard {
           }
 
           this.typeSimulatedKey(activeEl, key, options)
-          debug('returning null')
 
           return null
         }
       }
     )
 
-    const modifierKeys = _.filter(keyDetailsArr, isModifier)
-
-    if (options.simulated && !options.delay) {
-      _.each(typeKeyFns, (fn) => {
-        return fn()
-      })
-
-      if (options.release !== false) {
-        _.each(modifierKeys, (key) => {
-          return this.simulatedKeyup(getActiveEl(doc), key, options)
-        })
-      }
-
-      options.onAfterType()
-
-      return
-    }
+    // we will only press each modifier once, so only find unique modifiers
+    const modifierKeys = _
+    .chain(keyDetailsArr)
+    .filter(isModifier)
+    .uniqBy('key')
+    .value()
 
     return Promise
     .each(typeKeyFns, (fn) => {
@@ -898,7 +886,6 @@ export class Keyboard {
     debug(`dispatched [${eventType}] on ${el}`)
     const formattedKeyString = getFormattedKeyString(keyDetails)
 
-    debug('format string', formattedKeyString)
     options.onEvent(options.id, formattedKeyString, event, dispatched)
 
     return dispatched
@@ -956,9 +943,11 @@ export class Keyboard {
       const didFlag = this.flagModifier(_key)
 
       if (!didFlag) {
-        return null
+        // we've already pressed this modifier, so ignore it and don't fire keydown or keyup
+        _key.events.keydown = false
       }
 
+      // don't fire keyup for modifier keys, this will happen after all other keys are typed
       _key.events.keyup = false
     }
 
