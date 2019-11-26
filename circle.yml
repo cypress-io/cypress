@@ -1029,6 +1029,20 @@ jobs:
           repo: cypress-example-kitchensink
           browser: chrome
 
+  "test-binary-against-todomvc-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-todomvc
+          browser: firefox
+
+  "test-binary-against-documentation-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-documentation
+          browser: firefox
+
   test-binary-as-specific-user:
     <<: *defaults
     steps:
@@ -1283,6 +1297,24 @@ linux-workflow: &linux-workflow
           - build-npm-package
           - build-binary
     - test-binary-against-kitchensink-chrome:
+        filters:
+          branches:
+            only:
+              - develop
+              - issue-1096-firefox-support
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-todomvc-firefox:
+        filters:
+          branches:
+            only:
+              - develop
+              - issue-1096-firefox-support
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-documentation-firefox:
         filters:
           branches:
             only:
