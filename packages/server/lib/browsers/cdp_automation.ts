@@ -1,9 +1,8 @@
+import _ from 'lodash'
 import Bluebird from 'bluebird'
 import cdp from 'devtools-protocol'
-import _ from 'lodash'
+import { cors } from '@packages/network'
 import tough from 'tough-cookie'
-
-const cors = require('../util/cors')
 
 interface CyCookie {
   name: string
