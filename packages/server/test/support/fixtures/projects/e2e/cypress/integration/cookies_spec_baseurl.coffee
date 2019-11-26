@@ -8,6 +8,12 @@ otherHttpsUrl = Cypress.env('otherHttpsUrl')
 
 baseUrlLocation = new Cypress.Location(Cypress.config('baseUrl'))
 
+## setcookie sets on the superdomain by default
+setCookieDomain = ".#{baseUrlLocation.getSuperDomain()}"
+
+if ['localhost', '127.0.0.1'].includes(expectedDomain)
+  setCookieDomain = expectedDomain
+
 describe "cookies", ->
   before ->
     if Cypress.env('noBaseUrl')
@@ -28,12 +34,6 @@ describe "cookies", ->
       })
 
     it "can get all cookies", ->
-      ## setcookie sets on the superdomain by default
-      setCookieDomain = ".#{baseUrlLocation.getSuperDomain()}"
-
-      if ['localhost', '127.0.0.1'].includes(expectedDomain)
-        setCookieDomain = expectedDomain
-
       cy
         .clearCookie("foo1")
         .setCookie("foo", "bar").then (c) ->
@@ -172,6 +172,35 @@ describe "cookies", ->
       'request'
     ].forEach (cmd) ->
       context "in a cy.#{cmd}", ->
+        context "with Domain = superdomain", ->
+          it "is set properly with no redirects", ->
+            cy[cmd]("/setDomainCookie?domain=#{setCookieDomain}")
+
+            cy.getCookies()
+            .then (cookies) ->
+              expect(cookies).to.have.length(1)
+              expect(cookies[0]).to.include({
+                name: 'domaincookie',
+                value: 'foo'
+              })
+
+            cy.request('/requestCookies').its('body').should('include', { 'domaincookie': 'foo' })
+
+          it "is set properly with redirects", ->
+            cy[cmd]("/setDomainCookie?domain=#{setCookieDomain}&redirect=/requestCookiesHtml")
+
+            cy.getCookies()
+            .then (cookies) ->
+              expect(cookies).to.have.length(1)
+              expect(cookies[0]).to.include({
+                name: 'domaincookie',
+                value: 'foo'
+              })
+
+            cy.url().should('include', '/requestCookies')
+
+            cy.contains('domaincookie')
+
         [
           ['HTTP', otherUrl]
           ['HTTPS', otherHttpsUrl],
