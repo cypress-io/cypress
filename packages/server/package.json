@@ -106,7 +106,6 @@
     "ospath": "1.2.2",
     "p-queue": "6.1.0",
     "pluralize": "8.0.0",
-    "pumpify": "1.5.1",
     "ramda": "0.24.1",
     "randomstring": "1.1.5",
     "request": "cypress-io/request#47cdc67085c9fddc8d39d3172538f3f86c96bb8b",
