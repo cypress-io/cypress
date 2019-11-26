@@ -974,53 +974,53 @@ describe "src/cy/commands/connectors", ->
         cy.wrap(obj).its("foo").should("be.undefined")
         cy.wrap(obj).its("foo").should("eq", undefined)
 
-    describe "accepts a options argument and works as without options argument", ->
+      describe "accepts a options argument and works as without options argument", ->
 
-      it "proxies to #invokeFn", ->
-        fn = -> "bar"
-        cy.wrap({foo: fn}).its("foo", { log: false }).should("eq", fn)
+        it "proxies to #invokeFn", ->
+          fn = -> "bar"
+          cy.wrap({foo: fn}).its("foo", { log: false }).should("eq", fn)
 
-      it "does not invoke a function and uses as a property", ->
-        fn = -> "fn"
-        fn.bar = "bar"
+        it "does not invoke a function and uses as a property", ->
+          fn = -> "fn"
+          fn.bar = "bar"
 
-        cy.wrap(fn).its("bar", { log: false }).should("eq", "bar")
+          cy.wrap(fn).its("bar", { log: false }).should("eq", "bar")
 
-      it "works with numerical indexes", ->
-        cy.wrap(['foo', 'bar']).its(1, {}).should('eq', 'bar')
+        it "works with numerical indexes", ->
+          cy.wrap(['foo', 'bar']).its(1, {}).should('eq', 'bar')
 
-      describe ".log", -> 
-        beforeEach ->
-          @obj = {
-            foo: "foo bar baz"
-            num: 123
-          }
-
-          cy.on "log:added", (attrs, log) =>
-            @lastLog = log
-
-          return null
-
-        it "logs obj as a property", ->
-          cy.noop(@obj).its("foo", { log: true }).then ->
-            obj = {
-              name: "its"
-              message: ".foo"
+        describe ".log", -> 
+          beforeEach ->
+            @obj = {
+              foo: "foo bar baz"
+              num: 123
             }
 
-            lastLog = @lastLog
+            cy.on "log:added", (attrs, log) =>
+              @lastLog = log
 
-            _.each obj, (value, key) =>
-              expect(lastLog.get(key)).to.deep.eq value
+            return null
 
-        it "#consoleProps as a regular property", ->
-          cy.noop(@obj).its("num", { log: true }).then ->
-            expect(@lastLog.invoke("consoleProps")).to.deep.eq {
-              Command:  "its"
-              Property: ".num"
-              Subject:       @obj
-              Yielded: 123
-            }
+          it "logs obj as a property", ->
+            cy.noop(@obj).its("foo", { log: true }).then ->
+              obj = {
+                name: "its"
+                message: ".foo"
+              }
+
+              lastLog = @lastLog
+
+              _.each obj, (value, key) =>
+                expect(lastLog.get(key)).to.deep.eq value
+
+          it "#consoleProps as a regular property", ->
+            cy.noop(@obj).its("num", { log: true }).then ->
+              expect(@lastLog.invoke("consoleProps")).to.deep.eq {
+                Command:  "its"
+                Property: ".num"
+                Subject:       @obj
+                Yielded: 123
+              }
 
       describe ".log", ->
         beforeEach ->
