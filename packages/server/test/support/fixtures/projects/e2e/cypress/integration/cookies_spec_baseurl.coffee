@@ -197,9 +197,11 @@ describe "cookies", ->
                 value: 'foo'
               })
 
-            cy.url().should('include', '/requestCookies')
+            if cmd == 'visit'
+              cy.url().should('include', '/requestCookies')
+              cy.contains('domaincookie')
 
-            cy.contains('domaincookie')
+            cy.request('/requestCookies').its('body').should('include', { 'domaincookie': 'foo' })
 
         [
           ['HTTP', otherUrl]

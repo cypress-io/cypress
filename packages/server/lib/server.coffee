@@ -326,6 +326,10 @@ class Server
       options
     })
 
+    ## always clear buffers - reduces the possibility of a random HTTP request
+    ## accidentally retrieving buffered content at the wrong time
+    buffers.reset()
+
     startTime = new Date()
 
     ## if we have an existing url resolver
@@ -688,7 +692,10 @@ class Server
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
     options.onIncomingXhr = @_xhrServer.onIncomingXhr
-    options.onResetXhrServer = @_xhrServer.reset
+
+    options.onResetServerState = =>
+      @_xhrServer.reset()
+      buffers.reset()
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
