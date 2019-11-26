@@ -17,6 +17,7 @@
     "iconv-lite": "0.5.0",
     "lodash": "4.17.15",
     "pumpify": "1.5.1",
+    "through": "2.3.8",
     "utf8-stream": "0.0.0"
   },
   "devDependencies": {
