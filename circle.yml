@@ -246,6 +246,10 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "npm run e2e"
+      wait-on:
+        description: Url to wait-on before starting tests
+        type: string
+        default: ""
     steps:
       - attach_workspace:
           at: ~/
@@ -270,6 +274,12 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: npm start --if-present
           background: true
+      - when:
+          condition: <<parameters.wait-on>>
+          steps:
+            - run:
+                name: Wait-on <<parameters.wait-on>>
+                command: npx wait-on <<parameters.wait-on>> --timeout 60
       - run:
           working_directory: /tmp/<<parameters.repo>>
           command: <<parameters.command>> -- --browser <<parameters.browser>>
@@ -1047,6 +1057,7 @@ jobs:
           repo: cypress-documentation
           browser: firefox
           command: "npm run cypress:run"
+          wait-on: "http://localhost:2222"
 
   test-binary-as-specific-user:
     <<: *defaults
