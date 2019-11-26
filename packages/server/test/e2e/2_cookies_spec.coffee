@@ -77,6 +77,7 @@ onServer = (app) ->
 
     res.header("Set-Cookie", [
       "namefoo#{n}=valfoo#{n}"
+      "namebar#{n}=valbar#{n}"
     ])
 
     console.log('to', a, 'from', b)
