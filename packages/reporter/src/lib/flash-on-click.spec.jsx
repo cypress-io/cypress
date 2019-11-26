@@ -30,7 +30,7 @@ describe('<FlashOnClick />', () => {
     let onClick
     let component
 
-    before(() => {
+    beforeEach(() => {
       clock = sinon.useFakeTimers()
     })
 
@@ -38,10 +38,6 @@ describe('<FlashOnClick />', () => {
       onClick = sinon.spy()
       component = renderComponent({ onClick })
       component.find('Tooltip').find('.content').simulate('click')
-    })
-
-    after(() => {
-      clock.restore()
     })
 
     it('calls props.onClick', () => {

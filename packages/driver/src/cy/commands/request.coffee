@@ -1,4 +1,5 @@
 _ = require("lodash")
+whatIsCircular = require("@cypress/what-is-circular")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
@@ -21,6 +22,9 @@ REQUEST_DEFAULTS = {
   gzip: true
   timeout: null
   followRedirect: true
+  failOnStatusCode: true
+  retryOnNetworkFailure: true
+  retryOnStatusCodeFailure: false
 }
 
 REQUEST_PROPS = _.keys(REQUEST_DEFAULTS)
@@ -81,8 +85,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           o.body   = args[2]
 
       _.defaults(options, REQUEST_DEFAULTS, {
-        log: true,
-        failOnStatusCode: true
+        log: true
       })
 
       ## if timeout is not supplied, use the configured default
@@ -90,8 +93,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       options.method = options.method.toUpperCase()
 
+      if options.retryOnStatusCodeFailure and not options.failOnStatusCode
+        $utils.throwErrByPath("request.status_code_flags_invalid")
+
       if _.has(options, "failOnStatus")
-        $utils.warning("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+        $utils.warnByPath("request.failonstatus_deprecated_warning")
         options.failOnStatusCode = options.failOnStatus
 
       ## normalize followRedirects -> followRedirect
@@ -123,7 +129,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## if we made a request prior to a visit then it needs
       ## to be filled out
       if not $Location.isFullyQualifiedUrl(options.url)
-        $utils.throwErrByPath("request.url_invalid")
+        $utils.throwErrByPath("request.url_invalid", {
+          args: {
+            configFile: Cypress.config("configFile")
+          }
+        })
 
       ## if a user has `x-www-form-urlencoded` content-type set
       ## with an object body, they meant to add 'form: true'
@@ -131,6 +141,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## https://github.com/cypress-io/cypress/issues/2923
       if needsFormSpecified(options)
         options.form = true
+
+      if _.isObject(options.body) and path = whatIsCircular(options.body)
+        $utils.throwErrByPath("request.body_circular", { args: { path }})
 
       ## only set json to true if form isnt true
       ## and we have a valid object for body

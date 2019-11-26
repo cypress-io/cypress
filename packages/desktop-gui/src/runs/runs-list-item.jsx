@@ -2,9 +2,46 @@ import _ from 'lodash'
 import moment from 'moment'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
-import TimerDisplay from '../duration-timer/TimerDisplay'
 
-import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserNameFormatted, browserVersionFormatted, stripLeadingCyDirs } from '../lib/utils'
+import TimerDisplay from '../duration-timer/TimerDisplay'
+import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserNameFormatted, browserVersionFormatted, stripLeadingCyDirs, stripSharedDirsFromDir2 } from '../lib/utils'
+
+const RunDuration = ({ run }) => {
+  // Run was blocked due to exceeding limit
+  if (run.status === 'overLimit') {
+    return null
+  }
+
+  // Run has completed
+  if (run.totalDuration) {
+    if (run.parallelizationDisabled) {
+      return (
+        <Tooltip title="Parallelization was disabled for this run." placement="top" className="cy-tooltip">
+          <span className='env-duration'>
+            <i className='fa fa-exclamation-triangle orange'></i>
+            {' '}{durationFormatted(run.totalDuration)}
+          </span>
+        </Tooltip>
+      )
+    }
+
+    return (
+      <span className='env-duration'>
+        <i className='fa fa-hourglass-end'></i>
+        {' '}{durationFormatted(run.totalDuration)}
+      </span>
+    )
+  }
+
+  // Run is still going
+  if (run.createdAt) {
+    return (
+      <TimerDisplay startTime={run.createdAt} />
+    )
+  }
+
+  return null
+}
 
 export default class RunsListItem extends Component {
   render () {
@@ -55,7 +92,9 @@ export default class RunsListItem extends Component {
                       <span className='commit-msg'>
                         {run.commit.message.split(NEWLINE)[0]}
                       </span> :
-                      null
+                      <div className='msg italic'>
+                        - No commit info found -
+                      </div>
                   }
                 </div> :
                 <div className='msg italic'>
@@ -68,21 +107,12 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div>
             <i className='fa fa-clock-o'></i>{' '}
-            {moment(run.createdAt).fromNow()}
+            {moment(run.createdAt).fromNow() === '1 secs ago' ? '1 sec ago' : moment(run.createdAt).fromNow()}
           </div>
         </div>
         <div className='row-column-wrapper'>
-          <div>
-            {
-              run.totalDuration ?
-                <span>
-                  <i className='fa fa-hourglass-end'></i>{' '}
-                  {durationFormatted(run.totalDuration)}
-                </span> :
-                run.createdAt ?
-                  <TimerDisplay startTime={run.createdAt} /> :
-                  null
-            }
+          <div className='td-padding'>
+            <RunDuration run={run} />
           </div>
         </div>
         <div className='row-column-wrapper env-data'>
@@ -156,16 +186,21 @@ export default class RunsListItem extends Component {
   }
 
   _displaySpec () {
-    // only display spec if we for sure have 1 instance
-    if (!this._instancesExist() || this._moreThanOneInstance()) return null
-
-    let spec = this.props.run.instances[0].spec
-
-    if (!spec) return null
-
-    return (
-      <strong>{stripLeadingCyDirs(spec)}</strong>
-    )
+    if (this.props.run.instances.length === 1) {
+      return (
+        this.props.run.instances[0].spec ?
+          <span>
+            {
+              this.props.run.instances[0].integrationFolder ?
+                stripSharedDirsFromDir2(this.props.run.instances[0].integrationFolder, this.props.run.instances[0].spec, this.props.run.instances[0].platform.osName) ?
+                  stripSharedDirsFromDir2(this.props.run.instances[0].integrationFolder, this.props.run.instances[0].spec, this.props.run.instances[0].platform.osName) :
+                  this.props.run.instances[0].spec :
+                stripLeadingCyDirs(this.props.run.instances[0].spec)
+            }
+          </span> :
+          null
+      )
+    }
   }
 
   _getUniqBrowsers () {
@@ -174,29 +209,30 @@ export default class RunsListItem extends Component {
     return _
     .chain(this.props.run.instances)
     .map((instance) => {
-      return `${instance.platform.browserName} + ${instance.platform.browserVersion}`
+      return `${_.get(instance, 'platform.browserName', '')} + ${_.get(instance, 'platform.browserVersion', '')}`
     })
     .uniq()
     .value()
   }
 
   _browsersLength () {
-    if (this._getUniqBrowsers()) {
-      return this._getUniqBrowsers().length
-    }
+    return this._getUniqBrowsers().length
   }
 
   _browserIcon () {
-    return browserIcon(this.props.run.instances[0].platform.browserName)
+    return browserIcon(_.get(this.props.run, 'instances[0].platform.browserName', ''))
   }
 
   _osIcon () {
-    if (!this._moreThanOneInstance() && this.props.run.instances.length) {
-      return (osIcon(this.props.run.instances[0].platform.osName))
-    }
+    if (!this.props.run.instances) return
 
-    return 'desktop'
-
+    return _
+    .chain(this.props.run.instances)
+    .map((instance) => {
+      return `${_.get(instance, 'platform.osName', '')} + ${_.get(instance, 'platform.osVersion', '')}`
+    })
+    .uniq()
+    .value()
   }
 
   _getUniqOs () {
@@ -205,7 +241,7 @@ export default class RunsListItem extends Component {
     return _
     .chain(this.props.run.instances)
     .map((instance) => {
-      return `${instance.platform.osName} + ${instance.platform.osVersionFormatted}`
+      return `${_.get(instance, 'platform.osName', '')} + ${_.get(instance, 'platform.osVersion', '')}`
     })
     .uniq()
     .value()
@@ -218,9 +254,7 @@ export default class RunsListItem extends Component {
   _osDisplay = () => {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
-        <span>
-          {this.props.run.instances[0].platform.osVersionFormatted}
-        </span>
+        `${_.get(this.props.run, 'instances[0].platform.osVersionFormatted', this.props.run.instances[0].osFormatted)}`
       )
     }
   }
@@ -228,10 +262,7 @@ export default class RunsListItem extends Component {
   _browserDisplay = () => {
     if (this.props.run.instances && this.props.run.instances[0]) {
       return (
-        <span>
-          {browserNameFormatted(_.get(this.props.run, 'instances[0].platform.browserName', ''))}{' '}
-          {browserVersionFormatted(this.props.run.instances[0].platform.browserVersion)}
-        </span>
+        `${browserNameFormatted(_.get(this.props.run, 'instances[0].platform.browserName', ''))} ${browserVersionFormatted(_.get(this.props.run, 'instances[0].platform.browserVersion', ''))}`
       )
     }
   }

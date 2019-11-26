@@ -63,13 +63,13 @@ describe "s1", ->
         .then ->
           throw new Error("should have failed but did not")
 
-  context "bad gzipped js", ->
-    it "it does not crash", ->
+  context "bad gzipped content", ->
+    it "destroys the request socket", ->
       cy
       .visit("http://localhost:1123/index.html")
       .then (win) ->
         new Cypress.Promise (resolve) ->
           script = win.document.createElement("script")
-          script.src = "/gzip_500.js"
+          script.src = "/gzip-bad.js"
           script.onerror = resolve
           win.document.body.appendChild(script)

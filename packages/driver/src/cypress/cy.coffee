@@ -13,6 +13,8 @@ $Events = require("./events")
 $Errors = require("../cy/errors")
 $Ensures = require("../cy/ensures")
 $Focused = require("../cy/focused")
+$Mouse = require("../cy/mouse")
+$Keyboard = require("../cy/keyboard")
 $Location = require("../cy/location")
 $Assertions = require("../cy/assertions")
 $Listeners = require("../cy/listeners")
@@ -50,6 +52,32 @@ setWindowDocumentProps = (contentWindow, state) ->
 setRemoteIframeProps = ($autIframe, state) ->
   state("$autIframe", $autIframe)
 
+
+## We only set top.onerror once since we make it configurable:false
+## but we update cy instance every run (page reload or rerun button)
+curCy = null
+setTopOnError = (cy) ->
+  if curCy
+    curCy = cy
+    return
+  
+  curCy = cy
+
+  onTopError = ->
+    curCy.onUncaughtException.apply(curCy, arguments)
+
+  top.onerror = onTopError
+
+  ## Prevent Mocha from setting top.onerror which would override our handler
+  ## Since the setter will change which event handler gets invoked, we make it a noop
+  Object.defineProperty(top, 'onerror', {
+    set: ->
+    get: -> onTopError
+    configurable: false
+    enumerable: true
+  })
+  
+
 create = (specWindow, Cypress, Cookies, state, config, log) ->
   stopped = false
   commandFns = {}
@@ -57,7 +85,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   isStopped = -> stopped
 
   onFinishAssertions = ->
-    assertions.finishAssertions.apply(null, arguments)
+    assertions.finishAssertions.apply(window, arguments)
 
   warnMixingPromisesAndCommands = ->
     title = state("runnable").fullTitle()
@@ -80,6 +108,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   jquery = $jQuery.create(state)
   location = $Location.create(state)
   focused = $Focused.create(state)
+  keyboard = $Keyboard.create(state)
+  mouse = $Mouse.create(state, keyboard, focused)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -152,13 +182,29 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         })
 
       contentWindow.HTMLElement.prototype.focus = (focusOption) ->
-        focused.interceptFocus(this, contentWindow, focusOption)
+        focused.interceptFocus(@, contentWindow, focusOption)
 
-      contentWindow.HTMLInputElement.prototype.select = ->
-        $selection.interceptSelect.call(this)
+      contentWindow.HTMLElement.prototype.blur = ->
+        focused.interceptBlur(@)
+
+      contentWindow.SVGElement.prototype.focus = (focusOption) ->
+        focused.interceptFocus(@, contentWindow, focusOption)
+
+      contentWindow.SVGElement.prototype.blur = ->
+        focused.interceptBlur(@)
 
       contentWindow.document.hasFocus = ->
-        top.document.hasFocus()
+        focused.documentHasFocus.call(@)
+
+      cssModificationSpy = (original, args...) ->
+        snapshots.onCssModified(@href)
+        original.apply(@, args)
+
+      insertRule = contentWindow.CSSStyleSheet.prototype.insertRule
+      deleteRule = contentWindow.CSSStyleSheet.prototype.deleteRule
+
+      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
   enqueue = (obj) ->
     ## if we have a nestedIndex it means we're processing
@@ -438,6 +484,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## since this failed this means that a
       ## specific command failed and we should
       ## highlight it in red or insert a new command
+
+      err.name = err.name || 'CypressError'
       errors.commandRunningFailed(err)
 
       fail(err, state("runnable"))
@@ -514,8 +562,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
     if state("runnable")
-      ## make sure we don't ever time out this runnable now
-      timeouts.clearTimeout()
+      ## make sure we reset the runnable's timeout now
+      state("runnable").resetTimeout()
 
     ## if a command fails then after each commands
     ## could also fail unless we clear this out
@@ -625,10 +673,14 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     ## focused sync methods
     getFocused: focused.getFocused
-    needsForceFocus: focused.needsForceFocus
     needsFocus: focused.needsFocus
     fireFocus: focused.fireFocus
     fireBlur: focused.fireBlur
+
+    devices: {
+      mouse: mouse
+      keyboard: keyboard
+    }
 
     ## timer sync methods
     pauseTimers: timers.pauseTimers
@@ -650,9 +702,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ensureAttached: ensures.ensureAttached
     ensureExistence: ensures.ensureExistence
     ensureElExistence: ensures.ensureElExistence
+    ensureElDoesNotHaveCSS: ensures.ensureElDoesNotHaveCSS
     ensureVisibility: ensures.ensureVisibility
     ensureDescendents: ensures.ensureDescendents
-    ensureReceivability: ensures.ensureReceivability
+    ensureNotReadonly: ensures.ensureNotReadonly
+    ensureNotDisabled: ensures.ensureNotDisabled
     ensureValidPosition: ensures.ensureValidPosition
     ensureScrollability: ensures.ensureScrollability
     ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating
@@ -904,6 +958,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       wrapNativeMethods(contentWindow)
 
+      snapshots.onBeforeWindowLoad()
+
       timers.wrap(contentWindow)
 
     onSpecWindowUncaughtException: ->
@@ -936,7 +992,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## listeners returned false
       return if _.some(results, returnedFalse)
 
-      ## do all the normal fail stuff and promise cancellation
+      ## do all the normal fail stuff and promise cancelation
       ## but dont re-throw the error
       if r = state("reject")
         r(err)
@@ -946,8 +1002,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## When the function returns true, this prevents the firing of the default event handler.
       return true
 
-    getStyles: ->
-      snapshots.getStyles()
+    detachDom: (args...) ->
+      snapshots.detachDom(args...)
+
+    getStyles: (args...) ->
+      snapshots.getStyles(args...)
 
     setRunnable: (runnable, hookName) ->
       ## when we're setting a new runnable
@@ -1076,6 +1135,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           args: obj
         })
     })
+  
+  setTopOnError(cy)
 
   ## make cy global in the specWindow
   specWindow.cy = cy

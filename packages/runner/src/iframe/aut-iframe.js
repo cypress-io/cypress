@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import { $ } from '@packages/driver'
 
-import blankContents from './blank-contents'
 import dom from '../lib/dom'
-import eventManager from '../lib/event-manager'
 import logger from '../lib/logger'
+import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
+import blankContents from './blank-contents'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 export default class AutIframe {
@@ -51,33 +51,22 @@ export default class AutIframe {
     return this._contents() && this._contents().find('body')
   }
 
-  detachDom = (Cypress) => {
-    const contents = this._contents()
-    const { headStyles, bodyStyles } = Cypress.getStyles()
-    const htmlAttrs = _.transform(contents.find('html')[0].attributes, (memo, attr) => {
-      if (attr.specified) {
-        memo[attr.name] = attr.value
-      }
-    }, {})
-    const $body = contents.find('body')
+  detachDom = () => {
+    const Cypress = eventManager.getCypress()
 
-    $body.find('script,link[rel="stylesheet"],style').remove()
+    if (!Cypress) return
 
-    return {
-      body: $body.detach(),
-      htmlAttrs,
-      headStyles,
-      bodyStyles,
-    }
+    return Cypress.detachDom(this._contents())
   }
 
-  restoreDom = ({ body, htmlAttrs, headStyles, bodyStyles }) => {
+  restoreDom = (snapshot) => {
+    const Cypress = eventManager.getCypress()
+    const { headStyles, bodyStyles } = Cypress ? Cypress.getStyles(snapshot) : {}
+    const { body, htmlAttrs } = snapshot
     const contents = this._contents()
-
     const $html = contents.find('html')
 
     this._replaceHtmlAttrs($html, htmlAttrs)
-
     this._replaceHeadStyles(headStyles)
 
     // remove the old body and replace with restored one
@@ -89,10 +78,14 @@ export default class AutIframe {
   }
 
   _replaceHtmlAttrs ($html, htmlAttrs) {
+    let oldAttrs = {}
+
     // remove all attributes
-    const oldAttrs = _.map($html[0].attributes, (attr) => {
-      return attr.name
-    })
+    if ($html[0]) {
+      oldAttrs = _.map($html[0].attributes, (attr) => {
+        return attr.name
+      })
+    }
 
     _.each(oldAttrs, (attr) => {
       $html.removeAttr(attr)
@@ -104,7 +97,7 @@ export default class AutIframe {
     })
   }
 
-  _replaceHeadStyles (styles) {
+  _replaceHeadStyles (styles = []) {
     const $head = this._contents().find('head')
     const existingStyles = $head.find('link[rel="stylesheet"],style')
 
@@ -156,7 +149,7 @@ export default class AutIframe {
     }
   }
 
-  _insertBodyStyles ($body, styles) {
+  _insertBodyStyles ($body, styles = []) {
     _.each(styles, (style) => {
       $body.append(style.href ? this._linkTag(style) : this._styleTag(style))
     })
@@ -179,9 +172,15 @@ export default class AutIframe {
       body = this._body()
     }
 
+    // normalize
+    const el = $el.get(0)
+    const $body = body
+
+    body = $body.get(0)
+
     // scroll the top of the element into view
-    if ($el.get(0)) {
-      $el.get(0).scrollIntoView()
+    if (el) {
+      el.scrollIntoView()
       // if we have a scrollBy on our command
       // then we need to additional scroll the window
       // by these offsets
@@ -190,25 +189,28 @@ export default class AutIframe {
       }
     }
 
-    $el.each((__, el) => {
-      el = $(el)
+    $el.each((__, element) => {
+      const $_el = $(element)
+
       // bail if our el no longer exists in the parent body
-      if (!$.contains(body[0], el[0])) return
+      if (!$.contains(body, element)) return
 
       // switch to using outerWidth + outerHeight
       // because we want to highlight our element even
       // if it only has margin and zero content height / width
-      const dimensions = dom.getOuterSize(el)
+      const dimensions = dom.getOuterSize($_el)
 
       // dont show anything if our element displaces nothing
-      if (dimensions.width === 0 || dimensions.height === 0 || el.css('display') === 'none') return
+      if (dimensions.width === 0 || dimensions.height === 0 || $_el.css('display') === 'none') {
+        return
+      }
 
-      dom.addElementBoxModelLayers(el, body).attr('data-highlight-el', true)
+      dom.addElementBoxModelLayers($_el, $body).attr('data-highlight-el', true)
     })
 
     if (coords) {
       requestAnimationFrame(() => {
-        dom.addHitBoxLayer(coords, body).attr('data-highlight-hitbox', true)
+        dom.addHitBoxLayer(coords, $body).attr('data-highlight-hitbox', true)
       })
     }
   }
@@ -325,16 +327,16 @@ export default class AutIframe {
   }
 
   getElements (cypressDom) {
-    const contents = this._contents()
-    const selector = selectorPlaygroundModel.selector
+    const { selector, method } = selectorPlaygroundModel
+    const $contents = this._contents()
 
-    if (!contents || !selector) return
+    if (!$contents || !selector) return
 
     return dom.getElementsForSelector({
+      method,
       selector,
-      method: selectorPlaygroundModel.method,
-      root: contents,
       cypressDom,
+      $root: $contents,
     })
   }
 

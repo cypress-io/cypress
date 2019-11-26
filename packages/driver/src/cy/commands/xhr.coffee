@@ -7,8 +7,20 @@ $Location = require("../../cypress/location")
 
 server = null
 
+tryDecodeUri = (uri) ->
+  try
+    return decodeURI(uri)
+  catch
+    return uri
+
 getServer = ->
   server ? unavailableErr()
+
+cancelPendingXhrs = ->
+  if server
+    server.cancelPendingXhrs()
+
+  return null
 
 reset = ->
   if server
@@ -75,6 +87,9 @@ startXhrServer = (cy, state, config) ->
     xhrUrl: config("xhrUrl")
     stripOrigin: stripOrigin
 
+    emitIncoming: (id, route) ->
+      Cypress.backend('incoming:xhr', id, route)
+
     ## shouldnt these stubs be called routes?
     ## rename everything related to stubs => routes
     onSend: (xhr, stack, route) =>
@@ -126,6 +141,9 @@ startXhrServer = (cy, state, config) ->
             when xhr.aborted
               indicator = "aborted"
               "(aborted)"
+            when xhr.canceled
+              indicator = "aborted"
+              "(canceled)"
             when xhr.status > 0
               xhr.status
             else
@@ -134,9 +152,9 @@ startXhrServer = (cy, state, config) ->
 
           indicator ?= if /^2/.test(status) then "successful" else "bad"
 
-          {
+          return {
+            indicator,
             message: "#{xhr.method} #{status} #{stripOrigin(xhr.url)}"
-            indicator: indicator
           }
       })
 
@@ -165,8 +183,10 @@ startXhrServer = (cy, state, config) ->
       if log = logs[xhr.id]
         log.snapshot("error").error(err)
 
-      if r = state("reject")
-        r(err)
+      ## re-throw the error since this came from AUT code, and needs to
+      ## cause an 'uncaught:exception' event. This error will be caught in
+      ## top.onerror with stack as 5th argument.
+      throw err
 
     onXhrAbort: (xhr, stack) =>
       setResponse(state, xhr)
@@ -177,6 +197,15 @@ startXhrServer = (cy, state, config) ->
 
       if log = logs[xhr.id]
         log.snapshot("aborted").error(err)
+
+    onXhrCancel: (xhr) ->
+      setResponse(state, xhr)
+
+      if log = logs[xhr.id]
+        log.snapshot("canceled").set({
+          ended: true,
+          state: "failed"
+        })
 
     onAnyAbort: (route, xhr) =>
       if route and _.isFunction(route.onAbort)
@@ -215,6 +244,17 @@ defaults = {
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
+  ## if our page is going away due to
+  ## a form submit / anchor click then
+  ## we need to cancel all pending
+  ## XHR's so the command log displays
+  ## correctly
+  Cypress.on("window:unload", cancelPendingXhrs)
+
+  Cypress.on "test:before:run:async", ->
+    ## reset any state on the backend
+    Cypress.backend('reset:server:state')
+
   Cypress.on "test:before:run", ->
     ## reset the existing server
     reset()
@@ -225,7 +265,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## window such as if the last test ended
     ## with a cross origin window
     try
-      server = startXhrServer(cy, state, config)
+      server = startXhrServer(cy, state, config, Cypress)
     catch err
       ## in this case, just don't bind to the server
       server = null
@@ -378,6 +418,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## aliases subject
           options.response = aliasObj.subject
 
+        url = getUrl(options)
+
+        urlString = url.toString()
+
+        ## https://github.com/cypress-io/cypress/issues/2372
+        if (decodedUrl = tryDecodeUri(urlString)) and urlString != decodedUrl
+          $utils.warnByPath("route.url_percentencoding_warning", { args: { decodedUrl }})
+
         options.log = Cypress.log({
           name: "route"
           instrument: "route"
@@ -390,7 +438,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           numResponses: 0
           consoleProps: ->
             Method:   options.method
-            URL:      getUrl(options)
+            URL:      url
             Status:   options.status
             Response: options.response
             Alias:    options.alias

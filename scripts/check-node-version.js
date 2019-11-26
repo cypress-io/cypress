@@ -41,6 +41,7 @@ if (isWindows() && process.env.APPVEYOR) {
         'ia32',
         getErrMsg('ia32')
       )
+
       break
     case 'x64':
       assert.equal(
@@ -48,6 +49,7 @@ if (isWindows() && process.env.APPVEYOR) {
         'x64',
         getErrMsg('x64')
       )
+
       break
   }
 }

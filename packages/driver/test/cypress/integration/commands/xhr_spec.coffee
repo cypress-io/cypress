@@ -188,7 +188,7 @@ describe "src/cy/commands/xhr", ->
 
         cy
           .server()
-          .route({url: /timeout/}).as("getTimeout")
+          .route({url: /timeout/}).as("get.timeout")
           .window().then (win) ->
             xhr = new win.XMLHttpRequest
             xhr.open("GET", "/timeout?ms=100")
@@ -198,7 +198,7 @@ describe "src/cy/commands/xhr", ->
             xhr.onload = ->
               onloaded = true
             null
-          .wait("@getTimeout").then (xhr) ->
+          .wait("@get.timeout").then (xhr) ->
             expect(onloaded).to.be.true
             expect(onreadystatechanged).to.be.true
             expect(xhr.status).to.eq(200)
@@ -780,13 +780,18 @@ describe "src/cy/commands/xhr", ->
 
       it "sets err on log when caused by code errors", (done) ->
         finalThenCalled = false
+        uncaughtException = cy.stub().returns(true)
+        cy.on 'uncaught:exception', uncaughtException
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("name")).to.eq("xhr")
-          expect(lastLog.get("error")).to.eq err
+          expect(lastLog.get("error").message).contain('foo is not defined')
+          ## since this is AUT code, we should allow error to be caught in 'uncaught:exception' hook
+          ## https://github.com/cypress-io/cypress/issues/987
+          expect(uncaughtException).calledOnce
           done()
 
         cy
@@ -1327,6 +1332,25 @@ describe "src/cy/commands/xhr", ->
         .wait("@getFoo").then (xhr) ->
           expect(xhr.responseBody).to.eq "foo bar baz"
 
+    ## https://github.com/cypress-io/cypress/issues/2372
+    it "warns if a percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "/foo%25bar")
+      .then ->
+        expect(Cypress.utils.warning).to.be.calledWith """
+        A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.
+
+        Did you mean to pass "/foo%bar"?
+        """
+
+    it "does not warn if an invalid percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "http://example.com/%E0%A4%A")
+      .then ->
+        expect(Cypress.utils.warning).to.not.be.called
+
     it.skip "does not error when response is null but respond is false", ->
       cy.route
         url: /foo/
@@ -1541,7 +1565,7 @@ describe "src/cy/commands/xhr", ->
 
         cy.on "command:retry", =>
           if cy.state("error")
-            done("should have cancelled and not retried after failing")
+            done("should have canceled and not retried after failing")
 
         cy.on "fail", (err) =>
           p = cy.state("promise")
@@ -1886,6 +1910,10 @@ describe "src/cy/commands/xhr", ->
 
         cy.wrap(null).should ->
           expect(log.get("state")).to.eq("failed")
+          expect(log.invoke("renderProps")).to.deep.eq({
+            message: "GET (aborted) /timeout?ms=999",
+            indicator: 'aborted',
+          })
           expect(xhr.aborted).to.be.true
 
     ## https://github.com/cypress-io/cypress/issues/3008
@@ -1942,19 +1970,22 @@ describe "src/cy/commands/xhr", ->
           expect(log.get("state")).to.eq("passed")
 
   context "Cypress.on(window:unload)", ->
-    it "aborts all open XHR's", ->
+    it "cancels all open XHR's", ->
       xhrs = []
 
-      cy.window().then (win) ->
+      cy
+      .window()
+      .then (win) ->
         _.times 2, ->
           xhr = new win.XMLHttpRequest
-          xhr.open("GET", "/timeout?ms=100")
+          xhr.open("GET", "/timeout?ms=200")
           xhr.send()
 
           xhrs.push(xhr)
-      .reload().then ->
+      .reload()
+      .then ->
         _.each xhrs, (xhr) ->
-          expect(xhr.aborted).to.be.true
+          expect(xhr.canceled).to.be.true
 
   context "Cypress.on(window:before:load)", ->
     it "reapplies server + route automatically before window:load", ->

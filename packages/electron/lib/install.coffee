@@ -10,8 +10,8 @@ log     = require("debug")("cypress:electron")
 fs = Promise.promisifyAll(fs)
 
 ## ensure we have an electronVersion set in package.json
-if not electronVersion = pkg.electronVersion
-  throw new Error("Missing 'electronVersion' in ./package.json")
+if not electronVersion = pkg.devDependencies.electron
+  throw new Error("Missing 'electron' devDependency in ./package.json")
 
 module.exports = {
   checkCurrentVersion: ->
@@ -35,7 +35,7 @@ module.exports = {
   move: (src, dest) ->
     ## src  is ./tmp/Cypress-darwin-x64
     ## dest is ./dist/Cypress
-    fs.moveAsync(src, dest, {clobber: true})
+    fs.moveAsync(src, dest, {overwrite: true})
     .then ->
       ## remove the tmp folder now
       fs.removeAsync(path.dirname(src))

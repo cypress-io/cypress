@@ -3,9 +3,10 @@ require('../spec_helper')
 const os = require('os')
 const path = require('path')
 const R = require('ramda')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const Promise = require('bluebird')
 const tmp = Promise.promisifyAll(require('tmp'))
+const mockfs = require('mock-fs')
 
 const fs = require(`${lib}/fs`)
 const open = require(`${lib}/exec/open`)
@@ -13,6 +14,14 @@ const run = require(`${lib}/exec/run`)
 const cypress = require(`${lib}/cypress`)
 
 describe('cypress', function () {
+  beforeEach(function () {
+    mockfs({})
+  })
+
+  afterEach(() => {
+    mockfs.restore()
+  })
+
   context('.open', function () {
     beforeEach(function () {
       sinon.stub(open, 'start').resolves()
@@ -43,6 +52,18 @@ describe('cypress', function () {
       .then(getStartArgs)
       .then((args) => {
         expect(args).to.deep.eq({ config: JSON.stringify(config) })
+      })
+    })
+
+    it('passes configFile: false', () => {
+      const opts = {
+        configFile: false,
+      }
+
+      return cypress.open(opts)
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args).to.deep.eq(opts)
       })
     })
   })
@@ -113,6 +134,18 @@ describe('cypress', function () {
 
     it('resolves with contents of tmp file', () => {
       return cypress.run().then(snapshot)
+    })
+
+    it('passes configFile: false', () => {
+      const opts = {
+        configFile: false,
+      }
+
+      return cypress.run(opts)
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args).to.deep.eq(opts)
+      })
     })
   })
 })

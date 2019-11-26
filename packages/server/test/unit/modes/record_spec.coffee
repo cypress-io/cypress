@@ -22,7 +22,7 @@ initialEnv = _.clone(process.env)
 describe "lib/modes/record", ->
   ## QUESTION: why are these tests here when
   ## this is a module... ?
-  context "getCommitFromGitOrCi", ->
+  context ".getCommitFromGitOrCi", ->
     gitCommit = {
       branch: null
     }
@@ -126,7 +126,58 @@ describe "lib/modes/record", ->
           runAllSpecs
         })
         .then ->
-          expect(runAllSpecs).to.have.been.calledWith({}, false)
+          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
+          expect(createRun).to.have.been.calledOnce
+          expect(createRun.firstCall.args).to.have.length(1)
+          { commit } = createRun.firstCall.args[0]
+          debug('git is %o', commit)
+          expect(commit).to.deep.equal({
+            sha: env.COMMIT_INFO_SHA,
+            branch: env.COMMIT_INFO_BRANCH,
+            authorName: env.COMMIT_INFO_AUTHOR,
+            authorEmail: env.COMMIT_INFO_EMAIL,
+            message: env.COMMIT_INFO_MESSAGE,
+            remoteOrigin: env.COMMIT_INFO_REMOTE,
+            defaultBranch: null
+          })
+
+    describe "override commit information", ->
+      resetEnv = null
+
+      env = {
+        COMMIT_INFO_BRANCH: "my-branch-221",
+        COMMIT_INFO_MESSAGE: "best commit ever",
+        COMMIT_INFO_EMAIL: "user@company.com",
+        COMMIT_INFO_AUTHOR: "Agent Smith",
+        COMMIT_INFO_SHA: "0123456",
+        COMMIT_INFO_REMOTE: "remote repo"
+      }
+
+      beforeEach ->
+        # stub git commands to return values
+        sinon.stub(commitInfo, "getBranch").resolves("my-ci-branch")
+        sinon.stub(commitInfo, "getMessage").resolves("my ci msg")
+        sinon.stub(commitInfo, "getEmail").resolves("my.ci@email.com")
+        sinon.stub(commitInfo, "getAuthor").resolves("My CI Name")
+        sinon.stub(commitInfo, "getSha").resolves("mycisha")
+        sinon.stub(commitInfo, "getRemoteOrigin").resolves("my ci remote")
+        # but set environment variables
+        resetEnv = mockedEnv(env, {clear: true})
+
+      afterEach ->
+        resetEnv()
+
+      it "calls api.createRun with the commit overrided from environment variables", ->
+        createRun = sinon.stub(api, "createRun").resolves()
+        runAllSpecs = sinon.stub()
+        recordMode.createRunAndRecordSpecs({
+          key: "foo",
+          sys: {},
+          browser: {},
+          runAllSpecs
+        })
+        .then ->
+          expect(runAllSpecs).to.have.been.calledWith({ parallel: false })
           expect(createRun).to.have.been.calledOnce
           expect(createRun.firstCall.args).to.have.length(1)
           { commit } = createRun.firstCall.args[0]
@@ -372,7 +423,8 @@ describe "lib/modes/record", ->
       sinon.stub(api, "retryWithBackoff").yields().resolves()
 
       recordMode.createRun(@options)
-      expect(api.retryWithBackoff).to.be.called
+      .then ->
+        expect(api.retryWithBackoff).to.be.called
 
     it "logs on retry", ->
       sinon.stub(api, "retryWithBackoff").yields().resolves()

@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 require('@packages/coffee/register')
+require('@packages/ts/register')
 
 const command = process.argv[2]
 

@@ -2,7 +2,7 @@ require('../../spec_helper')
 
 const os = require('os')
 const path = require('path')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../../support/snapshot')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)

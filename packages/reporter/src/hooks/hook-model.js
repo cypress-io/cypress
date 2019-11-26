@@ -6,6 +6,8 @@ export default class Hook {
   @observable name
   @observable commands = []
   @observable failed = false
+
+  _aliasesWithDuplicatesCache = null
   _currentNumber = 1
 
   constructor (props) {
@@ -32,7 +34,16 @@ export default class Hook {
       return aliases.indexOf(alias) === i && aliases.lastIndexOf(alias) !== i
     })
 
-    return consecutiveDuplicateAliases.concat(nonConsecutiveDuplicateAliases)
+    const aliasesWithDuplicates = consecutiveDuplicateAliases.concat(nonConsecutiveDuplicateAliases)
+
+    // do a deep compare here to see if we can use the cached aliases, which will allow mobx's
+    // @computed identity comparison to pass, preventing unnecessary re-renders
+    // https://github.com/cypress-io/cypress/issues/4411
+    if (!_.isEqual(aliasesWithDuplicates, this._aliasesWithDuplicatesCache)) {
+      this._aliasesWithDuplicatesCache = aliasesWithDuplicates
+    }
+
+    return this._aliasesWithDuplicatesCache
   }
 
   addCommand (command) {

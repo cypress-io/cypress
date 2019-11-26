@@ -1,4 +1,5 @@
 _ = require("lodash")
+whatIsCircular = require("@cypress/what-is-circular")
 moment = require("moment")
 UrlParse = require("url-parse")
 Promise = require("bluebird")
@@ -13,8 +14,12 @@ hasVisitedAboutBlank  = null
 currentlyVisitingAboutBlank = null
 knownCommandCausedInstability = null
 
-REQUEST_URL_OPTS = ["auth", "failOnStatusCode", "method", "body", "headers"]
-VISIT_OPTS = ["url", "log", "onBeforeLoad", "onLoad", "timeout"].concat(REQUEST_URL_OPTS)
+REQUEST_URL_OPTS = "auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers"
+.split(" ")
+
+VISIT_OPTS = "url log onBeforeLoad onLoad timeout requestTimeout"
+.split(" ")
+.concat(REQUEST_URL_OPTS)
 
 reset = (test = {}) ->
   knownCommandCausedInstability = false
@@ -38,8 +43,11 @@ isValidVisitMethod = (method) ->
 
 timedOutWaitingForPageLoad = (ms, log) ->
   $utils.throwErrByPath("navigation.timed_out", {
+    args: {
+      configFile: Cypress.config("configFile")
+      ms
+    }
     onFail: log
-    args: { ms }
   })
 
 bothUrlsMatchAndRemoteHasHash = (current, remote) ->
@@ -63,6 +71,14 @@ cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
     args: {
       previousDomain: previousDomainVisited
       attemptedDomain: origin
+    }
+  })
+
+specifyFileByRelativePath = (url, log) ->
+  $utils.throwErrByPath("visit.specify_file_by_relative_path", {
+    onFail: log
+    args: {
+      attemptedUrl: url
     }
   })
 
@@ -208,6 +224,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
       $utils.throwErrByPath("navigation.cross_origin", {
         onFail: options._log
         args: {
+          configFile: Cypress.config("configFile")
           message: err.message
           originPolicy: originPolicy
         }
@@ -241,6 +258,20 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
     catch err
       reject(err)
 
+normalizeTimeoutOptions = (options) ->
+  ## there are really two timeout values - pageLoadTimeout
+  ## and the underlying responseTimeout. for the purposes
+  ## of resolving resolving the url, we only care about
+  ## responseTimeout - since pageLoadTimeout is a driver
+  ## and browser concern. therefore we normalize the options
+  ## object and send 'responseTimeout' as options.timeout
+  ## for the backend.
+  _
+  .chain(options)
+  .pick(REQUEST_URL_OPTS)
+  .extend({ timeout: options.responseTimeout })
+  .value()
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
@@ -268,7 +299,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     Cypress.backend(
       "resolve:url",
       url,
-      _.pick(options, REQUEST_URL_OPTS)
+      normalizeTimeoutOptions(options)
     )
     .then (resp = {}) ->
       switch
@@ -483,20 +514,32 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       _.defaults(options, {
         auth: null
         failOnStatusCode: true
+        retryOnNetworkFailure: true
+        retryOnStatusCodeFailure: false
         method: 'GET'
         body: null
         headers: {}
         log: true
+        responseTimeout: config('responseTimeout')
         timeout: config("pageLoadTimeout")
         onBeforeLoad: ->
         onLoad: ->
       })
+
+      if !_.isUndefined(options.qs) and not _.isObject(options.qs)
+        $utils.throwErrByPath("visit.invalid_qs", { args: { qs: String(options.qs) }})
+
+      if options.retryOnStatusCodeFailure and not options.failOnStatusCode
+        $utils.throwErrByPath("visit.status_code_flags_invalid")
 
       if not isValidVisitMethod(options.method)
         $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
 
       if not _.isObject(options.headers)
         $utils.throwErrByPath("visit.invalid_headers")
+
+      if _.isObject(options.body) and path = whatIsCircular(options.body)
+        $utils.throwErrByPath("visit.body_circular", { args: { path }})
 
       if options.log
         message = url
@@ -513,6 +556,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if baseUrl = config("baseUrl")
         url = $Location.qualifyWithBaseUrl(baseUrl, url)
+
+      if qs = options.qs
+        url = $Location.mergeUrlWithParams(url, qs)
 
       cleanup = null
 
@@ -553,7 +599,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           $utils.iframeSrc($autIframe, url)
 
-      onLoad = ({runOnLoadCallback}) ->
+      onLoad = ({runOnLoadCallback, totalTime}) ->
         ## reset window on load
         win = state("window")
 
@@ -561,7 +607,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if runOnLoadCallback isnt false
           options.onLoad?.call(runnable.ctx, win)
 
-        options._log.set({url: url}) if options._log
+        if options._log
+          options._log.set({
+            url
+            totalTime
+          })
 
         return Promise.resolve(win)
 
@@ -570,6 +620,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         existing = $utils.locExisting()
 
         ## TODO: $Location.resolve(existing.origin, url)
+
+        if $Location.isLocalFileUrl(url)
+          return specifyFileByRelativePath(url, options._log)
 
         ## in the case we are visiting a relative url
         ## then prepend the existing origin to it
@@ -656,7 +709,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             url = $Location.fullyQualifyUrl(url)
 
             changeIframeSrc(url, "window:load")
-            .then(onLoad)
+            .then ->
+              onLoad(resp)
           else
             ## if we've already visited a new superDomain
             ## then die else we'd be in a terrible endless loop
@@ -760,8 +814,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           go()
 
       visit()
-      .then ->
-        state("window")
       .timeout(options.timeout, "visit")
       .catch Promise.TimeoutError, (err) =>
         timedOutWaitingForPageLoad(options.timeout, options._log)

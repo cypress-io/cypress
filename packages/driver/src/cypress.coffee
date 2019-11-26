@@ -15,12 +15,13 @@ $Commands = require("./cypress/commands")
 $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
+$Keyboard = require("./cy/keyboard")
 $SetterGetter = require("./cypress/setter_getter")
-$Keyboard = require("./cypress/keyboard")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
+$Mouse = require("./cy/mouse")
 $Runner = require("./cypress/runner")
 $Server = require("./cypress/server")
 $Screenshot = require("./cypress/screenshot")
@@ -29,7 +30,7 @@ $utils = require("./cypress/utils")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
-  cy: "getStyles".split(" ")
+  cy: "detachDom getStyles".split(" ")
 }
 
 jqueryProxyFn = ->
@@ -160,17 +161,18 @@ class $Cypress
   ## or parsed. we have not received any custom commands
   ## at this point
   onSpecWindow: (specWindow) ->
-    logFn = =>
-      @log.apply(@, arguments)
+    logFn = (args...) =>
+      @log.apply(@, args)
 
     ## create cy and expose globally
     @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
+    @isCy = @cy.isCy
     @log = $Log.create(@, @cy, @state, @config)
     @mocha = $Mocha.create(specWindow, @)
     @runner = $Runner.create(specWindow, @mocha, @, @cy)
 
     ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @state, @config, @log)
+    @Commands = $Commands.create(@, @cy, @state, @config)
 
     @events.proxyTo(@cy)
 
@@ -394,6 +396,9 @@ class $Cypress
       when "app:window:unload"
         @emit("window:unload", args[0])
 
+      when "app:css:modified"
+        @emit("css:modified", args[0])
+
       when "spec:script:error"
         @emit("script:error", args...)
 
@@ -468,6 +473,7 @@ class $Cypress
   Log: $Log
   LocalStorage: $LocalStorage
   Mocha: $Mocha
+  Mouse: $Mouse
   Runner: $Runner
   Server: $Server
   Screenshot: $Screenshot
@@ -496,5 +502,6 @@ class $Cypress
 ## attaching these so they are accessible
 ## via the runner + integration spec helper
 $Cypress.$ = $
+$Cypress.dom = $dom
 
 module.exports = $Cypress

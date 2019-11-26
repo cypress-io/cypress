@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+
+<script>
+  window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = 'Dialog';
+    return;
+  })
+</script>

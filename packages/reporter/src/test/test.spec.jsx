@@ -151,6 +151,7 @@ describe('<Test />', () => {
             scroller={scroller}
           />
         )
+
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
 
@@ -162,6 +163,7 @@ describe('<Test />', () => {
             scroller={scroller}
           />
         )
+
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
 
@@ -173,6 +175,7 @@ describe('<Test />', () => {
             scroller={scroller}
           />
         )
+
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
 
@@ -184,6 +187,7 @@ describe('<Test />', () => {
             scroller={scroller}
           />
         )
+
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
     })

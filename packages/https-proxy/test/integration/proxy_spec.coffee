@@ -4,7 +4,10 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 _           = require("lodash")
 DebugProxy  = require("@cypress/debugging-proxy")
+fs          = require("fs-extra")
+https       = require("https")
 net         = require("net")
+network     = require("@packages/network")
 path        = require("path")
 Promise     = require("bluebird")
 proxy       = require("../helpers/proxy")
@@ -91,8 +94,21 @@ describe "Proxy", ->
     .then (html) ->
       expect(html).to.include("https server")
 
+  it "retries 5 times", ->
+    @sandbox.spy(net, 'connect')
+
+    request({
+      strictSSL: false
+      url: "https://localhost:12344"
+      proxy: "http://localhost:3333"
+    })
+    .then ->
+      throw new Error("should not reach")
+    .catch ->
+      expect(net.connect).to.have.callCount(5)
+
   it "closes outgoing connections when client disconnects", ->
-    @sandbox.spy(net.Socket.prototype, 'connect')
+    @sandbox.spy(net, 'connect')
 
     request({
       strictSSL: false
@@ -104,10 +120,10 @@ describe "Proxy", ->
       ## ensure client has disconnected
       expect(res.socket.destroyed).to.be.true
       ## ensure the outgoing socket created for this connection was destroyed
-      socket = net.Socket.prototype.connect.getCalls()
+      socket = net.connect.getCalls()
       .find (call) =>
-        _.isEqual(call.args.slice(0,2), ["8444", "localhost"])
-      .thisValue
+        call.args[0].port == "8444" && call.args[0].host == "localhost"
+      .returnValue
       expect(socket.destroyed).to.be.true
 
   it "can boot the httpServer", ->
@@ -116,6 +132,7 @@ describe "Proxy", ->
       url: "http://localhost:8080/"
       proxy: "http://localhost:3333"
     })
+
     .then (html) ->
       expect(html).to.include("http server")
 
@@ -137,6 +154,33 @@ describe "Proxy", ->
           url: "https://localhost:8443/"
           proxy: "http://localhost:3333"
         })
+
+    ## https://github.com/cypress-io/cypress/issues/771
+    it "generates certs and can proxy requests for HTTPS requests to IPs", ->
+      @sandbox.spy(@proxy, "_generateMissingCertificates")
+      @sandbox.spy(@proxy, "_getServerPortForIp")
+
+      Promise.all([
+        httpsServer.start(8445),
+        @proxy._ca.removeAll()
+      ])
+      .then =>
+        request({
+          strictSSL: false
+          url: "https://127.0.0.1:8445/"
+          proxy: "http://localhost:3333"
+        })
+      .then =>
+        ## this should not stand up its own https server
+        request({
+          strictSSL: false
+          url: "https://localhost:8443/"
+          proxy: "http://localhost:3333"
+        })
+      .then =>
+        expect(@proxy._ipServers["127.0.0.1"]).to.be.an.instanceOf(https.Server)
+        expect(@proxy._getServerPortForIp).to.be.calledWith('127.0.0.1').and.be.calledOnce
+        expect(@proxy._generateMissingCertificates).to.be.calledTwice
 
   context "closing", ->
     it "resets sslServers and can reopen", ->
@@ -161,7 +205,6 @@ describe "Proxy", ->
 
   context "with an upstream proxy", ->
     beforeEach ->
-      @oldEnv = Object.assign({}, process.env)
       process.env.NO_PROXY = ""
       process.env.HTTP_PROXY = process.env.HTTPS_PROXY = "http://localhost:9001"
 
@@ -172,15 +215,16 @@ describe "Proxy", ->
       @upstream.start(9001)
 
     it "passes a request to an https server through the upstream", ->
+      @upstream._onConnect = (domain, port) ->
+        expect(domain).to.eq('localhost')
+        expect(port).to.eq('8444')
+        return true
+
       request({
         strictSSL: false
         url: "https://localhost:8444/"
         proxy: "http://localhost:3333"
       }).then (res) =>
-        expect(@upstream.getRequests()[0]).to.include({
-          url: 'localhost:8444'
-          https: true
-        })
         expect(res).to.contain("https server")
 
     it "uses HTTP basic auth when provided", ->
@@ -189,6 +233,11 @@ describe "Proxy", ->
         password: 'bar'
       })
 
+      @upstream._onConnect = (domain, port) ->
+        expect(domain).to.eq('localhost')
+        expect(port).to.eq('8444')
+        return true
+
       process.env.HTTP_PROXY = process.env.HTTPS_PROXY = "http://foo:bar@localhost:9001"
 
       request({
@@ -196,14 +245,10 @@ describe "Proxy", ->
         url: "https://localhost:8444/"
         proxy: "http://localhost:3333"
       }).then (res) =>
-        expect(@upstream.getRequests()[0]).to.include({
-          url: 'localhost:8444'
-          https: true
-        })
         expect(res).to.contain("https server")
 
     it "closes outgoing connections when client disconnects", ->
-      @sandbox.spy(net.Socket.prototype, 'connect')
+      @sandbox.spy(net, 'connect')
 
       request({
         strictSSL: false
@@ -217,19 +262,39 @@ describe "Proxy", ->
         expect(res.socket.destroyed).to.be.true
 
         ## ensure the outgoing socket created for this connection was destroyed
-        socket = net.Socket.prototype.connect.getCalls()
+        socket = net.connect.getCalls()
         .find (call) =>
-          _.isEqual(call.args[0][0], {
-            host: 'localhost'
-            port: 9001
-          })
-        .thisValue
+          call.args[0].port == 9001 && call.args[0].host == "localhost"
+        .returnValue
 
         new Promise (resolve) ->
           socket.on 'close', =>
             expect(socket.destroyed).to.be.true
             resolve()
 
+    ## https://github.com/cypress-io/cypress/issues/4257
+    it "passes through to SNI when it is intercepted and not through proxy", ->
+      createSocket = @sandbox.stub(network.connect, 'createRetryingSocket').callsArgWith(1, new Error('stub'))
+      createProxyConn = @sandbox.spy(network.agent.httpsAgent, 'createUpstreamProxyConnection')
+
+      request({
+        strictSSL: false
+        url: "https://localhost:8443"
+        proxy: "http://localhost:3333"
+        resolveWithFullResponse: true
+        forever: false
+      })
+      .then =>
+        throw new Error('should not succeed')
+      .catch { message: 'Error: Client network socket disconnected before secure TLS connection was established' }, =>
+        expect(createProxyConn).to.not.be.called
+        expect(createSocket).to.be.calledWith({
+          port: @proxy._sniPort
+          host: 'localhost'
+        })
+
     afterEach ->
       @upstream.stop()
-      Object.assign(process.env, @oldEnv)
+      delete process.env.HTTP_PROXY
+      delete process.env.HTTPS_PROXY
+      delete process.env.NO_PROXY

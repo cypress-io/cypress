@@ -56,6 +56,13 @@ cy.on('window:alert', () => { })
 cy.on('window:alert', cy.spy())
 cy.on('window:alert', cy.stub())
 
+// sinon-chai example
+const stub = cy.stub()
+expect(stub).to.not.have.been.called
+stub()
+expect(stub).to.have.been.calledOnce
+cy.wrap(stub).should('have.been.calledOnce')
+
 // window:confirm stubbing
 Cypress.on('window:confirm', () => { })
 Cypress.on('window:confirm', cy.spy())

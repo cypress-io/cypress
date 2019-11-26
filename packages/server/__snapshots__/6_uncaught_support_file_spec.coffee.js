@@ -13,7 +13,7 @@ exports['e2e uncaught support file errors failing 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: spec.coffee...                                                                  (1 of 1) 
+  Running:  spec.coffee                                                                     (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -31,38 +31,36 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
 
   (Results)
 
-  ┌───────────────────────────┐
-  │ Tests:        1           │
-  │ Passing:      0           │
-  │ Failing:      1           │
-  │ Pending:      0           │
-  │ Skipped:      0           │
-  │ Screenshots:  1           │
-  │ Video:        true        │
-  │ Duration:     X seconds   │
-  │ Spec Ran:     spec.coffee │
-  └───────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     spec.coffee                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/uncaught-support-file/cypress/screenshots/spec.coffee/An uncaught error was detected outside of a test (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/spec.coffee/An uncaught error was detected outs          (YxX)
+     ide of a test (failed).png                                                                     
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/uncaught-support-file/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.coffee.mp4                     (X second)
 
 
 ====================================================================================================
@@ -70,11 +68,11 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ spec.coffee                               XX:XX        1        -        1        -        - │
+  │ ✖  spec.coffee                              XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `

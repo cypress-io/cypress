@@ -2,9 +2,11 @@ _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 debug       = require('debug')('cypress:server:events')
+pluralize   = require("pluralize")
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
+auth        = require("./auth")
 Windows     = require("./windows")
 api         = require("../api")
 open        = require("../util/open")
@@ -14,6 +16,7 @@ Updater     = require("../updater")
 Project     = require("../project")
 openProject = require("../open_project")
 ensureUrl   = require("../util/ensure-url")
+chromePolicyCheck = require("../util/chrome_policy_check")
 browsers    = require("../browsers")
 konfig      = require("../konfig")
 
@@ -58,6 +61,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "on:project:error"
       onBus("project:error")
 
+    when "on:auth:message"
+      onBus("auth:message")
+
     when "on:project:warning"
       onBus("project:warning")
 
@@ -82,14 +88,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "get:current:user"
-      user.get()
-      .then(send)
-      .catch(sendErr)
-
-    when "clear:github:cookies"
-      Windows.getBrowserAutomation(event.sender)
-      .clearCookies({domain: "github.com"})
-      .return(null)
+      user.getSafely()
       .then(send)
       .catch(sendErr)
 
@@ -109,6 +108,14 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onBrowserClose: ->
           send({browserClosed: true})
       })
+      .catch(sendErr)
+
+    when "begin:auth"
+      onMessage = (msg) ->
+        bus.emit('auth:message', msg)
+
+      auth.start(onMessage)
+      .then(send)
       .catch(sendErr)
 
     when "window:open"
@@ -173,7 +180,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "add:project"
-      Project.add(arg)
+      Project.add(arg, options)
       .then(send)
       .catch(sendErr)
 
@@ -183,6 +190,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
+      debug("open:project")
+
       onSettingsChanged = ->
         bus.emit("config:changed")
 
@@ -202,8 +211,14 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
       browsers.getAllBrowsersWith(options.browser)
       .then (browsers = []) ->
+        debug("setting found %s on the config", pluralize("browser", browsers.length, true))
         options.config = _.assign(options.config, { browsers })
       .then ->
+        chromePolicyCheck.run (err) ->
+          options.config.browsers.forEach (browser) ->
+            if browser.family == 'chrome'
+              browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
+
         openProject.create(arg, options, {
           onFocusTests: onFocusTests
           onSpecChanged: onSpecChanged

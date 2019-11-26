@@ -1,31 +1,140 @@
 require("../spec_helper")
 
+_       = require("lodash")
 http    = require("http")
+Bluebird = require("bluebird")
 Request = require("#{root}lib/request")
+snapshot = require("snap-shot-it")
 
 request = Request({timeout: 100})
 
+testAttachingCookiesWith = (fn) ->
+  set = sinon.spy(request, 'setCookiesOnBrowser')
+  get = sinon.spy(request, 'setRequestCookieHeader')
+
+  nock("http://localhost:1234")
+  .get("/")
+  .reply(302, "", {
+    'set-cookie': 'one=1'
+    location: "/second"
+  })
+  .get("/second")
+  .reply(302, "", {
+    'set-cookie': 'two=2'
+    location: "/third"
+  })
+  .get("/third")
+  .reply(200, "", {
+    'set-cookie': 'three=3'
+  })
+
+  fn()
+  .then ->
+    snapshot({
+      setCalls: set.getCalls().map (call) ->
+        {
+          currentUrl: call.args[1],
+          setCookie: call.args[0].headers['set-cookie']
+        }
+      getCalls: get.getCalls().map (call) ->
+        {
+          newUrl: _.get(call, 'args.1')
+        }
+    })
+
 describe "lib/request", ->
+  beforeEach ->
+    @fn = sinon.stub()
+    @fn.withArgs('set:cookie').resolves({})
+    @fn.withArgs('get:cookies').resolves([])
+
   it "is defined", ->
     expect(request).to.be.an("object")
 
-  context "#reduceCookieToArray", ->
-    it "converts object to array of key values", ->
-      obj = {
-        foo: "bar"
-        baz: "quux"
+  context "#getDelayForRetry", ->
+    it "divides by 10 when delay >= 1000 and err.code = ECONNREFUSED", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = [0, 999, 1000, 2000]
+
+      err = {
+        code: "ECONNREFUSED"
       }
 
-      expect(request.reduceCookieToArray(obj)).to.deep.eq(["foo=bar", "baz=quux"])
+      onNext = sinon.stub()
 
-  context "#createCookieString", ->
-    it "joins array by '; '", ->
-      obj = {
-        foo: "bar"
-        baz: "quux"
+      retryIntervals.forEach ->
+        request.getDelayForRetry({
+          err,
+          onNext,
+          retryIntervals,
+          delaysRemaining,
+        })
+
+      expect(delaysRemaining).to.be.empty
+      expect(onNext.args).to.deep.eq([
+        [0, 1]
+        [999, 2]
+        [100, 3]
+        [200, 4]
+      ])
+
+    it "does not divide by 10 when err.code != ECONNREFUSED", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = [2000, 2000, 2000, 2000]
+
+      err = {
+        code: "ECONNRESET"
       }
 
-      expect(request.createCookieString(obj)).to.eq("foo=bar; baz=quux")
+      onNext = sinon.stub()
+
+      request.getDelayForRetry({
+        err,
+        onNext,
+        retryIntervals,
+        delaysRemaining,
+      })
+
+      expect(delaysRemaining).to.have.length(3)
+      expect(onNext).to.be.calledWith(2000, 1)
+
+    it "calls onElse when delaysRemaining is exhausted", ->
+      retryIntervals = [1,2,3,4]
+      delaysRemaining = []
+
+      onNext = sinon.stub()
+      onElse = sinon.stub()
+
+      request.getDelayForRetry({
+        onElse
+        onNext,
+        retryIntervals,
+        delaysRemaining,
+      })
+
+      expect(onElse).to.be.calledWithExactly()
+      expect(onNext).not.to.be.called
+
+  context "#setDefaults", ->
+    it "delaysRemaining to retryIntervals clone", ->
+      retryIntervals = [1,2,3,4]
+
+      opts = request.setDefaults({ retryIntervals })
+
+      expect(opts.retryIntervals).to.eq(retryIntervals)
+      expect(opts.delaysRemaining).not.to.eq(retryIntervals)
+      expect(opts.delaysRemaining).to.deep.eq(retryIntervals)
+
+    it "retryIntervals to [0, 1000, 2000, 2000] by default", ->
+      opts = request.setDefaults({})
+
+      expect(opts.retryIntervals).to.deep.eq([0, 1000, 2000, 2000])
+
+    it "delaysRemaining can be overridden", ->
+      delaysRemaining = [1]
+      opts = request.setDefaults({ delaysRemaining })
+
+      expect(opts.delaysRemaining).to.eq(delaysRemaining)
 
   context "#normalizeResponse", ->
     beforeEach ->
@@ -72,10 +181,122 @@ describe "lib/request", ->
 
       expect(@push).to.be.calledOnce
 
-  context "#send", ->
-    beforeEach ->
-      @fn = sinon.stub()
+  context "#create", ->
+    beforeEach (done) ->
+      @hits = 0
 
+      @srv = http.createServer (req, res) =>
+        @hits++
+
+        switch req.url
+          when "/never-ends"
+            res.writeHead(200)
+            res.write("foo\n")
+          when "/econnreset"
+            req.socket.destroy()
+
+      @srv.listen(9988, done)
+
+    afterEach ->
+      @srv.close()
+
+    context "retries for streams", ->
+      it "does not retry on a timeout", ->
+        opts = request.setDefaults({
+          url: "http://localhost:9988/never-ends"
+          timeout: 1000
+        })
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
+          expect(err.code).to.eq('ESOCKETTIMEDOUT')
+          expect(retries).to.eq(0)
+
+      it "retries 4x on a connection reset", ->
+        opts = {
+          url: "http://localhost:9988/econnreset"
+          retryIntervals: [0, 1, 2, 3]
+          timeout: 1000
+        }
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
+          expect(err.code).to.eq('ECONNRESET')
+          expect(retries).to.eq(4)
+
+      it "retries 4x on a NXDOMAIN (ENOTFOUND)", ->
+        nock.enableNetConnect()
+
+        opts = {
+          url: "http://will-never-exist.invalid.example.com"
+          retryIntervals: [0, 1, 2, 3]
+          timeout: 1000
+        }
+
+        stream = request.create(opts)
+
+        retries = 0
+
+        stream.on "retry", ->
+          retries++
+
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
+          expect(err.code).to.eq('ENOTFOUND')
+          expect(retries).to.eq(4)
+
+    context "retries for promises", ->
+      it "does not retry on a timeout", ->
+        opts = {
+          url: "http://localhost:9988/never-ends"
+          timeout: 100
+        }
+
+        request.create(opts, true)
+        .then ->
+          throw new Error('should not reach')
+        .catch (err) =>
+          expect(err.error.code).to.eq('ESOCKETTIMEDOUT')
+          expect(@hits).to.eq(1)
+
+      it "retries 4x on a connection reset", ->
+        opts = {
+          url: "http://localhost:9988/econnreset"
+          retryIntervals: [0, 1, 2, 3]
+          timeout: 250
+        }
+
+        request.create(opts, true)
+        .then ->
+          throw new Error('should not reach')
+        .catch (err) =>
+          expect(err.error.code).to.eq('ECONNRESET')
+          expect(@hits).to.eq(5)
+
+  context "#sendPromise", ->
     it "sets strictSSL=false", ->
       init = sinon.spy(request.rp.Request.prototype, "init")
 
@@ -85,7 +306,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       }
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
       })
@@ -99,7 +320,7 @@ describe "lib/request", ->
 
       ## should not bomb on 500
       ## because simple = false
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
       })
@@ -111,7 +332,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/foo"
         cookies: false
         body: "foobarbaz"
@@ -144,6 +365,8 @@ describe "lib/request", ->
         ])
 
     it "includes redirects", ->
+      @fn.resolves()
+
       nock("http://www.github.com")
       .get("/dashboard")
       .reply(301, null, {
@@ -158,7 +381,7 @@ describe "lib/request", ->
         "Content-Type": "text/html"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://www.github.com/dashboard"
         cookies: false
       })
@@ -216,7 +439,7 @@ describe "lib/request", ->
       })
       .reply(200, {id: 1})
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/users"
         method: "POST"
         cookies: {foo: "bar", baz: "quux"}
@@ -233,7 +456,9 @@ describe "lib/request", ->
     it "catches errors", ->
       nock.enableNetConnect()
 
-      request.send({}, @fn, {
+      req = Request({ timeout: 2000 })
+
+      req.sendPromise({}, @fn, {
         url: "http://localhost:1111/foo"
         cookies: false
       })
@@ -249,7 +474,21 @@ describe "lib/request", ->
         "Content-Type": "application/json"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
+        url: "http://localhost:8080/status.json"
+        cookies: false
+      })
+      .then (resp) ->
+        expect(resp.body).to.deep.eq({status: "ok"})
+
+    it "parses response body as json if content-type application/vnd.api+json response headers", ->
+      nock("http://localhost:8080")
+      .get("/status.json")
+      .reply(200, JSON.stringify({status: "ok"}), {
+        "Content-Type": "application/vnd.api+json"
+      })
+
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/status.json"
         cookies: false
       })
@@ -263,7 +502,7 @@ describe "lib/request", ->
         "Content-Type": "application/json"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/status.json"
         cookies: false
       })
@@ -278,7 +517,7 @@ describe "lib/request", ->
         "Content-Type": "text/plain"
       })
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
       })
@@ -295,7 +534,7 @@ describe "lib/request", ->
       headers = {}
       headers["user-agent"] = "foobarbaz"
 
-      request.send(headers, @fn, {
+      request.sendPromise(headers, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
       })
@@ -308,12 +547,49 @@ describe "lib/request", ->
       .get("/foo")
       .reply(200, "it worked")
 
-      request.send({}, @fn, {
+      request.sendPromise({}, @fn, {
         url: "http://localhost:8080/foo"
         cookies: false
       })
       .then (resp) ->
         expect(resp.body).to.eq("it worked")
+
+    it "lower cases headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("test", "true")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {}
+      headers["user-agent"] = "foobarbaz"
+
+      request.sendPromise(headers, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'TEST': true,
+        }
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
+
+    it "allows overriding user-agent in headers", ->
+      nock("http://localhost:8080")
+      .matchHeader("user-agent", "custom-agent")
+      .get("/foo")
+      .reply(200, "derp")
+
+      headers = {'user-agent': 'test'}
+
+      request.sendPromise(headers, @fn, {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'User-Agent': "custom-agent",
+        },
+      })
+      .then (resp) ->
+        expect(resp.body).to.eq("derp")
 
     context "accept header", ->
       it "sets to */* by default", ->
@@ -322,7 +598,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
         })
@@ -335,7 +611,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
           headers: {
@@ -351,7 +627,7 @@ describe "lib/request", ->
         .get("/headers")
         .reply(200)
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/headers"
           cookies: false
           headers: {
@@ -367,7 +643,7 @@ describe "lib/request", ->
         .get("/foo?bar=baz&q=1")
         .reply(200)
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/foo"
           cookies: false
           qs: {
@@ -379,6 +655,9 @@ describe "lib/request", ->
           expect(resp.status).to.eq(200)
 
     context "followRedirect", ->
+      beforeEach ->
+        @fn.resolves()
+
       it "by default follow redirects", ->
         nock("http://localhost:8080")
         .get("/dashboard")
@@ -388,7 +667,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: true
@@ -407,7 +686,7 @@ describe "lib/request", ->
         .get("/dashboard")
         .reply(200, "dashboard")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           method: "POST"
           url: "http://localhost:8080/login"
           cookies: false
@@ -426,7 +705,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -445,7 +724,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -463,7 +742,7 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
           followRedirect: false
@@ -481,13 +760,19 @@ describe "lib/request", ->
         .get("/login")
         .reply(200, "login")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/dashboard"
           cookies: false
         })
         .then (resp) ->
           expect(resp.status).to.eq(200)
           expect(resp).not.to.have.property("redirectedToUrl")
+
+      it "gets + attaches the cookies at each redirect", ->
+        testAttachingCookiesWith =>
+          request.sendPromise({}, @fn, {
+            url: "http://localhost:1234/"
+          })
 
     context "form=true", ->
       beforeEach ->
@@ -497,7 +782,7 @@ describe "lib/request", ->
         .reply(200, "<html></html>")
 
       it "takes converts body to x-www-form-urlencoded and sets header", ->
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -519,7 +804,7 @@ describe "lib/request", ->
           baz: "quux"
         }
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -535,7 +820,7 @@ describe "lib/request", ->
       it "does not set json=true", ->
         init = sinon.spy(request.rp.Request.prototype, "init")
 
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:8080/login"
           method: "POST"
           cookies: false
@@ -563,7 +848,7 @@ describe "lib/request", ->
         @srv.close()
 
       it "recovers from bad headers", ->
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:9988/foo"
           cookies: false
           headers: {
@@ -573,10 +858,10 @@ describe "lib/request", ->
         .then ->
           throw new Error("should have failed")
         .catch (err) ->
-          expect(err.message).to.eq "TypeError: The header content contains invalid characters"
+          expect(err.message).to.eq "TypeError [ERR_INVALID_CHAR]: Invalid character in header content [\"x-text\"]"
 
       it "handles weird content in the body just fine", ->
-        request.send({}, @fn, {
+        request.sendPromise({}, @fn, {
           url: "http://localhost:9988/foo"
           cookies: false
           json: true
@@ -584,3 +869,42 @@ describe "lib/request", ->
             "x-text": "אבגד"
           }
         })
+
+  context "#sendStream", ->
+    it "allows overriding user-agent in headers", ->
+      nock("http://localhost:8080")
+        .matchHeader("user-agent", "custom-agent")
+        .get("/foo")
+        .reply(200, "derp")
+
+      sinon.spy(request, "create")
+      @fn.resolves({})
+
+      headers = {'user-agent': 'test'}
+
+      options =  {
+        url: "http://localhost:8080/foo"
+        cookies: false,
+        headers: {
+          'user-agent': "custom-agent",
+        },
+      }
+
+      request.sendStream(headers, @fn, options)
+      .then (beginFn) ->
+        beginFn()
+        expect(request.create).to.be.calledOnce
+        expect(request.create).to.be.calledWith(options)
+
+    it "gets + attaches the cookies at each redirect", ->
+      testAttachingCookiesWith =>
+        request.sendStream({}, @fn, {
+          url: "http://localhost:1234/"
+          followRedirect: _.stubTrue
+        })
+        .then (fn) =>
+          req = fn()
+
+          new Promise (resolve, reject) =>
+            req.on('response', resolve)
+            req.on('error', reject)

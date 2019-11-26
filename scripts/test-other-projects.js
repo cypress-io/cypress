@@ -2,7 +2,7 @@ require('@packages/coffee/register')
 
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const { getNameAndBinary, getJustVersion } = require('./utils')
+const { getNameAndBinary, getJustVersion, getShortCommit } = require('./utils')
 const bump = require('./binary/bump')
 const { stripIndent } = require('common-tags')
 const os = require('os')
@@ -30,24 +30,6 @@ const cliOptions = minimist(process.argv, {
     provider: 'p',
   },
 })
-
-const shorten = (s) => {
-  return s.substr(0, 7)
-}
-
-const getShortCommit = () => {
-  const sha =
-    process.env.APPVEYOR_REPO_COMMIT ||
-    process.env.CIRCLE_SHA1 ||
-    process.env.BUILDKITE_COMMIT
-
-  if (sha) {
-    return {
-      sha,
-      short: shorten(sha),
-    }
-  }
-}
 
 /**
  * Returns given string surrounded by ```json + ``` quotes
@@ -90,53 +72,67 @@ const env = {
   CYPRESS_INSTALL_BINARY: binary,
 }
 
-// also pass "status" object that points back at this repo and this commit
-// so that other projects can report their test success as GitHub commit status check
-let status = null
-const commit = commitInfo && commitInfo.sha
+const getStatusAndMessage = (projectRepoName) => {
+  // also pass "status" object that points back at this repo and this commit
+  // so that other projects can report their test success as GitHub commit status check
+  let status = null
+  const commit = commitInfo && commitInfo.sha
 
-if (commit && is.commitId(commit)) {
-  // commit is full 40 character hex string
-  status = {
-    owner: 'cypress-io',
-    repo: 'cypress',
-    sha: commit,
+  if (commit && is.commitId(commit)) {
+    // commit is full 40 character hex string
+    const platform = os.platform()
+    const arch = os.arch()
+
+    status = {
+      owner: 'cypress-io',
+      repo: 'cypress',
+      sha: commit,
+      platform,
+      arch,
+      context: `[${platform}-${arch}] ${projectRepoName}`,
+    }
+  }
+
+  const commitMessageInstructions = getInstallJson({
+    packages: npm,
+    env,
+    platform,
+    arch,
+    branch: shortNpmVersion, // use as version as branch name on test projects
+    commit,
+    status,
+  })
+  const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
+  const footer =
+    'Use tool `@cypress/commit-message-install` to install from above block'
+  let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
+
+  if (process.env.CIRCLE_BUILD_URL) {
+    message += '\n'
+    message += stripIndent`
+      CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
+    `
+  }
+
+  if (process.env.APPVEYOR) {
+    const account = process.env.APPVEYOR_ACCOUNT_NAME
+    const slug = process.env.APPVEYOR_PROJECT_SLUG
+    const build = process.env.APPVEYOR_BUILD_NUMBER
+
+    message += '\n'
+    message += stripIndent`
+      AppVeyor: ${account}/${slug} ${build}
+    `
+  }
+
+  console.log('commit message:')
+  console.log(message)
+
+  return {
+    status,
+    message,
   }
 }
-
-const commitMessageInstructions = getInstallJson({
-  packages: npm,
-  env,
-  platform,
-  arch,
-  branch: shortNpmVersion, // use as version as branch name on test projects
-  commit,
-  status,
-})
-const jsonBlock = toMarkdownJsonBlock(commitMessageInstructions)
-const footer = 'Use tool `@cypress/commit-message-install` to install from above block'
-let message = `${subject}\n\n${jsonBlock}\n${footer}\n`
-
-if (process.env.CIRCLE_BUILD_URL) {
-  message += '\n'
-  message += stripIndent`
-    CircleCI job url: ${process.env.CIRCLE_BUILD_URL}
-  `
-}
-
-if (process.env.APPVEYOR) {
-  const account = process.env.APPVEYOR_ACCOUNT_NAME
-  const slug = process.env.APPVEYOR_PROJECT_SLUG
-  const build = process.env.APPVEYOR_BUILD_NUMBER
-
-  message += '\n'
-  message += stripIndent`
-    AppVeyor: ${account}/${slug} ${build}
-  `
-}
-
-console.log('commit message')
-console.log(message)
 
 const onError = (e) => {
   console.error('could not bump test projects')
@@ -145,5 +141,10 @@ const onError = (e) => {
 }
 
 bump
-.runTestProjects(message, cliOptions.provider, shortNpmVersion)
+.runTestProjects(
+  getStatusAndMessage,
+  cliOptions.provider,
+  shortNpmVersion,
+  platform
+)
 .catch(onError)

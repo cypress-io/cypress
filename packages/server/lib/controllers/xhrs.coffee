@@ -1,6 +1,5 @@
 _           = require("lodash")
 mime        = require("mime")
-str         = require("string-to-stream")
 Promise     = require("bluebird")
 fixture     = require("../fixture")
 
@@ -19,7 +18,7 @@ isValidJSON = (text) ->
   return false
 
 module.exports = {
-  handle: (req, res, config, next) ->
+  handle: (req, res, getDeferredResponse, config, next) ->
     get = (val, def) ->
       decodeURI(req.get(val) ? def)
 
@@ -27,6 +26,10 @@ module.exports = {
     status   = get("x-cypress-status", 200)
     headers  = get("x-cypress-headers", null)
     response = get("x-cypress-response", "")
+
+    if get("x-cypress-responsedeferred", "")
+      id = get("x-cypress-id")
+      response = getDeferredResponse(id)
 
     respond = =>
       ## figure out the stream interface and pipe these
@@ -55,6 +58,10 @@ module.exports = {
         .set(headers)
         .status(status)
         .end(chunk)
+      .catch { testEndedBeforeResponseReceived: true }, ->
+        res
+        .socket
+        .destroy()
       .catch (err) ->
         res
         .status(400)
@@ -79,18 +86,16 @@ module.exports = {
     .then (bytes) ->
       {data: bytes, encoding: encoding}
 
-  getStream: (resp) ->
-    if fixturesRe.test(resp)
-      @_get(resp).then (contents) ->
-        str(contents)
-    else
-      str(resp)
-
   getResponse: (resp, config) ->
+    if resp.then
+      return resp
+      .then (data) =>
+        { data }
+
     if fixturesRe.test(resp)
-      @_get(resp, config)
-    else
-      Promise.resolve({data: resp})
+      return @_get(resp, config)
+
+    Promise.resolve({data: resp})
 
   parseContentType: (response) ->
     ret = (type) ->

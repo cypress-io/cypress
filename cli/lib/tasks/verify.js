@@ -6,12 +6,16 @@ const verbose = require('@cypress/listr-verbose-renderer')
 const { stripIndent } = require('common-tags')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
+const path = require('path')
+const os = require('os')
 
 const { throwFormErrorText, errors } = require('../errors')
 const util = require('../util')
 const logger = require('../logger')
 const xvfb = require('../exec/xvfb')
 const state = require('./state')
+
+const VERIFY_TEST_RUNNER_TIMEOUT_MS = 30000
 
 const checkExecutable = (binaryDir) => {
   const executable = state.getPathToExecutable(binaryDir)
@@ -36,70 +40,132 @@ const checkExecutable = (binaryDir) => {
   })
 }
 
-const runSmokeTest = (binaryDir) => {
-  debug('running smoke test')
-  const cypressExecPath = state.getPathToExecutable(binaryDir)
+const runSmokeTest = (binaryDir, options) => {
+  let executable = state.getPathToExecutable(binaryDir)
 
-  debug('using Cypress executable %s', cypressExecPath)
+  const onSmokeTestError = (smokeTestCommand, linuxWithDisplayEnv) => {
+    return (err) => {
+      debug('Smoke test failed:', err)
 
-  const onXvfbError = (err) => {
-    debug('caught xvfb error %s', err.message)
+      let errMessage = err.stderr || err.message
 
-    return throwFormErrorText(errors.missingXvfb)(`Caught error trying to run XVFB: "${err.message}"`)
-  }
+      debug('error message:', errMessage)
 
-  const onSmokeTestError = (err) => {
-    debug('Smoke test failed:', err)
+      if (err.timedOut) {
+        debug('error timedOut is true')
 
-    return throwFormErrorText(errors.missingDependency)(err.stderr || err.message)
+        return throwFormErrorText(
+          errors.smokeTestFailure(smokeTestCommand, true)
+        )(errMessage)
+      }
+
+      if (linuxWithDisplayEnv && util.isBrokenGtkDisplay(errMessage)) {
+        util.logBrokenGtkDisplayWarning()
+
+        return throwFormErrorText(errors.invalidSmokeTestDisplayError)(errMessage)
+      }
+
+      return throwFormErrorText(errors.missingDependency)(errMessage)
+    }
   }
 
   const needsXvfb = xvfb.isNeeded()
 
-  debug('needs XVFB?', needsXvfb)
+  debug('needs Xvfb?', needsXvfb)
 
-  const spawn = () => {
+  /**
+   * Spawn Cypress running smoke test to check if all operating system
+   * dependencies are good.
+   */
+  const spawn = (linuxWithDisplayEnv) => {
     const random = _.random(0, 1000)
     const args = ['--smoke-test', `--ping=${random}`]
-    const smokeTestCommand = `${cypressExecPath} ${args.join(' ')}`
 
+    if (needsSandbox()) {
+      // electron requires --no-sandbox to run as root
+      debug('disabling Electron sandbox')
+      args.unshift('--no-sandbox')
+    }
+
+    if (options.dev) {
+      executable = 'node'
+      args.unshift(
+        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+      )
+    }
+
+    const smokeTestCommand = `${executable} ${args.join(' ')}`
+
+    debug('running smoke test')
+    debug('using Cypress executable %s', executable)
     debug('smoke test command:', smokeTestCommand)
+    debug('smoke test timeout %d ms', options.smokeTestTimeout)
 
-    return Promise.resolve(util.exec(cypressExecPath, args))
-    .catch(onSmokeTestError)
+    const env = _.extend({}, process.env, {
+      ELECTRON_ENABLE_LOGGING: true,
+    })
+
+    const stdioOptions = _.extend({}, {
+      env,
+      timeout: options.smokeTestTimeout,
+    })
+
+    return Promise.resolve(util.exec(
+      executable,
+      args,
+      stdioOptions,
+    ))
+    .catch(onSmokeTestError(smokeTestCommand, linuxWithDisplayEnv))
     .then((result) => {
-      const smokeTestReturned = result.stdout
+      // TODO: when execa > 1.1 is released
+      // change this to `result.all` for both stderr and stdout
+      // use lodash to be robust during tests against null result or missing stdout
+      const smokeTestStdout = _.get(result, 'stdout', '')
 
-      debug('smoke test stdout "%s"', smokeTestReturned)
+      debug('smoke test stdout "%s"', smokeTestStdout)
 
-      if (!util.stdoutLineMatches(String(random), smokeTestReturned)) {
-        debug('Smoke test failed:', result)
-        throw new Error(stripIndent`
-          Smoke failed.
+      if (!util.stdoutLineMatches(String(random), smokeTestStdout)) {
+        debug('Smoke test failed because could not find %d in:', random, result)
 
-          Command was: ${smokeTestCommand}
+        const smokeTestStderr = _.get(result, 'stderr', '')
+        const errorText = smokeTestStderr || smokeTestStdout
 
-          Returned: ${smokeTestReturned}
-        `)
+        return throwFormErrorText(errors.smokeTestFailure(smokeTestCommand, false))(errorText)
       }
     })
   }
 
-  if (needsXvfb) {
-    return xvfb.start()
-    .catch(onXvfbError)
-    .then(spawn)
-    .finally(() => {
-      return xvfb.stop()
-      .catch(onXvfbError)
+  const spawnInXvfb = (linuxWithDisplayEnv) => {
+    return xvfb
+    .start()
+    .then(() => {
+      return spawn(linuxWithDisplayEnv)
+    })
+    .finally(xvfb.stop)
+  }
+
+  const userFriendlySpawn = (linuxWithDisplayEnv) => {
+    debug('spawning, should retry on display problem?', Boolean(linuxWithDisplayEnv))
+
+    return spawn(linuxWithDisplayEnv)
+    .catch({ code: 'INVALID_SMOKE_TEST_DISPLAY_ERROR' }, () => {
+      return spawnInXvfb(linuxWithDisplayEnv)
     })
   }
 
-  return spawn()
+  if (needsXvfb) {
+    return spawnInXvfb()
+  }
 
+  // if we are on linux and there's already a DISPLAY
+  // set, then we may need to rerun cypress after
+  // spawning our own Xvfb server
+  const linuxWithDisplayEnv = util.isPossibleLinuxWithIncorrectDisplay()
+
+  return userFriendlySpawn(linuxWithDisplayEnv)
 }
 
-function testBinary (version, binaryDir) {
+function testBinary (version, binaryDir, options) {
   debug('running binary verification check', version)
 
   logger.log(stripIndent`
@@ -128,7 +194,7 @@ function testBinary (version, binaryDir) {
         return state.clearBinaryStateAsync(binaryDir)
         .then(() => {
           return Promise.all([
-            runSmokeTest(binaryDir),
+            runSmokeTest(binaryDir, options),
             Promise.resolve().delay(1500), // good user experience
           ])
         })
@@ -154,10 +220,9 @@ function testBinary (version, binaryDir) {
   return tasks.run()
 }
 
-const maybeVerify = (installedVersion, binaryDir, options = {}) => {
+const maybeVerify = (installedVersion, binaryDir, options) => {
   return state.getBinaryVerifiedAsync(binaryDir)
   .then((isVerified) => {
-
     debug('is Verified ?', isVerified)
 
     let shouldVerify = !isVerified
@@ -169,7 +234,7 @@ const maybeVerify = (installedVersion, binaryDir, options = {}) => {
     }
 
     if (shouldVerify) {
-      return testBinary(installedVersion, binaryDir)
+      return testBinary(installedVersion, binaryDir, options)
       .then(() => {
         if (options.welcomeMessage) {
           logger.log()
@@ -187,19 +252,28 @@ const start = (options = {}) => {
   let binaryDir = state.getBinaryDir(packageVersion)
 
   _.defaults(options, {
+    dev: false,
     force: false,
     welcomeMessage: true,
+    smokeTestTimeout: VERIFY_TEST_RUNNER_TIMEOUT_MS,
   })
+
+  if (options.dev) {
+    return runSmokeTest('', options)
+  }
 
   const parseBinaryEnvVar = () => {
     const envBinaryPath = util.getEnv('CYPRESS_RUN_BINARY')
 
     debug('CYPRESS_RUN_BINARY exists, =', envBinaryPath)
     logger.log(stripIndent`
-        ${chalk.yellow('Note:')} You have set the environment variable: ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}:
-        
-              This overrides the default Cypress binary path used.
-        `)
+      ${chalk.yellow('Note:')} You have set the environment variable:
+
+      ${chalk.white('CYPRESS_RUN_BINARY=')}${chalk.cyan(envBinaryPath)}
+
+      This overrides the default Cypress binary path used.
+    `)
+
     logger.log()
 
     return util.isExecutableAsync(envBinaryPath)
@@ -244,7 +318,6 @@ const start = (options = {}) => {
     return state.getBinaryPkgVersionAsync(binaryDir)
   })
   .then((binaryVersion) => {
-
     if (!binaryVersion) {
       debug('no Cypress binary found for cli version ', packageVersion)
 
@@ -261,8 +334,8 @@ const start = (options = {}) => {
       logger.log(`Found binary version ${chalk.green(binaryVersion)} installed in: ${chalk.cyan(binaryDir)}`)
       logger.log()
       logger.warn(stripIndent`
-      
-      
+
+
       ${logSymbols.warning} Warning: Binary version ${chalk.green(binaryVersion)} does not match the expected package version ${chalk.green(packageVersion)}
 
         These versions may not work properly together.
@@ -283,7 +356,21 @@ const start = (options = {}) => {
   })
 }
 
+const isLinuxLike = () => os.platform() !== 'win32'
+
+/**
+ * Returns true if running on a system where Electron needs "--no-sandbox" flag.
+ * @see https://crbug.com/638180
+ *
+ * On Debian we had problems running in sandbox even for non-root users.
+ * @see https://github.com/cypress-io/cypress/issues/5434
+ * Seems there is a lot of discussion around this issue among Electron users
+ * @see https://github.com/electron/electron/issues/17972
+*/
+const needsSandbox = () => isLinuxLike()
+
 module.exports = {
   start,
-  maybeVerify,
+  VERIFY_TEST_RUNNER_TIMEOUT_MS,
+  needsSandbox,
 }

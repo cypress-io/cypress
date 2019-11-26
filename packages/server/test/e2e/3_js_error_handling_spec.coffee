@@ -12,7 +12,16 @@ onServer = (app) ->
       </html>
     """)
 
-  app.get "/gzip_500.js", (req, res) ->
+  app.get "/gzip-bad.html", (req, res) ->
+    buf = fs.readFileSync(Fixtures.path("server/gzip-bad.html.gz"))
+
+    res.set({
+      "content-type": "text/html"
+      "content-encoding": "gzip"
+    })
+    .send(buf)
+
+  app.get "/gzip-bad.js", (req, res) ->
     buf = fs.readFileSync(Fixtures.path("server/gzip-bad.html.gz"))
 
     res.set({
@@ -32,9 +41,8 @@ describe "e2e js error handling", ->
     }]
   })
 
-  it "fails", ->
-    e2e.exec(@, {
-      spec: "js_error_handling_failing_spec.coffee"
-      snapshot: true
-      expectedExitCode: 5
-    })
+  e2e.it "fails", {
+    spec: "js_error_handling_failing_spec.coffee"
+    snapshot: true
+    expectedExitCode: 5
+  }

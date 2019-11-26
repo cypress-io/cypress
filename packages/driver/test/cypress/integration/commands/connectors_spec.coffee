@@ -24,9 +24,9 @@ describe "src/cy/commands/connectors", ->
 
       it "spreads a jQuery wrapper into individual arguments", ->
         cy.noop($("div")).spread (first, second) ->
-          expect(first.tagName).to.eq('DIV');
+          expect(first.tagName).to.eq('DIV')
           expect(first.innerText).to.eq("div")
-          expect(second.tagName).to.eq('DIV');
+          expect(second.tagName).to.eq('DIV')
           expect(second.innerText).to.contain("Nested Find")
 
       it "passes timeout option to spread", ->
@@ -337,6 +337,14 @@ describe "src/cy/commands/connectors", ->
           cy.noop(@obj).invoke("foo").then (str) ->
             expect(str).to.eq "foo"
 
+        it "works with numerical indexes", ->
+          i = 0
+          fn = ->
+            i++
+            return i == 5
+
+          cy.noop([_.noop, fn]).invoke(1).should('be.true')
+
         it "forwards any additional arguments", ->
           cy.noop(@obj).invoke("bar", 1, 2).then (num) ->
             expect(num).to.eq 3
@@ -480,8 +488,8 @@ describe "src/cy/commands/connectors", ->
                 memo + num
               , 0
             math: {
-              sum: =>
-                @obj.sum.apply(@obj, arguments)
+              sum: (args...) =>
+                @obj.sum.apply(@obj, args)
             }
           }
 
@@ -604,11 +612,11 @@ describe "src/cy/commands/connectors", ->
 
           cy.invoke("queue")
 
-        it "throws when first argument isnt a string", (done) ->
+        it "throws when first argument isnt a string or a number", (done) ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
+            expect(err.message).to.eq "cy.invoke() only accepts a string or a number as the first argument."
             expect(lastLog.get("error")).to.eq err
             done()
 
@@ -697,6 +705,9 @@ describe "src/cy/commands/connectors", ->
       it "proxies to #invokeFn", ->
         fn = -> "bar"
         cy.wrap({foo: fn}).its("foo").should("eq", fn)
+
+      it "works with numerical indexes", ->
+        cy.wrap(['foo', 'bar']).its(1).should('eq', 'bar')
 
       it "reduces into dot separated values", ->
         obj = {
@@ -1222,7 +1233,7 @@ describe "src/cy/commands/connectors", ->
       it "awaits promises returned", ->
         count = 0
 
-        start = new Date
+        start = new Date()
 
         cy.get("#list li").each ($li, i, arr) ->
           new Promise (resolve, reject) ->
@@ -1232,7 +1243,7 @@ describe "src/cy/commands/connectors", ->
             , 20
         .then ($lis) ->
           expect(count).to.eq(3)
-          expect(new Date - start).to.be.gt(60)
+          expect(new Date() - start).to.be.gt(60)
 
       it "supports array like structures", ->
         count = 0
