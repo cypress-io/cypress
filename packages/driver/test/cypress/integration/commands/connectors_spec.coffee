@@ -486,6 +486,14 @@ describe "src/cy/commands/connectors", ->
           cy.noop({ bar: -> undefined }).invoke({ log: false }, "bar").then (val) ->
             expect(val).to.be.undefined
 
+        it "works with numerical indexes", ->
+          i = 0
+          fn = ->
+            i++
+            return i == 5
+
+          cy.noop([_.noop, fn]).invoke({}, 1).should('be.true')
+
         describe "errors", ->
           beforeEach ->
             Cypress.config("defaultCommandTimeout", 50)
@@ -977,6 +985,9 @@ describe "src/cy/commands/connectors", ->
         fn.bar = "bar"
 
         cy.wrap(fn).its("bar", { log: false }).should("eq", "bar")
+
+      it "works with numerical indexes", ->
+        cy.wrap(['foo', 'bar']).its(1, {}).should('eq', 'bar')
 
       describe ".log", -> 
         beforeEach ->
