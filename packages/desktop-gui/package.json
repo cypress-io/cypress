@@ -13,6 +13,7 @@
     "watch": "yarn build -- --watch --progress"
   },
   "devDependencies": {
+    "@babel/polyfill": "^7.7.0",
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.33.0",
     "@cypress/react-tooltip": "0.5.3",
@@ -36,6 +37,7 @@
     "react": "16.8.6",
     "react-bootstrap-modal": "4.2.0",
     "react-dom": "16.8.6",
+    "react-inspector": "^4.0.0",
     "react-loader": "2.4.5",
     "webpack": "4.35.3",
     "webpack-cli": "3.3.2"

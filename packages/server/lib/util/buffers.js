@@ -2,7 +2,7 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server:buffers')
 const uri = require('./uri')
 
-let buffers = []
+let buffer = null
 
 const stripPort = (url) => {
   try {
@@ -13,53 +13,46 @@ const stripPort = (url) => {
 }
 
 module.exports = {
-  all () {
-    return buffers
-  },
-
-  keys () {
-    return _.map(buffers, 'url')
+  getAny () {
+    return buffer
   },
 
   reset () {
     debug('resetting buffers')
 
-    buffers = []
+    buffer = null
   },
 
   set (obj = {}) {
+    obj = _.cloneDeep(obj)
     obj.url = stripPort(obj.url)
     obj.originalUrl = stripPort(obj.originalUrl)
 
-    debug('setting buffer %o', _.pick(obj, 'url'))
-
-    return buffers.push(_.pick(obj, 'url', 'originalUrl', 'jar', 'stream', 'response', 'details'))
-  },
-
-  getByOriginalUrl (str) {
-    const b = _.find(buffers, { originalUrl: stripPort(str) })
-
-    if (b) {
-      debug('found request buffer by original url %o', { str, buffer: _.pick(b, 'url', 'originalUrl', 'details'), bufferCount: buffers.length })
+    if (buffer) {
+      debug('warning: overwriting existing buffer...', { buffer: _.pick(buffer, 'url') })
     }
 
-    return b
+    debug('setting buffer %o', _.pick(obj, 'url'))
+
+    buffer = obj
   },
 
   get (str) {
-    return _.find(buffers, { url: stripPort(str) })
+    if (buffer && buffer.url === stripPort(str)) {
+      return buffer
+    }
   },
 
   take (str) {
-    const buffer = this.get(str)
+    const foundBuffer = this.get(str)
 
-    if (buffer) {
-      buffers = _.without(buffers, buffer)
+    if (foundBuffer) {
+      buffer = null
 
-      debug('found request buffer %o', { buffer: _.pick(buffer, 'url', 'originalUrl'), bufferCount: buffers.length })
+      debug('found request buffer %o', { buffer: _.pick(foundBuffer, 'url') })
+
+      return foundBuffer
     }
-
-    return buffer
   },
 
 }

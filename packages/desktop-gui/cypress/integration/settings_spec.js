@@ -77,17 +77,85 @@ describe('Settings', () => {
         cy.contains('Your project\'s configuration is displayed')
       })
 
-      it('displays legend in table', () => {
-        cy.get('table>tbody>tr').should('have.length', 6)
+      it('displays browser information which is collapsed by default', () => {
+        cy.contains('.config-vars', 'browsers')
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', '0:Chrome')
+
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('contain', '0:Chrome')
       })
 
-      it('wraps config line in proper classes', () => {
-        cy.get('.line').first().within(() => {
-          cy.contains('animationDistanceThreshold').should('have.class', 'key')
-          cy.contains(':').should('have.class', 'colon')
-          cy.contains('5').should('have.class', 'default')
-          cy.contains(',').should('have.class', 'comma')
-        })
+      it('removes the summary list of values once a key is expanded', () => {
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', 'Chrome, Chromium')
+
+        cy.get('.config-vars').invoke('text')
+        .should('contain', '0:Chrome')
+      })
+
+      it('distinguishes between Arrays and Objects when expanded', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', 'browsers: Array (4)')
+
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('contain', 'browsers: Array (4)')
+      })
+
+      it('applies the same color treatment to expanded key values as the root key', () => {
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').as('config-vars')
+        .contains('span', 'Chrome').parent('span').should('have.class', 'plugins')
+
+        cy.get('@config-vars')
+        .contains('span', 'Chromium').parent('span').should('have.class', 'plugins')
+
+        cy.get('@config-vars')
+        .contains('span', 'Canary').parent('span').should('have.class', 'plugins')
+
+        cy.get('@config-vars')
+        .contains('span', 'Electron').parent('span').should('have.class', 'plugins')
+
+        cy.contains('span', 'blacklistHosts').parents('div').first().find('span').first().click()
+        cy.get('@config-vars')
+        .contains('span', 'www.google-analytics.com').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', 'hotjar.com').parent('span').should('have.class', 'config')
+
+        cy.contains('span', 'hosts').parents('div').first().find('span').first().click()
+        cy.get('@config-vars')
+        .contains('span', '127.0.0.1').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', '127.0.0.2').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', 'Electron').parents('div').first().find('span').first().click()
+
+        cy.get('@config-vars').contains('span', 'electron').parents('li').eq(1).find('.line .plugins').should('have.length', 6)
+      })
+
+      it('displays string values as quoted strings', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('contain', 'baseUrl:"http://localhost:8080"')
+      })
+
+      it('displays undefined and null without quotations', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', '"undefined"')
+        .should('not.contain', '"null"')
+      })
+
+      it('does not show the root config label', () => {
+        cy.get('.config-vars').find('> ol > li > div').should('have.css', 'display', 'none')
+      })
+
+      it('displays legend in table', () => {
+        cy.get('table>tbody>tr').should('have.length', 6)
       })
 
       it('displays "true" values', () => {
@@ -99,26 +167,13 @@ describe('Settings', () => {
       })
 
       it('displays "object" values for env and hosts', () => {
-        cy.get('.nested-obj').eq(0)
-        .contains('fixturesFolder')
+        cy.get('.line').contains('www.google-analytics.com, hotjar.com')
 
-        cy.get('.nested-obj').eq(1)
-        .contains('*.foobar.com')
+        cy.get('.line').contains('*.foobar.com, *.bazqux.com')
       })
 
       it('displays "array" values for blacklistHosts', () => {
-        cy.get('.nested-arr')
-        .parent()
-        .should('contain', '[')
-        .and('contain', ']')
-        .and('not.contain', '0')
-        .and('not.contain', '1')
-        .find('.line .config').should(($lines) => {
-          expect($lines).to.have.length(2)
-          expect($lines).to.contain('www.google-analytics.com')
-
-          expect($lines).to.contain('hotjar.com')
-        })
+        cy.contains('.line', 'blacklistHosts').contains('www.google-analytics.com, hotjar.com')
       })
 
       it('opens help link on click', () => {
