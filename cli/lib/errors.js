@@ -201,7 +201,7 @@ const invalidCypressEnv = {
 */
 const childProcessKilled = (eventName, signal) => {
   return {
-    description: `The Test Runner received event ${chalk.cyan(eventName)} with signal ${chalk.cyan(signal)}`,
+    description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
     solution: solutionUnknown,
   }
 }
