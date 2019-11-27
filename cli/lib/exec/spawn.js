@@ -145,7 +145,6 @@ module.exports = {
               const errorObject = errors.errors.childProcessKilled(event, signal)
 
               return errors.getError(errorObject).then(reject)
-              // return reject(new Error('nope'))
             }
 
             resolve(code)

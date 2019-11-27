@@ -256,6 +256,18 @@ function addPlatformInformation (info) {
   })
 }
 
+/**
+ * Given an error object (see the errors above), forms error message text with details,
+ * then resolves with Error instance you can throw or reject with.
+ * @param {object} errorObject
+ * @returns {Promise<Error>} resolves with an Error
+ * @example
+  ```js
+  // inside a Promise with "resolve" and "reject"
+  const errorObject = childProcessKilled('exit', 'SIGKILL')
+  return getError(errorObject).then(reject)
+  ```
+ */
 function getError (errorObject) {
   return formErrorText(errorObject).then((errorMessage) => {
     const err = new Error(errorMessage)
