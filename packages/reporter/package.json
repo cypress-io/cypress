@@ -2,7 +2,7 @@
   "name": "@packages/reporter",
   "version": "0.0.0",
   "private": true,
-  "main": "src/main.jsx",
+  "main": "src/main.tsx",
   "scripts": {
     "prebuild": "npm run check-deps-pre",
     "build": "webpack",
@@ -13,7 +13,7 @@
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "postinstall": "echo '@packages/reporter needs: npm run build'",
-    "lint": "bin-up eslint --fix lib/*.js src/*.js* src/**/*.js*",
+    "lint": "../../node_modules/.bin/eslint --fix lib/*.js src/*.ts* src/**/*.ts*",
     "preclean": "npm run check-deps-pre",
     "pretest": "npm run check-deps-pre",
     "test": "node ../../scripts/test-unit",
@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
+    "@types/chai-enzyme": "^0.6.7",
     "@types/enzyme": "3.9.1",
     "bin-up": "1.2.2",
     "chai": "3.5.0",
