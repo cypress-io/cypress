@@ -12,7 +12,7 @@
   "rules": {
     "no-unused-vars": "off",
     "react/jsx-filename-extension": [
-      1,
+      "warn",
       {
         "extensions": [
           ".js",
