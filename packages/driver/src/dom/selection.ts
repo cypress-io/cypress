@@ -113,7 +113,7 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
 //   # startNode.nodeValue = updatedValue
 //   el.normalize()
 
-export const insertSubstring = (curText, newText, [start, end]) => {
+const insertSubstring = (curText, newText, [start, end]) => {
   return curText.substring(0, start) + newText + curText.substring(end)
 }
 
@@ -392,8 +392,7 @@ const isCollapsed = function (el) {
     return selection.isCollapsed
   }
 
-  // TODO: remove this
-  throw new Error('this should never happen')
+  return false
 }
 
 const selectAll = function (doc) {
@@ -425,17 +424,17 @@ const selectAll = function (doc) {
 
 const getSelectionBounds = function (el) {
   // this function works for input, textareas, and contentEditables
-  switch (false) {
-    case !$elements.isInput(el):
+  switch (true) {
+    case !!$elements.isInput(el):
       return _getSelectionBoundsFromInput(el)
-    case !$elements.isTextarea(el):
+    case !!$elements.isTextarea(el):
       return _getSelectionBoundsFromTextarea(el)
-    case !$elements.isContentEditable(el):
+    case !!$elements.isContentEditable(el):
       return _getSelectionBoundsFromContentEditable(el)
     default:
       return {
-        start: null,
-        end: null,
+        start: 0,
+        end: 0,
       }
   }
 }
@@ -518,7 +517,7 @@ const replaceSelectionContents = function (el, key) {
 const getCaretPosition = function (el) {
   const bounds = getSelectionBounds(el)
 
-  if ((bounds.start == null)) {
+  if (bounds.start == null) {
     // no selection
     return null
   }
@@ -631,5 +630,6 @@ export {
   moveCursorToLineEnd,
   replaceSelectionContents,
   isCollapsed,
+  insertSubstring,
   interceptSelect,
 }
