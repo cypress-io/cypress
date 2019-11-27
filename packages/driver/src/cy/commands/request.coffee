@@ -125,6 +125,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if originOrBase = config("baseUrl") or cy.getRemoteLocation("origin")
         options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)
 
+      ## Make sure the url unicode characters are properly escaped
+      ## https://github.com/cypress-io/cypress/issues/5274
+      try
+        options.url = decodeURI(options.url)
+      catch URIError
+        # The url is not already encoded just silence the error
+      finally
+        options.url = encodeURI(options.url)
+
       ## if options.url isnt FQDN then we need to throw here
       ## if we made a request prior to a visit then it needs
       ## to be filled out
