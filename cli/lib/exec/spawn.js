@@ -141,7 +141,7 @@ module.exports = {
           return function (code, signal) {
             debug('child event fired %o', { event, code, signal })
 
-            if (code === null && signal) {
+            if (code === null) {
               const errorObject = errors.errors.childProcessKilled(event, signal)
 
               return errors.getError(errorObject).then(reject)
