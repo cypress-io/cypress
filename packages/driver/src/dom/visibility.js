@@ -183,9 +183,9 @@ const elIsHiddenByTransform = ($el) => {
   // https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
   //
   if (transform.startsWith('matrix3d')) {
-    const m3d = transform.substring(8).match(/[0-9]+(?:\.[0-9]+)?/g)
+    const m3d = transform.substring(8).match(numberRegex)
 
-    // Z Axis
+    // Z Axis values
     if (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0) {
       return true
     }
