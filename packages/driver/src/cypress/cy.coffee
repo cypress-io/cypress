@@ -1112,7 +1112,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               ## If we are canceled or we don't have a runnable
               ## that means that this test is already over. 
               ## So don't try to end it again
-              if not state("canceled") and not _.isUndefined(runnable)
+              ## if we are canceled but we still have a runnable
+              ## then it's ok to end it
+              if not state("canceled") or not _.isUndefined(runnable) 
                 doneEarly()
                 originalDone(err)
                 state("runnable", undefined)
