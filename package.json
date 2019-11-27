@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "3.6.1",
+  "version": "3.7.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -57,6 +57,7 @@
     "test-s3-api": "node -r ./packages/coffee/register -r ./packages/ts/register scripts/binary/s3-api-demo.ts",
     "test-scripts": "mocha -r packages/coffee/register -r packages/ts/register --reporter spec 'scripts/unit/**/*spec.js'",
     "test-scripts-watch": "npm run test-scripts -- --watch --watch-extensions 'ts,js,coffee'",
+    "test-unit": "node ./scripts/test-unit",
     "watch": "npm run all watch"
   },
   "husky": {
@@ -75,14 +76,19 @@
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@types/bluebird": "3.5.21",
     "@types/chai": "4.1.7",
+    "@types/chai-enzyme": "0.6.7",
+    "@types/classnames": "2.2.9",
     "@types/debug": "4.1.4",
     "@types/execa": "0.7.2",
     "@types/fs-extra": "8.0.0",
     "@types/glob": "7.1.1",
     "@types/lodash": "4.14.122",
+    "@types/markdown-it": "0.0.9",
+    "@types/mini-css-extract-plugin": "0.8.0",
     "@types/mocha": "5.2.7",
     "@types/node": "11.12.0",
     "@types/ramda": "0.25.47",
+    "@types/react-dom": "16.9.4",
     "@types/request-promise": "4.1.42",
     "@types/sinon-chai": "3.2.2",
     "@typescript-eslint/eslint-plugin": "1.11.0",

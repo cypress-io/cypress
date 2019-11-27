@@ -19,7 +19,7 @@ describe('lib/util/buffers', () => {
 
       const buffer = buffers.get('foo')
 
-      expect(buffer).to.deep.eq(obj)
+      expect(buffer.url).to.eq(obj.url)
     })
 
     it('falls back to setting the port when buffer could not be found', () => {
@@ -29,19 +29,7 @@ describe('lib/util/buffers', () => {
 
       const buffer = buffers.get('https://www.google.com:443/')
 
-      expect(buffer).to.deep.eq(obj)
-    })
-  })
-
-  context('#getByOriginalUrl', () => {
-    it('returns buffer by originalUrl', () => {
-      const obj = { originalUrl: 'foo' }
-
-      buffers.set(obj)
-
-      const buffer = buffers.getByOriginalUrl('foo')
-
-      expect(buffer).to.deep.eq(obj)
+      expect(buffer.url).to.eq(obj.url)
     })
   })
 
@@ -51,13 +39,13 @@ describe('lib/util/buffers', () => {
 
       buffers.set(obj)
 
-      expect(buffers.all()).to.have.length(1)
+      expect(buffers.getAny()).to.exist
 
       const buffer = buffers.take('https://www.google.com:443/')
 
-      expect(buffer).to.deep.eq(obj)
+      expect(buffer.url).to.eq(obj.url)
 
-      expect(buffers.all()).to.have.length(0)
+      expect(buffers.getAny()).to.be.null
     })
 
     it('does not remove anything when not found', () => {
@@ -65,13 +53,13 @@ describe('lib/util/buffers', () => {
 
       buffers.set(obj)
 
-      expect(buffers.all()).to.have.length(1)
+      expect(buffers.getAny()).to.exist
 
       const buffer = buffers.take('asdf')
 
       expect(buffer).to.be.undefined
 
-      expect(buffers.all()).to.have.length(1)
+      expect(buffers.getAny()).to.exist
     })
   })
 })

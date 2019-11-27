@@ -11,6 +11,9 @@
  */
 const _ = require('lodash')
 const errors = require('../errors')
+const debug = require('debug')('cypress:server:validation')
+const is = require('check-more-types')
+const { commaListsOr } = require('common-tags')
 
 // # validation functions take a key and a value and should:
 // #  - return true if it passes validation
@@ -18,6 +21,13 @@ const errors = require('../errors')
 
 const str = JSON.stringify
 
+/**
+ * Forms good Markdown-like string message.
+ * @param {string} key - The key that caused the error
+ * @param {string} type - The expected type name
+ * @param {any} value - The actual value
+ * @returns {string} Formatted error message
+*/
 const errMsg = (key, value, type) => {
   return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(
     value
@@ -40,7 +50,75 @@ const { isArray } = _
 const isNumber = _.isFinite
 const { isString } = _
 
+/**
+ * Validates a single browser object.
+ * @returns {string|true} Returns `true` if the object is matching browser object schema. Returns an error message if it does not.
+ */
+const isValidBrowser = (browser) => {
+  if (!is.unemptyString(browser.name)) {
+    return errMsg('name', browser, 'a non-empty string')
+  }
+
+  const knownBrowserFamilies = ['electron', 'chrome', 'firefox']
+
+  if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
+    return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
+  }
+
+  if (!is.unemptyString(browser.displayName)) {
+    return errMsg('displayName', browser, 'a non-empty string')
+  }
+
+  if (!is.unemptyString(browser.version)) {
+    return errMsg('version', browser, 'a non-empty string')
+  }
+
+  if (!is.string(browser.path)) {
+    return errMsg('path', browser, 'a string')
+  }
+
+  if (!is.string(browser.majorVersion) && !is.positive(browser.majorVersion)) {
+    return errMsg('majorVersion', browser, 'a string or a positive number')
+  }
+
+  return true
+}
+
+/**
+ * Validates the list of browsers.
+ */
+const isValidBrowserList = (key, browsers) => {
+  debug('browsers %o', browsers)
+  if (!browsers) {
+    return 'Missing browsers list'
+  }
+
+  if (!Array.isArray(browsers)) {
+    debug('browsers is not an array', typeof browsers)
+
+    return 'Browsers should be an array'
+  }
+
+  if (!browsers.length) {
+    return 'Expected at list one browser'
+  }
+
+  for (let k = 0; k < browsers.length; k += 1) {
+    const err = isValidBrowser(browsers[k])
+
+    if (err !== true) {
+      return `Found an error while validating the \`browsers\` list. ${err}`
+    }
+  }
+
+  return true
+}
+
 module.exports = {
+  isValidBrowser,
+
+  isValidBrowserList,
+
   isNumber (key, value) {
     if (value == null || isNumber(value)) {
       return true

@@ -106,9 +106,10 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
     onElse,
   } = options
 
-  debug("received status code on request %o", {
+  debug("received status code & headers on request %o", {
     requestId,
-    statusCode: res.statusCode
+    statusCode: res.statusCode,
+    headers: _.pick(res.headers, 'content-type', 'set-cookie', 'location')
   })
 
   ## is this a retryable status code failure?
@@ -435,18 +436,25 @@ module.exports = (options = {}) ->
         cookies = [cookies]
 
       parsedUrl = url.parse(resUrl)
-      debug('setting cookies on browser %o', { url: parsedUrl.href, cookies })
+      defaultDomain = parsedUrl.hostname
 
-      Promise.map cookies, (cookie) ->
-        cookie = tough.Cookie.parse(cookie, { loose: true })
+      debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
+
+      Promise.map cookies, (cyCookie) ->
+        cookie = tough.Cookie.parse(cyCookie, { loose: true })
+
+        debug('parsing cookie %o', { cyCookie, toughCookie: cookie })
+
         cookie.name = cookie.key
 
         if not cookie.domain
           ## take the domain from the URL
-          cookie.domain = parsedUrl.hostname
+          cookie.domain = defaultDomain
           cookie.hostOnly = true
 
-        return if not tough.domainMatch(cookie.domain, parsedUrl.hostname)
+        if not tough.domainMatch(defaultDomain, cookie.domain)
+          debug('domain match failed:', { defaultDomain })
+          return
 
         expiry = cookie.expiryTime()
         if isFinite(expiry)
@@ -551,9 +559,9 @@ module.exports = (options = {}) ->
         push = (response) ->
           requestResponses.push(pick(response))
 
-        if options.followRedirect
-          currentUrl = options.url
+        currentUrl = options.url
 
+        if options.followRedirect
           options.followRedirect = (incomingRes) ->
             newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 
