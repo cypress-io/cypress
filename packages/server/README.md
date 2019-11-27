@@ -68,9 +68,13 @@ npm run test-watch ./test/unit/api_spec.coffee
 
 To run an individual e2e test:
 
+You must build all packages before running the E2E tests. Run `npm run build` or `npm run watch` in the project root to accomplish this.
+
 ```bash
 ## runs tests that match "base_url"
 npm run test-e2e -- --spec base_url
 ```
+
+When running e2e tests, some test projects output verbose logs. To see them run the test with `DEBUG=cypress:e2e` environment variable.
 
 To update snapshots, see `snap-shot-it` instructions: https://github.com/bahmutov/snap-shot-it#advanced-use

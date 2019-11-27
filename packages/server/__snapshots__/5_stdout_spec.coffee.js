@@ -32,7 +32,7 @@ exports['e2e stdout displays errors from failures 1'] = `
 
   1) stdout_failing_spec fails:
      Error: foo
-      at stack trace line
+      [stack trace lines]
 
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
      CypressError: cy.visit() failed trying to load:
@@ -48,20 +48,7 @@ The internal Cypress web server responded with:
   > 404: Not Found
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   3) stdout_failing_spec passing hook is failing:
      CypressError: cy.visit() failed trying to load:
@@ -75,20 +62,7 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

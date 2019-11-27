@@ -6,6 +6,7 @@ import BootstrapModal from 'react-bootstrap-modal'
 import ipc from '../lib/ipc'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project-modal'
+import authStore from '../auth/auth-store'
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -91,6 +92,22 @@ export default class ProjectNotSetup extends Component {
 
   _projectSetup () {
     if (!this.state.setupProjectModalOpen) return null
+
+    if (!this.props.isAuthenticated) {
+      authStore.openLogin((isAuthenticated) => {
+        if (!isAuthenticated) {
+          // auth was canceled, cancel project setup too
+          this.setState({ setupProjectModalOpen: false })
+        }
+      })
+
+      return null
+    }
+
+    if (this.props.isShowingLogin) {
+      // login dialog still open, wait for it to close before proceeding
+      return null
+    }
 
     return (
       <SetupProject

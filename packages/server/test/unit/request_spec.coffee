@@ -2,6 +2,7 @@ require("../spec_helper")
 
 _       = require("lodash")
 http    = require("http")
+Bluebird = require("bluebird")
 Request = require("#{root}lib/request")
 snapshot = require("snap-shot-it")
 
@@ -14,17 +15,17 @@ testAttachingCookiesWith = (fn) ->
   nock("http://localhost:1234")
   .get("/")
   .reply(302, "", {
-    'set-cookie': 'foo=bar'
-    location: "/B"
+    'set-cookie': 'one=1'
+    location: "/second"
   })
-  .get("/B")
+  .get("/second")
   .reply(302, "", {
-    'set-cookie': 'bar=baz'
-    location: "/B"
+    'set-cookie': 'two=2'
+    location: "/third"
   })
-  .get("/B")
+  .get("/third")
   .reply(200, "", {
-    'set-cookie': 'quuz=quux'
+    'set-cookie': 'three=3'
   })
 
   fn()
@@ -200,10 +201,10 @@ describe "lib/request", ->
       @srv.close()
 
     context "retries for streams", ->
-      it "does not retry on a timeout", (done) ->
+      it "does not retry on a timeout", ->
         opts = request.setDefaults({
           url: "http://localhost:9988/never-ends"
-          timeout: 100
+          timeout: 1000
         })
 
         stream = request.create(opts)
@@ -213,16 +214,19 @@ describe "lib/request", ->
         stream.on "retry", ->
           retries++
 
-        stream.on "error", (err) ->
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
           expect(err.code).to.eq('ESOCKETTIMEDOUT')
           expect(retries).to.eq(0)
-          done()
 
-      it "retries 4x on a connection reset", (done) ->
+      it "retries 4x on a connection reset", ->
         opts = {
           url: "http://localhost:9988/econnreset"
           retryIntervals: [0, 1, 2, 3]
-          timeout: 250
+          timeout: 1000
         }
 
         stream = request.create(opts)
@@ -232,17 +236,21 @@ describe "lib/request", ->
         stream.on "retry", ->
           retries++
 
-        stream.on "error", (err) ->
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
           expect(err.code).to.eq('ECONNRESET')
           expect(retries).to.eq(4)
-          done()
 
-      it "retries 4x on a NXDOMAIN (ENOTFOUND)", (done) ->
+      it "retries 4x on a NXDOMAIN (ENOTFOUND)", ->
         nock.enableNetConnect()
 
         opts = {
           url: "http://will-never-exist.invalid.example.com"
           retryIntervals: [0, 1, 2, 3]
+          timeout: 1000
         }
 
         stream = request.create(opts)
@@ -252,10 +260,13 @@ describe "lib/request", ->
         stream.on "retry", ->
           retries++
 
-        stream.on "error", (err) ->
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
           expect(err.code).to.eq('ENOTFOUND')
           expect(retries).to.eq(4)
-          done()
 
     context "retries for promises", ->
       it "does not retry on a timeout", ->

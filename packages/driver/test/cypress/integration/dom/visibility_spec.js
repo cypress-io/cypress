@@ -820,12 +820,53 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css backface-visibility', () => {
+      describe('element visibility by backface-visibility and rotation', () => {
+        const add = (el) => {
+          return $(el).appendTo(cy.$$('body'))
+        }
+
+        it('is visible when there is no transform', () => {
+          const el = add('<div>No transform</div>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is rotated < 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(45deg)">rotateX(45deg)</div>')
+
+          expect(el).to.be.visible
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-45deg)">rotateY(-45deg)</div>')
+
+          expect(el2).to.be.visible
+        })
+
+        it('is invisible when an element is rotated > 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(135deg)">rotateX(135deg)</div>')
+
+          expect(el).to.be.hidden
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-135deg)">rotateY(-135deg)</div>')
+
+          expect(el2).to.be.hidden
+        })
+
+        it('is invisible when an element is rotated in 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(90deg)">rotateX(90deg)</div>')
+
+          expect(el).to.be.hidden
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-90deg)">rotateY(-90deg)</div>')
+
+          expect(el2).to.be.hidden
+        })
+      })
+
       it('is visible when backface not visible', function () {
         expect(this.$parentsWithBackfaceVisibilityHidden.find('#front')).to.be.visible
       })
 
-      // TODO: why is this skipped?
-      it.skip('is hidden when backface visible', function () {
+      it('is hidden when backface visible', function () {
         expect(this.$parentsWithBackfaceVisibilityHidden.find('#back')).to.be.hidden
       })
     })
@@ -887,6 +928,17 @@ This element '<div#coveredUpPosFixed>' is not visible because it has CSS propert
 
 <div style="position: fixed; bottom: 0; left: 0">on top</div>\
 `)
+      })
+
+      it('needs scroll', function () {
+        const el = cy.$$('body').append(`
+          <div style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; overflow-x: hidden; overflow-y: auto;">
+            <div style="height: 800px">Big Element</div>
+            <button id="needsScroll">MyButton</button>
+          </div>
+        `)
+
+        this.reasonIs(el.find('#needsScroll'), `This element \'<button#needsScroll>\' is not visible because its ancestor has 'position: fixed' CSS property and it is overflowed by other elements. How about scrolling to the element with cy.scrollIntoView()?`)
       })
 
       it('cannot determine why element is not visible', function () {
