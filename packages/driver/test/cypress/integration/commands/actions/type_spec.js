@@ -18,7 +18,6 @@ const attachKeyListeners = attachListeners(keyEvents)
 const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
-
 describe('src/cy/commands/actions/type', () => {
   before(() => {
     cy
@@ -548,18 +547,17 @@ describe('src/cy/commands/actions/type', () => {
 
       it('can cancel additional keystrokes', (done) => {
         cy.stub(Cypress.runner, 'stop')
-
-        const text = cy.$$(':text:first').keydown(_.after(3, () => {
+        const text = cy.$$(':text:first').keydown(_.after(3, (e) => {
           Cypress.stop()
         }))
-
+        console.error("Attached keydown event to text...")
+        console.log(text)
         cy.on('stop', () => {
           return _.delay(() => {
             expect(text).to.have.value('foo')
-
             done()
           }
-          , 50)
+          , 10)
         })
 
         cy.get(':text:first').type('foo{enter}bar{leftarrow}')

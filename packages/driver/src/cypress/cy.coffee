@@ -540,9 +540,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     cancel = ->
       promise.cancel()
       inner.cancel()
-      console.log(promise.isCancelled())
-      console.log(inner.isCancelled())
-      console.log(state())
+      console.log("did we come here from doneEarly?")
+      console.log(stopped)
+      console.log(state("isDone"))
       ## notify the world
       Cypress.action("cy:canceled")
 
@@ -599,6 +599,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     if (p and p.isPending())
       state("canceled", true)
       state("cancel")()
+      state("isDone", true)
 
     cleanup()
 
@@ -606,7 +607,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ## cleanup could be called during a 'stop' event which
     ## could happen in between a runnable because they are async
     console.error("cleaning")
-    console.error(state("canceled"))
+    console.error(state("isDone"))
     if state("runnable")
       ## make sure we reset the runnable's timeout now
       state("runnable").resetTimeout()
@@ -640,7 +641,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## we aren't attached to the cypress command queue
       ## promise chain and throwing the error would only
       ## result in an unhandled rejection
+      console.log("finishing with fail...")
+      console.log(state("doone"))
       if d = state("done")
+        console.error("calling done callback")
         ## invoke it with err
         return d(err)
 
@@ -655,7 +659,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     ##    then it should fail
     ## 4. and tests without a done will pass
 
-    ## if we dont have a "fail" handler
+    ## if we dont have a "fail" handle
     ## 1. callback with state("done") when async
     ## 2. throw the error for the promise chain
     try
@@ -815,6 +819,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
     stop: ->
       ## don't do anything if we've already stopped
+      console.log("calling stop")
       if stopped
         return
 
@@ -829,17 +834,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         window: s.window
         document: s.document
         $autIframe: s.$autIframe
-        done: s.done
+        isDone: s.isDone
       }
-
       ## reset state back to empty object
       console.error(state("canceled"))
-      console.error(state("done"))
+      console.error(state("isDone"))
       state.reset()
       console.error("resetting state")
-      ## and then restore these backed up props
+      ## and then restore these backed upprops
       state(backup)
-      console.error(state("done"))
+      console.error(state("isDone"))
       queue.reset()
       timers.reset()
 
@@ -1052,8 +1056,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       ## do all the normal fail stuff and promise cancelation
       ## but dont re-throw the error
-      if r = state("reject")
+      if r = state("reject") and d = state("done")
         r(err)
+        d(err)
 
       ## per the onerror docs we need to return true here
       ## https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
@@ -1105,9 +1110,9 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           ## to change the semantics around how we
           ## attach the run queue
           if fn.length
-
+            console.log("We have a done callback")
             originalDone = arguments[0]
-
+            console.log("Setting done....")
             arguments[0] = done = (err) ->
               ## TODO: handle no longer error
               ## when ended early
@@ -1116,11 +1121,15 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               ## So don't try to end it again
               ## if we are canceled but we still have a runnable
               ## then it's ok to end it
-              if  not state("done") or not _.isUndefined(runnable) 
+              console.error("Trying to call done")
+              console.error(state("isDone"))
+              console.error(runnable)
+              console.log("is this here?")
+              if  not state("isDone") or not _.isUndefined(runnable) 
                 doneEarly()
                 originalDone(err)
                 state("runnable", undefined)
-                state("done", true)
+                state("isDone", true)
                 runnable = undefined
               ## return null else we there are situations
               ## where returning a regular bluebird promise
@@ -1188,6 +1197,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
           return ret
 
         catch err
+          console.log(err)
           ## if our runnable.fn throw synchronously
           ## then it didnt fail from a cypress command
           ## but we should still teardown and handle
