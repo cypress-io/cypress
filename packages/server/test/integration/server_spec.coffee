@@ -170,7 +170,7 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.keys()).to.deep.eq(["http://localhost:2000/index.html"])
+          expect(buffers.getAny()).to.include({ url: "http://localhost:2000/index.html" })
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) =>
@@ -187,7 +187,7 @@ describe "Server", ->
               cookies: []
             })
 
-            expect(@server._request.sendStream).to.be.calledOnce
+            expect(@server._request.sendStream).to.be.calledTwice
         .then =>
           @rp("http://localhost:2000/index.html")
           .then (res) =>
@@ -195,7 +195,7 @@ describe "Server", ->
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
             expect(res.body).to.include("Cypress")
-            expect(buffers.keys()).to.deep.eq([])
+            expect(buffers.getAny()).to.be.null
 
       it "can follow static file redirects", ->
         @server._onResolveUrl("/sub", {}, @automationRequest)
@@ -266,13 +266,13 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.keys()).to.deep.eq(["http://localhost:2000/index.html"])
+          expect(buffers.getAny()).to.include({ url: "http://localhost:2000/index.html" })
         .then =>
           @rp("http://localhost:2000/index.html")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            expect(buffers.keys()).to.deep.eq([])
+            expect(buffers.getAny()).to.be.null
 
     describe "http", ->
       beforeEach ->
@@ -496,16 +496,19 @@ describe "Server", ->
 
         nock("http://espn.com")
         .get("/")
+        .times(2)
         .reply 301, undefined, {
           "Location": "/foo"
         }
         .get("/foo")
+        .times(2)
         .reply 302, undefined, {
           "Location": "http://espn.go.com/"
         }
 
         nock("http://espn.go.com")
         .get("/")
+        .times(2)
         .reply 200, "<html><head></head><body>espn</body></html>", {
           "Content-Type": "text/html"
         }
@@ -527,7 +530,7 @@ describe "Server", ->
             ]
           })
 
-          expect(buffers.keys()).to.deep.eq(["http://espn.go.com/"])
+          expect(buffers.getAny()).to.include({ url: "http://espn.go.com/" })
         .then =>
           @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
           .then (obj = {}) =>
@@ -546,7 +549,7 @@ describe "Server", ->
               ]
             })
 
-            expect(@server._request.sendStream).to.be.calledOnce
+            expect(@server._request.sendStream).to.be.calledTwice
         .then =>
           @rp("http://espn.go.com/")
           .then (res) =>
@@ -554,7 +557,7 @@ describe "Server", ->
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("go.com")
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>espn</body></html>")
-            expect(buffers.keys()).to.deep.eq([])
+            expect(buffers.getAny()).to.be.null
 
       it "does not buffer 'bad' responses", ->
         sinon.spy(@server._request, "sendStream")
@@ -665,13 +668,13 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.keys()).to.deep.eq(["http://getbootstrap.com/"])
+          expect(buffers.getAny()).to.include({ url: "http://getbootstrap.com/" })
         .then =>
           @rp("http://getbootstrap.com/")
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            expect(buffers.keys()).to.deep.eq([])
+            expect(buffers.getAny()).to.be.null
 
       it "can serve non 2xx status code requests when option set", ->
         nock("http://google.com")

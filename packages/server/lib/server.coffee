@@ -326,6 +326,10 @@ class Server
       options
     })
 
+    ## always clear buffers - reduces the possibility of a random HTTP request
+    ## accidentally retrieving buffered content at the wrong time
+    buffers.reset()
+
     startTime = new Date()
 
     ## if we have an existing url resolver
@@ -360,26 +364,6 @@ class Server
 
         _.invoke(reqStream, "abort")
         _.invoke(currentPromisePhase, "cancel")
-
-      ## if we have a buffer for this url
-      ## then just respond with its details
-      ## so we are idempotant and do not make
-      ## another request
-      if obj = buffers.getByOriginalUrl(urlStr)
-        debug("got previous request buffer for url:", urlStr)
-
-        ## reset the cookies from the buffer on the browser
-        return runPhase ->
-          resolve(
-            Promise.map obj.details.cookies, (cookie) ->
-              ## prevent prepending a . to the cookie domain if top-level
-              ## navigation occurs as a result of a cy.visit
-              if _.isUndefined(cookie.hostOnly) && !cookie.domain?.startsWith('.')
-                cookie.hostOnly = true
-
-              automationRequest('set:cookie', cookie)
-            .return(obj.details)
-          )
 
       redirects = []
       newUrl = null
@@ -708,7 +692,10 @@ class Server
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
     options.onIncomingXhr = @_xhrServer.onIncomingXhr
-    options.onResetXhrServer = @_xhrServer.reset
+
+    options.onResetServerState = =>
+      @_xhrServer.reset()
+      buffers.reset()
 
     @_socket = Socket(config)
     @_socket.startListening(@_server, automation, config, options)
