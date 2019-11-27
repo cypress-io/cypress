@@ -6,9 +6,12 @@
   </head>
   <body>
     <button id="trigger-xhr">Trigger XHR</button>
+    <div id="result">Result</div>
     <script>
       $('#trigger-xhr').click(function(event) {
-        $.post('/test-xhr')
+        $.post('/test-xhr', function(data) {
+          $('#result').text(JSON.stringify(data))
+        })
         event.preventDefault()
       })
     </script>

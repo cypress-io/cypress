@@ -1438,6 +1438,11 @@ describe "src/cy/commands/xhr", ->
           .visit('/fixtures/xhr-triggered.html')
           .get('#trigger-xhr')
           .click()
+          .wait(250)
+        
+        cy
+          .get("#result")
+          .contains('{"foo":1,"bar":{"baz":"cypress"}}')
 
       it "works if the JSON file has null content", ->
         cy
@@ -1450,6 +1455,11 @@ describe "src/cy/commands/xhr", ->
           .visit('/fixtures/xhr-triggered.html')
           .get('#trigger-xhr')
           .click()
+          .wait(250)
+        
+        cy
+          .get('#result')
+          .contains('""')
 
     describe "errors", ->
       beforeEach ->
