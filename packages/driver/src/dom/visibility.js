@@ -448,11 +448,15 @@ const getReasonIsHidden = function ($el) {
       // show the long element here
       const covered = $elements.stringify(elAtCenterPoint($el))
 
-      return `\
+      if (covered) {
+        return `\
 This element '${node}' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
 
 ${covered}\
 `
+      }
+
+      return `This element '${node}' is not visible because its ancestor has 'position: fixed' CSS property and it is overflowed by other elements. How about scrolling to the element with cy.scrollIntoView()?`
     }
   } else {
     if (elIsOutOfBoundsOfAncestorsOverflow($el)) {

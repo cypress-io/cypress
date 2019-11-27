@@ -16,7 +16,7 @@
     "lint": "bin-up eslint --fix lib/*.js src/*.js* src/**/*.js*",
     "preclean": "npm run check-deps-pre",
     "pretest": "npm run check-deps-pre",
-    "test": "mocha 'src/**/*.spec.*'",
+    "test": "node ../../scripts/test-unit",
     "test-watch": "npm run test -- --watch",
     "prewatch": "npm run check-deps-pre",
     "watch": "npm run build -- --watch --progress"

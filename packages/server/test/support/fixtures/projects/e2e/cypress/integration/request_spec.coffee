@@ -29,7 +29,7 @@ describe "redirects + requests", ->
           secure: false
         })
 
-  it "visits idempotant", ->
+  it "visits to a different superdomain will be resolved twice", ->
     cy
       .visit("http://localhost:2290")
       .url()
@@ -42,9 +42,9 @@ describe "redirects + requests", ->
         .its("body").should("deep.eq", {"2292": "true"})
       .request("http://localhost:2292/counts")
         .its("body").should("deep.eq", {
-          "localhost:2290": 1
-          "localhost:2291": 1
-          "localhost:2292": 1
+          "localhost:2290": 2
+          "localhost:2291": 2
+          "localhost:2292": 2
           "localhost:2293": 1 ## from the previous test
         })
 

@@ -22,9 +22,13 @@ describe('<Header />', () => {
   })
 
   it('renders a tooltip around focus tests button', () => {
-    const component = shallow(<Header appState={appState} statsStore={statsStore} />)
+    const title = shallow(<Header appState={appState} statsStore={statsStore} />)
+    .find('Tooltip')
+    .prop('title')
 
-    expect(component.find('Tooltip')).to.have.prop('title', 'View All Tests')
+    const component = shallow(title)
+
+    expect(component.text()).to.contain('View All Tests')
   })
 
   it('emits the focus:tests event when the focus tests button is clicked', () => {
