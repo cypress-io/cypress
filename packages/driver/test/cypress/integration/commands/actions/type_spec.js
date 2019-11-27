@@ -985,49 +985,6 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      // https://github.com/cypress-io/cypress/issues/5703
-      it('overwrites text when selectAll in focus handler', () => {
-        const input = cy.$$('#input-without-value')
-
-        input
-        .val('f')
-        .on('focus', (e) => {
-          e.currentTarget.select()
-        })
-
-        cy.get('#input-without-value')
-        .type('foo')
-        .should('have.value', 'foo')
-      })
-
-      it('overwrites text when selectAll in focus handler in number', () => {
-        const input = cy.$$('#number-without-value')
-
-        input
-        .val('1')
-        .on('focus', (e) => {
-          e.currentTarget.select()
-        })
-
-        cy.get('#number-without-value')
-        .type('10')
-        .should('have.value', '10')
-      })
-
-      it('overwrites text when selectAll in focus handler in email', () => {
-        const input = cy.$$('#email-without-value')
-
-        input
-        .val('b')
-        .on('focus', (e) => {
-          e.currentTarget.select()
-        })
-
-        cy.get('#email-without-value')
-        .type('b@foo.com')
-        .should('have.value', 'b@foo.com')
-      })
-
       it('overwrites text when selectAll in mouseup handler', () => {
         cy.$$('#input-without-value').val('0').mouseup(function () {
           $(this).select()

@@ -8,6 +8,7 @@ import * as $dom from '../dom'
 import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
 import * as $selection from '../dom/selection'
+import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/types'
 import $window from '../dom/window'
 
 const debug = Debug('cypress:driver:keyboard')
@@ -35,7 +36,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
 }
 
 type SimulatedDefault = (
-  el: HTMLElement,
+  el: HTMLTextLikeElement,
   key: KeyDetails,
   options: any
 ) => void
@@ -62,7 +63,6 @@ const monthRe = /^\d{4}-(0\d|1[0-2])/
 const weekRe = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
 const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
-const numberRe = /^-?(0|[1-9]\d*)(\.\d+)?(e-?(0|[1-9]\d*))?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
 
 const INITIAL_MODIFIERS = {
@@ -235,7 +235,7 @@ const shouldIgnoreEvent = <
   return options[eventName] === false
 }
 
-const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
+const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
   if (!key.text) return false
 
   const bounds = $selection.getSelectionBounds(el)
@@ -244,29 +244,6 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
     if ($elements.isReadOnlyInputOrTextarea(el)) {
       return false
-    }
-
-    const isNumberInputType = $elements.isInput(el) && $elements.isInputType(el, 'number')
-
-    if (isNumberInputType) {
-      const needsValue = options.prevVal || ''
-      const needsValueLength = (needsValue && needsValue.length) || 0
-      const curVal = $elements.getNativeProp(el, 'value')
-      const bounds = $selection.getSelectionBounds(el)
-
-      // We need to see if the number we're about to type is a valid number, since setting a number input
-      // to an invalid number will not set the value and possibly throw a warning in the console
-      const potentialValue = $selection.insertSubstring(curVal + needsValue, key.text, [bounds.start + needsValueLength, bounds.end + needsValueLength])
-
-      if (!(numberRe.test(potentialValue))) {
-        debug('skipping inserting value since number input would be invalid', key.text, potentialValue)
-        options.prevVal = needsValue + key.text
-
-        return
-      }
-
-      key.text = (options.prevVal || '') + key.text
-      options.prevVal = null
     }
 
     if (noneSelected) {
@@ -331,15 +308,13 @@ const validateTyping = (
   let isWeek = false
   let isDateTime = false
 
-  // use 'type' attribute instead of prop since browsers without
-  // support for attribute input type will have type prop of 'text'
   if ($elements.isInput(el)) {
-    isDate = $elements.isAttrType(el, 'date')
-    isTime = $elements.isAttrType(el, 'time')
-    isMonth = $elements.isAttrType(el, 'month')
-    isWeek = $elements.isAttrType(el, 'week')
+    isDate = $dom.isInputType(el, 'date')
+    isTime = $dom.isInputType(el, 'time')
+    isMonth = $dom.isInputType(el, 'month')
+    isWeek = $dom.isInputType(el, 'week')
     isDateTime =
-      $elements.isAttrType(el, 'datetime') || $elements.isAttrType(el, 'datetime-local')
+      $dom.isInputType(el, 'datetime') || $dom.isInputType(el, 'datetime-local')
   }
 
   const isFocusable = $elements.isFocusable($el)
@@ -478,7 +453,7 @@ function _getEndIndex (str, substr) {
 const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
   Enter: (el, key, options) => {
     if ($elements.isContentEditable(el) || $elements.isTextarea(el)) {
-      key.events.input = !!$selection.replaceSelectionContents(el, '\n')
+      key.events.input = $selection.replaceSelectionContents(el, '\n')
     } else {
       key.events.input = false
     }
@@ -719,7 +694,7 @@ export class Keyboard {
                 debug('setting element value', valToSet, activeEl)
 
                 return $elements.setNativeProp(
-                  activeEl as $elements.HTMLTextLikeInputElement,
+                  activeEl as HTMLTextLikeInputElement,
                   'value',
                   valToSet
                 )
@@ -1060,7 +1035,7 @@ export class Keyboard {
     this.fireSimulatedEvent(el, 'keyup', key, options)
   }
 
-  getSimulatedDefaultForKey (key: KeyDetails, options) {
+  getSimulatedDefaultForKey (key: KeyDetails) {
     debug('getSimulatedDefaultForKey', key.key)
     if (key.simulatedDefault) return key.simulatedDefault
 
@@ -1069,7 +1044,7 @@ export class Keyboard {
     }
 
     return (el: HTMLElement) => {
-      if (!shouldUpdateValue(el, key, options)) {
+      if (!shouldUpdateValue(el, key)) {
         debug('skip typing key', false)
         key.events.input = false
 
@@ -1097,7 +1072,7 @@ export class Keyboard {
 
   performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {
     debug('performSimulatedDefault', key.key)
-    const simulatedDefault = this.getSimulatedDefaultForKey(key, options)
+    const simulatedDefault = this.getSimulatedDefaultForKey(key)
 
     if ($elements.isTextLike(el)) {
       if ($elements.isInput(el) || $elements.isTextarea(el)) {
