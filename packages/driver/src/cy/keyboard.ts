@@ -254,6 +254,8 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
       const curVal = $elements.getNativeProp(el, 'value')
       const bounds = $selection.getSelectionBounds(el)
 
+      // We need to see if the number we're about to type is a valid number, since setting a number input
+      // to an invalid number will not set the value and possibly throw a warning in the console
       const potentialValue = $selection.insertSubstring(curVal + needsValue, key.text, [bounds.start + needsValueLength, bounds.end + needsValueLength])
 
       if (!(numberRe.test(potentialValue))) {
