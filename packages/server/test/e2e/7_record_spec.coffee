@@ -14,7 +14,7 @@ postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1
 e2ePath = Fixtures.projectPath("e2e")
 outputPath = path.join(e2ePath, "output.json")
 
-{ runId, groupId, machineId, runUrl } = postRunResponse
+{ runId, groupId, machineId, runUrl, tags } = postRunResponse
 { instanceId } = postRunInstanceResponse
 
 requests = null
@@ -460,13 +460,12 @@ describe "e2e record", ->
 
     setup(routes)
 
-    it "passes in parallel with group and tag", ->
+    it "passes in parallel with group", ->
       Promise.all([
         e2e.exec(@, {
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record*"
           group: "prod-e2e"
-          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -487,7 +486,6 @@ describe "e2e record", ->
             key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
             spec: "record*"
             group: "prod-e2e"
-            tag: "nightly"
             record: true
             parallel: true
             snapshot: true
@@ -1287,6 +1285,7 @@ describe "e2e record", ->
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
               name: "foo"
               message: "foo"
@@ -1321,6 +1320,7 @@ describe "e2e record", ->
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
               name: "foo"
               message: "foo"
@@ -1355,6 +1355,7 @@ describe "e2e record", ->
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
               name: "foo"
               message: "foo"
@@ -1388,6 +1389,7 @@ describe "e2e record", ->
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
               name: "foo"
               message: "foo"
@@ -1421,6 +1423,7 @@ describe "e2e record", ->
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
               name: "foo"
               message: "foo"
@@ -1455,6 +1458,7 @@ describe "e2e record", ->
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
               name: "foo"
               message: "foo"
