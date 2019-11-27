@@ -1019,6 +1019,12 @@ describe('src/cypress/dom/visibility', () => {
         this.reasonIs(this.$elOutOfParentBoundsToRight.find('span'), 'This element \'<span>\' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \'hidden\', \'scroll\' or \'auto\'')
       })
 
+      it('is hidden by transform', function () {
+        const el = cy.$$('body').append(`<div id="invisible-transform" style="transform: scaleX(0)">Hello world</div>`)
+
+        this.reasonIs(el.find('#invisible-transform'), `This element \'<div#invisible-transform>\' is not visible because it is hidden by transform.`)
+      })
+
       it('element is fixed and being covered', function () {
         this.reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\
 This element '<div#coveredUpPosFixed>' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
