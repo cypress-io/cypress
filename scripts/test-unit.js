@@ -23,7 +23,7 @@ proc.stdout.on('end', async () => {
 })
 
 // Show result on console.
-spawn(`node`, ['./node_modules/.bin/mocha', 'src/**/*.spec.*'], {
+spawn(`node`, ['./node_modules/.bin/mocha', '"src/*.spec.*" "src/**/*.spec.*"'], {
   stdio: 'inherit',
   shell: true,
 })
