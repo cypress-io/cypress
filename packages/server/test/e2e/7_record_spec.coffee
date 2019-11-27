@@ -405,7 +405,7 @@ describe "e2e record", ->
         { group, tags, ciBuildId } = req.body
 
         expect(group).to.eq("prod-e2e")
-        expect(tags).to.eq(["nightly"])
+        expect(tags).to.deep.eq(['nightly'])
         expect(ciBuildId).to.eq("ciBuildId123")
 
         ## if this is the first response
@@ -469,6 +469,7 @@ describe "e2e record", ->
           record: true
           parallel: true
           snapshot: true
+          tag: "nightly"
           ciBuildId: "ciBuildId123"
           expectedExitCode: 3
           config: {
@@ -477,7 +478,7 @@ describe "e2e record", ->
         })
         .get("stdout"),
 
-        ## stagger the 2nd instance
+        ## stagger the 2nd run
         ## starting up a bit
         Promise
         .delay(3000)
@@ -489,6 +490,7 @@ describe "e2e record", ->
             record: true
             parallel: true
             snapshot: true
+            tag: "nightly"
             ciBuildId: "ciBuildId123"
             expectedExitCode: 0
             config: {
@@ -559,6 +561,7 @@ describe "e2e record", ->
         expectedExitCode: 0
       })
       .then ->
+        console.log('GETREQUESTURLS', getRequestUrls())
         expect(getRequestUrls()).to.be.empty
 
     it "warns but does not exit when is forked pr and parallel", ->
@@ -670,25 +673,6 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
-          record: true
-          snapshot: true
-          ciBuildId: "ciBuildId123"
-          expectedExitCode: 0
-        })
-        .then ->
-          urls = getRequestUrls()
-
-          expect(urls).to.deep.eq([
-            "POST /runs"
-          ])
-
-      it "warns but proceeds when tagging without parallelization", ->
-        process.env.DISABLE_API_RETRIES = "true"
-
-        e2e.exec(@, {
-          key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
-          spec: "record_pass*"
-          tag: "nightly"
           record: true
           snapshot: true
           ciBuildId: "ciBuildId123"

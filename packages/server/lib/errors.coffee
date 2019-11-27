@@ -166,7 +166,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       There is likely something wrong with the request.
 
       #{displayFlags(arg1.flags, {
-        tag: "--tag",
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",

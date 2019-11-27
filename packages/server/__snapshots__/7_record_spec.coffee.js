@@ -858,7 +858,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coffe │
   │             e, record_uncaught_spec.coffee)                                                    │
   │ Searched:   cypress/integration/record*                                                        │
-  │ Params:     Tag: false, Group: prod-e2e, Parallel: true                                        │
+  │ Params:     Tag: nightly, Group: prod-e2e, Parallel: true                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -934,7 +934,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   │ Specs:      4 found (record_error_spec.coffee, record_fail_spec.coffee, record_pass_spec.coffe │
   │             e, record_uncaught_spec.coffee)                                                    │
   │ Searched:   cypress/integration/record*                                                        │
-  │ Params:     Tag: false, Group: prod-e2e, Parallel: true                                        │
+  │ Params:     Tag: nightly, Group: prod-e2e, Parallel: true                                      │
   │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -1528,6 +1528,8 @@ exports['e2e record api interaction errors create run 402 - unknown error errors
 We encountered an unexpected error talking to our servers.
 
 There is likely something wrong with the request.
+
+The --tag flag you passed was: 
 
 The server's response was:
 
