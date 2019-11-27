@@ -203,7 +203,6 @@ const childProcessKilled = (eventName, signal) => {
   return {
     description: `The Test Runner received event ${chalk.cyan(eventName)} with signal ${chalk.cyan(signal)}`,
     solution: solutionUnknown,
-    exitCode: 12,
   }
 }
 

@@ -75,8 +75,7 @@ Cypress Version: 1.2.3
 
 exports['child kill error object'] = {
   "description": "The Test Runner received event [36mexit[39m with signal [36mSIGKILL[39m",
-  "solution": "Please search Cypress documentation for possible solutions:\n\n  [34mhttps://on.cypress.io[39m\n\nCheck if there is a GitHub issue describing this crash:\n\n  [34mhttps://github.com/cypress-io/cypress/issues[39m\n\nConsider opening a new issue.",
-  "exitCode": 12
+  "solution": "Please search Cypress documentation for possible solutions:\n\n  [34mhttps://on.cypress.io[39m\n\nCheck if there is a GitHub issue describing this crash:\n\n  [34mhttps://github.com/cypress-io/cypress/issues[39m\n\nConsider opening a new issue."
 }
 
 exports['Error message'] = `
