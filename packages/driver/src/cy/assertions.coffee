@@ -67,6 +67,8 @@ create = (state, queue, retryFn) ->
     
     if isNestedCommand
       nestedIndex = state("queuedIndex")+1
+      parentChainerId = parentCommand.attributes.chainerId
+      nestedQueue = parentCommand.get("queue")
       for cmd in parentCommand.get("queue").slice(nestedIndex).get()
         if cmd.is("utility")
           continue
@@ -75,6 +77,19 @@ create = (state, queue, retryFn) ->
            assertions.push(cmd)
         else 
           break
+      ## if this is the last nested command get the assertions for the parent as well
+      if current is nestedQueue.last()
+        for cmd in queue.slice(index).get()
+          ## don't break on utilities, just skip over them
+          if cmd.is("utility")
+            continue
+
+          ## grab all of the queued commands which are
+          ## assertions and match our current chainerId
+          if cmd.is("assertion") and cmd.attributes.chainerId is parentChainerId
+            assertions.push(cmd)
+          else
+            break
     else
       for cmd in queue.slice(index).get()
         ## don't break on utilities, just skip over them
@@ -193,7 +208,7 @@ create = (state, queue, retryFn) ->
       catch e3
         finishAssertions(options.assertions)
         throw e3
-
+      console.log(_.isFunction(onRetry))
       if _.isFunction(onRetry)
         retryFn(onRetry, options)
 

@@ -317,11 +317,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         Cypress.once("command:enqueued", commandEnqueued)
       ## this is where we should do the queue
       ## run the command's fn with runnable's context
+      currentCommand = command.get("queue")
       try
+        result = undefined
         ret = command.get("fn").apply(state("ctx"), args)
-        if not _.isUndefined(command.get("queue"))
-           subjects = await runQueuedCommands(command)
-           [..., result] = subjects
+        if not _.isUndefined(ret) and _.isFunction(ret.then)
+            await ret.then ->
+                if not _.isUndefined(command.get("queue"))
+                  subjects = await runQueuedCommands(command)
+                  [..., result] = subjects
+                ret
       catch err
         throw err
       finally
