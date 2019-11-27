@@ -1427,7 +1427,7 @@ describe "src/cy/commands/xhr", ->
             })
 
     describe "response fixtures", ->
-      it "works if the JSON file is valid", ->
+      it "works if the JSON file has an object", ->
         cy
           .server()
           .route({
@@ -1439,7 +1439,7 @@ describe "src/cy/commands/xhr", ->
           .get('#trigger-xhr')
           .click()
 
-      it "works if the JSON file has content, null", ->
+      it "works if the JSON file has null content", ->
         cy
           .server()
           .route({
