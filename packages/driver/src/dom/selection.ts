@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import * as $document from './document'
 import * as $elements from './elements'
-// import * as $dom from '.'
 
 const debug = require('debug')('cypress:driver:selection')
 
@@ -72,10 +71,7 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
   const doc = $document.getDocumentFromElement(el)
 
   // NOTE: insertText will also handle '\n', and render newlines
-  // doc.execCommand('insertText', true, text)
-  let nativeUI = true
-
-  $elements.callNativeMethod(doc, 'execCommand', 'insertText', nativeUI, text)
+  return $elements.callNativeMethod(doc, 'execCommand', 'insertText', true, text)
 }
 
 // Keeping around native implementation
@@ -157,9 +153,6 @@ const deleteSelectionContents = function (el) {
 
     return
   }
-
-  // for input and textarea, update selected text with empty string
-  debug('replace input/textarea selectioncontents')
 
   return replaceSelectionContents(el, '')
 }
@@ -289,7 +282,6 @@ const moveCursorLeft = function (el) {
     selection.collapseToStart()
 
     return
-    // console.log('sdfasfsafasdf')
   }
 }
 
@@ -499,7 +491,6 @@ const moveSelectionToEnd = _.curry(_moveSelectionTo)(false)
 
 const moveSelectionToStart = _.curry(_moveSelectionTo)(true)
 
-// TODO: think about renaming this
 const replaceSelectionContents = function (el, key) {
   if ($elements.isContentEditable(el)) {
     _replaceSelectionContentsContentEditable(el, key)
@@ -522,8 +513,6 @@ const replaceSelectionContents = function (el, key) {
   }
 
   return false
-
-  // throw new Error('this should never happen')
 }
 
 const getCaretPosition = function (el) {
