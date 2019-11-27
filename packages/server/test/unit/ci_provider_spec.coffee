@@ -60,7 +60,7 @@ describe "lib/util/ci_provider", ->
       APPVEYOR_ACCOUNT_NAME: "appveyorAccountName"
       APPVEYOR_PROJECT_SLUG: "appveyorProjectSlug"
       APPVEYOR_BUILD_VERSION: "appveyorBuildVersion"
-      APPVEYOR_BUILD_NUMBER: "appveyorBuildNumber" 
+      APPVEYOR_BUILD_NUMBER: "appveyorBuildNumber"
       APPVEYOR_PULL_REQUEST_NUMBER: "appveyorPullRequestNumber"
       APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH: "appveyorPullRequestHeadRepoBranch"
 
