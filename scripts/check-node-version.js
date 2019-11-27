@@ -38,7 +38,7 @@ if (isWindows() && process.env.CIRCLECI) {
   } else if (realArch === 'x64') {
     assert.equal(nodeArch, 'x64', getErrMsg())
   } else {
-    throw new Error("cannot determine expected architecture, failing")
+    throw new Error('cannot determine expected architecture, failing')
   }
 }
 
