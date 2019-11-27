@@ -168,20 +168,21 @@ const versionMismatch = {
   solution: 'Install Cypress and verify app again',
 }
 
+const solutionUnknown = stripIndent`
+  Please search Cypress documentation for possible solutions:
+
+    ${chalk.blue(docsUrl)}
+
+  Check if there is a GitHub issue describing this crash:
+
+    ${chalk.blue(util.issuesUrl)}
+
+  Consider opening a new issue.
+`
 const unexpected = {
   description:
     'An unexpected error occurred while verifying the Cypress executable.',
-  solution: stripIndent`
-    Please search Cypress documentation for possible solutions:
-
-      ${chalk.blue(docsUrl)}
-
-    Check if there is a GitHub issue describing this crash:
-
-      ${chalk.blue(util.issuesUrl)}
-
-    Consider opening a new issue.
-  `,
+  solution: solutionUnknown,
 }
 
 const invalidCypressEnv = {
@@ -189,6 +190,21 @@ const invalidCypressEnv = {
     chalk.red('The environment variable with the reserved name "CYPRESS_ENV" is set.'),
   solution: chalk.red('Unset the "CYPRESS_ENV" environment variable and run Cypress again.'),
   exitCode: 11,
+}
+
+/**
+ * This error happens when CLI detects that the child Test Runner process
+ * was killed with a signal, like SIGBUS
+ * @see https://github.com/cypress-io/cypress/issues/5808
+ * @param {'close'|'event'} eventName Child close event name
+ * @param {string} signal Signal that closed the child process, like "SIGBUS"
+*/
+const childProcessKilled = (eventName, signal) => {
+  return {
+    description: `The Test Runner received event ${chalk.cyan(eventName)} with signal ${chalk.cyan(signal)}`,
+    solution: solutionUnknown,
+    exitCode: 12,
+  }
 }
 
 const removed = {
@@ -237,6 +253,16 @@ function getPlatformInfo () {
 function addPlatformInformation (info) {
   return getPlatformInfo().then((platform) => {
     return merge(info, { platform })
+  })
+}
+
+function getError (errorObject) {
+  return formErrorText(errorObject).then((errorMessage) => {
+    const err = new Error(errorMessage)
+
+    err.known = true
+
+    return err
   })
 }
 
@@ -355,6 +381,7 @@ module.exports = {
   // formError,
   formErrorText,
   throwFormErrorText,
+  getError,
   hr,
   errors: {
     nonZeroExitCodeXvfb,
@@ -373,5 +400,6 @@ module.exports = {
     removed,
     CYPRESS_RUN_BINARY,
     smokeTestFailure,
+    childProcessKilled,
   },
 }
