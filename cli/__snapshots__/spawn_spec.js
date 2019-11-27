@@ -1,5 +1,5 @@
 exports['lib/exec/spawn .start detects kill signal exits with error on SIGKILL 1'] = `
-The Test Runner received event [36mexit[39m with signal [36mSIGKILL[39m
+The Test Runner unexpectedly exited via a [36mexit[39m event with signal [36mSIGKILL[39m
 
 Please search Cypress documentation for possible solutions:
 
