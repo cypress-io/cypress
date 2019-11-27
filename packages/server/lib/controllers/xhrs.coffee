@@ -53,7 +53,7 @@ module.exports = {
         ## when data is null, JSON.stringify returns null.
         ## handle that case. 
         if data is null
-          data = []
+          data = ''
 
         chunk = Buffer.from(data, encoding)
 
