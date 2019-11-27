@@ -19,7 +19,7 @@ exports['e2e requests / passes'] = `
 
   redirects + requests
     ✓ gets and sets cookies from cy.request
-    ✓ visits idempotant
+    ✓ visits to a different superdomain will be resolved twice
     ✓ automatically follows redirects
     ✓ can turn off following redirects that set a cookie
     ✓ can turn off automatically following redirects
