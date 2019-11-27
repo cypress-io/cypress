@@ -15,8 +15,11 @@ proc.stdout.on('data', (data) => {
 proc.stdout.on('end', async () => {
   await Promise.delay(500)
 
-  if (log.match(/[0-9]+ passing.*\n\s*[0-9]+ failing/g) !== null) {
-    process.exit(1)
+  const result = log.match(/\d+ passing.*\n\s*(\d+) failing/)
+  const numFailing = result && parseInt(result[1], 10)
+
+  if (!isNaN(numFailing)) {
+    process.exit(numFailing)
   }
 
   process.exit(0)
