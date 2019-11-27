@@ -1014,7 +1014,7 @@ describe('src/cy/commands/actions/type', () => {
         .should('have.value', '10')
       })
 
-      it('overwrites text when selectAll in focus handler in date', () => {
+      it('overwrites text when selectAll in focus handler in email', () => {
         const input = cy.$$('#email-without-value')
 
         input
