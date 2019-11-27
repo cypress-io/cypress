@@ -64,7 +64,7 @@ const isHidden = (el, name = 'isHidden()') => {
   // when an element is scaled to 0 in one axis
   // it is not visible to users.
   // So, it is hidden.
-  if (elIsHiddenByTransfrom($el)) {
+  if (elIsHiddenByTransform($el)) {
     return true
   }
 
@@ -162,7 +162,7 @@ const elHasVisibilityCollapse = ($el) => {
 }
 
 // This function checks 2 things that can happen: scale and rotate
-const elIsHiddenByTransfrom = ($el) => {
+const elIsHiddenByTransform = ($el) => {
   // We need to see the final calculation of the element.
   const el = $el[0]
 
@@ -359,7 +359,7 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
   }
 
-  if (elIsHiddenByTransfrom($parent)) {
+  if (elIsHiddenByTransform($parent)) {
     return true
   }
 
@@ -483,7 +483,7 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   }
 
-  if (elIsHiddenByTransfrom($el)) {
+  if (elIsHiddenByTransform($el)) {
     return `This element '${node}' is not visible because it is hidden by transform.`
   }
 
