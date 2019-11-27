@@ -76,10 +76,12 @@ if (isGteNode12()) {
   )
 }
 
-commandAndArguments.args.push(
-  'node_modules/.bin/_mocha',
-  run
-)
+if (!isWindows()) {
+  commandAndArguments.args.push(
+    'node_modules/.bin/_mocha',
+    run
+  )
+}
 
 if (options.fgrep) {
   commandAndArguments.args.push(

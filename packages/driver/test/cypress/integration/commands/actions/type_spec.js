@@ -2837,6 +2837,33 @@ describe('src/cy/commands/actions/type', () => {
           .should('have.value', 'foobar')
         })
 
+        // https://github.com/cypress-io/cypress/issues/5622
+        it('ignores duplicate modifiers in one command', () => {
+          const events = []
+
+          cy.$$('input:first').on('keydown', (e) => {
+            events.push(['keydown', e.key])
+          }).on('keyup', (e) => {
+            events.push(['keyup', e.key])
+          })
+
+          cy.get('input:first')
+          .type('{ctrl}{meta}a{control}b')
+          .should('have.value', 'ab')
+          .then(() => {
+            expect(events).deep.eq([
+              ['keydown', 'Control'],
+              ['keydown', 'Meta'],
+              ['keydown', 'a'],
+              ['keyup', 'a'],
+              ['keydown', 'b'],
+              ['keyup', 'b'],
+              ['keyup', 'Control'],
+              ['keyup', 'Meta'],
+            ])
+          })
+        })
+
         it('does not maintain modifiers for subsequent click commands', (done) => {
           const $button = cy.$$('button:first')
           let mouseDownEvent = null
