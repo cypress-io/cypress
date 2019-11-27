@@ -829,15 +829,17 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
         window: s.window
         document: s.document
         $autIframe: s.$autIframe
+        done: s.done
       }
 
       ## reset state back to empty object
       console.error(state("canceled"))
+      console.error(state("done"))
       state.reset()
       console.error("resetting state")
       ## and then restore these backed up props
       state(backup)
-
+      console.error(state("done"))
       queue.reset()
       timers.reset()
 
@@ -1114,10 +1116,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
               ## So don't try to end it again
               ## if we are canceled but we still have a runnable
               ## then it's ok to end it
-              if not state("canceled") or not _.isUndefined(runnable) 
+              if  not state("done") or not _.isUndefined(runnable) 
                 doneEarly()
                 originalDone(err)
                 state("runnable", undefined)
+                state("done", true)
                 runnable = undefined
               ## return null else we there are situations
               ## where returning a regular bluebird promise
