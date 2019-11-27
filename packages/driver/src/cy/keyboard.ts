@@ -329,6 +329,8 @@ const validateTyping = (
   let isWeek = false
   let isDateTime = false
 
+  // use 'type' attribute instead of prop since browsers without
+  // support for attribute input type will have type prop of 'text'
   if ($elements.isInput(el)) {
     isDate = $elements.isAttrType(el, 'date')
     isTime = $elements.isAttrType(el, 'time')
