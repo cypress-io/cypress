@@ -19,8 +19,9 @@ exports['e2e requests / passes'] = `
 
   redirects + requests
     ✓ gets and sets cookies from cy.request
-    ✓ visits idempotant
+    ✓ visits to a different superdomain will be resolved twice
     ✓ automatically follows redirects
+    ✓ can turn off following redirects that set a cookie
     ✓ can turn off automatically following redirects
     ✓ follows all redirects even when they change methods
     ✓ can submit json body
@@ -32,14 +33,14 @@ exports['e2e requests / passes'] = `
     ✓ issue #375: does not duplicate request cookies on 302 redirect
 
 
-  12 passing
+  13 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        12                                                                               │
-  │ Passing:      12                                                                               │
+  │ Tests:        13                                                                               │
+  │ Passing:      13                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -63,9 +64,9 @@ exports['e2e requests / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  request_spec.coffee                      XX:XX       12       12        -        -        - │
+  │ ✔  request_spec.coffee                      XX:XX       13       13        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       12       12        -        -        -  
+    ✔  All specs passed!                        XX:XX       13       13        -        -        -  
 
 
 `
@@ -125,33 +126,9 @@ Common situations why this would fail:
 The stack trace for this error is:
 
 RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
-    at stack trace line
+    [stack trace lines]
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -266,18 +243,7 @@ Headers: {
 }
 Body: Service Unavailable
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -401,18 +367,7 @@ Body: <!DOCTYPE html>
 <pre>Cannot GET /myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong</pre>
 </body>
 </html>
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

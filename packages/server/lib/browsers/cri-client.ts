@@ -84,15 +84,20 @@ const maybeDebugCdpMessages = (cri) => {
       data = _
       .chain(JSON.parse(data))
       .tap((data) => {
-        const str = _.get(data, 'params.data')
+        ([
+          'params.data', // screencast frame data
+          'result.data', // screenshot data
+        ]).forEach((truncatablePath) => {
+          const str = _.get(data, truncatablePath)
 
-        if (!_.isString(str)) {
-          return
-        }
+          if (!_.isString(str)) {
+            return
+          }
 
-        data.params.data = _.truncate(str, {
-          length: 100,
-          omission: `... [truncated string of total bytes: ${str.length}]`,
+          _.set(data, truncatablePath, _.truncate(str, {
+            length: 100,
+            omission: `... [truncated string of total bytes: ${str.length}]`,
+          }))
         })
 
         return data
