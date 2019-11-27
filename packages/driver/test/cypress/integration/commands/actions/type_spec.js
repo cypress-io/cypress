@@ -995,8 +995,6 @@ describe('src/cy/commands/actions/type', () => {
           e.currentTarget.select()
         })
 
-        // input[0].setSelectionRange(0,0)
-
         cy.get('#input-without-value')
         .type('foo')
         .should('have.value', 'foo')
