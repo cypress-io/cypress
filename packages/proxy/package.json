@@ -1,5 +1,5 @@
 {
-  "name": "@packages/network",
+  "name": "@packages/proxy",
   "version": "0.0.0",
   "private": true,
   "main": "index.js",
@@ -10,21 +10,22 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
-    "concat-stream": "1.6.2",
+    "charset": "1.0.1",
+    "common-tags": "1.8.0",
     "debug": "4.1.1",
+    "grapheme-splitter": "1.0.4",
+    "iconv-lite": "0.5.0",
     "lodash": "4.17.15",
-    "parse-domain": "2.3.4",
-    "proxy-from-env": "1.0.0"
+    "pumpify": "1.5.1",
+    "through": "2.3.8",
+    "utf8-stream": "0.0.0"
   },
   "devDependencies": {
-    "@cypress/debugging-proxy": "2.0.1",
-    "@types/concat-stream": "1.6.0",
-    "bin-up": "1.2.2",
-    "express": "4.16.4",
-    "request": "2.88.0",
-    "request-promise": "4.2.4",
-    "sinon": "7.3.1",
-    "sinon-chai": "3.3.0"
+    "@cypress/sinon-chai": "^2.9.0",
+    "@types/express": "^4.17.1",
+    "bin-up": "1.2.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
   },
   "files": [
     "lib"

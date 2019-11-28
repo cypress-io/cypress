@@ -1,8 +1,7 @@
-require('../spec_helper')
+import { cors } from '../../lib'
+import { expect } from 'chai'
 
-const cors = require(`${root}lib/util/cors`)
-
-describe('lib/util/cors', () => {
+describe('lib/cors', () => {
   context('.parseUrlIntoDomainTldPort', () => {
     beforeEach(function () {
       this.isEq = (url, obj) => {

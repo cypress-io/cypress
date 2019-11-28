@@ -1,5 +1,3 @@
-// Tests located in packages/server/test/unit/security_spec
-
 const pumpify = require('pumpify')
 const { replaceStream } = require('./replace_stream')
 const utf8Stream = require('utf8-stream')
@@ -9,7 +7,7 @@ const topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=]==?\s*(?:wind
 const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(top|parent)([.])(location|frames)/g
 const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
 
-const strip = (html) => {
+export function strip (html: string) {
   return html
   .replace(topOrParentEqualityBeforeRe, '$1self')
   .replace(topOrParentEqualityAfterRe, 'self$2')
@@ -17,7 +15,7 @@ const strip = (html) => {
   .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
 }
 
-const stripStream = () => {
+export function stripStream () {
   return pumpify(
     utf8Stream(),
     replaceStream(
@@ -35,10 +33,4 @@ const stripStream = () => {
       ]
     )
   )
-}
-
-module.exports = {
-  strip,
-
-  stripStream,
 }
