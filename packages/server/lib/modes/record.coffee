@@ -80,7 +80,7 @@ throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) ->
     )
 
 throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag) ->
-  if not record and _.some([ciBuildId, parallel, group])
+  if not record and _.some([ciBuildId, parallel, group, tag])
     errors.throw("RECORD_PARAMS_WITHOUT_RECORDING", {
       ciBuildId,
       tag,
@@ -448,7 +448,7 @@ createRun = Promise.method (options = {}) ->
           when "STALE_RUN"
             errors.throw("DASHBOARD_STALE_RUN", {
               runUrl,
-              tag,
+              tags,
               group,
               parallel,
               ciBuildId,

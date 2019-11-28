@@ -241,7 +241,6 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
-        tags: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
