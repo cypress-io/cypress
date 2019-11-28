@@ -12,7 +12,7 @@ const splitter: IGraphemeSplitter = new GraphemeSplitter()
  * UTF-8 grapheme aware stream replacer
  * https://github.com/cypress-io/cypress/pull/4984
  */
-function replaceStream (patterns: RegExp | RegExp[], replacements: string | string[], options = { maxTailLength: 100 }) {
+export function replaceStream (patterns: RegExp | RegExp[], replacements: string | string[], options = { maxTailLength: 100 }) {
   if (!Array.isArray(patterns)) {
     patterns = [patterns]
   }
@@ -77,8 +77,4 @@ function replaceStream (patterns: RegExp | RegExp[], replacements: string | stri
 
     this.queue(null)
   })
-}
-
-module.exports = {
-  replaceStream,
 }

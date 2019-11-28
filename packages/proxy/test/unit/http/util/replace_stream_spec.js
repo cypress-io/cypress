@@ -29,11 +29,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require('../spec_helper')
-
-const concatStream = require('concat-stream')
-const { passthruStream } = require(`${root}lib/util/passthru_stream`)
-const { replaceStream } = require(`${root}lib/util/replace_stream`)
+const { concatStream } = require('@packages/network')
+const { expect } = require('chai')
+const { PassThrough } = require('stream')
+const { replaceStream } = require(`../../../../lib/http/util/replace_stream`)
 
 const script = [
   '<script type="text/javascript">',
@@ -52,7 +51,7 @@ describe('lib/util/replace_stream', function () {
       return done()
     })
 
-    const pt = passthruStream()
+    const pt = PassThrough()
 
     const rs = replaceStream(/foobar/, 'replaced')
 

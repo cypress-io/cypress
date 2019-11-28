@@ -86,7 +86,7 @@
     "@types/markdown-it": "0.0.9",
     "@types/mini-css-extract-plugin": "0.8.0",
     "@types/mocha": "5.2.7",
-    "@types/node": "11.12.0",
+    "@types/node": "12.12.14",
     "@types/ramda": "0.25.47",
     "@types/react-dom": "16.9.4",
     "@types/request-promise": "4.1.42",
@@ -163,6 +163,7 @@
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "terminal-banner": "1.1.0",
+    "through": "2.3.8",
     "ts-node": "8.3.0",
     "typescript": "3.5.3",
     "vinyl-paths": "2.1.0"
