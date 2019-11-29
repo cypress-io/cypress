@@ -1,5 +1,5 @@
-import _ from 'lodash'
 import { computed, observable } from 'mobx'
+import { browserIcon } from '../lib/utils'
 
 export default class Browser {
   @observable displayName
@@ -26,14 +26,6 @@ export default class Browser {
   }
 
   @computed get icon () {
-    if (this.family === 'electron') {
-      return 'chrome'
-    }
-
-    return _
-    .chain(['chrome', 'firefox'])
-    .find(_.matches(this.family))
-    .defaultTo('globe')
-    .value()
+    return browserIcon(this.family)
   }
 }
