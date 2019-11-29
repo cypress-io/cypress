@@ -13,7 +13,7 @@
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/runner needs: npm run build'",
     "pretest": "npm run check-deps-pre",
-    "test": "mocha src/**/*.spec.*",
+    "test": "node ../../scripts/test-unit",
     "test-watch": "npm run test -- --watch",
     "prewatch": "npm run check-deps-pre",
     "watch": "webpack --watch --progress"
