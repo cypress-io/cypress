@@ -425,7 +425,7 @@ describe('Specs List', function () {
 
         it('updates spec icon', function () {
           cy.get('@firstSpec').find('i').should('have.class', 'fa-dot-circle')
-          cy.get('@firstSpec').find('i').should('not.have.class', 'fa-file-code-o')
+          cy.get('@firstSpec').find('i').should('not.have.class', 'fa-file-code')
         })
 
         it('sets spec as active', () => {
@@ -461,8 +461,8 @@ describe('Specs List', function () {
       })
 
       it('updates spec icon', function () {
-        cy.get('@firstSpec').find('i').should('not.have.class', 'fa-dot-circle')
-        cy.get('@secondSpec').find('i').should('have.class', 'fa-dot-circle-o')
+        cy.get('@firstSpec').find('i').should('not.have.class', 'fas fa-dot-circle')
+        cy.get('@secondSpec').find('i').should('have.class', 'far fa-dot-circle')
       })
 
       it('updates active spec', function () {
