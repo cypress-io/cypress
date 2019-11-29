@@ -94,7 +94,7 @@ class Test extends Component<Props> {
           </div>
           <div className='runnable-controls'>
             <Tooltip placement='top' title='One or more commands failed'>
-              <i className='fa fa-warning'></i>
+              <i className='fas fa-exclamation-triangle'></i>
             </Tooltip>
           </div>
         </div>

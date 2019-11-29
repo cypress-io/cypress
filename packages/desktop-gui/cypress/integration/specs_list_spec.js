@@ -186,7 +186,7 @@ describe('Specs List', function () {
           })
 
           it('updates spec icon', function () {
-            cy.get('@allSpecs').find('i').should('have.class', 'fa-dot-circle-o')
+            cy.get('@allSpecs').find('i').should('have.class', 'fa-dot-circle')
 
             cy.get('@allSpecs').find('i').should('not.have.class', 'fa-play')
           })
@@ -424,7 +424,7 @@ describe('Specs List', function () {
         })
 
         it('updates spec icon', function () {
-          cy.get('@firstSpec').find('i').should('have.class', 'fa-dot-circle-o')
+          cy.get('@firstSpec').find('i').should('have.class', 'fa-dot-circle')
           cy.get('@firstSpec').find('i').should('not.have.class', 'fa-file-code-o')
         })
 
@@ -439,7 +439,7 @@ describe('Specs List', function () {
         })
 
         it('updates spec icon', () => {
-          cy.get('@deepSpec').find('i').should('have.class', 'fa-dot-circle-o')
+          cy.get('@deepSpec').find('i').should('have.class', 'fa-dot-circle')
         })
 
         it('sets spec as active', () => {
@@ -461,7 +461,7 @@ describe('Specs List', function () {
       })
 
       it('updates spec icon', function () {
-        cy.get('@firstSpec').find('i').should('not.have.class', 'fa-dot-circle-o')
+        cy.get('@firstSpec').find('i').should('not.have.class', 'fa-dot-circle')
         cy.get('@secondSpec').find('i').should('have.class', 'fa-dot-circle-o')
       })
 

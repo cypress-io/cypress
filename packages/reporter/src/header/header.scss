@@ -120,7 +120,7 @@
       font-size: 90%;
       margin: 5px;
 
-      &.fa-repeat {
+      &.fa-redo {
         font-size: 112%;
         position: relative;
         top: 1px;
@@ -135,7 +135,7 @@
       }
 
       i:first-child {
-        @extend .#{$fa-css-prefix}-circle-o;
+        @extend .#{$fa-css-prefix}-circle;
         color: #999;
         font-size: 80%;
         margin-right: 3px;
