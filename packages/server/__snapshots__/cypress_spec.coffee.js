@@ -206,7 +206,6 @@ You passed the --parallel flag, but this run group was originally created withou
 
 The existing run is: https://dashboard.cypress.io/runs/12345
 
-The --tag flag you passed was: 
 The --group flag you passed was: electron-smoke-tests
 The --ciBuildId flag you passed was: ciBuildId123
 
