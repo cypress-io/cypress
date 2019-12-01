@@ -40,7 +40,7 @@
     "execa": "0.10.0",
     "executable": "4.1.1",
     "extract-zip": "1.6.7",
-    "fs-extra": "5.0.0",
+    "fs-extra": "7.0.1",
     "getos": "3.1.1",
     "is-ci": "1.2.1",
     "is-installed-globally": "0.1.0",
