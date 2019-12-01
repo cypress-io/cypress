@@ -153,7 +153,7 @@
     "pretty-ms": "5.0.0",
     "print-arch": "1.0.0",
     "proxyquire": "2.1.0",
-    "ramda": "0.24.1",
+    "ramda": "0.26.1",
     "request": "2.88.0",
     "request-promise": "4.2.4",
     "shelljs": "0.8.3",
