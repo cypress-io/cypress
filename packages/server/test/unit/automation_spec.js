@@ -1,29 +1,38 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-_ = require("lodash")
-Automation = require("#{root}lib/automation")
+const _ = require("lodash");
+const Automation = require(`${root}lib/automation`);
 
-describe "lib/automation", ->
-  beforeEach ->
-    @automation = Automation.create()
+describe("lib/automation", function() {
+  beforeEach(function() {
+    return this.automation = Automation.create();
+  });
 
-  context ".reset", ->
-    it "resets middleware", ->
-      m = @automation.get()
+  return context(".reset", () =>
+    it("resets middleware", function() {
+      const m = this.automation.get();
 
-      ## all props are null by default
-      expect(_.omitBy(m, _.isNull)).to.deep.eq({})
+      //# all props are null by default
+      expect(_.omitBy(m, _.isNull)).to.deep.eq({});
 
-      onRequest = ->
-      onPush = ->
-      @automation.use({ onRequest, onPush })
+      const onRequest = function() {};
+      const onPush = function() {};
+      this.automation.use({ onRequest, onPush });
 
-      expect(@automation.get().onRequest).to.eq(onRequest)
-      expect(@automation.get().onPush).to.eq(onPush)
+      expect(this.automation.get().onRequest).to.eq(onRequest);
+      expect(this.automation.get().onPush).to.eq(onPush);
 
-      @automation.reset()
+      this.automation.reset();
 
-      expect(@automation.get().onRequest).to.be.null
+      expect(this.automation.get().onRequest).to.be.null;
 
-      ## keep around onPush
-      expect(@automation.get().onPush).to.eq(onPush)
+      //# keep around onPush
+      return expect(this.automation.get().onPush).to.eq(onPush);
+    })
+  );
+});
