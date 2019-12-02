@@ -1,7 +1,7 @@
 _             = require("lodash")
 EE            = require("events")
 net           = require("net")
-Promise       = require("bluebird")
+Bluebird       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers:electron")
 { cors }      = require("@packages/network")
 menu          = require("../gui/menu")
@@ -32,9 +32,10 @@ tryToCall = (win, method) ->
     debug("got error calling window method:", err.stack)
 
 getAutomation = (win) ->
-  sendCommand = (args...) =>
-    win.webContents.debugger.sendCommand
-    .apply(win.webContents.debugger, args)
+  sendCommand = Bluebird.method (args...) =>
+    tryToCall win, ->
+      win.webContents.debugger.sendCommand
+      .apply(win.webContents.debugger, args)
 
   CdpAutomation(sendCommand)
 
@@ -114,7 +115,7 @@ module.exports = {
       win.on e, ->
         debug("%s fired on the BrowserWindow %o", e, { browserWindowUrl: url })
 
-    Promise.try =>
+    Bluebird.try =>
       @_attachDebugger(win.webContents)
     .then =>
       if ua = options.userAgent
@@ -124,7 +125,7 @@ module.exports = {
         if ps = options.proxyServer
           @_setProxy(win.webContents, ps)
 
-      Promise.join(
+      Bluebird.join(
         setProxy(),
         @_clearCache(win.webContents)
       )
@@ -170,7 +171,7 @@ module.exports = {
 
   _enableDebugger: (webContents) ->
     debug("debugger: enable Console and Network")
-    Promise.join(
+    Bluebird.join(
       webContents.debugger.sendCommand("Console.enable"),
       webContents.debugger.sendCommand("Network.enable")
     )
@@ -223,7 +224,7 @@ module.exports = {
 
       debug("browser window options %o", _.omitBy(options, _.isFunction))
 
-      Promise
+      Bluebird
       .try =>
         ## bail if we're not registered to this event
         return options if not plugins.has("before:browser:launch")
