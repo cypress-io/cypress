@@ -56,7 +56,7 @@ module.exports = {
         ## then display a warning to the user
         if not options.invokedFromCli
           warning("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
-        
+
         ## just run the gui code directly here
         ## and pass our options directly to main
         debug("running Electron currently")
@@ -128,6 +128,13 @@ module.exports = {
 
   start: (argv = []) ->
     debug("starting cypress with argv %o", argv)
+
+    # if the CLI passed "--" as the first argument to prevent Electron
+    # crashing on Windows https://github.com/cypress-io/cypress/issues/5466
+    # then remove it
+    if argv[0] == "--"
+      debug("stripped leading --")
+      argv = argv.slice(1)
 
     options = require("./util/args").toObject(argv)
 

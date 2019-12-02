@@ -306,6 +306,12 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
         @expectExitWith(0)
 
+    it.only "strips leading -- argument if present", ->
+      cypress.start(["--", "--run-project=#{@todosPath}"])
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+        @expectExitWith(0)
+
     it "runs project headlessly and exits with exit code 10", ->
       sinon.stub(runMode, "runSpecs").resolves({ totalFailed: 10 })
 
