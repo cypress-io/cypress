@@ -1,900 +1,1070 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-path         = require("path")
-Promise      = require("bluebird")
-commitInfo   = require("@cypress/commit-info")
-Fixtures     = require("../support/helpers/fixtures")
-api          = require("#{root}lib/api")
-user         = require("#{root}lib/user")
-cache        = require("#{root}lib/cache")
-errors       = require("#{root}lib/errors")
-config       = require("#{root}lib/config")
-scaffold     = require("#{root}lib/scaffold")
-Server       = require("#{root}lib/server")
-Project      = require("#{root}lib/project")
-Automation   = require("#{root}lib/automation")
-savedState   = require("#{root}lib/saved_state")
-preprocessor = require("#{root}lib/plugins/preprocessor")
-plugins      = require("#{root}lib/plugins")
-fs           = require("#{root}lib/util/fs")
-settings     = require("#{root}lib/util/settings")
+const path         = require("path");
+const Promise      = require("bluebird");
+const commitInfo   = require("@cypress/commit-info");
+const Fixtures     = require("../support/helpers/fixtures");
+const api          = require(`${root}lib/api`);
+const user         = require(`${root}lib/user`);
+const cache        = require(`${root}lib/cache`);
+const errors       = require(`${root}lib/errors`);
+const config       = require(`${root}lib/config`);
+const scaffold     = require(`${root}lib/scaffold`);
+const Server       = require(`${root}lib/server`);
+const Project      = require(`${root}lib/project`);
+const Automation   = require(`${root}lib/automation`);
+const savedState   = require(`${root}lib/saved_state`);
+const preprocessor = require(`${root}lib/plugins/preprocessor`);
+const plugins      = require(`${root}lib/plugins`);
+const fs           = require(`${root}lib/util/fs`);
+const settings     = require(`${root}lib/util/settings`);
 
-describe "lib/project", ->
-  beforeEach ->
-    Fixtures.scaffold()
+describe("lib/project", function() {
+  beforeEach(function() {
+    Fixtures.scaffold();
 
-    @todosPath    = Fixtures.projectPath("todos")
-    @idsPath      = Fixtures.projectPath("ids")
-    @pristinePath = Fixtures.projectPath("pristine")
+    this.todosPath    = Fixtures.projectPath("todos");
+    this.idsPath      = Fixtures.projectPath("ids");
+    this.pristinePath = Fixtures.projectPath("pristine");
 
-    settings.read(@todosPath).then (obj = {}) =>
-      {@projectId} = obj
+    return settings.read(this.todosPath).then((obj = {}) => {
+      ({projectId: this.projectId} = obj);
 
-      config.set({projectName: "project", projectRoot: "/foo/bar"})
-      .then (@config) =>
-        @project = Project(@todosPath)
+      return config.set({projectName: "project", projectRoot: "/foo/bar"})
+      .then(config1 => {
+        this.config = config1;
+        return this.project = Project(this.todosPath);
+      });
+    });
+  });
 
-  afterEach ->
-    Fixtures.remove()
-    @project?.close()
+  afterEach(function() {
+    Fixtures.remove();
+    return (this.project != null ? this.project.close() : undefined);
+  });
 
-  it "requires a projectRoot", ->
-    fn = -> Project()
-    expect(fn).to.throw "Instantiating lib/project requires a projectRoot!"
+  it("requires a projectRoot", function() {
+    const fn = () => Project();
+    return expect(fn).to.throw("Instantiating lib/project requires a projectRoot!");
+  });
 
-  it "always resolves the projectRoot to be absolute", ->
-    p = Project("../foo/bar")
-    expect(p.projectRoot).not.to.eq("../foo/bar")
-    expect(p.projectRoot).to.eq(path.resolve("../foo/bar"))
+  it("always resolves the projectRoot to be absolute", function() {
+    const p = Project("../foo/bar");
+    expect(p.projectRoot).not.to.eq("../foo/bar");
+    return expect(p.projectRoot).to.eq(path.resolve("../foo/bar"));
+  });
 
-  context "#saveState", ->
-    beforeEach ->
-      integrationFolder = "the/save/state/test"
-      sinon.stub(config, "get").withArgs(@todosPath).resolves({ integrationFolder })
-      sinon.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
-      @project.cfg = { integrationFolder }
-      savedState(@project.projectRoot)
-      .then (state) -> state.remove()
+  context("#saveState", function() {
+    beforeEach(function() {
+      const integrationFolder = "the/save/state/test";
+      sinon.stub(config, "get").withArgs(this.todosPath).resolves({ integrationFolder });
+      sinon.stub(this.project, "determineIsNewProject").withArgs(integrationFolder).resolves(false);
+      this.project.cfg = { integrationFolder };
+      return savedState(this.project.projectRoot)
+      .then(state => state.remove());
+    });
 
-    afterEach ->
-      savedState(@project.projectRoot)
-      .then (state) -> state.remove()
+    afterEach(function() {
+      return savedState(this.project.projectRoot)
+      .then(state => state.remove());
+    });
 
-    it "saves state without modification", ->
-      @project.saveState()
-      .then (state) ->
-        expect(state).to.deep.eq({})
+    it("saves state without modification", function() {
+      return this.project.saveState()
+      .then(state => expect(state).to.deep.eq({}));
+    });
 
-    it "adds property", ->
-      @project.saveState()
-      .then () => @project.saveState({ foo: 42 })
-      .then (state) ->
-        expect(state).to.deep.eq({ foo: 42 })
+    it("adds property", function() {
+      return this.project.saveState()
+      .then(() => this.project.saveState({ foo: 42 }))
+      .then(state => expect(state).to.deep.eq({ foo: 42 }));
+    });
 
-    it "adds second property", ->
-      @project.saveState()
-      .then () => @project.saveState({ foo: 42 })
-      .then () => @project.saveState({ bar: true })
-      .then (state) ->
-        expect(state).to.deep.eq({ foo: 42, bar: true })
+    it("adds second property", function() {
+      return this.project.saveState()
+      .then(() => this.project.saveState({ foo: 42 }))
+      .then(() => this.project.saveState({ bar: true }))
+      .then(state => expect(state).to.deep.eq({ foo: 42, bar: true }));
+    });
 
-    it "modifes property", ->
-      @project.saveState()
-      .then () => @project.saveState({ foo: 42 })
-      .then () => @project.saveState({ foo: 'modified' })
-      .then (state) ->
-        expect(state).to.deep.eq({ foo: 'modified' })
+    return it("modifes property", function() {
+      return this.project.saveState()
+      .then(() => this.project.saveState({ foo: 42 }))
+      .then(() => this.project.saveState({ foo: 'modified' }))
+      .then(state => expect(state).to.deep.eq({ foo: 'modified' }));
+    });
+  });
 
-  context "#getConfig", ->
-    integrationFolder = "foo/bar/baz"
-    beforeEach ->
-      sinon.stub(config, "get").withArgs(@todosPath, {foo: "bar"}).resolves({ baz: "quux", integrationFolder })
-      sinon.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
+  context("#getConfig", function() {
+    const integrationFolder = "foo/bar/baz";
+    beforeEach(function() {
+      sinon.stub(config, "get").withArgs(this.todosPath, {foo: "bar"}).resolves({ baz: "quux", integrationFolder });
+      return sinon.stub(this.project, "determineIsNewProject").withArgs(integrationFolder).resolves(false);
+    });
 
-    it "calls config.get with projectRoot + options + saved state", ->
-      savedState(@todosPath)
-      .then (state) =>
-        sinon.stub(state, "get").resolves({ reporterWidth: 225 })
-        @project.getConfig({foo: "bar"})
-        .then (cfg) ->
+    it("calls config.get with projectRoot + options + saved state", function() {
+      return savedState(this.todosPath)
+      .then(state => {
+        sinon.stub(state, "get").resolves({ reporterWidth: 225 });
+        return this.project.getConfig({foo: "bar"})
+        .then(cfg =>
           expect(cfg).to.deep.eq({
-            integrationFolder
-            isNewProject: false
-            baz: "quux"
+            integrationFolder,
+            isNewProject: false,
+            baz: "quux",
             state: {
               reporterWidth: 225
             }
           })
+        );
+      });
+    });
 
-    it "resolves if cfg is already set", ->
-      @project.cfg = {
-        integrationFolder: integrationFolder,
+    it("resolves if cfg is already set", function() {
+      this.project.cfg = {
+        integrationFolder,
         foo: "bar"
-      }
+      };
 
-      @project.getConfig()
-      .then (cfg) ->
+      return this.project.getConfig()
+      .then(cfg =>
         expect(cfg).to.deep.eq({
-          integrationFolder: integrationFolder,
+          integrationFolder,
           foo: "bar"
         })
+      );
+    });
 
-    it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
-      savedState(@todosPath)
-      .then (state) =>
-        sinon.stub(state, "get").resolves({ showedOnBoardingModal: true })
+    it("sets cfg.isNewProject to true when state.showedOnBoardingModal is true", function() {
+      return savedState(this.todosPath)
+      .then(state => {
+        sinon.stub(state, "get").resolves({ showedOnBoardingModal: true });
 
-        @project.getConfig({foo: "bar"})
-        .then (cfg) ->
+        return this.project.getConfig({foo: "bar"})
+        .then(cfg =>
           expect(cfg).to.deep.eq({
-            integrationFolder
-            isNewProject: false
-            baz: "quux"
+            integrationFolder,
+            isNewProject: false,
+            baz: "quux",
             state: {
               showedOnBoardingModal: true
             }
           })
+        );
+      });
+    });
 
-    it "does not set cfg.isNewProject when cfg.isTextTerminal", ->
-      cfg = { isTextTerminal: true }
+    return it("does not set cfg.isNewProject when cfg.isTextTerminal", function() {
+      const cfg = { isTextTerminal: true };
 
-      config.get.resolves(cfg)
+      config.get.resolves(cfg);
 
-      sinon.stub(@project, "_setSavedState").resolves(cfg)
+      sinon.stub(this.project, "_setSavedState").resolves(cfg);
 
-      @project.getConfig({foo: "bar"})
-      .then (cfg) ->
-        expect(cfg).not.to.have.property("isNewProject")
+      return this.project.getConfig({foo: "bar"})
+      .then(cfg => expect(cfg).not.to.have.property("isNewProject"));
+    });
+  });
 
-  context "#open", ->
-    beforeEach ->
-      sinon.stub(@project, "watchSettingsAndStartWebsockets").resolves()
-      sinon.stub(@project, "checkSupportFile").resolves()
-      sinon.stub(@project, "scaffold").resolves()
-      sinon.stub(@project, "getConfig").resolves(@config)
-      sinon.stub(Server.prototype, "open").resolves([])
-      sinon.stub(Server.prototype, "reset")
-      sinon.stub(config, "updateWithPluginValues").returns(@config)
-      sinon.stub(scaffold, "plugins").resolves()
-      sinon.stub(plugins, "init").resolves()
+  context("#open", function() {
+    beforeEach(function() {
+      sinon.stub(this.project, "watchSettingsAndStartWebsockets").resolves();
+      sinon.stub(this.project, "checkSupportFile").resolves();
+      sinon.stub(this.project, "scaffold").resolves();
+      sinon.stub(this.project, "getConfig").resolves(this.config);
+      sinon.stub(Server.prototype, "open").resolves([]);
+      sinon.stub(Server.prototype, "reset");
+      sinon.stub(config, "updateWithPluginValues").returns(this.config);
+      sinon.stub(scaffold, "plugins").resolves();
+      return sinon.stub(plugins, "init").resolves();
+    });
 
-    it "calls #watchSettingsAndStartWebsockets with options + config", ->
-      opts = {changeEvents: false, onAutomationRequest: ->}
-      @project.cfg = {}
-      @project.open(opts).then =>
-        expect(@project.watchSettingsAndStartWebsockets).to.be.calledWith(opts, @project.cfg)
+    it("calls #watchSettingsAndStartWebsockets with options + config", function() {
+      const opts = {changeEvents: false, onAutomationRequest() {}};
+      this.project.cfg = {};
+      return this.project.open(opts).then(() => {
+        return expect(this.project.watchSettingsAndStartWebsockets).to.be.calledWith(opts, this.project.cfg);
+      });
+    });
 
-    it "calls #scaffold with server config promise", ->
-      @project.open().then =>
-        expect(@project.scaffold).to.be.calledWith(@config)
+    it("calls #scaffold with server config promise", function() {
+      return this.project.open().then(() => {
+        return expect(this.project.scaffold).to.be.calledWith(this.config);
+      });
+    });
 
-    it "calls #checkSupportFile with server config when scaffolding is finished", ->
-      @project.open().then =>
-        expect(@project.checkSupportFile).to.be.calledWith(@config)
+    it("calls #checkSupportFile with server config when scaffolding is finished", function() {
+      return this.project.open().then(() => {
+        return expect(this.project.checkSupportFile).to.be.calledWith(this.config);
+      });
+    });
 
-    it "calls #getConfig options", ->
-      opts = {}
-      @project.open(opts).then =>
-        expect(@project.getConfig).to.be.calledWith(opts)
+    it("calls #getConfig options", function() {
+      const opts = {};
+      return this.project.open(opts).then(() => {
+        return expect(this.project.getConfig).to.be.calledWith(opts);
+      });
+    });
 
-    it "initializes the plugins", ->
-      @project.open({}).then =>
-        expect(plugins.init).to.be.called
+    it("initializes the plugins", function() {
+      return this.project.open({}).then(() => {
+        return expect(plugins.init).to.be.called;
+      });
+    });
 
-    it "calls support.plugins with pluginsFile directory", ->
-      @project.open({}).then =>
-        expect(scaffold.plugins).to.be.calledWith(path.dirname(@config.pluginsFile))
+    it("calls support.plugins with pluginsFile directory", function() {
+      return this.project.open({}).then(() => {
+        return expect(scaffold.plugins).to.be.calledWith(path.dirname(this.config.pluginsFile));
+      });
+    });
 
-    it "calls options.onError with plugins error when there is a plugins error", ->
-      onError = sinon.spy()
-      err = {
-        name: "plugin error name"
+    it("calls options.onError with plugins error when there is a plugins error", function() {
+      const onError = sinon.spy();
+      const err = {
+        name: "plugin error name",
         message: "plugin error message"
-      }
-      @project.open({ onError: onError }).then =>
-        pluginsOnError = plugins.init.lastCall.args[1].onError
-        expect(pluginsOnError).to.be.a("function")
-        pluginsOnError(err)
-        expect(onError).to.be.calledWith(err)
+      };
+      return this.project.open({ onError }).then(() => {
+        const pluginsOnError = plugins.init.lastCall.args[1].onError;
+        expect(pluginsOnError).to.be.a("function");
+        pluginsOnError(err);
+        return expect(onError).to.be.calledWith(err);
+      });
+    });
 
-    it "updates config.state when saved state changes", ->
-      sinon.spy(@project, "saveState")
+    it("updates config.state when saved state changes", function() {
+      sinon.spy(this.project, "saveState");
 
-      options = {}
+      const options = {};
 
-      @project.open(options)
-      .then =>
-        options.onSavedStateChanged({ autoScrollingEnabled: false })
-      .then =>
-        @project.getConfig()
-      .then (config) =>
-        expect(@project.saveState).to.be.calledWith({ autoScrollingEnabled: false})
-        expect(config.state).to.eql({ autoScrollingEnabled: false })
+      return this.project.open(options)
+      .then(() => {
+        return options.onSavedStateChanged({ autoScrollingEnabled: false });
+    }).then(() => {
+        return this.project.getConfig();
+      }).then(config => {
+        expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false});
+        return expect(config.state).to.eql({ autoScrollingEnabled: false });
+      });
+    });
 
-    # TODO: skip this for now
-    it.skip "watches cypress.json", ->
-      @server.open().bind(@).then ->
-        expect(Watchers::watch).to.be.calledWith("/Users/brian/app/cypress.json")
+    // TODO: skip this for now
+    it.skip("watches cypress.json", function() {
+      return this.server.open().bind(this).then(() => expect(Watchers.prototype.watch).to.be.calledWith("/Users/brian/app/cypress.json"));
+    });
 
-    # TODO: skip this for now
-    it.skip "passes watchers to Socket.startListening", ->
-      options = {}
+    // TODO: skip this for now
+    it.skip("passes watchers to Socket.startListening", function() {
+      const options = {};
 
-      @server.open(options).then ->
-        startListening = Socket::startListening
-        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
-        expect(startListening.getCall(0).args[1]).to.eq(options)
-    null
+      return this.server.open(options).then(function() {
+        const { startListening } = Socket.prototype;
+        expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers);
+        return expect(startListening.getCall(0).args[1]).to.eq(options);
+      });
+    });
+    return null;
+  });
 
-  context "#close", ->
-    beforeEach ->
-      @project = Project("/_test-output/path/to/project")
+  context("#close", function() {
+    beforeEach(function() {
+      this.project = Project("/_test-output/path/to/project");
 
-      sinon.stub(@project, "getConfig").resolves(@config)
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      sinon.stub(this.project, "getConfig").resolves(this.config);
+      return sinon.stub(user, "ensureAuthToken").resolves("auth-token-123");
+    });
 
-    it "closes server", ->
-      @project.server = sinon.stub({close: ->})
+    it("closes server", function() {
+      this.project.server = sinon.stub({close() {}});
 
-      @project.close().then =>
-        expect(@project.server.close).to.be.calledOnce
+      return this.project.close().then(() => {
+        return expect(this.project.server.close).to.be.calledOnce;
+      });
+    });
 
-    it "closes watchers", ->
-      @project.watchers = sinon.stub({close: ->})
+    it("closes watchers", function() {
+      this.project.watchers = sinon.stub({close() {}});
 
-      @project.close().then =>
-        expect(@project.watchers.close).to.be.calledOnce
+      return this.project.close().then(() => {
+        return expect(this.project.watchers.close).to.be.calledOnce;
+      });
+    });
 
-    it "can close when server + watchers arent open", ->
-      @project.close()
+    return it("can close when server + watchers arent open", function() {
+      return this.project.close();
+    });
+  });
 
-  context "#reset", ->
-    beforeEach ->
-      @project = Project(@pristinePath)
-      @project.automation = { reset: sinon.stub() }
-      @project.server = { reset: sinon.stub() }
+  context("#reset", function() {
+    beforeEach(function() {
+      this.project = Project(this.pristinePath);
+      this.project.automation = { reset: sinon.stub() };
+      return this.project.server = { reset: sinon.stub() };});
 
-    it "resets server + automation", ->
-      @project.reset()
-      .then =>
-        expect(@project.automation.reset).to.be.calledOnce
-        expect(@project.server.reset).to.be.calledOnce
+    return it("resets server + automation", function() {
+      return this.project.reset()
+      .then(() => {
+        expect(this.project.automation.reset).to.be.calledOnce;
+        return expect(this.project.server.reset).to.be.calledOnce;
+      });
+    });
+  });
 
-  context "#getRuns", ->
-    beforeEach ->
-      @project = Project(@todosPath)
-      sinon.stub(settings, "read").resolves({projectId: "id-123"})
-      sinon.stub(api, "getProjectRuns").resolves('runs')
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+  context("#getRuns", function() {
+    beforeEach(function() {
+      this.project = Project(this.todosPath);
+      sinon.stub(settings, "read").resolves({projectId: "id-123"});
+      sinon.stub(api, "getProjectRuns").resolves('runs');
+      return sinon.stub(user, "ensureAuthToken").resolves("auth-token-123");
+    });
 
-    it "calls api.getProjectRuns with project id + session", ->
-      @project.getRuns().then (runs) ->
-        expect(api.getProjectRuns).to.be.calledWith("id-123", "auth-token-123")
-        expect(runs).to.equal("runs")
+    return it("calls api.getProjectRuns with project id + session", function() {
+      return this.project.getRuns().then(function(runs) {
+        expect(api.getProjectRuns).to.be.calledWith("id-123", "auth-token-123");
+        return expect(runs).to.equal("runs");
+      });
+    });
+  });
 
-  context "#scaffold", ->
-    beforeEach ->
-      @project = Project("/_test-output/path/to/project")
-      sinon.stub(scaffold, "integration").resolves()
-      sinon.stub(scaffold, "fixture").resolves()
-      sinon.stub(scaffold, "support").resolves()
-      sinon.stub(scaffold, "plugins").resolves()
+  context("#scaffold", function() {
+    beforeEach(function() {
+      this.project = Project("/_test-output/path/to/project");
+      sinon.stub(scaffold, "integration").resolves();
+      sinon.stub(scaffold, "fixture").resolves();
+      sinon.stub(scaffold, "support").resolves();
+      sinon.stub(scaffold, "plugins").resolves();
 
-      @obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf", pluginsFile: "pf/index.js"}
+      return this.obj = {projectRoot: "pr", fixturesFolder: "ff", integrationFolder: "if", supportFolder: "sf", pluginsFile: "pf/index.js"};});
 
-    it "calls scaffold.integration with integrationFolder", ->
-      @project.scaffold(@obj).then =>
-        expect(scaffold.integration).to.be.calledWith(@obj.integrationFolder)
+    it("calls scaffold.integration with integrationFolder", function() {
+      return this.project.scaffold(this.obj).then(() => {
+        return expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder);
+      });
+    });
 
-    it "calls fixture.scaffold with fixturesFolder", ->
-      @project.scaffold(@obj).then =>
-        expect(scaffold.fixture).to.be.calledWith(@obj.fixturesFolder)
+    it("calls fixture.scaffold with fixturesFolder", function() {
+      return this.project.scaffold(this.obj).then(() => {
+        return expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder);
+      });
+    });
 
-    it "calls support.scaffold with supportFolder", ->
-      @project.scaffold(@obj).then =>
-        expect(scaffold.support).to.be.calledWith(@obj.supportFolder)
+    it("calls support.scaffold with supportFolder", function() {
+      return this.project.scaffold(this.obj).then(() => {
+        return expect(scaffold.support).to.be.calledWith(this.obj.supportFolder);
+      });
+    });
 
-    it "does not call support.plugins if config.pluginsFile is falsey", ->
-      @obj.pluginsFile = false
-      @project.scaffold(@obj).then =>
-        expect(scaffold.plugins).not.to.be.called
+    return it("does not call support.plugins if config.pluginsFile is falsey", function() {
+      this.obj.pluginsFile = false;
+      return this.project.scaffold(this.obj).then(() => {
+        return expect(scaffold.plugins).not.to.be.called;
+      });
+    });
+  });
 
-  context "#watchSettings", ->
-    beforeEach ->
-      @project = Project("/_test-output/path/to/project")
-      @project.server = {startWebsockets: ->}
-      sinon.stub(settings, "pathToConfigFile").returns("/path/to/cypress.json")
-      sinon.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json")
-      @watch = sinon.stub(@project.watchers, "watch")
+  context("#watchSettings", function() {
+    beforeEach(function() {
+      this.project = Project("/_test-output/path/to/project");
+      this.project.server = {startWebsockets() {}};
+      sinon.stub(settings, "pathToConfigFile").returns("/path/to/cypress.json");
+      sinon.stub(settings, "pathToCypressEnvJson").returns("/path/to/cypress.env.json");
+      return this.watch = sinon.stub(this.project.watchers, "watch");
+    });
 
-    it "watches cypress.json and cypress.env.json", ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: ->})
-      expect(@watch).to.be.calledTwice
-      expect(@watch).to.be.calledWith("/path/to/cypress.json")
-      expect(@watch).to.be.calledWith("/path/to/cypress.env.json")
+    it("watches cypress.json and cypress.env.json", function() {
+      this.project.watchSettingsAndStartWebsockets({onSettingsChanged() {}});
+      expect(this.watch).to.be.calledTwice;
+      expect(this.watch).to.be.calledWith("/path/to/cypress.json");
+      return expect(this.watch).to.be.calledWith("/path/to/cypress.env.json");
+    });
 
-    it "sets onChange event when {changeEvents: true}", (done) ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: ->done()})
+    it("sets onChange event when {changeEvents: true}", function(done) {
+      this.project.watchSettingsAndStartWebsockets({onSettingsChanged() { return done(); }});
 
-      ## get the object passed to watchers.watch
-      obj = @watch.getCall(0).args[1]
+      //# get the object passed to watchers.watch
+      const obj = this.watch.getCall(0).args[1];
 
-      expect(obj.onChange).to.be.a("function")
-      obj.onChange()
+      expect(obj.onChange).to.be.a("function");
+      return obj.onChange();
+    });
 
-    it "does not call watch when {changeEvents: false}", ->
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: undefined})
+    it("does not call watch when {changeEvents: false}", function() {
+      this.project.watchSettingsAndStartWebsockets({onSettingsChanged: undefined});
 
-      expect(@watch).not.to.be.called
+      return expect(this.watch).not.to.be.called;
+    });
 
-    it "does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second", ->
-      @project.generatedProjectIdTimestamp = timestamp = new Date()
+    return it("does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second", function() {
+      let timestamp;
+      this.project.generatedProjectIdTimestamp = (timestamp = new Date());
 
-      emit = sinon.spy(@project, "emit")
+      const emit = sinon.spy(this.project, "emit");
 
-      stub = sinon.stub()
+      const stub = sinon.stub();
 
-      @project.watchSettingsAndStartWebsockets({onSettingsChanged: stub})
+      this.project.watchSettingsAndStartWebsockets({onSettingsChanged: stub});
 
-      ## get the object passed to watchers.watch
-      obj = @watch.getCall(0).args[1]
-      obj.onChange()
+      //# get the object passed to watchers.watch
+      const obj = this.watch.getCall(0).args[1];
+      obj.onChange();
 
-      expect(stub).not.to.be.called
+      expect(stub).not.to.be.called;
 
-      ## subtract 1 second from our timestamp
-      timestamp.setSeconds(timestamp.getSeconds() - 1)
+      //# subtract 1 second from our timestamp
+      timestamp.setSeconds(timestamp.getSeconds() - 1);
 
-      obj.onChange()
+      obj.onChange();
 
-      expect(stub).to.be.calledOnce
+      return expect(stub).to.be.calledOnce;
+    });
+  });
 
-  context "#checkSupportFile", ->
-    beforeEach ->
-      sinon.stub(fs, "pathExists").resolves(true)
-      @project = Project("/_test-output/path/to/project")
-      @project.server = {onTestFileChange: sinon.spy()}
-      sinon.stub(preprocessor, "getFile").resolves()
-      @config = {
-        projectRoot: "/path/to/root/"
+  context("#checkSupportFile", function() {
+    beforeEach(function() {
+      sinon.stub(fs, "pathExists").resolves(true);
+      this.project = Project("/_test-output/path/to/project");
+      this.project.server = {onTestFileChange: sinon.spy()};
+      sinon.stub(preprocessor, "getFile").resolves();
+      return this.config = {
+        projectRoot: "/path/to/root/",
         supportFile: "/path/to/root/foo/bar.js"
-      }
+      };});
 
-    it "does nothing when {supportFile: false}", ->
-      ret = @project.checkSupportFile({supportFile: false})
+    it("does nothing when {supportFile: false}", function() {
+      const ret = this.project.checkSupportFile({supportFile: false});
 
-      expect(ret).to.be.undefined
+      return expect(ret).to.be.undefined;
+    });
 
-    it "throws when support file does not exist", ->
-      fs.pathExists.resolves(false)
-      @project.checkSupportFile(@config)
-      .catch (e) ->
-        expect(e.message).to.include("The support file is missing or invalid.")
+    return it("throws when support file does not exist", function() {
+      fs.pathExists.resolves(false);
+      return this.project.checkSupportFile(this.config)
+      .catch(e => expect(e.message).to.include("The support file is missing or invalid."));
+    });
+  });
 
-  context "#watchPluginsFile", ->
-    beforeEach ->
-      sinon.stub(fs, "pathExists").resolves(true)
-      @project = Project("/_test-output/path/to/project")
-      @project.watchers = { watchTree: sinon.spy() }
-      sinon.stub(plugins, "init").resolves()
-      @config = {
+  context("#watchPluginsFile", function() {
+    beforeEach(function() {
+      sinon.stub(fs, "pathExists").resolves(true);
+      this.project = Project("/_test-output/path/to/project");
+      this.project.watchers = { watchTree: sinon.spy() };
+      sinon.stub(plugins, "init").resolves();
+      return this.config = {
         pluginsFile: "/path/to/plugins-file"
-      }
+      };});
 
-    it "does nothing when {pluginsFile: false}", ->
-      @config.pluginsFile = false
-      @project.watchPluginsFile(@config, {}).then =>
-        expect(@project.watchers.watchTree).not.to.be.called
+    it("does nothing when {pluginsFile: false}", function() {
+      this.config.pluginsFile = false;
+      return this.project.watchPluginsFile(this.config, {}).then(() => {
+        return expect(this.project.watchers.watchTree).not.to.be.called;
+      });
+    });
 
-    it "does nothing if pluginsFile does not exist", ->
-      fs.pathExists.resolves(false)
-      @project.watchPluginsFile(@config, {}).then =>
-        expect(@project.watchers.watchTree).not.to.be.called
+    it("does nothing if pluginsFile does not exist", function() {
+      fs.pathExists.resolves(false);
+      return this.project.watchPluginsFile(this.config, {}).then(() => {
+        return expect(this.project.watchers.watchTree).not.to.be.called;
+      });
+    });
 
-    it "does nothing if in run mode", ->
-      @project.watchPluginsFile(@config, {
+    it("does nothing if in run mode", function() {
+      return this.project.watchPluginsFile(this.config, {
         isTextTerminal: true
-      }).then =>
-        expect(@project.watchers.watchTree).not.to.be.called
+      }).then(() => {
+        return expect(this.project.watchers.watchTree).not.to.be.called;
+      });
+    });
 
-    it "watches the pluginsFile", ->
-      @project.watchPluginsFile(@config, {}).then =>
-        expect(@project.watchers.watchTree).to.be.calledWith(@config.pluginsFile)
-        expect(@project.watchers.watchTree.lastCall.args[1]).to.be.an("object")
-        expect(@project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function")
+    it("watches the pluginsFile", function() {
+      return this.project.watchPluginsFile(this.config, {}).then(() => {
+        expect(this.project.watchers.watchTree).to.be.calledWith(this.config.pluginsFile);
+        expect(this.project.watchers.watchTree.lastCall.args[1]).to.be.an("object");
+        return expect(this.project.watchers.watchTree.lastCall.args[1].onChange).to.be.a("function");
+      });
+    });
 
-    it "calls plugins.init when file changes", ->
-      @project.watchPluginsFile(@config, {}).then =>
-        @project.watchers.watchTree.firstCall.args[1].onChange()
-        expect(plugins.init).to.be.calledWith(@config)
+    it("calls plugins.init when file changes", function() {
+      return this.project.watchPluginsFile(this.config, {}).then(() => {
+        this.project.watchers.watchTree.firstCall.args[1].onChange();
+        return expect(plugins.init).to.be.calledWith(this.config);
+      });
+    });
 
-    it "handles errors from calling plugins.init", (done) ->
-      error = {name: "foo", message: "foo"}
-      plugins.init.rejects(error)
-      @project.watchPluginsFile(@config, {
-        onError: (err) ->
-          expect(err).to.eql(error)
-          done()
+    return it("handles errors from calling plugins.init", function(done) {
+      const error = {name: "foo", message: "foo"};
+      plugins.init.rejects(error);
+      this.project.watchPluginsFile(this.config, {
+        onError(err) {
+          expect(err).to.eql(error);
+          return done();
+        }
       })
-      .then =>
-        @project.watchers.watchTree.firstCall.args[1].onChange()
-      return
+      .then(() => {
+        return this.project.watchers.watchTree.firstCall.args[1].onChange();
+      });
+    });
+  });
 
-  context "#watchSettingsAndStartWebsockets", ->
-    beforeEach ->
-      @project = Project("/_test-output/path/to/project")
-      @project.watchers = {}
-      @project.server = sinon.stub({startWebsockets: ->})
-      sinon.stub(@project, "watchSettings")
-      sinon.stub(Automation, "create").returns("automation")
+  context("#watchSettingsAndStartWebsockets", function() {
+    beforeEach(function() {
+      this.project = Project("/_test-output/path/to/project");
+      this.project.watchers = {};
+      this.project.server = sinon.stub({startWebsockets() {}});
+      sinon.stub(this.project, "watchSettings");
+      return sinon.stub(Automation, "create").returns("automation");
+    });
 
-    it "calls server.startWebsockets with automation + config", ->
-      c = {}
+    it("calls server.startWebsockets with automation + config", function() {
+      const c = {};
 
-      @project.watchSettingsAndStartWebsockets({}, c)
+      this.project.watchSettingsAndStartWebsockets({}, c);
 
-      expect(@project.server.startWebsockets).to.be.calledWith("automation", c)
+      return expect(this.project.server.startWebsockets).to.be.calledWith("automation", c);
+    });
 
-    it "passes onReloadBrowser callback", ->
-      fn = sinon.stub()
+    return it("passes onReloadBrowser callback", function() {
+      const fn = sinon.stub();
 
-      @project.server.startWebsockets.yieldsTo("onReloadBrowser")
+      this.project.server.startWebsockets.yieldsTo("onReloadBrowser");
 
-      @project.watchSettingsAndStartWebsockets({onReloadBrowser: fn}, {})
+      this.project.watchSettingsAndStartWebsockets({onReloadBrowser: fn}, {});
 
-      expect(fn).to.be.calledOnce
+      return expect(fn).to.be.calledOnce;
+    });
+  });
 
-  context "#getProjectId", ->
-    beforeEach ->
-      @project         = Project("/_test-output/path/to/project")
-      @verifyExistence = sinon.stub(Project.prototype, "verifyExistence").resolves()
+  context("#getProjectId", function() {
+    beforeEach(function() {
+      this.project         = Project("/_test-output/path/to/project");
+      return this.verifyExistence = sinon.stub(Project.prototype, "verifyExistence").resolves();
+    });
 
-    it "calls verifyExistence", ->
-      sinon.stub(settings, "read").resolves({projectId: "id-123"})
+    it("calls verifyExistence", function() {
+      sinon.stub(settings, "read").resolves({projectId: "id-123"});
 
-      @project.getProjectId()
-      .then =>
-        expect(@verifyExistence).to.be.calledOnce
+      return this.project.getProjectId()
+      .then(() => {
+        return expect(this.verifyExistence).to.be.calledOnce;
+      });
+    });
 
-    it "returns the project id from settings", ->
-      sinon.stub(settings, "read").resolves({projectId: "id-123"})
+    it("returns the project id from settings", function() {
+      sinon.stub(settings, "read").resolves({projectId: "id-123"});
 
-      @project.getProjectId()
-      .then (id) ->
-        expect(id).to.eq "id-123"
+      return this.project.getProjectId()
+      .then(id => expect(id).to.eq("id-123"));
+    });
 
-    it "throws NO_PROJECT_ID with the projectRoot when no projectId was found", ->
-      sinon.stub(settings, "read").resolves({})
+    it("throws NO_PROJECT_ID with the projectRoot when no projectId was found", function() {
+      sinon.stub(settings, "read").resolves({});
 
-      @project.getProjectId()
-      .then (id) ->
-        throw new Error("expected to fail, but did not")
-      .catch (err) ->
-        expect(err.type).to.eq("NO_PROJECT_ID")
-        expect(err.message).to.include("/_test-output/path/to/project")
+      return this.project.getProjectId()
+      .then(function(id) {
+        throw new Error("expected to fail, but did not");}).catch(function(err) {
+        expect(err.type).to.eq("NO_PROJECT_ID");
+        return expect(err.message).to.include("/_test-output/path/to/project");
+      });
+    });
 
-    it "bubbles up Settings.read errors", ->
-      err = new Error()
-      err.code = "EACCES"
+    return it("bubbles up Settings.read errors", function() {
+      const err = new Error();
+      err.code = "EACCES";
 
-      sinon.stub(settings, "read").rejects(err)
+      sinon.stub(settings, "read").rejects(err);
 
-      @project.getProjectId()
-      .then (id) ->
-        throw new Error("expected to fail, but did not")
-      .catch (err) ->
-        expect(err.code).to.eq("EACCES")
+      return this.project.getProjectId()
+      .then(function(id) {
+        throw new Error("expected to fail, but did not");}).catch(err => expect(err.code).to.eq("EACCES"));
+    });
+  });
 
-  context "#writeProjectId", ->
-    beforeEach ->
-      @project = Project("/_test-output/path/to/project")
+  context("#writeProjectId", function() {
+    beforeEach(function() {
+      this.project = Project("/_test-output/path/to/project");
 
-      sinon.stub(settings, "write")
-        .withArgs(@project.projectRoot, {projectId: "id-123"})
-        .resolves({projectId: "id-123"})
+      return sinon.stub(settings, "write")
+        .withArgs(this.project.projectRoot, {projectId: "id-123"})
+        .resolves({projectId: "id-123"});
+    });
 
-    it "calls Settings.write with projectRoot and attrs", ->
-      @project.writeProjectId("id-123").then (id) ->
-        expect(id).to.eq("id-123")
+    it("calls Settings.write with projectRoot and attrs", function() {
+      return this.project.writeProjectId("id-123").then(id => expect(id).to.eq("id-123"));
+    });
 
-    it "sets generatedProjectIdTimestamp", ->
-      @project.writeProjectId("id-123").then =>
-        expect(@project.generatedProjectIdTimestamp).to.be.a("date")
+    return it("sets generatedProjectIdTimestamp", function() {
+      return this.project.writeProjectId("id-123").then(() => {
+        return expect(this.project.generatedProjectIdTimestamp).to.be.a("date");
+      });
+    });
+  });
 
-  context "#getSpecUrl", ->
-    beforeEach ->
-      @project2 = Project(@idsPath)
+  context("#getSpecUrl", function() {
+    beforeEach(function() {
+      this.project2 = Project(this.idsPath);
 
-      settings.write(@idsPath, {port: 2020})
+      return settings.write(this.idsPath, {port: 2020});
+    });
 
-    it "returns fully qualified url when spec exists", ->
-      @project2.getSpecUrl("cypress/integration/bar.js")
-      .then (str) ->
-        expect(str).to.eq("http://localhost:2020/__/#/tests/integration/bar.js")
+    it("returns fully qualified url when spec exists", function() {
+      return this.project2.getSpecUrl("cypress/integration/bar.js")
+      .then(str => expect(str).to.eq("http://localhost:2020/__/#/tests/integration/bar.js"));
+    });
 
-    it "returns fully qualified url on absolute path to spec", ->
-      todosSpec = path.join(@todosPath, "tests/sub/sub_test.coffee")
-      @project.getSpecUrl(todosSpec)
-      .then (str) ->
-        expect(str).to.eq("http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee")
+    it("returns fully qualified url on absolute path to spec", function() {
+      const todosSpec = path.join(this.todosPath, "tests/sub/sub_test.coffee");
+      return this.project.getSpecUrl(todosSpec)
+      .then(str => expect(str).to.eq("http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee"));
+    });
 
-    it "returns __all spec url", ->
-      @project.getSpecUrl()
-      .then (str) ->
-        expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
+    it("returns __all spec url", function() {
+      return this.project.getSpecUrl()
+      .then(str => expect(str).to.eq("http://localhost:8888/__/#/tests/__all"));
+    });
 
-    it "returns __all spec url with spec is __all", ->
-      @project.getSpecUrl('__all')
-      .then (str) ->
-        expect(str).to.eq("http://localhost:8888/__/#/tests/__all")
+    return it("returns __all spec url with spec is __all", function() {
+      return this.project.getSpecUrl('__all')
+      .then(str => expect(str).to.eq("http://localhost:8888/__/#/tests/__all"));
+    });
+  });
 
-  context ".add", ->
-    beforeEach ->
-      @pristinePath = Fixtures.projectPath("pristine")
+  context(".add", function() {
+    beforeEach(function() {
+      return this.pristinePath = Fixtures.projectPath("pristine");
+    });
 
-    it "inserts path into cache", ->
-      Project.add(@pristinePath, {})
-      .then =>
-        cache.read()
-      .then (json) =>
-        expect(json.PROJECTS).to.deep.eq([@pristinePath])
+    it("inserts path into cache", function() {
+      return Project.add(this.pristinePath, {})
+      .then(() => {
+        return cache.read();
+    }).then(json => {
+        return expect(json.PROJECTS).to.deep.eq([this.pristinePath]);
+      });
+    });
 
-    describe "if project at path has id", ->
-      it "returns object containing path and id", ->
-        sinon.stub(settings, "read").resolves({projectId: "id-123"})
+    describe("if project at path has id", () =>
+      it("returns object containing path and id", function() {
+        sinon.stub(settings, "read").resolves({projectId: "id-123"});
 
-        Project.add(@pristinePath, {})
-        .then (project) =>
-          expect(project.id).to.equal("id-123")
-          expect(project.path).to.equal(@pristinePath)
+        return Project.add(this.pristinePath, {})
+        .then(project => {
+          expect(project.id).to.equal("id-123");
+          return expect(project.path).to.equal(this.pristinePath);
+        });
+      })
+    );
 
-    describe "if project at path does not have id", ->
-      it "returns object containing just the path", ->
-        sinon.stub(settings, "read").rejects()
+    describe("if project at path does not have id", () =>
+      it("returns object containing just the path", function() {
+        sinon.stub(settings, "read").rejects();
 
-        Project.add(@pristinePath, {})
-        .then (project) =>
-          expect(project.id).to.be.undefined
-          expect(project.path).to.equal(@pristinePath)
+        return Project.add(this.pristinePath, {})
+        .then(project => {
+          expect(project.id).to.be.undefined;
+          return expect(project.path).to.equal(this.pristinePath);
+        });
+      })
+    );
 
-    describe "if configFile is non-default", ->
-      it "doesn't cache anything and returns object containing just the path", ->
-        Project.add(@pristinePath, { configFile: false })
-        .then (project) =>
-          expect(project.id).to.be.undefined
-          expect(project.path).to.equal(@pristinePath)
-          cache.read()
-        .then (json) =>
-          expect(json.PROJECTS).to.deep.eq([])
+    return describe("if configFile is non-default", () =>
+      it("doesn't cache anything and returns object containing just the path", function() {
+        return Project.add(this.pristinePath, { configFile: false })
+        .then(project => {
+          expect(project.id).to.be.undefined;
+          expect(project.path).to.equal(this.pristinePath);
+          return cache.read();
+      }).then(json => {
+          return expect(json.PROJECTS).to.deep.eq([]);
+        });
+      })
+    );
+  });
 
-  context "#createCiProject", ->
-    beforeEach ->
-      @project = Project("/_test-output/path/to/project")
-      @newProject = { id: "project-id-123" }
+  context("#createCiProject", function() {
+    beforeEach(function() {
+      this.project = Project("/_test-output/path/to/project");
+      this.newProject = { id: "project-id-123" };
 
-      sinon.stub(@project, "writeProjectId").resolves("project-id-123")
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      sinon.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin")
-      sinon.stub(api, "createProject")
+      sinon.stub(this.project, "writeProjectId").resolves("project-id-123");
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123");
+      sinon.stub(commitInfo, "getRemoteOrigin").resolves("remoteOrigin");
+      return sinon.stub(api, "createProject")
       .withArgs({foo: "bar"}, "remoteOrigin", "auth-token-123")
-      .resolves(@newProject)
+      .resolves(this.newProject);
+    });
 
-    it "calls api.createProject with user session", ->
-      @project.createCiProject({foo: "bar"}).then ->
-        expect(api.createProject).to.be.calledWith({foo: "bar"}, "remoteOrigin", "auth-token-123")
+    it("calls api.createProject with user session", function() {
+      return this.project.createCiProject({foo: "bar"}).then(() => expect(api.createProject).to.be.calledWith({foo: "bar"}, "remoteOrigin", "auth-token-123"));
+    });
 
-    it "calls writeProjectId with id", ->
-      @project.createCiProject({foo: "bar"}).then =>
-        expect(@project.writeProjectId).to.be.calledWith("project-id-123")
+    it("calls writeProjectId with id", function() {
+      return this.project.createCiProject({foo: "bar"}).then(() => {
+        return expect(this.project.writeProjectId).to.be.calledWith("project-id-123");
+      });
+    });
 
-    it "returns project id", ->
-      @project.createCiProject({foo: "bar"}).then (projectId) =>
-        expect(projectId).to.eql(@newProject)
+    return it("returns project id", function() {
+      return this.project.createCiProject({foo: "bar"}).then(projectId => {
+        return expect(projectId).to.eql(this.newProject);
+      });
+    });
+  });
 
-  context "#getRecordKeys", ->
-    beforeEach ->
-      @recordKeys = []
-      @project = Project(@pristinePath)
-      sinon.stub(settings, "read").resolves({projectId: "id-123"})
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      sinon.stub(api, "getProjectRecordKeys").resolves(@recordKeys)
+  context("#getRecordKeys", function() {
+    beforeEach(function() {
+      this.recordKeys = [];
+      this.project = Project(this.pristinePath);
+      sinon.stub(settings, "read").resolves({projectId: "id-123"});
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123");
+      return sinon.stub(api, "getProjectRecordKeys").resolves(this.recordKeys);
+    });
 
-    it "calls api.getProjectRecordKeys with project id + session", ->
-      @project.getRecordKeys().then ->
-        expect(api.getProjectRecordKeys).to.be.calledWith("id-123", "auth-token-123")
+    it("calls api.getProjectRecordKeys with project id + session", function() {
+      return this.project.getRecordKeys().then(() => expect(api.getProjectRecordKeys).to.be.calledWith("id-123", "auth-token-123"));
+    });
 
-    it "returns ci keys", ->
-      @project.getRecordKeys().then (recordKeys) =>
-        expect(recordKeys).to.equal(@recordKeys)
+    return it("returns ci keys", function() {
+      return this.project.getRecordKeys().then(recordKeys => {
+        return expect(recordKeys).to.equal(this.recordKeys);
+      });
+    });
+  });
 
-  context "#requestAccess", ->
-    beforeEach ->
-      @project = Project(@pristinePath)
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      sinon.stub(api, "requestAccess").resolves("response")
+  context("#requestAccess", function() {
+    beforeEach(function() {
+      this.project = Project(this.pristinePath);
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123");
+      return sinon.stub(api, "requestAccess").resolves("response");
+    });
 
-    it "calls api.requestAccess with project id + auth token", ->
-      @project.requestAccess("project-id-123").then ->
-        expect(api.requestAccess).to.be.calledWith("project-id-123", "auth-token-123")
+    it("calls api.requestAccess with project id + auth token", function() {
+      return this.project.requestAccess("project-id-123").then(() => expect(api.requestAccess).to.be.calledWith("project-id-123", "auth-token-123"));
+    });
 
-    it "returns response", ->
-      @project.requestAccess("project-id-123").then (response) =>
-        expect(response).to.equal("response")
+    return it("returns response", function() {
+      return this.project.requestAccess("project-id-123").then(response => {
+        return expect(response).to.equal("response");
+      });
+    });
+  });
 
-  context ".remove", ->
-    beforeEach ->
-      sinon.stub(cache, "removeProject").resolves()
+  context(".remove", function() {
+    beforeEach(() => sinon.stub(cache, "removeProject").resolves());
 
-    it "calls cache.removeProject with path", ->
-      Project.remove("/_test-output/path/to/project").then ->
-        expect(cache.removeProject).to.be.calledWith("/_test-output/path/to/project")
+    return it("calls cache.removeProject with path", () =>
+      Project.remove("/_test-output/path/to/project").then(() => expect(cache.removeProject).to.be.calledWith("/_test-output/path/to/project"))
+    );
+  });
 
-  context ".id", ->
-    it "returns project id", ->
-      Project.id(@todosPath).then (id) =>
-        expect(id).to.eq(@projectId)
+  context(".id", () =>
+    it("returns project id", function() {
+      return Project.id(this.todosPath).then(id => {
+        return expect(id).to.eq(this.projectId);
+      });
+    })
+  );
 
-  context ".getOrgs", ->
-    beforeEach ->
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
-      sinon.stub(api, "getOrgs").resolves([])
+  context(".getOrgs", function() {
+    beforeEach(function() {
+      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123");
+      return sinon.stub(api, "getOrgs").resolves([]);
+    });
 
-    it "calls api.getOrgs", ->
-      Project.getOrgs().then (orgs) ->
-        expect(orgs).to.deep.eq([])
-        expect(api.getOrgs).to.be.calledOnce
-        expect(api.getOrgs).to.be.calledWith("auth-token-123")
+    return it("calls api.getOrgs", () =>
+      Project.getOrgs().then(function(orgs) {
+        expect(orgs).to.deep.eq([]);
+        expect(api.getOrgs).to.be.calledOnce;
+        return expect(api.getOrgs).to.be.calledWith("auth-token-123");
+      })
+    );
+  });
 
-  context ".paths", ->
-    beforeEach ->
-      sinon.stub(cache, "getProjectRoots").resolves([])
+  context(".paths", function() {
+    beforeEach(() => sinon.stub(cache, "getProjectRoots").resolves([]));
 
-    it "calls cache.getProjectRoots", ->
-      Project.paths().then (ret) ->
-        expect(ret).to.deep.eq([])
-        expect(cache.getProjectRoots).to.be.calledOnce
+    return it("calls cache.getProjectRoots", () =>
+      Project.paths().then(function(ret) {
+        expect(ret).to.deep.eq([]);
+        return expect(cache.getProjectRoots).to.be.calledOnce;
+      })
+    );
+  });
 
-  context ".getPathsAndIds", ->
-    beforeEach ->
+  context(".getPathsAndIds", function() {
+    beforeEach(function() {
       sinon.stub(cache, "getProjectRoots").resolves([
-        "/path/to/first"
+        "/path/to/first",
         "/path/to/second"
-      ])
-      sinon.stub(settings, "id").resolves("id-123")
+      ]);
+      return sinon.stub(settings, "id").resolves("id-123");
+    });
 
-    it "returns array of objects with paths and ids", ->
-      Project.getPathsAndIds().then (pathsAndIds) ->
+    return it("returns array of objects with paths and ids", () =>
+      Project.getPathsAndIds().then(pathsAndIds =>
         expect(pathsAndIds).to.eql([
           {
-            path: "/path/to/first"
+            path: "/path/to/first",
             id: "id-123"
-          }
+          },
           {
-            path: "/path/to/second"
+            path: "/path/to/second",
             id: "id-123"
           }
         ])
+      )
+    );
+  });
 
-  context ".getProjectStatuses", ->
-    beforeEach ->
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+  context(".getProjectStatuses", function() {
+    beforeEach(() => sinon.stub(user, "ensureAuthToken").resolves("auth-token-123"));
 
-    it "gets projects from api", ->
-      sinon.stub(api, "getProjects").resolves([])
+    it("gets projects from api", function() {
+      sinon.stub(api, "getProjects").resolves([]);
 
-      Project.getProjectStatuses([])
-      .then ->
-        expect(api.getProjects).to.have.been.calledWith("auth-token-123")
+      return Project.getProjectStatuses([])
+      .then(() => expect(api.getProjects).to.have.been.calledWith("auth-token-123"));
+    });
 
-    it "returns array of projects", ->
-      sinon.stub(api, "getProjects").resolves([])
+    it("returns array of projects", function() {
+      sinon.stub(api, "getProjects").resolves([]);
 
-      Project.getProjectStatuses([])
-      .then (projectsWithStatuses) =>
-        expect(projectsWithStatuses).to.eql([])
+      return Project.getProjectStatuses([])
+      .then(projectsWithStatuses => {
+        return expect(projectsWithStatuses).to.eql([]);
+      });
+    });
 
-    it "returns same number as client projects, even if there are less api projects", ->
-      sinon.stub(api, "getProjects").resolves([])
+    it("returns same number as client projects, even if there are less api projects", function() {
+      sinon.stub(api, "getProjects").resolves([]);
 
-      Project.getProjectStatuses([{}])
-      .then (projectsWithStatuses) =>
-        expect(projectsWithStatuses.length).to.eql(1)
+      return Project.getProjectStatuses([{}])
+      .then(projectsWithStatuses => {
+        return expect(projectsWithStatuses.length).to.eql(1);
+      });
+    });
 
-    it "returns same number as client projects, even if there are more api projects", ->
-      sinon.stub(api, "getProjects").resolves([{}, {}])
+    it("returns same number as client projects, even if there are more api projects", function() {
+      sinon.stub(api, "getProjects").resolves([{}, {}]);
 
-      Project.getProjectStatuses([{}])
-      .then (projectsWithStatuses) =>
-        expect(projectsWithStatuses.length).to.eql(1)
+      return Project.getProjectStatuses([{}])
+      .then(projectsWithStatuses => {
+        return expect(projectsWithStatuses.length).to.eql(1);
+      });
+    });
 
-    it "merges in details of matching projects", ->
+    it("merges in details of matching projects", function() {
       sinon.stub(api, "getProjects").resolves([
         { id: "id-123", lastBuildStatus: "passing" }
-      ])
+      ]);
 
-      Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
-      .then (projectsWithStatuses) =>
-        expect(projectsWithStatuses[0]).to.eql({
-          id: "id-123"
-          path: "/_test-output/path/to/project"
-          lastBuildStatus: "passing"
+      return Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
+      .then(projectsWithStatuses => {
+        return expect(projectsWithStatuses[0]).to.eql({
+          id: "id-123",
+          path: "/_test-output/path/to/project",
+          lastBuildStatus: "passing",
           state: "VALID"
-        })
+        });
+      });
+    });
 
-    it "returns client project when it has no id", ->
-      sinon.stub(api, "getProjects").resolves([])
+    it("returns client project when it has no id", function() {
+      sinon.stub(api, "getProjects").resolves([]);
 
-      Project.getProjectStatuses([{ path: "/_test-output/path/to/project" }])
-      .then (projectsWithStatuses) =>
-        expect(projectsWithStatuses[0]).to.eql({
-          path: "/_test-output/path/to/project"
+      return Project.getProjectStatuses([{ path: "/_test-output/path/to/project" }])
+      .then(projectsWithStatuses => {
+        return expect(projectsWithStatuses[0]).to.eql({
+          path: "/_test-output/path/to/project",
           state: "VALID"
-        })
+        });
+      });
+    });
 
-    describe "when client project has id and there is no matching user project", ->
-      beforeEach ->
-        sinon.stub(api, "getProjects").resolves([])
+    return describe("when client project has id and there is no matching user project", function() {
+      beforeEach(() => sinon.stub(api, "getProjects").resolves([]));
 
-      it "marks project as invalid if api 404s", ->
-        sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
+      it("marks project as invalid if api 404s", function() {
+        sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404});
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
-        .then (projectsWithStatuses) =>
-          expect(projectsWithStatuses[0]).to.eql({
-            id: "id-123"
-            path: "/_test-output/path/to/project"
+        return Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
+        .then(projectsWithStatuses => {
+          return expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123",
+            path: "/_test-output/path/to/project",
             state: "INVALID"
-          })
+          });
+        });
+      });
 
-      it "marks project as unauthorized if api 403s", ->
-        sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
+      it("marks project as unauthorized if api 403s", function() {
+        sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403});
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
-        .then (projectsWithStatuses) =>
-          expect(projectsWithStatuses[0]).to.eql({
-            id: "id-123"
-            path: "/_test-output/path/to/project"
+        return Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
+        .then(projectsWithStatuses => {
+          return expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123",
+            path: "/_test-output/path/to/project",
             state: "UNAUTHORIZED"
-          })
+          });
+        });
+      });
 
-      it "merges in project details and marks valid if somehow project exists and is authorized", ->
-        sinon.stub(api, "getProject").resolves({ id: "id-123", lastBuildStatus: "passing" })
+      it("merges in project details and marks valid if somehow project exists and is authorized", function() {
+        sinon.stub(api, "getProject").resolves({ id: "id-123", lastBuildStatus: "passing" });
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
-        .then (projectsWithStatuses) =>
-          expect(projectsWithStatuses[0]).to.eql({
-            id: "id-123"
-            path: "/_test-output/path/to/project"
-            lastBuildStatus: "passing"
+        return Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
+        .then(projectsWithStatuses => {
+          return expect(projectsWithStatuses[0]).to.eql({
+            id: "id-123",
+            path: "/_test-output/path/to/project",
+            lastBuildStatus: "passing",
             state: "VALID"
-          })
+          });
+        });
+      });
 
-      it "throws error if not accounted for", ->
-        error = {name: "", message: ""}
-        sinon.stub(api, "getProject").rejects(error)
+      return it("throws error if not accounted for", function() {
+        const error = {name: "", message: ""};
+        sinon.stub(api, "getProject").rejects(error);
 
-        Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
-        .then =>
-          throw new Error("should have caught error but did not")
-        .catch (err) ->
-          expect(err).to.equal(error)
+        return Project.getProjectStatuses([{ id: "id-123", path: "/_test-output/path/to/project" }])
+        .then(() => {
+          throw new Error("should have caught error but did not");
+      }).catch(err => expect(err).to.equal(error));
+      });
+    });
+  });
 
-  context ".getProjectStatus", ->
-    beforeEach ->
-      @clientProject = {
+  context(".getProjectStatus", function() {
+    beforeEach(function() {
+      this.clientProject = {
         id: "id-123",
         path: "/_test-output/path/to/project"
-      }
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+      };
+      return sinon.stub(user, "ensureAuthToken").resolves("auth-token-123");
+    });
 
-    it "gets project from api", ->
-      sinon.stub(api, "getProject").resolves([])
+    it("gets project from api", function() {
+      sinon.stub(api, "getProject").resolves([]);
 
-      Project.getProjectStatus(@clientProject)
-      .then ->
-        expect(api.getProject).to.have.been.calledWith("id-123", "auth-token-123")
+      return Project.getProjectStatus(this.clientProject)
+      .then(() => expect(api.getProject).to.have.been.calledWith("id-123", "auth-token-123"));
+    });
 
-    it "returns project merged with details", ->
+    it("returns project merged with details", function() {
       sinon.stub(api, "getProject").resolves({
         lastBuildStatus: "passing"
-      })
+      });
 
-      Project.getProjectStatus(@clientProject)
-      .then (project) =>
-        expect(project).to.eql({
-          id: "id-123"
-          path: "/_test-output/path/to/project"
-          lastBuildStatus: "passing"
+      return Project.getProjectStatus(this.clientProject)
+      .then(project => {
+        return expect(project).to.eql({
+          id: "id-123",
+          path: "/_test-output/path/to/project",
+          lastBuildStatus: "passing",
           state: "VALID"
-        })
+        });
+      });
+    });
 
-    it "returns project, marked as valid, if it does not have an id, without querying api", ->
-      sinon.stub(api, "getProject")
+    it("returns project, marked as valid, if it does not have an id, without querying api", function() {
+      sinon.stub(api, "getProject");
 
-      @clientProject.id = undefined
-      Project.getProjectStatus(@clientProject)
-      .then (project) =>
+      this.clientProject.id = undefined;
+      return Project.getProjectStatus(this.clientProject)
+      .then(project => {
         expect(project).to.eql({
-          id: undefined
-          path: "/_test-output/path/to/project"
+          id: undefined,
+          path: "/_test-output/path/to/project",
           state: "VALID"
-        })
-        expect(api.getProject).not.to.be.called
+        });
+        return expect(api.getProject).not.to.be.called;
+      });
+    });
 
-    it "marks project as invalid if api 404s", ->
-      sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404})
+    it("marks project as invalid if api 404s", function() {
+      sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 404});
 
-      Project.getProjectStatus(@clientProject)
-      .then (project) =>
-        expect(project).to.eql({
-          id: "id-123"
-          path: "/_test-output/path/to/project"
+      return Project.getProjectStatus(this.clientProject)
+      .then(project => {
+        return expect(project).to.eql({
+          id: "id-123",
+          path: "/_test-output/path/to/project",
           state: "INVALID"
-        })
+        });
+      });
+    });
 
-    it "marks project as unauthorized if api 403s", ->
-      sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403})
+    it("marks project as unauthorized if api 403s", function() {
+      sinon.stub(api, "getProject").rejects({name: "", message: "", statusCode: 403});
 
-      Project.getProjectStatus(@clientProject)
-      .then (project) =>
-        expect(project).to.eql({
-          id: "id-123"
-          path: "/_test-output/path/to/project"
+      return Project.getProjectStatus(this.clientProject)
+      .then(project => {
+        return expect(project).to.eql({
+          id: "id-123",
+          path: "/_test-output/path/to/project",
           state: "UNAUTHORIZED"
-        })
+        });
+      });
+    });
 
-    it "throws error if not accounted for", ->
-      error = {name: "", message: ""}
-      sinon.stub(api, "getProject").rejects(error)
+    return it("throws error if not accounted for", function() {
+      const error = {name: "", message: ""};
+      sinon.stub(api, "getProject").rejects(error);
 
-      Project.getProjectStatus(@clientProject)
-      .then =>
-        throw new Error("should have caught error but did not")
-      .catch (err) ->
-        expect(err).to.equal(error)
+      return Project.getProjectStatus(this.clientProject)
+      .then(() => {
+        throw new Error("should have caught error but did not");
+    }).catch(err => expect(err).to.equal(error));
+    });
+  });
 
-  context ".getSecretKeyByPath", ->
-    beforeEach ->
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+  context(".getSecretKeyByPath", function() {
+    beforeEach(() => sinon.stub(user, "ensureAuthToken").resolves("auth-token-123"));
 
-    it "calls api.getProjectToken with id + session", ->
+    it("calls api.getProjectToken with id + session", function() {
       sinon.stub(api, "getProjectToken")
-        .withArgs(@projectId, "auth-token-123")
-        .resolves("key-123")
+        .withArgs(this.projectId, "auth-token-123")
+        .resolves("key-123");
 
-      Project.getSecretKeyByPath(@todosPath).then (key) ->
-        expect(key).to.eq("key-123")
+      return Project.getSecretKeyByPath(this.todosPath).then(key => expect(key).to.eq("key-123"));
+    });
 
-    it "throws CANNOT_FETCH_PROJECT_TOKEN on error", ->
+    return it("throws CANNOT_FETCH_PROJECT_TOKEN on error", function() {
       sinon.stub(api, "getProjectToken")
-        .withArgs(@projectId, "auth-token-123")
-        .rejects(new Error())
+        .withArgs(this.projectId, "auth-token-123")
+        .rejects(new Error());
 
-      Project.getSecretKeyByPath(@todosPath)
-      .then ->
-        throw new Error("should have caught error but did not")
-      .catch (err) ->
-        expect(err.type).to.eq("CANNOT_FETCH_PROJECT_TOKEN")
+      return Project.getSecretKeyByPath(this.todosPath)
+      .then(function() {
+        throw new Error("should have caught error but did not");}).catch(err => expect(err.type).to.eq("CANNOT_FETCH_PROJECT_TOKEN"));
+    });
+  });
 
-  context ".generateSecretKeyByPath", ->
-    beforeEach ->
-      sinon.stub(user, "ensureAuthToken").resolves("auth-token-123")
+  return context(".generateSecretKeyByPath", function() {
+    beforeEach(() => sinon.stub(user, "ensureAuthToken").resolves("auth-token-123"));
 
-    it "calls api.updateProjectToken with id + session", ->
+    it("calls api.updateProjectToken with id + session", function() {
       sinon.stub(api, "updateProjectToken")
-        .withArgs(@projectId, "auth-token-123")
-        .resolves("new-key-123")
+        .withArgs(this.projectId, "auth-token-123")
+        .resolves("new-key-123");
 
-      Project.generateSecretKeyByPath(@todosPath).then (key) ->
-        expect(key).to.eq("new-key-123")
+      return Project.generateSecretKeyByPath(this.todosPath).then(key => expect(key).to.eq("new-key-123"));
+    });
 
-    it "throws CANNOT_CREATE_PROJECT_TOKEN on error", ->
+    return it("throws CANNOT_CREATE_PROJECT_TOKEN on error", function() {
       sinon.stub(api, "updateProjectToken")
-        .withArgs(@projectId, "auth-token-123")
-        .rejects(new Error())
+        .withArgs(this.projectId, "auth-token-123")
+        .rejects(new Error());
 
-      Project.generateSecretKeyByPath(@todosPath)
-      .then ->
-        throw new Error("should have caught error but did not")
-      .catch (err) ->
-        expect(err.type).to.eq("CANNOT_CREATE_PROJECT_TOKEN")
+      return Project.generateSecretKeyByPath(this.todosPath)
+      .then(function() {
+        throw new Error("should have caught error but did not");}).catch(err => expect(err.type).to.eq("CANNOT_CREATE_PROJECT_TOKEN"));
+    });
+  });
+});

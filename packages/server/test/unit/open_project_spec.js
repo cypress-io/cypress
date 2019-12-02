@@ -1,108 +1,134 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-chokidar = require("chokidar")
-browsers = require("#{root}lib/browsers")
-Project = require("#{root}lib/project")
-openProject = require("#{root}lib/open_project")
-preprocessor = require("#{root}lib/plugins/preprocessor")
+const chokidar = require("chokidar");
+const browsers = require(`${root}lib/browsers`);
+const Project = require(`${root}lib/project`);
+const openProject = require(`${root}lib/open_project`);
+const preprocessor = require(`${root}lib/plugins/preprocessor`);
 
-describe "lib/open_project", ->
-  beforeEach ->
-    @automation = {
-      reset: sinon.stub()
+describe("lib/open_project", function() {
+  beforeEach(function() {
+    this.automation = {
+      reset: sinon.stub(),
       use: sinon.stub()
-    }
-    @config = {
-      integrationFolder: "/user/foo/cypress/integration"
-      testFiles: "**/*.*"
+    };
+    this.config = {
+      integrationFolder: "/user/foo/cypress/integration",
+      testFiles: "**/*.*",
       ignoreTestFiles: "**/*.nope"
-    }
+    };
 
-    sinon.stub(browsers, "get").resolves()
-    sinon.stub(browsers, "open")
-    sinon.stub(Project.prototype, "open").resolves()
-    sinon.stub(Project.prototype, "reset").resolves()
-    sinon.stub(Project.prototype, "getSpecUrl").resolves()
-    sinon.stub(Project.prototype, "getConfig").resolves(@config)
-    sinon.stub(Project.prototype, "getAutomation").returns(@automation)
-    sinon.stub(preprocessor, "removeFile")
+    sinon.stub(browsers, "get").resolves();
+    sinon.stub(browsers, "open");
+    sinon.stub(Project.prototype, "open").resolves();
+    sinon.stub(Project.prototype, "reset").resolves();
+    sinon.stub(Project.prototype, "getSpecUrl").resolves();
+    sinon.stub(Project.prototype, "getConfig").resolves(this.config);
+    sinon.stub(Project.prototype, "getAutomation").returns(this.automation);
+    sinon.stub(preprocessor, "removeFile");
 
-    openProject.create("/project/root")
+    return openProject.create("/project/root");
+  });
 
-  context "#launch", ->
-    beforeEach ->
-      @spec = {
+  context("#launch", function() {
+    beforeEach(function() {
+      this.spec = {
         absolute: "path/to/spec"
-      }
+      };
 
-      @browser = { name: "chrome" }
+      return this.browser = { name: "chrome" };});
 
-    it "tells preprocessor to remove file on browser close", ->
-      openProject.launch(@browser, @spec)
-      .then ->
-        browsers.open.lastCall.args[1].onBrowserClose()
-        expect(preprocessor.removeFile).to.be.calledWith("path/to/spec")
+    it("tells preprocessor to remove file on browser close", function() {
+      return openProject.launch(this.browser, this.spec)
+      .then(function() {
+        browsers.open.lastCall.args[1].onBrowserClose();
+        return expect(preprocessor.removeFile).to.be.calledWith("path/to/spec");
+      });
+    });
 
-    it "does not tell preprocessor to remove file if no spec", ->
-      openProject.launch(@browser, {})
-      .then ->
-        browsers.open.lastCall.args[1].onBrowserClose()
-        expect(preprocessor.removeFile).not.to.be.called
+    it("does not tell preprocessor to remove file if no spec", function() {
+      return openProject.launch(this.browser, {})
+      .then(function() {
+        browsers.open.lastCall.args[1].onBrowserClose();
+        return expect(preprocessor.removeFile).not.to.be.called;
+      });
+    });
 
-    it "runs original onBrowserClose callback on browser close", ->
-      onBrowserClose = sinon.stub()
-      options = { onBrowserClose }
-      openProject.launch(@browser, @spec, options)
-      .then ->
-        browsers.open.lastCall.args[1].onBrowserClose()
-        expect(onBrowserClose).to.be.called
+    it("runs original onBrowserClose callback on browser close", function() {
+      const onBrowserClose = sinon.stub();
+      const options = { onBrowserClose };
+      return openProject.launch(this.browser, this.spec, options)
+      .then(function() {
+        browsers.open.lastCall.args[1].onBrowserClose();
+        return expect(onBrowserClose).to.be.called;
+      });
+    });
 
-    it "calls project.reset on launch", ->
-      openProject.launch(@browser, @spec)
-      .then ->
-        expect(Project.prototype.reset).to.be.called
+    it("calls project.reset on launch", function() {
+      return openProject.launch(this.browser, this.spec)
+      .then(() => expect(Project.prototype.reset).to.be.called);
+    });
 
-    it "sets isHeaded + isHeadless if not already defined", ->
-      expect(@browser.isHeaded).to.be.undefined
-      expect(@browser.isHeadless).to.be.undefined
+    return it("sets isHeaded + isHeadless if not already defined", function() {
+      expect(this.browser.isHeaded).to.be.undefined;
+      expect(this.browser.isHeadless).to.be.undefined;
 
-      openProject.launch(@browser, @spec)
-      .then =>
-        expect(@browser.isHeaded).to.be.true
-        expect(@browser.isHeadless).to.be.false
+      return openProject.launch(this.browser, this.spec)
+      .then(() => {
+        expect(this.browser.isHeaded).to.be.true;
+        return expect(this.browser.isHeadless).to.be.false;
+      });
+    });
+  });
 
-  context "#getSpecChanges", ->
-    beforeEach ->
-      @watcherStub = {
+  return context("#getSpecChanges", function() {
+    beforeEach(function() {
+      this.watcherStub = {
         on: sinon.stub()
-      }
-      sinon.stub(chokidar, "watch").returns(@watcherStub)
+      };
+      return sinon.stub(chokidar, "watch").returns(this.watcherStub);
+    });
 
-    it "watches spec files", ->
-      openProject.getSpecChanges({}).then =>
-        expect(chokidar.watch).to.be.calledWith(@config.testFiles, {
-          cwd: @config.integrationFolder
-          ignored: @config.ignoreTestFiles
+    it("watches spec files", function() {
+      return openProject.getSpecChanges({}).then(() => {
+        return expect(chokidar.watch).to.be.calledWith(this.config.testFiles, {
+          cwd: this.config.integrationFolder,
+          ignored: this.config.ignoreTestFiles,
           ignoreInitial: true
-        })
+        });
+      });
+    });
 
-    it "calls onChange callback when file is added", ->
-      onChange = sinon.spy()
-      @watcherStub.on.withArgs("add").yields()
-      openProject.getSpecChanges({ onChange }).then =>
-        expect(onChange).to.be.called
+    it("calls onChange callback when file is added", function() {
+      const onChange = sinon.spy();
+      this.watcherStub.on.withArgs("add").yields();
+      return openProject.getSpecChanges({ onChange }).then(() => {
+        return expect(onChange).to.be.called;
+      });
+    });
 
-    it "calls onChange callback when file is removed", ->
-      onChange = sinon.spy()
-      @watcherStub.on.withArgs("unlink").yields()
-      openProject.getSpecChanges({ onChange }).then =>
-        expect(onChange).to.be.called
+    it("calls onChange callback when file is removed", function() {
+      const onChange = sinon.spy();
+      this.watcherStub.on.withArgs("unlink").yields();
+      return openProject.getSpecChanges({ onChange }).then(() => {
+        return expect(onChange).to.be.called;
+      });
+    });
 
-    it "only calls onChange once if there are multiple changes in a row", ->
-      onChange = sinon.spy()
-      @watcherStub.on.withArgs("unlink").yields()
-      @watcherStub.on.withArgs("add").yields()
-      @watcherStub.on.withArgs("unlink").yields()
-      @watcherStub.on.withArgs("add").yields()
-      openProject.getSpecChanges({ onChange }).then =>
-        expect(onChange).to.be.calledOnce
+    return it("only calls onChange once if there are multiple changes in a row", function() {
+      const onChange = sinon.spy();
+      this.watcherStub.on.withArgs("unlink").yields();
+      this.watcherStub.on.withArgs("add").yields();
+      this.watcherStub.on.withArgs("unlink").yields();
+      this.watcherStub.on.withArgs("add").yields();
+      return openProject.getSpecChanges({ onChange }).then(() => {
+        return expect(onChange).to.be.calledOnce;
+      });
+    });
+  });
+});
