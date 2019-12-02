@@ -32,20 +32,7 @@ tryToCall = (win, method) ->
     debug("got error calling window method:", err.stack)
 
 getAutomation = (win) ->
-  sendDebuggerCommand = (message, data) ->
-    ## wrap in bluebird
-    tryToCall win, Promise.method ->
-      debug('debugger: sending %s with params %o', message, data)
-      win.webContents.debugger.sendCommand(message, data)
-    .tap (res) ->
-      if debug.enabled && res.data && res.data.length > 100
-        res = _.clone(res)
-        res.data = res.data.slice(0, 100) + ' [truncated]'
-      debug('debugger: received response to %s: %o', message, res)
-    .tapCatch (err) ->
-      debug('debugger: received error on %s: %o', messsage, err)
-
-  CdpAutomation(sendDebuggerCommand)
+  CdpAutomation(win.webContents.debugger.sendCommand)
 
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
@@ -148,6 +135,23 @@ module.exports = {
       debug("debugger attached")
     catch err
       debug("debugger attached failed %o", { err })
+      throw err
+
+    originalSendCommand = webContents.debugger.sendCommand
+
+    webContents.debugger.sendCommand = (message, data) ->
+      debug('debugger: sending %s with params %o', message, data)
+
+      ## wrap in bluebird & add logging
+      Promise.promisify(originalSendCommand)
+      .call(webContents.debugger, message, data)
+      .tap (res) ->
+        if debug.enabled && res.data && res.data.length > 100
+          res = _.clone(res)
+          res.data = res.data.slice(0, 100) + ' [truncated]'
+        debug('debugger: received response to %s: %o', message, res)
+      .tapCatch (err) ->
+        debug('debugger: received error on %s: %o', messsage, err)
 
     webContents.debugger.sendCommand('Browser.getVersion')
 
