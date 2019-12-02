@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 2.8
+// TypeScript Version: 2.9
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
@@ -60,7 +60,7 @@ declare namespace Cypress {
     name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
     displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
     version: string
-    majorVersion: string
+    majorVersion: number
     path: string
     isHeaded: boolean
     isHeadless: boolean
@@ -620,13 +620,60 @@ declare namespace Cypress {
      * @see https://on.cypress.io/dblclick
      */
     dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
-
+    /**
+     * Double-click a DOM element at specific corner / side.
+     *
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/dblclick
+     * @example
+     *    cy.get('button').dblclick('topRight')
+     */
+    dblclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Double-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/dblclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').dblclick(15, 40)
+    ```
+     */
+    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
      * @see https://on.cypress.io/rightclick
      */
     rightclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific corner / side.
+     *
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').rightclick('topRight')
+     */
+    rightclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/rightclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').rightclick(15, 40)
+    ```
+     */
+    rightclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
      * Set a debugger and log what the previous command yields.
@@ -820,6 +867,12 @@ declare namespace Cypress {
     hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
+     * Invoke a function in an array of functions.
+     * @see https://on.cypress.io/invoke
+     */
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
+
+    /**
      * Invoke a function on the previously yielded subject.
      * This isn't possible to strongly type without generic override yet.
      * If called on an object you can do this instead: `.then(s => s.show())`.
@@ -841,6 +894,13 @@ declare namespace Cypress {
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
     its<K extends keyof Subject>(propertyName: K): Chainable<Subject[K]>
+    /**
+     * Get a value by index from an array yielded from the previous command.
+     * @see https://on.cypress.io/its
+     * @example
+     *    cy.wrap(['a', 'b']).its(1).should('equal', 'b')
+     */
+    its<T, Subject extends T[]>(index: number): Chainable<T>
 
     /**
      * Get the last DOM element within a set of DOM elements.

@@ -2,6 +2,7 @@ _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 debug       = require('debug')('cypress:server:events')
+pluralize   = require("pluralize")
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
@@ -189,6 +190,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
+      debug("open:project")
+
       onSettingsChanged = ->
         bus.emit("config:changed")
 
@@ -208,6 +211,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
       browsers.getAllBrowsersWith(options.browser)
       .then (browsers = []) ->
+        debug("setting found %s on the config", pluralize("browser", browsers.length, true))
         options.config = _.assign(options.config, { browsers })
       .then ->
         chromePolicyCheck.run (err) ->

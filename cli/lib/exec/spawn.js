@@ -10,7 +10,7 @@ const util = require('../util')
 const state = require('../tasks/state')
 const xvfb = require('./xvfb')
 const verify = require('../tasks/verify')
-const { throwFormErrorText, errors } = require('../errors')
+const errors = require('../errors')
 
 const isXlibOrLibudevRe = /^(?:Xlib|libudev)/
 const isHighSierraWarningRe = /\*\*\* WARNING/
@@ -140,6 +140,13 @@ module.exports = {
         function resolveOn (event) {
           return function (code, signal) {
             debug('child event fired %o', { event, code, signal })
+
+            if (code === null) {
+              const errorObject = errors.errors.childProcessKilled(event, signal)
+
+              return errors.getError(errorObject).then(reject)
+            }
+
             resolve(code)
           }
         }
@@ -251,7 +258,9 @@ module.exports = {
 
         return code
       })
-      .catch(throwFormErrorText(errors.unexpected))
+      // we can format and handle an error message from the code above
+      // prevent wrapping error again by using "known: undefined" filter
+      .catch({ known: undefined }, errors.throwFormErrorText(errors.errors.unexpected))
     }
 
     if (needsXvfb) {

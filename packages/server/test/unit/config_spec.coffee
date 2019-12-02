@@ -765,7 +765,8 @@ describe "lib/config", ->
             projectId:                  { value: null, from: "default" },
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
-            blacklistHosts:             { value: null, from: "default" }
+            blacklistHosts:             { value: null, from: "default" },
+            browsers:                   { value: [], from: "default" },
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "json", from: "cli" },
             reporterOptions:            { value: null, from: "default" },
@@ -833,6 +834,7 @@ describe "lib/config", ->
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
+            browsers:                   { value: [], from: "default" }
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "spec", from: "default" },
             reporterOptions:            { value: null, from: "default" },
@@ -893,9 +895,82 @@ describe "lib/config", ->
             }
           })
 
+  context ".setPluginResolvedOn", ->
+    it "resolves an object with single property", ->
+      cfg = {}
+      obj = {
+        foo: "bar"
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg).to.deep.eq({
+        foo: {
+          value: "bar",
+          from: "plugin"
+        }
+      })
+
+    it "resolves an object with multiple properties", ->
+      cfg = {}
+      obj = {
+        foo: "bar",
+        baz: [1, 2, 3]
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg).to.deep.eq({
+        foo: {
+          value: "bar",
+          from: "plugin"
+        },
+        baz: {
+          value: [1, 2, 3],
+          from: "plugin"
+        }
+      })
+
+    it "resolves a nested object", ->
+      # we need at least the structure
+      cfg = {
+        foo: {
+          bar: 1
+        }
+      }
+      obj = {
+        foo: {
+          bar: 42
+        }
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg, "foo.bar gets value").to.deep.eq({
+        foo: {
+          bar: {
+            value: 42,
+            from: "plugin"
+          }
+        }
+      })
+
+  context "_.defaultsDeep", ->
+    it "merges arrays", ->
+      # sanity checks to confirm how Lodash merges arrays in defaultsDeep
+      diffs = {
+        list: [1]
+      }
+      cfg = {
+        list: [1, 2]
+      }
+      merged = _.defaultsDeep({}, diffs, cfg)
+      expect(merged, "arrays are combined").to.deep.eq({
+        list: [1, 2]
+      })
+
   context ".updateWithPluginValues", ->
     it "is noop when no overrides", ->
       expect(config.updateWithPluginValues({foo: 'bar'}, null)).to.deep.eq({
+        foo: 'bar'
+      })
+
+    it "is noop with empty overrides", ->
+      expect(config.updateWithPluginValues({foo: 'bar'}, {})).to.deep.eq({
         foo: 'bar'
       })
 
@@ -909,6 +984,7 @@ describe "lib/config", ->
           a: "a"
           b: "b"
         }
+        # previously resolved values
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "quux", from: "cli" }
@@ -949,6 +1025,117 @@ describe "lib/config", ->
             a: { value: "a", from: "config" }
             b: { value: "bb", from: "plugin" }
             c: { value: "c", from: "plugin" }
+          }
+        }
+      })
+
+    it "keeps the list of browsers if the plugins returns empty object", ->
+      browser = {
+        name: "fake browser name",
+        family: "chrome",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browser],
+        resolved: {
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      }
+
+      overrides = {}
+
+      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
+        browsers: [browser],
+        resolved: {
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      })
+
+    it "catches browsers=null returned from plugins", ->
+      browser = {
+        name: "fake browser name",
+        family: "chrome",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browser],
+        resolved: {
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      }
+
+      overrides = {
+        browsers: null
+      }
+
+      sinon.stub(errors, "throw")
+      config.updateWithPluginValues(cfg, overrides)
+      expect(errors.throw).to.have.been.calledWith("CONFIG_VALIDATION_ERROR")
+
+    it "allows user to filter browsers", ->
+      browserOne = {
+        name: "fake browser name",
+        family: "chrome",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+      browserTwo = {
+        name: "fake electron",
+        family: "electron",
+        displayName: "Electron",
+        version: "x.y.z",
+        # Electron browser is built-in, no external path
+        path: "",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browserOne, browserTwo],
+        resolved: {
+          browsers: {
+            value: [browserOne, browserTwo],
+            from: "default"
+          }
+        }
+      }
+
+      overrides = {
+        browsers: [browserTwo]
+      }
+
+      updated = config.updateWithPluginValues(cfg, overrides)
+      expect(updated.resolved, "resolved values").to.deep.eq({
+        browsers: {
+          value: [browserTwo],
+          from: 'plugin'
+        }
+      })
+
+      expect(updated, "all values").to.deep.eq({
+        browsers: [browserTwo],
+        resolved: {
+          browsers: {
+            value: [browserTwo],
+            from: 'plugin'
           }
         }
       })

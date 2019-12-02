@@ -3,6 +3,7 @@ EE            = require("events")
 net           = require("net")
 Promise       = require("bluebird")
 debug         = require("debug")("cypress:server:browsers:electron")
+{ cors }      = require("@packages/network")
 menu          = require("../gui/menu")
 Windows       = require("../gui/windows")
 appData       = require("../util/app_data")
@@ -10,6 +11,15 @@ appData       = require("../util/app_data")
 plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
+
+## additional events that are nice to know about to be logged
+## https://electronjs.org/docs/api/browser-window#instance-events
+ELECTRON_DEBUG_EVENTS = [
+  'close'
+  'responsive',
+  'session-end'
+  'unresponsive'
+]
 
 tryToCall = (win, method) ->
   try
@@ -25,7 +35,15 @@ getAutomation = (win) ->
   sendDebuggerCommand = (message, data) ->
     ## wrap in bluebird
     tryToCall win, Promise.method ->
+      debug('debugger: sending %s with params %o', message, data)
       win.webContents.debugger.sendCommand(message, data)
+    .tap (res) ->
+      if debug.enabled && res.data && res.data.length > 100
+        res = _.clone(res)
+        res.data = res.data.slice(0, 100) + ' [truncated]'
+      debug('debugger: received response to %s: %o', message, res)
+    .tapCatch (err) ->
+      debug('debugger: received error on %s: %o', messsage, err)
 
   CdpAutomation(sendDebuggerCommand)
 
@@ -61,7 +79,7 @@ module.exports = {
           ## close child on parent close
           _win.on "close", ->
             if not child.isDestroyed()
-              child.close()
+              child.destroy()
     }
 
     _.defaultsDeep({}, options, defaults)
@@ -98,6 +116,10 @@ module.exports = {
   _launch: (win, url, options) ->
     if options.show
       menu.set({withDevTools: true})
+
+    ELECTRON_DEBUG_EVENTS.forEach (e) ->
+      win.on e, ->
+        debug("%s fired on the BrowserWindow %o", e, { browserWindowUrl: url })
 
     Promise.try =>
       @_attachDebugger(win.webContents)
@@ -226,7 +248,7 @@ module.exports = {
 
         return _.extend events, {
           browserWindow:      win
-          kill:               -> tryToCall(win, "close")
+          kill:               -> tryToCall(win, "destroy")
           removeAllListeners: -> tryToCall(win, "removeAllListeners")
         }
 }

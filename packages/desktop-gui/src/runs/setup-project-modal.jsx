@@ -70,7 +70,7 @@ class SetupProject extends Component {
 
   render () {
     if (!authStore.isAuthenticated) {
-      authStore.setShowingLogin(true)
+      authStore.openLogin()
 
       return null
     }
