@@ -153,15 +153,26 @@ describe('<RadioGroup />', () => {
     it('can render custom radio items instead of the default radio input style', () => {
       cy.render(render, (
         <RadioGroup value="v2">
-          <CustomRadio value="v1" data-test="v1">
-            {ExampleCustomRadioComponent}
-          </CustomRadio>
-          <CustomRadio value="v2" data-test="v2">
-            {ExampleCustomRadioComponent}
-          </CustomRadio>
-          <CustomRadio value="v3" data-test="v3">
-            {ExampleCustomRadioComponent}
-          </CustomRadio>
+          <div style={{ display: 'flex' }}>
+            <label style={{ display: 'flex', margin: '8px' }}>
+              Apples
+              <CustomRadio value="v1" data-test="v1">
+                {ExampleCustomRadioComponent}
+              </CustomRadio>
+            </label>
+            <label style={{ display: 'flex', margin: '8px' }}>
+              Oranges
+              <CustomRadio value="v2" data-test="v2">
+                {ExampleCustomRadioComponent}
+              </CustomRadio>
+            </label>
+            <label style={{ display: 'flex', margin: '8px' }}>
+              Pears
+              <CustomRadio value="v3" data-test="v3">
+                {ExampleCustomRadioComponent}
+              </CustomRadio>
+            </label>
+          </div>
         </RadioGroup>
       ))
 
