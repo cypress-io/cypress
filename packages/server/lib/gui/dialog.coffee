@@ -1,3 +1,4 @@
+_ = require('lodash')
 dialog = require("electron").dialog
 
 module.exports = {
@@ -16,8 +17,8 @@ module.exports = {
     }
 
     dialog.showOpenDialog(props)
-    .then ({ filePaths }) ->
+    .then (obj) ->
       ## return the first path since there can only ever
       ## be a single directory selection
-      filePaths[0]
+      return _.get(obj, ['filePaths', 0])
 }
