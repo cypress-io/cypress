@@ -461,8 +461,8 @@ describe('Specs List', function () {
       })
 
       it('updates spec icon', function () {
-        cy.get('@firstSpec').find('i').should('not.have.class', 'fas fa-dot-circle')
-        cy.get('@secondSpec').find('i').should('have.class', 'far fa-dot-circle')
+        cy.get('@firstSpec').find('i').should('not.have.class', 'fa-dot-circle')
+        cy.get('@secondSpec').find('i').should('have.class', 'fa-dot-circle')
       })
 
       it('updates active spec', function () {
