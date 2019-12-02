@@ -1,141 +1,171 @@
-_           = require("lodash")
-uuid        = require("uuid")
-Promise     = require("bluebird")
-Cookies     = require("./cookies")
-Screenshot  = require("./screenshot")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _           = require("lodash");
+const uuid        = require("uuid");
+const Promise     = require("bluebird");
+const Cookies     = require("./cookies");
+const Screenshot  = require("./screenshot");
 
-assertValidOptions = (options, keys...) ->
-  _.each keys, (key) ->
-    if key not of options
-      throw new Error("Automation requires the key: #{key}. You passed in:", options)
+const assertValidOptions = (options, ...keys) =>
+  _.each(keys, function(key) {
+    if (!(key in options)) {
+      throw new Error(`Automation requires the key: ${key}. You passed in:`, options);
+    }
+  })
+;
 
 module.exports = {
-  create: (cyNamespace, cookieNamespace, screenshotsFolder) ->
-    # assertValidOptions(options, "namespace", "cookie", "screenshotsFolder")
+  create(cyNamespace, cookieNamespace, screenshotsFolder) {
+    // assertValidOptions(options, "namespace", "cookie", "screenshotsFolder")
 
-    requests = {}
+    const requests = {};
 
-    middleware = null
+    let middleware = null;
 
-    reset = ->
+    const reset = () =>
       middleware = {
-        onPush: null
-        onBeforeRequest: null
-        onRequest: null
-        onResponse: null
+        onPush: null,
+        onBeforeRequest: null,
+        onRequest: null,
+        onResponse: null,
         onAfterResponse: null
       }
+    ;
 
-    ## set the middleware
-    reset()
+    //# set the middleware
+    reset();
 
-    cookies    = Cookies(cyNamespace, cookieNamespace)
-    screenshot = Screenshot(screenshotsFolder)
+    const cookies    = Cookies(cyNamespace, cookieNamespace);
+    const screenshot = Screenshot(screenshotsFolder);
 
-    get = (fn) ->
-      middleware[fn]
+    const get = fn => middleware[fn];
 
-    invokeAsync = (fn, args...) ->
+    const invokeAsync = (fn, ...args) =>
       Promise
-      .try ->
-        if fn = get(fn)
-          fn.apply(null, args)
+      .try(function() {
+        if (fn = get(fn)) {
+          return fn.apply(null, args);
+        }
+      })
+    ;
 
-    requestAutomationResponse = (message, data, fn) ->
-      new Promise (resolve, reject) =>
-        id = uuid.v4()
+    const requestAutomationResponse = (message, data, fn) =>
+      new Promise((resolve, reject) => {
+        const id = uuid.v4();
 
-        requests[id] = (obj) ->
-          ## normalize the error from automation responses
-          if e = obj.__error
-            err = new Error(e)
-            err.name = obj.__name
-            err.stack = obj.__stack
-            reject(err)
-          else
-            ## normalize the response
-            resolve(obj.response)
+        requests[id] = function(obj) {
+          //# normalize the error from automation responses
+          let e;
+          if (e = obj.__error) {
+            const err = new Error(e);
+            err.name = obj.__name;
+            err.stack = obj.__stack;
+            return reject(err);
+          } else {
+            //# normalize the response
+            return resolve(obj.response);
+          }
+        };
 
-        ## callback onAutomate with the right args
-        fn(message, data, id)
+        //# callback onAutomate with the right args
+        return fn(message, data, id);
+      })
+    ;
 
-    automationValve = (message, fn) ->
-      return (msg, data) ->
-        ## enable us to omit message
-        ## argument
-        if not data
-          data = msg
-          msg  = message
+    const automationValve = (message, fn) =>
+      function(msg, data) {
+        //# enable us to omit message
+        //# argument
+        let onReq;
+        if (!data) {
+          data = msg;
+          msg  = message;
+        }
 
-        ## if we have an onRequest function
-        ## then just invoke that
-        if onReq = get("onRequest")
-          onReq(msg, data)
-        else
-          ## do the default
-          requestAutomationResponse(msg, data, fn)
+        //# if we have an onRequest function
+        //# then just invoke that
+        if ((onReq = get("onRequest"))) {
+          return onReq(msg, data);
+        } else {
+          //# do the default
+          return requestAutomationResponse(msg, data, fn);
+        }
+      }
+    ;
 
-    normalize = (message, data, automate) ->
-      Promise.try ->
-        switch message
-          when "take:screenshot"
-            screenshot.capture(data, automate)
-          when "get:cookies"
-            cookies.getCookies(data, automate)
-          when "get:cookie"
-            cookies.getCookie(data, automate)
-          when "set:cookie"
-            cookies.setCookie(data, automate)
-          when "clear:cookies"
-            cookies.clearCookies(data, automate)
-          when "clear:cookie"
-            cookies.clearCookie(data, automate)
-          when "change:cookie"
-            cookies.changeCookie(data)
-          else
-            automate(data)
+    const normalize = (message, data, automate) =>
+      Promise.try(function() {
+        switch (message) {
+          case "take:screenshot":
+            return screenshot.capture(data, automate);
+          case "get:cookies":
+            return cookies.getCookies(data, automate);
+          case "get:cookie":
+            return cookies.getCookie(data, automate);
+          case "set:cookie":
+            return cookies.setCookie(data, automate);
+          case "clear:cookies":
+            return cookies.clearCookies(data, automate);
+          case "clear:cookie":
+            return cookies.clearCookie(data, automate);
+          case "change:cookie":
+            return cookies.changeCookie(data);
+          default:
+            return automate(data);
+        }
+      })
+    ;
 
     return {
-      _requests: requests
+      _requests: requests,
 
-      reset: ->
-        ## TODO: there's gotta be a better
-        ## way to manage this state. i don't
-        ## like automation being a singleton
-        ## that's kept around between browsers
-        ## opening and closing
-        { onPush } = middleware
+      reset() {
+        //# TODO: there's gotta be a better
+        //# way to manage this state. i don't
+        //# like automation being a singleton
+        //# that's kept around between browsers
+        //# opening and closing
+        const { onPush } = middleware;
 
-        reset()
+        reset();
 
-        middleware.onPush = onPush
-        middleware
+        middleware.onPush = onPush;
+        return middleware;
+      },
 
-      get: -> middleware
+      get() { return middleware; },
 
-      use: (middlewares = {}) ->
-        _.extend(middleware, middlewares)
+      use(middlewares = {}) {
+        return _.extend(middleware, middlewares);
+      },
 
-      push: (message, data) ->
-        normalize(message, data)
-        .then (data) ->
-          invokeAsync("onPush", message, data) if data
+      push(message, data) {
+        return normalize(message, data)
+        .then(function(data) {
+          if (data) { return invokeAsync("onPush", message, data); }
+        });
+      },
 
-      request: (message, data, fn) ->
-        ## curry in the message + callback function
-        ## for obtaining the external automation data
-        automate = automationValve(message, fn)
+      request(message, data, fn) {
+        //# curry in the message + callback function
+        //# for obtaining the external automation data
+        const automate = automationValve(message, fn);
 
-        ## enable us to tap into before making the request
-        invokeAsync("onBeforeRequest", message, data)
-        .then ->
-          normalize(message, data, automate)
-        .tap (resp) ->
-          invokeAsync("onAfterResponse", message, data, resp)
+        //# enable us to tap into before making the request
+        return invokeAsync("onBeforeRequest", message, data)
+        .then(() => normalize(message, data, automate)).tap(resp => invokeAsync("onAfterResponse", message, data, resp));
+      },
 
-      response: (id, resp) ->
-        if request = requests[id]
-          delete request[id]
-          request(resp)
-    }
-}
+      response(id, resp) {
+        let request;
+        if (request = requests[id]) {
+          delete request[id];
+          return request(resp);
+        }
+      }
+    };
+  }
+};
