@@ -18,5 +18,6 @@ module.exports = {
     './scripts/decaff/empty-catch.js',
     './scripts/decaff/no-cond-assign.js',
     './scripts/decaff/arrow-comment.js',
+    './scripts/decaff/test-no-return.js',
   ],
 }
