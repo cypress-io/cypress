@@ -175,7 +175,7 @@
   }
 
   .rc-collapse-item-active .rc-collapse-header .arrow {
-    // @extend .#{$fa-css-prefix}-caret-down;
+    @extend .#{$fa-css-prefix}-caret-down;
   }
 
   .rc-collapse-content {

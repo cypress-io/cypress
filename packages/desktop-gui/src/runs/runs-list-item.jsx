@@ -127,7 +127,7 @@ export default class RunsListItem extends Component {
                   </div> :
                   // or did we only actual run it on one OS
                   <div>
-                    <i className={`fas fa-fw fa-${osIcon(this.props.run.instances[0].platform.osName)}`}></i>{' '}
+                    <i className={`fa-fw ${this._osIcon()}`}></i>{' '}
                     {this._osDisplay()}
                   </div> :
                 null
@@ -142,7 +142,7 @@ export default class RunsListItem extends Component {
                   </div> :
                   // or did we only actual run it on one browser
                   <div className='env-msg'>
-                    <i className={`fas fa-fw fa-${this._browserIcon()}`}></i>{' '}
+                    <i className={`fa-fw ${this._browserIcon()}`}></i>{' '}
                     {this._browserDisplay()}
                   </div> :
                 null
@@ -220,19 +220,15 @@ export default class RunsListItem extends Component {
   }
 
   _browserIcon () {
-    return browserIcon(_.get(this.props.run, 'instances[0].platform.browserName', ''))
+    const icon = browserIcon(_.get(this.props.run, 'instances[0].platform.browserName', ''))
+
+    return icon === 'globe' ? `fas fa-${icon}` : `fab fa-${icon}`
   }
 
   _osIcon () {
-    if (!this.props.run.instances) return
+    const icon = osIcon(this.props.run.instances[0].platform.osName)
 
-    return _
-    .chain(this.props.run.instances)
-    .map((instance) => {
-      return `${_.get(instance, 'platform.osName', '')} + ${_.get(instance, 'platform.osVersion', '')}`
-    })
-    .uniq()
-    .value()
+    return icon === 'desktop' ? `fas fa-${icon}` : `fab fa-${icon}`
   }
 
   _getUniqOs () {
