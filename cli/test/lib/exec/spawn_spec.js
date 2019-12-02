@@ -94,6 +94,7 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
+          '--',
           '--foo',
           '--cwd',
           cwd,
@@ -115,6 +116,7 @@ describe('lib/exec/spawn', function () {
         // entire ENV object with possible sensitive variables
         const args = cp.spawn.firstCall.args.slice(0, 2)
         const expectedCliArgs = [
+          '--',
           '--foo',
           '--cwd',
           cwd,
@@ -135,6 +137,7 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('node', [
           p,
+          '--',
           '--foo',
           '--cwd',
           cwd,
