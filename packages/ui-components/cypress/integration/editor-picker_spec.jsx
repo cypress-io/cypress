@@ -1,6 +1,9 @@
+import React from 'react'
+import { render } from 'react-dom'
+import { EditorPicker } from '../../'
+
 describe('<EditorPicker />', () => {
   let defaultProps
-  let render
 
   beforeEach(() => {
     defaultProps = {
@@ -14,16 +17,12 @@ describe('<EditorPicker />', () => {
       onSelect: () => {},
     }
 
-    render = (props = {}) => {
-      cy.window().invoke('renderEditorPicker', Object.assign({}, defaultProps, props))
-    }
-
     cy.visit('dist/index.html')
     cy.viewport(400, 600)
   })
 
   it('renders a dropdown with specified editors', () => {
-    render()
+    cy.render(render, <EditorPicker {...defaultProps} />)
 
     cy.get('option').eq(1).should('have.text', 'Atom')
     cy.get('option').eq(2).should('have.text', 'Sublime Text')
@@ -32,13 +31,13 @@ describe('<EditorPicker />', () => {
   })
 
   it('has chosen editor selected', () => {
-    render()
+    cy.render(render, <EditorPicker {...defaultProps} />)
 
     cy.get('select').should('have.value', 'vscode')
   })
 
   it('defaults to "Select an Editor" if not option chosen', () => {
-    render({ chosenEditor: undefined })
+    cy.render(render, <EditorPicker {...defaultProps} chosenEditor={undefined}/>)
 
     cy.get('select').should('have.value', 'none')
     cy.get('[value=none]').should('have.text', '--- Select an Editor ---')
@@ -47,7 +46,7 @@ describe('<EditorPicker />', () => {
   it('calls onSelect when option is chosen', () => {
     const onSelect = cy.stub()
 
-    render({ onSelect })
+    cy.render(render, <EditorPicker {...defaultProps} onSelect={onSelect}/>)
 
     cy.get('select').select('sublime').then(() => {
       expect(onSelect).to.be.calledWith({ id: 'sublime', name: 'Sublime Text' })
@@ -56,7 +55,7 @@ describe('<EditorPicker />', () => {
 
   describe('"Other" handling', () => {
     it('shows text input when chosen', () => {
-      render({ chosenEditor: defaultProps.editors[3] })
+      cy.render(render, <EditorPicker {...defaultProps} chosenEditor={defaultProps.editors[3]}/>)
 
       cy.contains('Enter the full path')
       cy.get('input').should('be.visible')
@@ -64,7 +63,7 @@ describe('<EditorPicker />', () => {
 
     it('populates path if specified', () => {
       defaultProps.editors[3].path = '/path/to/my/editor'
-      render({ chosenEditor: defaultProps.editors[3] })
+      cy.render(render, <EditorPicker {...defaultProps} chosenEditor={defaultProps.editors[3]}/>)
 
       cy.get('input').should('have.value', '/path/to/my/editor')
     })
@@ -74,7 +73,7 @@ describe('<EditorPicker />', () => {
       const path = '/path/to/my/editor'
       const chosenEditor = defaultProps.editors[3]
 
-      render({ onSelect, chosenEditor })
+      cy.render(render, <EditorPicker {...defaultProps} chosenEditor={chosenEditor} onSelect={onSelect}/>)
 
       path.split('').forEach((letter, i) => {
         const typedSoFar = path.substring(0, i + 1)
@@ -84,10 +83,7 @@ describe('<EditorPicker />', () => {
           id: 'other', name: 'Other', isOther: true, path: typedSoFar,
         })
 
-        render({
-          onSelect,
-          chosenEditor: Object.assign({}, chosenEditor, { path: typedSoFar }),
-        })
+        cy.render(render, <EditorPicker {...defaultProps} chosenEditor={chosenEditor} onSelect={onSelect} path={typedSoFar} />)
       })
     })
   })
