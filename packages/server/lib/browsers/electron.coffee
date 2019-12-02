@@ -181,8 +181,7 @@ module.exports = {
 
   _clearCache: (webContents) ->
     debug("clearing cache")
-    Promise.fromCallback (cb) =>
-      webContents.session.clearCache(cb)
+    webContents.session.clearCache()
 
   _setUserAgent: (webContents, userAgent) ->
     debug("setting user agent to:", userAgent)
@@ -191,14 +190,13 @@ module.exports = {
     webContents.session.setUserAgent(userAgent)
 
   _setProxy: (webContents, proxyServer) ->
-    Promise.fromCallback (cb) =>
-      webContents.session.setProxy({
-        proxyRules: proxyServer
-        ## this should really only be necessary when
-        ## running Chromium versions >= 72
-        ## https://github.com/cypress-io/cypress/issues/1872
-        proxyBypassRules: "<-loopback>"
-      }, cb)
+    webContents.session.setProxy({
+      proxyRules: proxyServer
+      ## this should really only be necessary when
+      ## running Chromium versions >= 72
+      ## https://github.com/cypress-io/cypress/issues/1872
+      proxyBypassRules: "<-loopback>"
+    })
 
   open: (browser, url, options = {}, automation) ->
     { projectRoot, isTextTerminal } = options
