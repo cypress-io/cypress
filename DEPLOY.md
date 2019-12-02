@@ -154,6 +154,17 @@ Once the `develop` branch for all test projects are reliably passing with the ne
     - Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release` (see its README for details)
 16. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
 17. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
+18. Try updating as many example projects to the new version. You probably want to update by using Renovate dependency issue like [`cypress-example-todomvc` "Update Dependencies (Renovate Bot)](https://github.com/cypress-io/cypress-example-todomvc/issues/99). Try updating at least the following projects:
+    - https://github.com/cypress-io/cypress-example-todomvc
+    - https://github.com/cypress-io/cypress-example-todomvc-redux
+    - https://github.com/cypress-io/cypress-example-realworld
+    - https://github.com/cypress-io/cypress-example-recipes
+    - https://github.com/cypress-io/cypress-example-docker-compose
+    - https://github.com/cypress-io/cypress-example-api-testing
+    - https://github.com/cypress-io/angular-pizza-creator
+    - https://github.com/cypress-io/cypress-fiddle
+    - https://github.com/cypress-io/cypress-example-piechopper
+    - https://github.com/cypress-io/cypress-documentation
 
 Take a break, you deserve it! :sunglasses:
 
