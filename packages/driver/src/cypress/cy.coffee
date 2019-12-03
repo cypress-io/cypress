@@ -321,12 +321,16 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       try
         result = undefined
         ret = command.get("fn").apply(state("ctx"), args)
-        if not _.isUndefined(ret) and _.isFunction(ret.then)
-            await ret.then ->
-                if not _.isUndefined(command.get("queue"))
-                  subjects = await runQueuedCommands(command)
-                  [..., result] = subjects
-                ret
+        console.log(command)
+        if not _.isUndefined(ret) and not _.isUndefined(command.get("queue"))
+            if _.isFunction(ret.then)
+              await ret.then ->
+                    subjects = await runQueuedCommands(command)
+                    [..., result] = subjects
+                  ret
+            else
+              subjects = await runQueuedCommands(command)
+              [..., result] = subjects
       catch err
         throw err
       finally
@@ -417,6 +421,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
     next = ->
       ## bail if we've been told to abort in case
       ## an old command continues to run after
+      console.log(queue)
       if stopped
         return
 
