@@ -115,12 +115,13 @@ describe('lib/exec/spawn', function () {
         // and also less risk that a failed assertion would dump the
         // entire ENV object with possible sensitive variables
         const args = cp.spawn.firstCall.args.slice(0, 2)
+        // it is important for "--no-sandbox" to appear before "--" separator
         const expectedCliArgs = [
+          '--no-sandbox',
           '--',
           '--foo',
           '--cwd',
           cwd,
-          '--no-sandbox',
         ]
 
         expect(args).to.deep.equal(['/path/to/cypress', expectedCliArgs])

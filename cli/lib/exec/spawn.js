@@ -114,7 +114,9 @@ module.exports = {
         const node11WindowsFix = isPlatform('win32')
 
         if (verify.needsSandbox()) {
-          electronArgs.push('--no-sandbox')
+          // this is one of the Electron's command line switches
+          // thus it needs to be before "--" separator
+          electronArgs.unshift('--no-sandbox')
         }
 
         // strip dev out of child process options
