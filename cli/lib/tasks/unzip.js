@@ -12,6 +12,10 @@ const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
 
+const unzipTools = {
+  extract,
+}
+
 // expose this function for simple testing
 const unzip = ({ zipFilePath, installDir, progress }) => {
   debug('unzipping from %s', zipFilePath)
@@ -32,9 +36,6 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
         if (err) return reject(err)
 
-        // debug('zipfile.paths:', zipFile)
-        // zipFile.on('entry', debug)
-        // debug(zipFile.readEntry())
         const total = zipFile.entryCount
 
         debug('zipFile entries count', total)
@@ -77,7 +78,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
             onEntry: tick,
           }
 
-          return extract(zipFilePath, opts, endFn)
+          return unzipTools.extract(zipFilePath, opts, endFn)
         }
 
         const unzipWithUnzipTool = () => {
@@ -198,4 +199,8 @@ const start = ({ zipFilePath, installDir, progress }) => {
 
 module.exports = {
   start,
+  utils: {
+    unzip,
+    unzipTools,
+  },
 }
