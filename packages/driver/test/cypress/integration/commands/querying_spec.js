@@ -1893,6 +1893,12 @@ space
         cy.get('#test-button').contains('Test')
       })
 
+      it('is case sensitive when matchCase is true', () => {
+        cy.get('#test-button').contains('Test', {
+          matchCase: true,
+        })
+      })
+
       it('is case insensitive when matchCase is false', () => {
         cy.get('#test-button').contains('test', {
           matchCase: false,

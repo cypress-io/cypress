@@ -15,7 +15,7 @@ const restoreContains = () => {
 
 const whitespaces = /\s+/g
 
-module.exports = function (Commands, Cypress, cy, state, config) {
+module.exports = (Commands, Cypress, cy) => {
   // restore initially when a run starts
   restoreContains()
 
