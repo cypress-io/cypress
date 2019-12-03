@@ -54,7 +54,7 @@ export default class ProjectNotSetup extends Component {
           className='btn btn-primary'
           onClick={this._showSetupProjectModal}
         >
-          <i className='fas fa-wrench'></i>{' '}
+          <i className='fa fa-wrench'></i>{' '}
           Set up project to record
         </button>
       </div>
@@ -70,7 +70,7 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className='empty-runs-not-displayed'>
         <h4>
-          <i className='fas fa-exclamation-triangle errored'></i>{' '}
+          <i className='fa fa-warning errored'></i>{' '}
           Runs cannot be displayed
         </h4>
         <p>We were unable to find an existing project matching the <code>projectId</code> in your {configFileFormatted(this.props.project.configFile)}.</p>
@@ -80,7 +80,7 @@ export default class ProjectNotSetup extends Component {
           className='btn btn-warning'
           onClick={this._showSetupProjectModal}
         >
-          <i className='fas fa-wrench'></i>{' '}
+          <i className='fa fa-wrench'></i>{' '}
           Set up a new project
         </button>
         <p>

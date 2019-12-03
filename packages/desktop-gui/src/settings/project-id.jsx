@@ -15,7 +15,7 @@ const ProjectId = observer(({ project }) => {
   return (
     <div>
       <a href='#' className='learn-more' onClick={openProjectIdHelp}>
-        <i className='fas fa-info-circle'></i>{' '}
+        <i className='fa fa-info-circle'></i>{' '}
         Learn more
       </a>
       <p className='text-muted'>This projectId should be in your {configFileFormatted(project.configFile)} and checked into source control.

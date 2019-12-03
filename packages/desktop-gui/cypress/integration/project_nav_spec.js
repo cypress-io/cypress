@@ -167,7 +167,7 @@ describe('Project Nav', function () {
 
         it('displays browser icon as spinner', () => {
           cy.get('.browsers-list>a').first().find('i')
-          .should('have.class', 'fas fa-sync fa-spin')
+          .should('have.class', 'fa fa-refresh fa-spin')
         })
 
         it('disables browser dropdown', () => {
@@ -185,7 +185,7 @@ describe('Project Nav', function () {
 
         it('displays browser icon as opened', () => {
           cy.get('.browsers-list>a').first().find('i')
-          .should('have.class', 'fas fa-check-circle')
+          .should('have.class', 'fa fa-check-circle-o')
         })
 
         it('disables browser dropdown', () => {

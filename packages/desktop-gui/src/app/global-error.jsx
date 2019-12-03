@@ -13,14 +13,14 @@ const GlobalError = observer(() => {
   return (
     <div className='global-error alert alert-danger'>
       <p>
-        <i className="fas fa-exclamation-triangle"></i>{' '}
+        <i className='fa fa-warning'></i>{' '}
         <strong>{appStore.error.name || 'Unexpected Error'}</strong>
       </p>
       <p dangerouslySetInnerHTML={{
         __html: appStore.error.message.split('\n').join('<br />'),
       }} />
       <button className='btn btn-link close' onClick={remove}>
-        <i className='fas fa-times' />
+        <i className='fa fa-remove' />
       </button>
     </div>
   )

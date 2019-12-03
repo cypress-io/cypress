@@ -18,10 +18,10 @@ export interface AnErrorProps {
 const AnError = observer(({ error }: AnErrorProps) => (
   <div className='error'>
     <h2>
-      <i className='fas fa-exclamation-triangle'></i> {error.title}
+      <i className='fa fa-warning'></i> {error.title}
       {error.link &&
         <a href={error.link} target='_blank' rel='noopener noreferrer'>
-          <i className='fas fa-question-circle'></i>
+          <i className='fa fa-question-circle'></i>
         </a>
       }
     </h2>

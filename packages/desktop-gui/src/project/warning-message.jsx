@@ -10,14 +10,14 @@ class WarningMessage extends Component {
     return (
       <div className='alert alert-warning'>
         <p className='header'>
-          <i className='fas fa-exclamation-triangle'></i>{' '}
+          <i className='fa fa-warning'></i>{' '}
           <strong>Warning</strong>
         </p>
         <div>
           <MarkdownRenderer markdown={warningText}/>
         </div>
         <button className='btn btn-link close' onClick={this.props.onClearWarning}>
-          <i className='fas fa-times' />
+          <i className='fa fa-remove' />
         </button>
       </div>
     )

@@ -43,12 +43,12 @@ class OnBoarding extends Component {
             <p>
               We've added some folders and example tests to your project. Try running the tests in the
               <strong onClick={this._openExampleSpec}>
-                <i className='far fa-folder'></i>{' '}
+                <i className='fa fa-folder-o'></i>{' '}
                 {project.integrationExampleName}{' '}
               </strong>
               folder or add your own test files to
               <strong onClick={this._openIntegrationFolder}>
-                <i className='far fa-folder'></i>{' '}
+                <i className='fa fa-folder-o'></i>{' '}
                 cypress/integration
               </strong>.
             </p>
@@ -56,13 +56,13 @@ class OnBoarding extends Component {
               <ul>
                 <li>
                   <span>
-                    <i className='far fa-folder-open'></i>{' '}
+                    <i className='fa fa-folder-open-o'></i>{' '}
                     {project.name}
                   </span>
                   <ul>
                     <li className='app-code'>
                       <span >
-                        <i className='far fa-folder'></i>{' '}
+                        <i className='fa fa-folder-o'></i>{' '}
                         ...
                       </span>
                     </li>
@@ -98,7 +98,7 @@ class OnBoarding extends Component {
         return (
           <li className={cs(className, 'new-item')} key={file.name}>
             <span>
-              <i className='far fa-folder-open'></i>{' '}
+              <i className='fa fa-folder-open-o'></i>{' '}
               {file.name}
             </span>
             <ul>
@@ -111,7 +111,7 @@ class OnBoarding extends Component {
       return (
         <li className={cs(className, 'new-item', { 'is-more': file.more })} key={file.name}>
           <span>
-            <i className='far fa-file-code'></i>{' '}
+            <i className='fa fa-file-code-o'></i>{' '}
             {file.name}
           </span>
         </li>

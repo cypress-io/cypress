@@ -14,7 +14,7 @@ class NoSpec extends Component {
           <p className='muted'>Choose a test to run from the desktop application.</p>
           <p>
             <button onClick={() => eventManager.focusTests()}>
-              <i className='fas fa-chevron-left'></i>
+              <i className='fa fa-chevron-left'></i>
               View All Tests
             </button>
           </p>

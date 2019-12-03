@@ -61,7 +61,7 @@ class LoginForm extends Component {
       if (message && message.name === 'AUTH_COULD_NOT_LAUNCH_BROWSER') {
         return (
           <span>
-            <i className='fas fa-exclamation-triangle'></i>{' '}
+            <i className='fa fa-exclamation-triangle'></i>{' '}
             Could not open browser.
           </span>
         )
@@ -69,7 +69,7 @@ class LoginForm extends Component {
 
       return (
         <span>
-          <i className='fas fa-spinner fa-spin'></i>{' '}
+          <i className='fa fa-spinner fa-spin'></i>{' '}
           {message && message.browserOpened ? 'Waiting for browser login...' : 'Opening browser...'}
         </span>
       )
@@ -90,7 +90,7 @@ class LoginForm extends Component {
     return (
       <div className='alert alert-danger'>
         <p>
-          <i className='fas fa-exclamation-triangle'></i>{' '}
+          <i className='fa fa-warning'></i>{' '}
           <strong>Can't Log In</strong>
         </p>
         <p>{this._errorMessage(error.message)}</p>

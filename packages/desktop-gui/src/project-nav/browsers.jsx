@@ -35,7 +35,7 @@ export default class Browsers extends Component {
       return (
         <li className='close-browser'>
           <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
-            <i className='fas fa-fw fa-times'></i>
+            <i className='fa fa-fw fa-times'></i>
             Stop
           </button>
         </li>
@@ -58,19 +58,19 @@ export default class Browsers extends Component {
     let prefixText
 
     if (project.browserState === 'opening') {
-      icon = 'fas fa-sync fa-spin'
+      icon = 'refresh fa-spin'
       prefixText = 'Opening'
     } else if (project.browserState === 'opened') {
-      icon = 'fas fa-check-circle green far'
+      icon = 'check-circle-o green'
       prefixText = 'Running'
     } else {
-      icon = `fab fa-${browser.icon}`
+      icon = browser.icon
       prefixText = ''
     }
 
     return (
       <span className={browser.name}>
-        <i className={icon}></i>{' '}
+        <i className={`fa fa-${icon}`}></i>{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
@@ -90,7 +90,7 @@ export default class Browsers extends Component {
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
-          <i className='fas fa-exclamation-triangle' />
+          <i className='fa fa-exclamation-triangle' />
         </Tooltip>
       </span>
     )
@@ -106,7 +106,7 @@ export default class Browsers extends Component {
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
-          <i className='fas fa-info-circle' />
+          <i className='fa fa-info-circle' />
         </Tooltip>
       </span>
     )

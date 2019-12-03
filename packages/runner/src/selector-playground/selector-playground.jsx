@@ -45,8 +45,8 @@ class SelectorPlayground extends Component {
               className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
               onClick={this._toggleEnablingSelectorPlayground}>
               <span className='fa-stack'>
-                <i className='far fa-square fa-stack-1x'></i>
-                <i className='fas fa-mouse-pointer fa-stack-1x'></i>
+                <i className='fa fa-square-o fa-stack-1x'></i>
+                <i className='fa fa-mouse-pointer fa-stack-1x'></i>
               </span>
             </button>
           </Tooltip>
@@ -71,7 +71,7 @@ class SelectorPlayground extends Component {
               <span className='info num-elements'>
                 {model.isValid ?
                   model.numElements :
-                  <i className='fas fa-exclamation-triangle'></i>
+                  <i className='fa fa-exclamation-triangle'></i>
                 }
               </span>
             </Tooltip>
@@ -84,7 +84,7 @@ class SelectorPlayground extends Component {
               disabled={!model.numElements || !model.isValid}
               onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
             >
-              <i className='far fa-copy' />
+              <i className='fa fa-copy' />
             </button>
           </Tooltip>
           <Tooltip title={this.printText || ''} updateCue={`${selectorText}${this.printText}`}>
@@ -95,12 +95,12 @@ class SelectorPlayground extends Component {
               disabled={!model.numElements || !model.isValid}
               onMouseOut={fixMouseOut(this._resetPrintText, () => this._printButton)}
             >
-              <i className='fas fa-terminal' />
+              <i className='fa fa-terminal' />
             </button>
           </Tooltip>
         </div>
         <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank">
-          <i className='fas fa-question-circle'></i>{' '}
+          <i className='fa fa-question-circle'></i>{' '}
           Learn more
         </a>
         <button className='close' onClick={this._togglePlaygroundOpen}>x</button>
@@ -142,7 +142,7 @@ class SelectorPlayground extends Component {
         'is-showing': this.showingMethodPicker,
       })}>
         <button onClick={this._toggleMethodPicker}>
-          <i className='fas fa-caret-down'></i>{' '}
+          <i className='fa fa-caret-down'></i>{' '}
           cy.{model.method}
         </button>
         <div className='method-picker'>

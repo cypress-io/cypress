@@ -18,7 +18,7 @@ const RunDuration = ({ run }) => {
       return (
         <Tooltip title="Parallelization was disabled for this run." placement="top" className="cy-tooltip">
           <span className='env-duration'>
-            <i className='fas fa-exclamation-triangle orange'></i>
+            <i className='fa fa-exclamation-triangle orange'></i>
             {' '}{durationFormatted(run.totalDuration)}
           </span>
         </Tooltip>
@@ -27,7 +27,7 @@ const RunDuration = ({ run }) => {
 
     return (
       <span className='env-duration'>
-        <i className='fas fa-hourglass-end'></i>
+        <i className='fa fa-hourglass-end'></i>
         {' '}{durationFormatted(run.totalDuration)}
       </span>
     )
@@ -57,7 +57,7 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div>
             <Tooltip title={_.startCase(run.status)} className='cy-tooltip'>
-              <i className={`fas ${run.status} fa-${getStatusIcon(run.status)}`}></i>
+              <i className={`fa ${run.status} fa-${getStatusIcon(run.status)}`}></i>
             </Tooltip>
             {' '}#{run.buildNumber}
           </div>
@@ -106,7 +106,7 @@ export default class RunsListItem extends Component {
         </div>
         <div className='row-column-wrapper'>
           <div>
-            <i className='far fa-clock'></i>{' '}
+            <i className='fa fa-clock-o'></i>{' '}
             {moment(run.createdAt).fromNow() === '1 secs ago' ? '1 sec ago' : moment(run.createdAt).fromNow()}
           </div>
         </div>
@@ -122,12 +122,12 @@ export default class RunsListItem extends Component {
               this._instancesExist() ?
                 this._moreThanOneInstance() && this._osLength() > 1 ?
                   <div>
-                    <i className='fas fa-fw fa-desktop'></i>{' '}
+                    <i className='fa fa-fw fa-desktop'></i>{' '}
                     {this._osLength()} OSs
                   </div> :
                   // or did we only actual run it on one OS
                   <div>
-                    <i className={`fa-fw ${this._osIcon()}`}></i>{' '}
+                    <i className={`fa fa-fw fa-${osIcon(this.props.run.instances[0].platform.osName)}`}></i>{' '}
                     {this._osDisplay()}
                   </div> :
                 null
@@ -137,12 +137,12 @@ export default class RunsListItem extends Component {
               this._instancesExist() ?
                 this._moreThanOneInstance() && this._browsersLength() > 1 ?
                   <div className='env-msg'>
-                    <i className='fas fa-fw fa-globe'></i>{' '}
+                    <i className='fa fa-fw fa-globe'></i>{' '}
                     {this._browsersLength()} browsers
                   </div> :
                   // or did we only actual run it on one browser
                   <div className='env-msg'>
-                    <i className={`fa-fw ${this._browserIcon()}`}></i>{' '}
+                    <i className={`fa fa-fw fa-${this._browserIcon()}`}></i>{' '}
                     {this._browserDisplay()}
                   </div> :
                 null
@@ -153,7 +153,7 @@ export default class RunsListItem extends Component {
           {
             run.status !== 'running' ?
               <div className='result'>
-                <i className='fas fa-check'></i>{' '}
+                <i className='fa fa-check'></i>{' '}
                 <span>
                   {run.totalPassed || '0'}
                 </span>
@@ -165,7 +165,7 @@ export default class RunsListItem extends Component {
           {
             run.status !== 'running' ?
               <div className='result'>
-                <i className='fas fa-times'></i>{' '}
+                <i className='fa fa-times'></i>{' '}
                 <span>
                   {run.totalFailed || '0'}
                 </span>
@@ -220,15 +220,19 @@ export default class RunsListItem extends Component {
   }
 
   _browserIcon () {
-    const icon = browserIcon(_.get(this.props.run, 'instances[0].platform.browserName', ''))
-
-    return icon === 'globe' ? `fas fa-${icon}` : `fab fa-${icon}`
+    return browserIcon(_.get(this.props.run, 'instances[0].platform.browserName', ''))
   }
 
   _osIcon () {
-    const icon = osIcon(this.props.run.instances[0].platform.osName)
+    if (!this.props.run.instances) return
 
-    return icon === 'desktop' ? `fas fa-${icon}` : `fab fa-${icon}`
+    return _
+    .chain(this.props.run.instances)
+    .map((instance) => {
+      return `${_.get(instance, 'platform.osName', '')} + ${_.get(instance, 'platform.osVersion', '')}`
+    })
+    .uniq()
+    .value()
   }
 
   _getUniqOs () {

@@ -55,10 +55,10 @@ class PermissionMessage extends Component {
         onClick={this._requestAccess}
       >
         <span>
-          <i className='fas fa-paper-plane'></i>{' '}
+          <i className='fa fa-paper-plane'></i>{' '}
           Request access
         </span>
-        <i className='fas fa-spinner fa-spin'></i>
+        <i className='fa fa-spinner fa-spin'></i>
       </button>
     )
   }
@@ -67,7 +67,7 @@ class PermissionMessage extends Component {
     return (
       <div className='empty'>
         <h4>
-          <i className='fas fa-check passed'></i>{' '}
+          <i className='fa fa-check passed'></i>{' '}
           Request sent
         </h4>
         <p>
@@ -89,7 +89,7 @@ class PermissionMessage extends Component {
     return (
       <div className='empty'>
         <h4>
-          <i className='fas fa-exclamation-triangle failed'></i>{' '}
+          <i className='fa fa-exclamation-triangle failed'></i>{' '}
             Request Failed
         </h4>
         <p>An unexpected error occurred while requesting access:</p>
@@ -106,7 +106,7 @@ class PermissionMessage extends Component {
     return (
       <div className="empty">
         <h4>
-          <i className='fas fa-lock'></i>{' '}
+          <i className='fa fa-lock'></i>{' '}
           Request access to see the runs
         </h4>
         <p>This is a private project created by someone else.</p>

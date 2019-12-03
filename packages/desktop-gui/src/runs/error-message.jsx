@@ -29,7 +29,7 @@ const ErrorMessage = observer(({ error }) => {
     <div className='runs-list-error'>
       <div className='empty'>
         <h4>
-          <i className='fas fa-exclamation-triangle red'></i>{' '}
+          <i className='fa fa-warning red'></i>{' '}
           Runs could not be loaded
         </h4>
         {errorMessage}

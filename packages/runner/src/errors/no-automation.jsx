@@ -10,10 +10,9 @@ const icon = (browser) => {
     case 'chrome':
     case 'chromium':
     case 'canary':
-    case 'electron':
-      return 'fab fa-chrome'
+      return 'chrome'
     default:
-      return 'fas fa-globe'
+      return ''
   }
 }
 
@@ -25,7 +24,7 @@ const noBrowsers = () => (
       </small>
     </p>
     <a href='https://www.google.com/chrome/browser/desktop' className='btn btn-primary btn-lg' target='_blank' rel='noopener noreferrer'>
-      <i className='fas fa-chrome'></i>
+      <i className='fa fa-chrome'></i>
       Download Chrome
     </a>
   </div>
@@ -33,7 +32,7 @@ const noBrowsers = () => (
 
 const browser = (browser) => (
   <span>
-    <i className={icon(browser.name)}></i>
+    <i className={`fa fa-${icon(browser.name)}`}></i>
     <span>Run {displayName(browser.name)} {browser.majorVersion}</span>
   </span>
 )
@@ -65,7 +64,7 @@ export default ({ browsers, onLaunchBrowser }) => (
       {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
       <div className='helper-line'>
         <a className='helper-docs-link' href='https://on.cypress.io/launching-browsers' target='_blank'>
-          <i className='fas fa-question-circle'></i> Why am I seeing this message?
+          <i className='fa fa-question-circle'></i> Why am I seeing this message?
         </a>
       </div>
     </div>

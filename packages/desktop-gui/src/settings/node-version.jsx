@@ -12,7 +12,7 @@ const openHelp = (e) => {
 const renderLearnMore = () => {
   return (
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fas fa-info-circle'></i> Learn more
+      <i className='fa fa-info-circle'></i> Learn more
     </a>
   )
 }

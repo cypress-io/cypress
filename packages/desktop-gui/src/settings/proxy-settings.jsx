@@ -24,7 +24,7 @@ const openHelp = (e) => {
 const renderLearnMore = () => {
   return (
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fas fa-info-circle'></i> Learn more
+      <i className='fa fa-info-circle'></i> Learn more
     </a>
   )
 }
@@ -64,7 +64,7 @@ const ProxySettings = observer(({ app }) => {
               <Tooltip className='cy-tooltip'
                 title='Cypress will not route requests to these domains through the configured proxy server.'
               >
-                <i className='fas fa-info-circle' />
+                <i className='fa fa-info-circle' />
               </Tooltip>
             </th>
             <td>

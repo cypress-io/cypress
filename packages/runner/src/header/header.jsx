@@ -35,7 +35,7 @@ export default class Header extends Component {
               onClick={this._togglePlaygroundOpen}
               disabled={state.isLoading || state.isRunning}
             >
-              <i aria-hidden="true" className='fas fa-crosshairs' />
+              <i aria-hidden="true" className='fa fa-crosshairs' />
             </button>
           </Tooltip>
           <div
@@ -46,7 +46,7 @@ export default class Header extends Component {
           >
             <input className='url' value={state.url} readOnly onClick={this._openUrl} />
             <span className='loading-container'>
-              ...loading <i className='fas fa-spinner fa-pulse'></i>
+              ...loading <i className='fa fa-spinner fa-spin fa-pulse'></i>
             </span>
           </div>
         </div>
@@ -54,7 +54,7 @@ export default class Header extends Component {
           <li className={cs('viewport-info', { 'open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>
               {state.width} <span className='the-x'>x</span> {state.height} <span className='viewport-scale'>({state.displayScale}%)</span>
-              <i className='fas fa-fw fa-info-circle'></i>
+              <i className='fa fa-fw fa-info-circle'></i>
             </button>
             <div className='viewport-menu'>
               <p>The <strong>viewport</strong> determines the width and height of your application. By default the viewport will be <strong>{state.defaults.width}px</strong> by <strong>{state.defaults.height}px</strong> unless specified by a <code>cy.viewport</code> command.</p>
@@ -67,7 +67,7 @@ export default class Header extends Component {
               </pre>{/* eslint-enable indent */}
               <p>
                 <a href='https://on.cypress.io/viewport' target='_blank'>
-                  <i className='fas fa-info-circle'></i>
+                  <i className='fa fa-info-circle'></i>
                   Read more about viewport here.
                 </a>
               </p>

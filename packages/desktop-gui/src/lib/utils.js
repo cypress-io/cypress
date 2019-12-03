@@ -65,7 +65,7 @@ export const getStatusIcon = (status) => {
     case 'passed':
       return 'check-circle'
     case 'running':
-      return 'sync fa-spin'
+      return 'refresh fa-spin'
     case 'overLimit':
       return 'exclamation-triangle'
     case 'timedOut':

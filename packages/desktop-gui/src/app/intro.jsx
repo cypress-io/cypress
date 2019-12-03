@@ -34,8 +34,8 @@ class Default extends Component {
             onDrop={this._drop}
           >
             <span className="fa-stack fa-lg">
-              <i className="fas fa-folder fa-stack-2x"></i>
-              <i className="fas fa-plus fa-stack-1x"></i>
+              <i className="fa fa-folder fa-stack-2x"></i>
+              <i className="fa fa-plus fa-stack-1x"></i>
             </span>
             <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
           </div>
@@ -51,7 +51,7 @@ class Default extends Component {
     return (
       <div className='local-install-notice alert alert-info alert-dismissible'>
         <p className='text-center'>
-          <i className='fas fa-info-circle'></i>{' '}
+          <i className='fa fa-info-circle'></i>{' '}
           We recommend versioning Cypress per project and{' '}
           <a onClick={this._openHelp} className='helper-docs-link'>
             installing it via <span className='mono'>npm</span>
