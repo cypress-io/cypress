@@ -528,27 +528,21 @@ const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
   selectAll: {
     key: 'selectAll',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.selectAll(doc)
+      $selection.selectAll(el)
     },
     simulatedDefaultOnly: true,
   },
   moveToStart: {
     key: 'moveToStart',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.moveSelectionToStart(doc)
+      $selection.moveSelectionToStart(el)
     },
     simulatedDefaultOnly: true,
   },
   moveToEnd: {
     key: 'moveToEnd',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.moveSelectionToEnd(doc)
+      $selection.moveSelectionToEnd(el)
     },
     simulatedDefaultOnly: true,
   },
