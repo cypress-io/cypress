@@ -112,7 +112,7 @@ describe "Routes", ->
           rp(options)
 
         open = =>
-          project = Project("/path/to/project")
+          project = new Project("/path/to/project")
 
           Promise.all([
             ## open our https server
