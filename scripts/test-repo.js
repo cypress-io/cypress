@@ -4,9 +4,12 @@
 
 const shell = require('shelljs')
 const path = require('path')
+const os = require('os')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
+
+const isWindows = os.platform() === 'win32'
 
 const tempFolder = shell.tempdir()
 
@@ -28,8 +31,11 @@ shell.exec(cmd)
 console.log('installing dependencies in %s', repoFolder)
 shell.exec('npm install --production', { cwd: repoFolder })
 
-console.log('starting server in background')
-const server = shell.exec('npm start', { cwd: repoFolder }, (code, stdout, stderr) => {
+const startCommand = isWindows ? 'npm run start:ci:windows' : 'npm run start:ci'
+
+console.log('starting server in background with command "%s"', startCommand)
+
+const server = shell.exec(startCommand, { cwd: repoFolder }, (code, stdout, stderr) => {
   if (code) {
     console.error('npm start finished with')
     console.error(stderr)
