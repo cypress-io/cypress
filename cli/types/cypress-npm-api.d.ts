@@ -242,6 +242,10 @@ declare module 'cypress' {
      */
     headed: boolean
     /**
+     * Hide the browser instead of running headed
+     */
+    headless: boolean
+    /**
      * Specify your secret record key
      */
     key: string
