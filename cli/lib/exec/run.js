@@ -4,6 +4,7 @@ const debug = require('debug')('cypress:cli')
 const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
+const { exitWithError, errors } = require('../errors')
 
 // maps options collected by the CLI
 // and forms list of CLI arguments to the server
@@ -90,6 +91,14 @@ const processRunOptions = (options = {}) => {
 
   if (options.headed) {
     args.push('--headed', options.headed)
+  }
+
+  if (options.headless) {
+    if (options.headed) {
+      exitWithError(errors.incompatibleHeadlessFlags)()
+    }
+
+    args.push('--headed', !options.headless)
   }
 
   if (options.exit === false) {

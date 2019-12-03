@@ -38,6 +38,20 @@ describe('exec run', function () {
       snapshot(args)
     })
 
+    it('does not allow setting paradoxical --headed and --headless flags', () => {
+      expect(() => run.processRunOptions({ headed: true, headless: true })).to.throw()
+    })
+
+    it('passes --headed according to --headless', () => {
+      expect(run.processRunOptions({ headless: false })).to.deep.eq([
+        '--run-project', undefined, '--headed', true,
+      ])
+
+      expect(run.processRunOptions({ headless: true })).to.deep.eq([
+        '--run-project', undefined, '--headed', false,
+      ])
+    })
+
     it('does not remove --record option when using --browser', () => {
       const args = run.processRunOptions({
         record: 'foo',
