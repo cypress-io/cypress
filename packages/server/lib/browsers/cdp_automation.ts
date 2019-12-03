@@ -3,7 +3,6 @@ import Bluebird from 'bluebird'
 import cdp from 'devtools-protocol'
 import { cors } from '@packages/network'
 import debugModule from 'debug'
-import tough from 'tough-cookie'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
@@ -18,14 +17,18 @@ interface CyCookie {
   httpOnly: boolean
 }
 
+// Cypress uses the webextension-style filtering
+// https://developer.chrome.com/extensions/cookies#method-getAll
+type CyCookieFilter = chrome.cookies.GetAllDetails
+
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
 
-const cookieMatches = (cookie: CyCookie, filter) => {
-  if (filter.domain && !tough.domainMatch(filter.domain, cookie.domain)) {
+const cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
+  if (filter.domain && (!cookie.domain || !cookie.domain.endsWith(filter.domain))) {
     return false
   }
 
-  if (filter.path && !tough.pathMatch(filter.path, cookie.path)) {
+  if (filter.path && filter.path !== cookie.path) {
     return false
   }
 
@@ -86,7 +89,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     return cookie
   }
 
-  const getAllCookies = (filter) => {
+  const getAllCookies = (filter: CyCookieFilter) => {
     return sendDebuggerCommandFn('Network.getAllCookies')
     .then((result: cdp.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
@@ -100,7 +103,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     })
   }
 
-  const getCookiesByUrl = (url) => {
+  const getCookiesByUrl = (url): Bluebird<CyCookie[]> => {
     return sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
@@ -109,8 +112,8 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     })
   }
 
-  const getCookie = (data): Bluebird<CyCookie | null> => {
-    return getAllCookies(data)
+  const getCookie = (filter: CyCookieFilter): Bluebird<CyCookie | null> => {
+    return getAllCookies(filter)
     .then((cookies) => {
       return _.get(cookies, 0, null)
     })
