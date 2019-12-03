@@ -2,6 +2,7 @@ import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack
 import path from 'path'
 import webpack from 'webpack'
 
+// @ts-ignore
 const config: webpack.Configuration = {
   ...getCommonConfig(),
   entry: {
@@ -22,5 +23,16 @@ config.plugins = [
     template: path.resolve(__dirname, 'static/index.html'),
   }),
 ]
+
+config.resolve = {
+  ...config.resolve,
+  alias: {
+    'lodash': require.resolve('lodash'),
+    'mobx': require.resolve('mobx'),
+    'mobx-react': require.resolve('mobx-react'),
+    'react': require.resolve('react'),
+    'react-dom': require.resolve('react-dom'),
+  },
+}
 
 export default config

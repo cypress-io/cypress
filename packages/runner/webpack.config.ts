@@ -12,6 +12,7 @@ lessCommonConfig.module.rules[1].use.options.plugins.push([require.resolve('babe
   'css': false,
 }])
 
+// @ts-ignore
 const config: webpack.Configuration = {
   ...lessCommonConfig,
   entry: {
