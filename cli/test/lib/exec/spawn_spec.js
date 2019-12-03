@@ -149,6 +149,27 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    it('does not pass --no-sandbox when running in dev mode', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(true)
+
+      const p = path.resolve('..', 'scripts', 'start.js')
+
+      return spawn.start('--foo', { dev: true, foo: 'bar' })
+      .then(() => {
+        expect(cp.spawn).to.be.calledWithMatch('node', [
+          p,
+          '--',
+          '--foo',
+          '--cwd',
+          cwd,
+        ], {
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
+        })
+      })
+    })
+
     it('starts xvfb when needed', function () {
       xvfb.isNeeded.returns(true)
 

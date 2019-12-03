@@ -113,7 +113,7 @@ module.exports = {
         const electronArgs = _.clone(args)
         const node11WindowsFix = isPlatform('win32')
 
-        if (verify.needsSandbox()) {
+        if (!options.dev && verify.needsSandbox()) {
           // this is one of the Electron's command line switches
           // thus it needs to be before "--" separator
           electronArgs.unshift('--no-sandbox')
