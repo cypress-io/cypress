@@ -196,6 +196,7 @@ const parseOpts = (opts) => {
     'browser',
     'detached',
     'headed',
+    'headless',
     'global',
     'dev',
     'force',

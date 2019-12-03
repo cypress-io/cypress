@@ -2,7 +2,7 @@ const _ = require('lodash')
 const commander = require('commander')
 const { stripIndent } = require('common-tags')
 const logSymbols = require('log-symbols')
-const debug = require('debug')('cypress:cli')
+const debug = require('debug')('cypress:cli:cli')
 const util = require('./util')
 const logger = require('./logger')
 const errors = require('./errors')
@@ -69,6 +69,8 @@ const parseVariableOpts = (fnArgs, args) => {
       opts.spec = opts.spec.join(',')
     }
   }
+
+  debug('variable-length opts parsed %o', { args, opts })
 
   return util.parseOpts(opts)
 }
@@ -191,6 +193,7 @@ module.exports = {
     .description('Runs Cypress tests from the CLI without the GUI')
     .option('--record [bool]', text('record'), coerceFalse)
     .option('--headed', text('headed'))
+    .option('--headless', text('headless'))
     .option('-k, --key <record-key>', text('key'))
     .option('-s, --spec <spec>', text('spec'))
     .option('-r, --reporter <reporter>', text('reporter'))
@@ -210,7 +213,7 @@ module.exports = {
     .option('--no-exit', text('exit'))
     .option('--dev', text('dev'), coerceFalse)
     .action((...fnArgs) => {
-      debug('running Cypress')
+      debug('running Cypress with args %o', fnArgs)
       require('./exec/run')
       .start(parseVariableOpts(fnArgs, args))
       .then(util.exit)

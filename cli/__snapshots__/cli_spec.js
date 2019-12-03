@@ -332,7 +332,8 @@ exports['shows help for run --foo 1'] = `
   Options:
 
     --record [bool]                            records the run. sends test results, screenshots and videos to your Cypress Dashboard.
-    --headed                                   displays the browser instead of running headlessly
+    --headed                                   displays the browser instead of running headlessly (defaults to true for Chrome-family browsers)
+    --headless                                 hide the browser instead of running headed (defaults to true for Electron)
     -k, --key <record-key>                     your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.
     -s, --spec <spec>                          runs a specific spec file. defaults to "all"
     -r, --reporter <reporter>                  runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"
