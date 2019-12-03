@@ -57,7 +57,7 @@
       background-color: #f7f8f9;
       cursor: pointer;
 
-      > .runnable-wrapper .runnable-controls i.fa-repeat {
+      > .runnable-wrapper .runnable-controls i.fa-redo {
         visibility: visible !important;
       }
     }
@@ -69,7 +69,7 @@
 
     &.runnable-active {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-refresh;
+        @extend .#{$fa-css-prefix}-sync;
         @extend .#{$fa-css-prefix}-spin;
       }
     }
@@ -91,7 +91,9 @@
 
     &.runnable-processing > .runnable-wrapper {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-square-o;
+        @extend .far;
+        line-height: 18px; // @extend .far overrides line-height, so we need to set it again
+        @extend .#{$fa-css-prefix}-square;
         color: #888;
       }
     }
@@ -99,7 +101,7 @@
     &.test.runnable-failed > .runnable-wrapper {
       border-left: 10px solid $fail;
 
-      .fa-warning.has-command-failures {
+      .fa-exclamation-triangle.has-command-failures {
         visibility: visible;
       }
     }
@@ -179,7 +181,7 @@
       }
 
       .runnable-state {
-        @extend .#{$fa-css-prefix}-circle-o-notch;
+        @extend .#{$fa-css-prefix}-circle-notch;
         color: lighten($pending, 20%);
       }
 

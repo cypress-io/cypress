@@ -5,10 +5,14 @@ Fixtures = require("../support/helpers/fixtures")
 
 pluginExtension = Fixtures.projectPath("plugin-extension")
 pluginConfig = Fixtures.projectPath("plugin-config")
+pluginFilterBrowsers = Fixtures.projectPath("plugin-filter-browsers")
 workingPreprocessor = Fixtures.projectPath("working-preprocessor")
 pluginsAsyncError = Fixtures.projectPath("plugins-async-error")
 pluginsAbsolutePath = Fixtures.projectPath("plugins-absolute-path")
 pluginAfterScreenshot = Fixtures.projectPath("plugin-after-screenshot")
+pluginReturnsBadConfig = Fixtures.projectPath("plugin-returns-bad-config")
+pluginReturnsEmptyBrowsersList = Fixtures.projectPath("plugin-returns-empty-browsers-list")
+pluginReturnsInvalidBrowser = Fixtures.projectPath("plugin-returns-invalid-browser")
 
 describe "e2e plugins", ->
   e2e.setup()
@@ -40,6 +44,43 @@ describe "e2e plugins", ->
       sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 0
+    })
+
+  it "catches invalid viewportWidth returned from plugins", ->
+    # the test project returns config object with a bad value
+    e2e.exec(@, {
+      project: pluginReturnsBadConfig
+      expectedExitCode: 1
+      snapshot: true
+    })
+
+  it "catches invalid browsers list returned from plugins", ->
+    e2e.exec(@, {
+      project: pluginReturnsEmptyBrowsersList
+      expectedExitCode: 1
+      snapshot: true
+    })
+
+  it "catches invalid browser returned from plugins", ->
+    e2e.exec(@, {
+      project: pluginReturnsInvalidBrowser
+      expectedExitCode: 1
+      snapshot: true
+    })
+
+  it "can filter browsers from config", ->
+    e2e.exec(@, {
+      project: pluginFilterBrowsers
+      # the test project filters available browsers
+      # and returns a list with JUST Electron browser
+      # and we ask to run in Chrome
+      # thus the test should fail
+      browser: "chrome"
+      expectedExitCode: 1
+      snapshot: true
+      # we are interested in the actual filtered available browser name
+      # which should be "electron"
+      normalizeAvailableBrowsers: false
     })
 
   e2e.it "works with user extensions", {

@@ -605,6 +605,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Fix the error in your code and re-run your tests.
       """
+    # happens when there is an error in configuration file like "cypress.json"
     when "SETTINGS_VALIDATION_ERROR"
       filePath = "`#{arg1}`"
       """
@@ -612,6 +613,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg2)}
       """
+    # happens when there is an invalid config value returnes from the
+    # project's plugins file like "cypress/plugins.index.js"
+    when "PLUGINS_CONFIG_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
+      """
+      An invalid configuration value returned from the plugins file: #{chalk.blue(filePath)}
+
+      #{chalk.yellow(arg2)}
+      """
+    # general configuration error not-specific to configuration or plugins files
     when "CONFIG_VALIDATION_ERROR"
       """
       We found an invalid configuration value:

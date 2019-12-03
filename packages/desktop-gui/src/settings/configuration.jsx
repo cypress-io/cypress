@@ -1,115 +1,105 @@
 import _ from 'lodash'
+import cn from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
+import { ObjectInspector, ObjectName } from 'react-inspector'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
-const display = (obj) => {
-  const keys = _.keys(obj)
-  const lastKey = _.last(keys)
-
-  return _.map(obj, (value, key) => {
-    const hasComma = lastKey !== key
-
-    if (value.from == null) {
-      return displayNestedObj(key, value, hasComma)
-    }
-
-    if (value.isArray) {
-      return getSpan(key, value, hasComma, true)
-    }
-
-    if (_.isObject(value.value)) {
-      const realValue = value.value.toJS ? value.value.toJS() : value.value
-
-      if (_.isArray(realValue)) {
-        return displayArray(key, value, hasComma)
+const formatData = (data) => {
+  if (Array.isArray(data)) {
+    return _.map(data, (v) => {
+      if (_.isObject(v) && (v.name || v.displayName)) {
+        return _.defaultTo(v.displayName, v.name)
       }
 
-      return displayObject(key, value, hasComma)
-    }
+      return String(v)
+    }).join(', ')
+  }
 
-    return getSpan(key, value, hasComma)
-  })
+  if (_.isObject(data)) {
+    return _.defaultTo(_.defaultTo(data.displayName, data.name), String(Object.keys(data).join(', ')))
+  }
+
+  const excludedFromQuotations = ['null', 'undefined']
+
+  if (_.isString(data) && !excludedFromQuotations.includes(data)) {
+    return `"${data}"`
+  }
+
+  return String(data)
 }
+const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
+  const formattedData = formatData(data)
 
-const displayNestedObj = (key, value, hasComma) => (
-  <span key={key}>
-    <span className='nested nested-obj'>
-      <span className='key'>{key}</span>
-      <span className='colon'>:</span>{' '}
-      {'{'}
-      {display(value)}
-    </span>
-    <span className='line'>{'}'}{getComma(hasComma)}</span>
-    <br />
-  </span>
-)
-
-const displayNestedArr = (key, value, hasComma) => (
-  <span key={key}>
-    <span className='nested nested-arr'>
-      <span className='key'>{key}</span>
-      <span className='colon'>:</span>{' '}
-      {'['}
-      {display(value)}
-    </span>
-    <span className='line'>{']'}{getComma(hasComma)}</span>
-    <br />
-  </span>
-)
-
-const displayArray = (key, nestedArr, hasComma) => {
-  const arr = _.map(nestedArr.value, (value) => {
-    return { value, from: nestedArr.from, isArray: true }
-  })
-
-  return displayNestedArr(key, arr, hasComma)
-}
-
-const displayObject = (key, nestedObj, hasComma) => {
-  const obj = _.reduce(nestedObj.value, (obj, value, key) => {
-    return _.extend(obj, {
-      [key]: { value, from: nestedObj.from },
-    })
-  }, {})
-
-  return displayNestedObj(key, obj, hasComma)
-}
-
-const getSpan = (key, obj, hasComma, isArray) => {
   return (
-    <div key={key} className='line'>
-      {getKey(key, isArray)}
-      {getColon(isArray)}
-      <Tooltip title={obj.from || ''} placement='right' className='cy-tooltip'>
-        <span className={obj.from}>
-          {getString(obj.value)}
-          {`${obj.value}`}
-          {getString(obj.value)}
-        </span>
-      </Tooltip>
-      {getComma(hasComma)}
-    </div>
+    <span className="line" key={name}>
+      <ObjectName name={name} dimmed={isNonenumerable} />
+      <span>:</span>
+      {!expanded && (
+        <>
+          <Tooltip title={from} placement='right' className='cy-tooltip'>
+            <span className={cn(from, 'key-value-pair-value')}>
+              <span>{formattedData}</span>
+            </span>
+          </Tooltip>
+        </>
+      )}
+      {expanded && Array.isArray(data) && (
+        <span> Array ({data.length})</span>
+      )}
+    </span>
   )
 }
 
-const getKey = (key, isArray) => {
-  return isArray ? '' : <span className='key'>{key}</span>
+ObjectLabel.defaultProps = {
+  data: 'undefined',
 }
 
-const getColon = (isArray) => {
-  return isArray ? '' : <span className="colon">:{' '}</span>
+const createComputeFromValue = (obj) => {
+  return (name, path) => {
+    const pathParts = path.split('.')
+    const pathDepth = pathParts.length
+
+    const rootKey = pathDepth <= 2 ? name : pathParts[1]
+
+    return obj[rootKey] ? obj[rootKey].from : undefined
+  }
 }
 
-const getString = (val) => {
-  return _.isString(val) ? '\'' : ''
-}
+const ConfigDisplay = ({ data: obj }) => {
+  const computeFromValue = createComputeFromValue(obj)
+  const renderNode = ({ depth, name, data, isNonenumerable, expanded, path }) => {
+    if (depth === 0) {
+      return null
+    }
 
-const getComma = (hasComma) => {
-  return hasComma ? <span className='comma'>,</span> : ''
+    const from = computeFromValue(name, path)
+
+    return (
+      <ObjectLabel
+        name={name}
+        data={data}
+        expanded={expanded}
+        from={from}
+        isNonenumerable={isNonenumerable}
+      />
+    )
+  }
+
+  const data = _.reduce(obj, (acc, value, key) => Object.assign(acc, {
+    [key]: value.value,
+  }), {})
+
+  return (
+    <div className="config-vars">
+      <span>{'{'}</span>
+      <ObjectInspector data={data} expandLevel={1} nodeRenderer={renderNode} />
+      <span>{'}'}</span>
+    </div>
+  )
 }
 
 const openHelp = (e) => {
@@ -120,7 +110,7 @@ const openHelp = (e) => {
 const Configuration = observer(({ project }) => (
   <div>
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fa fa-info-circle'></i> Learn more
+      <i className='fas fa-info-circle'></i> Learn more
     </a>
     <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:</p>
     <table className='table config-table'>
@@ -146,16 +136,12 @@ const Configuration = observer(({ project }) => (
           <td>set from CLI arguments</td>
         </tr>
         <tr className='config-keys'>
-          <td><span className='plugin'>plugin</span></td>
+          <td><span className='plugins'>plugin</span></td>
           <td>set from plugin file</td>
         </tr>
       </tbody>
     </table>
-    <pre className='config-vars'>
-      {'{'}
-      {display(project.resolvedConfig)}
-      {'}'}
-    </pre>
+    <ConfigDisplay data={project.resolvedConfig} />
   </div>
 ))
 

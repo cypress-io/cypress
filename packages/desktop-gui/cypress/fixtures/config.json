@@ -34,10 +34,11 @@
   "commandTimeout": 4000,
   "cypressHostUrl": "http://localhost:2020",
   "cypressEnv": "development",
-  "env": {
-
-  },
-  "blacklistHosts": ["www.google-analytics.com", "hotjar.com"],
+  "env": {},
+  "blacklistHosts": [
+    "www.google-analytics.com",
+    "hotjar.com"
+  ],
   "execTimeout": 60000,
   "fileServerFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink",
   "fixturesFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/fixtures",
@@ -46,9 +47,7 @@
   "integrationFolder": "/Users/jennifer/Dev/Projects/cypress-example-kitchensink/cypress/integration",
   "isHeadless": false,
   "isNewProject": false,
-  "javascripts": [
-
-  ],
+  "javascripts": [],
   "morgan": true,
   "namespace": "__cypress",
   "numTestsKeptInMemory": 50,
@@ -180,6 +179,43 @@
       "from": "config",
       "value": "http://localhost:8080"
     },
+    "browsers": {
+      "from": "plugins",
+      "value": [
+        {
+          "name": "chrome",
+          "displayName": "Chrome",
+          "family": "chrome",
+          "version": "50.0.2661.86",
+          "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+          "majorVersion": "50"
+        },
+        {
+          "name": "chromium",
+          "displayName": "Chromium",
+          "family": "chrome",
+          "version": "49.0.2609.0",
+          "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
+          "majorVersion": "49"
+        },
+        {
+          "name": "canary",
+          "displayName": "Canary",
+          "family": "chrome",
+          "version": "48.0",
+          "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",
+          "majorVersion": "48"
+        },
+        {
+          "name": "electron",
+          "family": "electron",
+          "displayName": "Electron",
+          "path": "",
+          "version": "99.101.1234",
+          "majorVersion": "99"
+        }
+      ]
+    },
     "commandTimeout": {
       "from": "default",
       "value": 4000
@@ -269,7 +305,8 @@
     "blacklistHosts": {
       "from": "config",
       "value": [
-        "www.google-analytics.com", "hotjar.com"
+        "www.google-analytics.com",
+        "hotjar.com"
       ]
     },
     "hosts": {

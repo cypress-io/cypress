@@ -53,7 +53,7 @@ npm install cypress --save-dev
 - [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/develop.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/develop) - `develop` branch
 - [![CircleCI](https://circleci.com/gh/cypress-io/cypress/tree/master.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress/tree/master) - `master` branch
 
-Please see our [Contributing Guideline](/CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
+Please see our [Contributing Guideline](.github/CONTRIBUTING.md) which explains repo organization, linting, testing, and other steps.
 
 ## License
 
