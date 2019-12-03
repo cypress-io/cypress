@@ -477,11 +477,7 @@ function _getEndIndex (str, substr) {
 // Simulated default actions for select few keys.
 const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
   Enter: (el, key, options) => {
-    if ($elements.isContentEditable(el) || $elements.isTextarea(el)) {
-      key.events.input = !!$selection.replaceSelectionContents(el, '\n')
-    } else {
-      key.events.input = false
-    }
+    $selection.replaceSelectionContents(el, '\n')
 
     options.onEnterPressed()
   },
@@ -979,9 +975,11 @@ export class Keyboard {
     const key = this.getModifierKeyDetails(_key)
 
     if (!key.text) {
-      key.events.input = false
       key.events.keypress = false
       key.events.textInput = false
+      if (key.key !== 'Backspace' && key.key !== 'Delete') {
+        key.events.input = false
+      }
     }
 
     let elToType
@@ -1001,9 +999,12 @@ export class Keyboard {
 
       if (key.key === 'Enter' && $elements.isInput(elToType)) {
         key.events.textInput = false
+        key.events.input = false
       }
 
-      if ($elements.isReadOnlyInputOrTextarea(elToType)) {
+      if ($elements.isContentEditable(elToType)) {
+        key.events.input = false
+      } else if ($elements.isReadOnlyInputOrTextarea(elToType)) {
         key.events.textInput = false
       }
 
@@ -1111,6 +1112,8 @@ export class Keyboard {
         // el is contenteditable
         simulatedDefault(el, key, options)
       }
+
+      debug({ key })
 
       shouldIgnoreEvent('input', key.events) ||
         this.fireSimulatedEvent(el, 'input', key, options)

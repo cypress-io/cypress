@@ -71,7 +71,7 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
   const doc = $document.getDocumentFromElement(el)
 
   // NOTE: insertText will also handle '\n', and render newlines
-  return $elements.callNativeMethod(doc, 'execCommand', 'insertText', true, text)
+  $elements.callNativeMethod(doc, 'execCommand', 'insertText', true, text)
 }
 
 // Keeping around native implementation
@@ -174,6 +174,9 @@ const setSelectionRange = function (el, start, end) {
   }
 }
 
+/**
+ * @returns {boolean} whether or not input events are needed
+ */
 const deleteRightOfCursor = function (el) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     const { start, end } = getSelectionBounds(el)
@@ -189,7 +192,7 @@ const deleteRightOfCursor = function (el) {
 
     deleteSelectionContents(el)
 
-    // successful delete
+    // successful delete, needs input events
     return true
   }
 
@@ -205,13 +208,16 @@ const deleteRightOfCursor = function (el) {
 
     deleteSelectionContents(el)
 
-    // successful delete
+    // successful delete, does not need input events
     return false
   }
 
   return false
 }
 
+/**
+ * @returns {boolean} whether or not input events are needed
+ */
 const deleteLeftOfCursor = function (el) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     const { start, end } = getSelectionBounds(el)
@@ -494,7 +500,7 @@ const replaceSelectionContents = function (el, key) {
   if ($elements.isContentEditable(el)) {
     _replaceSelectionContentsContentEditable(el, key)
 
-    return false
+    return
   }
 
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
@@ -508,10 +514,10 @@ const replaceSelectionContents = function (el, key) {
 
     $elements.setNativeProp(el, 'value', updatedValue)
 
-    return setSelectionRange(el, start + key.length, start + key.length)
-  }
+    setSelectionRange(el, start + key.length, start + key.length)
 
-  return false
+    return
+  }
 }
 
 const getCaretPosition = function (el) {
