@@ -197,6 +197,7 @@ module.exports = {
     webContents.session.setUserAgent(userAgent)
 
   _setProxy: (webContents, proxyServer) ->
+    debug("setting proxy to %o", { proxyServer })
     webContents.session.setProxy({
       proxyRules: proxyServer
       ## this should really only be necessary when
