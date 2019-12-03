@@ -91,55 +91,55 @@ systemConfigKeys = toWords """
 """
 
 CONFIG_DEFAULTS = {
-  port:                          null
-  hosts:                         null
-  morgan:                        true
+  animationDistanceThreshold:    5
+  autoOpen:                      false
   baseUrl:                       null
   # will be replaced by detected list of browsers
+  blacklistHosts:                null
   browsers:                      []
-  socketId:                      null
-  projectId:                     null
-  userAgent:                     null
+  chromeWebSecurity:             true
+  clientRoute:                   "/__/"
+  configFile:                    "cypress.json"
+  defaultCommandTimeout:         4000
+  execTimeout:                   60000
+  fileServerFolder:              ""
+  fixturesFolder:                "cypress/fixtures"
+  hosts:                         null
+  ignoreTestFiles:               "*.hot-update.js"
+  integrationFolder:             "cypress/integration"
   isTextTerminal:                false
+  modifyObstructiveCode:         true
+  morgan:                        true
+  namespace:                     "__cypress"
+  nodeVersion:                   "default"
+  numTestsKeptInMemory:          50
+  pageLoadTimeout:               60000
+  pluginsFile:                   "cypress/plugins"
+  port:                          null
+  projectId:                     null
   reporter:                      "spec"
   reporterOptions:               null
-  blacklistHosts:                null
-  clientRoute:                   "/__/"
-  xhrRoute:                      "/xhrs/"
-  socketIoRoute:                 "/__socket.io"
-  socketIoCookie:                "__socket.io"
   reporterRoute:                 "/__cypress/reporter"
-  ignoreTestFiles:               "*.hot-update.js"
-  testFiles:                     "**/*.*"
-  defaultCommandTimeout:         4000
   requestTimeout:                5000
   responseTimeout:               30000
-  pageLoadTimeout:               60000
-  execTimeout:                   60000
+  screenshotsFolder:             "cypress/screenshots"
+  socketId:                      null
+  socketIoRoute:                 "/__socket.io"
+  socketIoCookie:                "__socket.io"
+  supportFile:                   "cypress/support"
   taskTimeout:                   60000
+  testFiles:                     "**/*.*"
+  trashAssetsBeforeRuns:         true
+  userAgent:                     null
+  viewportHeight:                660
+  viewportWidth:                 1000
   video:                         true
   videoCompression:              32
-  videoUploadOnPasses:           true
-  modifyObstructiveCode:         true
-  chromeWebSecurity:             true
-  waitForAnimations:             true
-  animationDistanceThreshold:    5
-  numTestsKeptInMemory:          50
-  watchForFileChanges:           true
-  trashAssetsBeforeRuns:         true
-  autoOpen:                      false
-  viewportWidth:                 1000
-  viewportHeight:                660
-  fileServerFolder:              ""
   videosFolder:                  "cypress/videos"
-  supportFile:                   "cypress/support"
-  fixturesFolder:                "cypress/fixtures"
-  integrationFolder:             "cypress/integration"
-  screenshotsFolder:             "cypress/screenshots"
-  namespace:                     "__cypress"
-  pluginsFile:                   "cypress/plugins"
-  nodeVersion:                   "default"
-  configFile:                    "cypress.json"
+  videoUploadOnPasses:           true
+  waitForAnimations:             true
+  watchForFileChanges:           true
+  xhrRoute:                      "/xhrs/"
 
   ## deprecated
   javascripts:                   []
