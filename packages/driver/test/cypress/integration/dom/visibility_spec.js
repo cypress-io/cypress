@@ -1019,6 +1019,12 @@ describe('src/cypress/dom/visibility', () => {
         this.reasonIs(this.$elOutOfParentBoundsToRight.find('span'), 'This element \'<span>\' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \'hidden\', \'scroll\' or \'auto\'')
       })
 
+      it('is hidden because it is backface', function () {
+        const el = cy.$$('body').append(`<div id="backface-invisible" style="backface-visibility:hidden; transform: rotateX(180deg)">Hello world</div>`)
+
+        this.reasonIs(el.find('#backface-invisible'), `This element \'<div#backface-invisible>\' is not visible because it is rotated and its backface is hidden.`)
+      })
+
       it('is hidden by transform', function () {
         const el = cy.$$('body').append(`<div id="invisible-transform" style="transform: scaleX(0)">Hello world</div>`)
 
