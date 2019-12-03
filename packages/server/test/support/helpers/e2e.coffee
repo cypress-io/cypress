@@ -484,7 +484,7 @@ module.exports = e2e = {
 
           ## if we are in headed mode or in a browser other
           ## than electron
-          if options.headed
+          if options.headed or (browser and browser isnt "electron")
             expect(headless).not.to.exist
           else
             expect(headless).to.include("(headless)")
