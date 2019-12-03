@@ -88,6 +88,7 @@ breakingConfigKeys = toWords """
 # Internal configuration properties the user should be able to overwrite
 systemConfigKeys = toWords """
   browsers
+  configFile
 """
 
 CONFIG_DEFAULTS = {

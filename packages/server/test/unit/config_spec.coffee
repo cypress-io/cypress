@@ -763,6 +763,7 @@ describe "lib/config", ->
           expect(cfg.resolved).to.deep.eq({
             env:                        { }
             projectId:                  { value: null, from: "default" },
+            configFile:                 { value: "cypress.json", from: "default" },
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" },
@@ -807,6 +808,7 @@ describe "lib/config", ->
           RECORD_KEY: "foobarbazquux",
           CI_KEY: "justanothercikey",
           PROJECT_ID: "projectId123"
+          CONFIG_FILE: "test.json"
         })
 
         obj = {
@@ -832,6 +834,7 @@ describe "lib/config", ->
           expect(cfg.resolved).to.deep.eq({
             projectId:                  { value: "projectId123", from: "env" },
             port:                       { value: 2020, from: "config" },
+            configFile:                 { value: "test.json", from: "env" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
             browsers:                   { value: [], from: "default" }
