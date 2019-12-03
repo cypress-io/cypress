@@ -20,16 +20,16 @@ interface CyCookie {
 
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
 
-const cookieMatches = (cookie: CyCookie, data) => {
-  if (data.domain && !tough.domainMatch(cookie.domain, data.domain)) {
+const cookieMatches = (cookie: CyCookie, filter) => {
+  if (filter.domain && !tough.domainMatch(filter.domain, cookie.domain)) {
     return false
   }
 
-  if (data.path && !tough.pathMatch(cookie.path, data.path)) {
+  if (filter.path && !tough.pathMatch(filter.path, cookie.path)) {
     return false
   }
 
-  if (data.name && data.name !== cookie.name) {
+  if (filter.name && filter.name !== cookie.name) {
     return false
   }
 
