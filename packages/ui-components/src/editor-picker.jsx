@@ -3,16 +3,14 @@ import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import React from 'react'
 
-const EditorPicker = observer(({ chosenEditor, editors, onSelect }) => {
-  const defaultOption = { id: 'none', name: '--- Select an Editor ---' }
-  const options = [defaultOption].concat(editors)
-  const chosen = chosenEditor || defaultOption
+import { Select, SelectItem } from './select'
 
-  const onChange = (event) => {
-    const id = event.target.value
+const EditorPicker = observer(({ chosen, editors, onSelect }) => {
+  const editorOptions = _.reject(editors, { isOther: true })
+  const otherOption = _.find(editors, { isOther: true })
+
+  const onChange = (e, id) => {
     const editor = _.find(editors, { id })
-
-    if (!editor) return
 
     onSelect(editor)
   }
@@ -24,20 +22,24 @@ const EditorPicker = observer(({ chosenEditor, editors, onSelect }) => {
   }
 
   return (
-    <div className='editor-picker'>
-      <select value={chosen.id} onChange={onChange}>
-        {_.map(options, ({ name, id }) => (
-          <option key={id} value={id}>{name}</option>
+    <Select value={chosen.id} onChange={onChange}>
+      <ul>
+        {_.map(editorOptions, (editor) => (
+          <li key={editor.id}>
+            <label>
+              <SelectItem value={editor.id} /> {editor.name}
+            </label>
+          </li>
         ))}
-      </select>
-      {chosen.isOther &&
-        <form>
-          <label>Enter the full path to the executable of the editor you would like to open files with.
-            <input value={chosen.path} onChange={updateOtherPath} />
+        <li>
+          <label>
+            <SelectItem value={otherOption.id} />
+            {otherOption.name}: <input type='text' value={otherOption.path} onChange={updateOtherPath} />
           </label>
-        </form>
-      }
-    </div>
+          {chosen.isOther && <label>Enter the full path to the executable of the editor</label>}
+        </li>
+      </ul>
+    </Select>
   )
 })
 
