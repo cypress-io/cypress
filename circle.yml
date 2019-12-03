@@ -5,7 +5,6 @@ develop-only: &develop-only
     branches:
       only:
 ## NOTE: to test all jobs against your PR before merging, just add your branch name here
-        - develop
         - circleci-windows
 
 defaults: &defaults
