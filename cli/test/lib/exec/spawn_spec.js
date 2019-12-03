@@ -7,6 +7,7 @@ const tty = require('tty')
 const path = require('path')
 const EE = require('events')
 const mockedEnv = require('mocked-env')
+const debug = require('debug')('test')
 
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -14,6 +15,7 @@ const spawn = require(`${lib}/exec/spawn`)
 const verify = require(`${lib}/tasks/verify`)
 const util = require(`${lib}/util.js`)
 const expect = require('chai').expect
+const snapshot = require('../../support/snapshot')
 
 const cwd = process.cwd()
 
@@ -171,6 +173,20 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    context('detects kill signal', function () {
+      it('exits with error on SIGKILL', function () {
+        this.spawnedProcess.on.withArgs('exit').yieldsAsync(null, 'SIGKILL')
+
+        return spawn.start('--foo')
+        .then(() => {
+          throw new Error('should have hit error handler but did not')
+        }, (e) => {
+          debug('error message', e.message)
+          snapshot(e.message)
+        })
+      })
+    })
+
     it('does not start xvfb when its not needed', function () {
       this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
@@ -246,6 +262,7 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         throw new Error('should have hit error handler but did not')
       }, (e) => {
+        debug('error message', e.message)
         expect(e.message).to.include(msg)
       })
     })
