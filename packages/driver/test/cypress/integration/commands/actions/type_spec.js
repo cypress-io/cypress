@@ -2241,14 +2241,14 @@ describe('src/cy/commands/actions/type', () => {
           cy.getAll('ce', 'keypress textInput').each(shouldNotBeCalled)
         })
 
-        it.only('correct events in contenteditable with selection', () => {
+        it('correct events in contenteditable with selection', () => {
           const ce = cy.$$('[contenteditable]:first')
 
           attachKeyListeners({ ce })
 
           cy.get('[contenteditable]:first').invoke('text', 'ab')
           .focus()
-          // .type('{selectall}{del}')
+          .type('{selectall  }{del}')
           .should('have.text', '')
 
           cy.getAll('ce', 'keydown input keyup').each(shouldBeCalledOnce)
