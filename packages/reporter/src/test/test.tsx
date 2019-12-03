@@ -81,7 +81,7 @@ class Test extends Component<Props> {
         style={{ paddingLeft: indent(model.level) }}
       >
         <div className='runnable-content-region'>
-          <i aria-hidden="true" className='runnable-state fa'></i>
+          <i aria-hidden="true" className='runnable-state fas'></i>
           <div
             aria-expanded={this._shouldBeOpen() === true}
             className='runnable-title'

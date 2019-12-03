@@ -91,6 +91,8 @@
 
     &.runnable-processing > .runnable-wrapper {
       .runnable-state {
+        @extend .far;
+        line-height: 18px; // @extend .far overrides line-height, so we need to set it again
         @extend .#{$fa-css-prefix}-square;
         color: #888;
       }

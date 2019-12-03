@@ -135,6 +135,7 @@
       }
 
       i:first-child {
+        @extend .far;
         @extend .#{$fa-css-prefix}-circle;
         color: #999;
         font-size: 80%;
@@ -145,6 +146,7 @@
 
       &.auto-scrolling-enabled {
         i:first-child {
+          @extend .fas;
           @extend .#{$fa-css-prefix}-circle;
           color: #FFB61C;
         }

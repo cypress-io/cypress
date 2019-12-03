@@ -10,9 +10,10 @@ const icon = (browser) => {
     case 'chrome':
     case 'chromium':
     case 'canary':
-      return 'chrome'
+    case 'electron':
+      return 'fab fa-chrome'
     default:
-      return ''
+      return 'fas fa-globe'
   }
 }
 
@@ -32,7 +33,7 @@ const noBrowsers = () => (
 
 const browser = (browser) => (
   <span>
-    <i className={`fas fa-${icon(browser.name)}`}></i>
+    <i className={icon(browser.name)}></i>
     <span>Run {displayName(browser.name)} {browser.majorVersion}</span>
   </span>
 )

@@ -45,7 +45,7 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
             className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
             onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
           >
-            <i className='fas'></i>
+            <i />
             <i className='fas fa-arrows-alt-v'></i>
           </button>
         </Tooltip>
