@@ -34,7 +34,7 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
       {ifThen(appState.isPaused, (
         <Tooltip placement='bottom' title='Resume'>
           <button aria-label='Resume' className='play' onClick={emit('resume')}>
-            <i className='fa fa-play'></i>
+            <i className='fas fa-play'></i>
           </button>
         </Tooltip>
       ))}
@@ -45,29 +45,29 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
             className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
             onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
           >
-            <i className='fa'></i>
-            <i className='fa fa-arrows-v'></i>
+            <i />
+            <i className='fas fa-arrows-alt-v'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(appState.isRunning && !appState.isPaused, (
         <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>}>
           <button aria-label='Stop' className='stop' onClick={emit('stop')}>
-            <i className='fa fa-stop'></i>
+            <i className='fas fa-stop'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
         <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>}>
           <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
-            <i className='fa fa-repeat'></i>
+            <i className='fas fa-redo'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(!!appState.nextCommandName, (
         <Tooltip placement='bottom' title={`Next: '${appState.nextCommandName}'`}>
           <button aria-label={`Next: '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
-            <i className='fa fa-step-forward'></i>
+            <i className='fas fa-step-forward'></i>
           </button>
         </Tooltip>
       ))}
