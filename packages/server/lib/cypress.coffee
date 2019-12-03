@@ -10,11 +10,13 @@ require("./environment")
 ## mode.
 
 _       = require("lodash")
+R       = require("ramda")
 cp      = require("child_process")
 os      = require("os")
 path    = require("path")
 Promise = require("bluebird")
 debug   = require("debug")("cypress:server:cypress")
+argsUtils = require("./util/args")
 
 warning = (code) ->
   require("./errors").warning(code)
@@ -129,14 +131,11 @@ module.exports = {
   start: (argv = []) ->
     debug("starting cypress with argv %o", argv)
 
-    # if the CLI passed "--" as the first argument to prevent Electron
-    # crashing on Windows https://github.com/cypress-io/cypress/issues/5466
-    # then remove it
-    if argv[0] == "--"
-      debug("stripped leading --")
-      argv = argv.slice(1)
+    # if the CLI passed "--" somewhere, we need to remove it
+    # for https://github.com/cypress-io/cypress/issues/5466
+    argv = R.without("--", argv)
 
-    options = require("./util/args").toObject(argv)
+    options = argsUtils.toObject(argv)
 
     if options.runProject and not options.headed
       # scale the electron browser window
