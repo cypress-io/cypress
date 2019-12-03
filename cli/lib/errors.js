@@ -168,20 +168,21 @@ const versionMismatch = {
   solution: 'Install Cypress and verify app again',
 }
 
+const solutionUnknown = stripIndent`
+  Please search Cypress documentation for possible solutions:
+
+    ${chalk.blue(docsUrl)}
+
+  Check if there is a GitHub issue describing this crash:
+
+    ${chalk.blue(util.issuesUrl)}
+
+  Consider opening a new issue.
+`
 const unexpected = {
   description:
     'An unexpected error occurred while verifying the Cypress executable.',
-  solution: stripIndent`
-    Please search Cypress documentation for possible solutions:
-
-      ${chalk.blue(docsUrl)}
-
-    Check if there is a GitHub issue describing this crash:
-
-      ${chalk.blue(util.issuesUrl)}
-
-    Consider opening a new issue.
-  `,
+  solution: solutionUnknown,
 }
 
 const invalidCypressEnv = {
@@ -189,6 +190,20 @@ const invalidCypressEnv = {
     chalk.red('The environment variable with the reserved name "CYPRESS_ENV" is set.'),
   solution: chalk.red('Unset the "CYPRESS_ENV" environment variable and run Cypress again.'),
   exitCode: 11,
+}
+
+/**
+ * This error happens when CLI detects that the child Test Runner process
+ * was killed with a signal, like SIGBUS
+ * @see https://github.com/cypress-io/cypress/issues/5808
+ * @param {'close'|'event'} eventName Child close event name
+ * @param {string} signal Signal that closed the child process, like "SIGBUS"
+*/
+const childProcessKilled = (eventName, signal) => {
+  return {
+    description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
+    solution: solutionUnknown,
+  }
 }
 
 const removed = {
@@ -237,6 +252,28 @@ function getPlatformInfo () {
 function addPlatformInformation (info) {
   return getPlatformInfo().then((platform) => {
     return merge(info, { platform })
+  })
+}
+
+/**
+ * Given an error object (see the errors above), forms error message text with details,
+ * then resolves with Error instance you can throw or reject with.
+ * @param {object} errorObject
+ * @returns {Promise<Error>} resolves with an Error
+ * @example
+  ```js
+  // inside a Promise with "resolve" and "reject"
+  const errorObject = childProcessKilled('exit', 'SIGKILL')
+  return getError(errorObject).then(reject)
+  ```
+ */
+function getError (errorObject) {
+  return formErrorText(errorObject).then((errorMessage) => {
+    const err = new Error(errorMessage)
+
+    err.known = true
+
+    return err
   })
 }
 
@@ -355,6 +392,7 @@ module.exports = {
   // formError,
   formErrorText,
   throwFormErrorText,
+  getError,
   hr,
   errors: {
     nonZeroExitCodeXvfb,
@@ -373,5 +411,6 @@ module.exports = {
     removed,
     CYPRESS_RUN_BINARY,
     smokeTestFailure,
+    childProcessKilled,
   },
 }

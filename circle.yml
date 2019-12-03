@@ -40,7 +40,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.0.0-chrome73
+      - image: cypress/browsers:node12.8.1-chrome78-ff70
     environment:
       PLATFORM: linux
 
@@ -387,7 +387,7 @@ jobs:
       - run: npm run all test -- --package https-proxy
       - run: npm run all test -- --package launcher
       - run: npm run all test -- --package network
-      # how to pass Mocha reporter through zunder?
+      - run: npm run all test -- --package proxy
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
       - run: npm run all test -- --package socket
