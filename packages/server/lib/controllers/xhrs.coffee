@@ -50,6 +50,11 @@ module.exports = {
         if _.isObject(data)
           data = JSON.stringify(data)
 
+        ## when data is null, JSON.stringify returns null.
+        ## handle that case. 
+        if data is null
+          data = ''
+
         chunk = Buffer.from(data, encoding)
 
         headers["content-length"] = chunk.length

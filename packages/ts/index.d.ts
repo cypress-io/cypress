@@ -90,6 +90,12 @@ declare interface SymbolConstructor {
   for(str: string): SymbolConstructor
 }
 
+declare module 'url' {
+  interface UrlWithStringQuery {
+    format(): string
+  }
+}
+
 declare interface InternalStream {
   queue(str: string | null): void
 }
