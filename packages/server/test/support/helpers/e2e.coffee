@@ -398,8 +398,8 @@ module.exports = e2e = {
       ensurePort(options.port)
       args.push("--port=#{options.port}")
 
-    if options.headed
-      args.push("--headed")
+    if !_.isUndefined(options.headed)
+      args.push("--headed", options.headed)
 
     if options.record
       args.push("--record")
@@ -482,9 +482,9 @@ module.exports = e2e = {
 
           expect(parseFloat(version)).to.be.a.number
 
-          ## if we are in headed mode or in a browser other
+          ## if we are in headed mode or headed is undefined in a browser other
           ## than electron
-          if options.headed or (browser and browser isnt "electron")
+          if options.headed or (_.isUndefined(options.headed) and browser and browser isnt 'electron')
             expect(headless).not.to.exist
           else
             expect(headless).to.include("(headless)")
