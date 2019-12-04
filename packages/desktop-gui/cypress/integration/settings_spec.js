@@ -1,4 +1,5 @@
 const { _ } = Cypress
+const { each, flow, get, isString, join, map, sortBy, toPairs } = require('lodash/fp')
 
 describe('Settings', () => {
   beforeEach(function () {
@@ -179,6 +180,55 @@ describe('Settings', () => {
       it('opens help link on click', () => {
         cy.get('.settings-config .learn-more').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/guides/configuration')
+        })
+      })
+
+      it('displays env settings', () => {
+        cy.get('@config').then(({ resolved }) => {
+          const getEnvKeys = flow([
+            get('env'),
+            toPairs,
+            map(([key]) => key),
+            sortBy(get('')),
+          ])
+
+          cy.contains('.line', 'env').contains(flow([getEnvKeys, join(', ')])(resolved))
+          cy.contains('.line', 'env').click()
+          const assertKeyExists = each((key) => cy.contains('.line', key))
+          const assertKeyValuesExists = flow([
+            map((key) => {
+              return flow([
+                get(['env', key, 'value']),
+                (v) => {
+                  if (isString(v)) {
+                    return `"${v}"`
+                  }
+
+                  return v
+                },
+              ])(resolved)
+            }),
+            each((v) => {
+              cy.contains('.key-value-pair-value', v)
+            }),
+          ])
+
+          const assertFromTooltipsExist = flow([
+            map((key) => {
+              return [key,
+                flow([
+                  get(['env', key, 'from']),
+                  (from) => `.${from}`,
+                ])(resolved)]
+            }),
+            each(([key, fromTooltipClassName]) => {
+              cy.contains(key).parents('.line').first().find(fromTooltipClassName)
+            }),
+          ])
+
+          flow([getEnvKeys, assertKeyExists])(resolved)
+          flow([getEnvKeys, assertKeyValuesExists])(resolved)
+          flow([getEnvKeys, assertFromTooltipsExist])(resolved)
         })
       })
     })
