@@ -1172,10 +1172,7 @@ mac-workflow: &mac-workflow
         name: Mac binary upload
         executor: mac
         context: test-runner:upload
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac binary
 
