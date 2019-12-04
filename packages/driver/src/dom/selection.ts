@@ -174,6 +174,13 @@ const setSelectionRange = function (el, start, end) {
   }
 }
 
+// Whether or not the selection contains any text
+// since Selection.isCollapsed will be true when selection
+// is inside non-selectionRange input (e.g. input[type=email])
+const isSelectionCollapsed = function (selection: Selection) {
+  return !selection.toString()
+}
+
 /**
  * @returns {boolean} whether or not input events are needed
  */
@@ -199,7 +206,15 @@ const deleteRightOfCursor = function (el) {
   if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    $elements.callNativeMethod(selection, 'modify', 'extend', 'forward', 'character')
+    if (isSelectionCollapsed(selection)) {
+      $elements.callNativeMethod(
+        selection,
+        'modify',
+        'extend',
+        'forward',
+        'character',
+      )
+    }
 
     if ($elements.getNativeProp(selection, 'isCollapsed')) {
       // there's nothing to delete
@@ -243,12 +258,14 @@ const deleteLeftOfCursor = function (el) {
     // there is no 'backwardDelete' command for execCommand, so use the Selection API
     const selection = _getSelectionByEl(el)
 
-    $elements.callNativeMethod(selection, 'modify', 'extend', 'backward', 'character')
-
-    if (selection.isCollapsed) {
-      // there's nothing to delete
-      // since extending the selection didn't do anything
-      return false
+    if (isSelectionCollapsed(selection)) {
+      $elements.callNativeMethod(
+        selection,
+        'modify',
+        'extend',
+        'backward',
+        'character'
+      )
     }
 
     deleteSelectionContents(el)
@@ -401,9 +418,7 @@ const isCollapsed = function (el) {
   return false
 }
 
-const selectAll = function (doc) {
-  const el = doc.activeElement
-
+const selectAll = function (el: HTMLElement) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     setSelectionRange(el, 0, $elements.getNativeProp(el, 'value').length)
 
@@ -445,12 +460,12 @@ const getSelectionBounds = function (el) {
   }
 }
 
-const _moveSelectionTo = function (toStart: boolean, doc: Document, options = {}) {
+const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = {}) {
   const opts = _.defaults({}, options, {
     onlyIfEmptySelection: false,
   })
 
-  const el = $elements.getActiveElByDocument(doc)
+  const doc = $document.getDocumentFromElement(el)
 
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
     if (opts.onlyIfEmptySelection) {

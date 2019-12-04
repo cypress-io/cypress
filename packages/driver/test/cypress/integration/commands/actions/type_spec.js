@@ -1989,6 +1989,20 @@ describe('src/cy/commands/actions/type', () => {
           cy.getAll('input', 'keypress textInput').each(shouldNotBeCalled)
         })
 
+        it('correct events in input with selection', () => {
+          const input = cy.$$(':text:first')
+
+          attachKeyListeners({ input })
+
+          cy.get(':text:first').invoke('val', 'ab')
+          .focus()
+          .type('{selectall}{backspace}')
+          .should('have.value', '')
+
+          cy.getAll('input', 'keydown input keyup').each(shouldBeCalledOnce)
+          cy.getAll('input', 'keypress textInput').each(shouldNotBeCalled)
+        })
+
         it('correct events in input when noop', () => {
           const input = cy.$$(':text:first')
 
@@ -2018,6 +2032,20 @@ describe('src/cy/commands/actions/type', () => {
           cy.getAll('textarea', 'keypress textInput').each(shouldNotBeCalled)
         })
 
+        it('correct events in textarea with selection', () => {
+          const textarea = cy.$$('textarea:first')
+
+          attachKeyListeners({ textarea })
+
+          cy.get('textarea:first').invoke('val', 'ab')
+          .focus()
+          .type('{selectall}{backspace}')
+          .should('have.value', '')
+
+          cy.getAll('textarea', 'keydown input keyup').each(shouldBeCalledOnce)
+          cy.getAll('textarea', 'keypress textInput').each(shouldNotBeCalled)
+        })
+
         it('correct events in textarea when noop', () => {
           const input = cy.$$('textarea:first')
 
@@ -2040,6 +2068,24 @@ describe('src/cy/commands/actions/type', () => {
 
           cy.get('[contenteditable]:first').invoke('text', 'ab')
           .scrollIntoView()
+          .type('{backspace}')
+          .should('have.text', 'a')
+
+          cy.getAll('ce', 'keydown input keyup').each(shouldBeCalledOnce)
+          cy.getAll('ce', 'keypress textInput').each(shouldNotBeCalled)
+        })
+
+        it('correct events in contenteditable with selection', () => {
+          const ce = cy.$$('[contenteditable]:first')
+
+          attachKeyListeners({ ce })
+
+          cy.get('[contenteditable]:first').invoke('text', 'ab')
+          .scrollIntoView()
+          .type('{moveToEnd}')
+          .then(($el) => {
+            $el[0].ownerDocument.getSelection().modify('extend', 'backward', 'character')
+          })
           .type('{backspace}')
           .should('have.text', 'a')
 
@@ -2111,6 +2157,22 @@ describe('src/cy/commands/actions/type', () => {
           cy.getAll('input', 'keypress textInput').each(shouldNotBeCalled)
         })
 
+        it('correct events in input with selection', () => {
+          const input = cy.$$(':text:first')
+
+          attachKeyListeners({ input })
+
+          cy.get(':text:first').invoke('val', 'ab')
+
+          .then(($input) => $input[0].setSelectionRange(0, 0))
+          .focus()
+          .type('{selectall}{del}')
+          .should('have.value', '')
+
+          cy.getAll('input', 'keydown input keyup').each(shouldBeCalledOnce)
+          cy.getAll('input', 'keypress textInput').each(shouldNotBeCalled)
+        })
+
         it('correct events in input when noop', () => {
           const input = cy.$$(':text:first')
 
@@ -2140,6 +2202,21 @@ describe('src/cy/commands/actions/type', () => {
           cy.getAll('textarea', 'keypress textInput').each(shouldNotBeCalled)
         })
 
+        it('correct events in textarea with selection', () => {
+          const textarea = cy.$$('textarea:first')
+
+          attachKeyListeners({ textarea })
+
+          cy.get('textarea:first').invoke('val', 'ab')
+          .then(($textarea) => $textarea[0].setSelectionRange(0, 0))
+          .focus()
+          .type('{selectall}{del}')
+          .should('have.value', '')
+
+          cy.getAll('textarea', 'keydown input keyup').each(shouldBeCalledOnce)
+          cy.getAll('textarea', 'keypress textInput').each(shouldNotBeCalled)
+        })
+
         it('correct events in textarea when noop', () => {
           const input = cy.$$('textarea:first')
 
@@ -2157,14 +2234,6 @@ describe('src/cy/commands/actions/type', () => {
         it('correct events in contenteditable', () => {
           const ce = cy.$$('[contenteditable]:first')
 
-          const keydown = cy.stub().callsFake((e) => {
-            expect(e.which).to.eq(46)
-            expect(e.keyCode).to.eq(46)
-            expect(e.key).to.eq('Delete')
-          })
-
-          ce.on('keydown', keydown)
-
           attachKeyListeners({ ce })
 
           cy.get('[contenteditable]:first').invoke('text', 'ab')
@@ -2176,16 +2245,25 @@ describe('src/cy/commands/actions/type', () => {
           cy.getAll('ce', 'keypress textInput').each(shouldNotBeCalled)
         })
 
-        it('correct events in contenteditable when noop', () => {
+        it('correct events in contenteditable with selection', () => {
           const ce = cy.$$('[contenteditable]:first')
 
-          const keydown = cy.stub().callsFake((e) => {
-            expect(e.which).to.eq(46)
-            expect(e.keyCode).to.eq(46)
-            expect(e.key).to.eq('Delete')
-          })
+          attachKeyListeners({ ce })
 
-          ce.on('keydown', keydown)
+          cy.get('[contenteditable]:first').invoke('text', 'ab')
+          .type('{moveToStart}')
+          .then(($el) => {
+            $el[0].ownerDocument.getSelection().modify('extend', 'forward', 'character')
+          })
+          .type('{del}')
+          .should('have.text', 'b')
+
+          cy.getAll('ce', 'keydown input keyup').each(shouldBeCalledOnce)
+          cy.getAll('ce', 'keypress textInput').each(shouldNotBeCalled)
+        })
+
+        it('correct events in contenteditable when noop', () => {
+          const ce = cy.$$('[contenteditable]:first')
 
           attachKeyListeners({ ce })
 
@@ -5215,7 +5293,7 @@ https://on.cypress.io/type`)
       })
     })
 
-    it('can forcibly click even when being covered by another element', () => {
+    it('can force clear even when being covered by another element', () => {
       const $input = $('<input />')
       .attr('id', 'input-covered-in-span')
       .prependTo(cy.$$('body'))
@@ -5238,6 +5316,37 @@ https://on.cypress.io/type`)
       cy.get('#input-covered-in-span').clear({ force: true }).then(() => {
         expect(clicked).to.be.called
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/5835
+    it('can force clear when hidden in input', () => {
+      const input = cy.$$('input:first')
+      .val('foo')
+      .hide()
+
+      attachKeyListeners({ input })
+      cy.get('input:first')
+      .focus()
+      .clear({ force: true })
+      .should('have.value', '')
+
+      cy.getAll('input', 'keydown input keyup').each(shouldBeCalledOnce)
+      cy.getAll('input', 'textInput keypress').each(shouldNotBeCalled)
+    })
+
+    it('can force clear when hidden in textarea', () => {
+      const textarea = cy.$$('textarea:first')
+      .val('foo')
+      .hide()
+
+      attachKeyListeners({ textarea })
+      cy.get('textarea:first')
+      .focus()
+      .clear({ force: true })
+      .should('have.value', '')
+
+      cy.getAll('textarea', 'keydown input keyup').each(shouldBeCalledOnce)
+      cy.getAll('textarea', 'textInput keypress').each(shouldNotBeCalled)
     })
 
     it('passes timeout and interval down to click', (done) => {
