@@ -23,8 +23,15 @@ type CyCookieFilter = chrome.cookies.GetAllDetails
 
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
 
-const cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
-  if (filter.domain && (!cookie.domain || !cookie.domain.endsWith(filter.domain))) {
+export const _domainIsWithinSuperdomain = (domain: string, suffix: string) => {
+  const suffixParts = suffix.split('.').filter(_.identity)
+  const domainParts = domain.split('.').filter(_.identity)
+
+  return _.isEqual(suffixParts, domainParts.slice(domainParts.length - suffixParts.length))
+}
+
+export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
+  if (filter.domain && !(cookie.domain && _domainIsWithinSuperdomain(cookie.domain, filter.domain))) {
     return false
   }
 
@@ -94,7 +101,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     .then((result: cdp.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        const matches = cookieMatches(cookie, filter)
+        const matches = _cookieMatches(cookie, filter)
 
         debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
 
