@@ -4,6 +4,7 @@
     "publish": null,
     "target": "zip",
     "hardenedRuntime": true,
-    "entitlements": "./scripts/entitlements.mac.inherit.plist"
+    "entitlements": "./scripts/entitlements.mac.inherit.plist",
+    "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist"
   }
 }
