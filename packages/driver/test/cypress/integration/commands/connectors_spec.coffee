@@ -506,7 +506,7 @@ describe "src/cy/commands/connectors", ->
           it "throws when function name is missing", (done) ->
             cy.on "fail", (err) =>
                 lastLog = @lastLog
-                expect(err.message).to.include "cy.invoke() expects the function name to have a value"
+                expect(err.message).to.include "cy.invoke() expects the functionName argument to have a value"
                 expect(lastLog.get("error").message).to.include(err.message)
                 done()
               
@@ -1318,7 +1318,7 @@ describe "src/cy/commands/connectors", ->
         it "throws when property name is missing", (done) ->
           cy.on "fail", (err) =>
               lastLog = @lastLog
-              expect(err.message).to.include "cy.its() expects the property name to have a value"
+              expect(err.message).to.include "cy.its() expects the propertyName argument to have a value"
               expect(lastLog.get("error").message).to.include(err.message)
               done()
 
