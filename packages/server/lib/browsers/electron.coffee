@@ -193,7 +193,7 @@ module.exports = {
   _setUserAgent: (webContents, userAgent) ->
     debug("setting user agent to:", userAgent)
     ## set both because why not
-    webContents.setUserAgent(userAgent)
+    webContents.userAgent = userAgent
     webContents.session.setUserAgent(userAgent)
 
   _setProxy: (webContents, proxyServer) ->
