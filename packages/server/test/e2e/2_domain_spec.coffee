@@ -14,7 +14,6 @@ describe "e2e domain", ->
   })
 
   e2e.it "passes", {
-    exit: false
     spec: "domain*"
     snapshot: true
     expectedExitCode: 0

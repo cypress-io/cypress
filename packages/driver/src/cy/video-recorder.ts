@@ -26,7 +26,7 @@ export function create (state, Cypress) {
       mediaRecorder.start(200)
 
       mediaRecorder.addEventListener('dataavailable', (e) => {
-        // Cypress.action('recorder:frame', e.data)
+        Cypress.action('recorder:frame', e.data)
       })
     })
   }

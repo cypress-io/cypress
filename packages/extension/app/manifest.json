@@ -7,7 +7,6 @@
     }
   },
   "permissions": [
-    "browsingData",
     "cookies",
     "tabs",
     "http://*/*",

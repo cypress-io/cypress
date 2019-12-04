@@ -1,9 +1,8 @@
 describe "subdomains", ->
   beforeEach ->
-    cy.clearLocalStorage()
     cy.visit("http://www.foobar.com:2292")
 
-  it.only "can swap to help.foobar.com:2292", ->
+  it "can swap to help.foobar.com:2292", ->
     cy
       .get("a").click()
       .get("h1").should("contain", "Help")

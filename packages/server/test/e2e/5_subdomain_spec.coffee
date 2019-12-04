@@ -102,8 +102,7 @@ describe "e2e subdomain", ->
     }
   })
 
-  e2e.it.only "passes", {
-    exit: false
+  e2e.it "passes", {
     spec: "subdomain_spec.coffee"
     snapshot: true
     expectedExitCode: 0

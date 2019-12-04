@@ -365,7 +365,7 @@ module.exports = e2e = {
 
       @timeout(human("2 minutes"))
 
-      # Fixtures.remove()
+      Fixtures.remove()
 
       if s = @servers
         Promise.map(s, stopServer)

@@ -1,37 +1,23 @@
 _ = require("lodash")
 
 $utils = require("../../cypress/utils")
-$Location = require("../../cypress/location")
 $LocalStorage = require("../../cypress/local_storage")
-debug = require('debug')('cypress:driver:commands:localstorage')
-
 
 clearLocalStorage = (state, keys) ->
-  # debug('window')
-  # debug('clearing localstorage for window: ', cy.state('window').location.href)
-  local = window
-  remote = state("window")
+  local = window.localStorage
+  remote = state("window").localStorage
 
-  # ## set our localStorage and the remote localStorage
-  # $LocalStorage.setStorages(local, remote)
-  
-  localHostname = $Location.create(local.location.href).hostname
-  remoteHostname = $Location.create(remote.location.href).hostname
-  console.log()
-  # debugger
-  return Cypress.automation("clear:localStorage", { urls: _.compact [localHostname, remoteHostname]} )
-  .then ->
-    debugger
-    console.log('asfdasfasdf')
-  # return Cypress.Promise.delay(1000)
-  # ## clear the keys
-  # $LocalStorage.clear(keys)
+  ## set our localStorage and the remote localStorage
+  $LocalStorage.setStorages(local, remote)
 
-  # ## and then unset the references
-  # $LocalStorage.unsetStorages()
+  ## clear the keys
+  $LocalStorage.clear(keys)
 
-  # ## return the remote localStorage object
-  # return remote
+  ## and then unset the references
+  $LocalStorage.unsetStorages()
+
+  ## return the remote localStorage object
+  return remote
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   ## this MUST be prepended before anything else
@@ -39,7 +25,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     try
       ## this may fail if the current
       ## window is bound to another origin
-      # clearLocalStorage(state, [])
+      clearLocalStorage(state, [])
     catch
       null
 
