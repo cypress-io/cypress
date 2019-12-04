@@ -94,6 +94,7 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
+          '--',
           '--foo',
           '--cwd',
           cwd,
@@ -114,11 +115,13 @@ describe('lib/exec/spawn', function () {
         // and also less risk that a failed assertion would dump the
         // entire ENV object with possible sensitive variables
         const args = cp.spawn.firstCall.args.slice(0, 2)
+        // it is important for "--no-sandbox" to appear before "--" separator
         const expectedCliArgs = [
+          '--no-sandbox',
+          '--',
           '--foo',
           '--cwd',
           cwd,
-          '--no-sandbox',
         ]
 
         expect(args).to.deep.equal(['/path/to/cypress', expectedCliArgs])
@@ -135,6 +138,28 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('node', [
           p,
+          '--',
+          '--foo',
+          '--cwd',
+          cwd,
+        ], {
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
+        })
+      })
+    })
+
+    it('does not pass --no-sandbox when running in dev mode', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(true)
+
+      const p = path.resolve('..', 'scripts', 'start.js')
+
+      return spawn.start('--foo', { dev: true, foo: 'bar' })
+      .then(() => {
+        expect(cp.spawn).to.be.calledWithMatch('node', [
+          p,
+          '--',
           '--foo',
           '--cwd',
           cwd,

@@ -306,6 +306,24 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
         @expectExitWith(0)
 
+    describe "strips --", ->
+      beforeEach ->
+        sinon.spy(argsUtil, "toObject")
+
+      it "strips leading", ->
+        cypress.start(["--", "--run-project=#{@todosPath}"])
+        .then =>
+          expect(argsUtil.toObject).to.have.been.calledWith(["--run-project=#{@todosPath}"])
+          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          @expectExitWith(0)
+
+      it "strips in the middle", ->
+        cypress.start(["--run-project=#{@todosPath}", "--", "--browser=electron"])
+        .then =>
+          expect(argsUtil.toObject).to.have.been.calledWith(["--run-project=#{@todosPath}", "--browser=electron"])
+          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          @expectExitWith(0)
+
     it "runs project headlessly and exits with exit code 10", ->
       sinon.stub(runMode, "runSpecs").resolves({ totalFailed: 10 })
 
