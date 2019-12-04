@@ -969,4 +969,6 @@ module.exports = {
   throw: throwErr
 
   stripAnsi: strip
+
+  displayFlags
 }
