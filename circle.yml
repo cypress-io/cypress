@@ -1122,6 +1122,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - notarize-mac-build-5791
 
     - lint:
         name: Mac lint
@@ -1164,6 +1165,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - notarize-mac-build-5791
         requires:
           - Mac build
 
