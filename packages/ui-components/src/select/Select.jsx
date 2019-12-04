@@ -1,6 +1,5 @@
 import React, { Children, useCallback, useMemo, useState } from 'react'
-import { noop, uniqueId } from 'lodash'
-import { filter, findIndex, flow, map } from 'lodash/fp'
+import _ from 'lodash'
 import Context from './context'
 
 const generateGroupName = (name) => {
@@ -8,15 +7,16 @@ const generateGroupName = (name) => {
     return name
   }
 
-  return uniqueId('Select-')
+  return _.uniqueId('Select-')
 }
 
-const toValues = flow(
-  filter((child) => {
+const toValues = (children) => {
+  const withSelectItem = _.filter(children, (child) => {
     return child.props.selectItem
-  }),
-  map((child) => child.props.value)
-)
+  })
+
+  return _.map(withSelectItem, (child) => child.props.value)
+}
 
 const left = 13
 const up = 38
@@ -37,8 +37,7 @@ const Select = ({ children, multiSelect, name, onChange, value }) => {
       return
     }
 
-    const findCurrentValueIndex = findIndex((v) => v === checked)
-    const currentIndex = findCurrentValueIndex(allValues)
+    const currentIndex = _.findIndex(allValues, (v) => v === checked)
 
     if (currentIndex === -1) {
       setChecked(allValues[0])
@@ -73,7 +72,7 @@ const Select = ({ children, multiSelect, name, onChange, value }) => {
 }
 
 Select.defaultProps = {
-  onChange: noop,
+  onChange: _.noop,
   multiSelect: false,
 }
 

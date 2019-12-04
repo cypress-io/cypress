@@ -1,7 +1,8 @@
 import React from 'react'
 import { render } from 'react-dom'
-import { filter } from 'lodash/fp'
 import { Select, SelectItem } from '../../src'
+
+const _ = Cypress._
 
 describe('<Select />', () => {
   beforeEach(() => {
@@ -29,7 +30,7 @@ describe('<Select />', () => {
     cy.get('input[name="myName"]').then((el) => expect(el.length).to.eql(3))
     cy.get('input').then((els) => {
       expect(els.length).to.eql(6)
-      expect(filter((el) => el.name !== 'myName')(els).length).to.eql(3)
+      expect(_.filter(els, (el) => el.name !== 'myName').length).to.eql(3)
     })
   })
 
@@ -59,7 +60,7 @@ describe('<Select />', () => {
     cy.get('input[name="myName"]').then((el) => expect(el.length).to.eql(3))
     cy.get('input').then((els) => {
       expect(els.length).to.eql(9)
-      expect(filter((el) => el.name !== 'myName')(els).length).to.eql(6)
+      expect(_.filter(els, (el) => el.name !== 'myName').length).to.eql(6)
       expect(els[1].checked).to.be.true
       expect(els[3].checked).to.be.true
       expect(els[8].checked).to.be.true
