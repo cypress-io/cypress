@@ -140,5 +140,14 @@ describe('exec run', function () {
         ])
       })
     })
+
+    it('spawns with several --tag words unchanged', function () {
+      return run.start({ tag: 'nightly, sanity' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--tag', 'nightly, sanity',
+        ])
+      })
+    })
   })
 })
