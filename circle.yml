@@ -19,6 +19,16 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macBuildFilters: &macBuildFilters
+  filters:
+    branches:
+      only:
+        - develop
+        - electron-upgrade
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
@@ -1118,20 +1128,14 @@ mac-workflow: &mac-workflow
     - build:
         name: Mac build
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
 
     - lint:
         name: Mac lint
         executor: mac
+        <<: *macBuildFilters
         requires:
           - Mac build
-        filters:
-          branches:
-            only:
-              - develop
 
     # maybe run unit tests?
 
@@ -1160,10 +1164,7 @@ mac-workflow: &mac-workflow
         name: Mac binary
         context: org-global
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac build
 
@@ -1181,10 +1182,7 @@ mac-workflow: &mac-workflow
     - test-kitchensink:
         name: Test Mac Kitchensink
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac build
 
