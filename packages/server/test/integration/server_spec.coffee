@@ -6,7 +6,6 @@ rp            = require("request-promise")
 Promise       = require("bluebird")
 evilDns       = require("evil-dns")
 httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")
-buffers       = require("#{root}lib/util/buffers")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
@@ -84,6 +83,8 @@ describe "Server", ->
               # @session = new (Session({app: @srv}))
 
               @proxy = "http://localhost:" + port
+
+              @buffers = @server._networkProxy.http.buffers
 
               @fileServer = @server._fileServer.address()
           ])
@@ -170,7 +171,7 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.getAny()).to.include({ url: "http://localhost:2000/index.html" })
+          expect(@buffers.buffer).to.include({ url: "http://localhost:2000/index.html" })
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) =>
@@ -195,7 +196,7 @@ describe "Server", ->
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
             expect(res.body).to.include("Cypress")
-            expect(buffers.getAny()).to.be.null
+            expect(@buffers.buffer).to.be.undefined
 
       it "can follow static file redirects", ->
         @server._onResolveUrl("/sub", {}, @automationRequest)
@@ -266,13 +267,13 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.getAny()).to.include({ url: "http://localhost:2000/index.html" })
+          expect(@buffers.buffer).to.include({ url: "http://localhost:2000/index.html" })
         .then =>
           @rp("http://localhost:2000/index.html")
-          .then (res) ->
+          .then (res) =>
             expect(res.statusCode).to.eq(200)
 
-            expect(buffers.getAny()).to.be.null
+            expect(@buffers.buffer).to.be.undefined
 
     describe "http", ->
       beforeEach ->
@@ -530,7 +531,7 @@ describe "Server", ->
             ]
           })
 
-          expect(buffers.getAny()).to.include({ url: "http://espn.go.com/" })
+          expect(@buffers.buffer).to.include({ url: "http://espn.go.com/" })
         .then =>
           @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
           .then (obj = {}) =>
@@ -557,7 +558,7 @@ describe "Server", ->
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("go.com")
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>espn</body></html>")
-            expect(buffers.getAny()).to.be.null
+            expect(@buffers.buffer).to.be.undefined
 
       it "does not buffer 'bad' responses", ->
         sinon.spy(@server._request, "sendStream")
@@ -655,7 +656,7 @@ describe "Server", ->
         })
 
         @server._onResolveUrl("http://getbootstrap.com/#/foo", {}, @automationRequest)
-        .then (obj = {}) ->
+        .then (obj = {}) =>
           expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
@@ -668,13 +669,13 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.getAny()).to.include({ url: "http://getbootstrap.com/" })
+          expect(@buffers.buffer).to.include({ url: "http://getbootstrap.com/" })
         .then =>
           @rp("http://getbootstrap.com/")
-          .then (res) ->
+          .then (res) =>
             expect(res.statusCode).to.eq(200)
 
-            expect(buffers.getAny()).to.be.null
+            expect(@buffers.buffer).to.be.undefined
 
       it "can serve non 2xx status code requests when option set", ->
         nock("http://google.com")
