@@ -104,7 +104,7 @@ class LoginContent extends Component {
             className='btn btn-default btn-sm'
             onClick={this._pingApiServer}
           >
-            <i className='fas fa-sync'></i>{' '}
+            <i className='fas fa-sync-alt'></i>{' '}
             Try again
           </button>
         </p>

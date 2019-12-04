@@ -69,7 +69,7 @@
 
     &.runnable-active {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-sync;
+        @extend .#{$fa-css-prefix}-sync-alt;
         @extend .#{$fa-css-prefix}-spin;
       }
     }

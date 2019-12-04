@@ -81,7 +81,7 @@ class ErrorMessage extends Component {
             className='btn btn-default btn-sm'
             onClick={this.props.onTryAgain}
           >
-            <i className='fas fa-sync'></i>{' '}
+            <i className='fas fa-sync-alt'></i>{' '}
             Try Again
           </button>
         </div>
