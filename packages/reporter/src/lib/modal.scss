@@ -5,11 +5,13 @@
 
 [data-reach-dialog-content] {
   align-items: center;
+  background: #f8f8f8;
   border-radius: 3px;
   font-family: $open-sans;
+  font-size: 0.9em;
   justify-content: center;
   margin: auto;
-  min-width: 20em;
+  min-width: 30em;
   padding: 3rem 0 0;
   position: relative;
 
@@ -19,6 +21,11 @@
     cursor: pointer;
     font-size: 1em;
     padding: 0.4em 0.6em;
+  }
+
+  p {
+    line-height: 1.5;
+    margin-bottom: 0.5em;
   }
 
   .content {

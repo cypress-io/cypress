@@ -1,7 +1,99 @@
 const { EventEmitter } = require('events')
+const _ = Cypress._
 
 const cleanWhitespace = (text) => {
   return text.replace(/\s+/gm, '')
+}
+
+const itHandlesFileOpening = (trigger) => {
+  it('shows tooltip when file path hovered over', function () {
+    this.setError(this.commandErr)
+
+    trigger()
+    cy.get('.err-file-options').should('be.visible')
+  })
+
+  it('opens the file on computer when clicked', function () {
+    cy.spy(this.runner, 'emit')
+
+    this.setError(this.commandErr)
+
+    trigger()
+    cy.contains('Open on Computer').click().then(() => {
+      expect(this.runner.emit).to.be.calledWith('open:file', {
+        where: 'computer',
+        file: '/me/dev/my/app.js',
+        line: 2,
+        column: 7,
+      })
+    })
+  })
+
+  describe('open in editor', function () {
+    beforeEach(function () {
+      cy.stub(this.runner, 'emit').callThrough()
+      this.setError(this.commandErr)
+    })
+
+    it('loads editor when clicked', function () {
+      trigger()
+      cy.contains('Open in Editor').click()
+      cy.get('.err-file-options button').eq(1).should('have.class', 'is-loading').then(() => {
+        expect(this.runner.emit).to.be.calledWith('get:user:editor')
+      })
+    })
+
+    describe('when user has already set editor', function () {
+      beforeEach(function () {
+        this.runner.emit.withArgs('get:user:editor').yields({
+          preferredEditor: 'vscode',
+        })
+      })
+
+      it('opens in editor', function () {
+        trigger()
+        cy.contains('Open in Editor').click().then(() => {
+          expect(this.runner.emit).to.be.calledWith('open:file', {
+            where: 'vscode',
+            file: '/me/dev/my/app.js',
+            line: 2,
+            column: 7,
+          })
+        })
+      })
+    })
+
+    describe('when user has not already set editor', function () {
+      let availableEditors = [
+        { id: 'atom', name: 'Atom' },
+        { id: 'vim', name: 'Vim' },
+        { id: 'sublime', name: 'Sublime Text' },
+        { id: 'vscode', name: 'Visual Studio Code' },
+        { id: 'other', name: 'Other', isOther: true },
+      ]
+
+      beforeEach(function () {
+        this.runner.emit.withArgs('get:user:editor').yields({ availableEditors })
+        // usual viewport of only reporter is a bit cramped for the modal
+        cy.viewport(600, 600)
+      })
+
+      it('opens modal with available editors', function () {
+        trigger()
+        cy.contains('Open in Editor').click()
+        cy.get('.err-file-options').trigger('mouseout', { force: true })
+
+        _.each(availableEditors, ({ name }) => {
+          cy.contains(name)
+        })
+
+        cy.contains('Other')
+        cy.contains('Set Editor')
+      })
+
+      it('shows error message when user clicks "Set Editor" without selecting an editor')
+    })
+  })
 }
 
 describe('test errors', function () {
@@ -97,46 +189,9 @@ describe('test errors', function () {
       .should('have.text', 'cypress/integration/foo_spec.js:5:2')
     })
 
-    it('shows tooltip when hovered over', function () {
-      this.setError(this.commandErr)
-
+    itHandlesFileOpening(() => {
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace .runnable-err-file-path').first().trigger('mouseover')
-      cy.get('.err-file-options').should('be.visible')
-    })
-
-    it('opens the file on computer when clicked', function () {
-      cy.spy(this.runner, 'emit')
-
-      this.setError(this.commandErr)
-
-      cy.contains('View stack trace').click()
-      cy.get('.runnable-err-stack-trace .runnable-err-file-path').first().trigger('mouseover')
-      cy.contains('Open on Computer').click().then(() => {
-        expect(this.runner.emit).to.be.calledWith('open:file', {
-          where: 'computer',
-          file: '/me/dev/my/app.js',
-          line: 2,
-          column: 7,
-        })
-      })
-    })
-
-    it('opens the file on computer when clicked', function () {
-      cy.spy(this.runner, 'emit')
-
-      this.setError(this.commandErr)
-
-      cy.contains('View stack trace').click()
-      cy.get('.runnable-err-stack-trace .runnable-err-file-path').first().trigger('mouseover')
-      cy.contains('Open in Editor').click().then(() => {
-        expect(this.runner.emit).to.be.calledWith('open:file', {
-          where: 'editor',
-          file: '/me/dev/my/app.js',
-          line: 2,
-          column: 7,
-        })
-      })
     })
   })
 
@@ -217,46 +272,8 @@ describe('test errors', function () {
       .should('have.class', 'language-text')
     })
 
-    it('shows tooltip when file path hovered over', function () {
-      this.setError(this.commandErr)
-
-      cy.contains('View stack trace').click()
+    itHandlesFileOpening(() => {
       cy.get('.test-error-code-frame .runnable-err-file-path > span').trigger('mouseover')
-      cy.get('.err-file-options').should('be.visible')
-    })
-
-    it('opens the file on computer when clicked', function () {
-      cy.spy(this.runner, 'emit')
-
-      this.setError(this.commandErr)
-
-      cy.contains('View stack trace').click()
-      cy.get('.test-error-code-frame .runnable-err-file-path > span').trigger('mouseover')
-      cy.contains('Open on Computer').click().then(() => {
-        expect(this.runner.emit).to.be.calledWith('open:file', {
-          where: 'computer',
-          file: '/me/dev/my/app.js',
-          line: 2,
-          column: 7,
-        })
-      })
-    })
-
-    it('opens the file on computer when clicked', function () {
-      cy.spy(this.runner, 'emit')
-
-      this.setError(this.commandErr)
-
-      cy.contains('View stack trace').click()
-      cy.get('.test-error-code-frame .runnable-err-file-path > span').trigger('mouseover')
-      cy.contains('Open in Editor').click().then(() => {
-        expect(this.runner.emit).to.be.calledWith('open:file', {
-          where: 'editor',
-          file: '/me/dev/my/app.js',
-          line: 2,
-          column: 7,
-        })
-      })
     })
   })
 })

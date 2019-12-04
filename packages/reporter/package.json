@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
+    "@reach/dialog": "0.6.1",
+    "@reach/visually-hidden": "0.6.1",
     "@types/enzyme": "3.9.1",
     "bin-up": "1.2.2",
     "chai": "3.5.0",

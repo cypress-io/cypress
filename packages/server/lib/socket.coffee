@@ -342,6 +342,9 @@ class Socket
       socket.on "external:open", (url) ->
         require("electron").shell.openExternal(url)
 
+      socket.on "get:user:editor", (cb) ->
+        ## TODO
+
       socket.on "open:file", (fileDetails) ->
         switch fileDetails.where
           when "computer"

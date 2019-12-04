@@ -3,12 +3,14 @@ import React from 'react'
 
 import ErrorFilePath from './error-file-path'
 
-const ErrorStack = ({ err, onOpenComputer, onOpenEditor }) => {
+const ErrorStack = ({ err }) => {
   if (!err.parsedStack) return err.stack
 
-  const makeLine = (key, content) => (
-    <div key={key}>{content}</div>
-  )
+  const makeLine = (key, content) => {
+    return (
+      <div key={key}>{content}</div>
+    )
+  }
 
   return _.map(err.parsedStack, (stackLine, index) => {
     const key = `${relativeFile}${index}`
@@ -23,8 +25,6 @@ const ErrorStack = ({ err, onOpenComputer, onOpenEditor }) => {
       <ErrorFilePath
         key={key}
         fileDetails={stackLine}
-        onOpenComputer={onOpenComputer}
-        onOpenEditor={onOpenEditor}
       />
     )
 

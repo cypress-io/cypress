@@ -38,6 +38,12 @@ describe('<EditorPicker />', () => {
     cy.contains('VS Code').find('input').should('be.checked')
   })
 
+  it('has none chosen if not specified', () => {
+    cy.render(render, <EditorPicker {...defaultProps} chosen={undefined} />)
+
+    cy.get('input[type="radio"]').should('not.be.checked')
+  })
+
   it('calls onSelect when option is chosen', () => {
     const onSelect = cy.stub()
 

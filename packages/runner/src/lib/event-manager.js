@@ -95,6 +95,13 @@ const eventManager = {
 
     reporterBus.on('focus:tests', this.focusTests)
 
+    reporterBus.on('get:user:editor', () => {
+      ws.emit('get:user:editor', (result) => {
+        // TODO
+        console.log(result) // eslint-disable-line no-console
+      })
+    })
+
     reporterBus.on('runner:restart', rerun)
 
     function sendEventIfSnapshotProps (logId, event) {

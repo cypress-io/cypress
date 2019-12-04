@@ -5,7 +5,7 @@ import React from 'react'
 
 import { Select, SelectItem } from './select'
 
-const EditorPicker = observer(({ chosen, editors, onSelect }) => {
+const EditorPicker = observer(({ chosen = {}, editors, onSelect }) => {
   const editorOptions = _.reject(editors, { isOther: true })
   const otherOption = _.find(editors, { isOther: true })
 
@@ -34,7 +34,7 @@ const EditorPicker = observer(({ chosen, editors, onSelect }) => {
         <li>
           <label>
             <SelectItem value={otherOption.id} />
-            {otherOption.name}: <input type='text' value={otherOption.path} onChange={updateOtherPath} />
+            {otherOption.name}: <input type='text' value={otherOption.path || ''} onChange={updateOtherPath} />
           </label>
           {chosen.isOther && <label>Enter the full path to the executable of the editor</label>}
         </li>

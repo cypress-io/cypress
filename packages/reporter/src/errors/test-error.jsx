@@ -5,7 +5,6 @@ import Markdown from 'markdown-it'
 
 import ErrorCodeFrame from '../errors/error-code-frame'
 import ErrorStack from '../errors/error-stack'
-import events from '../lib/events'
 
 const md = new Markdown('zero')
 
@@ -13,15 +12,6 @@ md.enable(['backticks', 'emphasis', 'escape'])
 
 const formattedMessage = (message) => {
   return message ? md.renderInline(message) : ''
-}
-
-const openFile = (where) => ({ absoluteFile: file, line, column }) => {
-  events.emit('open:file', {
-    where,
-    file,
-    line,
-    column,
-  })
 }
 
 const TestError = observer(({ model }) => {
@@ -54,21 +44,11 @@ const TestError = observer(({ model }) => {
             headerClass='runnable-err-stack-expander'
             contentClass='runnable-err-stack-trace'
           >
-            <ErrorStack
-              err={err}
-              onOpenComputer={openFile('computer')}
-              onOpenEditor={openFile('editor')}
-            />
+            <ErrorStack err={err} />
           </Collapsible> :
           null
         }
-        {codeFrame &&
-          <ErrorCodeFrame
-            codeFrame={codeFrame}
-            onOpenComputer={openFile('computer')}
-            onOpenEditor={openFile('editor')}
-          />
-        }
+        {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
       </div>
     </div>
   )

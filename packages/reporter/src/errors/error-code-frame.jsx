@@ -19,11 +19,7 @@ class ErrorCodeFrame extends Component {
 
     return (
       <div className='test-error-code-frame'>
-        <ErrorFilePath
-          fileDetails={this.props.codeFrame}
-          onOpenComputer={this.props.onOpenComputer}
-          onOpenEditor={this.props.onOpenEditor}
-        />
+        <ErrorFilePath fileDetails={this.props.codeFrame} />
         <pre ref='codeFrame' data-line={highlightLine}>
           <code className={`language-${language || 'text'}`}>{frame}</code>
         </pre>

@@ -12,7 +12,7 @@ const fs = require('./util/fs')
 
 const stateFiles = {}
 
-const whitelist = `\
+const whitelist = `
 appWidth
 appHeight
 appX
@@ -25,7 +25,8 @@ browserY
 isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
-showedOnBoardingModal\
+showedOnBoardingModal
+preferredEditor
 `.trim().split(/\s+/)
 
 const toHashName = function (projectRoot) {

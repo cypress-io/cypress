@@ -181,7 +181,7 @@
     top: 100%;
   }
 
-  span {
+  > span {
     display: flex;
   }
 
@@ -194,6 +194,7 @@
     display: block;
     font-size: 1em;
     padding: 6px 8px;
+    position: relative;
 
     &:first-child {
       border-top-left-radius: 3px;
@@ -208,6 +209,30 @@
     &:hover,
     &:focus {
       background: rgba(255, 255, 255, 0.2);
+    }
+
+    .loader {
+      align-items: center;
+      bottom: 0;
+      display: none;
+      justify-content: center;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    &.is-loading {
+      cursor: default;
+      background: none;
+
+      .text {
+        visibility: hidden;
+      }
+
+      .loader {
+        display: flex;
+      }
     }
   }
 }
