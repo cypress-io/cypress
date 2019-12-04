@@ -211,9 +211,9 @@ describe "lib/util/args", ->
 
       ## make sure it works with both --env=foo=bar and --config foo=bar
       @obj = @setup(
-        "--config",
         "--get-key",
         "--env=foo=bar,baz=quux,bar=foo=quz",
+        "--config",
         "requestTimeout=1234,blacklistHosts=#{s(@blacklistHosts)},hosts=#{s(@hosts)}"
         "--reporter-options=foo=bar"
         "--spec=foo,bar,baz",
