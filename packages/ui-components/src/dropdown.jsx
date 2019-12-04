@@ -7,6 +7,7 @@ import { findDOMNode } from 'react-dom'
 class Dropdown extends Component {
   static defaultProps = {
     className: '',
+    document,
   }
 
   static propTypes = {
@@ -29,11 +30,11 @@ class Dropdown extends Component {
       }
     }
 
-    document.body.addEventListener('click', this.outsideClickHandler)
+    this.props.document.body.addEventListener('click', this.outsideClickHandler)
   }
 
   componentWillUnmount () {
-    document.body.removeEventListener('click', this.outsideClickHandler)
+    this.props.document.body.removeEventListener('click', this.outsideClickHandler)
   }
 
   render () {

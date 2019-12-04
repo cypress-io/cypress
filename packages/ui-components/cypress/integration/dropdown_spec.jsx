@@ -81,7 +81,9 @@ describe('<Dropdown />', () => {
   })
 
   it('closes dropdown when clicking outside of it', () => {
-    cy.render(render, <Dropdown {...defaultProps} />)
+    cy.document().then((doc) => {
+      cy.render(render, <Dropdown {...defaultProps} document={doc} />)
+    })
 
     cy.contains('First').click()
     cy.get('body').click()
