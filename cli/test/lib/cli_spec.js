@@ -319,6 +319,23 @@ describe('cli', () => {
       expect(run.start).to.be.calledWith({ tag: 'nightly' })
     })
 
+    it('calls run comma-separated --tag', () => {
+      this.exec('run --tag nightly,staging')
+      expect(run.start).to.be.calledWith({ tag: 'nightly,staging' })
+    })
+
+    it('does not remove double quotes from --tag', () => {
+      // I think it is a good idea to lock down this behavior
+      // to make sure we either preserve it or change it in the future
+      this.exec('run --tag "nightly"')
+      expect(run.start).to.be.calledWith({ tag: '"nightly"' })
+    })
+
+    it('calls run comma-separated --spec', () => {
+      this.exec('run --spec main_spec.js,view_spec.js')
+      expect(run.start).to.be.calledWith({ spec: 'main_spec.js,view_spec.js' })
+    })
+
     it('calls run with space-separated --tag', () => {
       this.exec('run --tag a b c d e f g')
       expect(run.start).to.be.calledWith({ tag: 'a,b,c,d,e,f,g' })
