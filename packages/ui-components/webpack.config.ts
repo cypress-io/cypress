@@ -24,11 +24,4 @@ config.plugins = [
   }),
 ]
 
-// config.resolve = {
-//   ...config.resolve,
-//   alias: {
-//     'lodash': require.resolve('lodash'),
-//   },
-// }
-
 export default config
