@@ -259,7 +259,9 @@ buildCypressApp = (platform, version, options = {}) ->
     execaBuild = Promise.method ->
       log("#codeSign #{appFolder}")
 
-      execa('build', ["--publish", "never", "--prepackaged", appFolder], {
+      # note: to see code sign logs use
+      # DEBUG=electron-builder,electron-osx-sign*
+      execa('electron-builder', ["--publish", "never", "--prepackaged", appFolder], {
         stdio: "inherit"
       })
       .catch (err) ->
