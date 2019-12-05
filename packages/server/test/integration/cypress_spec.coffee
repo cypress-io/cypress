@@ -1188,9 +1188,19 @@ describe "lib/cypress", ->
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
         snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel 1")
 
+    it "errors and exits when using --tag without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--tag=nightly",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-tag 1")
+
     it "errors and exits when using --group and --parallel without recording", ->
       cypress.start([
         "--run-project=#{@recordPath}",
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--parallel",
       ])
@@ -1296,6 +1306,7 @@ describe "lib/cypress", ->
         "--record"
         "--key=token-123",
         "--parallel"
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1319,6 +1330,7 @@ describe "lib/cypress", ->
         "--run-project=#{@recordPath}",
         "--record"
         "--key=token-123",
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1343,6 +1355,7 @@ describe "lib/cypress", ->
         "--record"
         "--key=token-123",
         "--parallel"
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
