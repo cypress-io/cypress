@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import * as $document from './document'
 import * as $elements from './elements'
-// import * as $dom from '.'
 
 const debug = require('debug')('cypress:driver:selection')
 
@@ -121,7 +120,7 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
 //   # startNode.nodeValue = updatedValue
 //   el.normalize()
 
-export const insertSubstring = (curText, newText, [start, end]) => {
+const insertSubstring = (curText, newText, [start, end]) => {
   return curText.substring(0, start) + newText + curText.substring(end)
 }
 
@@ -162,9 +161,6 @@ const deleteSelectionContents = function (el) {
     return
   }
 
-  // for input and textarea, update selected text with empty string
-  debug('replace input/textarea selectioncontents')
-
   return replaceSelectionContents(el, '')
 }
 
@@ -185,6 +181,16 @@ const setSelectionRange = function (el, start, end) {
   }
 }
 
+// Whether or not the selection contains any text
+// since Selection.isCollapsed will be true when selection
+// is inside non-selectionRange input (e.g. input[type=email])
+const isSelectionCollapsed = function (selection: Selection) {
+  return !selection.toString()
+}
+
+/**
+ * @returns {boolean} whether or not input events are needed
+ */
 const deleteRightOfCursor = function (el) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     const { start, end } = getSelectionBounds(el)
@@ -200,14 +206,22 @@ const deleteRightOfCursor = function (el) {
 
     deleteSelectionContents(el)
 
-    // successful delete
+    // successful delete, needs input events
     return true
   }
 
   if ($elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
 
-    $elements.callNativeMethod(selection, 'modify', 'extend', 'forward', 'character')
+    if (isSelectionCollapsed(selection)) {
+      $elements.callNativeMethod(
+        selection,
+        'modify',
+        'extend',
+        'forward',
+        'character',
+      )
+    }
 
     if ($elements.getNativeProp(selection, 'isCollapsed')) {
       // there's nothing to delete
@@ -216,13 +230,16 @@ const deleteRightOfCursor = function (el) {
 
     deleteSelectionContents(el)
 
-    // successful delete
+    // successful delete, does not need input events
     return false
   }
 
   return false
 }
 
+/**
+ * @returns {boolean} whether or not input events are needed
+ */
 const deleteLeftOfCursor = function (el) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     const { start, end } = getSelectionBounds(el)
@@ -248,12 +265,14 @@ const deleteLeftOfCursor = function (el) {
     // there is no 'backwardDelete' command for execCommand, so use the Selection API
     const selection = _getSelectionByEl(el)
 
-    $elements.callNativeMethod(selection, 'modify', 'extend', 'backward', 'character')
-
-    if (selection.isCollapsed) {
-      // there's nothing to delete
-      // since extending the selection didn't do anything
-      return false
+    if (isSelectionCollapsed(selection)) {
+      $elements.callNativeMethod(
+        selection,
+        'modify',
+        'extend',
+        'backward',
+        'character'
+      )
     }
 
     deleteSelectionContents(el)
@@ -293,7 +312,6 @@ const moveCursorLeft = function (el) {
     selection.collapseToStart()
 
     return
-    // console.log('sdfasfsafasdf')
   }
 }
 
@@ -479,13 +497,10 @@ const isCollapsed = function (el) {
     return selection.isCollapsed
   }
 
-  // TODO: remove this
-  throw new Error('this should never happen')
+  return false
 }
 
-const selectAll = function (doc) {
-  const el = doc.activeElement
-
+const selectAll = function (el: HTMLElement) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {
     setSelectionRange(el, 0, $elements.getNativeProp(el, 'value').length)
 
@@ -512,27 +527,27 @@ const selectAll = function (doc) {
 
 const getSelectionBounds = function (el) {
   // this function works for input, textareas, and contentEditables
-  switch (false) {
-    case !$elements.isInput(el):
+  switch (true) {
+    case !!$elements.isInput(el):
       return _getSelectionBoundsFromInput(el)
-    case !$elements.isTextarea(el):
+    case !!$elements.isTextarea(el):
       return _getSelectionBoundsFromTextarea(el)
-    case !$elements.isContentEditable(el):
+    case !!$elements.isContentEditable(el):
       return _getSelectionBoundsFromContentEditable(el)
     default:
       return {
-        start: null,
-        end: null,
+        start: 0,
+        end: 0,
       }
   }
 }
 
-const _moveSelectionTo = function (toStart: boolean, doc: Document, options = {}) {
+const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = {}) {
   const opts = _.defaults({}, options, {
     onlyIfEmptySelection: false,
   })
 
-  const el = $elements.getActiveElByDocument(doc)
+  const doc = $document.getDocumentFromElement(el)
 
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
     if (opts.onlyIfEmptySelection) {
@@ -578,12 +593,11 @@ const moveSelectionToEnd = _.curry(_moveSelectionTo)(false)
 
 const moveSelectionToStart = _.curry(_moveSelectionTo)(true)
 
-// TODO: think about renaming this
 const replaceSelectionContents = function (el, key) {
   if ($elements.isContentEditable(el)) {
     _replaceSelectionContentsContentEditable(el, key)
 
-    return false
+    return
   }
 
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
@@ -597,18 +611,16 @@ const replaceSelectionContents = function (el, key) {
 
     $elements.setNativeProp(el, 'value', updatedValue)
 
-    return setSelectionRange(el, start + key.length, start + key.length)
+    setSelectionRange(el, start + key.length, start + key.length)
+
+    return
   }
-
-  return false
-
-  // throw new Error('this should never happen')
 }
 
 const getCaretPosition = function (el) {
   const bounds = getSelectionBounds(el)
 
-  if ((bounds.start == null)) {
+  if (bounds.start == null) {
     // no selection
     return null
   }
@@ -721,5 +733,6 @@ export {
   moveCursorToLineEnd,
   replaceSelectionContents,
   isCollapsed,
+  insertSubstring,
   interceptSelect,
 }

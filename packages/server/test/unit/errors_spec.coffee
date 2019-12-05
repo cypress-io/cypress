@@ -4,15 +4,16 @@ style = require("ansi-styles")
 chalk  = require("chalk")
 errors = require("#{root}lib/errors")
 logger = require("#{root}lib/logger")
+snapshot = require("snap-shot-it")
 
 describe "lib/errors", ->
   beforeEach ->
     sinon.spy(console, "log")
-  
+
   context ".log", ->
     it "uses red by default", ->
       err = errors.get("NOT_LOGGED_IN")
-      
+
       ret = errors.log(err)
 
       expect(ret).to.be.undefined
@@ -24,7 +25,7 @@ describe "lib/errors", ->
 
     it "can change the color", ->
       err = errors.get("NOT_LOGGED_IN")
-      
+
       ret = errors.log(err, "yellow")
 
       expect(ret).to.be.undefined
@@ -36,20 +37,20 @@ describe "lib/errors", ->
 
     it "logs err.message", ->
       err = errors.get("NO_PROJECT_ID", "foo/bar/baz")
-      
+
       ret = errors.log(err)
 
       expect(ret).to.be.undefined
-      
+
       expect(console.log).to.be.calledWithMatch("foo/bar/baz")
 
     it "logs err.details", ->
       err = errors.get("PLUGINS_FUNCTION_ERROR", "foo/bar/baz", "details huh")
-      
+
       ret = errors.log(err)
-      
+
       expect(ret).to.be.undefined
-      
+
       expect(console.log).to.be.calledWithMatch("foo/bar/baz")
       expect(console.log).to.be.calledWithMatch("\n", "details huh")
 
@@ -57,11 +58,11 @@ describe "lib/errors", ->
       process.env.CYPRESS_ENV = "development"
 
       err = new Error("foo")
-      
+
       ret = errors.log(err)
 
       expect(ret).to.eq(err)
-      
+
       expect(console.log).to.be.calledWith(chalk.red(err.stack))
 
   context ".logException", ->
@@ -97,7 +98,7 @@ describe "lib/errors", ->
       .then ->
         expect(console.log).not.to.be.calledWith(err.stack)
         expect(logger.createException).not.to.be.called
-    
+
     it "swallows creating exception errors", ->
       sinon.stub(logger, "createException").rejects(new Error("foo"))
       sinon.stub(process.env, "CYPRESS_ENV").value("production")
@@ -113,3 +114,19 @@ describe "lib/errors", ->
       err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"))
       obj = errors.clone(err, {html: true})
       expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')
+
+  context ".displayFlags", ->
+    it "returns string formatted from selected keys", ->
+      options = {
+        tags: "nightly,staging",
+        name: "my tests",
+        unused: "some other value"
+      }
+      # we are only interested in showig tags and name values
+      # and prepending them with custom prefixes
+      mapping = {
+        tags: "--tag",
+        name: "--name"
+      }
+      text = errors.displayFlags(options, mapping)
+      snapshot("tags and name only", text)

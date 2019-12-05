@@ -1426,6 +1426,37 @@ describe "src/cy/commands/xhr", ->
               }
             })
 
+    describe "response fixtures", ->
+      it "works if the JSON file has an object", ->
+        cy
+          .server()
+          .route({
+            method: 'POST',
+            url: '/test-xhr',
+            response: 'fixture:valid.json',
+          })
+          .visit('/fixtures/xhr-triggered.html')
+          .get('#trigger-xhr')
+          .click()
+
+        cy
+          .contains("#result", '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+
+      it "works if the JSON file has null content", ->
+        cy
+          .server()
+          .route({
+            method: 'POST',
+            url: '/test-xhr',
+            response: 'fixture:null.json',
+          })
+          .visit('/fixtures/xhr-triggered.html')
+          .get('#trigger-xhr')
+          .click()
+
+        cy
+          .contains('#result', '""').should('be.visible')
+
     describe "errors", ->
       beforeEach ->
         Cypress.config("defaultCommandTimeout", 50)

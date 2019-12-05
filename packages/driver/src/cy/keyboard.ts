@@ -254,6 +254,8 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
       const curVal = $elements.getNativeProp(el, 'value')
       const bounds = $selection.getSelectionBounds(el)
 
+      // We need to see if the number we're about to type is a valid number, since setting a number input
+      // to an invalid number will not set the value and possibly throw a warning in the console
       const potentialValue = $selection.insertSubstring(curVal + needsValue, key.text, [bounds.start + needsValueLength, bounds.end + needsValueLength])
 
       if (!(numberRe.test(potentialValue))) {
@@ -329,6 +331,8 @@ const validateTyping = (
   let isWeek = false
   let isDateTime = false
 
+  // use 'type' attribute instead of prop since browsers without
+  // support for attribute input type will have type prop of 'text'
   if ($elements.isInput(el)) {
     isDate = $elements.isAttrType(el, 'date')
     isTime = $elements.isAttrType(el, 'time')
@@ -473,11 +477,7 @@ function _getEndIndex (str, substr) {
 // Simulated default actions for select few keys.
 const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
   Enter: (el, key, options) => {
-    if ($elements.isContentEditable(el) || $elements.isTextarea(el)) {
-      key.events.input = !!$selection.replaceSelectionContents(el, '\n')
-    } else {
-      key.events.input = false
-    }
+    $selection.replaceSelectionContents(el, '\n')
 
     options.onEnterPressed()
   },
@@ -528,27 +528,21 @@ const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
   selectAll: {
     key: 'selectAll',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.selectAll(doc)
+      $selection.selectAll(el)
     },
     simulatedDefaultOnly: true,
   },
   moveToStart: {
     key: 'moveToStart',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.moveSelectionToStart(doc)
+      $selection.moveSelectionToStart(el)
     },
     simulatedDefaultOnly: true,
   },
   moveToEnd: {
     key: 'moveToEnd',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.moveSelectionToEnd(doc)
+      $selection.moveSelectionToEnd(el)
     },
     simulatedDefaultOnly: true,
   },
@@ -733,30 +727,18 @@ export class Keyboard {
           }
 
           this.typeSimulatedKey(activeEl, key, options)
-          debug('returning null')
 
           return null
         }
       }
     )
 
-    const modifierKeys = _.filter(keyDetailsArr, isModifier)
-
-    if (options.simulated && !options.delay) {
-      _.each(typeKeyFns, (fn) => {
-        return fn()
-      })
-
-      if (options.release !== false) {
-        _.each(modifierKeys, (key) => {
-          return this.simulatedKeyup(getActiveEl(doc), key, options)
-        })
-      }
-
-      options.onAfterType()
-
-      return
-    }
+    // we will only press each modifier once, so only find unique modifiers
+    const modifierKeys = _
+    .chain(keyDetailsArr)
+    .filter(isModifier)
+    .uniqBy('key')
+    .value()
 
     return Promise
     .each(typeKeyFns, (fn) => {
@@ -918,7 +900,6 @@ export class Keyboard {
     debug(`dispatched [${eventType}] on ${el}`)
     const formattedKeyString = getFormattedKeyString(keyDetails)
 
-    debug('format string', formattedKeyString)
     options.onEvent(options.id, formattedKeyString, event, dispatched)
 
     return dispatched
@@ -976,18 +957,22 @@ export class Keyboard {
       const didFlag = this.flagModifier(_key)
 
       if (!didFlag) {
-        return null
+        // we've already pressed this modifier, so ignore it and don't fire keydown or keyup
+        _key.events.keydown = false
       }
 
+      // don't fire keyup for modifier keys, this will happen after all other keys are typed
       _key.events.keyup = false
     }
 
     const key = this.getModifierKeyDetails(_key)
 
     if (!key.text) {
-      key.events.input = false
       key.events.keypress = false
       key.events.textInput = false
+      if (key.key !== 'Backspace' && key.key !== 'Delete') {
+        key.events.input = false
+      }
     }
 
     let elToType
@@ -1007,9 +992,12 @@ export class Keyboard {
 
       if (key.key === 'Enter' && $elements.isInput(elToType)) {
         key.events.textInput = false
+        key.events.input = false
       }
 
-      if ($elements.isReadOnlyInputOrTextarea(elToType)) {
+      if ($elements.isContentEditable(elToType)) {
+        key.events.input = false
+      } else if ($elements.isReadOnlyInputOrTextarea(elToType)) {
         key.events.textInput = false
       }
 
@@ -1117,6 +1105,8 @@ export class Keyboard {
         // el is contenteditable
         simulatedDefault(el, key, options)
       }
+
+      debug({ key })
 
       shouldIgnoreEvent('input', key.events) ||
         this.fireSimulatedEvent(el, 'input', key, options)

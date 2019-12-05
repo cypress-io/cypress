@@ -476,7 +476,7 @@ const create = (state, keyboard, focused, Cypress) => {
 
       if (shouldMoveCursorToEndAfterMousedown($elToFocus[0])) {
         debug('moveSelectionToEnd due to click')
-        $selection.moveSelectionToEnd($dom.getDocumentFromElement($elToFocus[0]), { onlyIfEmptySelection: true })
+        $selection.moveSelectionToEnd($elToFocus[0], { onlyIfEmptySelection: true })
       }
 
       return mouseDownPhase

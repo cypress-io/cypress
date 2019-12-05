@@ -508,11 +508,7 @@ const isInputType = function (el: JQueryOrEl<HTMLElement>, type) {
 const isAttrType = function (el: HTMLInputElement, type: string) {
   const elType = (el.getAttribute('type') || '').toLowerCase()
 
-  if (elType === type) {
-    return true
-  }
-
-  return false
+  return elType === type
 }
 
 const isScrollOrAuto = (prop) => {

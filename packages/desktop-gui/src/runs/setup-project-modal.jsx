@@ -98,7 +98,7 @@ class SetupProject extends Component {
               >
                 {
                   this.state.isSubmitting ?
-                    <span><i className='fa fa-spin fa-refresh'></i>{' '}</span> :
+                    <span><i className='fas fa-spin fa-sync'></i>{' '}</span> :
                     null
                 }
                 <span>Set up project</span>
@@ -152,7 +152,7 @@ class SetupProject extends Component {
             Who should own this project?
             {' '}
             <a onClick={this._openOrgDocs}>
-              <i className='fa fa-question-circle'></i>
+              <i className='fas fa-question-circle'></i>
             </a>
           </label>
         </div>
@@ -189,7 +189,7 @@ class SetupProject extends Component {
                   checked={this.state.owner === 'org'}
                   onChange={this._updateOwner}
                 />
-                <i className='fa fa-building-o'></i>
+                <i className='far fa-building'></i>
                 {' '}An Organization
               </label>
             </div>
@@ -204,7 +204,7 @@ class SetupProject extends Component {
                     href='#'
                     className={cs('btn btn-link', { 'hidden': this.state.owner !== 'org' })}
                     onClick={this._manageOrgs}>
-                    <i className='fa fa-plus'></i>{' '}
+                    <i className='fas fa-plus'></i>{' '}
                     Create organization
                   </a>
                 </p>
@@ -263,7 +263,7 @@ class SetupProject extends Component {
           Who should see the runs and recordings?
           {' '}
           <a onClick={this._openAccessDocs}>
-            <i className='fa fa-question-circle'></i>
+            <i className='fas fa-question-circle'></i>
           </a>
         </label>
         <div className='radio privacy-radio'>
@@ -276,7 +276,7 @@ class SetupProject extends Component {
               onChange={this._updateAccess}
             />
             <p>
-              <i className='fa fa-eye'></i>{' '}
+              <i className='far fa-eye'></i>{' '}
               <strong>Public:</strong>{' '}
               Anyone has access.
             </p>
@@ -292,7 +292,7 @@ class SetupProject extends Component {
               onChange={this._updateAccess}
             />
             <p>
-              <i className='fa fa-lock'></i>{' '}
+              <i className='fas fa-lock'></i>{' '}
               <strong>Private:</strong>{' '}
               Only invited users have access.
             </p>
