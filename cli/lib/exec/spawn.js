@@ -250,9 +250,7 @@ module.exports = {
             // we should attempt to always slurp up
             // the stderr logs unless we've explicitly
             // enabled the electron debug logging
-            if (!debugElectron.enabled) {
-              return false
-            }
+            return !!debugElectron.enabled
           },
         })
       }
