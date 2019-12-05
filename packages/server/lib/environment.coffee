@@ -42,7 +42,8 @@ try
 
   if process.env.ELECTRON_EXTRA_LAUNCH_ARGS
     electronLaunchArgs = parseElectronLaunchArguments(process.env.ELECTRON_EXTRA_LAUNCH_ARGS)
-    Object.keys(electronLaunchArgs).forEach ({key, value}) ->
+    Object.keys(electronLaunchArgs).forEach (key) ->
+      value = electronLaunchArgs[key]
       if value == undefined
         app.commandLine.appendSwitch(key)
       else
