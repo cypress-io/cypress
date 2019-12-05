@@ -61,6 +61,13 @@ const isHidden = (el, name = 'isHidden()') => {
     return true // is hidden
   }
 
+  // when an element is scaled to 0 in one axis
+  // it is not visible to users.
+  // So, it is hidden.
+  if (elIsHiddenByTransform($el)) {
+    return true
+  }
+
   if (elIsBackface($el)) {
     return true
   }
@@ -152,6 +159,48 @@ const findNormal = (m) => {
 
 const elHasVisibilityCollapse = ($el) => {
   return $el.css('visibility') === 'collapse'
+}
+
+// This function checks 2 things that can happen: scale and rotate
+const elIsHiddenByTransform = ($el) => {
+  // We need to see the final calculation of the element.
+  const el = $el[0]
+
+  const style = window.getComputedStyle(el)
+  const transform = style.getPropertyValue('transform')
+
+  // Test scaleZ(0)
+  // width or height of getBoundingClientRect aren't 0 when scaleZ(0).
+  // But it is invisible.
+  // Experiment -> https://codepen.io/sainthkh/pen/LYYQGpm
+  // That's why we're checking transfomation matrix here.
+  //
+  // To understand how this part works,
+  // you need to understand tranformation matrix first.
+  // Matrix is hard to explain with only text. So, check these articles.
+  //
+  // https://www.useragentman.com/blog/2011/01/07/css3-matrix-transform-for-the-mathematically-challenged/
+  // https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+  //
+  if (transform.startsWith('matrix3d')) {
+    const m3d = transform.substring(8).match(numberRegex)
+
+    // Z Axis values
+    if (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0) {
+      return true
+    }
+  }
+
+  // Other cases
+  if (transform !== 'none') {
+    const { width, height } = el.getBoundingClientRect()
+
+    if (width === 0 || height === 0) {
+      return true
+    }
+  }
+
+  return false
 }
 
 const elHasDisplayNone = ($el) => {
@@ -310,6 +359,10 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
   }
 
+  if (elIsHiddenByTransform($parent)) {
+    return true
+  }
+
   if (elIsBackface($parent)) {
     return true
   }
@@ -428,6 +481,10 @@ const getReasonIsHidden = function ($el) {
 
   if (elHasNoOffsetWidthOrHeight($el)) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
+  }
+
+  if (elIsHiddenByTransform($el)) {
+    return `This element '${node}' is not visible because it is hidden by transform.`
   }
 
   if (elIsBackface($el)) {
