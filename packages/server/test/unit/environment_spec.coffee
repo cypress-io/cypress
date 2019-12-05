@@ -38,15 +38,15 @@ describe "lib/environment", ->
 
     beforeEach ->
       restore = mockedEnv({
-        ELECTRON_EXTRA_LAUNCH_ARGS: "foo bar=baz quux=true"
+        ELECTRON_EXTRA_LAUNCH_ARGS: "--foo --bar=baz --quux=true"
       })
 
     it "sets launch args", ->
-      sinon.stub(app.commandLine, "appendSwitch")
+      sinon.stub(app.commandLine, "appendArgument")
       require("#{root}lib/environment")
-      expect(app.commandLine.appendSwitch).to.have.been.calledWith("foo")
-      expect(app.commandLine.appendSwitch).to.have.been.calledWith("bar", "baz")
-      expect(app.commandLine.appendSwitch).to.have.been.calledWith("quux", true)
+      expect(app.commandLine.appendArgument).to.have.been.calledWith("--foo")
+      expect(app.commandLine.appendArgument).to.have.been.calledWith("--bar=baz")
+      expect(app.commandLine.appendArgument).to.have.been.calledWith("--quux=true")
 
     afterEach ->
       restore()

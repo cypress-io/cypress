@@ -8,7 +8,6 @@ os      = require("os")
 ## to the "packages/server" folder
 cwd     = require("./cwd")
 Promise = require("bluebird")
-{parseElectronLaunchArguments} = require("./util/electron_app")
 
 ## never cut off stack traces
 Error.stackTraceLimit = Infinity
@@ -61,9 +60,8 @@ try
     app.disableHardwareAcceleration()
 
   if process.env.ELECTRON_EXTRA_LAUNCH_ARGS
-    electronLaunchArgs = parseElectronLaunchArguments(process.env.ELECTRON_EXTRA_LAUNCH_ARGS)
-    Object.entries(electronLaunchArgs).forEach ([key, value]) ->
-      app.commandLine.appendSwitch(key, value)
+    electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.split(' ')
+    electronLaunchArguments.forEach app.commandLine.appendArgument
 
 catch e
   if env is "development"
