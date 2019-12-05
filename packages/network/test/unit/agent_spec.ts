@@ -208,6 +208,18 @@ describe('lib/agent', function () {
             }
           })
         })
+
+        // https://github.com/cypress-io/cypress/issues/5729
+        it('does not warn when making a request to an IP address', function () {
+          const warningStub = sinon.spy(process, 'emitWarning')
+
+          return this.request({
+            url: `https://127.0.0.1:${HTTPS_PORT}/get`,
+          })
+          .then(() => {
+            expect(warningStub).to.not.be.called
+          })
+        })
       })
     })
 

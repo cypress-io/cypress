@@ -1,10 +1,9 @@
+import _ from 'lodash'
 import Bluebird from 'bluebird'
 import cdp from 'devtools-protocol'
+import { cors } from '@packages/network'
 import debugModule from 'debug'
-import _ from 'lodash'
 import tough from 'tough-cookie'
-
-const cors = require('../util/cors')
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
