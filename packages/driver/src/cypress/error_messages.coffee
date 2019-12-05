@@ -409,12 +409,13 @@ module.exports = {
 
       cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')
       """
-    invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string or a number as the first argument."
-    invalid_num_of_args:
-      """
-      #{cmd('{{cmd}}')} only accepts a single argument.
-
-      If you want to invoke a function with arguments, use cy.invoke().
+    invalid_prop_name_arg: "#{cmd('{{cmd}}')} only accepts a string or a number as the {{identifier}}Name argument."
+    null_or_undefined_property_name: "#{cmd('{{cmd}}')} expects the {{identifier}}Name argument to have a value."
+    invalid_options_arg: "#{cmd('{{cmd}}')} only accepts an object as the options argument."
+    invalid_num_of_args:	
+      """	
+      #{cmd('{{cmd}}')} does not accept additional arguments.	
+      If you want to invoke a function with arguments, use cy.invoke().	
       """
     timed_out:
       """
