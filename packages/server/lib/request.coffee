@@ -325,6 +325,17 @@ caseInsensitiveGet = (obj, property) ->
     if key.toLowerCase() == lowercaseProperty
       return obj[key]
 
+## first, attempt to set on an existing property with differing case
+## if that fails, set the lowercase `property`
+caseInsensitiveSet = (obj, property, val) ->
+  lowercaseProperty = property.toLowerCase()
+
+  for key in Object.keys(obj)
+    if key.toLowerCase() == lowercaseProperty
+      return obj[key] = val
+
+  obj[lowercaseProperty] = val
+
 setDefaults = (opts) ->
   _
   .chain(opts)
@@ -424,8 +435,15 @@ module.exports = (options = {}) ->
         header = cookies.map (cookie) ->
           "#{cookie.name}=#{cookie.value}"
         .join("; ") || undefined
-        req.headers.Cookie = header
-        header
+
+        if header
+          if existingHeader = caseInsensitiveGet(req.headers, 'Cookie')
+            debug('found existing cookie header, merging %o', { header, existingHeader })
+            ## order does not not matter here
+            ## @see https://tools.ietf.org/html/rfc6265#section-4.2.2
+            header = [existingHeader, header].join(';')
+
+          caseInsensitiveSet(req.headers, 'Cookie', header)
 
     setCookiesOnBrowser: (res, resUrl, automationFn) ->
       cookies = res.headers['set-cookie']
