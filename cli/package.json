@@ -23,7 +23,7 @@
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run unit -- --watch",
     "types": "npm run dtslint",
-    "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
+    "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test ../node_modules/.bin/mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
     "@cypress/listr-verbose-renderer": "0.4.1",
