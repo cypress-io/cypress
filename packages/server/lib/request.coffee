@@ -603,20 +603,8 @@ module.exports = (options = {}) ->
           .return(resp)
 
       if c = options.cookies
-        ## if we have a cookie object then just
-        ## send the request up!
-        if _.isObject(c)
-          cookieHeader = _.keys(c).map (k) ->
-            "#{k}=#{c[k]}"
-          .join('; ')
-          if cookieHeader
-            options.headers.Cookie = cookieHeader
-          send()
-        else
-          ## else go get the cookies first
-          ## then make the request
-          self.setRequestCookieHeader(options, options.url, automationFn)
-          .then(send)
+        self.setRequestCookieHeader(options, options.url, automationFn)
+        .then(send)
       else
         send()
 
