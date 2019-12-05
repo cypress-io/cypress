@@ -28,7 +28,7 @@ class SpecsList extends Component {
             'show-clear-filter': !!specsStore.filter,
           })}>
             <label htmlFor='filter'>
-              <i className='fa fa-search'></i>
+              <i className='fas fa-search'></i>
             </label>
             <input
               id='filter'
@@ -43,11 +43,11 @@ class SpecsList extends Component {
               title='Clear search'
               className='browser-info-tooltip cy-tooltip'
             >
-              <a className='clear-filter fa fa-times' onClick={this._clearFilter} />
+              <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests btn btn-default', { active: specsStore.isChosen(allSpecsSpec) })}>
-            <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
+            <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
             {allSpecsSpec.displayName}
           </a>
         </header>
@@ -66,7 +66,7 @@ class SpecsList extends Component {
             this._clearFilter()
             this.filterRef.current.focus()
           }} className='btn btn-link'>
-            <i className='fa fa-times'/> Clear search
+            <i className='fas fa-times'/> Clear search
           </a>
         </div>
       )
@@ -84,11 +84,11 @@ class SpecsList extends Component {
   }
 
   _allSpecsIcon (allSpecsChosen) {
-    return allSpecsChosen ? 'fa-dot-circle-o green' : 'fa-play'
+    return allSpecsChosen ? 'far fa-dot-circle green' : 'fas fa-play'
   }
 
   _specIcon (isChosen) {
-    return isChosen ? 'fa-dot-circle-o green' : 'fa-file-code-o'
+    return isChosen ? 'fa-dot-circle green' : 'fa-file-code'
   }
 
   _clearFilter = () => {
@@ -130,8 +130,8 @@ class SpecsList extends Component {
       <li key={spec.path} className={`folder level-${nestingLevel} ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
           <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
-            <i className={`folder-collapse-icon fa fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
-            <i className={`fa fa-fw ${isExpanded ? 'fa-folder-open-o' : 'fa-folder-o'}`}></i>
+            <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
+            <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`}></i>
             {nestingLevel === 0 ? `${spec.displayName} tests` : spec.displayName}
           </div>
           {
@@ -154,7 +154,7 @@ class SpecsList extends Component {
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: specsStore.isChosen(spec) })}>
           <div>
             <div className="file-name">
-              <i className={`fa fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
+              <i className={`far fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
               {spec.displayName}
             </div>
           </div>
@@ -177,7 +177,7 @@ class SpecsList extends Component {
             </code>
           </h5>
           <a className='helper-docs-link' onClick={this._openHelp}>
-            <i className='fa fa-question-circle'></i>{' '}
+            <i className='fas fa-question-circle'></i>{' '}
               Need help?
           </a>
         </div>
