@@ -8,6 +8,7 @@ os      = require("os")
 ## to the "packages/server" folder
 cwd     = require("./cwd")
 Promise = require("bluebird")
+{parseElectronLaunchArguments} = require("./util/electron_app")
 
 ## never cut off stack traces
 Error.stackTraceLimit = Infinity
@@ -38,6 +39,14 @@ try
 
   if os.platform() is "linux"
     app.disableHardwareAcceleration()
+
+  if process.env.ELECTRON_EXTRA_LAUNCH_ARGS
+    electronLaunchArgs = parseElectronLaunchArguments(process.env.ELECTRON_EXTRA_LAUNCH_ARGS)
+    Object.keys(electronLaunchArgs).forEach ({key, value}) ->
+      if value == undefined
+        app.commandLine.appendSwitch(key)
+      else
+        app.commandLine.appendSwitch(key, value)
 
 ## instead of setting NODE_ENV we will
 ## use our own separate CYPRESS_ENV so
