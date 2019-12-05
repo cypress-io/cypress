@@ -128,11 +128,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## Make sure the url unicode characters are properly escaped
       ## https://github.com/cypress-io/cypress/issues/5274
       try
-        options.url = decodeURI(options.url)
-      catch URIError
-        # The url is not already encoded just silence the error
-      finally
-        options.url = encodeURI(options.url)
+        options.url = new URL(options.url).href
+      catch TypeError
+        # The URL object cannot be constructed because of URL failure
+        $utils.throwErrByPath("request.url_invalid", {
+          args: {
+            configFile: Cypress.config("configFile")
+          }
+        })
+
 
       ## if options.url isnt FQDN then we need to throw here
       ## if we made a request prior to a visit then it needs
