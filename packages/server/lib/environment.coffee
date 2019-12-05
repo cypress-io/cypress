@@ -51,6 +51,10 @@ try
       else
         app.commandLine.appendSwitch(key, value)
 
+catch e
+  console.error(e)
+  throw e
+
 ## instead of setting NODE_ENV we will
 ## use our own separate CYPRESS_ENV so
 ## as not to conflict with CI providers
