@@ -15,15 +15,6 @@ const getTestingPlugins = () => {
     ]
   }
 
-  if (TEST_ENV === 'ci') {
-    return [
-      PostCompile(() => {
-        cd(path.join(__dirname))
-        exec('yarn cypress:run', { async: true })
-      }, { once: true }),
-    ]
-  }
-
   return []
 }
 

@@ -337,7 +337,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/driver "yarn test-e2e:ci --record --parallel --group 5x-driver-chrome --browser chrome"
+            yarn test_e2e:ci --scope @packages/driver --record --parallel --group 5x-driver-chrome --browser chrome
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -381,7 +381,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/desktop-gui "yarn cypress:run --record --parallel --group 2x-desktop-gui"
+            yarn test-e2e:ci --scope @packages/desktop-gui --record --parallel --group 2x-desktop-gui
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -394,12 +394,10 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec  --scope @packages/reporter "yarn build-prod"
-      - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec  --scope @packages/reporter "yarn cypress:run --record --parallel --group reporter"
+            yarn test-e2e:ci --scope @packages/reporter --record --parallel --group reporter
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:

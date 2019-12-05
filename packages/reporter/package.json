@@ -12,7 +12,7 @@
     "postinstall": "echo '@packages/reporter needs: yarn build'",
     "lint": "eslint --fix lib/*.js src/*.ts* src/**/*.ts*",
     "test-e2e": "cross-env TEST_ENV=development yarn watch",
-    "test-e2e:ci": "cross-env TEST_ENV=ci yarn watch",
+    "test-e2e:ci": "yarn build && yarn cypress:run",
     "test-integration": "exit 0",
     "test-integration:ci": "exit 0",
     "test-unit": "mocha 'src/**/*.spec.*' --watch --inspect",

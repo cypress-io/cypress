@@ -11,7 +11,7 @@
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",
     "postinstall": "echo '@packages/desktop-gui needs: yarn build'",
     "test-e2e": "cross-env TEST_ENV=development yarn watch",
-    "test-e2e:ci": "cross-env TEST_ENV=ci yarn watch",
+    "test-e2e:ci": "yarn build && yarn cypress:run",
     "test-integration": "exit 0",
     "test-integration:ci": "exit 0",
     "test-unit": "exit 0",
