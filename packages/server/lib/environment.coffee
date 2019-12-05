@@ -18,8 +18,26 @@ Error.stackTraceLimit = Infinity
 ## would not be available
 pkg = require("@packages/root")
 
-# note: we silently swallow any errors, since the code
-# should be very simple
+## instead of setting NODE_ENV we will
+## use our own separate CYPRESS_ENV so
+## as not to conflict with CI providers
+
+## use env from package first
+## or development as default
+env = process.env["CYPRESS_ENV"] or= pkg.env ? "development"
+
+config = {
+  ## uses cancellation for automation timeouts
+  cancellation: true
+}
+
+if env is "development"
+  ## enable long stack traces in dev
+  config.longStackTraces = true
+
+Promise.config(config)
+
+# note: we print error in development mode only
 try
   ## i wish we didn't have to do this but we have to append
   ## these command line switches immediately
@@ -44,33 +62,11 @@ try
 
   if process.env.ELECTRON_EXTRA_LAUNCH_ARGS
     electronLaunchArgs = parseElectronLaunchArguments(process.env.ELECTRON_EXTRA_LAUNCH_ARGS)
-    Object.keys(electronLaunchArgs).forEach (key) ->
-      value = electronLaunchArgs[key]
-      if value == undefined
-        app.commandLine.appendSwitch(key)
-      else
-        app.commandLine.appendSwitch(key, value)
+    Object.entries(electronLaunchArgs).forEach ([key, value]) ->
+      app.commandLine.appendSwitch(key, value)
 
 catch e
-  console.error(e.message)
-
-## instead of setting NODE_ENV we will
-## use our own separate CYPRESS_ENV so
-## as not to conflict with CI providers
-
-## use env from package first
-## or development as default
-env = process.env["CYPRESS_ENV"] or= pkg.env ? "development"
-
-config = {
-  ## uses cancellation for automation timeouts
-  cancellation: true
-}
-
-if env is "dev"
-  ## enable long stack traces in dev
-  config.longStackTraces = true
-
-Promise.config(config)
+  if env is "development"
+    console.error(e.message)
 
 module.exports = env
