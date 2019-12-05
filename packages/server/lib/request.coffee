@@ -428,7 +428,7 @@ module.exports = (options = {}) ->
 
       return response
 
-    setRequestCookieHeader: (req, reqUrl, automationFn) ->
+    setRequestCookieHeader: (req, reqUrl, automationFn, existingHeader) ->
       automationFn('get:cookies', { url: reqUrl })
       .then (cookies) ->
         debug('got cookies from browser %o', { reqUrl, cookies })
@@ -437,8 +437,9 @@ module.exports = (options = {}) ->
         .join("; ") || undefined
 
         if header
-          if existingHeader = caseInsensitiveGet(req.headers, 'Cookie')
-            debug('found existing cookie header, merging %o', { header, existingHeader })
+          if existingHeader
+            ## existingHeader = whatever Cookie header the user is already trying to set
+            debug('there is an existing cookie header, merging %o', { header, existingHeader })
             ## order does not not matter here
             ## @see https://tools.ietf.org/html/rfc6265#section-4.2.2
             header = [existingHeader, header].join(';')
@@ -520,7 +521,7 @@ module.exports = (options = {}) ->
           currentUrl = newUrl
           true
 
-      @setRequestCookieHeader(options, options.url, automationFn)
+      @setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
       .then =>
         return =>
           debug("sending request as stream %o", merge(options))
@@ -621,7 +622,7 @@ module.exports = (options = {}) ->
           .return(resp)
 
       if c = options.cookies
-        self.setRequestCookieHeader(options, options.url, automationFn)
+        self.setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
         .then(send)
       else
         send()
