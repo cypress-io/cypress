@@ -13,7 +13,7 @@
     "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "size": "npm pack --dry",
     "pretest": "npm run check-deps-pre",
     "test": "npm run test-unit",
     "test-debug": "node --inspect --debug-brk $(bin-up _mocha)",
@@ -23,7 +23,7 @@
     "pretest-watch": "npm run check-deps-pre",
     "test-watch": "npm run unit -- --watch",
     "types": "npm run dtslint",
-    "unit": "BLUEBIRD_DEBUG=1 NODE_ENV=test ../node_modules/.bin/mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
+    "unit": "cross-env BLUEBIRD_DEBUG=1 NODE_ENV=test ../node_modules/.bin/mocha --reporter mocha-multi-reporters --reporter-options configFile=../mocha-reporter-config.json"
   },
   "dependencies": {
     "@cypress/listr-verbose-renderer": "0.4.1",
@@ -77,6 +77,7 @@
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "chai-string": "1.4.0",
+    "cross-env": "6.0.3",
     "dependency-check": "3.4.1",
     "dtslint": "0.9.0",
     "execa-wrap": "1.4.0",

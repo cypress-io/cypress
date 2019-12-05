@@ -28,7 +28,7 @@
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
-    "cross-env": "5.2.1",
+    "cross-env": "6.0.3",
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.12.1",
     "jsdom": "14.1.0",
