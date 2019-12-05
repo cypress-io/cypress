@@ -18,6 +18,8 @@ Error.stackTraceLimit = Infinity
 ## would not be available
 pkg = require("@packages/root")
 
+# note: we silently swallow any errors, since the code
+# should be very simple
 try
   ## i wish we didn't have to do this but we have to append
   ## these command line switches immediately
