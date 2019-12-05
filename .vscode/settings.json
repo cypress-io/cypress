@@ -46,4 +46,5 @@
       "source.fixAll.eslint": false
     }
   }
+  "debug.node.autoAttach": "on"
 }

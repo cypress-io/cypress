@@ -1,10 +1,9 @@
 {
-  "name": "@packages/coffee",
+  "name": "@packages/webpack-plugin-post-compile",
   "version": "0.0.0",
   "private": true,
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "clean-deps": "rm -rf node_modules",
     "test-e2e": "exit 0",
     "test-e2e:ci": "exit 0",
     "test-integration": "exit 0",
@@ -13,9 +12,10 @@
     "test-unit:ci": "exit 0"
   },
   "dependencies": {
-    "coffeescript": "1.12.7"
+    "lodash": "4.17.15"
   },
-  "files": [
-    "register.js"
-  ]
+  "engines": {
+    "node": ">=12"
+  },
+  "types": "index.d.ts"
 }

@@ -83,6 +83,12 @@ if (!isWindows()) {
   )
 }
 
+if (options['watch']) {
+  commandAndArguments.args.push(
+    '--watch',
+  )
+}
+
 if (options.fgrep) {
   commandAndArguments.args.push(
     '--fgrep',

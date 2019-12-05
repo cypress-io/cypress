@@ -8,7 +8,12 @@
     "build-prod": "yarn build",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/static needs: yarn build'",
-    "test": "echo 'Nothing to test yet'"
+    "test-e2e": "exit 0",
+    "test-e2e:ci": "exit 0",
+    "test-integration": "exit 0",
+    "test-integration:ci": "exit 0",
+    "test-unit": "exit 0",
+    "test-unit:ci": "exit 0"
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",

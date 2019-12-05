@@ -46,18 +46,13 @@
       "command": "yarn cypress:open"
     },
     {
-      "name": "packages/desktop-gui cypress open",
+      "name": "desktop-gui e2e develop",
       "focus": true,
       "onlySingle": true,
-      "cwd": "[cwd]/packages/desktop-gui",
-      "command": "yarn cypress:open"
-    },
-    {
-      "name": "packages/desktop-gui watch",
-      "focus": true,
-      "onlySingle": true,
-      "cwd": "[cwd]/packages/desktop-gui",
-      "command": "yarn watch"
+      "cwd": "[cwd]",
+      "commands": [
+        "yarn test-e2e --scope @packages/desktop-gui"
+      ]
     }
   ]
 }

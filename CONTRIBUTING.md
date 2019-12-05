@@ -326,22 +326,22 @@ $ yarn workspace @packages/server add --dev my-new-dep1
 
 ##### Common Top Level Tasks
 
-| Task               | Purpose                                                                                        |
-| :----------------- | :--------------------------------------------------------------------------------------------- |
-| `build`            | Build all packages                                                                             |
-| `start`            | Open Cypress in dev and global mode                                                            |
-| `watch`            | Run `yarn watch` in every package; piping the output back to the terminal                      |
-| `clean`            | Run `yarn clean` in every package; used to remove build artifacts from all packages            |
-| `clean-deps`       | Remove all dependencies installed (in root and in every package)                               |
-| `test`             | Runs `yarn test` in every package except those without a `test` script                         |
-| `test-unit`        | Runs `yarn test-unit` in every package except those without a `test-unit` script               |
-| `test-integration` | Runs `yarn test-integration` in every package except those without a `test-integration` script |
-| `test-e2e`         | Runs `yarn test-e2e` in every package except those without a `test-e2e` script                 |
-| `test-watch`       | Runs `yarn test-watch` in every package except those without a `test-watch` script             |
+| Task                  | Purpose                                                                                  |
+| :-------------------- | :--------------------------------------------------------------------------------------- |
+| `build`               | Build all packages                                                                       |
+| `start`               | Open Cypress in dev and global mode                                                      |
+| `clean`               | Run `yarn clean` in every package; used to remove build artifacts from all packages      |
+| `clean-deps`          | Remove all dependencies installed (in root and in every package)                         |
+| `test-e2e`            | Run e2e tests with the primary purpose of development (`cypress open` vs `cypress run`)  |
+| `test-integration`    | Run integration tests with the primary purpose of development (watches source and tests) |
+| `test-unit`           | Run unit tests with the primary purpose of development (watches source and tests)        |
+| `test-e2e:ci`         | Run e2e tests with purpose to see a pass/fail; run in CLI via `cypress run`              |
+| `test-integration:ci` | Run integration tests with purpose to see a pass/fail (no watch)                         |
+| `test-unit:ci`        | Run unit tests tests with purpose to see a pass/fail (no watch)                          |
 
 When run as-is, top level tasks will run across all packages. However, most scripts can be provided one or more scopes. Providing a scope will execute tasks within the provided packages. Scope values are based on **package names** and not the directory structure.
 
-> Most of the time you will only want to run a task within a specific package; this can be done by providing the package name as a scope to the top level task.
+> **Most of the time you will only want to run a task within a specific package; this can be done by providing the package name as a scope to the top level task.**
 
 ```shell
 # Run test-unit only within cypress package (./cli)
@@ -362,29 +362,26 @@ Each package is responsible for building itself and testing itself and can do so
 
 > In order to simplify top level tasks, if a package does not need a script, it is still included and simply exits 0 (`exit 0`).
 
-| Task               | Purpose                                                                                                                                                  |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `build`            | Build the package                                                                                                                                        |
-| `build-prod`       | Build all assets for production (if makes sense)                                                                                                         |
-| `start`            | Run a server for serving files                                                                                                                           |
-| `watch`            | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file. |
-| `clean`            | Remove any assets created by `build-dev` or `build-prod`                                                                                                 |
-| `clean-deps`       | Remove any dependencies installed (usually by `yarn`)                                                                                                    |
-| `test`             | Runs all tests once (this usually means running unit tests; via `yarn test-unit`)                                                                        |
-| `test-unit`        | Run all unit tests within the package; `exit 0` if N/A                                                                                                   |
-| `test-integration` | Run all integration tests within the package; `exit 0` if N/A                                                                                            |
-| `test-e2e`         | Run all e2e tests within the package; `exit 0` if N/A                                                                                                    |
-| `test-watch`       | Run all unit tests in the package in watch mode                                                                                                          |
+| Task                  | Purpose                                                                                 |
+| :-------------------- | :-------------------------------------------------------------------------------------- |
+| `build`               | Build the package                                                                       |
+| `build-prod`          | Build all assets for production (if makes sense)                                        |
+| `start`               | Run a server for serving files                                                          |
+| `clean`               | Remove any assets created by `build-dev` or `build-prod`                                |
+| `clean-deps`          | Remove any dependencies installed (usually by `yarn`)                                   |
+| `test-e2e`            | Run all e2e tests within the package for development purposes; `exit 0` if N/A          |
+| `test-integration`    | Run all integration tests within the package; for development purposes; `exit 0` if N/A |
+| `test-unit`           | Run all unit tests within the package; for development purposes; `exit 0` if N/A        |
+| `test-e2e:ci`         | Run all e2e tests within the package; outputs to CLI; `exit 0` if N/A                   |
+| `test-integration:ci` | Run all integration tests within the package;  outputs to CLI; `exit 0` if N/A          |
+| `test-unit:ci`        | Run all unit tests within the package;  outputs to CLI; `exit 0` if N/A                 |
 
 #### Debugging
 
-Some packages use [debug](https://github.com/visionmedia/debug#readme) to
-log debug messages to the console. The naming scheme should be
-`cypress:<package name>`. For example to see launcher messages during unit
-tests start it using
+Some packages use [debug](https://github.com/visionmedia/debug#readme) to log debug messages to the console. The naming scheme should be `cypress:<package name>`. For example to see launcher messages during unit tests start it using
 
 ```bash
-$ DEBUG=cypress:launcher yarn test --scope @packages/launcher
+$ DEBUG=cypress:launcher yarn test:unit --scope @packages/launcher
 ```
 
 If you want to see log messages from all Cypress projects use wild card

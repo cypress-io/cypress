@@ -10,7 +10,13 @@
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project .",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",
     "postinstall": "echo '@packages/desktop-gui needs: yarn build'",
-    "watch": "yarn build -- --watch --progress"
+    "test-e2e": "cross-env TEST_ENV=development yarn watch",
+    "test-e2e:ci": "cross-env TEST_ENV=ci yarn watch",
+    "test-integration": "exit 0",
+    "test-integration:ci": "exit 0",
+    "test-unit": "exit 0",
+    "test-unit:ci": "exit 0",
+    "watch": "yarn build --watch --progress"
   },
   "devDependencies": {
     "@babel/polyfill": "7.7.0",
@@ -19,6 +25,7 @@
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@packages/web-config": "*",
+    "@packages/webpack-plugin-post-compile": "*",
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
@@ -40,6 +47,7 @@
     "react-inspector": "4.0.0",
     "react-loader": "2.4.5",
     "react-select": "3.0.8",
+    "shelljs": "0.8.3",
     "webpack": "4.35.3",
     "webpack-cli": "3.3.2"
   },

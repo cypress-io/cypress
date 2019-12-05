@@ -3,8 +3,8 @@
 CMD="$1"
 ARGS="$2"
 
-npm run --silent $CMD $ARGS & \
+yarn $CMD $ARGS & \
 chokidar 'test/**/*' 'lib/**/*' \
--c "npm run --silent $CMD $ARGS" \
+-c "yarn $CMD $ARGS" \
 --polling \
 --poll-interval=250

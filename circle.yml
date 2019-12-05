@@ -67,7 +67,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/server "yarn test-e2e --chunk << parameters.chunk >> --browser << parameters.browser >>"
+          command: yarn lerna exec --scope @packages/server "yarn test-e2e:ci --chunk << parameters.chunk >> --browser << parameters.browser >>"
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -159,7 +159,7 @@ jobs:
       # make sure packages with TypeScript can be transpiled to JS
       - run: yarn lerna run build-js --parallel --stream
       # run unit tests from each individual package (10 total)
-      - run: yarn test
+      - run: yarn test-unit:ci --ignore @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -186,7 +186,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn test-unit --scope @packages/server
+      - run: yarn test-unit:ci --scope @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -197,7 +197,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn test-integration --scope @packages/server
+      - run: yarn test-integration:ci --scope @packages/server
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -334,15 +334,10 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/driver "yarn start"
-          background: true
-      - run:
-          command: yarn wait-on http://localhost:3500
-      - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-chrome --browser chrome"
+            yarn lerna exec --scope @packages/driver "yarn test-e2e:ci --record --parallel --group 5x-driver-chrome --browser chrome"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:

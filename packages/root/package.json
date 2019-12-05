@@ -2,5 +2,12 @@
   "name": "@packages/root",
   "version": "0.0.0",
   "description": "dummy package pointing at the root package",
-  "main": "index.js"
+  "main": "index.js",
+  "scripts": {
+    "test-e2e": "exit 0",
+    "test-e2e:ci": "exit 0",
+    "test-integration:ci": "exit 0",
+    "test-unit": "exit 0",
+    "test-unit:ci": "exit 0"
+  }
 }

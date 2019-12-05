@@ -16,12 +16,13 @@
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-e2e": "node ./test/scripts/e2e.js",
     "test-e2e-chrome": "node ./test/scripts/run.js test/e2e chrome",
-    "test-integration": "node ./test/scripts/run.js test/integration",
-    "test-integration-watch": "./test/support/watch test-integration",
+    "test-e2e:ci": "yarn test-e2e",
+    "test-integration": "./test/support/watch test-integration --inspect",
+    "test-integration:ci": "node ./test/scripts/run.js test/integration",
     "test-performance": "node ./test/scripts/run.js test/performance",
-    "test-unit": "node ./test/scripts/run.js test/unit",
-    "test-unit-watch": "./test/support/watch test/unit",
-    "test-watch": "./test/support/watch test-unit"
+    "test-unit": "./test/support/watch test-unit:ci --inspect",
+    "test-unit:ci": "node ./test/scripts/run.js test/unit",
+    "test-watch": "./test/support/watch test"
   },
   "dependencies": {
     "@cypress/browserify-preprocessor": "1.1.2",
@@ -46,6 +47,7 @@
     "compression": "1.7.4",
     "content-type": "1.0.4",
     "cookie-parser": "1.4.4",
+    "cross-env": "6.0.3",
     "data-uri-to-buffer": "2.0.1",
     "debug": "4.1.1",
     "dependency-tree": "7.0.2",
