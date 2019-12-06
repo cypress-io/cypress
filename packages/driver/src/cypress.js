@@ -1,507 +1,577 @@
-_ = require('lodash')
-$ = require("jquery")
-blobUtil = require("blob-util")
-minimatch = require("minimatch")
-moment = require("moment")
-Promise = require("bluebird")
-sinon = require("sinon")
-lolex = require("lolex")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS206: Consider reworking classes to avoid initClass
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require('lodash');
+const $ = require("jquery");
+const blobUtil = require("blob-util");
+const minimatch = require("minimatch");
+const moment = require("moment");
+const Promise = require("bluebird");
+const sinon = require("sinon");
+const lolex = require("lolex");
 
-$dom = require("./dom")
-$errorMessages = require("./cypress/error_messages")
-$Chainer = require("./cypress/chainer")
-$Command = require("./cypress/command")
-$Commands = require("./cypress/commands")
-$Cookies = require("./cypress/cookies")
-$Cy = require("./cypress/cy")
-$Events = require("./cypress/events")
-$Keyboard = require("./cy/keyboard")
-$SetterGetter = require("./cypress/setter_getter")
-$Log = require("./cypress/log")
-$Location = require("./cypress/location")
-$LocalStorage = require("./cypress/local_storage")
-$Mocha = require("./cypress/mocha")
-$Mouse = require("./cy/mouse")
-$Runner = require("./cypress/runner")
-$Server = require("./cypress/server")
-$Screenshot = require("./cypress/screenshot")
-$SelectorPlayground = require("./cypress/selector_playground")
-$utils = require("./cypress/utils")
+const $dom = require("./dom");
+const $errorMessages = require("./cypress/error_messages");
+const $Chainer = require("./cypress/chainer");
+const $Command = require("./cypress/command");
+const $Commands = require("./cypress/commands");
+const $Cookies = require("./cypress/cookies");
+const $Cy = require("./cypress/cy");
+const $Events = require("./cypress/events");
+const $Keyboard = require("./cy/keyboard");
+const $SetterGetter = require("./cypress/setter_getter");
+const $Log = require("./cypress/log");
+const $Location = require("./cypress/location");
+const $LocalStorage = require("./cypress/local_storage");
+const $Mocha = require("./cypress/mocha");
+const $Mouse = require("./cy/mouse");
+const $Runner = require("./cypress/runner");
+const $Server = require("./cypress/server");
+const $Screenshot = require("./cypress/screenshot");
+const $SelectorPlayground = require("./cypress/selector_playground");
+const $utils = require("./cypress/utils");
 
-proxies = {
-  runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
+const proxies = {
+  runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" "),
   cy: "detachDom getStyles".split(" ")
-}
+};
 
-jqueryProxyFn = ->
-  if not @cy
-    $utils.throwErrByPath("miscellaneous.no_cy")
+const jqueryProxyFn = function() {
+  if (!this.cy) {
+    $utils.throwErrByPath("miscellaneous.no_cy");
+  }
 
-  @cy.$$.apply(@cy, arguments)
+  return this.cy.$$.apply(this.cy, arguments);
+};
 
-_.extend(jqueryProxyFn, $)
+_.extend(jqueryProxyFn, $);
 
-## provide the old interface and
-## throw a deprecation message
-$Log.command = ->
-  $utils.throwErrByPath("miscellaneous.command_log_renamed")
+//# provide the old interface and
+//# throw a deprecation message
+$Log.command = () => $utils.throwErrByPath("miscellaneous.command_log_renamed");
 
-throwDeprecatedCommandInterface = (key, method) ->
-  signature = switch method
-    when "addParentCommand"
-      "'#{key}', function(){...}"
-    when "addChildCommand"
-      "'#{key}', { prevSubject: true }, function(){...}"
-    when "addDualCommand"
-      "'#{key}', { prevSubject: 'optional' }, function(){...}"
+const throwDeprecatedCommandInterface = function(key, method) {
+  const signature = (() => { switch (method) {
+    case "addParentCommand":
+      return `'${key}', function(){...}`;
+    case "addChildCommand":
+      return `'${key}', { prevSubject: true }, function(){...}`;
+    case "addDualCommand":
+      return `'${key}', { prevSubject: 'optional' }, function(){...}`;
+  } })();
 
-  $utils.throwErrByPath("miscellaneous.custom_command_interface_changed", {
+  return $utils.throwErrByPath("miscellaneous.custom_command_interface_changed", {
     args: { method, signature }
-  })
+  });
+};
 
-throwPrivateCommandInterface = (method) ->
+const throwPrivateCommandInterface = method =>
   $utils.throwErrByPath("miscellaneous.private_custom_command_interface", {
     args: { method }
   })
+;
 
-class $Cypress
-  constructor: (config = {}) ->
-    @cy       = null
-    @chai     = null
-    @mocha    = null
-    @runner   = null
-    @Commands = null
-    @_RESUMED_AT_TEST = null
+class $Cypress {
+  static initClass() {
+  
+    this.prototype.$ = jqueryProxyFn;
+  
+    //# attach to $Cypress to access
+    //# all of the constructors
+    //# to enable users to monkeypatch
+    this.prototype.$Cypress = $Cypress;
+    this.prototype.Cy = $Cy;
+    this.prototype.Chainer = $Chainer;
+    this.prototype.Cookies = $Cookies;
+    this.prototype.Command = $Command;
+    this.prototype.Commands = $Commands;
+    this.prototype.dom = $dom;
+    this.prototype.errorMessages = $errorMessages;
+    this.prototype.Keyboard = $Keyboard;
+    this.prototype.Location = $Location;
+    this.prototype.Log = $Log;
+    this.prototype.LocalStorage = $LocalStorage;
+    this.prototype.Mocha = $Mocha;
+    this.prototype.Mouse = $Mouse;
+    this.prototype.Runner = $Runner;
+    this.prototype.Server = $Server;
+    this.prototype.Screenshot = $Screenshot;
+    this.prototype.SelectorPlayground = $SelectorPlayground;
+    this.prototype.utils = $utils;
+    this.prototype._ = _;
+    this.prototype.moment = moment;
+    this.prototype.Blob = blobUtil;
+    this.prototype.Promise = Promise;
+    this.prototype.minimatch = minimatch;
+    this.prototype.sinon = sinon;
+    this.prototype.lolex = lolex;
+  
+    //# proxy all of the methods in proxies
+    //# to their corresponding objects
+    _.each(proxies, (methods, key) =>
+      _.each(methods, method =>
+        $Cypress.prototype[method] = function() {
+          const prop = this[key];
+  
+          return prop && prop[method].apply(prop, arguments);
+        }
+      )
+    );
+  }
+  constructor(config = {}) {
+    this.cy       = null;
+    this.chai     = null;
+    this.mocha    = null;
+    this.runner   = null;
+    this.Commands = null;
+    this._RESUMED_AT_TEST = null;
 
-    @events = $Events.extend(@)
+    this.events = $Events.extend(this);
 
-    @setConfig(config)
+    this.setConfig(config);
+  }
 
-  setConfig: (config = {}) ->
-    ## config.remote
-    # {
-    #   origin: "http://localhost:2020"
-    #   domainName: "localhost"
-    #   props: null
-    #   strategy: "file"
-    # }
+  setConfig(config = {}) {
+    //# config.remote
+    // {
+    //   origin: "http://localhost:2020"
+    //   domainName: "localhost"
+    //   props: null
+    //   strategy: "file"
+    // }
 
-    # -- or --
+    // -- or --
 
-    # {
-    #   origin: "https://foo.google.com"
-    #   domainName: "google.com"
-    #   strategy: "http"
-    #   props: {
-    #     port: 443
-    #     tld: "com"
-    #     domain: "google"
-    #   }
-    # }
+    // {
+    //   origin: "https://foo.google.com"
+    //   domainName: "google.com"
+    //   strategy: "http"
+    //   props: {
+    //     port: 443
+    //     tld: "com"
+    //     domain: "google"
+    //   }
+    // }
 
-    ## set domainName but allow us to turn
-    ## off this feature in testing
-    if d = config.remote?.domainName
-      document.domain = d
+    //# set domainName but allow us to turn
+    //# off this feature in testing
+    let d;
+    if (d = config.remote != null ? config.remote.domainName : undefined) {
+      document.domain = d;
+    }
 
-    ## a few static props for the host OS, browser
-    ## and the current version of Cypress
-    @arch = config.arch
-    @spec = config.spec
-    @version = config.version
-    @browser = config.browser
-    @platform = config.platform
+    //# a few static props for the host OS, browser
+    //# and the current version of Cypress
+    this.arch = config.arch;
+    this.spec = config.spec;
+    this.version = config.version;
+    this.browser = config.browser;
+    this.platform = config.platform;
 
-    ## normalize this into boolean
-    config.isTextTerminal = !!config.isTextTerminal
+    //# normalize this into boolean
+    config.isTextTerminal = !!config.isTextTerminal;
 
-    ## we asumme we're interactive based on whether or
-    ## not we're in a text terminal, but we keep this
-    ## as a separate property so we can potentially
-    ## slice up the behavior
-    config.isInteractive = !config.isTextTerminal
+    //# we asumme we're interactive based on whether or
+    //# not we're in a text terminal, but we keep this
+    //# as a separate property so we can potentially
+    //# slice up the behavior
+    config.isInteractive = !config.isTextTerminal;
 
-    ## enable long stack traces when
-    ## we not are running headlessly
-    ## for debuggability but disable
-    ## them when running headlessly for
-    ## performance since users cannot
-    ## interact with the stack traces
+    //# enable long stack traces when
+    //# we not are running headlessly
+    //# for debuggability but disable
+    //# them when running headlessly for
+    //# performance since users cannot
+    //# interact with the stack traces
     Promise.config({
       longStackTraces: config.isInteractive
-    })
+    });
+
+    const {env, remote} = config;
+
+    config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state");
+
+    this.state = $SetterGetter.create({});
+    this.config = $SetterGetter.create(config);
+    this.env = $SetterGetter.create(env);
+
+    this.Cookies = $Cookies.create(config.namespace, d);
+
+    return this.action("cypress:config", config);
+  }
+
+  initialize($autIframe) {
+    //# push down the options
+    //# to the runner
+    this.mocha.options(this.runner);
+
+    return this.cy.initialize($autIframe);
+  }
+
+  run(fn) {
+    if (!this.runner) { $utils.throwErrByPath("miscellaneous.no_runner"); }
+
+    return this.runner.run(fn);
+  }
+
+  //# onSpecWindow is called as the spec window
+  //# is being served but BEFORE any of the actual
+  //# specs or support files have been downloaded
+  //# or parsed. we have not received any custom commands
+  //# at this point
+  onSpecWindow(specWindow) {
+    const logFn = (...args) => {
+      return this.log.apply(this, args);
+    };
+
+    //# create cy and expose globally
+    this.cy = (window.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn));
+    this.isCy = this.cy.isCy;
+    this.log = $Log.create(this, this.cy, this.state, this.config);
+    this.mocha = $Mocha.create(specWindow, this);
+    this.runner = $Runner.create(specWindow, this.mocha, this, this.cy);
+
+    //# wire up command create to cy
+    this.Commands = $Commands.create(this, this.cy, this.state, this.config);
+
+    this.events.proxyTo(this.cy);
+
+    return null;
+  }
+
+  action(eventName, ...args) {
+    //# normalizes all the various ways
+    //# other objects communicate intent
+    //# and 'action' to Cypress
+    switch (eventName) {
+      case "cypress:stop":
+        return this.emit("stop");
+
+      case "cypress:config":
+        return this.emit("config", args[0]);
+
+      case "runner:start":
+        //# mocha runner has begun running the tests
+        this.emit("run:start");
+
+        if (this._RESUMED_AT_TEST) { return; }
+
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "start", args[0]);
+        }
+        break;
+
+      case "runner:end":
+        //# mocha runner has finished running the tests
+
+        //# end may have been caused by an uncaught error
+        //# that happened inside of a hook.
+        //#
+        //# when this happens mocha aborts the entire run
+        //# and does not do the usual cleanup so that means
+        //# we have to fire the test:after:hooks and
+        //# test:after:run events ourselves
+        this.emit("run:end");
+
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "end", args[0]);
+        }
+        break;
+
+      case "runner:set:runnable":
+        //# when there is a hook / test (runnable) that
+        //# is about to be invoked
+        return this.cy.setRunnable(...args);
+
+      case "runner:suite:start":
+        //# mocha runner started processing a suite
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "suite", ...args);
+        }
+        break;
+
+      case "runner:suite:end":
+        //# mocha runner finished processing a suite
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "suite end", ...args);
+        }
+        break;
+
+      case "runner:hook:start":
+        //# mocha runner started processing a hook
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "hook", ...args);
+        }
+        break;
+
+      case "runner:hook:end":
+        //# mocha runner finished processing a hook
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "hook end", ...args);
+        }
+        break;
+
+      case "runner:test:start":
+        //# mocha runner started processing a hook
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "test", ...args);
+        }
+        break;
+
+      case "runner:test:end":
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "test end", ...args);
+        }
+        break;
+
+      case "runner:pass":
+        //# mocha runner calculated a pass
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "pass", ...args);
+        }
+        break;
+
+      case "runner:pending":
+        //# mocha runner calculated a pending test
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "pending", ...args);
+        }
+        break;
 
-    {env, remote} = config
+      case "runner:fail":
+        //# mocha runner calculated a failure
+        if (this.config("isTextTerminal")) {
+          return this.emit("mocha", "fail", ...args);
+        }
+        break;
 
-    config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state")
+      case "mocha:runnable:run":
+        return this.runner.onRunnableRun(...args);
 
-    @state = $SetterGetter.create({})
-    @config = $SetterGetter.create(config)
-    @env = $SetterGetter.create(env)
+      case "runner:test:before:run":
+        //# get back to a clean slate
+        this.cy.reset();
 
-    @Cookies = $Cookies.create(config.namespace, d)
+        return this.emit("test:before:run", ...args);
 
-    @action("cypress:config", config)
-
-  initialize: ($autIframe) ->
-    ## push down the options
-    ## to the runner
-    @mocha.options(@runner)
+      case "runner:test:before:run:async":
+        //# TODO: handle timeouts here? or in the runner?
+        return this.emitThen("test:before:run:async", ...args);
 
-    @cy.initialize($autIframe)
+      case "runner:runnable:after:run:async":
+        return this.emitThen("runnable:after:run:async", ...args);
 
-  run: (fn) ->
-    $utils.throwErrByPath("miscellaneous.no_runner") if not @runner
+      case "runner:test:after:run":
+        this.runner.cleanupQueue(this.config("numTestsKeptInMemory"));
 
-    @runner.run(fn)
-
-  ## onSpecWindow is called as the spec window
-  ## is being served but BEFORE any of the actual
-  ## specs or support files have been downloaded
-  ## or parsed. we have not received any custom commands
-  ## at this point
-  onSpecWindow: (specWindow) ->
-    logFn = (args...) =>
-      @log.apply(@, args)
-
-    ## create cy and expose globally
-    @cy = window.cy = $Cy.create(specWindow, @, @Cookies, @state, @config, logFn)
-    @isCy = @cy.isCy
-    @log = $Log.create(@, @cy, @state, @config)
-    @mocha = $Mocha.create(specWindow, @)
-    @runner = $Runner.create(specWindow, @mocha, @, @cy)
-
-    ## wire up command create to cy
-    @Commands = $Commands.create(@, @cy, @state, @config)
+        //# this event is how the reporter knows how to display
+        //# stats and runnable properties such as errors
+        this.emit("test:after:run", ...args);
 
-    @events.proxyTo(@cy)
+        if (this.config("isTextTerminal")) {
+          //# needed for calculating wallClockDuration
+          //# and the timings of after + afterEach hooks
+          return this.emit("mocha", "test:after:run", args[0]);
+        }
+        break;
 
-    return null
+      case "cy:before:all:screenshots":
+        return this.emit("before:all:screenshots", ...args);
 
-  action: (eventName, args...) ->
-    ## normalizes all the various ways
-    ## other objects communicate intent
-    ## and 'action' to Cypress
-    switch eventName
-      when "cypress:stop"
-        @emit("stop")
+      case "cy:before:screenshot":
+        return this.emit("before:screenshot", ...args);
 
-      when "cypress:config"
-        @emit("config", args[0])
+      case "cy:after:screenshot":
+        return this.emit("after:screenshot", ...args);
 
-      when "runner:start"
-        ## mocha runner has begun running the tests
-        @emit("run:start")
+      case "cy:after:all:screenshots":
+        return this.emit("after:all:screenshots", ...args);
 
-        return if @_RESUMED_AT_TEST
+      case "command:log:added":
+        this.runner.addLog(args[0], this.config("isInteractive"));
 
-        if @config("isTextTerminal")
-          @emit("mocha", "start", args[0])
+        return this.emit("log:added", ...args);
 
-      when "runner:end"
-        ## mocha runner has finished running the tests
+      case "command:log:changed":
+        this.runner.addLog(args[0], this.config("isInteractive"));
 
-        ## end may have been caused by an uncaught error
-        ## that happened inside of a hook.
-        ##
-        ## when this happens mocha aborts the entire run
-        ## and does not do the usual cleanup so that means
-        ## we have to fire the test:after:hooks and
-        ## test:after:run events ourselves
-        @emit("run:end")
+        return this.emit("log:changed", ...args);
 
-        if @config("isTextTerminal")
-          @emit("mocha", "end", args[0])
+      case "cy:fail":
+        //# comes from cypress errors fail()
+        return this.emitMap("fail", ...args);
 
-      when "runner:set:runnable"
-        ## when there is a hook / test (runnable) that
-        ## is about to be invoked
-        @cy.setRunnable(args...)
+      case "cy:stability:changed":
+        return this.emit("stability:changed", ...args);
 
-      when "runner:suite:start"
-        ## mocha runner started processing a suite
-        if @config("isTextTerminal")
-          @emit("mocha", "suite", args...)
+      case "cy:paused":
+        return this.emit("paused", ...args);
+
+      case "cy:canceled":
+        return this.emit("canceled");
 
-      when "runner:suite:end"
-        ## mocha runner finished processing a suite
-        if @config("isTextTerminal")
-          @emit("mocha", "suite end", args...)
-
-      when "runner:hook:start"
-        ## mocha runner started processing a hook
-        if @config("isTextTerminal")
-          @emit("mocha", "hook", args...)
-
-      when "runner:hook:end"
-        ## mocha runner finished processing a hook
-        if @config("isTextTerminal")
-          @emit("mocha", "hook end", args...)
-
-      when "runner:test:start"
-        ## mocha runner started processing a hook
-        if @config("isTextTerminal")
-          @emit("mocha", "test", args...)
-
-      when "runner:test:end"
-        if @config("isTextTerminal")
-          @emit("mocha", "test end", args...)
-
-      when "runner:pass"
-        ## mocha runner calculated a pass
-        if @config("isTextTerminal")
-          @emit("mocha", "pass", args...)
-
-      when "runner:pending"
-        ## mocha runner calculated a pending test
-        if @config("isTextTerminal")
-          @emit("mocha", "pending", args...)
-
-      when "runner:fail"
-        ## mocha runner calculated a failure
-        if @config("isTextTerminal")
-          @emit("mocha", "fail", args...)
-
-      when "mocha:runnable:run"
-        @runner.onRunnableRun(args...)
-
-      when "runner:test:before:run"
-        ## get back to a clean slate
-        @cy.reset()
-
-        @emit("test:before:run", args...)
-
-      when "runner:test:before:run:async"
-        ## TODO: handle timeouts here? or in the runner?
-        @emitThen("test:before:run:async", args...)
-
-      when "runner:runnable:after:run:async"
-        @emitThen("runnable:after:run:async", args...)
-
-      when "runner:test:after:run"
-        @runner.cleanupQueue(@config("numTestsKeptInMemory"))
-
-        ## this event is how the reporter knows how to display
-        ## stats and runnable properties such as errors
-        @emit("test:after:run", args...)
-
-        if @config("isTextTerminal")
-          ## needed for calculating wallClockDuration
-          ## and the timings of after + afterEach hooks
-          @emit("mocha", "test:after:run", args[0])
-
-      when "cy:before:all:screenshots"
-        @emit("before:all:screenshots", args...)
-
-      when "cy:before:screenshot"
-        @emit("before:screenshot", args...)
-
-      when "cy:after:screenshot"
-        @emit("after:screenshot", args...)
-
-      when "cy:after:all:screenshots"
-        @emit("after:all:screenshots", args...)
-
-      when "command:log:added"
-        @runner.addLog(args[0], @config("isInteractive"))
-
-        @emit("log:added", args...)
-
-      when "command:log:changed"
-        @runner.addLog(args[0], @config("isInteractive"))
-
-        @emit("log:changed", args...)
-
-      when "cy:fail"
-        ## comes from cypress errors fail()
-        @emitMap("fail", args...)
-
-      when "cy:stability:changed"
-        @emit("stability:changed", args...)
-
-      when "cy:paused"
-        @emit("paused", args...)
-
-      when "cy:canceled"
-        @emit("canceled")
-
-      when "cy:visit:failed"
-        @emit("visit:failed", args[0])
-
-      when "cy:viewport:changed"
-        @emit("viewport:changed", args...)
-
-      when "cy:command:start"
-        @emit("command:start", args...)
-
-      when "cy:command:end"
-        @emit("command:end", args...)
-
-      when "cy:command:retry"
-        @emit("command:retry", args...)
-
-      when "cy:command:enqueued"
-        @emit("command:enqueued", args[0])
-
-      when "cy:command:queue:before:end"
-        @emit("command:queue:before:end")
-
-      when "cy:command:queue:end"
-        @emit("command:queue:end")
-
-      when "cy:url:changed"
-        @emit("url:changed", args[0])
-
-      when "cy:next:subject:prepared"
-        @emit("next:subject:prepared", args...)
-
-      when "cy:collect:run:state"
-        @emitThen("collect:run:state")
-
-      when "cy:scrolled"
-        @emit("scrolled", args...)
-
-      when "app:uncaught:exception"
-        @emitMap("uncaught:exception", args...)
-
-      when "app:window:alert"
-        @emit("window:alert", args[0])
-
-      when "app:window:confirm"
-        @emitMap("window:confirm", args[0])
-
-      when "app:window:confirmed"
-        @emit("window:confirmed", args...)
-
-      when "app:page:loading"
-        @emit("page:loading", args[0])
-
-      when "app:window:before:load"
-        @cy.onBeforeAppWindowLoad(args[0])
-
-        @emit("window:before:load", args[0])
-
-      when "app:navigation:changed"
-        @emit("navigation:changed", args...)
-
-      when "app:form:submitted"
-        @emit("form:submitted", args[0])
-
-      when "app:window:load"
-        @emit("window:load", args[0])
-
-      when "app:window:before:unload"
-        @emit("window:before:unload", args[0])
-
-      when "app:window:unload"
-        @emit("window:unload", args[0])
-
-      when "app:css:modified"
-        @emit("css:modified", args[0])
-
-      when "spec:script:error"
-        @emit("script:error", args...)
-
-  backend: (eventName, args...) ->
-    new Promise (resolve, reject) =>
-      fn = (reply) ->
-        if e = reply.error
-          ## clone the error object
-          ## and set stack cleaned
-          ## to prevent bluebird from
-          ## attaching long stace traces
-          ## which otherwise make this err
-          ## unusably long
-          err = $utils.cloneErr(e)
-          err.__stackCleaned__ = true
-          err.backend = true
-          reject(err)
-        else
-          resolve(reply.response)
-
-      @emit("backend:request", eventName, args..., fn)
-
-  automation: (eventName, args...) ->
-    ## wrap action in promise
-    new Promise (resolve, reject) =>
-      fn = (reply) ->
-        if e = reply.error
-          err = $utils.cloneErr(e)
-          err.automation = true
-          reject(err)
-        else
-          resolve(reply.response)
-
-      @emit("automation:request", eventName, args..., fn)
-
-  stop: ->
-    @runner.stop()
-    @cy.stop()
-
-    @action("cypress:stop")
-
-  addChildCommand: (key, fn) ->
-    throwDeprecatedCommandInterface(key, "addChildCommand")
-
-  addParentCommand: (key, fn) ->
-    throwDeprecatedCommandInterface(key, "addParentCommand")
-
-  addDualCommand: (key, fn) ->
-    throwDeprecatedCommandInterface(key, "addDualCommand")
-
-  addAssertionCommand: (key, fn) ->
-    throwPrivateCommandInterface("addAssertionCommand")
-
-  addUtilityCommand: (key, fn) ->
-    throwPrivateCommandInterface("addUtilityCommand")
-
-  $: jqueryProxyFn
-
-  ## attach to $Cypress to access
-  ## all of the constructors
-  ## to enable users to monkeypatch
-  $Cypress: $Cypress
-  Cy: $Cy
-  Chainer: $Chainer
-  Cookies: $Cookies
-  Command: $Command
-  Commands: $Commands
-  dom: $dom
-  errorMessages: $errorMessages
-  Keyboard: $Keyboard
-  Location: $Location
-  Log: $Log
-  LocalStorage: $LocalStorage
-  Mocha: $Mocha
-  Mouse: $Mouse
-  Runner: $Runner
-  Server: $Server
-  Screenshot: $Screenshot
-  SelectorPlayground: $SelectorPlayground
-  utils: $utils
-  _: _
-  moment: moment
-  Blob: blobUtil
-  Promise: Promise
-  minimatch: minimatch
-  sinon: sinon
-  lolex: lolex
-
-  @create = (config) ->
-    new $Cypress(config)
-
-  ## proxy all of the methods in proxies
-  ## to their corresponding objects
-  _.each proxies, (methods, key) ->
-    _.each methods, (method) ->
-      $Cypress.prototype[method] = ->
-        prop = @[key]
-
-        prop and prop[method].apply(prop, arguments)
-
-## attaching these so they are accessible
-## via the runner + integration spec helper
-$Cypress.$ = $
-$Cypress.dom = $dom
-
-module.exports = $Cypress
+      case "cy:visit:failed":
+        return this.emit("visit:failed", args[0]);
+
+      case "cy:viewport:changed":
+        return this.emit("viewport:changed", ...args);
+
+      case "cy:command:start":
+        return this.emit("command:start", ...args);
+
+      case "cy:command:end":
+        return this.emit("command:end", ...args);
+
+      case "cy:command:retry":
+        return this.emit("command:retry", ...args);
+
+      case "cy:command:enqueued":
+        return this.emit("command:enqueued", args[0]);
+
+      case "cy:command:queue:before:end":
+        return this.emit("command:queue:before:end");
+
+      case "cy:command:queue:end":
+        return this.emit("command:queue:end");
+
+      case "cy:url:changed":
+        return this.emit("url:changed", args[0]);
+
+      case "cy:next:subject:prepared":
+        return this.emit("next:subject:prepared", ...args);
+
+      case "cy:collect:run:state":
+        return this.emitThen("collect:run:state");
+
+      case "cy:scrolled":
+        return this.emit("scrolled", ...args);
+
+      case "app:uncaught:exception":
+        return this.emitMap("uncaught:exception", ...args);
+
+      case "app:window:alert":
+        return this.emit("window:alert", args[0]);
+
+      case "app:window:confirm":
+        return this.emitMap("window:confirm", args[0]);
+
+      case "app:window:confirmed":
+        return this.emit("window:confirmed", ...args);
+
+      case "app:page:loading":
+        return this.emit("page:loading", args[0]);
+
+      case "app:window:before:load":
+        this.cy.onBeforeAppWindowLoad(args[0]);
+
+        return this.emit("window:before:load", args[0]);
+
+      case "app:navigation:changed":
+        return this.emit("navigation:changed", ...args);
+
+      case "app:form:submitted":
+        return this.emit("form:submitted", args[0]);
+
+      case "app:window:load":
+        return this.emit("window:load", args[0]);
+
+      case "app:window:before:unload":
+        return this.emit("window:before:unload", args[0]);
+
+      case "app:window:unload":
+        return this.emit("window:unload", args[0]);
+
+      case "app:css:modified":
+        return this.emit("css:modified", args[0]);
+
+      case "spec:script:error":
+        return this.emit("script:error", ...args);
+    }
+  }
+
+  backend(eventName, ...args) {
+    return new Promise((resolve, reject) => {
+      const fn = function(reply) {
+        let e;
+        if (e = reply.error) {
+          //# clone the error object
+          //# and set stack cleaned
+          //# to prevent bluebird from
+          //# attaching long stace traces
+          //# which otherwise make this err
+          //# unusably long
+          const err = $utils.cloneErr(e);
+          err.__stackCleaned__ = true;
+          err.backend = true;
+          return reject(err);
+        } else {
+          return resolve(reply.response);
+        }
+      };
+
+      return this.emit("backend:request", eventName, ...args, fn);
+    });
+  }
+
+  automation(eventName, ...args) {
+    //# wrap action in promise
+    return new Promise((resolve, reject) => {
+      const fn = function(reply) {
+        let e;
+        if (e = reply.error) {
+          const err = $utils.cloneErr(e);
+          err.automation = true;
+          return reject(err);
+        } else {
+          return resolve(reply.response);
+        }
+      };
+
+      return this.emit("automation:request", eventName, ...args, fn);
+    });
+  }
+
+  stop() {
+    this.runner.stop();
+    this.cy.stop();
+
+    return this.action("cypress:stop");
+  }
+
+  addChildCommand(key, fn) {
+    return throwDeprecatedCommandInterface(key, "addChildCommand");
+  }
+
+  addParentCommand(key, fn) {
+    return throwDeprecatedCommandInterface(key, "addParentCommand");
+  }
+
+  addDualCommand(key, fn) {
+    return throwDeprecatedCommandInterface(key, "addDualCommand");
+  }
+
+  addAssertionCommand(key, fn) {
+    return throwPrivateCommandInterface("addAssertionCommand");
+  }
+
+  addUtilityCommand(key, fn) {
+    return throwPrivateCommandInterface("addUtilityCommand");
+  }
+
+  static create(config) {
+    return new $Cypress(config);
+  }
+}
+$Cypress.initClass();
+
+//# attaching these so they are accessible
+//# via the runner + integration spec helper
+$Cypress.$ = $;
+$Cypress.dom = $dom;
+
+module.exports = $Cypress;

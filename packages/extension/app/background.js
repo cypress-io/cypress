@@ -1,195 +1,238 @@
-map     = require("lodash/map")
-pick    = require("lodash/pick")
-once    = require("lodash/once")
-Promise = require("bluebird")
-client  = require("./client")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const map     = require("lodash/map");
+const pick    = require("lodash/pick");
+const once    = require("lodash/once");
+const Promise = require("bluebird");
+const client  = require("./client");
 
-COOKIE_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'storeId']
-GET_ALL_PROPS = COOKIE_PROPS.concat(['session'])
-SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
+const COOKIE_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'storeId'];
+const GET_ALL_PROPS = COOKIE_PROPS.concat(['session']);
+const SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate']);
 
-httpRe = /^http/
+const httpRe = /^http/;
 
-firstOrNull = (cookies) ->
-  ## normalize into null when empty array
-  cookies[0] ? null
+const firstOrNull = cookies =>
+  //# normalize into null when empty array
+  cookies[0] != null ? cookies[0] : null
+;
 
-connect = (host, path) ->
-  listenToCookieChanges = once ->
-    chrome.cookies.onChanged.addListener (info) ->
-      if info.cause isnt "overwrite"
-        ws.emit("automation:push:request", "change:cookie", info)
+const connect = function(host, path) {
+  const listenToCookieChanges = once(() =>
+    chrome.cookies.onChanged.addListener(function(info) {
+      if (info.cause !== "overwrite") {
+        return ws.emit("automation:push:request", "change:cookie", info);
+      }
+    })
+  );
 
-  fail = (id, err) ->
+  const fail = (id, err) =>
     ws.emit("automation:response", id, {
-      __error: err.message
-      __stack: err.stack
+      __error: err.message,
+      __stack: err.stack,
       __name:  err.name
     })
+  ;
 
-  invoke = (method, id, args...) ->
-    respond = (data) ->
-      ws.emit("automation:response", id, {response: data})
+  const invoke = function(method, id, ...args) {
+    const respond = data => ws.emit("automation:response", id, {response: data});
 
-    Promise.try ->
-      automation[method].apply(automation, args.concat(respond))
-    .catch (err) ->
-      fail(id, err)
+    return Promise.try(() => automation[method].apply(automation, args.concat(respond))).catch(err => fail(id, err));
+  };
 
-  ws = client.connect(host, path)
+  var ws = client.connect(host, path);
 
-  ws.on "automation:request", (id, msg, data) ->
-    switch msg
-      when "get:cookies"
-        invoke("getCookies", id, data)
-      when "get:cookie"
-        invoke("getCookie", id, data)
-      when "set:cookie"
-        invoke("setCookie", id, data)
-      when "clear:cookies"
-        invoke("clearCookies", id, data)
-      when "clear:cookie"
-        invoke("clearCookie", id, data)
-      when "is:automation:client:connected"
-        invoke("verify", id, data)
-      when "focus:browser:window"
-        invoke("focus", id)
-      when "take:screenshot"
-        invoke("takeScreenshot", id)
-      else
-        fail(id, {message: "No handler registered for: '#{msg}'"})
+  ws.on("automation:request", function(id, msg, data) {
+    switch (msg) {
+      case "get:cookies":
+        return invoke("getCookies", id, data);
+      case "get:cookie":
+        return invoke("getCookie", id, data);
+      case "set:cookie":
+        return invoke("setCookie", id, data);
+      case "clear:cookies":
+        return invoke("clearCookies", id, data);
+      case "clear:cookie":
+        return invoke("clearCookie", id, data);
+      case "is:automation:client:connected":
+        return invoke("verify", id, data);
+      case "focus:browser:window":
+        return invoke("focus", id);
+      case "take:screenshot":
+        return invoke("takeScreenshot", id);
+      default:
+        return fail(id, {message: `No handler registered for: '${msg}'`});
+    }
+  });
 
-  ws.on "connect", ->
-    listenToCookieChanges()
+  ws.on("connect", function() {
+    listenToCookieChanges();
 
-    ws.emit("automation:client:connected")
+    return ws.emit("automation:client:connected");
+  });
 
-  return ws
+  return ws;
+};
 
-automation = {
-  connect
+var automation = {
+  connect,
 
-  getUrl: (cookie = {}) ->
-    prefix = if cookie.secure then "https://" else "http://"
-    prefix + cookie.domain + cookie.path
+  getUrl(cookie = {}) {
+    const prefix = cookie.secure ? "https://" : "http://";
+    return prefix + cookie.domain + cookie.path;
+  },
 
-  clear: (filter = {}) ->
-    clear = (cookie) =>
-      new Promise (resolve, reject) =>
-        url = @getUrl(cookie)
-        props = {url: url, name: cookie.name}
-        chrome.cookies.remove props, (details) ->
-          if details
-            resolve(cookie)
-          else
-            err = new Error("Removing cookie failed for: #{JSON.stringify(props)}")
-            reject(chrome.runtime.lastError ? err)
+  clear(filter = {}) {
+    const clear = cookie => {
+      return new Promise((resolve, reject) => {
+        const url = this.getUrl(cookie);
+        const props = {url, name: cookie.name};
+        return chrome.cookies.remove(props, function(details) {
+          if (details) {
+            return resolve(cookie);
+          } else {
+            const err = new Error(`Removing cookie failed for: ${JSON.stringify(props)}`);
+            return reject(chrome.runtime.lastError != null ? chrome.runtime.lastError : err);
+          }
+        });
+      });
+    };
 
-    @getAll(filter)
-    .map(clear)
+    return this.getAll(filter)
+    .map(clear);
+  },
 
-  getAll: (filter = {}) ->
-    filter = pick(filter, GET_ALL_PROPS)
-    get = ->
-      new Promise (resolve) ->
-        chrome.cookies.getAll(filter, resolve)
+  getAll(filter = {}) {
+    filter = pick(filter, GET_ALL_PROPS);
+    const get = () =>
+      new Promise(function(resolve) {
+        return chrome.cookies.getAll(filter, resolve);
+      })
+    ;
 
-    get()
+    return get();
+  },
 
-  getCookies: (filter, fn) ->
-    @getAll(filter)
-    .then(fn)
+  getCookies(filter, fn) {
+    return this.getAll(filter)
+    .then(fn);
+  },
 
-  getCookie: (filter, fn) ->
-    @getAll(filter)
+  getCookie(filter, fn) {
+    return this.getAll(filter)
     .then(firstOrNull)
-    .then(fn)
+    .then(fn);
+  },
 
-  setCookie: (props = {}, fn) ->
-    set = =>
-      new Promise (resolve, reject) =>
-        ## only get the url if its not already set
-        props.url ?= @getUrl(props)
-        props = pick(props, SET_PROPS)
-        chrome.cookies.set props, (details) ->
-          switch
-            when details
-              resolve(details)
-            when err = chrome.runtime.lastError
-              reject(err)
-            else
-              ## the cookie callback could be null such as the
-              ## case when expirationDate is before now
-              resolve(null)
+  setCookie(props = {}, fn) {
+    const set = () => {
+      return new Promise((resolve, reject) => {
+        //# only get the url if its not already set
+        if (props.url == null) { props.url = this.getUrl(props); }
+        props = pick(props, SET_PROPS);
+        return chrome.cookies.set(props, function(details) {
+          let err;
+          switch (false) {
+            case !details:
+              return resolve(details);
+            case !(err = chrome.runtime.lastError):
+              return reject(err);
+            default:
+              //# the cookie callback could be null such as the
+              //# case when expirationDate is before now
+              return resolve(null);
+          }
+        });
+      });
+    };
 
-    set()
-    .then(fn)
+    return set()
+    .then(fn);
+  },
 
-  clearCookie: (filter, fn) ->
-    @clear(filter)
+  clearCookie(filter, fn) {
+    return this.clear(filter)
     .then(firstOrNull)
-    .then(fn)
+    .then(fn);
+  },
 
-  clearCookies: (filter, fn) ->
-    @clear(filter)
-    .then(fn)
+  clearCookies(filter, fn) {
+    return this.clear(filter)
+    .then(fn);
+  },
 
-  focus: (fn) ->
-    ## lets just make this simple and whatever is the current
-    ## window bring that into focus
-    ##
-    ## TODO: if we REALLY want to be nice its possible we can
-    ## figure out the exact window that's running Cypress but
-    ## that's too much work with too little value at the moment
-    chrome.windows.getCurrent (window) ->
-      chrome.windows.update window.id, {focused: true}, ->
-        fn()
+  focus(fn) {
+    //# lets just make this simple and whatever is the current
+    //# window bring that into focus
+    //#
+    //# TODO: if we REALLY want to be nice its possible we can
+    //# figure out the exact window that's running Cypress but
+    //# that's too much work with too little value at the moment
+    return chrome.windows.getCurrent(window =>
+      chrome.windows.update(window.id, {focused: true}, () => fn())
+    );
+  },
 
-  query: (data) ->
-    code = "var s; (s = document.getElementById('#{data.element}')) && s.textContent"
+  query(data) {
+    const code = `var s; (s = document.getElementById('${data.element}')) && s.textContent`;
 
-    query = ->
-      new Promise (resolve) ->
-        chrome.tabs.query({windowType: "normal"}, resolve)
+    const query = () =>
+      new Promise(function(resolve) {
+        return chrome.tabs.query({windowType: "normal"}, resolve);
+      })
+    ;
 
-    queryTab = (tab) ->
-      new Promise (resolve, reject) ->
-        chrome.tabs.executeScript tab.id, {code: code}, (result) ->
-          if result and result[0] is data.string
-            resolve()
-          else
-            reject(new Error)
+    const queryTab = tab =>
+      new Promise(function(resolve, reject) {
+        return chrome.tabs.executeScript(tab.id, {code}, function(result) {
+          if (result && (result[0] === data.string)) {
+            return resolve();
+          } else {
+            return reject(new Error);
+          }
+        });
+      })
+    ;
 
-    query()
-    .filter (tab) ->
-      ## the tab's url must begin with
-      ## http or https so that we filter out
-      ## about:blank and chrome:// urls
-      ## which will throw errors!
-      httpRe.test(tab.url)
-    .then (tabs) ->
-      ## generate array of promises
-      map(tabs, queryTab)
-    .any()
+    return query()
+    .filter(tab =>
+      //# the tab's url must begin with
+      //# http or https so that we filter out
+      //# about:blank and chrome:// urls
+      //# which will throw errors!
+      httpRe.test(tab.url)).then(tabs =>
+      //# generate array of promises
+      map(tabs, queryTab)).any();
+  },
 
-  verify: (data, fn) ->
-    @query(data)
-    .then(fn)
+  verify(data, fn) {
+    return this.query(data)
+    .then(fn);
+  },
 
-  lastFocusedWindow: ->
-    new Promise (resolve) ->
-      chrome.windows.getLastFocused(resolve)
+  lastFocusedWindow() {
+    return new Promise(function(resolve) {
+      return chrome.windows.getLastFocused(resolve);
+    });
+  },
 
-  takeScreenshot: (fn) ->
-    @lastFocusedWindow()
-    .then (win) ->
-      new Promise (resolve, reject) ->
-        chrome.tabs.captureVisibleTab win.id, {format: "png"}, (dataUrl) ->
-          if dataUrl
-            resolve(dataUrl)
-          else
-            reject(chrome.runtime.lastError)
-    .then(fn)
-}
+  takeScreenshot(fn) {
+    return this.lastFocusedWindow()
+    .then(win =>
+      new Promise(function(resolve, reject) {
+        return chrome.tabs.captureVisibleTab(win.id, {format: "png"}, function(dataUrl) {
+          if (dataUrl) {
+            return resolve(dataUrl);
+          } else {
+            return reject(chrome.runtime.lastError);
+          }
+        });
+      })).then(fn);
+  }
+};
 
-module.exports = automation
+module.exports = automation;
