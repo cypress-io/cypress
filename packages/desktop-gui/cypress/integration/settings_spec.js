@@ -184,23 +184,24 @@ describe('Settings', () => {
       })
 
       it('displays null when no env settings are found', function () {
-        const updateEnvConfig = (v) => {
+        const setConfigEnv = (config, v) => {
           return flow([
-            merge(this.config),
+            merge(config),
             set('resolved.env', v),
           ])({})
         }
 
-        const nullEnvConfig = updateEnvConfig(null)
-
-        this.ipc.openProject.onCall(1).resolves(nullEnvConfig)
+        this.ipc.openProject.onCall(1).resolves(setConfigEnv(this.config, null))
         this.ipc.onConfigChanged.yield()
 
         cy.contains('.line', 'env:null')
 
-        const emptyEnvConfig = updateEnvConfig({})
+        this.ipc.openProject.onCall(2).resolves(setConfigEnv(this.config, {}))
+        this.ipc.onConfigChanged.yield()
 
-        this.ipc.openProject.onCall(2).resolves(emptyEnvConfig)
+        cy.contains('.line', 'env:null')
+
+        this.ipc.openProject.onCall(3).resolves(setConfigEnv(this.config, undefined))
         this.ipc.onConfigChanged.yield()
 
         cy.contains('.line', 'env:null')
@@ -215,8 +216,6 @@ describe('Settings', () => {
             sortBy(get('')),
           ])
 
-          cy.contains('.line', 'env').contains(flow([getEnvKeys, join(', ')])(resolved))
-          cy.contains('.line', 'env').click()
           const assertKeyExists = each((key) => cy.contains('.line', key))
           const assertKeyValuesExists = flow([
             map((key) => {
@@ -249,6 +248,8 @@ describe('Settings', () => {
             }),
           ])
 
+          cy.contains('.line', 'env').contains(flow([getEnvKeys, join(', ')])(resolved))
+          cy.contains('.line', 'env').click()
           flow([getEnvKeys, assertKeyExists])(resolved)
           flow([getEnvKeys, assertKeyValuesExists])(resolved)
           flow([getEnvKeys, assertFromTooltipsExist])(resolved)
