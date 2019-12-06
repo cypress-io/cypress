@@ -1,4 +1,4 @@
-const { EventEmitter } = require('events')
+import { EventEmitter } from 'events'
 
 describe('controls', function () {
   beforeEach(function () {

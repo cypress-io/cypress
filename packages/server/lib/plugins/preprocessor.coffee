@@ -3,6 +3,7 @@ EE = require("events")
 path = require("path")
 debug = require("debug")("cypress:server:preprocessor")
 Promise = require("bluebird")
+resolve = require("resolve")
 appData = require("../util/app_data")
 cwd = require("../cwd")
 plugins = require("../plugins")
@@ -36,11 +37,42 @@ baseEmitter = new EE()
 fileObjects = {}
 fileProcessors = {}
 
-setDefaultPreprocessor = ->
+setDefaultPreprocessor = (config) ->
   debug("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
-  plugins.register("file:preprocessor", browserify())
+  # plugins.register("file:preprocessor", browserify({
+  #   browserifyOptions: {
+  #     extensions: ['.ts', '.tsx'],
+  #     plugin: [
+  #       [resolve.sync('tsify', {
+  #         baseDir: __dirname
+  #       }), {
+  #         typescript: resolve.sync('typescript', {
+  #           baseDir: config.projectRoot,
+  #         })
+  #       }]
+  #     ]
+  #   }
+  # }))
+  options = browserify.defaultOptions;
+  options.browserifyOptions.extensions.push('.ts', '.tsx');
+  babelifyConfig = options.browserifyOptions.transform[1][1];
+
+  resolveTypeScript = ->
+    try 
+      return resolve.sync('@babel/preset-typescript', {
+        baseDir: config.projectRoot
+      })
+    catch 
+      return resolve.sync('@babel/preset-typescript', {
+        baseDir: __dirname
+      })
+
+  babelifyConfig.presets.push(resolveTypeScript());
+  babelifyConfig.extensions = ['.js', '.jsx', '.ts', '.tsx'];
+
+  plugins.register("file:preprocessor", browserify(options));
 
 plugins.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
