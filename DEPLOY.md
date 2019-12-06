@@ -145,7 +145,9 @@ Once the `develop` branch for all test projects are reliably passing with the ne
     ```
 9. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 10. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
-11. Close the release in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release).
+11. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
+    - Close the current release in ZenHub.
+    - Create a new patch release (and a new minor release, if this is a minor release) in ZenHub, and schedule them both to be completed 2 weeks from the current date.
 12. Bump `version` in [`package.json`](package.json) and commit it to `develop` using a commit message like `release 3.4.0 [skip ci]`
 13. Tag this commit with `v3.4.0` and push that tag up.
 14. Merge `develop` into `master` and push that branch up.

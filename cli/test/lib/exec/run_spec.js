@@ -131,5 +131,23 @@ describe('exec run', function () {
         expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'])
       })
     })
+
+    it('spawns with --tag value', function () {
+      return run.start({ tag: 'nightly' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--tag', 'nightly',
+        ])
+      })
+    })
+
+    it('spawns with several --tag words unchanged', function () {
+      return run.start({ tag: 'nightly, sanity' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--tag', 'nightly, sanity',
+        ])
+      })
+    })
   })
 })
