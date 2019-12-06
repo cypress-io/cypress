@@ -53,6 +53,17 @@ const processRunOptions = (options = {}) => {
     args.push('--headed', options.headed)
   }
 
+  if (options.headless) {
+    if (options.headed) {
+      const err = new Error()
+
+      err.details = errors.incompatibleHeadlessFlags
+      throw err
+    }
+
+    args.push('--headed', !options.headless)
+  }
+
   // if key is set use that - else attempt to find it by environment variable
   if (options.key == null) {
     debug('--key is not set, looking up environment variable CYPRESS_RECORD_KEY')
@@ -95,21 +106,6 @@ const processRunOptions = (options = {}) => {
   // if we have specific spec(s) push that into the args
   if (options.spec) {
     args.push('--spec', options.spec)
-  }
-
-  if (options.headless) {
-    if (options.headed) {
-      const err = new Error()
-
-      err.details = errors.incompatibleHeadlessFlags
-      throw err
-    }
-
-    args.push('--headed', !options.headless)
-  }
-
-  if (options.exit === false) {
-    args.push('--no-exit')
   }
 
   if (options.tag) {
