@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { defaultTo, get, flow, join, map, reduce, take, toPairs, toPath } from 'lodash/fp'
+import { defaultTo, get, flow, isEmpty, join, map, reduce, take, toPairs, toPath } from 'lodash/fp'
 import cn from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
@@ -37,10 +37,18 @@ const formatValue = (value) => {
 }
 
 const normalizeWithoutMeta = flow([
+  defaultTo({}),
   toPairs,
   reduce((acc, [key, value]) => _.merge({}, acc, {
-    [key]: value.value,
+    [key]: value ? value.value : {},
   }), {}),
+  (v) => {
+    if (isEmpty(v)) {
+      return null
+    }
+
+    return v
+  },
 ])
 
 const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {

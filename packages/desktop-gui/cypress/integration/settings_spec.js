@@ -1,5 +1,5 @@
 const { _ } = Cypress
-const { each, flow, get, isString, join, map, sortBy, toPairs } = require('lodash/fp')
+const { each, flow, get, isString, join, map, merge, set, sortBy, toPairs } = require('lodash/fp')
 
 describe('Settings', () => {
   beforeEach(function () {
@@ -181,6 +181,29 @@ describe('Settings', () => {
         cy.get('.settings-config .learn-more').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/guides/configuration')
         })
+      })
+
+      it('displays null when no env settings are found', function () {
+        const updateEnvConfig = (v) => {
+          return flow([
+            merge(this.config),
+            set('resolved.env', v),
+          ])({})
+        }
+
+        const nullEnvConfig = updateEnvConfig(null)
+
+        this.ipc.openProject.onCall(1).resolves(nullEnvConfig)
+        this.ipc.onConfigChanged.yield()
+
+        cy.contains('.line', 'env:null')
+
+        const emptyEnvConfig = updateEnvConfig({})
+
+        this.ipc.openProject.onCall(2).resolves(emptyEnvConfig)
+        this.ipc.onConfigChanged.yield()
+
+        cy.contains('.line', 'env:null')
       })
 
       it('displays env settings', () => {
