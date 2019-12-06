@@ -167,7 +167,7 @@ describe('Project Nav', function () {
 
         it('displays browser icon as spinner', () => {
           cy.get('.browsers-list>a').first().find('i')
-          .should('have.class', 'fas fa-sync fa-spin')
+          .should('have.class', 'fas fa-sync-alt fa-spin')
         })
 
         it('disables browser dropdown', () => {

@@ -88,7 +88,7 @@ class SpecsList extends Component {
   }
 
   _specIcon (isChosen) {
-    return isChosen ? 'fa-dot-circle green' : 'fa-file-code'
+    return isChosen ? 'far fa-dot-circle green' : 'far fa-file'
   }
 
   _clearFilter = () => {
@@ -154,7 +154,7 @@ class SpecsList extends Component {
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: specsStore.isChosen(spec) })}>
           <div>
             <div className="file-name">
-              <i className={`far fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
+              <i className={`fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
               {spec.displayName}
             </div>
           </div>
