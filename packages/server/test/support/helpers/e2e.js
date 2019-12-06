@@ -1,3 +1,5 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -47,43 +49,43 @@ const stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/;
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g;
 
-//# this captures an entire stack trace and replaces it with [stack trace lines]
-//# so that the stdout can contain stack traces of different lengths
-//# '@' will be present in firefox stack trace lines
-//# 'at' will be present in chrome stack trace lines
+// this captures an entire stack trace and replaces it with [stack trace lines]
+// so that the stdout can contain stack traces of different lengths
+// '@' will be present in firefox stack trace lines
+// 'at' will be present in chrome stack trace lines
 const replaceStackTraceLines = str => str.replace(stackTraceLinesRe, "$1[stack trace lines]$5");
 
 const replaceBrowserName = function(str, key, customBrowserPath, browserName, version, headless, whitespace) {
-  //# get the padding for the existing browser string
+  // get the padding for the existing browser string
   const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, "length", 0), whitespace.length]);
 
-  //# this ensures we add whitespace so the border is not shifted
+  // this ensures we add whitespace so the border is not shifted
   return key + customBrowserPath + _.padEnd("FooBrowser 88", lengthOfExistingBrowserString);
 };
 
 const replaceDurationSeconds = function(str, p1, p2, p3, p4) {
-  //# get the padding for the existing duration
+  // get the padding for the existing duration
   const lengthOfExistingDuration = _.sum([(p2 != null ? p2.length : undefined) || 0, p3.length, p4.length]);
 
   return p1 + _.padEnd("X seconds", lengthOfExistingDuration);
 };
 
 const replaceDurationFromReporter = (str, p1, p2, p3) =>
-  //# duration='1589'
+  // duration='1589'
   p1 + _.padEnd("X", p2.length, "X") + p3
 ;
 
 const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length));
 
 const replaceDurationInTables = (str, p1, p2) =>
-  //# when swapping out the duration, ensure we pad the
-  //# full length of the duration so it doesn't shift content
+  // when swapping out the duration, ensure we pad the
+  // full length of the duration so it doesn't shift content
   _.padStart("XX:XX", p1.length + p2.length)
 ;
 
 const replaceParenTime = (str, p1) =>
-  //# could be (1 second) or (10 seconds)
-  //# need to account for shortest and longest
+  // could be (1 second) or (10 seconds)
+  // need to account for shortest and longest
   _.padStart("(X second)", p1.length)
 ;
 
@@ -105,11 +107,11 @@ const replaceUploadingResults = function(orig, ...rest) {
 const normalizeStdout = function(str, options = {}) {
   const normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true});
 
-  //# remove all of the dynamic parts of stdout
-  //# to normalize against what we expected
+  // remove all of the dynamic parts of stdout
+  // to normalize against what we expected
   str = str
-  //# /Users/jane/........../ -> //foo/bar/.projects/
-  //# (Required when paths are printed outside of our own formatting)
+  // /Users/jane/........../ -> //foo/bar/.projects/
+  // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join("/foo/bar/.projects");
 
   if (normalizeOptions.normalizeAvailableBrowsers) {
@@ -121,29 +123,29 @@ const normalizeStdout = function(str, options = {}) {
 
   str = str
   .replace(browserNameVersionRe, replaceBrowserName)
-  //# numbers in parenths
+  // numbers in parenths
   .replace(/\s\(\d+([ms]|ms)\)/g, "")
-  //# 12:35 -> XX:XX
+  // 12:35 -> XX:XX
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, "$1-456")
-  //# Cypress: 2.1.0 -> Cypress: 1.2.3
+  // Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, "$11.2.3")
-  //# Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
+  // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
   .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
-  //# 15 seconds -> X second
+  // 15 seconds -> X second
   .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
-  //# duration='1589' -> duration='XXXX'
+  // duration='1589' -> duration='XXXX'
   .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
-  //# (15 seconds) -> (XX seconds)
+  // (15 seconds) -> (XX seconds)
   .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
   .replace(/\r/g, "")
-  //# replaces multiple lines of uploading results (since order not guaranteed)
+  // replaces multiple lines of uploading results (since order not guaranteed)
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
-  //# fix "Require stacks" for CI
+  // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, "$1$3");
 
   if (options.sanitizeScreenshotDimensions) {
-    //# screenshot dimensions
+    // screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims);
   }
 
@@ -174,21 +176,21 @@ const startServer = function(obj) {
 
   app.use(morgan("dev"));
 
-  if (s = obj.static) {
+  s = obj.static;
+
+  if (s) {
     const opts = _.isObject(s) ? s : {};
     app.use(express.static(e2ePath, opts));
   }
 
-  return new Promise(function(resolve) {
-    return srv.listen(port, () => {
-      console.log(`listening on port: ${port}`);
-      if (typeof onServer === 'function') {
-        onServer(app, srv);
-      }
+  return new Promise(resolve => srv.listen(port, () => {
+    console.log(`listening on port: ${port}`);
+    if (typeof onServer === 'function') {
+      onServer(app, srv);
+    }
 
-      return resolve(srv);
-    });
-  });
+    return resolve(srv);
+  }));
 };
 
 const stopServer = srv => srv.destroyAsync();
@@ -204,8 +206,8 @@ const copy = function() {
 
     debug("Copying Circle Artifacts", ca, videosFolder, screenshotsFolder);
 
-    //# copy each of the screenshots and videos
-    //# to artifacts using each basename of the folders
+    // copy each of the screenshots and videos
+    // to artifacts using each basename of the folders
     return Promise.join(
       screenshots.copy(
         screenshotsFolder,
@@ -220,11 +222,11 @@ const copy = function() {
 };
 
 const getMochaItFn = function(only, skip, browser, specifiedBrowser) {
-  //# if we've been told to skip this test
-  //# or if we specified a particular browser and this
-  //# doesn't match the one we're currently trying to run...
+  // if we've been told to skip this test
+  // or if we specified a particular browser and this
+  // doesn't match the one we're currently trying to run...
   if (skip || (specifiedBrowser && (specifiedBrowser !== browser))) {
-    //# then skip this test
+    // then skip this test
     return it.skip;
   }
 
@@ -236,19 +238,19 @@ const getMochaItFn = function(only, skip, browser, specifiedBrowser) {
 };
 
 const getBrowsers = function(generateTestsForDefaultBrowsers, browser, defaultBrowsers) {
-  //# if we're generating tests for default browsers
+  // if we're generating tests for default browsers
   if (generateTestsForDefaultBrowsers) {
-    //# then return an array of default browsers
+    // then return an array of default browsers
     return defaultBrowsers;
   }
 
-  //# but if we haven't been told to generate tests for default browsers
-  //# and weren't provided a specified browser then throw
+  // but if we haven't been told to generate tests for default browsers
+  // and weren't provided a specified browser then throw
   if (!browser) {
     throw new Error('A browser must be specified when { generateTestsForDefaultBrowsers: false }.');
   }
 
-  //# otherwise return the specified browser
+  // otherwise return the specified browser
   return [browser];
 };
 
@@ -273,16 +275,16 @@ const localItFn = function(title, options = {}) {
     throw new Error('e2e.it(...) must be passed a title as the first argument');
   }
 
-  //# LOGIC FOR AUTOGENERATING DYNAMIC TESTS
-  //# - if generateTestsForDefaultBrowsers
-  //#   - create multiple tests for each default browser
-  //#   - if browser is specified in options:
-  //#     ...skip the tests for each default browser if that browser
-  //#     ...does not match the specified one (used in CI)
-  //# - else only generate a single test with the specified browser
+  // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
+  // - if generateTestsForDefaultBrowsers
+  //   - create multiple tests for each default browser
+  //   - if browser is specified in options:
+  //     ...skip the tests for each default browser if that browser
+  //     ...does not match the specified one (used in CI)
+  // - else only generate a single test with the specified browser
 
-  //# run the tests for all the default browsers, or if a browser
-  //# has been specified, only run it for that
+  // run the tests for all the default browsers, or if a browser
+  // has been specified, only run it for that
   const specifiedBrowser = browser;
   const browsersToTest = getBrowsers(generateTestsForDefaultBrowsers, browser, DEFAULT_BROWSERS);
 
@@ -323,10 +325,10 @@ module.exports = (e2e = {
   snapshot(...args) {
     args = _.compact(args);
 
-    //# grab the last element in index
+    // grab the last element in index
     const index = args.length - 1;
 
-    //# normalize the stdout of it
+    // normalize the stdout of it
     args[index] = normalizeStdout(args[index]);
 
     return snapshot.apply(null, args);
@@ -334,16 +336,18 @@ module.exports = (e2e = {
 
   setup(options = {}) {
     let npmI;
-    if (npmI = options.npmInstall) {
+    npmI = options.npmInstall;
+
+    if (npmI) {
       before(function() {
-        //# npm install needs extra time
+        // npm install needs extra time
         this.timeout(human("2 minutes"));
 
         return cp.execAsync("npm install", {
           cwd: Fixtures.path("projects/e2e"),
           maxBuffer: 1024*1000
         })
-        .then(function() {
+        .then(() => {
           if (_.isArray(npmI)) {
 
             const copyToE2ENodeModules = module =>
@@ -356,22 +360,22 @@ module.exports = (e2e = {
             .map(npmI, niv.install)
             .then(() => Promise.map(npmI, copyToE2ENodeModules));
           }}).then(() =>
-          //# symlinks mess up fs.copySync
-          //# and bin files aren't necessary for these tests
+          // symlinks mess up fs.copySync
+          // and bin files aren't necessary for these tests
           fs.removeAsync(Fixtures.path("projects/e2e/node_modules/.bin"))
         );
       });
 
       after(() =>
-        //# now cleanup the node modules after because these add a lot
-        //# of copy time for the Fixtures scaffolding
+        // now cleanup the node modules after because these add a lot
+        // of copy time for the Fixtures scaffolding
         fs.removeAsync(Fixtures.path("projects/e2e/node_modules"))
       );
     }
 
     beforeEach(function() {
-      //# after installing node modules copying all of the fixtures
-      //# can take a long time (5-15 secs)
+      // after installing node modules copying all of the fixtures
+      // can take a long time (5-15 secs)
       this.timeout(human("2 minutes"));
 
       Fixtures.scaffold();
@@ -380,19 +384,23 @@ module.exports = (e2e = {
 
       return Promise.try(() => {
         let servers;
-        if (servers = options.servers) {
+        servers = options.servers;
+
+        if (servers) {
           servers = [].concat(servers);
 
           return Promise.map(servers, startServer)
           .then(servers => {
-            return this.servers = servers;
+            this.servers = servers;
           });
         } else {
-          return this.servers = null;
+          this.servers = null;
         }
-    }).then(() => {
+      }).then(() => {
         let s;
-        if (s = options.settings) {
+        s = options.settings;
+
+        if (s) {
           return settings.write(e2ePath, s);
         }
       });
@@ -406,7 +414,9 @@ module.exports = (e2e = {
 
       Fixtures.remove();
 
-      if (s = this.servers) {
+      s = this.servers;
+
+      if (s) {
         return Promise.map(s, stopServer);
       }
     });
@@ -424,15 +434,17 @@ module.exports = (e2e = {
 
     ctx.timeout(options.timeout);
 
-    if (spec = options.spec) {
-      //# normalize into array and then prefix
-      const specs = spec.split(',').map(function(spec) {
+    spec = options.spec;
+
+    if (spec) {
+      // normalize into array and then prefix
+      const specs = spec.split(',').map(spec => {
         if (path.isAbsolute(spec)) { return spec; }
 
         return path.join(options.project, "cypress", "integration", spec);
       });
 
-      //# normalize the path to the spec
+      // normalize the path to the spec
       options.spec = specs.join(',');
     }
 
@@ -442,7 +454,7 @@ module.exports = (e2e = {
   args(options = {}) {
     let browser;
     const args = [
-      //# hides a user warning to go through NPM module
+      // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`
     ];
@@ -488,7 +500,9 @@ module.exports = (e2e = {
       args.push(`--reporter-options=${options.reporterOptions}`);
     }
 
-    if (browser = (options.browser)) {
+    browser = (options.browser;
+
+    if (browser) {
       args.push(`--browser=${browser}`);
     }
 
@@ -524,7 +538,7 @@ module.exports = (e2e = {
     const args    = this.args(options);
 
     return cypress.start(args)
-    .then(function() {
+    .then(() => {
       let code;
       if ((code = options.expectedExitCode) != null) {
         return expect(process.exit).to.be.calledWith(code);
@@ -547,17 +561,21 @@ module.exports = (e2e = {
         expect(code).to.eq(expected, "expected exit code");
       }
 
-      //# snapshot the stdout!
+      // snapshot the stdout!
       if (options.snapshot) {
-        //# enable callback to modify stdout
+        // enable callback to modify stdout
         let matches, ostd, str;
-        if (ostd = options.onStdout) {
+        ostd = options.onStdout;
+
+        if (ostd) {
           stdout = ostd(stdout);
         }
 
-        //# if we have browser in the stdout make
-        //# sure its legit
-        if (matches = browserNameVersionRe.exec(stdout)) {
+        // if we have browser in the stdout make
+        // sure its legit
+        matches = browserNameVersionRe.exec(stdout);
+
+        if (matches) {
           let browserName, customBrowserPath, headless, key, version;
           [str, key, customBrowserPath, browserName, version, headless] = matches;
 
@@ -569,8 +587,8 @@ module.exports = (e2e = {
 
           expect(parseFloat(version)).to.be.a.number;
 
-          //# if we are in headed mode or in a browser other
-          //# than electron
+          // if we are in headed mode or in a browser other
+          // than electron
           if (options.headed || (browser && (browser !== "electron"))) {
             expect(headless).not.to.exist;
           } else {
@@ -594,31 +612,31 @@ module.exports = (e2e = {
       };
     };
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       const sp = cp.spawn("node", args, {
         env: _.chain(process.env)
         .omit("CYPRESS_DEBUG")
         .extend({
-          //# FYI: color will be disabled
-          //# because we are piping the child process
+          // FYI: color will be disabled
+          // because we are piping the child process
           COLUMNS: 100,
           LINES: 24
         })
         .defaults({
           FAKE_CWD_PATH: "/XXX/XXX/XXX",
           DEBUG_COLORS: "1",
-          //# prevent any Compression progress
-          //# messages from showing up
+          // prevent any Compression progress
+          // messages from showing up
           VIDEO_COMPRESSION_THROTTLE: 120000,
 
-          //# don't fail our own tests running from forked PR's
+          // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: "1"
         })
         .value()
       });
 
-      //# pipe these to our current process
-      //# so we can see them in the terminal
+      // pipe these to our current process
+      // so we can see them in the terminal
       sp.stdout.pipe(process.stdout);
       sp.stderr.pipe(process.stderr);
 

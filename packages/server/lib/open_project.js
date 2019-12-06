@@ -83,7 +83,7 @@ const moduleFactory = () => {
           // so we can pass it down
           options.browser = browser
 
-          openProject.setCurrentSpecAndBrowser(spec, browser);
+          const automation = openProject.getAutomation()
 
           const automation = openProject.getAutomation()
 
@@ -122,7 +122,7 @@ const moduleFactory = () => {
               'launching browser: %o, spec: %s',
               browser,
               spec.relative
-            );
+            )
 
             return browsers.open(browser, options, automation)
           }

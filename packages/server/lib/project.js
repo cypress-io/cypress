@@ -356,7 +356,7 @@ class Project extends EE {
           return
         }
 
-        reporter.emit(event, runnable);
+        reporter.emit(event, runnable)
 
         if (event === 'end') {
           return Promise.all([
@@ -814,4 +814,4 @@ class Project extends EE {
   }
 }
 
-module.exports = Project;
+module.exports = Project
