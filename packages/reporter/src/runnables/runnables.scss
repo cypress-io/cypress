@@ -69,7 +69,7 @@
 
     &.runnable-active {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-sync;
+        @extend .#{$fa-css-prefix}-sync-alt;
         @extend .#{$fa-css-prefix}-spin;
       }
     }
@@ -81,6 +81,7 @@
       min-width: 12px;
       height: 18px;
       text-align: center;
+      font-size: 11px;
     }
 
     &.suite .collapsible-indicator  {

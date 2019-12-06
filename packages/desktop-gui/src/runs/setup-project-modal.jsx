@@ -98,7 +98,7 @@ class SetupProject extends Component {
               >
                 {
                   this.state.isSubmitting ?
-                    <span><i className='fas fa-spin fa-sync'></i>{' '}</span> :
+                    <span><i className='fas fa-spin fa-sync-alt'></i>{' '}</span> :
                     null
                 }
                 <span>Set up project</span>
