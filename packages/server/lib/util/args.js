@@ -10,8 +10,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk configFile proxySource'.split(' ')
-
+const whitelist = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version'.split(' ')
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = function (s) {
@@ -198,7 +197,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath } = options
+    const { env, config, reporterOptions, outputPath, tag } = options
     const project = options.project || options.runProject
 
     if (spec) {
@@ -213,6 +212,10 @@ module.exports = {
       }
 
       options.spec = strToArray(spec).map(resolvePath)
+    }
+
+    if (tag) {
+      options.tag = strToArray(tag)
     }
 
     if (env) {
