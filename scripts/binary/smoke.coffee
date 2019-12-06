@@ -26,9 +26,14 @@ runSmokeTest = (buildAppExecutable) ->
     lines = stdout.split('\n').map((s) -> s.trim())
     return lines.includes(rand)
 
-  args = ["--smoke-test", "--ping=#{rand}"]
+  args = []
   if verify.needsSandbox()
     args.push("--no-sandbox")
+
+  # separate any Electron command line arguments from Cypress args
+  args.push("--")
+  args.push("--smoke-test")
+  args.push("--ping=#{rand}")
 
   execa "#{buildAppExecutable}", args, {timeout: 10000}
   .catch (err) ->
@@ -38,6 +43,7 @@ runSmokeTest = (buildAppExecutable) ->
     stdout = stdout.replace(/\s/, "")
     if !hasRightResponse(stdout)
       throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
+    console.log("smoke test response", stdout)
     console.log("smokeTest passes")
 
 runProjectTest = (buildAppExecutable, e2e) ->

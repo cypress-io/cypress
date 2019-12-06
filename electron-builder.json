@@ -1,10 +1,12 @@
 {
   "mac": {
     "forceCodeSigning": true,
+    "gatekeeperAssess": true,
     "publish": null,
     "target": "zip",
     "hardenedRuntime": true,
     "entitlements": "./scripts/entitlements.mac.inherit.plist",
     "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist"
-  }
+  },
+  "electronVersion": "7.1.2"
 }
