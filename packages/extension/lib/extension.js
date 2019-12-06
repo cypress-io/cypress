@@ -1,19 +1,7 @@
-/* eslint-disable
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let fs = require('fs')
 const path = require('path')
 const Promise = require('bluebird')
 const background = require('../app/background')
-
-fs = Promise.promisifyAll(fs)
+const fs = Promise.promisifyAll(require('fs'))
 
 module.exports = {
   getPathToExtension (...args) {

@@ -1,13 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS204: Change includes calls to have a more natural evaluation order
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 const Promise = require('bluebird')
@@ -64,7 +54,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
     elAtCoords = $dom.getElementAtPointFromViewport(win.document, fromElViewport.x, fromElViewport.y)
 
     if (elAtCoords) {
-      $elAtCoords = $dom.wrap(elAtCoords)
+      return $elAtCoords = $dom.wrap(elAtCoords)
     }
   }
 

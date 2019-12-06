@@ -1,16 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-// Unit tests in ../../test/unit/browsers/chrome_spec
-
 const _ = require('lodash')
 const os = require('os')
 const path = require('path')
@@ -269,9 +256,8 @@ module.exports = {
 
       // copy the extension src to the extension dist
       return utils.copyExtension(pathToExtension, extensionDest)
-      .then(() =>
-      // and overwrite background.js with the final string bytes
-      {
+      .then(() => {
+        // and overwrite background.js with the final string bytes
         return fs.writeFileAsync(extensionBg, str)
       }).return(extensionDest)
     })

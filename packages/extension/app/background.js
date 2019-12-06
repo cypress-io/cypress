@@ -1,17 +1,4 @@
-/* eslint-disable
-    brace-style,
-    no-cond-assign,
-    no-undef,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* global chrome */
 const map = require('lodash/map')
 const pick = require('lodash/pick')
 const once = require('lodash/once')
@@ -24,9 +11,8 @@ const SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
 
 const httpRe = /^http/
 
-const firstOrNull = (cookies) =>
 // normalize into null when empty array
-{
+const firstOrNull = (cookies) => {
   return cookies[0] != null ? cookies[0] : null
 }
 
@@ -157,13 +143,13 @@ const automation = {
         props = pick(props, SET_PROPS)
 
         return chrome.cookies.set(props, (details) => {
-          let err
-
           if (details) {
             return resolve(details)
           }
 
-          if (err = chrome.runtime.lastError) {
+          let err = chrome.runtime.lastError
+
+          if (err) {
             return reject(err)
           }
 
@@ -225,16 +211,14 @@ const automation = {
     }
 
     return query()
-    .filter((tab) =>
-    // the tab's url must begin with
-    // http or https so that we filter out
-    // about:blank and chrome:// urls
-    // which will throw errors!
-    {
+    .filter((tab) => {
+      // the tab's url must begin with
+      // http or https so that we filter out
+      // about:blank and chrome:// urls
+      // which will throw errors!
       return httpRe.test(tab.url)
-    }).then((tabs) =>
-    // generate array of promises
-    {
+    }).then((tabs) => {
+      // generate array of promises
       return map(tabs, queryTab)
     }).any()
   },

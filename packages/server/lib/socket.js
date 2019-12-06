@@ -1,16 +1,3 @@
-/* eslint-disable
-    no-case-declarations,
-    no-unused-vars,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const path = require('path')
 const debug = require('debug')('cypress:server:socket')
@@ -18,14 +5,11 @@ const Promise = require('bluebird')
 const socketIo = require('@packages/socket')
 const fs = require('./util/fs')
 const open = require('./util/open')
-const pathHelpers = require('./util/path_helpers')
-const cwd = require('./cwd')
 const exec = require('./exec')
 const task = require('./task')
 const files = require('./files')
 const fixture = require('./fixture')
 const errors = require('./errors')
-const automation = require('./automation')
 const preprocessor = require('./plugins/preprocessor')
 
 const runnerEvents = [
@@ -61,10 +45,6 @@ const isSpecialSpec = (name) => {
 
 class Socket {
   constructor (config) {
-    if (!(this instanceof Socket)) {
-      return new Socket(config)
-    }
-
     this.ended = false
 
     this.onTestFileChange = this.onTestFileChange.bind(this)
@@ -375,10 +355,11 @@ class Socket {
               existingState = args[0]
 
               return null
-            case 'resolve:url':
+            case 'resolve:url': {
               const [url, resolveOpts] = args
 
               return options.onResolveUrl(url, headers, automationRequest, resolveOpts)
+            }
             case 'http:request':
               return options.onRequest(headers, automationRequest, args[0])
             case 'reset:server:state':

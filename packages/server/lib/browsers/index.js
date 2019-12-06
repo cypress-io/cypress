@@ -1,25 +1,9 @@
-/* eslint-disable
-    default-case,
-    no-unused-vars,
-    prefer-rest-params,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:browsers')
-const pluralize = require('pluralize')
 const utils = require('./utils')
 const errors = require('../errors')
-const fs = require('../util/fs')
-const la = require('lazy-ass')
 const check = require('check-more-types')
 
 // returns true if the passed string is a known browser family name
@@ -39,10 +23,10 @@ const kill = function (unbind) {
       instance.removeAllListeners()
     }
 
-    instance.once('exit', function (code, sigint) {
+    instance.once('exit', function (...args) {
       debug('browser process killed')
 
-      return resolve.apply(null, arguments)
+      return resolve.apply(null, args)
     })
 
     debug('killing browser process')
@@ -68,6 +52,8 @@ const getBrowserLauncherByFamily = function (family) {
       return require('./electron')
     case 'chrome':
       return require('./chrome')
+    default:
+      break
   }
 }
 

@@ -1,24 +1,5 @@
-/* eslint-disable
-    brace-style,
-    default-case,
-    no-case-declarations,
-    no-const-assign,
-    no-undef,
-    no-unused-vars,
-    no-var,
-    prefer-rest-params,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS203: Remove `|| {}` from converted for-own loops
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable prefer-rest-params */
+/* globals Cypress */
 const _ = require('lodash')
 const moment = require('moment')
 const Promise = require('bluebird')
@@ -188,12 +169,11 @@ const reduceProps = (obj, props) => {
   , {})
 }
 
-const wrap = (runnable) =>
 // we need to optimize wrap by converting
 // tests to an id-based object which prevents
 // us from recursively iterating through every
 // parent since we could just return the found test
-{
+const wrap = (runnable) => {
   return reduceProps(runnable, RUNNABLE_PROPS)
 }
 
@@ -222,8 +202,6 @@ const forceGc = function (obj) {
   // references to ctx, and removes callback
   // functions for closures
   for (let key of Object.keys(obj.ctx || {})) {
-    const value = obj.ctx[key]
-
     obj.ctx[key] = undefined
   }
 
@@ -396,8 +374,6 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
   const _runnerHook = _runner.hook
 
   _runner.hook = function (name, fn) {
-    const hooks = this.suite[`_${name}`]
-
     const allTests = getTests()
 
     const changeFnToRunAfterHooks = function () {
@@ -416,7 +392,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
     }
 
     switch (name) {
-      case 'afterEach':
+      case 'afterEach': {
         const t = getTest()
 
         // find all of the grep'd _tests which share
@@ -430,11 +406,12 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         }
 
         break
+      }
 
-      case 'afterAll':
+      case 'afterAll': {
         // find all of the grep'd allTests which share
         // the same parent suite as our current _test
-        t = getTest()
+        const t = getTest()
 
         if (t) {
           const siblings = getAllSiblingTests(t.parent, getTestById)
@@ -455,6 +432,10 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
           }
         }
 
+        break
+      }
+
+      default:
         break
     }
 
@@ -623,13 +604,6 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
   }
 
   return obj
-}
-
-const afterEachFailed = function (Cypress, test, err) {
-  test.state = 'failed'
-  test.err = wrapErr(err)
-
-  return Cypress.action('runner:test:end', wrap(test))
 }
 
 const hookFailed = function (hook, err, hookName, getTestById, getTest) {
@@ -899,9 +873,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
   }
   let _startTime = null
 
-  const getTestId = () =>
   // increment the id counter
-  {
+  const getTestId = () => {
     return `r${_id += 1}`
   }
 
@@ -1036,6 +1009,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
         case 'test':
           test = runnable
           break
+
+        default:
+          break
       }
 
       // closure for calculating the actual
@@ -1109,6 +1085,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
               afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
             })
 
+            break
+
+          default:
             break
         }
 
@@ -1237,7 +1216,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
       // search through all of the tests
       // until we find the current test
       // and break then
-      for (var test of _tests) {
+      for (let test of _tests) {
         if (test.id === id) {
           break
         } else {

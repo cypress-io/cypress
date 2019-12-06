@@ -1,17 +1,4 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
-const la = require('lazy-ass')
-const os = require('os')
-const path = require('path')
 const utils = require('fluent-ffmpeg/lib/utils')
 const debug = require('debug')('cypress:server:video')
 const ffmpeg = require('fluent-ffmpeg')
@@ -77,7 +64,6 @@ module.exports = {
     const pt = stream.PassThrough()
     const ended = deferredPromise()
     let done = false
-    const errored = false
     let written = false
     let logErrors = true
     let wantsWrite = true
@@ -191,12 +177,10 @@ module.exports = {
     let total = null
 
     return new Promise((resolve, reject) => {
-      let cmd
-
       debug('processing video from %s to %s video compression %o',
         name, cname, videoCompression)
 
-      cmd = ffmpeg()
+      ffmpeg()
       .input(name)
       .videoCodec('libx264')
       .outputOptions([
