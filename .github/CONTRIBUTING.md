@@ -267,6 +267,17 @@ We try to tag all issues with a `pkg/` tag describing the appropriate package th
 You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/) installed to run the project. We use [avn](https://github.com/wbyoung/avn), a utility to switch to the right npm version, in each folder. Currently, Cypress should be developed using the version specified in root [.node-version](.node-version) file.
 
 ### Getting Started
+**Windows user only**
+
+The main development is made on non-Windows operating systems. If you are running a Windows operating system you may encounter many commands that are not working. To fix this behaviour, you have to set a linux-like bash as default node script shell. Use one of the following command, based upon your operating system.
+
+```bash
+npm config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"  
+```
+
+```bash
+npm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"
+```
 
 **Install all dependencies:**
 
