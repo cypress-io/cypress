@@ -9,10 +9,10 @@ onServer = (app) ->
   app.get "/logout", (req, res) ->
     res.send("<html>logged out</html>")
 
-  app.get "/requestCookies", (req, res) ->
+  app.all "/requestCookies", (req, res) ->
     res.send(req.cookies)
 
-  app.get "/requestCookiesHtml", (req, res) ->
+  app.all "/requestCookiesHtml", (req, res) ->
     res.type('html').send(req.cookies)
 
   app.get "/set", (req, res) ->
