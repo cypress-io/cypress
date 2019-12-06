@@ -6,6 +6,8 @@ const Promise = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
 const la = require('lazy-ass')
 const check = require('check-more-types')
+const tsnode = require('ts-node')
+const resolve = require('resolve')
 const scaffoldDebug = require('debug')('cypress:server:scaffold')
 const debug = require('debug')('cypress:server:project')
 const cwd = require('./cwd')
@@ -99,6 +101,73 @@ class Project extends EE {
 
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
+    }).then((cfg) => {
+      const setupNodePath = path.join(
+        this.projectRoot,
+        cfg.nodeSetupFile
+      )
+
+      return fs.pathExists(setupNodePath)
+      .then((exists) => {
+        // TODO: This part is commented out because packages/server didn't turn on
+        // 'strict' option for TypeScript.
+        // When 'strict' is on, the cypress will fail because of implicit `any`s in
+        // packages/server code, not in users' code.
+        // So, when 'strict' is turned on for packages/server, it should be revisited.
+        // if (exists) {
+        //   debug('custom node setup file exists at %s', setupNodePath)
+
+        //   const setupNode = require(setupNodePath)
+
+        //   setupNode()
+
+        //   return
+        // }
+
+        const resolveProjectTypeScript = () => {
+          try {
+            return resolve.sync('typescript', {
+              basedir: this.projectRoot,
+            })
+          } catch (e) {
+            return undefined
+          }
+        }
+
+        debug('typescript option value: %s', cfg.typescript)
+
+        if (cfg.typescript === 'project') {
+          const tsPath = resolveProjectTypeScript()
+
+          debug('typescript path: %s', tsPath)
+
+          if (tsPath) {
+            tsnode.register({
+              compiler: tsPath,
+              transpileOnly: true,
+            })
+          } else {
+            throw new Error(`The value of 'typescript' option is 'project', but typescript is not set up in the project.`)
+          }
+        } else if (cfg.typescript === 'bundled') {
+          tsnode.register({
+            transpileOnly: true,
+          })
+        } else if (cfg.typescript === 'none') {
+          // Do nothing
+        } else {
+          const tsPath = resolveProjectTypeScript()
+
+          debug('typescript path: %s', tsPath)
+
+          tsnode.register({
+            compiler: tsPath,
+            transpileOnly: true,
+          })
+        }
+
+        return cfg
+      })
     }).then((cfg) => {
       return this._initPlugins(cfg, options)
       .then((modifiedCfg) => {
