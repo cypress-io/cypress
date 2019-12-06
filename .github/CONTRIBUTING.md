@@ -269,7 +269,7 @@ You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com
 ### Getting Started
 **Windows user only**
 
-The main development is made on non-Windows operating systems. If you are running a Windows operating system you may encounter many commands that are not working. To fix this behaviour, you have to set a linux-like bash as default node script shell. Use one of the following command, based upon your operating system.
+The main development is made on non-Windows operating systems. If you are running a Windows operating system you may encounter many commands that are not working. To fix this behaviour, you have to set a linux-like bash as default node script shell. Use one of the following command, based upon your operating system. Those commands require you to have git for Windows installed.
 
 ```bash
 npm config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"  
