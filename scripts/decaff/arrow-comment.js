@@ -15,9 +15,10 @@ module.exports = (fileInfo, api) => {
   })
   .replaceWith((nodePath) => {
     const { node } = nodePath
+    const comments = node.declarations[0].init.body.comments
 
-    if (node.declarations[0].init.body.comments.length > 0) {
-      node.comments = [...node.comments, ...node.declarations[0].init.body.comments]
+    if (comments && comments.length > 0) {
+      node.comments = [...node.comments, ...comments]
       node.declarations[0].init.body.comments = null
     }
 
