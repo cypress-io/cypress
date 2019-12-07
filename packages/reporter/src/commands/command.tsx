@@ -30,7 +30,10 @@ const formatOptions = (options: Record<string, any>) => {
     }
   })
 
-  return JSON.stringify(obj).replace(/"/g, '')
+  return JSON.stringify(obj)
+  .replace(/"/g, '')
+  .replace(/:/g, ': ')
+  .replace(/,/g, ', ')
 }
 const visibleMessage = (model: CommandModel) => {
   if (model.visible) return ''

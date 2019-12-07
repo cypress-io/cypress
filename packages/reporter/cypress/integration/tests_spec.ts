@@ -123,7 +123,7 @@ describe('controls', function () {
 
     describe('options', () => {
       it('shows option', () => {
-        cy.get('.command-name-visit .command-message-options').contains('{foo:bar}')
+        cy.get('.command-name-visit .command-message-options').contains('{foo: bar}')
       })
     })
   })
