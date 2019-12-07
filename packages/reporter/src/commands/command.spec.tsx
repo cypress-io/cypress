@@ -194,7 +194,7 @@ describe('<Command />', () => {
       it('shows options when it exists', () => {
         const component = shallow(<Command model={model({ options: { foo: 'bar' } })} aliasesWithDuplicates={null} />)
 
-        expect(component.find(Message).first().shallow().find('.command-message-options').html()).to.contain('{foo:bar}')
+        expect(component.find(Message).first().shallow().find('.command-message-options').html()).to.contain('{foo: bar}')
       })
 
       it('does not show options when option object is empty', () => {
@@ -206,7 +206,13 @@ describe('<Command />', () => {
       it('shows undefined as option value', () => {
         const component = shallow(<Command model={model({ options: { foo: undefined } })} aliasesWithDuplicates={null} />)
 
-        expect(component.find(Message).first().shallow().find('.command-message-options').html()).to.contain('{foo:undefined}')
+        expect(component.find(Message).first().shallow().find('.command-message-options').html()).to.contain('{foo: undefined}')
+      })
+
+      it('shows quotes when an option value has space, colon or comma', () => {
+        const component = shallow(<Command model={model({ options: { foo: 'bar, baz:dev', log: true } })} aliasesWithDuplicates={null} />)
+
+        expect(component.find(Message).first().shallow().find('.command-message-options').html()).to.contain('{foo: &quot;bar, baz:dev&quot;, log: true}')
       })
     })
   })

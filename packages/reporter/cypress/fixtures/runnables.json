@@ -30,7 +30,8 @@
               "state": "passed",
               "testId": "r4",
               "options": {
-                "foo": "bar"
+                "foo": "bar, baz:dev",
+                "timeout": 4000
               },
               "type": "parent"
             }

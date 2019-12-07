@@ -28,12 +28,19 @@ const formatOptions = (options: Record<string, any>) => {
     if (obj[k] === undefined) {
       obj[k] = 'undefined'
     }
+
+    if (typeof obj[k] === 'string' && obj[k].match(/[ ,:]/)) {
+      obj[k] = `__QUOTE__${obj[k].replace(/:/g, '__COLON__').replace(/,/g, '__COMMA__')}__QUOTE__`
+    }
   })
 
   return JSON.stringify(obj)
   .replace(/"/g, '')
   .replace(/:/g, ': ')
   .replace(/,/g, ', ')
+  .replace(/__COLON__/g, ':')
+  .replace(/__COMMA__/g, ',')
+  .replace(/__QUOTE__/g, `"`)
 }
 const visibleMessage = (model: CommandModel) => {
   if (model.visible) return ''
