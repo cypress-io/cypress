@@ -41,6 +41,7 @@ setDefaultPreprocessor = (config) ->
   debug("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
+  # ## Commented out for test. It will be removed in the final version. 
   # plugins.register("file:preprocessor", browserify({
   #   browserifyOptions: {
   #     extensions: ['.ts', '.tsx'],
