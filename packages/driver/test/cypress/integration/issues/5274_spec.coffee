@@ -19,6 +19,14 @@ describe "issue 5274", ->
 
       cy.request("http://localhost:1234/’")
 
+    it "should request url with % character in pathname without UNESCAPED_CHARACTERS error", (done) ->
+      cy.on "fail", (err) ->
+        expect(err.message).to.contain "cy.request() failed trying to load:"
+        expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
+        done()
+
+      cy.request("http://localhost:1234/%")
+
     it "should request url with ’ escaped in pathname without UNESCAPED_CHARACTERS error", (done) ->
       cy.on "fail", (err) ->
         expect(err.message).to.contain "cy.request() failed trying to load:"
@@ -27,7 +35,7 @@ describe "issue 5274", ->
 
       cy.request(encodeURI('http://localhost:1234/’'))
 
-    it "should visit url with Unicode in pathname from BMP to Astral Plane without UNESCAPED_CHARACTERS error", (done) ->
+    it "should request url with Unicode in pathname from BMP to Astral Plane without UNESCAPED_CHARACTERS error", (done) ->
       cy.on "fail", (err) ->
         expect(err.message).to.contain "cy.request() failed trying to load:"
         expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
@@ -98,7 +106,19 @@ describe "issue 5274", ->
           url: "http://localhost:1234/%E2%80%99"
         })
 
-    it "should visit url with Unicode in pathname from BMP to Astral Plane", ->
+    it "should request url with % character in pathname", ->
+      cy.request({ url: 'http://localhost:1234/%' }).then ->
+        @expectOptionsToBe({
+          url: "http://localhost:1234/%"
+        })
+
+    it "should request url with % escaped in pathname without alteration", ->
+      cy.request({ url: encodeURI('http://localhost:1234/%') }).then ->
+        @expectOptionsToBe({
+          url: "http://localhost:1234/%25"
+        })
+
+    it "should request url with Unicode in pathname from BMP to Astral Plane", ->
       cy.request({ url: 'http://localhost:1234/😀' }).then ->
         @expectOptionsToBe({
           url: "http://localhost:1234/%F0%9F%98%80"
