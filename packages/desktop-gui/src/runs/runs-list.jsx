@@ -215,7 +215,7 @@ class RunsList extends Component {
               disabled={this.runsStore.isLoading}
               onClick={this._getRuns}
             >
-              <i aria-hidden="true" className={`fas fa-sync ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
+              <i aria-hidden="true" className={`fas fa-sync-alt ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
           </h5>
           <div>
@@ -258,7 +258,7 @@ class RunsList extends Component {
             className='btn btn-default btn-sm'
             onClick={this._pingApiServer}
           >
-            <i className='fas fa-sync'></i>{' '}
+            <i className='fas fa-sync-alt'></i>{' '}
             Try again
           </button>
         </p>
