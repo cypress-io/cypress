@@ -19,7 +19,7 @@ const LogRequest: RequestMiddleware = function () {
   this.next()
 }
 
-const MaybeEndRequestWithBufferedResponse : RequestMiddleware = function () {
+const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   const buffer = this.buffers.take(this.req.proxiedUrl)
 
   if (buffer) {
@@ -32,7 +32,7 @@ const MaybeEndRequestWithBufferedResponse : RequestMiddleware = function () {
   this.next()
 }
 
-const RedirectToClientRouteIfUnloaded : RequestMiddleware = function () {
+const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   // if we have an unload header it means our parent app has been navigated away
   // directly and we need to automatically redirect to the clientRoute
   if (this.req.cookies['__cypress.unload']) {
@@ -83,7 +83,7 @@ const EndRequestsToBlacklistedHosts: RequestMiddleware = function () {
   this.next()
 }
 
-const StripUnsupportedAcceptEncoding : RequestMiddleware = function () {
+const StripUnsupportedAcceptEncoding: RequestMiddleware = function () {
   // Cypress can only support plaintext or gzip, so make sure we don't request anything else
   const acceptEncoding = this.req.headers['accept-encoding']
 

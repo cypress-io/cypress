@@ -6,7 +6,7 @@ import { emit } from './util'
 
 const debug = debugModule('cypress:net-stubbing:server:intercept-error')
 
-export const InterceptError : ErrorMiddleware = function () {
+export const InterceptError: ErrorMiddleware = function () {
   const backendRequest = this.netStubbingState.requests[this.req.requestId]
 
   debug('onProxiedResponseError %o', { req: this.req, backendRequest })
@@ -20,7 +20,7 @@ export const InterceptError : ErrorMiddleware = function () {
   backendRequest.sendResponseToDriver = false
   backendRequest.continueResponse = this.next
 
-  const frame : NetEventFrames.HttpResponseReceived = {
+  const frame: NetEventFrames.HttpResponseReceived = {
     routeHandlerId: backendRequest.route.handlerId!,
     requestId: backendRequest.requestId,
     res: {

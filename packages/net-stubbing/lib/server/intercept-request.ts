@@ -90,7 +90,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 }
 
 export function _getMatchableForRequest (req: CypressIncomingRequest) {
-  let matchable : any = _.pick(req, ['headers', 'method', 'webSocket'])
+  let matchable: any = _.pick(req, ['headers', 'method', 'webSocket'])
 
   const authorization = req.headers['authorization']
 
@@ -134,7 +134,7 @@ function _getRouteForRequest (routes: BackendRoute[], req: CypressIncomingReques
  * @param res
  * @param cb Can be called to resume the proxy's normal behavior. If `res` is not handled and this is not called, the request will hang.
  */
-export const InterceptRequest : RequestMiddleware = function () {
+export const InterceptRequest: RequestMiddleware = function () {
   const route = _getRouteForRequest(this.netStubbingState.routes, this.req)
 
   if (!route) {
@@ -144,7 +144,7 @@ export const InterceptRequest : RequestMiddleware = function () {
 
   const requestId = _.uniqueId('interceptedRequest')
 
-  const request : BackendRequest = {
+  const request: BackendRequest = {
     requestId,
     route,
     continueRequest: this.next,
@@ -176,7 +176,7 @@ function _interceptRequest (request: BackendRequest, route: BackendRoute, socket
     emit(socket, 'http:request:received', frame)
   }
 
-  const frame : NetEventFrames.HttpRequestReceived = {
+  const frame: NetEventFrames.HttpRequestReceived = {
     routeHandlerId: route.handlerId!,
     requestId: request.req.requestId,
     req: _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {

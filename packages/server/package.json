@@ -187,9 +187,9 @@
     "config",
     "lib"
   ],
+  "types": "index.d.ts",
   "productName": "Cypress",
   "optionalDependencies": {
     "registry-js": "1.8.0"
-  },
-  "types": "index.d.ts"
+  }
 }

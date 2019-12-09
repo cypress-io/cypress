@@ -1,6 +1,6 @@
 import { NetStubbingState } from './types'
 
-export function state () : NetStubbingState {
+export function state (): NetStubbingState {
   return {
     requests: {},
     routes: [],

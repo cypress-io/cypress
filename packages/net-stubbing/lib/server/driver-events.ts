@@ -43,7 +43,7 @@ function _onRouteAdded (state: NetStubbingState, options: NetEventFrames.AddRout
 function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
   const stringMatcherFields = getAllStringMatcherFields(options)
 
-  const ret : RouteMatcherOptions = {}
+  const ret: RouteMatcherOptions = {}
 
   stringMatcherFields.forEach((field) => {
     const obj = _.get(options, field)

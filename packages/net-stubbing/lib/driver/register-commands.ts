@@ -46,7 +46,7 @@ function _annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
     )
   )
 
-  const ret : AnnotatedRouteMatcherOptions = {}
+  const ret: AnnotatedRouteMatcherOptions = {}
 
   stringMatcherFields.forEach((field) => {
     const value = _.get(options, field)
@@ -70,22 +70,22 @@ function _getUniqueId () {
   return `${Number(new Date()).toString()}-${_.uniqueId()}`
 }
 
-function _isHttpRequestInterceptor (obj) : obj is HttpRequestInterceptor {
+function _isHttpRequestInterceptor (obj): obj is HttpRequestInterceptor {
   return typeof obj === 'function'
 }
 
-function _isWebSocketController (obj, options) : obj is WebSocketController {
+function _isWebSocketController (obj, options): obj is WebSocketController {
   return typeof obj === 'object' && options.webSocket === true
 }
 
-function _isRegExp (obj) : obj is RegExp {
+function _isRegExp (obj): obj is RegExp {
   return obj && (obj instanceof RegExp || obj.__proto__ === RegExp.prototype || obj.__proto__.constructor.name === 'RegExp')
 }
 
 function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHeaders) {
   if (_.isNumber(statusCodeOrBody)) {
     // statusCodeOrBody is a status code
-    const staticResponse : StaticResponse = {
+    const staticResponse: StaticResponse = {
       statusCode: statusCodeOrBody,
     }
 
@@ -102,7 +102,7 @@ function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHe
 
   if (_.isString(statusCodeOrBody) && !maybeHeaders) {
     // statusCodeOrBody is body
-    const staticResponse : StaticResponse = {
+    const staticResponse: StaticResponse = {
       body: statusCodeOrBody,
     }
 
@@ -158,7 +158,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
   }
 
   function _getNewRouteLog (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse) {
-    let obj : Partial<Cypress.LogConfig> = {
+    let obj: Partial<Cypress.LogConfig> = {
       name: 'route',
       instrument: 'route',
       isStubbed,
@@ -293,7 +293,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
   }
 
   function route (matcher: RouteMatcher, handler: RouteHandler) {
-    let options : RouteMatcherOptions
+    let options: RouteMatcherOptions
 
     if (matcher instanceof RegExp || typeof matcher === 'string') {
       options = {
@@ -307,7 +307,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     .then(() => null)
   }
 
-  function server () : void {
+  function server (): void {
 
   }
 
@@ -341,7 +341,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       return sendContinueFrame()
     }
 
-    const request : Partial<Request> = {
+    const request: Partial<Request> = {
       req,
       state: RequestState.Received,
     }
@@ -357,7 +357,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       return
     }
 
-    const continueFrame : Partial<NetEventFrames.HttpRequestContinue> = {
+    const continueFrame: Partial<NetEventFrames.HttpRequestContinue> = {
       routeHandlerId,
       requestId,
     }
@@ -368,7 +368,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
     route.hitCount++
 
-    const userReq : CyHttpMessages.IncomingHttpRequest = {
+    const userReq: CyHttpMessages.IncomingHttpRequest = {
       ...req,
       reply (responseHandler, maybeBody?, maybeHeaders?) {
         if (nextCalled) {
@@ -461,7 +461,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
     request.state = RequestState.ResponseReceived
 
-    const continueFrame : NetEventFrames.HttpResponseContinue = {
+    const continueFrame: NetEventFrames.HttpResponseContinue = {
       routeHandlerId,
       requestId,
     }
@@ -478,7 +478,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       _emit('http:response:continue', continueFrame)
     }
 
-    const userRes : CyHttpMessages.IncomingHttpResponse = {
+    const userRes: CyHttpMessages.IncomingHttpResponse = {
       ...res,
       send (staticResponse?, maybeBody?, maybeHeaders?) {
         if (sendCalled) {

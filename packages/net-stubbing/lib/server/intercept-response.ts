@@ -22,7 +22,7 @@ import {
 
 const debug = debugModule('cypress:net-stubbing:server:intercept-response')
 
-export const InterceptResponse : ResponseMiddleware = function () {
+export const InterceptResponse: ResponseMiddleware = function () {
   const backendRequest = this.netStubbingState.requests[this.req.requestId]
 
   debug('InterceptResponse %o', { req: this.req, backendRequest })
@@ -51,7 +51,7 @@ export const InterceptResponse : ResponseMiddleware = function () {
     this.next()
   }
 
-  const frame : NetEventFrames.HttpResponseReceived = {
+  const frame: NetEventFrames.HttpResponseReceived = {
     routeHandlerId: backendRequest.route.handlerId!,
     requestId: backendRequest.requestId,
     res: _.extend(_.pick(this.incomingRes, SERIALIZABLE_RES_PROPS), {
@@ -90,7 +90,7 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
   })
 
   function continueResponse () {
-    let newResStream : Optional<Readable>
+    let newResStream: Optional<Readable>
 
     function throttleify (body) {
       const throttleStr = new ThrottleStream(frame.throttleKbps! * 1024)

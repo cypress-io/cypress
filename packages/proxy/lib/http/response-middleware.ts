@@ -98,7 +98,7 @@ function responseMustHaveEmptyBody (req: CypressIncomingRequest, res: IncomingMe
 }
 
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
-  let opts : CookieOptions = { domain }
+  let opts: CookieOptions = { domain }
 
   if (!v) {
     v = ''
@@ -128,7 +128,7 @@ const LogResponse: ResponseMiddleware = function () {
   this.next()
 }
 
-const AttachPlainTextStreamFn : ResponseMiddleware = function () {
+const AttachPlainTextStreamFn: ResponseMiddleware = function () {
   this.makeResStreamPlainText = function () {
     debug('ensuring resStream is plaintext')
 
@@ -146,7 +146,7 @@ const AttachPlainTextStreamFn : ResponseMiddleware = function () {
   this.next()
 }
 
-const PatchExpressSetHeader : ResponseMiddleware = function () {
+const PatchExpressSetHeader: ResponseMiddleware = function () {
   const originalSetHeader = this.res.setHeader
 
   // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
@@ -278,7 +278,7 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeInjectHtml : ResponseMiddleware = function () {
+const MaybeInjectHtml: ResponseMiddleware = function () {
   if (!this.res.wantsInjection) {
     return this.next()
   }
@@ -319,7 +319,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.next()
 }
 
-const GzipBody : ResponseMiddleware = function () {
+const GzipBody: ResponseMiddleware = function () {
   if (this.isGunzipped) {
     debug('regzipping response body')
     this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)

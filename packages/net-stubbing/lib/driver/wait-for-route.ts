@@ -16,7 +16,7 @@ export function waitForRoute (alias: string, cy: Cypress.cy, state: Cypress.Stat
 
   // 1. Get route with this alias.
   // @ts-ignore
-  const route : Route = _.find(state('routes'), { alias })
+  const route: Route = _.find(state('routes'), { alias })
 
   function retry () {
     return cy.retry(() => {

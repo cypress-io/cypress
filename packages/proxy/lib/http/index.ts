@@ -46,7 +46,7 @@ export type ServerCtx = Readonly<{
   socket: CyServer.Socket
 }>
 
-const READONLY_MIDDLEWARE_KEYS : (keyof HttpMiddlewareThis<{}>)[] = [
+const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getRemoteState',
@@ -60,6 +60,7 @@ const READONLY_MIDDLEWARE_KEYS : (keyof HttpMiddlewareThis<{}>)[] = [
 
 type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
   buffers: HttpBuffers
+  request: any
 
   next: () => void
   /**
