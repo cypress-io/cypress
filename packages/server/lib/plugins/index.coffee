@@ -37,7 +37,18 @@ module.exports = {
 
       registeredEvents = {}
 
-      pluginsProcess = cp.fork(path.join(__dirname, "child", "index.js"), ["--file", config.pluginsFile], { stdio: "inherit" })
+      childIndexFilename = path.join(__dirname, "child", "index.js")
+      childArguments = ["--file", config.pluginsFile]
+      childOptions = {
+        stdio: "inherit"
+      }
+
+      if config.resolvedNodePath
+        debug("launching using custom node version %o", _.pick(config, ['resolvedNodePath', 'resolvedNodeVersion']))
+        childOptions.execPath = config.resolvedNodePath
+
+      debug("forking to run %s", childIndexFilename)
+      pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
       ipc = util.wrapIpc(pluginsProcess)
 
       handler(ipc) for handler in handlers
@@ -57,9 +68,11 @@ module.exports = {
               }
               ipc.send("execute", registration.event, ids, args)
 
+        debug("resolving with new config %o", newCfg)
         resolve(newCfg)
 
       ipc.on "load:error", (type, args...) ->
+        debug("load:error %s, rejecting", type)
         reject(errors.get(type, args...))
 
       killPluginsProcess = ->
@@ -68,6 +81,7 @@ module.exports = {
 
       handleError = (err) ->
         debug("plugins process error:", err.stack)
+        return if not pluginsProcess ## prevent repeating this in case of multiple errors
         killPluginsProcess()
         err = errors.get("PLUGINS_ERROR", err.annotated or err.stack or err.message)
         err.title = "Error running plugin"
@@ -92,7 +106,7 @@ module.exports = {
     isRegistered
 
   execute: (event, args...) ->
-    debug("execute plugin event '#{event}' with args: %o %o %o", args...)
+    debug("execute plugin event '#{event}' Node '#{process.version}' with args: %o %o %o", args...)
     registeredEvents[event](args...)
 
   ## for testing purposes

@@ -29,7 +29,7 @@
       "onlySingle": true,
       "execute": false,
       "cwd": "[cwd]/packages/server",
-      "command": "npm run test-e2e -- --spec name"
+      "command": "npm run test-e2e -- --spec [fileBasename]"
     },
     {
       "name": "packages/runner watch",

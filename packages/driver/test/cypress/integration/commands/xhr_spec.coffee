@@ -780,13 +780,18 @@ describe "src/cy/commands/xhr", ->
 
       it "sets err on log when caused by code errors", (done) ->
         finalThenCalled = false
+        uncaughtException = cy.stub().returns(true)
+        cy.on 'uncaught:exception', uncaughtException
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("name")).to.eq("xhr")
-          expect(lastLog.get("error")).to.eq err
+          expect(lastLog.get("error").message).contain('foo is not defined')
+          ## since this is AUT code, we should allow error to be caught in 'uncaught:exception' hook
+          ## https://github.com/cypress-io/cypress/issues/987
+          expect(uncaughtException).calledOnce
           done()
 
         cy
@@ -1420,6 +1425,37 @@ describe "src/cy/commands/xhr", ->
                 bar: "baz"
               }
             })
+
+    describe "response fixtures", ->
+      it "works if the JSON file has an object", ->
+        cy
+          .server()
+          .route({
+            method: 'POST',
+            url: '/test-xhr',
+            response: 'fixture:valid.json',
+          })
+          .visit('/fixtures/xhr-triggered.html')
+          .get('#trigger-xhr')
+          .click()
+
+        cy
+          .contains("#result", '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+
+      it "works if the JSON file has null content", ->
+        cy
+          .server()
+          .route({
+            method: 'POST',
+            url: '/test-xhr',
+            response: 'fixture:null.json',
+          })
+          .visit('/fixtures/xhr-triggered.html')
+          .get('#trigger-xhr')
+          .click()
+
+        cy
+          .contains('#result', '""').should('be.visible')
 
     describe "errors", ->
       beforeEach ->

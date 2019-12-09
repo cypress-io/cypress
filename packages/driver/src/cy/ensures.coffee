@@ -101,7 +101,7 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
-  ensureReceivability = (subject, onFail) ->
+  ensureNotDisabled = (subject, onFail) ->
     cmd = state("current").get("name")
 
     if subject.prop("disabled")
@@ -112,9 +112,12 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
+  ensureNotReadonly = (subject, onFail) ->
+    cmd = state("current").get("name")
+
     # readonly can only be applied to input/textarea
     # not on checkboxes, radios, etc..
-    if $dom.isTextLike(subject) and subject.prop("readonly")
+    if $dom.isTextLike(subject.get(0)) and subject.prop("readonly")
       node = $dom.stringify(subject)
 
       $utils.throwErrByPath("dom.readonly", {
@@ -127,7 +130,7 @@ create = (state, expect) ->
 
     # We overwrite the filter(":visible") in jquery
     # packages/driver/src/config/jquery.coffee#L51
-    # So that this effectively calls our logic 
+    # So that this effectively calls our logic
     # for $dom.isVisible aka !$dom.isHidden
     if not (subject.length is subject.filter(":visible").length)
       reason = $dom.getReasonIsHidden(subject)
@@ -139,15 +142,13 @@ create = (state, expect) ->
 
   ensureAttached = (subject, name, onFail) ->
     if $dom.isDetached(subject)
-      prev = state("current").get("prev")
+      cmd = name ? state("current").get("name")
+      prev = state("current").get("prev").get("name")
+      node = $dom.stringify(subject)
 
       $utils.throwErrByPath("subject.not_attached", {
         onFail
-        args: {
-          name
-          subject: $dom.stringify(subject),
-          previous: prev.get("name")
-        }
+        args: { cmd, prev, node }
       })
 
   ensureElement = (subject, name, onFail) ->
@@ -325,7 +326,7 @@ create = (state, expect) ->
 
     ensureElementIsNotAnimating
 
-    ensureReceivability
+    ensureNotDisabled
 
     ensureVisibility
 
@@ -338,6 +339,8 @@ create = (state, expect) ->
     ensureValidPosition
 
     ensureScrollability
+
+    ensureNotReadonly
   }
 
 module.exports = {

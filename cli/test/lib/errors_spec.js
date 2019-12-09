@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const os = require('os')
 const snapshot = require('../support/snapshot')
-const { errors, formErrorText } = require(`${lib}/errors`)
+const { errors, getError, formErrorText } = require(`${lib}/errors`)
 const util = require(`${lib}/util`)
 
 describe('errors', function () {
@@ -16,6 +16,20 @@ describe('errors', function () {
   describe('individual', () => {
     it('has the following errors', () => {
       return snapshot(Object.keys(errors).sort())
+    })
+  })
+
+  context('getError', () => {
+    it('forms full message and creates Error object', () => {
+      const errObject = errors.childProcessKilled('exit', 'SIGKILL')
+
+      snapshot('child kill error object', errObject)
+
+      return getError(errObject).then((e) => {
+        expect(e).to.be.an('Error')
+        expect(e).to.have.property('known', true)
+        snapshot('Error message', e.message)
+      })
     })
   })
 

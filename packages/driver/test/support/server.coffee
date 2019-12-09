@@ -83,6 +83,9 @@ niv.install("react-dom@15.6.1")
   app.all '/dump-method', (req, res) ->
     res.send("<html><body>request method: #{req.method}</body></html>")
 
+  app.all '/dump-qs', (req, res) ->
+    res.send("<html><body>it worked!<br>request querystring:<br>#{JSON.stringify(req.query)}</body></html>")
+
   app.post '/post-only', (req, res) ->
     res.send("<html><body>it worked!<br>request body:<br>#{JSON.stringify(req.body)}</body></html>")
 

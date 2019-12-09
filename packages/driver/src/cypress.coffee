@@ -15,11 +15,13 @@ $Commands = require("./cypress/commands")
 $Cookies = require("./cypress/cookies")
 $Cy = require("./cypress/cy")
 $Events = require("./cypress/events")
+$Keyboard = require("./cy/keyboard")
 $SetterGetter = require("./cypress/setter_getter")
 $Log = require("./cypress/log")
 $Location = require("./cypress/location")
 $LocalStorage = require("./cypress/local_storage")
 $Mocha = require("./cypress/mocha")
+$Mouse = require("./cy/mouse")
 $Runner = require("./cypress/runner")
 $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
@@ -465,10 +467,12 @@ class $Cypress
   Commands: $Commands
   dom: $dom
   errorMessages: $errorMessages
+  Keyboard: $Keyboard
   Location: $Location
   Log: $Log
   LocalStorage: $LocalStorage
   Mocha: $Mocha
+  Mouse: $Mouse
   Runner: $Runner
   Screenshot: $Screenshot
   SelectorPlayground: $SelectorPlayground
@@ -496,5 +500,6 @@ class $Cypress
 ## attaching these so they are accessible
 ## via the runner + integration spec helper
 $Cypress.$ = $
+$Cypress.dom = $dom
 
 module.exports = $Cypress

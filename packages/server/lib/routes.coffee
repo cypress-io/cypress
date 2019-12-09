@@ -12,10 +12,9 @@ runner      = require("./controllers/runner")
 xhrs        = require("./controllers/xhrs")
 client      = require("./controllers/client")
 files       = require("./controllers/files")
-proxy       = require("./controllers/proxy")
 staticCtrl  = require("./controllers/static")
 
-module.exports = (app, config, request, getRemoteState, project) ->
+module.exports = (app, config, request, getRemoteState, project, networkProxy) ->
   ## routing for the actual specs which are processed automatically
   ## this could be just a regular .js file or a .coffee file
   app.get "/__cypress/tests", (req, res, next) ->
@@ -44,9 +43,6 @@ module.exports = (app, config, request, getRemoteState, project) ->
   app.get "/__cypress/iframes/*", (req, res) ->
     files.handleIframe(req, res, config, getRemoteState)
 
-  app.all "/__cypress/xhrs/*", (req, res, next) ->
-    xhrs.handle(req, res, config, next)
-
   app.get "/__root/*", (req, res, next) ->
     file = path.join(config.projectRoot, req.params[0])
 
@@ -71,7 +67,7 @@ module.exports = (app, config, request, getRemoteState, project) ->
     })
 
   app.all "*", (req, res, next) ->
-    proxy.handle(req, res, config, getRemoteState, request, project)
+    networkProxy.handleHttpRequest(req, res)
 
   ## when we experience uncaught errors
   ## during routing just log them out to

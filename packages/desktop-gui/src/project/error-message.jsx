@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 
 import ipc from '../lib/ipc'
+import { configFileFormatted } from '../lib/config-file-formatted'
 
 import Markdown from 'markdown-it'
 
@@ -53,13 +54,13 @@ class ErrorMessage extends Component {
   }
 
   render () {
-    let err = this.props.error
+    let err = this.props.project.error
 
     return (
       <div className='full-alert-container'>
         <div className='full-alert alert alert-danger error'>
           <p className='header'>
-            <i className='fa fa-warning'></i>{' '}
+            <i className='fas fa-exclamation-triangle'></i>{' '}
             <strong>{err.title || 'Can\'t start server'}</strong>
           </p>
           <span className='alert-content'>
@@ -72,7 +73,7 @@ class ErrorMessage extends Component {
             {err.portInUse && (
               <div>
                 <hr />
-                <p>To fix, stop the other running process or change the port in <code>cypress.json</code></p>
+                <p>To fix, stop the other running process or change the port in {configFileFormatted(this.props.project.configFile)}</p>
               </div>
             )}
           </span>
@@ -80,7 +81,7 @@ class ErrorMessage extends Component {
             className='btn btn-default btn-sm'
             onClick={this.props.onTryAgain}
           >
-            <i className='fa fa-refresh'></i>{' '}
+            <i className='fas fa-sync-alt'></i>{' '}
             Try Again
           </button>
         </div>

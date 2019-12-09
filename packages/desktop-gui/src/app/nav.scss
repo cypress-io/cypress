@@ -24,12 +24,20 @@
   background-color:#ececec;
   box-shadow: 0 0 3px 0 rgba(0,0,0,0.20);
   border-color: #c8c8c8;
+  z-index: 10;
 
   .nav {
     > .open {
       > a, > a:hover {
         background-color: #dedede;
         color: #262626;
+      }
+    }
+
+    &.left-nav {
+      i {
+        font-size: 11px;
+        color: #555;
       }
     }
 
@@ -40,6 +48,8 @@
         color: #444;
         padding: 1px 20px 0 20px;
         line-height: 35px;
+
+
       }
 
       > a  {
@@ -66,6 +76,12 @@
         padding-left: 15px;
         padding-right: 15px;
       }
+    }
+  }
+
+  .browsers.nav {
+    i {
+      font-size: 13px;
     }
   }
 }
@@ -118,6 +134,10 @@
         background-color: #111;
         color: #fff;
       }
+    }
+
+    i {
+      font-size: 12px;
     }
 
     > li > div,

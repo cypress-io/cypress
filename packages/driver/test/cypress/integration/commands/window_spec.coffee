@@ -640,32 +640,16 @@ describe "src/cy/commands/window", ->
       it "throws when passed negative numbers", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
+          expect(err.message).to.eq "cy.viewport() width and height must be at least 0px."
           done()
 
         cy.viewport(800, -600)
 
-      it "throws when passed width less than 20", (done) ->
-        cy.on "fail", (err) =>
-          expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
-          done()
+      it "does not throw when passed width equal to 0", ->
+        cy.viewport(0, 600)
 
-        cy.viewport(19, 600)
-
-      it "does not throw when passed width equal to 20", ->
-        cy.viewport(20, 600)
-
-      it "throws when passed height greater than than 3000", (done) ->
-        cy.on "fail", (err) =>
-          expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() width and height must be between 20px and 3000px."
-          done()
-
-        cy.viewport(1000, 3001)
-
-      it "does not throw when passed width equal to 3000", ->
-        cy.viewport(200, 3000)
+      it "does not throw when passed width equal to 1000000", ->
+        cy.viewport(200, 1000000)
 
       it "throws when passed an empty string as width", (done) ->
         cy.on "fail", (err) =>

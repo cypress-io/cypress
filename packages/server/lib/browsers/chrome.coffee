@@ -4,12 +4,17 @@ _         = require("lodash")
 os        = require("os")
 path      = require("path")
 Promise   = require("bluebird")
+la        = require('lazy-ass')
+check     = require('check-more-types')
 extension = require("@packages/extension")
-debug     = require("debug")("cypress:server:browsers")
+debug     = require("debug")("cypress:server:browsers:chrome")
 plugins   = require("../plugins")
 fs        = require("../util/fs")
 appData   = require("../util/app_data")
 utils     = require("./utils")
+protocol  = require("./protocol")
+{ CdpAutomation } = require("./cdp_automation")
+CriClient = require("./cri-client")
 
 LOAD_EXTENSION = "--load-extension="
 CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = "66 67".split(" ")
@@ -42,8 +47,9 @@ defaultArgs = [
   "--allow-insecure-localhost"
   "--reduce-security-for-testing"
   "--enable-automation"
-  "--disable-infobars"
+
   "--disable-device-discovery-notifications"
+  "--disable-infobars"
 
   ## https://github.com/cypress-io/cypress/issues/2376
   "--autoplay-policy=no-user-gesture-required"
@@ -74,7 +80,23 @@ defaultArgs = [
   ## https://github.com/cypress-io/cypress/issues/2704
   "--use-fake-ui-for-media-stream"
   "--use-fake-device-for-media-stream"
+
+  ## so Cypress commands don't get throttled
+  ## https://github.com/cypress-io/cypress/issues/5132
+  "--disable-ipc-flooding-protection"
+
+  ## misc. options puppeteer passes
+  ## https://github.com/cypress-io/cypress/issues/3633
+  "--disable-backgrounding-occluded-window"
+  "--disable-breakpad"
+  "--password-store=basic"
+  "--use-mock-keychain"
 ]
+
+getRemoteDebuggingPort = Promise.method () ->
+  if port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
+    return port
+  utils.getPort()
 
 pluginsBeforeBrowserLaunch = (browser, args) ->
   ## bail if we're not registered to this event
@@ -125,10 +147,73 @@ _disableRestorePagesPrompt = (userDir) ->
         fs.writeJson(prefsPath, preferences)
   .catch ->
 
+## After the browser has been opened, we can connect to
+## its remote interface via a websocket.
+_connectToChromeRemoteInterface = (port) ->
+  la(check.userPort(port), "expected port number to connect CRI to", port)
+
+  debug("connecting to Chrome remote interface at random port %d", port)
+
+  protocol.getWsTargetFor(port)
+  .then (wsUrl) ->
+    debug("received wsUrl %s for port %d", wsUrl, port)
+
+    CriClient.create(wsUrl)
+
+_maybeRecordVideo = (options) ->
+  return (client) ->
+    if not options.screencastFrame
+      debug("screencastFrame is false")
+      return client
+
+    debug('starting screencast')
+    client.on('Page.screencastFrame', options.screencastFrame)
+
+    client.send('Page.startScreencast', {
+      format: 'jpeg'
+    })
+    .then ->
+      return client
+
+## a utility function that navigates to the given URL
+## once Chrome remote interface client is passed to it.
+_navigateUsingCRI = (url) ->
+  la(check.url(url), "missing url to navigate to", url)
+
+  return (client) ->
+    la(client, "could not get CRI client")
+    debug("received CRI client")
+    debug('navigating to page %s', url)
+
+    ## when opening the blank page and trying to navigate
+    ## the focus gets lost. Restore it and then navigate.
+    client.send("Page.bringToFront")
+    .then ->
+      client.send("Page.navigate", { url })
+
+_setAutomation = (client, automation) ->
+  automation.use(
+    CdpAutomation(client.send)
+  )
+
 module.exports = {
+  ##
+  ## tip:
+  ##   by adding utility functions that start with "_"
+  ##   as methods here we can easily stub them from our unit tests
+  ##
+
   _normalizeArgExtensions
 
   _removeRootExtension
+
+  _connectToChromeRemoteInterface
+
+  _maybeRecordVideo
+
+  _navigateUsingCRI
+
+  _setAutomation
 
   _writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute) ->
     ## get the string bytes for the final extension file
@@ -171,7 +256,7 @@ module.exports = {
     ## https://github.com/cypress-io/cypress/issues/2223
     { majorVersion } = options.browser
     if majorVersion in CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING
-       args.push("--disable-blink-features=RootLayerScrolling")
+      args.push("--disable-blink-features=RootLayerScrolling")
 
     ## https://chromium.googlesource.com/chromium/src/+/da790f920bbc169a6805a4fb83b4c2ab09532d91
     ## https://github.com/cypress-io/cypress/issues/1872
@@ -189,14 +274,18 @@ module.exports = {
     .try =>
       args = @_getArgs(options)
 
-      Promise.all([
-        ## ensure that we have a clean cache dir
-        ## before launching the browser every time
-        utils.ensureCleanCache(browser, isTextTerminal),
+      getRemoteDebuggingPort()
+      .then (port) ->
+        args.push("--remote-debugging-port=#{port}")
 
-        pluginsBeforeBrowserLaunch(options.browser, args)
-      ])
-    .spread (cacheDir, args) =>
+        Promise.all([
+          ## ensure that we have a clean cache dir
+          ## before launching the browser every time
+          utils.ensureCleanCache(browser, isTextTerminal),
+          pluginsBeforeBrowserLaunch(options.browser, args),
+          port
+        ])
+    .spread (cacheDir, args, port) =>
       Promise.all([
         @_writeExtension(
           browser,
@@ -217,7 +306,44 @@ module.exports = {
         args.push("--user-data-dir=#{userDir}")
         args.push("--disk-cache-dir=#{cacheDir}")
 
-        debug("launch in chrome: %s, %s", url, args)
+        debug("launching in chrome with debugging port", { url, args, port })
 
-        utils.launch(browser, url, args)
+        ## FIRST load the blank page
+        ## first allows us to connect the remote interface,
+        ## start video recording and then
+        ## we will load the actual page
+        utils.launch(browser, "about:blank", args)
+      .then (launchedBrowser) =>
+        la(launchedBrowser, "did not get launched browser instance")
+
+        ## SECOND connect to the Chrome remote interface
+        ## and when the connection is ready
+        ## navigate to the actual url
+        @_connectToChromeRemoteInterface(port)
+        .then (criClient) =>
+          la(criClient, "expected Chrome remote interface reference", criClient)
+
+          criClient.ensureMinimumProtocolVersion('1.3')
+          .catch (err) =>
+            throw new Error("Cypress requires at least Chrome 64.\n\nDetails:\n#{err.message}")
+          .then =>
+            @_setAutomation(criClient, automation)
+
+            ## monkey-patch the .kill method to that the CDP connection is closed
+            originalBrowserKill = launchedBrowser.kill
+
+            launchedBrowser.kill = (args...) =>
+              debug("closing remote interface client")
+
+              criClient.close()
+              .then =>
+                debug("closing chrome")
+                originalBrowserKill.apply(launchedBrowser, args)
+
+            return criClient
+        .then @_maybeRecordVideo(options)
+        .then @_navigateUsingCRI(url)
+        ## return the launched browser process
+        ## with additional method to close the remote connection
+        .return(launchedBrowser)
 }
