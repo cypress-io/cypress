@@ -27,7 +27,6 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
-XhrServer    = require("./xhr_ws_server")
 templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
