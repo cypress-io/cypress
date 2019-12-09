@@ -290,6 +290,8 @@ jobs:
       - run: npm run test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
       - run: npm run all build-js
+      # test codemods
+      - run: npm run test-jscodeshift
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package electron
