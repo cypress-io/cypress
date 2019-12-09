@@ -15,7 +15,14 @@ import {
 } from './types'
 import * as windowsHelper from './windows'
 
-const setMajorVersion = (browser: FoundBrowser) => {
+type HasVersion = {
+  version?: string
+  majorVersion?: string | number
+  name: string
+}
+
+// TODO: make this function NOT change its argument
+export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
   if (browser.version) {
     browser.majorVersion = browser.version.split('.')[0]
     log(
@@ -24,6 +31,10 @@ const setMajorVersion = (browser: FoundBrowser) => {
       browser.version,
       browser.majorVersion
     )
+
+    if (browser.majorVersion) {
+      browser.majorVersion = parseInt(browser.majorVersion)
+    }
   }
 
   return browser
@@ -153,14 +164,18 @@ export const detectByPath = (
 
     const regexExec = browser.versionRegex.exec(stdout) as Array<string>
 
-    return extend({}, browser, {
+    const parsedBrowser = {
+      name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
       custom: true,
       path,
       version: regexExec[1],
-      majorVersion: regexExec[1].split('.', 2)[0],
-    })
+    }
+
+    setMajorVersion(parsedBrowser)
+
+    return extend({}, browser, parsedBrowser)
   }
 
   return helper

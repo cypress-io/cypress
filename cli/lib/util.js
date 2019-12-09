@@ -158,6 +158,8 @@ function printNodeOptions (log = debug) {
  * Removes double quote characters
  * from the start and end of the given string IF they are both present
  *
+ * @param {string} str Input string
+ * @returns {string} Trimmed string or the original string if there are no double quotes around it.
  * @example
   ```
   dequote('"foo"')
@@ -175,8 +177,56 @@ const dequote = (str) => {
   return str
 }
 
+const parseOpts = (opts) => {
+  opts = _.pick(opts,
+    'browser',
+    'cachePath',
+    'cacheList',
+    'cacheClear',
+    'ciBuildId',
+    'config',
+    'configFile',
+    'cypressVersion',
+    'destination',
+    'detached',
+    'dev',
+    'exit',
+    'env',
+    'force',
+    'global',
+    'group',
+    'headed',
+    'key',
+    'path',
+    'parallel',
+    'port',
+    'project',
+    'reporter',
+    'reporterOptions',
+    'record',
+    'spec',
+    'tag')
+
+  if (opts.exit) {
+    opts = _.omit(opts, 'exit')
+  }
+
+  // some options might be quoted - which leads to unexpected results
+  // remove double quotes from certain options
+  const removeQuotes = {
+    group: dequote,
+    ciBuildId: dequote,
+  }
+  const cleanOpts = R.evolve(removeQuotes, opts)
+
+  debug('parsed cli options %o', cleanOpts)
+
+  return cleanOpts
+}
+
 const util = {
   normalizeModuleOptions,
+  parseOpts,
   isValidCypressEnvValue,
   printNodeOptions,
 

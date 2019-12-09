@@ -124,7 +124,7 @@ describe "Routes", ->
           rp(options)
 
         open = =>
-          project = Project("/path/to/project")
+          project = new Project("/path/to/project")
 
           Promise.all([
             ## open our https server
@@ -2465,8 +2465,7 @@ describe "Routes", ->
             "Cookie": "__cypress.initial=false"
           }
 
-          if type?
-            headers["Accept"] = type
+          headers["Accept"] = type
 
           @rp({
             url: "http://www.google.com/iframe"

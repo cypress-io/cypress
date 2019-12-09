@@ -242,19 +242,18 @@ describe('src/cy/commands/actions/click', () => {
     it('will not send mouseEvents/focus if pointerdown is defaultPrevented', () => {
       const $btn = cy.$$('#button')
 
-      // let clicked = false
-
-      $btn.get(0).addEventListener('pointerdown', (e) => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake((e) => {
         e.preventDefault()
-
         expect(e.defaultPrevented).to.be.true
       })
 
+      $btn.get(0).addEventListener('pointerdown', onEvent)
+
       attachMouseClickListeners({ $btn })
 
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.get('#button').click().should('not.have.focus')
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('$btn', 'pointerdown pointerup click').each(shouldBeCalledOnce)
       cy.getAll('$btn', 'mousedown mouseup').each(shouldNotBeCalled)
@@ -380,25 +379,27 @@ describe('src/cy/commands/actions/click', () => {
     it('events when element moved on mousedown', () => {
       const btn = cy.$$('button:first')
       const div = cy.$$('div#tabindex')
+      const root = cy.$$('#dom')
 
       attachFocusListeners({ btn, div })
-      attachMouseClickListeners({ btn, div })
+      attachMouseClickListeners({ btn, div, root })
       attachMouseHoverListeners({ btn, div })
 
-      // let clicked = false
-
-      btn.on('mousedown', () => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake(() => {
         div.css(overlayStyle)
       })
 
+      btn.on('mousedown', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.contains('button').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mouseover mouseenter mousedown focus').each(shouldBeCalled)
       cy.getAll('btn', 'click mouseup').each(shouldNotBeCalled)
       cy.getAll('div', 'mouseover mouseenter mouseup').each(shouldBeCalled)
       cy.getAll('div', 'click focus').each(shouldNotBeCalled)
+      cy.getAll('root', 'click').each(shouldBeCalled)
     })
 
     it('events when element moved on mouseup', () => {
@@ -409,15 +410,15 @@ describe('src/cy/commands/actions/click', () => {
       attachMouseClickListeners({ btn, div })
       attachMouseHoverListeners({ btn, div })
 
-      // let clicked = false
-
-      btn.on('mouseup', () => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake(() => {
         div.css(overlayStyle)
       })
 
+      btn.on('mouseup', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.contains('button').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mouseover mouseenter mousedown focus click mouseup').each(shouldBeCalled)
       cy.getAll('div', 'mouseover mouseenter').each(shouldBeCalled)
@@ -432,18 +433,99 @@ describe('src/cy/commands/actions/click', () => {
       attachMouseClickListeners({ btn, div })
       attachMouseHoverListeners({ btn, div })
 
-      // let clicked = false
-
-      btn.on('click', () => {
-        // clicked = true
+      const onEvent = cy.stub().callsFake(() => {
         div.css(overlayStyle)
       })
 
+      btn.on('click', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.contains('button').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('btn', 'mouseover mouseenter mousedown focus click mouseup').each(shouldBeCalled)
       cy.getAll('div', 'focus click mouseup mousedown').each(shouldNotBeCalled)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/5578
+    it('click when mouseup el is child of mousedown el', () => {
+      const btn = cy.$$('button:first')
+      const span = $('<span>foooo</span>')
+
+      attachFocusListeners({ btn, span })
+      attachMouseClickListeners({ btn, span })
+      attachMouseHoverListeners({ btn, span })
+
+      const onEvent = cy.stub().callsFake(() => {
+        // clicked = true
+        btn.html('')
+        btn.append(span)
+      })
+
+      btn.on('mousedown', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
+      cy.contains('button').click()
+
+      cy.getAll('btn', 'mousedown focus click mouseup').each(shouldBeCalled)
+      cy.getAll('span', 'mouseup').each(shouldBeCalled)
+      cy.getAll('span', 'focus click mousedown').each(shouldNotBeCalled)
+    })
+
+    it('click when mousedown el is child of mouseup el', () => {
+      const btn = cy.$$('button:first')
+      const span = $('<span>foooo</span>')
+
+      attachFocusListeners({ btn, span })
+      attachMouseClickListeners({ btn, span })
+      attachMouseHoverListeners({ btn, span })
+
+      btn.html('')
+      btn.append(span)
+
+      const onEvent = cy.stub().callsFake(() => {
+        span.css({ marginLeft: 50 })
+      })
+
+      btn.on('mousedown', onEvent)
+
+      cy.get('button:first').click()
+
+      cy.getAll('btn', 'mousedown focus click mouseup').each(shouldBeCalled)
+      cy.getAll('span', 'mousedown').each(shouldBeCalled)
+      cy.getAll('span', 'focus click mouseup').each(shouldNotBeCalled)
+    })
+
+    it('no click when new element at coords is not ancestor', () => {
+      const btn = cy.$$('button:first')
+      const span1 = $('<span>foooo</span>')
+      const span2 = $('<span>baaaar</span>')
+
+      attachFocusListeners({ btn, span1, span2 })
+      attachMouseClickListeners({ btn, span1, span2 })
+      attachMouseHoverListeners({ btn, span1, span2 })
+
+      btn.html('')
+      btn.append(span1)
+
+      const onEvent = cy.stub().callsFake(() => {
+        btn.html('')
+        btn.append(span2)
+      })
+
+      btn.on('mousedown', onEvent)
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
+      cy.get('button:first').click()
+
+      cy.getAll('btn', 'mouseenter mousedown mouseup').each(shouldBeCalled)
+      cy.getAll('btn', 'click focus').each(shouldNotBeCalled)
+      cy.getAll('span1', 'mouseover mouseenter mousedown').each(shouldBeCalled)
+      cy.getAll('span1', 'focus click mouseup').each(shouldNotBeCalled)
+      cy.getAll('span2', 'mouseup mouseover mouseenter').each(shouldBeCalled)
+      cy.getAll('span2', 'focus click mousedown').each(shouldNotBeCalled)
     })
 
     it('does not fire a click when element has been removed on mouseup', () => {
@@ -455,7 +537,11 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       $btn.on('click', () => {
-        fail('should not have gotten click')
+        fail('btn should not have gotten click')
+      })
+
+      cy.$$('body').on('click', (e) => {
+        throw new Error('should not have happened')
       })
 
       cy.contains('button').click()
@@ -1589,7 +1675,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('relative coordinate arguments', () => {
-      it('can specify x and y', (done) => {
+      it('can specify x and y', () => {
         const $btn = $('<button>button covered</button>')
         .attr('id', 'button-covered-in-span')
         .css({ height: 100, width: 100 })
@@ -1599,14 +1685,20 @@ describe('src/cy/commands/actions/click', () => {
         .css({ position: 'absolute', left: $btn.offset().left + 50, top: $btn.offset().top + 65, padding: 5, display: 'inline-block', backgroundColor: 'yellow' })
         .appendTo($btn)
 
-        const clicked = _.after(2, () => {
-          done()
+        cy.on('log:changed', (log, attr) => {
+          if (log.name === 'click' && attr._emittedAttrs.coords) {
+            expect(attr._emittedAttrs.coords).property('x')
+            expect(attr._emittedAttrs.coords).property('y')
+          }
         })
+
+        const clicked = cy.stub()
 
         $span.on('click', clicked)
         $btn.on('click', clicked)
 
         cy.get('#button-covered-in-span').click(75, 78)
+        .then(() => expect(clicked).calledTwice)
       })
 
       it('can pass options along with x, y', (done) => {
@@ -2245,67 +2337,61 @@ describe('src/cy/commands/actions/click', () => {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps.table[1]()).to.containSubset({
-            'name': 'Mouse Move Events',
+            'name': 'Mouse Events',
             'data': [
               {
-                'Event Name': 'pointerover',
+                'Event Type': 'pointerover',
                 'Target Element': { id: 'input' },
-                'Prevented Default?': false,
-                'Stopped Propagation?': false,
+                'Prevented Default': null,
+                'Stopped Propagation': null,
               },
               {
-                'Event Name': 'mouseover',
+                'Event Type': 'mouseover',
                 'Target Element': { id: 'input' },
-                'Prevented Default?': false,
-                'Stopped Propagation?': false,
+                'Prevented Default': null,
+                'Stopped Propagation': null,
               },
               {
-                'Event Name': 'pointermove',
+                'Event Type': 'pointermove',
                 'Target Element': { id: 'input' },
-                'Prevented Default?': false,
-                'Stopped Propagation?': false,
+                'Prevented Default': null,
+                'Stopped Propagation': null,
               },
               {
-                'Event Name': 'mousemove',
+                'Event Type': 'mousemove',
                 'Target Element': { id: 'input' },
-                'Prevented Default?': false,
-                'Stopped Propagation?': false,
-              },
-            ],
-          })
-
-          expect(consoleProps.table[2]()).to.containSubset({
-            name: 'Mouse Click Events',
-            data: [
-              {
-                'Event Name': 'pointerdown',
-                'Target Element': { id: 'input' },
-                'Prevented Default?': false,
-                'Stopped Propagation?': false,
+                'Prevented Default': null,
+                'Stopped Propagation': null,
               },
               {
-                'Event Name': 'mousedown',
+                'Event Type': 'pointerdown',
                 'Target Element': { id: 'input' },
-                'Prevented Default?': true,
-                'Stopped Propagation?': true,
+                'Prevented Default': null,
+                'Stopped Propagation': null,
               },
               {
-                'Event Name': 'pointerup',
+                'Event Type': 'mousedown',
                 'Target Element': { id: 'input' },
-                'Prevented Default?': false,
-                'Stopped Propagation?': false,
+                'Prevented Default': true,
+                'Stopped Propagation': true,
               },
               {
-                'Event Name': 'mouseup',
+                'Event Type': 'pointerup',
                 'Target Element': { id: 'input' },
-                'Prevented Default?': false,
-                'Stopped Propagation?': false,
+                'Prevented Default': null,
+                'Stopped Propagation': null,
               },
               {
-                'Event Name': 'click',
+                'Event Type': 'mouseup',
                 'Target Element': { id: 'input' },
-                'Prevented Default?': false,
-                'Stopped Propagation?': false,
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+              },
+              {
+                'Event Type': 'click',
+                'Target Element': { id: 'input' },
+                'Prevented Default': null,
+                'Stopped Propagation': null,
               },
             ],
           })
@@ -2316,36 +2402,36 @@ describe('src/cy/commands/actions/click', () => {
         cy.$$('input:first').mouseup(_.stubFalse)
 
         cy.get('input:first').click().then(function () {
-          expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
+          expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
-              'Event Name': 'pointerdown',
+              'Event Type': 'pointerdown',
               'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
             },
             {
-              'Event Name': 'mousedown',
+              'Event Type': 'mousedown',
               'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
             },
             {
-              'Event Name': 'pointerup',
+              'Event Type': 'pointerup',
               'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
             },
             {
-              'Event Name': 'mouseup',
+              'Event Type': 'mouseup',
               'Target Element': { id: 'input' },
-              'Prevented Default?': true,
-              'Stopped Propagation?': true,
+              'Prevented Default': true,
+              'Stopped Propagation': true,
             },
             {
-              'Event Name': 'click',
+              'Event Type': 'click',
               'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
             },
           ])
         })
@@ -2355,36 +2441,64 @@ describe('src/cy/commands/actions/click', () => {
         cy.$$('input:first').click(_.stubFalse)
 
         cy.get('input:first').click().then(function () {
-          expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
+          expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
-              'Event Name': 'pointerdown',
-              'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
+              'Event Type': 'pointerover',
+              'Target Element': {},
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'mousedown',
-              'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
+              'Event Type': 'mouseover',
+              'Target Element': {},
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'pointerup',
-              'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
+              'Event Type': 'pointermove',
+              'Target Element': {},
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'mouseup',
-              'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
+              'Event Type': 'mousemove',
+              'Target Element': {},
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'click',
+              'Event Type': 'pointerdown',
               'Target Element': { id: 'input' },
-              'Prevented Default?': true,
-              'Stopped Propagation?': true,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+            },
+            {
+              'Event Type': 'mousedown',
+              'Target Element': { id: 'input' },
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+            },
+            {
+              'Event Type': 'pointerup',
+              'Target Element': { id: 'input' },
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+            },
+            {
+              'Event Type': 'mouseup',
+              'Target Element': { id: 'input' },
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+            },
+            {
+              'Event Type': 'click',
+              'Target Element': { id: 'input' },
+              'Prevented Default': true,
+              'Stopped Propagation': true,
             },
           ])
         })
@@ -2409,46 +2523,42 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(_.map(consoleProps.table, (x) => x())).to.containSubset([
             {
-              'name': 'Mouse Move Events (skipped)',
-              'data': [],
-            },
-            {
-              'name': 'Mouse Click Events',
+              'name': 'Mouse Events',
               'data': [
                 {
-                  'Event Name': 'pointerdown',
+                  'Event Type': 'pointerdown',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
                 {
-                  'Event Name': 'mousedown',
+                  'Event Type': 'mousedown',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
                 {
-                  'Event Name': 'pointerup',
+                  'Event Type': 'pointerup',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
                 {
-                  'Event Name': 'mouseup',
+                  'Event Type': 'mouseup',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
                 {
-                  'Event Name': 'click',
+                  'Event Type': 'click',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
               ],
             },
@@ -2460,45 +2570,45 @@ describe('src/cy/commands/actions/click', () => {
         cy.$$('input:first').click(_.stubFalse)
 
         cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(function () {
-          expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
+          expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
-              'Event Name': 'pointerdown',
+              'Event Type': 'pointerdown',
               'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': 'ctrl, shift',
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': 'ctrl, shift',
 
             },
             {
-              'Event Name': 'mousedown',
+              'Event Type': 'mousedown',
               'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': 'ctrl, shift',
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': 'ctrl, shift',
 
             },
             {
-              'Event Name': 'pointerup',
+              'Event Type': 'pointerup',
               'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': 'ctrl, shift',
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': 'ctrl, shift',
 
             },
             {
-              'Event Name': 'mouseup',
+              'Event Type': 'mouseup',
               'Target Element': { id: 'input' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': 'ctrl, shift',
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': 'ctrl, shift',
 
             },
             {
-              'Event Name': 'click',
+              'Event Type': 'click',
               'Target Element': { id: 'input' },
-              'Prevented Default?': true,
-              'Stopped Propagation?': true,
-              'Modifiers': 'ctrl, shift',
+              'Prevented Default': true,
+              'Stopped Propagation': true,
+              'Active Modifiers': 'ctrl, shift',
 
             },
           ])
@@ -2514,41 +2624,69 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.contains('button').click().then(function () {
-          expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
+          expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
-              'Event Name': 'pointerdown',
+              'Event Type': 'pointerover',
               'Target Element': { id: 'button' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'mousedown',
+              'Event Type': 'mouseover',
               'Target Element': { id: 'button' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'pointerup',
+              'Event Type': 'pointermove',
               'Target Element': { id: 'button' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'mouseup',
+              'Event Type': 'mousemove',
               'Target Element': { id: 'button' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'click',
+              'Event Type': 'pointerdown',
+              'Target Element': { id: 'button' },
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
+            },
+            {
+              'Event Type': 'mousedown',
+              'Target Element': { id: 'button' },
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
+            },
+            {
+              'Event Type': 'pointerup',
+              'Target Element': { id: 'button' },
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
+            },
+            {
+              'Event Type': 'mouseup',
+              'Target Element': { id: 'button' },
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
+            },
+            {
+              'Event Type': 'click',
               'Target Element': '⚠️ not fired (element was detached)',
-              'Prevented Default?': null,
-              'Stopped Propagation?': null,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
           ])
         })
@@ -2563,41 +2701,41 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.contains('button').click().then(function () {
-          expect(this.lastLog.invoke('consoleProps').table[2]().data).to.containSubset([
+          expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
-              'Event Name': 'pointerdown',
+              'Event Type': 'pointerdown',
               'Target Element': { id: 'button' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'mousedown',
+              'Event Type': 'mousedown',
               'Target Element': { id: 'button' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'pointerup',
+              'Event Type': 'pointerup',
               'Target Element': { id: 'tabindex' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'mouseup',
+              'Event Type': 'mouseup',
               'Target Element': { id: 'tabindex' },
-              'Prevented Default?': false,
-              'Stopped Propagation?': false,
-              'Modifiers': null,
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
             {
-              'Event Name': 'click',
-              'Target Element': '⚠️ not fired (mouseup and mousedown not received by same element)',
-              'Prevented Default?': null,
-              'Stopped Propagation?': null,
-              'Modifiers': null,
+              'Event Type': 'click',
+              'Target Element': { id: 'dom' },
+              'Prevented Default': null,
+              'Stopped Propagation': null,
+              'Active Modifiers': null,
             },
           ])
         })
@@ -3042,124 +3180,113 @@ describe('src/cy/commands/actions/click', () => {
 
           const tables = _.map(consoleProps.table, ((x) => x()))
 
-          expect(tables).to.containSubset([
-            {
-              'name': 'Mouse Move Events',
-              'data': [
-                {
-                  'Event Name': 'pointerover',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                },
-                {
-                  'Event Name': 'mouseover',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                },
-                {
-                  'Event Name': 'pointermove',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                },
-                {
-                  'Event Name': 'mousemove',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                },
-              ],
-            },
-            {
-              'name': 'Mouse Click Events',
-              'data': [
-                {
-                  'Event Name': 'pointerdown',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'mousedown',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'pointerup',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'mouseup',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'click',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'pointerdown',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'mousedown',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'pointerup',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'mouseup',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-                {
-                  'Event Name': 'click',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-              ],
-            },
-            {
-              'name': 'Mouse Double Click Event',
-              'data': [
-                {
-                  'Event Name': 'dblclick',
-                  'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
-                },
-              ],
-            },
-          ])
+          expect(tables[0]).to.containSubset({
+            name: 'Mouse Events',
+            data: [
+              {
+                'Event Type': 'pointerover',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+              },
+              {
+                'Event Type': 'mouseover',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+              },
+              {
+                'Event Type': 'pointermove',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+              },
+              {
+                'Event Type': 'mousemove',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+              },
+
+              {
+                'Event Type': 'pointerdown',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'mousedown',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'pointerup',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'mouseup',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'click',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'pointerdown',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'mousedown',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'pointerup',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'mouseup',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'click',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+              {
+                'Event Type': 'dblclick',
+                'Target Element': {},
+                'Prevented Default': null,
+                'Stopped Propagation': null,
+                'Active Modifiers': null,
+              },
+            ],
+          })
         })
       })
     })
@@ -3481,76 +3608,68 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(tables).to.containSubset([
             {
-              'name': 'Mouse Move Events',
+              'name': 'Mouse Events',
               'data': [
                 {
-                  'Event Name': 'pointerover',
+                  'Event Type': 'pointerover',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
                 },
                 {
-                  'Event Name': 'mouseover',
+                  'Event Type': 'mouseover',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
                 },
                 {
-                  'Event Name': 'pointermove',
+                  'Event Type': 'pointermove',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
                 },
                 {
-                  'Event Name': 'mousemove',
+                  'Event Type': 'mousemove',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
                 },
-              ],
-            },
-            {
-              'name': 'Mouse Click Events',
-              'data': [
+
                 {
-                  'Event Name': 'pointerdown',
+                  'Event Type': 'pointerdown',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
                 {
-                  'Event Name': 'mousedown',
+                  'Event Type': 'mousedown',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
                 {
-                  'Event Name': 'pointerup',
+                  'Event Type': 'pointerup',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
                 {
-                  'Event Name': 'mouseup',
+                  'Event Type': 'mouseup',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
-              ],
-            },
-            {
-              'name': 'Mouse Right Click Event',
-              'data': [
+
                 {
-                  'Event Name': 'contextmenu',
+                  'Event Type': 'contextmenu',
                   'Target Element': {},
-                  'Prevented Default?': false,
-                  'Stopped Propagation?': false,
-                  'Modifiers': null,
+                  'Prevented Default': null,
+                  'Stopped Propagation': null,
+                  'Active Modifiers': null,
                 },
               ],
             },
@@ -4243,12 +4362,11 @@ describe('mouse state', () => {
       })
       .appendTo(btn.parent())
 
-      // let clicked = false
-
-      cover.on('mouseup', () => {
+      const onEvent = cy.stub().callsFake(() => {
         cover.hide()
-        // clicked = true
       })
+
+      cover.on('mouseup', onEvent)
 
       attachFocusListeners({ btn, cover })
       attachMouseHoverListeners({ btn, cover })
@@ -4258,8 +4376,9 @@ describe('mouse state', () => {
         btn.attr('disabled', true)
       })
 
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
       cy.get('#cover').click()
-      // cy.wrap(null).should(() => expect(clicked).ok)
 
       cy.getAll('cover', 'mousedown mouseup click mouseout mouseleave').each(shouldBeCalledOnce)
       cy.getAll('cover', 'focus').each(shouldNotBeCalled)
@@ -4284,12 +4403,13 @@ describe('mouse state', () => {
       })
       .appendTo(btn.parent())
 
-      // let clicked = false
-
-      cover.on('mouseover', () => {
+      const onEvent = cy.stub().callsFake(() => {
         cover.hide()
-        // clicked = true
       })
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
+      cover.on('mouseover', onEvent)
 
       attachFocusListeners({ btn, cover })
       attachMouseHoverListeners({ btn, cover })
@@ -4359,9 +4479,64 @@ describe('mouse state', () => {
 
           commandLogEl.find('.command-wrapper').click()
 
-          expect(spyTableName).calledWith('Mouse Move Events')
-          expect(spyTableName).calledWith('Mouse Click Events')
-          expect(spyTableData).calledTwice
+          expect(spyTableName).calledWith('Mouse Events')
+          expect(spyTableData).calledOnce
+        })
+      })
+    })
+
+    it('can print table of keys on dblclick', () => {
+      const spyTableName = cy.spy(top.console, 'groupCollapsed')
+      const spyTableData = cy.spy(top.console, 'table')
+
+      cy.get('input:first').dblclick()
+
+      cy.wrap(null, { timeout: 1000 })
+      .should(() => {
+        spyTableName.reset()
+        spyTableData.reset()
+
+        return withMutableReporterState(() => {
+          const commandLogEl = getCommandLogWithText('click')
+
+          const reactCommandInstance = findReactInstance(commandLogEl.get(0))
+
+          reactCommandInstance.props.appState.isRunning = false
+
+          commandLogEl.find('.command-wrapper').click()
+
+          expect(spyTableName).calledWith('Mouse Events')
+          expect(spyTableData).calledOnce
+          expect(spyTableData.lastCall.args[0]).property('8').includes({ 'Event Type': 'click' })
+          expect(spyTableData.lastCall.args[0]).property('13').includes({ 'Event Type': 'click' })
+          expect(spyTableData.lastCall.args[0]).property('14').includes({ 'Event Type': 'dblclick' })
+        })
+      })
+    })
+
+    it('can print table of keys on rightclick', () => {
+      const spyTableName = cy.spy(top.console, 'groupCollapsed')
+      const spyTableData = cy.spy(top.console, 'table')
+
+      cy.get('input:first').rightclick()
+
+      cy.wrap(null)
+      .should(() => {
+        spyTableName.reset()
+        spyTableData.reset()
+
+        return withMutableReporterState(() => {
+          const commandLogEl = getCommandLogWithText('click')
+
+          const reactCommandInstance = findReactInstance(commandLogEl.get(0))
+
+          reactCommandInstance.props.appState.isRunning = false
+
+          commandLogEl.find('.command-wrapper').click()
+
+          expect(spyTableName).calledWith('Mouse Events')
+          expect(spyTableData).calledOnce
+          expect(spyTableData.lastCall.args[0]).property('8').includes({ 'Event Type': 'contextmenu' })
         })
       })
     })

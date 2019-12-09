@@ -61,6 +61,17 @@ const isHidden = (el, name = 'isHidden()') => {
     return true // is hidden
   }
 
+  // when an element is scaled to 0 in one axis
+  // it is not visible to users.
+  // So, it is hidden.
+  if (elIsHiddenByTransform($el)) {
+    return true
+  }
+
+  if (elIsBackface($el)) {
+    return true
+  }
+
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
   if (elIsHiddenByAncestors($el)) {
@@ -112,8 +123,84 @@ const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
 }
 
+const numberRegex = /-?[0-9]+(?:\.[0-9]+)?/g
+// This is a simplified version of backface culling.
+// https://en.wikipedia.org/wiki/Back-face_culling
+//
+// We defined view normal vector, (0, 0, -1), - eye to screen.
+// and default normal vector, (0, 0, 1)
+// When dot product of them are >= 0, item is visible.
+const elIsBackface = ($el) => {
+  const el = $el[0]
+  const style = getComputedStyle(el)
+  const backface = style.getPropertyValue('backface-visibility')
+  const backfaceInvisible = backface === 'hidden'
+  const transform = style.getPropertyValue('transform')
+
+  if (!backfaceInvisible || !transform.startsWith('matrix3d')) {
+    return false
+  }
+
+  const m3d = transform.substring(8).match(numberRegex)
+  const defaultNormal = [0, 0, -1]
+  const elNormal = findNormal(m3d)
+  // Simplified dot product.
+  // [0] and [1] are always 0
+  const dot = defaultNormal[2] * elNormal[2]
+
+  return dot >= 0
+}
+
+const findNormal = (m) => {
+  const length = Math.sqrt(+m[8] * +m[8] + +m[9] * +m[9] + +m[10] * +m[10])
+
+  return [+m[8] / length, +m[9] / length, +m[10] / length]
+}
+
 const elHasVisibilityCollapse = ($el) => {
   return $el.css('visibility') === 'collapse'
+}
+
+// This function checks 2 things that can happen: scale and rotate
+const elIsHiddenByTransform = ($el) => {
+  // We need to see the final calculation of the element.
+  const el = $el[0]
+
+  const style = window.getComputedStyle(el)
+  const transform = style.getPropertyValue('transform')
+
+  // Test scaleZ(0)
+  // width or height of getBoundingClientRect aren't 0 when scaleZ(0).
+  // But it is invisible.
+  // Experiment -> https://codepen.io/sainthkh/pen/LYYQGpm
+  // That's why we're checking transfomation matrix here.
+  //
+  // To understand how this part works,
+  // you need to understand tranformation matrix first.
+  // Matrix is hard to explain with only text. So, check these articles.
+  //
+  // https://www.useragentman.com/blog/2011/01/07/css3-matrix-transform-for-the-mathematically-challenged/
+  // https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
+  //
+  if (transform.startsWith('matrix3d')) {
+    const m3d = transform.substring(8).match(numberRegex)
+
+    // Z Axis values
+    if (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0) {
+      return true
+    }
+  }
+
+  // Other cases
+  if (transform !== 'none') {
+    const { width, height } = el.getBoundingClientRect()
+
+    if (width === 0 || height === 0) {
+      return true
+    }
+  }
+
+  return false
 }
 
 const elHasDisplayNone = ($el) => {
@@ -272,6 +359,14 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
   }
 
+  if (elIsHiddenByTransform($parent)) {
+    return true
+  }
+
+  if (elIsBackface($parent)) {
+    return true
+  }
+
   // continue to recursively walk up the chain until we reach body or html
   return elIsHiddenByAncestors($parent, $origEl)
 }
@@ -388,6 +483,14 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   }
 
+  if (elIsHiddenByTransform($el)) {
+    return `This element '${node}' is not visible because it is hidden by transform.`
+  }
+
+  if (elIsBackface($el)) {
+    return `This element '${node}' is not visible because it is rotated and its backface is hidden.`
+  }
+
   if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())) {
     parentNode = $elements.stringify($parent, 'short')
     width = elOffsetWidth($parent)
@@ -402,11 +505,15 @@ const getReasonIsHidden = function ($el) {
       // show the long element here
       const covered = $elements.stringify(elAtCenterPoint($el))
 
-      return `\
+      if (covered) {
+        return `\
 This element '${node}' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
 
 ${covered}\
 `
+      }
+
+      return `This element '${node}' is not visible because its ancestor has 'position: fixed' CSS property and it is overflowed by other elements. How about scrolling to the element with cy.scrollIntoView()?`
     }
   } else {
     if (elIsOutOfBoundsOfAncestorsOverflow($el)) {

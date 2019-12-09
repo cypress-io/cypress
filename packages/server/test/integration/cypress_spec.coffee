@@ -1,5 +1,6 @@
 require("../spec_helper")
 
+R          = require("ramda")
 _          = require("lodash")
 os         = require("os")
 cp         = require("child_process")
@@ -12,6 +13,7 @@ commitInfo = require("@cypress/commit-info")
 Fixtures   = require("../support/helpers/fixtures")
 snapshot   = require("snap-shot-it")
 stripAnsi  = require("strip-ansi")
+debug      = require("debug")("test")
 pkg        = require("@packages/root")
 launcher   = require("@packages/launcher")
 extension  = require("@packages/extension")
@@ -42,6 +44,7 @@ browserUtils = require("#{root}lib/browsers/utils")
 chromeBrowser = require("#{root}lib/browsers/chrome")
 openProject   = require("#{root}lib/open_project")
 env           = require("#{root}lib/util/env")
+v             = require("#{root}lib/util/validation")
 system        = require("#{root}lib/util/system")
 appData       = require("#{root}lib/util/app_data")
 formStatePath = require("#{root}lib/util/saved_state").formStatePath
@@ -75,7 +78,9 @@ ELECTRON_BROWSER = {
   name: "electron"
   family: "electron"
   displayName: "Electron"
-  path: ""
+  path: "",
+  version: "99.101.1234",
+  majorVersion: 99
 }
 
 previousCwd = process.cwd()
@@ -129,6 +134,9 @@ describe "lib/cypress", ->
     sinon.spy(errors, "logException")
     sinon.spy(console, "log")
 
+    # to make sure our Electron browser mock object passes validation during tests
+    process.versions.chrome = ELECTRON_BROWSER.version
+
     @expectExitWith = (code) =>
       expect(process.exit).to.be.calledWith(code)
 
@@ -145,6 +153,30 @@ describe "lib/cypress", ->
     ## make sure every project
     ## we spawn is closed down
     openProject.close()
+
+  context "test browsers", ->
+    # sanity checks to make sure the browser objects we pass during tests
+    # all pass the internal validation function
+    it "has valid browsers", ->
+      expect(v.isValidBrowserList("browsers", TYPICAL_BROWSERS)).to.be.true
+
+    it "has valid electron browser", ->
+      expect(v.isValidBrowserList("browsers", [ELECTRON_BROWSER])).to.be.true
+
+    it "allows browser major to be a number", ->
+      browser = {
+        name: 'Edge Beta',
+        family: 'chrome',
+        displayName: 'Edge Beta',
+        version: '80.0.328.2',
+        path: '/some/path',
+        majorVersion: 80
+      }
+      expect(v.isValidBrowserList("browsers", [browser])).to.be.true
+
+    it "validates returned list", ->
+      browserUtils.getBrowsers().then (list) ->
+        expect(v.isValidBrowserList("browsers", list)).to.be.true
 
   context "--get-key", ->
     it "writes out key and exits on success", ->
@@ -274,6 +306,24 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
         @expectExitWith(0)
 
+    describe "strips --", ->
+      beforeEach ->
+        sinon.spy(argsUtil, "toObject")
+
+      it "strips leading", ->
+        cypress.start(["--", "--run-project=#{@todosPath}"])
+        .then =>
+          expect(argsUtil.toObject).to.have.been.calledWith(["--run-project=#{@todosPath}"])
+          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          @expectExitWith(0)
+
+      it "strips in the middle", ->
+        cypress.start(["--run-project=#{@todosPath}", "--", "--browser=electron"])
+        .then =>
+          expect(argsUtil.toObject).to.have.been.calledWith(["--run-project=#{@todosPath}", "--browser=electron"])
+          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          @expectExitWith(0)
+
     it "runs project headlessly and exits with exit code 10", ->
       sinon.stub(runMode, "runSpecs").resolves({ totalFailed: 10 })
 
@@ -292,7 +342,7 @@ describe "lib/cypress", ->
       .then =>
         expect(api.createProject).not.to.be.called
 
-        Project(@noScaffolding).getProjectId()
+        (new Project(@noScaffolding)).getProjectId()
         .then ->
           throw new Error("should have caught error but did not")
         .catch (err) ->
@@ -334,6 +384,20 @@ describe "lib/cypress", ->
       cypress.start(["--run-project=#{@todosPath}", "--spec=#{@todosPath}/tests/test2.coffee"])
       .then =>
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        @expectExitWith(0)
+
+    it "runs project by limiting spec files via config.testFiles string glob pattern", ->
+      cypress.start(["--run-project=#{@todosPath}", "--config=testFiles=#{@todosPath}/tests/test2.coffee"])
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+        @expectExitWith(0)
+
+    it "runs project by limiting spec files via config.testFiles as a JSON array of string glob patterns", ->
+      cypress.start(["--run-project=#{@todosPath}", "--config=testFiles=[\"**/test2.coffee\",\"**/test1.js\"]"])
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test2.coffee"})
+      .then =>
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, {url: "http://localhost:8888/__/#/tests/integration/test1.js"})
         @expectExitWith(0)
 
     it "does not watch settings or plugins in run mode", ->
@@ -770,7 +834,7 @@ describe "lib/cypress", ->
           # like calling client.close() if available to let the
           # browser free any resources
           ee.emit("exit")
-        ee.close = ->
+        ee.destroy = ->
           ee.emit("closed")
         ee.isDestroyed = -> false
         ee.loadURL = ->
@@ -815,13 +879,20 @@ describe "lib/cypress", ->
           .then =>
             args = browserUtils.launch.firstCall.args
 
-            expect(args[0]).to.eq(_.find(TYPICAL_BROWSERS, { name: "chrome" }))
+            # when we work with the browsers we set a few extra flags
+            chrome = _.find(TYPICAL_BROWSERS, { name: "chrome" })
+            launchedChrome = R.merge(chrome, {
+              isHeadless: false,
+              isHeaded: true
+            })
+
+            expect(args[0], "found and used Chrome").to.deep.eq(launchedChrome)
 
             browserArgs = args[2]
 
-            expect(browserArgs).to.have.length(7)
+            expect(browserArgs, "two arguments to Chrome").to.have.length(7)
 
-            expect(browserArgs.slice(0, 4)).to.deep.eq([
+            expect(browserArgs.slice(0, 4), "arguments to Chrome").to.deep.eq([
               "chrome", "foo", "bar", "baz"
             ])
 
@@ -1117,9 +1188,19 @@ describe "lib/cypress", ->
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
         snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel 1")
 
+    it "errors and exits when using --tag without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--tag=nightly",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-tag 1")
+
     it "errors and exits when using --group and --parallel without recording", ->
       cypress.start([
         "--run-project=#{@recordPath}",
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--parallel",
       ])
@@ -1225,6 +1306,7 @@ describe "lib/cypress", ->
         "--record"
         "--key=token-123",
         "--parallel"
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1248,6 +1330,7 @@ describe "lib/cypress", ->
         "--run-project=#{@recordPath}",
         "--record"
         "--key=token-123",
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1272,6 +1355,7 @@ describe "lib/cypress", ->
         "--record"
         "--key=token-123",
         "--parallel"
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1480,14 +1564,16 @@ describe "lib/cypress", ->
           "--config-file=#{@filename}"
         ])
         .then =>
+          debug("cypress started with config %s", @filename)
           options = Events.start.firstCall.args[0]
+          debug("first call arguments %o", Events.start.firstCall.args)
           Events.handleEvent(options, {}, {}, 123, "open:project", @pristinePath)
         .then =>
-          expect(@open).to.be.called
+          expect(@open, "open was called").to.be.called
 
           fs.readJsonAsync(path.join(@pristinePath, @filename))
           .then (json) =>
-            expect(json).to.deep.equal({})
+            expect(json, "json file is empty").to.deep.equal({})
 
   context "--cwd", ->
     beforeEach ->

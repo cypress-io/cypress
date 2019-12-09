@@ -53,6 +53,7 @@ install:
   - node --version
   - node --print process.arch
   - npm --version
+  - npm run check-next-dev-version
   # prints all public variables relevant to the build
   - print-env Platform
   - npm run check-node-version

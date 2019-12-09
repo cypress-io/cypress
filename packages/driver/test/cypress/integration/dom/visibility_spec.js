@@ -801,8 +801,105 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css transform', () => {
-      // TODO: why is this skipped?
-      it.skip('is hidden when outside parents transform scale', function () {
+      describe('element visibility by css transform', () => {
+        const add = (el) => {
+          return $(el).appendTo(cy.$$('body'))
+        }
+
+        it('is visible when an element is translated a bit', () => {
+          const el = add(`<div style="transform: translate(10px, 10px)">Translated</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is only skewed', () => {
+          const el = add(`<div style="transform: skew(10deg, 15deg)">Skewed</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is only rotated', () => {
+          const el = add(`<div style="transform: rotate(20deg)">Rotated</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is scaled by non-zero', () => {
+          const el = add(`<div style="transform: scale(2, 3)">Scaled</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is transformed in multiple ways but not scaled to zero', () => {
+          const el = add(`<div style="transform: translate(10px, 15px) skew(30deg) rotate(30deg) scale(4, 1)">Multiple transform</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is rotateZ(90deg)', () => {
+          const el = add(`<div style="transform: rotateZ(90deg)">rotateZ(90deg)</div>`)
+
+          expect(el).to.be.visible
+        })
+
+        it('is hidden when an element is scaled to X axis in 0', () => {
+          const el = add(`<div style="transform: scaleX(0)">ScaleX(0)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is scaled to Y axis in 0', () => {
+          const el = add(`<div style="transform: scaleY(0)">ScaleY(0)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is scaled to Z axis in 0', () => {
+          const el = add(`<div style="transform: scaleZ(0)">ScaleZ(0)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is transformed in multiple ways but scaled to 0 in one axis', () => {
+          const el = add(`<div style="transform: translate(15px, 30px) skew(20deg) rotate(40deg) scale(0, 0)">Multiple 2</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is rotateX(90deg)', () => {
+          const el = add(`<div style="transform: rotateX(90deg)">rotateX(90deg)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is rotateY(90deg)', () => {
+          const el = add(`<div style="transform: rotateX(90deg)">rotateY(90deg)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is rotateX(90deg) rotateY(90deg)', () => {
+          const el = add(`<div style="transform: rotateX(90deg) rotateY(90deg)">rotateX(90deg)</div>`)
+
+          expect(el).to.be.hidden
+        })
+
+        it('is hidden when an element is transformed in multiple ways but rotated to 90 deg in X or Y axis', () => {
+          const el = add(`<div style="transform: rotateX(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+
+          expect(el).to.be.hidden
+
+          const el2 = add(`<div style="transform: rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+
+          expect(el2).to.be.hidden
+
+          const el3 = add(`<div style="transform: rotateX(90deg) rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
+
+          expect(el3).to.be.hidden
+        })
+      })
+
+      it('is hidden when outside parents transform scale', function () {
         expect(this.$parentWithTransformScaleElOutsideScale.find('span')).to.be.hidden
       })
 
@@ -820,12 +917,53 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css backface-visibility', () => {
+      describe('element visibility by backface-visibility and rotation', () => {
+        const add = (el) => {
+          return $(el).appendTo(cy.$$('body'))
+        }
+
+        it('is visible when there is no transform', () => {
+          const el = add('<div>No transform</div>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when an element is rotated < 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(45deg)">rotateX(45deg)</div>')
+
+          expect(el).to.be.visible
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-45deg)">rotateY(-45deg)</div>')
+
+          expect(el2).to.be.visible
+        })
+
+        it('is invisible when an element is rotated > 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(135deg)">rotateX(135deg)</div>')
+
+          expect(el).to.be.hidden
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-135deg)">rotateY(-135deg)</div>')
+
+          expect(el2).to.be.hidden
+        })
+
+        it('is invisible when an element is rotated in 90 degrees', () => {
+          const el = add('<div style="backface-visibility: hidden; transform: rotateX(90deg)">rotateX(90deg)</div>')
+
+          expect(el).to.be.hidden
+
+          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-90deg)">rotateY(-90deg)</div>')
+
+          expect(el2).to.be.hidden
+        })
+      })
+
       it('is visible when backface not visible', function () {
         expect(this.$parentsWithBackfaceVisibilityHidden.find('#front')).to.be.visible
       })
 
-      // TODO: why is this skipped?
-      it.skip('is hidden when backface visible', function () {
+      it('is hidden when backface visible', function () {
         expect(this.$parentsWithBackfaceVisibilityHidden.find('#back')).to.be.hidden
       })
     })
@@ -881,12 +1019,35 @@ describe('src/cypress/dom/visibility', () => {
         this.reasonIs(this.$elOutOfParentBoundsToRight.find('span'), 'This element \'<span>\' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \'hidden\', \'scroll\' or \'auto\'')
       })
 
+      it('is hidden because it is backface', function () {
+        const el = cy.$$('body').append(`<div id="backface-invisible" style="backface-visibility:hidden; transform: rotateX(180deg)">Hello world</div>`)
+
+        this.reasonIs(el.find('#backface-invisible'), `This element \'<div#backface-invisible>\' is not visible because it is rotated and its backface is hidden.`)
+      })
+
+      it('is hidden by transform', function () {
+        const el = cy.$$('body').append(`<div id="invisible-transform" style="transform: scaleX(0)">Hello world</div>`)
+
+        this.reasonIs(el.find('#invisible-transform'), `This element \'<div#invisible-transform>\' is not visible because it is hidden by transform.`)
+      })
+
       it('element is fixed and being covered', function () {
         this.reasonIs(this.$coveredUpPosFixed.find('#coveredUpPosFixed'), `\
 This element '<div#coveredUpPosFixed>' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
 
 <div style="position: fixed; bottom: 0; left: 0">on top</div>\
 `)
+      })
+
+      it('needs scroll', function () {
+        const el = cy.$$('body').append(`
+          <div style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; overflow-x: hidden; overflow-y: auto;">
+            <div style="height: 800px">Big Element</div>
+            <button id="needsScroll">MyButton</button>
+          </div>
+        `)
+
+        this.reasonIs(el.find('#needsScroll'), `This element \'<button#needsScroll>\' is not visible because its ancestor has 'position: fixed' CSS property and it is overflowed by other elements. How about scrolling to the element with cy.scrollIntoView()?`)
       })
 
       it('cannot determine why element is not visible', function () {

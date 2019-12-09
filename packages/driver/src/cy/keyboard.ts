@@ -8,7 +8,6 @@ import * as $dom from '../dom'
 import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
 import * as $selection from '../dom/selection'
-import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/types'
 import $window from '../dom/window'
 
 const debug = Debug('cypress:driver:keyboard')
@@ -36,7 +35,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
 }
 
 type SimulatedDefault = (
-  el: HTMLTextLikeElement,
+  el: HTMLElement,
   key: KeyDetails,
   options: any
 ) => void
@@ -52,6 +51,7 @@ interface KeyDetails {
   shiftKeyCode?: number
   simulatedDefault?: SimulatedDefault
   simulatedDefaultOnly?: boolean
+  originalSequence?: string
   events: {
     [key in KeyEventType]?: boolean;
   }
@@ -62,6 +62,7 @@ const monthRe = /^\d{4}-(0\d|1[0-2])/
 const weekRe = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
 const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
+const numberRe = /^-?(0|[1-9]\d*)(\.\d+)?(e-?(0|[1-9]\d*))?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
 
 const INITIAL_MODIFIERS = {
@@ -153,16 +154,16 @@ const getFormattedKeyString = (details: KeyDetails) => {
   let foundKeyString = _.findKey(keyboardMappings, { key: details.key })
 
   if (foundKeyString) {
-    return `{${foundKeyString}}`
+    return `{${details.originalSequence}}`
   }
 
   foundKeyString = keyToModifierMap[details.key]
 
   if (foundKeyString) {
-    return `<${foundKeyString}>`
+    return `{${details.originalSequence}}`
   }
 
-  return details.key
+  return details.originalSequence
 }
 
 const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
@@ -206,6 +207,8 @@ const getKeyDetails = (onKeyNotFound) => {
         details.text = details.key
       }
 
+      details.originalSequence = key
+
       return details
     }
 
@@ -213,10 +216,6 @@ const getKeyDetails = (onKeyNotFound) => {
 
     throw new Error('this can never happen')
   }
-}
-
-const hasModifierBesidesShift = (modifiers: KeyboardModifiers) => {
-  return _.some(_.omit(modifiers, ['shift']))
 }
 
 /**
@@ -236,7 +235,7 @@ const shouldIgnoreEvent = <
   return options[eventName] === false
 }
 
-const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
+const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
   if (!key.text) return false
 
   const bounds = $selection.getSelectionBounds(el)
@@ -245,6 +244,29 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails) => {
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
     if ($elements.isReadOnlyInputOrTextarea(el)) {
       return false
+    }
+
+    const isNumberInputType = $elements.isInput(el) && $elements.isInputType(el, 'number')
+
+    if (isNumberInputType) {
+      const needsValue = options.prevVal || ''
+      const needsValueLength = (needsValue && needsValue.length) || 0
+      const curVal = $elements.getNativeProp(el, 'value')
+      const bounds = $selection.getSelectionBounds(el)
+
+      // We need to see if the number we're about to type is a valid number, since setting a number input
+      // to an invalid number will not set the value and possibly throw a warning in the console
+      const potentialValue = $selection.insertSubstring(curVal + needsValue, key.text, [bounds.start + needsValueLength, bounds.end + needsValueLength])
+
+      if (!(numberRe.test(potentialValue))) {
+        debug('skipping inserting value since number input would be invalid', key.text, potentialValue)
+        options.prevVal = needsValue + key.text
+
+        return
+      }
+
+      key.text = (options.prevVal || '') + key.text
+      options.prevVal = null
     }
 
     if (noneSelected) {
@@ -309,13 +331,15 @@ const validateTyping = (
   let isWeek = false
   let isDateTime = false
 
+  // use 'type' attribute instead of prop since browsers without
+  // support for attribute input type will have type prop of 'text'
   if ($elements.isInput(el)) {
-    isDate = $dom.isInputType(el, 'date')
-    isTime = $dom.isInputType(el, 'time')
-    isMonth = $dom.isInputType(el, 'month')
-    isWeek = $dom.isInputType(el, 'week')
+    isDate = $elements.isAttrType(el, 'date')
+    isTime = $elements.isAttrType(el, 'time')
+    isMonth = $elements.isAttrType(el, 'month')
+    isWeek = $elements.isAttrType(el, 'week')
     isDateTime =
-      $dom.isInputType(el, 'datetime') || $dom.isInputType(el, 'datetime-local')
+      $elements.isAttrType(el, 'datetime') || $elements.isAttrType(el, 'datetime-local')
   }
 
   const isFocusable = $elements.isFocusable($el)
@@ -453,11 +477,7 @@ function _getEndIndex (str, substr) {
 // Simulated default actions for select few keys.
 const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
   Enter: (el, key, options) => {
-    if ($elements.isContentEditable(el) || $elements.isTextarea(el)) {
-      key.events.input = $selection.replaceSelectionContents(el, '\n')
-    } else {
-      key.events.input = false
-    }
+    $selection.replaceSelectionContents(el, '\n')
 
     options.onEnterPressed()
   },
@@ -508,27 +528,21 @@ const keyboardMappings: { [key: string]: KeyDetailsPartial } = {
   selectAll: {
     key: 'selectAll',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.selectAll(doc)
+      $selection.selectAll(el)
     },
     simulatedDefaultOnly: true,
   },
   moveToStart: {
     key: 'moveToStart',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.moveSelectionToStart(doc)
+      $selection.moveSelectionToStart(el)
     },
     simulatedDefaultOnly: true,
   },
   moveToEnd: {
     key: 'moveToEnd',
     simulatedDefault: (el) => {
-      const doc = $document.getDocumentFromElement(el)
-
-      return $selection.moveSelectionToEnd(doc)
+      $selection.moveSelectionToEnd(el)
     },
     simulatedDefaultOnly: true,
   },
@@ -695,7 +709,7 @@ export class Keyboard {
                 debug('setting element value', valToSet, activeEl)
 
                 return $elements.setNativeProp(
-                  activeEl as HTMLTextLikeInputElement,
+                  activeEl as $elements.HTMLTextLikeInputElement,
                   'value',
                   valToSet
                 )
@@ -713,30 +727,18 @@ export class Keyboard {
           }
 
           this.typeSimulatedKey(activeEl, key, options)
-          debug('returning null')
 
           return null
         }
       }
     )
 
-    const modifierKeys = _.filter(keyDetailsArr, isModifier)
-
-    if (options.simulated && !options.delay) {
-      _.each(typeKeyFns, (fn) => {
-        return fn()
-      })
-
-      if (options.release !== false) {
-        _.each(modifierKeys, (key) => {
-          return this.simulatedKeyup(getActiveEl(doc), key, options)
-        })
-      }
-
-      options.onAfterType()
-
-      return
-    }
+    // we will only press each modifier once, so only find unique modifiers
+    const modifierKeys = _
+    .chain(keyDetailsArr)
+    .filter(isModifier)
+    .uniqBy('key')
+    .value()
 
     return Promise
     .each(typeKeyFns, (fn) => {
@@ -747,6 +749,8 @@ export class Keyboard {
     .then(() => {
       if (options.release !== false) {
         return Promise.map(modifierKeys, (key) => {
+          options.id = _.uniqueId('char')
+
           return this.simulatedKeyup(getActiveEl(doc), key, options)
         })
       }
@@ -897,8 +901,7 @@ export class Keyboard {
     debug(`dispatched [${eventType}] on ${el}`)
     const formattedKeyString = getFormattedKeyString(keyDetails)
 
-    debug('format string', formattedKeyString)
-    options.onEvent(options.id, formattedKeyString, eventType, which, dispatched)
+    options.onEvent(options.id, formattedKeyString, event, dispatched)
 
     return dispatched
   }
@@ -923,10 +926,11 @@ export class Keyboard {
       details.text = details.shiftText
     }
 
-    // If any modifier besides shift is pressed, no text.
-    if (hasModifierBesidesShift(modifiers)) {
-      details.text = ''
-    }
+    // TODO: Re-think skipping text insert if non-shift modifers
+    // @see https://github.com/cypress-io/cypress/issues/5622
+    // if (hasModifierBesidesShift(modifiers)) {
+    //   details.text = ''
+    // }
 
     return details
   }
@@ -954,18 +958,22 @@ export class Keyboard {
       const didFlag = this.flagModifier(_key)
 
       if (!didFlag) {
-        return null
+        // we've already pressed this modifier, so ignore it and don't fire keydown or keyup
+        _key.events.keydown = false
       }
 
+      // don't fire keyup for modifier keys, this will happen after all other keys are typed
       _key.events.keyup = false
     }
 
     const key = this.getModifierKeyDetails(_key)
 
     if (!key.text) {
-      key.events.input = false
       key.events.keypress = false
       key.events.textInput = false
+      if (key.key !== 'Backspace' && key.key !== 'Delete') {
+        key.events.input = false
+      }
     }
 
     let elToType
@@ -985,9 +993,12 @@ export class Keyboard {
 
       if (key.key === 'Enter' && $elements.isInput(elToType)) {
         key.events.textInput = false
+        key.events.input = false
       }
 
-      if ($elements.isReadOnlyInputOrTextarea(elToType)) {
+      if ($elements.isContentEditable(elToType)) {
+        key.events.input = false
+      } else if ($elements.isReadOnlyInputOrTextarea(elToType)) {
         key.events.textInput = false
       }
 
@@ -1044,19 +1055,16 @@ export class Keyboard {
     this.fireSimulatedEvent(el, 'keyup', key, options)
   }
 
-  getSimulatedDefaultForKey (key: KeyDetails) {
+  getSimulatedDefaultForKey (key: KeyDetails, options) {
     debug('getSimulatedDefaultForKey', key.key)
     if (key.simulatedDefault) return key.simulatedDefault
 
-    let nonShiftModifierPressed = hasModifierBesidesShift(this.getActiveModifiers())
-
-    debug({ nonShiftModifierPressed, key })
-    if (!nonShiftModifierPressed && simulatedDefaultKeyMap[key.key]) {
+    if (simulatedDefaultKeyMap[key.key]) {
       return simulatedDefaultKeyMap[key.key]
     }
 
     return (el: HTMLElement) => {
-      if (!shouldUpdateValue(el, key)) {
+      if (!shouldUpdateValue(el, key, options)) {
         debug('skip typing key', false)
         key.events.input = false
 
@@ -1084,7 +1092,7 @@ export class Keyboard {
 
   performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {
     debug('performSimulatedDefault', key.key)
-    const simulatedDefault = this.getSimulatedDefaultForKey(key)
+    const simulatedDefault = this.getSimulatedDefaultForKey(key, options)
 
     if ($elements.isTextLike(el)) {
       if ($elements.isInput(el) || $elements.isTextarea(el)) {
@@ -1098,6 +1106,8 @@ export class Keyboard {
         // el is contenteditable
         simulatedDefault(el, key, options)
       }
+
+      debug({ key })
 
       shouldIgnoreEvent('input', key.events) ||
         this.fireSimulatedEvent(el, 'input', key, options)

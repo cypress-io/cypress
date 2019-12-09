@@ -409,12 +409,13 @@ module.exports = {
 
       cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')
       """
-    invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
-    invalid_num_of_args:
-      """
-      #{cmd('{{cmd}}')} only accepts a single argument.
-
-      If you want to invoke a function with arguments, use cy.invoke().
+    invalid_prop_name_arg: "#{cmd('{{cmd}}')} only accepts a string or a number as the {{identifier}}Name argument."
+    null_or_undefined_property_name: "#{cmd('{{cmd}}')} expects the {{identifier}}Name argument to have a value."
+    invalid_options_arg: "#{cmd('{{cmd}}')} only accepts an object as the options argument."
+    invalid_num_of_args:	
+      """	
+      #{cmd('{{cmd}}')} does not accept additional arguments.	
+      If you want to invoke a function with arguments, use cy.invoke().	
       """
     timed_out:
       """
@@ -1040,7 +1041,7 @@ module.exports = {
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 4000px."
+    dimensions_out_of_range: "#{cmd('viewport')} width and height must be at least 0px."
     empty_string: "#{cmd('viewport')} cannot be passed an empty string."
     invalid_orientation: "#{cmd('viewport')} can only accept '{{all}}' as valid orientations. Your orientation was: '{{orientation}}'"
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"

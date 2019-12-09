@@ -13,7 +13,7 @@ exports['e2e commands outside of test / passes on passing assertions'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  assertions_passing_outside_of_test_spec.coffee                                  (1 of 1)
 
 
@@ -37,9 +37,9 @@ exports['e2e commands outside of test / passes on passing assertions'] = `
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Started processing:  Compressing to 32 CRF
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_passing_outside_of_t     (X second)
-                          est_spec.coffee.mp4                                                       
+                          est_spec.coffee.mp4
 
 
 ====================================================================================================
@@ -47,12 +47,12 @@ exports['e2e commands outside of test / passes on passing assertions'] = `
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  assertions_passing_outside_of_test_      XX:XX        -        -        -        -        - │
   │    spec.coffee                                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        -        -        -        -        -  
+    ✔  All specs passed!                        XX:XX        -        -        -        -        -
 
 
 `
@@ -72,7 +72,7 @@ exports['e2e commands outside of test / fails on failing assertions'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  assertions_failing_outside_of_test_spec.coffee                                  (1 of 1)
 
 
@@ -96,7 +96,7 @@ We dynamically generated a new test to display this failure.
 
       -true
       +false
-      
+
   AssertionError: expected true to be false
 
 
@@ -120,14 +120,14 @@ We dynamically generated a new test to display this failure.
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/assertions_failing_outside_of_test_spec.coffee/     (1280x720)
-     An uncaught error was detected outside of a test (failed).png                                  
+     An uncaught error was detected outside of a test (failed).png
 
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Started processing:  Compressing to 32 CRF
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_failing_outside_of_t     (X second)
-                          est_spec.coffee.mp4                                                       
+                          est_spec.coffee.mp4
 
 
 ====================================================================================================
@@ -135,12 +135,12 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  assertions_failing_outside_of_test_      XX:XX        1        -        1        -        - │
   │    spec.coffee                                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -
 
 
 `
@@ -160,7 +160,7 @@ exports['e2e commands outside of test / fails on cy commands'] = `
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
+
   Running:  commands_outside_of_test_spec.coffee                                            (1 of 1)
 
 
@@ -187,15 +187,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -218,14 +210,14 @@ We dynamically generated a new test to display this failure.
   (Screenshots)
 
   -  /XXX/XXX/XXX/cypress/screenshots/commands_outside_of_test_spec.coffee/An uncaugh     (1280x720)
-     t error was detected outside of a test (failed).png                                            
+     t error was detected outside of a test (failed).png
 
 
   (Video)
 
-  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Started processing:  Compressing to 32 CRF
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/commands_outside_of_test_spec.c     (X second)
-                          offee.mp4                                                                 
+                          offee.mp4
 
 
 ====================================================================================================
@@ -233,12 +225,12 @@ We dynamically generated a new test to display this failure.
   (Run Finished)
 
 
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  commands_outside_of_test_spec.coffe      XX:XX        1        -        1        -        - │
   │    e                                                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -
 
 
 `

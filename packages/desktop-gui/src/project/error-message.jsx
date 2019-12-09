@@ -60,7 +60,7 @@ class ErrorMessage extends Component {
       <div className='full-alert-container'>
         <div className='full-alert alert alert-danger error'>
           <p className='header'>
-            <i className='fa fa-warning'></i>{' '}
+            <i className='fas fa-exclamation-triangle'></i>{' '}
             <strong>{err.title || 'Can\'t start server'}</strong>
           </p>
           <span className='alert-content'>
@@ -81,7 +81,7 @@ class ErrorMessage extends Component {
             className='btn btn-default btn-sm'
             onClick={this.props.onTryAgain}
           >
-            <i className='fa fa-refresh'></i>{' '}
+            <i className='fas fa-sync-alt'></i>{' '}
             Try Again
           </button>
         </div>

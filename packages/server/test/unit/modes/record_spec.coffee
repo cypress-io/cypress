@@ -241,6 +241,7 @@ describe "lib/modes/record", ->
           displayName: "chrome"
           version: "59"
         }
+        tag = 'nightly,develop'
 
         recordMode.createRunAndRecordSpecs({
           key
@@ -254,6 +255,7 @@ describe "lib/modes/record", ->
           projectRoot
           specPattern
           runAllSpecs
+          tag
         })
         .then ->
           expect(commitInfo.commitInfo).to.be.calledWith(projectRoot)
@@ -299,6 +301,7 @@ describe "lib/modes/record", ->
             recordKey: "recordKey"
             specPattern: "spec/pattern1,spec/pattern2"
             specs: ["path/to/spec/a", "path/to/spec/b"]
+            tags: ['nightly', 'develop']
           })
 
   context ".updateInstanceStdout", ->

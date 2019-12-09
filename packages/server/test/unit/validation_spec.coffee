@@ -3,6 +3,57 @@ snapshot = require("snap-shot-it")
 v = require("#{root}lib/util/validation")
 
 describe "lib/util/validation", ->
+  context "#isValidBrowserList", ->
+    it "does not allow empty or not browsers", ->
+      snapshot("undefined browsers", v.isValidBrowserList("browsers"))
+      snapshot("empty list of browsers", v.isValidBrowserList("browsers", []))
+      snapshot("browsers list with a string", v.isValidBrowserList("browsers", ["foo"]))
+
+  context "#isValidBrowser", ->
+    it "passes valid browsers and forms error messages for invalid ones", ->
+      browsers = [
+        # valid browser
+        {
+          name: "Chrome",
+          displayName: "Chrome Browser",
+          family: "chrome",
+          path: "/path/to/chrome",
+          version: "1.2.3",
+          majorVersion: 1
+        },
+        # another valid browser
+        {
+          name: "FF",
+          displayName: "Firefox",
+          family: "firefox",
+          path: "/path/to/firefox",
+          version: "1.2.3",
+          majorVersion: "1"
+        },
+        # Electron is a valid browser
+        {
+          name: "Electron",
+          displayName: "Electron",
+          family: "electron",
+          path: "",
+          version: "99.101.3",
+          majorVersion: 99
+        },
+        # invalid browser, missing displayName
+        {
+          name: "No display name",
+          family: "electron"
+        },
+        {
+          name: "bad family",
+          displayName: "Bad family browser",
+          family: "unknown family"
+        }
+      ]
+      # data-driven testing - computers snapshot value for each item in the list passed through the function
+      # https://github.com/bahmutov/snap-shot-it#data-driven-testing
+      snapshot.apply(null, [v.isValidBrowser].concat(browsers))
+
   context "#isOneOf", ->
     it "validates a string", ->
       validate = v.isOneOf("foo", "bar")
