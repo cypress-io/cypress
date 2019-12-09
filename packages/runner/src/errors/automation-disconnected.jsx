@@ -6,7 +6,7 @@ export default ({ onReload }) => (
       <p>Whoops, the Cypress Chrome extension has disconnected.</p>
       <p className='muted'>Cypress cannot run tests without this extension.</p>
       <button onClick={onReload}>
-        <i className='fas fa-sync'></i> Reload the Browser
+        <i className='fas fa-sync-alt'></i> Reload the Browser
       </button>
       <div className='helper-line'>
         <a href='https://on.cypress.io/launching-browsers' target='_blank'>

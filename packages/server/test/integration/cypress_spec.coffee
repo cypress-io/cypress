@@ -342,7 +342,7 @@ describe "lib/cypress", ->
       .then =>
         expect(api.createProject).not.to.be.called
 
-        Project(@noScaffolding).getProjectId()
+        (new Project(@noScaffolding)).getProjectId()
         .then ->
           throw new Error("should have caught error but did not")
         .catch (err) ->

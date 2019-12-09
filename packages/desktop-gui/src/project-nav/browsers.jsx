@@ -58,7 +58,7 @@ export default class Browsers extends Component {
     let prefixText
 
     if (project.browserState === 'opening') {
-      icon = 'fas fa-sync fa-spin'
+      icon = 'fas fa-sync-alt fa-spin'
       prefixText = 'Opening'
     } else if (project.browserState === 'opened') {
       icon = 'fas fa-check-circle green far'
