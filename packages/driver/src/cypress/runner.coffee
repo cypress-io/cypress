@@ -661,6 +661,9 @@ create = (specWindow, mocha, Cypress, cy) ->
     ## else  do the same thing as mocha here
     err = $utils.appendErrMsg(err, append())
 
+    ## remove this error's stack since it gives no valuable context
+    err.stack = ''
+
     throwErr = ->
       throw err
 

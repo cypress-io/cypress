@@ -647,7 +647,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       errString = e.toString()
       errStack = e.stack
       if !errStack.slice(0, errStack.indexOf("\n")).includes(errString)
-        e.stack = errString + "\n" + e.stack
+        e.stack = errString + "\n" + errStack
       ## and if any of these throw synchronously immediately error
       finish(err2)
 
