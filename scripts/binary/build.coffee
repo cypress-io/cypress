@@ -266,6 +266,9 @@ buildCypressApp = (platform, version, options = {}) ->
 
       # note: to see code sign logs use
       # DEBUG=electron-builder,electron-osx-sign*
+      # to check if the application has been signed correctly run these commands
+      # codesign --verify --verbose build/darwin/Cypress.app
+      # spctl --assess --verbose build/darwin/Cypress.app
       execa('electron-builder', ["--publish", "never", "--prepackaged", appFolder], {
         stdio: "inherit"
       })
@@ -325,7 +328,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(removeDevElectronApp)
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
-  # .then(codeSign) ## codesign after running smoke tests due to changing .cy
+  .then(codeSign) ## codesign after running smoke tests due to changing .cy
   # .then(verifyAppCanOpen)
   .return({
     buildDir: buildDir()

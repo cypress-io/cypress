@@ -111,7 +111,7 @@
     "debug": "4.1.1",
     "decaffeinate": "6.0.1",
     "del": "3.0.0",
-    "electron-builder": "22.2.0",
+    "electron-builder": "20.41.0",
     "eslint": "6.1.0",
     "eslint-plugin-cypress": "2.6.0",
     "eslint-plugin-json-format": "2.0.0",
