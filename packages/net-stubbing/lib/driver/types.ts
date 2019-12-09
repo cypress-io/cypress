@@ -5,14 +5,6 @@ import {
   HttpResponseInterceptor,
 } from '../types'
 
-declare global {
-  namespace Cypress {
-    interface State {
-      (k: 'routes', v?: RouteMap): RouteMap
-    }
-  }
-}
-
 export interface Route {
   alias?: string
   log: Cypress.Log

@@ -51,6 +51,10 @@ declare global {
         message?: string
       }
     }
+
+    interface State {
+      (k: 'routes', v?: RouteMap): RouteMap
+    }
   }
 }
 

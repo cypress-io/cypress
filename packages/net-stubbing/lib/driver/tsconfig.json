@@ -1,8 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "types": [
-      "../../../driver/index.d.ts"
-    ]
-  }
-}

@@ -21,6 +21,7 @@ import {
   AnnotatedStringMatcher,
   NetEventFrames,
 } from '../types'
+import '@packages/driver'
 
 /**
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.

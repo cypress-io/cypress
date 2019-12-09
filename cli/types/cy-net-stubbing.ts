@@ -195,13 +195,14 @@ export interface StaticResponse {
  */
 export type StringMatcher = GlobPattern | RegExp
 
-export interface WebSocketController {
-  onConnect?: (req: CyHttpMessages.IncomingRequest, socket: CyWebSocket) => void
-  onIncomingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
-  onOutgoingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
-  onDisconnect?: (socket: CyWebSocket) => void
+export type WebSocketController = never
+// export interface WebSocketController {
+//   onConnect?: (req: CyHttpMessages.IncomingRequest, socket: CyWebSocket) => void
+//   onIncomingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
+//   onOutgoingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
+//   onDisconnect?: (socket: CyWebSocket) => void
 
-  transport: 'socket.io' // socket.io client over websockets
-              | 'socket.io-longpolling' // socket.io client via longpolling
-              | 'websockets' // vanilla websockets server
-}
+//   transport: 'socket.io' // socket.io client over websockets
+//               | 'socket.io-longpolling' // socket.io client via longpolling
+//               | 'websockets' // vanilla websockets server
+// }
