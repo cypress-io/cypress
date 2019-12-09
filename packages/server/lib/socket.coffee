@@ -237,9 +237,6 @@ class Socket
 
         ## TODO: what to do about runner disconnections?
 
-      # socket.on 'capture:extension:video:frame', (data) ->
-      #   options.onCaptureExtensionVideoFrame(data)
-
       socket.on "spec:changed", (spec) ->
         options.onSpecChanged(spec)
 
