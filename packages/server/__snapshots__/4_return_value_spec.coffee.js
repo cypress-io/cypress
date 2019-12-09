@@ -70,11 +70,7 @@ Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callb
 Original mocha error:
 
 Error: Resolution method is overspecified. Specify a callback *or* return a Promise; not both.
-    at stack trace line
-    at stack trace line
-  Error: Resolution method is overspecified. Specify a callback *or* return a Promise; not both.
-      at stack trace line
-      at stack trace line
+    [stack trace lines]
 
 
 
