@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <style>
+    .basic {
+      background: yellowgreen;
+      width: 200px;
+      height: 80px;
+    }
+
+    .grandgrandparent {
+      background-color: darkcyan;
+      width: 500px;
+      height: 120px;
+    }
+
+    .grandparent {
+      background: brown;
+      width: 400px;
+      height: 100px;
+    }
+
+    .parent {
+      background: blueviolet;
+      width: 300px;
+      height: 80px;
+    }
+
+    .target {
+      background: yellowgreen;
+      width: 200px;
+      height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Basic cases</h1>
+
+    <h4>No transform</h4>
+    <div id="b-1" class="basic">No transform</div>
+    
+    <h4>Rotate &lt; 90deg + backface-invisible</h4>
+    <div id="b-2" class="basic" style="backface-visibility: hidden; transform: rotateX(45deg)">rotateX(45deg)</div>
+    <div id="b-3" class="basic" style="backface-visibility: hidden; transform: rotateY(-45deg)">rotateY(-45deg)</div>
+    
+    <h4>Rotate &gt; 90deg + backface-invisible</h4>
+    <div id="b-4" class="basic" style="backface-visibility: hidden; transform: rotateX(135deg)">rotateX(135deg)</div>
+    <div id="b-5" class="basic" style="backface-visibility: hidden; transform: rotateY(-135deg)">rotateY(-135deg)</div>
+    
+    <h4>Rotate 90deg + backface-invisible</h4>
+    <div id="b-6" class="basic" style="backface-visibility: hidden; transform: rotateX(90deg)">rotateX(90deg)</div>
+    <div id="b-7" class="basic" style="backface-visibility: hidden; transform: rotateY(-90deg)">rotateY(-90deg)</div>
+
+    <h4>Rotate &gt; 135deg + backface-visible</h4>
+    <div id="b-8" class="basic" style="transform: rotateX(150deg)">Not hidden + rotateX(150deg)</div>
+  </div>
+  
+  <div>
+    <h1>Affected by flat ancestors</h1>
+    
+    <div>
+      <h2>CASE 1: All flat</h2>
+      
+      <h4>Parent hidden</h4>
+      <div class="parent" style="backface-visibility: hidden; transform: rotateX(180deg)">
+        <div id="a1-1" class="target">Hidden by parent</div>
+      </div>
+
+      <h4>Parent Visible</h4>
+      <div class="parent" style="backface-visibility: hidden;">
+        <div id="a1-2" class="target">Not hidden by parent</div>
+      </div>
+
+      <h4>Parent rotate 180deg + Child backface-invisible</h4>
+      <div class="parent" style="transform: rotateX(180deg)">
+        <div id="a1-3" class="target" style="backface-visibility: hidden;">Parent rotated 180deg</div>
+      </div>
+    </div>
+
+    <div>
+      <h2>CASE 2: No transform after preserve-3d</h2>
+
+      <h4>Parent rotate 180deg + Child backface-invisible</h4>
+      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(180deg)">
+        Parent rotateX(180deg)
+        <div id="a2-1" class="target" style="backface-visibility: hidden;">Target</div>
+      </div>
+
+      <h4>Parent rotate 45deg + Child rotate 45deg with backface-invisible</h4>
+      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(45deg)">
+        Parent rotateX(45deg) 
+        <div id="a2-2" class="target" style="backface-visibility: hidden;transform: rotateX(45deg)">Target rotateX(180deg)</div>
+      </div>
+
+      <h4>Parent rotate 90deg + Child rotate 190deg with backface-invisible</h4>
+      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(90deg)">
+        Parent rotateX(90deg)
+        <div id="a2-3" class="target" style="backface-visibility: hidden;transform: rotateX(190deg)">Target rotateX(190deg)</div>
+      </div>
+
+      <h4>Grandparent rotateX 180deg with preserve-3d + Parent rotate 180deg + Child backface-invisible</h4>
+      <div class="grandparent" style="transform-style:preserve-3d; transform: rotateX(180deg)">
+        Grandparent rotateX(180deg)
+        <div class="parent" style="transform: rotateX(180deg)">
+          Parent rotateX(180deg)
+          <div id="a2-1" class="target" style="backface-visibility: hidden;">Target</div>
+        </div>
+      </div>
+    </div>
+    
+    <div>
+      <h2>CASE 3: flat + preserver-3d</h2>
+
+      <h4>Parent rotate 180deg + Child backface-invisible with flat</h4>
+      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(180deg)">
+        Parent rotateX(180deg)
+        <div id="a3-1" class="target" style="transform-style: flat; backface-visibility: hidden;">Target</div>
+      </div>
+
+      <h4>Grandparent rotateX 60deg with flat + Parent rotate 60deg + Child backface-invisible</h4>
+      <div class="grandparent" style="transform-style:flat; transform: rotateX(60deg)">
+        Grandparent rotateX(60deg)
+        <div class="parent" style="transform-style:preserve-3d; transform: rotateX(60deg)">
+          Parent rotateX(60deg)
+          <div id="a2-1" class="target" style="backface-visibility: hidden;">Target</div>
+        </div>
+      </div>
+
+      <h4>Grandparent rotateX 180deg with flat + Parent rotate 180deg + Child backface-invisible</h4>
+      <div class="grandparent" style="transform-style:flat; transform: rotateX(180deg)">
+        Grandparent rotateX(180deg)
+        <div class="parent" style="transform-style:preserve-3d; transform: rotateX(180deg)">
+          Parent rotateX(180deg)
+          <div id="a2-1" class="target" style="backface-visibility: hidden;">Target</div>
+        </div>
+      </div>
+
+      <h4>Grandgrandparent rotateX 60deg with preserve3d + Grandparent rotateX 60deg with flat + Parent rotate 60deg with preserve3d + Child backface-invisible</h4>
+      <div class="grandgrandparent" style="transform-style: preserve-3d; transform: rotateX(60deg)">
+        Grandgrandparent rotateX(60deg)
+        <div class="grandparent" style="transform-style:flat; transform: rotateX(60deg)">
+          Grandparent rotateX(60deg)
+          <div class="parent" style="transform-style:preserve-3d; transform: rotateX(60deg)">
+            Parent rotateX(60deg)
+            <div id="a2-1" class="target" style="backface-visibility: hidden;">Target</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+
