@@ -117,6 +117,8 @@ module.exports = {
   throwErr: (err, options = {}) ->
     if _.isString(err)
       err = @cypressErr(err)
+      if options.noStackTrace
+        err.stack = ''
 
     onFail = options.onFail
     errProps = options.errProps

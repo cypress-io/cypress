@@ -7,6 +7,8 @@ path         = require("path")
 http         = require("http")
 human        = require("human-interval")
 morgan       = require("morgan")
+stream       = require("stream")
+chalk        = require("chalk").default
 express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
@@ -38,6 +40,7 @@ DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
+crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame|Permission denied.*cross-origin object)/gm
 
 currentOptions = {}
 
@@ -45,11 +48,12 @@ currentOptions = {}
 ## so that the stdout can contain stack traces of different lengths
 ## '@' will be present in firefox stack trace lines
 ## 'at' will be present in chrome stack trace lines
-replaceStackTraceLines = (str, browser) ->
+replaceStackTraceLines = (str) ->
   str.replace(stackTraceLinesRe, (match, parts...) ->
     pre = parts[0]
+    isFirefoxStack = parts[1] is '@'
     post = parts[4]
-    if browser is 'firefox'
+    if isFirefoxStack
       if pre is '\n'
         pre = '\n    '
       else
@@ -57,6 +61,10 @@ replaceStackTraceLines = (str, browser) ->
 
       post = post.slice(-1)
     return "#{pre}[stack trace lines]#{post}")
+
+## Different browsers have different cross-origin error messages
+replaceCrossOriginErorrMessages = (str) ->
+  str.replace crossOriginErrorRe, '[Cross origin error message]'
 
 replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
@@ -144,7 +152,7 @@ normalizeStdout = (str) ->
     ## screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
 
-  return replaceStackTraceLines(str, options.browser)
+  return replaceStackTraceLines( replaceCrossOriginErorrMessages str)
 
 ensurePort = (port) ->
   if port is 5566
@@ -539,10 +547,16 @@ module.exports = e2e = {
         .value()
       }
 
+      ColorOutput = () ->
+        colorOutput = new stream.Transform()
+        colorOutput._transform = (chunk, encoding, cb) ->
+          cb(null, chalk.magenta(chunk.toString()))
+        colorOutput
+
       ## pipe these to our current process
       ## so we can see them in the terminal
-      sp.stdout.pipe(process.stdout)
-      sp.stderr.pipe(process.stderr)
+      sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
+      sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
 
       sp.stdout.on "data", (buf) ->
         stdout += buf.toString()
