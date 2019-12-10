@@ -102,13 +102,39 @@ describe('Project Nav', function () {
       })
 
       context('normal browser list behavior', function () {
-        it('lists browsers', () => {
+        it('lists browsers', function () {
           cy.get('.browsers-list').parent()
           .find('.dropdown-menu').first()
-          .find('li').should('have.length', 2)
-          .should(function ($li) {
-            expect($li.first()).to.contain('Chromium')
-            expect($li.last()).to.contain('Canary')
+          // one is showing in the selection, so won't be in the list
+          .find('li').should('have.length', this.config.browsers.length - 1)
+          .each(function ($li, i) {
+            const dropdownBrowsers = Cypress._.filter(this.config.browsers, (b) => {
+              // Chrome is shown in selection, so skip it
+              return b.displayName !== 'Chrome'
+            })
+
+            expect($li).to.contain(dropdownBrowsers[i].displayName)
+          })
+        })
+
+        it('displays browsers icons', function () {
+          cy.get('.browsers-list').parent()
+          .find('.dropdown-menu').first()
+          // one is showing in the selection, so won't be in the list
+          .find('.browser-icon')
+          .each(function ($i, i) {
+            const dropdownBrowsers = Cypress._.filter(this.config.browsers, (b) => {
+              // Chrome is shown in selection, so skip it
+              return b.displayName !== 'Chrome'
+            })
+
+            let family = dropdownBrowsers[i].family
+
+            family = family === 'electron' ? 'chrome' : family
+
+            // first one is shown in selection, so skip first
+            cy.wrap($i).should('have.class',
+              `fa-${family}`)
           })
         })
 
@@ -145,13 +171,16 @@ describe('Project Nav', function () {
           cy.get('.browsers-list>a').first().contains('Chromium')
         })
 
-        it('swaps the chosen browser into the dropdown', () => {
+        it('swaps the chosen browser into the dropdown', function () {
           cy.get('.browsers-list').find('.dropdown-menu')
-          .find('li').should('have.length', 2)
-          .should(function ($li) {
-            expect($li.first()).to.contain('Chrome')
+          .find('li').should('have.length', this.config.browsers.length - 1)
+          .each(function ($li, i) {
+            const dropdownBrowsers = Cypress._.filter(this.config.browsers, (b) => {
+              // Chrome is shown in selection, so skip it
+              return b.displayName !== 'Chromium'
+            })
 
-            expect($li.last()).to.contain('Canary')
+            expect($li).to.contain(dropdownBrowsers[i].displayName)
           })
         })
 
@@ -343,28 +372,33 @@ describe('Project Nav', function () {
     describe('custom browser available', function () {
       beforeEach(function () {
         this.config.browsers.push({
-          name: 'chromium',
-          family: 'chrome',
+          name: 'foo browser',
+          family: 'foo',
           custom: true,
-          displayName: 'Custom Chromium',
+          displayName: 'Custom Foo',
           version: '72.0.3626.96',
           majorVersion: '72',
-          path: '/usr/bin/chromium-x',
-          info: 'Loaded from /usr/bin/chromium-x',
+          path: '/usr/bin/foo-x',
+          info: 'Loaded from /usr/bin/foo-x',
         })
 
         this.openProject.resolve(this.config)
       })
 
+      it('displays generic icon', () => {
+        cy.get('.browsers-list>a').first()
+        .should('contain', 'Custom Foo')
+      })
+
       it('pre-selects the custom browser', () => {
         cy.get('.browsers-list>a').first()
-        .should('contain', 'Custom Chromium')
+        .should('contain', 'Custom Foo')
       })
 
       it('pre-selects the custom browser if chosenBrowser saved locally', function () {
         localStorage.setItem('chosenBrowser', 'electron')
         cy.get('.browsers-list>a').first()
-        .should('contain', 'Custom Chromium')
+        .should('contain', 'Custom Foo')
 
         cy.wrap(localStorage.getItem('chosenBrowser')).should('equal', 'electron')
       })
