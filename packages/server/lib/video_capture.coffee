@@ -84,6 +84,8 @@ module.exports = {
       ## get resolve or rejected
       return ended.promise
 
+    lengths = {}
+
     writeVideoFrame = (data) ->
       ## make sure we haven't ended
       ## our stream yet because paint
@@ -97,9 +99,11 @@ module.exports = {
       debugFrames("writing video frame")
 
       # # wStream.write(data)
-      # pt.write(data)
-
-      # return
+      
+      if lengths[data.length]
+        return
+      
+      lengths[data.length] = true
 
       if wantsWrite
         if not wantsWrite = pt.write(data)
