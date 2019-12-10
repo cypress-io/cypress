@@ -1,4 +1,6 @@
 {
+  "productName": "Cypress",
+  "appId": "com.electron.cypress",
   "mac": {
     "forceCodeSigning": true,
     "publish": null,
@@ -9,5 +11,10 @@
     "type": "distribution"
   },
   "afterPack": "./scripts/after-pack-hook.js",
-  "electronVersion": "7.1.2"
+  "afterSign": "./scripts/after-sign-hook.js",
+  "files": [
+    "**/*",
+    "**/packages/coffee/node_modules/**/*",
+    "**/packages/server/node_modules/**/*"
+  ]
 }

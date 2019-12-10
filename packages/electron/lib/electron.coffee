@@ -20,6 +20,12 @@ module.exports = {
 
     install.package.apply(install, arguments)
 
+  getElectronVersion: ->
+    install.getElectronVersion()
+
+  icons: ->
+    install.icons()
+
   cli: (argv = []) ->
     opts = minimist(argv)
 

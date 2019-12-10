@@ -216,7 +216,39 @@ buildCypressApp = (platform, version, options = {}) ->
       dist
       platform
       appVersion: version
+      osxSign: true
     })
+
+  electronPackAndSign = ->
+    log("#electronPackAndSign")
+
+    # TODO remove dist/darwin/packages/server/.cy symlink first
+    appFolder = distDir()
+    # outputFolder = meta.zipDir(platform)
+    outputFolder = path.join(__dirname, "..", "..", "build")
+    electronVersion = electron.getElectronVersion()
+    la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion)
+    # electronDistFolder = path.join(dir, "packages", "electron", "node_modules", "electron", "dist")
+    electronDistFolder = path.join(__dirname, "..", "..", "packages", "electron", "node_modules", "electron", "dist")
+    iconsFolder = electron.icons().getPathToIcon("cypress")
+
+    args = [
+      "--publish=never",
+      "--c.electronVersion=#{electronVersion}",
+      "--c.directories.app=#{appFolder}",
+      "--c.directories.output=#{outputFolder}",
+      "--c.npmRebuild=false",
+      "--c.electronCompile=false",
+      "--c.electronDist=#{electronDistFolder}",
+      "--c.icon=#{iconsFolder}"
+    ]
+    opts = {
+      stdio: "inherit"
+    }
+    console.log("electron-builder arguments:")
+    console.log(args.join(' '))
+
+    execa('electron-builder', args, opts)
 
   removeDevElectronApp = ->
     log("#removeDevElectronApp")
@@ -269,7 +301,8 @@ buildCypressApp = (platform, version, options = {}) ->
       # to check if the application has been signed correctly run these commands
       # codesign --verify --verbose build/darwin/Cypress.app
       # spctl --assess --verbose build/darwin/Cypress.app
-      execa('electron-builder', ["--publish", "never", "--prepackaged", appFolder], {
+      execa('electron-builder', ["--publish", "never", appFolder], {
+      # execa('electron-builder', ["--publish", "never", "--prepackaged", appFolder], {
         stdio: "inherit"
       })
       .catch (err) ->
@@ -312,26 +345,27 @@ buildCypressApp = (platform, version, options = {}) ->
           reject new Error("Verifying App via GateKeeper failed")
 
   Promise.resolve()
-  .then(checkPlatform)
-  .then(cleanupPlatform)
-  .then(buildPackages)
-  .then(copyPackages)
-  .then(npmInstallPackages)
-  .then(createRootPackage)
-  .then(convertCoffeeToJs)
-  .then(removeTypeScript)
-  .then(cleanJs)
-  .then(transformSymlinkRequires)
-  .then(testVersion(distDir))
-  .then(testBuiltStaticAssets)
-  .then(elBuilder) # should we delete everything in the buildDir()?
-  .then(removeDevElectronApp)
-  .then(testVersion(buildAppDir))
-  .then(runSmokeTests)
-  .then(codeSign) ## codesign after running smoke tests due to changing .cy
+  # .then(checkPlatform)
+  # .then(cleanupPlatform)
+  # .then(buildPackages)
+  # .then(copyPackages)
+  # .then(npmInstallPackages)
+  # .then(createRootPackage)
+  # .then(convertCoffeeToJs)
+  # .then(removeTypeScript)
+  # .then(cleanJs)
+  # .then(transformSymlinkRequires)
+  # .then(testVersion(distDir))
+  # .then(testBuiltStaticAssets)
+  # .then(elBuilder) # should we delete everything in the buildDir()?
+  .then(electronPackAndSign)
+  # .then(removeDevElectronApp)
+  # .then(testVersion(buildAppDir))
+  # .then(runSmokeTests)
+  # .then(codeSign) ## codesign after running smoke tests due to changing .cy
   # .then(verifyAppCanOpen)
-  .return({
-    buildDir: buildDir()
-  })
+  # .return({
+  #   buildDir: buildDir()
+  # })
 
 module.exports = buildCypressApp

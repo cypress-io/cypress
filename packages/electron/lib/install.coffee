@@ -14,6 +14,9 @@ if not electronVersion = pkg.devDependencies.electron
   throw new Error("Missing 'electron' devDependency in ./package.json")
 
 module.exports = {
+  getElectronVersion: ->
+    electronVersion
+
   checkCurrentVersion: ->
     pathToVersion = paths.getPathToVersion()
 
@@ -50,6 +53,11 @@ module.exports = {
       @removeEmptyApp()
     .then ->
       process.exit()
+
+  # returns icons package so that the caller code can find
+  # paths to the icons without hard-coding them
+  icons: () ->
+    return require("@cypress/icons")
 
   package: (options = {}) ->
     pkgr    = require("electron-packager")
