@@ -18,7 +18,7 @@ specsUtil = require("#{root}../lib/util/specs")
 
 describe "lib/modes/run", ->
   beforeEach ->
-    @projectInstance = Project("/_test-output/path/to/project")
+    @projectInstance = new Project("/_test-output/path/to/project")
 
   context ".getProjectId", ->
     it "resolves if id", ->
