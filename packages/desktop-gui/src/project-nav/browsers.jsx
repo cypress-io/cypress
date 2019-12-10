@@ -70,7 +70,7 @@ export default class Browsers extends Component {
 
     return (
       <span className={browser.name}>
-        <i className={icon}></i>{' '}
+        <i className={`browser-icon ${icon}`}></i>{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
