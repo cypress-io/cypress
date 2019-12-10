@@ -29,5 +29,29 @@ exports['browsers returns the expected list of browsers 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "google-chrome-canary"
+  },
+  {
+    "name": "firefox",
+    "family": "firefox",
+    "displayName": "Firefox",
+    "versionRegex": {},
+    "profile": true,
+    "binary": "firefox"
+  },
+  {
+    "name": "firefoxDeveloperEdition",
+    "family": "firefox",
+    "displayName": "Firefox Developer Edition",
+    "versionRegex": {},
+    "profile": true,
+    "binary": "firefox-developer-edition"
+  },
+  {
+    "name": "firefoxNightly",
+    "family": "firefox",
+    "displayName": "Firefox Nightly",
+    "versionRegex": {},
+    "profile": true,
+    "binary": "firefox-nightly"
   }
 ]

@@ -453,15 +453,38 @@ const getProjectId = Promise.method((project, id) => {
 const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
 
-  if (browser.family === 'electron') {
-    return getElectronProps(browser.isHeaded, project, writeVideoFrame)
-  }
+  switch (browser.family) {
+    case 'electron':
+      return getElectronProps(browser.isHeaded, project, writeVideoFrame)
 
-  if (browser.family === 'chrome') {
-    return getChromeProps(browser.isHeaded, project, writeVideoFrame)
-  }
+    case 'chrome':
+      return getChromeProps(browser.isHeaded, project, writeVideoFrame)
 
-  return {}
+    case 'firefox':
+      return getFirefoxProps(browser.isHeaded, project, writeVideoFrame)
+
+    default:
+      return {}
+  }
+}
+
+const getFirefoxProps = (isHeaded, project, writeVideoFrame) => {
+  debug('setting Firefox properties %o', { isHeaded })
+
+  return _
+  .chain({})
+  .tap((props) => {
+    if (isHeaded && writeVideoFrame) {
+      const onScreencastFrame = (data) => {
+        writeVideoFrame(data)
+      }
+
+      project.on('capture:extension:video:frame', onScreencastFrame)
+
+      props.onScreencastFrame = true
+    }
+  })
+  .value()
 }
 
 const getChromeProps = (isHeaded, project, writeVideoFrame) => {
@@ -473,7 +496,7 @@ const getChromeProps = (isHeaded, project, writeVideoFrame) => {
   .chain({})
   .tap((props) => {
     if (isHeaded && writeVideoFrame) {
-      props.screencastFrame = (e) => {
+      props.onScreencastFrame = (e) => {
         // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
         writeVideoFrame(Buffer.from(e.data, 'base64'))
       }
@@ -554,6 +577,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     onWarning,
     onError (err) {
       console.log('')
+
       if (err.details) {
         console.log(err.message)
         console.log('')
@@ -628,23 +652,27 @@ const browserCanBeRecorded = (browser) => {
     return true
   }
 
+  if (browser.family === 'firefox' && browser.isHeaded) {
+    return true
+  }
+
   return false
 }
 
-const createVideoRecording = function (videoName) {
+const createVideoRecording = function (videoName, options = {}) {
   const outputDir = path.dirname(videoName)
 
   return fs
   .ensureDirAsync(outputDir)
   .then(() => {
     return videoCapture
-    .start(videoName, {
+    .start(videoName, _.extend({}, options, {
       onError (err) {
         // catch video recording failures and log them out
         // but don't let this affect the run at all
         return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
       },
-    })
+    }))
   })
 }
 
@@ -692,7 +720,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const videoName = videoPath('.mp4')
   const compressedVideoName = videoPath('-compressed.mp4')
 
-  return this.createVideoRecording(videoName)
+  return this.createVideoRecording(videoName, { webmInput: browser.family === 'firefox' })
   .then((props = {}) => {
     return {
       videoName,

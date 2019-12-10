@@ -27,6 +27,7 @@ $Server = require("./cypress/server")
 $Screenshot = require("./cypress/screenshot")
 $SelectorPlayground = require("./cypress/selector_playground")
 $utils = require("./cypress/utils")
+browserInfo = require("./cypress/browser")
 
 proxies = {
   runner: "getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll".split(" ")
@@ -135,6 +136,8 @@ class $Cypress
 
     config = _.omit(config, "env", "remote", "resolved", "scaffoldedFiles", "javascripts", "state")
 
+    _.extend(@, browserInfo(config))
+
     @state = $SetterGetter.create({})
     @config = $SetterGetter.create(config)
     @env = $SetterGetter.create(env)
@@ -179,6 +182,10 @@ class $Cypress
     ## other objects communicate intent
     ## and 'action' to Cypress
     switch eventName
+
+      when "recorder:frame"
+        @emit('recorder:frame', args[0])
+
       when "cypress:stop"
         @emit("stop")
 

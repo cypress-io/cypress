@@ -25,6 +25,7 @@ $Retries = require("../cy/retries")
 $Stability = require("../cy/stability")
 $Snapshots = require("../cy/snapshots")
 $CommandQueue = require("./command_queue")
+$VideoRecorder = require('../cy/video-recorder')
 
 crossOriginScriptRe = /^script error/i
 
@@ -100,6 +101,8 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
   queue = $CommandQueue.create()
 
+
+  VideoRecorder = $VideoRecorder.create(state, Cypress)
   timeouts = $Timeouts.create(state)
   stability = $Stability.create(Cypress, state)
   retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -109,7 +112,7 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   location = $Location.create(state)
   focused = $Focused.create(state)
   keyboard = $Keyboard.create(state)
-  mouse = $Mouse.create(state, keyboard, focused)
+  mouse = $Mouse.create(state, keyboard, focused, Cypress)
   timers = $Timers.create()
 
   { expect } = $Chai.create(specWindow, assertions.assert)
@@ -198,6 +201,10 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
 
       contentWindow.document.hasFocus = ->
         focused.documentHasFocus.call(@)
+
+      contentWindow.HTMLInputElement.prototype.select = ->
+        $selection.interceptSelect.call(@)
+
 
       cssModificationSpy = (original, args...) ->
         snapshots.onCssModified(@href)
@@ -586,6 +593,25 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
   fail = (err, runnable) ->
     stopped = true
 
+    stack = err.stack or ''
+
+    ## preserve message
+    ## and toString
+    msg = err.message
+    str = err.toString()
+
+    ## Firefox stack does not include toString'd error, so normalize
+    ## things by prepending it
+    if !_.includes(stack, str)
+      stack = "#{str}\n#{stack}"
+
+    ## set message
+    err.message = msg
+
+    ## reset stack by replacing the original first line
+    ## with the new one
+    err.stack = stack.replace(str, err.toString())
+
     ## store the error on state now
     state("error", err)
 
@@ -617,6 +643,11 @@ create = (specWindow, Cypress, Cookies, state, config, log) ->
       ## collect all of the callbacks for 'fail'
       rets = Cypress.action("cy:fail", err, state("runnable"))
     catch err2
+      e = err2
+      errString = e.toString()
+      errStack = e.stack
+      if !errStack.slice(0, errStack.indexOf("\n")).includes(errString)
+        e.stack = errString + "\n" + e.stack
       ## and if any of these throw synchronously immediately error
       finish(err2)
 

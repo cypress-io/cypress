@@ -1,4 +1,13 @@
+/* eslint-disable mocha/handle-done-callback */
+
 const pending = []
+
+const throwMetaError = (mes) => {
+  const err = new Error(mes)
+
+  err.name = 'MetaError'
+  throw err
+}
 
 Cypress.on('test:after:run', (test) => {
   if (test.state === 'pending') {
@@ -30,6 +39,81 @@ describe('src/cypress/runner', () => {
       expect(pending[0].title).to.eq('is pending 1')
 
       expect(pending[1].title).to.eq('is pending 2')
+    })
+  })
+
+  context('async timeouts', () => {
+    let lastTimeout = null
+    const runner = Cypress.mocha.getRunner()
+
+    const throwAfter = (n) => {
+      return setTimeout(() => {
+        throwMetaError(`The test did not time out before ${n} millis`)
+      }, n)
+    }
+
+    const getTest = (r) => r && r.ctx.currentTest || r
+
+    beforeEach(() => {
+      lastTimeout = throwAfter(500)
+
+      runner.once('fail', (r) => {
+        const runnable = cy.state('runnable')
+        const test = getTest(runnable)
+
+        if (test.err.name === 'Uncaught MetaError') {
+          test.err.message = test.err.message.split('\nThis error originated from')[0]
+
+          return
+        }
+
+        expect(r.err.message).to.contain('Timed out after')
+
+        test.error = null
+        test.state = 'passed'
+
+        return false
+      })
+    })
+
+    afterEach(() => {
+      clearTimeout(lastTimeout)
+    })
+
+    it('can timeout async test', function (done) {
+      this.timeout(100)
+    })
+
+    it('can timeout async test after cypress command', function (done) {
+      this.timeout(100)
+      cy.wait(0)
+    })
+
+    it('does not timeout during cypress command', function (done) {
+      this.timeout(100)
+      cy.wait(200)
+      cy.then(() => done())
+    })
+
+    it('defaults to 4000 mocha timeout for tests', function () {
+      expect(this.timeout()).eq(4000)
+    })
+
+    describe('hooks can timeout and share timeout with test', function () {
+      beforeEach((done) => {
+        this.ctx.test.timeout(100)
+      })
+
+      it('should timeout on hook', () => {})
+    })
+
+    describe('hooks can timeout and share timeout with test after cypress command', function () {
+      beforeEach((done) => {
+        cy.wait(0)
+        this.ctx.test.timeout(100)
+      })
+
+      it('should timeout on hook', () => {})
     })
   })
 })

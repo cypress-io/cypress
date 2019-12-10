@@ -82,8 +82,7 @@ exports['e2e commands outside of test / fails on failing assertions'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-
-      expected true to be false
+     Uncaught AssertionError: expected true to be false
 
 This error originated from your test code, not from Cypress.
 

@@ -306,7 +306,7 @@ describe "src/cy/commands/actions/scroll", ->
 
       it "waits until the subject is scrollable", ->
         cy.stub(cy, "ensureScrollability")
-        .onFirstCall().throws(new Error)
+        .onFirstCall().throws(new Error())
 
         cy.on "command:retry", ->
           cy.ensureScrollability.returns()
@@ -493,8 +493,8 @@ describe "src/cy/commands/actions/scroll", ->
 
       cy.get("#scroll-into-view-win-vertical div").scrollIntoView()
       cy.window().then (win) ->
-        expect(win.scrollY).not.to.eq(0)
-        expect(win.scrollX).to.eq(200)
+        expect(win.pageYOffset).not.to.eq(0)
+        expect(Math.floor(win.pageXOffset)).to.eq(200)
 
     it "scrolls both axes of window to element", ->
       expect(@win.scrollY).to.eq(0)

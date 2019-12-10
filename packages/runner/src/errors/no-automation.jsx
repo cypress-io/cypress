@@ -12,6 +12,10 @@ const icon = (browser) => {
     case 'canary':
     case 'electron':
       return 'fab fa-chrome'
+    case 'firefox':
+    case 'firefoxDeveloperEdition':
+    case 'firefoxNightly':
+      return 'fab fa-firefox'
     default:
       return 'fas fa-globe'
   }

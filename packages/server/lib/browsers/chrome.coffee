@@ -162,18 +162,18 @@ _connectToChromeRemoteInterface = (port) ->
 
 _maybeRecordVideo = (options) ->
   return (client) ->
-    if not options.screencastFrame
-      debug("screencastFrame is false")
+    if not options.onScreencastFrame
+      debug("options.onScreencastFrame is false")
       return client
 
     debug('starting screencast')
-    client.on('Page.screencastFrame', options.screencastFrame)
+    
+    client.on('Page.screencastFrame', options.onScreencastFrame)
 
     client.send('Page.startScreencast', {
       format: 'jpeg'
     })
-    .then ->
-      return client
+    .return(client)
 
 ## a utility function that navigates to the given URL
 ## once Chrome remote interface client is passed to it.

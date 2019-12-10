@@ -793,6 +793,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                     error: err
                     stack: err.stack
                   }
+                  noStackTrace: true
                 })
 
       visit = ->

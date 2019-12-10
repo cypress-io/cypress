@@ -871,8 +871,7 @@ export class Keyboard {
     let event: Event
 
     debug('event options:', eventType, eventOptions)
-
-    if (eventConstructor === 'TextEvent') {
+    if (eventConstructor === 'TextEvent' && win[eventConstructor]) {
       event = document.createEvent('TextEvent')
       // @ts-ignore
       event.initTextEvent(

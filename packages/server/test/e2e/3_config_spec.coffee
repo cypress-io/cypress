@@ -4,6 +4,7 @@ Fixtures = require("../support/helpers/fixtures")
 configWithInvalidViewport = Fixtures.projectPath("config-with-invalid-viewport")
 configWithInvalidBrowser = Fixtures.projectPath("config-with-invalid-browser")
 
+## FIREFOX FIXME: errors slightly different and stack trace lines not replaced in snapshot
 describe "e2e config", ->
   e2e.setup({
     settings: {

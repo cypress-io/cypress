@@ -1,5 +1,6 @@
 e2e = require("../support/helpers/e2e")
 
+## FIREFOX FIXME: errors slightly different and stack trace lines not replaced in snapshot
 describe "e2e issue 173", ->
   e2e.setup()
 

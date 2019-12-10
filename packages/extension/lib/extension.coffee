@@ -1,7 +1,7 @@
 fs         = require("fs")
 path       = require("path")
 Promise    = require("bluebird")
-background = require("../app/background")
+{ getCookieUrl } = require('./util')
 
 fs = Promise.promisifyAll(fs)
 
@@ -17,7 +17,7 @@ module.exports = {
   getPathToRoot: ->
     path.join(__dirname, "..")
 
-  setHostAndPath: (host, path) ->
+  setHostAndPath: (host, path, onScreencastFrame) ->
     src = @getPathToExtension("background.js")
 
     fs.readFileAsync(src, "utf8")
@@ -25,10 +25,8 @@ module.exports = {
       str
       .replace("CHANGE_ME_HOST", host)
       .replace("CHANGE_ME_PATH", path)
+      .replace("'CHANGE_ME_SCREENCAST_FRAME'", onScreencastFrame)
 
-  getCookieUrl: background.getUrl
+  getCookieUrl
 
-  connect: background.connect
-
-  app: background
 }

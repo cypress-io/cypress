@@ -96,6 +96,11 @@ module.exports = {
 
       debugFrames("writing video frame")
 
+      # # wStream.write(data)
+      # pt.write(data)
+
+      # return
+
       if wantsWrite
         if not wantsWrite = pt.write(data)
           pt.once "drain", ->
@@ -113,8 +118,6 @@ module.exports = {
           source: pt
           priority: 20
         })
-        .inputFormat("image2pipe")
-        .inputOptions("-use_wallclock_as_timestamps 1")
         .videoCodec("libx264")
         .outputOptions("-preset ultrafast")
         .on "start", (command) ->
@@ -146,7 +149,20 @@ module.exports = {
           debug("capture ended")
 
           ended.resolve()
-        .save(name)
+
+        if options.webmInput
+          cmd
+          .inputFormat('webm')
+          .withFpsInput(18)
+          # .videoFilters("scale=trunc(iw/2)*2:trunc(ih/2)*2")
+          ## same as above
+          .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
+
+        else
+          cmd
+          .inputFormat("image2pipe")
+          .inputOptions("-use_wallclock_as_timestamps 1")
+        cmd.save(name)
 
     startCapturing()
     .then ({ cmd, startedVideoCapture }) ->
@@ -170,6 +186,7 @@ module.exports = {
         "-preset fast"
         "-crf #{videoCompression}"
       ])
+      # .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
       .on "start", (command) ->
         debug("compression started %o", { command })
 
@@ -189,7 +206,10 @@ module.exports = {
 
         progressed = utils.timemarkToSeconds(progress.timemark)
 
-        onProgress(progressed / total)
+        percent = progressed / total
+        if percent < 1
+          onProgress(percent)
+
 
       .on "error", (err, stdout, stderr) ->
         debug("compression errored: %o", { error: err.message, stdout, stderr })

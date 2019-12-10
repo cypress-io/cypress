@@ -3,6 +3,7 @@ e2e      = require("../support/helpers/e2e")
 
 e2ePath = Fixtures.projectPath("e2e")
 
+## FIREFOX FIXME: errors slightly different and stack trace lines not replaced in snapshot
 describe "e2e caught and uncaught hooks errors", ->
   e2e.setup({
     servers: {

@@ -2,6 +2,11 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Promise = Cypress.Promise
 
+
+## TODO: (FIREFOX) submit() is flaky with cross-origin errors
+## @see packages/driver/src/cy/snapshots.coffee:133:11
+
+
 describe "src/cy/commands/actions/submit", ->
   before ->
     cy

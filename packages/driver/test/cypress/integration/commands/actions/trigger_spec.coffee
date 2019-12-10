@@ -259,21 +259,22 @@ describe "src/cy/commands/actions/trigger", ->
       it "issues event to descendent", ->
         mouseovers = 0
 
-        $btn = $("<button>", {
-          id: "button-covered-in-span"
+        $btn = $("<div>", {
+          id: "div-covered-in-span"
         })
+        .css({ padding: 10, margin: 0, border: "solid 1px #000" })
         .prependTo(cy.$$("body"))
 
-        $span = $("<span>span in button</span>")
-        .css({ padding: 5, display: "inline-block", backgroundColor: "yellow" })
+        $span = $("<span>span covering div</span>")
+        .css({ padding: 5, display: 'block', backgroundColor: "yellow" })
         .appendTo($btn)
 
         $btn.on "mouseover", -> mouseovers += 1
         $span.on "mouseover", -> mouseovers += 1
 
         cy
-          .get("#button-covered-in-span").trigger("mouseover")
-          .then ->
+          .get("#div-covered-in-span").trigger("mouseover")
+          .should ->
             expect(mouseovers).to.eq(2)
 
       it "scrolls the window past a fixed position element when being covered", ->
@@ -529,7 +530,8 @@ describe "src/cy/commands/actions/trigger", ->
         $button = cy.$$("<button />").css({width:200,height:100}).prependTo(cy.$$("body"))
         onMouseover = (e) ->
           expect(e.clientX).to.equal(8)
-          expect(e.clientY).to.equal(0)
+          ## NOTE: firefox leaves 1px on top of element on scroll, so add top offset
+          expect(e.clientY).to.equal(0 + Math.ceil(e.target.getBoundingClientRect().top))
           done()
 
         $button.on("mouseover", onMouseover)
@@ -541,7 +543,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         onMouseover = (e) ->
           expect(e.clientX).to.equal(207)
-          expect(e.clientY).to.equal(0)
+          expect(e.clientY).to.equal(0 + Math.ceil(e.target.getBoundingClientRect().top))
           done()
 
         $button.on("mouseover", onMouseover)
@@ -590,7 +592,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         onMouseover = (e) ->
           expect(e.clientX).to.equal(83)
-          expect(e.clientY).to.equal(78)
+          expect(e.clientY).to.equal(78 + Math.ceil(e.target.getBoundingClientRect().top))
           done()
 
         $button.on("mouseover", onMouseover)
@@ -602,7 +604,7 @@ describe "src/cy/commands/actions/trigger", ->
 
         onMouseover = (e) ->
           expect(e.clientX).to.equal(83)
-          expect(e.clientY).to.equal(78)
+          expect(e.clientY).to.equal(78 + Math.ceil(e.target.getBoundingClientRect().top))
           done()
 
         $button.on("mouseover", onMouseover)

@@ -182,6 +182,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         return resp
       .catch (err) ->
+        if !_.includes(err.stack, err.message)
+          err.stack = err.message + '\n' + err.stack
+        
         Cypress.utils.throwErrByPath("setCookie.backend_error", {
           args: {
             browserDisplayName: Cypress.browser.displayName,

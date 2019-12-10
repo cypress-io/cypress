@@ -331,7 +331,7 @@ const isNeedSingleValueChangeInputElement = (el: HTMLElement): el is HTMLSingleV
     return false
   }
 
-  return inputTypeNeedSingleValueChangeRe.test(el.type)
+  return inputTypeNeedSingleValueChangeRe.test((el.getAttribute('type') || '').toLocaleLowerCase())
 }
 
 const canSetSelectionRangeElement = (el): el is HTMLElementCanSetSelectionRange => {
@@ -350,7 +350,7 @@ const getTagName = (el) => {
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
 const isContentEditable = (el: any): el is HTMLContentEditableElement => {
-  return getNativeProp(el, 'isContentEditable')
+  return getNativeProp(el, 'isContentEditable') || $document.getDocumentFromElement(el).designMode === 'on'
 }
 
 const isTextarea = (el): el is HTMLTextAreaElement => {

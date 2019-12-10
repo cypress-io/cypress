@@ -146,6 +146,7 @@ class Socket
       checkForAppErrors: ->
       onSavedStateChanged: ->
       onTestFileChange: ->
+      onCaptureExtensionVideoFrame: ->
 
     automationClient = null
 
@@ -258,6 +259,9 @@ class Socket
         open.opn(p)
         .then -> cb()
 
+      socket.on "recorder:frame", (data) ->
+        options.onCaptureExtensionVideoFrame(data)
+
       socket.on "reload:browser", (url, browser) ->
         options.onReloadBrowser(url, browser)
 
@@ -319,7 +323,8 @@ class Socket
                 "You requested a backend event we cannot handle: #{eventName}"
               )
 
-        Promise.try(backendRequest)
+        Promise
+        .try(backendRequest)
         .then (resp) ->
           cb({response: resp})
         .catch (err) ->

@@ -7,6 +7,8 @@ path         = require("path")
 http         = require("http")
 human        = require("human-interval")
 morgan       = require("morgan")
+stream       = require("stream")
+chalk        = require("chalk").default
 express      = require("express")
 Promise      = require("bluebird")
 snapshot     = require("snap-shot-it")
@@ -33,18 +35,36 @@ Promise.config({
 e2ePath = Fixtures.projectPath("e2e")
 pathUpToProjectName = Fixtures.projectPath("")
 
-DEFAULT_BROWSERS = ['electron', 'chrome']
+DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 
-stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
+stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 availableBrowsersRe = /(Available browsers found are: )(.+)/g
+crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame|Permission denied.*cross-origin object)/gm
+
+currentOptions = {}
 
 ## this captures an entire stack trace and replaces it with [stack trace lines]
 ## so that the stdout can contain stack traces of different lengths
 ## '@' will be present in firefox stack trace lines
 ## 'at' will be present in chrome stack trace lines
 replaceStackTraceLines = (str) ->
-  str.replace(stackTraceLinesRe, "$1[stack trace lines]$5")
+  str.replace(stackTraceLinesRe, (match, parts...) ->
+    pre = parts[0]
+    isFirefoxStack = parts[1] is '@'
+    post = parts[4]
+    if isFirefoxStack
+      if pre is '\n'
+        pre = '\n    '
+      else
+        pre += pre.slice(1).repeat(2)
+
+      post = post.slice(-1)
+    return "#{pre}[stack trace lines]#{post}")
+
+## Different browsers have different cross-origin error messages
+replaceCrossOriginErorrMessages = (str) ->
+  str.replace crossOriginErrorRe, '[Cross origin error message]'
 
 replaceBrowserName = (str, key, customBrowserPath, browserName, version, headless, whitespace) ->
   ## get the padding for the existing browser string
@@ -89,8 +109,8 @@ replaceUploadingResults = (orig, match..., offset, string) ->
 
   return ret
 
-normalizeStdout = (str, options = {}) ->
-  normalizeOptions = _.defaults({}, options, {normalizeAvailableBrowsers: true})
+normalizeStdout = (str) ->
+  options = _.defaults({}, currentOptions, {normalizeAvailableBrowsers: true})
 
   ## remove all of the dynamic parts of stdout
   ## to normalize against what we expected
@@ -99,7 +119,7 @@ normalizeStdout = (str, options = {}) ->
   ## (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join("/foo/bar/.projects")
 
-  if normalizeOptions.normalizeAvailableBrowsers
+  if options.normalizeAvailableBrowsers
     # usually we are not interested in the browsers detected on this particular system
     # but some tests might filter / change the list of browsers
     # in that case the test should pass "normalizeAvailableBrowsers:false" as options
@@ -132,7 +152,7 @@ normalizeStdout = (str, options = {}) ->
     ## screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
 
-  return replaceStackTraceLines(str)
+  return replaceStackTraceLines( replaceCrossOriginErorrMessages str)
 
 ensurePort = (port) ->
   if port is 5566
@@ -218,6 +238,7 @@ getBrowsers = (generateTestsForDefaultBrowsers, browser, defaultBrowsers) ->
 
   ## otherwise return the specified browser
   return [browser]
+
 
 localItFn = (title, options = {}) ->
   options = _
@@ -378,6 +399,8 @@ module.exports = e2e = {
       ## normalize the path to the spec
       options.spec = specs.join(',')
 
+    currentOptions = options
+
     return options
 
   args: (options = {}) ->
@@ -488,7 +511,7 @@ module.exports = e2e = {
           else
             expect(headless).to.include("(headless)")
 
-        str = normalizeStdout(stdout, options)
+        str = normalizeStdout(stdout)
 
         if options.originalTitle
           snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
@@ -524,10 +547,16 @@ module.exports = e2e = {
         .value()
       }
 
+      ColorOutput = () ->
+        colorOutput = new stream.Transform()
+        colorOutput._transform = (chunk, encoding, cb) ->
+          cb(null, chalk.magenta(chunk.toString()))
+        colorOutput
+
       ## pipe these to our current process
       ## so we can see them in the terminal
-      sp.stdout.pipe(process.stdout)
-      sp.stderr.pipe(process.stderr)
+      sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
+      sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
 
       sp.stdout.on "data", (buf) ->
         stdout += buf.toString()
