@@ -82,14 +82,16 @@
   .browsers.nav {
     i {
       font-size: 13px;
+
+      &.fa-firefox {
+        font-size: 14px;
+      }
     }
   }
 }
 
 
-.navbar-right {
-  margin-right: 0;
-
+.nav {
   .user-avatar {
     position: relative;
     top: -1px;
