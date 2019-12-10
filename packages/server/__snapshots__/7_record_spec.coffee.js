@@ -78,7 +78,7 @@ Fix the error in your code and re-run your tests.
      Error: foo
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
-      [stack trace lines]
+  
 
 
 
@@ -1002,7 +1002,7 @@ Fix the error in your code and re-run your tests.
      Error: foo
 
 Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
-      [stack trace lines]
+  
 
 
 
