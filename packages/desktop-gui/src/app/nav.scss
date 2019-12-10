@@ -34,6 +34,13 @@
       }
     }
 
+    &.left-nav {
+      i {
+        font-size: 11px;
+        color: #555;
+      }
+    }
+
     > li {
       > div,
       > a {
@@ -41,6 +48,8 @@
         color: #444;
         padding: 1px 20px 0 20px;
         line-height: 35px;
+
+
       }
 
       > a  {
@@ -67,6 +76,12 @@
         padding-left: 15px;
         padding-right: 15px;
       }
+    }
+  }
+
+  .browsers.nav {
+    i {
+      font-size: 13px;
     }
   }
 }
@@ -119,6 +134,10 @@
         background-color: #111;
         color: #fff;
       }
+    }
+
+    i {
+      font-size: 12px;
     }
 
     > li > div,

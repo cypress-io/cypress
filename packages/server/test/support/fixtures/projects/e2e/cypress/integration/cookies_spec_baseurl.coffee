@@ -172,6 +172,27 @@ describe "cookies", ->
       'request'
     ].forEach (cmd) ->
       context "in a cy.#{cmd}", ->
+        ## https://github.com/cypress-io/cypress/issues/5894
+        it "can successfully send cookies as a Cookie header", ->
+          cy[cmd]({
+            url: "/requestCookies#{if cmd is 'visit' then 'Html' else ''}"
+            headers: {
+              Cookie: 'a=b;b=c;c=s%3APtCc3lNiuqN0AtR9ffgKUnUsDzR5n_4B.qzFDJDvqx8PZNvmOkmcexDs7fRJLOel56Z8Ii6PL%2BFo'
+            }
+            method: if cmd is 'visit' then 'POST' else 'PATCH'
+          })
+          .then (res) ->
+            if cmd is 'visit'
+              return cy.get('body').then (body) ->
+                JSON.parse(body.text())
+            return res.body
+          .then (cookies) ->
+            expect(cookies).to.deep.eq({
+              a: 'b'
+              b: 'c'
+              c: 's:PtCc3lNiuqN0AtR9ffgKUnUsDzR5n_4B.qzFDJDvqx8PZNvmOkmcexDs7fRJLOel56Z8Ii6PL+Fo'
+            })
+
         context "with Domain = superdomain", ->
           it "is set properly with no redirects", ->
             cy[cmd]("/setDomainCookie?domain=#{setCookieDomain}")
