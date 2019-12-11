@@ -1117,14 +1117,14 @@ module.exports = {
   },
 
   runSpecs (options = {}) {
+    options = _.defaults(options, {
+      // only non-Electron browsers run headed by default
+      headed: browser.family !== 'electron',
+    })
+
     const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
 
-    let isHeadless = !headed
-
-    if (_.isUndefined(headed)) {
-      // only Electron runs headlessly by default
-      isHeadless = browser.family === 'electron'
-    }
+    const isHeadless = !headed
 
     browser.isHeadless = isHeadless
     browser.isHeaded = !isHeadless
