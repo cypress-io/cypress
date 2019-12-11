@@ -28,20 +28,20 @@ module.exports = async function (params) {
 
   console.log(`Notarizing ${appId} found at ${appPath}`)
 
-  if (!process.env.appleId) {
-    throw new Error('Missing Apple id for notarization')
+  if (!process.env.NOTARIZE_APP_APPLE_ID) {
+    throw new Error('Missing Apple id for notarization: NOTARIZE_APP_APPLE_ID')
   }
 
-  if (!process.env.appleIdPassword) {
-    throw new Error('Missing Apple password for notarization')
+  if (!process.env.NOTARIZE_APP_PASSWORD) {
+    throw new Error('Missing Apple password for notarization: NOTARIZE_APP_PASSWORD')
   }
 
   try {
     await electron_notarize.notarize({
       appBundleId: appId,
       appPath,
-      appleId: process.env.appleId,
-      appleIdPassword: process.env.appleIdPassword,
+      appleId: process.env.NOTARIZE_APP_APPLE_ID,
+      appleIdPassword: process.env.NOTARIZE_APP_PASSWORD,
     })
   } catch (error) {
     console.error(error)
