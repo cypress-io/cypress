@@ -123,15 +123,7 @@ const elIsHiddenByTransform = ($el) => {
   const list = extractTransformInfoFromElements($el)
 
   if (existsInvisibleBackface(list)) {
-    let transformList
-
-    if (existsPreserve3d(list)) {
-      transformList = mergeTransformInfo(list)
-    } else {
-      transformList = filterTransformInfo(list)
-    }
-
-    return elIsBackface(transformList) ? 'backface' : 'visible'
+    return elIsBackface(list) ? 'backface' : 'visible'
   }
 
   return elIsTransformedToZero(list) ? 'transformed' : 'visible'
@@ -156,7 +148,7 @@ const extractTransformInfo = ($el) => {
   return {
     el,
     backfaceVisibility: style.getPropertyValue('backface-visibility'),
-    transformStyle: style.getPropertyValue('transformStyle'),
+    transformStyle: style.getPropertyValue('transform-style'),
     transform: style.getPropertyValue('transform'),
   }
 }
@@ -165,77 +157,116 @@ const existsInvisibleBackface = (list) => {
   return !!_.find(list, { backfaceVisibility: 'hidden' })
 }
 
-const existsPreserve3d = (list) => {
-  return !!_.find(list, { transformStyle: 'preserve-3d' })
-}
-
-const mergeTransformInfo = (list) => {
-  let transformList = []
-
-  for (let i = 0; i < list.length; i++) {
-    if (list[i].backfaceVisibility === 'hidden') {
-      if (list[i].transformStyle === 'preserve-3d') {
-        const transform = []
-
-        while (list[i].transformStyle === 'preserve-3d' &&
-        (i + 1 < list.length && list[i + 1].transformStyle === 'flat')) {
-          transform.push(list[i].transform)
-          i++
-        }
-
-        if (transform.length > 0) {
-          transformList.push(transform)
-        }
-      }
-
-      if (list[i].transform.startsWith('matrix3d')) {
-        transformList.push([list[i].transform])
-      }
-    }
+const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
+const defaultNormal = [0, 0, 1]
+// This function uses a simplified version of backface culling.
+// https://en.wikipedia.org/wiki/Back-face_culling
+//
+// We defined view vector, (0, 0, -1), - eye to screen.
+// and default normal vector of an element, (0, 0, 1)
+// When dot product of them are >= 0, item is visible.
+const elIsBackface = (list) => {
+  const nextPreserve3d = (i) => {
+    return i + 1 < list.length &&
+    list[i + 1].transformStyle === 'preserve-3d'
   }
 
-  return transformList
-}
+  let i = 0
 
-const filterTransformInfo = (list) => {
-  return list
-  .filter(({ backfaceVisibility, transform }) => {
-    return backfaceVisibility === 'hidden' && transform.startsWith('matrix3d')
-  })
-  .map(({ transform }) => [transform])
-}
+  const finalNormal = (startIndex) => {
+    i = startIndex
+    let normal = findNormal(list[i].transform)
 
-const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
-const elIsBackface = (transformList) => {
-  for (let i = 0; i < transformList.length; i++) {
-    if (isBackface(transformList[i])) {
-      return true
+    while (nextPreserve3d(i)) {
+      i++
+      normal = findNormal(list[i].transform, normal)
+    }
+
+    return normal
+  }
+
+  const skipToNextFlat = () => {
+    while (nextPreserve3d(i)) {
+      i++
+    }
+
+    i++
+  }
+
+  //
+  if (1 < list.length & list[1].transformStyle === 'preserve-3d') {
+    if (list[0].backfaceVisibility === 'hidden') {
+      let normal = finalNormal(0)
+
+      if (checkBackface(normal)) {
+        return true
+      }
+
+      i++
+    } else {
+      if (list[1].backfaceVisibility === 'visible') {
+        const { width, height } = list[0].el.getBoundingClientRect()
+
+        if (width === 0 || height === 0) {
+          return true
+        }
+
+        skipToNextFlat()
+      } else {
+        if (list[0].transform !== 'none') {
+          skipToNextFlat()
+        } else {
+          i++
+
+          let normal = finalNormal(i)
+
+          if (checkBackface(normal)) {
+            return true
+          }
+
+          i++
+        }
+      }
+    }
+  } else {
+    for (; i < list.length; i++) {
+      if (i > 0 && list[i].transformStyle === 'preserve-3d') {
+        continue
+      }
+
+      if (list[i].backfaceVisibility === 'hidden' && list[i].transform.startsWith('matrix3d')) {
+        let normal = findNormal(list[i].transform)
+
+        if (checkBackface(normal)) {
+          return true
+        }
+      }
     }
   }
 
   return false
 }
 
-// This is a simplified version of backface culling.
-// https://en.wikipedia.org/wiki/Back-face_culling
-//
-// We defined view vector, (0, 0, -1), - eye to screen.
-// and default normal vector of an element, (0, 0, 1)
-// When dot product of them are >= 0, item is visible.
-const isBackface = (transform) => {
+const checkBackface = (normal) => {
   const viewVector = [0, 0, -1]
-  const elNormal = findNormal(transform.reverse())
+
   // Simplified dot product.
-  // [0] and [1] are always 0
-  const dot = viewVector[2] * elNormal[2]
+  // viewVector[0] and viewVector[1] are always 0. So, they're ignored.
+  let dot = viewVector[2] * normal[2]
+
+  // Because of the floating point number rounding error,
+  // cos(90deg) isn't 0. It's 6.12323e-17.
+  // And it sometimes causes errors when dot product value is something like -6.12323e-17.
+  // So, we're setting the dot product result to 0 when its absolute value is less than 1e-10(10^-10).
+  if (Math.abs(dot) < 1e-10) {
+    dot = 0
+  }
 
   return dot >= 0
 }
 
-const findNormal = (transform, index = 0, normal = [0, 0, 1]) => {
-  const matrix = transform[index]
-
-  if (!matrix) {
+const findNormal = (matrix, normal = defaultNormal) => {
+  if (matrix === 'none') {
     return normal
   }
 
@@ -254,9 +285,7 @@ const findNormal = (transform, index = 0, normal = [0, 0, 1]) => {
     m[2] * v[0] + m[6] * v[1] + m[10] * v[2],
   ]
 
-  const computedUnitNormal = toUnitVector(computedNormal)
-
-  return findNormal(transform, index + 1, computedUnitNormal)
+  return toUnitVector(computedNormal)
 }
 
 const toMatrix3d = (m2d) => {
@@ -590,11 +619,13 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   }
 
-  if (elIsHiddenByTransform($el) === 'transformed') {
+  const transformResult = elIsHiddenByTransform($el)
+
+  if (transformResult === 'transformed') {
     return `This element '${node}' is not visible because it is hidden by transform.`
   }
 
-  if (elIsBackface($el)) {
+  if (transformResult === 'backface') {
     return `This element '${node}' is not visible because it is rotated and its backface is hidden.`
   }
 

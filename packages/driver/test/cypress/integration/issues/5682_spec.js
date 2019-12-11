@@ -48,33 +48,38 @@ describe('issue #5682 - backface visibility', () => {
     })
 
     describe('CASE 2: No transform after preserve-3d', () => {
-      it('is invisible when target is not transformed but parent is rotated > 90deg', () => {
-        cy.get('#a2-1-1').should('not.be.visible')
-        cy.get('#a2-1-2').should('not.be.visible')
+      it('target hidden + parents', () => {
+        cy.get('#a2-1').should('not.be.visible')
+        cy.get('#a2-2').should('not.be.visible')
+        cy.get('#a2-3').should('not.be.visible')
+        cy.get('#a2-4').should('not.be.visible')
       })
 
-      it('is always visible when target is transformed in identity and visible', () => {
-        cy.get('#a2-2-1').should('be.visible')
-        cy.get('#a2-2-2').should('be.visible')
-        cy.get('#a2-2-3').should('be.visible')
-        cy.get('#a2-2-4').should('be.visible')
+      it('target visible + parent visible', () => {
+        cy.get('#a2-5').should('be.visible')
+        cy.get('#a2-6').should('be.visible')
+        cy.get('#a2-7').should('not.be.visible')
       })
 
-      it('is invisible when an element is backface-invisible whose parent is rotated > 90deg', () => {
-        cy.get('#a2-5').should('not.be.visible')
-      })
-
-      it('is invisible when an element is rotated 45deg and its parent is 45deg', () => {
-        cy.get('#a2-6').should('not.be.visible')
-      })
-
-      it('is visible when target 30deg + parent 30deg + grandparent 30deg', () => {
-        cy.get('#a2-7').should('be.visible')
-      })
-
-      it('is visible when an element is rotated 190deg whose parent is roated 90deg', () => {
+      it('target visible + parent hidden', () => {
         cy.get('#a2-8').should('be.visible')
+        cy.get('#a2-9').should('not.be.visible')
+        cy.get('#a2-10').should('not.be.visible')
       })
+    })
+
+    describe('CASE 3: Others', () => {
+      it('ignores and returns visible when flat appears after preserve-3d', () => {
+        cy.get('#a3-1').should('be.visible')
+      })
+    })
+
+    it('issue case', () => {
+      cy.get('.front').should('be.visible')
+      cy.get('.back').should('not.be.visible')
+      cy.get('.container').click()
+      cy.get('.front').should('not.be.visible')
+      cy.get('.back').should('be.visible')
     })
   })
 })

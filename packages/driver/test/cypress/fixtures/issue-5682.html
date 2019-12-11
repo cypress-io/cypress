@@ -31,6 +31,33 @@
       width: 200px;
       height: 60px;
     }
+
+    .container {
+      position: relative;
+      transform-style: preserve-3d; /* This breaks visible check */
+      width: 200px;
+      height: 300px;
+    }
+
+    .flipped {
+      transform: rotateY(180deg);
+    }
+
+    .face {
+      backface-visibility: hidden;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .front {
+      background: blue;
+    }
+
+    .back {
+      transform: rotateY(180deg);
+      background: red;
+    }
   </style>
 </head>
 <body>
@@ -85,161 +112,112 @@
     </div>
 
     <div>
-      <h2>CASE 2: No transform after preserve-3d</h2>
+      <h2>CASE 2: Direct parent preserve-3d elements</h2>
 
-      <h4>Parent Flipped + no transform</h4>
+      <h4>Parent Flipped visible + target hidden</h4>
+      <div class="parent" style="transform-style: preserve-3d; transform: rotateX(180deg)">
+        Parent rotateX(180deg)
+        <div id="a2-1" class="target" style="backface-visibility: hidden;">No transform</div>
+      </div>
+
+      <h4>Parents rotated 60deg each visible + target hidden</h4>
+      <div class="grandparent" style="transform-style: preserve-3d; transform: rotateX(60deg)">
+        Grandparent rotateX(60deg)
+        <div class="parent" style="transform-style: preserve-3d; transform: rotateX(60deg)">
+          Parent rotateX(60deg)
+          <div id="a2-2" class="target" style="backface-visibility: hidden;">No transform</div>
+        </div>
+      </div>
+
+      <h4>Parent Flipped hidden + target hidden</h4>
+      <div class="parent" style="backface-visibility: hidden; transform-style: preserve-3d; transform: rotateX(180deg)">
+        Parent rotateX(180deg)
+        <div id="a2-3" class="target" style="backface-visibility: hidden; transform: rotateX(0deg);">No transform</div>
+      </div>
+
+      <h4>Parent 60deg visible + target hidden 60deg</h4>
+      <div class="parent" style="transform-style: preserve-3d; transform: rotateX(60deg)">
+        Parent rotateX(60deg)
+        <div id="a2-4" class="target" style="backface-visibility: hidden; transform: rotateX(60deg)">rotateX(60deg)</div>
+      </div>
+
+      <h4>Parent Flipped visible + target visible</h4>
+      <div class="parent" style="transform-style: preserve-3d; transform: rotateX(180deg)">
+        Parent rotateX(180deg)
+        <div id="a2-5" class="target">No transform</div>
+      </div>
+
+      <h4>Parents Flipped visible + target visible</h4>
+      <div class="grandparent" style="transform-style: preserve-3d; transform: rotateX(60deg)">
+        Parent rotateX(60deg)
+        <div class="parent" style="transform-style: preserve-3d; transform: rotateX(60deg)">
+          Parent rotateX(60deg)
+          <div id="a2-6" class="target">No transform</div>
+        </div>
+      </div>
+
+      <h4>Parents Flipped 45deg visible + target visible</h4>
+      <div class="grandparent" style="transform-style: preserve-3d; transform: rotateX(45deg)">
+        Grandparent rotateX(45deg)
+        <div class="parent" style="transform-style: preserve-3d; transform: rotateX(45deg)">
+          Parent rotateX(45deg)
+          <div id="a2-7" class="target">No transform</div>
+        </div>
+      </div>
+
+      <h4>Parent Flipped hidden + identity transform</h4>
       <div class="parent" style="transform-style: preserve-3d; backface-visibility: hidden; transform: rotateX(180deg)">
         Parent rotateX(180deg)
-        <div id="a2-1-1" class="target">No transform</div>
+        <div id="a2-8" class="target" style="transform: rotateX(0deg)">Identity transform</div>
       </div>
 
-      <h4>Grandparent Flipped + no transform parent + no transform child</h4>
-      <div class="grandparent" style="transform-style: preserve-3d; backface-visibility: hidden; transform: rotateX(180deg)">
-        Grandparent rotateX(180deg)
-        <div class="parent">
-          No transform
-          <div id="a2-1-2" class="target">No transform</div>
-        </div>
-      </div>
-
-      <h4>Parent Flipped + Identity Transform</h4>
+      <h4>Parent Flipped hidden + no transform</h4>
       <div class="parent" style="transform-style: preserve-3d; backface-visibility: hidden; transform: rotateX(180deg)">
         Parent rotateX(180deg)
-        <div id="a2-2-1" class="target" style="transform: rotateX(0deg)">Target</div>
+        <div id="a2-9" class="target">No transform</div>
       </div>
 
-      <h4>Grandparent Flipped + Parent no transform + Identity Transform</h4>
-      <div class="grandparent" style="transform-style: preserve-3d; backface-visibility: hidden; transform: rotateX(180deg)">
-        Grandparent rotateX(180deg)
-        <div class="parent">
-          Parent no transform
-          <div id="a2-2-2" class="target" style="transform: rotateX(0deg)">Target</div>
-        </div>
-      </div>
-
-      <h4>Grandparent Flipped + Parent identity transform + No Transform</h4>
-      <div class="grandparent" style="transform-style: preserve-3d; backface-visibility: hidden; transform: rotateX(180deg)">
-        Grandparent rotateX(180deg)
-        <div class="parent" style="transform: rotateX(0deg)">
-          Parent no transform
-          <div id="a2-2-3" class="target">Target</div>
-        </div>
-      </div>
-
-      <h4>Grandparent Flipped + Parent no transform with hidden + Child Indentity</h4>
-      <div class="grandparent" style="transform-style: preserve-3d; transform: rotateX(180deg)">
-        Grandparent rotateX(180deg)
-        <div class="parent" style="backface-visibility: hidden;">
-          Parent no transform
-          <div id="a2-2-4" class="target" style="transform: rotateX(0deg)">Target</div>
-        </div>
-      </div>
-
-      <h4>Grandgrandparent Flipped + Grandparent no transform + Parent no transform with hidden + Child Indentity</h4>
-      <div class="grandgrandparent" style="transform-style: preserve-3d; transform: rotateX(180deg)">
-        Grandparent rotateX(180deg)
-        <div class="grandparent">
-          Grandparent
-          <div class="parent" style="backface-visibility: hidden;">
-            Parent no transform
-            <div id="a2-2-4" class="target" style="transform: rotateX(0deg)">Target</div>
-          </div>
-        </div>
-      </div>
-
-      <h4>Grandgrandparent Flipped + Grandparent Identity + Parent no transform with hidden + Child Indentity</h4>
-      <div class="grandgrandparent" style="transform-style: preserve-3d; transform: rotateX(180deg)">
-        Grandparent rotateX(180deg)
-        <div class="grandparent" style="transform: rotateX(0deg)">
-          Grandparent
-          <div class="parent" style="backface-visibility: hidden;">
-            Parent no transform
-            <div id="a2-2-4" class="target" style="transform: rotateX(0deg)">Target</div>
-          </div>
-        </div>
-      </div>
-
-      <h4>Parent rotate 180deg + Child backface-invisible</h4>
-      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(180deg)">
-        Parent rotateX(180deg)
-        <div id="a2-" class="target" style="backface-visibility: hidden;">Target</div>
-      </div>
-
-      <h4>Parent rotate 45deg + Child rotate 45deg with backface-invisible</h4>
-      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(45deg)">
-        Parent rotateX(45deg) 
-        <div id="a2-6" class="target" style="backface-visibility: hidden; transform: rotateX(45deg)">Target rotateX(45deg)</div>
-      </div>
-
-      <h4>GrandParent 30deg + Parent rotate 30deg + Child 30deg with backface-invisible</h4>
-      <div class="grandparent" style="transform-style:preserve-3d; transform: rotateX(30deg)">
-        Grandparent rotateX(30deg)
-        <div class="parent" style="transform: rotateX(30deg)">
-          Parent rotateX(30deg) 
-          <div id="a2-7" class="target" style="backface-visibility: hidden; transform: rotateX(30deg)">Target rotateX(30deg)</div>
-        </div>
-      </div>
-
-      <h4>Parent rotate 90deg + Child rotate 190deg with backface-invisible</h4>
-      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(90deg)">
-        Parent rotateX(90deg)
-        <div id="a2-8" class="target" style="backface-visibility: hidden;transform: rotateX(190deg)">Target rotateX(190deg)</div>
-      </div>
-
-      <h4>Grandparent rotateX 180deg with preserve-3d + Parent rotate 180deg + Child backface-invisible</h4>
-      <div class="grandparent" style="transform-style:preserve-3d; transform: rotateX(180deg)">
-        Grandparent rotateX(180deg)
-        <div class="parent" style="transform: rotateX(180deg)">
-          Parent rotateX(180deg)
-          <div id="a2-9" class="target" style="backface-visibility: hidden;">Target</div>
+      <h4>Grandparent rotated 45deg + parent rotated 45deg hidden + target visible</h4>
+      <div class="grandparent" style="transform-style: preserve-3d; transform: rotateX(45deg)">
+        Grandparent rotateX(45deg)
+        <div class="parent" style="backface-visibility: hidden; transform-style: preserve-3d; transform: rotateX(45deg)">
+          Parent rotateX(45deg)
+          <div id="a2-10" class="target">No transform</div>
         </div>
       </div>
     </div>
-    
+
     <div>
-      <h2>CASE 3: flat + preserver-3d</h2>
+      <h2>CASE 3: Others</h2>
 
-      <h4>Parent rotate 180deg + Child backface-invisible with flat</h4>
-      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(180deg)">
-        Parent rotateX(180deg)
-        <div id="a3-1" class="target" style="transform-style: flat; backface-visibility: hidden;">Target</div>
-      </div>
-
-      <h4>Parent BI rotateX 180deg + Child Identidy with flat</h4>
-      <div class="parent" style="transform-style:preserve-3d; transform: rotateX(180deg); backface-visibility: hidden;">
-        Parent rotateX(180deg)
-        <div id="a3-1" class="target" style="transform-style: flat; transform: rotateX(0deg)">Target</div>
-      </div>
-
-      <h4>Grandparent rotateX 60deg with flat + Parent rotate 60deg + Child backface-invisible</h4>
-      <div class="grandparent" style="transform-style:flat; transform: rotateX(60deg)">
-        Grandparent rotateX(60deg)
-        <div class="parent" style="transform-style:preserve-3d; transform: rotateX(60deg)">
-          Parent rotateX(60deg)
-          <div id="a3-1" class="target" style="backface-visibility: hidden;">Target</div>
-        </div>
-      </div>
-
-      <h4>Grandparent rotateX 180deg with flat + Parent rotate 180deg + Child backface-invisible</h4>
-      <div class="grandparent" style="transform-style:flat; transform: rotateX(180deg)">
-        Grandparent rotateX(180deg)
-        <div class="parent" style="transform-style:preserve-3d; transform: rotateX(180deg)">
-          Parent rotateX(180deg)
-          <div id="a3-1" class="target" style="backface-visibility: hidden;">Target</div>
-        </div>
-      </div>
-
-      <h4>Grandgrandparent rotateX 60deg with preserve3d + Grandparent rotateX 60deg with flat + Parent rotate 60deg with preserve3d + Child backface-invisible</h4>
-      <div class="grandgrandparent" style="transform-style: preserve-3d; transform: rotateX(60deg)">
-        Grandgrandparent rotateX(60deg)
-        <div class="grandparent" style="transform-style:flat; transform: rotateX(60deg)">
-          Grandparent rotateX(60deg)
-          <div class="parent" style="transform-style:preserve-3d; transform: rotateX(60deg)">
-            Parent rotateX(60deg)
-            <div id="a3-1" class="target" style="backface-visibility: hidden;">Target</div>
+      <h4>flat after preserve-3d</h4>
+      <div class="grandgrandparent" style="backface-visibility: hidden; transform: rotateX(180deg);">
+        Grandgrandparent rotateX(180deg)
+        <div class="grandparent" style="transform-style: preserve-3d; transform: rotateX(30deg)">
+          Grandparent rotateX(30deg)
+          <div class="parent" style="transform-style: preserve-3d; transform: rotateX(30deg)">
+            Parent rotateX(30deg)
+            <div id="a3-1" class="target" style="backface-visibility: hidden;">No transform</div>
           </div>
         </div>
       </div>
+    </div>
+    <div>
+      <div class="container">
+        <div class="face front">
+          Front
+        </div>
+        <div class="face back">
+          Back
+        </div>
+      </div>
+      
+      <script>
+        const container = document.querySelector('.container');
+        container.addEventListener('click', () => {
+          container.classList.toggle('flipped');
+        })
+      </script>
     </div>
   </div>
 </body>
