@@ -155,6 +155,7 @@ class Server
       netStubbingState: @_netStubbingState
       config,
       getRemoteState,
+      request: @_request
     })
 
   createHosts: (hosts = {}) ->
