@@ -64,11 +64,7 @@ const isHidden = (el, name = 'isHidden()') => {
   // when an element is scaled to 0 in one axis
   // it is not visible to users.
   // So, it is hidden.
-  if (elIsHiddenByTransform($el)) {
-    return true
-  }
-
-  if (elIsBackface($el)) {
+  if (elIsHiddenByTransform($el) !== 'visible') {
     return true
   }
 
@@ -123,52 +119,167 @@ const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
 }
 
-const numberRegex = /-?[0-9]+(?:\.[0-9]+)?/g
+const elIsHiddenByTransform = ($el) => {
+  const list = extractTransformInfoFromElements($el)
+
+  if (existsInvisibleBackface(list)) {
+    let transformList
+
+    if (existsPreserve3d(list)) {
+      transformList = mergeTransformInfo(list)
+    } else {
+      transformList = filterTransformInfo(list)
+    }
+
+    return elIsBackface(transformList) ? 'backface' : 'visible'
+  }
+
+  return elIsTransformedToZero(list) ? 'transformed' : 'visible'
+}
+
+const extractTransformInfoFromElements = ($el, list = []) => {
+  list.push(extractTransformInfo($el))
+
+  const $parent = $el.parent()
+
+  if (!$parent.length || $document.isDocument($parent)) {
+    return list
+  }
+
+  return extractTransformInfoFromElements($parent, list)
+}
+
+const extractTransformInfo = ($el) => {
+  const el = $el[0]
+  const style = getComputedStyle(el)
+
+  return {
+    el,
+    backfaceVisibility: style.getPropertyValue('backface-visibility'),
+    transformStyle: style.getPropertyValue('transformStyle'),
+    transform: style.getPropertyValue('transform'),
+  }
+}
+
+const existsInvisibleBackface = (list) => {
+  return !!_.find(list, { backfaceVisibility: 'hidden' })
+}
+
+const existsPreserve3d = (list) => {
+  return !!_.find(list, { transformStyle: 'preserve-3d' })
+}
+
+const mergeTransformInfo = (list) => {
+  let transformList = []
+
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].backfaceVisibility === 'hidden') {
+      if (list[i].transformStyle === 'preserve-3d') {
+        const transform = []
+
+        while (list[i].transformStyle === 'preserve-3d' &&
+        (i + 1 < list.length && list[i + 1].transformStyle === 'flat')) {
+          transform.push(list[i].transform)
+          i++
+        }
+
+        if (transform.length > 0) {
+          transformList.push(transform)
+        }
+      }
+
+      if (list[i].transform.startsWith('matrix3d')) {
+        transformList.push([list[i].transform])
+      }
+    }
+  }
+
+  return transformList
+}
+
+const filterTransformInfo = (list) => {
+  return list
+  .filter(({ backfaceVisibility, transform }) => {
+    return backfaceVisibility === 'hidden' && transform.startsWith('matrix3d')
+  })
+  .map(({ transform }) => [transform])
+}
+
+const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
+const elIsBackface = (transformList) => {
+  for (let i = 0; i < transformList.length; i++) {
+    if (isBackface(transformList[i])) {
+      return true
+    }
+  }
+
+  return false
+}
+
 // This is a simplified version of backface culling.
 // https://en.wikipedia.org/wiki/Back-face_culling
 //
-// We defined view normal vector, (0, 0, -1), - eye to screen.
-// and default normal vector, (0, 0, 1)
+// We defined view vector, (0, 0, -1), - eye to screen.
+// and default normal vector of an element, (0, 0, 1)
 // When dot product of them are >= 0, item is visible.
-const elIsBackface = ($el) => {
-  const el = $el[0]
-  const style = getComputedStyle(el)
-  const backface = style.getPropertyValue('backface-visibility')
-  const backfaceInvisible = backface === 'hidden'
-  const transform = style.getPropertyValue('transform')
-
-  if (!backfaceInvisible || !transform.startsWith('matrix3d')) {
-    return false
-  }
-
-  const m3d = transform.substring(8).match(numberRegex)
-  const defaultNormal = [0, 0, -1]
-  const elNormal = findNormal(m3d)
+const isBackface = (transform) => {
+  const viewVector = [0, 0, -1]
+  const elNormal = findNormal(transform.reverse())
   // Simplified dot product.
   // [0] and [1] are always 0
-  const dot = defaultNormal[2] * elNormal[2]
+  const dot = viewVector[2] * elNormal[2]
 
   return dot >= 0
 }
 
-const findNormal = (m) => {
-  const length = Math.sqrt(+m[8] * +m[8] + +m[9] * +m[9] + +m[10] * +m[10])
+const findNormal = (transform, index = 0, normal = [0, 0, 1]) => {
+  const matrix = transform[index]
 
-  return [+m[8] / length, +m[9] / length, +m[10] / length]
+  if (!matrix) {
+    return normal
+  }
+
+  let m
+
+  if (matrix.startsWith('matrix3d')) {
+    m = matrix.substring(8).match(numberRegex)
+  } else {
+    m = toMatrix3d(matrix.match(numberRegex))
+  }
+
+  const v = normal // alias for shorter formula
+  const computedNormal = [
+    m[0] * v[0] + m[4] * v[1] + m[8] * v[2],
+    m[1] * v[0] + m[5] * v[1] + m[9] * v[2],
+    m[2] * v[0] + m[6] * v[1] + m[10] * v[2],
+  ]
+
+  const computedUnitNormal = toUnitVector(computedNormal)
+
+  return findNormal(transform, index + 1, computedUnitNormal)
 }
 
-const elHasVisibilityCollapse = ($el) => {
-  return $el.css('visibility') === 'collapse'
+const toMatrix3d = (m2d) => {
+  return [
+    m2d[0], m2d[1], 0, 0,
+    m2d[2], m2d[3], 0, 0,
+    0, 0, 1, 0,
+    m2d[4], m2d[5], 0, 1,
+  ]
 }
 
-// This function checks 2 things that can happen: scale and rotate
-const elIsHiddenByTransform = ($el) => {
-  // We need to see the final calculation of the element.
-  const el = $el[0]
+const toUnitVector = (v) => {
+  const length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
 
-  const style = window.getComputedStyle(el)
-  const transform = style.getPropertyValue('transform')
+  return [v[0] / length, v[1] / length, v[2] / length]
+}
 
+// This function checks 2 things that can happen: scale and rotate to 0 in width or height.
+const elIsTransformedToZero = (list) => {
+  return !!_.find(list, (info) => isTransformedToZero(info))
+}
+
+const isTransformedToZero = ({ transform, el }) => {
   // Test scaleZ(0)
   // width or height of getBoundingClientRect aren't 0 when scaleZ(0).
   // But it is invisible.
@@ -201,6 +312,10 @@ const elIsHiddenByTransform = ($el) => {
   }
 
   return false
+}
+
+const elHasVisibilityCollapse = ($el) => {
+  return $el.css('visibility') === 'collapse'
 }
 
 const elHasDisplayNone = ($el) => {
@@ -359,14 +474,6 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
     return !elDescendentsHavePositionFixedOrAbsolute($parent, $origEl)
   }
 
-  if (elIsHiddenByTransform($parent)) {
-    return true
-  }
-
-  if (elIsBackface($parent)) {
-    return true
-  }
-
   // continue to recursively walk up the chain until we reach body or html
   return elIsHiddenByAncestors($parent, $origEl)
 }
@@ -483,7 +590,7 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   }
 
-  if (elIsHiddenByTransform($el)) {
+  if (elIsHiddenByTransform($el) === 'transformed') {
     return `This element '${node}' is not visible because it is hidden by transform.`
   }
 
