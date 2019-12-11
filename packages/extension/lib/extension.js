@@ -1,32 +1,42 @@
-fs         = require("fs")
-path       = require("path")
-Promise    = require("bluebird")
-{ getCookieUrl } = require('./util')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let fs         = require("fs");
+const path       = require("path");
+const Promise    = require("bluebird");
+const { getCookieUrl } = require('./util');
 
-fs = Promise.promisifyAll(fs)
+fs = Promise.promisifyAll(fs);
 
 module.exports = {
-  getPathToExtension: (args...) ->
-    args = [__dirname, "..", "dist"].concat(args)
+  getPathToExtension(...args) {
+    args = [__dirname, "..", "dist"].concat(args);
 
-    path.join.apply(path, args)
+    return path.join.apply(path, args);
+  },
 
-  getPathToTheme: ->
-    path.join(__dirname, "..", "theme")
+  getPathToTheme() {
+    return path.join(__dirname, "..", "theme");
+  },
 
-  getPathToRoot: ->
-    path.join(__dirname, "..")
+  getPathToRoot() {
+    return path.join(__dirname, "..");
+  },
 
-  setHostAndPath: (host, path, onScreencastFrame) ->
-    src = @getPathToExtension("background.js")
+  setHostAndPath(host, path, onScreencastFrame) {
+    const src = this.getPathToExtension("background.js");
 
-    fs.readFileAsync(src, "utf8")
-    .then (str) ->
+    return fs.readFileAsync(src, "utf8")
+    .then(str =>
       str
       .replace("CHANGE_ME_HOST", host)
       .replace("CHANGE_ME_PATH", path)
       .replace("'CHANGE_ME_SCREENCAST_FRAME'", onScreencastFrame)
+    );
+  },
 
   getCookieUrl
 
-}
+};

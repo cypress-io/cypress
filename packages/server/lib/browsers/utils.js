@@ -1,130 +1,143 @@
-path     = require("path")
-debug    = require("debug")("cypress:server:browsers:utils")
-Promise  = require("bluebird")
-getPort  = require("get-port")
-launcher = require("@packages/launcher")
-fs       = require("../util/fs")
-extension = require("@packages/extension")
-appData  = require("../util/app_data")
-pluralize = require("pluralize")
-profileCleaner = require("../util/profile_cleaner")
-debug = require('debug')('cypress:server:browsers')
-PATH_TO_BROWSERS = appData.path("browsers")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const path     = require("path");
+let debug    = require("debug")("cypress:server:browsers:utils");
+const Promise  = require("bluebird");
+const getPort  = require("get-port");
+const launcher = require("@packages/launcher");
+const fs       = require("../util/fs");
+const extension = require("@packages/extension");
+const appData  = require("../util/app_data");
+const pluralize = require("pluralize");
+const profileCleaner = require("../util/profile_cleaner");
+debug = require('debug')('cypress:server:browsers');
+const PATH_TO_BROWSERS = appData.path("browsers");
 
-getBrowserPath = (browser) ->
+const getBrowserPath = browser =>
   path.join(
     PATH_TO_BROWSERS,
-    "#{browser.name}"
+    `${browser.name}`
   )
+;
 
-copyExtension = (src, dest) ->
-  fs.copyAsync(src, dest)
+const copyExtension = (src, dest) => fs.copyAsync(src, dest);
 
-getPartition = (isTextTerminal) ->
-  if isTextTerminal
-    return "run-#{process.pid}"
+const getPartition = function(isTextTerminal) {
+  if (isTextTerminal) {
+    return `run-${process.pid}`;
+  }
 
-  return "interactive"
+  return "interactive";
+};
 
-getProfileDir = (browser, isTextTerminal) ->
+const getProfileDir = (browser, isTextTerminal) =>
   path.join(
-    getBrowserPath(browser)
-    getPartition(isTextTerminal),
+    getBrowserPath(browser),
+    getPartition(isTextTerminal)
   )
+;
 
-getExtensionDir = (browser, isTextTerminal) ->
+const getExtensionDir = (browser, isTextTerminal) =>
   path.join(
     getProfileDir(browser, isTextTerminal),
     "CypressExtension"
   )
+;
 
-ensureCleanCache = (browser, isTextTerminal) ->
-  p = path.join(
+const ensureCleanCache = function(browser, isTextTerminal) {
+  const p = path.join(
     getProfileDir(browser, isTextTerminal),
     "CypressCache"
-  )
+  );
 
-  fs
+  return fs
   .removeAsync(p)
-  .then ->
-    fs.ensureDirAsync(p)
-  .return(p)
+  .then(() => fs.ensureDirAsync(p)).return(p);
+};
 
-removeOldProfiles = ->
-  ## a profile is considered old if it was used
-  ## in a previous run for a PID that is either
-  ## no longer active, or isnt a cypress related process
-  pathToProfiles = path.join(PATH_TO_BROWSERS, "*")
-  pathToPartitions = appData.electronPartitionsPath()
+const removeOldProfiles = function() {
+  //# a profile is considered old if it was used
+  //# in a previous run for a PID that is either
+  //# no longer active, or isnt a cypress related process
+  const pathToProfiles = path.join(PATH_TO_BROWSERS, "*");
+  const pathToPartitions = appData.electronPartitionsPath();
 
-  Promise.all([
-    ## we now store profiles in either interactive or run-* folders
-    ## so we need to remove the old root profiles that existed before
+  return Promise.all([
+    //# we now store profiles in either interactive or run-* folders
+    //# so we need to remove the old root profiles that existed before
     profileCleaner.removeRootProfile(pathToProfiles, [
-      path.join(pathToProfiles, "run-*")
+      path.join(pathToProfiles, "run-*"),
       path.join(pathToProfiles, "interactive")
-    ])
+    ]),
     profileCleaner.removeInactiveByPid(pathToProfiles, "run-"),
     profileCleaner.removeInactiveByPid(pathToPartitions, "run-"),
-  ])
+  ]);
+};
 
-pathToExtension = extension.getPathToExtension()
-extensionDest = appData.path("web-extension")
-extensionBg = appData.path("web-extension", "background.js")
+const pathToExtension = extension.getPathToExtension();
+let extensionDest = appData.path("web-extension");
+let extensionBg = appData.path("web-extension", "background.js");
 
 module.exports = {
-  getPort
+  getPort,
 
-  copyExtension
+  copyExtension,
 
-  getProfileDir
+  getProfileDir,
 
-  getExtensionDir
+  getExtensionDir,
 
-  ensureCleanCache
+  ensureCleanCache,
 
-  removeOldProfiles
+  removeOldProfiles,
 
-  getBrowserByPath: launcher.detectByPath
+  getBrowserByPath: launcher.detectByPath,
 
-  launch: launcher.launch
+  launch: launcher.launch,
 
-  writeExtension: (browser, isTextTerminal, proxyUrl, socketIoRoute, onScreencastFrame) ->
-    debug('writing extension')
-    # debug('writing extension to chrome browser')
-    ## get the string bytes for the final extension file
-    extension.setHostAndPath(proxyUrl, socketIoRoute, onScreencastFrame)
-    .then (str) ->
-      extensionDest = getExtensionDir(browser, isTextTerminal)
-      extensionBg   = path.join(extensionDest, "background.js")
+  writeExtension(browser, isTextTerminal, proxyUrl, socketIoRoute, onScreencastFrame) {
+    debug('writing extension');
+    // debug('writing extension to chrome browser')
+    //# get the string bytes for the final extension file
+    return extension.setHostAndPath(proxyUrl, socketIoRoute, onScreencastFrame)
+    .then(function(str) {
+      extensionDest = getExtensionDir(browser, isTextTerminal);
+      extensionBg   = path.join(extensionDest, "background.js");
 
-      ## copy the extension src to the extension dist
-      copyExtension(pathToExtension, extensionDest)
-      .then ->
-        debug('copied extension')
-        ## and overwrite background.js with the final string bytes
-        fs.writeFileAsync(extensionBg, str)
-      .return(extensionDest)
+      //# copy the extension src to the extension dist
+      return copyExtension(pathToExtension, extensionDest)
+      .then(function() {
+        debug('copied extension');
+        //# and overwrite background.js with the final string bytes
+        return fs.writeFileAsync(extensionBg, str);}).return(extensionDest);
+    });
+  },
 
-  getBrowsers: ->
-    debug("getBrowsers")
-    launcher.detect()
-    .then (browsers = []) ->
-      debug("found browsers %o", { browsers })
+  getBrowsers() {
+    debug("getBrowsers");
+    return launcher.detect()
+    .then(function(browsers = []) {
+      let majorVersion;
+      debug("found browsers %o", { browsers });
 
-      version = process.versions.chrome or ""
-      majorVersion = parseInt(version.split(".")[0]) if version
-      electronBrowser = {
-        name: "electron"
-        family: "electron"
-        displayName: "Electron"
-        version: version
-        path: ""
-        majorVersion: majorVersion
+      const version = process.versions.chrome || "";
+      if (version) { majorVersion = parseInt(version.split(".")[0]); }
+      const electronBrowser = {
+        name: "electron",
+        family: "electron",
+        displayName: "Electron",
+        version,
+        path: "",
+        majorVersion,
         info: "Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses."
-      }
+      };
 
-      ## the internal version of Electron, which won't be detected by `launcher`
-      debug("adding Electron browser with version %s", version)
-      browsers.concat(electronBrowser)
-}
+      //# the internal version of Electron, which won't be detected by `launcher`
+      debug("adding Electron browser with version %s", version);
+      return browsers.concat(electronBrowser);
+    });
+  }
+};
