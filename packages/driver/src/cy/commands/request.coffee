@@ -129,7 +129,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## https://github.com/cypress-io/cypress/issues/5274
       try
         options.url = new URL(options.url).href
-      catch TypeError
+      catch err
+        if !(err instanceof TypeError) ## unexpected, new URL should only throw TypeError
+          throw err
+          
         # The URL object cannot be constructed because of URL failure
         $utils.throwErrByPath("request.url_invalid", {
           args: {
