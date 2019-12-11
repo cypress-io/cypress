@@ -1,6 +1,7 @@
 require("../../spec_helper")
 
 extension = require("@packages/extension")
+Marionette = require('marionette-client')
 FirefoxProfile = require("firefox-profile")
 utils = require("#{root}../lib/browsers/utils")
 plugins = require("#{root}../lib/plugins")
@@ -14,14 +15,14 @@ describe "lib/browsers/firefox", ->
       @options = {
         proxyUrl: "http://proxy-url"
         socketIoRoute: "socket/io/route"
+        browser: { name: 'firefox' }
       }
 
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
+      sinon.stub(Marionette.Drivers.Tcp.prototype, 'connect').yields(null)
+      sinon.stub(Marionette.Drivers.Tcp.prototype, 'send').yields({sessionId: 'fooSessionId'})
       sinon.stub(utils, "writeExtension").resolves("/path/to/ext")
-      sinon.stub(firefoxUtil, "findRemotePort").resolves(6005)
-      @firefoxClient = { installTemporaryAddon: sinon.stub().resolves() }
-      sinon.stub(firefoxUtil, "connect").resolves(@firefoxClient)
       @browserInstance = {}
       sinon.stub(utils, "launch").resolves(@browserInstance)
       sinon.stub(FirefoxProfile.prototype, "setPreference")
@@ -67,8 +68,8 @@ describe "lib/browsers/firefox", ->
         extensions: ["/path/to/user/ext"]
       })
       firefox.open("firefox", "http://", @options).then =>
-        expect(@firefoxClient.installTemporaryAddon).to.be.calledWith("/path/to/user/ext")
-        expect(@firefoxClient.installTemporaryAddon).to.be.calledWith("/path/to/ext")
+        expect(Marionette.Drivers.Tcp.prototype.send).calledWithMatch({name: 'Addon:Install', params: {path: "/path/to/ext"}})
+        expect(Marionette.Drivers.Tcp.prototype.send).calledWithMatch({name: 'Addon:Install', params: {path: "/path/to/user/ext"}})
 
     it "adds only cypress extension if before:browser:launch returns object with non-array extensions", ->
       plugins.has.returns(true)
@@ -76,8 +77,8 @@ describe "lib/browsers/firefox", ->
         extensions: "not-an-array"
       })
       firefox.open("firefox", "http://", @options).then =>
-        expect(@firefoxClient.installTemporaryAddon).to.be.calledOnce
-        expect(@firefoxClient.installTemporaryAddon).to.be.calledWith("/path/to/ext")
+        expect(Marionette.Drivers.Tcp.prototype.send).calledWithMatch({name: 'Addon:Install', params: {path: "/path/to/ext"}})
+        expect(Marionette.Drivers.Tcp.prototype.send).not.calledWithMatch({name: 'Addon:Install', params: {path: "/path/to/user/ext"}})
 
     it "sets user-agent preference if specified", ->
       @options.userAgent = "User Agent"
@@ -86,9 +87,9 @@ describe "lib/browsers/firefox", ->
 
     it "writes extension", ->
       firefox.open("firefox", "http://", @options).then =>
-        expect(utils.writeExtension).to.be.calledWith(@options.proxyUrl, @options.socketIoRoute)
+        expect(utils.writeExtension).to.be.calledWith(@options.browser, @options.isTextTerminal, @options.proxyUrl, @options.socketIoRoute, @options.onScreencastFrame)
 
-    it "finds remote port for firefox debugger", ->
+    it.skip "finds remote port for firefox debugger", ->
       firefox.open("firefox", "http://", @options).then =>
         expect(firefoxUtil.findRemotePort).to.be.called
 
@@ -96,9 +97,9 @@ describe "lib/browsers/firefox", ->
       @options.proxyServer = "http://proxy-server:1234"
       firefox.open("firefox", "http://", @options).then =>
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.http", "proxy-server")
-        expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.https", "proxy-server")
+        expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.ssl", "proxy-server")
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.http_port", 1234)
-        expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.https_port", 1234)
+        expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.ssl_port", 1234)
         expect(FirefoxProfile.prototype.setPreference).to.be.calledWith("network.proxy.no_proxies_on")
 
     it "does not set proxy-related preferences if not specified", ->
@@ -115,19 +116,15 @@ describe "lib/browsers/firefox", ->
 
     it "launches with the url and args", ->
       firefox.open("firefox", "http://", @options).then =>
-        expect(utils.launch).to.be.calledWith("firefox", "http://", [
+        expect(utils.launch).to.be.calledWith("firefox", null, [
           "-profile"
           "/path/to/profile"
-          "-start-debugger-server"
-          "6005"
+          "-marionette"
           "-new-instance"
-          "-foreground"
+          "-foreground",
+          "-height", "794"
+          "-width", "1280"
         ])
-
-    it "connects to firefox debugger client and install extension", ->
-      firefox.open("firefox", "http://", @options).then =>
-        expect(firefoxUtil.connect).to.be.calledWith(6005)
-        expect(@firefoxClient.installTemporaryAddon).to.be.calledWith("/path/to/ext")
 
     it "resolves the browser instance", ->
       firefox.open("firefox", "http://", @options).then (result) =>
