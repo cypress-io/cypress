@@ -1,12 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS201: Simplify complex destructure assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let e2e
 
 require('../../spec_helper')
@@ -28,12 +19,13 @@ const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
 const fs = require(`${root}../lib/util/fs`)
 const allowDestroy = require(`${root}../lib/util/server_destroy`)
-const user = require(`${root}../lib/user`)
 const cypress = require(`${root}../lib/cypress`)
-const Project = require(`${root}../lib/project`)
 const screenshots = require(`${root}../lib/screenshots`)
 const videoCapture = require(`${root}../lib/video_capture`)
 const settings = require(`${root}../lib/util/settings`)
+
+// mutates mocha test runner - needed for `test.titlePath`
+require(`${root}../lib/project`)
 
 cp = Promise.promisifyAll(cp)
 
@@ -97,25 +89,22 @@ const replaceDurationSeconds = function (str, p1, p2, p3, p4) {
   return p1 + _.padEnd('X seconds', lengthOfExistingDuration)
 }
 
-const replaceDurationFromReporter = (str, p1, p2, p3) =>
-// duration='1589'
-{
+const replaceDurationFromReporter = (str, p1, p2, p3) => {
+  // duration='1589'
   return p1 + _.padEnd('X', p2.length, 'X') + p3
 }
 
 const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
 
-const replaceDurationInTables = (str, p1, p2) =>
-// when swapping out the duration, ensure we pad the
-// full length of the duration so it doesn't shift content
-{
+const replaceDurationInTables = (str, p1, p2) => {
+  // when swapping out the duration, ensure we pad the
+  // full length of the duration so it doesn't shift content
   return _.padStart('XX:XX', p1.length + p2.length)
 }
 
-const replaceParenTime = (str, p1) =>
+const replaceParenTime = (str, p1) => {
 // could be (1 second) or (10 seconds)
 // need to account for shortest and longest
-{
   return _.padStart('(X second)', p1.length)
 }
 
@@ -126,9 +115,6 @@ const replaceUploadingResults = function (orig, ...rest) {
 
   const match = rest.slice(0, adjustedLength - 2)
 
-  const offset = rest[adjustedLength - 2]
-
-  const string = rest[adjustedLength - 1]
   const results = match[1].split('\n').map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
   .sort()
   .join('\n')
@@ -219,6 +205,7 @@ const startServer = function (obj) {
 
   return new Promise((resolve) => {
     return srv.listen(port, () => {
+      // eslint-disable-next-line no-console
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
         onServer(app, srv)
@@ -305,7 +292,7 @@ const localItFn = function (title, options = {}) {
   })
   .value()
 
-  const { only, skip, browser, generateTestsForDefaultBrowsers, onRun, spec, expectedExitCode } = options
+  const { only, skip, browser, generateTestsForDefaultBrowsers, onRun } = options
 
   if (!title) {
     throw new Error('e2e.it(...) must be passed a title as the first argument')
@@ -398,18 +385,16 @@ module.exports = (e2e = {
             .map(npmI, niv.install)
             .then(() => Promise.map(npmI, copyToE2ENodeModules))
           }
-        }).then(() =>
-        // symlinks mess up fs.copySync
-        // and bin files aren't necessary for these tests
-        {
+          // symlinks mess up fs.copySync
+          // and bin files aren't necessary for these tests
+        }).then(() => {
           return fs.removeAsync(Fixtures.path('projects/e2e/node_modules/.bin'))
         })
       })
 
-      after(() =>
       // now cleanup the node modules after because these add a lot
       // of copy time for the Fixtures scaffolding
-      {
+      after(() => {
         return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
       })
     }
@@ -628,9 +613,8 @@ module.exports = (e2e = {
         matches = browserNameVersionRe.exec(stdout)
 
         if (matches) {
-          let browserName; let customBrowserPath; let headless; let key; let version;
-
-          [str, key, customBrowserPath, browserName, version, headless] = matches
+          // eslint-disable-next-line no-unused-vars
+          const [str, key, customBrowserPath, browserName, version, headless] = matches
 
           const { browser } = options
 

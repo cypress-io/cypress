@@ -1,4 +1,4 @@
-const background = require('./background.coffee')
+const background = require('./background')
 
 const HOST = 'CHANGE_ME_HOST'
 const PATH = 'CHANGE_ME_PATH'

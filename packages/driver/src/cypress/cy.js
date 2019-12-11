@@ -1,25 +1,9 @@
-/* eslint-disable
-    no-ex-assign,
-    no-unused-vars,
-    prefer-rest-params,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS204: Change includes calls to have a more natural evaluation order
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable prefer-rest-params */
 const _ = require('lodash')
 const $ = require('jquery')
 const Promise = require('bluebird')
 
 const $dom = require('../dom')
-const $selection = require('../dom/selection')
 const $utils = require('./utils')
 const $Chai = require('../cy/chai')
 const $Xhrs = require('../cy/xhrs')
@@ -39,11 +23,10 @@ const $Timers = require('../cy/timers')
 const $Timeouts = require('../cy/timeouts')
 const $Retries = require('../cy/retries')
 const $Stability = require('../cy/stability')
+const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
-
-const crossOriginScriptRe = /^script error/i
 
 const privateProps = {
   props: { name: 'state', url: true },
@@ -136,7 +119,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const queue = $CommandQueue.create()
 
-  const VideoRecorder = $VideoRecorder.create(state, Cypress)
+  $VideoRecorder.create(state, Cypress)
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -254,10 +237,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       contentWindow.document.hasFocus = function () {
         return focused.documentHasFocus.call(this)
-      }
-
-      contentWindow.HTMLInputElement.prototype.select = function () {
-        return $selection.interceptSelect.call(this)
       }
 
       const cssModificationSpy = function (original, ...args) {
@@ -909,6 +888,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // listeners time to be invoked prior to moving on
           return stability.isStable(true, 'load')
         } catch (err) {
+          let e = err
+
           // we failed setting the remote window props
           // which means we're in a cross domain failure
           // check first to see if you have a callback function
@@ -916,14 +897,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           onpl = state('onPageLoadErr')
 
           if (onpl) {
-            err = onpl(err)
+            e = onpl(e)
           }
 
           // and now reject with it
           r = state('reject')
 
           if (r) {
-            return r(err)
+            return r(e)
           }
         }
       })

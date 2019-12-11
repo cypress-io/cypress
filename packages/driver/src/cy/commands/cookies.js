@@ -1,20 +1,8 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* global Cypress */
 const _ = require('lodash')
-const cookieParser = require('strict-cookie-parser')
 const Promise = require('bluebird')
+const cookieParser = require('strict-cookie-parser')
 
-const $dom = require('../../dom')
 const $utils = require('../../cypress/utils')
 const $Location = require('../../cypress/location')
 
@@ -33,10 +21,9 @@ const mergeDefaults = function (obj) {
   // on our superdomain
   const { superDomain } = $Location.create(window.location.href)
 
-  const merge = (o) =>
   // and if the user did not provide a domain
   // then we know to set the default to be origin
-  {
+  const merge = (o) => {
     return _.defaults(o, { domain: superDomain })
   }
 
@@ -99,11 +86,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     })
   }
 
-  Cypress.on('test:before:run:async', () =>
   // TODO: handle failure here somehow
   // maybe by tapping into the Cypress reset
   // stuff, or handling this in the runner itself?
-  {
+  Cypress.on('test:before:run:async', () => {
     return getAndClear()
   })
 

@@ -1,25 +1,13 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const path = require('path')
-let debug = require('debug')('cypress:server:browsers:utils')
+const debug = require('debug')('cypress:server:browsers:utils')
 const Promise = require('bluebird')
 const getPort = require('get-port')
 const launcher = require('@packages/launcher')
 const fs = require('../util/fs')
 const extension = require('@packages/extension')
 const appData = require('../util/app_data')
-const pluralize = require('pluralize')
 const profileCleaner = require('../util/profile_cleaner')
 
-debug = require('debug')('cypress:server:browsers')
 const PATH_TO_BROWSERS = appData.path('browsers')
 
 const getBrowserPath = (browser) => {

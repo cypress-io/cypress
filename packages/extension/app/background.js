@@ -1,23 +1,9 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const browser = require('webextension-polyfill')
 const map = require('lodash/map')
 const pick = require('lodash/pick')
 const once = require('lodash/once')
 const Promise = require('bluebird')
+const browser = require('webextension-polyfill')
 const client = require('./client')
-const { startRecording } = require('./recording')
 const { getCookieUrl } = require('../lib/util')
 
 const COOKIE_PROPS = ['url', 'name', 'path', 'secure', 'domain']
@@ -26,9 +12,8 @@ const SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
 
 const httpRe = /^http/
 
-const firstOrNull = (cookies) =>
 // normalize into null when empty array
-{
+const firstOrNull = (cookies) => {
   return cookies[0] != null ? cookies[0] : null
 }
 
@@ -91,10 +76,6 @@ const connect = function (host, path, onScreencastFrame) {
 
     return ws.emit('automation:client:connected')
   })
-
-  // if onScreencastFrame
-  //   startRecording (data) ->
-  //     ws.emit('capture:extension:video:frame', data)
 
   return ws
 }
@@ -165,10 +146,9 @@ const automation = {
 
     return Promise.try(() => {
       return browser.cookies.set(props)
-    }).then((details) =>
-    // the cookie callback could be null such as the
-    // case when expirationDate is before now
-    {
+      // the cookie callback could be null such as the
+      // case when expirationDate is before now
+    }).then((details) => {
       return fn(details || null)
     })
   },
@@ -213,16 +193,14 @@ const automation = {
 
     return Promise.try(() => {
       return browser.tabs.query({ windowType: 'normal' })
-    }).filter((tab) =>
-    // the tab's url must begin with
-    // http or https so that we filter out
-    // about:blank and chrome:// urls
-    // which will throw errors!
-    {
+    }).filter((tab) => {
+      // the tab's url must begin with
+      // http or https so that we filter out
+      // about:blank and chrome:// urls
+      // which will throw errors!
       return httpRe.test(tab.url)
-    }).then((tabs) =>
-    // generate array of promises
-    {
+    }).then((tabs) => {
+      // generate array of promises
       return map(tabs, queryTab)
     }).any()
   },
