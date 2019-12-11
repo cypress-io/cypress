@@ -1067,6 +1067,16 @@ jobs:
           command: "npm run cypress:run"
           wait-on: "http://localhost:2222"
 
+
+  "test-binary-against-realworld-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-realworld
+          browser: firefox
+          command: "npm run cypress:run"
+          wait-on: "http://localhost:4100"
+
   "test-binary-against-api-testing-firefox":
     <<: *defaults
     steps:
@@ -1076,14 +1086,14 @@ jobs:
           command: "npm run cy:run"
           wait-on: "http://localhost:3000"
 
-    "test-binary-against-piechopper-firefox":
-      <<: *defaults
-      steps:
-        - test-binary-against-repo:
-            repo: cypress-example-piechopper
-            browser: firefox
-            command: "npm run cypress:run"
-            wait-on: "http://localhost:8080"
+  "test-binary-against-piechopper-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-piechopper
+          browser: firefox
+          command: "npm run cypress:run"
+          wait-on: "http://localhost:8080"
 
   test-binary-as-specific-user:
     <<: *defaults
@@ -1366,6 +1376,15 @@ linux-workflow: &linux-workflow
           - build-npm-package
           - build-binary
     - test-binary-against-api-testing-firefox:
+        filters:
+          branches:
+            only:
+              - develop
+              - issue-1096-firefox-support
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-against-realworld-firefox:
         filters:
           branches:
             only:
