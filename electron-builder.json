@@ -11,10 +11,5 @@
     "type": "distribution"
   },
   "afterPack": "./scripts/after-pack-hook.js",
-  "afterSign": "./scripts/after-sign-hook.js",
-  "files": [
-    "**/*",
-    "**/packages/coffee/node_modules/**/*",
-    "**/packages/server/node_modules/**/*"
-  ]
+  "afterSign": "./scripts/after-sign-hook.js"
 }

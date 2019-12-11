@@ -222,6 +222,10 @@ buildCypressApp = (platform, version, options = {}) ->
   electronPackAndSign = ->
     log("#electronPackAndSign")
 
+    # See the internal wiki document "Signing Test Runner on MacOS"
+    # to learn how to get the right Mac certificate for signing and notarizing
+    # the built Test Runner application
+
     # TODO remove dist/darwin/packages/server/.cy symlink first
     appFolder = distDir()
     # outputFolder = meta.zipDir(platform)
