@@ -205,9 +205,8 @@ const moduleFactory = () => {
     stopSpecsWatcher () {
       debug('stop spec watcher')
 
-      return Promise.try(() => {
-        return specsWatcher ? specsWatcher.close() : undefined
-      })
+      specsWatcher && specsWatcher.close()
+      specsWatcher = null
     },
 
     closeBrowser () {
