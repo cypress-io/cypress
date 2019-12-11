@@ -848,7 +848,6 @@ jobs:
 
   "test-binary-and-npm-against-other-projects":
     <<: *defaults
-    working_directory: /tmp/testing
     steps:
       # needs uploaded NPM and test binary
       - attach_workspace:
@@ -862,6 +861,7 @@ jobs:
       - run: mkdir /tmp/testing
       - run:
           name: create dummy package
+          working_directory: /tmp/testing
           command: npm init -y
       - run:
           # install NPM from unique urls
@@ -873,6 +873,7 @@ jobs:
               --cwd /tmp/testing
       - run:
           name: Verify Cypress binary
+          working_directory: /tmp/testing
           command: $(npm bin)/cypress verify
       - run:
           name: Post pre-release install comment
@@ -926,15 +927,15 @@ jobs:
       - run: ls -l cypress.zip cypress.tgz
       - run:
           name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git ~/cypress-test-tiny
+          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
       - run:
           name: Install Cypress
-          working_directory: ~/cypress-test-tiny
+          working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Run test project
-          working_directory: ~/cypress-test-tiny
+          working_directory: /tmp/cypress-test-tiny
           command: |
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
@@ -953,24 +954,24 @@ jobs:
       - run: ls -l cypress.zip cypress.tgz
       - run:
           name: Cloning kitchensink project
-          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git ~/kitchensink
+          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
       - run:
           command: npm install
-          working_directory: ~/kitchensink
+          working_directory: /tmp/kitchensink
       - run:
           name: Install Cypress
-          working_directory: ~/kitchensink
+          working_directory: /tmp/kitchensink
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
-          working_directory: ~/kitchensink
+          working_directory: /tmp/kitchensink
           command: npm run build
       - run:
-          working_directory: ~/kitchensink
+          working_directory: /tmp/kitchensink
           command: npm start
           background: true
       - run:
-          working_directory: ~/kitchensink
+          working_directory: /tmp/kitchensink
           command: npm run e2e
       - store-npm-logs
 
