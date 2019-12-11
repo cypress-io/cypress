@@ -34,9 +34,8 @@ describe "redirection", ->
           expect(@logs[2].get("name")).to.eq("page load")
           expect(@logs[3].get("name")).to.eq("new url")
 
-  ## TODO: get this passing in chrome 76
+  ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973 (chrome76+ and firefox)
   context.skip "javascript", ->
-    ## FIREFOX FIXME: logs doesn't include "page load"
     it "binds to the new page after a timeout", ->
       cy
         .visit("/fixtures/js-redirect-timeout.html")

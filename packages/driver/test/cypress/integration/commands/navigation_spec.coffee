@@ -1556,7 +1556,7 @@ describe "src/cy/commands/navigation", ->
 
           expect(Cookie.get("__cypress.initial")).to.be.undefined
 
-    ## TODO: hangs chrome76 and firefox
+    ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973 (chrome76+ and firefox)
     it.skip "does not reset the timeout", (done) ->
       cy.timeout(1000)
 
