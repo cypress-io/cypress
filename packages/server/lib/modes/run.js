@@ -1117,7 +1117,7 @@ module.exports = {
   },
 
   runSpecs (options = {}) {
-    options = _.defaults(options, {
+    _.defaults(options, {
       // only non-Electron browsers run headed by default
       headed: options.browser.family !== 'electron',
     })
