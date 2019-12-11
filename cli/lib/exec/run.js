@@ -55,6 +55,8 @@ const processRunOptions = (options = {}) => {
 
   if (options.headless) {
     if (options.headed) {
+      // throw this error synchronously, it will be caught later on and
+      // the details will be propagated to the promise chain
       const err = new Error()
 
       err.details = errors.incompatibleHeadlessFlags
