@@ -123,6 +123,8 @@ deploy = {
   setLocalVersionToNext: ->
     uploadUtils.getLiveManifest()
     .then ({ nextDevVersion }) ->
+      la(nextDevVersion, "could not get next dev version from live manifest")
+
       console.log("Setting package.json version to #{nextDevVersion}")
       cmd = "npm --no-git-tag-version version #{nextDevVersion}"
       console.log("running `#{cmd}`")
