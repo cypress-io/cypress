@@ -1119,7 +1119,7 @@ module.exports = {
   runSpecs (options = {}) {
     options = _.defaults(options, {
       // only non-Electron browsers run headed by default
-      headed: browser.family !== 'electron',
+      headed: options.browser.family !== 'electron',
     })
 
     const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
