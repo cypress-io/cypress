@@ -93,6 +93,12 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1}
       """
+    when "CHROME_WEB_SECURITY_NOT_SUPPORTED"
+      """
+      Browser: '#{arg1}' does not support the configuration value "chromeWebSecurity: false"
+      
+      Tests that require "chromeWebSecurity: false" will not run as expected.
+      """
     when "BROWSER_NOT_FOUND_BY_NAME"
       """
       Can't run because you've entered an invalid browser name.

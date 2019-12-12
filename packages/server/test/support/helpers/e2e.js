@@ -1,4 +1,5 @@
 require('../../spec_helper')
+require('mocha-banner').register()
 
 const _ = require('lodash')
 let cp = require('child_process')
@@ -36,7 +37,8 @@ Promise.config({
 const e2ePath = Fixtures.projectPath('e2e')
 const pathUpToProjectName = Fixtures.projectPath('')
 
-const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
+const AVAILABLE_BROWSERS = ['electron', 'chrome', 'firefox']
+const DEFAULT_BROWSERS = AVAILABLE_BROWSERS
 
 const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
@@ -246,71 +248,95 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   // if we've been told to skip this test
   // or if we specified a particular browser and this
   // doesn't match the one we're currently trying to run...
+
+  const itFn = only ? it.only : it
+
   if (skip || (specifiedBrowser && (specifiedBrowser !== browser))) {
-    // then skip this test
     return it.skip
   }
 
-  if (only) {
-    return it.only
-  }
-
-  return it
+  return itFn
 }
 
-const getBrowsers = function (generateTestsForDefaultBrowsers, browser, defaultBrowsers) {
-  // if we're generating tests for default browsers
-  if (generateTestsForDefaultBrowsers) {
-    // then return an array of default browsers
-    return defaultBrowsers
+function getBrowsers (browserPattern) {
+  if (!browserPattern.length) {
+    return DEFAULT_BROWSERS
   }
 
-  // but if we haven't been told to generate tests for default browsers
-  // and weren't provided a specified browser then throw
-  if (!browser) {
-    throw new Error('A browser must be specified when { generateTestsForDefaultBrowsers: false }.')
+  let selected = []
+
+  const addBrowsers = _.clone(browserPattern)
+  const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!'))
+
+  if (removeBrowsers.length) {
+    selected = _.without(AVAILABLE_BROWSERS, removeBrowsers.map((b) => b.slice(1)))
+  } else {
+    selected = _.intersection(AVAILABLE_BROWSERS, addBrowsers)
   }
 
-  // otherwise return the specified browser
-  return [browser]
+  if (!selected.length) {
+    throw new Error(`options.browser: "${browserPattern}" matched no browsers`)
+  }
+
+  // console.log(chalk.green(selected))
+
+  return selected
 }
 
-const localItFn = function (title, options = {}) {
-  options = _
-  .chain(options)
-  .clone()
-  .defaults({
+const normalizeToArray = (value) => {
+  if (value && !_.isArray(value)) {
+    return [value]
+  }
+
+  return value
+}
+
+const localItFn = function (title, opts = {}) {
+  opts.browser = normalizeToArray(opts.browser)
+  opts.stdoutInclude = normalizeToArray(opts.stdoutInclude)
+  opts.stdoutExclude = normalizeToArray(opts.stdoutExclude)
+
+  const DEFAULT_OPTIONS = {
+    stdoutInclude: [],
+    stdoutExclude: [],
     only: false,
     skip: false,
-    browser: process.env.BROWSER,
-    generateTestsForDefaultBrowsers: true,
+    browser: [],
+    expectedExitCode: 0,
+    snapshot: false,
+    spec: 'no spec name supplied!',
     onRun (execFn, browser, ctx) {
       return execFn()
     },
-  })
-  .value()
+  }
+  const invalidOptions = _.keys(_.omit(opts, _.keys(DEFAULT_OPTIONS)))
 
-  const { only, skip, browser, generateTestsForDefaultBrowsers, onRun } = options
+  if (invalidOptions.length) {
+    const e = new Error(`Invalid option(s) supplied: ${chalk.red(invalidOptions)}`)
+
+    e.stack = e.stack.split('\n').slice(0, 4).join('\n')
+    throw e
+  }
+
+  const options = _.defaults({}, opts, DEFAULT_OPTIONS)
 
   if (!title) {
     throw new Error('e2e.it(...) must be passed a title as the first argument')
   }
 
   // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
-  // - if generateTestsForDefaultBrowsers
-  //   - create multiple tests for each default browser
-  //   - if browser is specified in options:
-  //     ...skip the tests for each default browser if that browser
-  //     ...does not match the specified one (used in CI)
-  // - else only generate a single test with the specified browser
+  // - create multiple tests for each default browser
+  // - if browser is specified in options:
+  //   ...skip the tests for each default browser if that browser
+  //   ...does not match the specified one (used in CI)
 
   // run the tests for all the default browsers, or if a browser
   // has been specified, only run it for that
-  const specifiedBrowser = browser
-  const browsersToTest = getBrowsers(generateTestsForDefaultBrowsers, browser, DEFAULT_BROWSERS)
+  const specifiedBrowser = process.env.BROWSER
+  const browsersToTest = getBrowsers(options.browser)
 
   const browserToTest = function (browser) {
-    const mochaItFn = getMochaItFn(only, skip, browser, specifiedBrowser)
+    const mochaItFn = getMochaItFn(options.only, options.skip, browser, specifiedBrowser)
 
     const testTitle = `${title} [${browser}]`
 
@@ -321,7 +347,7 @@ const localItFn = function (title, options = {}) {
 
       const execFn = (overrides = {}) => e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
 
-      return onRun(execFn, browser, ctx)
+      return options.onRun(execFn, browser, ctx)
     })
   }
 
@@ -640,6 +666,18 @@ const e2e = {
           snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
         } else {
           snapshot(str)
+        }
+
+        if (options.stdoutInclude.length) {
+          options.stdoutInclude.forEach((v) => {
+            expect(str).contain(v)
+          })
+        }
+
+        if (options.stdoutExclude.length) {
+          options.stdoutExclude.forEach((v) => {
+            expect(str).not.contain(v)
+          })
         }
       }
 

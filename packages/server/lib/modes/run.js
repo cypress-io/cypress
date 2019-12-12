@@ -1230,6 +1230,11 @@ module.exports = {
       browser,
     })
 
+    if ((browser.family !== 'chrome' && browser.family !== 'electron') && !options.config.chromeWebSecurity) {
+      console.log()
+      errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
+    }
+
     const screenshots = []
 
     // we know we're done running headlessly

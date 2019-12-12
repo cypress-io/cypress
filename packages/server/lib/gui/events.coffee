@@ -213,6 +213,13 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then (browsers = []) ->
         debug("setting found %s on the config", pluralize("browser", browsers.length, true))
         options.config = _.assign(options.config, { browsers })
+
+        if options.config.chromeWebSecurity is false
+          _.chain(browsers)
+          .filter (browser) -> !(browser.family is 'chrome' || browser.family is 'electron')
+          .each (browser) -> browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name)
+          .value()
+        
       .then ->
         chromePolicyCheck.run (err) ->
           options.config.browsers.forEach (browser) ->
