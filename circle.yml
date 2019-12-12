@@ -1,5 +1,14 @@
 version: 2.1
 
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macBuildFilters: &macBuildFilters
+  filters:
+    branches:
+      only:
+        - develop
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -18,16 +27,6 @@ defaults: &defaults
     ## set so that e2e tests are consistent
     COLUMNS: 100
     LINES: 24
-
-# usually we don't build Mac app - it takes a long time
-# but sometimes we want to really confirm we are doing the right thing
-# so just add your branch to the list here to build and test on Mac
-macBuildFilters: &macBuildFilters
-  filters:
-    branches:
-      only:
-        - develop
-        - electron-upgrade
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
