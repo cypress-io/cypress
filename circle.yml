@@ -8,6 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
+        - try-new-electron-sign
 
 defaults: &defaults
   parallelism: 1
@@ -1163,7 +1164,7 @@ mac-workflow: &mac-workflow
 
     - build-binary:
         name: Mac binary
-        context: org-global
+        context: test-runner:sign-mac-binary
         executor: mac
         <<: *macBuildFilters
         requires:
