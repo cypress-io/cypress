@@ -11,7 +11,6 @@ const preprocessor = require('./plugins/preprocessor')
 const moduleFactory = () => {
   let openProject = null
   let relaunchBrowser = null
-  let specsWatcher = null
 
   const reset = () => {
     openProject = null
@@ -29,6 +28,8 @@ const moduleFactory = () => {
   }
 
   return {
+    specsWatcher: null,
+
     reset: tryToCall('reset'),
 
     getConfig: tryToCall('getConfig'),
@@ -165,21 +166,21 @@ const moduleFactory = () => {
       250, { leading: true })
 
       const createSpecsWatcher = (cfg) => {
-        if (specsWatcher) {
+        if (this.specsWatcher) {
           return
         }
 
         debug('watch test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
 
-        specsWatcher = chokidar.watch(cfg.testFiles, {
+        this.specsWatcher = chokidar.watch(cfg.testFiles, {
           cwd: cfg.integrationFolder,
           ignored: cfg.ignoreTestFiles,
           ignoreInitial: true,
         })
 
-        specsWatcher.on('add', checkForSpecUpdates)
+        this.specsWatcher.on('add', checkForSpecUpdates)
 
-        return specsWatcher.on('unlink', checkForSpecUpdates)
+        return this.specsWatcher.on('unlink', checkForSpecUpdates)
       }
 
       const get = () => {
@@ -205,9 +206,10 @@ const moduleFactory = () => {
     stopSpecsWatcher () {
       debug('stop spec watcher')
 
-      return Promise.try(() => {
-        return specsWatcher ? specsWatcher.close() : undefined
-      })
+      if (this.specsWatcher) {
+        this.specsWatcher.close()
+        this.specsWatcher = null
+      }
     },
 
     closeBrowser () {
