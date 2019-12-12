@@ -623,6 +623,8 @@ jobs:
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
           command: npm run binary-build -- --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+          # notarization on Mac can take a while
+          no_output_timeout: "20m"
       - run: npm run binary-zip -- --platform $PLATFORM
       # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
