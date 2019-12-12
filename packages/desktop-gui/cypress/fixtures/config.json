@@ -7,25 +7,41 @@
       "name": "chrome",
       "displayName": "Chrome",
       "family": "chrome",
-      "version": "50.0.2661.86",
+      "version": "78.0.3904.108",
       "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-      "majorVersion": "50"
+      "majorVersion": "78"
     },
     {
       "name": "chromium",
       "displayName": "Chromium",
       "family": "chrome",
-      "version": "49.0.2609.0",
-      "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
-      "majorVersion": "49"
+      "version": "74.0.3729.0",
+      "path": "/Applications/Chromium.app/Contents/MacOS/Chromium",
+      "majorVersion": "74"
     },
     {
       "name": "canary",
       "displayName": "Canary",
       "family": "chrome",
-      "version": "48.0",
-      "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",
-      "majorVersion": "48"
+      "version": "80.0.3977.4",
+      "path": "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+      "majorVersion": "80"
+    },
+    {
+      "name": "electron",
+      "displayName": "Electron",
+      "family": "electron",
+      "version": "73.0.3683.121",
+      "path": "",
+      "majorVersion": "73"
+    },
+    {
+      "name": "firefox",
+      "displayName": "Firefox",
+      "family": "firefox",
+      "version": "69.0.1",
+      "path": "/Applications/Firefox/Contents/MacOS/Firefox",
+      "majorVersion": "69"
     }
   ],
   "clientRoute": "/__/",

@@ -134,29 +134,30 @@ Once the `develop` branch for all test projects are reliably passing with the ne
     ```
     node scripts/test-other-projects.js --npm cypress@3.4.0 --binary 3.4.0
     ```
-6. Update and publish the changelog and any release-specific documentation changes in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
-7. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
+6. Test the new version of Cypress against the Cypress dashboard repo.
+7. Update and publish the changelog and any release-specific documentation changes in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
+8. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
     npm dist-tag add cypress@3.4.0
     ```
-8. Run `binary-release` to update the download the server's manifest, set the next CI version, and create an empty version commit:
+9. Run `binary-release` to update the download the server's manifest, set the next CI version, and create an empty version commit:
     ```shell
     npm run binary-release -- --version 3.4.0 --commit`
     ```
-9. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
-10. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
-11. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
+10. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
+11. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
+12. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
     - Close the current release in ZenHub.
     - Create a new patch release (and a new minor release, if this is a minor release) in ZenHub, and schedule them both to be completed 2 weeks from the current date.
-12. Bump `version` in [`package.json`](package.json) and commit it to `develop` using a commit message like `release 3.4.0 [skip ci]`
-13. Tag this commit with `v3.4.0` and push that tag up.
-14. Merge `develop` into `master` and push that branch up.
-15. Using [cypress-io/release-automations][release-automations]:
+13. Bump `version` in [`package.json`](package.json) and commit it to `develop` using a commit message like `release 3.4.0 [skip ci]`
+14. Tag this commit with `v3.4.0` and push that tag up.
+15. Merge `develop` into `master` and push that branch up.
+16. Using [cypress-io/release-automations][release-automations]:
     - Publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases` (see its README for details).
     - Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release` (see its README for details)
-16. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
-17. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
-18. Try updating as many example projects to the new version. You probably want to update by using Renovate dependency issue like [`cypress-example-todomvc` "Update Dependencies (Renovate Bot)](https://github.com/cypress-io/cypress-example-todomvc/issues/99). Try updating at least the following projects:
+17. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
+18. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
+19. Try updating as many example projects to the new version. You probably want to update by using Renovate dependency issue like [`cypress-example-todomvc` "Update Dependencies (Renovate Bot)](https://github.com/cypress-io/cypress-example-todomvc/issues/99). Try updating at least the following projects:
     - https://github.com/cypress-io/cypress-example-todomvc
     - https://github.com/cypress-io/cypress-example-todomvc-redux
     - https://github.com/cypress-io/cypress-example-realworld
