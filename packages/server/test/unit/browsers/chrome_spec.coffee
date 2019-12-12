@@ -68,6 +68,22 @@ describe "lib/browsers/chrome", ->
         # we load the browser with blank page first
         expect(utils.launch).to.be.calledWith("chrome", "about:blank", @args)
 
+    it "does not load extension in headless mode", ->
+      plugins.has.returns(false)
+
+      pathToTheme = extension.getPathToTheme()
+
+      chrome.open("chrome", "http://", { isHeadless: true, isHeaded: false }, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.deep.eq([
+          "--remote-debugging-port=50505"
+          "--load-extension=/path/to/ext,#{pathToTheme}"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
     it "normalizes --load-extension if provided in plugin", ->
       plugins.has.returns(true)
       plugins.execute.resolves([

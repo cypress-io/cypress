@@ -258,6 +258,7 @@ const localItFn = function (title, options = {}) {
     skip: false,
     browser: process.env.BROWSER,
     generateTestsForDefaultBrowsers: true,
+    useSeparateBrowserSnapshots: false,
     onRun (execFn, browser, ctx) {
       return execFn()
     },
@@ -289,6 +290,10 @@ const localItFn = function (title, options = {}) {
     const testTitle = `${title} [${browser}]`
 
     return mochaItFn(testTitle, function () {
+      if (options.useSeparateBrowserSnapshots) {
+        title = testTitle
+      }
+
       const originalTitle = this.test.parent.titlePath().concat(title).join(' / ')
 
       const ctx = this
@@ -472,8 +477,8 @@ module.exports = (e2e = {
       args.push(`--port=${options.port}`)
     }
 
-    if (options.headed) {
-      args.push('--headed')
+    if (!_.isUndefined(options.headed)) {
+      args.push('--headed', options.headed)
     }
 
     if (options.record) {
@@ -594,9 +599,9 @@ module.exports = (e2e = {
 
           expect(parseFloat(version)).to.be.a.number
 
-          // if we are in headed mode or in a browser other
+          // if we are in headed mode or headed is undefined in a browser other
           // than electron
-          if (options.headed || (browser && (browser !== 'electron'))) {
+          if (options.headed || (_.isUndefined(options.headed) && browser && browser !== 'electron')) {
             expect(headless).not.to.exist
           } else {
             expect(headless).to.include('(headless)')

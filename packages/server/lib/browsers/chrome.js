@@ -247,16 +247,22 @@ module.exports = {
 
   _setAutomation,
 
-  _writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
+  _writeExtension (browser, options) {
+    if (browser.isHeadless) {
+      debug('chrome is running headlessly, not installing extension')
+
+      return
+    }
+
     // get the string bytes for the final extension file
-    return extension.setHostAndPath(proxyUrl, socketIoRoute)
-    .then((str) => {
-      const extensionDest = utils.getExtensionDir(browser, isTextTerminal)
-      const extensionBg = path.join(extensionDest, 'background.js')
+    return extension.setHostAndPath(options.proxyUrl, options.socketIoRoute).then(function (str) {
+      let extensionBg; let extensionDest
+
+      extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
+      extensionBg = path.join(extensionDest, 'background.js')
 
       // copy the extension src to the extension dist
-      return utils.copyExtension(pathToExtension, extensionDest)
-      .then(() => {
+      return utils.copyExtension(pathToExtension, extensionDest).then(function () {
         // and overwrite background.js with the final string bytes
         return fs.writeFileAsync(extensionBg, str)
       }).return(extensionDest)
@@ -310,6 +316,10 @@ module.exports = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
+    if (options.isHeadless) {
+      args.push('--headless')
+    }
+
     return args
   },
 
@@ -338,9 +348,7 @@ module.exports = {
       return Promise.all([
         this._writeExtension(
           browser,
-          isTextTerminal,
-          options.proxyUrl,
-          options.socketIoRoute
+          options
         ),
         _removeRootExtension(),
         _disableRestorePagesPrompt(userDir),

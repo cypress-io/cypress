@@ -113,7 +113,7 @@ module.exports = {
         version,
         path: '',
         majorVersion,
-        info: 'Electron is the default browser that comes with Cypress. This is the browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
+        info: 'Electron is the default browser that comes with Cypress. This is the default browser that runs in headless mode. Selecting this browser is useful when debugging. The version number indicates the underlying Chromium version that Electron uses.',
       }
 
       // the internal version of Electron, which won't be detected by `launcher`

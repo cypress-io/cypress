@@ -406,7 +406,7 @@ describe('Project Nav', function () {
 
     describe('browser with info', function () {
       beforeEach(function () {
-        this.info = 'The Electron browser is the version of Chrome that is bundled with Electron. Cypress uses this browser when running headlessly, so it may be useful for debugging issues that occur only in headless mode.'
+        this.info = 'foo info bar'
         this.config.browsers = [{
           name: 'electron',
           family: 'electron',
