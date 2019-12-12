@@ -18,7 +18,15 @@ defaults: &defaults
       default: cy-doc
   executor: <<parameters.executor>>
   environment:
-    <<: *defaultEnvironment
+    ## set specific timezone
+    TZ: "/usr/share/zoneinfo/America/New_York"
+
+    ## store artifacts here
+    CIRCLE_ARTIFACTS: /tmp/artifacts
+
+    ## set so that e2e tests are consistent
+    COLUMNS: 100
+    LINES: 24
 
 
 executors:
