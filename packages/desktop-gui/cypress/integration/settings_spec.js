@@ -191,20 +191,24 @@ describe('Settings', () => {
           ])({})
         }
 
-        this.ipc.openProject.onCall(1).resolves(setConfigEnv(this.config, null))
+        this.ipc.openProject
+        .onCall(1).resolves(setConfigEnv(this.config, null))
+        .onCall(3).resolves(setConfigEnv(this.config, undefined))
+        .onCall(2).resolves(setConfigEnv(this.config, {}))
+
         this.ipc.onConfigChanged.yield()
 
         cy.contains('.line', 'env:null')
+        .then(() => {
+          this.ipc.onConfigChanged.yield()
 
-        this.ipc.openProject.onCall(2).resolves(setConfigEnv(this.config, {}))
-        this.ipc.onConfigChanged.yield()
+          cy.contains('.line', 'env:null')
+          .then(() => {
+            this.ipc.onConfigChanged.yield()
 
-        cy.contains('.line', 'env:null')
-
-        this.ipc.openProject.onCall(3).resolves(setConfigEnv(this.config, undefined))
-        this.ipc.onConfigChanged.yield()
-
-        cy.contains('.line', 'env:null')
+            cy.contains('.line', 'env:null')
+          })
+        })
       })
 
       it('displays env settings', () => {
