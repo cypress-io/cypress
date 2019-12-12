@@ -183,28 +183,31 @@ describe('Settings', () => {
         })
       })
 
-      it('displays null when no env settings are null', function () {
-        this.ipc.openProject.resolves(setConfigEnv(this.config, null))
-
-        this.ipc.onConfigChanged.yield()
-
-        cy.contains('.line', 'env:null')
-      })
-
-      it('displays null when no env settings are undefined', function () {
+      it('displays null when env settings are empty or not defined', function () {
         this.ipc.openProject.resolves(setConfigEnv(this.config, undefined))
-
         this.ipc.onConfigChanged.yield()
 
-        cy.contains('.line', 'env:null')
-      })
+        cy.contains('.line', 'env:null').then(() => {
+          this.ipc.openProject.resolves(this.config)
+          this.ipc.onConfigChanged.yield()
 
-      it('displays null when no env settings are empty', function () {
-        this.ipc.openProject.resolves(setConfigEnv(this.config, {}))
+          cy.contains('.line', 'env:fileServerFolder')
+          .then(() => {
+            this.ipc.openProject.resolves(setConfigEnv(this.config, null))
+            this.ipc.onConfigChanged.yield()
+            cy.contains('.line', 'env:null').then(() => {
+              this.ipc.openProject.resolves(this.config)
+              this.ipc.onConfigChanged.yield()
 
-        this.ipc.onConfigChanged.yield()
-
-        cy.contains('.line', 'env:null')
+              cy.contains('.line', 'env:fileServerFolder')
+              .then(() => {
+                this.ipc.openProject.resolves(setConfigEnv(this.config, {}))
+                this.ipc.onConfigChanged.yield()
+                cy.contains('.line', 'env:null')
+              })
+            })
+          })
+        })
       })
 
       it('displays env settings', () => {
