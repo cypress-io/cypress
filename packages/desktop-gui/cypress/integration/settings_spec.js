@@ -183,32 +183,31 @@ describe('Settings', () => {
         })
       })
 
-      it('displays null when no env settings are found', function () {
-        const setConfigEnv = (config, v) => {
-          return flow([
-            merge(config),
-            set('resolved.env', v),
-          ])({})
-        }
-
+      it('displays null when no env settings are null', function () {
         this.ipc.openProject
-        .onCall(1).resolves(setConfigEnv(this.config, null))
-        .onCall(3).resolves(setConfigEnv(this.config, undefined))
-        .onCall(2).resolves(setConfigEnv(this.config, {}))
+        .onCall(0).resolves(setConfigEnv(this.config, null))
 
         this.ipc.onConfigChanged.yield()
 
         cy.contains('.line', 'env:null')
-        .then(() => {
-          this.ipc.onConfigChanged.yield()
+      })
 
-          cy.contains('.line', 'env:null')
-          .then(() => {
-            this.ipc.onConfigChanged.yield()
+      it('displays null when no env settings are undefined', function () {
+        this.ipc.openProject
+        .onCall(0).resolves(setConfigEnv(this.config, undefined))
 
-            cy.contains('.line', 'env:null')
-          })
-        })
+        this.ipc.onConfigChanged.yield()
+
+        cy.contains('.line', 'env:null')
+      })
+
+      it('displays null when no env settings are empty', function () {
+        this.ipc.openProject
+        .onCall(0).resolves(setConfigEnv(this.config, {}))
+
+        this.ipc.onConfigChanged.yield()
+
+        cy.contains('.line', 'env:null')
       })
 
       it('displays env settings', () => {
@@ -597,3 +596,11 @@ describe('Settings', () => {
     })
   })
 })
+
+// --
+function setConfigEnv (config, v) {
+  return flow([
+    merge(config),
+    set('resolved.env', v),
+  ])({})
+}
