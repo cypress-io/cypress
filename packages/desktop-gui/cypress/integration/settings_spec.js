@@ -184,8 +184,7 @@ describe('Settings', () => {
       })
 
       it('displays null when no env settings are null', function () {
-        this.ipc.openProject
-        .onCall(0).resolves(setConfigEnv(this.config, null))
+        this.ipc.openProject.resolves(setConfigEnv(this.config, null))
 
         this.ipc.onConfigChanged.yield()
 
@@ -193,8 +192,7 @@ describe('Settings', () => {
       })
 
       it('displays null when no env settings are undefined', function () {
-        this.ipc.openProject
-        .onCall(0).resolves(setConfigEnv(this.config, undefined))
+        this.ipc.openProject.resolves(setConfigEnv(this.config, undefined))
 
         this.ipc.onConfigChanged.yield()
 
@@ -202,8 +200,7 @@ describe('Settings', () => {
       })
 
       it('displays null when no env settings are empty', function () {
-        this.ipc.openProject
-        .onCall(0).resolves(setConfigEnv(this.config, {}))
+        this.ipc.openProject.resolves(setConfigEnv(this.config, {}))
 
         this.ipc.onConfigChanged.yield()
 
