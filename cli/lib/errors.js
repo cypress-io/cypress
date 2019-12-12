@@ -168,6 +168,11 @@ const versionMismatch = {
   solution: 'Install Cypress and verify app again',
 }
 
+const incompatibleHeadlessFlags = {
+  description: '`--headed` and `--headless` cannot both be passed.',
+  solution: 'Either pass `--headed` or `--headless`, but not both.',
+}
+
 const solutionUnknown = stripIndent`
   Please search Cypress documentation for possible solutions:
 
@@ -412,5 +417,6 @@ module.exports = {
     CYPRESS_RUN_BINARY,
     smokeTestFailure,
     childProcessKilled,
+    incompatibleHeadlessFlags,
   },
 }

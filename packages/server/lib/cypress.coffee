@@ -10,11 +10,13 @@ require("./environment")
 ## mode.
 
 _       = require("lodash")
+R       = require("ramda")
 cp      = require("child_process")
 os      = require("os")
 path    = require("path")
 Promise = require("bluebird")
 debug   = require("debug")("cypress:server:cypress")
+argsUtils = require("./util/args")
 
 warning = (code) ->
   require("./errors").warning(code)
@@ -56,7 +58,7 @@ module.exports = {
         ## then display a warning to the user
         if not options.invokedFromCli
           warning("INVOKED_BINARY_OUTSIDE_NPM_MODULE")
-        
+
         ## just run the gui code directly here
         ## and pass our options directly to main
         debug("running Electron currently")
@@ -129,7 +131,11 @@ module.exports = {
   start: (argv = []) ->
     debug("starting cypress with argv %o", argv)
 
-    options = require("./util/args").toObject(argv)
+    # if the CLI passed "--" somewhere, we need to remove it
+    # for https://github.com/cypress-io/cypress/issues/5466
+    argv = R.without("--", argv)
+
+    options = argsUtils.toObject(argv)
 
     if options.runProject and not options.headed
       # scale the electron browser window

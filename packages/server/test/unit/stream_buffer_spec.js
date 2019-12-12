@@ -4,7 +4,7 @@ const _ = require('lodash')
 const fs = require('fs')
 const stream = require('stream')
 const Promise = require('bluebird')
-const concatStream = require('concat-stream')
+const { concatStream } = require('@packages/network')
 const { streamBuffer } = require('../../lib/util/stream_buffer')
 
 function drain (stream) {

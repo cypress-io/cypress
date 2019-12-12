@@ -5,6 +5,7 @@ $max-nesting-level: 14;
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-height: 0;
 
   .empty-well code {
     display: block;
@@ -95,7 +96,7 @@ $max-nesting-level: 14;
     }
 
     i {
-      font-size: 10px;
+      font-size: 8px;
       position: relative;
       top: -1px;
     }
@@ -118,7 +119,7 @@ $max-nesting-level: 14;
       align-items: center;
 
       i {
-        font-size: 13px;
+        font-size: 12px;
         margin-right: 5px;
         flex-shrink: 0;
       }
