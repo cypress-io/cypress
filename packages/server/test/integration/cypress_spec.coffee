@@ -847,8 +847,8 @@ describe "lib/cypress", ->
           }
           setUserAgent: sinon.stub()
           session: {
-            clearCache: sinon.stub().yieldsAsync()
-            setProxy: sinon.stub().yieldsAsync()
+            clearCache: sinon.stub().resolves()
+            setProxy: sinon.stub().resolves()
             setUserAgent: sinon.stub()
           }
         }

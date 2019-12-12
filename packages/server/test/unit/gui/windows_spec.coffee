@@ -23,8 +23,7 @@ describe "lib/gui/windows", ->
     @win.getPosition = sinon.stub().returns([3, 4])
     @win.webContents = new EE()
     @win.webContents.openDevTools = sinon.stub()
-    @win.webContents.setUserAgent = sinon.stub()
-    @win.webContents.getUserAgent = sinon.stub().returns(DEFAULT_USER_AGENT)
+    @win.webContents.userAgent = DEFAULT_USER_AGENT
     @win.isDestroyed = sinon.stub().returns(false)
 
     sinon.stub(Windows, "_newBrowserWindow").returns(@win)

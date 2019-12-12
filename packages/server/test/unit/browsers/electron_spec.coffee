@@ -60,7 +60,7 @@ describe "lib/browsers/electron", ->
 
         options = Windows.defaults(options)
 
-        keys = _.keys(electron._render.firstCall.args[2])
+        keys = _.keys(electron._render.firstCall.args[3])
 
         expect(_.keys(options)).to.deep.eq(keys)
 
@@ -76,21 +76,13 @@ describe "lib/browsers/electron", ->
         expect(obj.kill).to.be.a("function")
         expect(obj.removeAllListeners).to.be.a("function")
 
-    it "registers onRequest automation middleware", ->
-      sinon.spy(@automation, "use")
-
-      electron.open("electron", @url, @options, @automation)
-      .then =>
-        expect(@automation.use).to.be.called
-        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
-
     it "is noop when before:browser:launch yields null", ->
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
       electron.open("electron", @url, @options, @automation)
       .then =>
-        options = electron._render.firstCall.args[2]
+        options = electron._render.firstCall.args[3]
 
         expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
 
@@ -101,7 +93,7 @@ describe "lib/browsers/electron", ->
 
       electron.open("electron", @url, @options, @automation)
       .then =>
-        options = electron._render.firstCall.args[2]
+        options = electron._render.firstCall.args[3]
 
         expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
 
@@ -164,10 +156,18 @@ describe "lib/browsers/electron", ->
       .returns(@newWin)
 
     it "creates window instance and calls launch with window", ->
-      electron._render(@url, @options.projectRoot, @options)
+      electron._render(@url, @options.projectRoot, @automation, @options)
       .then =>
         expect(Windows.create).to.be.calledWith(@options.projectRoot, @options)
         expect(electron._launch).to.be.calledWith(@newWin, @url, @options)
+
+    it "registers onRequest automation middleware", ->
+      sinon.spy(@automation, "use")
+
+      electron._render(@url, @options.projectRoot, @automation, @options)
+      .then =>
+        expect(@automation.use).to.be.called
+        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
 
   context "._defaultOptions", ->
     beforeEach ->
@@ -348,7 +348,7 @@ describe "lib/browsers/electron", ->
     it "sets proxy rules for webContents", ->
       webContents = {
         session: {
-          setProxy: sinon.stub().callsArg(1)
+          setProxy: sinon.stub().resolves()
         }
       }
 
