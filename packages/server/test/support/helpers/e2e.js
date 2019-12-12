@@ -1,5 +1,3 @@
-let e2e
-
 require('../../spec_helper')
 
 const _ = require('lodash')
@@ -40,10 +38,10 @@ const pathUpToProjectName = Fixtures.projectPath('')
 
 const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 
-const stackTraceLinesRe = /(\n?\s*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
+const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g
-const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame|Permission denied.*cross-origin object)/gm
+const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 
 let currentOptions = {}
 
@@ -342,7 +340,10 @@ localItFn.skip = function (title, options) {
   return localItFn(title, options)
 }
 
-module.exports = (e2e = {
+const e2e = {
+
+  replaceStackTraceLines,
+
   normalizeStdout,
 
   it: localItFn,
@@ -708,4 +709,6 @@ module.exports = (e2e = {
 `)
     }
   },
-})
+}
+
+module.exports = e2e
