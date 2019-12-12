@@ -241,10 +241,9 @@ buildCypressApp = (platform, version, options = {}) ->
       "--c.electronVersion=#{electronVersion}",
       "--c.directories.app=#{appFolder}",
       "--c.directories.output=#{outputFolder}",
-      "--c.npmRebuild=false",
-      "--c.electronCompile=false",
       "--c.electronDist=#{electronDistFolder}",
-      "--c.icon=#{iconsFolder}"
+      "--c.icon=#{iconsFolder}",
+      "--c.asar=false"
     ]
     opts = {
       stdio: "inherit"
@@ -349,18 +348,18 @@ buildCypressApp = (platform, version, options = {}) ->
           reject new Error("Verifying App via GateKeeper failed")
 
   Promise.resolve()
-  # .then(checkPlatform)
-  # .then(cleanupPlatform)
-  # .then(buildPackages)
-  # .then(copyPackages)
-  # .then(npmInstallPackages)
-  # .then(createRootPackage)
-  # .then(convertCoffeeToJs)
-  # .then(removeTypeScript)
-  # .then(cleanJs)
-  # .then(transformSymlinkRequires)
-  # .then(testVersion(distDir))
-  # .then(testBuiltStaticAssets)
+  .then(checkPlatform)
+  .then(cleanupPlatform)
+  .then(buildPackages)
+  .then(copyPackages)
+  .then(npmInstallPackages)
+  .then(createRootPackage)
+  .then(convertCoffeeToJs)
+  .then(removeTypeScript)
+  .then(cleanJs)
+  .then(transformSymlinkRequires)
+  .then(testVersion(distDir))
+  .then(testBuiltStaticAssets)
   # .then(elBuilder) # should we delete everything in the buildDir()?
   .then(electronPackAndSign)
   # .then(removeDevElectronApp)
