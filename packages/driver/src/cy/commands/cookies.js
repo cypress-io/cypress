@@ -1,8 +1,5 @@
-/* global Cypress */
-
 const _ = require('lodash')
 const Promise = require('bluebird')
-const cookieParser = require('strict-cookie-parser')
 
 const $utils = require('../../cypress/utils')
 const $Location = require('../../cypress/location')
@@ -33,12 +30,6 @@ const mergeDefaults = function (obj) {
   }
 
   return merge(obj)
-}
-
-const validateCookieName = function (cmd, name, onFail) {
-  if (cookieParser.isCookieName(name) !== true) {
-    return Cypress.utils.throwErrByPath('cookies.invalid_name', { args: { cmd, name }, onFail })
-  }
 }
 
 module.exports = function (Commands, Cypress, cy, state, config) {
@@ -129,8 +120,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         $utils.throwErrByPath('getCookie.invalid_argument', { onFail })
       }
 
-      validateCookieName('getCookie', name, onFail)
-
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
       .then((resp) => {
         options.cookie = resp
@@ -214,12 +203,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         Cypress.utils.throwErrByPath('setCookie.invalid_arguments', { onFail })
       }
 
-      validateCookieName('setCookie', name, onFail)
-
-      if (cookieParser.parseCookieValue(value) === null) {
-        Cypress.utils.throwErrByPath('setCookie.invalid_value', { args: { value }, onFail })
-      }
-
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
       .then((resp) => {
         options.cookie = resp
@@ -270,8 +253,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (!_.isString(name)) {
         $utils.throwErrByPath('clearCookie.invalid_argument', { onFail })
       }
-
-      validateCookieName('clearCookie', name, onFail)
 
       // TODO: prevent clearing a cypress namespace
       return automateCookies('clear:cookie', { name }, options._log, options.timeout)

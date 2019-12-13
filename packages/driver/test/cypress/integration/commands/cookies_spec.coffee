@@ -292,15 +292,6 @@ describe "src/cy/commands/cookies", ->
 
         cy.getCookie(123)
 
-      it "throws an error if the cookie name is invalid", (done) ->
-        cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.getCookie() must be passed an RFC-6265-compliant cookie name.")
-          expect(err.message).to.include('You passed:\n\n`m=m`')
-
-          done()
-
-        cy.getCookie("m=m")
-
     describe ".log", ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>
@@ -498,27 +489,6 @@ describe "src/cy/commands/cookies", ->
         cy.setCookie("foo", 123)
 
       context "when setting an invalid cookie", ->
-        it "throws an error if the cookie name is invalid", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include("cy.setCookie() must be passed an RFC-6265-compliant cookie name.")
-            expect(err.message).to.include('You passed:\n\n`m=m`')
-
-            done()
-
-          ## cookie names may not contain =
-          ## https://stackoverflow.com/a/6109881/3474615
-          cy.setCookie("m=m", "foo")
-
-        it "throws an error if the cookie value is invalid", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include('must be passed an RFC-6265-compliant cookie value.')
-            expect(err.message).to.include('You passed:\n\n` bar`')
-
-            done()
-
-          ## cookies may not contain unquoted whitespace
-          cy.setCookie("foo", " bar")
-
         it "throws an error if the backend responds with an error", (done) ->
           cy.on "fail", (err) =>
             expect(skipErrStub).to.be.calledOnce
@@ -680,15 +650,6 @@ describe "src/cy/commands/cookies", ->
           done()
 
         cy.clearCookie(123)
-
-      it "throws an error if the cookie name is invalid", (done) ->
-        cy.on "fail", (err) =>
-          expect(err.message).to.include("cy.clearCookie() must be passed an RFC-6265-compliant cookie name.")
-          expect(err.message).to.include('You passed:\n\n`m=m`')
-
-          done()
-
-        cy.clearCookie("m=m")
 
     describe ".log", ->
       beforeEach ->

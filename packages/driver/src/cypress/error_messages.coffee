@@ -150,7 +150,6 @@ module.exports = {
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
 
   cookies:
-    invalid_name: "#{cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
     removed_method: """
       The Cypress.Cookies.{{method}}() method has been removed.
 
@@ -412,10 +411,10 @@ module.exports = {
     invalid_prop_name_arg: "#{cmd('{{cmd}}')} only accepts a string or a number as the {{identifier}}Name argument."
     null_or_undefined_property_name: "#{cmd('{{cmd}}')} expects the {{identifier}}Name argument to have a value."
     invalid_options_arg: "#{cmd('{{cmd}}')} only accepts an object as the options argument."
-    invalid_num_of_args:	
-      """	
-      #{cmd('{{cmd}}')} does not accept additional arguments.	
-      If you want to invoke a function with arguments, use cy.invoke().	
+    invalid_num_of_args:
+      """
+      #{cmd('{{cmd}}')} does not accept additional arguments.
+      If you want to invoke a function with arguments, use cy.invoke().
       """
     timed_out:
       """
@@ -829,7 +828,6 @@ module.exports = {
     {{errStack}}
     """
     invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
-    invalid_value: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
 
   spread:
     invalid_type: "#{cmd('spread')} requires the existing subject be array-like."
