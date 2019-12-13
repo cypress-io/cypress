@@ -316,10 +316,6 @@ module.exports = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
-    if (options.isHeadless) {
-      args.push('--headless')
-    }
-
     return args
   },
 
@@ -331,6 +327,10 @@ module.exports = {
     return Promise
     .try(() => {
       const args = this._getArgs(options)
+
+      if (browser.isHeadless) {
+        args.push('--headless')
+      }
 
       return getRemoteDebuggingPort()
       .then((port) => {
