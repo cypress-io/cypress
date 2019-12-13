@@ -243,15 +243,15 @@ buildCypressApp = (platform, version, options = {}) ->
     # to learn how to get the right Mac certificate for signing and notarizing
     # the built Test Runner application
 
-    # TODO remove dist/darwin/packages/server/.cy symlink first
     appFolder = distDir()
     outputFolder = meta.zipDir(platform)
-    # outputFolder = path.join(__dirname, "..", "..", "build")
     electronVersion = electron.getElectronVersion()
     la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion)
-    # electronDistFolder = path.join(dir, "packages", "electron", "node_modules", "electron", "dist")
     electronDistFolder = path.join(__dirname, "..", "..", "packages", "electron", "node_modules", "electron", "dist")
-    iconsFolder = electron.icons().getPathToIcon("cypress")
+
+    iconsFolder = electron.icons().getPathToIcon()
+    if platform is "darwin"
+      iconsFolder = electron.icons().getPathToIcon("cypress")
 
     args = [
       "--publish=never",
@@ -260,6 +260,11 @@ buildCypressApp = (platform, version, options = {}) ->
       "--c.directories.output=#{outputFolder}",
       "--c.electronDist=#{electronDistFolder}",
       "--c.icon=#{iconsFolder}",
+      # for now we cannot pack source files in asar file
+      # because electron-builder does not copy nested folders
+      # from packages/*/node_modules
+      # see https://github.com/electron-userland/electron-builder/issues/3185
+      # so we will copy those folders later ourselves
       "--c.asar=false"
     ]
     opts = {

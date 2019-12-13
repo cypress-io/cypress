@@ -15,7 +15,7 @@ module.exports = async function (params) {
     return
   }
 
-  console.log('afterSign hook triggered', params)
+  console.log('afterSign hook triggered in', params.appOutDir)
 
   // Same appId in electron-builder.
   let appId = 'com.electron.cypress'
