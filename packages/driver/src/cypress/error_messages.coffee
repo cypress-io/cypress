@@ -153,6 +153,7 @@ module.exports = {
     backend_error: """
     #{cmd('{{command}}')} had an unexpected error {{action}} {{browserDisplayName}}.
 
+    {{errMessage}}
     {{errStack}}
     """
     removed_method: """

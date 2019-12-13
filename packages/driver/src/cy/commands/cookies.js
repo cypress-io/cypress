@@ -89,6 +89,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           action,
           command,
           browserDisplayName: Cypress.browser.displayName,
+          errMessage: err.message,
           errStack: err.stack,
         },
         onFail,
