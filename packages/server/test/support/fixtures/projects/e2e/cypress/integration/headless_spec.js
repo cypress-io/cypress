@@ -5,4 +5,15 @@ describe('e2e headless spec', function () {
     expect(Cypress.browser.isHeadless).to.eq(expectedHeadless)
     expect(Cypress.browser.isHeaded).to.eq(!expectedHeadless)
   })
+
+  it('has expected launch args', function () {
+    if (Cypress.browser.family !== 'chrome') {
+      return
+    }
+
+    cy.exec(`ps aux`)
+    .its('stdout')
+    .should('contain', 'chrome')
+    .and(expectedHeadless ? 'match' : 'not.match', /chrome[^\n]+--headless/)
+  })
 })
