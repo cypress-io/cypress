@@ -19,24 +19,31 @@ exports['e2e headless / tests in headless mode pass'] = `
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
+    ✓ has expected launch args
+    ✓ has expected window bounds in CI
 
 
-  1 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     headless_spec.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/headless_spec.js/window-size.png                    (1280x720)
 
 
   (Video)
@@ -52,9 +59,9 @@ exports['e2e headless / tests in headless mode pass'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless_spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  headless_spec.js                         XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `
@@ -80,24 +87,31 @@ exports['e2e headless / tests in headed mode pass [chrome]'] = `
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
+    ✓ has expected launch args
+    ✓ has expected window bounds in CI
 
 
-  1 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     headless_spec.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/headless_spec.js/window-size.png                    (1280x720)
 
 
   (Video)
@@ -113,9 +127,9 @@ exports['e2e headless / tests in headed mode pass [chrome]'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless_spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  headless_spec.js                         XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `
@@ -147,24 +161,31 @@ A video will not be recorded when using this mode.
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
+    ✓ has expected launch args
+    ✓ has expected window bounds in CI
 
 
-  1 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     headless_spec.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/headless_spec.js/window-size.png                    (1280x695)
 
 
 ====================================================================================================
@@ -174,9 +195,9 @@ A video will not be recorded when using this mode.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless_spec.js                         XX:XX        1        1        -        -        - │
+  │ ✔  headless_spec.js                         XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `
