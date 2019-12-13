@@ -71,9 +71,6 @@ const replaceStackTraceLines = (str) => {
   })
 }
 
-// Different browsers have different cross-origin error messages
-const replaceCrossOriginErorrMessages = (str) => str.replace(crossOriginErrorRe, '[Cross origin error message]')
-
 const replaceBrowserName = function (str, key, customBrowserPath, browserName, version, headless, whitespace) {
   // get the padding for the existing browser string
   const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), whitespace.length])
@@ -162,13 +159,15 @@ const normalizeStdout = function (str) {
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
   // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
+  // Different browsers have different cross-origin error messages
+  .replace(crossOriginErrorRe, '[Cross origin error message]')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
     str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
   }
 
-  return replaceStackTraceLines(replaceCrossOriginErorrMessages(str))
+  return replaceStackTraceLines(str)
 }
 
 const ensurePort = function (port) {
@@ -302,21 +301,11 @@ const localItFn = function (title, opts = {}) {
     only: false,
     skip: false,
     browser: [],
-    expectedExitCode: 0,
     snapshot: false,
     spec: 'no spec name supplied!',
-    useSeparateBrowserSnapshots: false,
     onRun (execFn, browser, ctx) {
       return execFn()
     },
-  }
-  const invalidOptions = _.keys(_.omit(opts, _.keys(DEFAULT_OPTIONS)))
-
-  if (invalidOptions.length) {
-    const e = new Error(`Invalid option(s) supplied: ${chalk.red(invalidOptions)}`)
-
-    e.stack = e.stack.split('\n').slice(0, 4).join('\n')
-    throw e
   }
 
   const options = _.defaults({}, opts, DEFAULT_OPTIONS)
