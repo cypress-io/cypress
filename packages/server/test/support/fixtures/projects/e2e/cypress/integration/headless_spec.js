@@ -26,12 +26,17 @@ describe('e2e headless spec', function () {
   })
 
   it('has expected window bounds in CI', function () {
+    if (!Cypress.env('CI')) {
+      // will only work in the CI docker container, so skip it if we're not in CI
+      return this.skip()
+    }
+
     if (Cypress.browser.family !== 'chrome') {
       // Browser.getWindowForTarget does not exist in Electron
       return
     }
 
-    // in CI, Cypress will fill the entire screen, this test is to explicitly
+    // in CI with Xvfb, Cypress will fill the entire screen, this test is to explicitly
     // assert on the expected dimensions
 
     const cdp = _.bind(Cypress.automation, Cypress, 'remote:debugger:protocol')
