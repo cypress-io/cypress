@@ -118,7 +118,11 @@ const pluginsBeforeBrowserLaunch = function (browser, args) {
   })
 }
 
-const _normalizeArgExtensions = function (dest, args) {
+const _normalizeArgExtensions = function (dest, args, browser) {
+  if (browser.isHeadless) {
+    return args
+  }
+
   let userExtensions
   const loadExtension = _.find(args, (arg) => {
     return arg.includes(LOAD_EXTENSION)
@@ -356,7 +360,7 @@ module.exports = {
       .spread((extDest) => {
         // normalize the --load-extensions argument by
         // massaging what the user passed into our own
-        args = _normalizeArgExtensions(extDest, args)
+        args = _normalizeArgExtensions(extDest, args, browser)
 
         // this overrides any previous user-data-dir args
         // by being the last one
