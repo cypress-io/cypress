@@ -347,6 +347,10 @@
   .owner-parts {
     overflow: auto;
     clear: both;
+
+    .btn-group {
+      margin-bottom: 10px;
+    }
   }
 
   .owner-part-one {
@@ -404,7 +408,7 @@
   .manage-orgs-btn {
     padding: 0;
     font-size: 12px;
-    margin-top: 20px;
+    margin-top: 10px;
     line-height: 30px;
     margin-left: 10px;
   }
@@ -536,6 +540,6 @@
   select {
     float: left;
     width: 205px;
-    margin-top: 20px;
+    margin-top: 10px;
   }
 }

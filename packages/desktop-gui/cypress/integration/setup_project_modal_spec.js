@@ -128,6 +128,7 @@ describe('Set Up Project', function () {
         })
 
         it('lists organizations to assign to project', function () {
+          cy.get('.empty-select-orgs').should('not.be.visible')
           cy.get('#organizations-select').find('option')
           .should('have.length', this.orgs.length)
         })
@@ -163,13 +164,50 @@ describe('Set Up Project', function () {
         })
       })
 
+      context('orgs with no default org', function () {
+        beforeEach(function () {
+          this.getOrgs.resolve(Cypress._.filter(this.orgs, { 'default': false }))
+          cy.get('.btn').contains('Set up project').click()
+        })
+
+        it('does not display Me or Org radio', function () {
+          cy.get('select').select('Acme Developers')
+          cy.get('.privacy-radio')
+          .find('input').first().check()
+
+          cy.get('.btn').contains('Me').should('not.exist')
+          cy.get('.btn').contains('An Organization').should('not.exist')
+        })
+
+        it('lists organizations to assign to project', function () {
+          cy.get('.empty-select-orgs').should('not.be.visible')
+          cy.get('#organizations-select').find('option')
+          .should('have.length', this.orgs.length)
+        })
+
+        it('selects none by default', () => {
+          cy.get('#organizations-select').should('have.value', '')
+        })
+
+        it('opens external link on click of manage', () => {
+          cy.get('.manage-orgs-btn').click().then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
+          })
+        })
+
+        it('displays public & private radios on select', function () {
+          cy.get('.privacy-radio').should('not.be.visible')
+          cy.get('select').select('Acme Developers')
+
+          cy.get('.privacy-radio').should('be.visible')
+          .find('input').should('not.be.checked')
+        })
+      })
+
       context('without orgs', function () {
         beforeEach(function () {
           this.getOrgs.resolve([])
           cy.get('.btn').contains('Set up project').click()
-
-          cy.get('.modal-content')
-          .contains('.btn', 'An Organization').click()
         })
 
         it('displays empty message', () => {
