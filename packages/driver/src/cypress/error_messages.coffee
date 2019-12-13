@@ -150,6 +150,11 @@ module.exports = {
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
 
   cookies:
+    backend_error: """
+    #{cmd('{{command}}')} had an unexpected error {{action}} {{browserDisplayName}}.
+
+    {{errStack}}
+    """
     removed_method: """
       The Cypress.Cookies.{{method}}() method has been removed.
 
@@ -822,11 +827,6 @@ module.exports = {
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
-    backend_error: """
-    #{cmd('setCookie')} had an unexpected error setting the requested cookie in {{browserDisplayName}}.
-
-    {{errStack}}
-    """
     invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
 
   spread:

@@ -116,9 +116,9 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
 
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.getCookies() had an unexpected error reading cookies from #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "foo: some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.getCookies()
@@ -258,9 +258,9 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
 
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.getCookie() had an unexpected error reading the requested cookie from #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "foo: some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.getCookie("foo")
@@ -611,9 +611,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookie() had an unexpected error clearing the requested cookie in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "foo: some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.clearCookie("foo")
@@ -837,9 +837,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq err.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookies() had an unexpected error clearing cookies in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "foo: some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -876,9 +876,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookies() had an unexpected error clearing cookies in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "foo: some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           expect(lastLog.get("error")).to.eq(err)
           done()
 
