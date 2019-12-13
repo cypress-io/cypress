@@ -3,6 +3,7 @@
   "appId": "com.electron.cypress",
   "target": "zip",
   "mac": {
+    "target": "zip",
     "forceCodeSigning": true,
     "publish": null,
     "hardenedRuntime": true,
@@ -10,5 +11,6 @@
     "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist",
     "type": "distribution"
   },
-  "afterPack": "./scripts/after-pack-hook.js"
+  "afterPack": "./scripts/after-pack-hook.js",
+  "afterSign": "./scripts/after-sign-hook.js"
 }
