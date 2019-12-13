@@ -17,27 +17,31 @@ describe('e2e headless spec', function () {
   })
 
   it('has expected window bounds in CI', function () {
+    if (Cypress.browser.family !== 'chrome') {
+      // Browser.getWindowForTarget does not exist in Electron
+      return
+    }
+
     // in CI, Cypress will fill the entire screen, this test is to explicitly
     // assert on the expected dimensions
 
-    cy.screenshot('window-size', {
-      capture: 'runner',
+    const cdp = _.bind(Cypress.automation, Cypress, 'remote:debugger:protocol')
+
+    return cdp({
+      command: 'Browser.getWindowForTarget',
     })
-    .task('get:screenshots:taken')
-    .then((screenshotsTaken) => {
-      let expectedHeight = 695
-
-      const noTopBar = expectedHeadless || Cypress.browser.family === 'chrome'
-
-      if (noTopBar) {
-        expectedHeight += 25
-      }
-
-      const ss = _.find(screenshotsTaken, { name: 'window-size' })
-
-      expect(ss.dimensions).to.deep.eq({
-        width: 1280,
-        height: expectedHeight,
+    .then(({ windowId }) => {
+      return cdp({
+        command: 'Browser.getWindowBounds',
+        params: {
+          windowId,
+        },
+      })
+    })
+    .then(({ bounds }) => {
+      expect(bounds).to.include({
+        width: expectedHeadless ? 800 : 1050,
+        height: expectedHeadless ? 600 : 1004,
       })
     })
   })
