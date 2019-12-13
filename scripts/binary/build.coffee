@@ -251,7 +251,7 @@ buildCypressApp = (platform, version, options = {}) ->
     console.log("electron-builder arguments:")
     console.log(args.join(' '))
 
-    # execa('electron-builder', args, opts)
+    execa('electron-builder', args, opts)
 
   removeDevElectronApp = ->
     log("#removeDevElectronApp")
