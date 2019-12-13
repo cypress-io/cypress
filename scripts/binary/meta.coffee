@@ -57,7 +57,7 @@ buildAppDir = (platform, args...) ->
     when "darwin"
       buildDir(platform, "Cypress.app", "Contents", "resources", "app", args...)
     when "linux"
-      buildDir(platform, "resources", "app", args...)
+      buildDir(platform, "linux-unpacked", "resources", "app", args...)
     when "win32"
       buildDir(platform, "resources", "app", args...)
 
