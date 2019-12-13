@@ -668,13 +668,13 @@ const e2e = {
           snapshot(str)
         }
 
-        if (options.stdoutInclude.length) {
+        if (options.stdoutInclude && options.stdoutInclude.length) {
           options.stdoutInclude.forEach((v) => {
             expect(str).contain(v)
           })
         }
 
-        if (options.stdoutExclude.length) {
+        if (options.stdoutExclude && options.stdoutExclude.length) {
           options.stdoutExclude.forEach((v) => {
             expect(str).not.contain(v)
           })
