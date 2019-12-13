@@ -19,18 +19,19 @@ exports['e2e headless / tests in headless mode pass'] = `
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
+    ✓ has expected HeadlessChrome useragent
     ✓ has expected launch args
     ✓ has expected window bounds in CI
 
 
-  3 passing
+  4 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -54,9 +55,9 @@ exports['e2e headless / tests in headless mode pass'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless_spec.js                         XX:XX        3        3        -        -        - │
+  │ ✔  headless_spec.js                         XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `
@@ -82,18 +83,19 @@ exports['e2e headless / tests in headed mode pass [chrome]'] = `
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
+    ✓ has expected HeadlessChrome useragent
     ✓ has expected launch args
     ✓ has expected window bounds in CI
 
 
-  3 passing
+  4 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -117,9 +119,9 @@ exports['e2e headless / tests in headed mode pass [chrome]'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless_spec.js                         XX:XX        3        3        -        -        - │
+  │ ✔  headless_spec.js                         XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `
@@ -151,18 +153,19 @@ A video will not be recorded when using this mode.
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
+    ✓ has expected HeadlessChrome useragent
     ✓ has expected launch args
     ✓ has expected window bounds in CI
 
 
-  3 passing
+  4 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -180,9 +183,9 @@ A video will not be recorded when using this mode.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  headless_spec.js                         XX:XX        3        3        -        -        - │
+  │ ✔  headless_spec.js                         XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `
