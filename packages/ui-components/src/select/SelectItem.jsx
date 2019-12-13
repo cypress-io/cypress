@@ -1,5 +1,5 @@
 import React from 'react'
-import { partialRight } from 'lodash'
+import { partial } from 'lodash'
 import useSelect from './useSelect'
 
 const SelectItem = ({ value, selectItem, ...rest }) => {
@@ -9,7 +9,7 @@ const SelectItem = ({ value, selectItem, ...rest }) => {
     <input
       {...rest}
       checked={isChecked(value)}
-      onChange={partialRight(handleChange, value)}
+      onChange={partial(handleChange, value)}
       onKeyDown={handleKeyDown}
       name={name}
       type={multiSelect ? 'checkbox' : 'radio'}

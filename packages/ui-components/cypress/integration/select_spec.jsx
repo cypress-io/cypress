@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { render } from 'react-dom'
 import { Select, SelectItem } from '../../src'
 
@@ -68,12 +68,10 @@ describe('<Select />', () => {
   })
 
   it('only a single SelectItem is checked at a time', () => {
-    const handleChange = cy.stub()
+    const onChange = cy.stub()
 
     cy.render(render, (
-      <Select value="v2" onChange={(evt, value) => {
-        handleChange(value)
-      }}>
+      <Select value="v2" onChange={onChange}>
         <SelectItem value="v1" />
         <SelectItem value="v2" />
         <SelectItem value="v3" />
@@ -81,10 +79,10 @@ describe('<Select />', () => {
     ))
 
     cy.get('[value="v1"]').click()
-    .then(() => expect(handleChange).to.be.calledWith('v1'))
+    .then(() => expect(onChange).to.be.calledWith('v1'))
 
     cy.get('[value="v3"]').click()
-    .then(() => expect(handleChange).to.be.calledWith('v3'))
+    .then(() => expect(onChange).to.be.calledWith('v3'))
   })
 
   it('other components are permitted as children for a <Select />', () => {
@@ -150,63 +148,86 @@ describe('<Select />', () => {
       })
     })
 
-    it('left/down and right/up arrow keys cycle the checked item', () => {
-      cy.render(render, (
-        <Select>
-          <SelectItem value="v1" />
-          <input type="text"/>
-          <SelectItem value="v2" />
-          <SelectItem value="v3" />
-          <SelectItem value="v4" />
-          <SelectItem value="v5" />
-        </Select>
-      ))
-
+    describe('arrow keys', () => {
       const left = 13
       const up = 38
       const right = 39
       const down = 40
+      let onChange
 
-      cy.get('[value]').as('values')
+      beforeEach(() => {
+        const Wrapper = ({ onChangeSpy }) => {
+          const [selected, setSelected] = useState()
 
-      cy.get('@values').first().click().trigger('keydown', { keyCode: left, which: left })
-      cy.get('@values').last().then((el) => {
-        expect(el.is(':checked')).to.be.true
+          const onChange = (value) => {
+            onChangeSpy(value)
+            setSelected(value)
+          }
+
+          return (
+            <Select value={selected} onChange={onChange}>
+              <SelectItem value="v1" />
+              <input type="text"/>
+              <SelectItem value="v2" />
+              <SelectItem value="v3" />
+              <SelectItem value="v4" />
+              <SelectItem value="v5" />
+            </Select>
+          )
+        }
+
+        onChange = cy.spy()
+
+        cy.render(render, <Wrapper onChangeSpy={onChange} />)
+        cy.get('[value]').as('values')
       })
 
-      cy.get('@values').first().click().trigger('keydown', { keyCode: up, which: up })
-      cy.get('@values').last().then((el) => {
-        expect(el.is(':checked')).to.be.true
+      it('left on first goes to last', () => {
+        cy.get('@values').first().click().trigger('keydown', { keyCode: left, which: left })
+        cy.get('@values').last().should('be.checked')
+        cy.wrap(onChange).should('be.calledWith', 'v5')
       })
 
-      cy.get('@values').last().click().trigger('keydown', { keyCode: right, which: right })
-      cy.get('@values').first().then((el) => {
-        expect(el.is(':checked')).to.be.true
+      it('up on first goes to last', () => {
+        cy.get('@values').first().click().trigger('keydown', { keyCode: up, which: up })
+        cy.get('@values').last().should('be.checked')
+        cy.wrap(onChange).should('be.calledWith', 'v5')
       })
 
-      cy.get('@values').last().click().trigger('keydown', { keyCode: down, which: down })
-      cy.get('@values').first().then((el) => {
-        expect(el.is(':checked')).to.be.true
+      it('right on last goes to first', () => {
+        cy.get('@values').last().click().trigger('keydown', { keyCode: right, which: right })
+        cy.get('@values').first().should('be.checked')
+        cy.wrap(onChange).should('be.calledWith', 'v1')
       })
 
-      cy.get('@values').last().click().trigger('keydown', { keyCode: left, which: left })
-      cy.get('@values').eq(3).then((el) => {
-        expect(el.is(':checked')).to.be.true
+      it('down on last goes to first', () => {
+        cy.get('@values').last().click().trigger('keydown', { keyCode: down, which: down })
+        cy.get('@values').first().should('be.checked')
+        cy.wrap(onChange).should('be.calledWith', 'v1')
       })
 
-      cy.get('@values').last().click().trigger('keydown', { keyCode: up, which: up })
-      cy.get('@values').eq(3).then((el) => {
-        expect(el.is(':checked')).to.be.true
+      it('left on last goes to penultimate', () => {
+        cy.get('@values').last().click().trigger('keydown', { keyCode: left, which: left })
+        cy.get('@values').eq(3).should('be.checked')
+        cy.wrap(onChange).should('be.calledWith', 'v4')
       })
 
-      cy.get('@values').first().click().trigger('keydown', { keyCode: right, which: right })
-      cy.get('@values').eq(1).then((el) => {
-        expect(el.is(':checked')).to.be.true
+      it('up on last goes to penultimate', () => {
+        cy.get('@values').last().click().trigger('keydown', { keyCode: up, which: up })
+        cy.get('@values').eq(3).should('be.checked')
+        cy.wrap(onChange).should('be.calledWith', 'v4')
       })
 
-      cy.get('@values').first().click().trigger('keydown', { keyCode: down, which: down })
-      cy.get('@values').eq(1).then((el) => {
-        expect(el.is(':checked')).to.be.true
+      it('right on first goes to second', () => {
+        cy.get('@values').first().click().trigger('keydown', { keyCode: right, which: right })
+        cy.get('@values').eq(1).should('be.checked')
+        cy.wrap(onChange).should('be.calledWith', 'v2')
+      })
+
+      it('down on first goes to second', () => {
+        cy.get('@values').first().click().trigger('keydown', { keyCode: down, which: down })
+        cy.get('@values').eq(1).should('be.checked')
+        cy.wrap(onChange).should('be.calledWith', 'v2')
       })
     })
   })

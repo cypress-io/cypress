@@ -1,4 +1,4 @@
-import React, { Children, useCallback, useMemo, useState } from 'react'
+import React, { Children, useCallback, useMemo } from 'react'
 import _ from 'lodash'
 import Context from './context'
 
@@ -25,22 +25,16 @@ const down = 40
 
 const Select = ({ children, multiSelect, name, onChange, value }) => {
   const allValues = useMemo(() => toValues(Children.toArray(children)), [children])
-  const [checked, setChecked] = useState(value)
-
-  const handleChange = useCallback((evt, value) => {
-    setChecked(value)
-    onChange(evt, value)
-  }, [setChecked])
 
   const handleKeyDown = useCallback(({ keyCode }) => {
     if (![left, up, right, down].includes(keyCode)) {
       return
     }
 
-    const currentIndex = _.findIndex(allValues, (v) => v === checked)
+    const currentIndex = _.findIndex(allValues, (v) => v === value)
 
     if (currentIndex === -1) {
-      setChecked(allValues[0])
+      onChange(allValues[0])
 
       return
     }
@@ -50,19 +44,19 @@ const Select = ({ children, multiSelect, name, onChange, value }) => {
 
       const newIndex = incrementedIndex < 0 ? (Math.abs(incrementedIndex) + allValues.length - 2) : (incrementedIndex) % (allValues.length)
 
-      setChecked(allValues[newIndex])
+      onChange(allValues[newIndex])
     } else if ([right, down].includes(keyCode)) {
       const newIndex = (currentIndex + 1) % (allValues.length)
 
-      setChecked(allValues[newIndex])
+      onChange(allValues[newIndex])
     }
-  }, [allValues, checked, value])
+  }, [allValues, value])
 
   return (
     <Context.Provider value={{
-      handleChange,
+      handleChange: onChange,
       handleKeyDown,
-      isChecked: (v) => v === checked,
+      isChecked: (v) => v === value,
       name: generateGroupName(name),
       multiSelect,
     }}>

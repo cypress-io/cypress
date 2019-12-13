@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@cypress/eslint-plugin-dev": "5.0.0",
+    "chai-subset": "1.6.0",
     "classnames": "2.2.6",
     "eslint-plugin-cypress": "2.7.0",
     "eslint-plugin-react": "7.16.0",

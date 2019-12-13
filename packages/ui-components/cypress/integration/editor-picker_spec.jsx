@@ -1,6 +1,12 @@
-import React, { useState } from 'react'
+import chaiSubset from 'chai-subset'
+import { action } from 'mobx'
+import { observer, useLocalStore } from 'mobx-react'
 import { render } from 'react-dom'
+import React from 'react'
+
 import { EditorPicker } from '../../'
+
+chai.use(chaiSubset)
 
 const _ = Cypress._
 
@@ -9,12 +15,12 @@ describe('<EditorPicker />', () => {
 
   beforeEach(() => {
     defaultProps = {
-      chosen: { id: 'vscode', name: 'VS Code' },
+      chosen: { id: 'vscode', name: 'VS Code', openerId: 'vscode' },
       editors: [
-        { id: 'atom', name: 'Atom' },
-        { id: 'sublime', name: 'Sublime Text' },
-        { id: 'vscode', name: 'VS Code' },
-        { id: 'other', name: 'Other', path: '', isOther: true },
+        { id: 'atom', name: 'Atom', openerId: 'atom' },
+        { id: 'sublime', name: 'Sublime Text', openerId: 'sublime' },
+        { id: 'vscode', name: 'VS Code', openerId: 'vscode' },
+        { id: 'other', name: 'Other', openerId: '', isOther: true },
       ],
       onSelect: () => {},
     }
@@ -50,7 +56,7 @@ describe('<EditorPicker />', () => {
     cy.render(render, <EditorPicker {...defaultProps} onSelect={onSelect}/>)
 
     cy.contains('Sublime Text').click().then(() => {
-      expect(onSelect).to.be.calledWith({ id: 'sublime', name: 'Sublime Text' })
+      expect(onSelect).to.be.calledWith({ id: 'sublime', name: 'Sublime Text', openerId: 'sublime' })
     })
   })
 
@@ -69,42 +75,54 @@ describe('<EditorPicker />', () => {
     })
 
     it('populates path if specified', () => {
-      defaultProps.editors[3].path = '/path/to/my/editor'
+      defaultProps.editors[3].openerId = '/path/to/my/editor'
       cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[3]}/>)
 
       cy.contains('Other').find('input[type="text"]').should('have.value', '/path/to/my/editor')
     })
 
     it('calls onSelect for every character typed', () => {
-      const Wrapper = ({ onSelectSpy }) => {
-        const [editors, setEditors] = useState(_.cloneDeep(defaultProps.editors))
-        const [chosen, setChosen] = useState(editors[3])
+      const Wrapper = observer(({ onSelectSpy }) => {
+        const state = useLocalStore(() => ({
+          editors: defaultProps.editors,
+          setChosenEditor: action((editor) => {
+            state.chosenEditor = editor
+          }),
+          setOtherPath: action((otherPath) => {
+            const otherOption = _.find(state.editors, { isOther: true })
 
-        const onSelect = (value) => {
-          const newEditors = _.cloneDeep(editors)
+            otherOption.openerId = otherPath
+          }),
+        }))
 
-          newEditors[3].path = value.path
-          setEditors(newEditors)
-          setChosen(value)
-          onSelectSpy(value)
+        const onSelect = (chosen) => {
+          state.setChosenEditor(chosen)
+          onSelectSpy(chosen)
         }
 
         return (
-          <EditorPicker {...defaultProps} editors={editors} chosen={chosen} onSelect={onSelect}/>
+          <EditorPicker
+            {...defaultProps}
+            editors={state.editors}
+            chosen={state.chosen}
+            onSelect={onSelect}
+            onUpdateOtherPath={state.setOtherPath}
+          />
         )
-      }
+      })
 
       const onSelect = cy.stub()
       const path = '/path/to/my/editor'
 
       cy.render(render, <Wrapper onSelectSpy={onSelect} />)
-      cy.contains('Other').find('input[type="text"]').type(path, { delay: 0 })
 
       _.each(path.split(''), (letter, i) => {
-        const typedSoFar = path.substring(0, i + 1)
+        const pathSoFar = path.substring(0, i + 1)
 
-        cy.wrap(onSelect).should('be.calledWith', {
-          id: 'other', name: 'Other', isOther: true, path: typedSoFar,
+        cy.contains('Other').find('input[type="text"]').type(letter, { delay: 0 })
+        .should(() => {
+          expect(onSelect.lastCall.args[0].id).to.equal('other')
+          expect(onSelect.lastCall.args[0].openerId).to.equal(pathSoFar)
         })
       })
     })
