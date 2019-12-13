@@ -1,4 +1,3 @@
-import '../../../../cli'
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
