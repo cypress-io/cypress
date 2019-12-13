@@ -133,11 +133,11 @@ buildCypressApp = (platform, version, options = {}) ->
     .then (replaceCount) ->
       la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
 
-
   npmInstallPackages = ->
     log("#npmInstallPackages")
 
-    packages.npmInstallAll(distDir("packages", "*"), options)
+    pathToPackages = distDir("packages", "*")
+    packages.npmInstallAll(pathToPackages)
 
   createRootPackage = ->
     log("#createRootPackage #{platform} #{version}")
@@ -177,6 +177,38 @@ buildCypressApp = (platform, version, options = {}) ->
       )
       console.log(paths)
 
+  # we also don't need ".bin" links inside Electron application
+  # thus we can go through dist/packages/*/node_modules and remove all ".bin" folders
+  removeBinFolders = ->
+    log("#removeBinFolders")
+
+    searchMask = distDir("packages", "*", "node_modules", ".bin")
+    console.log("searching for", searchMask)
+
+    del([searchMask])
+    .then (paths) ->
+      console.log(
+        "deleted %d .bin %s",
+        paths.length,
+        pluralize("folder", paths.length)
+      )
+      console.log(paths)
+
+  removeCyFolders = ->
+    log("#removeCyFolders")
+
+    searchMask = distDir("packages", "server", ".cy")
+    console.log("searching", searchMask)
+
+    del([searchMask])
+    .then (paths) ->
+      console.log(
+        "deleted %d .cy %s",
+        paths.length,
+        pluralize("file", paths.length)
+      )
+      console.log(paths)
+
   cleanJs = ->
     log("#cleanJs")
 
@@ -203,21 +235,6 @@ buildCypressApp = (platform, version, options = {}) ->
       .pipe gulp.dest(distDir())
       .on("end", resolve)
       .on("error", reject)
-
-  elBuilder = ->
-    log("#elBuilder")
-    dir = distDir()
-    dist = buildDir()
-    console.log("from #{dir}")
-    console.log("into #{dist}")
-
-    electron.install({
-      dir
-      dist
-      platform
-      appVersion: version
-      osxSign: true
-    })
 
   electronPackAndSign = ->
     log("#electronPackAndSign")
@@ -274,12 +291,10 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#runSmokeTests")
 
     run = ->
-      # noticed the first test attempt fails with electron-builder 22.x
-      # but the second succeeds?!
+      # make sure to use a longer timeout - on Mac the first
+      # launch of a built application invokes gatekeeper check
+      # which takes a couple of seconds
       smoke.test(meta.buildAppExecutable(platform))
-      .catch ->
-        console.log("first smoke test has failed, trying again")
-        smoke.test(meta.buildAppExecutable(platform))
 
     if xvfb.isNeeded()
       xvfb.start()
@@ -287,50 +302,6 @@ buildCypressApp = (platform, version, options = {}) ->
       .finally(xvfb.stop)
     else
       run()
-
-  codeSign = Promise.method ->
-    if platform isnt "darwin"
-      # do we need to code sign on Windows?
-      return
-
-    appFolder = meta.zipDir(platform)
-    fiveMinutes = humanInterval("5 minutes")
-
-    execaBuild = Promise.method ->
-      log("#codeSign #{appFolder}")
-
-      # note: to see code sign logs use
-      # DEBUG=electron-builder,electron-osx-sign*
-      # to check if the application has been signed correctly run these commands
-      # codesign --verify --verbose build/darwin/Cypress.app
-      # spctl --assess --verbose build/darwin/Cypress.app
-      execa('electron-builder', ["--publish", "never", appFolder], {
-      # execa('electron-builder', ["--publish", "never", "--prepackaged", appFolder], {
-        stdio: "inherit"
-      })
-      .catch (err) ->
-        ## ignore canceled errors
-        if err.isCanceled
-          return
-
-        throw err
-
-    ## try to build and if we timeout in 5 minutes
-    ## then try again - which sometimes happens in
-    ## circle CI
-    b = execaBuild()
-
-    b
-    .timeout(fiveMinutes)
-    .catch Promise.TimeoutError, (err) ->
-      console.log(
-        chalk.red("timed out signing binary after #{fiveMinutes}ms. retrying...")
-      )
-
-      b.cancel()
-
-      execaBuild()
-
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()
@@ -360,12 +331,12 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(transformSymlinkRequires)
   .then(testVersion(distDir))
   .then(testBuiltStaticAssets)
-  # .then(elBuilder) # should we delete everything in the buildDir()?
+  .then(removeBinFolders)
+  .then(removeCyFolders)
   .then(electronPackAndSign)
   .then(removeDevElectronApp)
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
-  # .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
   .return({
     buildDir: buildDir()

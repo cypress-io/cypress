@@ -16,9 +16,10 @@ canRecordVideo = () ->
 shouldSkipProjectTest = () ->
   os.platform() == "win32"
 
-runSmokeTest = (buildAppExecutable) ->
+runSmokeTest = (buildAppExecutable, timeoutSeconds = 30) ->
   rand = String(_.random(0, 1000))
   console.log("executable path #{buildAppExecutable}")
+  console.log("timeout #{timeoutSeconds} seconds")
 
   hasRightResponse = (stdout) ->
     # there could be more debug lines in the output, so find 1 line with
@@ -35,7 +36,7 @@ runSmokeTest = (buildAppExecutable) ->
   args.push("--smoke-test")
   args.push("--ping=#{rand}")
 
-  execa "#{buildAppExecutable}", args, {timeout: 10000}
+  execa "#{buildAppExecutable}", args, {timeout: timeoutSeconds*1000}
   .catch (err) ->
     console.error("smoke test failed with error %s", err.message)
     throw err
@@ -50,8 +51,6 @@ runProjectTest = (buildAppExecutable, e2e) ->
   if shouldSkipProjectTest()
     console.log("skipping project test")
     return Promise.resolve()
-
-  console.log("running project test")
 
   new Promise (resolve, reject) ->
     env = _.omit(process.env, "CYPRESS_ENV")

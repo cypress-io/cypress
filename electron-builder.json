@@ -10,6 +10,5 @@
     "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist",
     "type": "distribution"
   },
-  "afterPack": "./scripts/after-pack-hook.js",
-  "afterSign": "./scripts/after-sign-hook.js"
+  "afterPack": "./scripts/after-pack-hook.js"
 }
