@@ -13,6 +13,7 @@ const Promise = require('bluebird')
 const execa = require('execa')
 const R = require('ramda')
 const os = require('os')
+const commandExistsModule = require('command-exists')
 const log = require('../log')
 
 const isWindows = () => {
@@ -106,6 +107,18 @@ const getShell = function (shell) {
   return findBash()
 }
 
+const commandExists = (command) => {
+  return Promise.resolve(commandExistsModule(command))
+  .then(() => true)
+  .catch((err) => {
+    // commandExists rejects with no error if command does not exist
+    if (!err) return false
+
+    // otherwise, it's a legitimate error
+    throw err
+  })
+}
+
 // for testing
 const reset = () => {
   return sourcedProfiles = []
@@ -118,4 +131,5 @@ module.exports = {
   getProfilePath,
   sourceShellCommand,
   startedNormally,
+  commandExists,
 }
