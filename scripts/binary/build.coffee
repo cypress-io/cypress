@@ -228,8 +228,8 @@ buildCypressApp = (platform, version, options = {}) ->
 
     # TODO remove dist/darwin/packages/server/.cy symlink first
     appFolder = distDir()
-    # outputFolder = meta.zipDir(platform)
-    outputFolder = path.join(__dirname, "..", "..", "build")
+    outputFolder = meta.zipDir(platform)
+    # outputFolder = path.join(__dirname, "..", "..", "build")
     electronVersion = electron.getElectronVersion()
     la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion)
     # electronDistFolder = path.join(dir, "packages", "electron", "node_modules", "electron", "dist")
@@ -251,7 +251,7 @@ buildCypressApp = (platform, version, options = {}) ->
     console.log("electron-builder arguments:")
     console.log(args.join(' '))
 
-    execa('electron-builder', args, opts)
+    # execa('electron-builder', args, opts)
 
   removeDevElectronApp = ->
     log("#removeDevElectronApp")
@@ -362,13 +362,13 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(testBuiltStaticAssets)
   # .then(elBuilder) # should we delete everything in the buildDir()?
   .then(electronPackAndSign)
-  # .then(removeDevElectronApp)
-  # .then(testVersion(buildAppDir))
-  # .then(runSmokeTests)
+  .then(removeDevElectronApp)
+  .then(testVersion(buildAppDir))
+  .then(runSmokeTests)
   # .then(codeSign) ## codesign after running smoke tests due to changing .cy
-  # .then(verifyAppCanOpen)
-  # .return({
-  #   buildDir: buildDir()
-  # })
+  .then(verifyAppCanOpen)
+  .return({
+    buildDir: buildDir()
+  })
 
 module.exports = buildCypressApp

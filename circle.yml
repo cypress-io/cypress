@@ -266,7 +266,8 @@ jobs:
           command: npm ls --depth=0 || true
 
       # Prune so we do not save removed dependencies to cache
-      - run: npm run all prune
+      # try again if command fails
+      - run: npm run all prune || npm run all prune
 
       - save-caches
       - store-npm-logs

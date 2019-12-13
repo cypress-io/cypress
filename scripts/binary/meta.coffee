@@ -25,7 +25,9 @@ buildDir = (platform, args...) ->
   checkPlatform(platform)
   switch platform
     when "darwin"
-      path.resolve("build", platform, args...)
+      # the new electron-builder for some reason adds its own platform
+      # subfolder and it is NOT "darwin" but "mac"
+      path.resolve("build", "mac", args...)
     when "linux"
       path.resolve("build", platform, "Cypress", args...)
     when "win32"
