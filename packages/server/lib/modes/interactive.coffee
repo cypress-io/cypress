@@ -7,7 +7,7 @@ Promise    = require("bluebird")
 cyIcons    = require("@cypress/icons")
 user       = require("../user")
 errors     = require("../errors")
-{ savedState } = require("../saved_state")
+savedState = require("../saved_state")
 logs       = require("../gui/logs")
 menu       = require("../gui/menu")
 Events     = require("../gui/events")
@@ -82,7 +82,7 @@ module.exports = {
         bus.emit("menu:item:clicked", "log:out")
     })
 
-    savedState(projectRoot, false)
+    savedState.create(projectRoot, false)
     .then (state) -> state.get()
     .then (state) =>
       Windows.open(projectRoot, @getWindowArgs(state, options))

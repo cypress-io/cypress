@@ -21,7 +21,7 @@ scaffold    = require("./scaffold")
 Watchers    = require("./watchers")
 Reporter    = require("./reporter")
 browsers    = require("./browsers")
-{ savedState }  = require("./saved_state")
+savedState  = require("./saved_state")
 Automation  = require("./automation")
 preprocessor = require("./plugins/preprocessor")
 fs          = require("./util/fs")
@@ -347,7 +347,7 @@ class Project extends EE
     throw new Error("Missing project config") if not @cfg
     throw new Error("Missing project root") if not @projectRoot
     newState = _.merge({}, @cfg.state, stateChanges)
-    savedState(@projectRoot, @cfg.isTextTerminal)
+    savedState.create(@projectRoot, @cfg.isTextTerminal)
     .then (state) ->
       state.set(newState)
     .then =>
@@ -356,7 +356,7 @@ class Project extends EE
 
   _setSavedState: (cfg) ->
     debug("get saved state")
-    savedState(@projectRoot, cfg.isTextTerminal)
+    savedState.create(@projectRoot, cfg.isTextTerminal)
     .then (state) -> state.get()
     .then (state) ->
       cfg.state = state

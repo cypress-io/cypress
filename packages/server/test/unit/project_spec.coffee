@@ -13,7 +13,7 @@ scaffold     = require("#{root}lib/scaffold")
 Server       = require("#{root}lib/server")
 Project      = require("#{root}lib/project")
 Automation   = require("#{root}lib/automation")
-{ savedState } = require("#{root}lib/saved_state")
+savedState = require("#{root}lib/saved_state")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 plugins      = require("#{root}lib/plugins")
 fs           = require("#{root}lib/util/fs")
@@ -53,11 +53,11 @@ describe "lib/project", ->
       sinon.stub(config, "get").withArgs(@todosPath).resolves({ integrationFolder })
       sinon.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
       @project.cfg = { integrationFolder }
-      savedState(@project.projectRoot)
+      savedState.create(@project.projectRoot)
       .then (state) -> state.remove()
 
     afterEach ->
-      savedState(@project.projectRoot)
+      savedState.create(@project.projectRoot)
       .then (state) -> state.remove()
 
     it "saves state without modification", ->
@@ -92,7 +92,7 @@ describe "lib/project", ->
       sinon.stub(@project, "determineIsNewProject").withArgs(integrationFolder).resolves(false)
 
     it "calls config.get with projectRoot + options + saved state", ->
-      savedState(@todosPath)
+      savedState.create(@todosPath)
       .then (state) =>
         sinon.stub(state, "get").resolves({ reporterWidth: 225 })
         @project.getConfig({foo: "bar"})
@@ -120,7 +120,7 @@ describe "lib/project", ->
         })
 
     it "sets cfg.isNewProject to true when state.showedOnBoardingModal is true", ->
-      savedState(@todosPath)
+      savedState.create(@todosPath)
       .then (state) =>
         sinon.stub(state, "get").resolves({ showedOnBoardingModal: true })
 

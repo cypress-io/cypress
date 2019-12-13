@@ -107,7 +107,7 @@ const normalizeAndWhitelistSet = (set, key, value) => {
   return set(_.pick(valueObject, whitelist))
 }
 
-const savedState = (projectRoot, isTextTerminal) => {
+const create = (projectRoot, isTextTerminal) => {
   if (isTextTerminal) {
     debug('noop saved state')
 
@@ -137,7 +137,7 @@ const savedState = (projectRoot, isTextTerminal) => {
 }
 
 module.exports = {
+  create,
   formStatePath,
-  savedState,
   toHashName,
 }

@@ -6,7 +6,7 @@ electron   = require("electron")
 user       = require("#{root}../lib/user")
 logger     = require("#{root}../lib/logger")
 Updater    = require("#{root}../lib/updater")
-{ savedState } = require("#{root}../lib/saved_state")
+savedState = require("#{root}../lib/saved_state")
 menu       = require("#{root}../lib/gui/menu")
 Events     = require("#{root}../lib/gui/events")
 Windows   = require("#{root}../lib/gui/windows")
@@ -95,7 +95,7 @@ describe "gui/interactive", ->
       sinon.stub(Windows, "open").resolves(@win)
       sinon.stub(Windows, "trackState")
 
-      state = savedState()
+      state = savedState.create()
       sinon.stub(state, "get").resolves(@state)
 
     it "calls Events.start with options, adding env, onFocusTests, and os", ->
