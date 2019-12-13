@@ -1,5 +1,6 @@
 require('../../spec_helper')
 
+const os = require('os')
 const snapshot = require('../../support/snapshot')
 
 const util = require(`${lib}/util`)
@@ -36,6 +37,19 @@ describe('exec run', function () {
       })
 
       snapshot(args)
+    })
+
+    it('does not allow setting paradoxical --headed and --headless flags', () => {
+      os.platform.returns('linux')
+      process.exit.returns()
+
+      expect(() => run.processRunOptions({ headed: true, headless: true })).to.throw()
+    })
+
+    it('passes --headed according to --headless', () => {
+      expect(run.processRunOptions({ headless: true })).to.deep.eq([
+        '--run-project', undefined, '--headed', false,
+      ])
     })
 
     it('does not remove --record option when using --browser', () => {

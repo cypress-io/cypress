@@ -94,6 +94,7 @@ describe('lib/open_project', () => {
     beforeEach(function () {
       this.watcherStub = {
         on: sinon.stub(),
+        close: sinon.stub(),
       }
 
       sinon.stub(chokidar, 'watch').returns(this.watcherStub)
@@ -139,6 +140,17 @@ describe('lib/open_project', () => {
 
       return openProject.getSpecChanges({ onChange }).then(() => {
         expect(onChange).to.be.calledOnce
+      })
+    })
+
+    it('destroys and creates specsWatcher as expected', function () {
+      expect(openProject.specsWatcher).to.exist
+      openProject.stopSpecsWatcher()
+      expect(openProject.specsWatcher).to.be.null
+
+      return openProject.getSpecChanges()
+      .then(() => {
+        expect(openProject.specsWatcher).to.exist
       })
     })
   })
