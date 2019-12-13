@@ -6,6 +6,8 @@ const path = require('path')
 const Promise = require('bluebird')
 const performance = require('../../../../test/support/helpers/performance')
 
+const screenshotsTaken = []
+
 module.exports = (on) => {
   // save some time by only reading the originals once
   let cache = {}
@@ -23,6 +25,10 @@ module.exports = (on) => {
       return image
     })
   }
+
+  on('after:screenshot', (details) => {
+    screenshotsTaken.push(details)
+  })
 
   on('task', {
     'returns:undefined' () {},
@@ -121,6 +127,10 @@ module.exports = (on) => {
 
       return performance.track('fast_visit_spec percentiles', data)
       .return(null)
+    },
+
+    'get:screenshots:taken' () {
+      return screenshotsTaken
     },
   })
 }
