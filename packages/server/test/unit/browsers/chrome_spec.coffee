@@ -79,6 +79,7 @@ describe "lib/browsers/chrome", ->
 
         expect(args).to.deep.eq([
           "--remote-debugging-port=50505"
+          "--remote-debugging-address=127.0.0.1"
           "--load-extension=/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
