@@ -2,12 +2,14 @@
 const fs = require('fs-extra')
 const { join } = require('path')
 const globby = require('globby')
+const os = require('os')
 
 module.exports = async function (params) {
   console.log('****************************')
   console.log('After pack hook')
-  console.log(params)
-  console.log(params.packager.info.nodeDependencyInfo)
+  console.log(params.appOutDir)
+  console.log(params.outDir)
+  console.log(params.electronPlatformName)
   console.log('****************************')
 
   const packages = await globby(['packages/*/node_modules'], {
@@ -15,12 +17,24 @@ module.exports = async function (params) {
     onlyFiles: false,
   })
 
+  const buildSubfoldersPerPlatform = {
+    darwin: join('Cypress.app', 'Contents', 'Resources', 'app'),
+    linux: join('resources', 'app'),
+    win32: join('resources', 'app'), // TODO check this path
+  }
+  const buildSubfolder = buildSubfoldersPerPlatform[os.platform()]
+  const outputFolder = join(params.appOutDir, buildSubfolder)
+
+  console.log('copying node_modules to', outputFolder)
+
   packages.forEach(async (packageNodeModules) => {
     console.log('copying', packageNodeModules)
 
     const sourceFolder = join(params.packager.info._appDir, packageNodeModules)
-    const destinationFolder = join(params.appOutDir, 'Cypress.app', 'Contents', 'Resources', 'app', packageNodeModules)
+    const destinationFolder = join(outputFolder, packageNodeModules)
 
     await fs.copy(sourceFolder, destinationFolder)
   })
+
+  console.log('all node_modules subfolders copied to', outputFolder)
 }
