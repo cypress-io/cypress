@@ -10,6 +10,9 @@
     "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist",
     "type": "distribution"
   },
+  "linux": {
+    "target": "zip"
+  },
   "afterPack": "./scripts/after-pack-hook.js",
   "afterSign": "./scripts/after-sign-hook.js"
 }
