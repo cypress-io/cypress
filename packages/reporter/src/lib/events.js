@@ -142,6 +142,10 @@ export default {
       runner.emit('get:user:editor', cb)
     })
 
+    localBus.on('set:user:editor', (editor) => {
+      runner.emit('set:user:editor', editor)
+    })
+
     localBus.on('save:state', () => {
       runner.emit('save:state', {
         autoScrollingEnabled: appState.autoScrollingEnabled,

@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import { Dialog } from '@reach/dialog'
+import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
 
 import cs from 'classnames'
@@ -10,16 +11,17 @@ import { EditorPicker } from '@packages/ui-components'
 
 import events from '../lib/events'
 
-const openFile = (where, { absoluteFile: file, line, column }) => {
+const openFile = (where, { absoluteFile: file, line, column }, editor) => {
   events.emit('open:file', {
     where,
     file,
     line,
     column,
+    editor,
   })
 }
 
-const Modal = observer(({ close, state, onSetEditor, onSelectEditor }) => {
+const Modal = observer(({ close, state, onSetEditor, onSelectEditor, onUpdateOtherPath }) => {
   const cancelRef = useRef()
 
   return (
@@ -33,9 +35,10 @@ const Modal = observer(({ close, state, onSetEditor, onSelectEditor }) => {
         <p>It looks like this is your first time opening a file in your editor. Please select from one of the editors we found on your system.</p>
         <p>The editor you select will be used automatically from now on to open files. You can change your selection in the Settings tab of the Cypress app.</p>
         <EditorPicker
-          chosenEditor={state.chosenEditor}
+          chosen={state.chosenEditor}
           editors={state.editors}
           onSelect={onSelectEditor}
+          onUpdateOtherPath={onUpdateOtherPath}
         />
       </div>
       <div className='controls'>
@@ -57,19 +60,24 @@ const ErrorFilePath = observer(({ fileDetails }) => {
     isLoadingEditor: false,
     isModalOpen: false,
     editors: [],
-    chosenEditor: null,
-    setIsLoadingEditor (isLoading) {
-      this.isLoadingEditor = isLoading
-    },
-    setIsModalOpen (isOpen) {
-      this.isModalOpen = isOpen
-    },
-    setEditors (editors) {
-      this.editors = editors
-    },
-    setChosenEditor (editor) {
-      this.chosenEditor = editor
-    },
+    chosenEditor: {},
+    setIsLoadingEditor: action((isLoading) => {
+      state.isLoadingEditor = isLoading
+    }),
+    setIsModalOpen: action((isOpen) => {
+      state.isModalOpen = isOpen
+    }),
+    setEditors: action((editors) => {
+      state.editors = editors
+    }),
+    setChosenEditor: action((editor) => {
+      state.chosenEditor = editor
+    }),
+    setOtherPath: action((otherPath) => {
+      const otherOption = _.find(state.editors, { isOther: true })
+
+      otherOption.openerId = otherPath
+    }),
   }))
 
   const openFileInEditor = () => {
@@ -79,24 +87,22 @@ const ErrorFilePath = observer(({ fileDetails }) => {
       state.setIsLoadingEditor(false)
 
       if (result.preferredEditor) {
-        return openFile(result.preferredEditor, fileDetails)
+        return openFile('editor', fileDetails, result.preferredEditor)
       }
 
-      state.setIsModalOpen(true)
       state.setEditors(result.availableEditors)
+      state.setIsModalOpen(true)
     })
-
-    // if it is, server returns the editor
-    // - just open in that editor
-    // else if it's not set, server looks up and returns available editors
-
-    // user needs to set editor
-    // this.isModalOpen = true
   }
 
   const setEditor = () => {
-    // TODO: set the editor and settings, then open file in editor
+    // TODO: validate editor is chosen
+    const editor = state.chosenEditor
+
+    // QUESTION: add error handling for this?
+    events.emit('set:user:editor', editor)
     state.setIsModalOpen(false)
+    openFile('editor', fileDetails, editor)
   }
 
   const openFileOnComputer = () => {
@@ -130,6 +136,7 @@ const ErrorFilePath = observer(({ fileDetails }) => {
         state={state}
         onSelectEditor={state.setChosenEditor}
         onSetEditor={setEditor}
+        onUpdateOtherPath={state.setOtherPath}
         close={_.partial(state.setIsModalOpen, false)}
       />
     </span>

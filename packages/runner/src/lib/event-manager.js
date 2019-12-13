@@ -95,11 +95,12 @@ const eventManager = {
 
     reporterBus.on('focus:tests', this.focusTests)
 
-    reporterBus.on('get:user:editor', () => {
-      ws.emit('get:user:editor', (result) => {
-        // TODO
-        console.log(result) // eslint-disable-line no-console
-      })
+    reporterBus.on('get:user:editor', (cb) => {
+      ws.emit('get:user:editor', cb)
+    })
+
+    reporterBus.on('set:user:editor', (editor) => {
+      ws.emit('set:user:editor', editor)
     })
 
     reporterBus.on('runner:restart', rerun)

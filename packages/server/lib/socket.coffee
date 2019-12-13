@@ -3,6 +3,9 @@ path          = require("path")
 debug         = require('debug')('cypress:server:socket')
 Promise       = require("bluebird")
 socketIo      = require("@packages/socket")
+openEditor = require('open-editor')
+
+editors = require("./util/editors")
 fs            = require("./util/fs")
 open          = require("./util/open")
 pathHelpers   = require("./util/path_helpers")
@@ -14,7 +17,7 @@ fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
 preprocessor  = require("./plugins/preprocessor")
-openEditor = require('open-editor')
+savedState = require("./saved_state")
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -343,18 +346,41 @@ class Socket
         require("electron").shell.openExternal(url)
 
       socket.on "get:user:editor", (cb) ->
-        ## TODO
+        debug("get user editor")
+
+        savedState.create()
+        .then (state) -> state.get()
+        .then (state) ->
+          if preferredEditor = state.preferredEditor
+            debug("return preferred editor: %o", preferredEditor)
+            cb({ preferredEditor })
+            return
+
+          editors.getUserEditors().then (availableEditors) ->
+            debug("return available editors: %o", availableEditors)
+            cb({ availableEditors })
+
+      socket.on "set:user:editor", (editor) ->
+        debug("set user editor: %o", editor)
+
+        savedState.create()
+        .then (state) ->
+          state.set("preferredEditor", editor)
 
       socket.on "open:file", (fileDetails) ->
+        debug("open file: %o", fileDetails)
+
         switch fileDetails.where
           when "computer"
             require("electron").shell.showItemInFolder(fileDetails.file)
           when "editor"
-            openEditor([].concat(fileDetails), {
-              editor: 'vscode',
-            })
-            ## this opens in default opener
-            # require("electron").shell.openItem(fileDetails.file)
+            try
+              files = [].concat(fileDetails)
+              editor = fileDetails.editor.openerId
+              debug("open with editor: %s", editor)
+              openEditor(files, { editor })
+            catch err
+              debug("error opening file: %s", err.stack)
 
       reporterEvents.forEach (event) =>
         socket.on event, (data) =>
