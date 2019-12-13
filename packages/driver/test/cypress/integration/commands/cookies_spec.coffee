@@ -491,18 +491,12 @@ describe "src/cy/commands/cookies", ->
       context "when setting an invalid cookie", ->
         it "throws an error if the backend responds with an error", (done) ->
           cy.on "fail", (err) =>
-            expect(skipErrStub).to.be.calledOnce
-            expect(errStub).to.be.calledTwice
+            expect(errStub).to.be.calledOnce
             expect(err.message).to.contain('unexpected error setting the requested cookie')
             done()
 
           errStub = cy.stub(Cypress.utils, "throwErrByPath")
           errStub.callThrough()
-
-          ## stub cookie validation so this invalid cookie can make it to the backend
-          skipErrStub = errStub
-          .withArgs("setCookie.invalid_value")
-          .returns()
 
           ## browser backend should yell since this is invalid
           cy.setCookie("foo", " bar")
