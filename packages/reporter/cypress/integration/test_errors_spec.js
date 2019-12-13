@@ -25,6 +25,7 @@ const itHandlesFileOpening = (trigger) => {
         file: '/me/dev/my/app.js',
         line: 2,
         column: 7,
+        editor: undefined,
       })
     })
   })
@@ -45,8 +46,10 @@ const itHandlesFileOpening = (trigger) => {
 
     describe('when user has already set editor', function () {
       beforeEach(function () {
+        this.editor = {}
+
         this.runner.emit.withArgs('get:user:editor').yields({
-          preferredEditor: 'vscode',
+          preferredEditor: this.editor,
         })
       })
 
@@ -54,10 +57,11 @@ const itHandlesFileOpening = (trigger) => {
         trigger()
         cy.contains('Open in Editor').click().then(() => {
           expect(this.runner.emit).to.be.calledWith('open:file', {
-            where: 'vscode',
+            where: 'editor',
             file: '/me/dev/my/app.js',
             line: 2,
             column: 7,
+            editor: this.editor,
           })
         })
       })
@@ -65,11 +69,11 @@ const itHandlesFileOpening = (trigger) => {
 
     describe('when user has not already set editor', function () {
       let availableEditors = [
-        { id: 'atom', name: 'Atom' },
-        { id: 'vim', name: 'Vim' },
-        { id: 'sublime', name: 'Sublime Text' },
-        { id: 'vscode', name: 'Visual Studio Code' },
-        { id: 'other', name: 'Other', isOther: true },
+        { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
+        { id: 'vim', name: 'Vim', isOther: false, openerId: 'vim' },
+        { id: 'sublime', name: 'Sublime Text', isOther: false, openerId: 'sublime' },
+        { id: 'vscode', name: 'Visual Studio Code', isOther: false, openerId: 'vscode' },
+        { id: 'other', name: 'Other', isOther: true, openerId: '' },
       ]
 
       beforeEach(function () {

@@ -27,7 +27,7 @@ const createEditor = (editor: Editor): CyEditor => {
 const getOtherEditor = (preferredEditor?: CyEditor) => {
   // if preferred editor is the 'other' option, use it since it has the
   // path (openerId) saved with it
-  if (preferredEditor && preferredEditor.id === 'other') {
+  if (preferredEditor && preferredEditor.isOther) {
     return preferredEditor
   }
 

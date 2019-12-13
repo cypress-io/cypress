@@ -33,9 +33,6 @@ describe "lib/saved_state", ->
       .catch ->
         ## ignore error if file didn't exist in the first place
 
-    it "is a function", ->
-      expect(savedState).to.be.a("function")
-
     it "resolves with an instance of FileUtil", ->
       savedState.create()
       .then (state) ->

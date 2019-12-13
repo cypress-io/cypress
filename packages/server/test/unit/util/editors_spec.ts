@@ -35,11 +35,11 @@ describe('lib/util/editors', () => {
         const names = _.map(editors, 'name')
 
         expect(names).to.eql(['Sublime Text', 'Visual Studio Code', 'Vim', 'Other'])
-        // @ts-ignore
-        expect(editors[3]).to.containSubset({
+        expect(editors[3]).to.eql({
           id: 'other',
           name: 'Other',
-          paths: [],
+          isOther: true,
+          openerId: '',
         })
       })
     })
@@ -49,12 +49,12 @@ describe('lib/util/editors', () => {
       savedState.create.resolves({
         foo: 'bar',
         get () {
-          return { preferredEditorPath: '/path/to/editor' }
+          return { isOther: true, openerId: '/path/to/editor' }
         },
       })
 
       return getUserEditors().then((editors) => {
-        expect(editors[3].paths[0]).to.equal('/path/to/editor')
+        expect(editors[3].openerId).to.equal('/path/to/editor')
       })
     })
   })
