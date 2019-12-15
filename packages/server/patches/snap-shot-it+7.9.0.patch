@@ -1,0 +1,13 @@
+diff --git a/node_modules/snap-shot-it/src/index.js b/node_modules/snap-shot-it/src/index.js
+index 704d165..edadb6b 100644
+--- a/node_modules/snap-shot-it/src/index.js
++++ b/node_modules/snap-shot-it/src/index.js
+@@ -41,7 +41,7 @@ function _pruneSnapshots () {
+ }
+ 
+ // eslint-disable-next-line immutable/no-let
+-let pruneSnapshots
++let pruneSnapshots = function noop() {}
+ let pruneSnapshotsOptions
+ 
+ /**
