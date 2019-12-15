@@ -94,8 +94,8 @@ const replaceDurationFromReporter = (str, p1, p2, p3) => {
 const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
 
 const replaceDurationInTables = (str, p1, p2) => {
-  // when swapping out the duration, ensure we pad the
-  // full length of the duration so it doesn't shift content
+// when swapping out the duration, ensure we pad the
+// full length of the duration so it doesn't shift content
   return _.padStart('XX:XX', p1.length + p2.length)
 }
 
@@ -109,9 +109,7 @@ const replaceScreenshotDims = (str, p1) => _.padStart('(YxX)', p1.length)
 
 const replaceUploadingResults = function (orig, ...rest) {
   const adjustedLength = Math.max(rest.length, 2)
-
   const match = rest.slice(0, adjustedLength - 2)
-
   const results = match[1].split('\n').map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
   .sort()
   .join('\n')
@@ -247,14 +245,16 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   // if we've been told to skip this test
   // or if we specified a particular browser and this
   // doesn't match the one we're currently trying to run...
-
-  const itFn = only ? it.only : it
-
   if (skip || (specifiedBrowser && (specifiedBrowser !== browser))) {
+    // then skip this test
     return it.skip
   }
 
-  return itFn
+  if (only) {
+    return it.only
+  }
+
+  return it
 }
 
 function getBrowsers (browserPattern) {
@@ -377,7 +377,7 @@ const e2e = {
     // normalize the stdout of it
     args[index] = normalizeStdout(args[index])
 
-    return snapshot(...args)
+    return snapshot.apply(null, args)
   },
 
   setup (options = {}) {
@@ -715,6 +715,7 @@ const e2e = {
 
       // pipe these to our current process
       // so we can see them in the terminal
+      // color it so we can tell which is test output
       sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
       sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
 
