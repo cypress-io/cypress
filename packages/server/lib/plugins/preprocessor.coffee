@@ -41,37 +41,26 @@ setDefaultPreprocessor = (config) ->
   debug("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
-  # ## Commented out for test. It will be removed in the final version. 
-  # plugins.register("file:preprocessor", browserify({
-  #   browserifyOptions: {
-  #     extensions: ['.ts', '.tsx'],
-  #     plugin: [
-  #       [resolve.sync('tsify', {
-  #         baseDir: __dirname
-  #       }), {
-  #         typescript: resolve.sync('typescript', {
-  #           baseDir: config.projectRoot,
-  #         })
-  #       }]
-  #     ]
-  #   }
-  # }))
+
   options = browserify.defaultOptions;
-  options.browserifyOptions.extensions.push('.ts', '.tsx');
-  babelifyConfig = options.browserifyOptions.transform[1][1];
 
-  resolveTypeScript = ->
-    try 
-      return resolve.sync('@babel/preset-typescript', {
-        baseDir: config.projectRoot
+  resolveTypeScript = () -> 
+    try
+      resolve.sync('typescript', {
+        baseDir: config.projectRoot,
       })
-    catch 
-      return resolve.sync('@babel/preset-typescript', {
-        baseDir: __dirname
-      })
+    catch
+      return null
 
-  babelifyConfig.presets.push(resolveTypeScript());
-  babelifyConfig.extensions = ['.js', '.jsx', '.ts', '.tsx'];
+  tsPath = resolveTypeScript()
+
+  if tsPath isnt null 
+    options.browserifyOptions.extensions.push('.ts', '.tsx');
+    options.browserifyOptions.transform.push([
+      path.join(__dirname, './simple_tsify'), {
+        typescript: require(tsPath),
+      },
+    ])
 
   plugins.register("file:preprocessor", browserify(options));
 
