@@ -1,4 +1,3 @@
-const { _ } = Cypress
 const expectedHeadless = !!Cypress.env('EXPECT_HEADLESS')
 
 describe('e2e headless spec', function () {
@@ -23,40 +22,5 @@ describe('e2e headless spec', function () {
 
     cy.task('get:browser:args')
     .should(expectedHeadless ? 'contain' : 'not.contain', '--headless')
-  })
-
-  it('has expected window bounds in CI', function () {
-    if (!Cypress.env('CI')) {
-      // will only work in the CI docker container, so skip it if we're not in CI
-      return this.skip()
-    }
-
-    if (Cypress.browser.family !== 'chrome') {
-      // Browser.getWindowForTarget does not exist in Electron
-      return
-    }
-
-    // in CI with Xvfb, Cypress will fill the entire screen, this test is to explicitly
-    // assert on the expected dimensions
-
-    const cdp = _.bind(Cypress.automation, Cypress, 'remote:debugger:protocol')
-
-    return cdp({
-      command: 'Browser.getWindowForTarget',
-    })
-    .then(({ windowId }) => {
-      return cdp({
-        command: 'Browser.getWindowBounds',
-        params: {
-          windowId,
-        },
-      })
-    })
-    .then(({ bounds }) => {
-      expect(bounds).to.include({
-        width: expectedHeadless ? 800 : 1050,
-        height: expectedHeadless ? 600 : 1004,
-      })
-    })
   })
 })
