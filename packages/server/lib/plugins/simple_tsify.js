@@ -5,7 +5,9 @@ module.exports = function (b, opts) {
     const ts = opts.typescript
 
     this.push(ts.transpileModule(buf.toString(), {
-      compilerOptions: {},
+      compilerOptions: {
+        esModuleInterop: true,
+      },
     }).outputText)
 
     next()
