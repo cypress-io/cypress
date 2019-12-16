@@ -28,6 +28,16 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+# filters and requires for testing binary with Firefox
+testBinaryFirefox: &testBinaryFirefox
+  filters:
+    branches:
+      only:
+        - develop
+        - issue-1096-firefox-support
+  requires:
+    - build-npm-package
+    - build-binary
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -1038,6 +1048,13 @@ jobs:
             $(npm bin)/cypress run --record
       - store-npm-logs
 
+  "test-binary-against-recipes-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci:firefox
+
   "test-binary-against-kitchensink":
     <<: *defaults
     steps:
@@ -1337,78 +1354,26 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
           - build-binary
+
+    - test-binary-against-recipes-firefox:
+        <<: *testBinaryFirefox
     - test-binary-against-kitchensink:
-        filters:
-          branches:
-            only:
-              - develop
-              - issue-1096-firefox-support
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
     - test-binary-against-kitchensink-firefox:
-        filters:
-          branches:
-            only:
-              - develop
-              - issue-1096-firefox-support
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
     - test-binary-against-kitchensink-chrome:
-        filters:
-          branches:
-            only:
-              - develop
-              - issue-1096-firefox-support
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
     - test-binary-against-todomvc-firefox:
-        filters:
-          branches:
-            only:
-              - develop
-              - issue-1096-firefox-support
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
     - test-binary-against-documentation-firefox:
-        filters:
-          branches:
-            only:
-              - develop
-              - issue-1096-firefox-support
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
     - test-binary-against-api-testing-firefox:
-        filters:
-          branches:
-            only:
-              - develop
-              - issue-1096-firefox-support
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
     - test-binary-against-realworld-firefox:
-        filters:
-          branches:
-            only:
-              - develop
-              - issue-1096-firefox-support
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
     - test-binary-against-piechopper-firefox:
-        filters:
-          branches:
-            only:
-              - develop
-              - issue-1096-firefox-support
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
+
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
