@@ -16,6 +16,7 @@
  */
 const _ = require('lodash')
 const $ = require('jquery')
+const chai = require('chai')
 const blobUtil = require('blob-util')
 const minimatch = require('minimatch')
 const moment = require('moment')
@@ -379,6 +380,13 @@ class $Cypress {
 
       case 'runner:fail':
         // mocha runner calculated a failure
+        // Cypress.log({
+        //   message: args
+        // })
+
+        args[0].err.actual = chai.util.inspect(args[0].err.actual)
+        args[0].err.expected = chai.util.inspect(args[0].err.expected)
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'fail', ...args)
         }
