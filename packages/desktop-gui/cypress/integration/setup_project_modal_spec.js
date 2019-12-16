@@ -97,8 +97,6 @@ describe('Set Up Project', function () {
 
       describe('selecting Personal org', function () {
         beforeEach(function () {
-          cy.get('.privacy-radio').should('not.be.visible')
-
           cy.get('.modal-content')
           cy.get('select').select('Your personal organization')
         })
@@ -129,12 +127,12 @@ describe('Set Up Project', function () {
         it('lists organizations to assign to project', function () {
           cy.get('.empty-select-orgs').should('not.be.visible')
           cy.get('#organizations-select').find('option')
-          // need to add one to account for --Select org-- option
-          .should('have.length', this.orgs.length + 1)
+          .should('have.length', this.orgs.length)
         })
 
         it('selects personal org by default', function () {
           cy.get('#organizations-select').should('have.value', this.orgs[0].id)
+          cy.get('.privacy-radio').should('be.visible')
         })
 
         it('opens external link on click of manage', () => {
@@ -144,7 +142,6 @@ describe('Set Up Project', function () {
         })
 
         it('displays public & private radios on select', function () {
-          cy.get('.privacy-radio').should('not.be.visible')
           cy.get('select').select('Acme Developers')
 
           cy.get('.privacy-radio').should('be.visible')
@@ -161,11 +158,11 @@ describe('Set Up Project', function () {
         it('lists organizations to assign to project', function () {
           cy.get('.empty-select-orgs').should('not.be.visible')
           cy.get('#organizations-select').find('option')
-          .should('have.length', this.orgs.length)
+          .should('have.length', this.orgs.length - 1)
         })
 
-        it('selects none by default', () => {
-          cy.get('#organizations-select').should('have.value', '')
+        it('selects first org by default', function () {
+          cy.get('#organizations-select').should('have.value', this.orgs[1].id)
         })
 
         it('opens external link on click of manage', () => {
@@ -175,7 +172,6 @@ describe('Set Up Project', function () {
         })
 
         it('displays public & private radios on select', function () {
-          cy.get('.privacy-radio').should('not.be.visible')
           cy.get('select').select('Acme Developers')
 
           cy.get('.privacy-radio').should('be.visible')
@@ -192,6 +188,7 @@ describe('Set Up Project', function () {
         it('displays empty message', () => {
           cy.get('.empty-select-orgs').should('be.visible')
           cy.get('#organizations-select').should('not.be.visible')
+          cy.get('.privacy-radio').should('not.be.visible')
         })
 
         it('opens dashboard organizations when \'create org\' is clicked', () => {
@@ -214,8 +211,7 @@ describe('Set Up Project', function () {
         })
 
         it('displays in dropdown', () => {
-          // extra option for --Select org-- option
-          cy.get('select option').should('have.length', 1 + 1)
+          cy.get('select option').should('have.length', 1)
         })
       })
 
@@ -255,8 +251,7 @@ describe('Set Up Project', function () {
           cy.tick(11000)
 
           cy.get('#organizations-select').find('option')
-          // add extra option for --Select org-- option
-          .should('have.length', this.orgs.length + 1)
+          .should('have.length', this.orgs.length)
         })
       })
     })

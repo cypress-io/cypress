@@ -189,10 +189,9 @@ class SetupProject extends Component {
           ref='orgId'
           id='organizations-select'
           className='form-control float-left'
-          value={this.state.orgId || this._defaultOrgId()}
+          value={this.state.orgId}
           onChange={this._updateOrgId}
         >
-          <option value=''>-- Select organization --</option>
           {_.map(orgsStore.orgs, (org) => {
             return (
               <option
@@ -216,7 +215,7 @@ class SetupProject extends Component {
 
   _accessSelector () {
     return (
-      <div className={cs({ 'hidden': !this.state.orgId })}>
+      <div className={cs({ 'hidden': !this._hasOrgs() })}>
         <hr />
         <label htmlFor='projectName' className='control-label'>
           Who should see the runs and recordings?
@@ -323,12 +322,6 @@ class SetupProject extends Component {
 
   _hasDefaultOrg () {
     return _.find(orgsStore.orgs, { default: true })
-  }
-
-  _defaultOrgId () {
-    const defaultOrg = _.find(orgsStore.orgs, { default: true })
-
-    return defaultOrg ? defaultOrg.id : ''
   }
 
   _updateAccess = (e) => {
