@@ -147,7 +147,8 @@ describe('lib/open_project', () => {
       expect(openProject.specsWatcher).to.exist
       openProject.stopSpecsWatcher()
       expect(openProject.specsWatcher).to.be.null
-      openProject.getSpecChanges()
+
+      return openProject.getSpecChanges()
       .then(() => {
         expect(openProject.specsWatcher).to.exist
       })
