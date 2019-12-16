@@ -332,9 +332,13 @@ buildCypressApp = (platform, version, options = {}) ->
 
       return data
 
+    printDiskUsage = (sizes) ->
+      bySize = R.sortBy(R.prop('size'))
+      console.log(bySize(sizes))
+
     execa("du", args)
     .then(parseDiskUsage)
-    .then(R.tap(console.log))
+    .then(R.tap(printDiskUsage))
 
   Promise.resolve()
   # .then(checkPlatform)
