@@ -310,28 +310,51 @@ buildCypressApp = (platform, version, options = {}) ->
     # "du" - disk usage utility
     # -d -1 depth of 1
     # -h human readable sizes (K and M)
-    args = ["-d", "1", "-h", appFolder]
-    execa("du", args, { stdio: "inherit" })
+    args = ["-d", "1", appFolder]
+
+    parseDiskUsage = (result) ->
+      lines = result.stdout.split(os.EOL)
+      data = []
+
+      lines.forEach (line) ->
+        parts = line.split('\t')
+        packageSize = parseFloat(parts[0])
+        folder = parts[1]
+
+        packageName = path.basename(folder)
+        if packageName is "packages"
+          return # root "packages" information
+
+        data.push({
+          package: packageName,
+          size: packageSize
+        })
+
+      return data
+
+    execa("du", args)
+    .then(parseDiskUsage)
+    .then(R.tap(console.log))
 
   Promise.resolve()
-  .then(checkPlatform)
-  .then(cleanupPlatform)
-  .then(buildPackages)
-  .then(copyPackages)
-  .then(npmInstallPackages)
-  .then(createRootPackage)
-  .then(convertCoffeeToJs)
-  .then(removeTypeScript)
-  .then(cleanJs)
-  .then(transformSymlinkRequires)
-  .then(testVersion(distDir))
-  .then(testBuiltStaticAssets)
-  .then(elBuilder) # should we delete everything in the buildDir()?
-  .then(removeDevElectronApp)
-  .then(testVersion(buildAppDir))
-  .then(runSmokeTests)
-  .then(codeSign) ## codesign after running smoke tests due to changing .cy
-  .then(verifyAppCanOpen)
+  # .then(checkPlatform)
+  # .then(cleanupPlatform)
+  # .then(buildPackages)
+  # .then(copyPackages)
+  # .then(npmInstallPackages)
+  # .then(createRootPackage)
+  # .then(convertCoffeeToJs)
+  # .then(removeTypeScript)
+  # .then(cleanJs)
+  # .then(transformSymlinkRequires)
+  # .then(testVersion(distDir))
+  # .then(testBuiltStaticAssets)
+  # .then(elBuilder) # should we delete everything in the buildDir()?
+  # .then(removeDevElectronApp)
+  # .then(testVersion(buildAppDir))
+  # .then(runSmokeTests)
+  # .then(codeSign) ## codesign after running smoke tests due to changing .cy
+  # .then(verifyAppCanOpen)
   .then(printPackageSizes)
   .return({
     buildDir: buildDir()
