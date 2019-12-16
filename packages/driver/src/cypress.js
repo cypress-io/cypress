@@ -380,9 +380,6 @@ class $Cypress {
 
       case 'runner:fail': {
         // mocha runner calculated a failure
-        // Cypress.log({
-        //   message: args
-        // })
 
         const err = args[0].err
 
