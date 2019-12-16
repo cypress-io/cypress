@@ -4,6 +4,8 @@ const Promise = require('bluebird')
 
 const $dom = require('../dom')
 const $errUtils = require('../cypress/error_utils')
+const { LOGGED_ARRAY_SIZE } = require('./chai')
+const { LOGGED_OBJ_SIZE } = require('./chai')
 
 // TODO
 // bTagOpen + bTagClosed
@@ -66,7 +68,8 @@ const parseValueActualAndExpected = (value, actual, expected) => {
       delete obj.actual
       delete obj.expected
     } else {
-      if ((Array.isArray(value) && value.length > 10) || (_.isObject(value) && Object.keys(value).length > 10)) {
+      if ((Array.isArray(value) && value.length > LOGGED_ARRAY_SIZE) ||
+        (_.isObject(value) && Object.keys(value).length > LOGGED_OBJ_SIZE)) {
         obj.subject = value
       }
     }

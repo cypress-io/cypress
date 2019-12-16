@@ -38,6 +38,9 @@ let existProto = null
 let getMessage = null
 let chaiUtils = null
 
+const LOGGED_ARRAY_SIZE = 10
+const LOGGED_OBJ_SIZE = 10
+
 chai.use(sinonChai)
 
 chai.use((chai, u) => {
@@ -154,8 +157,6 @@ chai.use((chai, u) => {
 
   const summarizeBigObjects = (value, args) => {
     // Summerize big arrays
-    const LOGGED_ARRAY_SIZE = 10
-
     if (Array.isArray(value) && value.length > LOGGED_ARRAY_SIZE) {
       const first10 = value.slice(0, LOGGED_ARRAY_SIZE)
 
@@ -176,8 +177,6 @@ chai.use((chai, u) => {
     }
 
     // Summarize big objects
-    const LOGGED_OBJ_SIZE = 10
-
     if (_.isObject(value) &&
     !($dom.isJquery(value) || $dom.isElement(value)) &&
     (typeof args[1] === 'string' && typeof args[2] === 'string')) {
@@ -608,5 +607,8 @@ chai.use((chai, u) => {
     overrideChaiAsserts,
 
     create,
+
+    LOGGED_ARRAY_SIZE,
+    LOGGED_OBJ_SIZE,
   }
 })
