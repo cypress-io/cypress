@@ -8,7 +8,6 @@ import Loader from 'react-loader'
 
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
-import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
 import orgsApi from '../organizations/organizations-api'
 
@@ -157,57 +156,15 @@ class SetupProject extends Component {
           </label>
         </div>
         <div className='owner-parts'>
-          {
-            this._hasDefaultOrg() ?
-              <div>
-                <div className='btn-group' data-toggle='buttons'>
-
-                  <label className={cs('btn btn-default', {
-                    'active': this.state.owner === 'me',
-                  })}>
-                    <input
-                      type='radio'
-                      name='owner-toggle'
-                      id='me'
-                      autoComplete='off'
-                      value='me'
-                      checked={this.state.owner === 'me'}
-                      onChange={this._updateOwner}
-                    />
-                    <img
-                      className='user-avatar'
-                      height='13'
-                      width='13'
-                      src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
-                    />
-                    {' '}Me
-                  </label>
-                  <label className={`btn btn-default ${this.state.owner === 'org' ? 'active' : ''}`}>
-                    <input
-                      type='radio'
-                      name='owner-toggle'
-                      id='org'
-                      autoComplete='off'
-                      value='org'
-                      checked={this.state.owner === 'org'}
-                      onChange={this._updateOwner}
-                    />
-                    <i className='far fa-building'></i>
-                    {' '}An Organization
-                  </label>
-                </div>
-              </div> :
-              null
-          }
           <div className='select-orgs'>
-            <div className={cs({ 'hidden': this.state.owner !== 'org' || this._hasOrgsOtherThanDefault() })}>
+            <div className={this._hasOrgs() ? 'hidden' : ''}>
               <div className='empty-select-orgs well'>
                 <p>You don't have any organizations yet.</p>
                 <p>Organizations can help you manage projects, including billing.</p>
                 <p>
                   <a
                     href='#'
-                    className={cs('btn btn-link', { 'hidden': this.state.owner !== 'org' })}
+                    className='btn btn-link'
                     onClick={this._manageOrgs}>
                     <i className='fas fa-plus'></i>{' '}
                     Create organization
@@ -222,13 +179,13 @@ class SetupProject extends Component {
     )
   }
 
-  _hasOrgsOtherThanDefault () {
-    return _.filter(orgsStore.orgs, { 'default': false }).length
+  _hasOrgs () {
+    return orgsStore.orgs.length
   }
 
   _orgSelector () {
     return (
-      <div className={cs({ 'hidden': this.state.owner !== 'org' || !(this._hasOrgsOtherThanDefault()) })}>
+      <div className={!this._hasOrgs() ? 'hidden' : ''}>
         <select
           ref='orgId'
           id='organizations-select'
@@ -238,14 +195,12 @@ class SetupProject extends Component {
         >
           <option value=''>-- Select organization --</option>
           {_.map(orgsStore.orgs, (org) => {
-            if (org.default) return null
-
             return (
               <option
                 key={org.id}
                 value={org.id}
               >
-                {org.name}
+                {org.default ? 'Your personal organization' : org.name}
               </option>
             )
           })}
@@ -369,30 +324,6 @@ class SetupProject extends Component {
 
   _hasDefaultOrg () {
     return _.find(orgsStore.orgs, { default: true })
-  }
-
-  _updateOwner = (e) => {
-    let owner = e.target.value
-
-    // if they clicked the same radio button that's
-    // already selected, then ignore it
-    if (this.state.owner === owner) return
-
-    let chosenOrgId = null
-
-    if (this._hasDefaultOrg()) {
-      const defaultOrg = _.find(orgsStore.orgs, { default: true })
-
-      chosenOrgId = owner === 'me' ? defaultOrg.id : null
-    }
-
-    // we want to clear all selects below the radio buttons
-    // otherwise it looks jarring to already have selects
-    this.setState({
-      owner,
-      orgId: chosenOrgId,
-      public: null,
-    })
   }
 
   _updateAccess = (e) => {

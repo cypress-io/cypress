@@ -347,25 +347,6 @@
   .owner-parts {
     overflow: auto;
     clear: both;
-
-    .btn-group {
-      margin-bottom: 10px;
-    }
-  }
-
-  .owner-part-one {
-    float: left;
-    width: 42%;
-    margin-right: 1%;
-  }
-
-  .owner-part-two {
-    float: left;
-    width: 57%;
-  }
-
-  .radio + .radio {
-    margin-bottom: 0;
   }
 
   .form-horizontal {
@@ -394,17 +375,6 @@
     border-color: #dadada !important;
   }
 
-  .btn-group .btn {
-    padding: 4px 12px;
-
-    i {
-      font-size: 12px;
-      position: relative;
-      top: -1px;
-      margin-right: 2px;
-    }
-  }
-
   .manage-orgs-btn {
     padding: 0;
     font-size: 12px;
@@ -419,7 +389,7 @@
   }
 
   .well.empty-select-orgs {
-    margin-top: 20px;
+    margin-top: 10px;
 
     a.btn.btn-link {
       padding: 0;
