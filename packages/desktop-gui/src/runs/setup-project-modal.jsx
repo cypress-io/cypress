@@ -25,7 +25,6 @@ class SetupProject extends Component {
       error: null,
       projectName: this.props.project.displayName,
       public: null,
-      owner: !this._hasDefaultOrg() ? 'org' : null,
       orgId: null,
       showNameMissingError: false,
       isSubmitting: false,
@@ -190,7 +189,7 @@ class SetupProject extends Component {
           ref='orgId'
           id='organizations-select'
           className='form-control float-left'
-          value={this.state.orgId || ''}
+          value={this.state.orgId || this._defaultOrgId()}
           onChange={this._updateOrgId}
         >
           <option value=''>-- Select organization --</option>
@@ -304,7 +303,7 @@ class SetupProject extends Component {
     })
 
     // deselect their choice for access
-    // if they didn'tselect anything
+    // if they didn't select anything
     if (orgIsNotSelected) {
       this.setState({
         public: null,
@@ -324,6 +323,12 @@ class SetupProject extends Component {
 
   _hasDefaultOrg () {
     return _.find(orgsStore.orgs, { default: true })
+  }
+
+  _defaultOrgId () {
+    const defaultOrg = _.find(orgsStore.orgs, { default: true })
+
+    return defaultOrg ? defaultOrg.id : ''
   }
 
   _updateAccess = (e) => {

@@ -133,8 +133,8 @@ describe('Set Up Project', function () {
           .should('have.length', this.orgs.length + 1)
         })
 
-        it('selects none by default', () => {
-          cy.get('#organizations-select').should('have.value', '')
+        it('selects personal org by default', function () {
+          cy.get('#organizations-select').should('have.value', this.orgs[0].id)
         })
 
         it('opens external link on click of manage', () => {
