@@ -667,7 +667,7 @@ jobs:
 
   "driver-integration-tests-firefox":
     <<: *defaults
-    parallelism: 3
+    parallelism: 5
     steps:
       - attach_workspace:
           at: ~/
@@ -682,7 +682,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 3x-driver-firefox --browser firefox
+            npm run cypress:run -- --record --parallel --group 5x-driver-firefox --browser firefox
           working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
