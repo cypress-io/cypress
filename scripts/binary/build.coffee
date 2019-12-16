@@ -301,6 +301,18 @@ buildCypressApp = (platform, version, options = {}) ->
         else
           reject new Error("Verifying App via GateKeeper failed")
 
+  printPackageSizes = ->
+    appFolder = meta.buildAppDir(platform, "packages")
+    log("#printPackageSizes #{appFolder}")
+
+    if (platform == "win32") then return Promise.resolve()
+
+    # "du" - disk usage utility
+    # -d -1 depth of 1
+    # -h human readable sizes (K and M)
+    args = ["-d", "1", "-h", appFolder]
+    execa("du", args, { stdio: "inherit" })
+
   Promise.resolve()
   .then(checkPlatform)
   .then(cleanupPlatform)
@@ -320,6 +332,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(runSmokeTests)
   .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
+  .then(printPackageSizes)
   .return({
     buildDir: buildDir()
   })
