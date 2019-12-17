@@ -14,7 +14,7 @@
     "concat-stream": "1.6.2",
     "debug": "4.1.1",
     "lodash": "4.17.15",
-    "parse-domain": "bahmutov/parse-domain#832822f",
+    "parse-domain": "bahmutov/parse-domain#fb60bd4",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
