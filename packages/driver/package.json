@@ -54,7 +54,7 @@
     "moment": "2.24.0",
     "morgan": "1.9.1",
     "npm-install-version": "6.0.2",
-    "parse-domain": "github:bahmutov/parse-domain#fb60bd4",
+    "parse-domain": "bahmutov/parse-domain#fb60bd4",
     "setimmediate": "1.0.5",
     "sinon": "3.3.0",
     "text-mask-addons": "3.8.0",
