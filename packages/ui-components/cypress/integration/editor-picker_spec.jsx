@@ -50,6 +50,13 @@ describe('<EditorPicker />', () => {
     cy.get('input[type="radio"]').should('not.be.checked')
   })
 
+  it('shows special message when no editors specified', () => {
+    cy.render(render, <EditorPicker {...defaultProps} editors={defaultProps.editors.slice(3)} chosen={undefined} />)
+
+    cy.contains('We could not find any editors on your system')
+    cy.get('input')
+  })
+
   it('calls onSelect when option is chosen', () => {
     const onSelect = cy.stub()
 

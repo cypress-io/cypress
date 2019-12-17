@@ -19,7 +19,22 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
     onUpdateOtherPath(_.trim(event.target.value || ''))
   }
 
-  // TODO: handle no editors besides 'Other' as a special case
+  const otherInput = (
+    <input type='text'
+      value={otherOption.openerId || ''}
+      onFocus={_.partial(onChange, 'other')}
+      onChange={updateOtherPath}
+    />
+  )
+
+  if (!editorOptions.length) {
+    return (
+      <div className='editor-picker-empty'>
+        <p>We could not find any editors on your system. Please enter the full path to your preferred editor.</p>
+        <p>{otherInput}</p>
+      </div>
+    )
+  }
 
   return (
     <Select value={chosen.id} name='editor-picker' onChange={onChange}>
@@ -34,12 +49,7 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
         <li>
           <label>
             <SelectItem value={otherOption.id} />
-            {otherOption.name}:
-            <input type='text'
-              value={otherOption.openerId || ''}
-              onFocus={_.partial(onChange, 'other')}
-              onChange={updateOtherPath}
-            />
+            {otherOption.name}: {otherInput}
           </label>
           {chosen.isOther && <label>Enter the full path to the executable of the editor</label>}
         </li>
