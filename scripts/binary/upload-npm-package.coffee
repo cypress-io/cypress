@@ -10,8 +10,6 @@ gulpDebug = require('gulp-debug')
 gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
-
-konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
 
 npmPackageExtension = ".tgz"
@@ -30,7 +28,9 @@ getCDN = ({version, hash, filename}) ->
   la(check.unemptyString(hash), 'missing hash', hash)
   la(check.unemptyString(filename), 'missing filename', filename)
   la(isNpmPackageFile(filename), 'wrong extension for file', filename)
-  [konfig("cdn_url"), rootFolder, npmFolder, version, hash, filename].join("/")
+  url = uploadUtils.getUploadUrl()
+  la(check.url(url), "could not get upload url", url)
+  [url, rootFolder, npmFolder, version, hash, filename].join("/")
 
 getUploadDirName = (options) ->
   la(check.unemptyString(options.version), 'missing version', options)
