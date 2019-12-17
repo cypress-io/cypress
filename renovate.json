@@ -12,7 +12,7 @@
   "rangeStrategy": "pin",
   "packageRules": [
     {
-      "packagePatterns": "^@types",
+      "packagePatterns": "^@types/",
       "groupName": "@types",
       "schedule": "before 3am on Monday"
     }
