@@ -83,7 +83,7 @@ function _isRegExp (obj): obj is RegExp {
   return obj && (obj instanceof RegExp || obj.__proto__ === RegExp.prototype || obj.__proto__.constructor.name === 'RegExp')
 }
 
-function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHeaders) {
+function _parseStaticResponseShorthand (statusCodeOrBody: number | string | any, bodyOrHeaders: string | { [key: string]: string }, maybeHeaders?: { [key: string]: string }) {
   if (_.isNumber(statusCodeOrBody)) {
     // statusCodeOrBody is a status code
     const staticResponse: StaticResponse = {
@@ -91,11 +91,11 @@ function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHe
     }
 
     if (!_.isUndefined(bodyOrHeaders)) {
-      staticResponse.body = bodyOrHeaders
+      staticResponse.body = bodyOrHeaders as string
     }
 
     if (_.isObject(maybeHeaders)) {
-      staticResponse.headers = maybeHeaders
+      staticResponse.headers = maybeHeaders as { [key: string]: string }
     }
 
     return staticResponse
@@ -108,7 +108,7 @@ function _parseStaticResponseShorthand (statusCodeOrBody, bodyOrHeaders, maybeHe
     }
 
     if (_.isObject(bodyOrHeaders)) {
-      staticResponse.headers = bodyOrHeaders
+      staticResponse.headers = bodyOrHeaders as { [key: string]: string }
     }
 
     return staticResponse
