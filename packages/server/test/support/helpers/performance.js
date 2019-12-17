@@ -4,6 +4,7 @@ const pkg = require('../../../../../package.json')
 const Promise = require('bluebird')
 const rp = require('request-promise')
 const debug = require('debug')('cypress:performance')
+const R = require('ramda')
 
 const API_URL = process.env.PERF_API_URL || 'http://localhost:2999/track'
 const API_KEY = process.env.PERF_API_KEY
@@ -19,10 +20,11 @@ function track (type, data) {
   debug('getting commit information')
 
   return commitInfo()
-  .then(({ message, timestamp }) => {
-    const { sha, branch, author } = ciProvider.commitParams()
-
-    timestamp = new Date(timestamp * 1000).toISOString()
+  .then((commitInformation) => {
+    const ciInformation = ciProvider.commitParams() || {}
+    const merged = R.mergeWith(R.or, commitInformation, ciInformation)
+    const { sha, branch, author, message, timestamp } = merged
+    const timestampISO = new Date(timestamp * 1000).toISOString()
 
     const body = {
       type,
@@ -33,7 +35,7 @@ function track (type, data) {
         'Commit Branch': branch,
         'Commit Author': author,
         'Commit Message': message,
-        'Commit Timestamp': timestamp,
+        'Commit Timestamp': timestampISO,
         'Build URL': process.env.CIRCLE_BUILD_URL,
         'Build Platform': process.platform,
         'Build Arch': process.arch,
@@ -42,6 +44,7 @@ function track (type, data) {
     }
 
     debug('sending performance numbers "%s"', type)
+    debug('%o', body.data)
 
     return rp.post({
       url: API_URL,
@@ -55,7 +58,7 @@ function track (type, data) {
   })
   .catch((err) => {
     /* eslint-disable no-console */
-    console.error('Track error for type %s %o', type, err)
+    console.error('Track error for type %s %s', type, err.message)
   })
 }
 
