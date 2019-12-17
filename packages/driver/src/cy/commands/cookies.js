@@ -1,8 +1,5 @@
-/* global Cypress */
-
 const _ = require('lodash')
 const Promise = require('bluebird')
-const cookieParser = require('strict-cookie-parser')
 
 const $utils = require('../../cypress/utils')
 const $Location = require('../../cypress/location')
@@ -33,12 +30,6 @@ const mergeDefaults = function (obj) {
   }
 
   return merge(obj)
-}
-
-const validateCookieName = function (cmd, name, onFail) {
-  if (cookieParser.isCookieName(name) !== true) {
-    return Cypress.utils.throwErrByPath('cookies.invalid_name', { args: { cmd, name }, onFail })
-  }
 }
 
 module.exports = function (Commands, Cypress, cy, state, config) {
@@ -87,6 +78,25 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     })
   }
 
+  const handleBackendError = (command, action, onFail) => {
+    return (err) => {
+      if (err.name === 'CypressError') {
+        throw err
+      }
+
+      Cypress.utils.throwErrByPath('cookies.backend_error', {
+        args: {
+          action,
+          command,
+          browserDisplayName: Cypress.browser.displayName,
+          errMessage: err.message,
+          errStack: err.stack,
+        },
+        onFail,
+      })
+    }
+  }
+
   // TODO: handle failure here somehow
   // maybe by tapping into the Cypress reset
   // stuff, or handling this in the runner itself?
@@ -129,14 +139,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         $utils.throwErrByPath('getCookie.invalid_argument', { onFail })
       }
 
-      validateCookieName('getCookie', name, onFail)
-
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
       .then((resp) => {
         options.cookie = resp
 
         return resp
       })
+      .catch(handleBackendError('getCookie', 'reading the requested cookie from', onFail))
     },
 
     getCookies (options = {}) {
@@ -171,6 +180,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         return resp
       })
+      .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
     },
 
     setCookie (name, value, userOptions = {}) {
@@ -214,26 +224,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         Cypress.utils.throwErrByPath('setCookie.invalid_arguments', { onFail })
       }
 
-      validateCookieName('setCookie', name, onFail)
-
-      if (cookieParser.parseCookieValue(value) === null) {
-        Cypress.utils.throwErrByPath('setCookie.invalid_value', { args: { value }, onFail })
-      }
-
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
       .then((resp) => {
         options.cookie = resp
 
         return resp
-      }).catch((err) => {
-        return Cypress.utils.throwErrByPath('setCookie.backend_error', {
-          args: {
-            browserDisplayName: Cypress.browser.displayName,
-            errStack: err.stack,
-          },
-          onFail,
-        })
-      })
+      }).catch(handleBackendError('setCookie', 'setting the requested cookie in', onFail))
     },
 
     clearCookie (name, options = {}) {
@@ -271,8 +267,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         $utils.throwErrByPath('clearCookie.invalid_argument', { onFail })
       }
 
-      validateCookieName('clearCookie', name, onFail)
-
       // TODO: prevent clearing a cypress namespace
       return automateCookies('clear:cookie', { name }, options._log, options.timeout)
       .then((resp) => {
@@ -281,6 +275,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         // null out the current subject
         return null
       })
+      .catch(handleBackendError('clearCookie', 'clearing the requested cookie in', onFail))
     },
 
     clearCookies (options = {}) {
@@ -322,6 +317,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         err.message = err.message.replace('getCookies', 'clearCookies')
         throw err
       })
+      .catch(handleBackendError('clearCookies', 'clearing cookies in', options._log))
     },
   })
 }
