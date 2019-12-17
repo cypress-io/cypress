@@ -5,6 +5,8 @@ import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 import Loader from 'react-loader'
+import Select from 'react-select'
+import { gravatarUrl } from '../lib/utils'
 
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
@@ -25,7 +27,7 @@ class SetupProject extends Component {
       error: null,
       projectName: this.props.project.displayName,
       public: null,
-      orgId: null,
+      selectedOrg: {},
       showNameMissingError: false,
       isSubmitting: false,
     }
@@ -152,7 +154,14 @@ class SetupProject extends Component {
             <a onClick={this._openOrgDocs}>
               <i className='fas fa-question-circle'></i>
             </a>
+
           </label>
+          <a
+            href='#'
+            className='btn btn-link manage-orgs-btn pull-right'
+            onClick={this._manageOrgs}>
+            Manage organizations
+          </a>
         </div>
         <div className='owner-parts'>
           <div className='select-orgs'>
@@ -182,33 +191,43 @@ class SetupProject extends Component {
     return orgsStore.orgs.length
   }
 
+  _orgSelectValue (options) {
+    if (!_.isEmpty(this.state.selectedOrg)) {
+      return this.state.selectedOrg
+    }
+
+    return this._hasDefaultOrg() ?
+      _.find(options, { default: true }) :
+      options[0]
+  }
+
   _orgSelector () {
+    const options = _.map(orgsStore.orgs, (org) => {
+      return {
+        value: org.id,
+        default: org.default,
+        label: org.default ?
+          <div>
+            <img
+              className='user-avatar'
+              height='13'
+              width='13'
+              src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
+            />
+            Your personal organization
+          </div> : org.name,
+      }
+    })
+
     return (
       <div className={!this._hasOrgs() ? 'hidden' : ''}>
-        <select
-          ref='orgId'
-          id='organizations-select'
-          className='form-control float-left'
-          value={this.state.orgId}
-          onChange={this._updateOrgId}
-        >
-          {_.map(orgsStore.orgs, (org) => {
-            return (
-              <option
-                key={org.id}
-                value={org.id}
-              >
-                {org.default ? 'Your personal organization' : org.name}
-              </option>
-            )
-          })}
-        </select>
-        <a
-          href='#'
-          className='btn btn-link manage-orgs-btn float-left'
-          onClick={this._manageOrgs}>
-          (manage organizations)
-        </a>
+        <Select
+          className='organizations-select'
+          classNamePrefix='organizations-select'
+          value={this._orgSelectValue(options)}
+          onChange={this._updateSelectedOrg}
+          options={options}
+        />
       </div>
     )
   }
@@ -292,13 +311,11 @@ class SetupProject extends Component {
     )
   }
 
-  _updateOrgId = () => {
-    const orgIsNotSelected = this.refs.orgId.value === '-- Select Organization --'
-
-    const orgId = orgIsNotSelected ? null : this.refs.orgId.value
+  _updateSelectedOrg = (selectedOrg, action) => {
+    const orgIsNotSelected = _.isEmpty(selectedOrg)
 
     this.setState({
-      orgId,
+      selectedOrg,
     })
 
     // deselect their choice for access
@@ -351,7 +368,7 @@ class SetupProject extends Component {
   _setupProject () {
     ipc.setupDashboardProject({
       projectName: this.state.projectName,
-      orgId: this.state.orgId,
+      orgId: this.state.selectedOrg.value,
       public: this.state.public,
     })
     .then((projectDetails) => {

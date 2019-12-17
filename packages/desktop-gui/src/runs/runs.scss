@@ -345,7 +345,6 @@
   }
 
   .owner-parts {
-    overflow: auto;
     clear: both;
   }
 
@@ -354,10 +353,6 @@
     margin: 0;
     padding: 0;
     border: 0;
-
-    .form-group {
-      overflow: auto;
-    }
   }
 
   .help-block {
@@ -378,8 +373,7 @@
   .manage-orgs-btn {
     padding: 0;
     font-size: 12px;
-    margin-top: 10px;
-    line-height: 30px;
+    line-height: 20px;
     margin-left: 10px;
   }
 
@@ -403,6 +397,7 @@
   .user-avatar {
     position: relative;
     top: -2px;
+    margin-right: 5px;
   }
 
   .control-label {
@@ -417,7 +412,7 @@
 
   input[type='text'].form-control {
     padding: 3px 6px;
-    height: 28px;
+    height: 38px;
   }
 
   .privacy-radio {
@@ -452,12 +447,13 @@
   .text-danger {
     margin-bottom: 0;
   }
-  .alert-danger {
-    margin: 0 0 1em;
+  pre.alert-danger {
+    margin: 1em 0;
     padding: 5px;
     max-height: 200px;
     overflow: auto;
     text-align: left;
+    border-radius: 5px;
   }
 }
 
@@ -505,8 +501,6 @@
 }
 
 .select-orgs {
-  overflow: auto;
-
   select {
     float: left;
     width: 205px;
