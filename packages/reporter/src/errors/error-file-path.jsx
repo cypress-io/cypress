@@ -21,7 +21,22 @@ const openFile = (where, { absoluteFile: file, line, column }, editor) => {
   })
 }
 
-const EditorPickerModal = observer(({ editors, onClose, onSetEditor }) => {
+const validate = (chosenEditor) => {
+  let isValid = !!chosenEditor && !!chosenEditor.id
+  let validationMessage = 'Please select an editor'
+
+  if (isValid && chosenEditor.isOther && !chosenEditor.openerId) {
+    isValid = false
+    validationMessage = 'Please enter the path to your editor'
+  }
+
+  return {
+    isValid,
+    validationMessage,
+  }
+}
+
+const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) => {
   const state = useLocalStore(() => ({
     chosenEditor: {},
     setChosenEditor: action((editor) => {
@@ -34,9 +49,12 @@ const EditorPickerModal = observer(({ editors, onClose, onSetEditor }) => {
     }),
   }))
 
+  const { isValid, validationMessage } = validate(state.chosenEditor)
+
   const setEditor = () => {
     const editor = state.chosenEditor
-    // TODO: validate editor is chosen
+
+    if (!isValid) return
 
     onSetEditor(editor)
   }
@@ -49,7 +67,7 @@ const EditorPickerModal = observer(({ editors, onClose, onSetEditor }) => {
     <Dialog
       aria-label="Explanation of choosing an editor"
       initialFocusRef={cancelRef}
-      isOpen={state.isModalOpen}
+      isOpen={isOpen}
       onDismiss={onClose}
     >
       <div className='content'>
@@ -62,8 +80,11 @@ const EditorPickerModal = observer(({ editors, onClose, onSetEditor }) => {
           onUpdateOtherPath={state.setOtherPath}
         />
       </div>
+      { !isValid && (
+        <p className='validation-error'>{validationMessage}</p>
+      )}
       <div className='controls'>
-        <button className='submit' onClick={setEditor}>Set Editor</button>
+        <button className='submit' onClick={setEditor}>Set editor and open file</button>
         <button className='cancel' onClick={onClose} ref={cancelRef}>Cancel</button>
       </div>
       <button className='close-button' onClick={onClose}>
@@ -142,6 +163,7 @@ const ErrorFilePath = observer(({ fileDetails }) => {
       </Tooltip>
       <EditorPickerModal
         editors={state.editors}
+        isOpen={state.isModalOpen}
         onSetEditor={setEditor}
         onClose={_.partial(state.setIsModalOpen, false)}
       />

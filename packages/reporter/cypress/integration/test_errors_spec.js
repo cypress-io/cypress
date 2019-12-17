@@ -44,7 +44,7 @@ const itHandlesFileOpening = (trigger) => {
       })
     })
 
-    describe('when user has already set editor', function () {
+    describe('when user has already set editor and open file', function () {
       beforeEach(function () {
         this.editor = {}
 
@@ -67,8 +67,8 @@ const itHandlesFileOpening = (trigger) => {
       })
     })
 
-    describe('when user has not already set editor', function () {
-      let availableEditors = [
+    describe('when user has not already set editor and opens file', function () {
+      const availableEditors = [
         { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
         { id: 'vim', name: 'Vim', isOther: false, openerId: 'vim' },
         { id: 'sublime', name: 'Sublime Text', isOther: false, openerId: 'sublime' },
@@ -92,10 +92,63 @@ const itHandlesFileOpening = (trigger) => {
         })
 
         cy.contains('Other')
-        cy.contains('Set Editor')
+        cy.contains('Set editor and open file')
       })
 
-      it('shows error message when user clicks "Set Editor" without selecting an editor')
+      it('shows error message when user clicks "Set editor and open file" without selecting an editor', function () {
+        trigger()
+        cy.contains('Open in Editor').click()
+        cy.get('.err-file-options').trigger('mouseout', { force: true })
+        cy.contains('Set editor and open file').click()
+
+        cy.contains('Set editor and open file').should('be.visible')
+        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
+        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
+
+        cy.get('.validation-error').should('have.text', 'Please select an editor')
+      })
+
+      it('shows error message when user selects "Other" and does not input path', function () {
+        trigger()
+        cy.contains('Open in Editor').click()
+        cy.get('.err-file-options').trigger('mouseout', { force: true })
+        cy.contains('Other').click()
+        cy.contains('Set editor and open file').click()
+
+        cy.contains('Set editor and open file').should('be.visible')
+        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
+        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
+
+        cy.get('.validation-error').should('have.text', 'Please enter the path to your editor')
+      })
+
+      describe('when editor is set', function () {
+        beforeEach(function () {
+          trigger()
+          cy.contains('Open in Editor').click()
+          cy.get('.err-file-options').trigger('mouseout', { force: true })
+          cy.contains('Visual Studio Code').click()
+          cy.contains('Set editor and open file').click()
+        })
+
+        it('closes modal', function () {
+          cy.contains('Set editor and open file').should('not.be.visible')
+        })
+
+        it('emits set:user:editor', function () {
+          expect(this.runner.emit).to.be.calledWith('set:user:editor', availableEditors[3])
+        })
+
+        it('opens file in selected editor', function () {
+          expect(this.runner.emit).to.be.calledWith('open:file', {
+            where: 'editor',
+            file: '/me/dev/my/app.js',
+            line: 2,
+            column: 7,
+            editor: availableEditors[3],
+          })
+        })
+      })
     })
   })
 }
