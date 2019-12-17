@@ -1248,6 +1248,7 @@ declare namespace Cypress {
      *    })
      */
     route(url: CyNetStubbing.RouteMatcher, response?: CyNetStubbing.RouteHandler): Chainable<null>
+    route(method: HttpMethod, url: CyNetStubbing.RouteMatcher, response?: CyNetStubbing.RouteHandler): Chainable<null>
 
     /**
      * Take a screenshot of the application under test and the Cypress Command Log.
