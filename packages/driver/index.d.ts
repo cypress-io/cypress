@@ -8,6 +8,7 @@ declare global {
     interface CypressUtils {
       throwErrByPath: (path: string, obj: { args: object }) => void
       warnByPath: (path: string, obj: { args: object }) => void
+      warning: (message: string) => void
     }
 
     interface Actions {
