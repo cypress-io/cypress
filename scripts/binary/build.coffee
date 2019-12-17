@@ -315,7 +315,8 @@ buildCypressApp = (platform, version, options = {}) ->
 
     parseDiskUsage = (result) ->
       lines = result.stdout.split(os.EOL)
-      data = []
+      # will store {package name: package size}
+      data = {}
 
       lines.forEach (line) ->
         parts = line.split('\t')
@@ -326,22 +327,19 @@ buildCypressApp = (platform, version, options = {}) ->
         if packageName is "packages"
           return # root "packages" information
 
-        data.push({
-          package: packageName,
-          size: packageSize
-        })
+        data[packageName] = packageSize
 
       return data
 
     printDiskUsage = (sizes) ->
-      bySize = R.sortBy(R.prop('size'))
-      console.log(bySize(sizes))
+      bySize = R.sortBy(R.prop('1'))
+      console.log(bySize(R.toPairs(sizes)))
 
     execa("du", args)
     .then(parseDiskUsage)
     .then(R.tap(printDiskUsage))
     .then((sizes) ->
-      performanceTracking.track('test runner size', { sizes })
+      performanceTracking.track('test runner size', sizes)
     )
 
   Promise.resolve()
