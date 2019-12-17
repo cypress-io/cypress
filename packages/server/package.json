@@ -40,7 +40,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
-    "@cypress/browserify-preprocessor": "1.1.2",
+    "@cypress/browserify-preprocessor": "2.1.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.0",
     "@cypress/icons": "0.7.0",
@@ -141,7 +141,7 @@
     "@babel/runtime": "7.4.4",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/json-schemas": "5.33.0",
-    "@cypress/sinon-chai": "1.1.0",
+    "@cypress/sinon-chai": "2.9.0",
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.91",
     "babel-plugin-add-module-exports": "1.0.2",
