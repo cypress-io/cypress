@@ -14,6 +14,7 @@ str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
 coffeeify       = require("coffeeify")
+simpleTsify  = require("#{root}lib/plugins/simple_tsify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
@@ -62,6 +63,9 @@ browserifyFile = (filePath) ->
           presets: ["@babel/preset-env", "@babel/preset-react"],
         }]
       ]
+    })
+    .transform(simpleTsify, {
+      typescript: require("typescript"),
     })
     .bundle()
   )
