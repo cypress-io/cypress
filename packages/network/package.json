@@ -6,6 +6,7 @@
   "scripts": {
     "build-js": "bin-up tsc --project .",
     "clean-deps": "rm -rf node_modules",
+    "postinstall": "cd node_modules/parse-domain && npm run postinstall",
     "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
