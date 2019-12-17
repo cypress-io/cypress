@@ -1069,6 +1069,7 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
     - build-binary:
+        context: test-runner:performance-tracking
         requires:
           - build
     - upload-binary:
