@@ -344,7 +344,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         return { proj, register }
       }
 
-      it('default + ts installed', () => {
+      it('ts installed', () => {
         const { proj, register } = setupProject('default', tsProjPath)
 
         return proj.open().then(() => {
@@ -355,69 +355,11 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         })
       })
 
-      it('default + ts not installed', () => {
+      it('ts not installed', () => {
         const { proj, register } = setupProject('default', rootPath)
 
         return proj.open().then(() => {
-          expect(register).to.be.calledWith({
-            transpileOnly: true,
-            compiler: undefined,
-          })
-        })
-      })
-
-      it('project + ts installed', () => {
-        const { proj, register } = setupProject('project', tsProjPath)
-
-        return proj.open().then(() => {
-          expect(register).to.be.calledWith({
-            transpileOnly: true,
-            compiler: projTsPath,
-          })
-        })
-      })
-
-      it('project + ts not installed', () => {
-        const { proj } = setupProject('project', rootPath)
-
-        return proj.open().catch((e) => {
-          expect(e.message).to.eq(`The value of 'typescript' option is 'project', but typescript is not set up in the project.`)
-        })
-      })
-
-      it('bundled + ts installed', () => {
-        const { proj, register } = setupProject('bundled', tsProjPath)
-
-        return proj.open().then(() => {
-          expect(register).to.be.calledWith({
-            transpileOnly: true,
-          })
-        })
-      })
-
-      it('bundled + ts not installed', () => {
-        const { proj, register } = setupProject('bundled', rootPath)
-
-        return proj.open().then(() => {
-          expect(register).to.be.calledWith({
-            transpileOnly: true,
-          })
-        })
-      })
-
-      it('none + ts installed', () => {
-        const { proj, register } = setupProject('none', tsProjPath)
-
-        return proj.open().then(() => {
-          expect(register).to.not.called
-        })
-      })
-
-      it('none + ts not installed', () => {
-        const { proj, register } = setupProject('none', rootPath)
-
-        return proj.open().then(() => {
-          expect(register).to.not.called
+          expect(register).not.called
         })
       })
     })
