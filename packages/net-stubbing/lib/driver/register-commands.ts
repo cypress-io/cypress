@@ -309,7 +309,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
   }
 
   function server (): void {
-
+    Cypress.utils.warnByPath('warn_server_deprecated', null)
   }
 
   function _onRequestReceived (frame: NetEventFrames.HttpRequestReceived) {

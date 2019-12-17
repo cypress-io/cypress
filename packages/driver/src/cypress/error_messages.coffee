@@ -683,6 +683,7 @@ module.exports = {
 
       Intercepted request: #{format(req)}
     """
+    warn_server_deprecated: "#{cmd('server')} is no longer required to use #{cmd('route')}. You can safely remove it from your test code."
 
 
   ng:
