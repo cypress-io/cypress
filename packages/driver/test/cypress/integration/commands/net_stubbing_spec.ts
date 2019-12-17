@@ -1090,7 +1090,7 @@ describe('src/cy/commands/net_stubbing', function () {
             expect(xhr.onload).to.be.a('function')
             expect(xhr.onerror).to.be.a('function')
 
-            return expect(xhr.onreadystatechange).to.be.a('function')
+            expect(xhr.onreadystatechange).to.be.a('function')
           })
         })
 
@@ -1148,7 +1148,7 @@ describe('src/cy/commands/net_stubbing', function () {
             expect(onloaded).to.be.true
             expect(onreadystatechanged).to.be.true
 
-            return expect(xhr.status).to.eq(404)
+            expect(xhr.status).to.eq(404)
           })
         })
 
@@ -1176,7 +1176,7 @@ describe('src/cy/commands/net_stubbing', function () {
           }).wait('@getLongText').then(function (xhr) {
             expect(responseStatuses).to.be.gt(1)
 
-            return expect(xhr.status).to.eq(200)
+            expect(xhr.status).to.eq(200)
           })
         })
 
@@ -1222,7 +1222,7 @@ describe('src/cy/commands/net_stubbing', function () {
             expect(failed).to.be.true
             expect(onloaded).to.be.true
 
-            return expect(xhr.status).to.eq(404)
+            expect(xhr.status).to.eq(404)
           })
         })
 
@@ -1248,7 +1248,7 @@ describe('src/cy/commands/net_stubbing', function () {
           }).wait('@getFoo').then(function (xhr) {
             expect(onloaded).to.be.true
 
-            return expect(xhr.status).to.eq(404)
+            expect(xhr.status).to.eq(404)
           })
         })
 
@@ -1273,7 +1273,7 @@ describe('src/cy/commands/net_stubbing', function () {
           }).wait('@getFoo').then(function (xhr) {
             expect(onloaded).to.be.true
 
-            return expect(xhr.status).to.eq(404)
+            expect(xhr.status).to.eq(404)
           })
         })
 
@@ -1300,7 +1300,7 @@ describe('src/cy/commands/net_stubbing', function () {
           }).wait('@getTimeout').then(function (xhr) {
             expect(onloaded).to.be.true
 
-            return expect(xhr.status).to.eq(200)
+            expect(xhr.status).to.eq(200)
           })
         })
 
@@ -1331,7 +1331,7 @@ describe('src/cy/commands/net_stubbing', function () {
             expect(onloaded).to.be.true
             expect(onreadystatechanged).to.be.true
 
-            return expect(xhr.status).to.eq(200)
+            expect(xhr.status).to.eq(200)
           })
         })
 
@@ -1347,7 +1347,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).wait('@getFoo').then(function (xhr) {
               expect(xhr.url).to.eq('http://localhost:3500/foo')
 
-              return expect(this.open).to.be.calledWith('GET', '/foo')
+              expect(this.open).to.be.calledWith('GET', '/foo')
             })
           })
 
@@ -1360,7 +1360,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).wait('@getFoo').then(function (xhr) {
               expect(xhr.url).to.eq('http://localhost:3500/fixtures/foo')
 
-              return expect(this.open).to.be.calledWith('GET', 'foo')
+              expect(this.open).to.be.calledWith('GET', 'foo')
             })
           })
 
@@ -1376,7 +1376,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).wait('@getFoo').then(function (xhr) {
               expect(xhr.url).to.eq('http://localhost:3500/foo')
 
-              return expect(this.open).to.be.calledWith('GET', 'foo')
+              expect(this.open).to.be.calledWith('GET', 'foo')
             })
           })
 
@@ -1392,7 +1392,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).wait('@getFoo').then(function (xhr) {
               expect(xhr.url).to.eq('http://localhost:3500/nested/foo')
 
-              return expect(this.open).to.be.calledWith('GET', '../foo')
+              expect(this.open).to.be.calledWith('GET', '../foo')
             })
           })
 
@@ -1405,7 +1405,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).wait('@getFoo').then(function (xhr) {
               expect(xhr.url).to.eq('http://localhost:3501/foo')
 
-              return expect(this.open).to.be.calledWith('GET', 'http://localhost:3501/foo')
+              expect(this.open).to.be.calledWith('GET', 'http://localhost:3501/foo')
             })
           })
 
@@ -1421,7 +1421,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).wait('@getFoo').then(function (xhr) {
               expect(xhr.url).to.eq('http://localhost:9999/foo')
 
-              return expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:9999/foo')
+              expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:9999/foo')
             })
           })
 
@@ -1434,7 +1434,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).wait('@getFoo').then(function (xhr) {
               expect(xhr.url).to.eq('http://localhost:3500/foo')
 
-              return expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/foo')
+              expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/foo')
             })
           })
 
@@ -1452,7 +1452,7 @@ describe('src/cy/commands/net_stubbing', function () {
                     foo: 'bar',
                   }),
                 }).fail(function () {
-                  return resolve()
+                  resolve()
                 })
               })
             }).then(function () {
@@ -1461,7 +1461,7 @@ describe('src/cy/commands/net_stubbing', function () {
               xhr = cy.state('responses')[0].xhr
               expect(xhr.url).to.eq('http://localhost:3500/foo')
 
-              return expect(this.open).to.be.calledWith('POST', '/__cypress/xhrs/http://localhost:3500/foo')
+              expect(this.open).to.be.calledWith('POST', '/__cypress/xhrs/http://localhost:3500/foo')
             })
           })
 
@@ -1480,7 +1480,7 @@ describe('src/cy/commands/net_stubbing', function () {
               xhr = cy.state('responses')[0].xhr
               expect(xhr.url).to.eq('http://localhost:3500/fixtures/phones/phones.json')
 
-              return expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/fixtures/phones/phones.json')
+              expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/fixtures/phones/phones.json')
             })
           })
 
@@ -1490,7 +1490,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return new Promise(function (resolve) {
                 return win.$.get('http://www.google.com/phones/phones.json').fail(function () {
-                  return resolve()
+                  resolve()
                 })
               })
             }).then(function () {
@@ -1499,7 +1499,7 @@ describe('src/cy/commands/net_stubbing', function () {
               xhr = cy.state('requests')[0].xhr
               expect(xhr.url).to.eq('http://www.google.com/phones/phones.json')
 
-              return expect(this.open).to.be.calledWith('GET', 'http://www.google.com/phones/phones.json')
+              expect(this.open).to.be.calledWith('GET', 'http://www.google.com/phones/phones.json')
             })
           })
 
@@ -1518,7 +1518,7 @@ describe('src/cy/commands/net_stubbing', function () {
               xhr = cy.state('responses')[0].xhr
               expect(xhr.url).to.eq('http://www.google.com/phones/phones.json')
 
-              return expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://www.google.com/phones/phones.json')
+              expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://www.google.com/phones/phones.json')
             })
           })
 
@@ -1534,7 +1534,7 @@ describe('src/cy/commands/net_stubbing', function () {
               xhr = cy.state('responses')[0].xhr
               expect(xhr.url).to.eq('http://localhost:3501/fixtures/app.json')
 
-              return expect(this.open).to.be.calledWith('GET', 'http://localhost:3501/fixtures/app.json')
+              expect(this.open).to.be.calledWith('GET', 'http://localhost:3501/fixtures/app.json')
             })
           })
 
@@ -1555,7 +1555,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).wait('@getFoo').then(function (xhr) {
               expect(xhr.url).to.eq('http://localhost:3500/foo')
 
-              return expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/foo')
+              expect(this.open).to.be.calledWith('GET', '/__cypress/xhrs/http://localhost:3500/foo')
             })
           })
 
@@ -1575,7 +1575,7 @@ describe('src/cy/commands/net_stubbing', function () {
               expect(xhr.url).to.eq('http://localhost:3500/users?q=(id eq 123)')
               url = encodeURI('users?q=(id eq 123)')
 
-              return expect(this.open).to.be.calledWith('GET', `/__cypress/xhrs/http://localhost:3500/${url}`)
+              expect(this.open).to.be.calledWith('GET', `/__cypress/xhrs/http://localhost:3500/${url}`)
             })
           })
 
@@ -1592,7 +1592,7 @@ describe('src/cy/commands/net_stubbing', function () {
               expect(xhr.url).to.eq('http://localhost:3500/accounts?page=1&$filter=(rowStatus+eq+1)&$orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true')
               url = 'accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true'
 
-              return expect(this.open).to.be.calledWith('GET', `/__cypress/xhrs/http://localhost:3500/${url}`)
+              expect(this.open).to.be.calledWith('GET', `/__cypress/xhrs/http://localhost:3500/${url}`)
             })
           })
         })
@@ -1713,7 +1713,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return null
             }).wait('@getBuffer').then(function (xhr) {
-              return expect(xhr.responseBody.toString()).to.eq('[object ArrayBuffer]')
+              expect(xhr.responseBody.toString()).to.eq('[object ArrayBuffer]')
             })
           })
 
@@ -1805,7 +1805,7 @@ describe('src/cy/commands/net_stubbing', function () {
                 expect(snapshots.length).to.eq(1)
                 expect(snapshots[0].name).to.eq('request')
 
-                return expect(snapshots[0].body).to.be.an('object')
+                expect(snapshots[0].body).to.be.an('object')
               })
             })
 
@@ -1837,13 +1837,13 @@ describe('src/cy/commands/net_stubbing', function () {
                 return _.each(logs, function (log) {
                   expect(log.get('name')).to.eq('xhr')
 
-                  return expect(log.get('end')).not.to.be.true
+                  expect(log.get('end')).not.to.be.true
                 })
               }).wait(['@getFoo', '@getFoo', '@getFoo']).then(function () {
                 return _.each(logs, function (log) {
                   expect(log.get('name')).to.eq('xhr')
 
-                  return expect(log.get('ended')).to.be.true
+                  expect(log.get('ended')).to.be.true
                 })
               })
             })
@@ -1879,10 +1879,10 @@ describe('src/cy/commands/net_stubbing', function () {
                 expect(cy.state('requests').length).to.eq(2)
 
                 // the abort should have set its response
-                return expect(cy.state('responses').length).to.eq(1)
+                expect(cy.state('responses').length).to.eq(1)
               }).wait(['@getFoo', '@getFoo']).then(function () {
                 // should not re-snapshot after the response
-                return expect(xhrs[0].get('snapshots').length).to.eq(2)
+                expect(xhrs[0].get('snapshots').length).to.eq(2)
               })
             })
 
@@ -1927,7 +1927,7 @@ describe('src/cy/commands/net_stubbing', function () {
               lastLog = this.lastLog
 
               return _.each(obj, (value, key) => {
-                return expect(lastLog.get(key)).to.deep.eq(value, `expected key: ${key} to eq value: ${value}`)
+                expect(lastLog.get(key)).to.deep.eq(value, `expected key: ${key} to eq value: ${value}`)
               })
             })
 
@@ -1936,7 +1936,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               lastLog = this.lastLog
 
-              return expect(lastLog.get('state')).to.eq('passed')
+              expect(lastLog.get('state')).to.eq('passed')
             })
 
             it('snapshots again', function () {
@@ -1948,7 +1948,7 @@ describe('src/cy/commands/net_stubbing', function () {
               expect(lastLog.get('snapshots')[0].body).to.be.an('object')
               expect(lastLog.get('snapshots')[1].name).to.eq('response')
 
-              return expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+              expect(lastLog.get('snapshots')[1].body).to.be.an('object')
             })
           })
         })
@@ -2034,7 +2034,7 @@ describe('src/cy/commands/net_stubbing', function () {
       // context('#server', function () {
       //   it('sets serverIsStubbed', function () {
       //     cy.server().then(function () {
-      //       return expect(cy.state('serverIsStubbed')).to.be.true
+      //       expect(cy.state('serverIsStubbed')).to.be.true
       //     })
       //   })
 
@@ -2042,7 +2042,7 @@ describe('src/cy/commands/net_stubbing', function () {
       //     cy.server({
       //       enable: false,
       //     }).then(function () {
-      //       return expect(cy.state('serverIsStubbed')).to.be.false
+      //       expect(cy.state('serverIsStubbed')).to.be.false
       //     })
       //   })
 
@@ -2052,7 +2052,7 @@ describe('src/cy/commands/net_stubbing', function () {
       //     set = cy.spy(cy.state('server'), 'set')
 
       //     cy.server().then(function () {
-      //       return expect(set).to.be.calledWithExactly({
+      //       expect(set).to.be.calledWithExactly({
       //         enable: true,
       //       })
       //     })
@@ -2070,7 +2070,7 @@ describe('src/cy/commands/net_stubbing', function () {
       //     }).wait('@getJSON').its('responseBody').should('deep.eq', {}).server({
       //       enable: false,
       //     }).then(function () {
-      //       return expect(set).to.be.calledWithExactly({
+      //       expect(set).to.be.calledWithExactly({
       //         enable: false,
       //       })
       //     }).window().then(function (win) {
@@ -2082,7 +2082,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
       //   it('sets delay at 0 by default', function () {
       //     cy.server().route('*', {}).then(function () {
-      //       return expect(cy.state('server').getRoutes()[0].delay).to.eq(0)
+      //       expect(cy.state('server').getRoutes()[0].delay).to.eq(0)
       //     })
       //   })
 
@@ -2090,7 +2090,7 @@ describe('src/cy/commands/net_stubbing', function () {
       //     cy.server({
       //       delay: 100,
       //     }).route('*', {}).then(function () {
-      //       return expect(cy.state('server').getRoutes()[0].delay).to.eq(100)
+      //       expect(cy.state('server').getRoutes()[0].delay).to.eq(100)
       //     })
       //   })
 
@@ -2168,7 +2168,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
       //           lastLog = this.lastLog
       //           _.each(obj, (value, key) => {
-      //             return expect(lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
+      //             expect(lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
       //           })
 
       //           done()
@@ -2192,7 +2192,7 @@ describe('src/cy/commands/net_stubbing', function () {
             options = this.route.getCall(0).args[0]
 
             return _.each(opts, function (value, key) {
-              return expect(options[key]).to.deep.eq(opts[key], `failed on property: (${key})`)
+              expect(options[key]).to.deep.eq(opts[key], `failed on property: (${key})`)
             })
           }
 
@@ -2227,7 +2227,7 @@ describe('src/cy/commands/net_stubbing', function () {
           cy.route('POST', /foo/, {}).as('getFoo').route(/bar/, {}).as('getBar').then(function () {
             expect(this.route.firstCall.args[0].method).to.eq('POST')
 
-            return expect(this.route.secondCall.args[0].method).to.eq('GET')
+            expect(this.route.secondCall.args[0].method).to.eq('GET')
           })
         })
 
@@ -2449,7 +2449,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           ctx = this
           getUsers = function () {
-            return expect(this === ctx).to.be.true
+            expect(this === ctx).to.be.true
           }
 
           cy.route(/users/, getUsers)
@@ -2461,7 +2461,7 @@ describe('src/cy/commands/net_stubbing', function () {
           getUsers = function (opts) {
             expect(opts).to.be.an('object')
 
-            return expect(opts.method).to.eq('GET')
+            expect(opts.method).to.eq('GET')
           }
 
           cy.route(/users/, getUsers)
@@ -2474,7 +2474,7 @@ describe('src/cy/commands/net_stubbing', function () {
           getUsers = function () {
             return new Promise(function (resolve) {
               return setTimeout(function () {
-                return resolve(users)
+                resolve(users)
               }, 10)
             })
           }
@@ -2535,7 +2535,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
             return null
           }).wait('@getFoo').then(function (xhr) {
-            return expect(xhr.responseBody).to.eq('foo bar baz')
+            expect(xhr.responseBody).to.eq('foo bar baz')
           })
         })
 
@@ -2548,7 +2548,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
             return null
           }).wait('@getFoo').then(function (xhr) {
-            return expect(xhr.responseBody).to.eq('foo bar baz')
+            expect(xhr.responseBody).to.eq('foo bar baz')
           })
         })
 
@@ -2557,7 +2557,7 @@ describe('src/cy/commands/net_stubbing', function () {
           cy.spy(Cypress.utils, 'warning')
 
           cy.route('GET', '/foo%25bar').then(function () {
-            return expect(Cypress.utils.warning).to.be.calledWith('A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?')
+            expect(Cypress.utils.warning).to.be.calledWith('A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?')
           })
         })
 
@@ -2565,7 +2565,7 @@ describe('src/cy/commands/net_stubbing', function () {
           cy.spy(Cypress.utils, 'warning')
 
           cy.route('GET', 'http://example.com/%E0%A4%A').then(function () {
-            return expect(Cypress.utils.warning).to.not.be.called
+            expect(Cypress.utils.warning).to.not.be.called
           })
         })
 
@@ -2578,7 +2578,7 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.server({
               force404: false,
             }).then(function () {
-              return expect(this.warn).to.be.calledWith('Cypress Warning: Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.')
+              expect(this.warn).to.be.calledWith('Cypress Warning: Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.')
             })
           })
 
@@ -2586,7 +2586,7 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.server({
               force404: true,
             }).then(function () {
-              return expect(this.warn).not.to.be.called
+              expect(this.warn).not.to.be.called
             })
           })
         })
@@ -2615,7 +2615,7 @@ describe('src/cy/commands/net_stubbing', function () {
                 foo: 'bar',
               })
 
-              return expect(xhr.responseBody).to.deep.eq(this.foo)
+              expect(xhr.responseBody).to.deep.eq(this.foo)
             })
           })
 
@@ -2637,7 +2637,7 @@ describe('src/cy/commands/net_stubbing', function () {
                 foo: 'bar',
               })
 
-              return expect(xhr.responseBody).to.deep.eq(this.foo)
+              expect(xhr.responseBody).to.deep.eq(this.foo)
             })
           })
 
@@ -2656,7 +2656,7 @@ describe('src/cy/commands/net_stubbing', function () {
               expect(log.get('displayName')).to.eq('xhr')
               expect(log.get('alias')).to.eq('getFoo')
 
-              return expect(xhr.responseBody).to.deep.eq({
+              expect(xhr.responseBody).to.deep.eq({
                 some: 'json',
                 foo: {
                   bar: 'baz',
@@ -2867,7 +2867,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               lastLog = this.lastLog
 
-              return expect(lastLog.get('name')).to.eq('route')
+              expect(lastLog.get('name')).to.eq('route')
             })
           })
 
@@ -2877,7 +2877,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               lastLog = this.lastLog
 
-              return expect(lastLog.get('url')).to.eq('*')
+              expect(lastLog.get('url')).to.eq('*')
             })
           })
 
@@ -2885,7 +2885,7 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.route('*', {
               foo: 'bar',
             }).as('foo').then(function () {
-              return expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+              expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
                 Command: 'route',
                 Method: 'GET',
                 URL: '*',
@@ -2908,7 +2908,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
                 lastLog = this.lastLog
 
-                return expect(lastLog.get('numResponses')).to.eq(0)
+                expect(lastLog.get('numResponses')).to.eq(0)
               })
             })
 
@@ -2916,7 +2916,7 @@ describe('src/cy/commands/net_stubbing', function () {
               cy.route(/foo/, {}).window().then(function (win) {
                 return win.$.get('/foo')
               }).then(function () {
-                return expect(this.lastLog.get('numResponses')).to.eq(1)
+                expect(this.lastLog.get('numResponses')).to.eq(1)
               })
             })
 
@@ -2924,7 +2924,7 @@ describe('src/cy/commands/net_stubbing', function () {
               cy.route(/foo/, {}).window().then(function (win) {
                 return Promise.all([win.$.get('/foo'), win.$.get('/foo'), win.$.get('/foo')])
               }).then(function () {
-                return expect(this.lastLog.get('numResponses')).to.eq(3)
+                expect(this.lastLog.get('numResponses')).to.eq(3)
               })
             })
           })
@@ -2952,7 +2952,7 @@ describe('src/cy/commands/net_stubbing', function () {
                 return win.$.get('/foo').done(resolve)
               })
             }).then(function () {
-              return expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('Yes')
+              expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('Yes')
             })
           })
         })
@@ -2970,7 +2970,7 @@ describe('src/cy/commands/net_stubbing', function () {
                     foo: 'bar',
                   }),
                 }).fail(function () {
-                  return resolve()
+                  resolve()
                 })
               })
             })
@@ -2984,7 +2984,7 @@ describe('src/cy/commands/net_stubbing', function () {
               expect(consoleProps.Duration).to.be.a('number')
               expect(consoleProps.Duration).to.be.gt(1)
 
-              return expect(consoleProps.Duration).to.be.lt(1000)
+              expect(consoleProps.Duration).to.be.lt(1000)
             })
           })
 
@@ -2995,7 +2995,7 @@ describe('src/cy/commands/net_stubbing', function () {
               xhr = cy.state('responses')[0].xhr
               consoleProps = _.pick(this.lastLog.invoke('consoleProps'), 'Method', 'Status', 'URL', 'XHR')
 
-              return expect(consoleProps).to.deep.eq({
+              expect(consoleProps).to.deep.eq({
                 Method: 'POST',
                 Status: '404 (Not Found)',
                 URL: 'http://localhost:3500/foo',
@@ -3005,7 +3005,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('says Stubbed: Yes when sent 404 back', function () {
-            return expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('Yes')
+            expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('Yes')
           })
         })
 
@@ -3014,7 +3014,7 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.server().window().then(function (win) {
               return win.$.get('/fixtures/app.js')
             }).then(function (resp) {
-              return expect(resp).to.eq('{ \'bar\' }\n')
+              expect(resp).to.eq('{ \'bar\' }\n')
             })
           })
         })
@@ -3036,7 +3036,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               consoleProps = this.lastLog.invoke('consoleProps')
 
-              return expect(consoleProps.Note).to.eq('This request did not match any of your routes. It was automatically sent back \'404\'. Setting cy.server({force404: false}) will turn off this behavior.')
+              expect(consoleProps.Note).to.eq('This request did not match any of your routes. It was automatically sent back \'404\'. Setting cy.server({force404: false}) will turn off this behavior.')
             })
           })
         })
@@ -3049,7 +3049,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('says Stubbed: No when request isnt forced 404', function () {
-            return expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('No')
+            expect(this.lastLog.invoke('consoleProps').Stubbed).to.eq('No')
           })
 
           it('logs request + response headers', function () {
@@ -3059,7 +3059,7 @@ describe('src/cy/commands/net_stubbing', function () {
               consoleProps = this.lastLog.invoke('consoleProps')
               expect(consoleProps.Request.headers).to.be.an('object')
 
-              return expect(consoleProps.Response.headers).to.be.an('object')
+              expect(consoleProps.Response.headers).to.be.an('object')
             })
           })
 
@@ -3070,7 +3070,7 @@ describe('src/cy/commands/net_stubbing', function () {
               xhr = cy.state('responses')[0].xhr
               consoleProps = _.pick(this.lastLog.invoke('consoleProps'), 'Method', 'Status', 'URL', 'XHR')
 
-              return expect(consoleProps).to.deep.eq({
+              expect(consoleProps).to.deep.eq({
                 Method: 'GET',
                 URL: 'http://localhost:3500/fixtures/app.json',
                 Status: '200 (OK)',
@@ -3085,7 +3085,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               consoleProps = this.lastLog.invoke('consoleProps')
 
-              return expect(consoleProps.Response.body).to.deep.eq({
+              expect(consoleProps.Response.body).to.deep.eq({
                 some: 'json',
                 foo: {
                   bar: 'baz',
@@ -3104,7 +3104,7 @@ describe('src/cy/commands/net_stubbing', function () {
               expect(group.label).to.be.false
               expect(group.items[0]).to.be.a('string')
 
-              return expect(group.items[0].split('\n').length).to.gt(1)
+              expect(group.items[0].split('\n').length).to.gt(1)
             })
           })
         })
@@ -3135,7 +3135,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           it('sends correct message', function () {
             cy.then(function () {
-              return expect(this.lastLog.invoke('renderProps').message).to.equal('GET 200 /foo')
+              expect(this.lastLog.invoke('renderProps').message).to.equal('GET 200 /foo')
             })
           })
         })
@@ -3151,7 +3151,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           it('sends correct indicator', function () {
             cy.then(function () {
-              return expect(this.lastLog.invoke('renderProps').indicator).to.equal('successful')
+              expect(this.lastLog.invoke('renderProps').indicator).to.equal('successful')
             })
           })
         })
@@ -3171,11 +3171,11 @@ describe('src/cy/commands/net_stubbing', function () {
 
           // FAILING
           it('sends correct message', function () {
-            return expect(this.lastLog.invoke('renderProps').message).to.equal('GET --- /foo')
+            expect(this.lastLog.invoke('renderProps').message).to.equal('GET --- /foo')
           })
 
           it('sends correct indicator', function () {
-            return expect(this.lastLog.invoke('renderProps').indicator).to.equal('pending')
+            expect(this.lastLog.invoke('renderProps').indicator).to.equal('pending')
           })
         })
 
@@ -3188,7 +3188,7 @@ describe('src/cy/commands/net_stubbing', function () {
             }).window().then(function (win) {
               return new Promise(function (resolve) {
                 return win.$.get('/foo').fail(function () {
-                  return resolve()
+                  resolve()
                 })
               })
             })
@@ -3196,7 +3196,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           it('sends correct indicator', function () {
             cy.then(function () {
-              return expect(this.lastLog.invoke('renderProps').indicator).to.equal('bad')
+              expect(this.lastLog.invoke('renderProps').indicator).to.equal('bad')
             })
           })
         })
@@ -3226,7 +3226,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         it('has not aborted the xhrs', function () {
           return _.each(xhrs, function (xhr) {
-            return expect(xhr.aborted).not.to.be.false
+            expect(xhr.aborted).not.to.be.false
           })
         })
 
@@ -3238,7 +3238,7 @@ describe('src/cy/commands/net_stubbing', function () {
             xhr.open('GET', '/timeout?ms=0')
             xhr.abort()
 
-            return expect(xhr.aborted).to.be.true
+            expect(xhr.aborted).to.be.true
           })
         })
 
@@ -3269,7 +3269,7 @@ describe('src/cy/commands/net_stubbing', function () {
                 indicator: 'aborted',
               })
 
-              return expect(xhr.aborted).to.be.true
+              expect(xhr.aborted).to.be.true
             })
           })
         })
@@ -3299,7 +3299,7 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.wrap(null).should(function () {
               expect(log.get('state')).to.eq('failed')
 
-              return expect(xhr.aborted).to.be.true
+              expect(xhr.aborted).to.be.true
             })
           })
         })
@@ -3327,7 +3327,7 @@ describe('src/cy/commands/net_stubbing', function () {
                 xhr.abort()
                 xhr.foo = 'bar'
 
-                return resolve(xhr)
+                resolve(xhr)
               }
 
               return xhr.send()
@@ -3340,7 +3340,7 @@ describe('src/cy/commands/net_stubbing', function () {
               expect(xhr.foo).to.eq('bar')
               expect(xhr.aborted).not.to.be.true
 
-              return expect(log.get('state')).to.eq('passed')
+              expect(log.get('state')).to.eq('passed')
             })
           })
         })
@@ -3364,7 +3364,7 @@ describe('src/cy/commands/net_stubbing', function () {
             })
           }).reload().then(function () {
             return _.each(xhrs, function (xhr) {
-              return expect(xhr.canceled).to.be.true
+              expect(xhr.canceled).to.be.true
             })
           })
         })
