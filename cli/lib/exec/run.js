@@ -1,14 +1,15 @@
 const _ = require('lodash')
-const debug = require('debug')('cypress:cli')
+const debug = require('debug')('cypress:cli:run')
 
 const util = require('../util')
 const spawn = require('./spawn')
 const verify = require('../tasks/verify')
+const { exitWithError, errors } = require('../errors')
 
 // maps options collected by the CLI
 // and forms list of CLI arguments to the server
 const processRunOptions = (options = {}) => {
-  debug('processing run options')
+  debug('processing run options %o', options)
 
   const args = ['--run-project', options.project]
 
@@ -50,6 +51,19 @@ const processRunOptions = (options = {}) => {
 
   if (options.headed) {
     args.push('--headed', options.headed)
+  }
+
+  if (options.headless) {
+    if (options.headed) {
+      // throw this error synchronously, it will be caught later on and
+      // the details will be propagated to the promise chain
+      const err = new Error()
+
+      err.details = errors.incompatibleHeadlessFlags
+      throw err
+    }
+
+    args.push('--headed', !options.headless)
   }
 
   // if key is set use that - else attempt to find it by environment variable
@@ -116,7 +130,17 @@ module.exports = {
     })
 
     function run () {
-      const args = processRunOptions(options)
+      let args
+
+      try {
+        args = processRunOptions(options)
+      } catch (err) {
+        if (err.details) {
+          return exitWithError(err.details)()
+        }
+
+        throw err
+      }
 
       debug('run to spawn.start args %j', args)
 
