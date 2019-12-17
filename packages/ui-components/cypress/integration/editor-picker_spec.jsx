@@ -81,7 +81,8 @@ describe('<EditorPicker />', () => {
       cy.contains('Other').find('input[type="text"]').should('have.value', '/path/to/my/editor')
     })
 
-    it('calls onSelect for every character typed', () => {
+    describe('typing path', () => {
+      const path = '/path/to/my/editor'
       const Wrapper = observer(({ onSelectSpy }) => {
         const state = useLocalStore(() => ({
           editors: defaultProps.editors,
@@ -111,18 +112,30 @@ describe('<EditorPicker />', () => {
         )
       })
 
-      const onSelect = cy.stub()
-      const path = '/path/to/my/editor'
+      it('trims the path', () => {
+        const onSelect = cy.stub()
 
-      cy.render(render, <Wrapper onSelectSpy={onSelect} />)
+        cy.render(render, <Wrapper onSelectSpy={onSelect} />)
 
-      _.each(path.split(''), (letter, i) => {
-        const pathSoFar = path.substring(0, i + 1)
-
-        cy.contains('Other').find('input[type="text"]').type(letter, { delay: 0 })
+        cy.contains('Other').find('input[type="text"]').type(`   ${path}  `, { delay: 0 })
         .should(() => {
-          expect(onSelect.lastCall.args[0].id).to.equal('other')
-          expect(onSelect.lastCall.args[0].openerId).to.equal(pathSoFar)
+          expect(onSelect.lastCall.args[0].openerId).to.equal(path)
+        })
+      })
+
+      it('calls onSelect for every character typed', () => {
+        const onSelect = cy.stub()
+
+        cy.render(render, <Wrapper onSelectSpy={onSelect} />)
+
+        _.each(path.split(''), (letter, i) => {
+          const pathSoFar = path.substring(0, i + 1)
+
+          cy.contains('Other').find('input[type="text"]').type(letter, { delay: 0 })
+          .should(() => {
+            expect(onSelect.lastCall.args[0].id).to.equal('other')
+            expect(onSelect.lastCall.args[0].openerId).to.equal(pathSoFar)
+          })
         })
       })
     })

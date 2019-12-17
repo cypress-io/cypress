@@ -16,7 +16,7 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
   }
 
   const updateOtherPath = (event) => {
-    onUpdateOtherPath(event.target.value)
+    onUpdateOtherPath(_.trim(event.target.value || ''))
   }
 
   // TODO: handle no editors besides 'Other' as a special case
