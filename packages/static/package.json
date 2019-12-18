@@ -6,6 +6,7 @@
   "scripts": {
     "prebuild": "npm run check-deps-pre",
     "build": "gulp build",
+    "build-prod": "npm run build",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
@@ -15,7 +16,7 @@
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
-    "gulp": "3.9.1"
+    "gulp": "4.0.2"
   },
   "files": [
     "dist",

@@ -1,0 +1,11 @@
+{
+  "parser": "espree",
+  "rules": {
+    "no-empty": "off",
+    "no-undef": "off",
+    "no-cond-assign": "off",
+    "semi": "off",
+    "brace-style": "off",
+    "no-case-declarations": "off"
+  }
+}

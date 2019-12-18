@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+	<style id="compiled-css" type="text/css">
+    div {
+      -webkit-transition: opacity 1s, background-color 0.5s;
+      transition: opacity 1s, background-color 0.5s;
+    }
+
+    .square {
+      width: 100px;
+      height: 100px;
+    }
+
+    .red {
+      background-color: red;
+    }
+
+    .blue {
+      background-color: blue;
+      opacity: 0;
+      display: none;
+      height: 50px;
+    }
+
+    .yellow {
+      background-color: yellow;
+    }
+
+    .green {
+      background-color: green;
+      margin-top: 10px;
+    }
+
+    .active {
+      opacity: 1;
+      display: inherit;
+    }
+
+    #sq6.hover {
+      margin-left: 100px;
+    }
+
+    button {
+      display: inherit;
+      position: relative;
+      margin: auto;
+      top: 15px;
+    }
+  </style>
+
+  <script type="text/javascript">
+    window.onload = function () {
+      const outer = document.getElementById('outer')
+      const inner = document.getElementById('inner')
+      const btn = document.getElementById('inner-btn')
+
+      function activate() {
+        inner.classList.add('active');
+      }
+
+      function deactivate() {
+        inner.classList.remove('active');
+      }
+
+      function setHover() {
+        // console.log('hover')
+        this.classList.add('hover');
+      }
+
+      function unsetHover() {
+        // console.log('unhover')
+        this.classList.remove('hover');
+      }
+
+      function color() {
+        if (outer.classList.contains('yellow')) {
+          outer.classList.remove('yellow');
+        } else {
+          outer.classList.add('yellow');
+        };
+      }
+
+      btn.addEventListener("click", color, false);
+      outer.addEventListener("mouseenter", activate, false);
+      outer.addEventListener("mouseleave", deactivate, false);
+
+      const sq3 = document.getElementById('sq3')
+
+      sq3.addEventListener('pointerover', () => {
+        sq3.remove()
+      })
+
+      const sq4 = document.getElementById('sq4')
+
+      sq4.addEventListener('pointerleave', (e) => {
+        sq4.style.position = 'absolute'
+        sq4.style.left = e.clientX - 50 + 'px'
+        sq4.style.top = e.clientY - 50 + 'px'
+        console.log(e)
+      })
+
+      const inp = document.getElementById('inp')
+
+      inp.addEventListener('pointerdown', (e) => {
+        e.preventDefault()
+      })
+
+      const sq6 = document.getElementById('sq6')
+
+      sq6.addEventListener("mouseenter", setHover);
+      sq6.addEventListener("mouseleave", unsetHover);
+
+    }
+  </script>
+</head>
+<body>
+  <div id="outer" class="red square">
+    <div id="inner" class="blue square">
+      <button id="inner-btn">CLICK</button>
+    </div>
+  </div>
+  <div class="square green"></div>
+  <div id="sq3" class="square yellow"></div>
+  <div id="sq4" class="square green"></div>
+  <input id="inp" />
+  <div id="sq6" class="square red"></div>
+</body>
+</html>

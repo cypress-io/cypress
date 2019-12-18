@@ -49,7 +49,17 @@ describe('Global Mode', function () {
   })
 
   it('shows cypress logo in nav', () => {
-    cy.get('.nav .logo img').should('have.attr', 'src', 'img/cypress-inverse.png')
+    cy.get('.nav .logo img')
+    .should('have.attr', 'src', './img/cypress-inverse.png')
+    .then(($el) => {
+      return new Cypress.Promise((resolve, reject) => {
+        const img = new Image()
+
+        img.onerror = () => reject(new Error `img failed to load src: ${img.src}`)
+        img.onload = resolve
+        img.src = $el[0].src
+      })
+    })
   })
 
   it('shows notice about using Cypress locally', () => {
@@ -161,7 +171,7 @@ describe('Global Mode', function () {
     })
 
     it('displays Back button', () => {
-      cy.get('.left-nav a').invoke('text').should('include', 'Back')
+      cy.get('.main-nav .nav:first-child a').invoke('text').should('include', 'Back')
     })
 
     it('sets title to project name', () => {

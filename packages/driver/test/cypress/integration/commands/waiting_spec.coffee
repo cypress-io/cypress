@@ -632,6 +632,7 @@ describe "src/cy/commands/waiting", ->
           .wait("@getUsers").then (xhr) ->
             expect(xhr.url).to.include "/users?num=4"
             expect(xhr.responseBody).to.deep.eq resp
+      null
 
     describe "errors", ->
       describe "invalid 1st argument", ->

@@ -14,11 +14,11 @@ class NoSpec extends Component {
           <p className='muted'>Choose a test to run from the desktop application.</p>
           <p>
             <button onClick={() => eventManager.focusTests()}>
-              <i className='fa fa-chevron-left'></i>
+              <i className='fas fa-chevron-left'></i>
               View All Tests
             </button>
           </p>
-          <img src={`/${this.props.config.namespace}/runner/no-spec-instructions.png`} />
+          <img src={require('../../static/no-spec-instructions.png')} />
         </div>
         {this.props.children}
       </div>
