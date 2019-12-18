@@ -34,6 +34,13 @@
       }
     }
 
+    &.left-nav {
+      i {
+        font-size: 11px;
+        color: #555;
+      }
+    }
+
     > li {
       > div,
       > a {
@@ -41,6 +48,8 @@
         color: #444;
         padding: 1px 20px 0 20px;
         line-height: 35px;
+
+
       }
 
       > a  {
@@ -69,12 +78,20 @@
       }
     }
   }
+
+  .browsers.nav {
+    i {
+      font-size: 13px;
+
+      &.fa-firefox {
+        font-size: 14px;
+      }
+    }
+  }
 }
 
 
-.navbar-right {
-  margin-right: 0;
-
+.nav {
   .user-avatar {
     position: relative;
     top: -1px;
@@ -121,6 +138,10 @@
       }
     }
 
+    i {
+      font-size: 12px;
+    }
+
     > li > div,
     > li > a,
     > li > span > a  {
@@ -148,10 +169,26 @@
     display: inline-block;
   }
 
-  .chrome > i { color: #1aa15f; }
-  .canary > i { color: #e4b721; }
-  .chromium > i { color: #829ac3; }
-  .electron > i { color: #777; }
+  .browser-icon { 
+    color: #4573d9; 
+  }
+
+  .chrome > .browser-icon { 
+    color: #1da261; 
+  }
+  .canary > .browser-icon { 
+    color: #f29b14; 
+  }
+  .chromium > .browser-icon { 
+    color: #4573d9; 
+  }
+  .electron > .browser-icon { 
+    color: #2b2e3a; 
+  }
+  .firefox > .browser-icon { 
+    color: #ff720d; 
+  }
+
 
   .dropdown-menu {
     left: auto;

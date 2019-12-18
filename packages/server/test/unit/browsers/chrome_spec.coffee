@@ -12,19 +12,49 @@ describe "lib/browsers/chrome", ->
   context "#open", ->
     beforeEach ->
       @args = []
+      # mock CRI client during testing
+      @criClient = {
+        ensureMinimumProtocolVersion: sinon.stub().resolves()
+        send: sinon.stub().resolves()
+        Page: {
+          screencastFrame: sinon.stub().returns()
+        },
+        close: sinon.stub().resolves()
+      }
+      @automation = {
+        use: sinon.stub().returns()
+      }
+      # mock launched browser child process object
+      @launchedBrowser = {
+        kill: sinon.stub().returns()
+      }
 
       sinon.stub(chrome, "_getArgs").returns(@args)
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
+      sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(@criClient)
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
-      sinon.stub(utils, "launch")
+      sinon.stub(utils, "launch").resolves(@launchedBrowser)
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
+      # port for Chrome remote interface communication
+      sinon.stub(utils, "getPort").resolves(50505)
+
+    afterEach ->
+      expect(@criClient.ensureMinimumProtocolVersion).to.be.calledOnce
+
+    it "focuses on the page and calls CRI Page.visit", ->
+      chrome.open("chrome", "http://", {}, @automation)
+      .then =>
+        expect(utils.getPort).to.have.been.calledOnce # to get remote interface port
+        expect(@criClient.send).to.have.been.calledTwice
+        expect(@criClient.send).to.have.been.calledWith("Page.bringToFront")
+        expect(@criClient.send).to.have.been.calledWith("Page.navigate")
 
     it "is noop without before:browser:launch", ->
       plugins.has.returns(false)
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then ->
         expect(plugins.execute).not.to.be.called
 
@@ -32,9 +62,28 @@ describe "lib/browsers/chrome", ->
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then =>
-        expect(utils.launch).to.be.calledWith("chrome", "http://", @args)
+        # to initialize remote interface client and prepare for true tests
+        # we load the browser with blank page first
+        expect(utils.launch).to.be.calledWith("chrome", "about:blank", @args)
+
+    it "does not load extension in headless mode", ->
+      plugins.has.returns(false)
+      chrome._writeExtension.restore()
+
+      pathToTheme = extension.getPathToTheme()
+
+      chrome.open({ isHeadless: true, isHeaded: false }, "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.deep.eq([
+          "--headless"
+          "--remote-debugging-port=50505"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
 
     it "normalizes --load-extension if provided in plugin", ->
       plugins.has.returns(true)
@@ -47,7 +96,7 @@ describe "lib/browsers/chrome", ->
       ## this should get obliterated
       @args.push("--something=else")
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
@@ -69,7 +118,7 @@ describe "lib/browsers/chrome", ->
       ## this should get obliterated
       @args.push("--something=else")
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
@@ -89,7 +138,7 @@ describe "lib/browsers/chrome", ->
       })
       sinon.stub(fs, "writeJson")
 
-      chrome.open("chrome", "http://", {}, {})
+      chrome.open("chrome", "http://", {}, @automation)
       .then ->
         expect(fs.writeJson).to.be.calledWith("/profile/dir/Default/Preferences", {
           profile: {
@@ -97,6 +146,23 @@ describe "lib/browsers/chrome", ->
             exited_cleanly: true
           }
         })
+
+    it "calls cri client close on kill", ->
+      ## need a reference here since the stub will be monkey-patched
+      kill = @launchedBrowser.kill
+
+      chrome.open("chrome", "http://", {}, @automation)
+      .then =>
+        expect(@launchedBrowser.kill).to.be.a("function")
+        @launchedBrowser.kill()
+      .then =>
+        expect(@criClient.close).to.be.calledOnce
+        expect(kill).to.be.calledOnce
+
+    it "rejects if CDP version check fails", ->
+      @criClient.ensureMinimumProtocolVersion.rejects()
+
+      expect(chrome.open("chrome", "http://", {}, @automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
 
   context "#_getArgs", ->
     it "disables gpu when linux", ->
@@ -178,4 +244,3 @@ describe "lib/browsers/chrome", ->
       chromeVersionHasLoopback("71", false)
       chromeVersionHasLoopback("72", true)
       chromeVersionHasLoopback("73", true)
-

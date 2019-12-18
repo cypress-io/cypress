@@ -374,6 +374,35 @@ describe "lib/util/ci_provider", ->
       defaultBranch: "droneRepoBranch"
     })
 
+  it "github actions", ->
+    resetEnv = mockedEnv({
+      GITHUB_ACTIONS: "true"
+
+      GITHUB_WORKFLOW: "ciGitHubWorkflowName"
+      GITHUB_ACTION: "ciGitHubActionId"
+      GITHUB_EVENT_NAME: "ciEventName"
+
+      GITHUB_SHA: "ciCommitSha"
+      GITHUB_REF: "ciCommitRef"
+
+      # only for forked repos
+      GITHUB_HEAD_REF: "ciHeadRef"
+      GITHUB_BASE_REF: "ciBaseRef"
+    }, {clear: true})
+
+    expectsName("githubActions")
+    expectsCiParams({
+      githubAction: "ciGitHubActionId"
+      githubEventName: "ciEventName"
+      githubWorkflow: "ciGitHubWorkflowName"
+    })
+    expectsCommitParams({
+      sha: "ciCommitSha"
+      defaultBranch: "ciBaseRef"
+      remoteBranch: "ciHeadRef"
+      branch: "ciCommitRef"
+    })
+
   it "gitlab", ->
     resetEnv = mockedEnv({
       GITLAB_CI: "true"
@@ -431,6 +460,7 @@ describe "lib/util/ci_provider", ->
     }, {clear: true})
 
     expectsName("gitlab")
+
   it "goCD", ->
     resetEnv = mockedEnv({
       GO_SERVER_URL: "https://127.0.0.1:8154/go",
@@ -759,6 +789,7 @@ describe "lib/util/ci_provider", ->
     })
 
   it "travis", ->
+    ## normal non-PR build
     resetEnv = mockedEnv({
       TRAVIS: "true"
 
@@ -769,8 +800,9 @@ describe "lib/util/ci_provider", ->
       TRAVIS_EVENT_TYPE: "travisEventType"
       TRAVIS_COMMIT_RANGE: "travisCommitRange"
       TRAVIS_BUILD_NUMBER: "travisBuildNumber"
-      TRAVIS_PULL_REQUEST: "travisPullRequest"
-      TRAVIS_PULL_REQUEST_BRANCH: "travisPullRequestBranch"
+      TRAVIS_PULL_REQUEST: ""
+      TRAVIS_PULL_REQUEST_BRANCH: ""
+      TRAVIS_PULL_REQUEST_SHA: ""
 
       TRAVIS_COMMIT: "travisCommit"
       TRAVIS_BRANCH: "travisBranch"
@@ -786,12 +818,13 @@ describe "lib/util/ci_provider", ->
       travisEventType: "travisEventType"
       travisCommitRange: "travisCommitRange"
       travisBuildNumber: "travisBuildNumber"
-      travisPullRequest: "travisPullRequest"
-      travisPullRequestBranch: "travisPullRequestBranch"
+      travisPullRequest: ""
+      travisPullRequestBranch: ""
+      travisPullRequestSha: ""
     })
     expectsCommitParams({
       sha: "travisCommit"
-      branch: "travisPullRequestBranch"
+      branch: "travisBranch"
       message: "travisCommitMessage"
     })
 
@@ -802,6 +835,24 @@ describe "lib/util/ci_provider", ->
 
     expectsCommitParams({
       branch: "travisBranch"
+    })
+
+    ## Pull Request build
+    resetEnv = mockedEnv({
+      TRAVIS: "true"
+      TRAVIS_PULL_REQUEST: "travisPullRequest"
+      TRAVIS_PULL_REQUEST_BRANCH: "travisPullRequestBranch"
+      TRAVIS_PULL_REQUEST_SHA: "travisPullRequestSha"
+
+      TRAVIS_COMMIT: "travisCommit"
+      TRAVIS_BRANCH: "travisBranch"
+      TRAVIS_COMMIT_MESSAGE: "travisCommitMessage"
+    }, {clear: true})
+
+    expectsCommitParams({
+      sha: "travisPullRequestSha"
+      branch: "travisPullRequestBranch"
+      message: "travisCommitMessage"
     })
 
   it "wercker", ->

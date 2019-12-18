@@ -184,6 +184,7 @@ module.exports = {
       "projectId",
       "recordKey",
       "specPattern",
+      "tags"
     ])
 
     rp.post({
