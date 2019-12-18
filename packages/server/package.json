@@ -155,7 +155,7 @@
     "coffee-coverage": "3.0.1",
     "cors": "2.8.5",
     "cross-env": "6.0.3",
-    "devtools-protocol": "0.0.702485",
+    "devtools-protocol": "0.0.725104",
     "eol": "0.9.1",
     "eventsource": "1.0.7",
     "express-session": "1.16.1",
