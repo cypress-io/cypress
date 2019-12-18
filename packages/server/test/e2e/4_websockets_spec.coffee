@@ -30,9 +30,8 @@ describe "e2e websockets", ->
   })
 
   ## https://github.com/cypress-io/cypress/issues/556
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "websockets_spec.coffee"
-      snapshot: true
-      expectedExitCode: 0
-    })
+  e2e.it "passes", {
+    spec: "websockets_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }

@@ -7,7 +7,7 @@ exports['e2e system node uses system node when launching plugins file 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:        1.2.3                                                                          │
   │ Browser:        FooBrowser 88                                                                  │
-  │ Node Version:   vXXXXXX (/foo/bar/node)                                                        │
+  │ Node Version:   vX (/foo/bar/node)                                                             │
   │ Specs:          1 found (spec.js)                                                              │
   │ Searched:       cypress/integration/spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -15,7 +15,7 @@ exports['e2e system node uses system node when launching plugins file 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: spec.js...                                                                      (1 of 1) 
+  Running:  spec.js                                                                         (1 of 1)
 
 
   ✓ has expected resolvedNodePath and resolvedNodeVersion
@@ -25,23 +25,23 @@ exports['e2e system node uses system node when launching plugins file 1'] = `
 
   (Results)
 
-  ┌─────────────────────────┐
-  │ Tests:        1         │
-  │ Passing:      1         │
-  │ Failing:      0         │
-  │ Pending:      0         │
-  │ Skipped:      0         │
-  │ Screenshots:  0         │
-  │ Video:        true      │
-  │ Duration:     X seconds │
-  │ Spec Ran:     spec.js   │
-  └─────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     spec.js                                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/system-node/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                         (X second)
 
 
 ====================================================================================================
@@ -49,11 +49,11 @@ exports['e2e system node uses system node when launching plugins file 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ spec.js                                   XX:XX        1        1        -        -        - │
+  │ ✔  spec.js                                  XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

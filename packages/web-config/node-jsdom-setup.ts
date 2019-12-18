@@ -60,7 +60,6 @@ export const register = ({
   const Module = require('module')
 
   const overrideRequire = () => {
-
     const _load = Module._load
 
     Module._load = function (...args) {
@@ -84,7 +83,6 @@ export const register = ({
 
       return ret
     }
-
   }
 
   overrideRequire()

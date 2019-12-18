@@ -55,6 +55,8 @@ browserifyFile = (filePath) ->
   )
 
 describe "Routes", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -110,7 +112,7 @@ describe "Routes", ->
           rp(options)
 
         open = =>
-          project = Project("/path/to/project")
+          project = new Project("/path/to/project")
 
           Promise.all([
             ## open our https server
@@ -664,6 +666,23 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.deep.eq({test: "We’ll"})
+
+      context "deferred", ->
+        it "closes connection if no stub is received before a reset", ->
+          p = @rp({
+            url: "http://localhost:2020/__cypress/xhrs/users/1"
+            json: true
+            headers: {
+              "x-cypress-id": "foo1"
+              "x-cypress-responsedeferred": true
+            }
+          })
+
+          setTimeout =>
+            @server._xhrServer.reset()
+          , 100
+
+          expect(p).to.be.rejectedWith('Error: socket hang up')
 
       context "fixture", ->
         beforeEach ->
@@ -2434,8 +2453,7 @@ describe "Routes", ->
             "Cookie": "__cypress.initial=false"
           }
 
-          if type?
-            headers["Accept"] = type
+          headers["Accept"] = type
 
           @rp({
             url: "http://www.google.com/iframe"

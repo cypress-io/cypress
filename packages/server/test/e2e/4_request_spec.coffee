@@ -42,6 +42,10 @@ onServer2 = (app) ->
   app.get "/redirect", (req, res) ->
     res.redirect("/home")
 
+  app.get "/redirectWithCookie", (req, res) ->
+    res.cookie('foo', 'bar')
+    res.redirect("/home")
+
   app.get "/home", (req, res) ->
     res.send("<html>home</html>")
 
@@ -134,17 +138,11 @@ describe "e2e requests", ->
       "localhost:2293": 0
     }
 
-  [
-    "electron",
-    "chrome"
-  ].forEach (browser) ->
-    it "passes in #{browser}", ->
-      e2e.exec(@, {
-        spec: "request_spec.coffee"
-        snapshot: true
-        expectedExitCode: 0
-        browser
-      })
+  e2e.it "passes", {
+    spec: "request_spec.coffee"
+    snapshot: true
+    expectedExitCode: 0
+  }
 
   it "fails when network immediately fails", ->
     e2e.exec(@, {
