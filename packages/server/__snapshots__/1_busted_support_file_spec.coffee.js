@@ -13,7 +13,7 @@ exports['e2e busted support file passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: app_spec.coffee...                                                              (1 of 1) 
+  Running:  app_spec.coffee                                                                 (1 of 1)
 
 Oops...we found an error preparing this test file:
 
@@ -32,23 +32,23 @@ Fix the error in your code and re-run your tests.
 
   (Results)
 
-  ┌───────────────────────────────┐
-  │ Tests:        0               │
-  │ Passing:      0               │
-  │ Failing:      1               │
-  │ Pending:      0               │
-  │ Skipped:      0               │
-  │ Screenshots:  0               │
-  │ Video:        true            │
-  │ Duration:     X seconds       │
-  │ Spec Ran:     app_spec.coffee │
-  └───────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.coffee                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/busted-support-file/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
 
 
 ====================================================================================================
@@ -56,11 +56,11 @@ Fix the error in your code and re-run your tests.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ app_spec.coffee                           XX:XX        -        -        1        -        - │
+  │ ✖  app_spec.coffee                          XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `

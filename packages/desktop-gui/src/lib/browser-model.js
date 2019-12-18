@@ -1,4 +1,5 @@
 import { computed, observable } from 'mobx'
+import { browserIcon } from '../lib/utils'
 
 export default class Browser {
   @observable displayName
@@ -25,6 +26,6 @@ export default class Browser {
   }
 
   @computed get icon () {
-    return 'chrome'
+    return browserIcon(this.family)
   }
 }

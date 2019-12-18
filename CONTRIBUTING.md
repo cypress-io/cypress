@@ -4,16 +4,17 @@ Thanks for taking the time to contribute! :smile:
 
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
-- Join the [Cypress Gitter chat](https://gitter.im/cypress-io/cypress) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
-- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [contact us](mailto:support@cypress.io).
-- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+- Join the [Cypress Gitter chat](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
+- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/.github/CONTRIBUTING.md#adding-examples).
+- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/.github/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
 **Want to dive deeper into how Cypress works? There are several ways you can help with the development of Cypress:**
 
 - [Report bugs](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
 - [Request features](https://github.com/cypress-io/cypress/issues/new) by opening an issue.
-- Write code for one of our core packages. [Please thoroughly read our writing code guide](#writing-code).
+- [Help triage existing issue](#triaging-issues).
+- Write code to address an issue. We have some issues labeled as [`first-timers-only`](https://github.com/cypress-io/cypress/labels/first-timers-only) that are good place to start. [Please thoroughly read our writing code guide](#writing-code).
 
 ## Table of Contents
 
@@ -52,7 +53,7 @@ Build status | Description
 
 ## Code of Conduct
 
-All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+All contributors are expecting to abide by our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 ## Opening Issues
 
@@ -66,7 +67,7 @@ All contributors are expecting to abide by our [Code of Conduct](CODE_OF_CONDUCT
 - [Describe your problem, not your solution](#describe-problems)
 - [Explain how to reproduce the issue](#reproducibility).
 
-Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can come up with, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
+Finally, if you are up to date, supported, have collected information about the problem, and have the best reproduction instructions you can give, you are ready to [open an issue](https://github.com/cypress-io/cypress/issues/new).
 
 ### Update Cypress
 
@@ -116,12 +117,23 @@ Some opened issue are questions, not bug reports or feature requests. Issues are
 
 ### Does this issue belong in this repository?
 
+#### Other open source repos
+
 Issues may be opened about wanting changes to our [documentation](), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
 
 - Thank them for their contribution.
 - Explain that this repo is only for bugs or feature requests of the Cypress product.
 - If you have permission to 'Transfer the issue', do so. If not, explain that they can open an issue in our other repository and link to the repository.
 - Close the issue (if not already transferred).
+
+#### Our Dashboard Service
+
+Issues may be opened about wanting features in our Dashboard Service. In this case you should:
+
+- Thank them for expressing interest in a new feature.
+- Refer them to the Dashboard ProductBoard: "You can express interest and see progress for this feature on our Roadmap from our Dashboard's product board here: https://portal.productboard.com/cypress-io/1-cypress-dashboard All related work for the Dashboard features is handled in that ProductBoard and will be handled by the Dashboard team directly when you comment there."
+- Close the issue
+- Close the issue to comments
 
 ### Is this already an open issue?
 
@@ -213,7 +225,7 @@ Some issues are resolved by the community, by giving some guidance or a workarou
 ## Writing Documentation
 
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
+See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/.github/CONTRIBUTING.md).
 
 ## Writing code
 
@@ -365,6 +377,8 @@ npm run lint-changed-fix
 When committing files, we run a Git pre-commit hook to lint the staged JS files. See the [`lint-staged` project](https://github.com/okonet/lint-staged).
 If this command fails, you may need to run `npm run lint-changed-fix` and commit those changes.
 
+We **DO NOT** use Prettier to format code. You can find [.prettierignore](.prettierignore) file that ignores all files in this repository. To ensure this file is loaded, please always open _the root repository folder_ in your text editor, otherwise your code formatter might execute, reformatting lots of source files.
+
 ### Tests
 
 For most packages there are typically unit and some integration tests.
@@ -377,11 +391,22 @@ If you're curious how we manage all of these tests in CI check out our [`circle.
 
 #### Docker
 
-Sometimes tests pass locally, but fail on CI. Our CI environment should be dockerized. In order to run the same image locally, there is script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that assumes that you have pulled the image `cypress/internal:chrome61` (see [circle.yml](circle.yml) for the current image name).
+Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. In order to run the image used in CI locally:
+
+1. [Install Docker](https://docs.docker.com/install/) and get it running on your machine.
+2. Run the following command from the root of the project:
+
+  ```shell
+  npm run docker
+  ```
+
+There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [circle.yml](circle.yml) for the current image name).
 
 The image will start and will map the root of the repository to `/cypress` inside the image. Now you can modify the files using your favorite environment and rerun tests inside the docker environment.
 
-**hint** sometimes building inside the image has problems with `node-sass` library.
+##### Troubleshooting
+
+Sometimes building inside the image has problems with `node-sass` library.
 
 ```text
 Error: Missing binding /cypress/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
@@ -404,13 +429,13 @@ npm rebuild node-sass
 
 #### Docker for built binary
 
-You can also use Docker to simulate and debug built binary. In a temp folder (for example from the folder `/tmp/test-folder/`) start a Docker image
+You can also use Docker to simulate and debug the built binary. In a temporary folder (for example from the folder `/tmp/test-folder/`) start a Docker image:
 
 ```shell
 $ docker run -it -w /app -v $PWD:/app cypress/base:8 /bin/bash
 ```
 
-Point installation at a specific binary and NPM (if needed) and _set local cache folder_ to unzip downloaded binary into a subfolder.
+Point the installation at a specific binary and npm (if needed) and _set local cache folder_ to unzip the downloaded binary into a subfolder.
 
 ```shell
 $ export CYPRESS_INSTALL_BINARY=https://cdn.cypress.io/beta/.../cypress.zip
@@ -418,13 +443,13 @@ $ export CYPRESS_CACHE_FOLDER=./cypress-cache
 $ npm i https://cdn.cypress.io/beta/npm/.../cypress.tgz
 ```
 
-Note that unzipping Linux binary inside Docker container onto a mapped volume drive is slow. But once this is done you can modify application resource folder in local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
+Note that unzipping the Linux binary inside a Docker container onto a mapped volume drive is *slow*. But once this is done you can modify the application resource folder in the local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
 
 ### Packages
 
 Generally when making contributions, you are typically making them to a small number of packages. Most of your local development work will be inside a single package at a time.
 
-Each package documents how to best work with it, so simply consult the `README.md` of each package.
+Each package documents how to best work with it, so consult the `README.md` of each package.
 
 They will outline development and test procedures. When in doubt just look at the `scripts` of each `package.json` file. Everything we do at Cypress is contained there.
 
@@ -435,15 +460,32 @@ They will outline development and test procedures. When in doubt just look at th
 The repository is setup with two main (protected) branches.
 
 - `master` is the code already published in the last Cypress version.
-- `develop` is the current latest "edge" code. This branch is set as the default branch, and all pull requests should be made against this branch.
+- `develop` is the current latest "pre-release" code. This branch is set as the default branch, and all pull requests should be made against this branch.
 
 ### Pull Requests
 
-- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If there is not an associated open issue, **create an issue using our [Issue Template](./ISSUE_TEMPLATE.md)**.
-- Please use the `address #[issue number]` or `close #[issue number]` syntax in the pull request description. This will automatically close the issue once the issue is merged.
-- Add [tests](#tests)! We are a testing product afterall. 😉
+- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./ISSUE_TEMPLATE.md)**.
+- PR's can be opened before all the work is finished. In fact we encourage this! Please write `[WIP]` in the title of your Pull Request if your PR is not ready for review - someone will review your PR as soon as the `[WIP]` is removed.
+- Fill out the [Pull Request Tempalte](./PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleteing those sections. PR's will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
+
+### Pull Request Reviews
+
+After a PR has been opened, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review Pull Requests. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
+
+**Some rules about Pull Requests Reviews:**
+
+1. The contributor opening the pull request may not approve their own PR.
+2. The PR will not be merged if some reviewers have voted "Needs changes".
+
+If any of the Pull Request Review guidelines can't be met, a comment will be left by the reviewer with 'Request changes'. Please make any updates as appropriate and we will rereview once those changes are addressed.
+
+**During a Pull Request Review, the following should be done:**
+
+- Run the code and use it as the end user would. Double check issue and PR description to ensure it is meeting requirements.
+- Read through every line of changed code (Yes, we know this could be a LOT).
+- If you don’t understand why some piece of code is required, ask for clarification! Likely the contributor had a reason and can provide the answer quicker than investigating yourself.
 
 ### Testing
 
@@ -455,16 +497,11 @@ To run local tests, consult the `README.md` of each package.
 
 We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our dependencies. The bot uses the settings in [renovate.json](renovate.json) to maintain our [Update Dependencies](https://github.com/cypress-io/cypress/issues/3777) issue and open PRs. You can manually select a package to open a PR from our [Update Dependencies](https://github.com/cypress-io/cypress/issues/3777) issue.
 
-Every PR for a package upgrade requires a review of the packages changes either from their changelog or their commits as well as all of the existing Cypress tests to pass.
-
-#### If there are test failures or breaking changes:
-
-- Note the breaking changes in a PR comment and note where the breaking change occured.
-- Edit the PR to fix any breaking changes, if you are able. If you are not able, mark the PR review as 'changes requested' and note that there are breaking changes.
+After a PR has been opened for a dependency update, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review the dependency update. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
 
 ## Deployment
 
-We will try to review and merge pull requests quickly. After merging we will try releasing a new version. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](DEPLOY.md)
+We will try to review and merge pull requests quickly. After merging we will try releasing a new version. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](./DEPLOY.md)
 
 ## Known problems
 

@@ -5,5 +5,7 @@
   "extends": [
     "plugin:@cypress/dev/general"
   ],
-  "rules": {}
+  "rules": {
+    "prefer-spread": "off"
+  }
 }

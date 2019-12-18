@@ -34,7 +34,8 @@ describe "redirection", ->
           expect(@logs[2].get("name")).to.eq("page load")
           expect(@logs[3].get("name")).to.eq("new url")
 
-  context "javascript", ->
+  ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973
+  context.skip "javascript", ->
     it "binds to the new page after a timeout", ->
       cy
         .visit("/fixtures/js-redirect-timeout.html")
