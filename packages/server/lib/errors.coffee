@@ -110,15 +110,15 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
-      Warning: Cypress can only record videos when running headlessly.
+      Warning: Cypress can only record videos of Electron when running headlessly.
 
-      You have set the 'electron' browser to run headed.
+      You have set the Electron browser to run headed.
 
       A video will not be recorded when using this mode.
       """
     when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
       """
-      Warning: Cypress can only record videos when using the built in 'electron' browser.
+      Warning: Cypress can only record videos when using an Electron or Chrome-family browser.
 
       You have set the browser to: '#{arg1}'
 
@@ -166,6 +166,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       There is likely something wrong with the request.
 
       #{displayFlags(arg1.flags, {
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -191,6 +192,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       You cannot parallelize a run that has been complete for that long.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -207,6 +209,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -221,6 +224,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -309,10 +313,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "RECORD_PARAMS_WITHOUT_RECORDING"
       """
-      You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+      You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
       #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel"
       })}
@@ -605,6 +610,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Fix the error in your code and re-run your tests.
       """
+    # happens when there is an error in configuration file like "cypress.json"
     when "SETTINGS_VALIDATION_ERROR"
       filePath = "`#{arg1}`"
       """
@@ -612,6 +618,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg2)}
       """
+    # happens when there is an invalid config value returnes from the
+    # project's plugins file like "cypress/plugins.index.js"
+    when "PLUGINS_CONFIG_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
+      """
+      An invalid configuration value returned from the plugins file: #{chalk.blue(filePath)}
+
+      #{chalk.yellow(arg2)}
+      """
+    # general configuration error not-specific to configuration or plugins files
     when "CONFIG_VALIDATION_ERROR"
       """
       We found an invalid configuration value:
@@ -700,7 +716,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       This is not the recommended approach, and Cypress may not work correctly.
 
       Please install the 'cypress' NPM package and follow the instructions here:
-      
+
       https://on.cypress.io/installing-cypress
       """
     when "DUPLICATE_TASK_KEY"
@@ -826,6 +842,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
+    when "COULD_NOT_FIND_SYSTEM_NODE"
+      """
+      `nodeVersion` is set to `system`, but Cypress could not find a usable Node executable on your PATH.
+
+      Make sure that your Node executable exists and can be run by the current user.
+
+      Cypress will use the built-in Node version (v#{arg1}) instead.
+      """
     when "INVALID_CYPRESS_ENV"
       """
       We have detected unknown or unsupported CYPRESS_ENV value
@@ -833,6 +857,26 @@ getMsgByType = (type, arg1 = {}, arg2) ->
         #{chalk.yellow(arg1)}
 
       Please do not modify CYPRESS_ENV value.
+      """
+    when "CDP_VERSION_TOO_OLD"
+      """
+      A minimum CDP version of v#{arg1} is required, but the current browser has #{if arg2.major != 0 then "v#{arg2.major}.#{arg2.minor}" else 'an older version'}.
+      """
+    when "CDP_COULD_NOT_CONNECT"
+      """
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+
+      This usually indicates there was a problem opening the Chrome browser.
+
+      The CDP port requested was #{chalk.yellow(arg1)}.
+
+      Error details:
+
+      #{arg2.stack}
+      """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
 
 get = (type, arg1, arg2) ->
@@ -854,7 +898,7 @@ get = (type, arg1, arg2) ->
 warning = (type, arg1, arg2) ->
   err = get(type, arg1, arg2)
   log(err, "magenta")
-  
+
   return null
 
 throwErr = (type, arg1, arg2) ->
@@ -895,16 +939,16 @@ log = (err, color = "red") ->
   console.log chalk[color](err.stack)
 
   return err
-  
+
 logException = Promise.method (err) ->
   ## TODO: remove context here
   if @log(err) and isProduction()
-    ## log this exception since 
+    ## log this exception since
     ## its not a known error
     return require("./logger")
     .createException(err)
     .catch(->)
-  
+
 module.exports = {
   get,
 
@@ -925,4 +969,6 @@ module.exports = {
   throw: throwErr
 
   stripAnsi: strip
+
+  displayFlags
 }

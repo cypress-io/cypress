@@ -2,9 +2,45 @@ require("../spec_helper")
 
 _       = require("lodash")
 http    = require("http")
+Bluebird = require("bluebird")
 Request = require("#{root}lib/request")
+snapshot = require("snap-shot-it")
 
 request = Request({timeout: 100})
+
+testAttachingCookiesWith = (fn) ->
+  set = sinon.spy(request, 'setCookiesOnBrowser')
+  get = sinon.spy(request, 'setRequestCookieHeader')
+
+  nock("http://localhost:1234")
+  .get("/")
+  .reply(302, "", {
+    'set-cookie': 'one=1'
+    location: "/second"
+  })
+  .get("/second")
+  .reply(302, "", {
+    'set-cookie': 'two=2'
+    location: "/third"
+  })
+  .get("/third")
+  .reply(200, "", {
+    'set-cookie': 'three=3'
+  })
+
+  fn()
+  .then ->
+    snapshot({
+      setCalls: set.getCalls().map (call) ->
+        {
+          currentUrl: call.args[1],
+          setCookie: call.args[0].headers['set-cookie']
+        }
+      getCalls: get.getCalls().map (call) ->
+        {
+          newUrl: _.get(call, 'args.1')
+        }
+    })
 
 describe "lib/request", ->
   beforeEach ->
@@ -165,10 +201,10 @@ describe "lib/request", ->
       @srv.close()
 
     context "retries for streams", ->
-      it "does not retry on a timeout", (done) ->
+      it "does not retry on a timeout", ->
         opts = request.setDefaults({
           url: "http://localhost:9988/never-ends"
-          timeout: 100
+          timeout: 1000
         })
 
         stream = request.create(opts)
@@ -178,16 +214,19 @@ describe "lib/request", ->
         stream.on "retry", ->
           retries++
 
-        stream.on "error", (err) ->
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
           expect(err.code).to.eq('ESOCKETTIMEDOUT')
           expect(retries).to.eq(0)
-          done()
 
-      it "retries 4x on a connection reset", (done) ->
+      it "retries 4x on a connection reset", ->
         opts = {
           url: "http://localhost:9988/econnreset"
           retryIntervals: [0, 1, 2, 3]
-          timeout: 250
+          timeout: 1000
         }
 
         stream = request.create(opts)
@@ -197,17 +236,21 @@ describe "lib/request", ->
         stream.on "retry", ->
           retries++
 
-        stream.on "error", (err) ->
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
           expect(err.code).to.eq('ECONNRESET')
           expect(retries).to.eq(4)
-          done()
 
-      it "retries 4x on a NXDOMAIN (ENOTFOUND)", (done) ->
+      it "retries 4x on a NXDOMAIN (ENOTFOUND)", ->
         nock.enableNetConnect()
 
         opts = {
           url: "http://will-never-exist.invalid.example.com"
           retryIntervals: [0, 1, 2, 3]
+          timeout: 1000
         }
 
         stream = request.create(opts)
@@ -217,10 +260,13 @@ describe "lib/request", ->
         stream.on "retry", ->
           retries++
 
-        stream.on "error", (err) ->
+        p = Bluebird.fromCallback (cb) ->
+          stream.on "error", cb
+
+        expect(p).to.be.rejected
+        .then (err) ->
           expect(err.code).to.eq('ENOTFOUND')
           expect(retries).to.eq(4)
-          done()
 
     context "retries for promises", ->
       it "does not retry on a timeout", ->
@@ -383,29 +429,6 @@ describe "lib/request", ->
             "Response Status":  200
           }
         ])
-
-    it "sends Cookie header, and body", ->
-      nock("http://localhost:8080")
-      .matchHeader("Cookie", "foo=bar; baz=quux")
-      .post("/users", {
-        first: "brian"
-        last: "mann"
-      })
-      .reply(200, {id: 1})
-
-      request.sendPromise({}, @fn, {
-        url: "http://localhost:8080/users"
-        method: "POST"
-        cookies: {foo: "bar", baz: "quux"}
-        json: true
-        body: {
-          first: "brian"
-          last: "mann"
-        }
-      })
-      .then (resp) ->
-        expect(resp.status).to.eq(200)
-        expect(resp.body.id).to.eq(1)
 
     it "catches errors", ->
       nock.enableNetConnect()
@@ -722,6 +745,12 @@ describe "lib/request", ->
           expect(resp.status).to.eq(200)
           expect(resp).not.to.have.property("redirectedToUrl")
 
+      it "gets + attaches the cookies at each redirect", ->
+        testAttachingCookiesWith =>
+          request.sendPromise({}, @fn, {
+            url: "http://localhost:1234/"
+          })
+
     context "form=true", ->
       beforeEach ->
         nock("http://localhost:8080")
@@ -843,3 +872,16 @@ describe "lib/request", ->
         beginFn()
         expect(request.create).to.be.calledOnce
         expect(request.create).to.be.calledWith(options)
+
+    it "gets + attaches the cookies at each redirect", ->
+      testAttachingCookiesWith =>
+        request.sendStream({}, @fn, {
+          url: "http://localhost:1234/"
+          followRedirect: _.stubTrue
+        })
+        .then (fn) =>
+          req = fn()
+
+          new Promise (resolve, reject) =>
+            req.on('response', resolve)
+            req.on('error', reject)

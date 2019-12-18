@@ -19,7 +19,6 @@ export default class Dropdown extends Component {
         {this._items()}
       </div>
     )
-
   }
 
   _caret () {

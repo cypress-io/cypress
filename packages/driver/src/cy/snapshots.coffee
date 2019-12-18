@@ -84,7 +84,7 @@ create = ($$, state) ->
         </style>
         <p>&lt;iframe&gt; placeholder for #{iframe.src}</p>
       """
-      $placeholder[0].src = "data:text/html;charset=utf-8,#{encodeURI(contents)}"
+      $placeholder[0].src = "data:text/html;base64,#{window.btoa(contents)}"
 
   getStyles = (snapshot) ->
     styleIds = snapshotsMap.get(snapshot)

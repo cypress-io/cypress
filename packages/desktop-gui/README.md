@@ -6,14 +6,14 @@ The Desktop GUI is the react application that is rendered by Electron. This acts
 
 **The Desktop GUI has the following responsibilities:**
 
-- Allow users to login through GitHub.
+- Allow users to log in through GitHub.
 - Allow users to add projects to be tested in Cypress.
 - Display existing projects and allow the removal of projects.
 - Initialize the server to run on a specific project.
 - Allow users to choose a specific browser to run tests within.
 - Display the resolved configuration of a running project.
 - Display the list of specs of a running project.
-- Initialize the run of a specific spec file or all tests chosen by the user.
+- Initialize the run of a specific spec file or all spec files chosen by the user.
 - Notify users of updates to Cypress and initialize update process.
 - Set up projects to be recorded.
 

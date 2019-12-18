@@ -60,7 +60,7 @@ describe "lib/browsers/electron", ->
 
         options = Windows.defaults(options)
 
-        keys = _.keys(electron._render.firstCall.args[2])
+        keys = _.keys(electron._render.firstCall.args[3])
 
         expect(_.keys(options)).to.deep.eq(keys)
 
@@ -76,21 +76,13 @@ describe "lib/browsers/electron", ->
         expect(obj.kill).to.be.a("function")
         expect(obj.removeAllListeners).to.be.a("function")
 
-    it "registers onRequest automation middleware", ->
-      sinon.spy(@automation, "use")
-
-      electron.open("electron", @url, @options, @automation)
-      .then =>
-        expect(@automation.use).to.be.called
-        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
-
     it "is noop when before:browser:launch yields null", ->
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
       electron.open("electron", @url, @options, @automation)
       .then =>
-        options = electron._render.firstCall.args[2]
+        options = electron._render.firstCall.args[3]
 
         expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
 
@@ -101,7 +93,7 @@ describe "lib/browsers/electron", ->
 
       electron.open("electron", @url, @options, @automation)
       .then =>
-        options = electron._render.firstCall.args[2]
+        options = electron._render.firstCall.args[3]
 
         expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
 
@@ -164,10 +156,18 @@ describe "lib/browsers/electron", ->
       .returns(@newWin)
 
     it "creates window instance and calls launch with window", ->
-      electron._render(@url, @options.projectRoot, @options)
+      electron._render(@url, @options.projectRoot, @automation, @options)
       .then =>
         expect(Windows.create).to.be.calledWith(@options.projectRoot, @options)
         expect(electron._launch).to.be.calledWith(@newWin, @url, @options)
+
+    it "registers onRequest automation middleware", ->
+      sinon.spy(@automation, "use")
+
+      electron._render(@url, @options.projectRoot, @automation, @options)
+      .then =>
+        expect(@automation.use).to.be.called
+        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
 
   context "._defaultOptions", ->
     beforeEach ->
@@ -348,7 +348,7 @@ describe "lib/browsers/electron", ->
     it "sets proxy rules for webContents", ->
       webContents = {
         session: {
-          setProxy: sinon.stub().callsArg(1)
+          setProxy: sinon.stub().resolves()
         }
       }
 
@@ -358,108 +358,3 @@ describe "lib/browsers/electron", ->
           proxyRules: "proxy rules"
           proxyBypassRules: "<-loopback>"
         })
-
-  context "._getAutomation", ->
-    beforeEach ->
-      @sendCommand = @win.webContents.debugger.sendCommand
-
-      @sendCommand.throws()
-      .withArgs('Browser.getVersion').resolves()
-
-      @onRequest = electron._getAutomation(@win).onRequest
-
-    describe "get:cookies", ->
-      beforeEach ->
-        @sendCommand.withArgs('Network.getAllCookies')
-        .resolves({
-          cookies: [
-            {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expires: 123}
-            {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expires: 456}
-          ]
-        })
-
-      it "returns all cookies", ->
-        @onRequest('get:cookies', { domain: "localhost" })
-        .then (resp) ->
-          expect(resp).to.deep.eq([
-            {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123}
-            {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456}
-          ])
-
-    describe "get:cookie", ->
-      beforeEach ->
-        @sendCommand.withArgs('Network.getAllCookies')
-        .resolves({
-          cookies: [
-            {name: "session", value: "key", path: "/login", domain: "google.com", secure: true, httpOnly: true, expires: 123}
-          ]
-        })
-
-      it "returns a specific cookie by name", ->
-        @onRequest('get:cookie', {domain: "google.com", name: "session"})
-        .then (resp) ->
-          expect(resp).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123})
-
-      it "returns null when no cookie by name is found", ->
-        @onRequest('get:cookie', {domain: "google.com", name: "doesNotExist"})
-        .then (resp) ->
-         expect(resp).to.be.null
-
-    describe "set:cookie", ->
-      beforeEach ->
-        @sendCommand.withArgs('Network.setCookie', {domain: ".google.com", name: "session", value: "key", path: "/", expires: undefined})
-        .resolves({ success: true })
-        .withArgs('Network.setCookie', {domain: "foo", path: "/bar", name: "", value: "", expires: undefined})
-        .rejects(new Error("some error"))
-        .withArgs('Network.getAllCookies')
-        .resolves({
-          cookies: [
-            {name: "session", value: "key", path: "/", domain: ".google.com", secure: false, httpOnly: false}
-          ]
-        })
-
-      it "resolves with the cookie props", ->
-        @onRequest('set:cookie', {domain: "google.com", name: "session", value: "key", path: "/"})
-        .then (resp) ->
-          expect(resp).to.deep.eq({domain: ".google.com", expirationDate: undefined, httpOnly: false, name: "session", value: "key", path: "/", secure: false})
-
-      it "rejects with error", ->
-        @onRequest('set:cookie', {domain: "foo", path: "/bar"})
-        .then ->
-          throw new Error("should have failed")
-        .catch (err) ->
-          expect(err.message).to.eq("some error")
-
-    describe "clear:cookie", ->
-      beforeEach ->
-        @sendCommand.withArgs('Network.getAllCookies')
-        .resolves({
-          cookies: [
-            {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expires: 123}
-            {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expires: 123}
-          ]
-        })
-
-        @sendCommand.withArgs('Network.deleteCookies', { domain: "cdn.github.com", name: "shouldThrow" })
-        .rejects(new Error("some error"))
-        .withArgs('Network.deleteCookies')
-        .resolves()
-
-      it "resolves single removed cookie", ->
-        @onRequest('clear:cookie', {domain: "google.com", name: "session"})
-        .then (resp) ->
-          expect(resp).to.deep.eq(
-            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
-          )
-
-      it "returns null when no cookie by name is found", ->
-        @onRequest('clear:cookie', {domain: "google.com", name: "doesNotExist"})
-        .then (resp) ->
-          expect(resp).to.be.null
-
-      it "rejects with error", ->
-        @onRequest('clear:cookie', {domain: "cdn.github.com", name: "shouldThrow"})
-        .then ->
-          throw new Error("should have failed")
-        .catch (err) ->
-          expect(err.message).to.eq("some error")

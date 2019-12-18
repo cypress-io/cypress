@@ -71,6 +71,9 @@ function addElementBoxModelLayers ($el, $body) {
   const dimensions = getElementDimensions($el)
 
   const $container = $('<div class="__cypress-highlight">')
+  .css({
+    opacity: 0.7,
+  })
 
   const layers = {
     Content: '#9FC4E7',
@@ -110,6 +113,11 @@ function addElementBoxModelLayers ($el, $body) {
     if (attr === 'Margin') {
       obj.top -= dimensions.marginTop
       obj.left -= dimensions.marginLeft
+    }
+
+    if (attr === 'Padding') {
+      obj.top += dimensions.borderTop
+      obj.left += dimensions.borderLeft
     }
 
     // bail if the dimensions of this layer match the previous one
@@ -219,7 +227,6 @@ function createLayer ($el, attr, color, container, dimensions) {
     position: 'absolute',
     zIndex: getZIndex($el),
     backgroundColor: color,
-    opacity: 0.6,
   }
 
   return $('<div>')
@@ -259,10 +266,12 @@ function getZIndex (el) {
 function getElementDimensions ($el) {
   const el = $el.get(0)
 
-  const dimensions = {
+  const { offsetHeight, offsetWidth } = el
+
+  const box = {
     offset: $el.offset(), // offset disregards margin but takes into account border + padding
-    height: el.offsetHeight, // we want to use offsetHeight here (because that always returns just the content hight) instead of .css() because .css('height') is altered based on whether box-sizing: border-box is set
-    width: el.offsetWidth,
+    // dont use jquery here for width/height because it uses getBoundingClientRect() which returns scaled values.
+    // TODO: switch back to using jquery when upgrading to jquery 3.4+
     paddingTop: getPadding($el, 'top'),
     paddingRight: getPadding($el, 'right'),
     paddingBottom: getPadding($el, 'bottom'),
@@ -277,6 +286,14 @@ function getElementDimensions ($el) {
     marginLeft: getMargin($el, 'left'),
   }
 
+  // NOTE: offsetWidth/height always give us content + padding + border, so subtract them
+  // to get the true "clientHeight" and "clientWidth".
+  // we CANNOT just use "clientHeight" and "clientWidth" because those always return 0
+  // for inline elements >_<
+  //
+  box.width = offsetWidth - (box.paddingLeft + box.paddingRight + box.borderLeft + box.borderRight)
+  box.height = offsetHeight - (box.paddingTop + box.paddingBottom + box.borderTop + box.borderBottom)
+
   // innerHeight: Get the current computed height for the first
   // element in the set of matched elements, including padding but not border.
 
@@ -284,16 +301,19 @@ function getElementDimensions ($el) {
   // element in the set of matched elements, including padding, border,
   // and optionally margin. Returns a number (without 'px') representation
   // of the value or null if called on an empty set of elements.
+  box.heightWithPadding = box.height + box.paddingTop + box.paddingBottom
 
-  dimensions.heightWithPadding = $el.innerHeight()
-  dimensions.heightWithBorder = $el.innerHeight() + getTotalFor(['borderTop', 'borderBottom'], dimensions)
-  dimensions.heightWithMargin = $el.outerHeight(true)
+  box.heightWithBorder = box.heightWithPadding + box.borderTop + box.borderBottom
 
-  dimensions.widthWithPadding = $el.innerWidth()
-  dimensions.widthWithBorder = $el.innerWidth() + getTotalFor(['borderRight', 'borderLeft'], dimensions)
-  dimensions.widthWithMargin = $el.outerWidth(true)
+  box.heightWithMargin = box.heightWithBorder + box.marginTop + box.marginBottom
 
-  return dimensions
+  box.widthWithPadding = box.width + box.paddingLeft + box.paddingRight
+
+  box.widthWithBorder = box.widthWithPadding + box.borderLeft + box.borderRight
+
+  box.widthWithMargin = box.widthWithBorder + box.marginLeft + box.marginRight
+
+  return box
 }
 
 function getNumAttrValue ($el, attr) {
@@ -317,12 +337,6 @@ function getBorder ($el, dir) {
 
 function getMargin ($el, dir) {
   return getNumAttrValue($el, `margin-${dir}`)
-}
-
-function getTotalFor (directions, dimensions) {
-  return _.reduce(directions, (memo, direction) => {
-    return memo + dimensions[direction]
-  }, 0)
 }
 
 function getOuterSize ($el) {

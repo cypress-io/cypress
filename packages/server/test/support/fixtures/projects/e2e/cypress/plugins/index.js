@@ -1,13 +1,17 @@
+require('@packages/ts/register')
+
 const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
-
 const performance = require('../../../../test/support/helpers/performance')
 
 module.exports = (on) => {
   // save some time by only reading the originals once
   let cache = {}
+
+  const screenshotsTaken = []
+  let browserArgs = null
 
   function getCachedImage (name) {
     const cachedImage = cache[name]
@@ -22,6 +26,16 @@ module.exports = (on) => {
       return image
     })
   }
+
+  on('after:screenshot', (details) => {
+    screenshotsTaken.push(details)
+  })
+
+  on('before:browser:launch', (browser, args) => {
+    browserArgs = args
+
+    return args
+  })
 
   on('task', {
     'returns:undefined' () {},
@@ -120,6 +134,14 @@ module.exports = (on) => {
 
       return performance.track('fast_visit_spec percentiles', data)
       .return(null)
+    },
+
+    'get:screenshots:taken' () {
+      return screenshotsTaken
+    },
+
+    'get:browser:args' () {
+      return browserArgs
     },
   })
 }

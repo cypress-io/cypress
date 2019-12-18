@@ -17,7 +17,7 @@ interface RequestOptionsWithProxy extends http.RequestOptions {
 }
 
 type FamilyCache = {
-  [host: string] : 4 | 6
+  [host: string]: 4 | 6
 }
 
 export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
@@ -322,7 +322,12 @@ class HttpsAgent extends https.Agent {
         if (options._agentKey) {
           // https.Agent will upgrade and reuse this socket now
           options.socket = proxySocket
-          options.servername = hostname
+
+          // as of Node 12, a ServerName cannot be an IP address
+          // https://github.com/cypress-io/cypress/issues/5729
+          if (!net.isIP(hostname)) {
+            options.servername = hostname
+          }
 
           return cb(undefined, super.createConnection(options, undefined))
         }

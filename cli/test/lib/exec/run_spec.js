@@ -1,5 +1,6 @@
 require('../../spec_helper')
 
+const os = require('os')
 const snapshot = require('../../support/snapshot')
 
 const util = require(`${lib}/util`)
@@ -36,6 +37,19 @@ describe('exec run', function () {
       })
 
       snapshot(args)
+    })
+
+    it('does not allow setting paradoxical --headed and --headless flags', () => {
+      os.platform.returns('linux')
+      process.exit.returns()
+
+      expect(() => run.processRunOptions({ headed: true, headless: true })).to.throw()
+    })
+
+    it('passes --headed according to --headless', () => {
+      expect(run.processRunOptions({ headless: true })).to.deep.eq([
+        '--run-project', undefined, '--headed', false,
+      ])
     })
 
     it('does not remove --record option when using --browser', () => {
@@ -129,6 +143,24 @@ describe('exec run', function () {
       return run.start({ outputPath: '/path/to/output' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--run-project', process.cwd(), '--output-path', '/path/to/output'])
+      })
+    })
+
+    it('spawns with --tag value', function () {
+      return run.start({ tag: 'nightly' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--tag', 'nightly',
+        ])
+      })
+    })
+
+    it('spawns with several --tag words unchanged', function () {
+      return run.start({ tag: 'nightly, sanity' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith([
+          '--run-project', process.cwd(), '--tag', 'nightly, sanity',
+        ])
       })
     })
   })

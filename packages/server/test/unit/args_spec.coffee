@@ -52,6 +52,13 @@ describe "lib/util/args", ->
       options = @setup("--run-project", "foo", "--spec", "'cypress/integration/foo_spec.js'")
       expect(options.spec[0]).to.eq("#{cwd}/cypress/integration/foo_spec.js")
 
+  context "--tag", ->
+    it "converts to array", ->
+      options = @setup("--run-project", "foo", "--tag", "nightly,production,build")
+      expect(options.tag[0]).to.eq("nightly")
+      expect(options.tag[1]).to.eq("production")
+      expect(options.tag[2]).to.eq("build")
+
   context "--port", ->
     it "converts to Number", ->
       options = @setup("--port", "8080")
@@ -171,8 +178,8 @@ describe "lib/util/args", ->
 
     it "rejects values which have an cooresponding underscore'd key", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
-        "--project=foo/bar",
         "--config=#{JSON.stringify({foo: 'bar'})}"
+        "--project=foo/bar",
       ])
 
   context ".toObject", ->
@@ -221,9 +228,9 @@ describe "lib/util/args", ->
       expect(@obj).to.deep.eq({
         cwd
         _: []
+        config: @config
         getKey: true
         invokedFromCli: false
-        config: @config
         spec: @specs
       })
 
@@ -241,10 +248,10 @@ describe "lib/util/args", ->
       args = argsUtil.toArray(@obj)
 
       expect(args).to.deep.eq([
+        "--config=#{mergedConfig}"
         "--cwd=#{cwd}"
         "--getKey=true"
         "--spec=#{JSON.stringify(@specs)}",
-        "--config=#{mergedConfig}"
       ])
 
       expect(argsUtil.toObject(args)).to.deep.eq({

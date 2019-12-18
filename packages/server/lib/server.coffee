@@ -1,8 +1,6 @@
 _            = require("lodash")
-exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
-concatStream = require("concat-stream")
 stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
@@ -14,14 +12,17 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
-agent        = require("@packages/network").agent
-cors         = require("./util/cors")
-uri          = require("./util/uri")
+{
+  agent,
+  blacklist,
+  concatStream,
+  cors,
+  uri
+} = require("@packages/network")
+{ NetworkProxy } = require("@packages/proxy")
 origin       = require("./util/origin")
 ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
-buffers      = require("./util/buffers")
-blacklist    = require("./util/blacklist")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
@@ -31,6 +32,8 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+XhrServer    = require("./xhr_ws_server")
+templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
@@ -85,11 +88,7 @@ class Server
 
     ## since we use absolute paths, configure express-handlebars to not automatically find layouts
     ## https://github.com/cypress-io/cypress/issues/2891
-    app.engine("html", exphbs({
-      defaultLayout: false
-      layoutsDir: []
-      partialsDir: []
-    }))
+    app.engine("html", templateEngine.render)
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
@@ -129,28 +128,28 @@ class Server
     e
 
   open: (config = {}, project, onWarning) ->
+    debug("server open")
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
-      ## always reset any buffers
-      ## TODO: change buffers to be an instance
-      ## here and pass this dependency around
-      buffers.reset()
-
       app = @createExpressApp(config.morgan)
 
       logger.setSettings(config)
 
       ## generate our request instance
       ## and set the responseTimeout
+      ## TODO: might not be needed anymore
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
+      @_xhrServer = XhrServer.create()
 
       getRemoteState = => @_getRemoteState()
 
+      @_networkProxy = new NetworkProxy({ config, getRemoteState, request: @_request })
+
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
+      @createRoutes(app, config, @_request, getRemoteState, @_xhrServer.getDeferredResponse, project, @_networkProxy)
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -327,6 +326,10 @@ class Server
       options
     })
 
+    ## always clear buffers - reduces the possibility of a random HTTP request
+    ## accidentally retrieving buffered content at the wrong time
+    @_networkProxy.reset()
+
     startTime = new Date()
 
     ## if we have an existing url resolver
@@ -361,20 +364,6 @@ class Server
 
         _.invoke(reqStream, "abort")
         _.invoke(currentPromisePhase, "cancel")
-
-      ## if we have a buffer for this url
-      ## then just respond with its details
-      ## so we are idempotant and do not make
-      ## another request
-      if obj = buffers.getByOriginalUrl(urlStr)
-        debug("got previous request buffer for url:", urlStr)
-
-        ## reset the cookies from the buffer on the browser
-        return runPhase ->
-          resolve(
-            Promise.map obj.details.cookies, _.partial(automationRequest, 'set:cookie')
-            .return(obj.details)
-          )
 
       redirects = []
       newUrl = null
@@ -453,11 +442,6 @@ class Server
                 ## where the headers have been sent but the
                 ## connection hangs before receiving a body.
 
-                if !_.get(responseBuffer, 'length')
-                  ## concatStream can yield an empty array, which is
-                  ## not a valid chunk
-                  responseBuffer = undefined
-
                 ## if there is not a content-type, try to determine
                 ## if the response content is HTML-like
                 ## https://github.com/cypress-io/cypress/issues/1727
@@ -482,7 +466,7 @@ class Server
 
                   responseBufferStream.end(responseBuffer)
 
-                  buffers.set({
+                  @_networkProxy.setHttpBuffer({
                     url: newUrl
                     stream: responseBufferStream
                     details
@@ -651,7 +635,7 @@ class Server
       socket.end() if socket.writable
 
   reset: ->
-    buffers.reset()
+    @_networkProxy?.reset()
 
     @_onDomainSet(@_baseUrl ? "<root>")
 
@@ -702,10 +686,14 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onIncomingXhr = @_xhrServer.onIncomingXhr
 
-    @_socket = Socket(config)
+    options.onResetServerState = =>
+      @_xhrServer.reset()
+      @_networkProxy.reset()
+
+    @_socket = new Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
-    # handleListeners(@_server)
 
 module.exports = Server
