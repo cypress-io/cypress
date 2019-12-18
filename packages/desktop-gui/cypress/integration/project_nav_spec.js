@@ -122,20 +122,6 @@ describe('Project Nav', function () {
           .find('.dropdown-menu').first()
           // one is showing in the selection, so won't be in the list
           .find('.browser-icon')
-          .each(function ($i, i) {
-            const dropdownBrowsers = Cypress._.filter(this.config.browsers, (b) => {
-              // Chrome is shown in selection, so skip it
-              return b.displayName !== 'Chrome'
-            })
-
-            let family = dropdownBrowsers[i].family
-
-            family = family === 'electron' ? 'chrome' : family
-
-            // first one is shown in selection, so skip first
-            cy.wrap($i).should('have.class',
-              `fa-${family}`)
-          })
         })
 
         it('does not display stop button', () => {
@@ -150,7 +136,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon in chosen', () => {
             cy.get('.browsers-list>a').first()
-            .find('.fa-chrome')
+            .find('img')
           })
         })
       })
@@ -195,8 +181,7 @@ describe('Project Nav', function () {
         })
 
         it('displays browser icon as spinner', () => {
-          cy.get('.browsers-list>a').first().find('i')
-          .should('have.class', 'fas fa-sync-alt fa-spin')
+          cy.get('.browsers-list>a').first().find('img')
         })
 
         it('disables browser dropdown', () => {
@@ -213,8 +198,7 @@ describe('Project Nav', function () {
         })
 
         it('displays browser icon as opened', () => {
-          cy.get('.browsers-list>a').first().find('i')
-          .should('have.class', 'fas fa-check-circle')
+          cy.get('.browsers-list>a').first().find('img')
         })
 
         it('disables browser dropdown', () => {
@@ -257,7 +241,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list>a').first()
-            .find('.fa-chrome')
+            .find('img')
           })
         })
 
@@ -277,7 +261,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list>a').first()
-            .find('.fa-chrome')
+            .find('img')
           })
         })
       })
@@ -301,7 +285,7 @@ describe('Project Nav', function () {
 
       it('displays local storage browser icon in chosen', () => {
         cy.get('.browsers-list>a').first()
-        .find('.fa-chrome')
+        .find('img')
       })
     })
 
