@@ -1,6 +1,8 @@
 {
+  "eslint.alwaysShowStatus": true,
+  "eslint.autoFixOnSave": true,
   "eslint.validate": [
-    { 
+    {
       "language": "javascript",
       "autoFix": true
     },
@@ -25,4 +27,15 @@
       "autoFix": false
     },
   ],
+  "eslint.enable": true,
+  // this project does not use Prettier
+  // thus set all settings to disable accidentally running Prettier
+  "prettier.requireConfig": true,
+  "prettier.disableLanguages": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "json"
+  ]
 }

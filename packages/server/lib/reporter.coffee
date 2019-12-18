@@ -1,6 +1,5 @@
 _     = require("lodash")
 path  = require("path")
-chalk = require("chalk")
 Mocha = require("mocha")
 debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")

@@ -3,9 +3,11 @@ strip   = require("strip-ansi")
 chalk   = require("chalk")
 ansi_up = require("ansi_up")
 Promise = require("bluebird")
-pluralize = require("pluralize")
 
 twoOrMoreNewLinesRe = /\n{2,}/
+
+isProduction = ->
+  process.env["CYPRESS_ENV"] is "production"
 
 listItems = (paths) ->
   _
@@ -26,7 +28,7 @@ displayFlags = (obj, mapper) ->
   .value()
 
 displayRetriesRemaining = (tries) ->
-  times = pluralize('time', tries)
+  times = if tries is 1 then 'time' else 'times'
 
   lastTryNewLine = if tries is 1 then "\n" else ""
 
@@ -108,15 +110,15 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
-      Warning: Cypress can only record videos when running headlessly.
+      Warning: Cypress can only record videos of Electron when running headlessly.
 
-      You have set the 'electron' browser to run headed.
+      You have set the Electron browser to run headed.
 
       A video will not be recorded when using this mode.
       """
     when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
       """
-      Warning: Cypress can only record videos when using the built in 'electron' browser.
+      Warning: Cypress can only record videos when using an Electron or Chrome-family browser.
 
       You have set the browser to: '#{arg1}'
 
@@ -136,7 +138,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We encountered an unexpected error talking to our servers.
 
-      We will retry #{arg1.tries} more #{pluralize('time', arg1.tries)} in #{arg1.delay}...
+      We will retry #{arg1.tries} more #{if arg1.tries is 1 then 'time' else 'times'} in #{arg1.delay}...
 
       The server's response was:
 
@@ -164,6 +166,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       There is likely something wrong with the request.
 
       #{displayFlags(arg1.flags, {
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -189,6 +192,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       You cannot parallelize a run that has been complete for that long.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -205,6 +209,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -219,6 +224,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -307,10 +313,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "RECORD_PARAMS_WITHOUT_RECORDING"
       """
-      You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+      You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
       #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel"
       })}
@@ -347,7 +354,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       You passed the --record flag but this project has not been setup to record.
 
-      This project is missing the 'projectId' inside of 'cypress.json'.
+      This project is missing the 'projectId' inside of '#{arg1}'.
 
       We cannot uniquely identify this project without this id.
 
@@ -455,7 +462,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We could not find a project with the ID: #{chalk.yellow(arg1)}
 
-      This projectId came from your cypress.json file or an environment variable.
+      This projectId came from your '#{arg2}' file or an environment variable.
 
       Please log into the Dashboard and find your project.
 
@@ -466,7 +473,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       https://on.cypress.io/dashboard
       """
     when "NO_PROJECT_ID"
-      "Can't find 'projectId' in the 'cypress.json' file for this project: " + chalk.blue(arg1)
+      "Can't find 'projectId' in the '#{arg1}' file for this project: " + chalk.blue(arg2)
     when "NO_PROJECT_FOUND_AT_PROJECT_ROOT"
       "Can't find project at the path: " + chalk.blue(arg1)
     when "CANNOT_FETCH_PROJECT_TOKEN"
@@ -544,7 +551,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Your `supportFile` is set to `#{arg1}`, but either the file is missing or it's invalid. The `supportFile` must be a `.js` or `.coffee` file or, if you're using a preprocessor plugin, it must be supported by that plugin.
 
-      Correct your `cypress.json`, create the appropriate file, or set `supportFile` to `false` if a support file is not necessary for your project.
+      Correct your `#{arg2}`, create the appropriate file, or set `supportFile` to `false` if a support file is not necessary for your project.
 
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
@@ -603,6 +610,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Fix the error in your code and re-run your tests.
       """
+    # happens when there is an error in configuration file like "cypress.json"
     when "SETTINGS_VALIDATION_ERROR"
       filePath = "`#{arg1}`"
       """
@@ -610,6 +618,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg2)}
       """
+    # happens when there is an invalid config value returnes from the
+    # project's plugins file like "cypress/plugins.index.js"
+    when "PLUGINS_CONFIG_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
+      """
+      An invalid configuration value returned from the plugins file: #{chalk.blue(filePath)}
+
+      #{chalk.yellow(arg2)}
+      """
+    # general configuration error not-specific to configuration or plugins files
     when "CONFIG_VALIDATION_ERROR"
       """
       We found an invalid configuration value:
@@ -685,11 +703,21 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Learn more at https://on.cypress.io/reporters
       """
-    when "PROJECT_DOES_NOT_EXIST"
+    when "CONFIG_FILE_NOT_FOUND"
       """
-      Could not find any tests to run.
+      Could not find a Cypress configuration file, exiting.
 
-      We looked but did not find a #{chalk.blue('cypress.json')} file in this folder: #{chalk.blue(arg1)}
+      We looked but did not find a #{chalk.blue(arg1)} file in this folder: #{chalk.blue(arg2)}
+      """
+    when "INVOKED_BINARY_OUTSIDE_NPM_MODULE"
+      """
+      It looks like you are running the Cypress binary directly.
+
+      This is not the recommended approach, and Cypress may not work correctly.
+
+      Please install the 'cypress' NPM package and follow the instructions here:
+
+      https://on.cypress.io/installing-cypress
       """
     when "DUPLICATE_TASK_KEY"
       """
@@ -814,6 +842,42 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
+    when "COULD_NOT_FIND_SYSTEM_NODE"
+      """
+      `nodeVersion` is set to `system`, but Cypress could not find a usable Node executable on your PATH.
+
+      Make sure that your Node executable exists and can be run by the current user.
+
+      Cypress will use the built-in Node version (v#{arg1}) instead.
+      """
+    when "INVALID_CYPRESS_ENV"
+      """
+      We have detected unknown or unsupported CYPRESS_ENV value
+
+        #{chalk.yellow(arg1)}
+
+      Please do not modify CYPRESS_ENV value.
+      """
+    when "CDP_VERSION_TOO_OLD"
+      """
+      A minimum CDP version of v#{arg1} is required, but the current browser has #{if arg2.major != 0 then "v#{arg2.major}.#{arg2.minor}" else 'an older version'}.
+      """
+    when "CDP_COULD_NOT_CONNECT"
+      """
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+
+      This usually indicates there was a problem opening the Chrome browser.
+
+      The CDP port requested was #{chalk.yellow(arg1)}.
+
+      Error details:
+
+      #{arg2.stack}
+      """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
+      """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
@@ -834,6 +898,8 @@ get = (type, arg1, arg2) ->
 warning = (type, arg1, arg2) ->
   err = get(type, arg1, arg2)
   log(err, "magenta")
+
+  return null
 
 throwErr = (type, arg1, arg2) ->
   throw get(type, arg1, arg2)
@@ -861,26 +927,34 @@ clone = (err, options = {}) ->
   obj
 
 log = (err, color = "red") ->
-  Promise.try ->
-    console.log chalk[color](err.message)
-    if err.details
-      console.log("\n", chalk["yellow"](err.details))
+  console.log chalk[color](err.message)
 
-    ## bail if this error came from known
-    ## list of Cypress errors
-    return if isCypressErr(err)
+  if err.details
+    console.log("\n", chalk["yellow"](err.details))
 
-    console.log chalk[color](err.stack)
+  ## bail if this error came from known
+  ## list of Cypress errors
+  return if isCypressErr(err)
 
-    if process.env["CYPRESS_ENV"] is "production"
-      ## log this error to raygun since its not
-      ## a known error
-      require("./logger").createException(err).catch(->)
+  console.log chalk[color](err.stack)
+
+  return err
+
+logException = Promise.method (err) ->
+  ## TODO: remove context here
+  if @log(err) and isProduction()
+    ## log this exception since
+    ## its not a known error
+    return require("./logger")
+    .createException(err)
+    .catch(->)
 
 module.exports = {
   get,
 
   log,
+
+  logException,
 
   clone,
 
@@ -895,4 +969,6 @@ module.exports = {
   throw: throwErr
 
   stripAnsi: strip
+
+  displayFlags
 }

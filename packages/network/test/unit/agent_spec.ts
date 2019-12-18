@@ -15,6 +15,7 @@ import {
   regenerateRequestHead, CombinedAgent,
 } from '../../lib/agent'
 import { AsyncServer, Servers } from '../support/servers'
+import { allowDestroy } from '../../lib/allow-destroy'
 
 const expect = chai.expect
 
@@ -207,6 +208,18 @@ describe('lib/agent', function () {
             }
           })
         })
+
+        // https://github.com/cypress-io/cypress/issues/5729
+        it('does not warn when making a request to an IP address', function () {
+          const warningStub = sinon.spy(process, 'emitWarning')
+
+          return this.request({
+            url: `https://127.0.0.1:${HTTPS_PORT}/get`,
+          })
+          .then(() => {
+            expect(warningStub).to.not.be.called
+          })
+        })
       })
     })
 
@@ -273,9 +286,11 @@ describe('lib/agent', function () {
 
       it('#createUpstreamProxyConnection throws when connection is accepted then closed', function () {
         const proxy = Bluebird.promisifyAll(
-          net.createServer((socket) => {
-            socket.end()
-          })
+          allowDestroy(
+            net.createServer((socket) => {
+              socket.end()
+            })
+          )
         ) as net.Server & AsyncServer
 
         const proxyPort = PROXY_PORT + 2
@@ -295,7 +310,7 @@ describe('lib/agent', function () {
         .catch((e) => {
           expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: The upstream proxy closed the socket after connecting but before sending a response.')
 
-          return proxy.closeAsync()
+          return proxy.destroyAsync()
         })
       })
     })

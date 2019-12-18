@@ -54,6 +54,18 @@ describe('cypress', function () {
         expect(args).to.deep.eq({ config: JSON.stringify(config) })
       })
     })
+
+    it('passes configFile: false', () => {
+      const opts = {
+        configFile: false,
+      }
+
+      return cypress.open(opts)
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args).to.deep.eq(opts)
+      })
+    })
   })
 
   context('.run', function () {
@@ -122,6 +134,18 @@ describe('cypress', function () {
 
     it('resolves with contents of tmp file', () => {
       return cypress.run().then(snapshot)
+    })
+
+    it('passes configFile: false', () => {
+      const opts = {
+        configFile: false,
+      }
+
+      return cypress.run(opts)
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args).to.deep.eq(opts)
+      })
     })
   })
 })

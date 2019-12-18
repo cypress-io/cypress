@@ -34,11 +34,10 @@ setWindowProxy = (win) ->
   if not process.env.HTTP_PROXY
     return
 
-  return new Promise (resolve) ->
-    win.webContents.session.setProxy({
-      proxyRules: process.env.HTTP_PROXY
-      proxyBypassRules: process.env.NO_PROXY
-    }, resolve)
+  win.webContents.session.setProxy({
+    proxyRules: process.env.HTTP_PROXY
+    proxyBypassRules: process.env.NO_PROXY
+  })
 
 module.exports = {
   reset: ->
@@ -68,67 +67,8 @@ module.exports = {
   getByWebContents: (webContents) ->
     BrowserWindow.fromWebContents(webContents)
 
-  getBrowserAutomation: (webContents) ->
-    win = @getByWebContents(webContents)
-
-    @automation(win)
-
   _newBrowserWindow: (options) ->
     new BrowserWindow(options)
-
-  automation: (win) ->
-    cookies = Promise.promisifyAll(win.webContents.session.cookies)
-
-    return {
-      clear: (filter = {}) ->
-        clear = (cookie) =>
-          url = getCookieUrl(cookie)
-
-          cookies.removeAsync(url, cookie.name)
-          .return(cookie)
-
-        @getAll(filter)
-        .map(clear)
-
-      getAll: (filter) ->
-        cookies
-        .getAsync(filter)
-
-      getCookies: (filter) ->
-        @getAll(filter)
-
-      getCookie: (filter) ->
-        @getAll(filter)
-        .then(firstOrNull)
-
-      setCookie: (props = {}) ->
-        ## only set the url if its not already present
-        props.url ?= getCookieUrl(props)
-
-        ## resolve with the cookie props. the extension
-        ## calls back with the cookie details but electron
-        ## chrome API's do not. but it doesn't matter because
-        ## we always send a fully complete cookie props object
-        ## which can simply be returned.
-        cookies
-        .setAsync(props)
-        .return(props)
-
-      clearCookie: (filter) ->
-        @clear(filter)
-        .then(firstOrNull)
-
-      clearCookies: (filter) ->
-        @clear(filter)
-
-      isAutomationConnected: ->
-        true
-
-      takeScreenshot: ->
-        new Promise (resolve) ->
-          win.capturePage (img) ->
-            resolve(img.toDataURL())
-    }
 
   defaults: (options = {}) ->
     _.defaultsDeep(options, {
@@ -154,7 +94,7 @@ module.exports = {
       onNewWindow: ->
       webPreferences:  {
         partition:            null
-        chromeWebSecurity:    true
+        webSecurity:          true
         nodeIntegration:      false
         backgroundThrottling: false
       }
@@ -167,8 +107,7 @@ module.exports = {
       options.frame = false
       options.webPreferences.offscreen = true
 
-    if options.chromeWebSecurity is false
-      options.webPreferences.webSecurity = false
+    options.webPreferences.webSecurity = !!options.chromeWebSecurity
 
     if options.partition
       options.webPreferences.partition = options.partition
@@ -215,16 +154,12 @@ module.exports = {
       })
 
     if options.onPaint
-      setFrameRate = (num) ->
-        if win.webContents.getFrameRate() isnt num
-          win.webContents.setFrameRate(num)
-
       win.webContents.on "paint", (event, dirty, image) ->
         ## https://github.com/cypress-io/cypress/issues/705
         ## if win is destroyed this will throw
         try
           if fr = options.recordFrameRate
-            setFrameRate(fr)
+            win.webContents.frameRate = fr
 
           options.onPaint.apply(win, arguments)
         catch err

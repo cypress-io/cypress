@@ -8,13 +8,13 @@ import UpdateBanner from '../update/update-banner'
 
 export default ({ children }) => {
   return (
-    <div>
+    <>
       <Nav />
       {children}
       <UpdateBanner />
       <Footer />
       <LoginModal />
       <GlobalError />
-    </div>
+    </>
   )
 }

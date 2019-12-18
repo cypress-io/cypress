@@ -31,7 +31,7 @@ describe('lib/connect', function () {
     })
 
     // Error: listen EADDRNOTAVAIL ::1
-    // TODO: add an ipv6 lo if to the docker container
+    // NOTE: add an ipv6 lo if to the docker container
     it.skip('resolves localhost on ::1 immediately', function () {
       this.timeout(50)
 

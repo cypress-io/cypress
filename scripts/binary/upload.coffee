@@ -1,6 +1,6 @@
 awspublish  = require('gulp-awspublish')
 rename      = require('gulp-rename')
-debug       = require('gulp-debug')
+gulpDebug   = require('gulp-debug')
 fs      = require("fs-extra")
 cp      = require("child_process")
 path    = require("path")
@@ -118,7 +118,7 @@ module.exports = {
         .pipe rename (p) ->
           p.dirname = aws.folder + "/" + p.dirname
           p
-        .pipe debug()
+        .pipe gulpDebug()
         .pipe publisher.publish(headers)
         .pipe awspublish.reporter()
         .on "error", reject
