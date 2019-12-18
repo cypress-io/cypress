@@ -16,6 +16,9 @@ checkPlatform = (platform) ->
   la(isValidPlatform(platform),
     "invalid build platform", platform, "valid choices", R.values(platforms))
 
+buildRootDir = () ->
+  path.resolve("build")
+
 ## returns a path into the /build directory
 ## the output folder should look something like this
 ## build/
@@ -23,15 +26,16 @@ checkPlatform = (platform) ->
 ##     ... platform-specific files
 buildDir = (platform, args...) ->
   checkPlatform(platform)
+  root = buildRootDir()
   switch platform
     when "darwin"
       # the new electron-builder for some reason adds its own platform
       # subfolder and it is NOT "darwin" but "mac"
-      path.resolve("build", "mac", args...)
+      path.resolve(root, "mac", args...)
     when "linux"
-      path.resolve("build", platform, "Cypress", args...)
+      path.resolve(root, platform, "Cypress", args...)
     when "win32"
-      path.resolve("build", platform, "Cypress", args...)
+      path.resolve(root, platform, "Cypress", args...)
 
 ## returns a path into the /dist directory
 distDir = (platform, args...) ->
@@ -73,6 +77,7 @@ buildAppExecutable = (platform) ->
 
 module.exports = {
   isValidPlatform
+  buildRootDir
   buildDir
   distDir
   zipDir

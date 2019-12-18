@@ -27,6 +27,7 @@ xvfb = require("../../cli/lib/exec/xvfb")
 linkPackages = require('../link-packages')
 { transformRequires } = require('./util/transform-requires')
 { testStaticAssets } = require('./util/testStaticAssets')
+performanceTracking = require('../../packages/server/test/support/helpers/performance.js')
 
 rootPackage = require("@packages/root")
 
@@ -254,7 +255,7 @@ buildCypressApp = (platform, version, options = {}) ->
     # the built Test Runner application
 
     appFolder = distDir()
-    outputFolder = meta.zipDir(platform)
+    outputFolder = meta.buildRootDir(platform)
     electronVersion = electron.getElectronVersion()
     la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion)
     electronDistFolder = path.join(__dirname, "..", "..", "packages", "electron", "node_modules", "electron", "dist")
@@ -330,6 +331,46 @@ buildCypressApp = (platform, version, options = {}) ->
         else
           reject new Error("Verifying App via GateKeeper failed")
 
+  printPackageSizes = ->
+    appFolder = meta.buildAppDir(platform, "packages")
+    log("#printPackageSizes #{appFolder}")
+
+    if (platform == "win32") then return Promise.resolve()
+
+    # "du" - disk usage utility
+    # -d -1 depth of 1
+    # -h human readable sizes (K and M)
+    args = ["-d", "1", appFolder]
+
+    parseDiskUsage = (result) ->
+      lines = result.stdout.split(os.EOL)
+      # will store {package name: package size}
+      data = {}
+
+      lines.forEach (line) ->
+        parts = line.split('\t')
+        packageSize = parseFloat(parts[0])
+        folder = parts[1]
+
+        packageName = path.basename(folder)
+        if packageName is "packages"
+          return # root "packages" information
+
+        data[packageName] = packageSize
+
+      return data
+
+    printDiskUsage = (sizes) ->
+      bySize = R.sortBy(R.prop('1'))
+      console.log(bySize(R.toPairs(sizes)))
+
+    execa("du", args)
+    .then(parseDiskUsage)
+    .then(R.tap(printDiskUsage))
+    .then((sizes) ->
+      performanceTracking.track('test runner size', sizes)
+    )
+
   Promise.resolve()
   .then(checkPlatform)
   .then(cleanupPlatform)
@@ -350,6 +391,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
   .then(verifyAppCanOpen)
+  .then(printPackageSizes)
   .return({
     buildDir: buildDir()
   })
