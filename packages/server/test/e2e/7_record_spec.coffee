@@ -7,13 +7,14 @@ e2e = require("../support/helpers/e2e")
 fs = require("../../lib/util/fs")
 Fixtures = require("../support/helpers/fixtures")
 
-postRunResponse = jsonSchemas.getExample("postRunResponse")("2.0.0")
+postRunResponseWithWarnings = jsonSchemas.getExample("postRunResponse")("2.2.0")
+postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 postRunInstanceResponse = jsonSchemas.getExample("postRunInstanceResponse")("2.1.0")
 
 e2ePath = Fixtures.projectPath("e2e")
 outputPath = path.join(e2ePath, "output.json")
 
-{ runId, groupId, machineId, runUrl } = postRunResponse
+{ runId, groupId, machineId, runUrl, tags } = postRunResponse
 { instanceId } = postRunInstanceResponse
 
 requests = null
@@ -21,12 +22,12 @@ requests = null
 getRequestUrls = ->
   _.map(requests, "url")
 
-getSchemaErr = (err, schema) ->
+getSchemaErr = (tag, err, schema) ->
   {
     errors: err.errors
     object: err.object
     example: err.example
-    message: "Request should follow #{schema} schema"
+    message: "#{tag} should follow #{schema} schema"
   }
 
 getResponse = (responseSchema) ->
@@ -37,24 +38,26 @@ getResponse = (responseSchema) ->
 
   jsonSchemas.getExample(name)(version)
 
-sendResponse = (req, res, responseSchema) ->
-  if _.isFunction(responseSchema)
-    return responseSchema(req, res)
+sendResponse = (req, res, responseBody) ->
+  if _.isFunction(responseBody)
+    return responseBody(req, res)
 
-  res.json(getResponse(responseSchema))
+  res.json(getResponse(responseBody))
 
-ensureSchema = (requestSchema, responseSchema) ->
-  if requestSchema
-    [ name, version ] = requestSchema.split("@")
+ensureSchema = (expectedRequestSchema, responseBody, expectedResponseSchema) ->
+  if expectedRequestSchema
+    [ reqName, reqVersion ] = expectedRequestSchema.split("@")
 
   return (req, res) ->
     { body } = req
 
     try
-      if requestSchema
-        jsonSchemas.assertSchema(name, version)(body)
+      if expectedRequestSchema
+        jsonSchemas.assertSchema(reqName, reqVersion)(body)
 
-      sendResponse(req, res, responseSchema)
+      res.expectedResponseSchema = expectedResponseSchema
+
+      sendResponse(req, res, responseBody)
 
       key = [req.method, req.url].join(" ")
 
@@ -63,7 +66,7 @@ ensureSchema = (requestSchema, responseSchema) ->
         body
       })
     catch err
-      res.status(412).json(getSchemaErr(err, requestSchema))
+      res.status(412).json(getSchemaErr("request", err, expectedRequestSchema))
 
 sendUploadUrls = (req, res) ->
   { body } = req
@@ -83,19 +86,54 @@ sendUploadUrls = (req, res) ->
       uploadUrl: "http://localhost:1234/screenshots/#{num}.png"
     }
 
-  if screenshotUploadUrls.length
-    json.screenshotUploadUrls = screenshotUploadUrls
+  json.screenshotUploadUrls = screenshotUploadUrls
 
   res.json(json)
+
+assertResponseBodySchema = (req, res, next) ->
+  oldWrite = res.write
+  oldEnd = res.end
+
+  chunks = []
+
+  res.write = (chunk) ->
+    ## buffer the response, we'll really write it on end
+    chunks.push(chunk)
+
+  res.end = (chunk) ->
+    if (chunk)
+      chunks.push(chunk)
+
+    res.write = oldWrite
+    res.end = oldEnd
+
+    if res.expectedResponseSchema && _.inRange(res.statusCode, 200, 299)
+      body = JSON.parse(Buffer.concat(chunks).toString('utf8'))
+
+      [ resName, resVersion ] = res.expectedResponseSchema.split("@")
+
+      try
+        jsonSchemas.assertSchema(resName, resVersion)(body)
+      catch err
+        return res.status(412).json(getSchemaErr("response", err, res.expectedResponseSchema))
+
+    chunks.map (chunk) ->
+      res.write(chunk)
+    res.end()
+
+  next()
 
 onServer = (routes) ->
   return (app) ->
     app.use(bodyParser.json())
 
+    app.use(assertResponseBodySchema)
+
     _.each routes, (route) ->
       app[route.method](route.url, ensureSchema(
         route.req,
-        route.res
+        route.res,
+        route.resSchema
       ))
 
 setup = (routes, settings = {}) ->
@@ -114,17 +152,20 @@ defaultRoutes = [
   {
     method: "post"
     url: "/runs"
-    req: "postRunRequest@2.1.0",
+    req: "postRunRequest@2.2.0",
+    resSchema: "postRunResponse@2.2.0"
     res: postRunResponse
   }, {
     method: "post"
     url: "/runs/:id/instances"
     req: "postRunInstanceRequest@2.1.0",
+    resSchema: "postRunInstanceResponse@2.1.0"
     res: postRunInstanceResponse
   }, {
     method: "put"
     url: "/instances/:id"
     req: "putInstanceRequest@2.0.0",
+    resSchema: "putInstanceResponse@2.0.0"
     res: sendUploadUrls
   }, {
     method: "put"
@@ -256,7 +297,7 @@ describe "e2e record", ->
         secondInstancePut = requests[6]
         expect(secondInstancePut.body.error).to.be.null
         expect(secondInstancePut.body.tests).to.have.length(2)
-        expect(secondInstancePut.body.hooks).to.have.length(1)
+        expect(secondInstancePut.body.hooks).to.have.length(2)
         expect(secondInstancePut.body.screenshots).to.have.length(1)
         expect(secondInstancePut.body.stats.tests).to.eq(2)
         expect(secondInstancePut.body.stats.failures).to.eq(1)
@@ -277,7 +318,7 @@ describe "e2e record", ->
         thirdInstancePut = requests[11]
         expect(thirdInstancePut.body.error).to.be.null
         expect(thirdInstancePut.body.tests).to.have.length(2)
-        expect(thirdInstancePut.body.hooks).to.have.length(0)
+        expect(thirdInstancePut.body.hooks).to.have.length(1)
         expect(thirdInstancePut.body.screenshots).to.have.length(1)
         expect(thirdInstancePut.body.stats.tests).to.eq(2)
         expect(thirdInstancePut.body.stats.passes).to.eq(1)
@@ -299,7 +340,7 @@ describe "e2e record", ->
         fourthInstancePut = requests[15]
         expect(fourthInstancePut.body.error).to.be.null
         expect(fourthInstancePut.body.tests).to.have.length(1)
-        expect(fourthInstancePut.body.hooks).to.have.length(0)
+        expect(fourthInstancePut.body.hooks).to.have.length(1)
         expect(fourthInstancePut.body.screenshots).to.have.length(1)
         expect(fourthInstancePut.body.stats.tests).to.eq(1)
         expect(fourthInstancePut.body.stats.failures).to.eq(1)
@@ -358,11 +399,13 @@ describe "e2e record", ->
     routes[0] = {
       method: "post"
       url: "/runs"
-      req: "postRunRequest@2.1.0",
+      req: "postRunRequest@2.2.0",
+      resSchema: "postRunResponse@2.2.0"
       res: (req, res) ->
-        { group, ciBuildId } = req.body
+        { group, tags, ciBuildId } = req.body
 
         expect(group).to.eq("prod-e2e")
+        expect(tags).to.deep.eq(['nightly'])
         expect(ciBuildId).to.eq("ciBuildId123")
 
         ## if this is the first response
@@ -382,6 +425,7 @@ describe "e2e record", ->
       method: "post"
       url: "/runs/:id/instances"
       req: "postRunInstanceRequest@2.1.0",
+      resSchema: "postRunInstanceResponse@2.1.0"
       res: (req, res) ->
         { machineId, spec } = req.body
 
@@ -425,6 +469,7 @@ describe "e2e record", ->
           record: true
           parallel: true
           snapshot: true
+          tag: "nightly"
           ciBuildId: "ciBuildId123"
           expectedExitCode: 3
           config: {
@@ -433,7 +478,7 @@ describe "e2e record", ->
         })
         .get("stdout"),
 
-        ## stagger the 2nd instance
+        ## stagger the 2nd run
         ## starting up a bit
         Promise
         .delay(3000)
@@ -445,6 +490,7 @@ describe "e2e record", ->
             record: true
             parallel: true
             snapshot: true
+            tag: "nightly"
             ciBuildId: "ciBuildId123"
             expectedExitCode: 0
             config: {
@@ -515,6 +561,7 @@ describe "e2e record", ->
         expectedExitCode: 0
       })
       .then ->
+        console.log('GETREQUESTURLS', getRequestUrls())
         expect(getRequestUrls()).to.be.empty
 
     it "warns but does not exit when is forked pr and parallel", ->
@@ -555,7 +602,7 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
           res: (req, res) -> res.sendStatus(401)
         }
       ]
@@ -576,7 +623,7 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
           res: (req, res) -> res.sendStatus(404)
         }
       ]
@@ -596,7 +643,7 @@ describe "e2e record", ->
       routes = [{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.sendStatus(500)
       }]
 
@@ -645,6 +692,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -665,6 +713,7 @@ describe "e2e record", ->
         method: "post"
         url: "/runs/:id/instances"
         req: "postRunInstanceRequest@2.1.0",
+        resSchema: "postRunInstanceResponse@2.1.0"
         res: (req, res) -> res.sendStatus(500)
       }
 
@@ -677,6 +726,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -698,6 +748,7 @@ describe "e2e record", ->
         method: "post"
         url: "/runs/:id/instances"
         req: "postRunInstanceRequest@2.1.0",
+        resSchema: "postRunInstanceResponse@2.1.0"
         res: (req, res) ->
           res.json({
             instanceId
@@ -724,6 +775,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -743,7 +795,7 @@ describe "e2e record", ->
       routes = [{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(422).json({
           code: "RUN_GROUP_NAME_NOT_UNIQUE"
           message: "Run group name cannot be used again without passing the parallel flag."
@@ -778,7 +830,7 @@ describe "e2e record", ->
       routes = [{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(422).json({
           code: "SOMETHING_UNKNOWN"
           message: "An unknown message here from the server."
@@ -792,6 +844,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "e2e-tests"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -809,7 +862,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           code: "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           payload: {
@@ -833,7 +886,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           code: "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
           payload: {
@@ -857,7 +910,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           code: "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
           payload: {
@@ -879,7 +932,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           code: "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN"
           payload: {
@@ -901,7 +954,7 @@ describe "e2e record", ->
       setup([{
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) -> res.status(402).json({
           error: "Something went wrong"
         })
@@ -921,12 +974,14 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
           req: "postRunInstanceRequest@2.1.0",
+          resSchema: "postRunInstanceResponse@2.1.0"
           res: (req, res) -> res.sendStatus(500)
         }
       ]
@@ -956,12 +1011,14 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
           req: "postRunInstanceRequest@2.1.0",
+          resSchema: "postRunInstanceResponse@2.1.0"
           res: postRunInstanceResponse
         }, {
           method: "put"
@@ -997,22 +1054,26 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
           req: "postRunInstanceRequest@2.1.0",
+          resSchema: "postRunInstanceResponse@2.1.0"
           res: postRunInstanceResponse
         }, {
           method: "put"
           url: "/instances/:id"
           req: "putInstanceRequest@2.0.0",
+          resSchema: "putInstanceResponse@2.0.0"
           res: sendUploadUrls
         }, {
           method: "put"
           url: "/instances/:id/stdout"
           req: "putInstanceStdoutRequest@1.0.0",
+          resSchema: "putInstanceStdoutRequest@1.0.0"
           res: (req, res) -> res.sendStatus(500)
         }, {
           method: "put"
@@ -1056,17 +1117,20 @@ describe "e2e record", ->
         {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: postRunResponse
         }, {
           method: "post"
           url: "/runs/:id/instances"
           req: "postRunInstanceRequest@2.1.0",
+          resSchema: "postRunInstanceResponse@2.1.0"
           res: postRunInstanceResponse
         }, {
           method: "put"
           url: "/instances/:id"
           req: "putInstanceRequest@2.0.0",
+          resSchema: "putInstanceResponse@2.0.0"
           res: sendUploadUrls
         }, {
           method: "put"
@@ -1119,7 +1183,7 @@ describe "e2e record", ->
       routes[0] = {
         method: "post"
         url: "/runs"
-        req: "postRunRequest@2.1.0",
+        req: "postRunRequest@2.2.0",
         res: (req, res) ->
           count += 1
 
@@ -1133,6 +1197,7 @@ describe "e2e record", ->
         method: "post"
         url: "/runs/:id/instances"
         req: "postRunInstanceRequest@2.1.0",
+        resSchema: "postRunInstanceResponse@2.1.0"
         res: (req, res) ->
           count += 1
 
@@ -1151,6 +1216,9 @@ describe "e2e record", ->
             res.json({
               instanceId,
               spec: null
+              estimatedWallClockDuration: null
+              totalInstances: 0
+              claimedInstances: 0
             })
       }
 
@@ -1163,6 +1231,7 @@ describe "e2e record", ->
           key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
           spec: "record_pass*"
           group: "foo"
+          tag: "nightly"
           record: true
           parallel: true
           snapshot: true
@@ -1193,13 +1262,17 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
               limit: 500
               gracePeriodEnds: "2999-12-31"
@@ -1224,13 +1297,17 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
               limit: 500
               gracePeriodEnds: "2999-12-31"
@@ -1255,13 +1332,17 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE"
               gracePeriodEnds: "2999-12-31"
               orgId: "org-id-1234"
@@ -1285,13 +1366,17 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
               gracePeriodEnds: "2999-12-31"
               orgId: "org-id-1234"
@@ -1315,13 +1400,17 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
               used: 700
               limit: 500
@@ -1346,13 +1435,17 @@ describe "e2e record", ->
         routes[0] = {
           method: "post"
           url: "/runs"
-          req: "postRunRequest@2.1.0",
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
           res: (req, res) -> res.status(200).json({
             runId
             groupId
             machineId
             runUrl
+            tags
             warnings: [{
+              name: "foo"
+              message: "foo"
               code: "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
               used: 700
               limit: 500
@@ -1364,6 +1457,27 @@ describe "e2e record", ->
         setup(routes)
 
         it "warns when over test recordings", ->
+          e2e.exec(@, {
+            key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
+            spec: "record_pass*"
+            record: true
+            snapshot: true
+            expectedExitCode: 0
+          })
+
+      describe "unknown warning", ->
+        routes = defaultRoutes.slice()
+        routes[0] = {
+          method: "post"
+          url: "/runs"
+          req: "postRunRequest@2.2.0",
+          resSchema: "postRunResponse@2.2.0"
+          res: postRunResponseWithWarnings
+        }
+
+        setup(routes)
+
+        it "warns with unknown warning code", ->
           e2e.exec(@, {
             key: "f858a2bc-b469-4e48-be67-0876339ee7e1"
             spec: "record_pass*"

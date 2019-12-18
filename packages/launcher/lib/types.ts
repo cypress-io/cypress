@@ -35,6 +35,8 @@ export type FoundBrowser = Browser & {
   custom?: boolean
   /** optional info that will be shown in the GUI */
   info?: string
+  /** optional warning that will be shown in the GUI */
+  warning?: string
 }
 
 // all common type definition for this module

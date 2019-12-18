@@ -53,6 +53,7 @@ const windowHasFocus = function () {
   window.addEventListener('focus', function () {
     hasFocus = true
   })
+
   window.focus()
 
   return hasFocus
@@ -64,7 +65,6 @@ const requireWindowInFocus = () => {
   if (!hasFocus) {
     expect(hasFocus, 'this test requires the window to be in focus').ok
   }
-
 }
 
 it('can intercept blur/focus events', () => {
@@ -86,7 +86,6 @@ it('can intercept blur/focus events', () => {
   cy
   .visit('http://localhost:3500/fixtures/active-elements.html')
   .then(() => {
-
     requireWindowInFocus()
 
     expect(cy.getFocused()).to.be.null
@@ -130,9 +129,7 @@ it('can intercept blur/focus events', () => {
 
     expect(blur).calledOnce
     expect(handleBlur).not.called
-
   })
-
 })
 
 it('blur the activeElement when clicking the body', () => {
@@ -253,7 +250,6 @@ describe('polyfill programmatic blur events', () => {
     cy
     .visit('http://localhost:3500/fixtures/active-elements.html')
     .then(() => {
-
       // programmatically focus the first, then second input element
       const $one = cy.$$('#one')
       const $two = cy.$$('#two')
@@ -301,7 +297,6 @@ describe('polyfill programmatic blur events', () => {
         })
       })
       .then(() => {
-
         stub.reset()
 
         setActiveElement($two.get(0))
@@ -311,8 +306,7 @@ describe('polyfill programmatic blur events', () => {
         expect(stub, 'should not send focus if already focused el').not.called
       })
     })
-  }
-  )
+  })
 
   // https://github.com/cypress-io/cypress/issues/1176
   it('simulated events when window is out of focus when .blur called', () => {
@@ -339,7 +333,6 @@ describe('polyfill programmatic blur events', () => {
       $one.get(0).blur()
 
       cy.then(() => {
-
         expect(stub).calledTwice
 
         expect(_.toPlainObject(stub.getCall(0).args[0].originalEvent)).to.containSubset({
@@ -356,7 +349,6 @@ describe('polyfill programmatic blur events', () => {
       })
 
       .then(() => {
-
         stub.reset()
 
         setActiveElement(cy.$$('body').get(0))
@@ -365,7 +357,6 @@ describe('polyfill programmatic blur events', () => {
 
         expect(stub, 'should not send blur if not focused el').not.called
       })
-
     })
   })
 
@@ -374,7 +365,6 @@ describe('polyfill programmatic blur events', () => {
     cy
     .visit('http://localhost:3500/fixtures/active-elements.html')
     .then(() => {
-
       // programmatically focus the first, then second input element
 
       const $one = cy.$$(`<svg id="svg-one" tabindex width="100" height="100">
@@ -427,7 +417,6 @@ describe('polyfill programmatic blur events', () => {
         })
       })
       .then(() => {
-
         stub.reset()
 
         setActiveElement($two.get(0))
@@ -437,8 +426,7 @@ describe('polyfill programmatic blur events', () => {
         expect(stub, 'should not send focus if already focused el').not.called
       })
     })
-  }
-  )
+  })
 
   // https://github.com/cypress-io/cypress/issues/1176
   it('SVGElement simulated events when window is out of focus when .blur called', () => {
@@ -469,7 +457,6 @@ describe('polyfill programmatic blur events', () => {
       $one.get(0).blur()
 
       cy.then(() => {
-
         expect(stub).calledTwice
 
         expect(_.toPlainObject(stub.getCall(0).args[0].originalEvent)).to.containSubset({
@@ -486,7 +473,6 @@ describe('polyfill programmatic blur events', () => {
       })
 
       .then(() => {
-
         stub.reset()
 
         setActiveElement(cy.$$('body').get(0))
@@ -495,7 +481,6 @@ describe('polyfill programmatic blur events', () => {
 
         expect(stub, 'should not send blur if not focused el').not.called
       })
-
     })
   })
 
@@ -509,7 +494,6 @@ describe('polyfill programmatic blur events', () => {
   it('does not send focus events for non-focusable elements', () => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html')
     .then(() => {
-
       cy.$$('<div id="no-focus">clearly not a focusable element</div>')
       .appendTo(cy.$$('body'))
 
@@ -522,9 +506,7 @@ describe('polyfill programmatic blur events', () => {
       el1[0].focus()
 
       expect(stub).not.called
-
     })
-
   })
 })
 
@@ -536,6 +518,7 @@ describe('intercept blur methods correctly', () => {
       cy.state('document').onselectionchange = cy.stub().as('selectionchange')
     })
   })
+
   it('focus  <a>', () => {
     const $el = cy.$$('<a href="#">foo</a>')
 
@@ -548,8 +531,8 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     cy.wait(0).get('@selectionchange').should('not.be.called')
-
   })
+
   it('focus <select>', () => {
     const $el = cy.$$('<select>')
 
@@ -559,8 +542,8 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     cy.wait(0).get('@selectionchange').should('not.be.called')
-
   })
+
   it('focus <button>', () => {
     const $el = cy.$$('<button/>')
 
@@ -570,8 +553,8 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     cy.wait(0).get('@selectionchange').should('not.be.called')
-
   })
+
   it('focus <iframe>', () => {
     const $el = cy.$$('<iframe src="" />')
 
@@ -581,8 +564,8 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     cy.wait(0).get('@selectionchange').should('not.be.called')
-
   })
+
   it('focus [tabindex]', () => {
     const $el = cy.$$('<div tabindex="1">tabindex</div>')
 
@@ -592,8 +575,8 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     cy.wait(0).get('@selectionchange').should('not.be.called')
-
   })
+
   it('focus <textarea>', () => {
     const $el = cy.$$('<textarea/>')
 
@@ -603,8 +586,8 @@ describe('intercept blur methods correctly', () => {
     .should('have.focus')
 
     cy.get('@selectionchange').should('be.calledOnce')
-
   })
+
   it('focus [contenteditable]', () => {
     const $el = cy.$$('<div contenteditable>contenteditable</div>')
 
@@ -615,6 +598,7 @@ describe('intercept blur methods correctly', () => {
 
     cy.get('@selectionchange').should('be.calledOnce')
   })
+
   it('cannot focus a [contenteditable] child', () => {
     const outer = cy.$$('<div contenteditable>contenteditable</div>').appendTo(cy.$$('body'))
     const inner = cy.$$('<div>first inner contenteditable</div>').appendTo(outer)
@@ -632,6 +616,7 @@ describe('intercept blur methods correctly', () => {
 
     cy.get('@selectionchange').should('not.be.called')
   })
+
   it('focus svg', () => {
     const $svg = cy.$$(`<svg tabindex="1" width="900px" height="500px" viewBox="0 0 95 50" style="border: solid red 1px;"
       xmlns="http://www.w3.org/2000/svg">
@@ -652,8 +637,8 @@ describe('intercept blur methods correctly', () => {
   </svg>`).appendTo(cy.$$('body'))
 
     cy.wrap($svg).focus().should('have.focus')
-
   })
+
   it('focus area', () => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
       cy.$$(`
@@ -666,8 +651,59 @@ describe('intercept blur methods correctly', () => {
       `).appendTo(cy.$$('body'))
 
       cy.get('area').focus().should('have.focus')
-
     })
+  })
 
+  // W3C Hidden @see html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  // fix https://github.com/cypress-io/cypress/issues/4898
+  it('does not send focus events for focusable elements that are w3c hidden', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html')
+    .then(() => {
+      cy.$$('<input style="visibility:hidden" id="no-focus-1"/>')
+      .appendTo(cy.$$('body'))
+
+      cy.$$('<input style="display:none" id="no-focus-2"/>')
+      .appendTo(cy.$$('body'))
+
+      cy.$$('<div style="visibility:hidden"><input id="no-focus-3"/></div>')
+      .appendTo(cy.$$('body'))
+
+      cy.$$('<div style="display:none"><input id="no-focus-4"/></div>')
+      .appendTo(cy.$$('body'))
+
+      const stub = cy.stub().as('focus')
+
+      cy.$$('#no-focus-1').on('focus', stub).get(0).focus()
+      cy.$$('#no-focus-2').on('focus', stub).get(0).focus()
+      cy.$$('#no-focus-3').on('focus', stub).get(0).focus()
+      cy.$$('#no-focus-4').on('focus', stub).get(0).focus()
+
+      expect(stub).not.called
+
+      cy.get('no-focus-1').should('not.be.visible')
+      cy.get('no-focus-2').should('not.be.visible')
+      cy.get('no-focus-3').should('not.be.visible')
+      cy.get('no-focus-4').should('not.be.visible')
+    })
+  })
+
+  // W3C Hidden @see html.spec.whatwg.org/multipage/interaction.html#focusable-area
+  // fix https://github.com/cypress-io/cypress/issues/4898
+  it('does send focus events for focusable elements that are 0x0 size', () => {
+    cy.visit('http://localhost:3500/fixtures/active-elements.html')
+    .then(() => {
+      cy.$$('<input style="width:0;height:0;padding:0;margin:0;border:0;outline:0" id="focus-1"/>')
+      .appendTo(cy.$$('body'))
+
+      const stub = cy.stub()
+
+      cy.$$('#focus-1')
+      .on('focus', stub)
+      .get(0).focus()
+
+      expect(stub).calledOnce
+
+      cy.get('#focus-1').should('not.be.visible')
+    })
   })
 })

@@ -6,7 +6,6 @@ rp            = require("request-promise")
 Promise       = require("bluebird")
 evilDns       = require("evil-dns")
 httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")
-buffers       = require("#{root}lib/util/buffers")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
@@ -19,6 +18,8 @@ expectToEqDetails = (actual, expected) ->
   expect(actual).to.deep.eq(expected)
 
 describe "Server", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     sinon.stub(Server.prototype, "reset")
 
@@ -29,8 +30,8 @@ describe "Server", ->
       nock.enableNetConnect()
 
       @automationRequest = sinon.stub()
-      .withArgs("get:cookies").resolves([])
-      .withArgs("set:cookie").resolves({})
+      @automationRequest.withArgs("get:cookies").resolves([])
+      @automationRequest.withArgs("set:cookie").resolves({})
 
       @setup = (initialUrl, obj = {}) =>
         if _.isObject(initialUrl)
@@ -65,36 +66,28 @@ describe "Server", ->
             }
             rp(options)
 
-          open = =>
-            Promise.all([
-              ## open our https server
-              httpsServer.start(8443),
+          return Promise.all([
+            ## open our https server
+            httpsServer.start(8443),
 
-              ## and open our cypress server
-              @server = Server()
+            ## and open our cypress server
+            @server = Server()
 
-              @server.open(cfg)
-              .spread (port) =>
-                if initialUrl
-                  @server._onDomainSet(initialUrl)
+            @server.open(cfg)
+            .spread (port) =>
+              if initialUrl
+                @server._onDomainSet(initialUrl)
 
-                @srv = @server.getHttpServer()
+              @srv = @server.getHttpServer()
 
-                # @session = new (Session({app: @srv}))
+              # @session = new (Session({app: @srv}))
 
-                @proxy = "http://localhost:" + port
+              @proxy = "http://localhost:" + port
 
-                @fileServer = @server._fileServer.address()
-            ])
+              @buffers = @server._networkProxy.http.buffers
 
-          if @server
-            Promise.join(
-              httpsServer.stop()
-              @server.close()
-            )
-            .then(open)
-          else
-            open()
+              @fileServer = @server._fileServer.address()
+          ])
 
     afterEach ->
       nock.cleanAll()
@@ -178,7 +171,7 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.keys()).to.deep.eq(["http://localhost:2000/index.html"])
+          expect(@buffers.buffer).to.include({ url: "http://localhost:2000/index.html" })
         .then =>
           @server._onResolveUrl("/index.html", {}, @automationRequest)
           .then (obj = {}) =>
@@ -195,7 +188,7 @@ describe "Server", ->
               cookies: []
             })
 
-            expect(@server._request.sendStream).to.be.calledOnce
+            expect(@server._request.sendStream).to.be.calledTwice
         .then =>
           @rp("http://localhost:2000/index.html")
           .then (res) =>
@@ -203,7 +196,7 @@ describe "Server", ->
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("localhost")
             expect(res.body).to.include("Cypress")
-            expect(buffers.keys()).to.deep.eq([])
+            expect(@buffers.buffer).to.be.undefined
 
       it "can follow static file redirects", ->
         @server._onResolveUrl("/sub", {}, @automationRequest)
@@ -274,13 +267,13 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.keys()).to.deep.eq(["http://localhost:2000/index.html"])
+          expect(@buffers.buffer).to.include({ url: "http://localhost:2000/index.html" })
         .then =>
           @rp("http://localhost:2000/index.html")
-          .then (res) ->
+          .then (res) =>
             expect(res.statusCode).to.eq(200)
 
-            expect(buffers.keys()).to.deep.eq([])
+            expect(@buffers.buffer).to.be.undefined
 
     describe "http", ->
       beforeEach ->
@@ -320,7 +313,7 @@ describe "Server", ->
 
             Promise.delay(100)
             .then =>
-              ## the p1 should not have a current promise phase or reqStream until it's cancelled
+              ## the p1 should not have a current promise phase or reqStream until it's canceled
               expect(p1).not.to.have.property('currentPromisePhase')
               expect(p1).not.to.have.property('reqStream')
 
@@ -504,16 +497,19 @@ describe "Server", ->
 
         nock("http://espn.com")
         .get("/")
+        .times(2)
         .reply 301, undefined, {
           "Location": "/foo"
         }
         .get("/foo")
+        .times(2)
         .reply 302, undefined, {
           "Location": "http://espn.go.com/"
         }
 
         nock("http://espn.go.com")
         .get("/")
+        .times(2)
         .reply 200, "<html><head></head><body>espn</body></html>", {
           "Content-Type": "text/html"
         }
@@ -535,7 +531,7 @@ describe "Server", ->
             ]
           })
 
-          expect(buffers.keys()).to.deep.eq(["http://espn.go.com/"])
+          expect(@buffers.buffer).to.include({ url: "http://espn.go.com/" })
         .then =>
           @server._onResolveUrl("http://espn.com/", {}, @automationRequest)
           .then (obj = {}) =>
@@ -554,7 +550,7 @@ describe "Server", ->
               ]
             })
 
-            expect(@server._request.sendStream).to.be.calledOnce
+            expect(@server._request.sendStream).to.be.calledTwice
         .then =>
           @rp("http://espn.go.com/")
           .then (res) =>
@@ -562,7 +558,7 @@ describe "Server", ->
             expect(res.body).to.include("document.domain")
             expect(res.body).to.include("go.com")
             expect(res.body).to.include("Cypress.action('app:window:before:load', window); </script></head><body>espn</body></html>")
-            expect(buffers.keys()).to.deep.eq([])
+            expect(@buffers.buffer).to.be.undefined
 
       it "does not buffer 'bad' responses", ->
         sinon.spy(@server._request, "sendStream")
@@ -649,7 +645,6 @@ describe "Server", ->
         @server._onResolveUrl("http://localhost:64646", {}, @automationRequest)
         .catch (err) ->
           expect(err.message).to.eq("connect ECONNREFUSED 127.0.0.1:64646")
-          expect(err.stack).to.include("._errnoException")
           expect(err.port).to.eq(64646)
           expect(err.code).to.eq("ECONNREFUSED")
 
@@ -661,7 +656,7 @@ describe "Server", ->
         })
 
         @server._onResolveUrl("http://getbootstrap.com/#/foo", {}, @automationRequest)
-        .then (obj = {}) ->
+        .then (obj = {}) =>
           expectToEqDetails(obj, {
             isOkStatusCode: true
             isHtml: true
@@ -674,13 +669,13 @@ describe "Server", ->
             cookies: []
           })
 
-          expect(buffers.keys()).to.deep.eq(["http://getbootstrap.com/"])
+          expect(@buffers.buffer).to.include({ url: "http://getbootstrap.com/" })
         .then =>
           @rp("http://getbootstrap.com/")
-          .then (res) ->
+          .then (res) =>
             expect(res.statusCode).to.eq(200)
 
-            expect(buffers.keys()).to.deep.eq([])
+            expect(@buffers.buffer).to.be.undefined
 
       it "can serve non 2xx status code requests when option set", ->
         nock("http://google.com")
@@ -1133,11 +1128,11 @@ describe "Server", ->
             origin: "https://s3.amazonaws.com"
             strategy: "http"
             visiting: false
-            domainName: "amazonaws.com"
+            domainName: "s3.amazonaws.com"
             fileServer: null
             props: {
-              domain: "amazonaws"
-              tld: "com"
+              domain: ""
+              tld: "s3.amazonaws.com"
               port: "443"
             }
           })
@@ -1208,10 +1203,10 @@ describe "Server", ->
               strategy: "http"
               visiting: false
               fileServer: null
-              domainName: "amazonaws.com"
+              domainName: "s3.amazonaws.com"
               props: {
-                domain: "amazonaws"
-                tld: "com"
+                domain: ""
+                tld: "s3.amazonaws.com"
                 port: "443"
               }
             })

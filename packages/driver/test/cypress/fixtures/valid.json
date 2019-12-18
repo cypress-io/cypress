@@ -1,0 +1,6 @@
+{
+  "foo": 1,
+  "bar": {
+    "baz": "cypress"
+  }
+}

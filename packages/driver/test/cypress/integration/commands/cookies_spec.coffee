@@ -116,9 +116,9 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
 
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.getCookies() had an unexpected error reading cookies from #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.getCookies()
@@ -258,9 +258,9 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
 
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.getCookie() had an unexpected error reading the requested cookie from #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.getCookie("foo")
@@ -379,6 +379,15 @@ describe "src/cy/commands/cookies", ->
           { domain: "brian.dev.local", name: "foo", value: "bar", path: "/foo", secure: true, httpOnly: true, expiry: 987 }
         )
 
+    it "can set multiple cookies with the same options", ->
+      Cypress.utils.addTwentyYears.restore()
+      options = {}
+
+      cy.setCookie("foo", "bar", options)
+      cy.setCookie("bing", "bong", options)
+
+      cy.getCookie("bing").its("value").should("equal", "bong")
+
     describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
         Cypress.config("responseTimeout", 2500)
@@ -427,7 +436,6 @@ describe "src/cy/commands/cookies", ->
       it "logs once on error", (done) ->
         error = new Error("some err message")
         error.name = "foo"
-        error.stack = "stack"
 
         Cypress.automation.rejects(error)
 
@@ -435,9 +443,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.include "some err message"
+          expect(lastLog.get("error").name).to.eq "CypressError"
+          expect(lastLog.get("error").stack).to.include error.stack
           done()
 
         cy.setCookie("foo", "bar")
@@ -453,7 +461,7 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("name")).to.eq("setCookie")
           expect(lastLog.get("message")).to.eq("foo, bar")
-          expect(err.message).to.eq("cy.setCookie() timed out waiting '50ms' to complete.")
+          expect(err.message).to.include("cy.setCookie() timed out waiting '50ms' to complete.")
           done()
 
         cy.setCookie("foo", "bar", {timeout: 50})
@@ -479,6 +487,19 @@ describe "src/cy/commands/cookies", ->
           done()
 
         cy.setCookie("foo", 123)
+
+      context "when setting an invalid cookie", ->
+        it "throws an error if the backend responds with an error", (done) ->
+          cy.on "fail", (err) =>
+            expect(errStub).to.be.calledOnce
+            expect(err.message).to.contain('unexpected error setting the requested cookie')
+            done()
+
+          errStub = cy.stub(Cypress.utils, "throwErrByPath")
+          errStub.callThrough()
+
+          ## browser backend should yell since this is invalid
+          cy.setCookie("foo", " bar")
 
     describe ".log", ->
       beforeEach ->
@@ -590,9 +611,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookie() had an unexpected error clearing the requested cookie in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.clearCookie("foo")
@@ -816,9 +837,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq err.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookies() had an unexpected error clearing cookies in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -855,9 +876,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookies() had an unexpected error clearing cookies in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           expect(lastLog.get("error")).to.eq(err)
           done()
 

@@ -40,6 +40,7 @@ describe('konfig check', () => {
       'differs after loading konfig',
       cwdAfter
     )
+
     la(is.fn(konfig), 'expected konfig to be a function', konfig)
   })
 })

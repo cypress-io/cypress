@@ -1,6 +1,7 @@
 _ = require("lodash")
 $dom = require("../dom")
 $utils = require("../cypress/utils")
+$elements = require("../dom/elements")
 
 VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
 
@@ -100,7 +101,7 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
-  ensureReceivability = (subject, onFail) ->
+  ensureNotDisabled = (subject, onFail) ->
     cmd = state("current").get("name")
 
     if subject.prop("disabled")
@@ -111,12 +112,25 @@ create = (state, expect) ->
         args: { cmd, node }
       })
 
+  ensureNotReadonly = (subject, onFail) ->
+    cmd = state("current").get("name")
+
+    # readonly can only be applied to input/textarea
+    # not on checkboxes, radios, etc..
+    if $dom.isTextLike(subject.get(0)) and subject.prop("readonly")
+      node = $dom.stringify(subject)
+
+      $utils.throwErrByPath("dom.readonly", {
+        onFail
+        args: { cmd, node }
+      })
+
   ensureVisibility = (subject, onFail) ->
     cmd = state("current").get("name")
 
     # We overwrite the filter(":visible") in jquery
     # packages/driver/src/config/jquery.coffee#L51
-    # So that this effectively calls our logic 
+    # So that this effectively calls our logic
     # for $dom.isVisible aka !$dom.isHidden
     if not (subject.length is subject.filter(":visible").length)
       reason = $dom.getReasonIsHidden(subject)
@@ -128,15 +142,13 @@ create = (state, expect) ->
 
   ensureAttached = (subject, name, onFail) ->
     if $dom.isDetached(subject)
-      prev = state("current").get("prev")
+      cmd = name ? state("current").get("name")
+      prev = state("current").get("prev").get("name")
+      node = $dom.stringify(subject)
 
       $utils.throwErrByPath("subject.not_attached", {
         onFail
-        args: {
-          name
-          subject: $dom.stringify(subject),
-          previous: prev.get("name")
-        }
+        args: { cmd, prev, node }
       })
 
   ensureElement = (subject, name, onFail) ->
@@ -212,6 +224,39 @@ create = (state, expect) ->
 
     cy.ensureExistence($el)
 
+  ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, onFail) ->
+    cmd = state("current").get("name")
+    el = $el[0]
+    win = $dom.getWindowByElement(el)
+    value = win.getComputedStyle(el)[cssProperty]
+    if value is cssValue
+      elInherited = $elements.findParent el, (el, prevEl) ->
+        if win.getComputedStyle(el)[cssProperty] isnt cssValue
+          return prevEl
+    
+      element = $dom.stringify(el)
+      elementInherited = (el isnt elInherited) && $dom.stringify(elInherited)
+
+      consoleProps = {
+        'But it has CSS': "#{cssProperty}: #{cssValue}"
+      }
+
+      if elementInherited then _.extend(consoleProps, {
+        'Inherited From': elInherited
+      })
+
+      $utils.throwErrByPath("dom.pointer_events_none", {
+        onFail
+        args: {
+          cmd
+          element
+          elementInherited
+        }
+        errProps: {
+          consoleProps
+        }
+      })
+
   ensureDescendents = ($el1, $el2, onFail) ->
     cmd = state("current").get("name")
 
@@ -222,12 +267,22 @@ create = (state, expect) ->
         $utils.throwErrByPath("dom.covered", {
           onFail
           args: { cmd, element1, element2 }
+          errProps: {
+            consoleProps: {
+              "But its Covered By": $dom.getElements($el2)
+            }
+          }
         })
       else
         node = $dom.stringify($el1)
         $utils.throwErrByPath("dom.center_hidden", {
           onFail
           args: { cmd, node }
+          errProps: {
+            consoleProps: {
+              "But its Covered By": $dom.getElements($el2)
+            }
+          }
         })
 
   ensureValidPosition = (position, log) ->
@@ -267,9 +322,11 @@ create = (state, expect) ->
 
     ensureDocument
 
+    ensureElDoesNotHaveCSS
+
     ensureElementIsNotAnimating
 
-    ensureReceivability
+    ensureNotDisabled
 
     ensureVisibility
 
@@ -282,6 +339,8 @@ create = (state, expect) ->
     ensureValidPosition
 
     ensureScrollability
+
+    ensureNotReadonly
   }
 
 module.exports = {

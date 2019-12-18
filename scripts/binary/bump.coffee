@@ -1,4 +1,3 @@
-require("console.table")
 _         = require("lodash")
 fs        = require("fs-extra")
 Promise   = require("bluebird")
@@ -21,7 +20,7 @@ car = null
 _PROVIDERS = {
   appVeyor: {
     main: "cypress-io/cypress"
-    others: [
+    win32: [
       "cypress-io/cypress-test-tiny"
       "cypress-io/cypress-test-example-repos"
     ]
@@ -29,12 +28,16 @@ _PROVIDERS = {
 
   circle: {
     main: "cypress-io/cypress"
-    others: [
+    linux: [
       "cypress-io/cypress-test-tiny"
       "cypress-io/cypress-test-module-api"
       "cypress-io/cypress-test-node-versions"
       "cypress-io/cypress-test-nested-projects"
       "cypress-io/cypress-test-ci-environments"
+      "cypress-io/cypress-test-example-repos"
+    ]
+    darwin: [
+      "cypress-io/cypress-test-tiny"
       "cypress-io/cypress-test-example-repos"
     ]
   }
@@ -44,11 +47,17 @@ remapProjects = (projectsByProvider) ->
   list = []
 
   _.mapValues projectsByProvider, (provider, name) ->
-    provider.others.forEach (repo) ->
-      list.push({
-        repo
-        provider: name
-      })
+    remapPlatform = (platform, repos) ->
+      repos.forEach (repo) ->
+        list.push({
+          repo
+          provider: name
+          platform
+        })
+
+    if provider.win32 then remapPlatform("win32", provider.win32)
+    if provider.linux then remapPlatform("linux", provider.linux)
+    if provider.darwin then remapPlatform("darwin", provider.darwin)
 
   list
 
@@ -64,7 +73,7 @@ remapMain = (projectsByProvider) ->
   list
 
 # make flat list of objects
-# {repo, provider}
+# {repo, provider, platform}
 PROJECTS = remapProjects(_PROVIDERS)
 
 getCiConfig = ->
@@ -109,25 +118,42 @@ awaitEachProjectAndProvider = (projects, fn, filter = R.identity) ->
   filteredProjects = R.filter(filter, projects)
   if check.empty(filteredProjects)
     console.log("⚠️ zero filtered projects left after filtering")
-  console.table("filtered projects", filteredProjects)
+  console.log("filtered projects:")
+  console.table(filteredProjects)
   Promise.mapSeries filteredProjects, (project) ->
     fn(project.repo, project.provider, creds)
 
 # do not trigger all projects if there is specific provider
 # for example appVeyor should be used for Windows testing
-getFilterByProvider = (providerName) ->
+getFilterByProvider = (providerName, platformName) ->
   if providerName
     console.log("only allow projects for provider", providerName)
-    projectFilter = R.propEq("provider", providerName)
+    providerFilter = R.propEq("provider", providerName)
   else
-    projectFilter = R.identity
+    providerFilter = R.identity
+
+  if platformName
+    console.log("only allow projects for platform", platformName)
+    platformFilter = R.propEq("platform", platformName)
+  else
+    platformFilter = R.identity
+
+  # combined filter is when both filters pass
+  projectFilter = R.allPass([providerFilter, platformFilter])
   projectFilter
 
 module.exports = {
+  _PROVIDERS,
+
+  remapProjects,
+
+  getFilterByProvider,
+
   nextVersion: (version) ->
     MAIN_PROJECTS = remapMain(_PROVIDERS)
     console.log("Setting next version to build", version)
-    console.table("In these projects", MAIN_PROJECTS)
+    console.log("In these projects:")
+    console.table(MAIN_PROJECTS)
 
     la(check.unemptyString(version),
       "missing next version to set", version)
@@ -143,7 +169,8 @@ module.exports = {
 
   # in each project, set a couple of environment variables
   version: (nameOrUrl, binaryVersionOrUrl, platform, providerName) ->
-    console.table("All possible projects", PROJECTS)
+    console.log("All possible projects:")
+    console.table(PROJECTS)
 
     la(check.unemptyString(nameOrUrl),
       "missing cypress name or url to set", nameOrUrl)
@@ -175,9 +202,9 @@ module.exports = {
   # triggers test projects on multiple CIs
   # the test projects will exercise the new version of
   # the Cypress test runner we just built
-  runTestProjects: (getStatusAndMessage, providerName, version) ->
+  runTestProjects: (getStatusAndMessage, providerName, version, platform) ->
 
-    projectFilter = getFilterByProvider(providerName)
+    projectFilter = getFilterByProvider(providerName, platform)
 
     makeCommit = (project, provider, creds) ->
       ## make empty commit to trigger CIs

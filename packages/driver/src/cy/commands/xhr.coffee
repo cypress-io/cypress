@@ -7,6 +7,12 @@ $Location = require("../../cypress/location")
 
 server = null
 
+tryDecodeUri = (uri) ->
+  try
+    return decodeURI(uri)
+  catch
+    return uri
+
 getServer = ->
   server ? unavailableErr()
 
@@ -80,6 +86,9 @@ startXhrServer = (cy, state, config) ->
   server = $Server.create({
     xhrUrl: config("xhrUrl")
     stripOrigin: stripOrigin
+
+    emitIncoming: (id, route) ->
+      Cypress.backend('incoming:xhr', id, route)
 
     ## shouldnt these stubs be called routes?
     ## rename everything related to stubs => routes
@@ -174,8 +183,10 @@ startXhrServer = (cy, state, config) ->
       if log = logs[xhr.id]
         log.snapshot("error").error(err)
 
-      if r = state("reject")
-        r(err)
+      ## re-throw the error since this came from AUT code, and needs to
+      ## cause an 'uncaught:exception' event. This error will be caught in
+      ## top.onerror with stack as 5th argument.
+      throw err
 
     onXhrAbort: (xhr, stack) =>
       setResponse(state, xhr)
@@ -240,6 +251,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## correctly
   Cypress.on("window:unload", cancelPendingXhrs)
 
+  Cypress.on "test:before:run:async", ->
+    ## reset any state on the backend
+    Cypress.backend('reset:server:state')
+
   Cypress.on "test:before:run", ->
     ## reset the existing server
     reset()
@@ -250,7 +265,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## window such as if the last test ended
     ## with a cross origin window
     try
-      server = startXhrServer(cy, state, config)
+      server = startXhrServer(cy, state, config, Cypress)
     catch err
       ## in this case, just don't bind to the server
       server = null
@@ -403,6 +418,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## aliases subject
           options.response = aliasObj.subject
 
+        url = getUrl(options)
+
+        urlString = url.toString()
+
+        ## https://github.com/cypress-io/cypress/issues/2372
+        if (decodedUrl = tryDecodeUri(urlString)) and urlString != decodedUrl
+          $utils.warnByPath("route.url_percentencoding_warning", { args: { decodedUrl }})
+
         options.log = Cypress.log({
           name: "route"
           instrument: "route"
@@ -415,7 +438,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           numResponses: 0
           consoleProps: ->
             Method:   options.method
-            URL:      getUrl(options)
+            URL:      url
             Status:   options.status
             Response: options.response
             Alias:    options.alias

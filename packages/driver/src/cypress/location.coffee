@@ -19,7 +19,7 @@ ipAddressRe = /^[\d\.]+$/
 
 reHttp = /^https?:\/\//
 reWww = /^www/
-
+reFile = /^file:\/\//
 reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
 
 class $Location
@@ -130,6 +130,9 @@ class $Location
       toString: _.bind(@getToString, @)
     }
 
+  @isLocalFileUrl = (url) ->
+    reFile.test(url)
+
   @isFullyQualifiedUrl = (url) ->
     reHttp.test(url)
 
@@ -150,6 +153,11 @@ class $Location
     ## as the baseUrl so that we do not accidentally
     ## have relative url's
     url = new UrlParse(url, existing.origin)
+    url.toString()
+
+  @mergeUrlWithParams = (url, params) ->
+    url = new UrlParse(url, null, true)
+    url.set("query", _.merge(url.query || {}, params))
     url.toString()
 
   @normalize = (url) ->

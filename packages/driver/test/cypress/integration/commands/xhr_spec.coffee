@@ -780,13 +780,18 @@ describe "src/cy/commands/xhr", ->
 
       it "sets err on log when caused by code errors", (done) ->
         finalThenCalled = false
+        uncaughtException = cy.stub().returns(true)
+        cy.on 'uncaught:exception', uncaughtException
 
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("name")).to.eq("xhr")
-          expect(lastLog.get("error")).to.eq err
+          expect(lastLog.get("error").message).contain('foo is not defined')
+          ## since this is AUT code, we should allow error to be caught in 'uncaught:exception' hook
+          ## https://github.com/cypress-io/cypress/issues/987
+          expect(uncaughtException).calledOnce
           done()
 
         cy
@@ -1327,6 +1332,25 @@ describe "src/cy/commands/xhr", ->
         .wait("@getFoo").then (xhr) ->
           expect(xhr.responseBody).to.eq "foo bar baz"
 
+    ## https://github.com/cypress-io/cypress/issues/2372
+    it "warns if a percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "/foo%25bar")
+      .then ->
+        expect(Cypress.utils.warning).to.be.calledWith """
+        A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.
+
+        Did you mean to pass "/foo%bar"?
+        """
+
+    it "does not warn if an invalid percent-encoded URL is used", ->
+      cy.spy(Cypress.utils, 'warning')
+
+      cy.route("GET", "http://example.com/%E0%A4%A")
+      .then ->
+        expect(Cypress.utils.warning).to.not.be.called
+
     it.skip "does not error when response is null but respond is false", ->
       cy.route
         url: /foo/
@@ -1401,6 +1425,37 @@ describe "src/cy/commands/xhr", ->
                 bar: "baz"
               }
             })
+
+    describe "response fixtures", ->
+      it "works if the JSON file has an object", ->
+        cy
+          .server()
+          .route({
+            method: 'POST',
+            url: '/test-xhr',
+            response: 'fixture:valid.json',
+          })
+          .visit('/fixtures/xhr-triggered.html')
+          .get('#trigger-xhr')
+          .click()
+
+        cy
+          .contains("#result", '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+
+      it "works if the JSON file has null content", ->
+        cy
+          .server()
+          .route({
+            method: 'POST',
+            url: '/test-xhr',
+            response: 'fixture:null.json',
+          })
+          .visit('/fixtures/xhr-triggered.html')
+          .get('#trigger-xhr')
+          .click()
+
+        cy
+          .contains('#result', '""').should('be.visible')
 
     describe "errors", ->
       beforeEach ->
@@ -1541,7 +1596,7 @@ describe "src/cy/commands/xhr", ->
 
         cy.on "command:retry", =>
           if cy.state("error")
-            done("should have cancelled and not retried after failing")
+            done("should have canceled and not retried after failing")
 
         cy.on "fail", (err) =>
           p = cy.state("promise")

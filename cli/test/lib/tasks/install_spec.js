@@ -59,7 +59,6 @@ describe('/lib/tasks/install', function () {
     })
 
     describe('skips install', function () {
-
       it('when environment variable is set', function () {
         process.env.CYPRESS_INSTALL_BINARY = '0'
 
@@ -76,7 +75,6 @@ describe('/lib/tasks/install', function () {
     })
 
     describe('override version', function () {
-
       it('warns when specifying cypress version in env', function () {
         const version = '0.12.1'
 
@@ -99,7 +97,49 @@ describe('/lib/tasks/install', function () {
         })
       })
 
-      it('can install local binary zip file without download', function () {
+      it('trims environment variable before installing', function () {
+        // note how the version has extra spaces around it on purpose
+        const filename = '/tmp/local/file.zip'
+        const version = ` ${filename}   `
+
+        process.env.CYPRESS_INSTALL_BINARY = version
+        // internally, the variable should be trimmed and just filename checked
+        sinon.stub(fs, 'pathExistsAsync').withArgs(filename).resolves(true)
+
+        const installDir = state.getVersionDir()
+
+        return install.start()
+        .then(() => {
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: filename,
+            installDir,
+          })
+        })
+      })
+
+      it('removes double quotes around the environment variable before installing', function () {
+        // note how the version has extra spaces around it on purpose
+        // and there are double quotes
+        const filename = '/tmp/local/file.zip'
+        const version = ` "${filename}"   `
+
+        process.env.CYPRESS_INSTALL_BINARY = version
+        // internally, the variable should be trimmed, double quotes removed
+        //  and just filename checked against the file system
+        sinon.stub(fs, 'pathExistsAsync').withArgs(filename).resolves(true)
+
+        const installDir = state.getVersionDir()
+
+        return install.start()
+        .then(() => {
+          expect(unzip.start).to.be.calledWithMatch({
+            zipFilePath: filename,
+            installDir,
+          })
+        })
+      })
+
+      it('can install local binary zip file without download from absolute path', function () {
         const version = '/tmp/local/file.zip'
 
         process.env.CYPRESS_INSTALL_BINARY = version
@@ -122,6 +162,7 @@ describe('/lib/tasks/install', function () {
         mockfs({
           [version]: 'asdf',
         })
+
         process.env.CYPRESS_INSTALL_BINARY = version
 
         const installDir = state.getVersionDir()
@@ -139,7 +180,6 @@ describe('/lib/tasks/install', function () {
       describe('when version is already installed', function () {
         beforeEach(function () {
           state.getBinaryPkgVersionAsync.resolves(packageVersion)
-
         })
 
         it('doesn\'t attempt to download', function () {
@@ -148,7 +188,6 @@ describe('/lib/tasks/install', function () {
             expect(download.start).not.to.be.called
             expect(state.getBinaryPkgVersionAsync).to.be.calledWith('/cache/Cypress/1.2.3/Cypress.app')
           })
-
         })
 
         it('logs \'skipping install\' when explicit cypress install', function () {
@@ -159,7 +198,6 @@ describe('/lib/tasks/install', function () {
               normalize(this.stdout.toString())
             )
           })
-
         })
 
         it('logs when already installed when run from postInstall', function () {
@@ -206,7 +244,6 @@ describe('/lib/tasks/install', function () {
         })
 
         it('logs message and starts download', function () {
-
           expect(download.start).to.be.calledWithMatch({
             version: packageVersion,
           })
@@ -258,7 +295,6 @@ describe('/lib/tasks/install', function () {
         })
 
         it('logs message and starts download', function () {
-
           expect(download.start).to.be.calledWithMatch({
             version: packageVersion,
           })
@@ -352,6 +388,7 @@ describe('/lib/tasks/install', function () {
             expect(download.start).to.not.be.called
           })
         })
+
         it('uses cache when mismatch version given URL ', function () {
           state.getBinaryPkgVersionAsync.resolves('1.2.3')
           util.pkgVersion.returns('4.0.0')
@@ -362,6 +399,7 @@ describe('/lib/tasks/install', function () {
             expect(download.start).to.not.be.called
           })
         })
+
         it('uses cache when correct version installed given Zip', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
@@ -375,6 +413,7 @@ describe('/lib/tasks/install', function () {
             expect(unzip.start).to.not.be.called
           })
         })
+
         it('uses cache when mismatch version given Zip ', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
@@ -421,5 +460,4 @@ describe('/lib/tasks/install', function () {
       })
     })
   })
-
 })

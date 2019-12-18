@@ -14,11 +14,13 @@ Automation  = require("#{root}lib/automation")
 Fixtures    = require("#{root}/test/support/helpers/fixtures")
 
 cyPort  = 12345
-otherPort = 5555
+otherPort = 55551
 wsPort  = 20000
 wssPort = 8443
 
 describe "Web Sockets", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     Fixtures.scaffold()
 
@@ -59,7 +61,7 @@ describe "Web Sockets", ->
         expect(err.code).to.eq("ECONNRESET")
         done()
 
-    it "sends back 502 Bad Gateway when error upgrading", (done) ->
+    it "sends back ECONNRESET when error upgrading", (done) ->
       agent = new httpsAgent("http://localhost:#{cyPort}")
 
       @server._onDomainSet("http://localhost:#{otherPort}")
@@ -68,11 +70,9 @@ describe "Web Sockets", ->
         agent: agent
       })
 
-      client.on "unexpected-response", (req, res) ->
-        expect(res.statusCode).to.eq(502)
-        expect(res.statusMessage).to.eq("Bad Gateway")
-        expect(res.headers).to.have.property("x-cypress-proxy-error-message")
-        expect(res.headers).to.have.property("x-cypress-proxy-error-code")
+      client.on "error", (err) ->
+        expect(err.code).to.eq('ECONNRESET')
+        expect(err.message).to.eq('socket hang up')
 
         done()
 
@@ -115,7 +115,11 @@ describe "Web Sockets", ->
 
     it "proxies https messages through http", (done) ->
       ## force node into legit proxy mode like a browser
-      agent = new httpsAgent("http://localhost:#{cyPort}")
+      agent = new httpsAgent({
+        host: "localhost"
+        port: cyPort
+        rejectUnauthorized: false
+      })
 
       @server._onDomainSet("https://localhost:#{wssPort}")
 
@@ -145,7 +149,11 @@ describe "Web Sockets", ->
       evilDns.add("ws.foobar.com", "127.0.0.1")
 
       ## force node into legit proxy mode like a browser
-      agent = new httpsAgent("http://localhost:#{cyPort}")
+      agent = new httpsAgent({
+        host: "localhost"
+        port: cyPort
+        rejectUnauthorized: false
+      })
 
       @server._onDomainSet("https://foobar.com:#{wssPort}")
 

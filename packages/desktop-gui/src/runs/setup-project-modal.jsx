@@ -12,8 +12,6 @@ import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
 import orgsApi from '../organizations/organizations-api'
 
-import LoginForm from '../auth/login-form'
-
 @observer
 class SetupProject extends Component {
   static propTypes = {
@@ -72,7 +70,9 @@ class SetupProject extends Component {
 
   render () {
     if (!authStore.isAuthenticated) {
-      return this._loginMessage()
+      authStore.openLogin()
+
+      return null
     }
 
     if (!orgsStore.isLoaded) {
@@ -98,7 +98,7 @@ class SetupProject extends Component {
               >
                 {
                   this.state.isSubmitting ?
-                    <span><i className='fa fa-spin fa-refresh'></i>{' '}</span> :
+                    <span><i className='fas fa-spin fa-sync-alt'></i>{' '}</span> :
                     null
                 }
                 <span>Set up project</span>
@@ -106,17 +106,6 @@ class SetupProject extends Component {
             </div>
           </div>
         </form>
-      </div>
-    )
-  }
-
-  _loginMessage () {
-    return (
-      <div className='login modal-body'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h1><i className='fa fa-lock'></i> Log in</h1>
-        <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
-        <LoginForm />
       </div>
     )
   }
@@ -141,7 +130,7 @@ class SetupProject extends Component {
         </div>
         <div>
           <input
-            autoFocus='true'
+            autoFocus={true}
             ref='projectName'
             type='text'
             className='form-control'
@@ -163,7 +152,7 @@ class SetupProject extends Component {
             Who should own this project?
             {' '}
             <a onClick={this._openOrgDocs}>
-              <i className='fa fa-question-circle'></i>
+              <i className='fas fa-question-circle'></i>
             </a>
           </label>
         </div>
@@ -200,7 +189,7 @@ class SetupProject extends Component {
                   checked={this.state.owner === 'org'}
                   onChange={this._updateOwner}
                 />
-                <i className='fa fa-building-o'></i>
+                <i className='far fa-building'></i>
                 {' '}An Organization
               </label>
             </div>
@@ -215,7 +204,7 @@ class SetupProject extends Component {
                     href='#'
                     className={cs('btn btn-link', { 'hidden': this.state.owner !== 'org' })}
                     onClick={this._manageOrgs}>
-                    <i className='fa fa-plus'></i>{' '}
+                    <i className='fas fa-plus'></i>{' '}
                     Create organization
                   </a>
                 </p>
@@ -274,7 +263,7 @@ class SetupProject extends Component {
           Who should see the runs and recordings?
           {' '}
           <a onClick={this._openAccessDocs}>
-            <i className='fa fa-question-circle'></i>
+            <i className='fas fa-question-circle'></i>
           </a>
         </label>
         <div className='radio privacy-radio'>
@@ -287,7 +276,7 @@ class SetupProject extends Component {
               onChange={this._updateAccess}
             />
             <p>
-              <i className='fa fa-eye'></i>{' '}
+              <i className='far fa-eye'></i>{' '}
               <strong>Public:</strong>{' '}
               Anyone has access.
             </p>
@@ -303,7 +292,7 @@ class SetupProject extends Component {
               onChange={this._updateAccess}
             />
             <p>
-              <i className='fa fa-lock'></i>{' '}
+              <i className='fas fa-lock'></i>{' '}
               <strong>Private:</strong>{' '}
               Only invited users have access.
             </p>
@@ -408,6 +397,7 @@ class SetupProject extends Component {
       this.setState({
         isSubmitting: true,
       })
+
       this._setupProject()
     } else {
       this.setState({
@@ -426,6 +416,7 @@ class SetupProject extends Component {
       this.setState({
         isSubmitting: false,
       })
+
       this.props.onSetup(projectDetails)
 
       return null
