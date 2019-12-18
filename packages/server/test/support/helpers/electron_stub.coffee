@@ -15,7 +15,9 @@ module.exports = {
     exit: ->
     commandLine: {
       appendSwitch: ->
-    }
+      appendArgument: ->
+    },
+    disableHardwareAcceleration: ->
   }
   systemPreferences: {
     isDarkMode: ->
