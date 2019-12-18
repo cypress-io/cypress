@@ -42,8 +42,24 @@ runAllBuildJs = _.partial(npmRun, ["run", "all", "build-js", "--skip-packages", 
 runAllCleanJs = _.partial(npmRun, ["run", "all", "clean-js", "--skip-packages", "cli"])
 
 # builds all the packages except for cli
-runAllBuild = _.partial(npmRun,
-  ["run", "all", "build", "--", "--serial", "--skip-packages", "cli"])
+runAllBuild = (args...) ->
+  getPackagesWithScript('build')
+  .then (pkgNameArr) ->
+    pkgs = pkgNameArr.join(' ')
+    npmRun(
+      ["run", "all", "build-prod", "--", "--serial", "--packages", pkgs, "--skip-packages", "cli"]
+      args...
+    )
+
+## @returns string[] with names of packages, e.g. ['runner', 'driver', 'server']
+getPackagesWithScript = (scriptName) ->
+  Promise.resolve(glob('./packages/*/package.json'))
+  .map (pkgPath) ->
+    fs.readJsonAsync(pkgPath)
+    .then (json) ->
+      if json.scripts?.build
+        return path.basename(path.dirname(pkgPath))
+  .filter(Boolean)
 
 copyAllToDist = (distDir) ->
   copyRelativePathToDist = (relative) ->
@@ -58,16 +74,18 @@ copyAllToDist = (distDir) ->
     ## copies the package to dist
     ## including the default paths
     ## and any specified in package.json files
-    fs.readJsonAsync(pathToPackageJson(pkg))
+    Promise.resolve(fs.readJsonAsync(pathToPackageJson(pkg)))
     .then (json) ->
       ## grab all the files
       ## and default included paths
       ## and convert to relative paths
-      DEFAULT_PATHS
-      .concat(json.files or [])
-      .concat(json.main or [])
-      .map (file) ->
-        path.join(pkg, file)
+      Promise.resolve(
+        DEFAULT_PATHS
+        .concat(json.files or [])
+        .concat(json.main or [])
+        .map (file) ->
+          path.join(pkg, file)
+      )
       .map(copyRelativePathToDist, {concurrency: 1})
 
         ## fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
@@ -130,6 +148,7 @@ npmInstallAll = (pathToPackages) ->
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
     npmInstall = _.partial(npmRun, ["install", "--only=production", "--quiet"])
+
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
       Promise
@@ -211,6 +230,8 @@ module.exports = {
   runAllCleanJs
 
   forceNpmInstall
+  
+  getPackagesWithScript
 }
 
 if not module.parent

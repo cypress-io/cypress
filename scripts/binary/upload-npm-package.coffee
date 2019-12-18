@@ -6,12 +6,12 @@ fs = require("fs")
 path = require("path")
 awspublish = require('gulp-awspublish')
 rename = require('gulp-rename')
-debug = require('gulp-debug')
+gulpDebug = require('gulp-debug')
 gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
 
-konfig  = require("../../packages/server/lib/konfig")
+konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
 
 npmPackageExtension = ".tgz"
@@ -19,14 +19,17 @@ uploadFileName = "cypress.tgz"
 
 isNpmPackageFile = check.extension(npmPackageExtension)
 
-# wonder if our CDN url would just work
-# https://cdn.cypress.io/desktop/0.20.1/osx64/cypress.zip
+# the package tgz file will be uploaded into unique folder
 # in our case something like this
-# https://cdn.cypress.io/beta/npm/0.20.2/<some unique version info>/cypress.tgz
-npmFolder = "npm"
+# https://cdn.cypress.io/beta/npm/<version>/<some unique hash>/cypress.tgz
 rootFolder = "beta"
+npmFolder = "npm"
 
 getCDN = ({version, hash, filename}) ->
+  la(check.semver(version), 'invalid version', version)
+  la(check.unemptyString(hash), 'missing hash', hash)
+  la(check.unemptyString(filename), 'missing filename', filename)
+  la(isNpmPackageFile(filename), 'wrong extension for file', filename)
   [konfig("cdn_url"), rootFolder, npmFolder, version, hash, filename].join("/")
 
 getUploadDirName = (options) ->
@@ -50,7 +53,7 @@ uploadFile = (options) ->
       la(check.unemptyString(p.basename), "missing basename")
       la(check.unemptyString(p.dirname), "missing dirname")
       p
-    .pipe debug()
+    .pipe gulpDebug()
     .pipe publisher.publish(headers)
     .pipe awspublish.reporter()
     .on "error", reject

@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const fs = require(`${lib}/fs`)
 const makeUserPackageFile = require('../../scripts/build')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const R = require('ramda')
@@ -26,6 +26,7 @@ describe('package.json build', () => {
       name: 'test',
       engines: 'test engines',
     })
+
     sinon.stub(fs, 'outputJsonAsync').resolves()
   })
 

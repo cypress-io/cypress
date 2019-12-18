@@ -12,22 +12,24 @@
   "rangeStrategy": "pin",
   "packageRules": [
     {
-      "packageNames": [
-        "node"
-      ],
-      "enabled": false
+      "packagePatterns": "^@types/",
+      "groupName": "@types",
+      "schedule": "before 3am on Monday"
     }
   ],
   "separateMultipleMajor": true,
-  "labels": ["type: dependencies", "renovate"],
+  "labels": [
+    "type: dependencies",
+    "renovate"
+  ],
   "commitMessage": "{{semanticPrefix}}Update {{depName}} to {{newVersion}} 🌟",
   "prTitle": "{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}} 🌟",
   "prHourlyLimit": 1,
-  "prConcurrentLimit": 5,
+  "prConcurrentLimit": 1,
   "updateNotScheduled": false,
   "timezone": "America/New_York",
   "schedule": [
-    "after 10pm and before 5am on every weekday",
-    "every weekend"
-  ]
+    "before 3am on the first day of the month"
+  ],
+  "masterIssue": true
 }

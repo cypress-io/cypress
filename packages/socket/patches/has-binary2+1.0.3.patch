@@ -1,0 +1,94 @@
+diff --git a/node_modules/has-binary2/index.js b/node_modules/has-binary2/index.js
+index cf756a3..277ed03 100644
+--- a/node_modules/has-binary2/index.js
++++ b/node_modules/has-binary2/index.js
+@@ -4,19 +4,19 @@
+  * Module requirements.
+  */
+ 
+-var isArray = require('isarray');
++let isArray = require('isarray')
+ 
+-var toString = Object.prototype.toString;
+-var withNativeBlob = typeof Blob === 'function' ||
+-                        typeof Blob !== 'undefined' && toString.call(Blob) === '[object BlobConstructor]';
+-var withNativeFile = typeof File === 'function' ||
+-                        typeof File !== 'undefined' && toString.call(File) === '[object FileConstructor]';
++let toString = Object.prototype.toString
++let withNativeBlob = typeof global.Blob === 'function' || toString.call(global.Blob) === '[object BlobConstructor]'
++let withNativeFile = typeof global.File === 'function' || toString.call(global.File) === '[object FileConstructor]'
+ 
+ /**
+  * Module exports.
+  */
+ 
+-module.exports = hasBinary;
++module.exports = function hasBinaryCircular (obj) {
++  return hasBinary(obj, [])
++}
+ 
+ /**
+  * Checks for binary data.
+@@ -27,38 +27,45 @@ module.exports = hasBinary;
+  * @api public
+  */
+ 
+-function hasBinary (obj) {
++function hasBinary (obj, known) {
+   if (!obj || typeof obj !== 'object') {
+-    return false;
++    return false
++  }
++
++  if (known.indexOf(obj) >= 0) {
++    return false
+   }
+ 
++  known.push(obj)
++
+   if (isArray(obj)) {
+-    for (var i = 0, l = obj.length; i < l; i++) {
+-      if (hasBinary(obj[i])) {
+-        return true;
++    for (let i = 0, l = obj.length; i < l; i++) {
++      if (hasBinary(obj[i], known)) {
++        return true
+       }
+     }
+-    return false;
++
++    return false
+   }
+ 
+-  if ((typeof Buffer === 'function' && Buffer.isBuffer && Buffer.isBuffer(obj)) ||
+-    (typeof ArrayBuffer === 'function' && obj instanceof ArrayBuffer) ||
+-    (withNativeBlob && obj instanceof Blob) ||
+-    (withNativeFile && obj instanceof File)
++  if ((typeof global.Buffer === 'function' && global.Buffer.isBuffer && global.Buffer.isBuffer(obj)) ||
++     (typeof global.ArrayBuffer === 'function' && obj instanceof ArrayBuffer) ||
++     (withNativeBlob && obj instanceof Blob) ||
++     (withNativeFile && obj instanceof File)
+   ) {
+-    return true;
++    return true
+   }
+ 
+   // see: https://github.com/Automattic/has-binary/pull/4
+-  if (obj.toJSON && typeof obj.toJSON === 'function' && arguments.length === 1) {
+-    return hasBinary(obj.toJSON(), true);
++  if (obj.toJSON && typeof obj.toJSON === 'function') {
++    return hasBinary(obj.toJSON(), known)
+   }
+ 
+-  for (var key in obj) {
+-    if (Object.prototype.hasOwnProperty.call(obj, key) && hasBinary(obj[key])) {
+-      return true;
++  for (let key in obj) {
++    if (Object.prototype.hasOwnProperty.call(obj, key) && hasBinary(obj[key], known)) {
++      return true
+     }
+   }
+ 
+-  return false;
++  return false
+ }

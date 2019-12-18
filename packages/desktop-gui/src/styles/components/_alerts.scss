@@ -15,6 +15,10 @@
     }
   }
 
+  .header {
+    margin-bottom: 10px;
+  }
+
   &.alert-dismissable .close, &.alert-dismissible .close {
     position: absolute;
     top: 10px;
@@ -33,11 +37,50 @@
   }
 }
 
-.full-alert {
+.full-alert-container {
+  align-items: center;
+  display: flex;
+  flex-grow: 2;
+  justify-content: center;
   overflow: auto;
-  text-align: center;
+  padding: 30px 60px;
+}
+
+.full-alert {
+  // `margin: auto` fixes issue with flexbox vertically-centered element + oveflow
+  // https://stackoverflow.com/questions/33454533/cant-scroll-to-top-of-flex-item-that-is-overflowing-container
+  margin: auto;
+  overflow: auto;
   padding: 20px;
-  margin: 80px 60px 60px;
+  text-align: center;
+
+  .alert-content {
+    text-align: left;
+  }
+
+  code, pre {
+    background-color: #f9f2f4;
+    color: #a94442;
+    border: none;
+  }
+
+  code {
+    padding: 1px 4px;
+  }
+
+  pre {
+    max-height: 200px;
+    overflow: auto;
+  }
+
+  summary {
+    cursor: pointer;
+    outline: none;
+  }
+
+  summary:focus {
+    text-decoration: underline;
+  }
 }
 
 .global-error {
@@ -49,8 +92,15 @@
 }
 
 .project-content .alert-warning {
-  position: relative;
   border-bottom: 1px solid #ddd;
+  flex-grow: 0;
+  flex-shrink: 0;
+  position: relative;
+
+  code, pre {
+    border: none;
+    color: #8a6d3b;
+  }
 }
 
 .project-content .alert-warning,

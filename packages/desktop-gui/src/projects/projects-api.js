@@ -71,6 +71,10 @@ const runSpec = (project, spec, browser) => {
     project.browserOpening()
 
     ipc.launchBrowser({ browser, spec: spec.file }, (err, data = {}) => {
+      if (err) {
+        return project.setError(err)
+      }
+
       if (data.browserOpened) {
         project.browserOpened()
       }
@@ -140,7 +144,13 @@ const openProject = (project) => {
   }
 
   const updateConfig = (config) => {
-    project.update({ id: config.projectId })
+    project.update({
+      id: config.projectId,
+      name: config.projectName,
+      configFile: config.configFile,
+      ..._.pick(config, ['resolvedNodeVersion', 'resolvedNodePath']),
+    })
+
     project.update({ name: config.projectName })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
@@ -164,7 +174,7 @@ const openProject = (project) => {
   })
 
   ipc.onProjectWarning((__, warning) => {
-    project.setWarning(warning)
+    project.addWarning(warning)
   })
 
   return ipc.openProject(project.path)

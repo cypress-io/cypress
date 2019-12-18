@@ -4,6 +4,7 @@ import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 
 import ipc from '../lib/ipc'
+import { configFileFormatted } from '../lib/config-file-formatted'
 import authStore from '../auth/auth-store'
 import RunsStore from './runs-store'
 import errors from '../lib/errors'
@@ -191,7 +192,6 @@ class RunsList extends Component {
 
     // OR there are no runs to show
     if (!this.runsStore.runs.length) {
-
       // AND they've never setup CI
       if (!project.id) {
         return this._projectNotSetup()
@@ -200,7 +200,6 @@ class RunsList extends Component {
       }
 
       return this._empty()
-
     }
     //--------End Run States----------//
 
@@ -211,16 +210,17 @@ class RunsList extends Component {
           <h5>Runs
             {this._lastUpdated()}
             <button
+              aria-label='Refresh'
               className='btn btn-link btn-sm'
               disabled={this.runsStore.isLoading}
               onClick={this._getRuns}
             >
-              <i className={`fa fa-refresh ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
+              <i aria-hidden="true" className={`fas fa-sync-alt ${this.runsStore.isLoading ? 'fa-spin' : ''}`}></i>
             </button>
           </h5>
           <div>
             <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
-              See all runs <i className='fa fa-external-link'></i>
+              See all runs <i className='fas fa-external-link-alt'></i>
             </a>
           </div>
         </header>
@@ -250,7 +250,7 @@ class RunsList extends Component {
   _noApiServer () {
     return (
       <div className='empty empty-no-api-server'>
-        <h4><i className='fa fa-wifi'></i> Cannot connect to API server</h4>
+        <h4><i className='fas fa-wifi'></i> Cannot connect to API server</h4>
         <p>Viewing runs requires connecting to an external API server.</p>
         <p>We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
@@ -258,7 +258,7 @@ class RunsList extends Component {
             className='btn btn-default btn-sm'
             onClick={this._pingApiServer}
           >
-            <i className='fa fa-refresh'></i>{' '}
+            <i className='fas fa-sync-alt'></i>{' '}
             Try again
           </button>
         </p>
@@ -290,6 +290,8 @@ class RunsList extends Component {
   _projectNotSetup (isValid = true) {
     return (
       <ProjectNotSetup
+        isAuthenticated={authStore.isAuthenticated}
+        isShowingLogin={authStore.isShowingLogin}
         project={this.props.project}
         isValid={isValid}
         onSetup={this._setProjectDetails}
@@ -327,10 +329,10 @@ class RunsList extends Component {
           </h4>
           <h5>
             <span className='pull-left'>
-              1. Check <code>cypress.json</code> into source control.
+              1. Check {configFileFormatted(this.props.project.configFile)} into source control.
             </span>
             <a onClick={this._openProjectIdGuide} className='pull-right'>
-              <i className='fa fa-question-circle'></i>{' '}
+              <i className='fas fa-question-circle'></i>{' '}
               {' '}
               Why?
             </a>
@@ -345,7 +347,7 @@ class RunsList extends Component {
               2. Run this command now, or in CI.
             </span>
             <a onClick={this._openCiGuide} className='pull-right'>
-              <i className='fa fa-question-circle'></i>{' '}
+              <i className='fas fa-question-circle'></i>{' '}
               Need help?
             </a>
           </h5>
@@ -354,7 +356,7 @@ class RunsList extends Component {
           </pre>
           <hr />
           <p className='alert alert-default'>
-            <i className='fa fa-info-circle'></i>{' '}
+            <i className='fas fa-info-circle'></i>{' '}
             Recorded runs will show up{' '}
             <a href='#' onClick={this._openRunGuide}>here</a>{' '}
             and on your{' '}

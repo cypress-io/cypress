@@ -1,0 +1,13 @@
+{
+  "extends": "./../ts/tsconfig.json",
+  "include": [
+    "lib/*.ts",
+    "lib/**/*.ts"
+  ],
+  "files": [
+    "./../ts/index.d.ts"
+  ],
+  "compilerOptions": {
+    "types": ["mocha", "node", "chrome"]
+  }
+}

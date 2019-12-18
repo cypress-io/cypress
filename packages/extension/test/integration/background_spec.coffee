@@ -94,10 +94,6 @@ tab3 = {
 }
 
 describe "app/background", ->
-  before ->
-    @io = global.io
-    global.io = socket.client
-
   beforeEach (done) ->
     @httpSrv = http.createServer()
     @server  = socket.server(@httpSrv, {path: "/__socket.io"})
@@ -106,9 +102,6 @@ describe "app/background", ->
   afterEach (done)  ->
     @server.close()
     @httpSrv.close -> done()
-
-  after ->
-    global.io = @io
 
   context ".connect", ->
     it "can connect", (done) ->
@@ -119,14 +112,14 @@ describe "app/background", ->
     it "emits 'automation:client:connected'", (done) ->
       client = background.connect("http://localhost:#{PORT}", "/__socket.io")
 
-      @sandbox.spy(client, "emit")
+      sinon.spy(client, "emit")
 
       client.on "connect", _.once ->
         expect(client.emit).to.be.calledWith("automation:client:connected")
         done()
 
     it "listens to cookie changes", (done) ->
-      addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener")
+      addListener = sinon.stub(chrome.cookies.onChanged, "addListener")
       client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
 
       client.on "connect", _.once ->
@@ -135,10 +128,10 @@ describe "app/background", ->
 
   context "onChanged", ->
     it "does not emit when cause is overwrite", (done) ->
-      addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener")
+      addListener = sinon.stub(chrome.cookies.onChanged, "addListener")
       client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
 
-      @sandbox.spy(client, "emit")
+      sinon.spy(client, "emit")
 
       client.on "connect", _.once ->
         fn = addListener.getCall(0).args[0]
@@ -151,7 +144,7 @@ describe "app/background", ->
     it "emits 'automation:push:request'", (done) ->
       info = { cause: "explicit", cookie: {name: "foo", value: "bar"} }
 
-      addListener = @sandbox.stub(chrome.cookies.onChanged, "addListener").yieldsAsync(info)
+      addListener = sinon.stub(chrome.cookies.onChanged, "addListener").yieldsAsync(info)
       client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
 
       client.on "connect", ->
@@ -163,7 +156,7 @@ describe "app/background", ->
 
   context ".getAll", ->
     it "resolves with specific cookie properties", ->
-      @sandbox.stub(chrome.cookies, "getAll")
+      sinon.stub(chrome.cookies, "getAll")
       .withArgs({domain: "localhost"})
       .yieldsAsync([
         {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123}
@@ -182,11 +175,11 @@ describe "app/background", ->
       @code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
 
     it "resolves on the 1st tab", ->
-      @sandbox.stub(chrome.tabs, "query")
+      sinon.stub(chrome.tabs, "query")
       .withArgs({windowType: "normal"})
       .yieldsAsync([tab1])
 
-      @sandbox.stub(chrome.tabs, "executeScript")
+      sinon.stub(chrome.tabs, "executeScript")
       .withArgs(tab1.id, {code: @code})
       .yieldsAsync(["1234"])
 
@@ -196,11 +189,11 @@ describe "app/background", ->
       })
 
     it "resolves on the 2nd tab", ->
-      @sandbox.stub(chrome.tabs, "query")
+      sinon.stub(chrome.tabs, "query")
       .withArgs({windowType: "normal"})
       .yieldsAsync([tab1, tab2])
 
-      @sandbox.stub(chrome.tabs, "executeScript")
+      sinon.stub(chrome.tabs, "executeScript")
       .withArgs(tab1.id, {code: @code})
       .yieldsAsync(["foobarbaz"])
       .withArgs(tab2.id, {code: @code})
@@ -212,7 +205,7 @@ describe "app/background", ->
       })
 
     it "filters out tabs that don't start with http", ->
-      @sandbox.stub(chrome.tabs, "query")
+      sinon.stub(chrome.tabs, "query")
       .yieldsAsync([tab3])
 
       background.query({
@@ -226,11 +219,11 @@ describe "app/background", ->
         expect(err).to.be.instanceof(Promise.RangeError)
 
     it "rejects if no tab matches", ->
-      @sandbox.stub(chrome.tabs, "query")
+      sinon.stub(chrome.tabs, "query")
       .withArgs({windowType: "normal"})
       .yieldsAsync([tab1, tab2])
 
-      @sandbox.stub(chrome.tabs, "executeScript")
+      sinon.stub(chrome.tabs, "executeScript")
       .withArgs(tab1.id, {code: @code})
       .yieldsAsync(["foobarbaz"])
       .withArgs(tab2.id, {code: @code})
@@ -248,7 +241,7 @@ describe "app/background", ->
         expect(err).to.be.instanceof(Promise.AggregateError)
 
     it "rejects if no tabs were found", ->
-      @sandbox.stub(chrome.tabs, "query")
+      sinon.stub(chrome.tabs, "query")
       .yieldsAsync([])
 
       background.query({
@@ -270,7 +263,7 @@ describe "app/background", ->
 
     describe "get:cookies", ->
       beforeEach ->
-        @sandbox.stub(chrome.cookies, "getAll")
+        sinon.stub(chrome.cookies, "getAll")
         .withArgs({domain: "google.com"})
         .yieldsAsync([{}, {}])
 
@@ -284,7 +277,7 @@ describe "app/background", ->
 
     describe "get:cookie", ->
       beforeEach ->
-        @sandbox.stub(chrome.cookies, "getAll")
+        sinon.stub(chrome.cookies, "getAll")
         .withArgs({domain: "google.com", name: "session"})
         .yieldsAsync([
           {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expirationDate: 123}
@@ -312,7 +305,7 @@ describe "app/background", ->
       beforeEach ->
         chrome.runtime.lastError = {message: "some error"}
 
-        @sandbox.stub(chrome.cookies, "set")
+        sinon.stub(chrome.cookies, "set")
         .withArgs({domain: "google.com", name: "session", value: "key", path: "/", secure: false, url: "http://google.com/"})
         .yieldsAsync(
           {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false}
@@ -365,7 +358,7 @@ describe "app/background", ->
       beforeEach ->
         chrome.runtime.lastError = {message: "some error"}
 
-        @sandbox.stub(chrome.cookies, "getAll")
+        sinon.stub(chrome.cookies, "getAll")
         .withArgs({domain: "google.com"})
         .yieldsAsync([
           {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
@@ -376,7 +369,7 @@ describe "app/background", ->
           {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expirationDate: 123}
         ])
 
-        @sandbox.stub(chrome.cookies, "remove")
+        sinon.stub(chrome.cookies, "remove")
         .withArgs({name: "session", url: "https://google.com/"})
         .yieldsAsync(
           {name: "session", url: "https://google.com/", storeId: "123"}
@@ -424,7 +417,7 @@ describe "app/background", ->
       beforeEach ->
         chrome.runtime.lastError = {message: "some error"}
 
-        @sandbox.stub(chrome.cookies, "getAll")
+        sinon.stub(chrome.cookies, "getAll")
         .withArgs({domain: "google.com", name: "session"})
         .yieldsAsync([
           {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
@@ -436,7 +429,7 @@ describe "app/background", ->
           {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expirationDate: 123}
         ])
 
-        @sandbox.stub(chrome.cookies, "remove")
+        sinon.stub(chrome.cookies, "remove")
         .withArgs({name: "session", url: "https://google.com/"})
         .yieldsAsync(
           {name: "session", url: "https://google.com/", storeId: "123"}
@@ -475,7 +468,7 @@ describe "app/background", ->
 
     describe "is:automation:client:connected", ->
       beforeEach ->
-        @sandbox.stub(chrome.tabs, "query")
+        sinon.stub(chrome.tabs, "query")
         .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
         .yieldsAsync([])
 
@@ -489,13 +482,13 @@ describe "app/background", ->
 
     describe "take:screenshot", ->
       beforeEach ->
-        @sandbox.stub(chrome.windows, "getLastFocused").yieldsAsync({id: 1})
+        sinon.stub(chrome.windows, "getLastFocused").yieldsAsync({id: 1})
 
       afterEach ->
         delete chrome.runtime.lastError
 
       it "resolves with screenshot", (done) ->
-        @sandbox.stub(chrome.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync("foobarbaz")
+        sinon.stub(chrome.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync("foobarbaz")
 
         @socket.on "automation:response", (id, obj = {}) ->
           expect(id).to.eq(123)
@@ -506,7 +499,7 @@ describe "app/background", ->
 
       it "rejects with chrome.runtime.lastError", (done) ->
         chrome.runtime.lastError = {message: "some error"}
-        @sandbox.stub(chrome.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync(undefined)
+        sinon.stub(chrome.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync(undefined)
 
         @socket.on "automation:response", (id, obj = {}) ->
           expect(id).to.eq(123)

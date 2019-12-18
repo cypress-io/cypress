@@ -32,7 +32,7 @@ describe "lib/scaffold", ->
 
     it "is false when files.length isnt 1", ->
       id = =>
-        @ids = Project(@idsPath)
+        @ids = new Project(@idsPath)
         @ids.getConfig()
         .then (cfg) =>
           @ids.scaffold(cfg).return(cfg)
@@ -42,7 +42,7 @@ describe "lib/scaffold", ->
           expect(ret).to.be.false
 
       todo = =>
-        @todos = Project(@todosPath)
+        @todos = new Project(@todosPath)
         @todos.getConfig()
         .then (cfg) =>
           @todos.scaffold(cfg).return(cfg)
@@ -55,7 +55,7 @@ describe "lib/scaffold", ->
 
     it "is true when files, name + bytes match to scaffold", ->
       ## TODO this test really can move to scaffold
-      pristine = Project(@pristinePath)
+      pristine = new Project(@pristinePath)
       pristine.getConfig()
       .then (cfg) ->
         pristine.scaffold(cfg).return(cfg)
@@ -66,7 +66,7 @@ describe "lib/scaffold", ->
 
     it "is false when bytes dont match scaffold", ->
       ## TODO this test really can move to scaffold
-      pristine = Project(@pristinePath)
+      pristine = new Project(@pristinePath)
       pristine.getConfig()
       .then (cfg) ->
         pristine.scaffold(cfg).return(cfg)
@@ -310,16 +310,16 @@ describe "lib/scaffold", ->
         @cfg.pluginsFile = path.join(@cfg.projectRoot, "cypress/plugins/index.js")
 
     it "returns tree-like structure of scaffolded", ->
-      snapshot(scaffold.fileTree(@cfg))
+      scaffold.fileTree(@cfg).then(snapshot)
 
     it "leaves out fixtures if configured to false", ->
       @cfg.fixturesFolder = false
-      snapshot(scaffold.fileTree(@cfg))
+      scaffold.fileTree(@cfg).then(snapshot)
 
     it "leaves out support if configured to false", ->
       @cfg.supportFile = false
-      snapshot(scaffold.fileTree(@cfg))
+      scaffold.fileTree(@cfg).then(snapshot)
 
     it "leaves out plugins if configured to false", ->
       @cfg.pluginsFile = false
-      snapshot(scaffold.fileTree(@cfg))
+      scaffold.fileTree(@cfg).then(snapshot)

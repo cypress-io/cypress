@@ -13,9 +13,11 @@ errors     = require("../errors")
 capture    = require("../capture")
 upload     = require("../upload")
 env        = require("../util/env")
+keys       = require("../util/keys")
 terminal   = require("../util/terminal")
 humanTime  = require("../util/human_time")
 ciProvider = require("../util/ci_provider")
+settings   = require("../util/settings")
 
 onBeforeRetry = (details) ->
   errors.warning(
@@ -77,10 +79,11 @@ throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) ->
       ciProvider.detectableCiBuildIdProviders()
     )
 
-throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group) ->
-  if not record and _.some([ciBuildId, parallel, group])
+throwIfRecordParamsWithoutRecording = (record, ciBuildId, parallel, group, tag) ->
+  if not record and _.some([ciBuildId, parallel, group, tag])
     errors.throw("RECORD_PARAMS_WITHOUT_RECORDING", {
       ciBuildId,
+      tag,
       group,
       parallel
     })
@@ -91,9 +94,9 @@ throwIfIncorrectCiBuildIdUsage = (ciBuildId, parallel, group) ->
   if ciBuildId and (not parallel and not group)
     errors.throw("INCORRECT_CI_BUILD_ID_USAGE", { ciBuildId })
 
-throwIfNoProjectId = (projectId) ->
+throwIfNoProjectId = (projectId, configFile) ->
   if not projectId
-    errors.throw("CANNOT_RECORD_NO_PROJECT_ID")
+    errors.throw("CANNOT_RECORD_NO_PROJECT_ID", configFile)
 
 getSpecRelativePath = (spec) ->
   _.get(spec, "relative", null)
@@ -231,9 +234,9 @@ getCommitFromGitOrCi = (git) ->
     defaultBranch: null
   })
 
-usedMessage = (limit) ->
+usedTestsMessage = (limit, phrase) ->
   if _.isFinite(limit)
-    "The limit is #{chalk.blue(limit)} private test recordings."
+    "The limit is #{chalk.blue(limit)} #{phrase} recordings."
   else
     ""
 
@@ -246,19 +249,20 @@ billingLink = (orgId) ->
 gracePeriodMessage = (gracePeriodEnds) ->
   gracePeriodEnds or "the grace period ends"
 
-createRun = (options = {}) ->
+createRun = Promise.method (options = {}) ->
   _.defaults(options, {
     group: null,
+    tags: null,
     parallel: null,
     ciBuildId: null,
   })
 
-  { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group } = options
+  { projectId, recordKey, platform, git, specPattern, specs, parallel, ciBuildId, group, tags } = options
 
   recordKey ?= env.get("CYPRESS_RECORD_KEY") or env.get("CYPRESS_CI_KEY")
 
   if not recordKey
-    ## are we a forked PR and are we NOT running our own internal
+    ## are we a forked pull request (forked PR) and are we NOT running our own internal
     ## e2e tests? currently some e2e tests fail when a user submits
     ## a PR because this logic triggers unintended here
     if isForkPr.isForkPr() and not runningInternalTests()
@@ -286,6 +290,7 @@ createRun = (options = {}) ->
     api.createRun({
       specs
       group
+      tags
       parallel
       platform
       ciBuildId
@@ -307,7 +312,13 @@ createRun = (options = {}) ->
       switch warning.code
         when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-            usedMessage: usedMessage(warning.limit)
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
+            link: billingLink(warning.orgId)
+          })
+        when "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS"
+          errors.warning("FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "test")
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
           })
@@ -318,13 +329,23 @@ createRun = (options = {}) ->
           })
         when "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
           errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-            usedMessage: usedMessage(warning.limit)
+            usedTestsMessage: usedTestsMessage(warning.limit, "private test")
+            link: billingLink(warning.orgId)
+          })
+        when "PAID_PLAN_EXCEEDS_MONTHLY_TESTS"
+          errors.warning("PAID_PLAN_EXCEEDS_MONTHLY_TESTS", {
+            usedTestsMessage: usedTestsMessage(warning.limit, "test")
             link: billingLink(warning.orgId)
           })
         when "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED"
           errors.warning("PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED", {
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds)
             link: billingLink(warning.orgId)
+          })
+        else
+          errors.warning("DASHBOARD_UNKNOWN_CREATE_RUN_WARNING", {
+            message: warning.message,
+            props: _.omit(warning, 'message')
           })
 
   .catch (err) ->
@@ -334,7 +355,7 @@ createRun = (options = {}) ->
 
     switch err.statusCode
       when 401
-        recordKey = recordKey.slice(0, 5) + "..." + recordKey.slice(-5)
+        recordKey = keys.hide(recordKey)
         errors.throw("DASHBOARD_RECORD_KEY_NOT_VALID", recordKey, projectId)
       when 402
         { code, payload } = err.error
@@ -345,7 +366,12 @@ createRun = (options = {}) ->
         switch code
           when "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS"
             errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS", {
-              usedMessage: usedMessage(limit)
+              usedTestsMessage: usedTestsMessage(limit, "private test")
+              link: billingLink(orgId)
+            })
+          when "FREE_PLAN_EXCEEDS_MONTHLY_TESTS"
+            errors.throw("FREE_PLAN_EXCEEDS_MONTHLY_TESTS", {
+              usedTestsMessage: usedTestsMessage(limit, "test")
               link: billingLink(orgId)
             })
           when "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN"
@@ -361,12 +387,13 @@ createRun = (options = {}) ->
               response: err,
               flags: {
                 group,
+                tags,
                 parallel,
                 ciBuildId,
               },
             })
       when 404
-        errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId)
+        errors.throw("DASHBOARD_PROJECT_NOT_FOUND", projectId, settings.configFile(options))
       when 412
         errors.throw("DASHBOARD_INVALID_RUN_REQUEST", err.error)
       when 422
@@ -398,12 +425,14 @@ createRun = (options = {}) ->
             })
           when "PARALLEL_DISALLOWED"
             errors.throw("DASHBOARD_PARALLEL_DISALLOWED", {
+              tags,
               group,
               runUrl,
               ciBuildId,
             })
           when "PARALLEL_REQUIRED"
             errors.throw("DASHBOARD_PARALLEL_REQUIRED", {
+              tags,
               group,
               runUrl,
               ciBuildId,
@@ -411,6 +440,7 @@ createRun = (options = {}) ->
           when "ALREADY_COMPLETE"
             errors.throw("DASHBOARD_ALREADY_COMPLETE", {
               runUrl,
+              tags,
               group,
               parallel,
               ciBuildId,
@@ -418,6 +448,7 @@ createRun = (options = {}) ->
           when "STALE_RUN"
             errors.throw("DASHBOARD_STALE_RUN", {
               runUrl,
+              tags,
               group,
               parallel,
               ciBuildId,
@@ -426,6 +457,7 @@ createRun = (options = {}) ->
             errors.throw("DASHBOARD_UNKNOWN_INVALID_REQUEST", {
               response: err,
               flags: {
+                tags,
                 group,
                 parallel,
                 ciBuildId,
@@ -489,8 +521,10 @@ createInstance = (options = {}) ->
 
 createRunAndRecordSpecs = (options = {}) ->
   { specPattern, specs, sys, browser, projectId, projectRoot, runAllSpecs, parallel, ciBuildId, group } = options
-
   recordKey = options.key
+
+  # we want to normalize this to an array to send to API
+  tags = _.split(options.tag, ',')
 
   commitInfo.commitInfo(projectRoot)
   .then (git) ->
@@ -510,6 +544,7 @@ createRunAndRecordSpecs = (options = {}) ->
       git
       specs
       group
+      tags
       parallel
       platform
       recordKey
@@ -521,7 +556,9 @@ createRunAndRecordSpecs = (options = {}) ->
       if not resp
         ## if a forked run, can't record and can't be parallel
         ## because the necessary env variables aren't present
-        runAllSpecs({}, false)
+        runAllSpecs({
+          parallel: false
+        })
       else
         { runUrl, runId, machineId, groupId } = resp
 
@@ -602,7 +639,12 @@ createRunAndRecordSpecs = (options = {}) ->
                 instanceId
               })
 
-        runAllSpecs({ beforeSpecRun, afterSpecRun, runUrl })
+        runAllSpecs({ 
+          runUrl,
+          parallel, 
+          beforeSpecRun,
+          afterSpecRun,
+        })
 
 module.exports = {
   createRun

@@ -1,21 +1,41 @@
+require('@packages/ts/register')
+
 const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
+const performance = require('../../../../test/support/helpers/performance')
 
 module.exports = (on) => {
   // save some time by only reading the originals once
   let cache = {}
+
+  const screenshotsTaken = []
+  let browserArgs = null
+
   function getCachedImage (name) {
     const cachedImage = cache[name]
+
     if (cachedImage) return Promise.resolve(cachedImage)
 
     const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
+
     return Jimp.read(imagePath).then((image) => {
       cache[name] = image
+
       return image
     })
   }
+
+  on('after:screenshot', (details) => {
+    screenshotsTaken.push(details)
+  })
+
+  on('before:browser:launch', (browser, args) => {
+    browserArgs = args
+
+    return args
+  })
 
   on('task', {
     'returns:undefined' () {},
@@ -24,23 +44,25 @@ module.exports = (on) => {
       throw new Error(message)
     },
 
-    'ensure:pixel:color' ({ name, coords, color, devicePixelRatio }) {
+    'ensure:pixel:color' ({ name, colors, devicePixelRatio }) {
       const imagePath = path.join(__dirname, '..', 'screenshots', `${name}.png`)
 
       return Jimp.read(imagePath)
       .then((image) => {
-        let [x, y] = coords
+        _.each(colors, ({ coords, color }) => {
+          let [x, y] = coords
 
-        x = x * devicePixelRatio
-        y = y * devicePixelRatio
+          x = x * devicePixelRatio
+          y = y * devicePixelRatio
 
-        const pixels = Jimp.intToRGBA(image.getPixelColor(x, y))
+          const pixels = Jimp.intToRGBA(image.getPixelColor(x, y))
 
-        const { r, g, b } = pixels
+          const { r, g, b } = pixels
 
-        if (!_.isEqual(color, [r, g, b])) {
-          throw new Error(`The pixel color at coords: [${x}, ${y}] does not match the expected pixel color. The color was [${r}, ${g}, ${b}] and was expected to be [${color.join(', ')}].`)
-        }
+          if (!_.isEqual(color, [r, g, b])) {
+            throw new Error(`The pixel color at coords: [${x}, ${y}] does not match the expected pixel color. The color was [${r}, ${g}, ${b}] and was expected to be [${color.join(', ')}].`)
+          }
+        })
 
         return null
       })
@@ -52,6 +74,7 @@ module.exports = (on) => {
       }
 
       const comparePath = path.join(__dirname, '..', 'screenshots', `${b}.png`)
+
       return Promise.all([
         getCachedImage(a),
         Jimp.read(comparePath),
@@ -90,6 +113,35 @@ module.exports = (on) => {
 
         return null
       })
+    },
+
+    'record:fast_visit_spec' ({ percentiles, url, browser, currentRetry }) {
+      percentiles.forEach(([percent, percentile]) => {
+        // eslint-disable-next-line no-console
+        console.log(`${percent}%\t of visits to ${url} finished in less than ${percentile}ms`)
+      })
+
+      const data = {
+        url,
+        browser,
+        currentRetry,
+        ...percentiles.reduce((acc, pair) => {
+          acc[pair[0]] = pair[1]
+
+          return acc
+        }, {}),
+      }
+
+      return performance.track('fast_visit_spec percentiles', data)
+      .return(null)
+    },
+
+    'get:screenshots:taken' () {
+      return screenshotsTaken
+    },
+
+    'get:browser:args' () {
+      return browserArgs
     },
   })
 }

@@ -10,6 +10,8 @@ user          = require("#{root}../lib/user")
 Windows       = require("#{root}../lib/gui/windows")
 savedState    = require("#{root}../lib/saved_state")
 
+DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36"
+
 describe "lib/gui/windows", ->
   beforeEach ->
     Windows.reset()
@@ -21,23 +23,13 @@ describe "lib/gui/windows", ->
     @win.getPosition = sinon.stub().returns([3, 4])
     @win.webContents = new EE()
     @win.webContents.openDevTools = sinon.stub()
+    @win.webContents.userAgent = DEFAULT_USER_AGENT
     @win.isDestroyed = sinon.stub().returns(false)
 
     sinon.stub(Windows, "_newBrowserWindow").returns(@win)
 
   afterEach ->
     Windows.reset()
-
-  context ".getBrowserAutomation", ->
-    beforeEach ->
-      sinon.stub(Windows, "automation")
-      sinon.stub(Windows, "getByWebContents")
-
-    it "gets window and passes to electron.automation", ->
-      Windows.getByWebContents.withArgs("foo").returns("bar")
-      Windows.automation.withArgs("bar").returns("baz")
-
-      expect(Windows.getBrowserAutomation("foo")).to.eq("baz")
 
   context ".getByWebContents", ->
     beforeEach ->
@@ -70,42 +62,6 @@ describe "lib/gui/windows", ->
         })
 
         expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
-
-    it "resolves with code on GITHUB_LOGIN for will-navigate", ->
-      options = {
-        type: "GITHUB_LOGIN"
-      }
-
-      url = "https://github.com/login"
-      url2 = "https://github.com?code=code123"
-
-      sinon.stub(user, "getLoginUrl").resolves(url)
-
-      sinon.stub(@win.webContents, "on").withArgs("will-navigate").yieldsAsync({}, url2)
-
-      Windows.open("/path/to/project", options)
-      .then (code) =>
-        expect(code).to.eq("code123")
-        expect(options.type).eq("GITHUB_LOGIN")
-        expect(@win.loadURL).to.be.calledWith(url)
-
-    it "resolves with code on GITHUB_LOGIN for did-get-redirect-request", ->
-      options = {
-        type: "GITHUB_LOGIN"
-      }
-
-      url = "https://github.com/login"
-      url2 = "https://github.com?code=code123"
-
-      sinon.stub(user, "getLoginUrl").resolves(url)
-
-      sinon.stub(@win.webContents, "on").withArgs("did-get-redirect-request").yieldsAsync({}, "foo", url2)
-
-      Windows.open("/path/to/project", options)
-      .then (code) =>
-        expect(code).to.eq("code123")
-        expect(options.type).eq("GITHUB_LOGIN")
-        expect(@win.loadURL).to.be.calledWith(url)
 
   context ".create", ->
     it "opens dev tools if saved state is open", ->
@@ -206,164 +162,3 @@ describe "lib/gui/windows", ->
       .delay(100)
       .then () =>
         expect(@state.set).to.be.calledWith({whatsUpWithDevTools: false})
-
-  context ".automation", ->
-    beforeEach ->
-      @cookies = {
-        set:    sinon.stub()
-        get:    sinon.stub()
-        remove: sinon.stub()
-      }
-
-      @win = {
-        webContents: {
-          session: {
-            cookies: @cookies
-          }
-        }
-      }
-
-      @automation = Windows.automation(@win)
-
-    describe ".getCookies", ->
-      beforeEach ->
-        @cookies.get
-        .withArgs({domain: "localhost"})
-        .yieldsAsync(null, [
-          {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123}
-          {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456}
-        ])
-
-      it "returns all cookies", ->
-        @automation.getCookies({domain: "localhost"})
-        .then (resp) ->
-          expect(resp).to.deep.eq([
-            {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expiry: 123}
-            {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expiry: 456}
-          ])
-
-    describe ".getCookie", ->
-      beforeEach ->
-        @cookies.get
-        .withArgs({domain: "google.com", name: "session"})
-        .yieldsAsync(null, [
-          {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123}
-        ])
-        .withArgs({domain: "google.com", name: "doesNotExist"})
-        .yieldsAsync(null, [])
-
-      it "returns a specific cookie by name", ->
-        @automation.getCookie({domain: "google.com", name: "session"})
-        .then (resp) ->
-          expect(resp).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expiry: 123})
-
-      it "returns null when no cookie by name is found", ->
-        @automation.getCookie({domain: "google.com", name: "doesNotExist"})
-        .then (resp) ->
-         expect(resp).to.be.null
-
-    describe ".setCookie", ->
-      beforeEach ->
-        @cookies.set
-        .withArgs({domain: "google.com", name: "session", value: "key", path: "/", url: "http://google.com/"})
-        .yieldsAsync(null,
-          {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false}
-        )
-        .withArgs({domain: "foo", path: "/bar", url: "http://foo/bar"})
-        .yieldsAsync(new Error("some error"))
-
-      it "resolves with the cookie props", ->
-        @automation.setCookie({domain: "google.com", name: "session", value: "key", path: "/"})
-        .then (resp) ->
-          expect(resp).to.deep.eq({domain: "google.com", name: "session", value: "key", path: "/", url: "http://google.com/"})
-
-      it "rejects with error", ->
-        @automation.setCookie({domain: "foo", path: "/bar", url: "http://foo/bar"})
-        .then ->
-          throw new Error("should have failed")
-        .catch (err) ->
-          expect(err.message).to.eq("some error")
-
-    describe ".clearCookies", ->
-      beforeEach ->
-        @cookies.get
-        .withArgs({domain: "google.com"})
-        .yieldsAsync(null, [
-          {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expiry: 123}
-          {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expiry: 456}
-        ])
-        .withArgs({domain: "cdn.github.com"})
-        .yieldsAsync(null, [
-          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123}
-        ])
-
-        @cookies.remove
-        .withArgs("https://google.com/", "session")
-        .yieldsAsync(null)
-
-        .withArgs("http://google.com/foo", "foo")
-        .yieldsAsync(null)
-
-        .withArgs("http://cdn.github.com/assets", "shouldThrow")
-        .yieldsAsync(new Error("some error"))
-
-      it "resolves with array of removed cookies", ->
-        @automation.clearCookies({domain: "google.com"})
-        .then (resp) ->
-          expect(resp).to.deep.eq([
-            {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expiry: 123}
-            {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expiry: 456}
-          ])
-
-      it "rejects with error", ->
-        @automation.clearCookies({domain: "cdn.github.com"})
-        .then ->
-          throw new Error("should have failed")
-        .catch (err) ->
-          expect(err.message).to.eq("some error")
-
-    describe ".clearCookie", ->
-      beforeEach ->
-        @cookies.get
-        .withArgs({domain: "google.com", name: "session"})
-        .yieldsAsync(null, [
-          {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expiry: 123}
-        ])
-
-        .withArgs({domain: "google.com", name: "doesNotExist"})
-        .yieldsAsync(null, [])
-
-        .withArgs({domain: "cdn.github.com", name: "shouldThrow"})
-        .yieldsAsync(null, [
-          {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expiry: 123}
-        ])
-
-        @cookies.remove
-        .withArgs("https://google.com/", "session")
-        .yieldsAsync(null)
-
-        .withArgs("http://cdn.github.com/assets", "shouldThrow")
-        .yieldsAsync(new Error("some error"))
-
-      it "resolves single removed cookie", ->
-        @automation.clearCookie({domain: "google.com", name: "session"})
-        .then (resp) ->
-          expect(resp).to.deep.eq(
-            {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expiry: 123}
-          )
-
-      it "returns null when no cookie by name is found", ->
-        @automation.clearCookie({domain: "google.com", name: "doesNotExist"})
-        .then (resp) ->
-          expect(resp).to.be.null
-
-      it "rejects with error", ->
-        @automation.clearCookie({domain: "cdn.github.com", name: "shouldThrow"})
-        .then ->
-          throw new Error("should have failed")
-        .catch (err) ->
-          expect(err.message).to.eq("some error")
-
-    describe "isAutomationConnected", ->
-      it "returns true", ->
-        expect(@automation.isAutomationConnected()).to.be.true

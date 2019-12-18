@@ -97,7 +97,6 @@ export default class State {
         top: (actualHeight + this.headerHeight + nudge),
       },
     }
-
   }
 
   @action setIsLoading (isLoading) {

@@ -29,7 +29,7 @@ describe "redirects + requests", ->
           secure: false
         })
 
-  it "visits idempotant", ->
+  it "visits to a different superdomain will be resolved twice", ->
     cy
       .visit("http://localhost:2290")
       .url()
@@ -42,9 +42,9 @@ describe "redirects + requests", ->
         .its("body").should("deep.eq", {"2292": "true"})
       .request("http://localhost:2292/counts")
         .its("body").should("deep.eq", {
-          "localhost:2290": 1
-          "localhost:2291": 1
-          "localhost:2292": 1
+          "localhost:2290": 2
+          "localhost:2291": 2
+          "localhost:2292": 2
           "localhost:2293": 1 ## from the previous test
         })
 
@@ -54,6 +54,16 @@ describe "redirects + requests", ->
       .then (resp) ->
         expect(resp.status).to.eq(200)
         expect(resp.body).to.eq("<html>home</html>")
+
+  ## https://github.com/cypress-io/cypress/issues/5654
+  it "can turn off following redirects that set a cookie", ->
+    cy
+      .request({
+        url: "http://localhost:2294/redirectWithCookie"
+        followRedirect: false
+      })
+      .then (resp) ->
+        expect(resp.status).to.eq(302)
 
   it "can turn off automatically following redirects", ->
     cy

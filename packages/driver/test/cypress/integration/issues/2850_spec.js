@@ -24,6 +24,7 @@ describe('issue #2850: invoking cy.clock() before two visits', () => {
         // manually restore the clock
         clock.restore()
       })
+
       cy.clock().then((clock2) => {
         clock2.restore()
       })

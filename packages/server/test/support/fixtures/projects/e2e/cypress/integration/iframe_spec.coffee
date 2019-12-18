@@ -67,19 +67,6 @@ describe "iframes", ->
         expect($body).to.contain("page/does-not-exist")
         expect($body).to.contain("The file was not found.")
 
-  it "injects on http request errors", ->
-    cy
-      .visit("http://www.foo.com:1616/req")
-      .get("iframe").then ($iframe) ->
-        br = $iframe.contents().find("br")
-
-        expect(br.length).to.be.gt(1)
-
-        expect(count).to.eq(1)
-      .get("a").click()
-      .get("body").then ($body) ->
-        expect($body).to.contain("Cannot GET /page/does-not-exist")
-
   it "does not inject into xhr's", ->
     cy
       .visit("http://localhost:1616/")

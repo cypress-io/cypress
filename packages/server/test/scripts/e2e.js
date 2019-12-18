@@ -37,7 +37,9 @@ glob('test/e2e/**/*')
 .then((specs = []) => {
   if (options.spec) {
     return _.filter(specs, (spec) => {
-      return spec.includes(options.spec)
+      return _.some(options.spec.split(','), (specPart) => {
+        return spec.includes(specPart)
+      })
     })
   }
 
@@ -57,6 +59,10 @@ glob('test/e2e/**/*')
     './test/scripts/run.js',
     spec,
   ]
+
+  if (options['inspect-brk']) {
+    args.push('--inspect-brk')
+  }
 
   return spawn('node', args, { stdio: 'inherit' })
   .then((code) => {

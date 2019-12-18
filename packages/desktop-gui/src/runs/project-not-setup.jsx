@@ -4,7 +4,9 @@ import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
 import ipc from '../lib/ipc'
+import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project-modal'
+import authStore from '../auth/auth-store'
 
 @observer
 export default class ProjectNotSetup extends Component {
@@ -52,7 +54,7 @@ export default class ProjectNotSetup extends Component {
           className='btn btn-primary'
           onClick={this._showSetupProjectModal}
         >
-          <i className='fa fa-wrench'></i>{' '}
+          <i className='fas fa-wrench'></i>{' '}
           Set up project to record
         </button>
       </div>
@@ -68,17 +70,17 @@ export default class ProjectNotSetup extends Component {
     return (
       <div className='empty-runs-not-displayed'>
         <h4>
-          <i className='fa fa-warning errored'></i>{' '}
+          <i className='fas fa-exclamation-triangle errored'></i>{' '}
           Runs cannot be displayed
         </h4>
-        <p>We were unable to find an existing project matching the <code>projectId</code> in your <code>cypress.json</code>.</p>
-        <p>To see runs for a current project, add the correct <code>projectId</code> to your <code>cypress.json</code></p>
+        <p>We were unable to find an existing project matching the <code>projectId</code> in your {configFileFormatted(this.props.project.configFile)}.</p>
+        <p>To see runs for a current project, add the correct <code>projectId</code> to your {configFileFormatted(this.props.project.configFile)}.</p>
         <p>- or -</p>
         <button
           className='btn btn-warning'
           onClick={this._showSetupProjectModal}
         >
-          <i className='fa fa-wrench'></i>{' '}
+          <i className='fas fa-wrench'></i>{' '}
           Set up a new project
         </button>
         <p>
@@ -90,6 +92,22 @@ export default class ProjectNotSetup extends Component {
 
   _projectSetup () {
     if (!this.state.setupProjectModalOpen) return null
+
+    if (!this.props.isAuthenticated) {
+      authStore.openLogin((isAuthenticated) => {
+        if (!isAuthenticated) {
+          // auth was canceled, cancel project setup too
+          this.setState({ setupProjectModalOpen: false })
+        }
+      })
+
+      return null
+    }
+
+    if (this.props.isShowingLogin) {
+      // login dialog still open, wait for it to close before proceeding
+      return null
+    }
 
     return (
       <SetupProject
