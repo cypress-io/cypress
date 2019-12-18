@@ -7,6 +7,7 @@ module.exports = function (b, opts) {
     this.push(ts.transpileModule(buf.toString(), {
       compilerOptions: {
         esModuleInterop: true,
+        jsx: 'react',
       },
     }).outputText)
 

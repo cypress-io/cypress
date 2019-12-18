@@ -3,11 +3,11 @@ EE = require("events")
 path = require("path")
 debug = require("debug")("cypress:server:preprocessor")
 Promise = require("bluebird")
-resolve = require("resolve")
 appData = require("../util/app_data")
 cwd = require("../cwd")
 plugins = require("../plugins")
 savedState = require("../saved_state")
+resolve = require('./resolve')
 
 errorMessage = (err = {}) ->
   (err.stack ? err.annotated ? err.message ? err.toString())
@@ -44,18 +44,11 @@ setDefaultPreprocessor = (config) ->
 
   options = browserify.defaultOptions;
 
-  resolveTypeScript = () -> 
-    try
-      resolve.sync('typescript', {
-        baseDir: config.projectRoot,
-      })
-    catch
-      return null
-
-  tsPath = resolveTypeScript()
+  tsPath = resolve.typescript(config)
 
   if tsPath isnt null 
     options.browserifyOptions.extensions.push('.ts', '.tsx');
+    options.browserifyOptions.transform.pop()
     options.browserifyOptions.transform.push([
       path.join(__dirname, './simple_tsify'), {
         typescript: require(tsPath),
