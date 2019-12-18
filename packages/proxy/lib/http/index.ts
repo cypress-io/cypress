@@ -1,13 +1,13 @@
-import _ from 'lodash'
-import debugModule from 'debug'
-import ErrorMiddleware from './error-middleware'
-import { HttpBuffers } from './util/buffers'
-import { IncomingMessage } from 'http'
 import Promise from 'bluebird'
-import { Readable } from 'stream'
+import debugModule from 'debug'
 import { Request, Response } from 'express'
+import { IncomingMessage } from 'http'
+import _ from 'lodash'
+import { Readable } from 'stream'
+import ErrorMiddleware from './error-middleware'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
+import { HttpBuffers } from './util/buffers'
 
 const debug = debugModule('cypress:proxy:http')
 
@@ -99,7 +99,6 @@ export function _runStage (type: HttpStages, ctx: any) {
         .omit(READONLY_MIDDLEWARE_KEYS)
         .forEach((value, key) => {
           if (ctx[key] !== value) {
-            debug(`copying %o`, { [key]: value })
             ctx[key] = value
           }
         })
@@ -138,7 +137,7 @@ export function _runStage (type: HttpStages, ctx: any) {
           _end()
         },
         onError: (error: Error) => {
-          debug('Error in middleware %o', { stage, middlewareName, error, ctx })
+          debug('Error in middleware %o', { stage, middlewareName, error })
 
           if (type === HttpStages.Error) {
             return

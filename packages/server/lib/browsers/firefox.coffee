@@ -125,7 +125,7 @@ module.exports = {
     extensions = []
     preferences = _.extend({}, defaultPreferences)
 
-    debug('firefox open', options)
+    debug('firefox open %o', options)
 
     if ps = options.proxyServer
       { hostname, port, protocol } = urlUtil.parse(ps)
@@ -150,7 +150,7 @@ module.exports = {
 
       plugins.execute("before:browser:launch", options.browser, { preferences, extensions })
       .then (result) ->
-        debug("got user args for 'before:browser:launch'", result)
+        debug("got user args for 'before:browser:launch' %o", result)
         return if not result
 
         if _.isPlainObject(result.preferences)
@@ -170,7 +170,7 @@ module.exports = {
       profile = new FirefoxProfile({
         destinationDirectory: profileDir
       })
-      debug("firefox profile dir:", profile.path())
+      debug("firefox profile dir %o", { path: profile.path() })
 
       preferences["browser.cache.disk.parent_directory"] = cacheDir
       for pref, value of preferences
@@ -183,11 +183,11 @@ module.exports = {
         "-marionette"
         "-new-instance"
         "-foreground"
-        "-height", "794"
+        "-height", "794" ## TODO: why 794?
         "-width", "1280"
       ]
 
-      debug("launch in firefox: %s, %s", url, args)
+      debug("launch in firefox", { url, args })
 
       utils.launch(browserName, null, args)
     .then (browserInstance) ->
