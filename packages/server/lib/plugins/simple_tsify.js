@@ -1,15 +1,30 @@
 let through = require('through2')
 
+const isJson = (code) => {
+  try {
+    JSON.parse(code)
+  } catch (e) {
+    return false
+  }
+
+  return true
+}
+
 module.exports = function (b, opts) {
   return through(function (buf, enc, next) {
     const ts = opts.typescript
+    const text = buf.toString()
 
-    this.push(ts.transpileModule(buf.toString(), {
-      compilerOptions: {
-        esModuleInterop: true,
-        jsx: 'react',
-      },
-    }).outputText)
+    if (isJson(text)) {
+      this.push(text)
+    } else {
+      this.push(ts.transpileModule(text, {
+        compilerOptions: {
+          esModuleInterop: true,
+          jsx: 'react',
+        },
+      }).outputText)
+    }
 
     next()
   })
