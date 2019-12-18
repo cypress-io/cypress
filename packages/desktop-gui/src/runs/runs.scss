@@ -322,6 +322,15 @@
 }
 
 .setup-project-modal {
+  form {
+    overflow: visible;
+  }
+
+  .loader {
+    position: relative;
+    min-height: 181px;
+  }
+
   a>i {
     color: #999;
     cursor: pointer;
@@ -438,6 +447,8 @@
 
   .actions.form-group {
     margin-bottom: 0;
+    display: flex;
+    flex-direction: row-reverse;
 
     button {
       position: relative;

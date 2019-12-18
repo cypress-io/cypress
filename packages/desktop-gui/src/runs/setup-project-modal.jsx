@@ -75,10 +75,6 @@ class SetupProject extends Component {
       return null
     }
 
-    if (!orgsStore.isLoaded) {
-      this._loading()
-    }
-
     return (
       <div className='setup-project-modal modal-body os-dialog'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
@@ -91,7 +87,7 @@ class SetupProject extends Component {
           {this._accessSelector()}
           {this._error()}
           <div className='actions form-group'>
-            <div className='pull-right'>
+            <div>
               <button
                 disabled={this.state.isSubmitting || this._formNotFilled()}
                 className='btn btn-primary btn-block'
@@ -106,15 +102,6 @@ class SetupProject extends Component {
             </div>
           </div>
         </form>
-      </div>
-    )
-  }
-
-  _loading () {
-    return (
-      <div className='setup-project-modal modal-body os-dialog'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <Loader color='#888' scale={0.5} />
       </div>
     )
   }
@@ -165,22 +152,25 @@ class SetupProject extends Component {
         </div>
         <div className='owner-parts'>
           <div className='select-orgs'>
-            <div className={this._hasOrgs() ? 'hidden' : ''}>
-              <div className='empty-select-orgs well'>
-                <p>You don't have any organizations yet.</p>
-                <p>Organizations can help you manage projects, including billing.</p>
-                <p>
-                  <a
-                    href='#'
-                    className='btn btn-link'
-                    onClick={this._manageOrgs}>
-                    <i className='fas fa-plus'></i>{' '}
-                    Create organization
-                  </a>
-                </p>
-              </div>
-            </div>
-            {this._orgSelector()}
+            {
+              orgsStore.isLoaded ?
+                this._hasOrgs() ?
+                  this._orgSelector() :
+                  <div className='empty-select-orgs well'>
+                    <p>You don't have any organizations yet.</p>
+                    <p>Organizations can help you manage projects, including billing.</p>
+                    <p>
+                      <a
+                        href='#'
+                        className='btn btn-link'
+                        onClick={this._manageOrgs}>
+                        <i className='fas fa-plus'></i>{' '}
+                          Create organization
+                      </a>
+                    </p>
+                  </div>
+                : <Loader color='#888' scale={0.5} />
+            }
           </div>
         </div>
       </div>
@@ -226,6 +216,7 @@ class SetupProject extends Component {
           classNamePrefix='organizations-select'
           value={this._orgSelectValue(options)}
           onChange={this._updateSelectedOrg}
+          isLoading={!orgsStore.isLoaded}
           options={options}
         />
       </div>

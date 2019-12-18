@@ -86,9 +86,32 @@ describe('Set Up Project', function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
         })
       })
+    })
 
+    describe('loading behavior', function () {
+      beforeEach(function () {
+        cy.get('.btn').contains('Set up project').click()
+      })
+
+      it('calls getOrgs', function () {
+        expect(this.ipc.getOrgs).to.be.calledOnce
+      })
+
+      it('displays loading view before orgs load', function () {
+        cy.get('.loader').then(function () {
+          this.getOrgs.resolve(this.orgs)
+        })
+
+        cy.get('.loader').should('not.exist')
+      })
+    })
+
+    describe('selecting an org', function () {
       describe('selecting Personal org', function () {
         beforeEach(function () {
+          this.getOrgs.resolve(this.orgs)
+
+          cy.get('.btn').contains('Set up project').click()
           cy.get('.modal-content')
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
@@ -108,9 +131,7 @@ describe('Set Up Project', function () {
           .find('input').should('not.be.checked')
         })
       })
-    })
 
-    describe('selecting an org', function () {
       context('with orgs', function () {
         beforeEach(function () {
           this.getOrgs.resolve(this.orgs)
