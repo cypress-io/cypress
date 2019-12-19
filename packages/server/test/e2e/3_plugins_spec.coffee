@@ -86,6 +86,7 @@ describe "e2e plugins", ->
   e2e.it "works with user extensions", {
     browser: "chrome"
     spec: "app_spec.coffee"
+    headed: true
     project: pluginExtension
     sanitizeScreenshotDimensions: true
     snapshot: true
