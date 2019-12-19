@@ -21,6 +21,7 @@ describe "e2e task", ->
     e2e.exec(@, {
       project: Fixtures.projectPath("multiple-task-registrations")
       spec: "multiple_task_registrations_spec.coffee"
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 0
     })

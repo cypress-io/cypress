@@ -25,7 +25,6 @@ describe('issue 3847', () => {
 
   // Unhandled rejection TypeError: Cannot read property 'error' of undefined
   it('options { log: false } will not throw Unhandled rejection', (done) => {
-
     // error should seem like { log: true }
     cy.on('fail', (err) => {
       expect(err.message).to.eql(error.message)

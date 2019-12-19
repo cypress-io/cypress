@@ -2,6 +2,7 @@ _           = require("lodash")
 ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 debug       = require('debug')('cypress:server:events')
+pluralize   = require("pluralize")
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
@@ -88,13 +89,6 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "get:current:user"
       user.getSafely()
-      .then(send)
-      .catch(sendErr)
-
-    when "clear:github:cookies"
-      Windows.getBrowserAutomation(event.sender)
-      .clearCookies({domain: "github.com"})
-      .return(null)
       .then(send)
       .catch(sendErr)
 
@@ -186,7 +180,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "add:project"
-      Project.add(arg)
+      Project.add(arg, options)
       .then(send)
       .catch(sendErr)
 
@@ -196,6 +190,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
+      debug("open:project")
+
       onSettingsChanged = ->
         bus.emit("config:changed")
 
@@ -215,6 +211,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
       browsers.getAllBrowsersWith(options.browser)
       .then (browsers = []) ->
+        debug("setting found %s on the config", pluralize("browser", browsers.length, true))
         options.config = _.assign(options.config, { browsers })
       .then ->
         chromePolicyCheck.run (err) ->

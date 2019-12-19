@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 2.8
+// TypeScript Version: 2.9
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
@@ -18,6 +18,10 @@
 /// <reference path="./mocha/index.d.ts" />
 /// <reference path="./jquery/index.d.ts" />
 /// <reference path="./chai-jquery/index.d.ts" />
+
+// jQuery includes dependency "sizzle" that provides types
+// so we include it too in "node_modules/sizzle".
+// This way jQuery can load it using 'reference types="sizzle"' directive
 
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
@@ -56,7 +60,7 @@ declare namespace Cypress {
     name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
     displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
     version: string
-    majorVersion: string
+    majorVersion: number
     path: string
     isHeaded: boolean
     isHeadless: boolean
@@ -288,7 +292,6 @@ declare namespace Cypress {
       add(name: string, fn: (...args: any[]) => void): void
       add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
       overwrite(name: string, fn: (...args: any[]) => void): void
-      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
     }
 
     /**
@@ -616,7 +619,61 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<Loggable>): Chainable
+    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Double-click a DOM element at specific corner / side.
+     *
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/dblclick
+     * @example
+     *    cy.get('button').dblclick('topRight')
+     */
+    dblclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Double-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/dblclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').dblclick(15, 40)
+    ```
+     */
+    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element.
+     *
+     * @see https://on.cypress.io/rightclick
+     */
+    rightclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific corner / side.
+     *
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').rightclick('topRight')
+     */
+    rightclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/rightclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').rightclick(15, 40)
+    ```
+     */
+    rightclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
      * Set a debugger and log what the previous command yields.
@@ -810,6 +867,13 @@ declare namespace Cypress {
     hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
+     * Invoke a function in an array of functions.
+     * @see https://on.cypress.io/invoke
+     */
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
+
+    /**
      * Invoke a function on the previously yielded subject.
      * This isn't possible to strongly type without generic override yet.
      * If called on an object you can do this instead: `.then(s => s.show())`.
@@ -819,6 +883,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
+    invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
 
     /**
      * Get a property’s value on the previously yielded subject.
@@ -830,7 +895,15 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K): Chainable<Subject[K]>
+    its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
+
+    /**
+     * Get a value by index from an array yielded from the previous command.
+     * @see https://on.cypress.io/its
+     * @example
+     *    cy.wrap(['a', 'b']).its(1).should('equal', 'b')
+     */
+    its<T, Subject extends T[]>(index: number, options?: Loggable): Chainable<T>
 
     /**
      * Get the last DOM element within a set of DOM elements.
@@ -2045,10 +2118,25 @@ declare namespace Cypress {
      */
     integrationFolder: string
     /**
+     * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
+     * @default "bundled"
+     */
+    nodeVersion: "system" | "bundled"
+    /**
      * Path to plugins file. (Pass false to disable)
      * @default "cypress/plugins/index.js"
      */
     pluginsFile: string
+    /**
+     * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
+     * @default null
+     */
+    resolvedNodePath: string
+    /**
+     * The version of `node` that is being used to execute plugins.
+     * @example 1.2.3
+     */
+    resolvedNodeVersion: string
     /**
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
@@ -2170,11 +2258,19 @@ declare namespace Cypress {
     height: number
   }
 
+  type Padding =
+    | number
+    | [number]
+    | [number, number]
+    | [number, number, number]
+    | [number, number, number, number]
+
   interface ScreenshotOptions {
     blackout: string[]
     capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
+    padding: Padding
     scale: boolean
     beforeScreenshot(doc: Document): void
     afterScreenshot(doc: Document): void
@@ -2349,6 +2445,11 @@ declare namespace Cypress {
      *    })
      */
     auth: Auth
+
+    /**
+     * Query parameters to append to the `url` of the request.
+     */
+    qs: object
   }
 
   /**
@@ -3743,6 +3844,14 @@ declare namespace Cypress {
      */
     (chainer: 'contain.html', value: string): Chainable<Subject>
     /**
+     * Assert that the html of the first element of the selection partially contains the given html, using `.html()`.
+     * @example
+     *    cy.get('#result').should('include.html', '<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'include.html', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection has the given id, using `.attr('id')`.
      * @example
      *    cy.get('#result').should('have.id', 'result')
@@ -3776,6 +3885,14 @@ declare namespace Cypress {
      */
     (chainer: 'contain.text', value: string): Chainable<Subject>
     /**
+     * Assert that the text of the first element of the selection partially contains the given text, using `.text()`.
+     * @example
+     *    cy.get('#result').should('include.text', 'John Doe')
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'include.text', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection has the given value, using `.val()`.
      * @example
      *    cy.get('textarea').should('have.value', 'foo bar baz')
@@ -3791,6 +3908,14 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'contain.value', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection partially contains the given value, using `.val()`.
+     * @example
+     *    cy.get('textarea').should('include.value', 'foo bar baz')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'include.value', value: string): Chainable<Subject>
     /**
      * Assert that the selection matches a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
@@ -3947,6 +4072,14 @@ declare namespace Cypress {
      */
     (chainer: 'not.contain.html', value: string): Chainable<Subject>
     /**
+     * Assert that the html of the first element of the selection does not contain the given html, using `.html()`.
+     * @example
+     *    cy.get('#result').should('not.include.html', '<em>John Doe</em>')
+     * @see http://chaijs.com/plugins/chai-jquery/#htmlhtml
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.include.html', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection does not have the given id, using `.attr('id')`.
      * @example
      *    cy.get('#result').should('not.have.id', 'result')
@@ -3980,6 +4113,14 @@ declare namespace Cypress {
      */
     (chainer: 'not.contain.text', value: string): Chainable<Subject>
     /**
+     * Assert that the text of the first element of the selection does not contain the given text, using `.text()`.
+     * @example
+     *    cy.get('#result').should('not.include.text', 'John Doe')
+     * @see http://chaijs.com/plugins/chai-jquery/#texttext
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.include.text', value: string): Chainable<Subject>
+    /**
      * Assert that the first element of the selection does not have the given value, using `.val()`.
      * @example
      *    cy.get('textarea').should('not.have.value', 'foo bar baz')
@@ -3995,6 +4136,14 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.contain.value', value: string): Chainable<Subject>
+    /**
+     * Assert that the first element of the selection does not contain the given value, using `.val()`.
+     * @example
+     *    cy.get('textarea').should('not.include.value', 'foo bar baz')
+     * @see http://chaijs.com/plugins/chai-jquery/#valuevalue
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.include.value', value: string): Chainable<Subject>
     /**
      * Assert that the selection does not match a given selector, using `.is()`. Note that this overrides the built-in chai assertion. If the object asserted against is not a jQuery object, the original implementation will be called.
      * @example
@@ -4316,7 +4465,7 @@ declare namespace Cypress {
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
-  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
     top: number,
     left: number

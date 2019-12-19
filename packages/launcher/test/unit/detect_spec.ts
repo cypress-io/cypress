@@ -1,4 +1,5 @@
-import { detect } from '../../lib/detect'
+require('../spec_helper')
+import { detect, setMajorVersion } from '../../lib/detect'
 const os = require('os')
 import { log } from '../log'
 import { project } from 'ramda'
@@ -12,7 +13,7 @@ describe('browser detection', () => {
   // using DEBUG=... flag
   const checkBrowsers = (browsers) => {
     log('detected browsers %j', browsers)
-    expect(browsers).to.be.an.array
+    expect(browsers).to.be.an('array')
 
     const mainProps = project(['name', 'version'], browsers)
 
@@ -31,5 +32,15 @@ describe('browser detection', () => {
   // real browsers
   it('detects available browsers', () => {
     return detect().then(checkBrowsers)
+  })
+
+  context('setMajorVersion', () => {
+    const foundBrowser = {
+      name: 'test browser',
+      version: '11.22.33',
+    }
+
+    setMajorVersion(foundBrowser)
+    expect(foundBrowser.majorVersion, 'major version was converted to number').to.equal(11)
   })
 })

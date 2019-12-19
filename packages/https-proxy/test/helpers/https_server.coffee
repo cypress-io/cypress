@@ -1,6 +1,6 @@
 https = require("https")
 Promise = require("bluebird")
-allowDestroy = require("server-destroy-vvo")
+{ allowDestroy } = require("@packages/network")
 certs = require("./certs")
 
 defaultOnRequest = (req, res) ->

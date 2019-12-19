@@ -17,11 +17,14 @@ const testStaticAssets = async (buildResourcePath) => {
       badStrings: [
         // should only exist during development
         'webpack-livereload-plugin',
-        // indicates eval source maps were included, which cause crossorigin errors
+        // indicates eval source maps were included, which cause cross-origin errors
         '//# sourceURL=cypress://',
+        // make sure webpack is not run with NODE_ENV=development
+        'react.development.js',
       ],
       goodStrings: [
-        // indicates inline source maps were included
+        // make sure webpack is run with NODE_ENV=production
+        'react.production.min.js',
       ],
       testAssetStrings: [
         [
@@ -42,7 +45,15 @@ const testStaticAssets = async (buildResourcePath) => {
     testPackageStaticAssets({
       assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/index.html`,
       goodStrings: [
+        // make sure webpack is run with NODE_ENV=production
         `window.env = 'production'`,
+      ],
+    }),
+    testPackageStaticAssets({
+      assetGlob: `${buildResourcePath}/packages/desktop-gui/dist/app.js`,
+      goodStrings: [
+        // make sure webpack is run with NODE_ENV=production
+        'react.production.min.js',
       ],
     }),
   ])
@@ -99,7 +110,6 @@ const testPackageStaticAssets = async (options = {}) => {
   la(!!foundAssets.length, stripIndent`
   expected assets to be found in ${chalk.green(opts.assetGlob)}
   `)
-
 }
 
 module.exports = {
@@ -108,7 +118,6 @@ module.exports = {
 }
 
 function includesCount (string, subString) {
-
   string += ''
   subString += ''
   if (subString.length <= 0) return (string.length + 1)
@@ -141,5 +150,4 @@ const includesString = (fileStr, options) => {
   const passed = count >= atLeast
 
   return [passed, count, atLeast]
-
 }
