@@ -1167,19 +1167,13 @@ mac-workflow: &mac-workflow
         executor: mac
         requires:
           - Mac build
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
 
     - upload-npm-package:
         name: Mac NPM package upload
         context: test-runner:upload
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac NPM package
 
@@ -1209,10 +1203,7 @@ mac-workflow: &mac-workflow
     - test-binary-against-kitchensink:
         name: Test Mac binary against kitchensink
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac NPM package
           - Mac binary
