@@ -33,7 +33,8 @@ buildDir = (platform, args...) ->
       # subfolder and it is NOT "darwin" but "mac"
       path.resolve(root, "mac", args...)
     when "linux"
-      path.resolve(root, platform, "Cypress", args...)
+      # path.resolve(root, platform, "Cypress", args...)
+      path.resolve(root, args...)
     when "win32"
       path.resolve(root, platform, "Cypress", args...)
 

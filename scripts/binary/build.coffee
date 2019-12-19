@@ -258,8 +258,11 @@ buildCypressApp = (platform, version, options = {}) ->
     outputFolder = meta.buildRootDir(platform)
     electronVersion = electron.getElectronVersion()
     la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion)
-    electronDistFolder = path.join(__dirname, "..", "..", "packages", "electron", "node_modules", "electron", "dist")
     iconFilename = getIconFilename(platform)
+    electronDistFolder = path.join(__dirname, "..", "..", "packages", "electron", "node_modules", "electron", "dist")
+    if platform is "linux"
+      # for some reason need to use copy of Electron
+      electronDistFolder = path.join("packages", "electron", "dist", "Cypress")
 
     args = [
       "--publish=never",
@@ -299,6 +302,26 @@ buildCypressApp = (platform, version, options = {}) ->
 
     console.log("Removing unnecessary folder '#{electronDistFolder}'")
     fs.removeAsync(electronDistFolder).catch(_.noop)
+
+  copyRenameElectronDist = ->
+    log("#copyRenameElectronDist")
+    # for some reason on Linux, during the build, electron-builder
+    # cannot find Electron (on Mac it just works)
+    # ⨯ ENOENT: no such file or directory, rename
+    # '/home/person/cypress/build/linux-unpacked/electron'
+    # -> '/home/person/cypress/build/linux-unpacked/cypress'
+    # so we can copy our Electron app ughh
+    if platform != "linux"
+      return Promise.resolve()
+
+    # cp from packages/electron/dist/Cypress/Cypress to
+    # packages/electron/dist/Cypress/electron
+
+    from = path.join("packages", "electron", "dist", "Cypress", "Cypress")
+    to = path.join("packages", "electron", "dist", "Cypress", "electron")
+    console.log(from, "copy ->", to)
+
+    fs.copyAsync(from, to)
 
   runSmokeTests = ->
     log("#runSmokeTests")
@@ -372,22 +395,23 @@ buildCypressApp = (platform, version, options = {}) ->
     )
 
   Promise.resolve()
-  .then(checkPlatform)
-  .then(cleanupPlatform)
-  .then(buildPackages)
-  .then(copyPackages)
-  .then(npmInstallPackages)
-  .then(createRootPackage)
-  .then(convertCoffeeToJs)
-  .then(removeTypeScript)
-  .then(cleanJs)
-  .then(transformSymlinkRequires)
-  .then(testVersion(distDir))
-  .then(testBuiltStaticAssets)
-  .then(removeBinFolders)
-  .then(removeCyFolders)
-  .then(removeDevElectronApp)
-  .then(electronPackAndSign)
+  # .then(checkPlatform)
+  # .then(cleanupPlatform)
+  # .then(buildPackages)
+  # .then(copyPackages)
+  # .then(npmInstallPackages)
+  # .then(createRootPackage)
+  # .then(convertCoffeeToJs)
+  # .then(removeTypeScript)
+  # .then(cleanJs)
+  # .then(transformSymlinkRequires)
+  # .then(testVersion(distDir))
+  # .then(testBuiltStaticAssets)
+  # .then(removeBinFolders)
+  # .then(removeCyFolders)
+  # .then(removeDevElectronApp)
+  # .then(copyRenameElectronDist)
+  # .then(electronPackAndSign)
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
   .then(verifyAppCanOpen)
