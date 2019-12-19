@@ -6,7 +6,6 @@ cp      = require("child_process")
 path    = require("path")
 gulp    = require("gulp")
 human   = require("human-interval")
-konfig  = require('../binary/get-config')()
 Promise = require("bluebird")
 meta    = require("./meta")
 la      = require("lazy-ass")
@@ -59,8 +58,10 @@ module.exports = {
     dirName
 
   getManifestUrl: (folder, version, uploadOsName) ->
+    url = uploadUtils.getUploadUrl()
+    la(check.url(url), "could not get upload url", url)
     {
-      url: [konfig('cdn_url'), folder, version, uploadOsName, zipName].join("/")
+      url: [url, folder, version, uploadOsName, zipName].join("/")
     }
 
   getRemoteManifest: (folder, version) ->

@@ -106,9 +106,10 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
     onElse,
   } = options
 
-  debug("received status code on request %o", {
+  debug("received status code & headers on request %o", {
     requestId,
-    statusCode: res.statusCode
+    statusCode: res.statusCode,
+    headers: _.pick(res.headers, 'content-type', 'set-cookie', 'location')
   })
 
   ## is this a retryable status code failure?
@@ -324,6 +325,17 @@ caseInsensitiveGet = (obj, property) ->
     if key.toLowerCase() == lowercaseProperty
       return obj[key]
 
+## first, attempt to set on an existing property with differing case
+## if that fails, set the lowercase `property`
+caseInsensitiveSet = (obj, property, val) ->
+  lowercaseProperty = property.toLowerCase()
+
+  for key in Object.keys(obj)
+    if key.toLowerCase() == lowercaseProperty
+      return obj[key] = val
+
+  obj[lowercaseProperty] = val
+
 setDefaults = (opts) ->
   _
   .chain(opts)
@@ -416,15 +428,23 @@ module.exports = (options = {}) ->
 
       return response
 
-    setRequestCookieHeader: (req, reqUrl, automationFn) ->
+    setRequestCookieHeader: (req, reqUrl, automationFn, existingHeader) ->
       automationFn('get:cookies', { url: reqUrl })
       .then (cookies) ->
         debug('got cookies from browser %o', { reqUrl, cookies })
         header = cookies.map (cookie) ->
           "#{cookie.name}=#{cookie.value}"
         .join("; ") || undefined
-        req.headers.Cookie = header
-        header
+
+        if header
+          if existingHeader
+            ## existingHeader = whatever Cookie header the user is already trying to set
+            debug('there is an existing cookie header, merging %o', { header, existingHeader })
+            ## order does not not matter here
+            ## @see https://tools.ietf.org/html/rfc6265#section-4.2.2
+            header = [existingHeader, header].join(';')
+
+          caseInsensitiveSet(req.headers, 'Cookie', header)
 
     setCookiesOnBrowser: (res, resUrl, automationFn) ->
       cookies = res.headers['set-cookie']
@@ -435,18 +455,25 @@ module.exports = (options = {}) ->
         cookies = [cookies]
 
       parsedUrl = url.parse(resUrl)
-      debug('setting cookies on browser %o', { url: parsedUrl.href, cookies })
+      defaultDomain = parsedUrl.hostname
 
-      Promise.map cookies, (cookie) ->
-        cookie = tough.Cookie.parse(cookie, { loose: true })
+      debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
+
+      Promise.map cookies, (cyCookie) ->
+        cookie = tough.Cookie.parse(cyCookie, { loose: true })
+
+        debug('parsing cookie %o', { cyCookie, toughCookie: cookie })
+
         cookie.name = cookie.key
 
         if not cookie.domain
           ## take the domain from the URL
-          cookie.domain = parsedUrl.hostname
+          cookie.domain = defaultDomain
           cookie.hostOnly = true
 
-        return if not tough.domainMatch(cookie.domain, parsedUrl.hostname)
+        if not tough.domainMatch(defaultDomain, cookie.domain)
+          debug('domain match failed:', { defaultDomain })
+          return
 
         expiry = cookie.expiryTime()
         if isFinite(expiry)
@@ -494,7 +521,7 @@ module.exports = (options = {}) ->
           currentUrl = newUrl
           true
 
-      @setRequestCookieHeader(options, options.url, automationFn)
+      @setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
       .then =>
         return =>
           debug("sending request as stream %o", merge(options))
@@ -595,20 +622,8 @@ module.exports = (options = {}) ->
           .return(resp)
 
       if c = options.cookies
-        ## if we have a cookie object then just
-        ## send the request up!
-        if _.isObject(c)
-          cookieHeader = _.keys(c).map (k) ->
-            "#{k}=#{c[k]}"
-          .join('; ')
-          if cookieHeader
-            options.headers.Cookie = cookieHeader
-          send()
-        else
-          ## else go get the cookies first
-          ## then make the request
-          self.setRequestCookieHeader(options, options.url, automationFn)
-          .then(send)
+        self.setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
+        .then(send)
       else
         send()
 

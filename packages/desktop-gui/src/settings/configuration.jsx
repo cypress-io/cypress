@@ -1,38 +1,58 @@
 import _ from 'lodash'
+import { defaultTo, get, flow, isEmpty, join, map, reduce, take, toPairs, toPath } from 'lodash/fp'
 import cn from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { ObjectInspector, ObjectName } from 'react-inspector'
-
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
-const formatData = (data) => {
-  if (Array.isArray(data)) {
-    return _.map(data, (v) => {
-      if (_.isObject(v) && (v.name || v.displayName)) {
-        return _.defaultTo(v.displayName, v.name)
-      }
+const joinWithCommas = join(', ')
+const objToString = (v) => flow([
+  defaultTo(v.name),
+  defaultTo(_.isObject(v) ? joinWithCommas(Object.keys(v)) : undefined),
+  defaultTo(String(v)),
+])(v.displayName)
 
-      return String(v)
-    }).join(', ')
+const formatValue = (value) => {
+  if (Array.isArray(value)) {
+    return flow([
+      map(objToString),
+      joinWithCommas,
+    ])(value)
   }
 
-  if (_.isObject(data)) {
-    return _.defaultTo(_.defaultTo(data.displayName, data.name), String(Object.keys(data).join(', ')))
+  if (_.isObject(value)) {
+    return objToString(value)
   }
 
   const excludedFromQuotations = ['null', 'undefined']
 
-  if (_.isString(data) && !excludedFromQuotations.includes(data)) {
-    return `"${data}"`
+  if (_.isString(value) && !excludedFromQuotations.includes(value)) {
+    return `"${value}"`
   }
 
-  return String(data)
+  return String(value)
 }
+
+const normalizeWithoutMeta = flow([
+  defaultTo({}),
+  toPairs,
+  reduce((acc, [key, value]) => _.merge({}, acc, {
+    [key]: value ? value.value : {},
+  }), {}),
+  (v) => {
+    if (isEmpty(v)) {
+      return null
+    }
+
+    return v
+  },
+])
+
 const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
-  const formattedData = formatData(data)
+  const formattedData = formatValue(data)
 
   return (
     <span className="line" key={name}>
@@ -40,11 +60,18 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
       <span>:</span>
       {!expanded && (
         <>
-          <Tooltip title={from} placement='right' className='cy-tooltip'>
+          {from && (
+            <Tooltip title={from} placement='right' className='cy-tooltip'>
+              <span className={cn(from, 'key-value-pair-value')}>
+                <span>{formattedData}</span>
+              </span>
+            </Tooltip>
+          )}
+          {!from && (
             <span className={cn(from, 'key-value-pair-value')}>
               <span>{formattedData}</span>
             </span>
-          </Tooltip>
+          )}
         </>
       )}
       {expanded && Array.isArray(data) && (
@@ -58,25 +85,36 @@ ObjectLabel.defaultProps = {
   data: 'undefined',
 }
 
-const createComputeFromValue = (obj) => {
-  return (name, path) => {
-    const pathParts = path.split('.')
-    const pathDepth = pathParts.length
+const computeFromValue = (obj, name, path) => {
+  const normalizedPath = path.replace('$.', '').replace(name, `['${name}']`)
+  const getValueForPath = flow([
+    toPath,
+    _.partialRight(get, obj),
+  ])
 
-    const rootKey = pathDepth <= 2 ? name : pathParts[1]
+  let value = getValueForPath(normalizedPath)
 
-    return obj[rootKey] ? obj[rootKey].from : undefined
+  if (!value) {
+    const onlyFirstKeyInPath = flow([toPath, take(1)])
+
+    value = getValueForPath(onlyFirstKeyInPath(normalizedPath))
   }
+
+  if (!value) {
+    return undefined
+  }
+
+  return value.from ? value.from : undefined
 }
 
 const ConfigDisplay = ({ data: obj }) => {
-  const computeFromValue = createComputeFromValue(obj)
+  const getFromValue = _.partial(computeFromValue, obj)
   const renderNode = ({ depth, name, data, isNonenumerable, expanded, path }) => {
     if (depth === 0) {
       return null
     }
 
-    const from = computeFromValue(name, path)
+    const from = getFromValue(name, path)
 
     return (
       <ObjectLabel
@@ -89,9 +127,9 @@ const ConfigDisplay = ({ data: obj }) => {
     )
   }
 
-  const data = _.reduce(obj, (acc, value, key) => Object.assign(acc, {
-    [key]: value.value,
-  }), {})
+  const data = normalizeWithoutMeta(obj)
+
+  data.env = normalizeWithoutMeta(obj.env)
 
   return (
     <div className="config-vars">
@@ -110,7 +148,7 @@ const openHelp = (e) => {
 const Configuration = observer(({ project }) => (
   <div>
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fa fa-info-circle'></i> Learn more
+      <i className='fas fa-info-circle'></i> Learn more
     </a>
     <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:</p>
     <table className='table config-table'>

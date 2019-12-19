@@ -505,6 +505,12 @@ const isInputType = function (el: JQueryOrEl<HTMLElement>, type) {
   return elType === type
 }
 
+const isAttrType = function (el: HTMLInputElement, type: string) {
+  const elType = (el.getAttribute('type') || '').toLowerCase()
+
+  return elType === type
+}
+
 const isScrollOrAuto = (prop) => {
   return prop === 'scroll' || prop === 'auto'
 }
@@ -1079,6 +1085,7 @@ export {
   isIframe,
   isTextarea,
   isInputType,
+  isAttrType,
   isFocused,
   isFocusedOrInFocused,
   isInputAllowingImplicitFormSubmission,

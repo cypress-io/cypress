@@ -146,18 +146,22 @@ const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => 
   }
 }
 
-const formatRecordParams = function (runUrl, parallel, group) {
+const formatRecordParams = function (runUrl, parallel, group, tag) {
   if (runUrl) {
     if (!group) {
       group = false
     }
 
-    return `Group: ${group}, Parallel: ${Boolean(parallel)}`
+    if (!tag) {
+      tag = false
+    }
+
+    return `Tag: ${tag}, Group: ${group}, Parallel: ${Boolean(parallel)}`
   }
 }
 
 const displayRunStarting = function (options = {}) {
-  const { config, specs, specPattern, browser, runUrl, parallel, group } = options
+  const { browser, config, group, parallel, runUrl, specPattern, specs, tag } = options
 
   console.log('')
 
@@ -211,7 +215,7 @@ const displayRunStarting = function (options = {}) {
     [gray('Node Version:'), formatNodeVersion(config, getWidth(table, 1))],
     [gray('Specs:'), formatSpecs(specs)],
     [gray('Searched:'), formatSpecPattern(specPattern)],
-    [gray('Params:'), formatRecordParams(runUrl, parallel, group)],
+    [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
   ])
   .filter(_.property(1))
@@ -468,7 +472,7 @@ const getChromeProps = (isHeaded, project, writeVideoFrame) => {
   return _
   .chain({})
   .tap((props) => {
-    if (isHeaded && writeVideoFrame) {
+    if (writeVideoFrame) {
       props.screencastFrame = (e) => {
         // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
         writeVideoFrame(Buffer.from(e.data, 'base64'))
@@ -616,11 +620,12 @@ const trashAssets = Promise.method((config = {}) => {
 
 // if we've been told to record and we're not spawning a headed browser
 const browserCanBeRecorded = (browser) => {
+  // TODO: enable recording Electron in headed mode too
   if (browser.family === 'electron' && browser.isHeadless) {
     return true
   }
 
-  if (browser.family === 'chrome' && browser.isHeaded) {
+  if (browser.family === 'chrome') {
     return true
   }
 
@@ -1112,9 +1117,14 @@ module.exports = {
   },
 
   runSpecs (options = {}) {
-    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group } = options
+    _.defaults(options, {
+      // only non-Electron browsers run headed by default
+      headed: options.browser.family !== 'electron',
+    })
 
-    const isHeadless = browser.family === 'electron' && !headed
+    const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
+
+    const isHeadless = !headed
 
     browser.isHeadless = isHeadless
     browser.isHeaded = !isHeadless
@@ -1144,6 +1154,7 @@ module.exports = {
       config,
       specs,
       group,
+      tag,
       runUrl,
       browser,
       parallel,
@@ -1268,7 +1279,7 @@ module.exports = {
 
     const socketId = random.id()
 
-    const { projectRoot, record, key, ciBuildId, parallel, group } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, tag } = options
 
     const browserName = options.browser
 
@@ -1291,7 +1302,7 @@ module.exports = {
 
         // if we have a project id and a key but record hasnt been given
         recordMode.warnIfProjectIdButNoRecordOption(projectId, options)
-        recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group)
+        recordMode.throwIfRecordParamsWithoutRecording(record, ciBuildId, parallel, group, tag)
 
         if (record) {
           recordMode.throwIfNoProjectId(projectId, settings.configFile(options))
@@ -1341,6 +1352,7 @@ module.exports = {
               config,
               specs,
               sys,
+              tag,
               videosFolder: config.videosFolder,
               video: config.video,
               videoCompression: config.videoCompression,
@@ -1360,6 +1372,7 @@ module.exports = {
               sys,
               specs,
               group,
+              tag,
               browser,
               parallel,
               ciBuildId,
