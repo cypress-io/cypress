@@ -11,21 +11,29 @@ const isJson = (code) => {
 }
 
 module.exports = function (b, opts) {
-  return through(function (buf, enc, next) {
-    const ts = opts.typescript
-    const text = buf.toString()
+  const chunks = []
 
-    if (isJson(text)) {
-      this.push(text)
-    } else {
-      this.push(ts.transpileModule(text, {
-        compilerOptions: {
-          esModuleInterop: true,
-          jsx: 'react',
-        },
-      }).outputText)
+  return through(
+    (buf, enc, next) => {
+      chunks.push(buf.toString())
+      next()
+    },
+    function (next) {
+      const ts = opts.typescript
+      const text = chunks.join('')
+
+      if (isJson(text)) {
+        this.push(text)
+      } else {
+        this.push(ts.transpileModule(text, {
+          compilerOptions: {
+            esModuleInterop: true,
+            jsx: 'react',
+          },
+        }).outputText)
+      }
+
+      next()
     }
-
-    next()
-  })
+  )
 }
