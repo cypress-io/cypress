@@ -1487,7 +1487,10 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.get('input:first')
         .then(($el) => {
-          $el[0].ownerDocument.addEventListener('scroll', () => {
+          // This represents an asynchronous re-render
+          // since we fire the 'scrolled' event during actionability
+          // if we use el.on('scroll'), headless electron is flaky
+          cy.on('scrolled', () => {
             $el.remove()
           })
         })

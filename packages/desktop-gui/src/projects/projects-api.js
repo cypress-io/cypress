@@ -148,8 +148,10 @@ const openProject = (project) => {
       id: config.projectId,
       name: config.projectName,
       configFile: config.configFile,
+      ..._.pick(config, ['resolvedNodeVersion', 'resolvedNodePath']),
     })
 
+    project.update({ name: config.projectName })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
     project.setResolvedConfig(config.resolved)
