@@ -50,7 +50,7 @@ zipDir = (platform) ->
     when "darwin"
       buildDir(platform, "Cypress.app")
     when "linux"
-      buildDir(platform)
+      buildDir(platform, "linux-unpacked")
     when "win32"
       buildDir(platform)
 

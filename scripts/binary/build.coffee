@@ -296,12 +296,12 @@ buildCypressApp = (platform, version, options = {}) ->
     # hint: you can see all symlinks in the build folder
     # using "find build/darwin/Cypress.app/ -type l -ls"
     console.log("platform", platform)
-    electronDistFolder = meta.buildAppDir(platform, "packages", "electron", "dist")
+    electronDistFolder = distDir("packages", "electron", "dist")
     la(check.unemptyString(electronDistFolder),
       "empty electron dist folder for platform", platform)
 
     console.log("Removing unnecessary folder '#{electronDistFolder}'")
-    fs.removeAsync(electronDistFolder).catch(_.noop)
+    fs.removeAsync(electronDistFolder) # .catch(_.noop) why are we ignoring an error here?!
 
   copyRenameElectronDist = ->
     log("#copyRenameElectronDist")
