@@ -1,7 +1,7 @@
-let gulp = require('gulp')
-let ghPages = require('gulp-gh-pages')
-let gulpClean = require('gulp-clean')
-let RevAll = require('gulp-rev-all')
+const gulp = require('gulp')
+const ghPages = require('gulp-gh-pages')
+const gulpClean = require('gulp-clean')
+const RevAll = require('gulp-rev-all')
 
 const assets = () => {
   const revAllOpts = {
