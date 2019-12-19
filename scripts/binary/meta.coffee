@@ -72,7 +72,7 @@ buildAppExecutable = (platform) ->
     when "darwin"
       buildDir(platform, "Cypress.app", "Contents", "MacOS", "Cypress")
     when "linux"
-      buildDir(platform, "Cypress")
+      path.join(buildRootDir(), "linux-unpacked", "Cypress")
     when "win32"
       buildDir(platform, "Cypress")
 
