@@ -1,5 +1,5 @@
-export { default as SelectItem } from './SelectItem'
+export { default as SelectItem } from './select-item'
 
-export { default as Select } from './Select'
+export { default as Select } from './select'
 
-export { default as useSelect } from './useSelect'
+export { default as useSelect } from './use-select'

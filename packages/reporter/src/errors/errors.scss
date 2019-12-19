@@ -236,3 +236,22 @@
     }
   }
 }
+
+.editor-picker-modal {
+  max-width: 40em;
+
+  .validation-error {
+    color: darken($fail, 30%);
+    margin-bottom: 0;
+    padding: 0 0.6em;
+    text-align: right;
+
+    i {
+      margin-right: 0.4em;
+    }
+  }
+
+  .controls {
+    margin-top: 0;
+  }
+}

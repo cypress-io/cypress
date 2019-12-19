@@ -78,10 +78,10 @@ describe('<Select />', () => {
       </Select>
     ))
 
-    cy.get('[value="v1"]').click()
+    cy.get('[data-value="v1"]').click()
     .then(() => expect(onChange).to.be.calledWith('v1'))
 
-    cy.get('[value="v3"]').click()
+    cy.get('[data-value="v3"]').click()
     .then(() => expect(onChange).to.be.calledWith('v3'))
   })
 
@@ -179,53 +179,54 @@ describe('<Select />', () => {
         onChange = cy.spy()
 
         cy.render(render, <Wrapper onChangeSpy={onChange} />)
+        cy.get('li').as('items')
         cy.get('[value]').as('values')
       })
 
       it('left on first goes to last', () => {
-        cy.get('@values').first().click().trigger('keydown', { keyCode: left, which: left })
+        cy.get('@items').first().click().trigger('keydown', { keyCode: left, which: left })
         cy.get('@values').last().should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v5')
       })
 
       it('up on first goes to last', () => {
-        cy.get('@values').first().click().trigger('keydown', { keyCode: up, which: up })
+        cy.get('@items').first().click().trigger('keydown', { keyCode: up, which: up })
         cy.get('@values').last().should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v5')
       })
 
       it('right on last goes to first', () => {
-        cy.get('@values').last().click().trigger('keydown', { keyCode: right, which: right })
+        cy.get('@items').last().click().trigger('keydown', { keyCode: right, which: right })
         cy.get('@values').first().should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v1')
       })
 
       it('down on last goes to first', () => {
-        cy.get('@values').last().click().trigger('keydown', { keyCode: down, which: down })
+        cy.get('@items').last().click().trigger('keydown', { keyCode: down, which: down })
         cy.get('@values').first().should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v1')
       })
 
       it('left on last goes to penultimate', () => {
-        cy.get('@values').last().click().trigger('keydown', { keyCode: left, which: left })
+        cy.get('@items').last().click().trigger('keydown', { keyCode: left, which: left })
         cy.get('@values').eq(3).should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v4')
       })
 
       it('up on last goes to penultimate', () => {
-        cy.get('@values').last().click().trigger('keydown', { keyCode: up, which: up })
+        cy.get('@items').last().click().trigger('keydown', { keyCode: up, which: up })
         cy.get('@values').eq(3).should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v4')
       })
 
       it('right on first goes to second', () => {
-        cy.get('@values').first().click().trigger('keydown', { keyCode: right, which: right })
+        cy.get('@items').first().click().trigger('keydown', { keyCode: right, which: right })
         cy.get('@values').eq(1).should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v2')
       })
 
       it('down on first goes to second', () => {
-        cy.get('@values').first().click().trigger('keydown', { keyCode: down, which: down })
+        cy.get('@items').first().click().trigger('keydown', { keyCode: down, which: down })
         cy.get('@values').eq(1).should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v2')
       })

@@ -80,13 +80,12 @@ const itHandlesFileOpening = (trigger) => {
         this.runner.emit.withArgs('get:user:editor').yields({ availableEditors })
         // usual viewport of only reporter is a bit cramped for the modal
         cy.viewport(600, 600)
-      })
-
-      it('opens modal with available editors', function () {
         trigger()
         cy.contains('Open in Editor').click()
         cy.get('.err-file-options').trigger('mouseout', { force: true })
+      })
 
+      it('opens modal with available editors', function () {
         _.each(availableEditors, ({ name }) => {
           cy.contains(name)
         })
@@ -95,10 +94,11 @@ const itHandlesFileOpening = (trigger) => {
         cy.contains('Set editor and open file')
       })
 
+      it('does not show error message when first shown', function () {
+        cy.contains('Please select an editor').should('not.exist')
+      })
+
       it('shows error message when user clicks "Set editor and open file" without selecting an editor', function () {
-        trigger()
-        cy.contains('Open in Editor').click()
-        cy.get('.err-file-options').trigger('mouseout', { force: true })
         cy.contains('Set editor and open file').click()
 
         cy.contains('Set editor and open file').should('be.visible')
@@ -109,9 +109,6 @@ const itHandlesFileOpening = (trigger) => {
       })
 
       it('shows error message when user selects "Other" and does not input path', function () {
-        trigger()
-        cy.contains('Open in Editor').click()
-        cy.get('.err-file-options').trigger('mouseout', { force: true })
         cy.contains('Other').click()
         cy.contains('Set editor and open file').click()
 
@@ -122,11 +119,17 @@ const itHandlesFileOpening = (trigger) => {
         cy.get('.validation-error').should('have.text', 'Please enter the path to your editor')
       })
 
+      it('hides error message when submitting "Other" then selecting different option', function () {
+        cy.contains('Other').click()
+        cy.contains('Set editor and open file').click()
+
+        cy.get('.validation-error').should('have.text', 'Please enter the path to your editor')
+        cy.contains('Atom').click()
+        cy.get('.validation-error').should('not.exist')
+      })
+
       describe('when editor is set', function () {
         beforeEach(function () {
-          trigger()
-          cy.contains('Open in Editor').click()
-          cy.get('.err-file-options').trigger('mouseout', { force: true })
           cy.contains('Visual Studio Code').click()
           cy.contains('Set editor and open file').click()
         })

@@ -39,7 +39,9 @@ const validate = (chosenEditor) => {
 const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) => {
   const state = useLocalStore(() => ({
     chosenEditor: {},
+    shouldShowValidation: false,
     setChosenEditor: action((editor) => {
+      state.setShouldShowValidation(false)
       state.chosenEditor = editor
     }),
     setOtherPath: action((otherPath) => {
@@ -47,14 +49,22 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
 
       otherOption.openerId = otherPath
     }),
+    setShouldShowValidation: action((shouldShow) => {
+      state.shouldShowValidation = shouldShow
+    }),
   }))
 
   const { isValid, validationMessage } = validate(state.chosenEditor)
 
   const setEditor = () => {
     const editor = state.chosenEditor
+    const { isValid } = validate(editor)
 
-    if (!isValid) return
+    if (!isValid) {
+      state.setShouldShowValidation(true)
+
+      return
+    }
 
     onSetEditor(editor)
   }
@@ -65,6 +75,7 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
 
   return (
     <Dialog
+      className='editor-picker-modal'
       aria-label="Explanation of choosing an editor"
       initialFocusRef={cancelRef}
       isOpen={isOpen}
@@ -80,8 +91,11 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
           onUpdateOtherPath={state.setOtherPath}
         />
       </div>
-      { !isValid && (
-        <p className='validation-error'>{validationMessage}</p>
+      {state.shouldShowValidation && !isValid && (
+        <p className='validation-error'>
+          <i className='fa fa-warning' />
+          {validationMessage}
+        </p>
       )}
       <div className='controls'>
         <button className='submit' onClick={setEditor}>Set editor and open file</button>

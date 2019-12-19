@@ -1,3 +1,26 @@
 .editor-picker {
+  label {
+    align-items: start;
+    display: flex;
+    flex-wrap: wrap;
+  }
 
+  .other-input {
+    border: solid 1px #7e7e7e;
+    border-radius: 3px;
+    margin-left: 0.3em;
+    padding: 0.2em 0.4em;
+  }
+
+  .is-selected .other-input {
+    flex-grow: 2;
+  }
+
+  .description {
+    color: #7e7e7e;
+    font-size: 0.9em;
+    display: block;
+    padding-left: 1.5em;
+    width: 100%;
+  }
 }

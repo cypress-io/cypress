@@ -1,3 +1,4 @@
+import cs from 'classnames'
 import React, { Children, useCallback, useMemo } from 'react'
 import _ from 'lodash'
 import Context from './context'
@@ -23,7 +24,7 @@ const up = 38
 const right = 39
 const down = 40
 
-const Select = ({ children, multiSelect, name, onChange, value }) => {
+const Select = ({ children, className, name, onChange, value }) => {
   const allValues = useMemo(() => toValues(Children.toArray(children)), [children])
 
   const handleKeyDown = useCallback(({ keyCode }) => {
@@ -56,18 +57,18 @@ const Select = ({ children, multiSelect, name, onChange, value }) => {
     <Context.Provider value={{
       handleChange: onChange,
       handleKeyDown,
-      isChecked: (v) => v === value,
+      isSelected: (v) => v === value,
       name: generateGroupName(name),
-      multiSelect,
     }}>
-      {children}
+      <ul className={cs('select', className)}>
+        {children}
+      </ul>
     </Context.Provider>
   )
 }
 
 Select.defaultProps = {
   onChange: _.noop,
-  multiSelect: false,
 }
 
 export default Select

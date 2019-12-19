@@ -20,7 +20,9 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
   }
 
   const otherInput = (
-    <input type='text'
+    <input
+      type='text'
+      className='other-input'
       value={otherOption.openerId || ''}
       onFocus={_.partial(onChange, 'other')}
       onChange={updateOtherPath}
@@ -37,23 +39,16 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
   }
 
   return (
-    <Select value={chosen.id} name='editor-picker' onChange={onChange}>
-      <ul>
-        {_.map(editorOptions, (editor) => (
-          <li key={editor.id}>
-            <label>
-              <SelectItem value={editor.id} /> {editor.name}
-            </label>
-          </li>
-        ))}
-        <li>
-          <label>
-            <SelectItem value={otherOption.id} />
-            {otherOption.name}: {otherInput}
-          </label>
-          {chosen.isOther && <label>Enter the full path to the executable of the editor</label>}
-        </li>
-      </ul>
+    <Select value={chosen.id} className='editor-picker' name='editor-picker' onChange={onChange}>
+      {_.map(editorOptions, (editor) => (
+        <SelectItem key={editor.id} value={editor.id}>
+          {editor.name}
+        </SelectItem>
+      ))}
+      <SelectItem value={otherOption.id}>
+        {otherOption.name}: {otherInput}
+        {chosen.isOther && <span className='description'>Enter the full path to the executable of the editor</span>}
+      </SelectItem>
     </Select>
   )
 })

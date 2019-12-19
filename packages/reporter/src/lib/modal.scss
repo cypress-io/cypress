@@ -12,7 +12,7 @@
   justify-content: center;
   margin: auto;
   min-width: 30em;
-  padding: 3rem 0 0;
+  padding: 2em 0 0;
   position: relative;
 
   button {
@@ -47,10 +47,20 @@
       color: #fff;
       margin-left: 0.6em;
       order: 1;
+
+      &:hover,
+      &:focus {
+        background: darken($pass, 10%);
+      }
     }
 
     .cancel {
       background: #e3e3e3;
+
+      &:hover,
+      &:focus {
+        background: darken(#e3e3e3, 10%);
+      }
     }
   }
 
