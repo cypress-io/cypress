@@ -5,10 +5,11 @@ import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 import Loader from 'react-loader'
+import Select from 'react-select'
+import { gravatarUrl } from '../lib/utils'
 
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
-import { gravatarUrl } from '../lib/utils'
 import orgsStore from '../organizations/organizations-store'
 import orgsApi from '../organizations/organizations-api'
 
@@ -26,8 +27,7 @@ class SetupProject extends Component {
       error: null,
       projectName: this.props.project.displayName,
       public: null,
-      owner: null,
-      orgId: null,
+      selectedOrg: {},
       showNameMissingError: false,
       isSubmitting: false,
     }
@@ -75,10 +75,6 @@ class SetupProject extends Component {
       return null
     }
 
-    if (!orgsStore.isLoaded) {
-      this._loading()
-    }
-
     return (
       <div className='setup-project-modal modal-body os-dialog'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
@@ -91,7 +87,7 @@ class SetupProject extends Component {
           {this._accessSelector()}
           {this._error()}
           <div className='actions form-group'>
-            <div className='pull-right'>
+            <div>
               <button
                 disabled={this.state.isSubmitting || this._formNotFilled()}
                 className='btn btn-primary btn-block'
@@ -106,15 +102,6 @@ class SetupProject extends Component {
             </div>
           </div>
         </form>
-      </div>
-    )
-  }
-
-  _loading () {
-    return (
-      <div className='setup-project-modal modal-body os-dialog'>
-        <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <Loader color='#888' scale={0.5} />
       </div>
     )
   }
@@ -154,110 +141,91 @@ class SetupProject extends Component {
             <a onClick={this._openOrgDocs}>
               <i className='fas fa-question-circle'></i>
             </a>
+
           </label>
+          <a
+            href='#'
+            className='btn btn-link manage-orgs-btn pull-right'
+            onClick={this._manageOrgs}>
+            Manage organizations
+          </a>
         </div>
         <div className='owner-parts'>
-          <div>
-            <div className='btn-group' data-toggle='buttons'>
-              <label className={cs('btn btn-default', {
-                'active': this.state.owner === 'me',
-              })}>
-                <input
-                  type='radio'
-                  name='owner-toggle'
-                  id='me'
-                  autoComplete='off'
-                  value='me'
-                  checked={this.state.owner === 'me'}
-                  onChange={this._updateOwner}
-                />
-                <img
-                  className='user-avatar'
-                  height='13'
-                  width='13'
-                  src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
-                />
-                {' '}Me
-              </label>
-              <label className={`btn btn-default ${this.state.owner === 'org' ? 'active' : ''}`}>
-                <input
-                  type='radio'
-                  name='owner-toggle'
-                  id='org'
-                  autoComplete='off'
-                  value='org'
-                  checked={this.state.owner === 'org'}
-                  onChange={this._updateOwner}
-                />
-                <i className='far fa-building'></i>
-                {' '}An Organization
-              </label>
-            </div>
-          </div>
           <div className='select-orgs'>
-            <div className={cs({ 'hidden': this.state.owner !== 'org' || this._hasOrgsOtherThanDefault() })}>
-              <div className='empty-select-orgs well'>
-                <p>You don't have any organizations yet.</p>
-                <p>Organizations can help you manage projects, including billing.</p>
-                <p>
-                  <a
-                    href='#'
-                    className={cs('btn btn-link', { 'hidden': this.state.owner !== 'org' })}
-                    onClick={this._manageOrgs}>
-                    <i className='fas fa-plus'></i>{' '}
-                    Create organization
-                  </a>
-                </p>
-              </div>
-            </div>
-            {this._orgSelector()}
+            {
+              orgsStore.isLoaded ?
+                this._hasOrgs() ?
+                  this._orgSelector() :
+                  <div className='empty-select-orgs well'>
+                    <p>You don't have any organizations yet.</p>
+                    <p>Organizations can help you manage projects, including billing.</p>
+                    <p>
+                      <a
+                        href='#'
+                        className='btn btn-link'
+                        onClick={this._manageOrgs}>
+                        <i className='fas fa-plus'></i>{' '}
+                          Create organization
+                      </a>
+                    </p>
+                  </div>
+                : <Loader color='#888' scale={0.5} />
+            }
           </div>
         </div>
       </div>
     )
   }
 
-  _hasOrgsOtherThanDefault () {
-    return orgsStore.orgs.length > 1
+  _hasOrgs () {
+    return orgsStore.orgs.length
+  }
+
+  _orgSelectValue (options) {
+    if (!_.isEmpty(this.state.selectedOrg)) {
+      return this.state.selectedOrg
+    }
+
+    return this._hasDefaultOrg() ?
+      _.find(options, { default: true }) :
+      options[0]
   }
 
   _orgSelector () {
-    return (
-      <div className={cs({ 'hidden': this.state.owner !== 'org' || !(this._hasOrgsOtherThanDefault()) })}>
-        <select
-          ref='orgId'
-          id='organizations-select'
-          className='form-control float-left'
-          value={this.state.orgId || ''}
-          onChange={this._updateOrgId}
-        >
-          <option value=''>-- Select organization --</option>
-          {_.map(orgsStore.orgs, (org) => {
-            if (org.default) return null
+    const options = _.map(orgsStore.orgs, (org) => {
+      return {
+        value: org.id,
+        default: org.default,
+        label: org.default ?
+          <div>
+            <img
+              className='user-avatar'
+              height='13'
+              width='13'
+              src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
+            />
+            Your personal organization
+          </div> : org.name,
+      }
+    })
 
-            return (
-              <option
-                key={org.id}
-                value={org.id}
-              >
-                {org.name}
-              </option>
-            )
-          })}
-        </select>
-        <a
-          href='#'
-          className='btn btn-link manage-orgs-btn float-left'
-          onClick={this._manageOrgs}>
-          (manage organizations)
-        </a>
+    return (
+      <div className={!this._hasOrgs() ? 'hidden' : ''}>
+        <Select
+          className='organizations-select'
+          classNamePrefix='organizations-select'
+          value={this._orgSelectValue(options)}
+          onChange={this._updateSelectedOrg}
+          isLoading={!orgsStore.isLoaded}
+          options={options}
+        />
       </div>
     )
   }
 
   _accessSelector () {
     return (
-      <div className={cs({ 'hidden': !this.state.orgId })}>
+      <div className={cs({ 'hidden': !this._hasOrgs() })}>
         <hr />
         <label htmlFor='projectName' className='control-label'>
           Who should see the runs and recordings?
@@ -334,17 +302,15 @@ class SetupProject extends Component {
     )
   }
 
-  _updateOrgId = () => {
-    const orgIsNotSelected = this.refs.orgId.value === '-- Select Organization --'
-
-    const orgId = orgIsNotSelected ? null : this.refs.orgId.value
+  _updateSelectedOrg = (selectedOrg, action) => {
+    const orgIsNotSelected = _.isEmpty(selectedOrg)
 
     this.setState({
-      orgId,
+      selectedOrg,
     })
 
     // deselect their choice for access
-    // if they didn'tselect anything
+    // if they didn't select anything
     if (orgIsNotSelected) {
       this.setState({
         public: null,
@@ -362,24 +328,8 @@ class SetupProject extends Component {
     return _.trim(this.state.projectName)
   }
 
-  _updateOwner = (e) => {
-    let owner = e.target.value
-
-    // if they clicked the same radio button that's
-    // already selected, then ignore it
-    if (this.state.owner === owner) return
-
-    const defaultOrg = _.find(orgsStore.orgs, { default: true })
-
-    let chosenOrgId = owner === 'me' ? defaultOrg.id : null
-
-    // we want to clear all selects below the radio buttons
-    // otherwise it looks jarring to already have selects
-    this.setState({
-      owner,
-      orgId: chosenOrgId,
-      public: null,
-    })
+  _hasDefaultOrg () {
+    return _.find(orgsStore.orgs, { default: true })
   }
 
   _updateAccess = (e) => {
@@ -409,7 +359,7 @@ class SetupProject extends Component {
   _setupProject () {
     ipc.setupDashboardProject({
       projectName: this.state.projectName,
-      orgId: this.state.orgId,
+      orgId: this.state.selectedOrg.value,
       public: this.state.public,
     })
     .then((projectDetails) => {
