@@ -70,16 +70,17 @@ describe "lib/browsers/chrome", ->
 
     it "does not load extension in headless mode", ->
       plugins.has.returns(false)
+      chrome._writeExtension.restore()
 
       pathToTheme = extension.getPathToTheme()
 
-      chrome.open("chrome", "http://", { isHeadless: true, isHeaded: false }, @automation)
+      chrome.open({ isHeadless: true, isHeaded: false }, "http://", {}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
         expect(args).to.deep.eq([
+          "--headless"
           "--remote-debugging-port=50505"
-          "--load-extension=/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
