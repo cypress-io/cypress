@@ -100,7 +100,17 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   // display:none elements, and generally any elements that are not directly rendered,
   // an empty list is returned.
 
-  return (elOffsetWidth($el) <= 0) || (elOffsetHeight($el) <= 0) || ($el[0].getClientRects().length <= 0)
+  // From https://github.com/cypress-io/cypress/issues/5974,
+  // we learned that when an element has non-'none' transform style value like "translate(0, 0)",
+  // it is visible even with `height: 0` or `width: 0`.
+  // That's why we're checking `transform === 'none'` together with elOffsetWidth/Height.
+
+  const style = elComputedStyle($el)
+  const transform = style.getPropertyValue('transform')
+
+  return (elOffsetWidth($el) <= 0 && transform === 'none') ||
+  (elOffsetHeight($el) <= 0 && transform === 'none') ||
+  ($el[0].getClientRects().length <= 0)
 }
 
 const elHasNoOffsetWidthOrHeight = ($el) => {
@@ -123,6 +133,12 @@ const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
 }
 
+const elComputedStyle = ($el) => {
+  const el = $el[0]
+
+  return getComputedStyle(el)
+}
+
 const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
 // This is a simplified version of backface culling.
 // https://en.wikipedia.org/wiki/Back-face_culling
@@ -131,8 +147,7 @@ const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
 // and default normal vector, (0, 0, 1)
 // When dot product of them are >= 0, item is visible.
 const elIsBackface = ($el) => {
-  const el = $el[0]
-  const style = getComputedStyle(el)
+  const style = elComputedStyle($el)
   const backface = style.getPropertyValue('backface-visibility')
   const backfaceInvisible = backface === 'hidden'
   const transform = style.getPropertyValue('transform')
@@ -163,10 +178,7 @@ const elHasVisibilityCollapse = ($el) => {
 
 // This function checks 2 things that can happen: scale and rotate
 const elIsHiddenByTransform = ($el) => {
-  // We need to see the final calculation of the element.
-  const el = $el[0]
-
-  const style = window.getComputedStyle(el)
+  const style = elComputedStyle($el)
   const transform = style.getPropertyValue('transform')
 
   if (transform === 'none') {

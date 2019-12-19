@@ -899,20 +899,32 @@ describe('src/cypress/dom/visibility', () => {
         })
       })
 
-      describe('when parent height/width is set', () => {
+      describe('when height/width is set', () => {
         it('is visible when transform is not 0, but height is 0', () => {
+          const el = add('<div style="transform: translate(0, 0); height: 0;">Text</div>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when transform is not 0, but width is 0', () => {
+          const el = add('<p style="transform: rotateX(30deg); width: 0;">Text</p>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when parent transform is not 0, but height is 0', () => {
           const el = add('<div style="transform: translate(0, 0); height: 0;"><p id="tr-p-0">Text</p></div>')
 
           expect(el.find('#tr-p-0')).to.be.visible
         })
 
-        it('is visible when transform is not 0, but width is 0', () => {
+        it('is visible when parent transform is not 0, but width is 0', () => {
           const el = add('<div style="transform: translate(0, 0); height: 0%;"><p id="tr-p-1">Test</p></div>')
 
           expect(el.find('#tr-p-1')).to.be.visible
         })
 
-        it('is invisible when transform is 0, but height is not 0', () => {
+        it('is invisible when parent transform is 0, but height is not 0', () => {
           const el = add('<div style="transform: scaleX(0); height: 10px"><p id="tr-p-2">Test</p></div>')
 
           expect(el.find('#tr-p-2')).to.be.hidden
