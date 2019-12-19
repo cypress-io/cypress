@@ -36,7 +36,10 @@ runSmokeTest = (buildAppExecutable, timeoutSeconds = 30) ->
   args.push("--smoke-test")
   args.push("--ping=#{rand}")
 
-  execa "#{buildAppExecutable}", args, {timeout: timeoutSeconds*1000}
+  options = {
+    timeout: timeoutSeconds * 1000
+  }
+  execa "#{buildAppExecutable}", args, options
   .catch (err) ->
     console.error("smoke test failed with error %s", err.message)
     throw err
