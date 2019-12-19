@@ -13,6 +13,7 @@ import chromium from './icons/chromium.svg'
 import loading from './icons/loading.svg'
 import checkmark from './icons/checkmark.svg'
 import firefox from './icons/firefox.svg'
+import defaultBrowser from './icons/defaultBrowser.svg'
 
 @observer
 export default class Browsers extends Component {
@@ -94,7 +95,7 @@ export default class Browsers extends Component {
           break
         }
         default: {
-          icon = electron
+          icon = defaultBrowser
           break
         }
       }
@@ -103,7 +104,7 @@ export default class Browsers extends Component {
 
     return (
       <span className={browser.name}>
-        <img src={icon} className='browser-icon'></img>{' '}
+        <img src={icon} className={`browser-icon ${icon}`}></img>{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}

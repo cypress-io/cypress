@@ -136,7 +136,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon in chosen', () => {
             cy.get('.browsers-list>a').first()
-            .find('img')
+            .find('.chrome')
           })
         })
       })
@@ -181,7 +181,8 @@ describe('Project Nav', function () {
         })
 
         it('displays browser icon as spinner', () => {
-          cy.get('.browsers-list>a').first().find('img')
+          cy.get('.browsers-list>a').find('img')
+          .should('have.class', 'browser-icon ./fonts/loading.svg')
         })
 
         it('disables browser dropdown', () => {
@@ -199,6 +200,7 @@ describe('Project Nav', function () {
 
         it('displays browser icon as opened', () => {
           cy.get('.browsers-list>a').first().find('img')
+          .should('have.class', 'browser-icon ./fonts/checkmark.svg')
         })
 
         it('disables browser dropdown', () => {
@@ -241,7 +243,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list>a').first()
-            .find('img')
+            .find('.chrome')
           })
         })
 
@@ -261,7 +263,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list>a').first()
-            .find('img')
+            .find('.chrome')
           })
         })
       })
@@ -285,7 +287,7 @@ describe('Project Nav', function () {
 
       it('displays local storage browser icon in chosen', () => {
         cy.get('.browsers-list>a').first()
-        .find('img')
+        .find('.chromium')
       })
     })
 
