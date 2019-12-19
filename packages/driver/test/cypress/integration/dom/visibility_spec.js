@@ -1051,7 +1051,7 @@ This element '<div#coveredUpPosFixed>' is not visible because it has CSS propert
       })
 
       it('cannot determine why element is not visible', function () {
-        this.reasonIs(this.$btnOpacity, 'Cypress could not determine why this element \'<button>\' is not visible.')
+        this.reasonIs(this.$btnOpacity, 'This element \'<button>\' is not visible.')
       })
     })
   })
