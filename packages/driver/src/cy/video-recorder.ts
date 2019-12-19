@@ -1,6 +1,11 @@
 // TODO: record only if set in config
 export function create (state, Cypress) {
-  if (Cypress.browser.family === 'firefox' && Cypress.config('video') && !Cypress.config('isInteractive')
+  if (
+    Cypress.browser.family === 'firefox'
+    && Cypress.config('video')
+    && !Cypress.config('isInteractive')
+    // navigator.mediaDevices will be undefined if video capture from previous navigation is still recording
+    && window.navigator.mediaDevices
   ) {
     window.navigator.mediaDevices.getUserMedia({
       audio: false,
