@@ -123,7 +123,7 @@ const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
 }
 
-const numberRegex = /-?[0-9]+(?:\.[0-9]+)?/g
+const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
 // This is a simplified version of backface culling.
 // https://en.wikipedia.org/wiki/Back-face_culling
 //
@@ -169,12 +169,10 @@ const elIsHiddenByTransform = ($el) => {
   const style = window.getComputedStyle(el)
   const transform = style.getPropertyValue('transform')
 
-  // Test scaleZ(0)
-  // width or height of getBoundingClientRect aren't 0 when scaleZ(0).
-  // But it is invisible.
-  // Experiment -> https://codepen.io/sainthkh/pen/LYYQGpm
-  // That's why we're checking transfomation matrix here.
-  //
+  if (transform === 'none') {
+    return false
+  }
+
   // To understand how this part works,
   // you need to understand tranformation matrix first.
   // Matrix is hard to explain with only text. So, check these articles.
@@ -185,19 +183,28 @@ const elIsHiddenByTransform = ($el) => {
   if (transform.startsWith('matrix3d')) {
     const m3d = transform.substring(8).match(numberRegex)
 
-    // Z Axis values
-    if (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0) {
+    // Test scale to 0
+    if ((+m3d[0] === 0 && +m3d[4] === 0 && +m3d[8] === 0) || // X Axis
+    (+m3d[1] === 0 && +m3d[5] === 0 && +m3d[9] === 0) || // Y Axis
+    (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0)) { // Z Axis
       return true
     }
+
+    // Test rotate 90deg
+    const defaultNormal = [0, 0, -1]
+    const elNormal = findNormal(m3d)
+    // Simplified dot product.
+    // [0] and [1] are always 0
+    const dot = defaultNormal[2] * elNormal[2]
+
+    return Math.abs(dot) <= 1e-10
   }
 
-  // Other cases
-  if (transform !== 'none') {
-    const { width, height } = el.getBoundingClientRect()
+  const m = transform.match(numberRegex)
 
-    if (width === 0 || height === 0) {
-      return true
-    }
+  if ((+m[0] === 0 && +m[2] === 0) || // X Axis
+    (+m[1] === 0 && +m[3] === 0)) { // Y Axis
+    return true
   }
 
   return false
