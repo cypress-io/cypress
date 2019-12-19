@@ -360,7 +360,10 @@ module.exports = {
 
       return getRemoteDebuggingPort()
       .then((port) => {
+        // force ipv4
+        // https://github.com/cypress-io/cypress/issues/5912
         args.push(`--remote-debugging-port=${port}`)
+        args.push('--remote-debugging-address=127.0.0.1')
 
         return Promise.all([
           // ensure that we have a clean cache dir

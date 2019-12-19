@@ -76,7 +76,7 @@ describe('lib/browsers/protocol', function () {
 
       const end = sinon.stub()
 
-      sinon.stub(CRI, 'List').withArgs({ port: 12345 }).resolves(targets)
+      sinon.stub(CRI, 'List').withArgs({ host: '127.0.0.1', port: 12345 }).resolves(targets)
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
       const p = protocol.getWsTargetFor(12345)
