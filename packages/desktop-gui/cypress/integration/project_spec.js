@@ -4,7 +4,6 @@ describe('Project', function () {
     cy.fixture('config').as('config')
     cy.fixture('specs').as('specs')
     cy.fixture('projects_statuses').as('projectStatuses')
-    cy.fixture('base_url_warning').as('baseUrlWarning')
 
     cy.visitIndex().then((win) => {
       ({ start: this.start, ipc: this.ipc } = win.App)
@@ -15,7 +14,6 @@ describe('Project', function () {
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
       cy.stub(this.ipc, 'closeProject').resolves()
       cy.stub(this.ipc, 'onConfigChanged')
-      cy.stub(this.ipc, 'onProjectWarning')
 
       this.getProjectStatus = this.util.deferred()
       cy.stub(this.ipc, 'getProjectStatus').returns(this.getProjectStatus.promise)
@@ -80,38 +78,5 @@ describe('Project', function () {
         expect(this.ipc.getProjectStatus).to.be.calledTwice
       })
     })
-  })
-
-  describe('unreachable baseUrl warning', function () {
-    beforeEach(function () {
-      this.start()
-      cy.shouldBeOnProjectSpecs().then(() => {
-        this.ipc.onProjectWarning.yield(null, this.baseUrlWarning)
-      })
-    })
-
-    it('shows warning message when baseUrl unreachable', function () {
-      cy.get('.alert-warning').should('be.visible')
-    })
-
-    it('reloads project when retry button clicked', function () {
-      cy.get('.retry-button').click().then(() => {
-        expect(this.ipc.closeProject).to.be.called
-        expect(this.ipc.openProject).to.be.called
-        cy.shouldBeOnProjectSpecs()
-      })
-    })
-
-    it('shows/hides warning on retry', function () {
-      cy.get('.retry-button').click().then(() => {
-        this.ipc.onProjectWarning.yield(null, this.baseUrlWarning)
-        cy.get('.alert-warning').should('be.visible')
-      })
-
-      cy.get('.retry-button').click().then(() => {
-        cy.get('.alert-warning').should('not.be.visible')
-      })
-    })
-
   })
 })

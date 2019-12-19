@@ -193,7 +193,7 @@ const openProject = (project) => {
 
 const reopenProject = (project) => {
   project.clearError()
-  project.clearWarning(null, true)
+  project.clearWarning()
 
   return closeProject(project)
   .then(() => {
@@ -221,6 +221,10 @@ const getRecordKeys = () => {
   })
 }
 
+const pingBaseUrl = (baseUrl) => {
+  return ipc.pingBaseUrl(baseUrl)
+}
+
 export default {
   loadProjects,
   openProject,
@@ -232,4 +236,5 @@ export default {
   runSpec,
   closeBrowser,
   getRecordKeys,
+  pingBaseUrl,
 }

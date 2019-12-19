@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
+import { toJS } from 'mobx'
 import Loader from 'react-loader'
 
 import C from '../lib/constants'
@@ -78,15 +79,16 @@ class Project extends Component {
     const { warnings } = this.props.project
 
     return warnings.map((warning, i) =>
-      (<WarningMessage key={i} warning={warning} onTryAgain={() => this._reopenProject()} onClearWarning={() => this._removeWarning(warning)}/>))
+      (<WarningMessage key={i} warning={warning} onTryAgain={() => this._pingBaseUrl()} onClearWarning={() => this._removeWarning(warning)}/>))
   }
 
   _removeWarning = (warning) => {
     this.props.project.clearWarning(warning)
   }
 
-  _reopenProject = () => {
-    projectsApi.reopenProject(this.props.project)
+  _pingBaseUrl = () => {
+    this.props.project.clearWarning(null, true)
+    projectsApi.pingBaseUrl(toJS(this.props.project.resolvedConfig.baseUrl).value)
   }
 }
 
