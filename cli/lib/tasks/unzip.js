@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const cp = require('child_process')
@@ -81,6 +82,8 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
           return unzipTools.extract(zipFilePath, opts, endFn)
         }
 
+        const unzipFallback = _.once(unzipWithNode)
+
         const unzipWithUnzipTool = () => {
           debug('unzipping via `unzip`')
 
@@ -88,7 +91,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
           const sp = cp.spawn('unzip', ['-o', zipFilePath, '-d', installDir])
 
-          sp.on('error', unzipWithNode)
+          sp.on('error', unzipFallback)
 
           sp.on('close', (code) => {
             if (code === 0) {
@@ -100,7 +103,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
             debug('`unzip` failed %o', { code })
 
-            return unzipWithNode()
+            return unzipFallback()
           })
 
           sp.stdout.on('data', (data) => {
@@ -127,7 +130,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
           const sp = cp.spawn('ditto', ['-xkV', zipFilePath, installDir])
 
           // f-it just unzip with node
-          sp.on('error', unzipWithNode)
+          sp.on('error', unzipFallback)
 
           sp.on('close', (code) => {
             if (code === 0) {
@@ -141,7 +144,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
             debug('`ditto` failed %o', { code })
 
-            return unzipWithNode()
+            return unzipFallback()
           })
 
           return readline.createInterface({
