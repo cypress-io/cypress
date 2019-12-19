@@ -4,7 +4,7 @@ import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
 
 import cs from 'classnames'
-import React, { useRef } from 'react'
+import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import VisuallyHidden from '@reach/visually-hidden'
 import { EditorPicker } from '@packages/ui-components'
@@ -69,15 +69,12 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
     onSetEditor(editor)
   }
 
-  const cancelRef = useRef()
-
   if (!editors.length) return null
 
   return (
     <Dialog
       className='editor-picker-modal'
       aria-label="Explanation of choosing an editor"
-      initialFocusRef={cancelRef}
       isOpen={isOpen}
       onDismiss={onClose}
     >
@@ -99,7 +96,7 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
       )}
       <div className='controls'>
         <button className='submit' onClick={setEditor}>Set editor and open file</button>
-        <button className='cancel' onClick={onClose} ref={cancelRef}>Cancel</button>
+        <button className='cancel' onClick={onClose}>Cancel</button>
       </div>
       <button className='close-button' onClick={onClose}>
         <VisuallyHidden>Close</VisuallyHidden>

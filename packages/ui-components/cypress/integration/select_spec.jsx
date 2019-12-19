@@ -4,7 +4,11 @@ import { Select, SelectItem } from '../../src'
 
 const _ = Cypress._
 
-describe('<Select />', () => {
+it('fail', () => {
+  expect(true).to.be.false
+})
+
+describe.skip('<Select />', () => {
   beforeEach(() => {
     cy.visit('dist/index.html')
     cy.viewport(400, 600)
