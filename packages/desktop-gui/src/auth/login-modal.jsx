@@ -8,7 +8,7 @@ import authStore from './auth-store'
 import ipc from '../lib/ipc'
 
 const close = () => {
-  authStore.setShowingLogin(false)
+  authStore.closeLogin()
 }
 
 // LoginContent is a separate component so that it pings the api
@@ -68,7 +68,7 @@ class LoginContent extends Component {
     return (
       <div className='modal-body login'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h1><i className='fa fa-lock'></i> Log In</h1>
+        <h1><i className='fas fa-lock'></i> Log In</h1>
         <p>Logging in gives you access to the <a onClick={this._openDashboard}>Cypress Dashboard Service</a>. You can set up projects to be recorded and see test data from your project.</p>
         <LoginForm onSuccess={() => this.setState({ succeeded: true })} />
       </div>
@@ -79,7 +79,7 @@ class LoginContent extends Component {
     return (
       <div className='modal-body login'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h1><i className='fa fa-check'></i> Login Successful</h1>
+        <h1><i className='fas fa-check'></i> Login Successful</h1>
         <p>You are now logged in as {authStore.user.name}.</p>
         <div className='login-content'>
           <button
@@ -97,14 +97,14 @@ class LoginContent extends Component {
     return (
       <div className='modal-body login login-no-api-server'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-        <h4><i className='fa fa-wifi'></i> Cannot connect to API server</h4>
+        <h4><i className='fas fa-wifi'></i> Cannot connect to API server</h4>
         <p>Logging in requires connecting to an external API server. We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
           <button
             className='btn btn-default btn-sm'
             onClick={this._pingApiServer}
           >
-            <i className='fa fa-refresh'></i>{' '}
+            <i className='fas fa-sync-alt'></i>{' '}
             Try again
           </button>
         </p>

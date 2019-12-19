@@ -35,10 +35,17 @@ describe "e2e stdout", ->
       expectedExitCode: 0
     })
 
-  it "logs that chrome cannot be recorded", ->
+  e2e.it "logs that chrome cannot be recorded", {
+    spec: "simple_spec.coffee"
+    browser: "chrome"
+    snapshot: true
+    expectedExitCode: 0
+  }
+
+  it "displays fullname of nested specfile", ->
     e2e.exec(@, {
-      spec: "simple_spec.coffee"
-      browser: "chrome"
+      port: 2020
       snapshot: true
+      spec: "nested-1/nested-2/nested-3/*"
       expectedExitCode: 0
     })

@@ -120,8 +120,8 @@
       font-size: 90%;
       margin: 5px;
 
-      &.fa-repeat {
-        font-size: 112%;
+      &.fa-redo {
+        font-size: 100%;
         position: relative;
         top: 1px;
       }
@@ -135,7 +135,8 @@
       }
 
       i:first-child {
-        @extend .#{$fa-css-prefix}-circle-o;
+        @extend .far;
+        @extend .#{$fa-css-prefix}-circle;
         color: #999;
         font-size: 80%;
         margin-right: 3px;
@@ -145,6 +146,7 @@
 
       &.auto-scrolling-enabled {
         i:first-child {
+          @extend .fas;
           @extend .#{$fa-css-prefix}-circle;
           color: #FFB61C;
         }

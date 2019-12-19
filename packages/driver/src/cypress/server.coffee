@@ -10,11 +10,8 @@ props                    = "onreadystatechange onload onerror".split(" ")
 
 restoreFn = null
 
-setHeader = (xhr, key, val, transformer) ->
+setHeader = (xhr, key, val) ->
   if val?
-    if transformer
-      val = transformer(val)
-
     key = "X-Cypress-" + _.capitalize(key)
     xhr.setRequestHeader(key, encodeURI(val))
 
@@ -176,18 +173,30 @@ create = (options = {}) ->
       hasEnabledStubs and route and route.response?
 
     applyStubProperties: (xhr, route) ->
-      responser = if _.isObject(route.response) then JSON.stringify else null
+      responseToString = =>
+        if not _.isString(route.response)
+          return JSON.stringify(route.response)
 
-      ## add header properties for the xhr's id
-      ## and the testId
-      setHeader(xhr, "id", xhr.id)
-      # setHeader(xhr, "testId", options.testId)
+        route.response
 
-      setHeader(xhr, "status",   route.status)
-      setHeader(xhr, "response", route.response, responser)
-      setHeader(xhr, "matched",  route.url + "")
-      setHeader(xhr, "delay",    route.delay)
-      setHeader(xhr, "headers",  route.headers, transformHeaders)
+      response = responseToString()
+
+      headers = {
+        "id": xhr.id
+        "status": route.status
+        "matched": route.url + ""
+        "delay": route.delay
+        "headers": transformHeaders(route.headers)
+      }
+
+      if response.length > 4096
+        options.emitIncoming(xhr.id, response)
+        headers.responseDeferred = true
+      else
+        headers.response = response
+
+      _.map headers, (v, k) =>
+        setHeader(xhr, k, v)
 
     route: (attrs = {}) ->
       warnOnStubDeprecation(attrs, "route")

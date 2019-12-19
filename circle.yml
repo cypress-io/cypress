@@ -1,5 +1,14 @@
 version: 2.1
 
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macBuildFilters: &macBuildFilters
+  filters:
+    branches:
+      only:
+        - develop
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -19,11 +28,20 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.0.0-chrome73
+      - image: cypress/browsers:node12.8.1-chrome78-ff70
+    environment:
+      PLATFORM: linux
+
+  # Docker image with non-root "node" user
+  non-root-docker-user:
+    docker:
+      - image: cypress/base:12.0.0
+        user: node
     environment:
       PLATFORM: linux
 
@@ -37,6 +55,24 @@ executors:
       PLATFORM: mac
 
 commands:
+  run-e2e-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+      chunk:
+        description: e2e test chunk number
+        type: integer
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
+          working_directory: packages/server
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
   store-npm-logs:
     description: Saves any NPM debug logs as artifacts in case there is a problem
     steps:
@@ -223,7 +259,8 @@ jobs:
       # Install the root packages
       # Link sup packages in ./node_modules/@packages/*
       # Install sub packages dependencies and build all sub packages via postinstall script
-      - run: npm install
+      # try several times, because flaky NPM installs ...
+      - run: npm install || npm install
       - run:
           name: Top level packages
           command: npm ls --depth=0 || true
@@ -263,6 +300,8 @@ jobs:
       - run: npm run test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
       - run: npm run all build-js
+      # test codemods
+      - run: npm run test-jscodeshift
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package electron
@@ -270,7 +309,7 @@ jobs:
       - run: npm run all test -- --package https-proxy
       - run: npm run all test -- --package launcher
       - run: npm run all test -- --package network
-      # how to pass Mocha reporter through zunder?
+      - run: npm run all test -- --package proxy
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
       - run: npm run all test -- --package socket
@@ -331,101 +370,117 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "server-e2e-tests-1":
+  "server-e2e-tests-chrome-1":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 1
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 1
 
-  "server-e2e-tests-2":
+  "server-e2e-tests-chrome-2":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 2
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 2
 
-  "server-e2e-tests-3":
+  "server-e2e-tests-chrome-3":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 3
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 3
 
-
-  "server-e2e-tests-4":
+  "server-e2e-tests-chrome-4":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 4
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 4
 
-  "server-e2e-tests-5":
+  "server-e2e-tests-chrome-5":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 5
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 5
 
-  "server-e2e-tests-6":
+  "server-e2e-tests-chrome-6":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 6
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 6
 
-  "server-e2e-tests-7":
+  "server-e2e-tests-chrome-7":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 7
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 7
 
-  "server-e2e-tests-8":
-      <<: *defaults
-      steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: npm run test-e2e -- --chunk 8
-          working_directory: packages/server
-      - store_test_results:
-          path: /tmp/cypress
-      - store-npm-logs
+  "server-e2e-tests-chrome-8":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: chrome
+          chunk: 8
+
+  "server-e2e-tests-electron-1":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 1
+
+  "server-e2e-tests-electron-2":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 2
+
+  "server-e2e-tests-electron-3":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 3
+
+  "server-e2e-tests-electron-4":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 4
+
+  "server-e2e-tests-electron-5":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 5
+
+  "server-e2e-tests-electron-6":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 6
+
+  "server-e2e-tests-electron-7":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 7
+
+  "server-e2e-tests-electron-8":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: electron
+          chunk: 8
 
   "driver-integration-tests-chrome":
     <<: *defaults
@@ -564,9 +619,25 @@ jobs:
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
-          command: npm run binary-build -- --platform $PLATFORM --version $NEXT_DEV_VERSION
+          # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
+          # won't be set and we will use default version, since we are not going to
+          # upload the dev binary build anywhere
+          command: npm run binary-build -- --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run: npm run binary-zip -- --platform $PLATFORM
+      # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/cypress.zip
+
+  upload-binary:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: ls -l
       - run:
           name: upload unique binary
           command: |
@@ -574,16 +645,37 @@ jobs:
               --file cypress.zip \
               --version $NEXT_DEV_VERSION
       - run: cat binary-url.json
-      - run: mkdir /tmp/urls
-      - run: cp binary-url.json /tmp/urls
-      - run: cp cypress.zip /tmp/urls
-      - run: ls /tmp/urls
       - store-npm-logs
       - persist_to_workspace:
-          root: /tmp/urls
+          root: ~/
           paths:
-            - binary-url.json
-            - cypress.zip
+            - cypress/binary-url.json
+
+  test-kitchensink:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - run:
+          name: Install prod dependencies
+          command: npm install --production
+          working_directory: /tmp/repo
+      - run:
+          name: Example server
+          command: npm start
+          working_directory: /tmp/repo
+          background: true
+      - run:
+          name: Run Kitchensink example project
+          command: npm run cypress:run -- --project /tmp/repo
+      - store_artifacts:
+          path: /tmp/repo/cypress/screenshots
+      - store_artifacts:
+          path: /tmp/repo/cypress/videos
+      - store-npm-logs
 
   "test-kitchensink-against-staging":
     <<: *defaults
@@ -629,14 +721,15 @@ jobs:
             npm run cypress:run -- --project /tmp/repo --record
       - store-npm-logs
 
-  "build-npm-package":
+  build-npm-package:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
+      - run: npm run check-next-dev-version
       - run:
           name: bump NPM version
-          command: npm --no-git-tag-version version $NEXT_DEV_VERSION
+          command: npm --no-git-tag-version --allow-same-version version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
           working_directory: cli
@@ -657,33 +750,50 @@ jobs:
           working_directory: cli/build
           command: ls -l
       # created file should have filename cypress-<version>.tgz
-      - run:
-          name: upload NPM package
-          command: |
-            node scripts/binary.js upload-npm-package \
-              --file cli/build/cypress-$NEXT_DEV_VERSION.tgz \
-              --version $NEXT_DEV_VERSION
-      - run: cat npm-package-url.json
       - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-$NEXT_DEV_VERSION.tgz /tmp/urls/cypress.tgz
-      - run: cp npm-package-url.json /tmp/urls
-      - run: ls /tmp/urls
+      - run: cp cli/build/cypress-${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
+      - run: cp cli/build/cypress-${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
+      - run: ls -l /tmp/urls
       - store-npm-logs
+      - run: pwd
+      - run: ls -l
       - persist_to_workspace:
-          root: /tmp/urls
+          root: ~/
           paths:
-            - npm-package-url.json
-            - cypress.tgz
+            - cypress/cypress.tgz
 
-  "test-binary-and-npm-against-other-projects":
+  upload-npm-package:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
+      - run: ls -l
+      # NPM package file should have filename cypress-<version>.tgz
+      - run:
+          name: upload NPM package
+          command: |
+            node scripts/binary.js upload-npm-package \
+              --file cypress.tgz \
+              --version $NEXT_DEV_VERSION
+      - store-npm-logs
+      - run: ls -l
+      - run: cat npm-package-url.json
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cypress/npm-package-url.json
+
+  "test-binary-and-npm-against-other-projects":
+    <<: *defaults
+    steps:
+      # needs uploaded NPM and test binary
       - attach_workspace:
-          at: /tmp/urls
-      - run: ls -la /tmp/urls
-      - run: cat /tmp/urls/*.json
+          at: ~/
+      - run: ls -la
+      # make sure JSON files with uploaded urls are present
+      - run: ls -la binary-url.json npm-package-url.json
+      - run: cat binary-url.json
+      - run: cat npm-package-url.json
       - run: mkdir /tmp/testing
       - run:
           name: create dummy package
@@ -694,8 +804,8 @@ jobs:
           name: Install Cypress
           command: |
             node scripts/test-unique-npm-and-binary.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
+              --npm npm-package-url.json \
+              --binary binary-url.json \
               --cwd /tmp/testing
       - run:
           name: Verify Cypress binary
@@ -705,14 +815,14 @@ jobs:
           name: Post pre-release install comment
           command: |
             node scripts/add-install-comment.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json
+              --npm npm-package-url.json \
+              --binary binary-url.json
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json \
+              --npm npm-package-url.json \
+              --binary binary-url.json \
               --provider circle
       - store-npm-logs
 
@@ -721,14 +831,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
       # make sure we have cypress.zip received
-      - run: ls -l /tmp/urls/cypress.zip
-      # build NPM package
-      - run:
-          command: npm run build
-          working_directory: cli
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
       - run: mkdir test-binary
       - run:
           name: Create new NPM package
@@ -739,7 +844,7 @@ jobs:
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -752,12 +857,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
-      # make sure we have the binary
-      - run: ls -l /tmp/urls/cypress.zip
-      # make sure we have the NPM package
-      - run: ls -l /tmp/urls/cypress.tgz
+      - run: ls -l
+      # make sure we have the binary and NPM package
+      - run: ls -l cypress.zip cypress.tgz
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
@@ -765,7 +867,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           name: Run test project
           working_directory: /tmp/cypress-test-tiny
@@ -781,8 +883,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
       - run:
           name: Cloning kitchensink project
           command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
@@ -793,7 +896,7 @@ jobs:
           name: Install Cypress
           working_directory: /tmp/kitchensink
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/tmp/urls/cypress.zip npm i /tmp/urls/cypress.tgz
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           working_directory: /tmp/kitchensink
           command: npm run build
@@ -804,6 +907,46 @@ jobs:
       - run:
           working_directory: /tmp/kitchensink
           command: npm run e2e
+      - store-npm-logs
+
+  test-binary-as-specific-user:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      # the user should be "node"
+      - run: whoami
+      - run: pwd
+      # prints the current user's effective user id
+      # for root it is 0
+      # for other users it is a positive integer
+      - run: node -e 'console.log(process.geteuid())'
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir test-binary
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
+      - run:
+          # install NPM from built NPM package folder
+          name: Install Cypress
+          working_directory: test-binary
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          name: Add Cypress demo
+          working_directory: test-binary
+          command: npx @bahmutov/cly init
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: DEBUG=cypress:cli $(npm bin)/cypress verify
+      - run:
+          name: Run Cypress binary
+          working_directory: test-binary
+          command: DEBUG=cypress:cli $(npm bin)/cypress run
       - store-npm-logs
 
 linux-workflow: &linux-workflow
@@ -827,47 +970,84 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - server-performance-tests:
+        context: test-runner:performance-tracking
         requires:
           - build
-    - server-e2e-tests-1:
+    - server-e2e-tests-chrome-1:
+        context: test-runner:performance-tracking
         requires:
           - build
-    - server-e2e-tests-2:
+    - server-e2e-tests-chrome-2:
+        context: test-runner:performance-tracking
         requires:
           - build
-    - server-e2e-tests-3:
+    - server-e2e-tests-chrome-3:
+        context: test-runner:performance-tracking
         requires:
           - build
-    - server-e2e-tests-4:
+    - server-e2e-tests-chrome-4:
+        context: test-runner:performance-tracking
         requires:
           - build
-    - server-e2e-tests-5:
+    - server-e2e-tests-chrome-5:
+        context: test-runner:performance-tracking
         requires:
           - build
-    - server-e2e-tests-6:
+    - server-e2e-tests-chrome-6:
+        context: test-runner:performance-tracking
         requires:
           - build
-    - server-e2e-tests-7:
+    - server-e2e-tests-chrome-7:
+        context: test-runner:performance-tracking
         requires:
           - build
-    - server-e2e-tests-8:
+    - server-e2e-tests-chrome-8:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-electron-1:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-electron-2:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-electron-3:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-electron-4:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-electron-5:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-electron-6:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-electron-7:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-electron-8:
+        context: test-runner:performance-tracking
         requires:
           - build
     - driver-integration-tests-chrome:
-        context: test-runner:integration-tests
         requires:
           - build
     ## TODO: add these back in when flaky tests are fixed
     # - driver-integration-tests-electron:
-    #     context: test-runner:integration-tests
     #     requires:
     #       - build
     - desktop-gui-integration-tests-2x:
-        context: test-runner:integration-tests
         requires:
           - build
     - reporter-integration-tests:
-        context: test-runner:integration-tests
         requires:
           - build
     - run-launcher:
@@ -883,6 +1063,9 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build
+    - test-kitchensink:
+        requires:
+          - build
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         filters:
@@ -892,21 +1075,28 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - build-npm-package:
+        requires:
+          - build
+    - upload-npm-package:
         context: test-runner:upload
         filters:
           branches:
             only:
               - develop
         requires:
-          - build
+          - build-npm-package
     - build-binary:
+        context: test-runner:performance-tracking
+        requires:
+          - build
+    - upload-binary:
         context: test-runner:upload
         filters:
           branches:
             only:
               - develop
         requires:
-          - build
+          - build-binary
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         filters:
@@ -914,8 +1104,8 @@ linux-workflow: &linux-workflow
             only:
               - develop
         requires:
-          - build-npm-package
-          - build-binary
+          - upload-npm-package
+          - upload-binary
     - test-npm-module-and-verify-binary:
         filters:
           branches:
@@ -941,15 +1131,29 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
           - build-binary
+    - test-binary-as-specific-user:
+        name: "test binary as a non-root user"
+        executor: non-root-docker-user
+        requires:
+          - build-npm-package
+          - build-binary
+    - test-binary-as-specific-user:
+        name: "test binary as a root user"
+        requires:
+          - build-npm-package
+          - build-binary
 
 mac-workflow: &mac-workflow
   jobs:
     - build:
         name: Mac build
         executor: mac
+        <<: *macBuildFilters
+
     - lint:
         name: Mac lint
         executor: mac
+        <<: *macBuildFilters
         requires:
           - Mac build
 
@@ -957,26 +1161,48 @@ mac-workflow: &mac-workflow
 
     - build-npm-package:
         name: Mac NPM package
+        executor: mac
+        requires:
+          - Mac build
+        filters:
+          branches:
+            only:
+              - develop
+
+    - upload-npm-package:
+        name: Mac NPM package upload
         context: test-runner:upload
         executor: mac
         filters:
           branches:
             only:
               - develop
-              - test-example-repos-on-mac-4526
         requires:
-          - Mac build
+          - Mac NPM package
 
     - build-binary:
         name: Mac binary
-        executor: mac
         context: org-global
+        executor: mac
+        <<: *macBuildFilters
+        requires:
+          - Mac build
+
+    - upload-binary:
+        name: Mac binary upload
+        executor: mac
+        context: test-runner:upload
         filters:
           branches:
             only:
               - develop
-              - binary-metadata
-              - test-example-repos-on-mac-4526
+        requires:
+          - Mac binary
+
+    - test-kitchensink:
+        name: Test Mac Kitchensink
+        executor: mac
+        <<: *macBuildFilters
         requires:
           - Mac build
 
@@ -1011,10 +1237,9 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
-              - test-example-repos-on-mac-4526
         requires:
-          - Mac NPM package
-          - Mac binary
+          - Mac NPM package upload
+          - Mac binary upload
 
 workflows:
   linux:

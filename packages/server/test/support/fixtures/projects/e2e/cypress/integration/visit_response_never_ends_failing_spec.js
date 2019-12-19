@@ -1,5 +1,4 @@
 context('response timeouts result in an error', () => {
-
   // ESOCKETTIMEDOUT after ~2 seconds
   it('handles no response errors on the initial visit', () => {
     cy
