@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 2.8
+// TypeScript Version: 2.9
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
@@ -60,7 +60,7 @@ declare namespace Cypress {
     name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
     displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
     version: string
-    majorVersion: string
+    majorVersion: number
     path: string
     isHeaded: boolean
     isHeadless: boolean
@@ -867,6 +867,13 @@ declare namespace Cypress {
     hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
+     * Invoke a function in an array of functions.
+     * @see https://on.cypress.io/invoke
+     */
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
+
+    /**
      * Invoke a function on the previously yielded subject.
      * This isn't possible to strongly type without generic override yet.
      * If called on an object you can do this instead: `.then(s => s.show())`.
@@ -876,6 +883,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
+    invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
 
     /**
      * Get a property’s value on the previously yielded subject.
@@ -887,7 +895,15 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K): Chainable<Subject[K]>
+    its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
+
+    /**
+     * Get a value by index from an array yielded from the previous command.
+     * @see https://on.cypress.io/its
+     * @example
+     *    cy.wrap(['a', 'b']).its(1).should('equal', 'b')
+     */
+    its<T, Subject extends T[]>(index: number, options?: Loggable): Chainable<T>
 
     /**
      * Get the last DOM element within a set of DOM elements.

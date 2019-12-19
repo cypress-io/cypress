@@ -32,10 +32,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -117,11 +114,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -201,7 +194,7 @@ exports['e2e uncaught errors / failing3'] = `
 This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -285,7 +278,7 @@ This error originated from your test code, not from Cypress.
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -367,19 +360,19 @@ exports['e2e uncaught errors / failing5'] = `
 
   1) foo baz fails:
      ReferenceError: foo is not defined
-      at stack trace line
+      [stack trace lines]
 
   2) foo bar fails:
      ReferenceError: foo is not defined
-      at stack trace line
+      [stack trace lines]
 
   3) foo quux fails:
      ReferenceError: foo is not defined
-      at stack trace line
+      [stack trace lines]
 
   4) foo quux2 fails:
      ReferenceError: foo is not defined
-      at stack trace line
+      [stack trace lines]
 
 
 

@@ -427,13 +427,13 @@ describe "lib/socket", ->
     context "constructor", ->
       it "listens for 'file:updated' on preprocessor", ->
         @cfg.watchForFileChanges = true
-        socket = Socket(@cfg)
+        socket = new Socket(@cfg)
         expect(preprocessor.emitter.on).to.be.calledWith("file:updated")
 
       it "does not listen for 'file:updated' if config.watchForFileChanges is false", ->
         preprocessor.emitter.on.reset()
         @cfg.watchForFileChanges = false
-        socket = Socket(@cfg)
+        socket = new Socket(@cfg)
         expect(preprocessor.emitter.on).not.to.be.called
 
     context "#close", ->

@@ -1,3 +1,0 @@
-test/unit
---compilers ts:@packages/ts/register,coffee:@packages/coffee/register
---recursive

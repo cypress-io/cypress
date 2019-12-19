@@ -1,115 +1,143 @@
 import _ from 'lodash'
+import { defaultTo, get, flow, isEmpty, join, map, reduce, take, toPairs, toPath } from 'lodash/fp'
+import cn from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
-
+import { ObjectInspector, ObjectName } from 'react-inspector'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
-const display = (obj) => {
-  const keys = _.keys(obj)
-  const lastKey = _.last(keys)
+const joinWithCommas = join(', ')
+const objToString = (v) => flow([
+  defaultTo(v.name),
+  defaultTo(_.isObject(v) ? joinWithCommas(Object.keys(v)) : undefined),
+  defaultTo(String(v)),
+])(v.displayName)
 
-  return _.map(obj, (value, key) => {
-    const hasComma = lastKey !== key
+const formatValue = (value) => {
+  if (Array.isArray(value)) {
+    return flow([
+      map(objToString),
+      joinWithCommas,
+    ])(value)
+  }
 
-    if (value.from == null) {
-      return displayNestedObj(key, value, hasComma)
-    }
+  if (_.isObject(value)) {
+    return objToString(value)
+  }
 
-    if (value.isArray) {
-      return getSpan(key, value, hasComma, true)
-    }
+  const excludedFromQuotations = ['null', 'undefined']
 
-    if (_.isObject(value.value)) {
-      const realValue = value.value.toJS ? value.value.toJS() : value.value
+  if (_.isString(value) && !excludedFromQuotations.includes(value)) {
+    return `"${value}"`
+  }
 
-      if (_.isArray(realValue)) {
-        return displayArray(key, value, hasComma)
-      }
-
-      return displayObject(key, value, hasComma)
-    }
-
-    return getSpan(key, value, hasComma)
-  })
+  return String(value)
 }
 
-const displayNestedObj = (key, value, hasComma) => (
-  <span key={key}>
-    <span className='nested nested-obj'>
-      <span className='key'>{key}</span>
-      <span className='colon'>:</span>{' '}
-      {'{'}
-      {display(value)}
-    </span>
-    <span className='line'>{'}'}{getComma(hasComma)}</span>
-    <br />
-  </span>
-)
+const normalizeWithoutMeta = flow([
+  defaultTo({}),
+  toPairs,
+  reduce((acc, [key, value]) => _.merge({}, acc, {
+    [key]: value ? value.value : {},
+  }), {}),
+  (v) => {
+    if (isEmpty(v)) {
+      return null
+    }
 
-const displayNestedArr = (key, value, hasComma) => (
-  <span key={key}>
-    <span className='nested nested-arr'>
-      <span className='key'>{key}</span>
-      <span className='colon'>:</span>{' '}
-      {'['}
-      {display(value)}
-    </span>
-    <span className='line'>{']'}{getComma(hasComma)}</span>
-    <br />
-  </span>
-)
+    return v
+  },
+])
 
-const displayArray = (key, nestedArr, hasComma) => {
-  const arr = _.map(nestedArr.value, (value) => {
-    return { value, from: nestedArr.from, isArray: true }
-  })
+const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
+  const formattedData = formatValue(data)
 
-  return displayNestedArr(key, arr, hasComma)
-}
-
-const displayObject = (key, nestedObj, hasComma) => {
-  const obj = _.reduce(nestedObj.value, (obj, value, key) => {
-    return _.extend(obj, {
-      [key]: { value, from: nestedObj.from },
-    })
-  }, {})
-
-  return displayNestedObj(key, obj, hasComma)
-}
-
-const getSpan = (key, obj, hasComma, isArray) => {
   return (
-    <div key={key} className='line'>
-      {getKey(key, isArray)}
-      {getColon(isArray)}
-      <Tooltip title={obj.from || ''} placement='right' className='cy-tooltip'>
-        <span className={obj.from}>
-          {getString(obj.value)}
-          {`${obj.value}`}
-          {getString(obj.value)}
-        </span>
-      </Tooltip>
-      {getComma(hasComma)}
-    </div>
+    <span className="line" key={name}>
+      <ObjectName name={name} dimmed={isNonenumerable} />
+      <span>:</span>
+      {!expanded && (
+        <>
+          {from && (
+            <Tooltip title={from} placement='right' className='cy-tooltip'>
+              <span className={cn(from, 'key-value-pair-value')}>
+                <span>{formattedData}</span>
+              </span>
+            </Tooltip>
+          )}
+          {!from && (
+            <span className={cn(from, 'key-value-pair-value')}>
+              <span>{formattedData}</span>
+            </span>
+          )}
+        </>
+      )}
+      {expanded && Array.isArray(data) && (
+        <span> Array ({data.length})</span>
+      )}
+    </span>
   )
 }
 
-const getKey = (key, isArray) => {
-  return isArray ? '' : <span className='key'>{key}</span>
+ObjectLabel.defaultProps = {
+  data: 'undefined',
 }
 
-const getColon = (isArray) => {
-  return isArray ? '' : <span className="colon">:{' '}</span>
+const computeFromValue = (obj, name, path) => {
+  const normalizedPath = path.replace('$.', '').replace(name, `['${name}']`)
+  const getValueForPath = flow([
+    toPath,
+    _.partialRight(get, obj),
+  ])
+
+  let value = getValueForPath(normalizedPath)
+
+  if (!value) {
+    const onlyFirstKeyInPath = flow([toPath, take(1)])
+
+    value = getValueForPath(onlyFirstKeyInPath(normalizedPath))
+  }
+
+  if (!value) {
+    return undefined
+  }
+
+  return value.from ? value.from : undefined
 }
 
-const getString = (val) => {
-  return _.isString(val) ? '\'' : ''
-}
+const ConfigDisplay = ({ data: obj }) => {
+  const getFromValue = _.partial(computeFromValue, obj)
+  const renderNode = ({ depth, name, data, isNonenumerable, expanded, path }) => {
+    if (depth === 0) {
+      return null
+    }
 
-const getComma = (hasComma) => {
-  return hasComma ? <span className='comma'>,</span> : ''
+    const from = getFromValue(name, path)
+
+    return (
+      <ObjectLabel
+        name={name}
+        data={data}
+        expanded={expanded}
+        from={from}
+        isNonenumerable={isNonenumerable}
+      />
+    )
+  }
+
+  const data = normalizeWithoutMeta(obj)
+
+  data.env = normalizeWithoutMeta(obj.env)
+
+  return (
+    <div className="config-vars">
+      <span>{'{'}</span>
+      <ObjectInspector data={data} expandLevel={1} nodeRenderer={renderNode} />
+      <span>{'}'}</span>
+    </div>
+  )
 }
 
 const openHelp = (e) => {
@@ -120,7 +148,7 @@ const openHelp = (e) => {
 const Configuration = observer(({ project }) => (
   <div>
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fa fa-info-circle'></i> Learn more
+      <i className='fas fa-info-circle'></i> Learn more
     </a>
     <p className='text-muted'>Your project's configuration is displayed below. A value can be set from the following sources:</p>
     <table className='table config-table'>
@@ -146,16 +174,12 @@ const Configuration = observer(({ project }) => (
           <td>set from CLI arguments</td>
         </tr>
         <tr className='config-keys'>
-          <td><span className='plugin'>plugin</span></td>
+          <td><span className='plugins'>plugin</span></td>
           <td>set from plugin file</td>
         </tr>
       </tbody>
     </table>
-    <pre className='config-vars'>
-      {'{'}
-      {display(project.resolvedConfig)}
-      {'}'}
-    </pre>
+    <ConfigDisplay data={project.resolvedConfig} />
   </div>
 ))
 
