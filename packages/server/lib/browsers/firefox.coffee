@@ -180,11 +180,14 @@ module.exports = {
       args = [
         "-profile"
         profile.path()
+        ## TODO: ensure binding to 127.0.0.1 for RDP and Marionette
         "-marionette"
         "-new-instance"
         "-foreground"
         "-height", "794" ## TODO: why 794?
         "-width", "1280"
+        ## TODO: ensure binding to 127.0.0.1 for RDP and Marionette
+        "-start-debugger-server", "2929"
       ]
 
       debug("launch in firefox", { url, args })

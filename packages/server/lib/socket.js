@@ -11,6 +11,7 @@ const files = require('./files')
 const fixture = require('./fixture')
 const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
+const firefoxUtil = require('./browsers/firefox-util')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -368,7 +369,10 @@ class Socket {
             case 'http:request':
               return options.onRequest(headers, automationRequest, args[0])
             case 'reset:server:state':
-              return options.onResetServerState()
+              return Promise.all([
+                firefoxUtil.collectGarbage(),
+                options.onResetServerState(),
+              ])
             case 'incoming:xhr':
               return options.onIncomingXhr(args[0], args[1])
             case 'get:fixture':
