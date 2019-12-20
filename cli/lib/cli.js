@@ -140,12 +140,6 @@ module.exports = {
     })
 
     program
-    .option('-v, --version', text('version'))
-    .command('version')
-    .description(text('version'))
-    .action(showVersions)
-
-    program
     .command('run')
     .usage('[options]')
     .description('Runs Cypress tests from the CLI without the GUI')
@@ -256,14 +250,6 @@ module.exports = {
       debug('printing help')
       program.help()
       // exits
-    }
-
-    if (includesVersion(args)) {
-      // commander 2.11.0 changes behavior
-      // and now does not understand top level options
-      // .option('-v, --version').command('version')
-      // so we have to manually catch '-v, --version'
-      return showVersions()
     }
 
     debug('program parsing arguments')
