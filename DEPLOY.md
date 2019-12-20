@@ -104,7 +104,7 @@ Once the `develop` branch for all test projects are reliably passing with the ne
 
 ### Steps to Publish a New Version
 
-0. Make sure that if there is a new [`cypress-example-kitchensink`][https://github.com/cypress-io/cypress-example-kitchensink/releases] version, the corresponding dependency in [`packages/example`](./packages/example) has been updated to that new version.
+0. Make sure that if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, the corresponding dependency in [`packages/example`](./packages/example) has been updated to that new version.
 1. Make sure that you have the correct environment variables set up before proceeding.
     - You'll need Cypress AWS access keys in `aws_credentials_json`, which looks like this:
         ```text

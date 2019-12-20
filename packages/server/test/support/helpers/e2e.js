@@ -265,10 +265,10 @@ function getBrowsers (browserPattern) {
   let selected = []
 
   const addBrowsers = _.clone(browserPattern)
-  const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!'))
+  const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
 
   if (removeBrowsers.length) {
-    selected = _.without(AVAILABLE_BROWSERS, removeBrowsers.map((b) => b.slice(1)))
+    selected = _.without(AVAILABLE_BROWSERS, ...removeBrowsers)
   } else {
     selected = _.intersection(AVAILABLE_BROWSERS, addBrowsers)
   }

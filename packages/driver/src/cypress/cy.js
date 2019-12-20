@@ -26,6 +26,7 @@ const $Stability = require('../cy/stability')
 const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
+const $VideoRecorder = require('../cy/video-recorder')
 
 const privateProps = {
   props: { name: 'state', url: true },
@@ -118,6 +119,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const queue = $CommandQueue.create()
 
+  $VideoRecorder.create(state, Cypress)
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
