@@ -8,19 +8,6 @@ const logger = require('./logger')
 const errors = require('./errors')
 const cache = require('./tasks/cache')
 
-// patch "commander" method called when a user passed an unknown option
-// we want to print help for the current command and exit with an error
-function unknownOption (flag, type = 'option') {
-  if (this._allowUnknownOption) return
-
-  logger.error()
-  logger.error(`  error: unknown ${type}:`, flag)
-  logger.error()
-  this.outputHelp()
-  util.exit(1)
-}
-commander.Command.prototype.unknownOption = unknownOption
-
 const coerceFalse = (arg) => {
   return arg !== 'false'
 }
@@ -287,10 +274,6 @@ module.exports = {
       if (!_.isString(opts)) {
         this.outputHelp()
         util.exit(1)
-      }
-
-      if (opts.command || !_.includes(['list', 'path', 'clear'], opts)) {
-        unknownOption.call(this, `cache ${opts}`, 'command')
       }
 
       cache[opts]()
