@@ -59,7 +59,16 @@ module.exports = {
         return Promise.mapSeries(tabs, (tab: any) => {
           return tab.memory.attach()
           .then(() => {
+            return tab.memory.measure()
+          })
+          .then(() => {
             return tab.memory.forceCycleCollection()
+          })
+          .then(() => {
+            return tab.memory.forceGarbageCollection()
+          })
+          .then(() => {
+            return tab.memory.measure()
           })
         })
       })
