@@ -7,6 +7,7 @@ const util = require('./util')
 const logger = require('./logger')
 const errors = require('./errors')
 const cache = require('./tasks/cache')
+const { name, version } = require('../package.json')
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
@@ -101,22 +102,7 @@ const descriptions = {
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
   spec: 'runs specific spec file(s). defaults to "all"',
   tag: 'named tag(s) for recorded runs in the Cypress Dashboard',
-  version: 'prints Cypress version',
 }
-
-const knownCommands = [
-  'cache',
-  'help',
-  '-h',
-  '--help',
-  'install',
-  'open',
-  'run',
-  'verify',
-  '-v',
-  '--version',
-  'version',
-]
 
 const text = (description) => {
   if (!descriptions[description]) {
@@ -124,27 +110,6 @@ const text = (description) => {
   }
 
   return descriptions[description]
-}
-
-function includesVersion (args) {
-  return (
-    _.includes(args, 'version') ||
-    _.includes(args, '--version') ||
-    _.includes(args, '-v')
-  )
-}
-
-function showVersions () {
-  debug('printing Cypress version')
-
-  return require('./exec/versions')
-  .getVersions()
-  .then((versions = {}) => {
-    logger.log('Cypress package version:', versions.package)
-    logger.log('Cypress binary version:', versions.binary)
-    process.exit(0)
-  })
-  .catch(util.logErrorExit1)
 }
 
 module.exports = {
@@ -164,7 +129,7 @@ module.exports = {
     const program = new commander.Command()
 
     program
-    .name('cypress')
+    .name(name)
     .usage('<command> [options]')
 
     program
