@@ -279,6 +279,12 @@ module.exports = {
       cache[opts]()
     })
 
+    program.on('command:*', (cmd) => {
+      program.outputHelp();
+      console.error(`\nUnknown command ${cmd}`);
+      process.exit(1);
+    });
+
     debug('cli starts with arguments %j', args)
     util.printNodeOptions()
 
@@ -287,16 +293,6 @@ module.exports = {
       debug('printing help')
       program.help()
       // exits
-    }
-
-    const firstCommand = args[2]
-
-    if (!_.includes(knownCommands, firstCommand)) {
-      debug('unknown command %s', firstCommand)
-      logger.error('Unknown command', `"${firstCommand}"`)
-      program.outputHelp()
-
-      return util.exit(1)
     }
 
     if (includesVersion(args)) {
