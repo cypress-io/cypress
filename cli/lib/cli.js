@@ -238,10 +238,10 @@ module.exports = {
     })
 
     program.on('command:*', (cmd) => {
-      program.outputHelp();
-      console.error(`\nUnknown command ${cmd}`);
-      process.exit(1);
-    });
+      program.outputHelp()
+      logger.error(`\nUnknown command ${cmd}`)
+      process.exit(1)
+    })
 
     debug('cli starts with arguments %j', args)
     util.printNodeOptions()
@@ -259,8 +259,8 @@ module.exports = {
   },
 }
 
-/* if (!module.parent) {
+if (!module.parent) {
   logger.error('This CLI module should be required from another Node module')
   logger.error('and not executed directly')
   process.exit(-1)
-} */
+}
