@@ -296,10 +296,10 @@ handleEvent = (options, bus, event, id, type, arg) ->
     when "ping:baseUrl"
       baseUrl = arg
       ensureUrl.isListening(baseUrl)
-        .return(null)
+        .then(send)
         .catch (err) ->
           warning = errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
-          bus.emit("project:warning", errors.clone(warning, {html: true}))
+          sendErr(warning)
 
     else
       throw new Error("No ipc event registered for: '#{type}'")

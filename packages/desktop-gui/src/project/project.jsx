@@ -88,7 +88,11 @@ class Project extends Component {
 
   _pingBaseUrl = () => {
     this.props.project.clearWarning(null, true)
-    projectsApi.pingBaseUrl(toJS(this.props.project.resolvedConfig.baseUrl).value)
+    ipc.pingBaseUrl(toJS(this.props.project.resolvedConfig.baseUrl).value)
+    .then((_response) => {
+    }).catch((err) => {
+      this.props.project.addWarning(err)
+    })
   }
 }
 

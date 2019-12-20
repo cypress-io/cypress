@@ -1,0 +1,6 @@
+{	
+    "isCypressErr": true, 	
+    "message": "Cypress could not verify that this server is running and tests will likely fail if it is not running.", 	
+    "name": "Error",	
+    "type": "CANNOT_CONNECT_BASE_URL_WARNING"	
+}

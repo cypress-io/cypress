@@ -223,10 +223,6 @@ const getRecordKeys = () => {
   })
 }
 
-const pingBaseUrl = (baseUrl) => {
-  return ipc.pingBaseUrl(baseUrl)
-}
-
 export default {
   loadProjects,
   openProject,
@@ -238,5 +234,4 @@ export default {
   runSpec,
   closeBrowser,
   getRecordKeys,
-  pingBaseUrl,
 }
