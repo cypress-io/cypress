@@ -8,29 +8,38 @@ fs      = require("fs")
 R       = require("ramda")
 filesize = require("filesize")
 
+# prints disk usage numbers using "du" utility
+# available on Linux and Mac
+printFileSizes = (folder) ->
+  console.log("File sizes in #{folder}")
+  paths = path.join(folder, "*")
+  execa.shell("du -hs #{paths}", {stdio: "inherit"})
+
 # resolves with zipped filename
 macZip = (src, dest) ->
-  new Promise (resolve, reject) =>
-    if os.platform() != "darwin"
-      throw new Error("Can only zip on Mac platform")
-    # Ditto (Mac) options
-    # http://www.unix.com/man-page/OSX/1/ditto/
-    # -c create archive
-    # -k set archive format to PKZip
-    # --sequesterRsrc When creating a PKZip archive, preserve resource
-    #   forks and HFS meta-data in the subdirectory __MACOSX
-    # --keepParent when zipping folder "foo", makes the folder
-    #   the top level in the archive
-    #   foo.zip
-    #     foo/
-    #        ...
-    zip = "ditto -c -k --sequesterRsrc --keepParent #{src} #{dest}"
-    console.log(zip)
-    cp.exec zip, {}, (err, stdout, stderr) ->
-      return reject(err) if err
+  printFileSizes(src)
+  .then () ->
+    new Promise (resolve, reject) ->
+      if os.platform() != "darwin"
+        throw new Error("Can only zip on Mac platform")
+      # Ditto (Mac) options
+      # http://www.unix.com/man-page/OSX/1/ditto/
+      # -c create archive
+      # -k set archive format to PKZip
+      # --sequesterRsrc When creating a PKZip archive, preserve resource
+      #   forks and HFS meta-data in the subdirectory __MACOSX
+      # --keepParent when zipping folder "foo", makes the folder
+      #   the top level in the archive
+      #   foo.zip
+      #     foo/
+      #        ...
+      zip = "ditto -c -k --sequesterRsrc --keepParent #{src} #{dest}"
+      console.log(zip)
+      cp.exec zip, {}, (err, stdout, stderr) ->
+        return reject(err) if err
 
-      console.log("✅ ditto zip finished")
-      resolve(dest)
+        console.log("✅ ditto zip finished")
+        resolve(dest)
 
 megaBytes = (bytes) ->
   1024 * 1024 * bytes
@@ -88,6 +97,10 @@ linuxZip = (src, dest) ->
   # on Linux, make sure the folder name is "Cypress" first
   renameFolder(src)
   .then (renamedSource) ->
+    printFileSizes(renamedSource)
+    .then R.always(renamedSource)
+  .then (renamedSource) ->
+    console.log("will zip folder #{renamedSource}")
     parentFolder = path.dirname(renamedSource)
     relativeSource = path.basename(renamedSource)
     linuxZipAction(parentFolder, dest, relativeSource)
@@ -127,10 +140,13 @@ zippers = {
 }
 
 module.exports = {
+  # zip Cypress folder to create destination zip file
+  # uses tool depending on the platform
   ditto: (src, dest) ->
     platform = os.platform()
     console.log("#zip", platform)
     console.log("Zipping %s into %s", src, dest)
+
     zipper = zippers[platform]
     if !zipper
       throw new Error("Missing zip function for platform #{platform}")
