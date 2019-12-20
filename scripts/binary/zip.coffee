@@ -39,19 +39,13 @@ checkZipSize = (zipPath) ->
   stats = fs.statSync(zipPath)
   zipSize = filesize(stats.size, {round: 0})
   console.log("zip file size #{zipSize}")
-  MAX_ALLOWED_SIZE_MB = if os.platform() == "win32" then 245 else 200
+  MAX_ALLOWED_SIZE_MB = if os.platform() == "win32" then 245 else 170
   MAX_ZIP_FILE_SIZE = megaBytes(MAX_ALLOWED_SIZE_MB)
   if stats.size > MAX_ZIP_FILE_SIZE
     throw new Error("Zip file is too large: #{zipSize} (#{stats.size} bytes) exceeds #{MAX_ZIP_FILE_SIZE} bytes")
 
-# resolves with zipped filename
-linuxZip = (src, dest) ->
-  # in Linux switch to the folder containing source folder
-  la(path.isAbsolute(src), "source path should be absolute", src)
-  la(path.isAbsolute(dest), "destination path should be absolute", dest)
-  parentFolder = path.dirname(src)
-  relativeSource = path.basename(src)
-
+linuxZipAction = (parentFolder, dest, relativeSource) ->
+  console.log("zipping #{parentFolder}")
   cmd = "cd #{parentFolder} && zip -r9 #{dest} #{relativeSource}"
   console.log("linux zip: #{cmd}")
 
@@ -59,7 +53,8 @@ linuxZip = (src, dest) ->
     console.log("✅ zip finished")
 
   onError = (err) ->
-    console.error("⛔️ could not zip #{src} into #{dest}")
+    console.error("⛔️ could not zip #{relativeSource} in folder #{parentFolder}")
+    console.error("to produce #{dest}")
     console.error(err.message)
     throw err
 
@@ -68,6 +63,34 @@ linuxZip = (src, dest) ->
   .then R.always(dest)
   .then R.tap(checkZipSize)
   .catch onError
+
+# src is built folder with packed Cypress application
+# like /root/app/build/linux-unpacked
+# and we want to always have /root/app/build/Cypress
+renameFolder = (src) ->
+  parentFolder = path.dirname(src)
+  folderName = path.basename(src)
+  if folderName is "Cypress"
+    console.log("nothing to rename, folder ends with Cypress")
+    return Promise.resolve(src)
+
+  renamed = path.join(parentFolder, "Cypress")
+  console.log("renaming #{src} to #{renamed}")
+  fs.promises.rename(src, renamed)
+  .then R.always(renamed)
+
+# resolves with zipped filename
+linuxZip = (src, dest) ->
+  # in Linux switch to the folder containing source folder
+  la(path.isAbsolute(src), "source path should be absolute", src)
+  la(path.isAbsolute(dest), "destination path should be absolute", dest)
+
+  # on Linux, make sure the folder name is "Cypress" first
+  renameFolder(src)
+  .then (renamedSource) ->
+    parentFolder = path.dirname(renamedSource)
+    relativeSource = path.basename(renamedSource)
+    linuxZipAction(parentFolder, dest, relativeSource)
 
 # resolves with zipped filename
 windowsZip = (src, dest) ->
