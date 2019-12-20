@@ -33,8 +33,7 @@ buildDir = (platform, args...) ->
       # subfolder and it is NOT "darwin" but "mac"
       path.resolve(root, "mac", args...)
     when "linux"
-      # path.resolve(root, platform, "Cypress", args...)
-      path.resolve(root, args...)
+      path.resolve(root, "linux-unpacked", args...)
     when "win32"
       path.resolve(root, platform, "Cypress", args...)
 
@@ -50,7 +49,7 @@ zipDir = (platform) ->
     when "darwin"
       buildDir(platform, "Cypress.app")
     when "linux"
-      buildDir(platform, "linux-unpacked")
+      buildDir(platform)
     when "win32"
       buildDir(platform)
 
@@ -62,7 +61,7 @@ buildAppDir = (platform, args...) ->
     when "darwin"
       buildDir(platform, "Cypress.app", "Contents", "resources", "app", args...)
     when "linux"
-      buildDir(platform, "linux-unpacked", "resources", "app", args...)
+      buildDir(platform, "resources", "app", args...)
     when "win32"
       buildDir(platform, "resources", "app", args...)
 
@@ -72,7 +71,7 @@ buildAppExecutable = (platform) ->
     when "darwin"
       buildDir(platform, "Cypress.app", "Contents", "MacOS", "Cypress")
     when "linux"
-      path.join(buildRootDir(), "linux-unpacked", "Cypress")
+      buildDir(platform, "Cypress")
     when "win32"
       buildDir(platform, "Cypress")
 
