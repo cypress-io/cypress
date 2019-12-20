@@ -381,6 +381,10 @@
     .command-message {
       white-space: initial;
       word-wrap: break-word;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 50;
+      -webkit-box-orient: vertical;
     }
   }
 
