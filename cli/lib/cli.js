@@ -163,11 +163,9 @@ module.exports = {
 
     const program = new commander.Command()
 
-    // bug in commander not printing name
-    // in usage help docs
-    program._name = 'cypress'
-
-    program.usage('<command> [options]')
+    program
+    .name('cypress')
+    .usage('<command> [options]')
 
     program
     .command('help')
