@@ -303,6 +303,48 @@ buildCypressApp = (platform, version, options = {}) ->
     console.log("Removing unnecessary folder '#{electronDistFolder}'")
     fs.removeAsync(electronDistFolder) # .catch(_.noop) why are we ignoring an error here?!
 
+  removeDuplicateElectron = ->
+    log('#removeDuplicateElectron')
+    if platform != "linux"
+      console.log("no duplicate file on platform #{platform}")
+      return Promise.resolve()
+    # for some reason I see duplicate "electron" binary left in the build folder
+    # build/linux-unpacked/Cypress <-- good built app
+    # build/linux-unpacked/electron <-- same file as "Cypress" app
+    CypressFilename = buildDir("Cypress")
+    cypressFilename = buildDir("cypress")
+    console.log(CypressFilename)
+    console.log(cypressFilename)
+    Promise.all([
+      fs.pathExists(CypressFilename),
+      fs.pathExists(cypressFilename),
+    ]).then ([CypressExists, cypressExists]) ->
+      la(CypressExists, "could not find expected file", CypressFilename)
+
+      if not cypressExists
+        return
+
+
+      console.log("cypress file found", cypressFilename)
+
+      Promise.all([
+        fs.promises.stat(CypressFilename),
+        fs.promises.stat(cypressFilename),
+      ])
+    .then ([CypressStats, cypressStats]) ->
+      console.log('Cypress stats for', CypressFilename)
+      console.log("%o", CypressStats)
+
+      console.log('cypress stats for', cypressFilename)
+      console.log("%o", CypressStats)
+
+      if CypressStats.ino == cypressStats.ino
+        console.log("Uppercase and lowercase Cypress files are same file")
+        return
+
+      console.log("deleting separate file", cypressFilename)
+      fs.removeAsync(cypressFilename)
+
   copyRenameElectronDist = ->
     log("#copyRenameElectronDist")
     # for some reason on Linux, during the build, electron-builder
@@ -413,6 +455,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(removeDevElectronApp)
   .then(copyRenameElectronDist)
   .then(electronPackAndSign)
+  .then(removeDuplicateElectron)
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
   .then(verifyAppCanOpen)
