@@ -8,6 +8,7 @@ describe('e2e headless', function () {
     spec: 'headless_spec.js',
     config: {
       env: {
+        'CI': process.env.CI,
         'EXPECT_HEADLESS': '1',
       },
     },
@@ -19,6 +20,11 @@ describe('e2e headless', function () {
   // cypress run --headed
   e2e.it('tests in headed mode pass', {
     spec: 'headless_spec.js',
+    config: {
+      env: {
+        'CI': process.env.CI,
+      },
+    },
     expectedExitCode: 0,
     headed: true,
     snapshot: true,

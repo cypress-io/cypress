@@ -521,7 +521,7 @@ ${covered}\
     }
   }
 
-  return `Cypress could not determine why this element '${node}' is not visible.`
+  return `This element '${node}' is not visible.`
 }
 /* eslint-enable no-cond-assign */
 

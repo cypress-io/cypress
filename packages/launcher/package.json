@@ -38,5 +38,5 @@
   "files": [
     "lib"
   ],
-  "types": "../ts/index.d.ts"
+  "types": "./lib/types.ts"
 }
