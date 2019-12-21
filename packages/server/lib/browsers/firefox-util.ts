@@ -51,24 +51,29 @@ module.exports = {
 
     const { browser } = foxdriver
 
+    const attach = Promise.method((tab) => {
+      return tab.memory.attach()
+    })
+
     cb = () => {
       return browser.listTabs()
       .then((tabs) => {
         browser.tabs = tabs
 
         return Promise.mapSeries(tabs, (tab: any) => {
-          return tab.memory.attach()
-          .then(() => {
-            return tab.memory.measure()
-          })
+          return attach(tab)
           .then(() => {
             return tab.memory.forceCycleCollection()
           })
           .then(() => {
             return tab.memory.forceGarbageCollection()
           })
+          // .then(() => {
+          // return tab.memory.measure()
+          // .then(console.log)
+          // })
           .then(() => {
-            return tab.memory.measure()
+            return tab.memory.detach()
           })
         })
       })
