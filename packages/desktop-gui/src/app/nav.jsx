@@ -25,12 +25,12 @@ export default class Nav extends Component {
         <ul className='nav'>
           <li>
             <a onClick={this._openSupport} href='#'>
-              <i className='fa fa-question-circle'></i> Support
+              <i className='fas fa-question-circle'></i> Support
             </a>
           </li>
           <li>
             <a onClick={this._openDocs} href='#'>
-              <i className='fa fa-graduation-cap'></i> Docs
+              <i className='fas fa-graduation-cap'></i> Docs
             </a>
           </li>
           {this._userStateButton()}
@@ -51,7 +51,7 @@ export default class Nav extends Component {
     if (appStore.isGlobalMode && project) {
       return (
         <Link to={routes.intro()}>
-          <i className='fa fa-chevron-left'></i> Back
+          <i className='fas fa-chevron-left'></i> Back
         </Link>
       )
     }
@@ -69,7 +69,7 @@ export default class Nav extends Component {
       return (
         <li>
           <div>
-            <i className='fa fa-user' /> <i className='fa fa-spinner fa-spin' />
+            <i className='fas fa-user' /> <i className='fas fa-spinner fa-spin' />
           </div>
         </li>
       )
@@ -79,7 +79,7 @@ export default class Nav extends Component {
       return (
         <li>
           <a onClick={this._showLogin}>
-            <i className='fa fa-user' /> Log In
+            <i className='fas fa-user' /> Log In
           </a>
         </li>
       )
@@ -114,7 +114,7 @@ export default class Nav extends Component {
 
     return (
       <span>
-        <i className='fa fa-sign-out'></i>{' '}
+        <i className='fas fa-sign-out-alt'></i>{' '}
         Log Out
       </span>
     )
@@ -127,7 +127,7 @@ export default class Nav extends Component {
   }
 
   _showLogin () {
-    authStore.setShowingLogin(true)
+    authStore.openLogin()
   }
 
   _openDocs (e) {

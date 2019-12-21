@@ -1,4 +1,4 @@
-const { $ } = Cypress
+const { $, _ } = Cypress
 
 export const getCommandLogWithText = (text) => {
   return cy
@@ -53,3 +53,41 @@ export const withMutableReporterState = (fn) => {
     top.Runner.configureMobx({ enforceActions: 'strict' })
   })
 }
+
+const wrapped = (obj) => cy.wrap(obj, { log: false })
+
+export const shouldBeCalled = (stub) => wrapped(stub).should('be.called')
+
+export const shouldBeCalledOnce = (stub) => wrapped(stub).should('be.calledOnce')
+
+export const shouldBeCalledWithCount = (num) => (stub) => wrapped(stub).should('have.callCount', num)
+
+export const shouldNotBeCalled = (stub) => wrapped(stub).should('not.be.called')
+
+export const attachListeners = (listenerArr) => {
+  return (els) => {
+    _.each(els, (el, elName) => {
+      return listenerArr.forEach((evtName) => {
+        el.on(evtName, cy.stub().as(`${elName}:${evtName}`))
+      })
+    })
+  }
+}
+
+const getAllFn = (...aliases) => {
+  if (aliases.length > 1) {
+    return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
+  }
+
+  return Cypress.Promise.all(
+    aliases[0].split(' ').map((alias) => {
+      return cy.now('get', alias)
+    })
+  )
+}
+
+Cypress.Commands.add('getAll', getAllFn)
+
+const chaiSubset = require('chai-subset')
+
+chai.use(chaiSubset)

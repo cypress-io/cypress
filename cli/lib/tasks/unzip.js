@@ -3,7 +3,7 @@ const is = require('check-more-types')
 const cp = require('child_process')
 const os = require('os')
 const yauzl = require('yauzl')
-const debug = require('debug')('cypress:cli')
+const debug = require('debug')('cypress:cli:unzip')
 const extract = require('extract-zip')
 const Promise = require('bluebird')
 const readline = require('readline')
@@ -11,6 +11,10 @@ const readline = require('readline')
 const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
+
+const unzipTools = {
+  extract,
+}
 
 // expose this function for simple testing
 const unzip = ({ zipFilePath, installDir, progress }) => {
@@ -21,15 +25,17 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
     throw new Error('Missing zip filename')
   }
 
+  const startTime = Date.now()
+  let yauzlDoneTime = 0
+
   return fs.ensureDirAsync(installDir)
   .then(() => {
     return new Promise((resolve, reject) => {
       return yauzl.open(zipFilePath, (err, zipFile) => {
+        yauzlDoneTime = Date.now()
+
         if (err) return reject(err)
 
-        // debug('zipfile.paths:', zipFile)
-        // zipFile.on('entry', debug)
-        // debug(zipFile.readEntry())
         const total = zipFile.entryCount
 
         debug('zipFile entries count', total)
@@ -57,6 +63,8 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
         }
 
         const unzipWithNode = () => {
+          debug('unzipping with node.js (slow)')
+
           const endFn = (err) => {
             if (err) {
               return reject(err)
@@ -70,15 +78,50 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
             onEntry: tick,
           }
 
-          return extract(zipFilePath, opts, endFn)
+          return unzipTools.extract(zipFilePath, opts, endFn)
         }
 
-        //# we attempt to first unzip with the native osx
-        //# ditto because its less likely to have problems
-        //# with corruption, symlinks, or icons causing failures
-        //# and can handle resource forks
-        //# http://automatica.com.au/2011/02/unzip-mac-os-x-zip-in-terminal/
+        const unzipWithUnzipTool = () => {
+          debug('unzipping via `unzip`')
+
+          const inflatingRe = /inflating:/
+
+          const sp = cp.spawn('unzip', ['-o', zipFilePath, '-d', installDir])
+
+          sp.on('error', unzipWithNode)
+
+          sp.on('close', (code) => {
+            if (code === 0) {
+              percent = 100
+              notify(percent)
+
+              return resolve()
+            }
+
+            debug('`unzip` failed %o', { code })
+
+            return unzipWithNode()
+          })
+
+          sp.stdout.on('data', (data) => {
+            if (inflatingRe.test(data)) {
+              return tick()
+            }
+          })
+
+          sp.stderr.on('data', (data) => {
+            debug('`unzip` stderr %s', data)
+          })
+        }
+
+        // we attempt to first unzip with the native osx
+        // ditto because its less likely to have problems
+        // with corruption, symlinks, or icons causing failures
+        // and can handle resource forks
+        // http://automatica.com.au/2011/02/unzip-mac-os-x-zip-in-terminal/
         const unzipWithOsx = () => {
+          debug('unzipping via `ditto`')
+
           const copyingFileRe = /^copying file/
 
           const sp = cp.spawn('ditto', ['-xkV', zipFilePath, installDir])
@@ -95,6 +138,8 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
               return resolve()
             }
+
+            debug('`ditto` failed %o', { code })
 
             return unzipWithNode()
           })
@@ -113,11 +158,18 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
           case 'darwin':
             return unzipWithOsx()
           case 'linux':
+            return unzipWithUnzipTool()
           case 'win32':
             return unzipWithNode()
           default:
             return
         }
+      })
+    })
+    .tap(() => {
+      debug('unzip completed %o', {
+        yauzlMs: yauzlDoneTime - startTime,
+        unzipMs: Date.now() - yauzlDoneTime,
       })
     })
   })
@@ -147,4 +199,8 @@ const start = ({ zipFilePath, installDir, progress }) => {
 
 module.exports = {
   start,
+  utils: {
+    unzip,
+    unzipTools,
+  },
 }

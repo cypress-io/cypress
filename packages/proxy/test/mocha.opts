@@ -1,0 +1,5 @@
+test/unit
+--compilers ts:@packages/ts/register,coffee:@packages/coffee/register
+--timeout 10000
+--recursive
+--require test/pretest.ts
