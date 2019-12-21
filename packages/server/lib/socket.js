@@ -210,14 +210,14 @@ class Socket {
           }
 
           // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
-          return Promise.delay(500)
+          return Promise.delay(2000)
           .then(() => {
             // bail if we've swapped to a new automationClient
             if (automationClient !== socket) {
               return
             }
 
-            // give ourselves about 500ms to reconnected
+            // give ourselves about 2000ms to reconnect
             // and if we're connected its all good
             if (automationClient.connected) {
               return

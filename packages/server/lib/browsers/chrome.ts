@@ -287,10 +287,13 @@ module.exports = {
       extensionBg = path.join(extensionDest, 'background.js')
 
       // copy the extension src to the extension dist
-      return utils.copyExtension(pathToExtension, extensionDest).then(function () {
+      return utils
+      .copyExtension(pathToExtension, extensionDest)
+      .then(function () {
         // and overwrite background.js with the final string bytes
         return fs.writeFileAsync(extensionBg, str)
-      }).return(extensionDest)
+      })
+      .return(extensionDest)
     })
   },
 
