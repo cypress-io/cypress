@@ -6,14 +6,14 @@ import { Command } from 'marionette-client/lib/marionette/message.js'
 import {
   _connectAsync,
 } from './protocol'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import Debug from 'debug'
 
 const debug = Debug('cypress:server:browsers')
 
 const promisify = (fn) => {
   return (...args) => {
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
       fn(...args, (data) => {
         if ('error' in data) {
           reject(new Exception(data, data))
@@ -35,7 +35,7 @@ module.exports = {
   },
 
   setup (extensions, url) {
-    return Promise.all([
+    return Bluebird.all([
       this.setupFoxdriver(),
       this.setupMarionette(extensions, url),
     ])
@@ -51,7 +51,7 @@ module.exports = {
 
     const { browser } = foxdriver
 
-    const attach = Promise.method((tab) => {
+    const attach = Bluebird.method((tab) => {
       return tab.memory.attach()
     })
 
@@ -60,7 +60,7 @@ module.exports = {
       .then((tabs) => {
         browser.tabs = tabs
 
-        return Promise.mapSeries(tabs, (tab: any) => {
+        return Bluebird.mapSeries(tabs, (tab: any) => {
           return attach(tab)
           .then(() => {
             return tab.memory.forceCycleCollection()
@@ -83,7 +83,7 @@ module.exports = {
   setupMarionette (extensions, url) {
     const driver = new Marionette.Drivers.Tcp({})
 
-    const connect = Promise.promisify(driver.connect.bind(driver))
+    const connect = Bluebird.promisify(driver.connect.bind(driver))
     const driverSend = promisify(driver.send.bind(driver))
 
     sendMarionette = (data) => {
@@ -100,7 +100,7 @@ module.exports = {
       })
     })
     .then(({ sessionId }) => {
-      return Promise.all(_.map(extensions, (path) => {
+      return Bluebird.all(_.map(extensions, (path) => {
         return sendMarionette({
           name: 'Addon:Install',
           sessionId,
