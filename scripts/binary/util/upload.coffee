@@ -9,8 +9,14 @@ fse = require("fs-extra")
 os = require("os")
 Promise = require("bluebird")
 {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
-konfig = require('../../binary/get-config')()
+konfig = require('../get-config')()
 { purgeCloudflareCache } = require('./purge-cloudflare-cache')
+
+getUploadUrl = () ->
+  url = konfig("cdn_url")
+  la(check.url(url), "could not get CDN url", url)
+  console.log("upload url", url)
+  url
 
 formHashFromEnvironment = () ->
   env = process.env
@@ -59,7 +65,8 @@ getPublisher = (getAwsObj = getS3Credentials) ->
   }
 
 getDesktopUrl = (version, osName, zipName) ->
-  [konfig("cdn_url"), "desktop", version, osName, zipName].join("/")
+  url = getUploadUrl()
+  [url, "desktop", version, osName, zipName].join("/")
 
 # purges desktop application url from Cloudflare cache
 purgeDesktopAppFromCache = ({version, platform, zipName}) ->
@@ -135,5 +142,6 @@ module.exports = {
   getValidPlatformArchs,
   isValidPlatformArch,
   saveUrl,
-  formHashFromEnvironment
+  formHashFromEnvironment,
+  getUploadUrl
 }

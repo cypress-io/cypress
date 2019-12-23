@@ -970,54 +970,71 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - server-performance-tests:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-1:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-2:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-3:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-4:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-5:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-6:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-7:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-8:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-1:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-2:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-3:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-4:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-5:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-6:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-7:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-8:
+        context: test-runner:performance-tracking
         requires:
           - build
     - driver-integration-tests-chrome:
@@ -1069,6 +1086,7 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
     - build-binary:
+        context: test-runner:performance-tracking
         requires:
           - build
     - upload-binary:
