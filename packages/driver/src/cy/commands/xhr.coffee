@@ -251,9 +251,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## correctly
   Cypress.on("window:unload", cancelPendingXhrs)
 
-  Cypress.on "test:before:run:async", ->
-    ## reset any state on the backend
-    Cypress.backend('reset:server:state')
+  if Cypress.isBrowser('firefox')
+    Cypress.on "test:before:run:async", ->
+      ## reset any state on the backend
+      Cypress.backend('reset:server:state')
 
   Cypress.on "test:before:run", ->
     ## reset the existing server
