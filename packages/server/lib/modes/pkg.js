@@ -1,5 +1,9 @@
-Promise = require("bluebird")
-pkg     = require("@packages/root")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const Promise = require("bluebird");
+const pkg     = require("@packages/root");
 
-module.exports = ->
-  Promise.resolve(pkg)
+module.exports = () => Promise.resolve(pkg);

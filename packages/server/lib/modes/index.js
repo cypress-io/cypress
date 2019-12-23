@@ -1,10 +1,17 @@
-module.exports = (mode, options) ->
-  switch mode
-    when "record"
-      require("./record").run(options)
-    when "run"
-      require("./run").run(options)
-    when "interactive"
-      require("./interactive").run(options)
-    when "smokeTest"
-      require("./smoke_test").run(options)
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+module.exports = function(mode, options) {
+  switch (mode) {
+    case "record":
+      return require("./record").run(options);
+    case "run":
+      return require("./run").run(options);
+    case "interactive":
+      return require("./interactive").run(options);
+    case "smokeTest":
+      return require("./smoke_test").run(options);
+  }
+};

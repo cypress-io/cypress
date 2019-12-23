@@ -1,108 +1,126 @@
-_          = require("lodash")
-os         = require("os")
-EE         = require("events")
-app        = require("electron").app
-image      = require("electron").nativeImage
-Promise    = require("bluebird")
-cyIcons    = require("@cypress/icons")
-user       = require("../user")
-errors     = require("../errors")
-savedState = require("../saved_state")
-logs       = require("../gui/logs")
-menu       = require("../gui/menu")
-Events     = require("../gui/events")
-Windows    = require("../gui/windows")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _          = require("lodash");
+const os         = require("os");
+const EE         = require("events");
+const { app }        = require("electron");
+const image      = require("electron").nativeImage;
+const Promise    = require("bluebird");
+const cyIcons    = require("@cypress/icons");
+const user       = require("../user");
+const errors     = require("../errors");
+const savedState = require("../saved_state");
+const logs       = require("../gui/logs");
+const menu       = require("../gui/menu");
+const Events     = require("../gui/events");
+const Windows    = require("../gui/windows");
 
-isDev = ->
-  process.env["CYPRESS_ENV"] is "development"
+const isDev = () => process.env["CYPRESS_ENV"] === "development";
 
 module.exports = {
-  isMac: ->
-    os.platform() is "darwin"
+  isMac() {
+    return os.platform() === "darwin";
+  },
 
-  getWindowArgs: (state, options = {}) ->
-    common = {
-      backgroundColor: "#dfe2e4"
-      width: state.appWidth or 800
-      height: state.appHeight or 550
-      minWidth: 458
-      minHeight: 400
-      x: state.appX
-      y: state.appY
-      type: "INDEX"
-      devTools: state.isAppDevToolsOpen
+  getWindowArgs(state, options = {}) {
+    const common = {
+      backgroundColor: "#dfe2e4",
+      width: state.appWidth || 800,
+      height: state.appHeight || 550,
+      minWidth: 458,
+      minHeight: 400,
+      x: state.appX,
+      y: state.appY,
+      type: "INDEX",
+      devTools: state.isAppDevToolsOpen,
       trackState: {
-        width: "appWidth"
-        height: "appHeight"
-        x: "appX"
-        y: "appY"
+        width: "appWidth",
+        height: "appHeight",
+        x: "appX",
+        y: "appY",
         devTools: "isAppDevToolsOpen"
+      },
+      onBlur() {
+        if (this.webContents.isDevToolsOpened()) { return; }
+
+        return Windows.hideAllUnlessAnotherWindowIsFocused();
+      },
+      onFocus() {
+        //# hide dev tools if in production and previously focused
+        //# window was the electron browser
+        menu.set({withDevTools: isDev()});
+        return Windows.showAll();
+      },
+      onClose() {
+        return process.exit();
       }
-      onBlur: ->
-        return if @webContents.isDevToolsOpened()
+    };
 
-        Windows.hideAllUnlessAnotherWindowIsFocused()
-      onFocus: ->
-        ## hide dev tools if in production and previously focused
-        ## window was the electron browser
-        menu.set({withDevTools: isDev()})
-        Windows.showAll()
-      onClose: ->
-        process.exit()
-    }
+    return _.extend(common, this.platformArgs());
+  },
 
-    _.extend(common, @platformArgs())
-
-  platformArgs: ->
-    {
+  platformArgs() {
+    return {
       darwin: {
-        show:        true
-        frame:       true
+        show:        true,
+        frame:       true,
         transparent: false
-      }
+      },
 
       linux: {
-        show:        true
-        frame:       true
-        transparent: false
+        show:        true,
+        frame:       true,
+        transparent: false,
         icon: image.createFromPath(cyIcons.getPathToIcon("icon_128x128.png"))
       }
-    }[os.platform()]
+    }[os.platform()];
+  },
 
-  ready: (options = {}) ->
-    bus = new EE
+  ready(options = {}) {
+    const bus = new EE;
 
-    { projectRoot } = options
+    const { projectRoot } = options;
 
-    ## TODO: potentially just pass an event emitter
-    ## instance here instead of callback functions
+    //# TODO: potentially just pass an event emitter
+    //# instance here instead of callback functions
     menu.set({
-      withDevTools: isDev()
-      onLogOutClicked: ->
-        bus.emit("menu:item:clicked", "log:out")
-    })
+      withDevTools: isDev(),
+      onLogOutClicked() {
+        return bus.emit("menu:item:clicked", "log:out");
+      }
+    });
 
-    savedState(projectRoot, false)
-    .then (state) -> state.get()
-    .then (state) =>
-      Windows.open(projectRoot, @getWindowArgs(state, options))
-      .then (win) =>
+    return savedState(projectRoot, false)
+    .then(state => state.get())
+    .then(state => {
+      return Windows.open(projectRoot, this.getWindowArgs(state, options))
+      .then(win => {
         Events.start(_.extend({}, options, {
-          onFocusTests: -> win.focus()
+          onFocusTests() { return win.focus(); },
           os: os.platform()
-        }), bus)
+        }), bus);
 
-        return win
+        return win;
+      });
+    });
+  },
 
-  run: (options) ->
-    waitForReady = ->
-      new Promise (resolve, reject) ->
-        app.on "ready", resolve
+  run(options) {
+    const waitForReady = () =>
+      new Promise(function(resolve, reject) {
+        return app.on("ready", resolve);
+      })
+    ;
 
-    Promise.any([
-      waitForReady()
+    return Promise.any([
+      waitForReady(),
       Promise.delay(500)
     ])
-    .then =>
-      @ready(options)
-}
+    .then(() => {
+      return this.ready(options);
+    });
+  }
+};
