@@ -41,6 +41,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
+    "@babel/runtime": "7.4.4",
     "@cypress/browserify-preprocessor": "1.1.2",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.0",
@@ -143,7 +144,6 @@
     "@babel/plugin-transform-runtime": "7.4.4",
     "@babel/preset-env": "7.4.4",
     "@babel/preset-react": "7.0.0",
-    "@babel/runtime": "7.4.4",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/json-schemas": "5.33.0",
     "@cypress/sinon-chai": "1.1.0",
