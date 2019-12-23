@@ -5,7 +5,6 @@ debug = require("debug")("cypress:server:browsers")
 path = require("path")
 urlUtil = require("url")
 FirefoxProfile = require("firefox-profile")
-webExt = require("web-ext").default
 firefoxUtil = require("./firefox-util")
 
 plugins = require("../plugins")
