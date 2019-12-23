@@ -87,7 +87,7 @@
     "@types/markdown-it": "0.0.9",
     "@types/mini-css-extract-plugin": "0.8.0",
     "@types/mocha": "5.2.7",
-    "@types/node": "12.12.17",
+    "@types/node": "12.12.21",
     "@types/ramda": "0.26.38",
     "@types/react-dom": "16.9.4",
     "@types/request-promise": "4.1.45",
