@@ -182,7 +182,7 @@
   },
   "engines": {
     "node": ">=12.0.0",
-    "yarn": ">=1.21.1"
+    "yarn": ">=1.17.3"
   },
   "productName": "Cypress",
   "license": "MIT",
