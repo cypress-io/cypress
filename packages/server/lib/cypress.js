@@ -1,109 +1,108 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-require("./environment");
+require('./environment')
 
-//# we are not requiring everything up front
-//# to optimize how quickly electron boots while
-//# in dev or linux production. the reasoning is
-//# that we likely may need to spawn a new child process
-//# and its a huge waste of time (about 1.5secs) of
-//# synchronous requires the first go around just to
-//# essentially do it all again when we boot the correct
-//# mode.
+// we are not requiring everything up front
+// to optimize how quickly electron boots while
+// in dev or linux production. the reasoning is
+// that we likely may need to spawn a new child process
+// and its a huge waste of time (about 1.5secs) of
+// synchronous requires the first go around just to
+// essentially do it all again when we boot the correct
+// mode.
 
-const _       = require("lodash");
-const R       = require("ramda");
-const cp      = require("child_process");
-const os      = require("os");
-const path    = require("path");
-const Promise = require("bluebird");
-const debug   = require("debug")("cypress:server:cypress");
-const argsUtils = require("./util/args");
+const R = require('ramda')
+const Promise = require('bluebird')
+const debug = require('debug')('cypress:server:cypress')
+const argsUtils = require('./util/args')
 
-const warning = code => require("./errors").warning(code);
+const warning = (code) => {
+  return require('./errors').warning(code)
+}
 
-const exit = function(code = 0) {
-  //# TODO: we shouldn't have to do this
-  //# but cannot figure out how null is
-  //# being passed into exit
-  debug("about to exit with code", code);
-  return process.exit(code);
-};
+const exit = (code = 0) => {
+  // TODO: we shouldn't have to do this
+  // but cannot figure out how null is
+  // being passed into exit
+  debug('about to exit with code', code)
 
-const exit0 = () => exit(0);
+  return process.exit(code)
+}
 
-const exitErr = function(err) {
-  //# log errors to the console
-  //# and potentially raygun
-  //# and exit with 1
-  debug('exiting with err', err);
+const exit0 = () => {
+  return exit(0)
+}
 
-  return require("./errors").logException(err)
-  .then(() => exit(1));
-};
+const exitErr = (err) => {
+  // log errors to the console
+  // and potentially raygun
+  // and exit with 1
+  debug('exiting with err', err)
+
+  return require('./errors').logException(err)
+  .then(() => {
+    return exit(1)
+  })
+}
 
 module.exports = {
-  isCurrentlyRunningElectron() {
-    return !!(process.versions && process.versions.electron);
+  isCurrentlyRunningElectron () {
+    return !!(process.versions && process.versions.electron)
   },
 
-  runElectron(mode, options) {
-    //# wrap all of this in a promise to force the
-    //# promise interface - even if it doesn't matter
-    //# in dev mode due to cp.spawn
+  runElectron (mode, options) {
+    // wrap all of this in a promise to force the
+    // promise interface - even if it doesn't matter
+    // in dev mode due to cp.spawn
     return Promise.try(() => {
-      //# if we have the electron property on versions
-      //# that means we're already running in electron
-      //# like in production and we shouldn't spawn a new
-      //# process
+      // if we have the electron property on versions
+      // that means we're already running in electron
+      // like in production and we shouldn't spawn a new
+      // process
       if (this.isCurrentlyRunningElectron()) {
-        //# if we weren't invoked from the CLI
-        //# then display a warning to the user
+        // if we weren't invoked from the CLI
+        // then display a warning to the user
         if (!options.invokedFromCli) {
-          warning("INVOKED_BINARY_OUTSIDE_NPM_MODULE");
+          warning('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
         }
 
-        //# just run the gui code directly here
-        //# and pass our options directly to main
-        debug("running Electron currently");
-        return require("./modes")(mode, options);
-      } else {
-        return new Promise(function(resolve) {
-          debug("starting Electron");
-          const cypressElectron = require("@packages/electron");
+        // just run the gui code directly here
+        // and pass our options directly to main
+        debug('running Electron currently')
 
-          const fn = function(code) {
-            //# juggle up the totalFailed since our outer
-            //# promise is expecting this object structure
-            debug("electron finished with", code);
-
-            if (mode === "smokeTest") {
-              return resolve(code);
-            }
-
-            return resolve({totalFailed: code});
-          };
-
-          const args = require("./util/args").toArray(options);
-          debug("electron open arguments %o", args);
-          return cypressElectron.open(".", args, fn);
-        });
+        return require('./modes')(mode, options)
       }
-    });
+
+      return new Promise((resolve) => {
+        debug('starting Electron')
+        const cypressElectron = require('@packages/electron')
+
+        const fn = (code) => {
+          // juggle up the totalFailed since our outer
+          // promise is expecting this object structure
+          debug('electron finished with', code)
+
+          if (mode === 'smokeTest') {
+            return resolve(code)
+          }
+
+          return resolve({ totalFailed: code })
+        }
+
+        const args = require('./util/args').toArray(options)
+
+        debug('electron open arguments %o', args)
+
+        return cypressElectron.open('.', args, fn)
+      })
+    })
   },
 
-  openProject(options) {
-    //# this code actually starts a project
-    //# and is spawned from nodemon
-    return require("./open_project").open(options.project, options);
+  openProject (options) {
+    // this code actually starts a project
+    // and is spawned from nodemon
+    return require('./open_project').open(options.project, options)
   },
 
-  runServer(options) {},
+  runServer (options) {
     // args = {}
     //
     // _.defaults options, { autoOpen: true }
@@ -143,148 +142,146 @@ module.exports = {
     //   cp.spawn("node-inspector", [], {stdio: "inherit"})
     //
     //   require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
+  },
 
-  start(argv = []) {
-    debug("starting cypress with argv %o", argv);
+  start (argv = []) {
+    debug('starting cypress with argv %o', argv)
 
     // if the CLI passed "--" somewhere, we need to remove it
     // for https://github.com/cypress-io/cypress/issues/5466
-    argv = R.without("--", argv);
+    argv = R.without('--', argv)
 
-    const options = argsUtils.toObject(argv);
+    const options = argsUtils.toObject(argv)
 
     if (options.runProject && !options.headed) {
       // scale the electron browser window
       // to force retina screens to not
       // upsample their images when offscreen
       // rendering
-      require("./util/electron_app").scale();
+      require('./util/electron_app').scale()
     }
 
-    //# make sure we have the appData folder
-    return require("./util/app_data").ensure()
+    // make sure we have the appData folder
+    return require('./util/app_data').ensure()
     .then(() => {
-      //# else determine the mode by
-      //# the passed in arguments / options
-      //# and normalize this mode
-      const mode = (() => { switch (false) {
-        case !options.version:
-          return "version";
+      // else determine the mode by
+      // the passed in arguments / options
+      // and normalize this mode
+      let mode = options.mode || 'interactive'
 
-        case !options.smokeTest:
-          return "smokeTest";
+      if (options.version) {
+        mode = 'version'
+      } else if (options.smokeTest) {
+        mode = 'smokeTest'
+      } else if (options.returnPkg) {
+        mode = 'returnPkg'
+      } else if (options.logs) {
+        mode = 'logs'
+      } else if (options.clearLogs) {
+        mode = 'clearLogs'
+      } else if (options.getKey) {
+        mode = 'getKey'
+      } else if (options.generateKey) {
+        mode = 'generateKey'
+      } else if (!(options.exitWithCode == null)) {
+        mode = 'exitWithCode'
+      } else if (options.runProject) {
+        // go into headless mode when running
+        // until completion + exit
+        mode = 'run'
+      }
 
-        case !options.returnPkg:
-          return "returnPkg";
-
-        case !options.logs:
-          return "logs";
-
-        case !options.clearLogs:
-          return "clearLogs";
-
-        case !options.getKey:
-          return "getKey";
-
-        case !options.generateKey:
-          return "generateKey";
-
-        case (options.exitWithCode == null):
-          return "exitWithCode";
-
-        case !options.runProject:
-          //# go into headless mode when running
-          //# until completion + exit
-          return "run";
-
-        default:
-          //# set the default mode as interactive
-          return options.mode || "interactive";
-      } })();
-
-      return this.startInMode(mode, options);
-    });
+      return this.startInMode(mode, options)
+    })
   },
 
-  startInMode(mode, options) {
-    debug("starting in mode %s", mode);
+  startInMode (mode, options) {
+    debug('starting in mode %s', mode)
 
     switch (mode) {
-      case "version":
-        return require("./modes/pkg")(options)
-        .get("version")
-        .then(version => console.log(version)).then(exit0)
-        .catch(exitErr);
+      case 'version':
+        return require('./modes/pkg')(options)
+        .get('version')
+        .then((version) => {
+          return console.log(version) // eslint-disable-line no-console
+        }).then(exit0)
+        .catch(exitErr)
 
-      case "smokeTest":
+      case 'smokeTest':
         return this.runElectron(mode, options)
-        .then(pong => {
+        .then((pong) => {
           if (!this.isCurrentlyRunningElectron()) {
-            return pong;
+            return pong
           }
 
           if (pong === options.ping) {
-            return 0;
+            return 0
           }
 
-          return 1;
-      }).then(exit)
-        .catch(exitErr);
+          return 1
+        }).then(exit)
+        .catch(exitErr)
 
-      case "returnPkg":
-        return require("./modes/pkg")(options)
-        .then(pkg => console.log(JSON.stringify(pkg))).then(exit0)
-        .catch(exitErr);
+      case 'returnPkg':
+        return require('./modes/pkg')(options)
+        .then((pkg) => {
+          return console.log(JSON.stringify(pkg)) // eslint-disable-line no-console
+        }).then(exit0)
+        .catch(exitErr)
 
-      case "logs":
-        //# print the logs + exit
-        return require("./gui/logs").print()
+      case 'logs':
+        // print the logs + exit
+        return require('./gui/logs').print()
         .then(exit0)
-        .catch(exitErr);
+        .catch(exitErr)
 
-      case "clearLogs":
-        //# clear the logs + exit
-        return require("./gui/logs").clear()
+      case 'clearLogs':
+        // clear the logs + exit
+        return require('./gui/logs').clear()
         .then(exit0)
-        .catch(exitErr);
+        .catch(exitErr)
 
-      case "getKey":
-        //# print the key + exit
-        return require("./project").getSecretKeyByPath(options.projectRoot)
-        .then(key => console.log(key)).then(exit0)
-        .catch(exitErr);
+      case 'getKey':
+        // print the key + exit
+        return require('./project').getSecretKeyByPath(options.projectRoot)
+        .then((key) => {
+          return console.log(key) // eslint-disable-line no-console
+        }).then(exit0)
+        .catch(exitErr)
 
-      case "generateKey":
-        //# generate + print the key + exit
-        return require("./project").generateSecretKeyByPath(options.projectRoot)
-        .then(key => console.log(key)).then(exit0)
-        .catch(exitErr);
+      case 'generateKey':
+        // generate + print the key + exit
+        return require('./project').generateSecretKeyByPath(options.projectRoot)
+        .then((key) => {
+          return console.log(key) // eslint-disable-line no-console
+        }).then(exit0)
+        .catch(exitErr)
 
-      case "exitWithCode":
-        return require("./modes/exit")(options)
+      case 'exitWithCode':
+        return require('./modes/exit')(options)
         .then(exit)
-        .catch(exitErr);
+        .catch(exitErr)
 
-      case "run":
-        //# run headlessly and exit
-        //# with num of totalFailed
+      case 'run':
+        // run headlessly and exit
+        // with num of totalFailed
         return this.runElectron(mode, options)
-        .get("totalFailed")
+        .get('totalFailed')
         .then(exit)
-        .catch(exitErr);
+        .catch(exitErr)
 
-      case "interactive":
-        return this.runElectron(mode, options);
+      case 'interactive':
+        return this.runElectron(mode, options)
 
-      case "server":
-        return this.runServer(options);
+      case 'server':
+        return this.runServer(options)
 
-      case "openProject":
-        //# open + start the project
-        return this.openProject(options);
+      case 'openProject':
+        // open + start the project
+        return this.openProject(options)
 
       default:
-        throw new Error(`Cannot start. Invalid mode: '${mode}'`);
+        throw new Error(`Cannot start. Invalid mode: '${mode}'`)
     }
-  }
-};
+  },
+}
