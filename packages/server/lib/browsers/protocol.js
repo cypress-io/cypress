@@ -47,16 +47,23 @@ const getWsTargetFor = (port) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
-  return _connectAsync({ port })
+  // force ipv4
+  // https://github.com/cypress-io/cypress/issues/5912
+  const connectOpts = {
+    host: '127.0.0.1',
+    port,
+  }
+
+  return _connectAsync(connectOpts)
   .tapCatch((err) => {
-    debug('failed to connect to CDP %o', { port, err })
+    debug('failed to connect to CDP %o', { connectOpts, err })
   })
   .then(() => {
     debug('CRI.List on port %d', port)
 
     // what happens if the next call throws an error?
     // it seems to leave the browser instance open
-    return CRI.List({ port })
+    return CRI.List(connectOpts)
   })
   .then((targets) => {
     debug('CRI List %o', { numTargets: targets.length, targets })

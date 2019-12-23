@@ -430,29 +430,6 @@ describe "lib/request", ->
           }
         ])
 
-    it "sends Cookie header, and body", ->
-      nock("http://localhost:8080")
-      .matchHeader("Cookie", "foo=bar; baz=quux")
-      .post("/users", {
-        first: "brian"
-        last: "mann"
-      })
-      .reply(200, {id: 1})
-
-      request.sendPromise({}, @fn, {
-        url: "http://localhost:8080/users"
-        method: "POST"
-        cookies: {foo: "bar", baz: "quux"}
-        json: true
-        body: {
-          first: "brian"
-          last: "mann"
-        }
-      })
-      .then (resp) ->
-        expect(resp.status).to.eq(200)
-        expect(resp.body.id).to.eq(1)
-
     it "catches errors", ->
       nock.enableNetConnect()
 

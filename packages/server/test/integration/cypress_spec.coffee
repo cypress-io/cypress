@@ -306,6 +306,24 @@ describe "lib/cypress", ->
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
         @expectExitWith(0)
 
+    describe "strips --", ->
+      beforeEach ->
+        sinon.spy(argsUtil, "toObject")
+
+      it "strips leading", ->
+        cypress.start(["--", "--run-project=#{@todosPath}"])
+        .then =>
+          expect(argsUtil.toObject).to.have.been.calledWith(["--run-project=#{@todosPath}"])
+          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          @expectExitWith(0)
+
+      it "strips in the middle", ->
+        cypress.start(["--run-project=#{@todosPath}", "--", "--browser=electron"])
+        .then =>
+          expect(argsUtil.toObject).to.have.been.calledWith(["--run-project=#{@todosPath}", "--browser=electron"])
+          expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+          @expectExitWith(0)
+
     it "runs project headlessly and exits with exit code 10", ->
       sinon.stub(runMode, "runSpecs").resolves({ totalFailed: 10 })
 
@@ -324,7 +342,7 @@ describe "lib/cypress", ->
       .then =>
         expect(api.createProject).not.to.be.called
 
-        Project(@noScaffolding).getProjectId()
+        (new Project(@noScaffolding)).getProjectId()
         .then ->
           throw new Error("should have caught error but did not")
         .catch (err) ->
@@ -829,8 +847,8 @@ describe "lib/cypress", ->
           }
           setUserAgent: sinon.stub()
           session: {
-            clearCache: sinon.stub().yieldsAsync()
-            setProxy: sinon.stub().yieldsAsync()
+            clearCache: sinon.stub().resolves()
+            setProxy: sinon.stub().resolves()
             setUserAgent: sinon.stub()
           }
         }
@@ -1170,9 +1188,19 @@ describe "lib/cypress", ->
         @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
         snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-parallel 1")
 
+    it "errors and exits when using --tag without recording", ->
+      cypress.start([
+        "--run-project=#{@recordPath}",
+        "--tag=nightly",
+      ])
+      .then =>
+        @expectExitWithErr("RECORD_PARAMS_WITHOUT_RECORDING")
+        snapshotConsoleLogs("RECORD_PARAMS_WITHOUT_RECORDING-tag 1")
+
     it "errors and exits when using --group and --parallel without recording", ->
       cypress.start([
         "--run-project=#{@recordPath}",
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--parallel",
       ])
@@ -1278,6 +1306,7 @@ describe "lib/cypress", ->
         "--record"
         "--key=token-123",
         "--parallel"
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1301,6 +1330,7 @@ describe "lib/cypress", ->
         "--run-project=#{@recordPath}",
         "--record"
         "--key=token-123",
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])
@@ -1325,6 +1355,7 @@ describe "lib/cypress", ->
         "--record"
         "--key=token-123",
         "--parallel"
+        "--tag=nightly",
         "--group=electron-smoke-tests",
         "--ciBuildId=ciBuildId123",
       ])

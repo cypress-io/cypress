@@ -1555,7 +1555,8 @@ describe "src/cy/commands/navigation", ->
 
           expect(Cookie.get("__cypress.initial")).to.be.undefined
 
-    it "does not reset the timeout", (done) ->
+    ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973
+    it.skip "does not reset the timeout", (done) ->
       cy.timeout(1000)
 
       ## previously loading would reset the timeout
