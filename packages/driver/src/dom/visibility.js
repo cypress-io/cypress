@@ -193,33 +193,55 @@ const elIsHiddenByTransform = ($el) => {
   // https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
   //
   if (transform.startsWith('matrix3d')) {
-    const m3d = transform.substring(8).match(numberRegex)
+    const matrix3d = transform.substring(8).match(numberRegex)
 
-    // Test scale to 0
-    if ((+m3d[0] === 0 && +m3d[4] === 0 && +m3d[8] === 0) || // X Axis
-    (+m3d[1] === 0 && +m3d[5] === 0 && +m3d[9] === 0) || // Y Axis
-    (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0)) { // Z Axis
+    if (is3DMatrixScaledTo0(matrix3d)) {
       return true
     }
 
-    // Test rotate 90deg
-    const defaultNormal = [0, 0, -1]
-    const elNormal = findNormal(m3d)
-    // Simplified dot product.
-    // [0] and [1] are always 0
-    const dot = defaultNormal[2] * elNormal[2]
-
-    return Math.abs(dot) <= 1e-10
+    return isElementOrthogonalWithView(matrix3d)
   }
 
   const m = transform.match(numberRegex)
 
-  if ((+m[0] === 0 && +m[2] === 0) || // X Axis
-    (+m[1] === 0 && +m[3] === 0)) { // Y Axis
+  if (is2DMatrixScaledTo0(m)) {
     return true
   }
 
   return false
+}
+
+const is3DMatrixScaledTo0 = (m3d) => {
+  const xAxisScaledTo0 = +m3d[0] === 0 && +m3d[4] === 0 && +m3d[8] === 0
+  const yAxisScaledTo0 = +m3d[1] === 0 && +m3d[5] === 0 && +m3d[9] === 0
+  const zAxisScaledTo0 = +m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0
+
+  if (xAxisScaledTo0 || yAxisScaledTo0 || zAxisScaledTo0) {
+    return true
+  }
+
+  return false
+}
+
+const is2DMatrixScaledTo0 = (m) => {
+  const xAxisScaledTo0 = +m[0] === 0 && +m[2] === 0
+  const yAxisScaledTo0 = +m[1] === 0 && +m[3] === 0
+
+  if (xAxisScaledTo0 || yAxisScaledTo0) {
+    return true
+  }
+
+  return false
+}
+
+const isElementOrthogonalWithView = (matrix3d) => {
+  const defaultNormal = [0, 0, -1]
+  const elNormal = findNormal(matrix3d)
+  // Simplified dot product.
+  // [0] and [1] are always 0
+  const dot = defaultNormal[2] * elNormal[2]
+
+  return Math.abs(dot) <= 1e-10
 }
 
 const elHasDisplayNone = ($el) => {
