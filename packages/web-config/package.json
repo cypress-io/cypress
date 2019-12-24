@@ -35,7 +35,6 @@
     "resolve-url-loader": "3.1.0",
     "sass-loader": "7.1.0",
     "sinon-chai": "3.3.0",
-    "style-loader": "0.23.1",
     "webpack": "4.29.6",
     "webpack-cli": "3.2.3",
     "webpack-livereload-plugin": "2.2.0"
