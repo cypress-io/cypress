@@ -110,7 +110,7 @@
     "coffeelint": "1.16.2",
     "common-tags": "1.8.0",
     "debug": "4.1.1",
-    "decaffeinate": "6.0.1",
+    "decaffeinate": "6.0.9",
     "del": "3.0.0",
     "electron-builder": "20.39.0",
     "eslint": "6.1.0",
