@@ -125,6 +125,7 @@ const knownCommands = [
   'install',
   'open',
   'run',
+  'init',
   'verify',
   '-v',
   '--version',
@@ -262,6 +263,25 @@ module.exports = {
       debug('opening Cypress')
       require('./exec/open')
       .start(util.parseOpts(opts))
+      .catch(util.logErrorExit1)
+    })
+
+    program
+    .command('init')
+    .usage('[options]')
+    .description('Generate cypress.json based on your answers')
+    .option('-y, --yes', 'skip questionnaire')
+    .option('-f, --force', 'alias of --yes')
+    .option('--baseFile <config-path>', 'The config file your new cypress.json will base on')
+    .option('--config', 'sets configuration values. separate multiple values with a comma. overrides default values.')
+    .option('--no-example', `don't generate example files`)
+    .option('--typescript', 'generate examples, plugin, support in TypeScript')
+    .option('--eslint', 'set up eslint-plugin-cypress for you')
+    .option('--chai-friendly', `set up eslint-plugin-chai-friendly for you. it doesn't work if you didn't set up eslints`)
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      require('./exec/init')
+      .start(opts) // TODO: create parseInitOpts() in util.js
       .catch(util.logErrorExit1)
     })
 

@@ -150,6 +150,8 @@ module.exports = {
       // and normalize this mode
       let mode = options.mode || 'interactive'
 
+      console.log(mode)
+
       if (options.version) {
         mode = 'version'
       } else if (options.smokeTest) {
