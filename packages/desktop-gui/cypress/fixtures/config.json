@@ -196,7 +196,7 @@
       "value": "http://localhost:8080"
     },
     "browsers": {
-      "from": "plugins",
+      "from": "plugin",
       "value": [
         {
           "name": "chrome",
