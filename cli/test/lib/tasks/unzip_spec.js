@@ -112,5 +112,51 @@ describe('lib/tasks/unzip', function () {
         done()
       })
     })
+
+    it('calls node unzip just once', function (done) {
+      const zipFilePath = path.join('test', 'fixture', 'example.zip')
+
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath, opts, cb) => {
+        debug('unzip extract called with %s', filePath)
+        expect(filePath, 'zipfile is the same').to.equal(zipFilePath)
+        expect(cb, 'has callback').to.be.a('function')
+        setTimeout(cb, 10)
+      })
+
+      const unzipChildProcess = new events.EventEmitter()
+
+      unzipChildProcess.stdout = {
+        on () {},
+      }
+
+      unzipChildProcess.stderr = {
+        on () {},
+      }
+
+      sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess)
+
+      setTimeout(() => {
+        debug('emitting unzip error')
+        unzipChildProcess.emit('error', new Error('unzip fails badly'))
+      }, 100)
+
+      setTimeout(() => {
+        debug('emitting unzip close')
+        unzipChildProcess.emit('close', 1)
+      }, 110)
+
+      unzip
+      .start({
+        zipFilePath,
+        installDir,
+      })
+      .then(() => {
+        debug('checking if unzip was called')
+        expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('unzip')
+        expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
+        expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
+        done()
+      })
+    })
   })
 })
