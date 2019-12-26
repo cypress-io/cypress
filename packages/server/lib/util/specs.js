@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const la = require('lazy-ass')
 const path = require('path')
@@ -46,10 +36,10 @@ const find = function findSpecs (config, specPattern) {
     debug('there is no spec pattern')
   }
 
-  //# support files are not automatically
-  //# ignored because only _fixtures are hard
-  //# coded. the rest is simply whatever is in
-  //# the javascripts array
+  // support files are not automatically
+  // ignored because only _fixtures are hard
+  // coded. the rest is simply whatever is in
+  // the javascripts array
 
   if (config.fixturesFolder) {
     fixturesFolderPath = path.join(
@@ -61,15 +51,15 @@ const find = function findSpecs (config, specPattern) {
 
   const supportFilePath = config.supportFile || []
 
-  //# map all of the javascripts to the project root
-  //# TODO: think about moving this into config
-  //# and mapping each of the javascripts into an
-  //# absolute path
+  // map all of the javascripts to the project root
+  // TODO: think about moving this into config
+  // and mapping each of the javascripts into an
+  // absolute path
   const javascriptsPaths = _.map(config.javascripts, (js) => {
     return path.join(config.projectRoot, js)
   })
 
-  //# ignore fixtures + javascripts
+  // ignore fixtures + javascripts
   const options = {
     sort: true,
     absolute: true,
@@ -82,10 +72,10 @@ const find = function findSpecs (config, specPattern) {
     ])),
   }
 
-  //# filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
-  //# integrationFolderPath             = /Users/bmann/Dev/my-project/cypress/integration
-  //# relativePathFromIntegrationFolder = foo.coffee
-  //# relativePathFromProjectRoot       = cypress/integration/foo.coffee
+  // filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
+  // integrationFolderPath             = /Users/bmann/Dev/my-project/cypress/integration
+  // relativePathFromIntegrationFolder = foo.coffee
+  // relativePathFromProjectRoot       = cypress/integration/foo.coffee
 
   const relativePathFromIntegrationFolder = (file) => {
     return path.relative(integrationFolderPath, file)
@@ -95,7 +85,7 @@ const find = function findSpecs (config, specPattern) {
     return path.relative(config.projectRoot, file)
   }
 
-  const setNameParts = function (file) {
+  const setNameParts = (file) => {
     debug('found spec file %s', file)
 
     if (!path.isAbsolute(file)) {
@@ -111,20 +101,19 @@ const find = function findSpecs (config, specPattern) {
 
   const ignorePatterns = [].concat(config.ignoreTestFiles)
 
-  //# a function which returns true if the file does NOT match
-  //# all of our ignored patterns
-  const doesNotMatchAllIgnoredPatterns = (file) =>
-  //# using {dot: true} here so that folders with a '.' in them are matched
-  //# as regular characters without needing an '.' in the
-  //# using {matchBase: true} here so that patterns without a globstar **
-  //# match against the basename of the file
-  {
+  // a function which returns true if the file does NOT match
+  // all of our ignored patterns
+  const doesNotMatchAllIgnoredPatterns = (file) => {
+    // using {dot: true} here so that folders with a '.' in them are matched
+    // as regular characters without needing an '.' in the
+    // using {matchBase: true} here so that patterns without a globstar **
+    // match against the basename of the file
     return _.every(ignorePatterns, (pattern) => {
       return !minimatch(file, pattern, MINIMATCH_OPTIONS)
     })
   }
 
-  const matchesSpecPattern = function (file) {
+  const matchesSpecPattern = (file) => {
     if (!specPattern) {
       return true
     }
@@ -133,8 +122,8 @@ const find = function findSpecs (config, specPattern) {
       return minimatch(file, pattern, MINIMATCH_OPTIONS)
     }
 
-    //# check to see if the file matches
-    //# any of the spec patterns array
+    // check to see if the file matches
+    // any of the spec patterns array
     return _
     .chain([])
     .concat(specPattern)
