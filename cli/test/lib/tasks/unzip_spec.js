@@ -1,9 +1,11 @@
 require('../../spec_helper')
 
+const events = require('events')
 const os = require('os')
 const path = require('path')
 const snapshot = require('../../support/snapshot')
 const cp = require('child_process')
+const debug = require('debug')('test')
 
 const fs = require(`${lib}/fs`)
 const util = require(`${lib}/util`)
@@ -65,39 +67,49 @@ describe('lib/tasks/unzip', function () {
     })
   })
 
-  // NOTE: hmm, running this test for some reason breaks 4 tests in verify_spec.js with very weird errors
-  context.skip('on linux', () => {
+  context('on linux', () => {
     beforeEach(() => {
       os.platform.returns('linux')
     })
 
-    it('can try unzip first then fall back to node unzip', function () {
-      sinon.stub(unzip.utils.unzipTools, 'extract').resolves()
-
-      const unzipChildProcess = {
-        on: sinon.stub(),
-        stdout: {
-          on () {},
-        },
-        stderr: {
-          on () {},
-        },
-      }
-
-      unzipChildProcess.on.withArgs('error').yieldsAsync(0)
-      unzipChildProcess.on.withArgs('close').yieldsAsync(0)
-      sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess)
-
+    it('can try unzip first then fall back to node unzip', function (done) {
       const zipFilePath = path.join('test', 'fixture', 'example.zip')
 
-      return unzip
+      sinon.stub(unzip.utils.unzipTools, 'extract').callsFake((filePath, opts, cb) => {
+        debug('unzip extract called with %s', filePath)
+        expect(filePath, 'zipfile is the same').to.equal(zipFilePath)
+        expect(cb, 'has callback').to.be.a('function')
+        setTimeout(cb, 10)
+      })
+
+      const unzipChildProcess = new events.EventEmitter()
+
+      unzipChildProcess.stdout = {
+        on () {},
+      }
+
+      unzipChildProcess.stderr = {
+        on () {},
+      }
+
+      sinon.stub(cp, 'spawn').withArgs('unzip').returns(unzipChildProcess)
+
+      setTimeout(() => {
+        debug('emitting unzip error')
+        unzipChildProcess.emit('error', new Error('unzip fails badly'))
+      }, 100)
+
+      unzip
       .start({
         zipFilePath,
         installDir,
       })
       .then(() => {
-        expect(cp.spawn).to.have.been.calledWith('unzip')
-        expect(unzip.utils.unzipTools.extract).to.be.calledWith(zipFilePath)
+        debug('checking if unzip was called')
+        expect(cp.spawn, 'unzip spawn').to.have.been.calledWith('unzip')
+        expect(unzip.utils.unzipTools.extract, 'extract called').to.be.calledWith(zipFilePath)
+        expect(unzip.utils.unzipTools.extract, 'extract called once').to.be.calledOnce
+        done()
       })
     })
   })
