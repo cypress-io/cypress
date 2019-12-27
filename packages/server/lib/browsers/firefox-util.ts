@@ -1,13 +1,14 @@
+/* eslint-disable no-console */
+
+import Bluebird from 'bluebird'
+import Debug from 'debug'
+import Foxdriver from 'foxdriver'
 import _ from 'lodash'
 import Marionette from 'marionette-client'
 import Exception from 'marionette-client/lib/marionette/error'
-import Foxdriver from 'foxdriver'
 import { Command } from 'marionette-client/lib/marionette/message.js'
-import {
-  _connectAsync,
-} from './protocol'
-import Bluebird from 'bluebird'
-import Debug from 'debug'
+import util from 'util'
+import { _connectAsync } from './protocol'
 
 const debug = Debug('cypress:server:browsers')
 
@@ -29,7 +30,45 @@ let sendMarionette
 
 let cb
 
+let timings = {
+  gc: [],
+  cc: [],
+}
+
+const log = () => {
+  console.log('timings', util.inspect(timings, {
+    compact: true,
+    breakLength: Infinity,
+    maxArrayLength: Infinity,
+  }))
+
+  console.log('times', {
+    gc: timings.gc.length,
+    cc: timings.cc.length,
+  })
+
+  console.log('average', {
+    gc: _.chain(timings.gc).sum().divide(timings.gc.length).value(),
+    cc: _.chain(timings.cc).sum().divide(timings.cc.length).value(),
+  })
+
+  console.log('total', {
+    gc: _.sum(timings.gc),
+    cc: _.sum(timings.cc),
+  })
+
+  // reset all the timings
+  timings = {
+    gc: [],
+    cc: [],
+  }
+}
+
 module.exports = {
+  log () {
+    log()
+  },
+
   collectGarbage () {
     return cb()
   },
@@ -56,18 +95,44 @@ module.exports = {
     })
 
     cb = () => {
+      let duration
+
+      const gc = (tab) => {
+        return () => {
+          console.time('garbage collection')
+          duration = Date.now()
+
+          return tab.memory.forceGarbageCollection()
+          .then(() => {
+            console.timeEnd('garbage collection')
+
+            timings.gc.push(Date.now() - duration)
+          })
+        }
+      }
+
+      const cc = (tab) => {
+        return () => {
+          console.time('cycle collection')
+          duration = Date.now()
+
+          return tab.memory.forceCycleCollection()
+          .then(() => {
+            console.timeEnd('cycle collection')
+
+            timings.cc.push(Date.now() - duration)
+          })
+        }
+      }
+
       return browser.listTabs()
       .then((tabs) => {
         browser.tabs = tabs
 
         return Bluebird.mapSeries(tabs, (tab: any) => {
           return attach(tab)
-          .then(() => {
-            return tab.memory.forceCycleCollection()
-          })
-          .then(() => {
-            return tab.memory.forceGarbageCollection()
-          })
+          .then(gc(tab))
+          .then(cc(tab))
           // .then(() => {
           // return tab.memory.measure()
           // .then(console.log)
