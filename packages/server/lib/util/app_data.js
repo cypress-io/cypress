@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const os = require('os')
 const path = require('path')
 const ospath = require('ospath')
@@ -25,7 +18,7 @@ if (!PRODUCT_NAME) {
   throw new Error('Root package is missing name')
 }
 
-const getSymlinkType = function () {
+const getSymlinkType = () => {
   if (os.platform() === 'win32') {
     return 'junction'
   }
@@ -49,7 +42,7 @@ module.exports = {
       })
     }
 
-    //# try twice to ensure the dir
+    // try twice to ensure the dir
     return ensure()
     .catch(ensure)
   },
@@ -74,7 +67,7 @@ module.exports = {
     la(check.unemptyString(env.CYPRESS_ENV),
       'expected CYPRESS_ENV, found', env.CYPRESS_ENV)
 
-    //# allow overriding the app_data folder
+    // allow overriding the app_data folder
     const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_ENV
 
     const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)

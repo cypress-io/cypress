@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const _ = require('lodash')
 const chalk = require('chalk')
 const Table = require('cli-table3')
@@ -33,7 +32,7 @@ const renderTables = (...tables) => {
   .value()
 }
 
-const getChars = function (type) {
+const getChars = (type) => {
   switch (type) {
     case 'border':
       return {
@@ -131,7 +130,7 @@ const wrapBordersInGray = (chars) => {
   })
 }
 
-const table = function (options = {}) {
+const table = (options = {}) => {
   const { type } = options
   const defaults = utils.mergeOptions({})
 
@@ -146,9 +145,9 @@ const table = function (options = {}) {
       'padding-left': 1,
       'padding-right': 1,
     },
-  });
+  })
 
-  ({ chars } = options)
+  chars = options.chars
 
   if (colWidths) {
     const sum = _.sum(colWidths)
@@ -178,7 +177,7 @@ const table = function (options = {}) {
   return new Table(options)
 }
 
-const header = function (message, options = {}) {
+const header = (message, options = {}) => {
   _.defaults(options, {
     color: null,
   })
@@ -190,18 +189,17 @@ const header = function (message, options = {}) {
 
     message = _.reduce(colors, (memo, color) => {
       return chalk[color](memo)
-    }
-    , message)
+    }, message)
   }
 
-  console.log(message)
+  console.log(message) // eslint-disable-line no-console
 }
 
-const divider = function (symbol, color = 'gray') {
+const divider = (symbol, color = 'gray') => {
   const cols = getMaximumColumns()
   const str = symbol.repeat(cols)
 
-  console.log(chalk[color](str))
+  console.log(chalk[color](str)) // eslint-disable-line no-console
 }
 
 module.exports = {

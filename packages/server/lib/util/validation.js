@@ -1,23 +1,11 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
-const errors = require('../errors')
 const debug = require('debug')('cypress:server:validation')
 const is = require('check-more-types')
 const { commaListsOr } = require('common-tags')
 
-// # validation functions take a key and a value and should:
-// #  - return true if it passes validation
-// #  - return a error message if it fails validation
+// validation functions take a key and a value and should:
+//  - return true if it passes validation
+//  - return a error message if it fails validation
 
 const str = JSON.stringify
 

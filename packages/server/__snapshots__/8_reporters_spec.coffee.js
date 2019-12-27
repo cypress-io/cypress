@@ -13,8 +13,8 @@ Require stack:
 - lib/reporter.coffee
 - lib/project.js
 - lib/modes/run.js
-- lib/modes/index.coffee
-- lib/cypress.coffee
+- lib/modes/index.js
+- lib/cypress.js
 - index.js
 - 
 
