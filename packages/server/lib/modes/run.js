@@ -999,7 +999,7 @@ module.exports = {
         this.waitForSocketConnection(project, socketId),
         this.launchBrowser(options)
       )
-      .timeout(timeout || 30000)
+      .timeout(timeout || 60000)
       .catch(Promise.TimeoutError, (err) => {
         attempts += 1
 
