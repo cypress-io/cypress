@@ -17,7 +17,6 @@ fixture       = require("./fixture")
 errors        = require("./errors")
 automation    = require("./automation")
 preprocessor  = require("./plugins/preprocessor")
-savedState = require("./saved_state")
 
 runnerEvents = [
   "reporter:restart:test:run"
@@ -348,24 +347,13 @@ class Socket
       socket.on "get:user:editor", (cb) ->
         debug("get user editor")
 
-        savedState.create()
-        .then (state) -> state.get()
-        .then (state) ->
-          if preferredEditor = state.preferredEditor
-            debug("return preferred editor: %o", preferredEditor)
-            cb({ preferredEditor })
-            return
-
-          editors.getUserEditors().then (availableEditors) ->
-            debug("return available editors: %o", availableEditors)
-            cb({ availableEditors })
+        editors.getUserEditor(false)
+        .then(cb)
 
       socket.on "set:user:editor", (editor) ->
         debug("set user editor: %o", editor)
 
-        savedState.create()
-        .then (state) ->
-          state.set("preferredEditor", editor)
+        editors.setUserEditor(editor)
 
       socket.on "open:file", (fileDetails) ->
         debug("open file: %o", fileDetails)

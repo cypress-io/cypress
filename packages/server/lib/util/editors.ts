@@ -39,7 +39,7 @@ const getOtherEditor = (preferredEditor?: CyEditor) => {
   }
 }
 
-export const getUserEditors = (): Bluebird<CyEditor[]> => {
+const getUserEditors = (): Bluebird<CyEditor[]> => {
   return Bluebird.filter(allEditors(), (editor) => {
     debug('check if user has editor %s with binary %s', editor.name, editor.binary)
 
@@ -57,5 +57,33 @@ export const getUserEditors = (): Bluebird<CyEditor[]> => {
 
       return _.map(editors, createEditor).concat([getOtherEditor(preferredEditor)])
     })
+  })
+}
+
+export const getUserEditor = (alwaysIncludeEditors = false) => {
+  return savedState.create()
+  .then((state) => state.get())
+  .then((state) => {
+    const preferredEditor = state.preferredEditor
+
+    if (preferredEditor) {
+      debug('return preferred editor: %o', preferredEditor)
+      if (!alwaysIncludeEditors) {
+        return { preferredEditor }
+      }
+    }
+
+    return getUserEditors().then((availableEditors) => {
+      debug('return available editors: %o', availableEditors)
+
+      return { availableEditors, preferredEditor }
+    })
+  })
+}
+
+export const setUserEditor = (editor) => {
+  return savedState.create()
+  .then((state) => {
+    state.set('preferredEditor', editor)
   })
 }
