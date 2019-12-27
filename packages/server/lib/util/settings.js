@@ -1,15 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-cond-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
@@ -17,18 +5,14 @@ const errors = require('../errors')
 const log = require('../log')
 const fs = require('../util/fs')
 
-//# TODO:
-//# think about adding another PSemaphore
-//# here since we can read + write the
-//# settings at the same time something else
-//# is potentially reading it
+// TODO:
+// think about adding another PSemaphore
+// here since we can read + write the
+// settings at the same time something else
+// is potentially reading it
 
-const flattenCypress = function (obj) {
-  let cypress
-
-  if (cypress = obj.cypress) {
-    return cypress
-  }
+const flattenCypress = (obj) => {
+  return obj.cypress ? obj.cypress : undefined
 }
 
 const maybeVerifyConfigFile = Promise.method((configFile) => {
@@ -39,10 +23,10 @@ const maybeVerifyConfigFile = Promise.method((configFile) => {
   return fs.statAsync(configFile)
 })
 
-const renameVisitToPageLoad = function (obj) {
-  let v
+const renameVisitToPageLoad = (obj) => {
+  const v = obj.visitTimeout
 
-  if (v = obj.visitTimeout) {
+  if (v) {
     obj = _.omit(obj, 'visitTimeout')
     obj.pageLoadTimeout = v
 
@@ -50,10 +34,10 @@ const renameVisitToPageLoad = function (obj) {
   }
 }
 
-const renameCommandTimeout = function (obj) {
-  let c
+const renameCommandTimeout = (obj) => {
+  const c = obj.commandTimeout
 
-  if (c = obj.commandTimeout) {
+  if (c) {
     obj = _.omit(obj, 'commandTimeout')
     obj.defaultCommandTimeout = c
 
@@ -61,10 +45,10 @@ const renameCommandTimeout = function (obj) {
   }
 }
 
-const renameSupportFolder = function (obj) {
-  let sf
+const renameSupportFolder = (obj) => {
+  const sf = obj.supportFolder
 
-  if (sf = obj.supportFolder) {
+  if (sf) {
     obj = _.omit(obj, 'supportFolder')
     obj.supportFile = sf
 
@@ -103,15 +87,10 @@ module.exports = {
 
   _applyRewriteRules (obj = {}) {
     return _.reduce([flattenCypress, renameVisitToPageLoad, renameCommandTimeout, renameSupportFolder], (memo, fn) => {
-      let ret
+      const ret = fn(memo)
 
-      if (ret = fn(memo)) {
-        return ret
-      }
-
-      return memo
-    }
-    , _.cloneDeep(obj))
+      return ret ? ret : memo
+    }, _.cloneDeep(obj))
   },
 
   configFile (options = {}) {
@@ -133,12 +112,11 @@ module.exports = {
 
     // first check if cypress.json exists
     return maybeVerifyConfigFile(file)
-    .then(() =>
-    // if it does also check that the projectRoot
-    // directory is writable
-    {
+    .then(() => {
+      // if it does also check that the projectRoot
+      // directory is writable
       return fs.accessAsync(projectRoot, fs.W_OK)
-    }).catch({ code: 'ENOENT' }, (err) => {
+    }).catch({ code: 'ENOENT' }, () => {
       // cypress.json does not exist, we missing project
       log('cannot find file %s', file)
 
@@ -166,13 +144,13 @@ module.exports = {
     }).then((json = {}) => {
       const changed = this._applyRewriteRules(json)
 
-      //# if our object is unchanged
-      //# then just return it
+      // if our object is unchanged
+      // then just return it
       if (_.isEqual(json, changed)) {
         return json
       }
 
-      //# else write the new reduced obj
+      // else write the new reduced obj
       return this._write(file, changed)
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
