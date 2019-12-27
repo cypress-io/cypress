@@ -150,8 +150,6 @@ module.exports = {
       // and normalize this mode
       let mode = options.mode || 'interactive'
 
-      console.log(mode)
-
       if (options.version) {
         mode = 'version'
       } else if (options.smokeTest) {
@@ -172,6 +170,8 @@ module.exports = {
         // go into headless mode when running
         // until completion + exit
         mode = 'run'
+      } else if (options.initProject) {
+        mode = 'init'
       }
 
       return this.startInMode(mode, options)
@@ -260,6 +260,11 @@ module.exports = {
 
       case 'interactive':
         return this.runElectron(mode, options)
+
+      case 'init':
+        return require('./modes/init')(options)
+        .get(exit)
+        .catch(exitErr)
 
       case 'openProject':
         // open + start the project

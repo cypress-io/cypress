@@ -160,6 +160,7 @@ module.exports = {
       'exec-path': 'execPath',
       'exit-with-code': 'exitWithCode',
       'inspect-brk': 'inspectBrk',
+      'init-project': 'initProject',
       'get-key': 'getKey',
       'new-key': 'generateKey',
       'output-path': 'outputPath',

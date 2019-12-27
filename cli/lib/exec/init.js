@@ -9,7 +9,7 @@ module.exports = {
       options.project = process.cwd()
     }
 
-    const args = ['--init']
+    const args = ['--init-project']
 
     if (options.config) {
       args.push('--config', options.config)
