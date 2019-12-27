@@ -1,16 +1,22 @@
 version: 2.1
 
-develop-only: &develop-only
+## NOTE: to test building the binary, npm package, and test against example repos before
+## merging, change `develop` to your branch name below
+extra-testing-filters: &extra-testing-filters
   filters:
     branches:
       only:
-## NOTE: to test all jobs against your PR before merging, just add your branch name here
         - circleci-windows
-        
-# usually we don't build Mac app - it takes a long time
-# but sometimes we want to really confirm we are doing the right thing
-# so just add your branch to the list here to build and test on Mac
-macBuildFilters: &macBuildFilters
+
+## NOTE: to run macOS tests before merging, change `develop` to your branch name below
+mac-build-filters: &mac-build-filters
+  filters:
+    branches:
+      only:
+        - circleci-windows
+
+## NOTE: to run Windows tests before merging, change `develop` to your branch name below
+win-build-filters: &win-build-filters
   filters:
     branches:
       only:
@@ -1136,7 +1142,7 @@ linux-workflow: &linux-workflow
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
-        <<: *develop-only
+        <<: *extra-testing-filters
         context: test-runner:record-tests
         requires:
           - build
@@ -1144,7 +1150,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - test-kitchensink-against-staging:
-        <<: *develop-only
+        <<: *extra-testing-filters
         context: test-runner:record-tests
         requires:
           - build
@@ -1152,7 +1158,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - upload-npm-package:
-        <<: *develop-only
+        <<: *extra-testing-filters
         context: test-runner:upload
         requires:
           - build-npm-package
@@ -1161,29 +1167,29 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - upload-binary:
-        <<: *develop-only
+        <<: *extra-testing-filters
         context: test-runner:upload
         requires:
           - build-binary
     - test-binary-and-npm-against-other-projects:
-        <<: *develop-only
+        <<: *extra-testing-filters
         context: test-runner:trigger-test-jobs
         requires:
           - upload-npm-package
           - upload-binary
     - test-npm-module-and-verify-binary:
-        <<: *develop-only
+        <<: *extra-testing-filters
         requires:
           - build-npm-package
           - build-binary
     - test-binary-against-staging:
-        <<: *develop-only
+        <<: *extra-testing-filters
         context: test-runner:record-tests
         requires:
           - build-npm-package
           - build-binary
     - test-binary-against-kitchensink:
-        <<: *develop-only
+        <<: *extra-testing-filters
         requires:
           - build-npm-package
           - build-binary
@@ -1202,7 +1208,7 @@ linux-workflow: &linux-workflow
 mac-workflow: &mac-workflow
   jobs:
     - posix-build:
-        <<: *macBuildFilters
+        <<: *mac-build-filters
         name: mac-build
         executor: mac
     - lint:
@@ -1263,7 +1269,7 @@ win-ia32-workflow: &win-ia32-workflow
   jobs:
   - win-build:
       <<: *win-executor
-      <<: *develop-only
+      <<: *win-build-filters
       name: 'win-ia32-build'
       arch: x86
   - build-npm-package:
@@ -1319,7 +1325,7 @@ win-x64-workflow: &win-x64-workflow
   jobs:
   - win-build:
       <<: *win-executor
-      <<: *develop-only
+      <<: *win-build-filters
       name: 'win-x64-build'
       arch: x64
   - build-npm-package:
