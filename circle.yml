@@ -766,6 +766,8 @@ jobs:
           command: node ./scripts/test-repo
           ## must use cmd.exe because of https://github.com/cypress-io/cypress/issues/789
           shell: cmd.exe
+          environment:
+            SHELL:
       - store-npm-logs
 
   "test-kitchensink-against-staging":
