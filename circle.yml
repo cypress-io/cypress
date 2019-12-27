@@ -746,7 +746,8 @@ jobs:
           at: ~/
       - run:
           name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git .
+          working_directory: /tmp/repo
       - run:
           name: Install prod dependencies
           command: npm install --production
@@ -773,7 +774,8 @@ jobs:
           at: ~/
       - run:
           name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
+          command: git clone https://github.com/cypress-io/cypress-test-tiny.git .
+          working_directory: /tmp/repo
       - run:
           name: Run test project
           command: |
@@ -870,7 +872,7 @@ jobs:
             node scripts/test-unique-npm-and-binary.js \
               --npm npm-package-url.json \
               --binary binary-url.json \
-              --cwd /tmp/testing
+          working_directory: /tmp/testing
       - run:
           name: Verify Cypress binary
           working_directory: /tmp/testing
@@ -927,7 +929,8 @@ jobs:
       - run: ls -l cypress.zip cypress.tgz
       - run:
           name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+          command: git clone https://github.com/cypress-io/cypress-test-tiny.git .
+          working_directory: /tmp/cypress-test-tiny
       - run:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
