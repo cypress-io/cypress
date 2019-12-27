@@ -122,6 +122,10 @@ describe('Project Nav', function () {
           .find('.dropdown-menu').first()
           // one is showing in the selection, so won't be in the list
           .find('.browser-icon')
+          .each(function ($i) {
+            cy.wrap($i).should('have.class',
+              `browser-icon`)
+          })
         })
 
         it('does not display stop button', () => {
