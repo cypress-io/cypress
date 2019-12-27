@@ -73,33 +73,31 @@ export default class Browsers extends Component {
       icon = checkmark
       prefixText = 'Running'
     } else {
-      switch (browser.name) {
+      icon = getIcon(browser.name)
+      prefixText = ''
+    }
+
+    function getIcon (browserName) {
+      switch (browserName) {
         case 'electron': {
-          icon = electron
-          break
+          return electron
         }
         case 'chrome': {
-          icon = chrome
-          break
+          return chrome
         }
         case 'canary': {
-          icon = canary
-          break
+          return canary
         }
         case 'chromium': {
-          icon = chromium
-          break
+          return chromium
         }
         case 'firefox': {
-          icon = firefox
-          break
+          return firefox
         }
         default: {
-          icon = defaultBrowser
-          break
+          return defaultBrowser
         }
       }
-      prefixText = ''
     }
 
     return (
