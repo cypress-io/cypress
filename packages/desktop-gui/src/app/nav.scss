@@ -169,12 +169,29 @@
     display: inline-block;
   }
 
-  .browser-icon { 
-    padding-right: 5px; 
+  .chrome > .browser-icon { 	 
+    width: 16px;
+    height: 16px;
   }
-
-  .browser.name {
-    padding: 5px;
+  .canary > .browser-icon { 	 
+    width: 16px;
+    height: 16px;
+  }
+  .chromium > .browser-icon { 	 
+    width: 16px;
+    height: 16px;
+  }
+  .electron > .browser-icon { 	 
+    width: 16px;
+    height: 16px;
+  }
+  .firefox > .browser-icon { 	 
+    width: 16px;
+    height: 16px;
+  }
+  .defaultBrowser > .browser-icon { 	 
+    width: 16px;
+    height: 16px;
   }
 
   .dropdown-menu {
@@ -182,6 +199,7 @@
     right: 0;
   }
 }
+
 
 .nav .browser-info {
   color: #999;
