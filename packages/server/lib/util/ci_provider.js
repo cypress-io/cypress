@@ -99,7 +99,7 @@ const CI_PROVIDERS = {
   'wercker': isWercker,
 }
 
-const _detectProviderName = function () {
+const _detectProviderName = () => {
   const { env } = process
 
   // return the key of the first provider
@@ -338,7 +338,7 @@ const _providerCiParams = () => {
 
 // tries to grab commit information from CI environment variables
 // very useful to fill missing information when Git cannot grab correct values
-const _providerCommitParams = function () {
+const _providerCommitParams = () => {
   const { env } = process
 
   return {
@@ -500,11 +500,11 @@ const _providerCommitParams = function () {
   }
 }
 
-const provider = function () {
+const provider = () => {
   return _detectProviderName() || null
 }
 
-const omitUndefined = function (ret) {
+const omitUndefined = (ret) => {
   if (_.isObject(ret)) {
     return _.omitBy(ret, _.isUndefined)
   }
@@ -527,7 +527,7 @@ const commitParams = () => {
   return _get(_providerCommitParams)
 }
 
-const commitDefaults = function (existingInfo) {
+const commitDefaults = (existingInfo) => {
   debug('git commit existing info')
   debug(existingInfo)
 

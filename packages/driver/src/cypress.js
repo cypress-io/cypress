@@ -1,19 +1,3 @@
-/* eslint-disable
-    default-case,
-    no-unused-vars,
-    prefer-rest-params,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS206: Consider reworking classes to avoid initClass
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 const blobUtil = require('blob-util')
@@ -49,12 +33,12 @@ const proxies = {
   cy: 'detachDom getStyles'.split(' '),
 }
 
-const jqueryProxyFn = function () {
+const jqueryProxyFn = function (...args) {
   if (!this.cy) {
     $utils.throwErrByPath('miscellaneous.no_cy')
   }
 
-  return this.cy.$$.apply(this.cy, arguments)
+  return this.cy.$$.apply(this.cy, args)
 }
 
 _.extend(jqueryProxyFn, $)
@@ -65,75 +49,35 @@ $Log.command = () => {
   return $utils.throwErrByPath('miscellaneous.command_log_renamed')
 }
 
-const throwDeprecatedCommandInterface = function (key, method) {
-  const signature = (() => {
-    switch (method) {
-      case 'addParentCommand':
-        return `'${key}', function(){...}`
-      case 'addChildCommand':
-        return `'${key}', { prevSubject: true }, function(){...}`
-      case 'addDualCommand':
-        return `'${key}', { prevSubject: 'optional' }, function(){...}`
-    }
-  })()
+const throwDeprecatedCommandInterface = (key, method) => {
+  let signature = ''
 
-  return $utils.throwErrByPath('miscellaneous.custom_command_interface_changed', {
+  switch (method) {
+    case 'addParentCommand':
+      signature = `'${key}', function(){...}`
+      break
+    case 'addChildCommand':
+      signature = `'${key}', { prevSubject: true }, function(){...}`
+      break
+    case 'addDualCommand':
+      signature = `'${key}', { prevSubject: 'optional' }, function(){...}`
+      break
+    default:
+      break
+  }
+
+  $utils.throwErrByPath('miscellaneous.custom_command_interface_changed', {
     args: { method, signature },
   })
 }
 
 const throwPrivateCommandInterface = (method) => {
-  return $utils.throwErrByPath('miscellaneous.private_custom_command_interface', {
+  $utils.throwErrByPath('miscellaneous.private_custom_command_interface', {
     args: { method },
   })
 }
 
 class $Cypress {
-  static initClass () {
-    this.prototype.$ = jqueryProxyFn
-
-    // attach to $Cypress to access
-    // all of the constructors
-    // to enable users to monkeypatch
-    this.prototype.$Cypress = $Cypress
-    this.prototype.Cy = $Cy
-    this.prototype.Chainer = $Chainer
-    this.prototype.Cookies = $Cookies
-    this.prototype.Command = $Command
-    this.prototype.Commands = $Commands
-    this.prototype.dom = $dom
-    this.prototype.errorMessages = $errorMessages
-    this.prototype.Keyboard = $Keyboard
-    this.prototype.Location = $Location
-    this.prototype.Log = $Log
-    this.prototype.LocalStorage = $LocalStorage
-    this.prototype.Mocha = $Mocha
-    this.prototype.Mouse = $Mouse
-    this.prototype.Runner = $Runner
-    this.prototype.Server = $Server
-    this.prototype.Screenshot = $Screenshot
-    this.prototype.SelectorPlayground = $SelectorPlayground
-    this.prototype.utils = $utils
-    this.prototype._ = _
-    this.prototype.moment = moment
-    this.prototype.Blob = blobUtil
-    this.prototype.Promise = Promise
-    this.prototype.minimatch = minimatch
-    this.prototype.sinon = sinon
-    this.prototype.lolex = lolex
-
-    // proxy all of the methods in proxies
-    // to their corresponding objects
-    _.each(proxies, (methods, key) => {
-      return _.each(methods, (method) => {
-        return $Cypress.prototype[method] = function () {
-          const prop = this[key]
-
-          return prop && prop[method].apply(prop, arguments)
-        }
-      })
-    })
-  }
   constructor (config = {}) {
     this.cy = null
     this.chai = null
@@ -169,12 +113,10 @@ class $Cypress {
     //   }
     // }
 
+    let d = config.remote ? config.remote.domainName : undefined
+
     // set domainName but allow us to turn
     // off this feature in testing
-    let d
-
-    d = config.remote != null ? config.remote.domainName : undefined
-
     if (d) {
       document.domain = d
     }
@@ -206,7 +148,7 @@ class $Cypress {
       longStackTraces: config.isInteractive,
     })
 
-    const { env, remote } = config
+    const { env } = config
 
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state')
 
@@ -246,7 +188,8 @@ class $Cypress {
     }
 
     // create cy and expose globally
-    this.cy = (window.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn))
+    this.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn)
+    window.cy = this.cy
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)
     this.mocha = $Mocha.create(specWindow, this)
@@ -521,15 +464,16 @@ class $Cypress {
 
       case 'spec:script:error':
         return this.emit('script:error', ...args)
+
+      default:
+        return
     }
   }
 
   backend (eventName, ...args) {
     return new Promise((resolve, reject) => {
       const fn = function (reply) {
-        let e
-
-        e = reply.error
+        const e = reply.error
 
         if (e) {
           // clone the error object
@@ -557,9 +501,7 @@ class $Cypress {
     // wrap action in promise
     return new Promise((resolve, reject) => {
       const fn = function (reply) {
-        let e
-
-        e = reply.error
+        const e = reply.error
 
         if (e) {
           const err = $utils.cloneErr(e)
@@ -583,23 +525,23 @@ class $Cypress {
     return this.action('cypress:stop')
   }
 
-  addChildCommand (key, fn) {
+  addChildCommand (key) {
     return throwDeprecatedCommandInterface(key, 'addChildCommand')
   }
 
-  addParentCommand (key, fn) {
+  addParentCommand (key) {
     return throwDeprecatedCommandInterface(key, 'addParentCommand')
   }
 
-  addDualCommand (key, fn) {
+  addDualCommand (key) {
     return throwDeprecatedCommandInterface(key, 'addDualCommand')
   }
 
-  addAssertionCommand (key, fn) {
+  addAssertionCommand () {
     return throwPrivateCommandInterface('addAssertionCommand')
   }
 
-  addUtilityCommand (key, fn) {
+  addUtilityCommand () {
     return throwPrivateCommandInterface('addUtilityCommand')
   }
 
@@ -607,7 +549,50 @@ class $Cypress {
     return new $Cypress(config)
   }
 }
-$Cypress.initClass()
+
+$Cypress.prototype.$ = jqueryProxyFn
+
+// attach to $Cypress to access
+// all of the constructors
+// to enable users to monkeypatch
+$Cypress.prototype.$Cypress = $Cypress
+$Cypress.prototype.Cy = $Cy
+$Cypress.prototype.Chainer = $Chainer
+$Cypress.prototype.Cookies = $Cookies
+$Cypress.prototype.Command = $Command
+$Cypress.prototype.Commands = $Commands
+$Cypress.prototype.dom = $dom
+$Cypress.prototype.errorMessages = $errorMessages
+$Cypress.prototype.Keyboard = $Keyboard
+$Cypress.prototype.Location = $Location
+$Cypress.prototype.Log = $Log
+$Cypress.prototype.LocalStorage = $LocalStorage
+$Cypress.prototype.Mocha = $Mocha
+$Cypress.prototype.Mouse = $Mouse
+$Cypress.prototype.Runner = $Runner
+$Cypress.prototype.Server = $Server
+$Cypress.prototype.Screenshot = $Screenshot
+$Cypress.prototype.SelectorPlayground = $SelectorPlayground
+$Cypress.prototype.utils = $utils
+$Cypress.prototype._ = _
+$Cypress.prototype.moment = moment
+$Cypress.prototype.Blob = blobUtil
+$Cypress.prototype.Promise = Promise
+$Cypress.prototype.minimatch = minimatch
+$Cypress.prototype.sinon = sinon
+$Cypress.prototype.lolex = lolex
+
+// proxy all of the methods in proxies
+// to their corresponding objects
+_.each(proxies, (methods, key) => {
+  return _.each(methods, (method) => {
+    return $Cypress.prototype[method] = function (...args) {
+      const prop = this[key]
+
+      return prop && prop[method].apply(prop, args)
+    }
+  })
+})
 
 // attaching these so they are accessible
 // via the runner + integration spec helper

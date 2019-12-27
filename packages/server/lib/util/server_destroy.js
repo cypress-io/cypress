@@ -6,7 +6,6 @@ module.exports = function (server) {
 
   server.destroyAsync = () => {
     return Promise.promisify(server.destroy)()
-    .catch(() => {})
+    .catch(() => {}) // dont catch any errors
   }
 }
-// dont catch any errors
