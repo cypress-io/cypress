@@ -1,8 +1,11 @@
-_       = require("lodash")
-strip   = require("strip-ansi")
-chalk   = require("chalk")
-ansi_up = require("ansi_up")
+_ = require("lodash")
+strip = require("strip-ansi")
+chalk = require("chalk")
+AU = require('ansi_up')
 Promise = require("bluebird")
+
+ansi_up = new AU.default
+ansi_up.use_classes = true
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
@@ -110,15 +113,15 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
-      Warning: Cypress can only record videos when running headlessly.
+      Warning: Cypress can only record videos of Electron when running headlessly.
 
-      You have set the 'electron' browser to run headed.
+      You have set the Electron browser to run headed.
 
       A video will not be recorded when using this mode.
       """
     when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
       """
-      Warning: Cypress can only record videos when using the built in 'electron' browser.
+      Warning: Cypress can only record videos when using an Electron or Chrome-family browser.
 
       You have set the browser to: '#{arg1}'
 
@@ -166,6 +169,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       There is likely something wrong with the request.
 
       #{displayFlags(arg1.flags, {
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -191,6 +195,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       You cannot parallelize a run that has been complete for that long.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -207,6 +212,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -221,6 +227,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -309,10 +316,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "RECORD_PARAMS_WITHOUT_RECORDING"
       """
-      You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+      You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
       #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel"
       })}
@@ -908,9 +916,7 @@ clone = (err, options = {}) ->
   obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
 
   if options.html
-    obj.message = ansi_up.ansi_to_html(err.message, {
-      use_classes: true
-    })
+    obj.message = ansi_up.ansi_to_html(err.message)
   else
     obj.message = err.message
 
@@ -964,4 +970,6 @@ module.exports = {
   throw: throwErr
 
   stripAnsi: strip
+
+  displayFlags
 }

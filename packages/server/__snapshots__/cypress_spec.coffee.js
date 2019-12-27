@@ -1,5 +1,5 @@
 exports['RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId 1'] = `
-You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
 The --ci-build-id flag you passed was: ciBuildId123
 
@@ -19,7 +19,7 @@ https://on.cypress.io/incorrect-ci-build-id-usage
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-group 1'] = `
-You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
 The --group flag you passed was: e2e-tests
 
@@ -29,7 +29,7 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-parallel 1'] = `
-You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
 The --parallel flag you passed was: true
 
@@ -39,7 +39,7 @@ https://on.cypress.io/record-params-without-recording
 `
 
 exports['RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1'] = `
-You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
 The --group flag you passed was: electron-smoke-tests
 The --parallel flag you passed was: true
@@ -219,6 +219,7 @@ You did not pass the --parallel flag, but this run's group was originally create
 
 The existing run is: https://dashboard.cypress.io/runs/12345
 
+The --tag flag you passed was: nightly
 The --group flag you passed was: electron-smoke-tests
 The --ciBuildId flag you passed was: ciBuildId123
 
@@ -234,6 +235,7 @@ The existing run is: https://dashboard.cypress.io/runs/12345
 
 When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
+The --tag flag you passed was: nightly
 The --group flag you passed was: electron-smoke-tests
 The --ciBuildId flag you passed was: ciBuildId123
 
@@ -247,9 +249,18 @@ The existing run is: https://dashboard.cypress.io/runs/12345
 
 You cannot parallelize a run that has been complete for that long.
 
+The --tag flag you passed was: nightly
 The --group flag you passed was: electron-smoke-tests
 The --parallel flag you passed was: true
 The --ciBuildId flag you passed was: ciBuildId123
 
 https://on.cypress.io/stale-run
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-tag 1'] = `
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+
+These flags can only be used when recording to the Cypress Dashboard service.
+
+https://on.cypress.io/record-params-without-recording
 `

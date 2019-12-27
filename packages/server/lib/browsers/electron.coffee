@@ -157,7 +157,7 @@ module.exports = {
         debug('debugger: received response to %s: %o', message, res)
         res
       .catch (err) ->
-        debug('debugger: received error on %s: %o', messsage, err)
+        debug('debugger: received error on %s: %o', message, err)
         throw err
 
     webContents.debugger.sendCommand('Browser.getVersion')
@@ -193,11 +193,10 @@ module.exports = {
   _setUserAgent: (webContents, userAgent) ->
     debug("setting user agent to:", userAgent)
     ## set both because why not
-    webContents.setUserAgent(userAgent)
+    webContents.userAgent = userAgent
     webContents.session.setUserAgent(userAgent)
 
   _setProxy: (webContents, proxyServer) ->
-    debug("setting proxy to %o", { proxyServer })
     webContents.session.setProxy({
       proxyRules: proxyServer
       ## this should really only be necessary when

@@ -154,16 +154,12 @@ module.exports = {
       })
 
     if options.onPaint
-      setFrameRate = (num) ->
-        if win.webContents.getFrameRate() isnt num
-          win.webContents.setFrameRate(num)
-
       win.webContents.on "paint", (event, dirty, image) ->
         ## https://github.com/cypress-io/cypress/issues/705
         ## if win is destroyed this will throw
         try
           if fr = options.recordFrameRate
-            setFrameRate(fr)
+            win.webContents.frameRate = fr
 
           options.onPaint.apply(win, arguments)
         catch err
