@@ -18,7 +18,7 @@ const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
-const RUNNABLE_PROPS = 'id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings'.split(' ')
+const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings'.split(' ')
 
 // ## initial payload
 // {
@@ -499,8 +499,16 @@ const normalizeAll = function (suite, initialTests = {}, grep, setTestsById, set
   }
 
   if (setTests) {
+    let i = 0
+
+    const testsArr = _.map(tests, (test) => {
+      test.order = i += 1
+
+      return test
+    })
+
     // same pattern here
-    setTests(_.values(tests))
+    setTests(testsArr)
   }
 
   return obj

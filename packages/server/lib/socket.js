@@ -369,10 +369,11 @@ class Socket {
             case 'http:request':
               return options.onRequest(headers, automationRequest, args[0])
             case 'reset:server:state':
-              return Promise.all([
-                firefoxUtil.collectGarbage(),
-                options.onResetServerState(),
-              ])
+              return options.onResetServerState()
+            case 'log:memory:pressure':
+              return firefoxUtil.log()
+            case 'reduce:memory:pressure':
+              return firefoxUtil.collectGarbage()
             case 'incoming:xhr':
               return options.onIncomingXhr(args[0], args[1])
             case 'get:fixture':

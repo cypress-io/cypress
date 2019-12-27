@@ -35,6 +35,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## currentViewport could already be set due to previous runs
   currentViewport ?= defaultViewport
 
+  Cypress.on "test:before:run:async", (testAttrs) ->
+    { order } = testAttrs
+    fmri = config("firefoxMemoryReductionInterval")
+
+    ## TODO: add !isInteractive here too
+
+    ## if we've enabled firefox memory reduction
+    ## and the test order matches this interval
+    if fmri > 0 and order % fmri is 0
+      Cypress.backend("reduce:memory:pressure")
+  
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we
