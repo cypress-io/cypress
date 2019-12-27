@@ -110,10 +110,15 @@ describe "lib/errors", ->
         expect(ret).to.be.undefined
 
   context ".clone", ->
-    it "converts err.message from ansi to html with span classes", ->
+    it "converts err.message from ansi to html with span classes when html true", ->
       err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"))
       obj = errors.clone(err, {html: true})
       expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')
+
+    it "does not convert err.message from ansi to html when no html option", ->
+      err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"))
+      obj = errors.clone(err)
+      expect(obj.message).to.eq('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
 
   context ".displayFlags", ->
     it "returns string formatted from selected keys", ->

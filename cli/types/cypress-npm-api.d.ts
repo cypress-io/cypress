@@ -238,9 +238,13 @@ declare module 'cypress' {
      */
     group: string
     /**
-     * Display the Electron browser instead of running headlessly
+     * Display the browser instead of running headlessly
      */
     headed: boolean
+    /**
+     * Hide the browser instead of running headed
+     */
+    headless: boolean
     /**
      * Specify your secret record key
      */

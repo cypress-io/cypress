@@ -196,6 +196,7 @@ const parseOpts = (opts) => {
     'global',
     'group',
     'headed',
+    'headless',
     'key',
     'path',
     'parallel',
