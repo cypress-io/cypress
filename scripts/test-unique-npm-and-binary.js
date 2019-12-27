@@ -14,7 +14,7 @@ la(is.unemptyString(binary), 'missing binary url')
 
 console.log('testing NPM from', npm)
 console.log('and binary from', binary)
-const cwd = options.cwd || process.cwd()
+const cwd = (process.platform === 'win32' ? options.wincwd : options.cwd) || process.cwd()
 
 console.log('in', cwd)
 

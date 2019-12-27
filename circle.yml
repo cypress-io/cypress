@@ -889,7 +889,8 @@ jobs:
             node scripts/test-unique-npm-and-binary.js \
               --npm npm-package-url.json \
               --binary binary-url.json \
-          working_directory: /tmp/testing
+              --cwd /tmp/testing \
+              --wincwd C:\tmp\testing
       - run:
           name: Verify Cypress binary
           working_directory: /tmp/testing
