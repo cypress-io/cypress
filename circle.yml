@@ -749,8 +749,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      # setting a SHELL on Windows will cause a test to fail, so don't
-      - run: SHELL= node ./scripts/test-repo
+      - run: SHELL=bash node ./scripts/test-repo
       # - store_artifacts:
       #     path: /tmp/repo/cypress/screenshots
       # - store_artifacts:
