@@ -749,11 +749,23 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: SHELL=bash node ./scripts/test-repo
+      - run:
+          command: node ./scripts/test-repo
       # - store_artifacts:
       #     path: /tmp/repo/cypress/screenshots
       # - store_artifacts:
       #     path: /tmp/repo/cypress/videos
+      - store-npm-logs
+
+  win-test-kitchensink:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: node ./scripts/test-repo
+          ## must use cmd.exe because of https://github.com/cypress-io/cypress/issues/789
+          shell: cmd.exe
       - store-npm-logs
 
   "test-kitchensink-against-staging":
@@ -1296,7 +1308,7 @@ win-ia32-workflow: &win-ia32-workflow
       context: test-runner:upload
       requires:
         - win-ia32-build-binary
-  - test-kitchensink:
+  - win-test-kitchensink:
       <<: *win-executor
       name: 'win-ia32-test-kitchensink'
       requires:
@@ -1352,7 +1364,7 @@ win-x64-workflow: &win-x64-workflow
       context: test-runner:upload
       requires:
         - win-x64-build-binary
-  - test-kitchensink:
+  - win-test-kitchensink:
       <<: *win-executor
       name: 'win-x64-test-kitchensink'
       requires:
