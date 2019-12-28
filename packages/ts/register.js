@@ -1,5 +1,4 @@
 const log = require('debug')('cypress:ts')
-let tsNode
 
 // in development we should have TypeScript hook installed
 // in production or staging we are likely to be running
@@ -7,11 +6,17 @@ let tsNode
 // build has been done correctly
 
 try {
-  tsNode = require('ts-node')
+  const tsNode = require('ts-node')
+  const path = require('path')
+
+  const stack = (new Error('not a real error')).stack
+  const requiringPackage = stack.split('\n').find((v) => v.includes('/packages/') && !v.includes('packages/ts'))
+  const packageName = requiringPackage.match('\/packages\/(.*?)\/')[1]
 
   // register TypeScript Node require hook
   // https://github.com/TypeStrong/ts-node#programmatic-usage
-  const project = require('path').join(__dirname, 'tsconfig.json')
+  const packagePath = path.join(__dirname, '..', packageName)
+  const project = path.join(packagePath, 'tsconfig.json')
 
   // transpile TypeScript without checking types by default
   // set environment variable when you want to actually verify types

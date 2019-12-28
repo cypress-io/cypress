@@ -41,6 +41,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
+    "@benmalka/foxdriver": "0.2.3",
     "@cypress/browserify-preprocessor": "1.1.2",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.0",
@@ -48,7 +49,6 @@
     "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@ffmpeg-installer/ffmpeg": "1.0.19",
     "ansi_up": "4.0.3",
-    "babel-runtime": "6.26.0",
     "black-hole-stream": "0.0.1",
     "bluebird": "3.7.0",
     "browserify": "16.3.0",
@@ -150,7 +150,6 @@
     "@cypress/sinon-chai": "1.1.0",
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.91",
-    "babel-plugin-add-module-exports": "1.0.2",
     "babelify": "10.0.0",
     "bin-up": "1.2.2",
     "body-parser": "1.19.0",

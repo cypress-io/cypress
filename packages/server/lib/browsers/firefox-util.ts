@@ -2,10 +2,10 @@
 
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import Foxdriver from 'foxdriver'
 import _ from 'lodash'
 import Marionette from 'marionette-client'
 import Exception from 'marionette-client/lib/marionette/error'
+import Foxdriver from '@benmalka/foxdriver'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import { _connectAsync } from './protocol'
