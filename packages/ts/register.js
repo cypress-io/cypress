@@ -8,15 +8,18 @@ const log = require('debug')('cypress:ts')
 try {
   const tsNode = require('ts-node')
   const path = require('path')
+  const fs = require('fs-extra')
 
   const stack = (new Error('not a real error')).stack
-  const requiringPackage = stack.split('\n').find((v) => v.includes('/packages/') && !v.includes('packages/ts'))
+  const requiringPackage = stack.split('\n').reverse().find((v) => v.includes('/packages/') && !v.includes('packages/ts'))
   const packageName = requiringPackage.match('\/packages\/(.*?)\/')[1]
 
   // register TypeScript Node require hook
   // https://github.com/TypeStrong/ts-node#programmatic-usage
   const packagePath = path.join(__dirname, '..', packageName)
-  const project = path.join(packagePath, 'tsconfig.json')
+  const requiringProject = path.join(packagePath, 'tsconfig.json')
+
+  const project = fs.existsSync(requiringProject) ? requiringProject : path.join(__dirname, 'tsconfig.json')
 
   // transpile TypeScript without checking types by default
   // set environment variable when you want to actually verify types
