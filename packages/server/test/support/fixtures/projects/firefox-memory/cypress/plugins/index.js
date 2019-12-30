@@ -15,7 +15,6 @@
 
 const _ = require('lodash')
 const execa = require('execa')
-const filesize = require('filesize')
 const os = require('os')
 const util = require('util')
 const si = require('systeminformation')
@@ -82,7 +81,7 @@ module.exports = (on, config) => {
         })
         .sumBy('mem_rss')
         .thru((kb) => {
-          return filesize(kb * 1024)
+          return Math.round(kb / 1024) // mb
         })
         .value()
 
