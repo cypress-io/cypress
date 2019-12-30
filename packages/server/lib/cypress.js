@@ -262,7 +262,7 @@ module.exports = {
         return this.runElectron(mode, options)
 
       case 'init':
-        return require('./modes/init')(options)
+        return require('./modes/init').prompt(options)
         .get(exit)
         .catch(exitErr)
 
