@@ -15,6 +15,7 @@
 
 const _ = require('lodash')
 const execa = require('execa')
+const filesize = require('filesize')
 const os = require('os')
 const util = require('util')
 const si = require('systeminformation')
@@ -51,27 +52,44 @@ module.exports = (on, config) => {
         intervalId = setInterval(() => {
           execa('free', ['-m'])
           .then(({ stdout }) => {
-            si.mem()
-            .then((data) => {
-              console.log(stdout)
-              const avail = _
-              .chain(stdout)
-              .split('\n')
-              .nth(1)
-              .split(' ')
-              .last()
-              .toNumber()
-              .value()
+            console.log(stdout)
+            const avail = _
+            .chain(stdout)
+            .split('\n')
+            .nth(1)
+            .split(' ')
+            .last()
+            .toNumber()
+            .value()
 
-              console.log(avail)
-              timings.push(avail)
-              console.log('systeminformation: ', data)
-            })
+            console.log(avail)
+            timings.push(avail)
           })
         }, 1000)
       }
 
       return null
+    },
+    'log:memory' () {
+      return si.processes()
+      .then(({ list }) => {
+        const totalRss = _.chain(list)
+        // BLOCKING TODO: need to make this detect firefox that are children of Cypress
+        // *only* using parent pid and pid, otherwise it will detect the user's
+        // Firefox
+        .filter((proc) => {
+          return ['firefox', 'firefox-bin'].includes(proc.command)
+        })
+        .sumBy('mem_rss')
+        .thru((kb) => {
+          return filesize(kb * 1024)
+        })
+        .value()
+
+        console.log({ totalRss })
+
+        return null
+      })
     },
   })
 }

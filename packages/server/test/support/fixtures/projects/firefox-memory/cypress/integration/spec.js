@@ -20,6 +20,7 @@ function parse (obj) {
   const str = JSON.stringify(obj, [
     'usedJSHeapSize',
     'totalJSHeapSize',
+
     'jsHeapSizeLimit',
   ])
 
@@ -37,6 +38,10 @@ const stats = () => {
 describe('memory leak finder', function () {
   let duration
 
+  beforeEach(() => {
+    cy.task('log:memory')
+  })
+
   before(stats)
   before(() => {
     duration = Date.now()
@@ -47,6 +52,7 @@ describe('memory leak finder', function () {
   after(() => {
     duration = Date.now() - duration
     cy
+
     .task('stop:capture:memory')
     .then(() => {
       return Cypress.backend('log:memory:pressure')
