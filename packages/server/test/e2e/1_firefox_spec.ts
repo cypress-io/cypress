@@ -9,6 +9,7 @@ describe('e2e firefox', function () {
     spec: 'spec.js',
     browser: 'firefox',
     expectedExitCode: 0,
+    timeout: 1e9,
     // snapshot: true,
   })
 })
