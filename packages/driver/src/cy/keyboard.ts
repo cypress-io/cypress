@@ -64,6 +64,7 @@ const timeRe = /^([0-1]\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\.[0-9]{1,3})?/
 const dateTimeRe = /^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}/
 const numberRe = /^-?(\d+|\d+\.\d+|\.\d+)([eE][-+]?\d+)?$/i
 const charsBetweenCurlyBracesRe = /({.+?})/
+const isValidNumberInputChar = /[-+eE\d\.]/
 
 const INITIAL_MODIFIERS = {
   alt: false,
@@ -260,11 +261,14 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
 
       if (!(numberRe.test(potentialValue))) {
         debug('skipping inserting value since number input would be invalid', key.text, potentialValue)
-        if (key.text.match(/[-+eE\d\.]/)) {
-          options.prevVal = needsValue + key.text
-        } else {
+        // when typing in a number input, only certain whitelisted chars will insert text
+        if (!key.text.match(isValidNumberInputChar)) {
           options.prevVal = ''
+
+          return
         }
+
+        options.prevVal = needsValue + key.text
 
         return
       }
@@ -481,6 +485,7 @@ function _getEndIndex (str, substr) {
 // Simulated default actions for select few keys.
 const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
   Enter: (el, key, options) => {
+    // if input element, Enter key does not insert text
     if (!$elements.isInput(el)) {
       $selection.replaceSelectionContents(el, '\n')
     }

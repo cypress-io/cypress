@@ -1,19 +1,7 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const path = require('path')
-const Promise = require('bluebird')
 const fs = require('./fs')
 
 const isIntegrationTestRe = /^integration/
-const isUnitTestRe = /^unit/
 
 // require.resolve walks the symlinks, which can really change
 // the results. For example
@@ -36,7 +24,7 @@ const checkIfResolveChangedRootFolder = (resolved, initial) => {
 
 // real folder path found could be different due to symlinks
 // For example, folder /tmp/foo on Mac is really /private/tmp/foo
-const getRealFolderPath = function (folder) {
+const getRealFolderPath = (folder) => {
   // TODO check if folder is a non-empty string
   if (!folder) {
     throw new Error('Expected folder')
@@ -45,13 +33,13 @@ const getRealFolderPath = function (folder) {
   return fs.realpathAsync(folder)
 }
 
-const getRelativePathToSpec = function (spec) {
+const getRelativePathToSpec = (spec) => {
   switch (false) {
-    //# if our file is an integration test
-    //# then figure out the absolute path
-    //# to it
+    // if our file is an integration test
+    // then figure out the absolute path
+    // to it
     case !isIntegrationTestRe.test(spec):
-      //# strip off the integration part
+      // strip off the integration part
       return path.relative('integration', spec)
     default:
       return spec
@@ -67,24 +55,24 @@ module.exports = {
 
   getAbsolutePathToSpec (spec, config) {
     switch (false) {
-      //# if our file is an integration test
-      //# then figure out the absolute path
-      //# to it
+      // if our file is an integration test
+      // then figure out the absolute path
+      // to it
       case !isIntegrationTestRe.test(spec):
         spec = getRelativePathToSpec(spec)
 
-        //# now simply join this with our integrationFolder
-        //# which makes it an absolute path
+        // now simply join this with our integrationFolder
+        // which makes it an absolute path
         return path.join(config.integrationFolder, spec)
 
-        // ## commented out until we implement unit testing
+        // // commented out until we implement unit testing
         // when isUnitTestRe.test(spec)
 
-        //# strip off the unit part
+        // // strip off the unit part
         // spec = path.relative("unit", spec)
 
-        // ## now simply resolve this with our unitFolder
-        // ## which makes it an absolute path
+        // // now simply resolve this with our unitFolder
+        // // which makes it an absolute path
         // path.join(config.unitFolder, spec)
 
       default:
