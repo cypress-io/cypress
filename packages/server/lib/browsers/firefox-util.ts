@@ -98,6 +98,10 @@ module.exports = {
 
       const gc = (tab) => {
         return () => {
+          if (process.env.CYPRESS_SKIP_GC) {
+            return
+          }
+
           console.time('garbage collection')
           duration = Date.now()
 
@@ -112,6 +116,10 @@ module.exports = {
 
       const cc = (tab) => {
         return () => {
+          if (process.env.CYPRESS_SKIP_CC) {
+            return
+          }
+
           console.time('cycle collection')
           duration = Date.now()
 
@@ -129,6 +137,7 @@ module.exports = {
         browser.tabs = tabs
 
         return Bluebird.mapSeries(tabs, (tab: any) => {
+          // FIXME: do we really need to attach and detach every time?
           return attach(tab)
           .then(gc(tab))
           .then(cc(tab))
