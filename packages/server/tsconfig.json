@@ -8,7 +8,6 @@
     "./../ts/index.d.ts"
   ],
   "compilerOptions": {
-    "types": ["mocha", "node", "chrome"],
-    "strict": false
+    "types": ["mocha", "node", "chrome"]
   }
 }
