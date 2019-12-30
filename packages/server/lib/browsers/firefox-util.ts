@@ -31,13 +31,12 @@ let sendMarionette
 let cb
 
 let timings = {
-  gc: [],
-  cc: [],
+  gc: [] as any[],
+  cc: [] as any[],
 }
 
 const log = () => {
   console.log('timings', util.inspect(timings, {
-    compact: true,
     breakLength: Infinity,
     maxArrayLength: Infinity,
   }))
