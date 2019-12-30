@@ -63,7 +63,7 @@ module.exports = (on, config) => {
             .value()
 
             console.log(avail)
-            timings.push(avail)
+            // timings.push(avail)
           })
         }, 1000)
       }
@@ -87,6 +87,8 @@ module.exports = (on, config) => {
         .value()
 
         console.log({ totalRss })
+
+        timings.push(totalRss)
 
         return null
       })
