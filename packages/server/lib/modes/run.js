@@ -545,7 +545,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
   // - YES display reporter results (via mocha reporter)
   const options = {
     socketId,
-    onSettingsChanged: options.simulateOpenMode ? function () {} : false,
+    onSettingsChanged: args.simulateOpenMode ? function () {} : false,
     morgan: false,
     report: true,
     isTextTerminal: args.isTextTerminal,
