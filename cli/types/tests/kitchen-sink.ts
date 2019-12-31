@@ -71,6 +71,11 @@ cy.on('window:confirm', () => { })
 cy.on('window:confirm', cy.spy())
 cy.on('window:confirm', cy.stub())
 
+Cypress.removeListener('fail', () => {})
+Cypress.removeAllListeners('fail')
+cy.removeListener('fail', () => {})
+cy.removeAllListeners('fail')
+
 // specifying HTTP method directly in the options object
 cy.request({
   url: "http://localhost:3000/myressource",
