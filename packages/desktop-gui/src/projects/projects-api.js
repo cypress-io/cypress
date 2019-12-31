@@ -166,7 +166,7 @@ const openProject = (project) => {
   })
 
   ipc.onConfigChanged((__, filePath) => {
-    project.setWarning({
+    project.addWarning({
       isCypressErr: true,
       type: 'CONFIGURATION_CHANGED',
       message: `\`${filePath}\` was modified. Restart Cypress for changes to take effect.`,
