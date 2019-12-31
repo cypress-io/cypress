@@ -1452,7 +1452,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('expected `<button#button>` to be `visible`')
+          expect(err.message).to.include('This element `<button#button>` is not visible because it has CSS property: `display: none`')
 
           done()
         })
@@ -1487,7 +1487,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws when alias property is `0`', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('`0` is not a valid alias property. Are you trying to ask for the first response? If so write @getUsers.1')
+          expect(err.message).to.include('`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@getUsers.1`')
 
           done()
         })
@@ -2173,7 +2173,7 @@ space
       it('throws when assertion is have.length > 1', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(err.message).to.eq('`cy.contains()` cannot be passed a length option because it will only ever return 1 element.')
+          expect(err.message).to.eq('`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 
           done()

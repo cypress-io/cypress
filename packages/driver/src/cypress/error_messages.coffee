@@ -419,7 +419,7 @@ module.exports = {
 
   get:
     alias_invalid: {
-      message: "`{{prop}}` is not a valid alias property. Only numbers or `all` is permitted."
+      message: "`{{prop}}` is not a valid alias property. Only `numbers` or `all` is permitted."
       docsUrl: "https://on.cypress.io/get"
     }
     alias_zero: {
