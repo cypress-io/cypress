@@ -46,9 +46,7 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   2) s1 without an afterEach hook t2:
      Uncaught ReferenceError: bar is not defined
@@ -61,11 +59,7 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   3) s1 with an afterEach hook t4:
      Uncaught ReferenceError: foo is not defined
@@ -78,13 +72,11 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   4) s1 with an afterEach hook t5:
      Error: baz
-      at stack trace line
+      [stack trace lines]
 
   5) s1 cross origin script errors explains where script errored:
      Uncaught Error: Script error.
@@ -107,10 +99,7 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

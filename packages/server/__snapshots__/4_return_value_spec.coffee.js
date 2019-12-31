@@ -35,22 +35,7 @@ Because cy commands are asynchronous and are queued to be run later, it doesn't 
 For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
 In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
-
-https://on.cypress.io/returning-value-and-commands-in-test
-
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   2)  errors when invoking commands in custom command and returning differnet value:
      CypressError: Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
@@ -71,16 +56,7 @@ In previous versions of Cypress we automatically detected this and forced the cy
 
 https://on.cypress.io/returning-value-and-commands-in-custom-command
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

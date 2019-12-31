@@ -715,8 +715,10 @@ describe('Runs List', function () {
 
       it('clears message after setting up to record', function () {
         cy.contains('.btn', 'Set up project').click()
-        cy.get('.modal-body')
-        .contains('.btn', 'Me').click()
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Your personal organization').click()
 
         cy.get('.privacy-radio').find('input').last().check()
         cy.get('.modal-body')
@@ -784,8 +786,10 @@ describe('Runs List', function () {
 
       it('clears message after setting up CI', function () {
         cy.contains('.btn', 'Set up a new project').click()
-        cy.get('.modal-body')
-        .contains('.btn', 'Me').click()
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Your personal organization').click()
 
         cy.get('.privacy-radio').find('input').last().check()
         cy.get('.modal-body')

@@ -19,9 +19,20 @@ class AuthStore {
     this.message = message
   }
 
-  @action setShowingLogin (isShowing) {
+  @action openLogin (onCloseCb) {
+    this.onCloseCb = onCloseCb
+
     this.setMessage(null)
-    this.isShowingLogin = isShowing
+    this.isShowingLogin = true
+  }
+
+  @action closeLogin () {
+    if (this.onCloseCb) {
+      this.onCloseCb(this.isAuthenticated)
+    }
+
+    this.setMessage(null)
+    this.isShowingLogin = false
   }
 
   @action setUser (user) {

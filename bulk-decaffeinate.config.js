@@ -13,5 +13,10 @@ module.exports = {
     path.resolve('node_modules', 'jscodemods', 'decaffeinate', 'fix-multi-assign-class-export.js'),
     path.resolve('node_modules', 'jscodemods', 'decaffeinate', 'fix-implicit-return-assignment.js'),
     path.resolve('node_modules', 'jscodemods', 'decaffeinate', 'fix-existential-conditional-assignment.js'),
+    './scripts/decaff/remove-comment-sharp.js',
+    './scripts/decaff/switch-false.js',
+    './scripts/decaff/empty-catch.js',
+    './scripts/decaff/no-cond-assign.js',
+    './scripts/decaff/arrow-comment.js',
   ],
 }

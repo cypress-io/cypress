@@ -116,9 +116,9 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
 
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.getCookies() had an unexpected error reading cookies from #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.getCookies()
@@ -259,9 +259,9 @@ describe "src/cy/commands/cookies", ->
 
           expect(@logs.length).to.eq(1)
 
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.getCookie() had an unexpected error reading the requested cookie from #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.getCookie("foo")
@@ -294,15 +294,6 @@ describe "src/cy/commands/cookies", ->
           done()
 
         cy.getCookie(123)
-
-      it "throws an error if the cookie name is invalid", (done) ->
-        cy.on "fail", (err) =>
-          expect(err.message).to.include("`cy.getCookie()` must be passed an RFC-6265-compliant cookie name.")
-          expect(err.message).to.include('You passed:\n\n`m=m`')
-
-          done()
-
-        cy.getCookie("m=m")
 
     describe ".log", ->
       beforeEach ->
@@ -390,6 +381,15 @@ describe "src/cy/commands/cookies", ->
           "set:cookie",
           { domain: "brian.dev.local", name: "foo", value: "bar", path: "/foo", secure: true, httpOnly: true, expiry: 987 }
         )
+
+    it "can set multiple cookies with the same options", ->
+      Cypress.utils.addTwentyYears.restore()
+      options = {}
+
+      cy.setCookie("foo", "bar", options)
+      cy.setCookie("bing", "bong", options)
+
+      cy.getCookie("bing").its("value").should("equal", "bong")
 
     describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
@@ -495,38 +495,22 @@ describe "src/cy/commands/cookies", ->
         cy.setCookie("foo", 123)
 
       context "when setting an invalid cookie", ->
-        it "throws an error if the cookie name is invalid", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include("`cy.setCookie()` must be passed an RFC-6265-compliant cookie name.")
-            expect(err.message).to.include('You passed:\n\n`m=m`')
-
-            done()
-
-          ## cookie names may not contain =
-          ## https://stackoverflow.com/a/6109881/3474615
-          cy.setCookie("m=m", "foo")
-
-        it "throws an error if the cookie value is invalid", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.include('must be passed an RFC-6265-compliant cookie value.')
-            expect(err.message).to.include('You passed:\n\n` bar`')
-
-            done()
-
-          ## cookies may not contain unquoted whitespace
-          cy.setCookie("foo", " bar")
-
         it "throws an error if the backend responds with an error", (done) ->
           err = new Error("backend could not set cookie")
 
           Cypress.automation.withArgs("set:cookie").rejects(err)
 
           cy.on "fail", (err) =>
+            expect(errStub).to.be.calledOnce
             expect(err.message).to.contain('unexpected error setting the requested cookie')
             expect(err.message).to.contain(err.message)
             done()
 
-          cy.setCookie("foo", "bar")
+          errStub = cy.stub(Cypress.utils, "throwErrByPath")
+          errStub.callThrough()
+
+          ## browser backend should yell since this is invalid
+          cy.setCookie("foo", " bar")
 
     describe ".log", ->
       beforeEach ->
@@ -638,9 +622,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookie() had an unexpected error clearing the requested cookie in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           done()
 
         cy.clearCookie("foo")
@@ -673,15 +657,6 @@ describe "src/cy/commands/cookies", ->
           done()
 
         cy.clearCookie(123)
-
-      it "throws an error if the cookie name is invalid", (done) ->
-        cy.on "fail", (err) =>
-          expect(err.message).to.include("`cy.clearCookie()` must be passed an RFC-6265-compliant cookie name.")
-          expect(err.message).to.include('You passed:\n\n`m=m`')
-
-          done()
-
-        cy.clearCookie("m=m")
 
     describe ".log", ->
       beforeEach ->
@@ -875,9 +850,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq err.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookies() had an unexpected error clearing cookies in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -916,9 +891,9 @@ describe "src/cy/commands/cookies", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq "some err message"
-          expect(lastLog.get("error").name).to.eq "foo"
-          expect(lastLog.get("error").stack).to.eq error.stack
+          expect(lastLog.get("error").message).to.contain "cy.clearCookies() had an unexpected error clearing cookies in #{Cypress.browser.displayName}."
+          expect(lastLog.get("error").message).to.contain "some err message"
+          expect(lastLog.get("error").message).to.contain error.stack
           expect(lastLog.get("error")).to.eq(err)
           done()
 

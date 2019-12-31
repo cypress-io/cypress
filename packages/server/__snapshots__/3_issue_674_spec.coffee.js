@@ -28,12 +28,12 @@ exports['e2e issue 674 fails 1'] = `
   1) issue 674 "before each" hook for "doesn't hang when both beforeEach and afterEach fail":
      Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'issue 674'
   rror
-      at stack trace line
+      [stack trace lines]
 
   2) issue 674 "after each" hook for "doesn't hang when both beforeEach and afterEach fail":
      Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: 'issue 674'
   rror
-      at stack trace line
+      [stack trace lines]
 
 
 

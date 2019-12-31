@@ -89,10 +89,12 @@ describe('lib/gui/auth', function () {
 
       it('returns a promise that is fulfilled when openExternal succeeds', function () {
         sinon.stub(electron.shell, 'openExternal').resolves()
+        const sendWarning = sinon.stub()
 
-        return auth._launchNativeAuth(REDIRECT_URL)
+        return auth._launchNativeAuth(REDIRECT_URL, sendWarning)
         .then(() => {
           expect(electron.shell.openExternal).to.be.calledWithMatch(REDIRECT_URL)
+          expect(sendWarning).to.not.be.called
         })
       })
 

@@ -2,6 +2,7 @@ import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack
 import path from 'path'
 import webpack from 'webpack'
 
+// @ts-ignore
 const config: webpack.Configuration = {
   ...getCommonConfig(),
   entry: {

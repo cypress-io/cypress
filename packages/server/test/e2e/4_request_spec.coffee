@@ -42,6 +42,10 @@ onServer2 = (app) ->
   app.get "/redirect", (req, res) ->
     res.redirect("/home")
 
+  app.get "/redirectWithCookie", (req, res) ->
+    res.cookie('foo', 'bar')
+    res.redirect("/home")
+
   app.get "/home", (req, res) ->
     res.send("<html>home</html>")
 
