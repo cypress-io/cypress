@@ -46,7 +46,7 @@ describe "src/cy/commands/actions/focus", ->
         .get("input:first").focus()
         .get("#focus input").focus()
         .then ->
-           expect(blurred).to.be.true
+          expect(blurred).to.be.true
 
     it "matches cy.focused()", ->
       button = cy.$$("#button")
@@ -153,6 +153,14 @@ describe "src/cy/commands/actions/focus", ->
       cy.get("[data-cy=rect]").focus().then ->
         expect(onFocus).to.be.calledOnce
 
+    it "can focus on readonly inputs", ->
+      onFocus = cy.stub()
+
+      cy.$$("#readonly-attr").focus(onFocus)
+
+      cy.get("#readonly-attr").focus().then ->
+        expect(onFocus).to.be.calledOnce
+
     describe "assertion verification", ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>
@@ -192,7 +200,7 @@ describe "src/cy/commands/actions/focus", ->
 
         ## we can't end early here because our focus()
         ## command will still be in flight and the promise
-        ## chain will get cancelled before it gets attached
+        ## chain will get canceled before it gets attached
         ## (besides the code will continue to run and create
         ## side effects)
         cy.on "log:added", (attrs, log) ->
@@ -290,6 +298,7 @@ describe "src/cy/commands/actions/focus", ->
 
         cy.focus()
 
+      ## TODO: dont skip this
       it.skip "slurps up failed promises", (done) ->
         cy.timeout(1000)
 

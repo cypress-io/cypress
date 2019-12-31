@@ -1,14 +1,9 @@
 const moment = require('moment')
-const pluralize = require('pluralize')
 
-const parse = function (ms) {
-  let mins = 0
-
+const parse = (ms) => {
   const duration = moment.duration(ms)
-
   const hours = duration.hours()
-
-  mins = hours * 60
+  let mins = hours * 60
 
   return {
     mins,
@@ -17,33 +12,31 @@ const parse = function (ms) {
   }
 }
 
-const long = function (ms, alwaysIncludeSeconds = true) {
+const long = (ms, alwaysIncludeSeconds = true) => {
+  let { mins, duration } = parse(ms)
   let word
   const msg = []
-
-  let { mins, duration } = parse(ms)
 
   mins += duration.minutes()
 
   if (mins) {
-    word = pluralize('minute', mins)
+    word = mins === 1 ? 'minute' : 'minutes'
     msg.push(`${mins} ${word}`)
   }
 
   const secs = duration.seconds()
 
   if (alwaysIncludeSeconds || (secs > 0)) {
-    word = pluralize('second', secs)
+    word = secs === 1 ? 'second' : 'seconds'
     msg.push(`${secs} ${word}`)
   }
 
   return msg.join(', ')
 }
 
-const short = function (ms) {
-  const msg = []
-
+const short = (ms) => {
   let { mins, duration } = parse(ms)
+  const msg = []
 
   mins += duration.minutes()
 

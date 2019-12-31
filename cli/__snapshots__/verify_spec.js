@@ -159,7 +159,7 @@ Error: Cypress verification timed out.
 
 This command failed with the following output:
 
-/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --no-sandbox --smoke-test --ping=222
 
 ----------
 
@@ -181,7 +181,7 @@ Error: Cypress verification failed.
 
 This command failed with the following output:
 
-/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --no-sandbox --smoke-test --ping=222
 
 ----------
 
@@ -203,7 +203,7 @@ Error: Cypress verification failed.
 
 This command failed with the following output:
 
-/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --smoke-test --ping=222
+/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress --no-sandbox --smoke-test --ping=222
 
 ----------
 

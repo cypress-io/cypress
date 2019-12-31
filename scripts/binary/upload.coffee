@@ -1,12 +1,11 @@
 awspublish  = require('gulp-awspublish')
 rename      = require('gulp-rename')
-debug       = require('gulp-debug')
+gulpDebug   = require('gulp-debug')
 fs      = require("fs-extra")
 cp      = require("child_process")
 path    = require("path")
 gulp    = require("gulp")
 human   = require("human-interval")
-konfig  = require('../binary/get-config')()
 Promise = require("bluebird")
 meta    = require("./meta")
 la      = require("lazy-ass")
@@ -59,8 +58,10 @@ module.exports = {
     dirName
 
   getManifestUrl: (folder, version, uploadOsName) ->
+    url = uploadUtils.getUploadUrl()
+    la(check.url(url), "could not get upload url", url)
     {
-      url: [konfig('cdn_url'), folder, version, uploadOsName, zipName].join("/")
+      url: [url, folder, version, uploadOsName, zipName].join("/")
     }
 
   getRemoteManifest: (folder, version) ->
@@ -118,7 +119,7 @@ module.exports = {
         .pipe rename (p) ->
           p.dirname = aws.folder + "/" + p.dirname
           p
-        .pipe debug()
+        .pipe gulpDebug()
         .pipe publisher.publish(headers)
         .pipe awspublish.reporter()
         .on "error", reject

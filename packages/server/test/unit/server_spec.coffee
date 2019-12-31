@@ -13,7 +13,6 @@ Server        = require("#{root}lib/server")
 Socket        = require("#{root}lib/socket")
 fileServer    = require("#{root}lib/file_server")
 ensureUrl     = require("#{root}lib/util/ensure-url")
-buffers       = require("#{root}lib/util/buffers")
 
 morganFn = ->
 mockery.registerMock("morgan", -> morganFn)
@@ -193,11 +192,14 @@ describe "lib/server", ->
 
   context "#reset", ->
     beforeEach ->
-      sinon.stub(buffers, "reset")
+      @server.open(@config)
+      .then =>
+        @buffers = @server._networkProxy.http
+        sinon.stub(@buffers, "reset")
 
     it "resets the buffers", ->
       @server.reset()
-      expect(buffers.reset).to.be.called
+      expect(@buffers.reset).to.be.called
 
     it "sets the domain to the previous base url if set", ->
       @server._baseUrl = "http://localhost:3000"

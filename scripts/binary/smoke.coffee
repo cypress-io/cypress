@@ -1,9 +1,11 @@
 _ = require("lodash")
 fse = require("fs-extra")
 cp = require("child_process")
+execa = require('execa')
 path = require("path")
 Promise = require("bluebird")
 os = require("os")
+verify = require("../../cli/lib/tasks/verify")
 Fixtures = require("../../packages/server/test/support/helpers/fixtures")
 
 fs = Promise.promisifyAll(fse)
@@ -15,28 +17,28 @@ shouldSkipProjectTest = () ->
   os.platform() == "win32"
 
 runSmokeTest = (buildAppExecutable) ->
-  new Promise (resolve, reject) ->
-    rand = "" + Math.random()
-    console.log("executable path #{buildAppExecutable}")
+  rand = String(_.random(0, 1000))
+  console.log("executable path #{buildAppExecutable}")
 
-    hasRightResponse = (stdout) ->
-      # there could be more debug lines in the output, so find 1 line with
-      # expected random value
-      lines = stdout.split('\n').map((s) -> s.trim())
-      return lines.includes(rand)
+  hasRightResponse = (stdout) ->
+    # there could be more debug lines in the output, so find 1 line with
+    # expected random value
+    lines = stdout.split('\n').map((s) -> s.trim())
+    return lines.includes(rand)
 
-    cp.exec "#{buildAppExecutable} --smoke-test --ping=#{rand}", (err, stdout, stderr) ->
-      stdout = stdout.replace(/\s/, "")
+  args = ["--smoke-test", "--ping=#{rand}"]
+  if verify.needsSandbox()
+    args.push("--no-sandbox")
 
-      if err
-        console.error("smoke test failed with error %s", err.message)
-        return reject(err)
-
-      if !hasRightResponse(stdout)
-        throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
-      else
-        console.log("smokeTest passes")
-        resolve()
+  execa "#{buildAppExecutable}", args, {timeout: 10000}
+  .catch (err) ->
+    console.error("smoke test failed with error %s", err.message)
+    throw err
+  .then ({stdout}) ->
+    stdout = stdout.replace(/\s/, "")
+    if !hasRightResponse(stdout)
+      throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
+    console.log("smokeTest passes")
 
 runProjectTest = (buildAppExecutable, e2e) ->
   if shouldSkipProjectTest()
@@ -56,6 +58,8 @@ runProjectTest = (buildAppExecutable, e2e) ->
       "--run-project=#{e2e}",
       "--spec=#{e2e}/cypress/integration/simple_passing_spec.coffee"
     ]
+    if verify.needsSandbox()
+      args.push("--no-sandbox")
     options = {
       stdio: "inherit", env: env
     }
@@ -89,12 +93,18 @@ runFailingProjectTest = (buildAppExecutable, e2e) ->
     new Promise (resolve, reject) ->
       env = _.omit(process.env, "CYPRESS_ENV")
 
-      cp.spawn(buildAppExecutable, [
+      args = [
         "--run-project=#{e2e}",
         "--spec=#{e2e}/cypress/integration/simple_failing_spec.coffee"
-      ], {
-        stdio: "inherit", env: env
-      })
+      ]
+      if verify.needsSandbox()
+        args.push("--no-sandbox")
+
+      options = {
+        stdio: "inherit",
+        env
+      }
+      cp.spawn(buildAppExecutable, args, options)
       .on "exit", (code) ->
         if code is 2
           resolve()

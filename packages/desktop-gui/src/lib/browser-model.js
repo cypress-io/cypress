@@ -1,4 +1,5 @@
 import { computed, observable } from 'mobx'
+import { browserIcon } from '../lib/utils'
 
 export default class Browser {
   @observable displayName
@@ -9,6 +10,7 @@ export default class Browser {
   @observable majorVersion
   @observable info
   @observable custom
+  @observable warning
   @observable isChosen = false
 
   constructor (browser) {
@@ -20,9 +22,10 @@ export default class Browser {
     this.majorVersion = browser.majorVersion
     this.info = browser.info
     this.custom = browser.custom
+    this.warning = browser.warning
   }
 
   @computed get icon () {
-    return 'chrome'
+    return browserIcon(this.family)
   }
 }

@@ -5,7 +5,6 @@ R   = require("ramda")
 cp  = require("child_process")
 pr  = require("../support/helpers/process")
 pkg = require("../../package.json")
-root = require("@packages/root")
 execa = require("execa")
 semver = require("semver")
 
@@ -33,7 +32,7 @@ describe "CLI Interface", ->
     @currentTest.timeout(20000)
 
   it "writes out ping value and exits", (done) ->
-    cp.exec "npm run dev -- --smoke-test --ping=12345", {env: env}, (err, stdout, stderr) ->
+    cp.exec "npm run dev -- --cwd=/foo/bar --smoke-test --ping=12345", {env: env}, (err, stdout, stderr) ->
       done(err) if err
 
       expect(clean(stdout)).to.eq("12345")

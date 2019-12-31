@@ -9,7 +9,7 @@ const Banner = observer(({ events, filePath }) => {
       <div className='text-container'>
         <p><code>{ filePath }</code> was modified. Please restart Cypress for changes to take effect.</p>
         <button className='restart' onClick={emit('reload:configuration')}>
-          <i className='fa fa-refresh'></i>
+          <i className='fas fa-sync-alt'></i>
         Restart
         </button>
       </div>

@@ -3,12 +3,12 @@ const os = require('os')
 const md5 = require('md5')
 const path = require('path')
 const debug = require('debug')('cypress:server:file')
-const Queue = require('p-queue')
 const Promise = require('bluebird')
 const lockFile = Promise.promisifyAll(require('lockfile'))
 const fs = require('./fs')
 const env = require('./env')
 const exit = require('./exit')
+const { default: pQueue } = require('p-queue')
 
 const DEBOUNCE_LIMIT = 1000
 const LOCK_TIMEOUT = 2000
@@ -24,7 +24,7 @@ class File {
     this._lockFileDir = path.join(os.tmpdir(), 'cypress')
     this._lockFilePath = path.join(this._lockFileDir, `${md5(this.path)}.lock`)
 
-    this._queue = new Queue({ concurrency: 1 })
+    this._queue = new pQueue({ concurrency: 1 })
 
     this._cache = {}
     this._lastRead = 0
@@ -93,10 +93,10 @@ class File {
   }
 
   _getContents () {
-    //# read from disk on first call, but resolve cache for any subsequent
-    //# calls within the DEBOUNCE_LIMIT
-    //# once the DEBOUNCE_LIMIT passes, read from disk again
-    //# on the next call
+    // read from disk on first call, but resolve cache for any subsequent
+    // calls within the DEBOUNCE_LIMIT
+    // once the DEBOUNCE_LIMIT passes, read from disk again
+    // on the next call
     if ((Date.now() - this._lastRead) > DEBOUNCE_LIMIT) {
       this._lastRead = Date.now()
 
@@ -117,17 +117,16 @@ class File {
       return fs.readJsonAsync(this.path, 'utf8')
     })
     .catch((err) => {
-      //# default to {} in certain cases, otherwise bubble up error
+      // default to {} in certain cases, otherwise bubble up error
       if (
-        (err.code === 'ENOENT') || //# file doesn't exist
-        (err.code === 'EEXIST') || //# file contains invalid JSON
-        (err.name === 'SyntaxError') //# can't get lock on file
+        (err.code === 'ENOENT') || // file doesn't exist
+        (err.code === 'EEXIST') || // file contains invalid JSON
+        (err.name === 'SyntaxError') // can't get lock on file
       ) {
         return {}
       }
 
       throw err
-
     })
     .finally(() => {
       debug('read succeeded or failed for %s', this.path)
@@ -143,17 +142,15 @@ class File {
       throw new TypeError(`Expected \`key\` to be of type \`string\` or \`object\`, got \`${type}\``)
     }
 
-    const valueObject = (() => {
-      if (_.isString(key)) {
-        const tmp = {}
+    let valueObject = key
 
-        tmp[key] = value
+    if (_.isString(key)) {
+      const tmp = {}
 
-        return tmp
-      }
+      tmp[key] = value
 
-      return key
-    })()
+      valueObject = tmp
+    }
 
     if (inTransaction) {
       return this._setContents(valueObject)
@@ -178,7 +175,7 @@ class File {
   }
 
   _addToQueue (operation) {
-    //# queues operations so they occur serially as invoked
+    // queues operations so they occur serially as invoked
     return Promise.try(() => {
       return this._queue.add(operation)
     })
@@ -204,7 +201,7 @@ class File {
     return fs
     .ensureDirAsync(this._lockFileDir)
     .then(() => {
-      //# polls every 100ms up to 2000ms to obtain lock, otherwise rejects
+      // polls every 100ms up to 2000ms to obtain lock, otherwise rejects
       return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
     })
     .finally(() => {
@@ -218,7 +215,7 @@ class File {
     return lockFile
     .unlockAsync(this._lockFilePath)
     .timeout(env.get('FILE_UNLOCK_TIMEOUT') || LOCK_TIMEOUT)
-    .catch(Promise.TimeoutError, () => {}) //# ignore timeouts
+    .catch(Promise.TimeoutError, () => {}) // ignore timeouts
     .finally(() => {
       return debug('unlock succeeded or failed for %s', this.path)
     })

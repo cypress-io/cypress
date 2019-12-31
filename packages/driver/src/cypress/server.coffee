@@ -10,11 +10,8 @@ props                    = "onreadystatechange onload onerror".split(" ")
 
 restoreFn = null
 
-setHeader = (xhr, key, val, transformer) ->
+setHeader = (xhr, key, val) ->
   if val?
-    if transformer
-      val = transformer(val)
-
     key = "X-Cypress-" + _.capitalize(key)
     xhr.setRequestHeader(key, encodeURI(val))
 
@@ -44,14 +41,11 @@ isAbortedThroughUnload = (xhr) ->
 
 warnOnStubDeprecation = (obj, type) ->
   if _.has(obj, "stub")
-    $utils.warning("""
-      Passing cy.#{type}({stub: false}) is now deprecated. You can safely remove: {stub: false}.\n
-      https://on.cypress.io/deprecated-stub-false-on-#{type}
-    """)
+    $utils.warnByPath("server.stub_deprecated", { args: { type }})
 
 warnOnForce404Default = (obj) ->
   if obj.force404 is false
-    $utils.warning("Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+    $utils.warnByPath("server.force404_deprecated")
 
 whitelist = (xhr) ->
   ## whitelist if we're GET + looks like we're fetching regular resources
@@ -115,7 +109,7 @@ transformHeaders = (headers) ->
 
 normalizeStubUrl = (xhrUrl, url) ->
   if not xhrUrl
-    $utils.warning("'Server.options.xhrUrl' has not been set")
+    $utils.warnByPath("server.xhrurl_not_set")
 
   ## always ensure this is an absolute-relative url
   ## and remove any double slashes
@@ -179,18 +173,30 @@ create = (options = {}) ->
       hasEnabledStubs and route and route.response?
 
     applyStubProperties: (xhr, route) ->
-      responser = if _.isObject(route.response) then JSON.stringify else null
+      responseToString = =>
+        if not _.isString(route.response)
+          return JSON.stringify(route.response)
 
-      ## add header properties for the xhr's id
-      ## and the testId
-      setHeader(xhr, "id", xhr.id)
-      # setHeader(xhr, "testId", options.testId)
+        route.response
 
-      setHeader(xhr, "status",   route.status)
-      setHeader(xhr, "response", route.response, responser)
-      setHeader(xhr, "matched",  route.url + "")
-      setHeader(xhr, "delay",    route.delay)
-      setHeader(xhr, "headers",  route.headers, transformHeaders)
+      response = responseToString()
+
+      headers = {
+        "id": xhr.id
+        "status": route.status
+        "matched": route.url + ""
+        "delay": route.delay
+        "headers": transformHeaders(route.headers)
+      }
+
+      if response.length > 4096
+        options.emitIncoming(xhr.id, response)
+        headers.responseDeferred = true
+      else
+        headers.response = response
+
+      _.map headers, (v, k) =>
+        setHeader(xhr, k, v)
 
     route: (attrs = {}) ->
       warnOnStubDeprecation(attrs, "route")
@@ -418,7 +424,7 @@ create = (options = {}) ->
             return if isCalled
             isCalled = true
             try
-              return fn.apply(null, arguments)
+              return fn.apply(window, arguments)
             finally
               isCalled = false
 

@@ -9,7 +9,6 @@ chalk = require("chalk")
 Promise = require("bluebird")
 gulpDebug = require("gulp-debug")
 gulpCoffee = require("gulp-coffee")
-gulpTypeScript = require("gulp-typescript")
 pluralize = require("pluralize")
 vinylPaths = require("vinyl-paths")
 coffee = require("@packages/coffee")
@@ -26,6 +25,9 @@ smoke = require("./smoke")
 packages = require("./util/packages")
 xvfb = require("../../cli/lib/exec/xvfb")
 linkPackages = require('../link-packages')
+{ transformRequires } = require('./util/transform-requires')
+{ testStaticAssets } = require('./util/testStaticAssets')
+performanceTracking = require('../../packages/server/test/support/helpers/performance.js')
 
 rootPackage = require("@packages/root")
 
@@ -72,6 +74,10 @@ buildCypressApp = (platform, version, options = {}) ->
       console.log('built app version', result.stdout)
       la(result.stdout == version, "different version reported",
         result.stdout, "from input version to build", version)
+
+  testBuiltStaticAssets = ->
+    log('#testBuiltStaticAssets')
+    testStaticAssets(distDir())
 
   canBuildInDocker = ->
     platform is "linux" and os.platform() is "darwin"
@@ -121,6 +127,14 @@ buildCypressApp = (platform, version, options = {}) ->
 
     packages.copyAllToDist(distDir())
 
+  transformSymlinkRequires = ->
+    log("#transformSymlinkRequires")
+
+    transformRequires(distDir())
+    .then (replaceCount) ->
+      la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
+
+
   npmInstallPackages = ->
     log("#npmInstallPackages")
 
@@ -145,20 +159,6 @@ buildCypressApp = (platform, version, options = {}) ->
       """
 
       fs.outputFileAsync(distDir("index.js"), str)
-
-  copyPackageProxies = (destinationFolder) ->
-    () ->
-      log("#copyPackageProxies")
-      la(check.fn(destinationFolder),
-        "missing destination folder function", destinationFolder)
-      dest = destinationFolder("node_modules", "@packages")
-      la(check.unemptyString(dest), "missing destination folder", dest)
-      source = path.join(process.cwd(), "node_modules", "@packages")
-      fs.unlinkAsync(dest).catch(_.noop)
-      .then(() ->
-        console.log("Copying #{source} to #{dest}")
-        fs.copyAsync(source, dest)
-      )
 
   removeTypeScript = ->
     ## remove the .ts files in our packages
@@ -195,7 +195,7 @@ buildCypressApp = (platform, version, options = {}) ->
 
         ## except those in node_modules
         "!" + distDir("**", "node_modules", "**", "*.coffee")
-      ])
+      ], { sourcemaps: true })
       .pipe vinylPaths(del)
       .pipe(gulpDebug())
       .pipe gulpCoffee({
@@ -302,6 +302,46 @@ buildCypressApp = (platform, version, options = {}) ->
         else
           reject new Error("Verifying App via GateKeeper failed")
 
+  printPackageSizes = ->
+    appFolder = meta.buildAppDir(platform, "packages")
+    log("#printPackageSizes #{appFolder}")
+
+    if (platform == "win32") then return Promise.resolve()
+
+    # "du" - disk usage utility
+    # -d -1 depth of 1
+    # -h human readable sizes (K and M)
+    args = ["-d", "1", appFolder]
+
+    parseDiskUsage = (result) ->
+      lines = result.stdout.split(os.EOL)
+      # will store {package name: package size}
+      data = {}
+
+      lines.forEach (line) ->
+        parts = line.split('\t')
+        packageSize = parseFloat(parts[0])
+        folder = parts[1]
+
+        packageName = path.basename(folder)
+        if packageName is "packages"
+          return # root "packages" information
+
+        data[packageName] = packageSize
+
+      return data
+
+    printDiskUsage = (sizes) ->
+      bySize = R.sortBy(R.prop('1'))
+      console.log(bySize(R.toPairs(sizes)))
+
+    execa("du", args)
+    .then(parseDiskUsage)
+    .then(R.tap(printDiskUsage))
+    .then((sizes) ->
+      performanceTracking.track('test runner size', sizes)
+    )
+
   Promise.resolve()
   .then(checkPlatform)
   .then(cleanupPlatform)
@@ -309,18 +349,19 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(copyPackages)
   .then(npmInstallPackages)
   .then(createRootPackage)
-  .then(copyPackageProxies(distDir))
   .then(convertCoffeeToJs)
   .then(removeTypeScript)
   .then(cleanJs)
+  .then(transformSymlinkRequires)
   .then(testVersion(distDir))
+  .then(testBuiltStaticAssets)
   .then(elBuilder) # should we delete everything in the buildDir()?
   .then(removeDevElectronApp)
-  .then(copyPackageProxies(buildAppDir))
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
   .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
+  .then(printPackageSizes)
   .return({
     buildDir: buildDir()
   })

@@ -9,6 +9,7 @@ describe "e2e busted support file", ->
   it "passes", ->
     e2e.exec(@, {
       project: bustedSupportFile
+      sanitizeScreenshotDimensions: true
       snapshot: true
       expectedExitCode: 1
     })

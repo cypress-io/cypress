@@ -8,7 +8,7 @@ describe('konfig check', () => {
     script tests should NOT suddenly change the current working directory to
     packages/server - otherwise the local path filenames might be all wrong
     and unexpected. The current working directory changes when we
-    require `packages/server/lib/konfig` which in tern requires
+    require `packages/server/lib/konfig` which in turn requires
     `lib/cwd` which changes CWD.
 
     From the scripts unit tests we should not use `lib/konfig` directly,
@@ -40,6 +40,7 @@ describe('konfig check', () => {
       'differs after loading konfig',
       cwdAfter
     )
+
     la(is.fn(konfig), 'expected konfig to be a function', konfig)
   })
 })

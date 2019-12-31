@@ -6,13 +6,12 @@ fs = require("fs")
 path = require("path")
 awspublish = require('gulp-awspublish')
 rename = require('gulp-rename')
-debug = require('gulp-debug')
+gulpDebug = require('gulp-debug')
 gulp = require("gulp")
 human = require("human-interval")
 R = require("ramda")
 hasha = require('hasha')
 
-konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
 s3helpers = require("./s3-api").s3helpers
 
@@ -35,7 +34,8 @@ getCDN = ({version, hash, filename, platform}) ->
   la(isBinaryFile(filename), 'wrong extension for file', filename)
   la(check.unemptyString(platform), 'missing platform', platform)
 
-  cdnUrl = konfig("cdn_url")
+  cdnUrl = uploadUtils.getUploadUrl()
+  la(check.url(cdnUrl), "could not get cdn url", cdnUrl)
   [cdnUrl, rootFolder, folder, version, platform, hash, filename].join("/")
 
 # returns folder that contains beta (unreleased) binaries for given version
@@ -83,7 +83,7 @@ uploadFile = (options) ->
       la(check.unemptyString(p.dirname), "missing dirname")
       key = p.dirname + uploadFileName
       p
-    .pipe debug()
+    .pipe gulpDebug()
     .pipe publisher.publish(headers)
     .pipe awspublish.reporter()
     .on "error", reject
@@ -96,7 +96,7 @@ setChecksum = (filename, key) =>
   la(check.unemptyString(filename), 'expected filename', filename)
   la(check.unemptyString(key), 'expected uploaded S3 key', key)
 
-  checksum = hasha.fromFileSync(filename)
+  checksum = hasha.fromFileSync(filename, { algorithm: 'sha512' })
   size = fs.statSync(filename).size
   console.log('SHA256 checksum %s', checksum)
   console.log('size', size)

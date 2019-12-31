@@ -12,15 +12,6 @@ describe "lib/util/routes", ->
   it "ping", ->
     expect(routes.ping()).to.eq("http://localhost:1234/ping")
 
-  it "signin", ->
-    expect(routes.signin()).to.eq "http://localhost:1234/signin"
-
-  it "signin?code=abc", ->
-    expect(routes.signin({code: "abc"})).to.eq "http://localhost:1234/signin?code=abc"
-
-  it "signout", ->
-    expect(routes.signout()).to.eq "http://localhost:1234/signout"
-
   it "runs", ->
     expect(routes.runs()).to.eq("http://localhost:1234/runs")
 
