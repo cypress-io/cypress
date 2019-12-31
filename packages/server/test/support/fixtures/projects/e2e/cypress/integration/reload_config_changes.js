@@ -1,3 +1,4 @@
+/* eslint-disable mocha/no-global-tests */
 it('reloads when restart is clicked after config changes', () => {
   cy.visit('/index.html')
   cy.task('modify:cypress:json').then(() => {
@@ -8,4 +9,3 @@ it('reloads when restart is clicked after config changes', () => {
     .contains('Restart')
   })
 })
-

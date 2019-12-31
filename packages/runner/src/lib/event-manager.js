@@ -102,7 +102,7 @@ const eventManager = {
     reporterBus.on('runner:restart', rerun)
 
     reporterBus.on('reload:configuration', () => {
-      channel.emit('reload:configuration')
+      ws.emit('reload:configuration')
     })
 
     function sendEventIfSnapshotProps (logId, event) {

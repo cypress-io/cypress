@@ -175,10 +175,7 @@ module.exports = {
     .chain(options)
     .defaults(whitelisted)
     .omit(_.keys(alias)) // remove aliases
-<<<<<<< HEAD
-=======
     .extend({ invokedFromCli })
->>>>>>> develop
     .defaults({
       // set in case we
       // bypassed the cli
@@ -297,10 +294,6 @@ module.exports = {
     // and converts to an array by picking
     // only the whitelisted properties and
     // mapping them to include the argument
-<<<<<<< HEAD
-
-=======
->>>>>>> develop
     return _
     .chain(obj)
     .pick(...whitelist)
