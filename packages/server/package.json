@@ -162,7 +162,7 @@
     "express-session": "1.16.1",
     "express-useragent": "1.0.12",
     "http-mitm-proxy": "0.7.0",
-    "https-proxy-agent": "3.0.0",
+    "https-proxy-agent": "4.0.0",
     "istanbul": "0.4.5",
     "mocked-env": "1.2.4",
     "mockery": "2.1.0",
