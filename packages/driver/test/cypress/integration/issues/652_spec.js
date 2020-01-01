@@ -1,17 +1,23 @@
-## https://github.com/cypress-io/cypress/issues/652
-describe "issue 652", ->
-  before ->
-    cy.visit("/fixtures/issue-652.html")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+//# https://github.com/cypress-io/cypress/issues/652
+describe("issue 652", function() {
+  before(() => cy.visit("/fixtures/issue-652.html"));
 
-  it 'should visit all the hashes', ->
-    # cy.wait(0)
-    cy.visit('/fixtures/issue-652.html#one')
-    # cy.wait(0)
-    cy.visit('/fixtures/issue-652.html#two')
-    # cy.wait(0)
-    cy.visit('/fixtures/issue-652.html#three')
+  return it('should visit all the hashes', function() {
+    // cy.wait(0)
+    cy.visit('/fixtures/issue-652.html#one');
+    // cy.wait(0)
+    cy.visit('/fixtures/issue-652.html#two');
+    // cy.wait(0)
+    cy.visit('/fixtures/issue-652.html#three');
 
-    cy.get('#visited')
+    return cy.get('#visited')
       .should('contain', 'one')
       .should('contain', 'two')
-      .should('contain', 'three')
+      .should('contain', 'three');
+  });
+});
