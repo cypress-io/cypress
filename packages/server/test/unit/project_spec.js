@@ -533,34 +533,8 @@ describe('lib/project', () => {
 
       this.project.watchPluginsFile(this.config, options).then(() => {
         this.project.watchers.watchTree.firstCall.args[1].onChange(this.config.pluginsFile)
-      })
-
-      expect(options.onPluginsChanged).to.be.calledWith(this.config.pluginsFile)
-      expect(this.project.server.onConfigurationChange).to.be.calledWith(this.config.pluginsFile)
-    })
-
-    it('calls plugins.init when file changes', function () {
-      return this.project.watchPluginsFile(this.config, {}).then(() => {
-        this.project.watchers.watchTree.firstCall.args[1].onChange()
-
-        expect(plugins.init).to.be.calledWith(this.config)
-      })
-    })
-
-    it('handles errors from calling plugins.init', function (done) {
-      const error = { name: 'foo', message: 'foo' }
-
-      plugins.init.rejects(error)
-
-      return this.project.watchPluginsFile(this.config, {
-        onError (err) {
-          expect(err).to.eql(error)
-
-          done()
-        },
-      })
-      .then(() => {
-        this.project.watchers.watchTree.firstCall.args[1].onChange()
+        expect(options.onPluginsChanged).to.be.calledWith(this.config.pluginsFile)
+        expect(this.project.server.onConfigurationChange).to.be.calledWith(this.config.pluginsFile)
       })
     })
   })
