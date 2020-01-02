@@ -59,6 +59,8 @@ function streamBuffer (initialSize = 2048) {
     autoDestroy: true,
   })
 
+  // there is no "createReadStream" on Writeable
+  // @ts-ignore
   writeable.createReadStream = () => {
     let bytesRead = 0
     const readerId = _.uniqueId('reader')
@@ -124,15 +126,20 @@ function streamBuffer (initialSize = 2048) {
     return readable
   }
 
+  // add a few more methods and bypass TSC errors
+
+  // @ts-ignore
   writeable.unpipeAll = () => {
     buffer = null // aggressive GC
     _.invokeMap(readers, 'unpipe')
   }
 
+  // @ts-ignore
   writeable._buffer = () => {
     return buffer
   }
 
+  // @ts-ignore
   writeable._finished = () => {
     return finished
   }
