@@ -416,8 +416,6 @@ describe "lib/gui/events", ->
           assert.sendCalledWith(undefined)
 
       it "sends 'config:changed' from onSettingsChanged", ->
-        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("on:config:changed")
@@ -426,8 +424,6 @@ describe "lib/gui/events", ->
           assert.sendCalledWith(undefined)
 
       it "sends 'config:changed' from onPluginsChanged", ->
-        sinon.stub(Project.prototype, "getConfig").resolves({some: "config"})
-
         @handleEvent("open:project", "/_test-output/path/to/project")
         .then =>
           @handleEvent("on:config:changed")
