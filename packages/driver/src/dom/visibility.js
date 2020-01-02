@@ -100,7 +100,17 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   // display:none elements, and generally any elements that are not directly rendered,
   // an empty list is returned.
 
-  return (elOffsetWidth($el) <= 0) || (elOffsetHeight($el) <= 0) || ($el[0].getClientRects().length <= 0)
+  // From https://github.com/cypress-io/cypress/issues/5974,
+  // we learned that when an element has non-'none' transform style value like "translate(0, 0)",
+  // it is visible even with `height: 0` or `width: 0`.
+  // That's why we're checking `transform === 'none'` together with elOffsetWidth/Height.
+
+  const style = elComputedStyle($el)
+  const transform = style.getPropertyValue('transform')
+
+  return (elOffsetWidth($el) <= 0 && transform === 'none') ||
+  (elOffsetHeight($el) <= 0 && transform === 'none') ||
+  ($el[0].getClientRects().length <= 0)
 }
 
 const elHasNoOffsetWidthOrHeight = ($el) => {
@@ -123,7 +133,13 @@ const elHasVisibilityHidden = ($el) => {
   return $el.css('visibility') === 'hidden'
 }
 
-const numberRegex = /-?[0-9]+(?:\.[0-9]+)?/g
+const elComputedStyle = ($el) => {
+  const el = $el[0]
+
+  return getComputedStyle(el)
+}
+
+const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
 // This is a simplified version of backface culling.
 // https://en.wikipedia.org/wiki/Back-face_culling
 //
@@ -131,8 +147,7 @@ const numberRegex = /-?[0-9]+(?:\.[0-9]+)?/g
 // and default normal vector, (0, 0, 1)
 // When dot product of them are >= 0, item is visible.
 const elIsBackface = ($el) => {
-  const el = $el[0]
-  const style = getComputedStyle(el)
+  const style = elComputedStyle($el)
   const backface = style.getPropertyValue('backface-visibility')
   const backfaceInvisible = backface === 'hidden'
   const transform = style.getPropertyValue('transform')
@@ -163,18 +178,13 @@ const elHasVisibilityCollapse = ($el) => {
 
 // This function checks 2 things that can happen: scale and rotate
 const elIsHiddenByTransform = ($el) => {
-  // We need to see the final calculation of the element.
-  const el = $el[0]
-
-  const style = window.getComputedStyle(el)
+  const style = elComputedStyle($el)
   const transform = style.getPropertyValue('transform')
 
-  // Test scaleZ(0)
-  // width or height of getBoundingClientRect aren't 0 when scaleZ(0).
-  // But it is invisible.
-  // Experiment -> https://codepen.io/sainthkh/pen/LYYQGpm
-  // That's why we're checking transfomation matrix here.
-  //
+  if (transform === 'none') {
+    return false
+  }
+
   // To understand how this part works,
   // you need to understand tranformation matrix first.
   // Matrix is hard to explain with only text. So, check these articles.
@@ -183,24 +193,55 @@ const elIsHiddenByTransform = ($el) => {
   // https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
   //
   if (transform.startsWith('matrix3d')) {
-    const m3d = transform.substring(8).match(numberRegex)
+    const matrix3d = transform.substring(8).match(numberRegex)
 
-    // Z Axis values
-    if (+m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0) {
+    if (is3DMatrixScaledTo0(matrix3d)) {
       return true
     }
+
+    return isElementOrthogonalWithView(matrix3d)
   }
 
-  // Other cases
-  if (transform !== 'none') {
-    const { width, height } = el.getBoundingClientRect()
+  const m = transform.match(numberRegex)
 
-    if (width === 0 || height === 0) {
-      return true
-    }
+  if (is2DMatrixScaledTo0(m)) {
+    return true
   }
 
   return false
+}
+
+const is3DMatrixScaledTo0 = (m3d) => {
+  const xAxisScaledTo0 = +m3d[0] === 0 && +m3d[4] === 0 && +m3d[8] === 0
+  const yAxisScaledTo0 = +m3d[1] === 0 && +m3d[5] === 0 && +m3d[9] === 0
+  const zAxisScaledTo0 = +m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0
+
+  if (xAxisScaledTo0 || yAxisScaledTo0 || zAxisScaledTo0) {
+    return true
+  }
+
+  return false
+}
+
+const is2DMatrixScaledTo0 = (m) => {
+  const xAxisScaledTo0 = +m[0] === 0 && +m[2] === 0
+  const yAxisScaledTo0 = +m[1] === 0 && +m[3] === 0
+
+  if (xAxisScaledTo0 || yAxisScaledTo0) {
+    return true
+  }
+
+  return false
+}
+
+const isElementOrthogonalWithView = (matrix3d) => {
+  const defaultNormal = [0, 0, -1]
+  const elNormal = findNormal(matrix3d)
+  // Simplified dot product.
+  // [0] and [1] are always 0
+  const dot = defaultNormal[2] * elNormal[2]
+
+  return Math.abs(dot) <= 1e-10
 }
 
 const elHasDisplayNone = ($el) => {
