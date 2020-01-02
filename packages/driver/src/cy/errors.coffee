@@ -61,7 +61,7 @@ create = (state, config, log) ->
     errString = e.toString()
     errStack = e.stack
 
-    if !errStack.slice(0, errStack.indexOf('\n')).includes(errString)
+    if !errStack.slice(0, errStack.indexOf('\n')).includes(errString.slice(0, errString.indexOf('\n')))
       e.stack = "#{errString}\n#{errStack}"
     
 
