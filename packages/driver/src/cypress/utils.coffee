@@ -101,14 +101,14 @@ module.exports = {
     ## with the new one
     err.stack = stack.replace(str, err.toString())
 
-    ## normalize error message for firefox
-    ## TODO: cleanup this dup. logic and move it to common util
-    e = err
-    errString = e.toString()
-    errStack = e.stack
+    # ## normalize error message for firefox
+    # ## TODO: cleanup this dup. logic and move it to common util
+    # e = err
+    # errString = e.toString()
+    # errStack = e.stack
 
-    if !errStack.slice(0, errStack.indexOf('\n')).includes(errString)
-      e.stack = "#{errString}\n#{errStack}"
+    # if !errStack.slice(0, errStack.indexOf('\n')).includes(errString)
+    #   e.stack = "#{errString}\n#{errStack}"
 
     return err
 
