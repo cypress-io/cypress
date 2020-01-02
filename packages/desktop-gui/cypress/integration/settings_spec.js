@@ -183,33 +183,6 @@ describe('Settings', () => {
         })
       })
 
-      it('displays null when env settings are empty or not defined', function () {
-        this.ipc.openProject.resolves(setConfigEnv(this.config, undefined))
-        this.ipc.onConfigChanged.yield()
-
-        cy.contains('.line', 'env:null').then(() => {
-          this.ipc.openProject.resolves(this.config)
-          this.ipc.onConfigChanged.yield()
-
-          cy.contains('.line', 'env:fileServerFolder')
-          .then(() => {
-            this.ipc.openProject.resolves(setConfigEnv(this.config, null))
-            this.ipc.onConfigChanged.yield()
-            cy.contains('.line', 'env:null').then(() => {
-              this.ipc.openProject.resolves(this.config)
-              this.ipc.onConfigChanged.yield()
-
-              cy.contains('.line', 'env:fileServerFolder')
-              .then(() => {
-                this.ipc.openProject.resolves(setConfigEnv(this.config, {}))
-                this.ipc.onConfigChanged.yield()
-                cy.contains('.line', 'env:null')
-              })
-            })
-          })
-        })
-      })
-
       it('displays env settings', () => {
         cy.get('@config').then(({ resolved }) => {
           const getEnvKeys = flow([
@@ -542,6 +515,52 @@ describe('Settings', () => {
 
     it('notes that a custom config is in use', () => {
       cy.contains('set from custom config file special-cypress.json')
+    })
+  })
+
+  context('when env settings are set', function () {
+    it('displays value of env', function () {
+      this.openProject.resolve(this.config)
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+
+      cy.contains('Configuration').click()
+      cy.contains('.line', 'env:fileServerFolder')
+    })
+
+    it('displays null when undefined', function () {
+      this.openProject.resolve(setConfigEnv(this.config, undefined))
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+
+      cy.contains('Configuration').click()
+      cy.contains('.line', 'env:null')
+    })
+
+    it('displays null when null', function () {
+      this.openProject.resolve(setConfigEnv(this.config, null))
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+
+      cy.contains('Configuration').click()
+      cy.contains('.line', 'env:null')
+    })
+
+    it('displays null when empty', function () {
+      this.openProject.resolve(setConfigEnv(this.config, {}))
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+
+      cy.contains('Configuration').click()
+      cy.contains('.line', 'env:null')
     })
   })
 })
