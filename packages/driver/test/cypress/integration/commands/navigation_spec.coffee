@@ -1661,7 +1661,7 @@ describe "src/cy/commands/navigation", ->
           .wrap(null).then ->
             thenCalled = true
 
-      it.only "does time out once stability is reached", (done) ->
+      it "does time out once stability is reached", (done) ->
         logByName = (name) =>
           _.find @logs, (log) ->
             log.get("name") is name
