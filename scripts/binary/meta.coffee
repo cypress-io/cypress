@@ -35,7 +35,7 @@ buildDir = (platform, args...) ->
     when "linux"
       path.resolve(root, "linux-unpacked", args...)
     when "win32"
-      path.resolve(root, platform, "Cypress", args...)
+      path.resolve(root, "win-unpacked", args...)
 
 ## returns a path into the /dist directory
 distDir = (platform, args...) ->
