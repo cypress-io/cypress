@@ -122,9 +122,17 @@ describe('Project Nav', function () {
           .find('.dropdown-menu').first()
           // one is showing in the selection, so won't be in the list
           .find('.browser-icon')
-          .each(function ($i) {
+          .each(function ($i, i) {
+            const dropdownBrowsers = Cypress._.filter(this.config.browsers, (b) => {
+              // Chrome is shown in selection, so skip it
+              return b.displayName !== 'Chrome'
+            })
+
+            let name = dropdownBrowsers[i].name
+
+            // first one is shown in selection, so skip first
             cy.wrap($i).should('have.class',
-              `browser-icon`)
+              `browser-icon ./fonts/${name}.svg`)
           })
         })
 
