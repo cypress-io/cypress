@@ -14,7 +14,7 @@ exports['e2e reload config changes passes 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: reload_config_changes.js...                                                     (1 of 1) 
+  Running:  reload_config_changes.js                                                        (1 of 1)
 
 
   ✓ reloads when restart is clicked after config changes
@@ -24,23 +24,23 @@ exports['e2e reload config changes passes 1'] = `
 
   (Results)
 
-  ┌────────────────────────────────────────┐
-  │ Tests:        1                        │
-  │ Passing:      1                        │
-  │ Failing:      0                        │
-  │ Pending:      0                        │
-  │ Skipped:      0                        │
-  │ Screenshots:  0                        │
-  │ Video:        true                     │
-  │ Duration:     X seconds                │
-  │ Spec Ran:     reload_config_changes.js │
-  └────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     reload_config_changes.js                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/reload_config_changes.js.mp4        (X second)
 
 
 ====================================================================================================
@@ -48,11 +48,11 @@ exports['e2e reload config changes passes 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ reload_config_changes.js                  XX:XX        1        1        -        -        - │
+  │ ✔  reload_config_changes.js                 XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
