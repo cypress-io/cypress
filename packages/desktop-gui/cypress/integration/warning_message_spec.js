@@ -185,10 +185,10 @@ describe('Warning Message', function () {
         name: 'Configuration changed',
         message: '`cypress.json` was modified. Restart Cypress for changes to take effect.',
       }
-    })
 
-    cy.shouldBeOnProjectSpecs().then(function () {
-      this.ipc.onProjectWarning.yield(null, this.configWarningObj)
+      cy.shouldBeOnProjectSpecs().then(function () {
+        this.ipc.onProjectWarning.yield(null, this.configWarningObj)
+      })
     })
 
     it('renders configuration change message with the correct file name', function () {
