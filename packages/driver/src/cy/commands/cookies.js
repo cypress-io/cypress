@@ -85,10 +85,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         throw err
       }
 
-      Cypress.errUtils.throwErrByPath('cookies.backend_error', {
+      $errUtils.throwErrByPath('cookies.backend_error', {
         args: {
           action,
-          command,
+          cmd: command,
           browserDisplayName: Cypress.browser.displayName,
           errMessage: err.message,
           errStack: err.stack,
@@ -222,7 +222,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const onFail = options._log
 
       if (!_.isString(name) || !_.isString(value)) {
-        Cypress.errUtils.throwErrByPath('setCookie.invalid_arguments', { onFail })
+        $errUtils.throwErrByPath('setCookie.invalid_arguments', { onFail })
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)

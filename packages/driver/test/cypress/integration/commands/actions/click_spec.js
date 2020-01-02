@@ -868,7 +868,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain(`has CSS 'pointer-events: none'`)
+          expect(err.message).to.contain('has CSS `pointer-events: none`')
           expect(err.message).to.not.contain('inherited from')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -894,7 +894,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain(`has CSS 'pointer-events: none', inherited from this element:`)
+          expect(err.message).to.contain('has CSS `pointer-events: none`, inherited from this element:')
           expect(err.message).to.contain('<div id="ptrNone"')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -946,7 +946,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain('has CSS \'pointer-events: none\'')
+          expect(err.message).to.contain('has CSS `pointer-events: none`')
           expect(err.message).to.not.contain('inherited from')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -972,7 +972,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain('has CSS \'pointer-events: none\', inherited from this element:')
+          expect(err.message).to.contain('has CSS `pointer-events: none`, inherited from this element:')
           expect(err.message).to.contain('<div id="ptrNone"')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -3735,9 +3735,9 @@ describe('mouse state', () => {
             bubbles: true,
             button: 0,
             buttons: 0,
-            cancelBubble: false,
             cancelable: true,
-            clientX: 492,
+            cancelBubble: false,
+            clientX: 500,
             clientY: 9,
             composed: true,
             ctrlKey: false,
@@ -3747,18 +3747,18 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
+            layerX: 500,
             layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
+            pageX: 500,
             pageY: 215,
             relatedTarget: cy.$$('div.item')[1],
             returnValue: true,
-            screenX: 492,
+            screenX: 500,
             screenY: 9,
             shiftKey: false,
             sourceCapabilities: null,
@@ -3768,7 +3768,7 @@ describe('mouse state', () => {
             type: 'mouseout',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
+            x: 500,
             y: 9,
           })
         }).as('mouseout')
@@ -3780,7 +3780,7 @@ describe('mouse state', () => {
             buttons: 0,
             cancelBubble: false,
             cancelable: false,
-            clientX: 492,
+            clientX: 500,
             clientY: 9,
             composed: true,
             ctrlKey: false,
@@ -3790,18 +3790,18 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
+            layerX: 500,
             layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
+            pageX: 500,
             pageY: 215,
             relatedTarget: cy.$$('div.item')[1],
             returnValue: true,
-            screenX: 492,
+            screenX: 500,
             screenY: 9,
             shiftKey: false,
             sourceCapabilities: null,
@@ -3811,7 +3811,7 @@ describe('mouse state', () => {
             type: 'mouseleave',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
+            x: 500,
             y: 9,
           })
         }).as('mouseleave')
@@ -3823,7 +3823,7 @@ describe('mouse state', () => {
             buttons: 0,
             cancelBubble: false,
             cancelable: true,
-            clientX: 492,
+            clientX: 500,
             clientY: 9,
             composed: true,
             ctrlKey: false,
@@ -3833,18 +3833,18 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
+            layerX: 500,
             layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
+            pageX: 500,
             pageY: 215,
             relatedTarget: cy.$$('div.item')[1],
             returnValue: true,
-            screenX: 492,
+            screenX: 500,
             screenY: 9,
             shiftKey: false,
             sourceCapabilities: null,
@@ -3854,7 +3854,7 @@ describe('mouse state', () => {
             type: 'pointerout',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
+            x: 500,
             y: 9,
           })
         }).as('pointerout')
@@ -3866,7 +3866,7 @@ describe('mouse state', () => {
             buttons: 0,
             cancelBubble: false,
             cancelable: false,
-            clientX: 492,
+            clientX: 500,
             clientY: 9,
             composed: true,
             ctrlKey: false,
@@ -3876,18 +3876,18 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
+            layerX: 500,
             layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
+            pageX: 500,
             pageY: 215,
             relatedTarget: cy.$$('div.item')[1],
             returnValue: true,
-            screenX: 492,
+            screenX: 500,
             screenY: 9,
             shiftKey: false,
             sourceCapabilities: null,
@@ -3897,7 +3897,7 @@ describe('mouse state', () => {
             type: 'pointerleave',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
+            x: 500,
             y: 9,
           })
         }).as('pointerleave')
@@ -3909,7 +3909,7 @@ describe('mouse state', () => {
             buttons: 0,
             cancelBubble: false,
             cancelable: true,
-            clientX: 492,
+            clientX: 500,
             clientY: 9,
             composed: true,
             ctrlKey: false,
@@ -3919,18 +3919,18 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
+            layerX: 500,
             layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
+            pageX: 500,
             pageY: 215,
             relatedTarget: cy.$$('div.item')[0],
             returnValue: true,
-            screenX: 492,
+            screenX: 500,
             screenY: 9,
             shiftKey: false,
             sourceCapabilities: null,
@@ -3940,7 +3940,7 @@ describe('mouse state', () => {
             type: 'mouseover',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
+            x: 500,
             y: 9,
           })
         }).as('mouseover')
@@ -3952,7 +3952,7 @@ describe('mouse state', () => {
             buttons: 0,
             cancelBubble: false,
             cancelable: false,
-            clientX: 492,
+            clientX: 500,
             clientY: 9,
             composed: true,
             ctrlKey: false,
@@ -3962,18 +3962,18 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
+            layerX: 500,
             layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
+            pageX: 500,
             pageY: 215,
             relatedTarget: cy.$$('div.item')[0],
             returnValue: true,
-            screenX: 492,
+            screenX: 500,
             screenY: 9,
             shiftKey: false,
             sourceCapabilities: null,
@@ -3983,7 +3983,7 @@ describe('mouse state', () => {
             type: 'mouseenter',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
+            x: 500,
             y: 9,
           })
         }).as('mouseenter')
@@ -3995,7 +3995,7 @@ describe('mouse state', () => {
             buttons: 0,
             cancelBubble: false,
             cancelable: true,
-            clientX: 492,
+            clientX: 500,
             clientY: 9,
             composed: true,
             ctrlKey: false,
@@ -4005,18 +4005,18 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
+            layerX: 500,
             layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
+            pageX: 500,
             pageY: 215,
             relatedTarget: cy.$$('div.item')[0],
             returnValue: true,
-            screenX: 492,
+            screenX: 500,
             screenY: 9,
             shiftKey: false,
             sourceCapabilities: null,
@@ -4026,7 +4026,7 @@ describe('mouse state', () => {
             type: 'pointerover',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
+            x: 500,
             y: 9,
           })
         }).as('pointerover')
@@ -4038,7 +4038,7 @@ describe('mouse state', () => {
             buttons: 0,
             cancelBubble: false,
             cancelable: false,
-            clientX: 492,
+            clientX: 500,
             clientY: 9,
             composed: true,
             ctrlKey: false,
@@ -4048,18 +4048,18 @@ describe('mouse state', () => {
             eventPhase: 2,
             // fromElement: cy.$$('div.item')[0],
             isTrusted: false,
-            layerX: 492,
+            layerX: 500,
             layerY: 215,
             metaKey: false,
             movementX: 0,
             movementY: 0,
             // offsetX: 484,
             // offsetY: 27,
-            pageX: 492,
+            pageX: 500,
             pageY: 215,
             relatedTarget: cy.$$('div.item')[0],
             returnValue: true,
-            screenX: 492,
+            screenX: 500,
             screenY: 9,
             shiftKey: false,
             sourceCapabilities: null,
@@ -4069,7 +4069,7 @@ describe('mouse state', () => {
             type: 'pointerenter',
             view: cy.state('window'),
             // which: 0,
-            x: 492,
+            x: 500,
             y: 9,
           })
         }).as('pointerenter')

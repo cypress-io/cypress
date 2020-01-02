@@ -42,7 +42,7 @@ chai.use((chai, u) => {
   $chaiJquery(chai, chaiUtils, {
     onInvalid (method, obj) {
       const err = $errUtils.cypressErr(
-        $errUtils.errMessageByPath(
+        $errUtils.errMsgByPath(
           'chai.invalid_jquery_obj', {
             assertion: method,
             subject: $utils.stringifyActual(obj),
@@ -166,7 +166,7 @@ chai.use((chai, u) => {
           return _super.apply(this, [regExp, ...args])
         }
 
-        const err = $errUtils.cypressErr($errUtils.errMessageByPath('chai.match_invalid_argument', { regExp }))
+        const err = $errUtils.cypressErr($errUtils.errMsgByPath('chai.match_invalid_argument', { regExp }))
 
         err.retry = false
         throw err
@@ -257,7 +257,7 @@ chai.use((chai, u) => {
               throw e1
             }
 
-            const e2 = $errUtils.cypressErr($errUtils.errMessageByPath('chai.length_invalid_argument', { length }))
+            const e2 = $errUtils.cypressErr($errUtils.errMsgByPath('chai.length_invalid_argument', { length }))
 
             e2.retry = false
             throw e2

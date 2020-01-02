@@ -503,7 +503,7 @@ describe "src/cy/commands/connectors", ->
           it "throws when function name is missing", (done) ->
             cy.on "fail", (err) =>
                 lastLog = @lastLog
-                expect(err.message).to.include "cy.invoke() expects the functionName argument to have a value"
+                expect(err.message).to.include "`cy.invoke()` expects the functionName argument to have a value"
                 expect(lastLog.get("error").message).to.include(err.message)
                 done()
 
@@ -512,7 +512,7 @@ describe "src/cy/commands/connectors", ->
           it "throws when function name is not of type string but of type boolean", (done) ->
             cy.on "fail", (err) =>
                 lastLog = @lastLog
-                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
+                expect(err.message).to.include "`cy.invoke()` only accepts a string or a number as the functionName argument."
                 expect(lastLog.get("error").message).to.include(err.message)
                 done()
 
@@ -521,7 +521,7 @@ describe "src/cy/commands/connectors", ->
           it "throws when function name is not of type string but of type function", (done) ->
             cy.on "fail", (err) =>
                 lastLog = @lastLog
-                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
+                expect(err.message).to.include "`cy.invoke()` only accepts a string or a number as the functionName argument."
                 expect(lastLog.get("error").message).to.include(err.message)
                 done()
 
@@ -530,7 +530,7 @@ describe "src/cy/commands/connectors", ->
           it "throws when first parameter is neither of type object nor of type string nor of type number", (done) ->
             cy.on "fail", (err) =>
                 lastLog = @lastLog
-                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
+                expect(err.message).to.include "`cy.invoke()` only accepts a string or a number as the functionName argument."
                 expect(lastLog.get("error").message).to.include(err.message)
                 done()
 
@@ -1281,7 +1281,7 @@ describe "src/cy/commands/connectors", ->
         it "throws when options argument is not an object", (done) ->
           cy.on "fail", (err) =>
               lastLog = @lastLog
-              expect(err.message).to.include "cy.its() only accepts an object as the options argument."
+              expect(err.message).to.include "`cy.its()` only accepts an object as the options argument."
               expect(lastLog.get("error").message).to.include(err.message)
               done()
 
@@ -1290,7 +1290,7 @@ describe "src/cy/commands/connectors", ->
         it "throws when property name is missing", (done) ->
           cy.on "fail", (err) =>
               lastLog = @lastLog
-              expect(err.message).to.include "cy.its() expects the propertyName argument to have a value"
+              expect(err.message).to.include "`cy.its()` expects the propertyName argument to have a value"
               expect(lastLog.get("error").message).to.include(err.message)
               done()
 
@@ -1299,7 +1299,7 @@ describe "src/cy/commands/connectors", ->
         it "throws when property name is not of type string", (done) ->
           cy.on "fail", (err) =>
               lastLog = @lastLog
-              expect(err.message).to.include "cy.its() only accepts a string or a number as the propertyName argument."
+              expect(err.message).to.include "`cy.its()` only accepts a string or a number as the propertyName argument."
               expect(lastLog.get("error").message).to.include(err.message)
               done()
 

@@ -1046,7 +1046,7 @@ This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS prope
           </div>
         `)
 
-        this.reasonIs(el.find('#needsScroll'), `This element \`<button#needsScroll>\` is not visible because its ancestor has 'position: fixed' CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`)
+        this.reasonIs(el.find('#needsScroll'), `This element \`<button#needsScroll>\` is not visible because its ancestor has \`position: fixed\` CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`)
       })
 
       it('cannot determine why element is not visible', function () {

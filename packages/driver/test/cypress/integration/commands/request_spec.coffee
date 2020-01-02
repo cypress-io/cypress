@@ -333,8 +333,7 @@ describe "src/cy/commands/request", ->
         .then (resp) ->
           ## make sure it really was 500!
           expect(resp.status).to.eq(500)
-
-          expect(warning).to.be.calledWith("The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.")
+          expect(warning.lastCall.args[0]).to.include("The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.")
 
     describe "failOnStatusCode", ->
       it "does not fail on status 401", ->
@@ -970,7 +969,7 @@ describe "src/cy/commands/request", ->
       ## https://github.com/cypress-io/cypress/issues/5274
       it "dont throw UNESCAPED_CHARACTERS error for url with ’ character in pathname", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -978,7 +977,7 @@ describe "src/cy/commands/request", ->
 
       it "dont throw UNESCAPED_CHARACTERS error for url with % character in pathname", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -986,7 +985,7 @@ describe "src/cy/commands/request", ->
 
       it "dont throw UNESCAPED_CHARACTERS error for url with ’ escaped in pathname", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -994,7 +993,7 @@ describe "src/cy/commands/request", ->
 
       it "dont throw UNESCAPED_CHARACTERS error for url with Unicode in pathname from BMP to Astral Plane", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -1002,7 +1001,7 @@ describe "src/cy/commands/request", ->
 
       it "dont throw UNESCAPED_CHARACTERS error for url with any Unicode escaped character in pathname", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 

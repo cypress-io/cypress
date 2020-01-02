@@ -61,6 +61,12 @@ getHttpProps = (fields = []) ->
   .value()
 
 module.exports = {
+  add:
+    type_missing: "`Cypress.add(key, fn, type)` must include a type!"
+
+  agents:
+    deprecated_warning: "#{cmd('agents')} is deprecated. Use #{cmd('stub')} and #{cmd('spy')} instead."
+
   alias:
     invalid: "Invalid alias: `{{name}}`.\nYou forgot the `@`. It should be written as: `@{{displayName}}`."
     not_registered_with_available: "#{cmd('{{cmd}}')} could not find a registered alias for: `@{{displayName}}`.\nAvailable aliases are: `{{availableAliases}}`."
@@ -198,10 +204,19 @@ module.exports = {
     }
 
   cookies:
+    backend_error: (obj) -> {
+      message: """
+      #{cmd('{{cmd}}')} had an unexpected error {{action}} {{browserDisplayName}}.
+      {{errMessage}}
+      {{errStack}}
+      """
+      docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
+    }
+
     invalid_name: (obj) -> {
       message: "#{cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
       docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
-      }
+    }
     timed_out: (obj) -> {
       message: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
       docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
@@ -264,11 +279,11 @@ module.exports = {
       message: """
         #{cmd(obj.cmd)} failed because this element:
 
-        #{obj.element}
+        `#{obj.element}`
 
-        has CSS 'pointer-events: none'#{if obj.elementInherited then ", inherited from this element:\n\n#{obj.elementInherited}\n" else ""}
+        has CSS `pointer-events: none`#{if obj.elementInherited then ", inherited from this element:\n\n`#{obj.elementInherited}`\n" else ""}
 
-        'pointer-events: none' prevents user mouse interaction.
+        `pointer-events: none` prevents user mouse interaction.
 
         Fix this problem, or use {force: true} to disable error checking.
       """
