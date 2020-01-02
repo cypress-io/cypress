@@ -55,6 +55,16 @@ create = (state, config, log) ->
       if l = current and current.getLastLog()
         l.error(err)
 
+    ## normalize error message for firefox
+    ## TODO: cleanup this dup. logic and move it to common util
+    e = err
+    errString = e.toString()
+    errStack = e.stack
+
+    if !errStack.slice(0, errStack.indexOf('\n')).includes(errString)
+      e.stack = "#{errString}\n#{errStack}"
+    
+
     return err
 
   commandRunningFailed = (err) ->

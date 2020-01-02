@@ -602,10 +602,10 @@ const isAttached = function ($el) {
   const doc = $document.getDocumentFromElement(els[0])
 
   // TODO: i guess its possible each element
-  // is technically bound to a differnet document
+  // is technically bound to a different document
   // but c'mon
   const isIn = (el) => {
-    return $.contains((doc as unknown) as Element, el)
+    return $.contains(doc, el)
   }
 
   // make sure the document is currently

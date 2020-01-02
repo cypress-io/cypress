@@ -1,6 +1,5 @@
 $ = Cypress.$.bind(Cypress)
-_ = Cypress._
-Promise = Cypress.Promise
+{ _, Promise } = Cypress
 
 Cookie = require("js-cookie")
 
@@ -102,7 +101,7 @@ describe "src/cy/commands/navigation", ->
 
     describe "errors", ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
@@ -326,7 +325,6 @@ describe "src/cy/commands/navigation", ->
 
         cy.go(0)
 
-      ## FIREFOX FIXME: hangs
       it "throws when go times out", (done) ->
         cy.timeout(1000)
         cy
@@ -1574,8 +1572,7 @@ describe "src/cy/commands/navigation", ->
 
         win.location.href = "about:blank"
 
-    ## FIXME: (FIREFOX) can't find element
-    it.skip "does not time out current commands until stability is reached", ->
+    it "does not time out current commands until stability is reached", ->
       ## on the first retry cause a page load event synchronously
       cy.on "command:retry", (options) ->
         switch options._retries
@@ -1589,7 +1586,10 @@ describe "src/cy/commands/navigation", ->
 
             ## this causes a synchronous beforeunload event
             ## unlike win.location.href setter
-            $a.get(0).click()
+            if Cypress.isBrowser('firefox')
+              win.location.href = $a[0].href
+            else $a.get(0).click()
+
 
           when 2
             ## on 2nd retry add the DOM element
@@ -1620,8 +1620,7 @@ describe "src/cy/commands/navigation", ->
 
         return null
 
-      ## FIXME: (FIREFOX) hangs
-      it.skip "can time out", (done) ->
+      it "can time out", (done) ->
         thenCalled = false
 
         cy.on "fail", (err) =>
@@ -1652,14 +1651,17 @@ describe "src/cy/commands/navigation", ->
 
             ## this causes a synchronous beforeunload event
             ## unlike win.location.href setter
-            $a.get(0).click()
+            if Cypress.isBrowser('firefox')
+              win.location.href = $a[0].href
+            else $a.get(0).click()
+
+
 
             null
           .wrap(null).then ->
             thenCalled = true
 
-      ## FIREFOX FIXME: logByName doesn't find log
-      it "does time out once stability is reached", (done) ->
+      it.only "does time out once stability is reached", (done) ->
         logByName = (name) =>
           _.find @logs, (log) ->
             log.get("name") is name
@@ -1698,7 +1700,9 @@ describe "src/cy/commands/navigation", ->
 
               ## this causes a synchronous beforeunload event
               ## unlike win.location.href setter
-              $a.get(0).click()
+              if Cypress.isBrowser('firefox')
+                win.location.href = $a[0].href
+              else $a.get(0).click()
 
               ## immediately logs pending state
               expect(logByName("page load").get("state")).to.eq("pending")

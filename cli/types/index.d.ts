@@ -280,6 +280,12 @@ declare namespace Cypress {
     isCy(obj: any): obj is Chainable
 
     /**
+     * Checks if you're running in the supplied browser.
+     * @param name browser name to check
+     */
+    isBrowser(name: string): boolean
+
+    /**
      * Internal options for "cy.log" used in custom commands.
      *
      * @see https://on.cypress.io/cypress-log
