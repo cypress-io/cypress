@@ -2,6 +2,7 @@ path = require("path")
 la = require("lazy-ass")
 check = require("check-more-types")
 R = require("ramda")
+os = require("os")
 
 # canonical platform names
 platforms = {
@@ -35,7 +36,11 @@ buildDir = (platform, args...) ->
     when "linux"
       path.resolve(root, "linux-unpacked", args...)
     when "win32"
-      path.resolve(root, "win-unpacked", args...)
+      if os.arch() == "x64"
+        path.resolve(root, "win-unpacked", args...)
+      else
+        # x86 32bit architecture
+        path.resolve(root, "win-ia32-unpacked", args...)
 
 ## returns a path into the /dist directory
 distDir = (platform, args...) ->
