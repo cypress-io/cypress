@@ -86,6 +86,10 @@ class Project extends Component {
     this.props.project.clearWarning(warning)
   }
 
+  _reopenProject = () => {
+    projectsApi.reopenProject(this.props.project)
+  }
+
   _pingBaseUrl = () => {
     this.props.project.clearWarning(null, true)
     ipc.pingBaseUrl(toJS(this.props.project.resolvedConfig.baseUrl).value)
