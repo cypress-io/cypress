@@ -3728,8 +3728,7 @@ describe('mouse state', () => {
     })
 
     describe('mouseout', () => {
-      // NOTE: temporarily skip while working out CI issue
-      it.skip('can move mouse from a div to another div', () => {
+      it('can move mouse from a div to another div', () => {
         const mouseout = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
             altKey: false,
@@ -3772,6 +3771,8 @@ describe('mouse state', () => {
             x: 500,
             y: 9,
           })
+
+          e.target.removeEventListener('mouseout', mouseout)
         }).as('mouseout')
         const mouseleave = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3815,6 +3816,8 @@ describe('mouse state', () => {
             x: 500,
             y: 9,
           })
+
+          e.target.removeEventListener('mouseleave', mouseleave)
         }).as('mouseleave')
         const pointerout = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3858,6 +3861,8 @@ describe('mouse state', () => {
             x: 500,
             y: 9,
           })
+
+          e.target.removeEventListener('pointerout', pointerout)
         }).as('pointerout')
         const pointerleave = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3901,6 +3906,8 @@ describe('mouse state', () => {
             x: 500,
             y: 9,
           })
+
+          e.target.removeEventListener('pointerleave', pointerleave)
         }).as('pointerleave')
         const mouseover = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3944,6 +3951,8 @@ describe('mouse state', () => {
             x: 500,
             y: 9,
           })
+
+          e.target.removeEventListener('mouseover', mouseover)
         }).as('mouseover')
         const mouseenter = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3987,6 +3996,8 @@ describe('mouse state', () => {
             x: 500,
             y: 9,
           })
+
+          e.target.removeEventListener('mouseenter', mouseenter)
         }).as('mouseenter')
         const pointerover = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -4030,6 +4041,8 @@ describe('mouse state', () => {
             x: 500,
             y: 9,
           })
+
+          e.target.removeEventListener('pointerover', pointerover)
         }).as('pointerover')
         const pointerenter = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -4073,6 +4086,8 @@ describe('mouse state', () => {
             x: 500,
             y: 9,
           })
+
+          e.target.removeEventListener('pointerenter', pointerenter)
         }).as('pointerenter')
 
         cy.get('div.item').eq(0)
