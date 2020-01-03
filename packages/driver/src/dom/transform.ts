@@ -69,6 +69,9 @@ const identityMatrix3D: Matrix3D = [
   0, 0, 0, 1,
 ]
 
+// It became 1e-5 from 1e-10. Because 30deg + 30deg + 30deg is 6.0568e-7 and it caused a false negative.
+const TINY_NUMBER = 1e-5
+
 const nextPreserve3d = (i: number, list: TransformInfo[]) => {
   return i + 1 < list.length &&
   list[i + 1].transformStyle === 'preserve-3d'
@@ -86,14 +89,10 @@ const finalNormal = (startIndex: number, list: TransformInfo[]) => {
   return normal
 }
 
-// This function uses a simplified version of backface culling.
-// https://en.wikipedia.org/wiki/Back-face_culling
-//
-// We defined view vector, (0, 0, -1), - eye to screen.
-// and default normal vector of an element, (0, 0, 1)
-// When dot product of them are >= 0, item is visible.
 const elIsBackface = (list: TransformInfo[]) => {
-  if (1 < list.length && list[1].transformStyle === 'preserve-3d') {
+  // When the direct parent of the target has style, preserve-3d
+  if (list.length > 1 && list[1].transformStyle === 'preserve-3d') {
+    // When the target is backface-invisible a2-1-1 ~ a2-1-4
     if (list[0].backfaceVisibility === 'hidden') {
       let normal = finalNormal(0, list)
 
@@ -101,29 +100,27 @@ const elIsBackface = (list: TransformInfo[]) => {
         return true
       }
     } else {
-      if (list[1].backfaceVisibility === 'visible') {
-        const { width, height } = list[0].el.getBoundingClientRect()
+      // When the direct parent of the target is backface-invisible
+      if (list[1].backfaceVisibility === 'hidden') {
+        // If it is not none, it is visible. Check a2-3-1
+        if (list[0].transform === 'none') {
+          let normal = finalNormal(1, list)
 
-        if (width === 0 || height === 0) {
-          return true
+          if (checkBackface(normal)) {
+            return true
+          }
         }
-      } else {
-        if (list[0].transform !== 'none') {
-          // TODO: check 90 deg.
-          return false
-        }
-
-        let normal = finalNormal(1, list)
-
-        if (checkBackface(normal)) {
-          return true
-        }
-
-        return false
       }
+
+      // Check 90deg a2-2-3, a2-2-4.
+      let normal = finalNormal(0, list)
+
+      return isElementOrthogonalWithView(normal)
     }
   } else {
     for (let i = 0; i < list.length; i++) {
+      // Ignore preserve-3d when it is not a direct parent.
+      // Why? -> https://github.com/cypress-io/cypress/pull/5916
       if (i > 0 && list[i].transformStyle === 'preserve-3d') {
         continue
       }
@@ -141,6 +138,12 @@ const elIsBackface = (list: TransformInfo[]) => {
   return false
 }
 
+// This function uses a simplified version of backface culling.
+// https://en.wikipedia.org/wiki/Back-face_culling
+//
+// We defined view vector, (0, 0, -1), - eye to screen.
+// and default normal vector of an element, (0, 0, 1)
+// When dot product of them are >= 0, item is visible.
 const checkBackface = (normal: Vector3) => {
   // Simplified dot product.
   // viewVector[0] and viewVector[1] are always 0. So, they're ignored.
@@ -149,8 +152,8 @@ const checkBackface = (normal: Vector3) => {
   // Because of the floating point number rounding error,
   // cos(90deg) isn't 0. It's 6.12323e-17.
   // And it sometimes causes errors when dot product value is something like -6.12323e-17.
-  // So, we're setting the dot product result to 0 when its absolute value is less than 1e-10(10^-10).
-  if (Math.abs(dot) < 1e-10) {
+  // So, we're setting the dot product result to 0 when its absolute value is less than SMALL_NUMBER(10^-10).
+  if (Math.abs(dot) < TINY_NUMBER) {
     dot = 0
   }
 
@@ -276,5 +279,5 @@ const isElementOrthogonalWithView = (normal: Vector3) => {
   // [0] and [1] are always 0
   const dot = viewVector[2] * normal[2]
 
-  return Math.abs(dot) <= 1e-10
+  return Math.abs(dot) < TINY_NUMBER
 }

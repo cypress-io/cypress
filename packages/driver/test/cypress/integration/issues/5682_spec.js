@@ -47,30 +47,25 @@ describe('issue #5682 - backface visibility', () => {
       })
     })
 
-    describe('CASE 2: No transform after preserve-3d', () => {
+    describe('CASE 2: when direct parents have preserve-3d', () => {
       it('target hidden + parents', () => {
-        cy.get('#a2-1').should('not.be.visible')
-        cy.get('#a2-2').should('not.be.visible')
-        cy.get('#a2-3').should('not.be.visible')
-        cy.get('#a2-4').should('not.be.visible')
+        cy.get('#a2-1-1').should('not.be.visible')
+        cy.get('#a2-1-2').should('not.be.visible')
+        cy.get('#a2-1-3').should('not.be.visible')
+        cy.get('#a2-1-4').should('not.be.visible')
       })
 
       it('target visible + parent visible', () => {
-        cy.get('#a2-5').should('be.visible')
-        cy.get('#a2-6').should('be.visible')
-        cy.get('#a2-7').should('not.be.visible')
+        cy.get('#a2-2-1').should('be.visible')
+        cy.get('#a2-2-2').should('be.visible')
+        cy.get('#a2-2-3').should('not.be.visible')
+        cy.get('#a2-2-4').should('not.be.visible')
       })
 
       it('target visible + parent hidden', () => {
-        cy.get('#a2-8').should('be.visible')
-        cy.get('#a2-9').should('not.be.visible')
-        cy.get('#a2-10').should('not.be.visible')
-      })
-    })
-
-    describe('CASE 3: Others', () => {
-      it('ignores and returns visible when flat appears after preserve-3d', () => {
-        cy.get('#a3-1').should('be.visible')
+        cy.get('#a2-3-1').should('be.visible')
+        cy.get('#a2-3-2').should('not.be.visible')
+        cy.get('#a2-3-3').should('not.be.visible')
       })
     })
 
