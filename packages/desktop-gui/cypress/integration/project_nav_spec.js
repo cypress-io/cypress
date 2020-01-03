@@ -386,6 +386,8 @@ describe('Project Nav', function () {
       it('displays generic icon', () => {
         cy.get('.browsers-list>a').first()
         .should('contain', 'Custom Foo')
+        .find('.browser-icon').should('have.class',
+          `browser-icon ./fonts/defaultBrowser.svg`)
       })
 
       it('pre-selects the custom browser', () => {
