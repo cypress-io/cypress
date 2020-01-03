@@ -108,6 +108,10 @@ const getDistDir = () => {
   return path.join(__dirname, '..', '..', 'dist')
 }
 
+/**
+ * Returns full filename to the file that keeps the Test Runner verification state as JSON text.
+ * @param {string} binaryDir - full path to the folder holding the binary
+ */
 const getBinaryStatePath = (binaryDir) => {
   return path.join(binaryDir, 'binary_state.json')
 }
@@ -132,7 +136,10 @@ const clearBinaryStateAsync = (binaryDir) => {
 }
 
 /**
- * @param {boolean} verified
+ * Writes the new binary status.
+ * @param {boolean} verified The new test runner state after smoke test
+ * @param {string} binaryDir Folder holding the binary
+ * @returns {Promise<void>} returns a promise
  */
 const writeBinaryVerifiedAsync = (verified, binaryDir) => {
   return getBinaryStateContentsAsync(binaryDir)

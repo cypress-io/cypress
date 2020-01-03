@@ -747,9 +747,18 @@ context('lib/tasks/verify', () => {
 
 // TODO this needs documentation with examples badly.
 function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
+  if (!customDir) {
+    customDir = '/cache/Cypress/1.2.3/Cypress.app'
+  }
+
+  const binaryState = {
+    verified: alreadyVerified,
+  }
+  const binaryStateText = JSON.stringify(binaryState)
+
   let mockFiles = {
-    [customDir ? customDir : '/cache/Cypress/1.2.3/Cypress.app']: {
-      'binary_state.json': `{"verified": ${alreadyVerified}}`,
+    [customDir]: {
+      'binary_state.json': binaryStateText,
       Contents: {
         MacOS: executable
           ? {
