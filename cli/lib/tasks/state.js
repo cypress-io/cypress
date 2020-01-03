@@ -110,16 +110,19 @@ const getDistDir = () => {
 
 /**
  * Returns full filename to the file that keeps the Test Runner verification state as JSON text.
- * @param {string} binaryDir - full path to the folder holding the binary
+ * Note: the binary state file will be stored one level up from the given binary folder.
+ * @param {string} binaryDir - full path to the folder holding the binary.
  */
 const getBinaryStatePath = (binaryDir) => {
-  return path.join(binaryDir, 'binary_state.json')
+  return path.join(binaryDir, '..', 'binary_state.json')
 }
 
 const getBinaryStateContentsAsync = (binaryDir) => {
-  return fs.readJsonAsync(getBinaryStatePath(binaryDir))
+  const fullPath = getBinaryStatePath(binaryDir)
+
+  return fs.readJsonAsync(fullPath)
   .catch({ code: 'ENOENT' }, SyntaxError, () => {
-    debug('could not read binary_state.json file')
+    debug('could not read binary_state.json file at "%s"', fullPath)
 
     return {}
   })
