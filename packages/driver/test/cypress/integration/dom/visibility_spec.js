@@ -792,11 +792,11 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css transform', () => {
-      describe('element visibility by css transform', () => {
-        const add = (el) => {
-          return $(el).appendTo(cy.$$('body'))
-        }
+      const add = (el) => {
+        return $(el).appendTo(cy.$$('body'))
+      }
 
+      describe('element visibility by css transform', () => {
         it('is visible when an element is translated a bit', () => {
           const el = add(`<div style="transform: translate(10px, 10px)">Translated</div>`)
 
@@ -887,6 +887,38 @@ describe('src/cypress/dom/visibility', () => {
           const el3 = add(`<div style="transform: rotateX(90deg) rotateY(90deg) skew(30deg, 50deg) translate(15px, 60px) scale(3.5)">rotateX(90deg)</div>`)
 
           expect(el3).to.be.hidden
+        })
+      })
+
+      describe('when height/width is set', () => {
+        it('is visible when transform is not 0, but height is 0', () => {
+          const el = add('<div style="transform: translate(0, 0); height: 0;">Text</div>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when transform is not 0, but width is 0', () => {
+          const el = add('<p style="transform: rotateX(30deg); width: 0;">Text</p>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when parent transform is not 0, but height is 0', () => {
+          const el = add('<div style="transform: translate(0, 0); height: 0;"><p id="tr-p-0">Text</p></div>')
+
+          expect(el.find('#tr-p-0')).to.be.visible
+        })
+
+        it('is visible when parent transform is not 0, but width is 0', () => {
+          const el = add('<div style="transform: translate(0, 0); height: 0%;"><p id="tr-p-1">Test</p></div>')
+
+          expect(el.find('#tr-p-1')).to.be.visible
+        })
+
+        it('is invisible when parent transform is 0, but height is not 0', () => {
+          const el = add('<div style="transform: scaleX(0); height: 10px"><p id="tr-p-2">Test</p></div>')
+
+          expect(el.find('#tr-p-2')).to.be.hidden
         })
       })
 
@@ -990,7 +1022,7 @@ This element '<div#coveredUpPosFixed>' is not visible because it has CSS propert
       })
 
       it('cannot determine why element is not visible', function () {
-        this.reasonIs(this.$btnOpacity, 'Cypress could not determine why this element \'<button>\' is not visible.')
+        this.reasonIs(this.$btnOpacity, 'This element \'<button>\' is not visible.')
       })
     })
   })
