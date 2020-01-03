@@ -13,6 +13,18 @@ export const detectVisibility = ($el: any) => {
 
 type BackfaceVisibility = 'hidden' | 'visible'
 type TransformStyle = 'flat' | 'preserve-3d'
+type Matrix2D = [
+  number, number, number,
+  number, number, number,
+]
+type Matrix3D = [
+  number, number, number, number,
+  number, number, number, number,
+  number, number, number, number,
+  number, number, number, number,
+]
+
+type Vector3 = [number, number, number]
 
 interface TransformInfo {
   backfaceVisibility: BackfaceVisibility
@@ -20,7 +32,7 @@ interface TransformInfo {
   transform: string
 }
 
-const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []) => {
+const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []): TransformInfo[] => {
   list.push(extractTransformInfo($el))
 
   const $parent = $el.parent()
@@ -43,56 +55,51 @@ const extractTransformInfo = ($el): TransformInfo => {
   }
 }
 
-const existsInvisibleBackface = (list) => {
+const existsInvisibleBackface = (list: TransformInfo[]) => {
   return !!_.find(list, { backfaceVisibility: 'hidden' })
 }
 
 const numberRegex = /-?[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/g
-const defaultNormal = [0, 0, 1]
-const viewVector = [0, 0, -1]
+const defaultNormal: Vector3 = [0, 0, 1]
+const viewVector: Vector3 = [0, 0, -1]
+const identityMatrix3D: Matrix3D = [
+  1, 0, 0, 0,
+  0, 1, 0, 0,
+  0, 0, 1, 0,
+  0, 0, 0, 1,
+]
+
+const nextPreserve3d = (i: number, list: TransformInfo[]) => {
+  return i + 1 < list.length &&
+  list[i + 1].transformStyle === 'preserve-3d'
+}
+
+const finalNormal = (startIndex: number, list: TransformInfo[]) => {
+  let i = startIndex
+  let normal = findNormal(parseMatrix3D(list[i].transform))
+
+  while (nextPreserve3d(i, list)) {
+    i++
+    normal = findNormal(parseMatrix3D(list[i].transform), normal)
+  }
+
+  return normal
+}
+
 // This function uses a simplified version of backface culling.
 // https://en.wikipedia.org/wiki/Back-face_culling
 //
 // We defined view vector, (0, 0, -1), - eye to screen.
 // and default normal vector of an element, (0, 0, 1)
 // When dot product of them are >= 0, item is visible.
-const elIsBackface = (list) => {
-  const nextPreserve3d = (i) => {
-    return i + 1 < list.length &&
-    list[i + 1].transformStyle === 'preserve-3d'
-  }
-
-  let i = 0
-
-  const finalNormal = (startIndex) => {
-    i = startIndex
-    let normal = findNormal(parseMatrix(list[i].transform))
-
-    while (nextPreserve3d(i)) {
-      i++
-      normal = findNormal(parseMatrix(list[i].transform), normal)
-    }
-
-    return normal
-  }
-
-  const skipToNextFlat = () => {
-    while (nextPreserve3d(i)) {
-      i++
-    }
-
-    i++
-  }
-
+const elIsBackface = (list: TransformInfo[]) => {
   if (1 < list.length && list[1].transformStyle === 'preserve-3d') {
     if (list[0].backfaceVisibility === 'hidden') {
-      let normal = finalNormal(0)
+      let normal = finalNormal(0, list)
 
       if (checkBackface(normal)) {
         return true
       }
-
-      i++
     } else {
       if (list[1].backfaceVisibility === 'visible') {
         const { width, height } = list[0].el.getBoundingClientRect()
@@ -100,32 +107,29 @@ const elIsBackface = (list) => {
         if (width === 0 || height === 0) {
           return true
         }
-
-        skipToNextFlat()
       } else {
         if (list[0].transform !== 'none') {
-          skipToNextFlat()
-        } else {
-          i++
-
-          let normal = finalNormal(i)
-
-          if (checkBackface(normal)) {
-            return true
-          }
-
-          i++
+          // TODO: check 90 deg.
+          return false
         }
+
+        let normal = finalNormal(1, list)
+
+        if (checkBackface(normal)) {
+          return true
+        }
+
+        return false
       }
     }
   } else {
-    for (; i < list.length; i++) {
+    for (let i = 0; i < list.length; i++) {
       if (i > 0 && list[i].transformStyle === 'preserve-3d') {
         continue
       }
 
       if (list[i].backfaceVisibility === 'hidden' && list[i].transform.startsWith('matrix3d')) {
-        let normal = findNormal(parseMatrix(list[i].transform))
+        let normal = findNormal(parseMatrix3D(list[i].transform))
 
         if (checkBackface(normal)) {
           return true
@@ -137,7 +141,7 @@ const elIsBackface = (list) => {
   return false
 }
 
-const checkBackface = (normal) => {
+const checkBackface = (normal: Vector3) => {
   // Simplified dot product.
   // viewVector[0] and viewVector[1] are always 0. So, they're ignored.
   let dot = viewVector[2] * normal[2]
@@ -153,26 +157,30 @@ const checkBackface = (normal) => {
   return dot >= 0
 }
 
-const parseMatrix = (transform) => {
+const parseMatrix3D = (transform: string): Matrix3D => {
   if (transform === 'none') {
-    return []
+    return identityMatrix3D
   }
 
   if (transform.startsWith('matrix3d')) {
-    return transform.substring(8).match(numberRegex)
+    const matrix: Matrix3D = transform.substring(8).match(numberRegex)!.map((n) => {
+      return parseFloat(n)
+    }) as Matrix3D
+
+    return matrix
   }
 
-  return toMatrix3d(transform.match(numberRegex))
+  return toMatrix3d(transform.match(numberRegex)!.map((n) => parseFloat(n)) as Matrix2D)
 }
 
-const findNormal = (matrix, normal = defaultNormal) => {
-  if (matrix.length === 0) {
-    return normal
-  }
+const parseMatrix2D = (transform: string): Matrix2D => {
+  return transform.match(numberRegex)!.map((n) => parseFloat(n)) as Matrix2D
+}
 
+const findNormal = (matrix: Matrix3D, normal: Vector3 = defaultNormal): Vector3 => {
   const m = matrix // alias for shorter formula
   const v = normal // alias for shorter formula
-  const computedNormal = [
+  const computedNormal: Vector3 = [
     m[0] * v[0] + m[4] * v[1] + m[8] * v[2],
     m[1] * v[0] + m[5] * v[1] + m[9] * v[2],
     m[2] * v[0] + m[6] * v[1] + m[10] * v[2],
@@ -181,7 +189,7 @@ const findNormal = (matrix, normal = defaultNormal) => {
   return toUnitVector(computedNormal)
 }
 
-const toMatrix3d = (m2d) => {
+const toMatrix3d = (m2d: Matrix2D): Matrix3D => {
   return [
     m2d[0], m2d[1], 0, 0,
     m2d[2], m2d[3], 0, 0,
@@ -190,18 +198,24 @@ const toMatrix3d = (m2d) => {
   ]
 }
 
-const toUnitVector = (v) => {
+const toUnitVector = (v: Vector3): Vector3 => {
   const length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
 
   return [v[0] / length, v[1] / length, v[2] / length]
 }
 
 // This function checks 2 things that can happen: scale and rotate to 0 in width or height.
-const elIsTransformedToZero = (list) => {
+const elIsTransformedToZero = (list: TransformInfo[]) => {
+  if (list[1].transformStyle === 'preserve-3d') {
+    const normal = finalNormal(0, list)
+
+    return isElementOrthogonalWithView(normal)
+  }
+
   return !!_.find(list, (info) => isTransformedToZero(info))
 }
 
-const isTransformedToZero = ({ transform }) => {
+const isTransformedToZero = ({ transform }: TransformInfo) => {
   if (transform === 'none') {
     return false
   }
@@ -214,16 +228,18 @@ const isTransformedToZero = ({ transform }) => {
   // https://en.wikipedia.org/wiki/Rotation_matrix#In_three_dimensions
   //
   if (transform.startsWith('matrix3d')) {
-    const matrix3d = parseMatrix(transform)
+    const matrix3d = parseMatrix3D(transform)
 
     if (is3DMatrixScaledTo0(matrix3d)) {
       return true
     }
 
-    return isElementOrthogonalWithView(matrix3d)
+    const normal = findNormal(matrix3d)
+
+    return isElementOrthogonalWithView(normal)
   }
 
-  const m = transform.match(numberRegex)
+  const m = parseMatrix2D(transform)
 
   if (is2DMatrixScaledTo0(m)) {
     return true
@@ -232,10 +248,10 @@ const isTransformedToZero = ({ transform }) => {
   return false
 }
 
-const is3DMatrixScaledTo0 = (m3d) => {
-  const xAxisScaledTo0 = +m3d[0] === 0 && +m3d[4] === 0 && +m3d[8] === 0
-  const yAxisScaledTo0 = +m3d[1] === 0 && +m3d[5] === 0 && +m3d[9] === 0
-  const zAxisScaledTo0 = +m3d[2] === 0 && +m3d[6] === 0 && +m3d[10] === 0
+const is3DMatrixScaledTo0 = (m3d: Matrix3D) => {
+  const xAxisScaledTo0 = m3d[0] === 0 && m3d[4] === 0 && m3d[8] === 0
+  const yAxisScaledTo0 = m3d[1] === 0 && m3d[5] === 0 && m3d[9] === 0
+  const zAxisScaledTo0 = m3d[2] === 0 && m3d[6] === 0 && m3d[10] === 0
 
   if (xAxisScaledTo0 || yAxisScaledTo0 || zAxisScaledTo0) {
     return true
@@ -244,9 +260,9 @@ const is3DMatrixScaledTo0 = (m3d) => {
   return false
 }
 
-const is2DMatrixScaledTo0 = (m) => {
-  const xAxisScaledTo0 = +m[0] === 0 && +m[2] === 0
-  const yAxisScaledTo0 = +m[1] === 0 && +m[3] === 0
+const is2DMatrixScaledTo0 = (m: Matrix2D) => {
+  const xAxisScaledTo0 = m[0] === 0 && m[2] === 0
+  const yAxisScaledTo0 = m[1] === 0 && m[3] === 0
 
   if (xAxisScaledTo0 || yAxisScaledTo0) {
     return true
@@ -255,11 +271,10 @@ const is2DMatrixScaledTo0 = (m) => {
   return false
 }
 
-const isElementOrthogonalWithView = (matrix3d) => {
-  const elNormal = findNormal(matrix3d)
+const isElementOrthogonalWithView = (normal: Vector3) => {
   // Simplified dot product.
   // [0] and [1] are always 0
-  const dot = viewVector[2] * elNormal[2]
+  const dot = viewVector[2] * normal[2]
 
   return Math.abs(dot) <= 1e-10
 }
