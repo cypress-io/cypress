@@ -14,12 +14,12 @@
   },
   "devDependencies": {
     "@cypress/eslint-plugin-dev": "5.0.0",
+    "@fortawesome/fontawesome-free": "5.11.2",
     "@reach/visually-hidden": "0.6.2",
     "chai-subset": "1.6.0",
     "classnames": "2.2.6",
     "eslint-plugin-cypress": "2.7.0",
     "eslint-plugin-react": "7.16.0",
-    "font-awesome": "4.7.0",
     "lodash": "4.17.15",
     "mobx": "5.15.0",
     "mobx-react": "6.1.4",

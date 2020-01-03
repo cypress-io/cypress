@@ -148,6 +148,55 @@ describe "src/cy/commands/request", ->
               url: "http://localhost:8080/app/foobar?cat=1"
             })
 
+        ## https://github.com/cypress-io/cypress/issues/5274
+        it "encode url with ’ character in pathname", ->
+          cy.request({ url: 'http://localhost:1234/’' }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:1234/%E2%80%99"
+            })
+
+        it "dont re-encode url with ’ escaped in pathname", ->
+          cy.request({ url: encodeURI('http://localhost:1234/’') }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:1234/%E2%80%99"
+            })
+
+        it "encode url with % character in pathname", ->
+          cy.request({ url: 'http://localhost:1234/%' }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:1234/%"
+            })
+
+        it "dont re-encode url with % escaped in pathname", ->
+          cy.request({ url: encodeURI('http://localhost:1234/%') }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:1234/%25"
+            })
+
+        it "encode url with Astral Plane Unicode in pathname", ->
+          cy.request({ url: 'http://localhost:1234/😀' }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:1234/%F0%9F%98%80"
+            })
+
+        it "dont re-encode url with Astral Plane Unicode escaped character in pathname", ->
+          cy.request({ url: encodeURI('http://localhost:1234/😀') }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:1234/%F0%9F%98%80"
+            })
+
+        it "should percent escape Unicode in pathname and convert Unicode in domain name properly", ->
+          cy.request({ url: 'http://localhost😀:1234/😀' }).then ->
+            @expectOptionsToBe({
+              url: "http://xn--localhost-ob26h:1234/%F0%9F%98%80"
+            })
+
+        it "should percent escape Unicode in pathname and convert Unicode in domain name with URI encoded URL", ->
+          cy.request({ url: encodeURI('http://localhost😀:1234/😀') }).then ->
+            @expectOptionsToBe({
+              url: "http://xn--localhost-ob26h:1234/%F0%9F%98%80"
+            })
+
       context "gzip", ->
         it "can turn off gzipping", ->
           cy.request({
@@ -284,8 +333,7 @@ describe "src/cy/commands/request", ->
         .then (resp) ->
           ## make sure it really was 500!
           expect(resp.status).to.eq(500)
-
-          expect(warning).to.be.calledWith("The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.")
+          expect(warning.lastCall.args[0]).to.include("The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.")
 
     describe "failOnStatusCode", ->
       it "does not fail on status 401", ->
@@ -917,6 +965,47 @@ describe "src/cy/commands/request", ->
           done()
 
         cy.request("http://localhost:1234/foo")
+
+      ## https://github.com/cypress-io/cypress/issues/5274
+      it "dont throw UNESCAPED_CHARACTERS error for url with ’ character in pathname", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
+          expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
+          done()
+
+        cy.request("http://localhost:1234/’")
+
+      it "dont throw UNESCAPED_CHARACTERS error for url with % character in pathname", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
+          expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
+          done()
+
+        cy.request("http://localhost:1234/%")
+
+      it "dont throw UNESCAPED_CHARACTERS error for url with ’ escaped in pathname", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
+          expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
+          done()
+
+        cy.request(encodeURI('http://localhost:1234/’'))
+
+      it "dont throw UNESCAPED_CHARACTERS error for url with Unicode in pathname from BMP to Astral Plane", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
+          expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
+          done()
+
+        cy.request('http://localhost:1234/😀')
+
+      it "dont throw UNESCAPED_CHARACTERS error for url with any Unicode escaped character in pathname", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
+          expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
+          done()
+
+        cy.request(encodeURI('http://localhost:1234/😀'))
 
       context "displays error", ->
         it "displays method and url in error", (done) ->

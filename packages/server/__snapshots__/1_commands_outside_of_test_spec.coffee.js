@@ -37,20 +37,7 @@ We dynamically generated a new test to display this failure.
 
 https://on.cypress.io/cannot-execute-commands-outside-test
 
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -128,11 +115,7 @@ exports['e2e commands outside of test / fails on failing assertions'] = `
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

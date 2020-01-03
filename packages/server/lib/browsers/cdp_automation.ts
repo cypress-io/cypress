@@ -1,9 +1,10 @@
+import _ from 'lodash'
 import Bluebird from 'bluebird'
 import cdp from 'devtools-protocol'
-import _ from 'lodash'
-import tough from 'tough-cookie'
+import { cors } from '@packages/network'
+import debugModule from 'debug'
 
-const cors = require('../util/cors')
+const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
 interface CyCookie {
   name: string
@@ -16,18 +17,29 @@ interface CyCookie {
   httpOnly: boolean
 }
 
+// Cypress uses the webextension-style filtering
+// https://developer.chrome.com/extensions/cookies#method-getAll
+type CyCookieFilter = chrome.cookies.GetAllDetails
+
 type SendDebuggerCommand = (message: string, data?: any) => Bluebird<any>
 
-const cookieMatches = (cookie: CyCookie, data) => {
-  if (data.domain && !tough.domainMatch(cookie.domain, data.domain)) {
+export const _domainIsWithinSuperdomain = (domain: string, suffix: string) => {
+  const suffixParts = suffix.split('.').filter(_.identity)
+  const domainParts = domain.split('.').filter(_.identity)
+
+  return _.isEqual(suffixParts, domainParts.slice(domainParts.length - suffixParts.length))
+}
+
+export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
+  if (filter.domain && !(cookie.domain && _domainIsWithinSuperdomain(cookie.domain, filter.domain))) {
     return false
   }
 
-  if (data.path && !tough.pathMatch(cookie.path, data.path)) {
+  if (filter.path && filter.path !== cookie.path) {
     return false
   }
 
-  if (data.name && data.name !== cookie.name) {
+  if (filter.name && filter.name !== cookie.name) {
     return false
   }
 
@@ -53,17 +65,19 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   }
 
   const normalizeSetCookieProps = (cookie: CyCookie): cdp.Network.SetCookieRequest => {
+    // this logic forms a SetCookie request that will be received by Chrome
+    // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
+    // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
+
     _.defaults(cookie, {
       name: '',
       value: '',
     })
 
-    // this logic forms a SetCookie request that will be received by Chrome
-    // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
-    // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
-
     // @ts-ignore
     cookie.expires = cookie.expirationDate
+
+    // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
     if (!cookie.hostOnly && cookie.domain[0] !== '.') {
       let parsedDomain = cors.parseDomain(cookie.domain)
 
@@ -82,17 +96,21 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     return cookie
   }
 
-  const getAllCookies = (data) => {
+  const getAllCookies = (filter: CyCookieFilter) => {
     return sendDebuggerCommandFn('Network.getAllCookies')
     .then((result: cdp.Network.GetAllCookiesResponse) => {
       return normalizeGetCookies(result.cookies)
       .filter((cookie: CyCookie) => {
-        return cookieMatches(cookie, data)
+        const matches = _cookieMatches(cookie, filter)
+
+        debugVerbose('cookie matches filter? %o', { matches, cookie, filter })
+
+        return matches
       })
     })
   }
 
-  const getCookiesByUrl = (url) => {
+  const getCookiesByUrl = (url): Bluebird<CyCookie[]> => {
     return sendDebuggerCommandFn('Network.getCookies', {
       urls: [url],
     })
@@ -101,8 +119,8 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     })
   }
 
-  const getCookie = (data): Bluebird<CyCookie | null> => {
-    return getAllCookies(data)
+  const getCookie = (filter: CyCookieFilter): Bluebird<CyCookie | null> => {
+    return getAllCookies(filter)
     .then((cookies) => {
       return _.get(cookies, 0, null)
     })
@@ -135,9 +153,15 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
         })
       case 'clear:cookie':
         return getCookie(data)
-        // so we can resolve with the value of the removed cookie
-        .tap((_cookieToBeCleared) => {
-          return sendDebuggerCommandFn('Network.deleteCookies', data)
+        // tap, so we can resolve with the value of the removed cookie
+        // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
+        // that matches the cookie domain that is really stored
+        .tap((cookieToBeCleared) => {
+          if (!cookieToBeCleared) {
+            return
+          }
+
+          return sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
         })
       case 'is:automation:client:connected':
         return true

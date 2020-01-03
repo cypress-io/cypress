@@ -90,7 +90,7 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
       </div>
       {state.shouldShowValidation && !isValid && (
         <p className='validation-error'>
-          <i className='fa fa-warning' />
+          <i className='fas fa-exclamation-triangle' />
           {validationMessage}
         </p>
       )}
@@ -101,7 +101,7 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
       <button className='close-button' onClick={onClose}>
         <VisuallyHidden>Close</VisuallyHidden>
         <span aria-hidden>
-          <i className='fa fa-remove' />
+          <i className='fas fa-times' />
         </span>
       </button>
     </Dialog>
@@ -162,7 +162,7 @@ const ErrorFilePath = observer(({ fileDetails }) => {
     >
       <span className='text'>Open in Editor</span>
       <span className='loader'>
-        <i className='fa fa-spinner fa-spin fa-pulse'></i>
+        <i className='fas fa-spinner fa-spin'></i>
       </span>
     </button>
   </>)

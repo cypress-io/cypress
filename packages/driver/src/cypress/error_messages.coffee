@@ -61,6 +61,12 @@ getHttpProps = (fields = []) ->
   .value()
 
 module.exports = {
+  add:
+    type_missing: "`Cypress.add(key, fn, type)` must include a type!"
+
+  agents:
+    deprecated_warning: "#{cmd('agents')} is deprecated. Use #{cmd('stub')} and #{cmd('spy')} instead."
+
   alias:
     invalid: "Invalid alias: `{{name}}`.\nYou forgot the `@`. It should be written as: `@{{displayName}}`."
     not_registered_with_available: "#{cmd('{{cmd}}')} could not find a registered alias for: `@{{displayName}}`.\nAvailable aliases are: `{{availableAliases}}`."
@@ -198,48 +204,37 @@ module.exports = {
     }
 
   cookies:
+    backend_error: (obj) -> {
+      message: """
+      #{cmd('{{cmd}}')} had an unexpected error {{action}} {{browserDisplayName}}.
+      {{errMessage}}
+      {{errStack}}
+      """
+      docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
+    }
+
     invalid_name: (obj) -> {
       message: "#{cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
       docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
-      }
+    }
     timed_out: (obj) -> {
       message: "#{cmd('{{cmd}}')} timed out waiting `{{timeout}}ms` to complete."
       docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
     }
+    removed_method: {
+      message: """
+      The `Cypress.Cookies.{{method}}()` method has been removed.
 
-  deprecated:
-    agents: "`cy.agents()` is deprecated. Use `cy.stub()` and `cy.spy()` instead."
-    command_log: """
-      `Cypress.Log.command()` has been renamed to `Cypress.log()`
+      Setting, getting, and clearing cookies is now an asynchronous operation.
 
-      Please update your code. You should be able to safely do a find/replace.
-    """
-    cookies:
-      method: """
-        The `Cypress.Cookies.{{method}}()` method has been removed.
-
-        Setting, getting, and clearing cookies is now an asynchronous operation.
-
-        Replace this call with the appropriate command such as:
-          - `cy.getCookie()`
-          - `cy.getCookies()`
-          - `cy.setCookie()`
-          - `cy.clearCookie()`
-          - `cy.clearCookies()`
+      Replace this call with the appropriate command such as:
+        - `cy.getCookie()`
+        - `cy.getCookies()`
+        - `cy.setCookie()`
+        - `cy.clearCookie()`
+        - `cy.clearCookies()`
       """
-    request:
-      failonstatus: "The #{cmd('request')} `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time."
-    server:
-      force404: "Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option."
-      stub: ({ type }) -> {
-        message: "Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`."
-        docsUrl: "https://on.cypress.io/deprecated-stub-false-on-#{type}"
-      }
-    wait:
-      fn: "#{cmd('wait', 'fn')} has been deprecated. Change this command to be #{cmd('should', 'fn')}."
-    xhr:
-      requestjson: "`requestJSON` is now deprecated and will be removed in the next version. Update this to `requestBody` or `request.body`."
-      responsejson: "`responseJSON` is now deprecated and will be removed in the next version. Update this to `responseBody` or `response.body`."
+    }
 
   dom:
     animating: {
@@ -284,11 +279,11 @@ module.exports = {
       message: """
         #{cmd(obj.cmd)} failed because this element:
 
-        #{obj.element}
+        `#{obj.element}`
 
-        has CSS 'pointer-events: none'#{if obj.elementInherited then ", inherited from this element:\n\n#{obj.elementInherited}\n" else ""}
+        has CSS `pointer-events: none`#{if obj.elementInherited then ", inherited from this element:\n\n`#{obj.elementInherited}`\n" else ""}
 
-        'pointer-events: none' prevents user mouse interaction.
+        `pointer-events: none` prevents user mouse interaction.
 
         Fix this problem, or use {force: true} to disable error checking.
       """
@@ -439,7 +434,7 @@ module.exports = {
 
   get:
     alias_invalid: {
-      message: "`{{prop}}` is not a valid alias property. Only numbers or `all` is permitted."
+      message: "`{{prop}}` is not a valid alias property. Only `numbers` or `all` is permitted."
       docsUrl: "https://on.cypress.io/get"
     }
     alias_zero: {
@@ -571,10 +566,22 @@ module.exports = {
     }
     invalid_num_of_args: {
       message: """
-        #{cmd('{{cmd}}')} only accepts a single argument.
+      #{cmd('{{cmd}}')} does not accept additional arguments.
 
-        If you want to invoke a function with arguments, use `.invoke()`.
-        """
+      If you want to invoke a function with arguments, use `.invoke()`.
+      """
+      docsUrl: "https://on.cypress.io/{{cmd}}"
+    }
+    invalid_options_arg: {
+      message: "#{cmd('{{cmd}}')} only accepts an object as the options argument."
+      docsUrl: "https://on.cypress.io/{{cmd}}"
+    }
+    invalid_prop_name_arg: {
+      message: "#{cmd('{{cmd}}')} only accepts a string or a number as the {{identifier}}Name argument."
+      docsUrl: "https://on.cypress.io/{{cmd}}"
+    }
+    null_or_undefined_property_name: {
+      message: "#{cmd('{{cmd}}')} expects the {{identifier}}Name argument to have a value."
       docsUrl: "https://on.cypress.io/{{cmd}}"
     }
     timed_out: {
@@ -589,7 +596,6 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/{{cmd}}"
     }
-
   location:
     invalid_key: {
       message: "Location object does not have key: `{{key}}`"
@@ -837,6 +843,10 @@ module.exports = {
     }
     invalid_method: {
       message: "#{cmd('request')} was called with an invalid method: `{{method}}`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser."
+      docsUrl: "https://on.cypress.io/request"
+    }
+    failonstatus_deprecated_warning: {
+      message: "The #{cmd('request')} `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time."
       docsUrl: "https://on.cypress.io/request"
     }
     form_invalid: {
@@ -1110,9 +1120,14 @@ module.exports = {
     }
 
   server:
+    force404_deprecated: "Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option."
     invalid_argument: {
       message: "#{cmd('server')} accepts only an object literal as its argument."
       docsUrl: "https://on.cypress.io/server"
+    }
+    stub_deprecated: {
+      message: "Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`."
+      docsUrl: "https://on.cypress.io/deprecated-stub-false-on-{{type}}"
     }
     xhrurl_not_set: "`Server.options.xhrUrl` has not been set"
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
@@ -1406,7 +1421,7 @@ module.exports = {
       docsUrl: "https://on.cypress.io/viewport"
     }
     dimensions_out_of_range: {
-      message: "#{cmd('viewport')} `width` and `height` must be between `20px` and `4000px`."
+      message: "#{cmd('viewport')} `width` and `height` must be at least 0px."
       docsUrl: "https://on.cypress.io/viewport"
     }
     empty_string: {
@@ -1562,7 +1577,14 @@ module.exports = {
       """
 
   wait:
-    alias_invalid: "`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`"
+    alias_invalid: {
+      message: "`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`"
+      docsUrl: "https://on.cypress.io/wait"
+    }
+    fn_deprecated: {
+      message: "#{cmd('wait', 'fn')} has been deprecated. Change this command to be #{cmd('should', 'fn')}."
+      docsUrl: "https://on.cypress.io/wait"
+    }
     invalid_1st_arg: {
       message: "#{cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: `{{arg}}`"
       docsUrl: "https://on.cypress.io/wait"
@@ -1594,4 +1616,6 @@ module.exports = {
     aborted: "This XHR was aborted by your code -- check this stack trace below."
     missing: "`XMLHttpRequest#xhr` is missing."
     network_error: "The network request for this XHR could not be made. Check your console for the reason."
+    requestjson_deprecated: "`requestJSON` is now deprecated and will be removed in the next version. Update this to `requestBody` or `request.body`."
+    responsejson_deprecated: "`responseJSON` is now deprecated and will be removed in the next version. Update this to `responseBody` or `response.body`."
 }

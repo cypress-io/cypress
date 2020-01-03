@@ -98,7 +98,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         $errUtils.throwErrByPath("request.status_code_flags_invalid")
 
       if _.has(options, "failOnStatus")
-        $errUtils.warnByPath("deprecated.request.failonstatus")
+        $errUtils.warnByPath("request.failonstatus_deprecated_warning")
         options.failOnStatusCode = options.failOnStatus
 
       ## normalize followRedirects -> followRedirect
@@ -125,6 +125,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       if originOrBase = config("baseUrl") or cy.getRemoteLocation("origin")
         options.url = $Location.qualifyWithBaseUrl(originOrBase, options.url)
+
+      ## Make sure the url unicode characters are properly escaped
+      ## https://github.com/cypress-io/cypress/issues/5274
+      try
+        options.url = new URL(options.url).href
+      catch err
+        if !(err instanceof TypeError) ## unexpected, new URL should only throw TypeError
+          throw err
+
+        # The URL object cannot be constructed because of URL failure
+        $errUtils.throwErrByPath("request.url_invalid", {
+          args: {
+            configFile: Cypress.config("configFile")
+          }
+        })
+
 
       ## if options.url isnt FQDN then we need to throw here
       ## if we made a request prior to a visit then it needs

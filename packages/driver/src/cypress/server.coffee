@@ -42,11 +42,11 @@ isAbortedThroughUnload = (xhr) ->
 
 warnOnStubDeprecation = (obj, type) ->
   if _.has(obj, "stub")
-    $errUtils.warnByPath("deprecated.server.stub", { args: { type }})
+    $errUtils.warnByPath("server.stub_deprecated", { args: { type }})
 
 warnOnForce404Default = (obj) ->
   if obj.force404 is false
-    $errUtils.warnByPath("deprecated.server.force404")
+    $errUtils.warnByPath("server.force404_deprecated")
 
 whitelist = (xhr) ->
   ## whitelist if we're GET + looks like we're fetching regular resources

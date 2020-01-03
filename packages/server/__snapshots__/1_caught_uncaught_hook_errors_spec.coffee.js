@@ -49,13 +49,13 @@ Because this error occurred during a \`before each\` hook we are skipping the re
      s3a before hook failed
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 's3a'
-      at stack trace line
+      [stack trace lines]
 
   3) s4a "before all" hook for "t10a":
      s4a before hook failed
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 's4a'
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -152,7 +152,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1b'
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -237,7 +237,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
 Because this error occurred during a \`before each\` hook we are skipping all of the remaining tests.
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -328,7 +328,7 @@ https://on.cypress.io/uncaught-exception-from-application
 
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1'
-      at stack trace line
+      [stack trace lines]
 
 
 

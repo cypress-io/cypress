@@ -3,12 +3,24 @@
     "plugin:@cypress/dev/react",
     "plugin:@cypress/dev/tests"
   ],
-  "rules": {
-    "arrow-body-style": "off"
-  },
+  "parser": "@typescript-eslint/parser",
   "settings": {
     "react": {
       "version": "16.12"
     }
+  },
+  "rules": {
+    "arrow-body-style": "off",
+    "no-unused-vars": "off",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".tsx"
+        ]
+      }
+    ]
   }
 }

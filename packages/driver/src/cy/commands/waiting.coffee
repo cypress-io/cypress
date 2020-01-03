@@ -18,7 +18,7 @@ throwErr = (arg) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   waitFunction = ->
-    $errUtils.throwErrByPath("deprecated.wait.fn")
+    $errUtils.throwErrByPath("wait.fn_deprecated")
 
   waitNumber = (subject, ms, options) ->
     ## increase the timeout by the delta
@@ -85,7 +85,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       {alias, command} = aliasObj
 
       str = _.compact([alias, str2]).join(".")
- 
+
       type = cy.getXhrTypeByAlias(str)
 
       [ index, num ] = getNumRequests(state, alias)

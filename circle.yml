@@ -1,5 +1,14 @@
 version: 2.1
 
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macBuildFilters: &macBuildFilters
+  filters:
+    branches:
+      only:
+        - develop
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -19,11 +28,12 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.0.0-chrome73
+      - image: cypress/browsers:node12.8.1-chrome78-ff70
     environment:
       PLATFORM: linux
 
@@ -295,6 +305,8 @@ jobs:
       - run: npm run test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
       - run: npm run all build-js
+      # test codemods
+      - run: npm run test-jscodeshift
       # run unit tests from individual packages
       - run: npm run all test -- --package cli
       - run: npm run all test -- --package electron
@@ -302,7 +314,7 @@ jobs:
       - run: npm run all test -- --package https-proxy
       - run: npm run all test -- --package launcher
       - run: npm run all test -- --package network
-      # how to pass Mocha reporter through zunder?
+      - run: npm run all test -- --package proxy
       - run: npm run all test -- --package reporter
       - run: npm run all test -- --package runner
       - run: npm run all test -- --package socket
@@ -739,9 +751,10 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - run: npm run check-next-dev-version
       - run:
           name: bump NPM version
-          command: npm --no-git-tag-version version ${NEXT_DEV_VERSION:-0.0.0-development}
+          command: npm --no-git-tag-version --allow-same-version version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
           working_directory: cli
@@ -982,54 +995,71 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - server-performance-tests:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-1:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-2:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-3:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-4:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-5:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-6:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-7:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-8:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-1:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-2:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-3:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-4:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-5:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-6:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-7:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-8:
+        context: test-runner:performance-tracking
         requires:
           - build
     - driver-integration-tests-chrome:
@@ -1084,6 +1114,7 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
     - build-binary:
+        context: test-runner:performance-tracking
         requires:
           - build
     - upload-binary:
@@ -1145,20 +1176,14 @@ mac-workflow: &mac-workflow
     - build:
         name: Mac build
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
 
     - lint:
         name: Mac lint
         executor: mac
+        <<: *macBuildFilters
         requires:
           - Mac build
-        filters:
-          branches:
-            only:
-              - develop
 
     # maybe run unit tests?
 
@@ -1187,10 +1212,7 @@ mac-workflow: &mac-workflow
         name: Mac binary
         context: org-global
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac build
 
@@ -1208,10 +1230,7 @@ mac-workflow: &mac-workflow
     - test-kitchensink:
         name: Test Mac Kitchensink
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac build
 

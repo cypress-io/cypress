@@ -27,11 +27,7 @@ exports['e2e uncaught support file errors failing 1'] = `
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

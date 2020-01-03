@@ -31,7 +31,7 @@ Fix this in your plugins file here:
 /foo/bar/.projects/task-not-registered/cypress/plugins/index.js
 
 https://on.cypress.io/api/task
-      at stack trace line
+      [stack trace lines]
 
 
 

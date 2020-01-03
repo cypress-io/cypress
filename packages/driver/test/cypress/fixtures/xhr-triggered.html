@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>jQuery 3.2.1 Fixture</title>
+    <script type="text/javascript" src="/fixtures/jquery-3.2.1.js"></script>
+  </head>
+  <body>
+    <button id="trigger-xhr">Trigger XHR</button>
+    <div id="result">Result</div>
+    <script>
+      $('#trigger-xhr').click(function(event) {
+        $.post('/test-xhr', function(data) {
+          $('#result').text(JSON.stringify(data))
+        })
+        event.preventDefault()
+      })
+    </script>
+  </body>
+</html>

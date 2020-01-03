@@ -32,7 +32,7 @@ exports['e2e stdout displays errors from failures 1'] = `
 
   1) stdout_failing_spec fails:
      foo
-      at stack trace line
+      [stack trace lines]
 
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
      \`cy.visit()\` failed trying to load:
@@ -48,7 +48,7 @@ The internal Cypress web server responded with:
   > 404: Not Found
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'failing hook'
-      at stack trace line
+      [stack trace lines]
 
   3) stdout_failing_spec passing hook is failing:
      \`cy.visit()\` failed trying to load:
@@ -62,7 +62,7 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
+      [stack trace lines]
 
 
 
@@ -275,9 +275,9 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
                                                                                                     
   Running:  simple_spec.coffee                                                              (1 of 1)
 
-Warning: Cypress can only record videos when running headlessly.
+Warning: Cypress can only record videos of Electron when running headlessly.
 
-You have set the 'electron' browser to run headed.
+You have set the Electron browser to run headed.
 
 A video will not be recorded when using this mode.
 

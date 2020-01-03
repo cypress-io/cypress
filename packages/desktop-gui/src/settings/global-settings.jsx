@@ -50,7 +50,7 @@ const GlobalSettings = observer(() => {
   return (
     <div className="global-settings">
       <a href='#' className='learn-more' onClick={openHelp}>
-        <i className='fa fa-info-circle'></i> Learn more
+        <i className='fas fa-info-circle'></i> Learn more
       </a>
 
       <p className='text-muted'>Global settings take effect for every project on your system. Changing them here will change them for other projects as well.</p>
@@ -58,7 +58,7 @@ const GlobalSettings = observer(() => {
       <p>Your preferred editor is used to open files from the test runner (e.g. when clicking links in error stack traces)</p>
       {state.isLoadingEditor ?
         <p className='loading-editors'>
-          <i className='fa fa-spinner fa-spin'></i> Loading Editors...
+          <i className='fas fa-spinner fa-spin'></i> Loading Editors...
         </p> :
         <EditorPicker
           chosen={state.chosenEditor}

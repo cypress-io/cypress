@@ -642,13 +642,13 @@ describe "src/cy/commands/waiting", ->
           Cypress.config("defaultCommandTimeout", 50)
 
         _.each [
-            { type: 'NaN', val: 0/0, errVal: 'NaN' }, 
-            { type: 'Infinity', val: Infinity, errVal: 'Infinity' }, 
-            { type: 'Array', val: [] }, 
-            { type: 'null', val: null }, 
-            { type: 'undefined', val: undefined }, 
-            { type: 'Boolean', val: true }, 
-            { type: 'Object', val: {} }, 
+            { type: 'NaN', val: 0/0, errVal: 'NaN' },
+            { type: 'Infinity', val: Infinity, errVal: 'Infinity' },
+            { type: 'Array', val: [] },
+            { type: 'null', val: null },
+            { type: 'undefined', val: undefined },
+            { type: 'Boolean', val: true },
+            { type: 'Object', val: {} },
             { type: 'Symbol', val: Symbol.iterator, errVal: "Symbol(Symbol.iterator)" }
           ], (attrs) =>
           it "throws when 1st arg is #{attrs.type}", (done) =>
