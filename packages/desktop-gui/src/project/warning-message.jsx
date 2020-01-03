@@ -1,14 +1,8 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import Markdown from 'markdown-it'
 import errors from '../lib/errors'
 import projectsApi from '../projects/projects-api'
 import MarkdownRenderer from '../lib/markdown-renderer'
-
-const md = new Markdown({
-  html: true,
-  linkify: true,
-})
 
 @observer
 class WarningMessage extends Component {
@@ -20,9 +14,7 @@ class WarningMessage extends Component {
     if (errors.isConfigurationChanged(warning)) {
       return (
         <div className='alert alert-warning centered'>
-          <div ref={(node) => this.warningMessageNode = node} dangerouslySetInnerHTML={{
-            __html: md.render(warningText),
-          }}></div>
+          <MarkdownRenderer markdown={warningText} />
           <button className='restart' onClick={reloadConfiguration()}>
             <i className='fas fa-sync-alt'></i>
             Restart

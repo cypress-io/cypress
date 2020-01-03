@@ -55,9 +55,9 @@ describe('Project', function () {
 
     it('re-opens project if config changes', function () {
       cy.shouldBeOnProjectSpecs().then(() => {
-        this.ipc.onConfigChanged.yield({}, '/path/to/file')
+        this.ipc.onConfigChanged.yield({}, '/Users/Jane/Dev/my-application/file.ext')
 
-        cy.contains('/path/to/file was modified. Restart Cypress for changes to take effect.')
+        cy.contains('file.ext was modified. Restart Cypress for changes to take effect.')
       })
     })
   })

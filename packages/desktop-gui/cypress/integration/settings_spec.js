@@ -444,8 +444,8 @@ describe('Settings', () => {
       cy.contains('Configuration').click()
       cy.contains('Restart').should('not.exist')
       cy.contains('http://localhost:7777').then(function () {
-        this.ipc.onConfigChanged.yield({}, '/path/to/file')
-        cy.contains('/path/to/file was modified. Restart Cypress for changes to take effect.')
+        this.ipc.onConfigChanged.yield({}, '/Users/Jane/Dev/my-application/file.ext')
+        cy.contains('file.ext was modified. Restart Cypress for changes to take effect.')
       })
     })
   })
