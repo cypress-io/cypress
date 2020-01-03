@@ -157,7 +157,7 @@ module.exports = {
         debug('debugger: received response to %s: %o', message, res)
         res
       .catch (err) ->
-        debug('debugger: received error on %s: %o', messsage, err)
+        debug('debugger: received error on %s: %o', message, err)
         throw err
 
     webContents.debugger.sendCommand('Browser.getVersion')

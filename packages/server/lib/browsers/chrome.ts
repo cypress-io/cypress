@@ -1,18 +1,30 @@
-const _ = require('lodash')
-const os = require('os')
-const path = require('path')
-const Promise = require('bluebird')
-const la = require('lazy-ass')
-const check = require('check-more-types')
-const extension = require('@packages/extension')
-const debug = require('debug')('cypress:server:browsers:chrome')
+import _ from 'lodash'
+import os from 'os'
+import path from 'path'
+import Promise from 'bluebird'
+import la from 'lazy-ass'
+import check from 'check-more-types'
+import extension from '@packages/extension'
+import { FoundBrowser } from '@packages/launcher'
+import debugModule from 'debug'
+import fs from '../util/fs'
+import appData from '../util/app_data'
+import utils from './utils'
+import protocol from './protocol'
+import { CdpAutomation } from './cdp_automation'
+import * as CriClient from './cri-client'
+
+// TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
+type CypressConfiguration = any
+
+type Browser = FoundBrowser & {
+  isHeadless: boolean
+  isHeaded: boolean
+}
+
 const plugins = require('../plugins')
-const fs = require('../util/fs')
-const appData = require('../util/app_data')
-const utils = require('./utils')
-const protocol = require('./protocol')
-const { CdpAutomation } = require('./cdp_automation')
-const CriClient = require('./cri-client')
+
+const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
@@ -118,7 +130,19 @@ const pluginsBeforeBrowserLaunch = function (browser, args) {
   })
 }
 
-const _normalizeArgExtensions = function (dest, args) {
+/**
+ * Merge the different `--load-extension` arguments into one.
+ *
+ * @param extPath path to Cypress extension
+ * @param args all browser args
+ * @param browser the current browser being launched
+ * @returns the modified list of arguments
+ */
+const _normalizeArgExtensions = function (extPath, args, browser: Browser): string[] {
+  if (browser.isHeadless) {
+    return args
+  }
+
   let userExtensions
   const loadExtension = _.find(args, (arg) => {
     return arg.includes(LOAD_EXTENSION)
@@ -131,7 +155,7 @@ const _normalizeArgExtensions = function (dest, args) {
     userExtensions = loadExtension.replace(LOAD_EXTENSION, '').split(',')
   }
 
-  const extensions = [].concat(userExtensions, dest, pathToTheme)
+  const extensions = [].concat(userExtensions, extPath, pathToTheme)
 
   args.push(LOAD_EXTENSION + _.compact(extensions).join(','))
 
@@ -171,6 +195,7 @@ const _disableRestorePagesPrompt = function (userDir) {
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
 const _connectToChromeRemoteInterface = function (port) {
+  // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
 
   debug('connecting to Chrome remote interface at random port %d', port)
@@ -206,6 +231,7 @@ const _maybeRecordVideo = (options) => {
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
 const _navigateUsingCRI = function (url) {
+  // @ts-ignore
   la(check.url(url), 'missing url to navigate to', url)
 
   return function (client) {
@@ -247,7 +273,7 @@ module.exports = {
 
   _setAutomation,
 
-  _writeExtension (browser, options) {
+  _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
       debug('chrome is running headlessly, not installing extension')
 
@@ -269,14 +295,14 @@ module.exports = {
     })
   },
 
-  _getArgs (options = {}) {
+  _getArgs (options: CypressConfiguration = {}) {
     let ps; let ua
 
     _.defaults(options, {
       browser: {},
     })
 
-    const args = [].concat(defaultArgs)
+    const args = ([] as string[]).concat(defaultArgs)
 
     if (os.platform() === 'linux') {
       args.push('--disable-gpu')
@@ -316,14 +342,10 @@ module.exports = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
-    if (options.isHeadless) {
-      args.push('--headless')
-    }
-
     return args
   },
 
-  open (browser, url, options = {}, automation) {
+  open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
@@ -332,9 +354,16 @@ module.exports = {
     .try(() => {
       const args = this._getArgs(options)
 
+      if (browser.isHeadless) {
+        args.push('--headless')
+      }
+
       return getRemoteDebuggingPort()
       .then((port) => {
+        // force ipv4
+        // https://github.com/cypress-io/cypress/issues/5912
         args.push(`--remote-debugging-port=${port}`)
+        args.push('--remote-debugging-address=127.0.0.1')
 
         return Promise.all([
           // ensure that we have a clean cache dir
@@ -344,7 +373,7 @@ module.exports = {
           port,
         ])
       })
-    }).spread((cacheDir, args, port) => {
+    }).spread((cacheDir, args: string[], port) => {
       return Promise.all([
         this._writeExtension(
           browser,
@@ -356,7 +385,7 @@ module.exports = {
       .spread((extDest) => {
         // normalize the --load-extensions argument by
         // massaging what the user passed into our own
-        args = _normalizeArgExtensions(extDest, args)
+        args = _normalizeArgExtensions(extDest, args, browser)
 
         // this overrides any previous user-data-dir args
         // by being the last one

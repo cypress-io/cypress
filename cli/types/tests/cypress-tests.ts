@@ -332,3 +332,9 @@ namespace CypressContainsTests {
   cy.contains('#app', 'my text to find', {log: false, timeout: 100})
   cy.contains('my text to find', {log: false, timeout: 100})
 }
+
+// https://github.com/cypress-io/cypress/pull/5574
+namespace CypressLocationTests {
+  cy.location('path') // $ExpectError
+  cy.location('pathname') // $ExpectType Chainable<string>
+}

@@ -104,7 +104,9 @@ Once the `develop` branch for all test projects are reliably passing with the ne
 
 ### Steps to Publish a New Version
 
-0. Make sure that if there is a new [`cypress-example-kitchensink`][https://github.com/cypress-io/cypress-example-kitchensink/releases] version, the corresponding dependency in [`packages/example`](./packages/example) has been updated to that new version.
+In the following instructions, "X.Y.Z" is used to denote the version of Cypress being published.
+
+0. Make sure that if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, the corresponding dependency in [`packages/example`](./packages/example) has been updated to that new version.
 1. Make sure that you have the correct environment variables set up before proceeding.
     - You'll need Cypress AWS access keys in `aws_credentials_json`, which looks like this:
         ```text
@@ -123,38 +125,44 @@ Once the `develop` branch for all test projects are reliably passing with the ne
     ```
 3. Publish the new NPM package under the `dev` tag. The unique link to the package file `cypress.tgz` is the one already tested above. You can publish to the NPM registry straight from the URL:
     ```shell
-    npm publish https://cdn.../npm/3.4.0/<long sha>/cypress.tgz --tag dev
+    npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
     ```
-4. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions):
+4. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). Example output:
     ```shell
     dist-tags:
     dev: 3.4.0     latest: 3.3.2
     ```
-5. Test `cypress@3.4.0` again to make sure everything is working. You can trigger test projects from the command line (if you have the appropriate permissions)
+5. Test `cypress@X.Y.Z` again to make sure everything is working. You can trigger test projects from the command line (if you have the appropriate permissions)
     ```
-    node scripts/test-other-projects.js --npm cypress@3.4.0 --binary 3.4.0
+    node scripts/test-other-projects.js --npm cypress@X.Y.Z --binary X.Y.Z
     ```
 6. Test the new version of Cypress against the Cypress dashboard repo.
 7. Update and publish the changelog and any release-specific documentation changes in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
 8. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
-    npm dist-tag add cypress@3.4.0
+    npm dist-tag add cypress@X.Y.Z
     ```
 9. Run `binary-release` to update the download the server's manifest, set the next CI version, and create an empty version commit:
     ```shell
-    npm run binary-release -- --version 3.4.0 --commit`
+    npm run binary-release -- --version X.Y.Z --commit
     ```
 10. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 11. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
 12. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
     - Close the current release in ZenHub.
     - Create a new patch release (and a new minor release, if this is a minor release) in ZenHub, and schedule them both to be completed 2 weeks from the current date.
-13. Bump `version` in [`package.json`](package.json) and commit it to `develop` using a commit message like `release 3.4.0 [skip ci]`
-14. Tag this commit with `v3.4.0` and push that tag up.
+13. Bump `version` in [`package.json`](package.json) and commit it to `develop` using a commit message like `release X.Y.Z [skip ci]`
+14. Tag this commit with `vX.Y.Z` and push that tag up.
 15. Merge `develop` into `master` and push that branch up.
-16. Using [cypress-io/release-automations][release-automations]:
-    - Publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases` (see its README for details).
-    - Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release` (see its README for details)
+16. Inside of [cypress-io/release-automations][release-automations]:
+    - Publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases`:
+        ```shell
+        cd set-releases && npm run release-log -- --version X.Y.Z
+        ```
+    - Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release`:
+        ```shell
+        cd issues-in-release && npm run do:comment -- --version X.Y.Z
+        ```
 17. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
 18. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
 19. Try updating as many example projects to the new version. You probably want to update by using Renovate dependency issue like [`cypress-example-todomvc` "Update Dependencies (Renovate Bot)](https://github.com/cypress-io/cypress-example-todomvc/issues/99). Try updating at least the following projects:
