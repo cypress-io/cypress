@@ -169,29 +169,14 @@
     display: inline-block;
   }
 
-  .chrome > .browser-icon { 	 
+  .browser-icon {
     width: 16px;
     height: 16px;
   }
-  .canary > .browser-icon { 	 
-    width: 16px;
-    height: 16px;
-  }
-  .chromium > .browser-icon { 	 
-    width: 16px;
-    height: 16px;
-  }
-  .electron > .browser-icon { 	 
-    width: 16px;
-    height: 16px;
-  }
-  .firefox > .browser-icon { 	 
-    width: 16px;
-    height: 16px;
-  }
-  .defaultBrowser > .browser-icon { 	 
-    width: 16px;
-    height: 16px;
+
+  .selected .browser-icon {
+    position: relative;
+    top: -1px;
   }
 
   .dropdown-menu {
