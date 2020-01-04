@@ -112,6 +112,6 @@
   "dependencies": {
     "@cypress/webpack-preprocessor": "2.0.1",
     "common-tags": "1.8.0",
-    "@kazupon/vue-i18n-loader": "0.3.0"
+    "@kazupon/vue-i18n-loader": "0.5.0"
   }
 }
