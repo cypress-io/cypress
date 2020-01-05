@@ -109,16 +109,16 @@ describe('Settings', () => {
       it('applies the same color treatment to expanded key values as the root key', () => {
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
         cy.get('.config-vars').as('config-vars')
-        .contains('span', 'Chrome').parent('span').should('have.class', 'plugins')
+        .contains('span', 'Chrome').parent('span').should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Chromium').parent('span').should('have.class', 'plugins')
+        .contains('span', 'Chromium').parent('span').should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Canary').parent('span').should('have.class', 'plugins')
+        .contains('span', 'Canary').parent('span').should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Electron').parent('span').should('have.class', 'plugins')
+        .contains('span', 'Electron').parent('span').should('have.class', 'plugin')
 
         cy.contains('span', 'blacklistHosts').parents('div').first().find('span').first().click()
         cy.get('@config-vars')
@@ -137,7 +137,7 @@ describe('Settings', () => {
         cy.get('@config-vars')
         .contains('span', 'Electron').parents('div').first().find('span').first().click()
 
-        cy.get('@config-vars').contains('span', 'electron').parents('li').eq(1).find('.line .plugins').should('have.length', 6)
+        cy.get('@config-vars').contains('span', 'electron').parents('li').eq(1).find('.line .plugin').should('have.length', 6)
       })
 
       it('displays string values as quoted strings', () => {
