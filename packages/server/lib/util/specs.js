@@ -182,14 +182,18 @@ function findSpecsOfType (searchOptions, specPattern) {
 const find = (config, specPattern) => {
   const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
 
+  /**
+   * Sets "testType: integration|component" on each object in a list
+  */
+  const setTestType = (testType) => R.map(R.set(R.lensProp('testType'), testType))
+
   const findIntegrationSpecs = () => {
     const searchOptions = _.pick(config, commonSearchOptions)
 
     searchOptions.searchFolder = config.integrationFolder
 
     return findSpecsOfType(searchOptions, specPattern)
-    // set "type: integration" on each object
-    .then(R.map(R.set(R.lensProp('type'), TEST_TYPES.INTEGRATION)))
+    .then(setTestType(TEST_TYPES.INTEGRATION))
   }
 
   const findComponentSpecs = () => {
@@ -198,8 +202,7 @@ const find = (config, specPattern) => {
     searchOptions.searchFolder = config.componentFolder
 
     return findSpecsOfType(searchOptions, specPattern)
-    // set "type: component" on each object
-    .then(R.map(R.set(R.lensProp('type'), TEST_TYPES.COMPONENT)))
+    .then(setTestType(TEST_TYPES.COMPONENT))
   }
 
   return Promise.all([
@@ -210,11 +213,11 @@ const find = (config, specPattern) => {
   .tap((foundSpecs) => {
     if (debug.enabled) {
       const table = new Table({
-        head: ['relative', 'type'],
+        head: ['relative', 'testType'],
       })
 
       foundSpecs.forEach((spec) => {
-        table.push([spec.relative, spec.type])
+        table.push([spec.relative, spec.testType])
       })
 
       /* eslint-disable no-console */

@@ -2,10 +2,16 @@ import ipc from '../lib/ipc'
 import specsStore from './specs-store'
 
 const getSpecs = (setProjectError) => {
-  ipc.getSpecs((err, specs = []) => {
+  const DEFAULT_SPECS = {
+    integration: [],
+  }
+
+  ipc.getSpecs((err, specs = DEFAULT_SPECS) => {
     if (err) {
       return setProjectError(err)
     }
+
+    console.table(specs.integration)
 
     specsStore.setSpecs(specs)
   })
