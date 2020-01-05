@@ -18,7 +18,7 @@ const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
  * component tests are new beasts, and they change how we mount the
  * code into the test frame.
 */
-const TEST_TYPES = {
+const SPEC_TYPES = {
   INTEGRATION: 'integration',
   COMPONENT: 'component',
 }
@@ -185,7 +185,7 @@ const find = (config, specPattern) => {
   /**
    * Sets "testType: integration|component" on each object in a list
   */
-  const setTestType = (testType) => R.map(R.set(R.lensProp('testType'), testType))
+  const setTestType = (testType) => R.map(R.set(R.lensProp('specType'), testType))
 
   const findIntegrationSpecs = () => {
     const searchOptions = _.pick(config, commonSearchOptions)
@@ -193,7 +193,7 @@ const find = (config, specPattern) => {
     searchOptions.searchFolder = config.integrationFolder
 
     return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(TEST_TYPES.INTEGRATION))
+    .then(setTestType(SPEC_TYPES.INTEGRATION))
   }
 
   const findComponentSpecs = () => {
@@ -202,7 +202,7 @@ const find = (config, specPattern) => {
     searchOptions.searchFolder = config.componentFolder
 
     return findSpecsOfType(searchOptions, specPattern)
-    .then(setTestType(TEST_TYPES.COMPONENT))
+    .then(setTestType(SPEC_TYPES.COMPONENT))
   }
 
   return Promise.all([
@@ -213,11 +213,11 @@ const find = (config, specPattern) => {
   .tap((foundSpecs) => {
     if (debug.enabled) {
       const table = new Table({
-        head: ['relative', 'testType'],
+        head: ['relative', 'specType'],
       })
 
       foundSpecs.forEach((spec) => {
-        table.push([spec.relative, spec.testType])
+        table.push([spec.relative, spec.specType])
       })
 
       /* eslint-disable no-console */
@@ -231,5 +231,5 @@ module.exports = {
 
   getPatternRelativeToProjectRoot,
 
-  TEST_TYPES,
+  TEST_TYPES: SPEC_TYPES,
 }

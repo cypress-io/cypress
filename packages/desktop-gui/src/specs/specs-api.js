@@ -11,8 +11,6 @@ const getSpecs = (setProjectError) => {
       return setProjectError(err)
     }
 
-    console.table(specs.integration)
-
     specsStore.setSpecs(specs)
   })
 }
