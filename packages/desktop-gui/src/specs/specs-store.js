@@ -41,7 +41,6 @@ export class SpecsStore {
   }
 
   @action setSpecs (specsByType) {
-    debugger
     this._files = _.flatten(_.map(specsByType, (specs, type) => {
       return _.map(specs, (spec) => {
         return _.extend({}, spec, { type })
