@@ -42,6 +42,7 @@ export default {
     return ''
   },
 
+  // TODO: handle both integration and components specs
   absoluteSpecPath (config) {
     const relativeSpecPath = path.relative('integration', this.specPath())
 

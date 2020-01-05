@@ -189,13 +189,25 @@ const moduleFactory = () => {
           createSpecsWatcher(cfg)
 
           return specsUtil.find(cfg)
-        })
-        // TODO: put back 'integration' property
-        // on the specs
-        .then((specs = []) => {
-          return {
-            integration: specs,
-          }
+          // TODO: put back 'integration' property on the specs
+          .then((specs = []) => {
+            // TODO merge logic with "run.js"
+            if (debug.enabled) {
+              const names = _.map(specs, 'name')
+
+              // TODO use pluralize to form good debug message
+              debug(
+                'found \'%d\' specs using spec pattern \'%s\': %o',
+                names.length,
+                cfg.testFiles,
+                names
+              )
+            }
+
+            return {
+              integration: specs,
+            }
+          })
         })
       }
 

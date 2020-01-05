@@ -48,6 +48,7 @@ folders = toWords """
   fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
   screenshotsFolder  supportFile      supportFolder       unitFolder
   videosFolder
+  componentFolder
 """
 
 # Public configuration properties, like "cypress.json" fields
@@ -57,6 +58,7 @@ configKeys = toWords """
   blacklistHosts
   chromeWebSecurity
   modifyObstructiveCode           integrationFolder
+  componentFolder
   env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
@@ -135,6 +137,7 @@ CONFIG_DEFAULTS = {
   supportFile:                   "cypress/support"
   fixturesFolder:                "cypress/fixtures"
   integrationFolder:             "cypress/integration"
+  componentFolder:               "cypress/component"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
   pluginsFile:                   "cypress/plugins"
@@ -159,6 +162,7 @@ validationRules = {
   fixturesFolder: v.isStringOrFalse
   ignoreTestFiles: v.isStringOrArrayOfStrings
   integrationFolder: v.isString
+  componentFolder: v.isString
   modifyObstructiveCode: v.isBoolean
   nodeVersion: v.isOneOf("default", "bundled", "system")
   numTestsKeptInMemory: v.isNumber
@@ -584,6 +588,7 @@ module.exports = {
   setParentTestsPaths: (obj) ->
     ## projectRoot:              "/path/to/project"
     ## integrationFolder:        "/path/to/project/cypress/integration"
+    ## componentFolder:          "/path/to/project/cypress/components"
     ## parentTestsFolder:        "/path/to/project/cypress"
     ## parentTestsFolderDisplay: "project/cypress"
 
