@@ -74,6 +74,7 @@ const runSpec = (project, spec, browser) => {
       browser,
       spec: spec.file,
       specType: spec.specType,
+      relative: spec.relative,
     }
 
     ipc.launchBrowser(launchOptions, (err, data = {}) => {

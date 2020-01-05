@@ -1,7 +1,10 @@
 const path = require('path')
 const fs = require('./fs')
+const debug = require('debug')('cypress:server:path_helpers')
 
 const isIntegrationTestRe = /^integration/
+// TODO THIS IS A HACK, WE MUST DETERMINE PATH TO LOAD BETTER
+const isComponentTestRe = /component/
 
 // require.resolve walks the symlinks, which can really change
 // the results. For example
@@ -54,6 +57,10 @@ module.exports = {
   getRelativePathToSpec,
 
   getAbsolutePathToSpec (spec, config) {
+    debug('get absolute path to spec %o', { spec })
+
+    let resolved
+
     switch (false) {
       // if our file is an integration test
       // then figure out the absolute path
@@ -63,7 +70,11 @@ module.exports = {
 
         // now simply join this with our integrationFolder
         // which makes it an absolute path
-        return path.join(config.integrationFolder, spec)
+        resolved = path.join(config.integrationFolder, spec)
+
+        debug('resolved path %s', resolved)
+
+        return resolved
 
         // // commented out until we implement unit testing
         // when isUnitTestRe.test(spec)
@@ -75,7 +86,16 @@ module.exports = {
         // // which makes it an absolute path
         // path.join(config.unitFolder, spec)
 
+      case !isComponentTestRe.test(spec):
+        resolved = path.join(config.parentTestsFolder, spec)
+
+        debug('resolved component path %s', resolved)
+
+        return resolved
+
       default:
+        debug('returning default path %s', spec)
+
         return spec
     }
   },

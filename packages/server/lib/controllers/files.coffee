@@ -6,6 +6,7 @@ glob        = require("../util/glob")
 specsUtil   = require("../util/specs")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
+debug       = require("debug")("cypress:server:controllers")
 
 module.exports = {
   handleFiles: (req, res, config) ->
@@ -17,6 +18,7 @@ module.exports = {
 
   handleIframe: (req, res, config, getRemoteState) ->
     test = req.params[0]
+    debug("handle iframe %o", { test })
 
     iframePath = cwd("lib", "html", "iframe.html")
 
@@ -36,11 +38,12 @@ module.exports = {
     convertSpecPath = (spec) =>
       ## get the absolute path to this spec and
       ## get the browser url + cache buster
-      spec = pathHelpers.getAbsolutePathToSpec(spec, config)
+      convertedSpec = pathHelpers.getAbsolutePathToSpec(spec, config)
+      debug("converted %s to %s", spec, convertedSpec)
 
-      @prepareForBrowser(spec, config.projectRoot)
+      @prepareForBrowser(convertedSpec, config.projectRoot)
 
-    getSpecs = =>
+    getSpecsHelper = =>
       ## grab all of the specs if this is ci
       if spec is "__all"
         specsUtil.find(config)
@@ -54,12 +57,13 @@ module.exports = {
 
     Promise
     .try =>
-      getSpecs()
+      getSpecsHelper()
 
   prepareForBrowser: (filePath, projectRoot) ->
-    filePath = path.relative(projectRoot, filePath)
+    relativeFilePath = path.relative(projectRoot, filePath)
+    debug("from file path %s got relative path %s to project root", filePath, relativeFilePath)
 
-    @getTestUrl(filePath)
+    @getTestUrl(relativeFilePath)
 
   getTestUrl: (file) ->
     file += CacheBuster.get()

@@ -59,6 +59,8 @@ const moduleFactory = () => {
       return this.reset()
       .then(() => openProject.getSpecUrl(spec.absolute))
       .then((url) => {
+        debug('open project url %s', url)
+
         return openProject.getConfig()
         .then((cfg) => {
           options.browsers = cfg.browsers
