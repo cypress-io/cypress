@@ -101,7 +101,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "launch:browser"
-      openProject.launch(arg.browser, arg.spec, {
+      # is there a way to lint the arguments received?
+      fullSpec = _.merge({}, arg.spec, {specType: arg.specType})
+      openProject.launch(arg.browser, fullSpec, {
         projectRoot: options.projectRoot
         onBrowserOpen: ->
           send({browserOpened: true})
