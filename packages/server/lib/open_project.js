@@ -49,7 +49,8 @@ const moduleFactory = () => {
     },
 
     launch (browser, spec, options = {}) {
-      debug('resetting project state, preparing to launch browser')
+      debug('resetting project state, preparing to launch browser %s for spec %o options %o',
+        browser.name, spec, options)
 
       la(_.isPlainObject(browser), 'expected browser object:', browser)
 
