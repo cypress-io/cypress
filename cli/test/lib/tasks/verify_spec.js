@@ -753,6 +753,7 @@ function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
   }
 
   // binary state is stored one folder higher than the runner itself
+  // see https://github.com/cypress-io/cypress/issues/6089
   const binaryStateFolder = path.join(customDir, '..')
 
   const binaryState = {
