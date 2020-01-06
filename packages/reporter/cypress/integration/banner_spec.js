@@ -66,13 +66,13 @@ describe('banner', function () {
 
       cy.get('.banner').should('contain', this.file)
       cy.get('.reporter').then(() => {
-        this.runner.emit('reporter:restart:test:run')
-        this.runner.emit('runnables:ready', this.runnables)
-        this.runner.emit('reporter:start', {})
-      }).then(() => {
         this.reloadConfig = sinon.spy()
 
         this.runner.on('reload:configuration', this.reloadConfig)
+        this.runner.emit('reporter:restart:test:run')
+        this.runner.emit('runnables:ready', this.runnables)
+        this.runner.emit('reporter:start', {})
+
         expect(this.reloadConfig).to.be.called
       })
 

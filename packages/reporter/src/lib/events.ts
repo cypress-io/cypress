@@ -74,6 +74,7 @@ const events: Events = {
       appState.reset()
       runnablesStore.reset()
       statsStore.reset()
+      runner.emit('reload:configuration')
       runner.emit('reporter:restarted')
     }))
 
