@@ -11,7 +11,7 @@
 
   i {
     @extend .far;
-    @extend .#{$fa-css-prefix}-circle;
+    // @extend .#{$fa-css-prefix}-circle;
     color: #999;
     margin-right: 0.5em;
     position: relative;
@@ -24,7 +24,7 @@
 
     i {
       @extend .fas;
-      @extend .#{$fa-css-prefix}-circle;
+      // @extend .#{$fa-css-prefix}-circle;
       color: #999;
     }
   }
@@ -35,7 +35,7 @@
 
     i {
       @extend .fas;
-      @extend .#{$fa-css-prefix}-circle;
+      // @extend .#{$fa-css-prefix}-circle;
       color: #08c18d;
     }
   }
