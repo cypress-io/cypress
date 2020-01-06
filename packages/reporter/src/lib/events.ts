@@ -194,6 +194,7 @@ const events: Events = {
     })
 
     localBus.on('reload:configuration', () => {
+      appState.configurationFilePathChanged = null
       runner.emit('reload:configuration')
     })
 
