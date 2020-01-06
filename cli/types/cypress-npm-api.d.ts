@@ -461,6 +461,7 @@ declare module 'cypress' {
     totalPassed: number
     totalPending: number
     totalSkipped: number
+    runUrl: string
     runs: RunResult[]
     browserPath: string
     browserName: string
