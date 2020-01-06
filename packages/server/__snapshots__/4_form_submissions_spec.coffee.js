@@ -16,8 +16,6 @@ exports['e2e forms / <form> submissions / passes with https on localhost'] = `
                                                                                                     
   Running:  form_submission_multipart_spec.coffee                                           (1 of 1)
 
-Timed out waiting for the browser to connect. Retrying...
-
 
   <form> submissions
     ✓ can submit a form correctly

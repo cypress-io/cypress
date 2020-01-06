@@ -25,7 +25,7 @@ exports['e2e issue 173 failing 1'] = `
 
   1)  fails:
      Timed out retrying: Expected to find element: \`element_does_not_exist\`, but never found it.
-      at stack trace line
+      [stack trace lines]
 
 
 

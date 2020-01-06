@@ -43,7 +43,7 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
      Timed out retrying: Expected to find element: \`.does-not-exist\`, but never found it.
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1a'
-      at stack trace line
+      [stack trace lines]
 
   2) s3a "before all" hook for "t8a":
      s3a before hook failed

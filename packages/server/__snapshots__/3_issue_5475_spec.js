@@ -58,7 +58,7 @@ exports['e2e issue 5475 history pushState hangs / fails when remote debugging po
   1 failing
 
   1) issue #5475 hangs on next spec after modifying history.pushState:
-     Error: foo
+     foo
       [stack trace lines]
 
 
