@@ -37,14 +37,14 @@ describe('banner', function () {
 
     it('emits reload:configuration event on click of restart', function () {
       cy.get('.reporter').then(() => {
-        this.reloadRunner = sinon.spy()
+        this.reloadConfig = sinon.spy()
 
-        this.runner.on('reload:configuration', this.reloadRunner)
+        this.runner.on('reload:configuration', this.reloadConfig)
         this.runner.emit('config:changed', 'app/path/to/file')
       })
 
       cy.get('.banner').contains('Restart').click().then(() => {
-        expect(this.reloadRunner).to.be.called
+        expect(this.reloadConfig).to.be.called
       })
     })
 
@@ -55,6 +55,27 @@ describe('banner', function () {
       })
 
       cy.get('.banner').contains('Restart').click()
+      cy.get('.banner').should('not.exist')
+    })
+
+    it('reloads config after reload of tests and hides banner', function () {
+      this.file = 'app/path/to/file'
+      cy.get('.reporter').then(() => {
+        this.runner.emit('config:changed', this.file)
+      })
+
+      cy.get('.banner').should('contain', this.file)
+      cy.get('.reporter').then(() => {
+        this.runner.emit('reporter:restart:test:run')
+        this.runner.emit('runnables:ready', this.runnables)
+        this.runner.emit('reporter:start', {})
+      }).then(() => {
+        this.reloadConfig = sinon.spy()
+
+        this.runner.on('reload:configuration', this.reloadConfig)
+        expect(this.reloadConfig).to.be.called
+      })
+
       cy.get('.banner').should('not.exist')
     })
   })
