@@ -1,6 +1,11 @@
 .runner {
   .iframes-container {
     position: fixed;
+
+    &.has-error {
+      width: 100%;
+      height: 100%;
+    }
   }
 
   .size-container {
