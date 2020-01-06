@@ -7,6 +7,10 @@ export const prompt = async (options: any) => {
     message: 'Customize settings?',
   })
 
+  if (customize) {
+
+  }
+
   const { useTypeScript } = await prompts({
     type: 'confirm',
     name: 'useTypeScript',
