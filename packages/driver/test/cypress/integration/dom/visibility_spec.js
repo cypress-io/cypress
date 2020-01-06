@@ -920,6 +920,44 @@ describe('src/cypress/dom/visibility', () => {
 
           expect(el.find('#tr-p-2')).to.be.hidden
         })
+
+        describe('invisible when overflow: hidden', () => {
+          it('height: 0 + overflow', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('height: 0 + overflow-x', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('height: 0 + overflow-y', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow-x', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow-y', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+        })
       })
 
       it('is hidden when outside parents transform scale', function () {

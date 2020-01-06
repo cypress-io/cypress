@@ -97,18 +97,31 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   // display:none elements, and generally any elements that are not directly rendered,
   // an empty list is returned.
 
+  const el = $el[0]
+  const style = getComputedStyle(el)
+  const transform = style.getPropertyValue('transform')
+  const width = elOffsetWidth($el)
+  const height = elOffsetHeight($el)
+  const overflowHidden = elHasOverflowHidden($el)
+
+  return isZeroLengthAndTransformNone(width, height, transform) ||
+  isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
+  (el.getClientRects().length <= 0)
+}
+
+const isZeroLengthAndTransformNone = (width, height, transform) => {
   // From https://github.com/cypress-io/cypress/issues/5974,
   // we learned that when an element has non-'none' transform style value like "translate(0, 0)",
   // it is visible even with `height: 0` or `width: 0`.
   // That's why we're checking `transform === 'none'` together with elOffsetWidth/Height.
 
-  const el = $el[0]
-  const style = getComputedStyle(el)
-  const transform = style.getPropertyValue('transform')
+  return (width <= 0 && transform === 'none') ||
+  (height <= 0 && transform === 'none')
+}
 
-  return (elOffsetWidth($el) <= 0 && transform === 'none') ||
-  (elOffsetHeight($el) <= 0 && transform === 'none') ||
-  ($el[0].getClientRects().length <= 0)
+const isZeroLengthAndOverflowHidden = (width, height, overflowHidden) => {
+  return (width <= 0 && overflowHidden) ||
+  (height <= 0 && overflowHidden)
 }
 
 const elHasNoOffsetWidthOrHeight = ($el) => {
