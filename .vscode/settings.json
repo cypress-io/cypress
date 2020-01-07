@@ -45,5 +45,6 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": false
     }
-  }
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
