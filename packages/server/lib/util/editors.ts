@@ -15,6 +15,11 @@ interface CyEditor {
   isOther: boolean
 }
 
+interface EditorsResult {
+  preferredEditor?: CyEditor
+  availableEditors?: CyEditor[]
+}
+
 const createEditor = (editor: Editor): CyEditor => {
   return {
     id: editor.id,
@@ -60,7 +65,7 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
   })
 }
 
-export const getUserEditor = (alwaysIncludeEditors = false) => {
+export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsResult> => {
   return savedState.create()
   .then((state) => state.get())
   .then((state) => {
