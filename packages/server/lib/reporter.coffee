@@ -59,6 +59,7 @@ createRunnable = (obj, parent) ->
   runnable.duration = obj.duration
   runnable.state    = obj.state ? "skipped" ## skipped by default
   runnable.body     ?= body
+  runnable._slow    = obj._slow
 
   runnable.parent = parent if parent
 
