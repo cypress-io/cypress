@@ -43,7 +43,7 @@ interface EventEmitter extends EventEmitter2 {
 declare const expect: Chai.ExpectStatic
 declare const assert: Chai.AssertStatic
 
-declare namespace Cypress {
+export declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = "back" | "forward"
   type HttpMethod = string
@@ -125,7 +125,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/minimatch
      */
-    minimatch: typeof Minimatch.minimatch
+    minimatch: typeof import('./cy-minimatch').minimatch
     /**
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
