@@ -10,8 +10,8 @@
   }
 
   i {
-    // @extend .far;
-    // @extend .#{$fa-css-prefix}-circle;
+    @extend .far;
+    @extend .#{$fa-css-prefix}-circle;
     color: #999;
     margin-right: 0.5em;
     position: relative;
@@ -23,8 +23,8 @@
     background: #fff;
 
     i {
-      // @extend .fas;
-      // @extend .#{$fa-css-prefix}-circle;
+      @extend .fas;
+      @extend .#{$fa-css-prefix}-circle;
       color: #999;
     }
   }
@@ -34,8 +34,8 @@
     border-color: #08c18d;
 
     i {
-      // @extend .fas;
-      // @extend .#{$fa-css-prefix}-circle;
+      @extend .fas;
+      @extend .#{$fa-css-prefix}-circle;
       color: #08c18d;
     }
   }
