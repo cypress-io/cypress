@@ -10,6 +10,11 @@ describe "visits", ->
   it "can load a local file with a huge amount of elements without timing out", ->
     cy.visit("/elements.html", {timeout: 5000})
 
+  ## https://github.com/cypress-io/cypress/issues/5602
+  it.only "can load a website which uses invalid HTTP header chars", ->
+    cy.visit("http://localhost:3434/invalid-header-char")
+    .contains('foo')
+
   context "issue #225: hash urls", ->
     rand = Math.random()
 
