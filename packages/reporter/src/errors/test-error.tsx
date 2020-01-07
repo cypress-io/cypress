@@ -31,7 +31,7 @@ const TestError = observer((props: Props) => {
     <div className='runnable-err-wrapper'>
       <div className='runnable-err'>
         <div className='runnable-err-header'>
-          <div className='runnbale-err-name'>
+          <div className='runnable-err-name'>
             <i className='fas fa-exclamation-circle'></i>
             {err.name}
           </div>
