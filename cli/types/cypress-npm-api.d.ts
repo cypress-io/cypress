@@ -462,7 +462,7 @@ declare module 'cypress' {
     totalPending: number
     totalSkipped: number
     /**
-     * If Cypress test run is being recorded, full rul will be provided.
+     * If Cypress test run is being recorded, full url will be provided.
      * @see https://on.cypress.io/dashboard-introduction
      */
     runUrl?: string
