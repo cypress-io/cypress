@@ -15,11 +15,11 @@
 
 const _ = require('lodash')
 const execa = require('execa')
-const os = require('os')
 const util = require('util')
 const si = require('systeminformation')
 
-let timings; let intervalId
+let timings = []
+let intervalId
 
 module.exports = (on, config) => {
   on('task', {
@@ -45,27 +45,27 @@ module.exports = (on, config) => {
       return null
     },
     'capture:memory' () {
-      if (os.platform() === 'linux') {
-        clearInterval(intervalId)
-        timings = []
-        intervalId = setInterval(() => {
-          execa('free', ['-m'])
-          .then(({ stdout }) => {
-            console.log(stdout)
-            const avail = _
-            .chain(stdout)
-            .split('\n')
-            .nth(1)
-            .split(' ')
-            .last()
-            .toNumber()
-            .value()
+      clearInterval(intervalId)
 
-            console.log(avail)
-            // timings.push(avail)
-          })
-        }, 1000)
-      }
+      timings = []
+
+      intervalId = setInterval(() => {
+        execa('free', ['-m'])
+        .then(({ stdout }) => {
+          console.log(stdout)
+          const avail = _
+          .chain(stdout)
+          .split('\n')
+          .nth(1)
+          .split(' ')
+          .last()
+          .toNumber()
+          .value()
+
+          console.log(avail)
+          timings.push(avail)
+        })
+      }, 1000)
 
       return null
     },

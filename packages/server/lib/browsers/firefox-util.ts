@@ -5,9 +5,9 @@ import Debug from 'debug'
 import _ from 'lodash'
 import Marionette from 'marionette-client'
 import Exception from 'marionette-client/lib/marionette/error'
-import Foxdriver from '@benmalka/foxdriver'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
+import Foxdriver from '@benmalka/foxdriver'
 import { _connectAsync } from './protocol'
 
 const debug = Debug('cypress:server:browsers')
@@ -90,7 +90,31 @@ module.exports = {
     const { browser } = foxdriver
 
     const attach = Bluebird.method((tab) => {
-      return tab.memory.attach()
+      if (tab.memory.isAttached) {
+        return
+      }
+
+      return tab.memory.getState()
+      .then((state) => {
+        if (state === 'attached') {
+          return
+        }
+
+        tab.memory.on('garbage-collection', ({ data }) => {
+          console.log('received garbage-collection', data)
+        })
+
+        return tab.memory.attach()
+      })
+    })
+
+    const listTabs = Bluebird.method((browser) => {
+      // if we already have tabs then immediately resolve
+      if (_.get(browser, 'tabs.length')) {
+        return browser.tabs
+      }
+
+      return browser.listTabs()
     })
 
     cb = () => {
@@ -132,12 +156,11 @@ module.exports = {
         }
       }
 
-      return browser.listTabs()
+      return listTabs(browser)
       .then((tabs) => {
         browser.tabs = tabs
 
         return Bluebird.mapSeries(tabs, (tab: any) => {
-          // FIXME: do we really need to attach and detach every time?
           return attach(tab)
           .then(gc(tab))
           .then(cc(tab))
@@ -145,9 +168,6 @@ module.exports = {
           // return tab.memory.measure()
           // .then(console.log)
           // })
-          .then(() => {
-            return tab.memory.detach()
-          })
         })
       })
     }
