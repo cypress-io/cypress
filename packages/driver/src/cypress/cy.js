@@ -966,8 +966,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     },
 
     addCommand ({ name, fn, type, prevSubject }) {
-      const invocationStack = specWindow.__getSpecFrameStack('command invocation stack')
-
       // TODO: prob don't need this anymore
       commandFns[name] = fn
 
@@ -997,6 +995,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
+        const invocationStack = specWindow.__getSpecFrameStack('command invocation stack')
         let ret
 
         ensures.ensureRunnable(name)
