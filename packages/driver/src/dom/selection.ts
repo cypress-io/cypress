@@ -347,15 +347,7 @@ const moveCursorRight = function (el) {
   }
 }
 
-const moveCursorUp = (el) => {
-  return _moveCursorUpOrDown(el, true)
-}
-
-const moveCursorDown = (el) => {
-  return _moveCursorUpOrDown(el, false)
-}
-
-const _moveCursorUpOrDown = function (el, up) {
+const _moveCursorUpOrDown = function (up: boolean, el: HTMLElement) {
   if ($elements.isInput(el)) {
     // on an input, instead of moving the cursor
     // we want to perform the native browser action
@@ -422,15 +414,10 @@ const _moveCursorUpOrDown = function (el, up) {
   }
 }
 
-const moveCursorToLineStart = (el) => {
-  return _moveCursorToLineStartOrEnd(el, true)
-}
+const moveCursorUp = _.curry(_moveCursorUpOrDown)(true)
+const moveCursorDown = _.curry(_moveCursorUpOrDown)(false)
 
-const moveCursorToLineEnd = (el) => {
-  return _moveCursorToLineStartOrEnd(el, false)
-}
-
-const _moveCursorToLineStartOrEnd = function (el: HTMLElement, toStart) {
+const _moveCursorToLineStartOrEnd = function (toStart: boolean, el: HTMLElement) {
   const isInput = $elements.isInput(el)
   const isTextarea = $elements.isTextarea(el)
   const isInputOrTextArea = isInput || isTextarea
@@ -483,6 +470,9 @@ const _moveCursorToLineStartOrEnd = function (el: HTMLElement, toStart) {
     return $elements.callNativeMethod(selection, 'modify', 'move', toStart ? 'backward' : 'forward', 'lineboundary')
   }
 }
+
+const moveCursorToLineStart = _.curry(_moveCursorToLineStartOrEnd)(true)
+const moveCursorToLineEnd = _.curry(_moveCursorToLineStartOrEnd)(false)
 
 const isCollapsed = function (el) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {

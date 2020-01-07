@@ -7,6 +7,9 @@ import * as $jquery from './jquery'
 import * as $selection from './selection'
 import { parentHasDisplayNone } from './visibility'
 import * as $window from './window'
+import Debug from 'debug'
+
+const debug = Debug('cypress:driver:elements')
 
 const { wrap } = $jquery
 
@@ -730,11 +733,15 @@ const isScrollable = ($el) => {
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
     if (win.innerHeight < documentElement.scrollHeight) {
+      debug('isScrollable: window scrollable on Y')
+
       return true
     }
 
     // Check if body width is higher than window width
     if (win.innerWidth < documentElement.scrollWidth) {
+      debug('isScrollable: window scrollable on X')
+
       return true
     }
 
@@ -762,6 +769,8 @@ const isScrollable = ($el) => {
   if (el.clientHeight < el.scrollHeight) {
     // and our element has scroll or auto overflow or overflowX
     if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowY)) {
+      debug('isScrollable: clientHeight < scrollHeight and scroll/auto overflow')
+
       return true
     }
   }
@@ -769,6 +778,8 @@ const isScrollable = ($el) => {
   // x axis
   if (el.clientWidth < el.scrollWidth) {
     if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowX)) {
+      debug('isScrollable: clientWidth < scrollWidth and scroll/auto overflow')
+
       return true
     }
   }

@@ -173,7 +173,7 @@ const create = (state, keyboard, focused, Cypress) => {
 
   const mouse = {
     _getDefaultMouseOptions (x, y, win) {
-      const _activeModifiers = keyboard.getActiveModifiers(state)
+      const _activeModifiers = keyboard.getActiveModifiers()
       const modifiersEventOptions = $Keyboard.toModifiersEventOptions(_activeModifiers)
       const coordsEventOptions = toCoordsEventOptions(x, y, win)
 
