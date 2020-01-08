@@ -43,7 +43,7 @@ const log = () => {
       return _
       .chain(event)
       .extend({
-        duration: _.sumBy(event.collections, (collection) => {
+        duration: _.sumBy(event.collections, (collection: any) => {
           return collection.endTimestamp - collection.startTimestamp
         }),
         spread: _.chain(event.collections).thru((collection) => {
