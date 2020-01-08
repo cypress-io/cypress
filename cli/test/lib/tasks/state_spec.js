@@ -179,16 +179,18 @@ describe('lib/tasks/state', function () {
     })
 
     it('can accept custom binaryDir', function () {
-      const customBinaryDir = '/custom/binary/dir'
+      // note how the binary state file is in the runner's parent folder
+      const customBinaryDir = '/custom/binary/1.2.3/runner'
+      const binaryStatePath = '/custom/binary/1.2.3/binary_state.json'
 
       sinon
       .stub(fs, 'pathExistsAsync')
-      .withArgs('/custom/binary/dir/binary_state.json')
-      .resolves({ verified: true })
+      .withArgs(binaryStatePath)
+      .resolves(true)
 
       sinon
       .stub(fs, 'readJsonAsync')
-      .withArgs('/custom/binary/dir/binary_state.json')
+      .withArgs(binaryStatePath)
       .resolves({ verified: true })
 
       return state
@@ -200,6 +202,8 @@ describe('lib/tasks/state', function () {
   })
 
   context('.writeBinaryVerified', function () {
+    const binaryStateFilename = path.join(versionDir, 'binary_state.json')
+
     beforeEach(() => {
       mockfs({})
     })
@@ -216,7 +220,7 @@ describe('lib/tasks/state', function () {
       .then(
         () => {
           return expect(fs.outputJsonAsync).to.be.calledWith(
-            path.join(binaryDir, 'binary_state.json'),
+            binaryStateFilename,
             { verified: true }
           )
         },
@@ -231,7 +235,7 @@ describe('lib/tasks/state', function () {
       .writeBinaryVerifiedAsync(false, binaryDir)
       .then(() => {
         return expect(fs.outputJsonAsync).to.be.calledWith(
-          path.join(binaryDir, 'binary_state.json'),
+          binaryStateFilename,
           { verified: false },
           { spaces: 2 }
         )

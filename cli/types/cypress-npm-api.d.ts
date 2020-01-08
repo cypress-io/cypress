@@ -461,6 +461,11 @@ declare module 'cypress' {
     totalPassed: number
     totalPending: number
     totalSkipped: number
+    /**
+     * If Cypress test run is being recorded, full url will be provided.
+     * @see https://on.cypress.io/dashboard-introduction
+     */
+    runUrl?: string
     runs: RunResult[]
     browserPath: string
     browserName: string

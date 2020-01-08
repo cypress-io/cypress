@@ -411,6 +411,7 @@ describe "lib/util/ci_provider", ->
       CI_BUILD_ID: "ciJobId"
       CI_JOB_ID: "ciJobId"
       CI_JOB_URL: "ciJobUrl"
+      CI_JOB_NAME: "ciJobName"
 
       CI_PIPELINE_ID: "ciPipelineId"
       CI_PIPELINE_URL: "ciPipelineUrl"
@@ -432,6 +433,7 @@ describe "lib/util/ci_provider", ->
     expectsCiParams({
       ciJobId: "ciJobId"
       ciJobUrl: "ciJobUrl"
+      ciJobName: "ciJobName"
       ciBuildId: "ciJobId"
       ciPipelineId: "ciPipelineId"
       ciPipelineUrl: "ciPipelineUrl"
