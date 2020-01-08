@@ -217,6 +217,7 @@
     ],
     "nohoist": [
       "@packages/*/parse-domain",
+      "@packages/*/npm-run-all",
       "@packages/driver/*"
     ]
   },
