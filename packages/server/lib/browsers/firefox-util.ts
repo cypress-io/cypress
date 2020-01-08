@@ -33,6 +33,7 @@ let cb
 let timings = {
   gc: [] as any[],
   cc: [] as any[],
+  events: [] as any[],
 }
 
 const log = () => {
@@ -44,6 +45,7 @@ const log = () => {
   console.log('times', {
     gc: timings.gc.length,
     cc: timings.cc.length,
+    events: timings.events.length,
   })
 
   console.log('average', {
@@ -60,6 +62,7 @@ const log = () => {
   timings = {
     gc: [],
     cc: [],
+    events: [],
   }
 }
 
@@ -102,19 +105,41 @@ module.exports = {
 
         tab.memory.on('garbage-collection', ({ data }) => {
           console.log('received garbage-collection', data)
+          timings.events.push(data)
         })
 
         return tab.memory.attach()
       })
     })
 
-    const listTabs = Bluebird.method((browser) => {
-      // if we already have tabs then immediately resolve
-      if (_.get(browser, 'tabs.length')) {
-        return browser.tabs
+    const getTabId = (tab) => {
+      return _.get(tab, 'browsingContextID')
+    }
+
+    const getPrimaryTab = Bluebird.method((browser) => {
+      const setPrimaryTab = () => {
+        return browser.listTabs()
+        .then((tabs) => {
+          browser.tabs = tabs
+
+          return browser.primaryTab = _.first(tabs)
+        })
       }
 
-      return browser.listTabs()
+      if (!browser.primaryTab) {
+        return setPrimaryTab()
+      }
+
+      return browser.request('listTabs')
+      .then(({ tabs }) => {
+        const firstTab = _.first(tabs)
+
+        if (getTabId(browser.primaryTab.data) !== getTabId(firstTab)) {
+          return setPrimaryTab()
+        }
+
+        return browser.primaryTab
+      })
     })
 
     cb = () => {
@@ -156,19 +181,22 @@ module.exports = {
         }
       }
 
-      return listTabs(browser)
-      .then((tabs) => {
-        browser.tabs = tabs
+      return getPrimaryTab(browser)
+      .then((tab) => {
+        return attach(tab)
+        .then(gc(tab))
+        .then(cc(tab))
+        // .then(() => {
+        //   return tab.memory.measure()
+        // .then(console.log)
+        // })
+        // })
+      })
+      .tapCatch((err) => {
+        console.log('firefox RDP error', err.stack)
 
-        return Bluebird.mapSeries(tabs, (tab: any) => {
-          return attach(tab)
-          .then(gc(tab))
-          .then(cc(tab))
-          // .then(() => {
-          // return tab.memory.measure()
-          // .then(console.log)
-          // })
-        })
+        // eslint-disable-next-line no-debugger
+        debugger
       })
     }
   },
