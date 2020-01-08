@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@packages/coffee": "*",
-    "electron": "7.1.4",
+    "electron": "7.1.7",
     "mocha": "3.5.3"
   },
   "files": [
