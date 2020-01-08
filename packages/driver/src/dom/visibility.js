@@ -423,11 +423,11 @@ const getReasonIsHidden = function ($el) {
   const transformResult = $transform.detectVisibility($el)
 
   if (transformResult === 'transformed') {
-    return `This element '${node}' is not visible because it is hidden by transform.`
+    return `This element \`${node}\` is not visible because it is hidden by transform.`
   }
 
   if (transformResult === 'backface') {
-    return `This element '${node}' is not visible because it is rotated and its backface is hidden.`
+    return `This element \`${node}\` is not visible because it is rotated and its backface is hidden.`
   }
 
   if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())) {
