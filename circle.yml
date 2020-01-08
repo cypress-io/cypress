@@ -55,6 +55,14 @@ executors:
       PLATFORM: mac
 
 commands:
+  install-latest-chrome:
+    steps:
+      - run:
+          command: |
+            apt update ;
+            apt install google-chrome-stable -y ;
+            which google-chrome ;
+            google-chrome --version        
   run-e2e-tests:
     parameters:
       browser:
@@ -70,12 +78,7 @@ commands:
       - unless:
           condition: <<parameters.browser>>
           steps:
-            - run:
-              command: |
-                apt update ;
-                apt install google-chrome-stable -y ;
-                which google-chrome ;
-                google-chrome --version ;
+            - install-latest-chrome
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
@@ -490,6 +493,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-latest-chrome
       - run:
           command: npm start
           background: true
@@ -497,12 +501,6 @@ jobs:
       - run:
           command: $(npm bin)/wait-on http://localhost:3500
           working_directory: packages/driver
-      - run: 
-          command: |
-            apt update ;
-            apt install google-chrome-stable -y ;
-            which google-chrome ;
-            google-chrome --version ;
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
