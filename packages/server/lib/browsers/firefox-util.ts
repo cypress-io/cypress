@@ -33,36 +33,61 @@ let cb
 let timings = {
   gc: [] as any[],
   cc: [] as any[],
-  events: [] as any[],
+  collections: [] as any[],
 }
 
 const log = () => {
-  console.log('timings', util.inspect(timings, {
+  const reducedTimings = {
+    ...timings,
+    collections: _.map(timings.collections, (event) => {
+      return _
+      .chain(event)
+      .extend({
+        duration: _.sumBy(event.collections, (collection) => {
+          return collection.endTimestamp - collection.startTimestamp
+        }),
+        spread: _.chain(event.collections).thru((collection) => {
+          const first = _.first(collection)
+          const last = _.last(collection)
+
+          return last.endTimestamp - first.startTimestamp
+        }).value(),
+      })
+      .pick('nonincrementalReason', 'reason', 'gcCycleNumber', 'duration', 'spread')
+      .value()
+    }),
+  }
+
+  console.log('timings', util.inspect(reducedTimings, {
     breakLength: Infinity,
     maxArrayLength: Infinity,
   }))
 
   console.log('times', {
-    gc: timings.gc.length,
-    cc: timings.cc.length,
-    events: timings.events.length,
+    gc: reducedTimings.gc.length,
+    cc: reducedTimings.cc.length,
+    collections: reducedTimings.collections.length,
   })
 
   console.log('average', {
-    gc: _.chain(timings.gc).sum().divide(timings.gc.length).value(),
-    cc: _.chain(timings.cc).sum().divide(timings.cc.length).value(),
+    gc: _.chain(reducedTimings.gc).sum().divide(reducedTimings.gc.length).value(),
+    cc: _.chain(reducedTimings.cc).sum().divide(reducedTimings.cc.length).value(),
+    collections: _.chain(reducedTimings.collections).sumBy('duration').divide(reducedTimings.collections.length).value(),
+    spread: _.chain(reducedTimings.collections).sumBy('spread').divide(reducedTimings.collections.length).value(),
   })
 
   console.log('total', {
-    gc: _.sum(timings.gc),
-    cc: _.sum(timings.cc),
+    gc: _.sum(reducedTimings.gc),
+    cc: _.sum(reducedTimings.cc),
+    collections: _.sumBy(reducedTimings.collections, 'duration'),
+    spread: _.sumBy(reducedTimings.collections, 'spread'),
   })
 
   // reset all the timings
   timings = {
     gc: [],
     cc: [],
-    events: [],
+    collections: [],
   }
 }
 
@@ -105,7 +130,7 @@ module.exports = {
 
         tab.memory.on('garbage-collection', ({ data }) => {
           console.log('received garbage-collection', data)
-          timings.events.push(data)
+          timings.collections.push(data)
         })
 
         return tab.memory.attach()
