@@ -965,7 +965,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return $Chainer.add(name, fn)
     },
 
-    addCommand ({ name, fn, type, prevSubject }) {
+    addCommand ({ name, fn, type, prevSubject, isCustom }) {
       // TODO: prob don't need this anymore
       commandFns[name] = fn
 
@@ -1062,6 +1062,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           type,
           chainerId,
           invocationStack,
+          isCustom,
           fn: wrap(firstCall),
         })
 
