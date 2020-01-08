@@ -53,7 +53,7 @@ const log = () => {
           return last.endTimestamp - first.startTimestamp
         }).value(),
       })
-      .pick('nonincrementalReason', 'reason', 'gcCycleNumber', 'duration', 'spread')
+      .pick('num', 'nonincrementalReason', 'reason', 'gcCycleNumber', 'duration', 'spread')
       .value()
     }),
   }
@@ -129,8 +129,9 @@ module.exports = {
         }
 
         tab.memory.on('garbage-collection', ({ data }) => {
-          console.log('received garbage-collection', data)
+          data.num = timings.collections.length + 1
           timings.collections.push(data)
+          console.log('received garbage-collection', data)
         })
 
         return tab.memory.attach()
