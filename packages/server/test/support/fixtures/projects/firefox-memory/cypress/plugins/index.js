@@ -19,6 +19,7 @@ const util = require('util')
 const si = require('systeminformation')
 
 let timings = []
+let rss = []
 let intervalId
 
 module.exports = (on, config) => {
@@ -30,16 +31,28 @@ module.exports = (on, config) => {
     },
     'stop:capture:memory' () {
       clearInterval(intervalId)
-      console.log('memory', util.inspect(timings, {
+      console.log('available memory', util.inspect(timings, {
         compact: true,
         breakLength: Infinity,
         maxArrayLength: Infinity,
       }))
 
-      console.log('details', {
+      console.log('details of available memory', {
         min: _.min(timings),
         max: _.max(timings),
         average: _.chain(timings).sum().divide(timings.length).value(),
+      })
+
+      console.log('firefox rss', util.inspect(rss, {
+        compact: true,
+        breakLength: Infinity,
+        maxArrayLength: Infinity,
+      }))
+
+      console.log('details of firefox rss', {
+        min: _.min(rss),
+        max: _.max(rss),
+        average: _.chain(rss).sum().divide(rss.length).value(),
       })
 
       return null
@@ -87,7 +100,7 @@ module.exports = (on, config) => {
 
         console.log({ totalRss })
 
-        timings.push(totalRss)
+        rss.push(totalRss)
 
         return null
       })
