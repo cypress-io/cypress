@@ -1100,7 +1100,7 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a domain that is of a different origin.")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1113,7 +1113,7 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a domain that is of a different origin.")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1126,7 +1126,7 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a domain that is of a different origin.")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1161,7 +1161,7 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a domain that is of a different origin.")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
