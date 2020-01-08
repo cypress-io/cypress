@@ -615,7 +615,7 @@ module.exports = {
       Before the page load, you were bound to the origin policy:
         > #{originPolicy}
 
-      A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+      A cross origin error happens when your application navigates to a new domain which does not match the origin policy above.
 
       This typically happens in one of three ways:
 
@@ -623,7 +623,7 @@ module.exports = {
       2. You submitted a form and your server redirected you outside of your application
       3. You used a javascript redirect to a page outside of your application
 
-      Cypress does not allow you to change superdomains within a single test.
+      Cypress does not allow you to change to a non same-origin domain within a single test.
 
       You may need to restructure some of your test code to avoid this problem.
 
@@ -1060,17 +1060,15 @@ module.exports = {
       URL from the `url` parameter: {{url}}
     """
     cannot_visit_2nd_domain: """
-      #{cmd('visit')} failed because you are attempting to visit a second unique domain.
+      #{cmd('visit')} failed because you are attempting to visit a domain that is of a different origin.
 
-      You may only visit a single unique domain per test.
-
-      Different subdomains are okay, but unique domains are not.
+      You may only visit same-origin domains within a single test.
 
       The previous domain you visited was: '{{previousDomain}}'
 
-      You're attempting to visit this new domain: '{{attemptedDomain}}'
+      You're attempting to visit this domain: '{{attemptedDomain}}'
 
-      You may need to restructure some of your code to prevent this from happening.
+      You may need to restructure some of your test code to avoid this problem.
 
       https://on.cypress.io/cannot-visit-second-unique-domain
     """
