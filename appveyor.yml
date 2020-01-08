@@ -41,7 +41,7 @@ platform:
 # https://github.com/npm/npm/issues/17747
 cache:
   - node_modules -> yarn.lock
-  - '%LOCALAPPDATA%/Yarn' -> yarn.lock
+  - '%LOCALAPPDATA%/Yarn -> yarn.lock'
 #   # todo: cache node_modules in each package
 
 # Install scripts. (runs after repo cloning)
