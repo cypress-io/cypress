@@ -1070,7 +1070,7 @@ module.exports = {
 
       You may need to restructure some of your test code to avoid this problem.
 
-      https://on.cypress.io/cannot-visit-second-unique-domain
+      https://on.cypress.io/cannot-visit-different-origin-domain
     """
     loading_network_failed: """
       #{cmd('visit')} failed trying to load:
