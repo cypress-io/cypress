@@ -10,7 +10,7 @@ module.exports = {
   reset: ->
     Server.reset()
 
-  httpsServer: (onRequest, options) ->
-    require("../test/helpers/https_server").create(onRequest, options)
+  httpsServer: (onRequest) ->
+    require("../test/helpers/https_server").create(onRequest)
 
 }

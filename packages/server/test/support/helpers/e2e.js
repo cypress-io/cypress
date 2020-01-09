@@ -151,14 +151,14 @@ const ensurePort = function (port) {
 
 const startServer = function (obj) {
   let s; let srv
-  const { onServer, port, https, httpsOptions } = obj
+  const { onServer, port, https } = obj
 
   ensurePort(port)
 
   const app = express()
 
   if (https) {
-    srv = httpsProxy.httpsServer(app, httpsOptions)
+    srv = httpsProxy.httpsServer(app)
   } else {
     srv = http.Server(app)
   }
