@@ -5,6 +5,7 @@ const errors = require('../errors')
 const Promise = require('bluebird')
 const la = require('lazy-ass')
 const is = require('check-more-types')
+const pRetry = require('p-retry')
 const debug = require('debug')('cypress:server:protocol')
 
 function _getDelayMsForRetry (i) {
@@ -40,6 +41,40 @@ function _connectAsync (opts) {
 }
 
 /**
+ * Tries to find the starting page (probably blank tab)
+ * among all targets returned by CRI.List call.
+ *
+ * @returns {string} web socket debugger url
+ */
+const findStartPage = (targets) => {
+  debug('CRI List %o', { numTargets: targets.length, targets })
+  // activate the first available id
+  // find the first target page that's a real tab
+  // and not the dev tools or background page.
+  // since we open a blank page first, it has a special url
+  const newTabTargetFields = {
+    type: 'page',
+    url: 'about:blank',
+  }
+
+  const target = _.find(targets, newTabTargetFields)
+
+  la(target, 'could not find CRI target')
+
+  debug('found CRI target %o', target)
+
+  return target.webSocketDebuggerUrl
+}
+
+const findStartPageTarget = (connectOpts) => {
+  debug('CRI.List on port %d', connectOpts.port)
+
+  // what happens if the next call throws an error?
+  // it seems to leave the browser instance open
+  return CRI.List(connectOpts).then(findStartPage)
+}
+
+/**
  * Waits for the port to respond with connection to Chrome Remote Interface
  * @param {number} port Port number to connect to
  */
@@ -59,30 +94,13 @@ const getWsTargetFor = (port) => {
     debug('failed to connect to CDP %o', { connectOpts, err })
   })
   .then(() => {
-    debug('CRI.List on port %d', port)
+    const findPage = findStartPageTarget.bind(null, connectOpts)
 
-    // what happens if the next call throws an error?
-    // it seems to leave the browser instance open
-    return CRI.List(connectOpts)
-  })
-  .then((targets) => {
-    debug('CRI List %o', { numTargets: targets.length, targets })
-    // activate the first available id
-    // find the first target page that's a real tab
-    // and not the dev tools or background page.
-    // since we open a blank page first, it has a special url
-    const newTabTargetFields = {
-      type: 'page',
-      url: 'about:blank',
-    }
-
-    const target = _.find(targets, newTabTargetFields)
-
-    la(target, 'could not find CRI target')
-
-    debug('found CRI target %o', target)
-
-    return target.webSocketDebuggerUrl
+    // p-retry https://github.com/sindresorhus/p-retry uses options
+    // from https://github.com/tim-kos/node-retry#retryoperationoptions
+    // and defaults (1 second first retry, exponential factor 2, 10 attempts)
+    // are reasonable
+    return pRetry(findPage)
   })
 }
 

@@ -106,6 +106,7 @@
     "opn": "cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5",
     "ospath": "1.2.2",
     "p-queue": "6.1.0",
+    "p-retry": "4.2.0",
     "pluralize": "8.0.0",
     "ramda": "0.24.1",
     "randomstring": "1.1.5",
