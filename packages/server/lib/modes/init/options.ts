@@ -13,7 +13,7 @@ export const optionInfo = [
       {
         "name": "baseUrl",
         "default": "null",
-        "type": "string",
+        "type": "text",
         "description": "URL used as prefix for `cy.visit()` or `cy.request()` command's URL"
       },
       {
@@ -31,25 +31,25 @@ export const optionInfo = [
       {
         "name": "port",
         "default": "null",
-        "type": "string",
+        "type": "text",
         "description": "Port used to host Cypress. Normally this is a randomly generated port"
       },
       {
         "name": "reporter",
         "default": "spec",
-        "type": "string",
+        "type": "text",
         "description": "The 'reporter' used during `cypress run`"
       },
       {
         "name": "reporterOptions",
         "default": "null",
-        "type": "string",
+        "type": "text",
         "description": "The 'reporter options' used. Supported options depend on the reporter."
       },
       {
         "name": "watchForFileChanges",
         "default": "true",
-        "type": "string",
+        "type": "text",
         "description": "Whether Cypress will watch and restart tests on test file changes"
       }
     ]
@@ -101,55 +101,55 @@ export const optionInfo = [
       {
         "name": "fileServerFolder",
         "default": "root project folder",
-        "type": "string",
+        "type": "text",
         "description": "Path to folder where application files will attempt to be served from"
       },
       {
         "name": "fixturesFolder",
         "default": "cypress/fixtures",
-        "type": "string",
+        "type": "text",
         "description": "Path to folder containing fixture files (Pass `false` to disable)"
       },
       {
         "name": "ignoreTestFiles",
         "default": "*.hot-update.js",
-        "type": "string",
+        "type": "text",
         "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest using \"http://globtester.com\" to test what files would match."
       },
       {
         "name": "integrationFolder",
         "default": "cypress/integration",
-        "type": "string",
+        "type": "text",
         "description": "Path to folder containing integration test files"
       },
       {
         "name": "pluginsFile",
         "default": "cypress/plugins/index.js",
-        "type": "string",
+        "type": "text",
         "description": "Path to plugins file. (Pass `false` to disable)"
       },
       {
         "name": "screenshotsFolder",
         "default": "cypress/screenshots",
-        "type": "string",
+        "type": "text",
         "description": "Path to folder where screenshots will be saved from `cy.screenshot()` command or after a test fails during `cypress run`"
       },
       {
         "name": "supportFile",
         "default": "cypress/support/index.js",
-        "type": "string",
+        "type": "text",
         "description": "Path to file to load before test files load. This file is compiled and bundled. (Pass `false` to disable)"
       },
       {
         "name": "testFiles",
         "default": "**/*.*",
-        "type": "string",
+        "type": "text",
         "description": "A String or Array of glob patterns of the test files to load"
       },
       {
         "name": "videosFolder",
         "default": "cypress/videos",
-        "type": "string",
+        "type": "text",
         "description": "Path to folder where videos will be saved during `cypress run`"
       }
     ]
@@ -160,13 +160,13 @@ export const optionInfo = [
       {
         "name": "screenshotsFolder",
         "default": "cypress/screenshots",
-        "type": "string",
+        "type": "text",
         "description": "Path to folder where screenshots will be saved from `cy.screenshot()` command or after a test fails during `cypress run`"
       },
       {
         "name": "trashAssetsBeforeRuns",
         "default": "true",
-        "type": "string",
+        "type": "text",
         "description": "Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before tests run with `cypress run`."
       }
     ]
@@ -177,7 +177,7 @@ export const optionInfo = [
       {
         "name": "trashAssetsBeforeRuns",
         "default": "true",
-        "type": "string",
+        "type": "text",
         "description": "Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before tests run with `cypress run`."
       },
       {
@@ -189,19 +189,19 @@ export const optionInfo = [
       {
         "name": "videosFolder",
         "default": "cypress/videos",
-        "type": "string",
+        "type": "text",
         "description": "Where Cypress will automatically save the video of the test run when tests run with `cypress run`."
       },
       {
         "name": "video",
         "default": "true",
-        "type": "string",
+        "type": "text",
         "description": "Whether Cypress will capture a video of the tests run with `cypress run`."
       },
       {
         "name": "videoUploadOnPasses",
         "default": "true",
-        "type": "string",
+        "type": "text",
         "description": "Whether Cypress will process, compress, and upload videos to the \"Dashboard\" even when all tests in a spec file are passing. This only applies when recording your runs to the Dashboard. Turn this off if you'd like to only upload the spec file's video when there are failing tests."
       }
     ]
@@ -212,25 +212,25 @@ export const optionInfo = [
       {
         "name": "chromeWebSecurity",
         "default": "true",
-        "type": "string",
+        "type": "text",
         "description": "Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. 'Read more about this here'"
       },
       {
         "name": "userAgent",
         "default": "null",
-        "type": "string",
+        "type": "text",
         "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See \"User-Agent MDN Documentation\" for example user agent values."
       },
       {
         "name": "blacklistHosts",
         "default": "null",
-        "type": "string",
+        "type": "text",
         "description": "A String or Array of hosts that you wish to block traffic for. 'Please read the notes for examples on using this.'"
       },
       {
         "name": "modifyObstructiveCode",
         "default": "true",
-        "type": "string",
+        "type": "text",
         "description": "Whether Cypress will search for and replace obstructive JS code in `.js` or `.html` files. 'Please read the notes for more information on this setting.'"
       }
     ]
@@ -264,7 +264,7 @@ export const optionInfo = [
       {
         "name": "waitForAnimations",
         "default": "true",
-        "type": "string",
+        "type": "text",
         "description": "Whether to wait for elements to finish animating before executing commands"
       }
     ]
@@ -275,7 +275,7 @@ export const optionInfo = [
       {
         "name": "nodeVersion",
         "default": "bundled",
-        "type": "string",
+        "type": "text",
         "description": "If set to `system`, Cypress will try to find a Node executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
       }
     ]

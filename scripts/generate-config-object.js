@@ -16,7 +16,7 @@ function optionType (val) {
     return 'object'
   }
 
-  return 'string'
+  return 'text'
 }
 
 function removePercentTags (val) {
