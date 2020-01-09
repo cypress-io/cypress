@@ -19,6 +19,18 @@ function optionType (val) {
   return 'string'
 }
 
+function removePercentTags (val) {
+  return val.replace(/{%(.*?)%}/g, (m, m0) => {
+    let text = m0.replace(/"(.*?)"/g, (match) => {
+      return match.replace(/ /g, '<==>')
+    }).replace(/'(.*?)'/g, (match) => {
+      return match.replace(/ /g, '<==>')
+    })
+
+    return text.trim().split(' ')[1].replace(/<==>/g, ' ')
+  })
+}
+
 fs.readFile(file)
 .then((value) => {
   const options = []
@@ -43,7 +55,7 @@ fs.readFile(file)
         name: arr[i].replace(/`/g, ''),
         default: defaultVal,
         type: optionType(defaultVal),
-        description: arr[i + 2],
+        description: removePercentTags(arr[i + 2]),
       }
 
       category.options.push(option)

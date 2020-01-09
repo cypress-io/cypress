@@ -14,13 +14,13 @@ export const optionInfo = [
         "name": "baseUrl",
         "default": "null",
         "type": "string",
-        "description": "URL used as prefix for {% url `cy.visit()` visit %} or {% url `cy.request()` request %} command's URL"
+        "description": "URL used as prefix for `cy.visit()` or `cy.request()` command's URL"
       },
       {
         "name": "env",
         "default": "{}",
         "type": "object",
-        "description": "Any values to be set as {% url 'environment variables' environment-variables %}"
+        "description": "Any values to be set as 'environment variables'"
       },
       {
         "name": "numTestsKeptInMemory",
@@ -38,13 +38,13 @@ export const optionInfo = [
         "name": "reporter",
         "default": "spec",
         "type": "string",
-        "description": "The {% url 'reporter' reporters %} used during `cypress run`"
+        "description": "The 'reporter' used during `cypress run`"
       },
       {
         "name": "reporterOptions",
         "default": "null",
         "type": "string",
-        "description": "The {% url 'reporter options' reporters#Reporter-Options %} used. Supported options depend on the reporter."
+        "description": "The 'reporter options' used. Supported options depend on the reporter."
       },
       {
         "name": "watchForFileChanges",
@@ -67,31 +67,31 @@ export const optionInfo = [
         "name": "execTimeout",
         "default": "60000",
         "type": "number",
-        "description": "Time, in milliseconds, to wait for a system command to finish executing during a {% url `cy.exec()` exec %} command"
+        "description": "Time, in milliseconds, to wait for a system command to finish executing during a `cy.exec()` command"
       },
       {
         "name": "taskTimeout",
         "default": "60000",
         "type": "number",
-        "description": "Time, in milliseconds, to wait for a task to finish executing during a {% url `cy.task()` task %} command"
+        "description": "Time, in milliseconds, to wait for a task to finish executing during a `cy.task()` command"
       },
       {
         "name": "pageLoadTimeout",
         "default": "60000",
         "type": "number",
-        "description": "Time, in milliseconds, to wait for `page transition events` or {% url `cy.visit()` visit %}, {% url `cy.go()` go %}, {% url `cy.reload()` reload %} commands to fire their page `load` events. Network requests are limited by the underlying operating system, and may still time out if this value is increased."
+        "description": "Time, in milliseconds, to wait for `page transition events` or `cy.visit()`, `cy.go()`, `cy.reload()` commands to fire their page `load` events. Network requests are limited by the underlying operating system, and may still time out if this value is increased."
       },
       {
         "name": "requestTimeout",
         "default": "5000",
         "type": "number",
-        "description": "Time, in milliseconds, to wait for an XHR request to go out in a {% url `cy.wait()` wait %} command"
+        "description": "Time, in milliseconds, to wait for an XHR request to go out in a `cy.wait()` command"
       },
       {
         "name": "responseTimeout",
         "default": "30000",
         "type": "number",
-        "description": "Time, in milliseconds, to wait until a response in a {% url `cy.request()` request %}, {% url `cy.wait()` wait %}, {% url `cy.fixture()` fixture %}, {% url `cy.getCookie()` getcookie %}, {% url `cy.getCookies()` getcookies %}, {% url `cy.setCookie()` setcookie %}, {% url `cy.clearCookie()` clearcookie %}, {% url `cy.clearCookies()` clearcookies %}, and {% url `cy.screenshot()` screenshot %} commands"
+        "description": "Time, in milliseconds, to wait until a response in a `cy.request()`, `cy.wait()`, `cy.fixture()`, `cy.getCookie()`, `cy.getCookies()`, `cy.setCookie()`, `cy.clearCookie()`, `cy.clearCookies()`, and `cy.screenshot()` commands"
       }
     ]
   },
@@ -114,7 +114,7 @@ export const optionInfo = [
         "name": "ignoreTestFiles",
         "default": "*.hot-update.js",
         "type": "string",
-        "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest using {% url \"http://globtester.com\" http://globtester.com %} to test what files would match."
+        "description": "A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses `minimatch` with the options: `{dot: true, matchBase: true}`. We suggest using \"http://globtester.com\" to test what files would match."
       },
       {
         "name": "integrationFolder",
@@ -132,7 +132,7 @@ export const optionInfo = [
         "name": "screenshotsFolder",
         "default": "cypress/screenshots",
         "type": "string",
-        "description": "Path to folder where screenshots will be saved from {% url `cy.screenshot()` screenshot %} command or after a test fails during `cypress run`"
+        "description": "Path to folder where screenshots will be saved from `cy.screenshot()` command or after a test fails during `cypress run`"
       },
       {
         "name": "supportFile",
@@ -161,7 +161,7 @@ export const optionInfo = [
         "name": "screenshotsFolder",
         "default": "cypress/screenshots",
         "type": "string",
-        "description": "Path to folder where screenshots will be saved from {% url `cy.screenshot()` screenshot %} command or after a test fails during `cypress run`"
+        "description": "Path to folder where screenshots will be saved from `cy.screenshot()` command or after a test fails during `cypress run`"
       },
       {
         "name": "trashAssetsBeforeRuns",
@@ -202,7 +202,7 @@ export const optionInfo = [
         "name": "videoUploadOnPasses",
         "default": "true",
         "type": "string",
-        "description": "Whether Cypress will process, compress, and upload videos to the {% url \"Dashboard\" dashboard-introduction%} even when all tests in a spec file are passing. This only applies when recording your runs to the Dashboard. Turn this off if you'd like to only upload the spec file's video when there are failing tests."
+        "description": "Whether Cypress will process, compress, and upload videos to the \"Dashboard\" even when all tests in a spec file are passing. This only applies when recording your runs to the Dashboard. Turn this off if you'd like to only upload the spec file's video when there are failing tests."
       }
     ]
   },
@@ -213,25 +213,25 @@ export const optionInfo = [
         "name": "chromeWebSecurity",
         "default": "true",
         "type": "string",
-        "description": "Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. {% url 'Read more about this here' web-security %}"
+        "description": "Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. 'Read more about this here'"
       },
       {
         "name": "userAgent",
         "default": "null",
         "type": "string",
-        "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See {% url \"User-Agent MDN Documentation\" https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent %} for example user agent values."
+        "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See \"User-Agent MDN Documentation\" for example user agent values."
       },
       {
         "name": "blacklistHosts",
         "default": "null",
         "type": "string",
-        "description": "A String or Array of hosts that you wish to block traffic for. {% urlHash 'Please read the notes for examples on using this.' blacklistHosts %}"
+        "description": "A String or Array of hosts that you wish to block traffic for. 'Please read the notes for examples on using this.'"
       },
       {
         "name": "modifyObstructiveCode",
         "default": "true",
         "type": "string",
-        "description": "Whether Cypress will search for and replace obstructive JS code in `.js` or `.html` files. {% urlHash 'Please read the notes for more information on this setting.' modifyObstructiveCode %}"
+        "description": "Whether Cypress will search for and replace obstructive JS code in `.js` or `.html` files. 'Please read the notes for more information on this setting.'"
       }
     ]
   },
@@ -242,13 +242,13 @@ export const optionInfo = [
         "name": "viewportHeight",
         "default": "660",
         "type": "number",
-        "description": "Default height in pixels for the application under tests' viewport (Override with {% url `cy.viewport()` viewport %} command)"
+        "description": "Default height in pixels for the application under tests' viewport (Override with `cy.viewport()` command)"
       },
       {
         "name": "viewportWidth",
         "default": "1000",
         "type": "number",
-        "description": "Default width in pixels for the application under tests' viewport. (Override with {% url `cy.viewport()` viewport %} command)"
+        "description": "Default width in pixels for the application under tests' viewport. (Override with `cy.viewport()` command)"
       }
     ]
   },
@@ -276,7 +276,7 @@ export const optionInfo = [
         "name": "nodeVersion",
         "default": "bundled",
         "type": "string",
-        "description": "If set to `system`, Cypress will try to find a Node executable on your path to use when executing your {% url plugins plugins-guide %}. Otherwise, Cypress will use the Node version bundled with Cypress."
+        "description": "If set to `system`, Cypress will try to find a Node executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
       }
     ]
   }
