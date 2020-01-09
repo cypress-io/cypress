@@ -1,3 +1,4 @@
+_ = require('lodash')
 https = require("https")
 Promise = require("bluebird")
 { allowDestroy } = require("@packages/network")
@@ -13,8 +14,8 @@ defaultOnRequest = (req, res) ->
 
 servers = []
 
-create = (onRequest) ->
-  https.createServer(certs, onRequest ? defaultOnRequest)
+create = (onRequest, options) ->
+  https.createServer(_.merge({}, certs, options), onRequest ? defaultOnRequest)
 
 module.exports = {
   create
