@@ -217,6 +217,24 @@ describe('test errors', function () {
     })
   })
 
+  describe('print to console', function () {
+    beforeEach(function () {
+      this.setError(this.commandErr)
+    })
+
+    it('hovering shows tooltip', function () {
+      cy.get('.runnable-err-print').trigger('mouseover')
+      cy.get('.tooltip').should('have.text', 'Print error to console')
+    })
+
+    it('clicking prints to console', function () {
+      cy.spy(this.runner, 'emit')
+      cy.get('.runnable-err-print').click().then(() => {
+        expect(this.runner.emit).to.be.calledWith('runner:console:error', 'r3')
+      })
+    })
+  })
+
   describe('stack trace', function () {
     it('hides stack trace by default', function () {
       this.setError(this.commandErr)

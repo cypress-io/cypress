@@ -79,6 +79,8 @@
     font-weight: bold;
 
     .runnable-err-name {
+      flex-grow: 2;
+
       i {
         font-size: 10px;
         margin-right: 10px;
@@ -86,7 +88,24 @@
     }
   }
 
+  .runnable-err-print {
+    background: none;
+    border: solid 2px $err-text;
+    border-radius: 3px;
+    color: $err-text;
+    font-size: 8px;
+    padding: 0.4em;
+
+    &:hover,
+    &:focus {
+      background: rgba(255, 255, 255, 0.6);
+      outline: none;
+    }
+  }
+
   .runnable-err-docs-url {
+    margin-left: 0.5em;
+
     a, a:hover, a:focus {
       cursor: pointer;
       color: $err-text;
