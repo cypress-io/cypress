@@ -13,6 +13,9 @@ import stripAnsi from 'strip-ansi'
 import { stripIndents } from 'common-tags'
 
 describe('lib/browsers/protocol', function () {
+  // protocol connects explicitly to this host
+  const host = '127.0.0.1'
+
   context('._getDelayMsForRetry', function () {
     it('retries as expected for up to 20 seconds', function () {
       const log = sinon.spy(console, 'log')
@@ -76,13 +79,43 @@ describe('lib/browsers/protocol', function () {
 
       const end = sinon.stub()
 
-      sinon.stub(CRI, 'List').withArgs({ host: '127.0.0.1', port: 12345 }).resolves(targets)
+      sinon.stub(CRI, 'List').withArgs({ host, port: 12345 }).resolves(targets)
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
       const p = protocol.getWsTargetFor(12345)
 
       await expect(p).to.eventually.equal('bar')
       expect(end).to.be.calledOnce
+    })
+  })
+
+  context('CRI.List', function () {
+    it('retries several times if starting page cannot be found', async () => {
+      const port = 1234
+      const targets = [
+        {
+          type: 'page',
+          url: 'chrome://newtab',
+          webSocketDebuggerUrl: 'foo',
+        },
+        {
+          type: 'page',
+          url: 'about:blank',
+          webSocketDebuggerUrl: 'ws://debug-url',
+        },
+      ]
+
+      sinon.stub(protocol, '_connectAsync').resolves()
+      const criList = sinon.stub(CRI, 'List')
+      .withArgs({ host, port })
+      .onFirstCall().resolves([])
+      .onSecondCall().resolves([])
+      .onThirdCall().resolves(targets)
+
+      const targetUrl = await protocol.getWsTargetFor(port)
+
+      expect(criList).to.have.been.calledThrice
+      expect(targetUrl).to.equal('ws://debug-url')
     })
   })
 })

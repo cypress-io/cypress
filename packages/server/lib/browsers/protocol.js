@@ -89,7 +89,8 @@ const getWsTargetFor = (port) => {
     port,
   }
 
-  return _connectAsync(connectOpts)
+  // call via "module.exports" to enable easy stubbing from tests
+  return module.exports._connectAsync(connectOpts)
   .tapCatch((err) => {
     debug('failed to connect to CDP %o', { connectOpts, err })
   })
@@ -98,9 +99,11 @@ const getWsTargetFor = (port) => {
 
     // p-retry https://github.com/sindresorhus/p-retry uses options
     // from https://github.com/tim-kos/node-retry#retryoperationoptions
-    // and defaults (1 second first retry, exponential factor 2, 10 attempts)
+    // and defaults (1 second first retry, 10 attempts)
     // are reasonable
-    return pRetry(findPage)
+    return pRetry(findPage, {
+      factor: 1, // no need to increase timeouts exponentially
+    })
   })
 }
 
