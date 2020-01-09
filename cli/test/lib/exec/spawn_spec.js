@@ -7,6 +7,7 @@ const tty = require('tty')
 const path = require('path')
 const EE = require('events')
 const mockedEnv = require('mocked-env')
+const debug = require('debug')('test')
 
 const state = require(`${lib}/tasks/state`)
 const xvfb = require(`${lib}/exec/xvfb`)
@@ -14,6 +15,7 @@ const spawn = require(`${lib}/exec/spawn`)
 const verify = require(`${lib}/tasks/verify`)
 const util = require(`${lib}/util.js`)
 const expect = require('chai').expect
+const snapshot = require('../../support/snapshot')
 
 const cwd = process.cwd()
 
@@ -92,6 +94,7 @@ describe('lib/exec/spawn', function () {
       return spawn.start('--foo', { foo: 'bar' })
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('/path/to/cypress', [
+          '--',
           '--foo',
           '--cwd',
           cwd,
@@ -112,11 +115,13 @@ describe('lib/exec/spawn', function () {
         // and also less risk that a failed assertion would dump the
         // entire ENV object with possible sensitive variables
         const args = cp.spawn.firstCall.args.slice(0, 2)
+        // it is important for "--no-sandbox" to appear before "--" separator
         const expectedCliArgs = [
+          '--no-sandbox',
+          '--',
           '--foo',
           '--cwd',
           cwd,
-          '--no-sandbox',
         ]
 
         expect(args).to.deep.equal(['/path/to/cypress', expectedCliArgs])
@@ -133,6 +138,28 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         expect(cp.spawn).to.be.calledWithMatch('node', [
           p,
+          '--',
+          '--foo',
+          '--cwd',
+          cwd,
+        ], {
+          detached: false,
+          stdio: ['inherit', 'inherit', 'pipe'],
+        })
+      })
+    })
+
+    it('does not pass --no-sandbox when running in dev mode', function () {
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+      sinon.stub(verify, 'needsSandbox').returns(true)
+
+      const p = path.resolve('..', 'scripts', 'start.js')
+
+      return spawn.start('--foo', { dev: true, foo: 'bar' })
+      .then(() => {
+        expect(cp.spawn).to.be.calledWithMatch('node', [
+          p,
+          '--',
           '--foo',
           '--cwd',
           cwd,
@@ -168,6 +195,20 @@ describe('lib/exec/spawn', function () {
         this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
 
         return spawn.start('--foo')
+      })
+    })
+
+    context('detects kill signal', function () {
+      it('exits with error on SIGKILL', function () {
+        this.spawnedProcess.on.withArgs('exit').yieldsAsync(null, 'SIGKILL')
+
+        return spawn.start('--foo')
+        .then(() => {
+          throw new Error('should have hit error handler but did not')
+        }, (e) => {
+          debug('error message', e.message)
+          snapshot(e.message)
+        })
       })
     })
 
@@ -246,6 +287,7 @@ describe('lib/exec/spawn', function () {
       .then(() => {
         throw new Error('should have hit error handler but did not')
       }, (e) => {
+        debug('error message', e.message)
         expect(e.message).to.include(msg)
       })
     })

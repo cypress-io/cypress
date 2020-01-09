@@ -43,9 +43,9 @@ declare module 'cypress' {
      */
     reporter: string,
     /**
-     * A String glob pattern of the test files to load.
+     * A String or Array of string glob pattern of the test files to load.
      */
-    testFiles: string
+    testFiles: string | string[]
 
     //
     // timeouts
@@ -238,9 +238,13 @@ declare module 'cypress' {
      */
     group: string
     /**
-     * Display the Electron browser instead of running headlessly
+     * Display the browser instead of running headlessly
      */
     headed: boolean
+    /**
+     * Hide the browser instead of running headed
+     */
+    headless: boolean
     /**
      * Specify your secret record key
      */
@@ -290,7 +294,7 @@ declare module 'cypress' {
     })
     ```
    */
-  interface CypressOpenOptions extends CypressCommonOptions  {
+  interface CypressOpenOptions extends CypressCommonOptions {
     /**
      * Specify a filesystem path to a custom browser
      */
@@ -457,6 +461,11 @@ declare module 'cypress' {
     totalPassed: number
     totalPending: number
     totalSkipped: number
+    /**
+     * If Cypress test run is being recorded, full url will be provided.
+     * @see https://on.cypress.io/dashboard-introduction
+     */
+    runUrl?: string
     runs: RunResult[]
     browserPath: string
     browserName: string

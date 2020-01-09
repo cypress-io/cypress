@@ -1,8 +1,11 @@
-_       = require("lodash")
-strip   = require("strip-ansi")
-chalk   = require("chalk")
-ansi_up = require("ansi_up")
+_ = require("lodash")
+strip = require("strip-ansi")
+chalk = require("chalk")
+AU = require('ansi_up')
 Promise = require("bluebird")
+
+ansi_up = new AU.default
+ansi_up.use_classes = true
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
@@ -110,15 +113,15 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       return {msg: msg, details: arg2}
     when "CANNOT_RECORD_VIDEO_HEADED"
       """
-      Warning: Cypress can only record videos when running headlessly.
+      Warning: Cypress can only record videos of Electron when running headlessly.
 
-      You have set the 'electron' browser to run headed.
+      You have set the Electron browser to run headed.
 
       A video will not be recorded when using this mode.
       """
     when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
       """
-      Warning: Cypress can only record videos when using the built in 'electron' browser.
+      Warning: Cypress can only record videos when using an Electron or Chrome-family browser.
 
       You have set the browser to: '#{arg1}'
 
@@ -166,6 +169,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       There is likely something wrong with the request.
 
       #{displayFlags(arg1.flags, {
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -191,6 +195,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       You cannot parallelize a run that has been complete for that long.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -207,6 +212,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -221,6 +227,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -309,10 +316,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "RECORD_PARAMS_WITHOUT_RECORDING"
       """
-      You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+      You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
       #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel"
       })}
@@ -610,6 +618,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Fix the error in your code and re-run your tests.
       """
+    # happens when there is an error in configuration file like "cypress.json"
     when "SETTINGS_VALIDATION_ERROR"
       filePath = "`#{arg1}`"
       """
@@ -617,6 +626,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg2)}
       """
+    # happens when there is an invalid config value returnes from the
+    # project's plugins file like "cypress/plugins.index.js"
+    when "PLUGINS_CONFIG_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
+      """
+      An invalid configuration value returned from the plugins file: #{chalk.blue(filePath)}
+
+      #{chalk.yellow(arg2)}
+      """
+    # general configuration error not-specific to configuration or plugins files
     when "CONFIG_VALIDATION_ERROR"
       """
       We found an invalid configuration value:
@@ -853,7 +872,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CDP_COULD_NOT_CONNECT"
       """
-      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 5 seconds.
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
 
       This usually indicates there was a problem opening the Chrome browser.
 
@@ -862,6 +881,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       Error details:
 
       #{arg2.stack}
+      """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
 
 get = (type, arg1, arg2) ->
@@ -898,9 +921,7 @@ clone = (err, options = {}) ->
   obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
 
   if options.html
-    obj.message = ansi_up.ansi_to_html(err.message, {
-      use_classes: true
-    })
+    obj.message = ansi_up.ansi_to_html(err.message)
   else
     obj.message = err.message
 
@@ -954,4 +975,6 @@ module.exports = {
   throw: throwErr
 
   stripAnsi: strip
+
+  displayFlags
 }

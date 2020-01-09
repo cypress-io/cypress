@@ -4,6 +4,7 @@ const $jquery = require('./jquery')
 const $document = require('./document')
 const $elements = require('./elements')
 const $coordinates = require('./coordinates')
+const $transform = require('./transform')
 
 const fixedOrAbsoluteRe = /(fixed|absolute)/
 
@@ -61,6 +62,13 @@ const isHidden = (el, name = 'isHidden()') => {
     return true // is hidden
   }
 
+  // when an element is scaled to 0 in one axis
+  // it is not visible to users.
+  // So, it is hidden.
+  if ($transform.detectVisibility($el) !== 'visible') {
+    return true
+  }
+
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
   if (elIsHiddenByAncestors($el)) {
@@ -89,7 +97,31 @@ const elHasNoEffectiveWidthOrHeight = ($el) => {
   // display:none elements, and generally any elements that are not directly rendered,
   // an empty list is returned.
 
-  return (elOffsetWidth($el) <= 0) || (elOffsetHeight($el) <= 0) || ($el[0].getClientRects().length <= 0)
+  const el = $el[0]
+  const style = getComputedStyle(el)
+  const transform = style.getPropertyValue('transform')
+  const width = elOffsetWidth($el)
+  const height = elOffsetHeight($el)
+  const overflowHidden = elHasOverflowHidden($el)
+
+  return isZeroLengthAndTransformNone(width, height, transform) ||
+  isZeroLengthAndOverflowHidden(width, height, overflowHidden) ||
+  (el.getClientRects().length <= 0)
+}
+
+const isZeroLengthAndTransformNone = (width, height, transform) => {
+  // From https://github.com/cypress-io/cypress/issues/5974,
+  // we learned that when an element has non-'none' transform style value like "translate(0, 0)",
+  // it is visible even with `height: 0` or `width: 0`.
+  // That's why we're checking `transform === 'none'` together with elOffsetWidth/Height.
+
+  return (width <= 0 && transform === 'none') ||
+  (height <= 0 && transform === 'none')
+}
+
+const isZeroLengthAndOverflowHidden = (width, height, overflowHidden) => {
+  return (width <= 0 && overflowHidden) ||
+  (height <= 0 && overflowHidden)
 }
 
 const elHasNoOffsetWidthOrHeight = ($el) => {
@@ -388,6 +420,16 @@ const getReasonIsHidden = function ($el) {
     return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
   }
 
+  const transformResult = $transform.detectVisibility($el)
+
+  if (transformResult === 'transformed') {
+    return `This element '${node}' is not visible because it is hidden by transform.`
+  }
+
+  if (transformResult === 'backface') {
+    return `This element '${node}' is not visible because it is rotated and its backface is hidden.`
+  }
+
   if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())) {
     parentNode = $elements.stringify($parent, 'short')
     width = elOffsetWidth($parent)
@@ -402,11 +444,15 @@ const getReasonIsHidden = function ($el) {
       // show the long element here
       const covered = $elements.stringify(elAtCenterPoint($el))
 
-      return `\
+      if (covered) {
+        return `\
 This element '${node}' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
 
 ${covered}\
 `
+      }
+
+      return `This element '${node}' is not visible because its ancestor has 'position: fixed' CSS property and it is overflowed by other elements. How about scrolling to the element with cy.scrollIntoView()?`
     }
   } else {
     if (elIsOutOfBoundsOfAncestorsOverflow($el)) {
@@ -414,7 +460,7 @@ ${covered}\
     }
   }
 
-  return `Cypress could not determine why this element '${node}' is not visible.`
+  return `This element '${node}' is not visible.`
 }
 /* eslint-enable no-cond-assign */
 

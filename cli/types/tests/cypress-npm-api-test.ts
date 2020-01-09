@@ -11,6 +11,7 @@ cypress.run().then(results => {
   results // $ExpectType CypressRunResult
   results.failures // $ExpectType number | undefined
   results.message // $ExpectType string | undefined
+  results.runUrl // $ExpectType string | undefined
 })
 cypress.open() // $ExpectType Promise<void>
 cypress.run() // $ExpectType Promise<CypressRunResult>

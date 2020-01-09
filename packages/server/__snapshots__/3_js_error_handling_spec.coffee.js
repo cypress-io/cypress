@@ -45,17 +45,19 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
 
 https://on.cypress.io/uncaught-exception-from-application
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   2) s1 without an afterEach hook t2:
-     ReferenceError: bar is not defined
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+     Uncaught ReferenceError: bar is not defined
+
+This error originated from your application code, not from Cypress.
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
 
   3) s1 with an afterEach hook t4:
      Uncaught ReferenceError: foo is not defined
@@ -67,13 +69,11 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
 
 https://on.cypress.io/uncaught-exception-from-application
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
   4) s1 with an afterEach hook t5:
      Error: baz
-      at stack trace line
+      [stack trace lines]
 
   5) s1 cross origin script errors explains where script errored:
      Uncaught Error: Script error.
@@ -95,10 +95,7 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the 'uncaught:exception' event.
 
 https://on.cypress.io/uncaught-exception-from-application
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 

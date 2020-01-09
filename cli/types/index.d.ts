@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 2.8
+// TypeScript Version: 2.9
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
@@ -29,6 +29,15 @@
 // load ambient declaration for "cypress" NPM module
 // hmm, how to load it better?
 /// <reference path="./cypress-npm-api.d.ts" />
+
+// Cypress, cy, Log inherits EventEmitter.
+type EventEmitter2 = import("eventemitter2").EventEmitter2
+
+interface EventEmitter extends EventEmitter2 {
+  proxyTo: (cy: Cypress.cy) => null
+  emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
+  emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
+}
 
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
@@ -60,7 +69,7 @@ declare namespace Cypress {
     name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
     displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
     version: string
-    majorVersion: string
+    majorVersion: number
     path: string
     isHeaded: boolean
     isHeadless: boolean
@@ -620,13 +629,60 @@ declare namespace Cypress {
      * @see https://on.cypress.io/dblclick
      */
     dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
-
+    /**
+     * Double-click a DOM element at specific corner / side.
+     *
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/dblclick
+     * @example
+     *    cy.get('button').dblclick('topRight')
+     */
+    dblclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Double-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/dblclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').dblclick(15, 40)
+    ```
+     */
+    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element.
      *
      * @see https://on.cypress.io/rightclick
      */
     rightclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific corner / side.
+     *
+     * @param {String} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').rightclick('topRight')
+     */
+    rightclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/rightclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').rightclick(15, 40)
+    ```
+     */
+    rightclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
      * Set a debugger and log what the previous command yields.
@@ -820,6 +876,13 @@ declare namespace Cypress {
     hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
+     * Invoke a function in an array of functions.
+     * @see https://on.cypress.io/invoke
+     */
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
+
+    /**
      * Invoke a function on the previously yielded subject.
      * This isn't possible to strongly type without generic override yet.
      * If called on an object you can do this instead: `.then(s => s.show())`.
@@ -829,6 +892,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
+    invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
 
     /**
      * Get a property’s value on the previously yielded subject.
@@ -840,7 +904,15 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K): Chainable<Subject[K]>
+    its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
+
+    /**
+     * Get a value by index from an array yielded from the previous command.
+     * @see https://on.cypress.io/its
+     * @example
+     *    cy.wrap(['a', 'b']).its(1).should('equal', 'b')
+     */
+    its<T, Subject extends T[]>(index: number, options?: Loggable): Chainable<T>
 
     /**
      * Get the last DOM element within a set of DOM elements.
@@ -867,7 +939,7 @@ declare namespace Cypress {
      *    // Assert on the href of the location
      *    cy.location('href').should('contain', '/tag/tutorials')
      */
-    location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location<K extends keyof Location>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<Location[K]>
 
     /**
      * Print a message to the Cypress Command Log.
@@ -4443,7 +4515,7 @@ cy.get('button').click()
 cy.get('.result').contains('Expected text')
 ```
  */
-declare const cy: Cypress.cy
+declare const cy: Cypress.cy & EventEmitter
 
 /**
  * Global variable `Cypress` holds common utilities and constants.
@@ -4455,4 +4527,4 @@ Cypress.version // => "1.4.0"
 Cypress._ // => Lodash _
 ```
  */
-declare const Cypress: Cypress.Cypress
+declare const Cypress: Cypress.Cypress & EventEmitter

@@ -15,6 +15,12 @@ function _getDelayMsForRetry (i) {
   if (i < 18) {
     return 500
   }
+
+  if (i < 33) { // after 5 seconds, begin logging and retrying
+    errors.warning('CDP_RETRYING_CONNECTION', i)
+
+    return 1000
+  }
 }
 
 function _connectAsync (opts) {
@@ -41,16 +47,23 @@ const getWsTargetFor = (port) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
-  return _connectAsync({ port })
+  // force ipv4
+  // https://github.com/cypress-io/cypress/issues/5912
+  const connectOpts = {
+    host: '127.0.0.1',
+    port,
+  }
+
+  return _connectAsync(connectOpts)
   .tapCatch((err) => {
-    debug('failed to connect to CDP %o', { port, err })
+    debug('failed to connect to CDP %o', { connectOpts, err })
   })
   .then(() => {
     debug('CRI.List on port %d', port)
 
     // what happens if the next call throws an error?
     // it seems to leave the browser instance open
-    return CRI.List({ port })
+    return CRI.List(connectOpts)
   })
   .then((targets) => {
     debug('CRI List %o', { numTargets: targets.length, targets })

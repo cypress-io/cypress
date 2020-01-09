@@ -7,7 +7,7 @@ branches:
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
 environment:
   # use matching version of Node.js
-  nodejs_version: "12.0.0"
+  nodejs_version: "12.8.1"
   # encode secure variables which will NOT be used
   # in pull requests
   # https://www.appveyor.com/docs/build-configuration/#secure-variables
@@ -53,6 +53,7 @@ install:
   - node --version
   - node --print process.arch
   - npm --version
+  - npm run check-next-dev-version
   # prints all public variables relevant to the build
   - print-env Platform
   - npm run check-node-version
