@@ -1302,6 +1302,20 @@ describe('src/cy/commands/actions/type', () => {
             expect(blurred).to.be.calledOnce
           })
         })
+
+        // https://github.com/cypress-io/cypress/issues/5997
+        it('type=number can accept values with commas (,)', () => {
+          cy.get('#number-without-value')
+          .type('1,000')
+          .should('have.value', '1000')
+        })
+
+        // https://github.com/cypress-io/cypress/issues/5968
+        it('type=number can include {enter}', () => {
+          cy.get('#number-without-value')
+          .type('100{enter}')
+          .should('have.value', '100')
+        })
       })
 
       describe('input[type=email]', () => {

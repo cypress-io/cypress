@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const os = require('os')
 const Promise = require('bluebird')
 const getos = Promise.promisify(require('getos'))
@@ -18,7 +8,7 @@ const getOsVersion = () => {
       return getos()
       .then((obj) => {
         return [obj.dist, obj.release].join(' - ')
-      }).catch((err) => {
+      }).catch(() => {
         return os.release()
       })
     }

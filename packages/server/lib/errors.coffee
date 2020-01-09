@@ -1,8 +1,11 @@
-_       = require("lodash")
-strip   = require("strip-ansi")
-chalk   = require("chalk")
-ansi_up = require("ansi_up")
+_ = require("lodash")
+strip = require("strip-ansi")
+chalk = require("chalk")
+AU = require('ansi_up')
 Promise = require("bluebird")
+
+ansi_up = new AU.default
+ansi_up.use_classes = true
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
@@ -913,9 +916,7 @@ clone = (err, options = {}) ->
   obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
 
   if options.html
-    obj.message = ansi_up.ansi_to_html(err.message, {
-      use_classes: true
-    })
+    obj.message = ansi_up.ansi_to_html(err.message)
   else
     obj.message = err.message
 

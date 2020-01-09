@@ -80,27 +80,43 @@ describe('Set Up Project', function () {
         .should('have.value', 'New Project Here')
       })
 
-      describe('default owner', function () {
-        it('has no owner selected by default', function () {
-          cy.get('#me').should('not.be.selected')
-
-          cy.get('#org').should('not.be.selected')
-        })
-
-        it('org docs are linked', () => {
-          cy.contains('label', 'Who should own this')
-          .find('a').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
-          })
+      it('org docs are linked', () => {
+        cy.contains('label', 'Who should own this')
+        .find('a').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-are-organizations')
         })
       })
+    })
 
-      describe('selecting me as owner', function () {
+    describe('loading behavior', function () {
+      beforeEach(function () {
+        cy.get('.btn').contains('Set up project').click()
+      })
+
+      it('calls getOrgs', function () {
+        expect(this.ipc.getOrgs).to.be.calledOnce
+      })
+
+      it('displays loading view before orgs load', function () {
+        cy.get('.loader').then(function () {
+          this.getOrgs.resolve(this.orgs)
+        })
+
+        cy.get('.loader').should('not.exist')
+      })
+    })
+
+    describe('selecting an org', function () {
+      describe('selecting Personal org', function () {
         beforeEach(function () {
-          cy.get('.privacy-radio').should('not.be.visible')
+          this.getOrgs.resolve(this.orgs)
 
+          cy.get('.btn').contains('Set up project').click()
           cy.get('.modal-content')
-          .contains('.btn', 'Me').click()
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Your personal organization').click()
         })
 
         it('access docs are linked', () => {
@@ -115,25 +131,29 @@ describe('Set Up Project', function () {
           .find('input').should('not.be.checked')
         })
       })
-    })
 
-    describe('selecting an org', function () {
       context('with orgs', function () {
         beforeEach(function () {
           this.getOrgs.resolve(this.orgs)
           cy.get('.btn').contains('Set up project').click()
 
           cy.get('.modal-content')
-          .contains('.btn', 'An Organization').click()
         })
 
         it('lists organizations to assign to project', function () {
-          cy.get('#organizations-select').find('option')
+          cy.get('.empty-select-orgs').should('not.be.visible')
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
           .should('have.length', this.orgs.length)
         })
 
-        it('selects none by default', () => {
-          cy.get('#organizations-select').should('have.value', '')
+        it('selects personal org by default', function () {
+          cy.get('.organizations-select').contains(
+            'Your personal organization'
+          )
+
+          cy.get('.privacy-radio').should('be.visible')
         })
 
         it('opens external link on click of manage', () => {
@@ -143,23 +163,49 @@ describe('Set Up Project', function () {
         })
 
         it('displays public & private radios on select', function () {
-          cy.get('.privacy-radio').should('not.be.visible')
-          cy.get('select').select('Acme Developers')
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Acme Developers').click()
 
           cy.get('.privacy-radio').should('be.visible')
           .find('input').should('not.be.checked')
         })
+      })
 
-        it('clears selections when switching back to Me', function () {
-          cy.get('select').select('Acme Developers')
-          cy.get('.privacy-radio')
-          .find('input').first().check()
+      context('orgs with no default org', function () {
+        beforeEach(function () {
+          this.getOrgs.resolve(Cypress._.filter(this.orgs, { 'default': false }))
+          cy.get('.btn').contains('Set up project').click()
+        })
 
-          cy.get('.btn').contains('Me').click()
-          cy.get('.privacy-radio').find('input').should('not.be.checked')
-          cy.get('.btn').contains('An Organization').click()
+        it('lists organizations to assign to project', function () {
+          cy.get('.empty-select-orgs').should('not.be.visible')
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          // do not count the default org we removed
+          .should('have.length', this.orgs.length - 1)
+        })
 
-          cy.get('#organizations-select').should('have.value', '')
+        it('selects first org by default', function () {
+          cy.get('.organizations-select').contains(this.orgs[1].name)
+        })
+
+        it('opens external link on click of manage', () => {
+          cy.get('.manage-orgs-btn').click().then(function () {
+            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
+          })
+        })
+
+        it('displays public & private radios on select', function () {
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Acme Developers').click()
+
+          cy.get('.privacy-radio').should('be.visible')
+          .find('input').should('not.be.checked')
         })
       })
 
@@ -167,13 +213,12 @@ describe('Set Up Project', function () {
         beforeEach(function () {
           this.getOrgs.resolve([])
           cy.get('.btn').contains('Set up project').click()
-
-          cy.get('.modal-content')
-          .contains('.btn', 'An Organization').click()
         })
 
         it('displays empty message', () => {
           cy.get('.empty-select-orgs').should('be.visible')
+          cy.get('.organizations-select').should('not.be.visible')
+          cy.get('.privacy-radio').should('not.be.visible')
         })
 
         it('opens dashboard organizations when \'create org\' is clicked', () => {
@@ -183,7 +228,7 @@ describe('Set Up Project', function () {
         })
       })
 
-      context('without only default org', function () {
+      context('with only default org', function () {
         beforeEach(function () {
           this.getOrgs.resolve([{
             'id': '000',
@@ -192,19 +237,13 @@ describe('Set Up Project', function () {
           }])
 
           cy.get('.btn').contains('Set up project').click()
-
           cy.get('.modal-content')
-          .contains('.btn', 'An Organization').click()
         })
 
-        it('displays empty message', () => {
-          cy.get('.empty-select-orgs').should('be.visible')
-        })
-
-        it('opens dashboard organizations when \'create org\' is clicked', () => {
-          cy.contains('Create organization').click().then(function () {
-            expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard/organizations')
-          })
+        it('displays in dropdown', () => {
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option').should('have.length', 1)
         })
       })
 
@@ -213,9 +252,6 @@ describe('Set Up Project', function () {
           cy.clock()
           this.getOrgs.resolve(this.orgs)
           cy.get('.btn').contains('Set up project').click()
-
-          cy.get('.modal-content')
-          .contains('.btn', 'An Organization').click()
         })
 
         it('polls for orgs twice in 10+sec on click of org', function () {
@@ -226,12 +262,14 @@ describe('Set Up Project', function () {
 
         it('updates org name on list on successful poll', function () {
           this.name = 'Foo Bar Devs'
-          this.orgs[0].name = this.name
+          this.orgs[1].name = this.name
           this.getOrgsAgain = this.ipc.getOrgs.onCall(2).resolves(this.orgs)
 
           cy.tick(11000)
 
-          cy.get('#organizations-select').find('option')
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
           .contains(this.name)
         })
 
@@ -246,7 +284,9 @@ describe('Set Up Project', function () {
 
           cy.tick(11000)
 
-          cy.get('#organizations-select').find('option')
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
           .should('have.length', this.orgs.length)
         })
       })
@@ -256,8 +296,10 @@ describe('Set Up Project', function () {
       beforeEach(function () {
         this.getOrgs.resolve(this.orgs)
         cy.contains('.btn', 'Set up project').click()
-        cy.get('.modal-body')
-        .contains('.btn', 'Me').click()
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Your personal organization').click()
 
         cy.get('.privacy-radio').find('input').last().check()
 
@@ -292,11 +334,12 @@ describe('Set Up Project', function () {
       })
 
       it('sends project name, org id, and public flag to ipc event', function () {
-        cy.get('.modal-body')
-        .contains('.btn', 'An Organization').click()
-
         cy.get('#projectName').clear().type('New Project')
-        cy.get('select').select('Acme Developers')
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Acme Developers').click()
+
         cy.get('.privacy-radio').find('input').first().check()
 
         cy.get('.modal-body')
@@ -312,10 +355,11 @@ describe('Set Up Project', function () {
 
       context('org/public', function () {
         beforeEach(function () {
-          cy.get('.modal-body')
-          .contains('.btn', 'An Organization').click()
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Acme Developers').click()
 
-          cy.get('select').select('Acme Developers')
           cy.get('.privacy-radio').find('input').first().check()
 
           cy.get('.modal-body')
@@ -333,11 +377,12 @@ describe('Set Up Project', function () {
 
       context('me/private', function () {
         beforeEach(function () {
-          cy.get('.modal-body')
-          .contains('.btn', 'Me').click()
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Your personal organization').click()
 
           cy.get('.privacy-radio').find('input').last().check()
-
           cy.get('.modal-body')
           .contains('.btn', 'Set up project').click()
         })
@@ -353,11 +398,12 @@ describe('Set Up Project', function () {
 
       context('me/public', function () {
         beforeEach(function () {
-          cy.get('.modal-body')
-          .contains('.btn', 'Me').click()
+          cy.get('.organizations-select__dropdown-indicator').click()
+          cy.get('.organizations-select__menu').should('be.visible')
+          cy.get('.organizations-select__option')
+          .contains('Your personal organization').click()
 
           cy.get('.privacy-radio').find('input').first().check()
-
           cy.get('.modal-body')
           .contains('.btn', 'Set up project').click()
         })
@@ -392,8 +438,10 @@ describe('Set Up Project', function () {
       beforeEach(function () {
         this.getOrgs.resolve(this.orgs)
         cy.contains('.btn', 'Set up project').click()
-        cy.get('.modal-body')
-        .contains('.btn', 'Me').click()
+        cy.get('.organizations-select__dropdown-indicator').click()
+        cy.get('.organizations-select__menu').should('be.visible')
+        cy.get('.organizations-select__option')
+        .contains('Your personal organization').click()
 
         cy.get('.privacy-radio').find('input').last().check()
 
