@@ -38,11 +38,13 @@ class PermissionMessage extends Component {
 
     if (this.state.result === SUCCESS || membershipRequested) {
       return this._success()
-    } else if (this.state.result === FAILURE) {
-      return this._failure()
-    } else {
-      return this._noResult()
     }
+
+    if (this.state.result === FAILURE) {
+      return this._failure()
+    }
+
+    return this._noResult()
   }
 
   _button () {
@@ -53,10 +55,10 @@ class PermissionMessage extends Component {
         onClick={this._requestAccess}
       >
         <span>
-          <i className='fa fa-paper-plane'></i>{' '}
+          <i className='fas fa-paper-plane'></i>{' '}
           Request access
         </span>
-        <i className='fa fa-spinner fa-spin'></i>
+        <i className='fas fa-spinner fa-spin'></i>
       </button>
     )
   }
@@ -65,7 +67,7 @@ class PermissionMessage extends Component {
     return (
       <div className='empty'>
         <h4>
-          <i className='fa fa-check passed'></i>{' '}
+          <i className='fas fa-check passed'></i>{' '}
           Request sent
         </h4>
         <p>
@@ -82,29 +84,29 @@ class PermissionMessage extends Component {
     // tell them it's all good
     if (errors.isDenied(error) || errors.isAlreadyRequested(error)) {
       return this._success()
-    } else {
-      return (
-        <div className='empty'>
-          <h4>
-            <i className='fa fa-exclamation-triangle failed'></i>{' '}
-            Request Failed
-          </h4>
-          <p>An unexpected error occurred while requesting access:</p>
-          <pre className='alert alert-danger'>
-            {this.state.error.message}
-          </pre>
-          <p>Try again.</p>
-          {this._button()}
-        </div>
-      )
     }
+
+    return (
+      <div className='empty'>
+        <h4>
+          <i className='fas fa-exclamation-triangle failed'></i>{' '}
+            Request Failed
+        </h4>
+        <p>An unexpected error occurred while requesting access:</p>
+        <pre className='alert alert-danger'>
+          {this.state.error.message}
+        </pre>
+        <p>Try again.</p>
+        {this._button()}
+      </div>
+    )
   }
 
   _noResult () {
     return (
       <div className="empty">
         <h4>
-          <i className='fa fa-lock'></i>{' '}
+          <i className='fas fa-lock'></i>{' '}
           Request access to see the runs
         </h4>
         <p>This is a private project created by someone else.</p>
@@ -135,6 +137,7 @@ class PermissionMessage extends Component {
   _setResult (error) {
     if (errors.isAlreadyMember(error)) {
       this.props.onRetry()
+
       return
     }
 

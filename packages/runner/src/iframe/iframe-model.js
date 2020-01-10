@@ -80,6 +80,7 @@ export default class IframeModel {
     if (!snapshots || !snapshots.length) {
       this._clearSnapshots()
       this._setMissingSnapshotMessage()
+
       return
     }
 
@@ -100,6 +101,7 @@ export default class IframeModel {
 
     if (snapshots.length > 1) {
       let i = 0
+
       this.intervalId = setInterval(() => {
         if (this.isSnapshotPinned) return
 
@@ -154,7 +156,7 @@ export default class IframeModel {
 
       this._updateViewport(this.originalState)
       this._updateUrl(this.originalState.url)
-      this.restoreDom(this.originalState)
+      this.restoreDom(this.originalState.snapshot)
       this._clearMessage()
 
       this.originalState = null
@@ -168,6 +170,7 @@ export default class IframeModel {
     if (!snapshots || !snapshots.length) {
       eventManager.snapshotUnpinned()
       this._setMissingSnapshotMessage()
+
       return
     }
 
@@ -205,16 +208,16 @@ export default class IframeModel {
   }
 
   _storeOriginalState () {
-    const originalState = this.detachDom()
-    if (!originalState) return
+    const finalSnapshot = this.detachDom()
 
-    const { body, htmlAttrs, headStyles, bodyStyles } = originalState
+    if (!finalSnapshot) return
+
+    const { body, htmlAttrs } = finalSnapshot
 
     this.originalState = {
       body,
       htmlAttrs,
-      headStyles,
-      bodyStyles,
+      snapshot: finalSnapshot,
       url: this.state.url,
       viewportWidth: this.state.width,
       viewportHeight: this.state.height,

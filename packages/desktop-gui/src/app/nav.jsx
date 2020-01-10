@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import Tooltip from '@cypress/react-tooltip'
 
 import appStore from '../lib/app-store'
 import authApi from '../auth/auth-api'
@@ -16,37 +15,26 @@ import Dropdown from '../dropdown/dropdown'
 export default class Nav extends Component {
   render () {
     return (
-      <nav className='main-nav navbar navbar-inverse navbar-fixed-top'>
-        <div className='container-fluid'>
-          <ul className='nav navbar-nav'>
-            <li className='left-nav'>
-              {this._leftNav()}
-            </li>
-          </ul>
-          <ul className='nav navbar-nav navbar-right'>
-            <li>
-              <Tooltip
-                title='Support'
-                placement='bottom'
-                className='cy-tooltip'>
-                <a onClick={this._openSupport} href='#'>
-                  <i className='fa fa-question-circle'></i>{' '}
-                </a>
-              </Tooltip>
-            </li>
-            <li>
-              <Tooltip
-                title='Docs'
-                placement='bottom'
-                className='cy-tooltip'>
-                <a onClick={this._openDocs} href='#'>
-                  <i className='fa fa-graduation-cap'></i>{' '}
-                </a>
-              </Tooltip>
-            </li>
-            {this._userStateButton()}
-          </ul>
-        </div>
+      <nav className='main-nav navbar navbar-inverse'>
+        <ul className='nav'>
+          <li>
+            {this._leftNav()}
+          </li>
+        </ul>
+        <div className='spacer' />
+        <ul className='nav'>
+          <li>
+            <a onClick={this._openSupport} href='#'>
+              <i className='fas fa-question-circle'></i> Support
+            </a>
+          </li>
+          <li>
+            <a onClick={this._openDocs} href='#'>
+              <i className='fas fa-graduation-cap'></i> Docs
+            </a>
+          </li>
+          {this._userStateButton()}
+        </ul>
       </nav>
     )
   }
@@ -63,7 +51,7 @@ export default class Nav extends Component {
     if (appStore.isGlobalMode && project) {
       return (
         <Link to={routes.intro()}>
-          <i className='fa fa-chevron-left'></i> Back
+          <i className='fas fa-chevron-left'></i> Back
         </Link>
       )
     }
@@ -71,8 +59,7 @@ export default class Nav extends Component {
     // global mode, on intro page
     return (
       <div className='logo'>
-        <img src='img/cypress-inverse.png' />
-        <span>Beta</span>
+        <img src={require('@cypress/icons/dist/logo/cypress-inverse.png')} />
       </div>
     )
   }
@@ -82,7 +69,7 @@ export default class Nav extends Component {
       return (
         <li>
           <div>
-            <i className='fa fa-user' /> <i className='fa fa-spinner fa-spin' />
+            <i className='fas fa-user' /> <i className='fas fa-spinner fa-spin' />
           </div>
         </li>
       )
@@ -92,7 +79,7 @@ export default class Nav extends Component {
       return (
         <li>
           <a onClick={this._showLogin}>
-            <i className='fa fa-user' /> Log In
+            <i className='fas fa-user' /> Log In
           </a>
         </li>
       )
@@ -123,14 +110,14 @@ export default class Nav extends Component {
           {' '}{authStore.user.displayName}
         </span>
       )
-    } else {
-      return (
-        <span>
-          <i className='fa fa-sign-out'></i>{' '}
-          Log Out
-        </span>
-      )
     }
+
+    return (
+      <span>
+        <i className='fas fa-sign-out-alt'></i>{' '}
+        Log Out
+      </span>
+    )
   }
 
   _select = (item) => {
@@ -140,7 +127,7 @@ export default class Nav extends Component {
   }
 
   _showLogin () {
-    authStore.setShowingLogin(true)
+    authStore.openLogin()
   }
 
   _openDocs (e) {

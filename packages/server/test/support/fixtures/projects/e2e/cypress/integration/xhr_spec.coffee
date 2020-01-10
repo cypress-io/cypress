@@ -76,6 +76,33 @@ describe "xhrs", ->
   it "works prior to visit", ->
     cy.server()
 
+  ## https://github.com/cypress-io/cypress/issues/5431
+  it "can stub a 100kb response", (done) ->
+    body = 'X'.repeat(100 * 1024)
+
+    cy.server()
+    cy.route({
+      method: 'POST'
+      url: '/foo'
+      response: {
+        'bar': body
+      }
+    })
+
+    cy.visit("/index.html")
+    .then (win) ->
+      xhr = new win.XMLHttpRequest
+      xhr.open("POST", "/foo")
+      xhr.send()
+
+      finish = ->
+        expect(xhr.status).to.eq(200)
+        expect(xhr.responseText).to.include(body)
+        done()
+
+      xhr.onload = finish
+      xhr.onerror = finish
+
   describe "server with 1 visit", ->
     before ->
       cy.visit("/xhr.html")
@@ -100,16 +127,18 @@ describe "xhrs", ->
 
     it "aborts", ->
       cy
-        .route({
-          method: "POST",
-          url: /users/,
-          response: {name: "b"},
-          delay: 200
-        }).as("createUser")
-        .get("#create").click()
-        .then ->
-          ## simulate an open request which should become
-          ## aborted due to window:unload event
-          Cypress.action("app:window:unload", {})
+        .window()
+        .then (win) ->
+          cy
+          .route({
+            method: "POST",
+            url: /users/,
+            response: {name: "b"},
+            delay: 2000
+          })
+          .as("createUser")
+          .get("#create").click()
+          .then ->
+            win.location.href = '/index.html'
 
-        .wait("@createUser").its("aborted").should("be.true")
+          .wait("@createUser").its("canceled").should("be.true")

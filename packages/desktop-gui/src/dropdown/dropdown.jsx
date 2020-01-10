@@ -29,6 +29,7 @@ class Dropdown extends Component {
         this.setState({ open: false })
       }
     }
+
     document.body.addEventListener('click', this.outsideClickHandler)
   }
 
@@ -48,17 +49,17 @@ class Dropdown extends Component {
   _button () {
     if (this.props.others.length) {
       return (
-        <a onClick={this._toggleOpen} className={this.props.disabled ? 'disabled' : ''}>
+        <a onClick={this._toggleOpen} className={`selected ${this.props.disabled ? 'disabled' : ''}`}>
           {this._buttonContent()}
         </a>
       )
-    } else {
-      return (
-        <span>
-          {this._buttonContent()}
-        </span>
-      )
     }
+
+    return (
+      <span>
+        {this._buttonContent()}
+      </span>
+    )
   }
 
   _buttonContent () {

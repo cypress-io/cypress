@@ -6,14 +6,15 @@ dataUriToBuffer = require("data-uri-to-buffer")
 Jimp            = require("jimp")
 sizeOf          = require("image-size")
 colorString     = require("color-string")
+sanitize        = require("sanitize-filename")
 debug           = require("debug")("cypress:server:screenshot")
+plugins         = require("./plugins")
 fs              = require("./util/fs")
 glob            = require("./util/glob")
 pathHelpers     = require("./util/path_helpers")
 
 RUNNABLE_SEPARATOR = " -- "
 pathSeparatorRe = /[\\\/]/g
-invalidCharsRe = /[^0-9a-zA-Z-_\s\(\)]/g
 
 ## internal id incrementor
 __ID__ = null
@@ -22,9 +23,6 @@ __ID__ = null
 ## a semaphore to access the file system when we write
 ## screenshots since its possible two screenshots with
 ## the same name will be written to the file system
-
-replaceInvalidChars = (str) ->
-  str.replace(invalidCharsRe, "")
 
 ## when debugging logs automatically prefix the
 ## screenshot id to the debug logs for easier association
@@ -290,36 +288,57 @@ getBuffer = (details) ->
 getDimensions = (details) ->
   pick = (obj) ->
     _.pick(obj, "width", "height")
-  
+
   if details.buffer
     pick(sizeOf(details.buffer))
   else
     pick(details.image.bitmap)
 
-ensureUniquePath = (takenPaths, withoutExt, extension) ->
-  fullPath = "#{withoutExt}.#{extension}"
-  num = 0
-  while _.includes(takenPaths, fullPath)
-    fullPath = "#{withoutExt} (#{++num}).#{extension}"
-  return fullPath
+ensureUniquePath = (withoutExt, extension, num = 0) ->
+  fullPath = if num then "#{withoutExt} (#{num}).#{extension}" else "#{withoutExt}.#{extension}"
+  fs.pathExists(fullPath)
+  .then (found) ->
+    if found
+      return ensureUniquePath(withoutExt, extension, num += 1)
+    return fullPath
+
+sanitizeToString = (title) ->
+  ## test titles may be values which aren't strings like
+  ## null or undefined - so convert before trying to sanitize
+  sanitize(_.toString(title))
 
 getPath = (data, ext, screenshotsFolder) ->
   specNames = (data.specName or "")
   .split(pathSeparatorRe)
-  
+
   if data.name
-    names = data.name.split(pathSeparatorRe).map(replaceInvalidChars)
+    names = data.name.split(pathSeparatorRe).map(sanitize)
   else
-    names = [data.titles.map(replaceInvalidChars).join(RUNNABLE_SEPARATOR)]
-  
+    names = _
+    .chain(data.titles)
+    .map(sanitizeToString)
+    .join(RUNNABLE_SEPARATOR)
+    .concat([])
+    .value()
+
+  # truncate file names to be less than 220 characters
+  # to accomodate filename size limits
+  maxFileNameLength = 220
+  index = names.length - 1
+
+  if names[index].length > maxFileNameLength
+    names[index] = _.truncate(names[index], {
+      length: maxFileNameLength,
+      omission: ''
+    })
+
   ## append (failed) to the last name
   if data.testFailure
-    index = names.length - 1
     names[index] = names[index] + " (failed)"
-  
+
   withoutExt = path.join(screenshotsFolder, specNames..., names...)
 
-  ensureUniquePath(data.takenPaths, withoutExt, ext)
+  ensureUniquePath(withoutExt, ext)
 
 getPathToScreenshot = (data, details, screenshotsFolder) ->
   ext = mime.extension(getType(details))
@@ -356,7 +375,8 @@ module.exports = {
     ## caused by jimp reading the image buffer
     if data.simple
       takenAt = new Date().toJSON()
-      return automate(data).then (dataUrl) ->
+      return automate(data)
+      .then (dataUrl) ->
         {
           takenAt
           multipart: false
@@ -409,30 +429,46 @@ module.exports = {
       return { image, pixelRatio, multipart, takenAt }
 
   save: (data, details, screenshotsFolder) ->
-    pathToScreenshot = getPathToScreenshot(data, details, screenshotsFolder)
+    getPathToScreenshot(data, details, screenshotsFolder)
+    .then (pathToScreenshot) ->
+      debug("save", pathToScreenshot)
 
-    debug("save", pathToScreenshot)
+      getBuffer(details)
+      .then (buffer) ->
+        fs.outputFileAsync(pathToScreenshot, buffer)
+      .then ->
+        fs.statAsync(pathToScreenshot).get("size")
+      .then (size) ->
+        dimensions = getDimensions(details)
 
-    getBuffer(details)
-    .then (buffer) ->
-      fs.outputFileAsync(pathToScreenshot, buffer)
-    .then ->
-      fs.statAsync(pathToScreenshot).get("size")
-    .then (size) ->
-      dimensions = getDimensions(details)
+        { multipart, pixelRatio, takenAt } = details
 
-      { multipart, pixelRatio, takenAt } = details
+        {
+          size
+          takenAt
+          dimensions
+          multipart
+          pixelRatio
+          name: data.name
+          specName: data.specName
+          testFailure: data.testFailure
+          path: pathToScreenshot
+        }
 
-      {
-        size 
-        takenAt
-        dimensions
-        multipart
-        pixelRatio
-        name: data.name
-        specName: data.specName
-        testFailure: data.testFailure
-        path: pathToScreenshot
-      }
+  afterScreenshot: (data, details) ->
+    duration = new Date() - new Date(data.startTime)
+
+    details = _.extend({}, data, details, { duration })
+    details = _.pick(details, "size", "takenAt", "dimensions", "multipart", "pixelRatio", "name", "specName", "testFailure", "path", "scaled", "blackout", "duration")
+
+    if not plugins.has("after:screenshot")
+      return Promise.resolve(details)
+
+    plugins.execute("after:screenshot", details)
+    .then (updates) =>
+      if not _.isPlainObject(updates)
+        return details
+
+      _.extend(details, _.pick(updates, "size", "dimensions", "path"))
 
 }

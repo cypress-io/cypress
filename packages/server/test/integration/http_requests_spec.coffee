@@ -3,9 +3,12 @@ require("../spec_helper")
 _             = require("lodash")
 r             = require("request")
 rp            = require("request-promise")
+compression   = require("compression")
 dns           = require("dns")
+express       = require("express")
 http          = require("http")
 path          = require("path")
+url           = require("url")
 zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
@@ -16,6 +19,8 @@ evilDns       = require("evil-dns")
 Promise       = require("bluebird")
 httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")
 pkg           = require("@packages/root")
+SseStream     = require('ssestream')
+EventSource   = require("eventsource")
 config        = require("#{root}lib/config")
 Server        = require("#{root}lib/server")
 Project       = require("#{root}lib/project")
@@ -30,8 +35,8 @@ Fixtures      = require("#{root}test/support/helpers/fixtures")
 
 zlib = Promise.promisifyAll(zlib)
 
-## force supertest-session to use supertest-as-promised, hah
-Session       = proxyquire("supertest-session", {supertest: supertest})
+## force supertest-session to use promises provided in supertest
+session = proxyquire("supertest-session", {supertest: supertest})
 
 removeWhitespace = (c) ->
   c = str.clean(c)
@@ -43,13 +48,15 @@ browserifyFile = (filePath) ->
     browserify(filePath)
     .transform(cjsxify)
     .transform(babelify, {
-      plugins: ["add-module-exports"],
-      presets: ["latest", "react"],
+      plugins: ["add-module-exports", "@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-runtime"],
+      presets: ["@babel/preset-env", "@babel/preset-react"],
     })
     .bundle()
   )
 
 describe "Routes", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -69,7 +76,7 @@ describe "Routes", ->
       ## and allow us to override them
       ## for each test
       config.set(obj)
-      .then  (cfg) =>
+      .then (cfg) =>
         ## use a jar for each test
         ## but reset it automatically
         ## between test
@@ -91,11 +98,11 @@ describe "Routes", ->
         ## options including our proxy
         @rp = (options = {}) =>
           if _.isString(options)
-            url = options
+            targetUrl = options
             options = {}
 
           _.defaults options, {
-            url,
+            url: targetUrl,
             proxy: @proxy,
             jar,
             simple: false,
@@ -105,7 +112,7 @@ describe "Routes", ->
           rp(options)
 
         open = =>
-          project = Project("/path/to/project")
+          project = new Project("/path/to/project")
 
           Promise.all([
             ## open our https server
@@ -121,7 +128,7 @@ describe "Routes", ->
 
               @srv = @server.getHttpServer()
 
-              @session = new (Session({app: @srv}))
+              @session = session(@srv)
 
               @proxy = "http://localhost:" + port
           ])
@@ -266,8 +273,12 @@ describe "Routes", ->
         @rp("http://localhost:9999/__")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include("version")
-          expect(res.body).to.include(pkg.version)
+
+          base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include("version")
+          expect(configStr).to.include(pkg.version)
 
   context "GET /__cypress/runner/*", ->
     beforeEach ->
@@ -656,6 +667,23 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.deep.eq({test: "We’ll"})
 
+      context "deferred", ->
+        it "closes connection if no stub is received before a reset", ->
+          p = @rp({
+            url: "http://localhost:2020/__cypress/xhrs/users/1"
+            json: true
+            headers: {
+              "x-cypress-id": "foo1"
+              "x-cypress-responsedeferred": true
+            }
+          })
+
+          setTimeout =>
+            @server._xhrServer.reset()
+          , 100
+
+          expect(p).to.be.rejectedWith('Error: socket hang up')
+
       context "fixture", ->
         beforeEach ->
           Fixtures.scaffold("todos")
@@ -1000,6 +1028,44 @@ describe "Routes", ->
           expect(res.body).not.to.include("document.domain = 'github.com'")
           expect(res.body).to.include("</html>")
 
+      ## https://github.com/cypress-io/cypress/issues/1746
+      it "can ungzip utf-8 javascript and inject without corrupting it", ->
+        js = ""
+
+        app = express()
+
+        app.use compression({ chunkSize: 64, threshold: 1 })
+
+        app.get "/", (req, res) =>
+          res.setHeader('content-type', 'application/javascript; charset=UTF-8')
+          res.setHeader('transfer-encoding', 'chunked')
+
+          write = (chunk) =>
+            js += chunk
+            res.write(chunk)
+
+          write("function ")
+          _.times 100, =>
+            write("😡😈".repeat(10))
+          write(" () { }")
+          res.end()
+
+        server = http.createServer(app)
+
+        Promise.fromCallback (cb) =>
+          server.listen(12345, cb)
+        .then =>
+          @rp({
+            url: "http://localhost:12345"
+            gzip: true
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.deep.eq(js)
+        .finally =>
+          Promise.fromCallback (cb) =>
+            server.close(cb)
+
     context "accept-encoding", ->
       beforeEach ->
         @setup("http://www.github.com")
@@ -1210,7 +1276,7 @@ describe "Routes", ->
           expect(res.body).to.include("document.domain = 'github.com'")
           expect(res.headers["set-cookie"]).to.match(/__cypress.initial=;/)
 
-      it "sends back cypress content on request errors which match origin", ->
+      it "sends back socket hang up on request errors which match origin", ->
         nock("http://app.github.com")
         .get("/")
         .replyWithError("ECONNREFUSED")
@@ -1221,18 +1287,12 @@ describe "Routes", ->
             "Accept": "text/html, application/xhtml+xml, */*"
           }
         })
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
-          expect(res.body).to.include("http://app.github.com")
-          expect(res.body).to.include("The error was:")
-          expect(res.body).to.include("ECONNREFUSED")
-          expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("<html>\n<head> <script")
-          expect(res.body).to.include("</script> </head> <body>")
-          expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
+        .then ->
+          throw new Error("should not reach")
+        .catch (err) ->
+          expect(err.message).to.eq('Error: socket hang up')
 
-      it "sends back cypress content on actual request errors", ->
+      it "sends back socket hang up on actual request errors", ->
         @setup("http://localhost:64644")
         .then =>
           @rp({
@@ -1241,38 +1301,22 @@ describe "Routes", ->
               "Accept": "text/html, application/xhtml+xml, */*"
             }
           })
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
-          expect(res.body).to.include("http://localhost:64644")
-          expect(res.body).to.include("The error was:")
-          expect(res.body).to.include("connect ECONNREFUSED 127.0.0.1:64644")
-          expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("_exceptionWithHostPort")
-          expect(res.body).to.include("TCPConnectWrap.afterConnect")
-          expect(res.body).to.include("<html>\n<head> <script")
-          expect(res.body).to.include("</script> </head> <body>")
-          expect(res.body).to.include("document.domain = 'localhost';") ## should continue to inject
+        .then ->
+          throw new Error("should not reach")
+        .catch (err) ->
+          expect(err.message).to.eq('Error: socket hang up')
 
-      it "sends back cypress content without injection on http errors when no matching origin", ->
+      it "sends back socket hang up on http errors when no matching origin", ->
         @rp({
           url: "http://localhost:64644"
           headers: {
             "Accept": "text/html, application/xhtml+xml, */*"
           }
         })
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
-          expect(res.body).to.include("http://localhost:64644")
-          expect(res.body).to.include("The error was:")
-          expect(res.body).to.include("connect ECONNREFUSED 127.0.0.1:64644")
-          expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("_exceptionWithHostPort")
-          expect(res.body).to.include("TCPConnectWrap.afterConnect")
-          expect(res.body).not.to.include("<html>\n<head> <script")
-          expect(res.body).not.to.include("</script> </head> <body>")
-          expect(res.body).not.to.include("document.domain") ## should not inject because
+        .then ->
+          throw new Error("should not reach")
+        .catch (err) ->
+          expect(err.message).to.eq('Error: socket hang up')
 
       it "sends back 404 when file does not exist locally", ->
         @setup("<root>", {
@@ -1309,7 +1353,7 @@ describe "Routes", ->
             expect(res.statusCode).to.eq(500)
             expect(res.body).to.eq("server error")
 
-      it "handles decoding gzip failures", ->
+      it "transparently proxies decoding gzip failures", ->
         nock(@server._remoteOrigin)
         .get("/index.html")
         .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
@@ -1322,19 +1366,12 @@ describe "Routes", ->
           headers: {
             "Accept": "text/html, application/xhtml+xml, */*"
           }
+          gzip: true
         })
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-          expect(res.headers).not.to.have.property("content-encoding")
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url:")
-          expect(res.body).to.include("http://www.github.com/index.html")
-          expect(res.body).to.include("The error was:")
-          expect(res.body).to.include("incorrect header check")
-          expect(res.body).to.include("The stack trace was:")
-          expect(res.body).to.include("at Gunzip.zlibOnError")
-          expect(res.body).to.include("<html>\n<head> <script")
-          expect(res.body).to.include("</script> </head> <body>")
-          expect(res.body).to.include("document.domain = 'github.com';") ## should continue to inject
+        .then ->
+          throw new Error("should not reach")
+        .catch (err) ->
+          expect(err.error.code).to.eq("ECONNRESET")
 
     context "headers", ->
       beforeEach ->
@@ -1393,7 +1430,7 @@ describe "Routes", ->
       it "sends with Transfer-Encoding: chunked without Content-Length", ->
         nock(@server._remoteOrigin)
         .get("/login")
-        .reply 200, new Buffer("foo"), {
+        .reply 200, Buffer.from("foo"), {
           "Content-Type": "text/html"
         }
 
@@ -1667,16 +1704,22 @@ describe "Routes", ->
           .reply(200, "{}", {
             "Content-Type": "text/css"
           })
-
         .then ->
-          matches "http://127.0.0.1:80/app.css", ->
-            nock("http://127.0.0.1:80")
+          matches "http://127.0.0.1/app.css", ->
+            nock("http://127.0.0.1")
             .matchHeader("host", "127.0.0.1")
             .get("/app.css")
             .reply(200, "{}", {
               "Content-Type": "text/css"
             })
-
+        .then ->
+          matches "http://127.0.0.1:80/app2.css", ->
+            nock("http://127.0.0.1:80")
+            .matchHeader("host", "127.0.0.1")
+            .get("/app2.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
         .then ->
           matches "https://www.google.com:443/app.css", ->
             nock("https://www.google.com")
@@ -1685,59 +1728,97 @@ describe "Routes", ->
             .reply(200, "{}", {
               "Content-Type": "text/css"
             })
+        .then ->
+          matches "https://www.apple.com/app.css", ->
+            nock("https://www.apple.com")
+            .matchHeader("host", "www.apple.com")
+            .get("/app.css")
+            .reply(200, "{}", {
+              "Content-Type": "text/css"
+            })
 
-      it "attaches auth headers when matches origin", ->
-        username = "u"
-        password = "p"
+      context "authorization", ->
+        it "attaches auth headers when matches origin", ->
+          username = "u"
+          password = "p"
 
-        base64 = new Buffer(username + ":" + password).toString("base64")
+          base64 = Buffer.from(username + ":" + password).toString("base64")
 
-        @server._remoteAuth = {
-          username
-          password
-        }
-
-        nock("http://localhost:8080")
-        .get("/index")
-        .matchHeader("authorization", "Basic #{base64}")
-        .reply(200, "")
-
-        @rp("http://localhost:8080/index")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      it "does not attach auth headers when not matching origin", ->
-        nock("http://localhost:8080", {
-          badheaders: ['authorization']
-        })
-        .get("/index")
-        .reply(200, "")
-
-        @rp("http://localhost:8080/index")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-      it "does not modify existing auth headers when matching origin", ->
-        existing = "Basic asdf"
-
-        @server._remoteAuth = {
-          username: "u"
-          password: "p"
-        }
-
-        nock("http://localhost:8080")
-        .get("/index")
-        .matchHeader("authorization", existing)
-        .reply(200, "")
-
-        @rp({
-          url: "http://localhost:8080/index"
-          headers: {
-            "Authorization": existing
+          @server._remoteAuth = {
+            username
+            password
           }
-        })
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
+
+          nock("http://localhost:8080")
+          .get("/index")
+          .matchHeader("authorization", "Basic #{base64}")
+          .reply(200, "")
+
+          @rp("http://localhost:8080/index")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        it "does not attach auth headers when not matching origin", ->
+          nock("http://localhost:8080", {
+            badheaders: ['authorization']
+          })
+          .get("/index")
+          .reply(200, "")
+
+          @rp("http://localhost:8080/index")
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        it "does not modify existing auth headers when matching origin", ->
+          existing = "Basic asdf"
+
+          @server._remoteAuth = {
+            username: "u"
+            password: "p"
+          }
+
+          nock("http://localhost:8080")
+          .get("/index")
+          .matchHeader("authorization", existing)
+          .reply(200, "")
+
+          @rp({
+            url: "http://localhost:8080/index"
+            headers: {
+              "Authorization": existing
+            }
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+
+        ## https://github.com/cypress-io/cypress/issues/4267
+        it "doesn't attach auth headers to a diff protection space on the same origin", ->
+          @setup("http://beta.something.com")
+          .then =>
+            username = "u"
+            password = "p"
+
+            base64 = Buffer.from(username + ":" + password).toString("base64")
+
+            @server._remoteAuth = {
+              username
+              password
+            }
+
+            nock(/.*\.something.com/)
+            .get("/index")
+            .matchHeader("authorization", "Basic #{base64}")
+            .reply(200, "")
+            .get("/index")
+            .matchHeader("authorization", _.isUndefined)
+            .reply(200, "")
+
+            @rp("http://beta.something.com/index")
+            .then (res) =>
+              expect(res.statusCode).to.eq(200)
+              @rp("http://cdn.something.com/index")
+            .then (res) =>
+              expect(res.statusCode).to.eq(200)
 
     context "images", ->
       beforeEach ->
@@ -1996,6 +2077,24 @@ describe "Routes", ->
 
           expect(res.body).to.include "<head> <script"
           expect(res.body).to.include "</head><div>hello from bar!</div>"
+
+      it "injects after DOCTYPE declaration when no other content", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "<!DOCTYPE>", {
+          "Content-Type": "text/html"
+        }
+
+        @rp({
+          url: "http://www.google.com/bar"
+          headers: {
+            "Cookie": "__cypress.initial=true"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.body).to.include "<!DOCTYPE><head> <script"
 
       it "injects superdomain even when head tag is missing", ->
         nock(@server._remoteOrigin)
@@ -2354,8 +2453,7 @@ describe "Routes", ->
             "Cookie": "__cypress.initial=false"
           }
 
-          if type?
-            headers["Accept"] = type
+          headers["Accept"] = type
 
           @rp({
             url: "http://www.google.com/iframe"
@@ -2511,7 +2609,7 @@ describe "Routes", ->
 
               expect(res.body).to.include("I am a gzipped response</html>")
 
-        it "handles bad gzip responses", (done) ->
+        it "ECONNRESETs bad gzip responses when not injecting", (done) ->
           nock(@server._remoteOrigin)
           .get("/app.js")
           .delayBody(100)
@@ -2520,23 +2618,16 @@ describe "Routes", ->
             "Content-Encoding": "gzip"
           })
 
-          gotResponse = false
-
           @r({
             url: "http://www.google.com/app.js"
             gzip: true
           })
           .on "error", (err) ->
-            expect(err.code).to.eq("Z_BUF_ERROR")
+            expect(err.code).to.eq("ECONNRESET")
 
             done()
-          .on "response", (res) ->
-            gotResponse = true
 
-            expect(res.statusCode).to.eq(502)
-            expect(res.headers["x-cypress-proxy-error-message"]).to.eq("incorrect header check")
-
-        it "handles bad gzip responses when injecting", ->
+        it "ECONNRESETs bad gzip responses when injecting", ->
           nock(@server._remoteOrigin)
           .get("/index.html")
           .replyWithFile(200, Fixtures.path("server/gzip-bad.html.gz"), {
@@ -2551,16 +2642,16 @@ describe "Routes", ->
               "Cookie": "__cypress.initial=true"
             }
           })
-          .then (res) ->
-            expect(res.statusCode).to.eq(500)
-
-            expect(res.body).to.include("<html>")
+          .then ->
+            throw new Error("should not reach")
+          .catch (err) ->
+            expect(err.error.code).to.eq("ECONNRESET")
 
         it "does not die rewriting a huge JS file", ->
           pathToHugeAppJs = Fixtures.path("server/libs/huge_app.js")
 
           getHugeFile = ->
-            rp("https://s3.amazonaws.com/assets.cypress.io/huge_app.js")
+            rp("https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/huge_app.js")
             .then (resp) ->
               fs
               .outputFileAsync(pathToHugeAppJs, resp)
@@ -2585,20 +2676,6 @@ describe "Routes", ->
 
               ## shouldn't be more than 500ms
               expect(reqTime).to.be.lt(500)
-
-              # b = res.body
-              #
-              # console.time("1")
-              # b.replace(topOrParentEqualityBeforeRe, "$self")
-              # console.timeEnd("1")
-              #
-              # console.time("2")
-              # b.replace(topOrParentEqualityAfterRe, "self$2")
-              # console.timeEnd("2")
-              #
-              # console.time("3")
-              # b.replace(topOrParentLocationOrFramesRe, "$1self$3$4")
-              # console.timeEnd("3")
 
       describe "off with config", ->
         beforeEach ->
@@ -2888,6 +2965,12 @@ describe "Routes", ->
         @setup("http://localhost:6565")
 
       it "makes requests to ipv6 when ipv4 fails", (done) ->
+        ## make sure that this test times out relatively fast
+        ## to ensure that requests are fast, the retrying functionality
+        ## does not extend them, and that the server closes quickly
+        ## due to the reduced keep alive timeout
+        @timeout(1500)
+
         dns.lookup "localhost", {all: true}, (err, addresses) =>
           return done(err) if err
 
@@ -2901,11 +2984,14 @@ describe "Routes", ->
             res.writeHead(200)
             res.end()
 
+          ## reduce this down from 5000ms to 100ms
+          ## so that our server closes much faster
+          server.keepAliveTimeout = 100
+
           ## start the server listening on ipv6 only
           ## for demo how to bind to localhost via ipv6 see project
           ## https://github.com/bahmutov/docker-ip6
           server.listen 6565, "::", =>
-
             @rp("http://localhost:6565/#/foo")
             .then (res) ->
               expect(res.statusCode).to.eq(200)
@@ -2922,56 +3008,6 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(204)
 
           expect(res.body).to.eq("")
-
-      # it "handles protocol-less proxies", ->
-      #   nock("http://www.cdnjs.com")
-      #     .get("backbone.js")
-      #     .reply 200, "var foo;", {
-      #       "Content-Type" : "text/javascript"
-      #     }
-
-      #   supertest(@srv)
-      #   .get("/www.cdnjs.com/backbone.js")
-      #   .expect(200)
-
-    context "without finishing responses", ->
-      beforeEach (done) ->
-        @setup("http://localhost:5959", {
-          config: {
-            responseTimeout: 50
-          }
-        })
-        .then =>
-          @srv = http.createServer (req, res) =>
-            @onRequest?.call(@, req, res)
-
-          @srv.listen =>
-            @port = @srv.address().port
-
-            done()
-
-      afterEach ->
-        @srv.close()
-
-      it "gracefully handles responses without headers", ->
-        @onRequest = (req, res) ->
-
-        @rp("http://localhost:#{@port}/")
-        .then (res) ->
-          expect(res.statusCode).to.eq(500)
-
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
-
-      it "gracefully handles responses with headers + incomplete body", ->
-        @onRequest = (req, res) ->
-          res.writeHead(401)
-          res.write("foo\n")
-
-        @rp("http://localhost:#{@port}/")
-        .then (res) ->
-          expect(res.statusCode).to.eq(401)
-
-          expect(res.body).to.include("Cypress errored attempting to make an http request to this url")
 
     context "blacklisted hosts", ->
       beforeEach ->
@@ -3008,6 +3044,147 @@ describe "Routes", ->
           expectedHeader(responses[2], "cypress.io")
           expectedHeader(responses[3], "localhost:6666")
           expectedHeader(responses[4], "*adwords.com")
+
+    context "client aborts", ->
+      beforeEach ->
+        @setup("http://localhost:6565")
+
+      it "aborts the proxied request", (done) ->
+        fs
+        .readFileAsync(Fixtures.path("server/libs/huge_app.js"), "utf8")
+        .then (str) =>
+          server = http.createServer (req, res) ->
+            ## when the incoming message to our
+            ## 3rd party server is aborted then
+            ## we know we've juggled up the event
+            ## properly
+            req.on "aborted", ->
+              server.close -> done()
+
+            res.writeHead(200, {
+              "Content-Type": "application/javascript"
+            })
+
+            ## write some bytes, causing
+            ## the response event to fire
+            ## on our request
+            res.write(str.slice(0, 10000))
+
+          server.listen 6565, =>
+            abort = ->
+              r.abort()
+
+            r = @r({
+              url: "http://localhost:6565/app.js"
+            })
+            ## abort when we get the
+            ## response headers
+            .on "response", abort
+
+    context "event source / server sent events / SSE", ->
+      onRequest = null
+
+      beforeEach ->
+        onRequest = ->
+
+        @setup("http://localhost:5959", {
+          config: {
+            responseTimeout: 50
+          }
+        })
+        .then =>
+          @srv = http.createServer (req, res) =>
+            onRequest(req, res)
+
+            @sseStream = new SseStream(req)
+            @sseStream.pipe(res)
+
+          Promise.promisifyAll(@srv)
+
+          @srv.listenAsync()
+          .then =>
+            @port = @srv.address().port
+
+      afterEach ->
+        @srv.closeAsync()
+
+      it "receives event source messages through the proxy", (done) ->
+        onRequest = (req, res) ->
+          ## when the request is finally
+          ## aborted then we know we've closed
+          ## the connection correctly
+          closed = new Promise (resolve) ->
+            res.on "close", ->
+              resolve()
+
+          aborted = new Promise (resolve) ->
+            req.on "aborted", ->
+              resolve()
+
+          Promise.join(aborted, closed)
+          .then ->
+            done()
+
+        es = new EventSource("http://localhost:#{@port}/sse", {
+          proxy: @proxy
+        })
+
+        es.onopen = =>
+          Promise
+          .delay(100)
+          .then =>
+            @sseStream.write({
+              data: "hey"
+            })
+
+        es.onmessage = (m) =>
+          expect(m.data).to.eq("hey")
+          es.close()
+
+    context "when body should be empty", ->
+      @timeout(1000)
+
+      beforeEach (done) ->
+        @httpSrv = http.createServer (req, res) ->
+          { query } = url.parse(req.url, true)
+
+          if _.has(query, 'chunked')
+            res.setHeader('tranfer-encoding', 'chunked')
+          else
+            res.setHeader('content-length', '0')
+
+          res.writeHead(Number(query.status), {
+            'x-foo': 'bar'
+          })
+          res.end()
+
+        @httpSrv.listen =>
+          @port = @httpSrv.address().port
+
+          @setup("http://localhost:#{@port}")
+          .then(_.ary(done, 0))
+
+      afterEach ->
+        @httpSrv.close()
+
+      [204, 304].forEach (status) ->
+        it "passes through a #{status} response immediately", ->
+          @rp({
+            url: "http://localhost:#{@port}/?status=#{status}"
+            timeout: 100
+          })
+          .then (res) ->
+            expect(res.headers['x-foo']).to.eq('bar')
+            expect(res.statusCode).to.eq(status)
+
+        it "passes through a #{status} response with chunked encoding immediately", ->
+          @rp({
+            url: "http://localhost:#{@port}/?status=#{status}&chunked"
+            timeout: 100
+          })
+          .then (res) ->
+            expect(res.headers['x-foo']).to.eq('bar')
+            expect(res.statusCode).to.eq(status)
 
   context "POST *", ->
     beforeEach ->

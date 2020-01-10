@@ -75,6 +75,18 @@ describe "src/cy/commands/actions/check", ->
         done("should not fire change event")
 
       cy.get(checkbox).check()
+    
+    ## readonly should only be limited to inputs, not checkboxes
+    it "can check readonly checkboxes", ->
+      cy.get('#readonly-checkbox').check().then ($checkbox) ->
+        expect($checkbox).to.be.checked
+
+    it "does not require visibility with force: true", ->
+      checkbox = ":checkbox[name='birds']"
+      $(checkbox).last().hide()
+
+      cy.get(checkbox).check({force: true}).then ($checkbox) ->
+        expect($checkbox).to.be.checked
 
     it "can check a collection", ->
       cy.get("[name=colors]").check().then ($inputs) ->
@@ -188,9 +200,12 @@ describe "src/cy/commands/actions/check", ->
         $("[name=colors][value=blue]").change -> done()
         cy.get("[name=colors]").check("blue")
 
-      it "emits focus event", (done) ->
-        $("[name=colors][value=blue]").focus -> done()
-        cy.get("[name=colors]").check("blue")
+      it "emits focus event", () ->
+        focus = false
+        $("[name=colors][value=blue]").focus -> focus = true
+        cy.get("[name=colors]")
+        .check("blue")
+        .then -> expect(focus).to.eq true
 
     describe "errors", ->
       beforeEach ->
@@ -417,8 +432,8 @@ describe "src/cy/commands/actions/check", ->
       it "passes in coords", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
           lastLog = @lastLog
-          { fromWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
-          expect(lastLog.get("coords")).to.deep.eq(fromWindow)
+          { fromElWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
+          expect(lastLog.get("coords")).to.deep.eq(fromElWindow)
 
       it "ends command when checkbox is already checked", ->
         cy.get("[name=colors][value=blue]").check().check().then ->
@@ -430,13 +445,13 @@ describe "src/cy/commands/actions/check", ->
         cy.get("[name=colors][value=blue]").check().then ($input) ->
           lastLog = @lastLog
 
-          { fromWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
+          { fromElWindow }= Cypress.dom.getElementCoordinatesByPosition($input)
           console = lastLog.invoke("consoleProps")
           expect(console.Command).to.eq "check"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
           expect(console.Elements).to.eq 1
           expect(console.Coords).to.deep.eq(
-            _.pick(fromWindow, "x", "y")
+            _.pick(fromElWindow, "x", "y")
           )
 
       it "#consoleProps when checkbox is already checked", ->
@@ -553,7 +568,7 @@ describe "src/cy/commands/actions/check", ->
         checked = true
 
       cy.get(checkbox).uncheck().then ->
-        expect(checked).to.be.falsed
+        expect(checked).to.be.false
 
     it "can forcibly click even when being covered by another element", (done) ->
       checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prop("checked", true).prependTo($("body"))
@@ -821,13 +836,13 @@ describe "src/cy/commands/actions/check", ->
         cy.get("[name=colors][value=blue]").uncheck().then ($input) ->
           lastLog = @lastLog
 
-          { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
+          { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($input)
           console = lastLog.invoke("consoleProps")
           expect(console.Command).to.eq "uncheck"
           expect(console["Applied To"]).to.eq lastLog.get("$el").get(0)
           expect(console.Elements).to.eq(1)
           expect(console.Coords).to.deep.eq(
-            _.pick(fromWindow, "x", "y")
+            _.pick(fromElWindow, "x", "y")
           )
 
       it "#consoleProps when checkbox is already unchecked", ->

@@ -1,153 +1,127 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
+import path from 'path'
 
 import localData from '../lib/local-data'
 import Spec from './spec-model'
+import Folder from './folder-model'
 
-const ALL_SPECS = '__all'
+const pathSeparatorRe = /[\\\/]/g
+
+export const allSpecsSpec = new Spec({
+  name: 'All Specs',
+  absolute: '__all',
+  relative: '__all',
+  displayName: 'Run all specs',
+})
+
+const formRelativePath = (spec) => {
+  return spec === allSpecsSpec ? spec.relative : path.join(spec.type, spec.name)
+}
+
+const pathsEqual = (path1, path2) => {
+  if (!path1 || !path2) return false
+
+  return path1.replace(pathSeparatorRe, '') === path2.replace(pathSeparatorRe, '')
+}
 
 export class SpecsStore {
-  @observable _specs = []
-  @observable error = null
+  @observable _files = []
+  @observable chosenSpecPath
+  @observable error
   @observable isLoading = false
-  @observable filter = null
-
-  constructor () {
-    this.models = []
-
-    this.allSpecsSpec = new Spec({
-      name: null,
-      path: ALL_SPECS,
-      displayName: 'Run all specs',
-      obj: {
-        name: 'All Specs',
-        relative: null,
-        absolute: null,
-      },
-    })
-  }
+  @observable filter
 
   @computed get specs () {
-    return this._tree(this._specs)
+    return this._tree(this._files)
   }
 
   @action loading (bool) {
     this.isLoading = bool
   }
 
-  @action setSpecs (specs) {
-    this._specs = specs
+  @action setSpecs (specsByType) {
+    this._files = _.flatten(_.map(specsByType, (specs, type) => {
+      return _.map(specs, (spec) => {
+        return _.extend({}, spec, { type })
+      })
+    }))
 
     this.isLoading = false
   }
 
   @action setChosenSpec (spec) {
-    // set all the models to false
-    _
-    .chain(this.models)
-    .concat(this.allSpecsSpec)
-    .invokeMap('setChosen', false)
-    .value()
+    this.chosenSpecPath = spec ? formRelativePath(spec) : null
+  }
 
-    if (spec) {
-      spec.setChosen(true)
-    }
+  @action setChosenSpecByRelativePath (relativePath) {
+    this.chosenSpecPath = relativePath
   }
 
   @action setExpandSpecFolder (spec) {
     spec.setExpanded(!spec.isExpanded)
   }
 
-  @action setFilter (projectId, filter = null) {
-    localData.set(`specsFilter-${projectId}`, filter)
+  @action setFilter (project, filter = null) {
+    if (!filter) return this.clearFilter(project)
+
+    localData.set(this.getSpecsFilterId(project), filter)
 
     this.filter = filter
   }
 
-  @action clearFilter (projectId) {
-    localData.remove(`specsFilter-${projectId}`)
+  @action clearFilter (project) {
+    localData.remove(this.getSpecsFilterId(project))
 
     this.filter = null
   }
 
-  setChosenSpecByRelativePath (relativePath) {
-    // TODO: currently this will always find nothing
-    // because this data is sent from the driver when
-    // a spec first opens. it passes the normalized url
-    // which will no longer match any spec. we need to
-    // change the logic to do this. it's barely worth it though.
-    const found = this.findSpecModelByPath(relativePath)
-
-    if (found) {
-      this.setChosenSpec(found)
-    }
+  isChosen (spec) {
+    return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
   }
 
-  findOrCreateSpec (file, segment) {
-    const spec = new Spec({
-      obj: file, // store the original obj
-      name: file.name,
-      path: file.relative,
-      displayName: segment,
-    })
+  getSpecsFilterId ({ id = '<no-id>', path = '' }) {
+    const shortenedPath = path.replace(/.*cypress/, 'cypress')
 
-    const found = this.findSpecModelByPath(file.relative)
-
-    if (found) {
-      spec.merge(found)
-    }
-
-    return spec
+    return `specsFilter-${id}-${shortenedPath}`
   }
 
-  findSpecModelByPath (path) {
-    return _.find(this.models, { path })
-  }
-
-  getAllSpecsSpec () {
-    return this.allSpecsSpec
-  }
-
-  _tree (specsByType) {
-    let specs = _.flatten(_.map(specsByType, (specs, type) => {
-      return _.map(specs, (spec) => {
-        // add type (unit, integration, etc) to beginning
-        // and  change \\ to / for Windows
-        return _.extend({}, spec, {
-          name: `${type}/${spec.name.replace(/\\/g, '/')}`,
-        })
-      })
-    }))
-
+  _tree (files) {
     if (this.filter) {
-      specs = _.filter(specs, (spec) => {
+      files = _.filter(files, (spec) => {
         return spec.name.toLowerCase().includes(this.filter.toLowerCase())
       })
     }
 
-    const specModels = []
+    const tree = _.reduce(files, (root, file) => {
+      const segments = [file.type].concat(file.name.split(pathSeparatorRe))
+      const segmentsPassed = []
 
-    const tree = _.reduce(specs, (root, file) => {
       let placeholder = root
 
-      const segments = file.name.split('/')
+      _.each(segments, (segment, i) => {
+        segmentsPassed.push(segment)
+        const currentPath = path.join(...segmentsPassed)
+        const isCurrentAFile = i === segments.length - 1
+        const props = { path: currentPath, displayName: segment }
 
-      _.each(segments, (segment) => {
-        let spec = _.find(placeholder, { displayName: segment })
-        if (!spec) {
-          spec = this.findOrCreateSpec(file, segment)
+        let existing = _.find(placeholder, (file) => {
+          return pathsEqual(file.path, currentPath)
+        })
 
-          specModels.push(spec)
-          placeholder.push(spec)
+        if (!existing) {
+          existing = isCurrentAFile ? new Spec(_.extend(file, props)) : new Folder(props)
+
+          placeholder.push(existing)
         }
 
-        placeholder = spec.children
+        if (!isCurrentAFile) {
+          placeholder = existing.children
+        }
       })
 
       return root
     }, [])
-
-    this.models = specModels
 
     return tree
   }

@@ -43,12 +43,12 @@ class OnBoarding extends Component {
             <p>
               We've added some folders and example tests to your project. Try running the tests in the
               <strong onClick={this._openExampleSpec}>
-                <i className='fa fa-folder-o'></i>{' '}
+                <i className='far fa-folder'></i>{' '}
                 {project.integrationExampleName}{' '}
               </strong>
               folder or add your own test files to
               <strong onClick={this._openIntegrationFolder}>
-                <i className='fa fa-folder-o'></i>{' '}
+                <i className='far fa-folder'></i>{' '}
                 cypress/integration
               </strong>.
             </p>
@@ -56,13 +56,13 @@ class OnBoarding extends Component {
               <ul>
                 <li>
                   <span>
-                    <i className='fa fa-folder-open-o'></i>{' '}
+                    <i className='far fa-folder-open'></i>{' '}
                     {project.name}
                   </span>
                   <ul>
                     <li className='app-code'>
                       <span >
-                        <i className='fa fa-folder-o'></i>{' '}
+                        <i className='far fa-folder'></i>{' '}
                         ...
                       </span>
                     </li>
@@ -86,8 +86,10 @@ class OnBoarding extends Component {
     files = _.sortBy(files, 'name')
 
     const notFolders = _.every(files, (file) => !file.children)
+
     if (notFolders && files.length > 3) {
       const numHidden = files.length - 2
+
       files = files.slice(0, 2).concat({ name: `... ${numHidden} more files ...`, more: true })
     }
 
@@ -96,7 +98,7 @@ class OnBoarding extends Component {
         return (
           <li className={cs(className, 'new-item')} key={file.name}>
             <span>
-              <i className='fa fa-folder-open-o'></i>{' '}
+              <i className='far fa-folder-open'></i>{' '}
               {file.name}
             </span>
             <ul>
@@ -104,16 +106,16 @@ class OnBoarding extends Component {
             </ul>
           </li>
         )
-      } else {
-        return (
-          <li className={cs(className, 'new-item', { 'is-more': file.more })} key={file.name}>
-            <span>
-              <i className='fa fa-file-code-o'></i>{' '}
-              {file.name}
-            </span>
-          </li>
-        )
       }
+
+      return (
+        <li className={cs(className, 'new-item', { 'is-more': file.more })} key={file.name}>
+          <span>
+            <i className='far fa-file-code'></i>{' '}
+            {file.name}
+          </span>
+        </li>
+      )
     })
   }
 

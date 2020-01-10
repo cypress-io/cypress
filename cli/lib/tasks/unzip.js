@@ -1,9 +1,10 @@
+const _ = require('lodash')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const cp = require('child_process')
 const os = require('os')
 const yauzl = require('yauzl')
-const debug = require('debug')('cypress:cli')
+const debug = require('debug')('cypress:cli:unzip')
 const extract = require('extract-zip')
 const Promise = require('bluebird')
 const readline = require('readline')
@@ -12,9 +13,12 @@ const { throwFormErrorText, errors } = require('../errors')
 const fs = require('../fs')
 const util = require('../util')
 
+const unzipTools = {
+  extract,
+}
+
 // expose this function for simple testing
 const unzip = ({ zipFilePath, installDir, progress }) => {
-
   debug('unzipping from %s', zipFilePath)
   debug('into', installDir)
 
@@ -22,18 +26,24 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
     throw new Error('Missing zip filename')
   }
 
+  const startTime = Date.now()
+  let yauzlDoneTime = 0
+
   return fs.ensureDirAsync(installDir)
   .then(() => {
     return new Promise((resolve, reject) => {
       return yauzl.open(zipFilePath, (err, zipFile) => {
-        if (err) return reject(err)
-        // debug('zipfile.paths:', zipFile)
-        // zipFile.on('entry', debug)
-        // debug(zipFile.readEntry())
+        yauzlDoneTime = Date.now()
+
+        if (err) {
+          debug('error using yauzl %s', err.message)
+
+          return reject(err)
+        }
+
         const total = zipFile.entryCount
 
         debug('zipFile entries count', total)
-
 
         const started = new Date()
 
@@ -58,8 +68,16 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
         }
 
         const unzipWithNode = () => {
+          debug('unzipping with node.js (slow)')
+
           const endFn = (err) => {
-            if (err) { return reject(err) }
+            if (err) {
+              debug('error %s', err.message)
+
+              return reject(err)
+            }
+
+            debug('node unzip finished')
 
             return resolve()
           }
@@ -69,22 +87,67 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
             onEntry: tick,
           }
 
-          return extract(zipFilePath, opts, endFn)
+          debug('calling Node extract tool %s %o', zipFilePath, opts)
+
+          return unzipTools.extract(zipFilePath, opts, endFn)
         }
 
-        //# we attempt to first unzip with the native osx
-        //# ditto because its less likely to have problems
-        //# with corruption, symlinks, or icons causing failures
-        //# and can handle resource forks
-        //# http://automatica.com.au/2011/02/unzip-mac-os-x-zip-in-terminal/
+        const unzipFallback = _.once(unzipWithNode)
+
+        const unzipWithUnzipTool = () => {
+          debug('unzipping via `unzip`')
+
+          const inflatingRe = /inflating:/
+
+          const sp = cp.spawn('unzip', ['-o', zipFilePath, '-d', installDir])
+
+          sp.on('error', (err) => {
+            debug('unzip tool error: %s', err.message)
+            unzipFallback()
+          })
+
+          sp.on('close', (code) => {
+            debug('unzip tool close with code %d', code)
+            if (code === 0) {
+              percent = 100
+              notify(percent)
+
+              return resolve()
+            }
+
+            debug('`unzip` failed %o', { code })
+
+            return unzipFallback()
+          })
+
+          sp.stdout.on('data', (data) => {
+            if (inflatingRe.test(data)) {
+              return tick()
+            }
+          })
+
+          sp.stderr.on('data', (data) => {
+            debug('`unzip` stderr %s', data)
+          })
+        }
+
+        // we attempt to first unzip with the native osx
+        // ditto because its less likely to have problems
+        // with corruption, symlinks, or icons causing failures
+        // and can handle resource forks
+        // http://automatica.com.au/2011/02/unzip-mac-os-x-zip-in-terminal/
         const unzipWithOsx = () => {
+          debug('unzipping via `ditto`')
+
           const copyingFileRe = /^copying file/
 
           const sp = cp.spawn('ditto', ['-xkV', zipFilePath, installDir])
-          sp.on('error', () =>
+
           // f-it just unzip with node
-            unzipWithNode()
-          )
+          sp.on('error', (err) => {
+            debug(err.message)
+            unzipFallback()
+          })
 
           sp.on('close', (code) => {
             if (code === 0) {
@@ -96,7 +159,9 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
               return resolve()
             }
 
-            return unzipWithNode()
+            debug('`ditto` failed %o', { code })
+
+            return unzipFallback()
           })
 
           return readline.createInterface({
@@ -113,6 +178,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
           case 'darwin':
             return unzipWithOsx()
           case 'linux':
+            return unzipWithUnzipTool()
           case 'win32':
             return unzipWithNode()
           default:
@@ -120,17 +186,28 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
         }
       })
     })
+    .tap(() => {
+      debug('unzip completed %o', {
+        yauzlMs: yauzlDoneTime - startTime,
+        unzipMs: Date.now() - yauzlDoneTime,
+      })
+    })
   })
 }
 
 const start = ({ zipFilePath, installDir, progress }) => {
   la(is.unemptyString(installDir), 'missing installDir')
-  if (!progress) progress = { onProgress: () => ({}) }
+  if (!progress) {
+    progress = { onProgress: () => {
+      return {}
+    } }
+  }
 
   return fs.pathExists(installDir)
   .then((exists) => {
     if (exists) {
       debug('removing existing unzipped binary', installDir)
+
       return fs.removeAsync(installDir)
     }
   })
@@ -142,4 +219,8 @@ const start = ({ zipFilePath, installDir, progress }) => {
 
 module.exports = {
   start,
+  utils: {
+    unzip,
+    unzipTools,
+  },
 }

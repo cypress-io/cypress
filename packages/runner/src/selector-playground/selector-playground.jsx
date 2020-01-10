@@ -45,8 +45,8 @@ class SelectorPlayground extends Component {
               className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
               onClick={this._toggleEnablingSelectorPlayground}>
               <span className='fa-stack'>
-                <i className='fa fa-square-o fa-stack-1x'></i>
-                <i className='fa fa-mouse-pointer fa-stack-1x'></i>
+                <i className='far fa-square fa-stack-1x'></i>
+                <i className='fas fa-mouse-pointer fa-stack-1x'></i>
               </span>
             </button>
           </Tooltip>
@@ -67,16 +67,16 @@ class SelectorPlayground extends Component {
             /><span>{'\''}</span>
             <span>)</span>
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-            <Tooltip title={model.infoHelp}>
+            <Tooltip title={model.infoHelp || ''}>
               <span className='info num-elements'>
                 {model.isValid ?
                   model.numElements :
-                  <i className='fa fa-exclamation-triangle'></i>
+                  <i className='fas fa-exclamation-triangle'></i>
                 }
               </span>
             </Tooltip>
           </div>
-          <Tooltip title={this.copyText} updateCue={`${selectorText}${this.copyText}`}>
+          <Tooltip title={this.copyText || ''} updateCue={`${selectorText}${this.copyText}`}>
             <button
               ref={(node) => this._copyButton = node}
               className='copy-to-clipboard'
@@ -84,10 +84,10 @@ class SelectorPlayground extends Component {
               disabled={!model.numElements || !model.isValid}
               onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
             >
-              <i className='fa fa-copy' />
+              <i className='far fa-copy' />
             </button>
           </Tooltip>
-          <Tooltip title={this.printText} updateCue={`${selectorText}${this.printText}`}>
+          <Tooltip title={this.printText || ''} updateCue={`${selectorText}${this.printText}`}>
             <button
               ref={(node) => this._printButton = node}
               className='print-to-console'
@@ -95,12 +95,12 @@ class SelectorPlayground extends Component {
               disabled={!model.numElements || !model.isValid}
               onMouseOut={fixMouseOut(this._resetPrintText, () => this._printButton)}
             >
-              <i className='fa fa-terminal' />
+              <i className='fas fa-terminal' />
             </button>
           </Tooltip>
         </div>
-        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank" rel="noopener noreferrer">
-          <i className='fa fa-question-circle'></i>{' '}
+        <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank">
+          <i className='fas fa-question-circle'></i>{' '}
           Learn more
         </a>
         <button className='close' onClick={this._togglePlaygroundOpen}>x</button>
@@ -123,6 +123,7 @@ class SelectorPlayground extends Component {
       if (this.props.model.isEnabled) {
         this._focusAndSelectInputText()
       }
+
       this._previousIsEnabled = this.props.model.isEnabled
       this._previousMethod = this.props.model.method
     }
@@ -141,7 +142,7 @@ class SelectorPlayground extends Component {
         'is-showing': this.showingMethodPicker,
       })}>
         <button onClick={this._toggleMethodPicker}>
-          <i className='fa fa-caret-down'></i>{' '}
+          <i className='fas fa-caret-down'></i>{' '}
           cy.{model.method}
         </button>
         <div className='method-picker'>
@@ -186,6 +187,7 @@ class SelectorPlayground extends Component {
     try {
       this.refs.copyText.select()
       const successful = document.execCommand('copy')
+
       this._setCopyText(successful ? 'Copied!' : 'Oops, unable to copy')
     } catch (err) {
       this._setCopyText('Oops, unable to copy')
@@ -223,6 +225,7 @@ class SelectorPlayground extends Component {
 
   _updateSelector = (e) => {
     const { model } = this.props
+
     model.setSelector(e.target.value)
     model.setShowingHighlight(true)
   }

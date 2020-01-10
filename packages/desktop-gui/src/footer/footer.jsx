@@ -9,7 +9,7 @@ export default class Footer extends Component {
       <footer className='footer'>
         <div className='container-fluid'>
           <p className='text-center'>
-            Beta Version {appStore.displayVersion} |{' '}
+            Version {appStore.displayVersion} |{' '}
             <a onClick={this._openChangelog} href='#'>Changelog</a>
           </p>
         </div>
@@ -19,6 +19,7 @@ export default class Footer extends Component {
 
   _openChangelog (e) {
     e.preventDefault()
+
     return ipc.externalOpen('https://on.cypress.io/changelog')
   }
 }

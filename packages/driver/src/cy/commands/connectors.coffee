@@ -1,5 +1,4 @@
 _ = require("lodash")
-$ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../../dom")
@@ -18,6 +17,21 @@ returnFalseIfThenable = (key, args...) ->
     ## return false then ensuring the command is not queued
     args[0]()
     return false
+
+primitiveToObject = (memo) ->
+  switch
+    when _.isString(memo)
+      new String(memo)
+    when _.isNumber(memo)
+      new Number(memo)
+    else
+      memo
+
+getFormattedElement = ($el) ->
+  if $dom.isElement($el)
+    $dom.getElements($el)
+  else
+    $el
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   ## thens can return more "thenables" which are not resolved
@@ -121,131 +135,231 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       }
     .finally(cleanup)
 
-  invokeFn = (subject, fn, args...) ->
-    options = {}
+  invokeItsFn = (subject, str, options, args...) ->
+    return invokeBaseFn(options or { log: true }, subject, str, args...)
 
-    getMessage = ->
-      if name is "invoke"
-        ".#{fn}(" + $utils.stringify(args) + ")"
-      else
-        ".#{fn}"
+  invokeFn = (subject, optionsOrStr, args...) ->
+    optionsPassed = _.isObject(optionsOrStr) and !_.isFunction(optionsOrStr)
+    options = null 
+    str = null
+
+    if not optionsPassed
+      str = optionsOrStr
+      options = { log: true }
+    else
+      options = optionsOrStr
+      if args.length > 0
+        str = args[0]
+        args = args.slice(1)
+
+    return invokeBaseFn(options, subject, str, args...)
+
+  invokeBaseFn = (options, subject, str, args...) ->
 
     ## name could be invoke or its!
     name = state("current").get("name")
 
+    isCmdIts = name is "its"
+    isCmdInvoke = name is "invoke"
+
+    getMessage = ->
+      if isCmdIts
+        return ".#{str}"
+
+      return ".#{str}(" + $utils.stringify(args) + ")"
+
     message = getMessage()
 
-    options._log = Cypress.log
-      message: message
-      $el: if $dom.isElement(subject) then subject else null
-      consoleProps: ->
-        Subject: subject
+    traversalErr = null
 
-    if not _.isString(fn)
-      $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
+    if options.log
+      options._log = Cypress.log
+        message: message
+        $el: if $dom.isElement(subject) then subject else null
+        consoleProps: ->
+          Subject: subject
+
+    if not str
+      $utils.throwErrByPath("invoke_its.null_or_undefined_property_name", {
+        onFail: options._log
+        args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
+      })
+
+    if not _.isString(str) and not _.isNumber(str)
+      $utils.throwErrByPath("invoke_its.invalid_prop_name_arg", {
+        onFail: options._log
+        args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
+      })
+
+    if not _.isObject(options) or _.isFunction(options)
+      $utils.throwErrByPath("invoke_its.invalid_options_arg", {
         onFail: options._log
         args: { cmd: name }
       })
 
-    if name is "its" and args.length > 0
-      $utils.throwErrByPath("invoke_its.invalid_num_of_args", {
-        onFail: options._log
+    if isCmdIts and args and args.length > 0	
+      $utils.throwErrByPath("invoke_its.invalid_num_of_args", {	
+        onFail: options._log	
         args: { cmd: name }
       })
 
-    fail = (prop) ->
-      $utils.throwErrByPath("invoke_its.invalid_property", {
+    ## TODO: use the new error utils that are part of
+    ## the error message enhancements PR
+    propertyNotOnSubjectErr = (prop) ->
+      $utils.cypressErr(
+        $utils.errMessageByPath("invoke_its.nonexistent_prop", {
+          prop,
+          cmd: name
+        })
+      )
+
+    propertyValueNullOrUndefinedErr = (prop, value) ->
+      errMessagePath = if isCmdIts then "its" else "invoke"
+
+      $utils.cypressErr(
+        $utils.errMessageByPath("#{errMessagePath}.null_or_undefined_prop_value", {
+          prop,
+          value,
+          cmd: name
+        })
+      )
+
+    subjectNullOrUndefinedErr = (prop, value) ->
+      errMessagePath = if isCmdIts then "its" else "invoke"
+
+      $utils.cypressErr(
+        $utils.errMessageByPath("#{errMessagePath}.subject_null_or_undefined", {
+          prop,
+          value,
+          cmd: name
+        })
+      )
+
+    propertyNotOnPreviousNullOrUndefinedValueErr = (prop, value, previousProp) ->
+      $utils.cypressErr(
+        $utils.errMessageByPath("invoke_its.previous_prop_null_or_undefined", {
+          prop,
+          value,
+          previousProp,
+          cmd: name
+        })
+      )
+
+    traverseObjectAtPath = (acc, pathsArray, index = 0) ->
+      ## traverse at this depth
+      prop = pathsArray[index]
+      previousProp = pathsArray[index - 1]
+      valIsNullOrUndefined = _.isNil(acc)
+
+      ## if we're attempting to tunnel into
+      ## a null or undefined object...
+      if prop and valIsNullOrUndefined
+        if index is 0
+          ## give an error stating the current subject is nil
+          traversalErr = subjectNullOrUndefinedErr(prop, acc)
+        else
+          ## else refer to the previous property so users know which prop
+          ## caused us to hit this dead end
+          traversalErr = propertyNotOnPreviousNullOrUndefinedValueErr(prop, acc, previousProp)
+
+        return acc
+
+      ## if we have no more properties to traverse
+      if not prop
+        if valIsNullOrUndefined
+          ## set traversal error that the final value is null or undefined
+          traversalErr = propertyValueNullOrUndefinedErr(previousProp, acc)
+
+        ## finally return the reduced traversed accumulator here
+        return acc
+
+      ## attempt to lookup this property on the acc
+      ## if our property does not exist then allow
+      ## undefined to pass through but set the traversalErr
+      ## since if we don't have any assertions we want to
+      ## provide a very specific error message and not the
+      ## generic existence one
+      if (prop not of primitiveToObject(acc))
+        traversalErr = propertyNotOnSubjectErr(prop)
+
+        return undefined
+
+      ## if we succeeded then continue to traverse
+      return traverseObjectAtPath(acc[prop], pathsArray, index + 1)
+
+    getSettledValue = (value, subject, propAtLastPath) ->
+      if isCmdIts
+        return value
+
+      if _.isFunction(value)
+        return value.apply(subject, args)
+
+      ## TODO: this logic should likely be part of
+      ## traverseObjectAtPath(...) rather be further
+      ## away from the handling of traversals. this
+      ## causes us to need to separately handle
+      ## the 'propAtLastPath' argument since we're
+      ## outside of the reduced accumulator.
+
+      ## if we're not a function and we have a traversal
+      ## error then throw it now - since that provide a
+      ## more specific error regarding non-existant
+      ## properties or null or undefined values
+      if traversalErr
+        throw traversalErr
+
+      ## else throw that prop isn't a function
+      $utils.throwErrByPath("invoke.prop_not_a_function", {
         onFail: options._log
-        args: { prop, cmd: name }
+        args: {
+          prop: propAtLastPath
+          type: $utils.stringifyFriendlyTypeof(value)
+        }
       })
-
-    failOnPreviousNullOrUndefinedValue = (previousProp, currentProp, value) ->
-      $utils.throwErrByPath("invoke_its.previous_prop_nonexistent", {
-        args: { previousProp, currentProp, value, cmd: name }
-      })
-
-    failOnCurrentNullOrUndefinedValue = (prop, value) ->
-      $utils.throwErrByPath("invoke_its.current_prop_nonexistent", {
-        args: { prop, value, cmd: name }
-      })
-
-    getReducedProp = (str, subject) ->
-      getValue = (memo, prop) ->
-        switch
-          when _.isString(memo)
-            new String(memo)
-          when _.isNumber(memo)
-            new Number(memo)
-          else
-            memo
-
-      _.reduce str.split("."), (memo, prop, index, array) ->
-
-        ## if the property does not EXIST on the subject
-        ## then throw a specific error message
-        try
-          fail(prop) if prop not of getValue(memo, prop)
-        catch e
-          ## if the value is null or undefined then it does
-          ## not have properties which causes us to throw
-          ## an even more particular error
-          if _.isNull(memo) or _.isUndefined(memo)
-            if index > 0
-              failOnPreviousNullOrUndefinedValue(array[index - 1], prop, memo)
-            else
-              failOnCurrentNullOrUndefinedValue(prop, memo)
-          else
-            throw e
-        return memo[prop]
-
-      , subject
 
     getValue = ->
+      ## reset this on each go around so previous errors
+      ## don't leak into new failures or upcoming assertion errors
+      traversalErr = null
+
       remoteSubject = cy.getRemotejQueryInstance(subject)
 
       actualSubject = remoteSubject or subject
 
-      prop = getReducedProp(fn, actualSubject)
+      if _.isString(str)
+        paths = str.split(".")
+      else
+        paths = [str]
 
-      invoke = ->
-        switch name
-          when "its"
-            prop
-          when "invoke"
-            if _.isFunction(prop)
-              prop.apply(actualSubject, args)
-            else
-              $utils.throwErrByPath("invoke.invalid_type", {
-                onFail: options._log
-                args: { prop: fn }
-              })
+      prop = traverseObjectAtPath(actualSubject, paths)
 
-      getFormattedElement = ($el) ->
-        if $dom.isElement($el)
-          $dom.getElements($el)
-        else
-          $el
-
-      value = invoke()
+      value = getSettledValue(prop, actualSubject, _.last(paths))
 
       if options._log
-        options._log.set
+        options._log.set({
           consoleProps: ->
             obj = {}
 
-            if name is "invoke"
+            if isCmdInvoke
               obj["Function"] = message
               obj["With Arguments"] = args if args.length
             else
               obj["Property"] = message
 
-            _.extend obj,
-              On:       getFormattedElement(actualSubject)
+            _.extend(obj, {
+              Subject: getFormattedElement(actualSubject)
               Yielded: getFormattedElement(value)
+            })
 
-            obj
+            return obj
+        })
 
       return value
+
+    ## by default we want to only add the default assertion
+    ## of ensuring existence for cy.its() not cy.invoke() because
+    ## invoking a function can legitimately return null or undefined
+    ensureExistenceFor = if isCmdIts then "subject" else false
 
     ## wrap retrying into its own
     ## separate function
@@ -257,9 +371,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         cy.retry(retryValue, options)
 
     do resolveValue = ->
-      Promise.try(retryValue).then (value) ->
+      Promise
+      .try(retryValue)
+      .then (value) ->
         cy.verifyUpcomingAssertions(value, options, {
+          ensureExistenceFor
           onRetry: resolveValue
+          onFail: (err, isDefaultAssertionErr, assertionLogs) ->
+            ## if we failed our upcoming assertions and also
+            ## exited early out of getting the value of our
+            ## subject then reset the error to this one
+            if traversalErr
+              return options.error = traversalErr
         })
 
   Commands.addAll({ prevSubject: true }, {
@@ -320,7 +443,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return if endEarly
 
         if $dom.isElement(el)
-          el = $(el)
+          el = $dom.wrap(el)
 
         callback = ->
           ret = fn.call(ctx, el, index, subject)
@@ -357,9 +480,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## return values are undefined.  prob should rethink
     ## this and investigate why that is the default behavior
     ## of child commands
-    invoke: ->
-      invokeFn.apply(@, arguments)
+    invoke: (subject, optionsOrStr, args...) ->
+      invokeFn.apply(@, [subject, optionsOrStr, args...])
 
-    its: ->
-      invokeFn.apply(@, arguments)
+    its: (subject, str, options, args...) ->
+      invokeItsFn.apply(@, [subject, str, options, args...])
   })

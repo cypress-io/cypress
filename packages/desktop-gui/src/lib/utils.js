@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import gravatar from 'gravatar'
 import duration from '../../../server/lib/util/duration'
 
@@ -11,67 +12,102 @@ const osIconLookup = {
 
 const browserIconLookup = {
   chrome: 'chrome',
-  Electron: 'chrome',
+  electron: 'chrome',
   firefox: 'firefox',
   safari: 'safari',
 }
 
-module.exports = {
-  durationFormatted: duration.format,
+export const durationFormatted = duration.format
 
-  osIcon: (osName) => {
-    if (!osName) return ''
+export const osIcon = (osName) => {
+  if (!osName) return ''
 
-    return osIconLookup[osName] || 'desktop'
-  },
+  return osIconLookup[osName] || 'desktop'
+}
 
-  browserIcon: (browserName) => {
-    if (!browserName) return ''
+export const browserIcon = (browserName) => {
+  if (!browserName) return ''
 
-    return browserIconLookup[browserName] || 'globe'
-  },
+  return browserIconLookup[_.lowerCase(browserName)] || 'globe'
+}
 
-  browserVersionFormatted: (browserVersion) => {
-    if (!browserVersion) return ''
+export const browserNameFormatted = (browserName) => {
+  if (!browserName) return ''
 
-    // looks like: '53.0.2785.143'
-    return browserVersion.split('.')[0]
-  },
+  return _.capitalize(browserName)
+}
 
-  gravatarUrl: (email) => {
-    let opts = { size: '13', default: 'mm' }
+export const browserVersionFormatted = (browserVersion) => {
+  if (!browserVersion) return ''
 
-    if (!email) { opts.forcedefault = 'y' }
+  // looks like: '53.0.2785.143'
+  return browserVersion.split('.')[0]
+}
 
-    return gravatar.url(email, opts, true)
-  },
+export const gravatarUrl = (email) => {
+  let opts = { size: '13', default: 'mm' }
 
-  getStatusIcon: (status) => {
-    switch (status) {
-      case 'errored':
-        return 'exclamation-triangle'
-      case 'failed':
-        return 'exclamation-circle'
-      case 'noTests':
-        return 'ban'
-      case 'passed':
-        return 'check-circle'
-      case 'running':
-        return 'refresh fa-spin'
-      case 'overLimit':
-        return 'exclamation-triangle'
-      case 'timedOut':
-        return 'hourglass-end'
-      case null:
-        return 'terminal'
-      default:
-        return ''
+  if (!email) {
+    opts.forcedefault = 'y'
+  }
+
+  return gravatar.url(email, opts, true)
+}
+
+export const getStatusIcon = (status) => {
+  switch (status) {
+    case 'errored':
+      return 'exclamation-triangle'
+    case 'failed':
+      return 'exclamation-circle'
+    case 'noTests':
+      return 'ban'
+    case 'passed':
+      return 'check-circle'
+    case 'running':
+      return 'sync-alt fa-spin'
+    case 'overLimit':
+      return 'exclamation-triangle'
+    case 'timedOut':
+      return 'hourglass-end'
+    case null:
+      return 'terminal'
+    default:
+      return ''
+  }
+}
+
+export function stripLeadingCyDirs (spec) {
+  if (!spec) return null
+
+  // remove leading 'cypress/integration' from spec
+  return spec.replace(cyDirRegex, '')
+}
+
+export function stripSharedDirsFromDir2 (dir1, dir2, osName) {
+  const sep = osName === 'win32' ? '\\' : '/'
+
+  const arr1 = dir1.split(sep)
+  const arr2 = dir2.split(sep)
+
+  let found = false
+
+  return _
+  .chain(arr2)
+  .transform((memo, segment, index) => {
+    const segmentsFromEnd1 = arr1.slice(-(index + 1))
+    const segmentsFromBeg2 = arr2.slice(0, index + 1)
+
+    if (_.isEqual(segmentsFromBeg2, segmentsFromEnd1)) {
+      return found = arr2.slice(index + 1)
     }
-  },
 
-  stripLeadingCyDirs (spec) {
-    if (!spec) return null
-    // remove leading 'cypress/integration' from spec
-    return spec.replace(cyDirRegex, '')
-  },
+    if (found) {
+      memo.push(...found)
+
+      return false
+    }
+  })
+  .join(sep)
+  .value()
 }

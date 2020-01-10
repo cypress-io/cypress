@@ -25,6 +25,8 @@ function preparePackageForNpmRelease (json) {
   // to prepare it for releasing to npm
   delete json.devDependencies
   delete json['private']
+  // no need to include "nyc" code coverage settings
+  delete json.nyc
 
   _.extend(json, {
     version,
@@ -51,7 +53,8 @@ function makeUserPackageFile () {
   .then((json) => {
     return fs.outputJsonAsync(packageJsonDest, json, {
       spaces: 2,
-    }).then(() => json) // returning package json object makes it easy to test
+    })
+    .return(json) // returning package json object makes it easy to test
   })
 }
 

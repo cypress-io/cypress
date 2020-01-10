@@ -1,0 +1,35 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "automerge": true,
+  "major": {
+    "automerge": false
+  },
+  "minor": {
+    "automerge": false
+  },
+  "rangeStrategy": "pin",
+  "packageRules": [
+    {
+      "packagePatterns": "^@types/",
+      "groupName": "@types",
+      "schedule": "before 3am on Monday"
+    }
+  ],
+  "separateMultipleMajor": true,
+  "labels": [
+    "type: dependencies",
+    "renovate"
+  ],
+  "commitMessage": "{{semanticPrefix}}Update {{depName}} to {{newVersion}} 🌟",
+  "prTitle": "{{semanticPrefix}}{{#if isPin}}Pin{{else}}Update{{/if}} dependency {{depName}} to version {{#if isRange}}{{newVersion}}{{else}}{{#if isMajor}}{{newVersionMajor}}.x{{else}}{{newVersion}}{{/if}}{{/if}} 🌟",
+  "prHourlyLimit": 1,
+  "prConcurrentLimit": 1,
+  "updateNotScheduled": false,
+  "timezone": "America/New_York",
+  "schedule": [
+    "before 3am on the first day of the month"
+  ],
+  "masterIssue": true
+}

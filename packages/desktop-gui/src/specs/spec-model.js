@@ -1,39 +1,28 @@
 import _ from 'lodash'
-import { action, observable } from 'mobx'
+import { computed, observable } from 'mobx'
 
 export default class Spec {
-  @observable name
   @observable path
+  @observable name
+  @observable absolute
   @observable displayName
+  @observable type
   @observable isChosen = false
-  @observable isExpanded = false
-  @observable children = []
 
-  constructor ({ obj, name, displayName, path }) {
-    this.obj = obj
-    this.name = name
+  constructor ({ path, name, absolute, relative, displayName, type }) {
     this.path = path
-    this.isExpanded = true
+    this.name = name
+    this.absolute = absolute
+    this.relative = relative
     this.displayName = displayName
+    this.type = type
   }
 
-  getStateProps () {
-    return _.pick(this, 'isChosen', 'isExpanded')
+  @computed get hasChildren () {
+    return false
   }
 
-  hasChildren () {
-    return this.children && this.children.length
-  }
-
-  @action merge (other) {
-    _.extend(this, other.getStateProps())
-  }
-
-  @action setChosen (isChosen) {
-    this.isChosen = isChosen
-  }
-
-  @action setExpanded (isExpanded) {
-    this.isExpanded = isExpanded
+  @computed get file () {
+    return _.pick(this, 'name', 'absolute', 'relative')
   }
 }

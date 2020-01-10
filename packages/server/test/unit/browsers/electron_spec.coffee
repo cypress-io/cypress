@@ -22,6 +22,7 @@ describe "lib/browsers/electron", ->
     }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
+      isDestroyed: -> false
       close: sinon.stub()
       loadURL: sinon.stub()
       focusOnWebView: sinon.stub()
@@ -32,6 +33,11 @@ describe "lib/browsers/electron", ->
             set: sinon.stub()
             remove: sinon.stub()
           }
+        }
+        "debugger": {
+          attach: sinon.stub().returns()
+          sendCommand: sinon.stub().resolves()
+          on: sinon.stub().returns()
         }
       }
     })
@@ -54,7 +60,7 @@ describe "lib/browsers/electron", ->
 
         options = Windows.defaults(options)
 
-        keys = _.keys(electron._render.firstCall.args[2])
+        keys = _.keys(electron._render.firstCall.args[3])
 
         expect(_.keys(options)).to.deep.eq(keys)
 
@@ -70,21 +76,13 @@ describe "lib/browsers/electron", ->
         expect(obj.kill).to.be.a("function")
         expect(obj.removeAllListeners).to.be.a("function")
 
-    it "registers onRequest automation middleware", ->
-      sinon.spy(@automation, "use")
-
-      electron.open("electron", @url, @options, @automation)
-      .then =>
-        expect(@automation.use).to.be.called
-        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
-
     it "is noop when before:browser:launch yields null", ->
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
       electron.open("electron", @url, @options, @automation)
       .then =>
-        options = electron._render.firstCall.args[2]
+        options = electron._render.firstCall.args[3]
 
         expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
 
@@ -95,21 +93,28 @@ describe "lib/browsers/electron", ->
 
       electron.open("electron", @url, @options, @automation)
       .then =>
-        options = electron._render.firstCall.args[2]
+        options = electron._render.firstCall.args[3]
 
         expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
 
   context "._launch", ->
     beforeEach ->
       sinon.stub(menu, "set")
+      sinon.stub(electron, "_attachDebugger").resolves()
       sinon.stub(electron, "_clearCache").resolves()
       sinon.stub(electron, "_setProxy").resolves()
       sinon.stub(electron, "_setUserAgent")
 
-    it "sets dev tools in menu", ->
-      electron._launch(@win, @url, @options)
+    it "sets menu.set whether or not its in headless mode", ->
+      electron._launch(@win, @url, { show: true })
       .then ->
         expect(menu.set).to.be.calledWith({withDevTools: true})
+      .then =>
+        menu.set.reset()
+
+        electron._launch(@win, @url, { show: false })
+      .then ->
+        expect(menu.set).not.to.be.called
 
     it "sets user agent if options.userAgent", ->
       electron._launch(@win, @url, @options)
@@ -151,10 +156,18 @@ describe "lib/browsers/electron", ->
       .returns(@newWin)
 
     it "creates window instance and calls launch with window", ->
-      electron._render(@url, @options.projectRoot, @options)
+      electron._render(@url, @options.projectRoot, @automation, @options)
       .then =>
         expect(Windows.create).to.be.calledWith(@options.projectRoot, @options)
         expect(electron._launch).to.be.calledWith(@newWin, @url, @options)
+
+    it "registers onRequest automation middleware", ->
+      sinon.spy(@automation, "use")
+
+      electron._render(@url, @options.projectRoot, @automation, @options)
+      .then =>
+        expect(@automation.use).to.be.called
+        expect(@automation.use.lastCall.args[0].onRequest).to.be.a("function")
 
   context "._defaultOptions", ->
     beforeEach ->
@@ -198,9 +211,15 @@ describe "lib/browsers/electron", ->
       })
 
     it ".onFocus", ->
-      opts = electron._defaultOptions("/foo", @state, @options)
+      opts = electron._defaultOptions("/foo", @state, { show: true })
       opts.onFocus()
       expect(menu.set).to.be.calledWith({withDevTools: true})
+
+      menu.set.reset()
+
+      opts = electron._defaultOptions("/foo", @state, { show: false })
+      opts.onFocus()
+      expect(menu.set).not.to.be.called
 
     describe ".onNewWindow", ->
       beforeEach ->
@@ -329,7 +348,7 @@ describe "lib/browsers/electron", ->
     it "sets proxy rules for webContents", ->
       webContents = {
         session: {
-          setProxy: sinon.stub().yieldsAsync()
+          setProxy: sinon.stub().resolves()
         }
       }
 
@@ -337,4 +356,5 @@ describe "lib/browsers/electron", ->
       .then ->
         expect(webContents.session.setProxy).to.be.calledWith({
           proxyRules: "proxy rules"
+          proxyBypassRules: "<-loopback>"
         })

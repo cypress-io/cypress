@@ -1,1 +1,1 @@
-export defalt "foo"
+export default {

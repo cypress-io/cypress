@@ -34,8 +34,8 @@ class Default extends Component {
             onDrop={this._drop}
           >
             <span className="fa-stack fa-lg">
-              <i className="fa fa-folder fa-stack-2x"></i>
-              <i className="fa fa-plus fa-stack-1x"></i>
+              <i className="fas fa-folder fa-stack-2x"></i>
+              <i className="fas fa-plus fa-stack-1x"></i>
             </span>
             <p>Drag your project here or <a href="#" onClick={this._selectProject}>select manually</a>.</p>
           </div>
@@ -51,7 +51,7 @@ class Default extends Component {
     return (
       <div className='local-install-notice alert alert-info alert-dismissible'>
         <p className='text-center'>
-          <i className='fa fa-info-circle'></i>{' '}
+          <i className='fas fa-info-circle'></i>{' '}
           We recommend versioning Cypress per project and{' '}
           <a onClick={this._openHelp} className='helper-docs-link'>
             installing it via <span className='mono'>npm</span>
@@ -74,7 +74,7 @@ class Default extends Component {
   _selectProject = (e) => {
     e.preventDefault()
     ipc.showDirectoryDialog().then((path) => {
-      if (!path) return // user cancelled
+      if (!path) return // user canceled
 
       return this._addProject(path)
     })
@@ -92,11 +92,13 @@ class Default extends Component {
 
   _dragover = () => {
     this._setDragging(true)
+
     return false
   }
 
   _dragleave = () => {
     this._setDragging(false)
+
     return false
   }
 
@@ -105,6 +107,7 @@ class Default extends Component {
     this._setDragging(false)
 
     const file = _.get(e, 'dataTransfer.files[0]')
+
     if (!file) return false
 
     this._addProject(file.path)
@@ -118,6 +121,7 @@ class Default extends Component {
 
   _nope (e) {
     e.preventDefault()
+
     return false
   }
 

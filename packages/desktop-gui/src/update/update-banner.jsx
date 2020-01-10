@@ -33,10 +33,10 @@ class UpdateBanner extends Component {
     document.getElementsByTagName('html')[0].classList.add('has-updates')
 
     return (
-      <div id='updates-available'>
+      <div className='updates-available'>
         New updates are available
         <strong onClick={() => this._toggleModal(true)}>
-          <i className='fa fa-download'></i>{' '}
+          <i className='fas fa-download'></i>{' '}
           Update
         </strong>
         <BootstrapModal
@@ -46,7 +46,7 @@ class UpdateBanner extends Component {
         >
           <div className='update-modal modal-body os-dialog'>
             <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
-            <h4><i className='fa fa-download'></i> Update Available</h4>
+            <h4><i className='fas fa-download'></i> Update Available</h4>
             <p>
               <a href='#' onClick={this._openChangelog}><strong>Version {appStore.newVersion}</strong></a> is now available (currently running <strong>Version {appStore.displayVersion}</strong>)
             </p>
@@ -65,7 +65,7 @@ class UpdateBanner extends Component {
         <ol>
           <li>
             <span>
-              <a href='#' onClick={this._openDownload}><i className='fa fa-download'></i> Download the new version.</a>
+              <a href='#' onClick={this._openDownload}><i className='fas fa-download'></i> Download the new version.</a>
             </span>
           </li>
           <li>
@@ -76,21 +76,24 @@ class UpdateBanner extends Component {
           </li>
         </ol>
       )
-    } else {
-      return (
-        <ol>
-          <li>
-            <span>Quit this app.</span>
-          </li>
-          <li>
-            <span>Run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
-          </li>
-          <li>
-            <span>Run <a href='#' onClick={this._openCyOpenDoc}><code>node_modules/.bin/cypress open</code></a> to open the new version.</span>
-          </li>
-        </ol>
-      )
     }
+
+    return (
+      <ol>
+        <li>
+          <span>Quit this app.</span>
+        </li>
+        <li>
+          <span>If using npm, run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
+          <br/>
+          <span>If using yarn, run <code>yarn add cypress@{appStore.newVersion}</code></span>
+
+        </li>
+        <li>
+          <span>Run <a href='#' onClick={this._openCyOpenDoc}><code>node_modules/.bin/cypress open</code></a> to open the new version.</span>
+        </li>
+      </ol>
+    )
   }
 
   _checkForUpdate () {

@@ -1,5 +1,7 @@
 {
+  "projectId": "ypt4pf",
   "viewportWidth": 400,
   "viewportHeight": 450,
-  "supportFile": false
+  "supportFile": false,
+  "pluginFile": false
 }

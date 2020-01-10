@@ -2,9 +2,11 @@ require('../spec_helper')
 
 const os = require('os')
 const tty = require('tty')
-const snapshot = require('snap-shot-it')
+const snapshot = require('../support/snapshot')
 const supportsColor = require('supports-color')
 const proxyquire = require('proxyquire')
+const hasha = require('hasha')
+const la = require('lazy-ass')
 
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
@@ -13,6 +15,39 @@ describe('util', () => {
   beforeEach(() => {
     sinon.stub(process, 'exit')
     sinon.stub(logger, 'error')
+  })
+
+  context('.isBrokenGtkDisplay', () => {
+    it('detects only GTK message', () => {
+      os.platform.returns('linux')
+      const text = '[some noise here] Gtk: cannot open display: 99'
+
+      expect(util.isBrokenGtkDisplay(text)).to.be.true
+      // and not for the other messages
+      expect(util.isBrokenGtkDisplay('display was set incorrectly')).to.be.false
+    })
+  })
+
+  context('.getGitHubIssueUrl', () => {
+    it('returls url for issue number', () => {
+      const url = util.getGitHubIssueUrl(4034)
+
+      expect(url).to.equal('https://github.com/cypress-io/cypress/issues/4034')
+    })
+
+    it('throws for anything but a positive integer', () => {
+      expect(() => {
+        return util.getGitHubIssueUrl('4034')
+      }).to.throw
+
+      expect(() => {
+        return util.getGitHubIssueUrl(-5)
+      }).to.throw
+
+      expect(() => {
+        return util.getGitHubIssueUrl(5.19)
+      }).to.throw
+    })
   })
 
   context('.stdoutLineMatches', () => {
@@ -24,24 +59,28 @@ describe('util', () => {
 
     it('matches entire output', () => {
       const line = '444'
+
       expect(stdoutLineMatches(line, line)).to.be.true
     })
 
     it('matches a line in output', () => {
       const line = '444'
       const stdout = ['start', line, 'something else'].join('\n')
+
       expect(stdoutLineMatches(line, stdout)).to.be.true
     })
 
     it('matches a trimmed line in output', () => {
       const line = '444'
       const stdout = ['start', `  ${line} `, 'something else'].join('\n')
+
       expect(stdoutLineMatches(line, stdout)).to.be.true
     })
 
     it('does not find match', () => {
       const line = '445'
       const stdout = ['start', '444', 'something else'].join('\n')
+
       expect(stdoutLineMatches(line, stdout)).to.be.false
     })
   })
@@ -53,14 +92,16 @@ describe('util', () => {
       const options = {
         foo: 'bar',
       }
-      snapshot('others_unchanged', normalizeModuleOptions(options))
+
+      snapshot('others_unchanged 1', normalizeModuleOptions(options))
     })
 
     it('passes string env unchanged', () => {
       const options = {
         env: 'foo=bar',
       }
-      snapshot('env_as_string', normalizeModuleOptions(options))
+
+      snapshot('env_as_string 1', normalizeModuleOptions(options))
     })
 
     it('converts environment object', () => {
@@ -71,7 +112,8 @@ describe('util', () => {
           host: 'kevin.dev.local',
         },
       }
-      snapshot('env_as_object', normalizeModuleOptions(options))
+
+      snapshot('env_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts config object', () => {
@@ -81,7 +123,8 @@ describe('util', () => {
           watchForFileChanges: false,
         },
       }
-      snapshot('config_as_object', normalizeModuleOptions(options))
+
+      snapshot('config_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts reporterOptions object', () => {
@@ -91,7 +134,8 @@ describe('util', () => {
           toConsole: true,
         },
       }
-      snapshot('reporter_options_as_object', normalizeModuleOptions(options))
+
+      snapshot('reporter_options_as_object 1', normalizeModuleOptions(options))
     })
 
     it('converts specs array', () => {
@@ -100,14 +144,16 @@ describe('util', () => {
           'a', 'b', 'c',
         ],
       }
-      snapshot('spec_as_array', normalizeModuleOptions(options))
+
+      snapshot('spec_as_array 1', normalizeModuleOptions(options))
     })
 
     it('does not convert spec when string', () => {
       const options = {
         spec: 'x,y,z',
       }
-      snapshot('spec_as_string', normalizeModuleOptions(options))
+
+      snapshot('spec_as_string 1', normalizeModuleOptions(options))
     })
   })
 
@@ -231,25 +277,53 @@ describe('util', () => {
     it('is true with 3-digit version', () => {
       expect(util.isSemver('1.2.3')).to.equal(true)
     })
+
     it('is true with 2-digit version', () => {
       expect(util.isSemver('1.2')).to.equal(true)
     })
+
     it('is true with 1-digit version', () => {
       expect(util.isSemver('1')).to.equal(true)
     })
+
     it('is false with URL', () => {
       expect(util.isSemver('www.cypress.io/download/1.2.3')).to.equal(false)
     })
+
     it('is false with file path', () => {
       expect(util.isSemver('0/path/1.2.3/mypath/2.3')).to.equal(false)
     })
   })
 
+  describe('.calculateEta', () => {
+    it('Remaining eta is same as elapsed when 50%', () => {
+      expect(util.calculateEta('50', 1000)).to.equal(1000)
+    })
+
+    it('Remaining eta is 0 when 100%', () => {
+      expect(util.calculateEta('100', 500)).to.equal(0)
+    })
+  })
+
+  describe('.convertPercentToPercentage', () => {
+    it('converts to 100 when 1', () => {
+      expect(util.convertPercentToPercentage(1)).to.equal(100)
+    })
+
+    it('strips out extra decimals', () => {
+      expect(util.convertPercentToPercentage(0.37892)).to.equal(38)
+    })
+
+    it('returns 0 if null num', () => {
+      expect(util.convertPercentToPercentage(null)).to.equal(0)
+    })
+  })
+
   context('.printNodeOptions', () => {
     describe('NODE_OPTIONS is not set', () => {
-
       it('does nothing if debug is not enabled', () => {
         const log = sinon.spy()
+
         log.enabled = false
         util.printNodeOptions(log)
         expect(log).not.have.been.called
@@ -257,6 +331,7 @@ describe('util', () => {
 
       it('prints message when debug is enabled', () => {
         const log = sinon.spy()
+
         log.enabled = true
         util.printNodeOptions(log)
         expect(log).to.be.calledWith('NODE_OPTIONS is not set')
@@ -270,6 +345,7 @@ describe('util', () => {
 
       it('does nothing if debug is not enabled', () => {
         const log = sinon.spy()
+
         log.enabled = false
         util.printNodeOptions(log)
         expect(log).not.have.been.called
@@ -277,6 +353,7 @@ describe('util', () => {
 
       it('prints value when debug is enabled', () => {
         const log = sinon.spy()
+
         log.enabled = true
         util.printNodeOptions(log)
         expect(log).to.be.calledWith('NODE_OPTIONS=%s', 'foo')
@@ -287,9 +364,11 @@ describe('util', () => {
   describe('.getOsVersionAsync', () => {
     let util
     let getos = sinon.stub().resolves(['distro-release'])
+
     beforeEach(() => {
       util = proxyquire(`${lib}/util`, { getos })
     })
+
     it('calls os.release on non-linux', () => {
       os.platform.returns('darwin')
       os.release.returns('some-release')
@@ -299,6 +378,7 @@ describe('util', () => {
         expect(getos).to.not.be.called
       })
     })
+
     it('NOT calls os.release on linux', () => {
       os.platform.returns('linux')
       util.getOsVersionAsync()
@@ -309,28 +389,162 @@ describe('util', () => {
     })
   })
 
+  describe('dequote', () => {
+    it('removes double quotes', () => {
+      expect(util.dequote('"foo"')).to.equal('foo')
+    })
+
+    it('keeps single quotes', () => {
+      expect(util.dequote('\'foo\'')).to.equal('\'foo\'')
+    })
+
+    it('keeps unbalanced double quotes', () => {
+      expect(util.dequote('"foo')).to.equal('"foo')
+    })
+
+    it('keeps inner double quotes', () => {
+      expect(util.dequote('a"b"c')).to.equal('a"b"c')
+    })
+
+    it('passes empty strings', () => {
+      expect(util.dequote('')).to.equal('')
+    })
+
+    it('keeps single double quote character', () => {
+      expect(util.dequote('"')).to.equal('"')
+    })
+  })
+
   describe('.getEnv', () => {
     it('reads from package.json config', () => {
       process.env.npm_package_config_CYPRESS_FOO = 'bar'
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
+
     it('reads from .npmrc config', () => {
       process.env.npm_config_CYPRESS_FOO = 'bar'
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
+
     it('reads from env var', () => {
       process.env.CYPRESS_FOO = 'bar'
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
+
     it('prefers env var over .npmrc config', () => {
       process.env.CYPRESS_FOO = 'bar'
       process.env.npm_config_CYPRESS_FOO = 'baz'
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
+
     it('prefers .npmrc config over package config', () => {
       process.env.npm_package_config_CYPRESS_FOO = 'baz'
       process.env.npm_config_CYPRESS_FOO = 'bloop'
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bloop')
+    })
+
+    it('throws on non-string name', () => {
+      expect(() => {
+        util.getEnv()
+      }).to.throw()
+
+      expect(() => {
+        util.getEnv(42)
+      }).to.throw()
+    })
+
+    context('with trim = true', () => {
+      it('trims returned string', () => {
+        process.env.FOO = '  bar  '
+        expect(util.getEnv('FOO', true)).to.equal('bar')
+      })
+
+      it('removes quotes from the returned string', () => {
+        process.env.FOO = '  "bar"  '
+        expect(util.getEnv('FOO', true)).to.equal('bar')
+      })
+
+      it('removes only single level of double quotes', () => {
+        process.env.FOO = '  ""bar""  '
+        expect(util.getEnv('FOO', true)).to.equal('"bar"')
+      })
+
+      it('keeps unbalanced double quote', () => {
+        process.env.FOO = '  "bar  '
+        expect(util.getEnv('FOO', true)).to.equal('"bar')
+      })
+
+      it('trims but does not remove single quotes', () => {
+        process.env.FOO = '  \'bar\'  '
+        expect(util.getEnv('FOO', true)).to.equal('\'bar\'')
+      })
+
+      it('keeps whitespace inside removed quotes', () => {
+        process.env.FOO = '"foo.txt "'
+        expect(util.getEnv('FOO', true)).to.equal('foo.txt ')
+      })
+    })
+  })
+
+  context('.getFileChecksum', () => {
+    it('computes same hash as Hasha SHA512', () => {
+      return Promise.all([
+        util.getFileChecksum(__filename),
+        hasha.fromFile(__filename, { algorithm: 'sha512' }),
+      ]).then(([checksum, expectedChecksum]) => {
+        la(checksum === expectedChecksum, 'our computed checksum', checksum,
+          'is different from expected', expectedChecksum)
+      })
+    })
+  })
+
+  context('parseOpts', () => {
+    it('passes normal options and strips unknown ones', () => {
+      const result = util.parseOpts({
+        unknownOptions: true,
+        group: 'my group name',
+        ciBuildId: 'my ci build id',
+      })
+
+      expect(result).to.deep.equal({
+        group: 'my group name',
+        ciBuildId: 'my ci build id',
+      })
+    })
+
+    it('removes leftover double quotes', () => {
+      const result = util.parseOpts({
+        group: '"my group name"',
+        ciBuildId: '"my ci build id"',
+      })
+
+      expect(result).to.deep.equal({
+        group: 'my group name',
+        ciBuildId: 'my ci build id',
+      })
+    })
+
+    it('leaves unbalanced double quotes', () => {
+      const result = util.parseOpts({
+        group: 'my group name"',
+        ciBuildId: '"my ci build id',
+      })
+
+      expect(result).to.deep.equal({
+        group: 'my group name"',
+        ciBuildId: '"my ci build id',
+      })
+    })
+
+    it('works with unspecified options', () => {
+      const result = util.parseOpts({
+        // notice that "group" option is missing
+        ciBuildId: '"my ci build id"',
+      })
+
+      expect(result).to.deep.equal({
+        ciBuildId: 'my ci build id',
+      })
     })
   })
 })

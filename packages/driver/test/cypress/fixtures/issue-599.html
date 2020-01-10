@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Issue 599</title>
+  </head>
+  <body>
+    <script type="text/javascript">
+      var xhr = new XMLHttpRequest()
+      var url = "http://localhost:3500/fixtures/generic.html"
+
+      function clickHandler() {
+        xhr.open("GET", url, true)
+        xhr.onreadystatechange = function () {};
+        xhr.send()
+      }
+    </script>
+    <button onclick='clickHandler()'>xhr test</button>
+  </body>
+</html>

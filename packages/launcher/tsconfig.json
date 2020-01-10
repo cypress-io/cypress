@@ -6,5 +6,8 @@
   ],
   "files": [
     "./../ts/index.d.ts"
+  ],
+  "exclude": [
+    "test"
   ]
 }

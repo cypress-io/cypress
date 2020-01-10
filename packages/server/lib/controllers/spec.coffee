@@ -1,11 +1,11 @@
-log = require("debug")("cypress:server:controllers:spec")
+debug = require("debug")("cypress:server:controllers:spec")
 Promise = require("bluebird")
 errors = require("../errors")
 preprocessor = require("../plugins/preprocessor")
 
 module.exports = {
   handle: (spec, req, res, config, next, project) ->
-    log("request for", spec)
+    debug("request for %o", { spec })
 
     res.set({
       "Cache-Control": "no-cache, no-store, must-revalidate"
@@ -18,7 +18,7 @@ module.exports = {
     preprocessor
     .getFile(spec, config)
     .then (filePath) ->
-      log("send #{filePath}")
+      debug("sending spec %o", { filePath })
       sendFile = Promise.promisify(res.sendFile.bind(res))
       sendFile(filePath)
     .catch { code: "ECONNABORTED" }, (err) ->

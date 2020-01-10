@@ -2,7 +2,6 @@ require("../spec_helper")
 
 delete global.fs
 
-winston       = require("winston")
 api           = require("#{root}lib/api")
 user          = require("#{root}lib/user")
 logger        = require("#{root}lib/logger")
@@ -63,15 +62,31 @@ describe "lib/exceptions", ->
             at bar /Users/ruby/dev/bar.js:92
           """
         }
+        @windowsError = {
+          name: "Path not found: \\Users\\ruby\\dev\\"
+          message: "Could not find \\Users\\ruby\\dev\\foo.js"
+          stack: """
+            Error at \\Users\\ruby\\dev\\index.js:102
+            at foo \\Users\\ruby\\dev\\foo.js:4
+            at bar \\Users\\ruby\\dev\\bar.js:92
+          """
+        }
 
       it "strips paths from name, leaving file name and line number", ->
         expect(exception.getErr(@err).name).to.equal("Path not found: <stripped-path>")
+        expect(exception.getErr(@windowsError).name).to.equal("Path not found: <stripped-path>")
 
       it "strips paths from message, leaving file name and line number", ->
         expect(exception.getErr(@err).message).to.equal("Could not find <stripped-path>foo.js")
+        expect(exception.getErr(@windowsError).message).to.equal("Could not find <stripped-path>foo.js")
 
       it "strips paths from stack, leaving file name and line number", ->
         expect(exception.getErr(@err).stack).to.equal("""
+          Error at <stripped-path>index.js:102
+          at foo <stripped-path>foo.js:4
+          at bar <stripped-path>bar.js:92
+        """)
+        expect(exception.getErr(@windowsError).stack).to.equal("""
           Error at <stripped-path>index.js:102
           at foo <stripped-path>foo.js:4
           at bar <stripped-path>bar.js:92
@@ -108,9 +123,22 @@ describe "lib/exceptions", ->
   context ".create", ->
     beforeEach ->
       @env = process.env["CYPRESS_ENV"]
+      sinon.stub(api, "createCrashReport")
 
     afterEach ->
       process.env["CYPRESS_ENV"] = @env
+
+    describe "with CYPRESS_CRASH_REPORTS=0", ->
+      beforeEach ->
+        process.env["CYPRESS_CRASH_REPORTS"] = "0"
+
+      afterEach ->
+        delete process.env["CYPRESS_CRASH_REPORTS"]
+
+      it "immediately resolves", ->
+        exception.create()
+        .then ->
+          expect(api.createCrashReport).to.not.be.called
 
     describe "development", ->
       beforeEach ->
@@ -118,6 +146,8 @@ describe "lib/exceptions", ->
 
       it "immediately resolves", ->
         exception.create()
+        .then ->
+          expect(api.createCrashReport).to.not.be.called
 
     describe "production", ->
       beforeEach ->
@@ -132,10 +162,8 @@ describe "lib/exceptions", ->
 
         sinon.stub(exception, "getAuthToken").resolves("auth-token-123")
 
-        sinon.stub(api, "createRaygunException")
-
-      it "sends body + authToken to api.createRaygunException", ->
-        api.createRaygunException.resolves()
+      it "sends body + authToken to api.createCrashReport", ->
+        api.createCrashReport.resolves()
 
         exception.create().then =>
           body = {
@@ -143,4 +171,4 @@ describe "lib/exceptions", ->
             version: "0.1.2"
           }
 
-          expect(api.createRaygunException).to.be.calledWith(body, "auth-token-123")
+          expect(api.createCrashReport).to.be.calledWith(body, "auth-token-123")
