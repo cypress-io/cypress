@@ -1,29 +1,41 @@
 const _ = require('lodash')
 const CRI = require('chrome-remote-interface')
-const promiseRetry = require('promise-retry')
+const { connect } = require('@packages/network')
+const errors = require('../errors')
 const Promise = require('bluebird')
-const net = require('net')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const pluralize = require('pluralize')
 const debug = require('debug')('cypress:server:protocol')
 
-function connectAsync (opts) {
-  return new Promise(function (resolve, reject) {
-    debug('connectAsync with options %o', opts)
-    let socket = net.connect(opts)
+function _getDelayMsForRetry (i) {
+  if (i < 10) {
+    return 100
+  }
 
-    socket.once('connect', function () {
-      socket.removeListener('error', reject)
-      debug('successfully connected with options %o', opts)
-      resolve(socket)
-    })
+  if (i < 18) {
+    return 500
+  }
 
-    socket.once('error', function (err) {
-      debug('error connecting with options %o', opts, err)
-      socket.removeListener('connection', resolve)
-      reject(err)
-    })
+  if (i < 33) { // after 5 seconds, begin logging and retrying
+    errors.warning('CDP_RETRYING_CONNECTION', i)
+
+    return 1000
+  }
+}
+
+function _connectAsync (opts) {
+  return Promise.fromCallback((cb) => {
+    connect.createRetryingSocket({
+      getDelayMsForRetry: _getDelayMsForRetry,
+      ...opts,
+    }, cb)
+  })
+  .then((sock) => {
+    // can be closed, just needed to test the connection
+    sock.end()
+  })
+  .catch((err) => {
+    errors.throw('CDP_COULD_NOT_CONNECT', opts.port, err)
   })
 }
 
@@ -35,51 +47,39 @@ const getWsTargetFor = (port) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
-  return promiseRetry(
-    (retry) => {
-      return connectAsync({ port }).catch(retry)
-    },
-    { retries: 10 }
-  )
-  .catch(() => {
-    debug('retry connecting to debugging port %d', port)
+  // force ipv4
+  // https://github.com/cypress-io/cypress/issues/5912
+  const connectOpts = {
+    host: '127.0.0.1',
+    port,
+  }
+
+  return _connectAsync(connectOpts)
+  .tapCatch((err) => {
+    debug('failed to connect to CDP %o', { connectOpts, err })
   })
   .then(() => {
     debug('CRI.List on port %d', port)
 
     // what happens if the next call throws an error?
     // it seems to leave the browser instance open
-    return CRI.List({ port })
+    return CRI.List(connectOpts)
   })
   .then((targets) => {
-    debug(
-      'CRI list has %s %o',
-      pluralize('targets', targets.length, true),
-      targets
-    )
+    debug('CRI List %o', { numTargets: targets.length, targets })
     // activate the first available id
-
     // find the first target page that's a real tab
     // and not the dev tools or background page.
-    // typically there are two targets found like
-    // { title: 'Cypress', type: 'background_page', url: 'chrome-extension://...', ... }
-    // { title: 'New Tab', type: 'page', url: 'chrome://newtab/', ...}
-    // const newTabTargetFields = { type: 'page', url: 'chrome://newtab/' }
-    // const newTabTargetFields = {
-    //   type: 'page',
-    //   // title: 'cypress-example-electron',
-    //   title: '',
-    //   // title: 'cypress.html',
-    // }
-    const isThisTheTestAutomationPage = (target) => {
-      return (
-        target.type === 'page' &&
-        (target.title === '' || target.title === 'cypress.html')
-      )
+    // since we open a blank page first, it has a special url
+    const newTabTargetFields = {
+      type: 'page',
+      url: 'about:blank',
     }
-    const target = _.find(targets, isThisTheTestAutomationPage)
+
+    const target = _.find(targets, newTabTargetFields)
 
     la(target, 'could not find CRI target')
+
     debug('found CRI target %o', target)
 
     return target.webSocketDebuggerUrl
@@ -87,5 +87,7 @@ const getWsTargetFor = (port) => {
 }
 
 module.exports = {
+  _connectAsync,
+  _getDelayMsForRetry,
   getWsTargetFor,
 }

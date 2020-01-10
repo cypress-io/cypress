@@ -3,6 +3,8 @@ require("../spec_helper")
 Promise = require("bluebird")
 pkg = require("@packages/root")
 fs = require("#{root}lib/util/fs")
+mockedEnv = require('mocked-env')
+app = require("electron").app
 
 setEnv = (env) =>
   process.env["CYPRESS_ENV"] = env
@@ -30,6 +32,24 @@ describe "lib/environment", ->
 
   after ->
     process.env["CYPRESS_ENV"] = env
+
+  context "parses ELECTRON_EXTRA_LAUNCH_ARGS", ->
+    restore = null
+
+    beforeEach ->
+      restore = mockedEnv({
+        ELECTRON_EXTRA_LAUNCH_ARGS: "--foo --bar=baz --quux=true"
+      })
+
+    it "sets launch args", ->
+      sinon.stub(app.commandLine, "appendArgument")
+      require("#{root}lib/environment")
+      expect(app.commandLine.appendArgument).to.have.been.calledWith("--foo")
+      expect(app.commandLine.appendArgument).to.have.been.calledWith("--bar=baz")
+      expect(app.commandLine.appendArgument).to.have.been.calledWith("--quux=true")
+
+    afterEach ->
+      restore()
 
   context "#existing process.env.CYPRESS_ENV", ->
     it "is production", ->

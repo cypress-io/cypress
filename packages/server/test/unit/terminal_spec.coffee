@@ -25,21 +25,6 @@ expectLength = (str, length) ->
   expect(lineLength).to.eq(length)
 
 describe "lib/util/terminal", ->
-  context ".convertDecimalsToNumber", ->
-    it "divides colWidths by cols", ->
-      expect(terminal.convertDecimalsToNumber(
-        [25, 25, 5, 15, 15, 15], 200
-      )).to.deep.eq([
-        50, 50, 10, 30, 30, 30
-      ])
-
-    it "adds remainder to first index", ->
-      expect(terminal.convertDecimalsToNumber(
-        [50, 50], 15
-      )).to.deep.eq([
-        8, 7
-      ])
-
   context ".getMaximumColumns", ->
     it "uses max 100 when exceeds terminalSize", ->
       sinon.stub(terminalSize, "get").returns({ columns: 1000 })
@@ -65,7 +50,7 @@ describe "lib/util/terminal", ->
         colAligns
         colWidths
         type: "noBorder"
-        head: ["  Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
+        head: ["Spec", "", "Tests", "Passing", "Failing", "Pending", "Skipped"]
       })
 
       table2 = terminal.table({
@@ -79,9 +64,6 @@ describe "lib/util/terminal", ->
         colWidths
         type: "noBorder"
         head: ["2 of 3 passed (66%)", "1:05:36", 37, 29, 8, 102, 18]
-        style: {
-          "padding-right": 2
-        }
       })
 
       table2.push(

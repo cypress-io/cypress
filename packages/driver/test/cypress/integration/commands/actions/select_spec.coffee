@@ -374,13 +374,13 @@ describe "src/cy/commands/actions/select", ->
 
       it "#consoleProps", ->
         cy.get("#select-maps").select("de_dust2").then ($select) ->
-          { fromWindow } = Cypress.dom.getElementCoordinatesByPosition($select)
+          { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($select)
           console = @lastLog.invoke("consoleProps")
           expect(console.Command).to.eq("select")
           expect(console.Selected).to.deep.eq ["de_dust2"]
           expect(console["Applied To"]).to.eq $select.get(0)
-          expect(console.Coords.x).to.be.closeTo(fromWindow.x, 10)
-          expect(console.Coords.y).to.be.closeTo(fromWindow.y, 10)
+          expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 10)
+          expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 10)
 
       it "logs only one select event", ->
         types = []

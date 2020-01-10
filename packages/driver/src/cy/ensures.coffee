@@ -117,7 +117,7 @@ create = (state, expect) ->
 
     # readonly can only be applied to input/textarea
     # not on checkboxes, radios, etc..
-    if $dom.isTextLike(subject) and subject.prop("readonly")
+    if $dom.isTextLike(subject.get(0)) and subject.prop("readonly")
       node = $dom.stringify(subject)
 
       $utils.throwErrByPath("dom.readonly", {

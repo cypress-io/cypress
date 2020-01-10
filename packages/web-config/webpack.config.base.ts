@@ -1,7 +1,9 @@
 import execa from 'execa'
 import webpack from 'webpack'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
+// @ts-ignore
 import sassGlobImporter = require('node-sass-globbing')
+// @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
@@ -22,7 +24,7 @@ if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reload
 
 process.env.NODE_ENV = env
 
-const config: webpack.Configuration = {
+const commonConfig: webpack.Configuration = {
   mode: 'none',
   node: {
     fs: 'empty',
@@ -111,7 +113,7 @@ const config: webpack.Configuration = {
             loader: require.resolve('sass-loader'),
             options: {
               sourceMap: true,
-              importer (...args) {
+              importer (...args: any[]) {
                 args[0] = args[0].replace(/\\/g, '/')
                 args[1] = args[1].replace(/\\/g, '/')
 
@@ -187,13 +189,12 @@ const config: webpack.Configuration = {
         }),
       ]
     ),
-    ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost' })] : []),
+    ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })] : []),
   ],
 
   cache: true,
-
 }
 
-export default config
+export default commonConfig
 
 export { HtmlWebpackPlugin }

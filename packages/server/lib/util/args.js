@@ -10,11 +10,10 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk configFile proxySource'.split(' ')
-
+const whitelist = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version'.split(' ')
 // returns true if the given string has double quote character "
 // only at the last position.
-const hasStrayEndQuote = function (s) {
+const hasStrayEndQuote = (s) => {
   const quoteAt = s.indexOf('"')
 
   return quoteAt === (s.length - 1)
@@ -24,16 +23,15 @@ const removeLastCharacter = (s) => {
   return s.substr(0, s.length - 1)
 }
 
-const normalizeBackslash = function (s) {
+const normalizeBackslash = (s) => {
   if (hasStrayEndQuote(s)) {
     return removeLastCharacter(s)
   }
 
   return s
-
 }
 
-const normalizeBackslashes = function (options) {
+const normalizeBackslashes = (options) => {
   // remove stray double quote from runProject and other path properties
   // due to bug in NPM passing arguments with
   // backslash at the end
@@ -50,7 +48,7 @@ const normalizeBackslashes = function (options) {
   return options
 }
 
-const stringify = function (val) {
+const stringify = (val) => {
   if (_.isObject(val)) {
     return JSON.stringify(val)
   }
@@ -58,7 +56,7 @@ const stringify = function (val) {
   return val
 }
 
-const strToArray = function (str) {
+const strToArray = (str) => {
   const parsed = tryJSONParse(str)
 
   if (parsed) {
@@ -69,7 +67,7 @@ const strToArray = function (str) {
 }
 
 // swap out comma's for bars
-const commasToPipes = (match, p1, p2, p3) => {
+const commasToPipes = (match) => {
   return match.split(',').join('|')
 }
 
@@ -79,7 +77,7 @@ const pipesToCommas = (str) => {
   return str.split('|').join(',')
 }
 
-const tryJSONParse = function (str) {
+const tryJSONParse = (str) => {
   try {
     return JSON.parse(str)
   } catch (err) {
@@ -87,7 +85,7 @@ const tryJSONParse = function (str) {
   }
 }
 
-const JSONOrCoerce = function (str) {
+const JSONOrCoerce = (str) => {
   // valid JSON? horray
   const parsed = tryJSONParse(str)
 
@@ -109,7 +107,7 @@ const JSONOrCoerce = function (str) {
   return coerceUtil(str)
 }
 
-const sanitizeAndConvertNestedArgs = function (str) {
+const sanitizeAndConvertNestedArgs = (str) => {
   // if this is valid JSON then just
   // parse it and call it a day
   const parsed = tryJSONParse(str)
@@ -199,7 +197,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath } = options
+    const { env, config, reporterOptions, outputPath, tag } = options
     const project = options.project || options.runProject
 
     if (spec) {
@@ -214,6 +212,10 @@ module.exports = {
       }
 
       options.spec = strToArray(spec).map(resolvePath)
+    }
+
+    if (tag) {
+      options.tag = strToArray(tag)
     }
 
     if (env) {
