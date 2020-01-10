@@ -1872,7 +1872,6 @@ describe "src/cy/commands/navigation", ->
       cy.on "log:added", (attrs, log) =>
         if attrs.name is "new url"
           @lastLog = log
-          attrs.event = false
 
           @logs.push(log)
 
