@@ -34,6 +34,13 @@
       }
     }
 
+    &.left-nav {
+      i {
+        font-size: 11px;
+        color: #555;
+      }
+    }
+
     > li {
       > div,
       > a {
@@ -41,6 +48,8 @@
         color: #444;
         padding: 1px 20px 0 20px;
         line-height: 35px;
+
+
       }
 
       > a  {
@@ -69,12 +78,20 @@
       }
     }
   }
+
+  .browsers.nav {
+    i {
+      font-size: 13px;
+
+      &.fa-firefox {
+        font-size: 14px;
+      }
+    }
+  }
 }
 
 
-.navbar-right {
-  margin-right: 0;
-
+.nav {
   .user-avatar {
     position: relative;
     top: -1px;
@@ -121,6 +138,10 @@
       }
     }
 
+    i {
+      font-size: 12px;
+    }
+
     > li > div,
     > li > a,
     > li > span > a  {
@@ -148,16 +169,27 @@
     display: inline-block;
   }
 
-  .chrome > i { color: #1aa15f; }
-  .canary > i { color: #e4b721; }
-  .chromium > i { color: #829ac3; }
-  .electron > i { color: #777; }
+  .browser-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .selected .browser-icon {
+    position: relative;
+    top: -1px;
+  }
+
+  .electron .browser-icon {
+    position: relative;
+    top: -1px;
+  }
 
   .dropdown-menu {
     left: auto;
     right: 0;
   }
 }
+
 
 .nav .browser-info {
   color: #999;

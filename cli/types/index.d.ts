@@ -24,6 +24,15 @@
 // hmm, how to load it better?
 /// <reference path="./cypress-npm-api.d.ts" />
 
+// Cypress, cy, Log inherits EventEmitter.
+type EventEmitter2 = import("eventemitter2").EventEmitter2
+
+interface EventEmitter extends EventEmitter2 {
+  proxyTo: (cy: Cypress.cy) => null
+  emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
+  emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
+}
+
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
 declare const assert: Chai.AssertStatic
@@ -933,7 +942,7 @@ declare namespace Cypress {
      *    // Assert on the href of the location
      *    cy.location('href').should('contain', '/tag/tutorials')
      */
-    location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location<K extends keyof Location>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<Location[K]>
 
     /**
      * Print a message to the Cypress Command Log.
@@ -4509,7 +4518,7 @@ cy.get('button').click()
 cy.get('.result').contains('Expected text')
 ```
  */
-declare const cy: Cypress.cy
+declare const cy: Cypress.cy & EventEmitter
 
 /**
  * Global variable `Cypress` holds common utilities and constants.
@@ -4521,4 +4530,4 @@ Cypress.version // => "1.4.0"
 Cypress._ // => Lodash _
 ```
  */
-declare const Cypress: Cypress.Cypress
+declare const Cypress: Cypress.Cypress & EventEmitter

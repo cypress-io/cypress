@@ -63,7 +63,7 @@ function streamBuffer (initialSize = 2048) {
     let bytesRead = 0
     const readerId = _.uniqueId('reader')
 
-    const onRead = function (size) {
+    const onRead = (size) => {
       if (!buffer) {
         debug('read requested after unpipeAll, ignoring %o', { size })
 

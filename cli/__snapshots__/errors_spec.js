@@ -32,6 +32,7 @@ exports['errors individual has the following errors 1'] = [
   "childProcessKilled",
   "failedDownload",
   "failedUnzip",
+  "incompatibleHeadlessFlags",
   "invalidCacheDirectory",
   "invalidCypressEnv",
   "invalidSmokeTestDisplayError",

@@ -150,7 +150,12 @@ module.exports = {
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
 
   cookies:
-    invalid_name: "#{cmd('{{cmd}}')} must be passed an RFC-6265-compliant cookie name. You passed:\n\n`{{name}}`"
+    backend_error: """
+    #{cmd('{{command}}')} had an unexpected error {{action}} {{browserDisplayName}}.
+
+    {{errMessage}}
+    {{errStack}}
+    """
     removed_method: """
       The Cypress.Cookies.{{method}}() method has been removed.
 
@@ -412,10 +417,10 @@ module.exports = {
     invalid_prop_name_arg: "#{cmd('{{cmd}}')} only accepts a string or a number as the {{identifier}}Name argument."
     null_or_undefined_property_name: "#{cmd('{{cmd}}')} expects the {{identifier}}Name argument to have a value."
     invalid_options_arg: "#{cmd('{{cmd}}')} only accepts an object as the options argument."
-    invalid_num_of_args:	
-      """	
-      #{cmd('{{cmd}}')} does not accept additional arguments.	
-      If you want to invoke a function with arguments, use cy.invoke().	
+    invalid_num_of_args:
+      """
+      #{cmd('{{cmd}}')} does not accept additional arguments.
+      If you want to invoke a function with arguments, use cy.invoke().
       """
     timed_out:
       """
@@ -823,13 +828,7 @@ module.exports = {
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
-    backend_error: """
-    #{cmd('setCookie')} had an unexpected error setting the requested cookie in {{browserDisplayName}}.
-
-    {{errStack}}
-    """
     invalid_arguments: "#{cmd('setCookie')} must be passed two string arguments for name and value."
-    invalid_value: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
 
   spread:
     invalid_type: "#{cmd('spread')} requires the existing subject be array-like."
@@ -1030,7 +1029,7 @@ module.exports = {
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 4000px."
+    dimensions_out_of_range: "#{cmd('viewport')} width and height must be at least 0px."
     empty_string: "#{cmd('viewport')} cannot be passed an empty string."
     invalid_orientation: "#{cmd('viewport')} can only accept '{{all}}' as valid orientations. Your orientation was: '{{orientation}}'"
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"

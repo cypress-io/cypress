@@ -12,7 +12,6 @@ human = require("human-interval")
 R = require("ramda")
 hasha = require('hasha')
 
-konfig = require('../binary/get-config')()
 uploadUtils = require("./util/upload")
 s3helpers = require("./s3-api").s3helpers
 
@@ -35,7 +34,8 @@ getCDN = ({version, hash, filename, platform}) ->
   la(isBinaryFile(filename), 'wrong extension for file', filename)
   la(check.unemptyString(platform), 'missing platform', platform)
 
-  cdnUrl = konfig("cdn_url")
+  cdnUrl = uploadUtils.getUploadUrl()
+  la(check.url(cdnUrl), "could not get cdn url", cdnUrl)
   [cdnUrl, rootFolder, folder, version, platform, hash, filename].join("/")
 
 # returns folder that contains beta (unreleased) binaries for given version

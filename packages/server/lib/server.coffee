@@ -692,7 +692,7 @@ class Server
       @_xhrServer.reset()
       @_networkProxy.reset()
 
-    @_socket = Socket(config)
+    @_socket = new Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
 

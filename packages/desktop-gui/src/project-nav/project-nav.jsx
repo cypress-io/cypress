@@ -9,7 +9,7 @@ export default class ProjectNav extends Component {
 
     return (
       <nav className='project-nav navbar navbar-default'>
-        <ul className='nav'>
+        <ul className='nav left-nav'>
           <li>
             <Link to={routes.specs(project)}>
               <i className='fas fa-code'></i>{' '}
