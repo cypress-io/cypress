@@ -1,10 +1,6 @@
 const { EventEmitter } = require('events')
 const _ = Cypress._
 
-const cleanWhitespace = (text) => {
-  return text.replace(/\s+/gm, '')
-}
-
 const itHandlesFileOpening = (trigger) => {
   it('shows tooltip when file path hovered over', function () {
     this.setError(this.commandErr)
@@ -165,8 +161,10 @@ describe('test errors', function () {
       message: '`foo` \\`bar\\` **baz** *fizz* ** buzz **',
       mdMessage: '`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`',
       stack: `Some Error
-      at foo.bar (my/app.js:2:7)
-      at baz.qux (cypress/integration/foo_spec.js:5:2)
+        at foo.bar (my/app.js:2:7)
+          at baz.qux (cypress/integration/foo_spec.js:5:2)
+      From previous event:
+        at bar.baz (my/app.js:8:11)
       `,
       parsedStack: [{
         message: 'Some Error',
@@ -176,12 +174,24 @@ describe('test errors', function () {
         function: 'foo.bar',
         line: 2,
         column: 7,
+        whitespace: '  ',
       }, {
         relativeFile: 'cypress/integration/foo_spec.js',
         absoluteFile: '/me/dev/cypress/integration/foo_spec.js',
         function: 'baz.qux',
         line: 5,
         column: 2,
+        whitespace: '    ',
+      }, {
+        message: 'At previous event:',
+        whitespace: '  ',
+      }, {
+        relativeFile: 'my/app.js',
+        absoluteFile: '/me/dev/my/app.js',
+        function: 'bar.baz',
+        line: 8,
+        column: 11,
+        whitespace: '    ',
       }],
       docsUrl: 'https://on.cypress.io/type',
       codeFrame: {
@@ -249,19 +259,43 @@ describe('test errors', function () {
       this.setError(this.commandErr)
 
       cy.contains('View stack trace').click()
-      cy.get('.runnable-err-stack-trace')
-      .should('be.visible')
-      .invoke('text')
-      .should((content) => {
-        expect(cleanWhitespace(content)).to.equal(cleanWhitespace(this.commandErr.stack))
+      cy.get('.runnable-err-stack-trace').should('be.visible')
+    })
+
+    it('pairs down stack line whitespace', function () {
+      this.setError(this.commandErr)
+      cy.contains('View stack trace').click()
+
+      cy.get('.runnable-err-stack-trace').within(() => {
+        cy.get('.err-stack-line')
+        .should('have.length', 4)
+        .first().should('have.text', 'at foo.bar (my/app.js:2:7)')
+
+        cy.get('.err-stack-line')
+        .eq(1).should('have.text', '  at baz.qux (cypress/integration/foo_spec.js:5:2)')
+
+        cy.get('.err-stack-line')
+        .eq(2).should('have.text', 'At previous event:')
+
+        cy.get('.err-stack-line')
+        .eq(3).should('have.text', '  at bar.baz (my/app.js:8:11)')
       })
+    })
+
+    it('does not include message in stack trace', function () {
+      this.setError(this.commandErr)
+
+      cy.contains('View stack trace').click()
+      cy.get('.runnable-err-stack-trace')
+      .invoke('text')
+      .should('not.include', 'Some Error')
     })
 
     it('turns files into links', function () {
       this.setError(this.commandErr)
 
       cy.get('.runnable-err-stack-trace .runnable-err-file-path')
-      .should('have.length', 2)
+      .should('have.length', 3)
       .first()
       .should('have.text', 'my/app.js:2:7')
 
