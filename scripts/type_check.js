@@ -16,9 +16,11 @@ program
   const projects = []
   const packageRoot = path.join(__dirname, '../packages')
   const getPackagePath = (name) => {
-    return name === 'cli'
-      ? path.join(__dirname, '../cli/types')
-      : path.join(packageRoot, name)
+    if (name !== 'cli') {
+      return path.join(packageRoot, name)
+    }
+
+    throw new Error(`type-check command doesn't check cli types. Use "npm run dtslint" in "cli" directory instead.`)
   }
   const addProject = (name) => {
     return projects.push({
@@ -30,8 +32,6 @@ program
   if (program.project) {
     program.project.split(',').forEach((p) => addProject(p))
   } else {
-    addProject('cli')
-
     fs.readdirSync(packageRoot).forEach((file) => {
       const packagePath = getPackagePath(file)
 
