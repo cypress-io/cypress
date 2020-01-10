@@ -78,5 +78,6 @@ pre[class*="language-"] {
 }
 
 .test-error-code-frame pre[data-line] {
-	padding-left: 1em;
+	padding-left: 0.5em;
+	position: relative;
 }

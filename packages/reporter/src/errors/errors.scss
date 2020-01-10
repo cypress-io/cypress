@@ -80,6 +80,8 @@
 
     .runnable-err-name {
       flex-grow: 2;
+      font-size: 13px;
+      line-height: 22px;;
 
       i {
         font-size: 10px;
@@ -105,34 +107,42 @@
 
   .runnable-err-docs-url {
     margin-left: 0.5em;
-
-    a, a:hover, a:focus {
-      cursor: pointer;
-      color: $err-text;
-    }
-
+    cursor: pointer;
+    color: $err-text;
+    text-decoration: underline;
+    
     i {
       position: relative;
       top: 1px;
       font-size: 10px;
       margin-left: 5px;
     }
+
+    &:hover, &:focus {
+      cursor: pointer;
+      color: $err-text;
+    }
+
   }
 
   .runnable-err-file-path {
     color: $link-text;
     text-decoration: underline;
+  }
 
-    .test-error-code-frame & {
-      display: block;
-      padding: 3px 10px 0;
-    }
+  .test-error-code-frame .runnable-err-file-path{
+    padding: 3px 10px 0;
+    line-height: 24px;
+    font-size: 13px;
+    position: relative;
+    top: 5px;
   }
 
   .runnable-err-message {
     padding: 10px;
     font-family: $monospace;
     color: $err-text;
+    font-size: 1em;
 
     code {
       background-color: $err-code-background;
@@ -157,6 +167,7 @@
 
     .collapsible-header-text {
       text-decoration: underline;
+      font-size: 13px;
     }
 
     .collapsible-indicator {
@@ -273,5 +284,6 @@
 
   .controls {
     margin-top: 0;
+    padding: 1em;
   }
 }

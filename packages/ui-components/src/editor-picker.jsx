@@ -32,7 +32,7 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
   if (!editorOptions.length) {
     return (
       <div className='editor-picker-empty'>
-        <p>We could not find any editors on your system. Please enter the full path to your preferred editor.</p>
+        <p>We could not find any editors on your system. Please enter the full path to your preferred editor's executable.</p>
         <p>{otherInput}</p>
       </div>
     )
@@ -47,7 +47,7 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
       ))}
       <SelectItem value={otherOption.id}>
         {otherOption.name}: {otherInput}
-        {chosen.isOther && <span className='description'>Enter the full path to the executable of the editor</span>}
+        {chosen.isOther && <span className='description'>Enter the full path to your editor's executable</span>}
       </SelectItem>
     </Select>
   )

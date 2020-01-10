@@ -42,19 +42,23 @@ const TestError = observer((props: Props) => {
             <i className='fas fa-exclamation-circle'></i>
             {err.name}
           </div>
+
           <Tooltip title='Print error to console'>
             <button className='runnable-err-print' onClick={onPrint}>
               <i className='fas fa-terminal'></i>
             </button>
           </Tooltip>
+        </div>
+        <div className='runnable-err-message'>
+          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></span>
           {err.docsUrl &&
-            <div className='runnable-err-docs-url'>
-              <a href={err.docsUrl} target='_blank'>Learn more</a>
+            <a className='runnable-err-docs-url' href={err.docsUrl} target='_blank'>
+              Learn more
               <i className='fas fa-external-link-alt'></i>
-            </div>
+            </a>
           }
         </div>
-        <div className='runnable-err-message' dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></div>
+
         {err.stack &&
           <Collapsible
             header='View stack trace'

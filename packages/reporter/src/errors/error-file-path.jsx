@@ -79,8 +79,9 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
       onDismiss={onClose}
     >
       <div className='content'>
-        <p>It looks like this is your first time opening a file in your editor. Please select from one of the editors we found on your system.</p>
-        <p>The editor you select will be used automatically from now on to open files. You can change your selection in the Settings tab of the Cypress app.</p>
+        <h1>Select Editor Preference</h1>
+        <p>Please select your editor from the editors we found on your system. </p>
+        <p>We will use your selected editor to open files in the future. You can change your editor preference in the <b>Settings</b> tab of the Cypress Test Runner.</p>
         <EditorPicker
           chosen={state.chosenEditor}
           editors={editors}

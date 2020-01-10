@@ -133,7 +133,7 @@
 }
 
 .settings-wrapper {
-  padding: 20px 20px 0;
+  padding: 20px;
 
   pre {
     border-radius: 3px;
@@ -255,5 +255,6 @@
 
   label {
     margin: 0;
+    font-weight: normal;
   }
 }
