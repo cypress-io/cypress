@@ -184,74 +184,74 @@
       border: 0;
     }
   }
+}
 
-  .err-file-options {
+.err-file-options {
+  border: none;
+  padding: 0;
+  max-width: 300px;
+
+  // ensure moving mouse from file to tooltip doesn't mouse out and hide tooltip
+  &:before {
+    content: '';
+    position: absolute;
+    height: 6px;
+    left: 0;
+    right: 0;
+    top: 100%;
+  }
+
+  > span {
+    display: flex;
+  }
+
+  button {
+    background: none;
     border: none;
-    padding: 0;
-    max-width: 300px;
+    border-radius: 0;
+    color: #fff;
+    cursor: pointer;
+    display: block;
+    font-size: 1em;
+    padding: 6px 8px;
+    position: relative;
 
-    // ensure moving mouse from file to tooltip doesn't mouse out and hide tooltip
-    &:before {
-      content: '';
-      position: absolute;
-      height: 6px;
+    &:first-child {
+      border-top-left-radius: 3px;
+      border-bottom-left-radius: 3px;
+    }
+
+    &:last-child {
+      border-top-right-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+
+    &:hover,
+    &:focus {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .loader {
+      align-items: center;
+      bottom: 0;
+      display: none;
+      justify-content: center;
       left: 0;
+      position: absolute;
       right: 0;
-      top: 100%;
+      top: 0;
     }
 
-    > span {
-      display: flex;
-    }
-
-    button {
+    &.is-loading {
+      cursor: default;
       background: none;
-      border: none;
-      border-radius: 0;
-      color: #fff;
-      cursor: pointer;
-      display: block;
-      font-size: 1em;
-      padding: 6px 8px;
-      position: relative;
 
-      &:first-child {
-        border-top-left-radius: 3px;
-        border-bottom-left-radius: 3px;
-      }
-
-      &:last-child {
-        border-top-right-radius: 3px;
-        border-bottom-right-radius: 3px;
-      }
-
-      &:hover,
-      &:focus {
-        background: rgba(255, 255, 255, 0.2);
+      .text {
+        visibility: hidden;
       }
 
       .loader {
-        align-items: center;
-        bottom: 0;
-        display: none;
-        justify-content: center;
-        left: 0;
-        position: absolute;
-        right: 0;
-        top: 0;
-      }
-
-      &.is-loading {
-        cursor: default;
-        background: none;
-
-        .text {
-          visibility: hidden;
-        }
-
-        .loader {
-          display: flex;
-        }
+        display: flex;
       }
     }
   }
