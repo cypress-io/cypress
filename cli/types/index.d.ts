@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 2.9
+// TypeScript Version: 3.0
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference types="blob-util" />
@@ -15,6 +15,7 @@
 /// <reference types="jquery" />
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
+/// <reference types="bluebird" />
 
 // jQuery includes dependency "sizzle" that provides types
 // so we include it too in "node_modules/sizzle".
@@ -26,11 +27,12 @@
 
 // Cypress, cy, Log inherits EventEmitter.
 type EventEmitter2 = import("eventemitter2").EventEmitter2
+type Bluebird<R> = import("bluebird")<R>
 
 interface EventEmitter extends EventEmitter2 {
   proxyTo: (cy: Cypress.cy) => null
   emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
-  emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
+  emitThen: (eventName: string, args: any[]) => Bluebird<any>
 }
 
 // Cypress adds chai expect and assert to global
