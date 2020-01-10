@@ -5,7 +5,6 @@ const errors = require('../errors')
 const Promise = require('bluebird')
 const la = require('lazy-ass')
 const is = require('check-more-types')
-const pRetry = require('p-retry')
 const debug = require('debug')('cypress:server:protocol')
 
 function _getDelayMsForRetry (i) {
@@ -26,10 +25,7 @@ function _getDelayMsForRetry (i) {
 
 function _connectAsync (opts) {
   return Promise.fromCallback((cb) => {
-    connect.createRetryingSocket({
-      getDelayMsForRetry: _getDelayMsForRetry,
-      ...opts,
-    }, cb)
+    connect.createRetryingSocket(opts, cb)
   })
   .then((sock) => {
     // can be closed, just needed to test the connection
@@ -82,11 +78,18 @@ const getWsTargetFor = (port) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
+  let retryIndex = 0
+
   // force ipv4
   // https://github.com/cypress-io/cypress/issues/5912
   const connectOpts = {
     host: '127.0.0.1',
     port,
+    getDelayMsForRetry: (i) => {
+      retryIndex = i
+
+      return _getDelayMsForRetry(i)
+    },
   }
 
   return _connectAsync(connectOpts)
@@ -94,15 +97,26 @@ const getWsTargetFor = (port) => {
     debug('failed to connect to CDP %o', { connectOpts, err })
   })
   .then(() => {
-    const findPage = findStartPageTarget.bind(null, connectOpts)
+    const retry = () => {
+      debug('attempting to find CRI target... %o', { retryIndex })
 
-    // p-retry https://github.com/sindresorhus/p-retry uses options
-    // from https://github.com/tim-kos/node-retry#retryoperationoptions
-    // and defaults (1 second first retry, 10 attempts)
-    // are reasonable
-    return pRetry(findPage, {
-      factor: 1, // no need to increase timeouts exponentially
-    })
+      return findStartPageTarget(connectOpts)
+      .catch((err) => {
+        retryIndex++
+        const delay = _getDelayMsForRetry(retryIndex)
+
+        debug('error finding CRI target, maybe retrying %o', { delay, err })
+
+        if (typeof delay === 'undefined') {
+          throw err
+        }
+
+        return Promise.delay(delay)
+        .then(retry)
+      })
+    }
+
+    return retry()
   })
 }
 

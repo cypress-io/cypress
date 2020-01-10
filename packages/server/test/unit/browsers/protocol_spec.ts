@@ -79,7 +79,10 @@ describe('lib/browsers/protocol', () => {
 
       const end = sinon.stub()
 
-      sinon.stub(CRI, 'List').withArgs({ host, port: 12345 }).resolves(targets)
+      sinon.stub(CRI, 'List')
+      .withArgs({ host, port: 12345, getDelayMsForRetry: sinon.match.func })
+      .resolves(targets)
+
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
       const p = protocol.getWsTargetFor(12345)
@@ -110,7 +113,7 @@ describe('lib/browsers/protocol', () => {
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
 
       const criList = sinon.stub(CRI, 'List')
-      .withArgs({ host, port })
+      .withArgs({ host, port: 1234, getDelayMsForRetry: sinon.match.func }).resolves(targets)
       .onFirstCall().resolves([])
       .onSecondCall().resolves([])
       .onThirdCall().resolves(targets)
