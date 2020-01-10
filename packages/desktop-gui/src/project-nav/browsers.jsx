@@ -6,6 +6,15 @@ import MarkdownRenderer from '../lib/markdown-renderer'
 
 import projectsApi from '../projects/projects-api'
 
+import electron from './icons/electron.svg'
+import chrome from './icons/chrome.svg'
+import canary from './icons/canary.svg'
+import chromium from './icons/chromium.svg'
+import loading from './icons/loading.svg'
+import checkmark from './icons/checkmark.svg'
+import firefox from './icons/firefox.svg'
+import defaultBrowser from './icons/defaultBrowser.svg'
+
 @observer
 export default class Browsers extends Component {
   render () {
@@ -58,19 +67,42 @@ export default class Browsers extends Component {
     let prefixText
 
     if (project.browserState === 'opening') {
-      icon = 'fas fa-sync-alt fa-spin'
+      icon = loading
       prefixText = 'Opening'
     } else if (project.browserState === 'opened') {
-      icon = 'fas fa-check-circle green far'
+      icon = checkmark
       prefixText = 'Running'
     } else {
-      icon = `fab fa-${browser.icon}`
+      icon = getIcon(browser.name)
       prefixText = ''
+    }
+
+    function getIcon (browserName) {
+      switch (browserName) {
+        case 'electron': {
+          return electron
+        }
+        case 'chrome': {
+          return chrome
+        }
+        case 'canary': {
+          return canary
+        }
+        case 'chromium': {
+          return chromium
+        }
+        case 'firefox': {
+          return firefox
+        }
+        default: {
+          return defaultBrowser
+        }
+      }
     }
 
     return (
       <span className={browser.name}>
-        <i className={`browser-icon ${icon}`}></i>{' '}
+        <img src={icon} className={`browser-icon ${icon}`}></img>{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}

@@ -1252,6 +1252,13 @@ describe('src/cy/commands/actions/type', () => {
           .should('have.value', '-123.12')
         })
 
+        // https://github.com/cypress-io/cypress/issues/6055
+        it('can type negative numbers and dismiss invalid characters', () => {
+          cy.get('#number-without-value')
+          .type('-a42')
+          .should('have.value', '-42')
+        })
+
         it('can type {del}', () => {
           cy.get('#number-with-value')
           .type('{selectAll}{del}')

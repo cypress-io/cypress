@@ -128,13 +128,11 @@ describe('Project Nav', function () {
               return b.displayName !== 'Chrome'
             })
 
-            let family = dropdownBrowsers[i].family
-
-            family = family === 'electron' ? 'chrome' : family
+            let name = dropdownBrowsers[i].name
 
             // first one is shown in selection, so skip first
             cy.wrap($i).should('have.class',
-              `fa-${family}`)
+              `browser-icon ./fonts/${name}.svg`)
           })
         })
 
@@ -150,7 +148,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon in chosen', () => {
             cy.get('.browsers-list>a').first()
-            .find('.fa-chrome')
+            .find('.chrome')
           })
         })
       })
@@ -195,8 +193,8 @@ describe('Project Nav', function () {
         })
 
         it('displays browser icon as spinner', () => {
-          cy.get('.browsers-list>a').first().find('i')
-          .should('have.class', 'fas fa-sync-alt fa-spin')
+          cy.get('.browsers-list>a').find('img')
+          .should('have.class', 'browser-icon ./fonts/loading.svg')
         })
 
         it('disables browser dropdown', () => {
@@ -213,8 +211,8 @@ describe('Project Nav', function () {
         })
 
         it('displays browser icon as opened', () => {
-          cy.get('.browsers-list>a').first().find('i')
-          .should('have.class', 'fas fa-check-circle')
+          cy.get('.browsers-list>a').first().find('img')
+          .should('have.class', 'browser-icon ./fonts/checkmark.svg')
         })
 
         it('disables browser dropdown', () => {
@@ -257,7 +255,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list>a').first()
-            .find('.fa-chrome')
+            .find('.chrome')
           })
         })
 
@@ -277,7 +275,7 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list>a').first()
-            .find('.fa-chrome')
+            .find('.chrome')
           })
         })
       })
@@ -301,7 +299,7 @@ describe('Project Nav', function () {
 
       it('displays local storage browser icon in chosen', () => {
         cy.get('.browsers-list>a').first()
-        .find('.fa-chrome')
+        .find('.chromium')
       })
     })
 
@@ -388,6 +386,8 @@ describe('Project Nav', function () {
       it('displays generic icon', () => {
         cy.get('.browsers-list>a').first()
         .should('contain', 'Custom Foo')
+        .find('.browser-icon').should('have.class',
+          `browser-icon ./fonts/defaultBrowser.svg`)
       })
 
       it('pre-selects the custom browser', () => {
