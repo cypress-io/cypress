@@ -89,8 +89,7 @@ const getWsTargetFor = (port) => {
     port,
   }
 
-  // call via "module.exports" to enable easy stubbing from tests
-  return module.exports._connectAsync(connectOpts)
+  return _connectAsync(connectOpts)
   .tapCatch((err) => {
     debug('failed to connect to CDP %o', { connectOpts, err })
   })

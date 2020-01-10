@@ -12,12 +12,12 @@ import snapshot from 'snap-shot-it'
 import stripAnsi from 'strip-ansi'
 import { stripIndents } from 'common-tags'
 
-describe('lib/browsers/protocol', function () {
+describe('lib/browsers/protocol', () => {
   // protocol connects explicitly to this host
   const host = '127.0.0.1'
 
-  context('._getDelayMsForRetry', function () {
-    it('retries as expected for up to 20 seconds', function () {
+  context('._getDelayMsForRetry', () => {
+    it('retries as expected for up to 20 seconds', () => {
       const log = sinon.spy(console, 'log')
 
       let delays = []
@@ -41,8 +41,8 @@ describe('lib/browsers/protocol', function () {
     })
   })
 
-  context('.getWsTargetFor', function () {
-    it('rejects if CDP connection fails', function () {
+  context('.getWsTargetFor', () => {
+    it('rejects if CDP connection fails', () => {
       const innerErr = new Error('cdp connection failure')
 
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, innerErr)
@@ -58,12 +58,12 @@ describe('lib/browsers/protocol', function () {
         Error details:
       `
 
-      return expect(p).to.eventually.be.rejected
+      expect(p).to.eventually.be.rejected
       .and.property('message').include(expectedError)
       .and.include(innerErr.message)
     })
 
-    it('returns the debugger URL of the first about:blank tab', async function () {
+    it('returns the debugger URL of the first about:blank tab', async () => {
       const targets = [
         {
           type: 'page',
@@ -89,7 +89,7 @@ describe('lib/browsers/protocol', function () {
     })
   })
 
-  context('CRI.List', function () {
+  context('CRI.List', () => {
     it('retries several times if starting page cannot be found', async () => {
       const port = 1234
       const targets = [
@@ -105,7 +105,10 @@ describe('lib/browsers/protocol', function () {
         },
       ]
 
-      sinon.stub(protocol, '_connectAsync').resolves()
+      const end = sinon.stub()
+
+      sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
+
       const criList = sinon.stub(CRI, 'List')
       .withArgs({ host, port })
       .onFirstCall().resolves([])
