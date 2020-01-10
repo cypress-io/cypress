@@ -230,7 +230,10 @@ describe('test errors', function () {
     it('clicking prints to console', function () {
       cy.spy(this.runner, 'emit')
       cy.get('.runnable-err-print').click().then(() => {
-        expect(this.runner.emit).to.be.calledWith('runner:console:error', 'r3')
+        expect(this.runner.emit).to.be.calledWith('runner:console:error', {
+          commandId: undefined,
+          testId: 'r3',
+        })
       })
     })
   })

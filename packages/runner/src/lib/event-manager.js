@@ -71,13 +71,20 @@ const eventManager = {
       ws.on(event, rerun)
     })
 
-    reporterBus.on('runner:console:error', (testId) => {
+    const logCommand = (logId) => {
+      const consoleProps = Cypress.getConsolePropsForLogById(logId)
+
+      logger.logFormatted(consoleProps)
+    }
+
+    reporterBus.on('runner:console:error', ({ testId, commandId }) => {
       if (!Cypress) return
 
       const err = Cypress.getErrorByTestId(testId)
 
       if (err) {
         logger.clearLog()
+        commandId && logCommand(commandId)
         logger.logError(err.stack)
       } else {
         logger.logError('No error found for test id', testId)
@@ -87,10 +94,8 @@ const eventManager = {
     reporterBus.on('runner:console:log', (logId) => {
       if (!Cypress) return
 
-      const consoleProps = Cypress.getConsolePropsForLogById(logId)
-
       logger.clearLog()
-      logger.logFormatted(consoleProps)
+      logCommand(logId)
     })
 
     reporterBus.on('focus:tests', this.focusTests)

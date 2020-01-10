@@ -150,16 +150,12 @@ const events: Events = {
 
     localBus.on('show:error', (testId: number) => {
       const test = runnablesStore.testById(testId)
+      let command = test.err.isCommandErr && test.commandMatchingErr()
 
-      if (test.err.isCommandErr) {
-        const command = test.commandMatchingErr()
-
-        if (!command) return
-
-        runner.emit('runner:console:log', command.id)
-      } else {
-        runner.emit('runner:console:error', testId)
-      }
+      runner.emit('runner:console:error', {
+        testId,
+        commandId: (command || {}).id,
+      })
     })
 
     localBus.on('show:snapshot', (commandId) => {
