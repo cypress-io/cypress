@@ -63,11 +63,12 @@ const findStartPage = (targets) => {
 }
 
 const findStartPageTarget = (connectOpts) => {
-  debug('CRI.List on port %d', connectOpts.port)
+  debug('CRI.List %o', connectOpts)
 
   // what happens if the next call throws an error?
   // it seems to leave the browser instance open
-  return CRI.List(connectOpts).then(findStartPage)
+  // need to clone connectOpts, CRI modifies it
+  return CRI.List(_.clone(connectOpts)).then(findStartPage)
 }
 
 /**
@@ -93,9 +94,6 @@ const getWsTargetFor = (port) => {
   }
 
   return _connectAsync(connectOpts)
-  .tapCatch((err) => {
-    debug('failed to connect to CDP %o', { connectOpts, err })
-  })
   .then(() => {
     const retry = () => {
       debug('attempting to find CRI target... %o', { retryIndex })
@@ -117,6 +115,9 @@ const getWsTargetFor = (port) => {
     }
 
     return retry()
+  })
+  .tapCatch((err) => {
+    debug('failed to connect to CDP %o', { connectOpts, err })
   })
 }
 
