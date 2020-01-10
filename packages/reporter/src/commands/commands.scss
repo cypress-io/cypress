@@ -377,6 +377,17 @@
     }
   }
 
+  .command-name-log {
+    .command-message-text {
+      white-space: initial;
+      word-wrap: break-word;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 50;
+      -webkit-box-orient: vertical;
+    }
+  }
+
   .command-controls {
     i {
       padding: 2px;
@@ -389,7 +400,7 @@
       line-height: 1.75;
       margin-left: 5px;
 
-      
+
     }
 
     i:hover {

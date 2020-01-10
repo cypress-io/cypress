@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "3.8.1",
+  "version": "3.8.2",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -171,7 +171,7 @@
     "vinyl-paths": "2.1.0"
   },
   "engines": {
-    "node": "12.0.0"
+    "node": "12.8.1"
   },
   "productName": "Cypress",
   "license": "MIT",
