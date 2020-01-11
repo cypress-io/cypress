@@ -108,12 +108,35 @@ namespace CypressItsTests {
 }
 
 namespace CypressInvokeTests {
+  const options = { log: false }
   const returnsString = () => 'foo'
   const returnsNumber = () => 42
+  const returnsStringWithSuffix = (it: string) => it + 'foo'
+  const returnsNumberPlusOne = (it: number) => it + 1
+  const returnsSum = (a: number, b: number) => a + b
 
-  // unfortunately could not define more precise type
-  // in this case it should have been "number", but so far no luck
-  cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<any>
+  const a: [() => string, () => number] = [returnsString, returnsNumber]
+  cy.wrap(a).invoke(0) // $ExpectType Chainable<string>
+  cy.wrap(a).invoke(1) // $ExpectType Chainable<number>
+  cy.wrap(a).invoke(1, 2) // $ExpectError
+  cy.wrap(a).invoke(options, 1) // $ExpectType Chainable<number>
+
+  const b: [() => string, (it: number) => number] = [returnsString, returnsNumberPlusOne]
+  cy.wrap(b).invoke(1, 82) // $ExpectType Chainable<number>
+  cy.wrap(b).invoke(1, 82, 4) // $ExpectError
+  cy.wrap(b).invoke(options, 1, 82) // $ExpectType Chainable<number>
+
+  const c: [() => string, (a: number, b: number) => number] = [returnsString, returnsSum]
+  cy.wrap(c).invoke(1, 82, 3) // $ExpectType Chainable<number>
+  cy.wrap(c).invoke(0, 82, 3) // $ExpectError
+  cy.wrap(c).invoke(options, 1, 82, 3) // $ExpectType Chainable<number>
+
+  const d: [(it: string) => string, (it: number) => number] = [returnsStringWithSuffix, returnsNumberPlusOne]
+  cy.wrap(d).invoke(0, 'a') // $ExpectType Chainable<string>
+  cy.wrap(d).invoke(1, 'a') // $ExpectError
+  cy.wrap(d).invoke(0, 23) // $ExpectError
+  cy.wrap(d).invoke(1, 23) // $ExpectType Chainable<number>
+  cy.wrap(d).invoke(options, 1, 23) // $ExpectType Chainable<number>
 
   class TestClass {
     foo(s: string, b: number): string | number

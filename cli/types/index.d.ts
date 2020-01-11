@@ -878,9 +878,21 @@ declare namespace Cypress {
     /**
      * Invoke a function in an array of functions.
      * @see https://on.cypress.io/invoke
-     */
-    invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
-    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
+     */ 
+    invoke<
+      TIndex extends keyof Exclude<keyof Subject, keyof any[]>,
+      // @ts-ignore compiler can't figure out that TIndex can index Subject
+      TFunc extends Subject[TIndex],
+      TArgs extends OverloadedParameters<TFunc>,
+      TReturn extends OverloadedReturnType<TFunc, TArgs>,
+    >(index: TIndex, ...args: TArgs): Chainable<TReturn>
+    invoke<
+      TIndex extends keyof Exclude<keyof Subject, keyof any[]>,
+      // @ts-ignore compiler can't figure out that TIndex can index Subject
+      TFunc extends Subject[TIndex],
+      TArgs extends OverloadedParameters<TFunc>,
+      TReturn extends OverloadedReturnType<TFunc, TArgs>,
+    >(options: Loggable, index: TIndex, ...args: TArgs): Chainable<TReturn>
 
     /**
      * Invoke a function on the previously yielded subject, yielding the result.
