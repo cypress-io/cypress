@@ -880,15 +880,19 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */ 
     invoke<
-      TIndex extends keyof Exclude<keyof Subject, keyof any[]>,
-      // @ts-ignore compiler can't figure out that TIndex can index Subject
+      TIndex extends
+        & (keyof Exclude<keyof Subject, keyof any[]>)
+        // needed because compiler can't figure out that the type above is a valid index for Subject
+        & (keyof Subject),
       TFunc extends Subject[TIndex],
       TArgs extends OverloadedParameters<TFunc>,
       TReturn extends OverloadedReturnType<TFunc, TArgs>,
     >(index: TIndex, ...args: TArgs): Chainable<TReturn>
     invoke<
-      TIndex extends keyof Exclude<keyof Subject, keyof any[]>,
-      // @ts-ignore compiler can't figure out that TIndex can index Subject
+      TIndex extends
+        & (keyof Exclude<keyof Subject, keyof any[]>)
+        // needed because compiler can't figure out that the type above is a valid index for Subject
+        & (keyof Subject),
       TFunc extends Subject[TIndex],
       TArgs extends OverloadedParameters<TFunc>,
       TReturn extends OverloadedReturnType<TFunc, TArgs>,
