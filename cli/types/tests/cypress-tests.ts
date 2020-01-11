@@ -141,6 +141,7 @@ namespace CypressInvokeTests {
     bar: { baz: (a: number) => a + 1 },
     bam: () => 1
   }
+  cy.wrap(obj).invoke({ log: false }, 'foo', 1).should('equal', 'n = 2') // $ExpectType Chainable<string>
   cy.wrap(obj).invoke('foo', 1).should('equal', 'n = 2') // $ExpectType Chainable<string>
   cy.wrap(obj).invoke('foo', 5, 'b').should('equal', 'b = 6') // $ExpectType Chainable<string>
   cy.wrap(obj).its('bar').invoke('baz', 2).should('equal', 3) // $ExpectType Chainable<number>
@@ -153,6 +154,7 @@ namespace CypressInvokeTests {
   cy.get('input').then(it => it[0]).invoke('checkValidity') // $ExpectError
   cy.get('input').invoke('val', 25, 12) // $ExpectError
   cy.get('input').invoke('val', 25) // $ExpectType Chainable<JQuery<HTMLInputElement>>
+  cy.get('input').invoke({ log: false }, 'val', 25) // $ExpectType Chainable<JQuery<HTMLInputElement>>
   cy.get('input').invoke('val') // $ExpectType Chainable<string | number | string[] | undefined>
   cy.get('input').invoke('css', '') // $ExpectType Chainable<string>
   cy.get('input').invoke('css') // $ExpectError

@@ -894,12 +894,17 @@ declare namespace Cypress {
      *    cy.get('.modal').invoke('show').should('be.visible') // jQuery's 'show' functions
      */
     invoke<
-      TActualSubject extends (Subject extends Node | Node[] ? JQuery<Subject> : Subject),
+      TActualSubject extends WrapJQuery<Subject>,
       TName extends FunctionKeys<TActualSubject>,
       TArgs extends OverloadedParameters<TActualSubject[TName]>,
       TReturn extends OverloadedReturnType<TActualSubject[TName], TArgs>,
     >(functionName: TName, ...args: TArgs): Chainable<TReturn>
-    invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
+    invoke<
+      TActualSubject extends WrapJQuery<Subject>,
+      TName extends FunctionKeys<TActualSubject>,
+      TArgs extends OverloadedParameters<TActualSubject[TName]>,
+      TReturn extends OverloadedReturnType<TActualSubject[TName], TArgs>,
+    >(options: Loggable, functionName: TName, ...args: TArgs): Chainable<TReturn>
 
     /**
      * Get a property’s value on the previously yielded subject.
@@ -4495,6 +4500,8 @@ declare namespace Cypress {
    * Obtain the keys of T whose values are functions
    */
   type FunctionKeys<T> = ({ [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never }[keyof T])
+
+  type WrapJQuery<T> = T extends Node | Node[] ? JQuery<T> : T
 
   type ExcludeUnknownArray<T> = unknown[] extends T ? never : T
   type ExcludeUnknown<T> = unknown extends T ? never : T
