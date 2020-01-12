@@ -878,7 +878,7 @@ declare namespace Cypress {
     /**
      * Invoke a function in an array of functions.
      * @see https://on.cypress.io/invoke
-     */ 
+     */
     invoke<
       TIndex extends
         & (keyof Exclude<keyof Subject, keyof any[]>)
