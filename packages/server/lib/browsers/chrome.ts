@@ -347,98 +347,90 @@ module.exports = {
     return args
   },
 
-  open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    return Promise
-    .try(() => {
-      const args = this._getArgs(options)
+    let defaultArgs = this._getArgs(options)
 
-      if (browser.isHeadless) {
-        args.push('--headless')
-      }
+    if (browser.isHeadless) {
+      defaultArgs.push('--headless')
+    }
 
-      return getRemoteDebuggingPort()
-      .then((port) => {
-        // force ipv4
-        // https://github.com/cypress-io/cypress/issues/5912
-        args.push(`--remote-debugging-port=${port}`)
-        args.push('--remote-debugging-address=127.0.0.1')
+    const port = await getRemoteDebuggingPort()
 
-        return Promise.all([
-          // ensure that we have a clean cache dir
-          // before launching the browser every time
-          utils.ensureCleanCache(browser, isTextTerminal),
-          pluginsBeforeBrowserLaunch(options.browser, args),
-          port,
-        ])
-      })
-    }).spread((cacheDir, args: string[], port) => {
-      return Promise.all([
-        this._writeExtension(
-          browser,
-          options
-        ),
-        _removeRootExtension(),
-        _disableRestorePagesPrompt(userDir),
-      ])
-      .spread((extDest) => {
-        // normalize the --load-extensions argument by
-        // massaging what the user passed into our own
-        args = _normalizeArgExtensions(extDest, args, browser)
+    // force ipv4
+    // https://github.com/cypress-io/cypress/issues/5912
+    defaultArgs.push(`--remote-debugging-port=${port}`)
+    defaultArgs.push('--remote-debugging-address=127.0.0.1')
 
-        // this overrides any previous user-data-dir args
-        // by being the last one
-        args.push(`--user-data-dir=${userDir}`)
-        args.push(`--disk-cache-dir=${cacheDir}`)
+    const [cacheDir, afterPluginsArgs] = await Promise.all([
+      // ensure that we have a clean cache dir
+      // before launching the browser every time
+      utils.ensureCleanCache(browser, isTextTerminal),
+      pluginsBeforeBrowserLaunch(options.browser, defaultArgs),
+    ])
+    const [extDest] = await Promise.all([
+      this._writeExtension(
+        browser,
+        options
+      ),
+      _removeRootExtension(),
+      _disableRestorePagesPrompt(userDir),
+    ])
+    // normalize the --load-extensions argument by
+    // massaging what the user passed into our own
+    const args = _normalizeArgExtensions(extDest, afterPluginsArgs, browser)
 
-        debug('launching in chrome with debugging port', { url, args, port })
+    // this overrides any previous user-data-dir args
+    // by being the last one
+    args.push(`--user-data-dir=${userDir}`)
+    args.push(`--disk-cache-dir=${cacheDir}`)
 
-        // FIRST load the blank page
-        // first allows us to connect the remote interface,
-        // start video recording and then
-        // we will load the actual page
-        return utils.launch(browser, 'about:blank', args)
-      }).then((launchedBrowser) => {
-        la(launchedBrowser, 'did not get launched browser instance')
+    debug('launching in chrome with debugging port', { url, args, port })
 
-        // SECOND connect to the Chrome remote interface
-        // and when the connection is ready
-        // navigate to the actual url
-        return this._connectToChromeRemoteInterface(port)
-        .then((criClient) => {
-          la(criClient, 'expected Chrome remote interface reference', criClient)
+    // FIRST load the blank page
+    // first allows us to connect the remote interface,
+    // start video recording and then
+    // we will load the actual page
+    const launchedBrowser = await utils.launch(browser, 'about:blank', args)
 
-          return criClient.ensureMinimumProtocolVersion('1.3')
-          .catch((err) => {
-            throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-          }).then(() => {
-            this._setAutomation(criClient, automation)
+    la(launchedBrowser, 'did not get launched browser instance')
 
-            // monkey-patch the .kill method to that the CDP connection is closed
-            const originalBrowserKill = launchedBrowser.kill
+    // SECOND connect to the Chrome remote interface
+    // and when the connection is ready
+    // navigate to the actual url
+    const criClient = await this._connectToChromeRemoteInterface(port)
 
-            launchedBrowser.kill = (...args) => {
-              debug('closing remote interface client')
+    la(criClient, 'expected Chrome remote interface reference', criClient)
 
-              return criClient.close()
-              .then(() => {
-                debug('closing chrome')
-
-                return originalBrowserKill.apply(launchedBrowser, args)
-              })
-            }
-
-            return criClient
-          })
-        }).then(this._maybeRecordVideo(options))
-        .then(this._navigateUsingCRI(url))
-        // return the launched browser process
-        // with additional method to close the remote connection
-        .return(launchedBrowser)
-      })
+    await criClient.ensureMinimumProtocolVersion('1.3')
+    .catch((err) => {
+      throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
+
+    this._setAutomation(criClient, automation)
+
+    // monkey-patch the .kill method to that the CDP connection is closed
+    const originalBrowserKill = launchedBrowser.kill
+
+    launchedBrowser.kill = (...args) => {
+      debug('closing remote interface client')
+
+      return criClient.close()
+      .then(() => {
+        debug('closing chrome')
+
+        return originalBrowserKill.apply(launchedBrowser, args)
+      })
+    }
+
+    this._maybeRecordVideo(options)(criClient)
+    this._navigateUsingCRI(url)(criClient)
+
+    // return the launched browser process
+    // with additional method to close the remote connection
+    return launchedBrowser
   },
 }
