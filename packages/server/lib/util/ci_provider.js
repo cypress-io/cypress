@@ -30,8 +30,8 @@ const isAzureCi = () => {
   return process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
 }
 
-const isBamboo =() => {
-    return process.env.bamboo_buildNumber
+const isBamboo = () => {
+  return process.env.bamboo_buildNumber
 }
 
 const isCodeshipBasic = () => {
@@ -107,15 +107,16 @@ const _detectProviderName = () => {
   const { env } = process
   // return the key of the first provider
   // which is truthy
+
     return _.findKey(CI_PROVIDERS, (value) => {
-        if (_.isString(value)) {
-            return env[value]
-        }
+      if (_.isString(value)) {
+        return env[value]
+      }
 
-        if (_.isFunction(value)) {
+      if (_.isFunction(value)) {
 
-            return value()
-        }
+          return value()
+      }
     })
 }
 
@@ -144,7 +145,7 @@ const _providerCiParams = () => {
       'bamboo_planRepository_repositoryUrl',
       'bamboo_planKey',
       'bamboo_buildKey',
-      'bamboo_agentId'
+      'bamboo_agentId',
     ]),
     bitbucket: extract([
       'BITBUCKET_REPO_SLUG',
@@ -376,7 +377,7 @@ const _providerCommitParams = () => {
       // message: ???
       authorName: env.bamboo_planRepository_username,
       // authorEmail: ???
-      remoteOrigin: env.bamboo_planRepository_repositoryURL
+      remoteOrigin: env.bamboo_planRepository_repositoryURL,
       // defaultBranch: ???
     },
     bitbucket: {
