@@ -10,6 +10,11 @@ import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import { _connectAsync } from './protocol'
 
+type CollectGarbageArgs = {
+  shouldRunGc: boolean
+  shouldRunCc: boolean
+}
+
 const debug = Debug('cypress:server:browsers')
 
 const promisify = (fn) => {
@@ -28,7 +33,7 @@ const promisify = (fn) => {
 
 let sendMarionette
 
-let cb
+let cb: (args: CollectGarbageArgs) => Promise<void>
 
 let timings = {
   gc: [] as any[],
@@ -96,8 +101,8 @@ module.exports = {
     log()
   },
 
-  collectGarbage () {
-    return cb()
+  collectGarbage (args: CollectGarbageArgs) {
+    return cb(args)
   },
 
   setup (extensions, url) {
@@ -168,12 +173,12 @@ module.exports = {
       })
     })
 
-    cb = () => {
+    cb = (args: CollectGarbageArgs) => {
       let duration
 
       const gc = (tab) => {
         return () => {
-          if (process.env.CYPRESS_SKIP_GC) {
+          if (!args.shouldRunGc) {
             return
           }
 
@@ -191,7 +196,7 @@ module.exports = {
 
       const cc = (tab) => {
         return () => {
-          if (process.env.CYPRESS_SKIP_CC) {
+          if (!args.shouldRunCc) {
             return
           }
 
@@ -212,17 +217,9 @@ module.exports = {
         return attach(tab)
         .then(gc(tab))
         .then(cc(tab))
-        // .then(() => {
-        //   return tab.memory.measure()
-        // .then(console.log)
-        // })
-        // })
       })
       .tapCatch((err) => {
         console.log('firefox RDP error', err.stack)
-
-        // eslint-disable-next-line no-debugger
-        debugger
       })
     }
   },

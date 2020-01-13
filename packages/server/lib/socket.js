@@ -373,7 +373,7 @@ class Socket {
             case 'log:memory:pressure':
               return firefoxUtil.log()
             case 'reduce:memory:pressure':
-              return firefoxUtil.collectGarbage()
+              return firefoxUtil.collectGarbage(args[0])
             case 'incoming:xhr':
               return options.onIncomingXhr(args[0], args[1])
             case 'get:fixture':

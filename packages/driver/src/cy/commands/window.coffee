@@ -37,15 +37,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Cypress.on "test:before:run:async", (testAttrs) ->
     { order } = testAttrs
-    fmri = config("firefoxMemoryReductionInterval")
 
-    ## TODO: add !isInteractive here too
+    if Cypress.isBrowser('firefox')
+      ## TODO: add !isInteractive here too
+      shouldRunCc = (order % config("firefoxCcInterval") is 0)
+      shouldRunGc = (order % config("firefoxGcInterval") is 0)
 
-    ## if we've enabled firefox memory reduction
-    ## and the test order matches this interval
-    if fmri > 0 and order % fmri is 0 && Cypress.isBrowser('firefox')
-      Cypress.backend("reduce:memory:pressure")
-  
+      if shouldRunCc or shouldRunGc
+        Cypress.backend("reduce:memory:pressure", { shouldRunCc, shouldRunGc })
+
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means
     ## something has changed the default and we

@@ -88,6 +88,8 @@ breakingConfigKeys = toWords """
 # Internal configuration properties the user should be able to overwrite
 systemConfigKeys = toWords """
   browsers
+  firefoxGcInterval
+  firefoxCcInterval
 """
 
 CONFIG_DEFAULTS = {
@@ -140,6 +142,8 @@ CONFIG_DEFAULTS = {
   pluginsFile:                   "cypress/plugins"
   nodeVersion:                   "default"
   configFile:                    "cypress.json"
+  firefoxGcInterval:             1
+  firefoxCcInterval:             1
 
   ## deprecated
   javascripts:                   []
@@ -181,6 +185,8 @@ validationRules = {
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
+  firefoxCcInterval: v.isNumber
+  firefoxCcInterval: v.isNumber
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
