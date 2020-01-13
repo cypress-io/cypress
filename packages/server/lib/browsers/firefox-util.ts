@@ -5,10 +5,15 @@ import Debug from 'debug'
 import _ from 'lodash'
 import Marionette from 'marionette-client'
 import Exception from 'marionette-client/lib/marionette/error'
-import Foxdriver from '@benmalka/foxdriver'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
-import protocol from './protocol'
+import Foxdriver from '@benmalka/foxdriver'
+import * as protocol from './protocol'
+
+type CollectGarbageArgs = {
+  shouldRunGc: boolean
+  shouldRunCc: boolean
+}
 
 const debug = Debug('cypress:server:browsers')
 
@@ -28,154 +33,231 @@ const promisify = (fn) => {
 
 let sendMarionette
 
-let cb
+let cb: (args: CollectGarbageArgs) => Promise<void>
 
 let timings = {
   gc: [] as any[],
   cc: [] as any[],
+  collections: [] as any[],
 }
 
-export const log = () => {
-  console.log('timings', util.inspect(timings, {
+const log = () => {
+  const reducedTimings = {
+    ...timings,
+    collections: _.map(timings.collections, (event) => {
+      return _
+      .chain(event)
+      .extend({
+        duration: _.sumBy(event.collections, (collection: any) => {
+          return collection.endTimestamp - collection.startTimestamp
+        }),
+        spread: _.chain(event.collections).thru((collection) => {
+          const first = _.first(collection)
+          const last = _.last(collection)
+
+          return last.endTimestamp - first.startTimestamp
+        }).value(),
+      })
+      .pick('num', 'nonincrementalReason', 'reason', 'gcCycleNumber', 'duration', 'spread')
+      .value()
+    }),
+  }
+
+  console.log('timings', util.inspect(reducedTimings, {
     breakLength: Infinity,
     maxArrayLength: Infinity,
   }))
 
   console.log('times', {
-    gc: timings.gc.length,
-    cc: timings.cc.length,
+    gc: reducedTimings.gc.length,
+    cc: reducedTimings.cc.length,
+    collections: reducedTimings.collections.length,
   })
 
   console.log('average', {
-    gc: _.chain(timings.gc).sum().divide(timings.gc.length).value(),
-    cc: _.chain(timings.cc).sum().divide(timings.cc.length).value(),
+    gc: _.chain(reducedTimings.gc).sum().divide(reducedTimings.gc.length).value(),
+    cc: _.chain(reducedTimings.cc).sum().divide(reducedTimings.cc.length).value(),
+    collections: _.chain(reducedTimings.collections).sumBy('duration').divide(reducedTimings.collections.length).value(),
+    spread: _.chain(reducedTimings.collections).sumBy('spread').divide(reducedTimings.collections.length).value(),
   })
 
   console.log('total', {
-    gc: _.sum(timings.gc),
-    cc: _.sum(timings.cc),
+    gc: _.sum(reducedTimings.gc),
+    cc: _.sum(reducedTimings.cc),
+    collections: _.sumBy(reducedTimings.collections, 'duration'),
+    spread: _.sumBy(reducedTimings.collections, 'spread'),
   })
 
   // reset all the timings
   timings = {
     gc: [],
     cc: [],
+    collections: [],
   }
 }
 
-export function collectGarbage () {
-  return cb()
-}
+module.exports = {
+  log () {
+    log()
+  },
 
-export function setup (extensions, url) {
-  return Bluebird.all([
-    setupFoxdriver(),
-    setupMarionette(extensions, url),
-  ])
-}
+  collectGarbage (args: CollectGarbageArgs) {
+    return cb(args)
+  },
 
-export async function setupFoxdriver () {
-  await protocol._connectAsync({
-    host: '127.0.0.1',
-    port: 2929,
-  })
+  setup (extensions, url) {
+    return Bluebird.all([
+      this.setupFoxdriver(),
+      this.setupMarionette(extensions, url),
+    ])
+  },
 
-  const { browser } = await Foxdriver.attach('127.0.0.1', 2929)
+  async setupFoxdriver () {
+    await protocol._connectAsync({
+      host: '127.0.0.1',
+      port: 2929,
+    })
 
-  const attach = async (tab) => {
-    return await tab.memory.attach()
-  }
+    const foxdriver = await Foxdriver.attach('127.0.0.1', 2929)
 
-  cb = () => {
-    let duration
+    const { browser } = foxdriver
 
-    const gc = (tab) => {
-      return () => {
-        if (process.env.CYPRESS_SKIP_GC) {
+    const attach = Bluebird.method((tab) => {
+      if (tab.memory.isAttached) {
+        return
+      }
+
+      return tab.memory.getState()
+      .then((state) => {
+        if (state === 'attached') {
           return
         }
 
-        console.time('garbage collection')
-        duration = Date.now()
-
-        return tab.memory.forceGarbageCollection()
-        .then(() => {
-          console.timeEnd('garbage collection')
-
-          timings.gc.push(Date.now() - duration)
+        tab.memory.on('garbage-collection', ({ data }) => {
+          data.num = timings.collections.length + 1
+          timings.collections.push(data)
+          console.log('received garbage-collection', data)
         })
-      }
+
+        return tab.memory.attach()
+      })
+    })
+
+    const getTabId = (tab) => {
+      return _.get(tab, 'browsingContextID')
     }
 
-    const cc = (tab) => {
-      return () => {
-        if (process.env.CYPRESS_SKIP_CC) {
-          return
+    const getPrimaryTab = Bluebird.method((browser) => {
+      const setPrimaryTab = () => {
+        return browser.listTabs()
+        .then((tabs) => {
+          browser.tabs = tabs
+
+          return browser.primaryTab = _.first(tabs)
+        })
+      }
+
+      if (!browser.primaryTab) {
+        return setPrimaryTab()
+      }
+
+      return browser.request('listTabs')
+      .then(({ tabs }) => {
+        const firstTab = _.first(tabs)
+
+        if (getTabId(browser.primaryTab.data) !== getTabId(firstTab)) {
+          return setPrimaryTab()
         }
 
-        console.time('cycle collection')
-        duration = Date.now()
+        return browser.primaryTab
+      })
+    })
 
-        return tab.memory.forceCycleCollection()
-        .then(() => {
-          console.timeEnd('cycle collection')
+    cb = (args: CollectGarbageArgs) => {
+      let duration
 
-          timings.cc.push(Date.now() - duration)
-        })
+      const gc = (tab) => {
+        return () => {
+          if (!args.shouldRunGc) {
+            return
+          }
+
+          console.time('garbage collection')
+          duration = Date.now()
+
+          return tab.memory.forceGarbageCollection()
+          .then(() => {
+            console.timeEnd('garbage collection')
+
+            timings.gc.push(Date.now() - duration)
+          })
+        }
       }
-    }
 
-    return browser.listTabs()
-    .then((tabs) => {
-      browser.tabs = tabs
+      const cc = (tab) => {
+        return () => {
+          if (!args.shouldRunCc) {
+            return
+          }
 
-      return Bluebird.mapSeries(tabs, (tab: any) => {
-        // FIXME: do we really need to attach and detach every time?
+          console.time('cycle collection')
+          duration = Date.now()
+
+          return tab.memory.forceCycleCollection()
+          .then(() => {
+            console.timeEnd('cycle collection')
+
+            timings.cc.push(Date.now() - duration)
+          })
+        }
+      }
+
+      return getPrimaryTab(browser)
+      .then((tab) => {
         return attach(tab)
         .then(gc(tab))
         .then(cc(tab))
-        // .then(() => {
-        // return tab.memory.measure()
-        // .then(console.log)
-        // })
-        .then(() => {
-          return tab.memory.detach()
+      })
+      .tapCatch((err) => {
+        console.log('firefox RDP error', err.stack)
+      })
+    }
+  },
+
+  setupMarionette (extensions, url) {
+    const driver = new Marionette.Drivers.Tcp({})
+
+    const connect = Bluebird.promisify(driver.connect.bind(driver))
+    const driverSend = promisify(driver.send.bind(driver))
+
+    sendMarionette = (data) => {
+      return driverSend(new Command(data))
+    }
+
+    debug('firefox: navigating page with webdriver')
+
+    return connect()
+    .then(() => {
+      return sendMarionette({
+        name: 'WebDriver:NewSession',
+        parameters: { acceptInsecureCerts: true },
+      })
+    })
+    .then(({ sessionId }) => {
+      return Bluebird.all(_.map(extensions, (path) => {
+        return sendMarionette({
+          name: 'Addon:Install',
+          sessionId,
+          parameters: { path, temporary: true },
+        })
+      }))
+      .then(() => {
+        return sendMarionette({
+          name: 'WebDriver:Navigate',
+          sessionId,
+          parameters: { url },
         })
       })
     })
-  }
-}
-
-export async function setupMarionette (extensions, url) {
-  const driver = new Marionette.Drivers.Tcp({})
-
-  const connect = Bluebird.promisify(driver.connect.bind(driver))
-  const driverSend = promisify(driver.send.bind(driver))
-
-  sendMarionette = (data) => {
-    return driverSend(new Command(data))
-  }
-
-  debug('firefox: navigating page with webdriver')
-
-  await connect()
-
-  const { sessionId } = await sendMarionette({
-    name: 'WebDriver:NewSession',
-    parameters: { acceptInsecureCerts: true },
-  })
-
-  await Bluebird.all(_.map(extensions, (path) => {
-    return sendMarionette({
-      name: 'Addon:Install',
-      sessionId,
-      parameters: { path, temporary: true },
-    })
-  }))
-
-  await sendMarionette({
-    name: 'WebDriver:Navigate',
-    sessionId,
-    parameters: { url },
-  })
+  },
 }

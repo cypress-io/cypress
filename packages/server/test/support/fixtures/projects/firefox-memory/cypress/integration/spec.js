@@ -45,14 +45,17 @@ describe('memory leak finder', function () {
   before(stats)
   before(() => {
     duration = Date.now()
-    cy.task('capture:memory')
+
+    if (Cypress.platform === 'linux') {
+      cy.task('capture:memory')
+    }
   })
 
   after(stats)
   after(() => {
     duration = Date.now() - duration
-    cy
 
+    cy
     .task('stop:capture:memory')
     .then(() => {
       return Cypress.backend('log:memory:pressure')

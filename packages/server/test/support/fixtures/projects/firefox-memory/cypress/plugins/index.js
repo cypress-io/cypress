@@ -15,11 +15,12 @@
 
 const _ = require('lodash')
 const execa = require('execa')
-const os = require('os')
 const util = require('util')
 const si = require('systeminformation')
 
-let timings; let intervalId
+let timings = []
+let rss = []
+let intervalId
 
 module.exports = (on, config) => {
   on('task', {
@@ -30,42 +31,54 @@ module.exports = (on, config) => {
     },
     'stop:capture:memory' () {
       clearInterval(intervalId)
-      console.log('memory', util.inspect(timings, {
+      console.log('available memory', util.inspect(timings, {
         compact: true,
         breakLength: Infinity,
         maxArrayLength: Infinity,
       }))
 
-      console.log('details', {
+      console.log('details of available memory', {
         min: _.min(timings),
         max: _.max(timings),
         average: _.chain(timings).sum().divide(timings.length).value(),
       })
 
+      console.log('firefox rss', util.inspect(rss, {
+        compact: true,
+        breakLength: Infinity,
+        maxArrayLength: Infinity,
+      }))
+
+      console.log('details of firefox rss', {
+        min: _.min(rss),
+        max: _.max(rss),
+        average: _.chain(rss).sum().divide(rss.length).value(),
+      })
+
       return null
     },
     'capture:memory' () {
-      if (os.platform() === 'linux') {
-        clearInterval(intervalId)
-        timings = []
-        intervalId = setInterval(() => {
-          execa('free', ['-m'])
-          .then(({ stdout }) => {
-            console.log(stdout)
-            const avail = _
-            .chain(stdout)
-            .split('\n')
-            .nth(1)
-            .split(' ')
-            .last()
-            .toNumber()
-            .value()
+      clearInterval(intervalId)
 
-            console.log(avail)
-            // timings.push(avail)
-          })
-        }, 1000)
-      }
+      timings = []
+
+      intervalId = setInterval(() => {
+        execa('free', ['-m'])
+        .then(({ stdout }) => {
+          console.log(stdout)
+          const avail = _
+          .chain(stdout)
+          .split('\n')
+          .nth(1)
+          .split(' ')
+          .last()
+          .toNumber()
+          .value()
+
+          console.log(avail)
+          timings.push(avail)
+        })
+      }, 1000)
 
       return null
     },
@@ -87,7 +100,7 @@ module.exports = (on, config) => {
 
         console.log({ totalRss })
 
-        timings.push(totalRss)
+        rss.push(totalRss)
 
         return null
       })
