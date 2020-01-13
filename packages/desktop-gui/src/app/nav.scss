@@ -169,27 +169,32 @@
     display: inline-block;
   }
 
-  .browser-icon {
-    width: 16px;
-    height: 16px;
+  .browser-icon { 
+    color: #4573d9; 
   }
 
-  .selected .browser-icon {
-    position: relative;
-    top: -1px;
+  .chrome > .browser-icon { 
+    color: #1da261; 
+  }
+  .canary > .browser-icon { 
+    color: #f29b14; 
+  }
+  .chromium > .browser-icon { 
+    color: #4573d9; 
+  }
+  .electron > .browser-icon { 
+    color: #2b2e3a; 
+  }
+  .firefox > .browser-icon { 
+    color: #ff720d; 
   }
 
-  .electron .browser-icon {
-    position: relative;
-    top: -1px;
-  }
 
   .dropdown-menu {
     left: auto;
     right: 0;
   }
 }
-
 
 .nav .browser-info {
   color: #999;
