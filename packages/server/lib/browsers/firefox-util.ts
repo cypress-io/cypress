@@ -8,7 +8,7 @@ import Exception from 'marionette-client/lib/marionette/error'
 import Foxdriver from '@benmalka/foxdriver'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
-import { _connectAsync } from './protocol'
+import protocol from './protocol'
 
 const debug = Debug('cypress:server:browsers')
 
@@ -35,7 +35,7 @@ let timings = {
   cc: [] as any[],
 }
 
-const log = () => {
+export const log = () => {
   console.log('timings', util.inspect(timings, {
     breakLength: Infinity,
     maxArrayLength: Infinity,
@@ -63,130 +63,119 @@ const log = () => {
   }
 }
 
-module.exports = {
-  log () {
-    log()
-  },
+export function collectGarbage () {
+  return cb()
+}
 
-  collectGarbage () {
-    return cb()
-  },
+export function setup (extensions, url) {
+  return Bluebird.all([
+    setupFoxdriver(),
+    setupMarionette(extensions, url),
+  ])
+}
 
-  setup (extensions, url) {
-    return Bluebird.all([
-      this.setupFoxdriver(),
-      this.setupMarionette(extensions, url),
-    ])
-  },
+export async function setupFoxdriver () {
+  await protocol._connectAsync({
+    host: '127.0.0.1',
+    port: 2929,
+  })
 
-  async setupFoxdriver () {
-    await _connectAsync({
-      host: '127.0.0.1',
-      port: 2929,
-    })
+  const { browser } = await Foxdriver.attach('127.0.0.1', 2929)
 
-    const foxdriver = await Foxdriver.attach('127.0.0.1', 2929)
+  const attach = async (tab) => {
+    return await tab.memory.attach()
+  }
 
-    const { browser } = foxdriver
+  cb = () => {
+    let duration
 
-    const attach = Bluebird.method((tab) => {
-      return tab.memory.attach()
-    })
-
-    cb = () => {
-      let duration
-
-      const gc = (tab) => {
-        return () => {
-          if (process.env.CYPRESS_SKIP_GC) {
-            return
-          }
-
-          console.time('garbage collection')
-          duration = Date.now()
-
-          return tab.memory.forceGarbageCollection()
-          .then(() => {
-            console.timeEnd('garbage collection')
-
-            timings.gc.push(Date.now() - duration)
-          })
+    const gc = (tab) => {
+      return () => {
+        if (process.env.CYPRESS_SKIP_GC) {
+          return
         }
-      }
 
-      const cc = (tab) => {
-        return () => {
-          if (process.env.CYPRESS_SKIP_CC) {
-            return
-          }
+        console.time('garbage collection')
+        duration = Date.now()
 
-          console.time('cycle collection')
-          duration = Date.now()
+        return tab.memory.forceGarbageCollection()
+        .then(() => {
+          console.timeEnd('garbage collection')
 
-          return tab.memory.forceCycleCollection()
-          .then(() => {
-            console.timeEnd('cycle collection')
-
-            timings.cc.push(Date.now() - duration)
-          })
-        }
-      }
-
-      return browser.listTabs()
-      .then((tabs) => {
-        browser.tabs = tabs
-
-        return Bluebird.mapSeries(tabs, (tab: any) => {
-          // FIXME: do we really need to attach and detach every time?
-          return attach(tab)
-          .then(gc(tab))
-          .then(cc(tab))
-          // .then(() => {
-          // return tab.memory.measure()
-          // .then(console.log)
-          // })
-          .then(() => {
-            return tab.memory.detach()
-          })
+          timings.gc.push(Date.now() - duration)
         })
-      })
-    }
-  },
-
-  setupMarionette (extensions, url) {
-    const driver = new Marionette.Drivers.Tcp({})
-
-    const connect = Bluebird.promisify(driver.connect.bind(driver))
-    const driverSend = promisify(driver.send.bind(driver))
-
-    sendMarionette = (data) => {
-      return driverSend(new Command(data))
+      }
     }
 
-    debug('firefox: navigating page with webdriver')
+    const cc = (tab) => {
+      return () => {
+        if (process.env.CYPRESS_SKIP_CC) {
+          return
+        }
 
-    return connect()
-    .then(() => {
-      return sendMarionette({
-        name: 'WebDriver:NewSession',
-        parameters: { acceptInsecureCerts: true },
+        console.time('cycle collection')
+        duration = Date.now()
+
+        return tab.memory.forceCycleCollection()
+        .then(() => {
+          console.timeEnd('cycle collection')
+
+          timings.cc.push(Date.now() - duration)
+        })
+      }
+    }
+
+    return browser.listTabs()
+    .then((tabs) => {
+      browser.tabs = tabs
+
+      return Bluebird.mapSeries(tabs, (tab: any) => {
+        // FIXME: do we really need to attach and detach every time?
+        return attach(tab)
+        .then(gc(tab))
+        .then(cc(tab))
+        // .then(() => {
+        // return tab.memory.measure()
+        // .then(console.log)
+        // })
+        .then(() => {
+          return tab.memory.detach()
+        })
       })
     })
-    .then(({ sessionId }) => {
-      return Bluebird.all(_.map(extensions, (path) => {
-        return sendMarionette({
-          name: 'Addon:Install',
-          sessionId,
-          parameters: { path, temporary: true },
-        })
-      }))
-      .then(() => {
-        return sendMarionette({
-          name: 'WebDriver:Navigate',
-          sessionId,
-          parameters: { url },
-        })
-      })
+  }
+}
+
+export async function setupMarionette (extensions, url) {
+  const driver = new Marionette.Drivers.Tcp({})
+
+  const connect = Bluebird.promisify(driver.connect.bind(driver))
+  const driverSend = promisify(driver.send.bind(driver))
+
+  sendMarionette = (data) => {
+    return driverSend(new Command(data))
+  }
+
+  debug('firefox: navigating page with webdriver')
+
+  await connect()
+
+  const { sessionId } = await sendMarionette({
+    name: 'WebDriver:NewSession',
+    parameters: { acceptInsecureCerts: true },
+  })
+
+  await Bluebird.all(_.map(extensions, (path) => {
+    return sendMarionette({
+      name: 'Addon:Install',
+      sessionId,
+      parameters: { path, temporary: true },
     })
-  },
+  }))
+
+  await sendMarionette({
+    name: 'WebDriver:Navigate',
+    sessionId,
+    parameters: { url },
+  })
 }

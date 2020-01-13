@@ -9,6 +9,7 @@ const appData = require('../util/app_data')
 const profileCleaner = require('../util/profile_cleaner')
 
 const PATH_TO_BROWSERS = appData.path('browsers')
+const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
 
 const getBrowserPath = (browser) => {
   return path.join(
@@ -43,33 +44,35 @@ const getExtensionDir = (browser, isTextTerminal) => {
   )
 }
 
-const ensureCleanCache = function (browser, isTextTerminal) {
+const ensureCleanCache = async function (browser, isTextTerminal) {
   const p = path.join(
     getProfileDir(browser, isTextTerminal),
     'CypressCache'
   )
 
-  return fs
-  .removeAsync(p)
-  .then(() => {
-    return fs.ensureDirAsync(p)
-  }).return(p)
+  await fs.removeAsync(p)
+  await fs.ensureDirAsync(p)
+
+  return p
+}
+
+// we now store profiles inside the Cypress binary folder
+// so we need to remove the legacy root profiles that existed before
+function removeLegacyProfiles () {
+  return profileCleaner.removeRootProfile(pathToProfiles, [
+    path.join(pathToProfiles, 'run-*'),
+    path.join(pathToProfiles, 'interactive'),
+  ])
 }
 
 const removeOldProfiles = function () {
   // a profile is considered old if it was used
   // in a previous run for a PID that is either
   // no longer active, or isnt a cypress related process
-  const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
   const pathToPartitions = appData.electronPartitionsPath()
 
   return Promise.all([
-    // we now store profiles in either interactive or run-* folders
-    // so we need to remove the old root profiles that existed before
-    profileCleaner.removeRootProfile(pathToProfiles, [
-      path.join(pathToProfiles, 'run-*'),
-      path.join(pathToProfiles, 'interactive'),
-    ]),
+    removeLegacyProfiles(),
     profileCleaner.removeInactiveByPid(pathToProfiles, 'run-'),
     profileCleaner.removeInactiveByPid(pathToPartitions, 'run-'),
   ])

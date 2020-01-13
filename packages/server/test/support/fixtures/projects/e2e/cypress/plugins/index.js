@@ -32,6 +32,12 @@ module.exports = (on) => {
   })
 
   on('before:browser:launch', (browser, args) => {
+    if (browser.family === 'firefox') {
+      // this is needed to ensure correct error screenshot / video recording
+      // resolution of exactly 1280x720 (height must account for firefox url bar)
+      args.args = args.args.concat(['-width', '1280', '-height', '789'])
+    }
+
     browserArgs = args
 
     return args

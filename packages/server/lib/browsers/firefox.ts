@@ -1,26 +1,17 @@
-/* eslint-disable
-    no-dupe-keys,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _ = require('lodash')
-const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs-extra'))
-const debug = require('debug')('cypress:server:browsers')
-const path = require('path')
-const urlUtil = require('url')
-const FirefoxProfile = require('firefox-profile')
-const firefoxUtil = require('./firefox-util')
+import _ from 'lodash'
+import Bluebird from 'bluebird'
+import fs from 'fs-extra'
+import Debug from 'debug'
+import path from 'path'
+import urlUtil from 'url'
+import FirefoxProfile from 'firefox-profile'
+import * as firefoxUtil from './firefox-util'
+// @ts-ignore
+import plugins from '../plugins'
+import utils from './utils'
+import { Browser } from '@packages/launcher'
 
-const plugins = require('../plugins')
-const utils = require('./utils')
+const debug = Debug('cypress:server:browsers')
 
 const defaultPreferences = {
   'network.proxy.type': 1,
@@ -51,8 +42,6 @@ const defaultPreferences = {
   'browser.link.open_newwindow': 2,
   'browser.offline': false,
   'browser.reader.detectedFirstArticle': true,
-  'browser.safebrowsing.enabled': false,
-  'browser.safebrowsing.malware.enabled': false,
   'browser.search.update': false,
   'browser.selfsupport.url': '',
   'browser.sessionstore.resume_from_crash': false,
@@ -108,11 +97,15 @@ const defaultPreferences = {
   'webdriver_assume_untrusted_issuer': true,
   // prevent going into safe mode after crash
   'toolkit.startup.max_resumed_crashes': -1,
+  'toolkit.legacyUserProfileCustomizations.stylesheets': true,
+  'browser.tabs.drawInTitlebar': true,
+
   'geo.provider.testing': true,
 
   // allow playing videos w/o user interaction
   'media.autoplay.default': 0,
 
+  'browser.safebrowsing.enabled': false,
   'browser.safebrowsing.blockedURIs.enabled': false,
   'browser.safebrowsing.downloads.enabled': false,
   'browser.safebrowsing.passwords.enabled': false,
@@ -126,117 +119,120 @@ const defaultPreferences = {
 
   'dom.min_background_timeout_value': 4,
   'dom.timeout.enable_budget_timer_throttling': false,
-
 }
 
-module.exports = {
-  send: firefoxUtil.send,
+export async function open (browser: Browser, url, options: any = {}) {
+  let extensions: string[] = []
+  let preferences = _.extend({}, defaultPreferences)
+  let args = [
+    '-marionette',
+    '-new-instance',
+    '-foreground',
+    // TODO: ensure binding to 127.0.0.1 for RDP and Marionette and use rand port
+    '-start-debugger-server', '2929',
+  ]
 
-  open (browserName, url, options = {}) {
-    let ps; let ua
-    let extensions = []
-    let preferences = _.extend({}, defaultPreferences)
+  debug('firefox open %o', options)
 
-    debug('firefox open %o', options)
+  const ps = options.proxyServer
 
-    ps = options.proxyServer
+  if (ps) {
+    let { hostname, port, protocol } = urlUtil.parse(ps)
 
-    if (ps) {
-      let { hostname, port, protocol } = urlUtil.parse(ps)
-
-      if (port == null) {
-        port = protocol === 'https:' ? 443 : 80
-      }
-
-      port = parseFloat(port)
-
-      _.extend(preferences, {
-        'network.proxy.allow_hijacking_localhost': true,
-        'network.proxy.http': hostname,
-        'network.proxy.ssl': hostname,
-        'network.proxy.http_port': port,
-        'network.proxy.ssl_port': port,
-        'network.proxy.no_proxies_on': '',
-      })
+    if (port == null) {
+      port = protocol === 'https:' ? '443' : '80'
     }
 
-    ua = options.userAgent
-
-    if (ua) {
-      preferences['general.useragent.override'] = ua
-    }
-
-    return Promise
-    .try(() => {
-      if (!plugins.has('before:browser:launch')) {
-        return
-      }
-
-      return plugins.execute('before:browser:launch', options.browser, { preferences, extensions })
-      .then((result) => {
-        debug('got user args for \'before:browser:launch\' %o', result)
-        if (!result) {
-          return
-        }
-
-        if (_.isPlainObject(result.preferences)) {
-          ({
-            preferences,
-          } = result)
-        }
-
-        if (_.isArray(result.extensions)) {
-          extensions = result.extensions
-        }
-      })
-    }).then(() => {
-      return Promise.all([
-        utils.ensureCleanCache(browserName),
-        utils.writeExtension(options.browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute, options.onScreencastFrame),
-        utils.ensureCleanCache(browserName),
-      ])
-    }).spread((cacheDir, extensionDest, profileDir) => {
-      extensions.push(extensionDest)
-
-      const profile = new FirefoxProfile({
-        destinationDirectory: profileDir,
-      })
-
-      debug('firefox profile dir %o', { path: profile.path() })
-
-      preferences['browser.cache.disk.parent_directory'] = cacheDir
-      for (let pref in preferences) {
-        const value = preferences[pref]
-
-        profile.setPreference(pref, value)
-      }
-      profile.updatePreferences()
-
-      const args = [
-        '-profile',
-        profile.path(),
-        // TODO: ensure binding to 127.0.0.1 for RDP and Marionette
-        '-marionette',
-        '-new-instance',
-        '-foreground',
-        '-height', '794', // TODO: why 794?
-        '-width', '1280',
-        // TODO: ensure binding to 127.0.0.1 for RDP and Marionette
-        '-start-debugger-server', '2929',
-      ]
-
-      debug('launch in firefox', { url, args })
-
-      return utils.launch(browserName, null, args)
-    }).then((browserInstance) => {
-      return firefoxUtil.setup(extensions, url)
-      .then(() => {
-        return browserInstance
-      })
-    }).catch((err) => {
-      debug('launch error:', err.stack)
-      throw err
+    _.extend(preferences, {
+      'network.proxy.allow_hijacking_localhost': true,
+      'network.proxy.http': hostname,
+      'network.proxy.ssl': hostname,
+      'network.proxy.http_port': +port,
+      'network.proxy.ssl_port': +port,
+      'network.proxy.no_proxies_on': '',
     })
-  },
+  }
 
+  const ua = options.userAgent
+
+  if (ua) {
+    preferences['general.useragent.override'] = ua
+  }
+
+  if (plugins.has('before:browser:launch')) {
+    const result = await plugins.execute('before:browser:launch', browser, { preferences, args, extensions })
+
+    debug('got user args for \'before:browser:launch\' %o', result)
+    if (result) {
+      if (_.isPlainObject(result.preferences)) {
+        debug('before:browser:launch', 'set preferences')
+        preferences = result.preferences
+      }
+
+      if (_.isArray(result.args)) {
+        debug('before:browser:launch', 'set args')
+        args = result.args
+      }
+
+      if (_.isArray(result.extensions)) {
+        debug('before:browser:launch', 'set extensions')
+        extensions = result.extensions
+      }
+    }
+  }
+
+  const [cacheDir, extensionDest] = await Bluebird.all([
+    utils.ensureCleanCache(browser, options.isTextTerminal),
+    utils.writeExtension(options.browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute, options.onScreencastFrame),
+  ])
+
+  extensions.push(extensionDest)
+  const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
+
+  const profile = new FirefoxProfile({
+    destinationDirectory: profileDir,
+  })
+
+  debug('firefox profile dir %o', { path: profile.path() })
+
+  preferences['browser.cache.disk.parent_directory'] = cacheDir
+  for (let pref in preferences) {
+    const value = preferences[pref]
+
+    profile.setPreference(pref, value)
+  }
+  profile.updatePreferences()
+
+  const xulStorePath = path.join(profile.path(), 'xulstore.json')
+
+  if (!await fs.pathExists(xulStorePath)) {
+    // this causes the browser to launch maximized, which chrome does by default
+    // otherwise an arbitrary size will be picked for the window size
+    // this will not have an effect after first launch in 'interactive' mode
+    await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 720, 'sizemode': 'maximized' } } })
+  }
+
+  const userCSSPath = path.join(profileDir, 'chrome')
+
+  if (!await fs.pathExists(path.join(userCSSPath, 'userChrome.css'))) {
+    // TODO: this hides the tab bar, possibly we might not want to do this
+    await fs.mkdir(userCSSPath)
+    await fs.writeFile(path.join(profileDir, 'chrome', 'userChrome.css'), `#tabbrowser-tabs {
+        visibility: collapse !important;
+      }
+    `)
+  }
+
+  args = args.concat([
+    '-profile',
+    profile.path(),
+  ])
+
+  debug('launch in firefox', { url, args })
+
+  const browserInstance = await utils.launch(browser, null, args)
+
+  await firefoxUtil.setup(extensions, url)
+
+  return browserInstance
 }
