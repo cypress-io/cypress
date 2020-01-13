@@ -16,7 +16,7 @@ const SelectItem = ({ value, children, selectItem, ...rest }) => {
     data-value={value}
   >
     <label htmlFor={id}>
-      <i className='fa' />
+      <i className='select-item-indicator fa' />
       <VisuallyHidden>
         <input
           {...rest}

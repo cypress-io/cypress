@@ -60,51 +60,51 @@ describe('lib/util/editors', () => {
     })
 
     describe('when alwaysIncludeEditors is true', () => {
-      it('returns editors along with preferred editor', () => {
-        const preferredEditor = {}
+      it('returns editors along with preferred opener', () => {
+        const preferredOpener = {}
 
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return { preferredEditor }
+            return { preferredOpener }
           },
         })
 
-        return getUserEditor(true).then(({ availableEditors, preferredEditor }) => {
+        return getUserEditor(true).then(({ availableEditors, preferredOpener }) => {
           expect(availableEditors).to.have.length(4)
-          expect(preferredEditor).to.equal(preferredEditor)
+          expect(preferredOpener).to.equal(preferredOpener)
         })
       })
     })
 
     describe('when alwaysIncludeEditors is false', () => {
-      it('only returns preferred editor if one has been saved', () => {
-        const preferredEditor = {}
+      it('only returns preferred opener if one has been saved', () => {
+        const preferredOpener = {}
 
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return { preferredEditor }
+            return { preferredOpener }
           },
         })
 
-        return getUserEditor(false).then(({ availableEditors, preferredEditor }) => {
+        return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
           expect(availableEditors).to.be.undefined
-          expect(preferredEditor).to.equal(preferredEditor)
+          expect(preferredOpener).to.equal(preferredOpener)
         })
       })
 
-      it('returns available editors if preferred editor has not been saved', () => {
-        return getUserEditor(false).then(({ availableEditors, preferredEditor }) => {
+      it('returns available editors if preferred opener has not been saved', () => {
+        return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
           expect(availableEditors).to.have.length(4)
-          expect(preferredEditor).to.be.undefined
+          expect(preferredOpener).to.be.undefined
         })
       })
 
       it('is default', () => {
-        return getUserEditor().then(({ availableEditors, preferredEditor }) => {
+        return getUserEditor().then(({ availableEditors, preferredOpener }) => {
           expect(availableEditors).to.have.length(4)
-          expect(preferredEditor).to.be.undefined
+          expect(preferredOpener).to.be.undefined
         })
       })
     })

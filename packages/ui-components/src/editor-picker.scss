@@ -21,6 +21,14 @@
   .description {
     color: #7e7e7e;
     font-size: 0.9em;
+  }
+
+  i.description {
+    margin-left: 0.4em;
+    margin-top: 0.1em;
+  }
+
+  span.description {
     display: block;
     padding-left: 1.5em;
     width: 100%;

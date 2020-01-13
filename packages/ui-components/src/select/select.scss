@@ -9,7 +9,7 @@
     cursor: pointer;
   }
 
-  i {
+  .select-item-indicator {
     @extend .far;
     @extend .#{$fa-css-prefix}-circle;
     color: #999;
@@ -22,7 +22,7 @@
   &:focus {
     background: #fff;
 
-    i {
+    .select-item-indicator {
       @extend .fas;
       @extend .#{$fa-css-prefix}-circle;
       color: #999;
@@ -33,7 +33,7 @@
     background: #fff;
     border-color: #08c18d;
 
-    i {
+    .select-item-indicator {
       @extend .fas;
       @extend .#{$fa-css-prefix}-circle;
       color: #08c18d;

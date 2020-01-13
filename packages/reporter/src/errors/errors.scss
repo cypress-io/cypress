@@ -110,7 +110,7 @@
     cursor: pointer;
     color: $err-text;
     text-decoration: underline;
-    
+
     i {
       position: relative;
       top: 1px;
@@ -123,19 +123,6 @@
       color: $err-text;
     }
 
-  }
-
-  .runnable-err-file-path {
-    color: $link-text;
-    text-decoration: underline;
-  }
-
-  .test-error-code-frame .runnable-err-file-path{
-    padding: 3px 10px 0;
-    line-height: 24px;
-    font-size: 13px;
-    position: relative;
-    top: 5px;
   }
 
   .runnable-err-message {
@@ -185,85 +172,22 @@
     font-family: $monospace;
   }
 
-  .test-error-code-frame {
+  .test-err-code-frame {
     background-color: #fff;
     border: 1px solid #ffe4e7;
     margin: 10px;
 
+    .runnable-err-file-path {
+      padding: 3px 10px 0;
+      line-height: 24px;
+      font-size: 13px;
+      position: relative;
+      top: 5px;
+    }
+
     pre {
       background-color: #fff;
       border: 0;
-    }
-  }
-}
-
-.err-file-options {
-  border: none;
-  padding: 0;
-  max-width: 300px;
-
-  // ensure moving mouse from file to tooltip doesn't mouse out and hide tooltip
-  &:before {
-    content: '';
-    position: absolute;
-    height: 6px;
-    left: 0;
-    right: 0;
-    top: 100%;
-  }
-
-  > span {
-    display: flex;
-  }
-
-  button {
-    background: none;
-    border: none;
-    border-radius: 0;
-    color: #fff;
-    cursor: pointer;
-    display: block;
-    font-size: 1em;
-    padding: 6px 8px;
-    position: relative;
-
-    &:first-child {
-      border-top-left-radius: 3px;
-      border-bottom-left-radius: 3px;
-    }
-
-    &:last-child {
-      border-top-right-radius: 3px;
-      border-bottom-right-radius: 3px;
-    }
-
-    &:hover,
-    &:focus {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .loader {
-      align-items: center;
-      bottom: 0;
-      display: none;
-      justify-content: center;
-      left: 0;
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-
-    &.is-loading {
-      cursor: default;
-      background: none;
-
-      .text {
-        visibility: hidden;
-      }
-
-      .loader {
-        display: flex;
-      }
     }
   }
 }
