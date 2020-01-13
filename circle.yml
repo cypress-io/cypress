@@ -12,7 +12,6 @@ macBuildFilters: &macBuildFilters
 
 # branches for which we should upload built Mac binary
 macUploadBuildFilters: &macUploadBuildFilters
-  context: test-runner:upload
   filters:
     branches:
       only:
@@ -1204,7 +1203,8 @@ mac-workflow: &mac-workflow
     - upload-npm-package:
         name: Mac NPM package upload
         executor: mac
-        <<: *macBuildUploadFilters
+        context: test-runner:upload
+        <<: *macUploadBuildFilters
         requires:
           - Mac NPM package
 
@@ -1219,7 +1219,8 @@ mac-workflow: &mac-workflow
     - upload-binary:
         name: Mac binary upload
         executor: mac
-        <<: *macBuildUploadFilters
+        context: test-runner:upload
+        <<: *macUploadBuildFilters
         requires:
           - Mac binary
 
@@ -1255,13 +1256,9 @@ mac-workflow: &mac-workflow
 
     - post-beta-install-comment:
         name: Post Mac beta install comment
-        context: test-runner:commit-status-checks
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
-              - test-electron-app-4964
+        context: test-runner:commit-status-checks
+        <<: *macUploadBuildFilters
         requires:
           - Mac NPM package
           - Mac binary
