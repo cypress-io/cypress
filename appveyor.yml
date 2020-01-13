@@ -2,6 +2,7 @@ branches:
   only:
     - master
     - develop
+    - test-electron-app-4964
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

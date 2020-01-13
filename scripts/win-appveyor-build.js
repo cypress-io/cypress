@@ -26,7 +26,9 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  return branch === 'develop' || shouldForceBinaryBuild
+  const isBranchToBuild = ['develop', 'test-electron-app-4964 '].includes(branch)
+
+  return isBranchToBuild || shouldForceBinaryBuild
 }
 
 const isForkedPullRequest = () => {
