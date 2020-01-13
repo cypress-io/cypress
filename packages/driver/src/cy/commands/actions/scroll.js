@@ -1,14 +1,3 @@
-/* eslint-disable
-    default-case,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 const Promise = require('bluebird')
@@ -227,6 +216,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           x = '100%'
           y = '100%'
           break
+        default:
       }
 
       if (y == null) {

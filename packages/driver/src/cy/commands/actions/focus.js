@@ -1,22 +1,10 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
-const Promise = require('bluebird')
 
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
 const $elements = require('../../../dom/elements')
-const $actionability = require('../../actionability')
 
-module.exports = (Commands, Cypress, cy, state, config) => {
+module.exports = (Commands, Cypress, cy) => {
   return Commands.addAll({ prevSubject: ['element', 'window'] }, {
     focus (subject, options = {}) {
     // we should throw errors by default!
@@ -108,7 +96,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         force: false,
       })
 
-      const { $el, $focused } = options
+      const { $focused } = options
 
       isWin = $dom.isWindow(options.$el)
 
