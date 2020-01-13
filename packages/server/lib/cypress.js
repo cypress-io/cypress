@@ -153,7 +153,19 @@ module.exports = {
 
     const options = argsUtils.toObject(argv)
 
+    debug('from argv %o got options %o', argv, options)
+
+    if (options.headless) {
+      // --headless is same as --headed false
+      if (options.headed) {
+        throw new Error('Impossible options: both headless and headed are true')
+      }
+
+      options.headed = false
+    }
+
     if (options.runProject && !options.headed) {
+      debug('scaling electron app in headless mode')
       // scale the electron browser window
       // to force retina screens to not
       // upsample their images when offscreen
@@ -196,7 +208,7 @@ module.exports = {
   },
 
   startInMode (mode, options) {
-    debug('starting in mode %s', mode)
+    debug('starting in mode %s with options %o', mode, options)
 
     switch (mode) {
       case 'version':
