@@ -368,6 +368,12 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('throws an error if both --headed and --headless are true', function () {
+      // error is thrown synchronously
+      expect(() => cypress.start([`--run-project=${this.todosPath}`, '--headless', '--headed']))
+      .to.throw('Impossible options: both headless and headed are true')
+    })
+
     describe('strips --', () => {
       beforeEach(() => {
         sinon.spy(argsUtil, 'toObject')

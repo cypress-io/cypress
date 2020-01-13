@@ -157,6 +157,10 @@ module.exports = {
 
     if (options.headless) {
       // --headless is same as --headed false
+      if (options.headed) {
+        throw new Error('Impossible options: both headless and headed are true')
+      }
+
       options.headed = false
     }
 
