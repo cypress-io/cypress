@@ -26,7 +26,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  const isBranchToBuild = ['develop', 'test-electron-app-4964 '].includes(branch)
+  const isBranchToBuild = ['develop', 'test-electron-app-4964'].includes(branch)
 
   console.log('should build branch "%s"?', branch, isBranchToBuild)
   console.log('should force binary build?', shouldForceBinaryBuild)
