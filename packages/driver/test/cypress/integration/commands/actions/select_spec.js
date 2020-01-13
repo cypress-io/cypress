@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $ = Cypress.$.bind(Cypress)
 const {
   _,
@@ -15,7 +5,7 @@ const {
 
 describe('src/cy/commands/actions/select', function () {
   before(() => {
-    return cy
+    cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
       this.body = win.document.body.outerHTML
@@ -32,7 +22,7 @@ describe('src/cy/commands/actions/select', function () {
     it('does not change the subject', () => {
       const select = cy.$$('select[name=maps]')
 
-      return cy.get('select[name=maps]').select('train').then(($select) => expect($select).to.match(select))
+      cy.get('select[name=maps]').select('train').then(($select) => expect($select).to.match(select))
     })
 
     it('selects by value', () => cy.get('select[name=maps]').select('de_train').then(($select) => expect($select).to.have.value('de_train')))
@@ -48,22 +38,22 @@ describe('src/cy/commands/actions/select', function () {
     it('can handle options nested in optgroups', () => cy.get('select[name=starwars]').select('Jar Jar').then(($select) => expect($select).to.have.value('jarjar')))
 
     it('can handle options with same value selected by text', () => {
-      return cy.get('select[name=startrek-same]').select('Uhura').then(($select) => {
+      cy.get('select[name=startrek-same]').select('Uhura').then(($select) => {
         expect($select.val()).to.equal('same')
         expect($select.find('option:selected')).to.have.text('Uhura')
         expect($select[0].selectedIndex).to.equal(2)
 
-        return expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
+        expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
       })
     })
 
     it('can handle options with some same values selected by text', () => {
-      return cy.get('select[name=startrek-some-same]').select('Uhura').then(($select) => {
+      cy.get('select[name=startrek-some-same]').select('Uhura').then(($select) => {
         expect($select.val()).to.equal('same')
         expect($select.find('option:selected')).to.have.text('Uhura')
         expect($select[0].selectedIndex).to.equal(2)
 
-        return expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
+        expect($select[0].selectedOptions[0]).to.eql($select.find('option:selected')[0])
       })
     })
 
@@ -80,13 +70,13 @@ describe('src/cy/commands/actions/select', function () {
 
       expect(select.val()).to.deep.eq(['2001'])
 
-      return cy.get('select[name=movies]').select(['apoc', 'br']).then(($select) => expect($select.val()).to.deep.eq(['apoc', 'br']))
+      cy.get('select[name=movies]').select(['apoc', 'br']).then(($select) => expect($select.val()).to.deep.eq(['apoc', 'br']))
     })
 
     it('lists the select as the focused element', () => {
       const select = cy.$$('#select-maps')
 
-      return cy.get('#select-maps').select('de_train').focused().then(($focused) => expect($focused.get(0)).to.eq(select.get(0)))
+      cy.get('#select-maps').select('de_train').focused().then(($focused) => expect($focused.get(0)).to.eq(select.get(0)))
     })
 
     it('causes previous input to receive blur', (done) => {
@@ -94,21 +84,23 @@ describe('src/cy/commands/actions/select', function () {
 
       cy.get('input:text:first').type('foo')
 
-      return cy.get('#select-maps').select('de_train')
+      cy.get('#select-maps').select('de_train')
     })
 
     it('can forcibly click even when being covered by another element', (done) => {
       const select = $('<select><option>foo</option></select>').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
-      const span = $('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+
+      cy.$$('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
       select.on('click', () => done())
 
-      return cy.get('#select-covered-in-span').select('foo', { force: true })
+      cy.get('#select-covered-in-span').select('foo', { force: true })
     })
 
     it('passes timeout and interval down to click', (done) => {
       const select = $('<select />').attr('id', 'select-covered-in-span').prependTo(cy.$$('body'))
-      const span = $('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
+
+      cy.$$('<span>span on select</span>').css({ position: 'absolute', left: select.offset().left, top: select.offset().top, padding: 5, display: 'inline-block', backgroundColor: 'yellow' }).prependTo(cy.$$('body'))
 
       cy.on('command:retry', (options) => {
         expect(options.timeout).to.eq(1000)
@@ -117,7 +109,7 @@ describe('src/cy/commands/actions/select', function () {
         return done()
       })
 
-      return cy.get('#select-covered-in-span').select('foobar', { timeout: 1000, interval: 60 })
+      cy.get('#select-covered-in-span').select('foobar', { timeout: 1000, interval: 60 })
     })
 
     it('can forcibly click even when element is invisible', (done) => {
@@ -125,17 +117,17 @@ describe('src/cy/commands/actions/select', function () {
 
       select.click(() => done())
 
-      return cy.get('#select-maps').select('de_dust2', { force: true })
+      cy.get('#select-maps').select('de_dust2', { force: true })
     })
 
     it('retries until <option> can be selected', () => {
       const option = cy.$$('<option>foo</option>')
 
       cy.on('command:retry', _.once(() => {
-        return cy.$$('#select-maps').append(option)
+        cy.$$('#select-maps').append(option)
       }))
 
-      return cy.get('#select-maps').select('foo')
+      cy.get('#select-maps').select('foo')
     })
 
     it('retries until <select> is no longer disabled', () => {
@@ -145,7 +137,7 @@ describe('src/cy/commands/actions/select', function () {
         return select.prop('disabled', false)
       }))
 
-      return cy.get('select[name=disabled]').select('foo')
+      cy.get('select[name=disabled]').select('foo')
     })
 
     it('retries until <options> are no longer disabled', () => {
@@ -155,7 +147,7 @@ describe('src/cy/commands/actions/select', function () {
         return select.find('option').prop('disabled', false)
       }))
 
-      return cy.get('select[name=opt-disabled]').select('bar')
+      cy.get('select[name=opt-disabled]').select('bar')
     })
 
     describe('assertion verification', function () {
@@ -169,7 +161,7 @@ describe('src/cy/commands/actions/select', function () {
         return null
       })
 
-      return it('eventually passes the assertion', function () {
+      it('eventually passes the assertion', function () {
         cy.$$('#select-maps').change(function () {
           return _.delay(() => {
             return $(this).addClass('selected')
@@ -177,7 +169,7 @@ describe('src/cy/commands/actions/select', function () {
           , 100)
         })
 
-        return cy.get('#select-maps').select('de_nuke').should('have.class', 'selected').then(function () {
+        cy.get('#select-maps').select('de_nuke').should('have.class', 'selected').then(function () {
           const {
             lastLog,
           } = this
@@ -185,7 +177,7 @@ describe('src/cy/commands/actions/select', function () {
           expect(lastLog.get('name')).to.eq('assert')
           expect(lastLog.get('state')).to.eq('passed')
 
-          return expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('ended')).to.be.true
         })
       })
     })
@@ -194,36 +186,36 @@ describe('src/cy/commands/actions/select', function () {
       it('emits click event', (done) => {
         cy.$$('select[name=maps]').click(() => done())
 
-        return cy.get('select[name=maps]').select('train')
+        cy.get('select[name=maps]').select('train')
       })
 
       it('emits change event', (done) => {
         cy.$$('select[name=maps]').change(() => done())
 
-        return cy.get('select[name=maps]').select('train')
+        cy.get('select[name=maps]').select('train')
       })
 
       it('emits focus event', (done) => {
         cy.$$('select[name=maps]').one('focus', () => done())
 
-        return cy.get('select[name=maps]').select('train')
+        cy.get('select[name=maps]').select('train')
       })
 
       it('emits input event', (done) => {
         cy.$$('select[name=maps]').one('input', () => done())
 
-        return cy.get('select[name=maps]').select('train')
+        cy.get('select[name=maps]').select('train')
       })
 
-      return it('emits all events in the correct order', () => {
+      it('emits all events in the correct order', () => {
         const fired = []
         const events = ['mousedown', 'focus', 'mouseup', 'click', 'input', 'change']
 
         _.each(events, (event) => {
-          return cy.$$('select[name=maps]').one(event, () => fired.push(event))
+          cy.$$('select[name=maps]').one(event, () => fired.push(event))
         })
 
-        return cy.get('select[name=maps]').select('train').then(() => expect(fired).to.deep.eq(events))
+        cy.get('select[name=maps]').select('train').then(() => expect(fired).to.deep.eq(events))
       })
     })
 
@@ -245,7 +237,7 @@ describe('src/cy/commands/actions/select', function () {
       it('throws when not a dom subject', (done) => {
         cy.on('fail', () => done())
 
-        return cy.noop({}).select('foo')
+        cy.noop({}).select('foo')
       })
 
       it('throws when subject is not in the document', (done) => {
@@ -264,7 +256,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('#select-maps').select('de_dust2').select('de_aztec')
+        cy.get('#select-maps').select('de_dust2').select('de_aztec')
       })
 
       it('throws when more than 1 element in the collection', (done) => {
@@ -276,7 +268,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy
+        cy
         .get('select')
         .select('foo')
       })
@@ -288,7 +280,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('input:first').select('foo')
+        cy.get('input:first').select('foo')
       })
 
       it('throws when finding duplicate values', (done) => {
@@ -298,7 +290,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('select[name=names]').select('bm')
+        cy.get('select[name=names]').select('bm')
       })
 
       it('throws when passing an array to a non multiple select', (done) => {
@@ -308,11 +300,11 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('select[name=names]').select(['bm', 'ss'])
+        cy.get('select[name=names]').select(['bm', 'ss'])
       })
 
       it('throws when the subject isnt visible', (done) => {
-        const select = cy.$$('#select-maps').show().hide()
+        cy.$$('#select-maps').show().hide()
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.select() failed because this element is not visible')
@@ -320,7 +312,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('#select-maps').select('de_dust2')
+        cy.get('#select-maps').select('de_dust2')
       })
 
       it('throws when value or text does not exist', (done) => {
@@ -330,7 +322,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('select[name=foods]').select('foo')
+        cy.get('select[name=foods]').select('foo')
       })
 
       it('throws when the <select> itself is disabled', (done) => {
@@ -340,7 +332,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('select[name=disabled]').select('foo')
+        cy.get('select[name=disabled]').select('foo')
       })
 
       it('throws when options are disabled', (done) => {
@@ -350,7 +342,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('select[name=opt-disabled]').select('bar')
+        cy.get('select[name=opt-disabled]').select('bar')
       })
 
       it('eventually fails the assertion', function (done) {
@@ -368,7 +360,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('#select-maps').select('de_nuke').should('have.class', 'selected')
+        cy.get('#select-maps').select('de_nuke').should('have.class', 'selected')
       })
 
       it('does not log an additional log on failure', function (done) {
@@ -378,10 +370,10 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('#select-maps').select('de_nuke').should('have.class', 'selected')
+        cy.get('#select-maps').select('de_nuke').should('have.class', 'selected')
       })
 
-      return it('only logs once on failure', function (done) {
+      it('only logs once on failure', function (done) {
         cy.on('fail', (err) => {
           // 2 logs, 1 for cy.get, 1 for cy.select
           expect(this.logs.length).to.eq(2)
@@ -389,7 +381,7 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('#select-maps').select('does_not_exist')
+        cy.get('#select-maps').select('does_not_exist')
       })
     })
 
@@ -407,22 +399,22 @@ describe('src/cy/commands/actions/select', function () {
       })
 
       it('logs out select', () => {
-        return cy.get('#select-maps').select('de_dust2').then(function () {
+        cy.get('#select-maps').select('de_dust2').then(function () {
           const {
             lastLog,
           } = this
 
-          return expect(lastLog.get('name')).to.eq('select')
+          expect(lastLog.get('name')).to.eq('select')
         })
       })
 
       it('passes in $el', () => {
-        return cy.get('#select-maps').select('de_dust2').then(function ($select) {
+        cy.get('#select-maps').select('de_dust2').then(function ($select) {
           const {
             lastLog,
           } = this
 
-          return expect(lastLog.get('$el')).to.eq($select)
+          expect(lastLog.get('$el')).to.eq($select)
         })
       })
 
@@ -439,11 +431,11 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('#select-maps').select('de_dust2').then(($select) => {})
+        cy.get('#select-maps').select('de_dust2').then(($select) => {})
       })
 
       it('snapshots after clicking', () => {
-        return cy.get('#select-maps').select('de_dust2').then(function ($select) {
+        cy.get('#select-maps').select('de_dust2').then(function ($select) {
           const {
             lastLog,
           } = this
@@ -451,7 +443,7 @@ describe('src/cy/commands/actions/select', function () {
           expect(lastLog.get('snapshots').length).to.eq(2)
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
 
-          return expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+          expect(lastLog.get('snapshots')[1].body).to.be.an('object')
         })
       })
 
@@ -466,21 +458,21 @@ describe('src/cy/commands/actions/select', function () {
           return done()
         })
 
-        return cy.get('#select-maps').select('de_dust2')
+        cy.get('#select-maps').select('de_dust2')
       })
 
       it('ends', () => {
-        return cy.get('#select-maps').select('de_dust2').then(function () {
+        cy.get('#select-maps').select('de_dust2').then(function () {
           const {
             lastLog,
           } = this
 
-          return expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('state')).to.eq('passed')
         })
       })
 
       it('#consoleProps', () => {
-        return cy.get('#select-maps').select('de_dust2').then(function ($select) {
+        cy.get('#select-maps').select('de_dust2').then(function ($select) {
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($select)
           const console = this.lastLog.invoke('consoleProps')
 
@@ -489,7 +481,7 @@ describe('src/cy/commands/actions/select', function () {
           expect(console['Applied To']).to.eq($select.get(0))
           expect(console.Coords.x).to.be.closeTo(fromElWindow.x, 10)
 
-          return expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 10)
+          expect(console.Coords.y).to.be.closeTo(fromElWindow.y, 10)
         })
       })
 
@@ -502,22 +494,22 @@ describe('src/cy/commands/actions/select', function () {
           }
         })
 
-        return cy.get('#select-maps').select('de_dust2').then(function () {
+        cy.get('#select-maps').select('de_dust2').then(function () {
           expect(this.logs.length).to.eq(2)
 
-          return expect(types.length).to.eq(1)
+          expect(types.length).to.eq(1)
         })
       })
 
-      return it('logs deltaOptions', () => {
-        return cy.get('#select-maps').select('de_dust2', { force: true, timeout: 1000 }).then(function () {
+      it('logs deltaOptions', () => {
+        cy.get('#select-maps').select('de_dust2', { force: true, timeout: 1000 }).then(function () {
           const {
             lastLog,
           } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
 
-          return expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
+          expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
     })
