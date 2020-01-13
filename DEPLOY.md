@@ -151,6 +151,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 12. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
     - Close the current release in ZenHub.
     - Create a new patch release (and a new minor release, if this is a minor release) in ZenHub, and schedule them both to be completed 2 weeks from the current date.
+    - Move all issues that are still open from the current release to the appropriate future release.
 13. Bump `version` in [`package.json`](package.json) and commit it to `develop` using a commit message like `release X.Y.Z [skip ci]`
 14. Tag this commit with `vX.Y.Z` and push that tag up.
 15. Merge `develop` into `master` and push that branch up.
