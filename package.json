@@ -96,7 +96,8 @@
     "vue-loader": "14.2.4",
     "vue-router": "3.0.5",
     "vue-template-compiler": "2.6.10",
-    "vuex": "3.1.1"
+    "vuex": "3.1.1",
+    "webpack": "4.41.5"
   },
   "standard": {
     "globals": [
@@ -110,7 +111,7 @@
     "cypress": "*"
   },
   "dependencies": {
-    "@cypress/webpack-preprocessor": "2.0.1",
+    "@cypress/webpack-preprocessor": "4.1.1",
     "common-tags": "1.8.0",
     "@kazupon/vue-i18n-loader": "0.5.0"
   }
