@@ -108,16 +108,15 @@ const _detectProviderName = () => {
   // return the key of the first provider
   // which is truthy
 
-    return _.findKey(CI_PROVIDERS, (value) => {
-      if (_.isString(value)) {
-        return env[value]
-      }
+  return _.findKey(CI_PROVIDERS, (value) => {
+    if (_.isString(value)) {
+      return env[value]
+    }
 
-      if (_.isFunction(value)) {
-
-          return value()
-      }
-    })
+    if (_.isFunction(value)) {
+      return value()
+    }
+  })
 }
 
 // TODO: dont forget about buildNumber!
