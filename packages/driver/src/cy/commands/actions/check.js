@@ -1,14 +1,3 @@
-/* eslint-disable
-    default-case,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 
@@ -16,7 +5,7 @@ const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
 const $elements = require('../../../dom/elements')
 
-const checkOrUncheck = function (type, subject, values = [], options = {}) {
+const checkOrUncheck = function (type, subject, Cypress, cy, values = [], options = {}) {
   // we're not handling conversion of values to strings
   // in case we've received numbers
 
@@ -47,6 +36,7 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
         return $el.prop('checked')
       case 'uncheck':
         return !$el.prop('checked')
+      default:
     }
   }
 
@@ -56,6 +46,7 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
         return $el.is(':checkbox,:radio')
       case 'uncheck':
         return $el.is(':checkbox')
+      default:
     }
   }
 
@@ -173,11 +164,11 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
 module.exports = function (Commands, Cypress, cy, state, config) {
   return Commands.addAll({ prevSubject: 'element' }, {
     check (subject, values, options) {
-      return checkOrUncheck.call(this, 'check', subject, values, options)
+      return checkOrUncheck.call(this, 'check', subject, Cypress, cy, values, options)
     },
 
     uncheck (subject, values, options) {
-      return checkOrUncheck.call(this, 'uncheck', subject, values, options)
+      return checkOrUncheck.call(this, 'uncheck', subject, Cypress, cy, values, options)
     },
   })
 }

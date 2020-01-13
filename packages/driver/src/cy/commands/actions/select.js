@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 
@@ -187,7 +177,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           force: options.force,
           timeout: options.timeout,
           interval: options.interval,
-        }).then(() => // TODO:
+        }).then(() => { // TODO:
         // 1. test cancelation
         // 2. test passing optionEls to each directly
         // 3. update other tests using this Promise.each pattern
@@ -196,7 +186,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         // 6. test that option actually receives click event
         // 7. test that select still has focus (i think it already does have a test)
         // 8. test that multiple=true selects receive option event for each selected option
-        {
           return Promise
           .resolve(optionEls) // why cant we just pass these directly to .each?
           .each((optEl) => {
