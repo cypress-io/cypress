@@ -797,16 +797,15 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - attach_workspace:
-          at: /tmp/urls
-      - run: ls -la /tmp/urls
-      - run: cat /tmp/urls/*.json
+      - run: ls -la
+      # make sure JSON files with uploaded urls are present
+      - run: ls -la binary-url.json npm-package-url.json
       - run:
           name: Post pre-release install comment
           command: |
             node scripts/add-install-comment.js \
-              --npm /tmp/urls/npm-package-url.json \
-              --binary /tmp/urls/binary-url.json
+              --npm npm-package-url.json \
+              --binary binary-url.json
 
   "test-binary-and-npm-against-other-projects":
     <<: *defaults
