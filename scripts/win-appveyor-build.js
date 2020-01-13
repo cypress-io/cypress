@@ -28,6 +28,9 @@ const isRightBranch = () => {
 
   const isBranchToBuild = ['develop', 'test-electron-app-4964 '].includes(branch)
 
+  console.log('should build branch "%s"?', branch, isBranchToBuild)
+  console.log('should force binary build?', shouldForceBinaryBuild)
+
   return isBranchToBuild || shouldForceBinaryBuild
 }
 
