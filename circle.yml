@@ -1259,8 +1259,8 @@ mac-workflow: &mac-workflow
         context: test-runner:commit-status-checks
         <<: *macUploadBuildFilters
         requires:
-          - Mac NPM package
-          - Mac binary
+          - Mac NPM package upload
+          - Mac binary upload
 
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
