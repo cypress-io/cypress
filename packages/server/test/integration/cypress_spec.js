@@ -348,6 +348,26 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('sets --headed false if --headless', function () {
+      sinon.spy(cypress, 'startInMode')
+
+      return cypress.start([`--run-project=${this.todosPath}`, '--headless'])
+      .then(() => {
+        expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER)
+        this.expectExitWith(0)
+
+        // check how --headless option sets --headed
+        expect(cypress.startInMode).to.be.calledOnce
+        expect(cypress.startInMode).to.be.calledWith('run')
+        const startInModeOptions = cypress.startInMode.firstCall.args[1]
+
+        expect(startInModeOptions).to.include({
+          headless: true,
+          headed: false,
+        })
+      })
+    })
+
     describe('strips --', () => {
       beforeEach(() => {
         sinon.spy(argsUtil, 'toObject')
