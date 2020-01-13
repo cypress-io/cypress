@@ -12,7 +12,7 @@ const $errUtils = require('../cypress/error_utils')
 const $stackUtils = require('../cypress/stack_utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 const chaiInspect = require('./chai/inspect')
-const { replaceToBigValueTags } = require('./big_object')
+const { replaceToBigValueTags } = require('./big_value')
 
 // all words between single quotes
 const allPropertyWordsBetweenSingleQuotes = /('.*?')/g

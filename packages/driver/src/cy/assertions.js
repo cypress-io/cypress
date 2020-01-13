@@ -6,7 +6,7 @@ const $dom = require('../dom')
 const $errUtils = require('../cypress/error_utils')
 const { LOGGED_ARRAY_SIZE } = require('./chai')
 const { LOGGED_OBJ_SIZE } = require('./chai')
-const { logBigValue } = require('./big_object')
+const { logBigValue } = require('./big_value')
 
 // TODO
 // bTagOpen + bTagClosed
