@@ -195,7 +195,7 @@ const create = (specWindow, Cypress, reporter) => {
   // generate the mocha + Mocha globals
   // on the specWindow, and get the new
   // _mocha instance
-  let _mocha = globals(specWindow, reporter)
+  const _mocha = globals(specWindow, reporter)
 
   const _runner = getRunner(_mocha)
 
