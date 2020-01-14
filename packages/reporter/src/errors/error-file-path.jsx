@@ -36,7 +36,7 @@ const validate = (chosenEditor) => {
 }
 
 const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) => {
-  const state = useLocalStore(() => ({
+  const state = useLocalStore((external) => ({
     chosenEditor: {},
     shouldShowValidation: false,
     setChosenEditor: action((editor) => {
@@ -44,14 +44,14 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
       state.chosenEditor = editor
     }),
     setOtherPath: action((otherPath) => {
-      const otherOption = _.find(editors, { isOther: true })
+      const otherOption = _.find(external.editors, { isOther: true })
 
       otherOption.openerId = otherPath
     }),
     setShouldShowValidation: action((shouldShow) => {
       state.shouldShowValidation = shouldShow
     }),
-  }))
+  }), { editors })
 
   const { isValid, validationMessage } = validate(state.chosenEditor)
 

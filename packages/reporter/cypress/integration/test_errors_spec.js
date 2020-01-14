@@ -55,6 +55,14 @@ const itHandlesFileOpening = (containerSelector) => {
       cy.contains('Set editor and open file')
     })
 
+    // NOTE: this fails because mobx doesn't make the editors observable, so
+    // the changes to the path don't bubble up correctly. this only happens
+    // in the Cypress test and not when running the actual app
+    it.skip('updates "Other" path when typed into', function () {
+      cy.contains('Other').find('input[type="text"]').type('/path/to/editor')
+      .should('have.value', '/path/to/editor')
+    })
+
     it('does not show error message when first shown', function () {
       cy.contains('Please select an editor').should('not.exist')
     })
