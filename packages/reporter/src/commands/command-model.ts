@@ -11,10 +11,12 @@ interface RenderProps {
   indicator?: string
 }
 
-type TestedValue = {
+export type TestedValueObject = {
   summary: string
   value: string | object | any[]
-} | null
+}
+
+export type TestedValue = TestedValueObject | null
 
 export interface CommandProps extends InstrumentProps {
   err?: Err

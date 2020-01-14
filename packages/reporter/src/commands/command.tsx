@@ -14,7 +14,7 @@ import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
-import CommandModel from './command-model'
+import CommandModel, { TestedValueObject } from './command-model'
 import { Message, DetailViewer } from './message'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
@@ -191,17 +191,17 @@ class Command extends Component<Props> {
         </FlashOnClick>
         {
           this.showSubject
-            ? <DetailViewer name='subject' value={model.subject && model.subject.value} />
+            ? <DetailViewer name='subject' target={model.subject as TestedValueObject} />
             : null
         }
         {
           this.showExpected
-            ? <DetailViewer name='expected' value={model.expected && model.expected.value} />
+            ? <DetailViewer name='expected' target={model.expected as TestedValueObject} />
             : null
         }
         {
           this.showActual
-            ? <DetailViewer name='actual' value={model.actual && model.actual.value} />
+            ? <DetailViewer name='actual' target={model.actual as TestedValueObject} />
             : null
         }
         {this._duplicates()}

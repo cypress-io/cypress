@@ -6,7 +6,7 @@ import Markdown from 'markdown-it'
 // @ts-ignore
 import { ObjectInspector, chromeLight, ObjectRootLabel, ObjectLabel, InspectorProps } from 'react-inspector'
 
-import CommandModel from './command-model'
+import CommandModel, { TestedValueObject } from './command-model'
 
 const md = new Markdown()
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
@@ -134,10 +134,12 @@ const SummaryButton = ({ summary, toggle }: SummmaryButtonProps) => {
 
 interface DetailViewerProps {
   name: string
-  value: any
+  target: TestedValueObject
 }
 
-export const DetailViewer = ({ name, value }: DetailViewerProps) => {
+export const DetailViewer = ({ name, target }: DetailViewerProps) => {
+  const { value, summary } = target
+
   return (
     <div className="command-detail-viewer">
       <div className="command-detail-viewer-title">{name} details</div>
@@ -145,7 +147,7 @@ export const DetailViewer = ({ name, value }: DetailViewerProps) => {
         {
           typeof (value) === 'string'
             ? value
-            : <ValueInspector value={value} />
+            : <ValueInspector value={value} summary={summary} />
         }
       </div>
     </div>
@@ -157,32 +159,33 @@ const VALUE_SUMMARY_PREFIX = 'cypress_value_summary:'
 
 interface ValueInspectorProps {
   value: any
+  summary: string
 }
 
-const ValueInspector = ({ value }: ValueInspectorProps) => {
-  const [summary, setSummary] = useState(initialSummary(value))
-  const [data, setData] = useState(generateDataFromSummary(value, summary))
+const ValueInspector = ({ value, summary: summaryText }: ValueInspectorProps) => {
+  const [valueSummary, setSummary] = useState(initialSummary(value))
+  const [summarizedData, setSummarizedData] = useState(generateDataFromSummary(value, valueSummary))
 
   return (
     <ObjectInspector
       theme={inspectorTheme('#555', '#555')}
-      data={data}
+      data={summarizedData}
       expandLevel={1}
       // @ts-ignore
-      nodeRenderer={({ depth, name, data, isNonenumerable }: InspectorProps) => {
+      nodeRenderer={({ depth, name, data, isNonEnumerable }: InspectorProps) => {
         return depth === 0
-          ? <ObjectRootLabel name={name} data={data} />
+          ? <span>{`(${valueLength(summarizedData)}/${valueLength(value)}) ${summaryText}`}</span>
           : data && typeof (data) === 'string' && data.startsWith(VALUE_SUMMARY_PREFIX)
             ? <a onClick={(e: MouseEvent) => {
               e.preventDefault()
               e.stopPropagation()
 
-              const updated = updateSummary(summary, data)
+              const updated = updateSummary(valueSummary, data)
 
               setSummary(updated)
-              setData(generateDataFromSummary(value, updated))
+              setSummarizedData(generateDataFromSummary(value, updated))
             }}>...Load more</a>
-            : <ObjectLabel name={name} data={data} isNonenumerable={isNonenumerable} />
+            : <ObjectLabel name={name} data={data} isNonenumerable={isNonEnumerable} />
       }}
     />
   )
