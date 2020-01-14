@@ -214,6 +214,7 @@ const _providerCiParams = () => {
       'CI_BUILD_ID', // build id and job id are aliases
       'CI_JOB_ID',
       'CI_JOB_URL',
+      'CI_JOB_NAME',
       // other information
       'GITLAB_HOST',
       'CI_PROJECT_ID',

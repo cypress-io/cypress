@@ -444,15 +444,6 @@ describe('src/cypress/dom/visibility', () => {
 </div>\
 `)
 
-      this.$parentsWithBackfaceVisibilityHidden = add(`\
-<div style="position: absolute; width: 200px; height: 260px; background: red; backface-visibility: hidden;">
-  <span id="front">front</span>
-</div>
-<div style="position: absolute; width: 200px; height: 260px; background: blue; backface-visibility: hidden; transform: rotateY(180deg);">
-  <span id="back" >back</span>
-</div>\
-`)
-
       this.$ancestorTransformMakesElOutOfBoundsOfAncestor = add(`\
 <div style='margin-left: 100px; overflow: hidden; width: 100px;'>
   <div style='transform: translateX(-100px); width: 200px;'>
@@ -929,6 +920,44 @@ describe('src/cypress/dom/visibility', () => {
 
           expect(el.find('#tr-p-2')).to.be.hidden
         })
+
+        describe('invisible when overflow: hidden', () => {
+          it('height: 0 + overflow', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('height: 0 + overflow-x', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('height: 0 + overflow-y', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow-x', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow-y', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+        })
       })
 
       it('is hidden when outside parents transform scale', function () {
@@ -945,58 +974,6 @@ describe('src/cypress/dom/visibility', () => {
 
       it('is visible when in ancestor\'s bounds due to ancestor\'s transform', function () {
         expect(this.$ancestorTransformMakesElInBoundsOfAncestor.find('#inbounds')).to.be.visible
-      })
-    })
-
-    describe('css backface-visibility', () => {
-      describe('element visibility by backface-visibility and rotation', () => {
-        const add = (el) => {
-          return $(el).appendTo(cy.$$('body'))
-        }
-
-        it('is visible when there is no transform', () => {
-          const el = add('<div>No transform</div>')
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when an element is rotated < 90 degrees', () => {
-          const el = add('<div style="backface-visibility: hidden; transform: rotateX(45deg)">rotateX(45deg)</div>')
-
-          expect(el).to.be.visible
-
-          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-45deg)">rotateY(-45deg)</div>')
-
-          expect(el2).to.be.visible
-        })
-
-        it('is invisible when an element is rotated > 90 degrees', () => {
-          const el = add('<div style="backface-visibility: hidden; transform: rotateX(135deg)">rotateX(135deg)</div>')
-
-          expect(el).to.be.hidden
-
-          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-135deg)">rotateY(-135deg)</div>')
-
-          expect(el2).to.be.hidden
-        })
-
-        it('is invisible when an element is rotated in 90 degrees', () => {
-          const el = add('<div style="backface-visibility: hidden; transform: rotateX(90deg)">rotateX(90deg)</div>')
-
-          expect(el).to.be.hidden
-
-          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-90deg)">rotateY(-90deg)</div>')
-
-          expect(el2).to.be.hidden
-        })
-      })
-
-      it('is visible when backface not visible', function () {
-        expect(this.$parentsWithBackfaceVisibilityHidden.find('#front')).to.be.visible
-      })
-
-      it('is hidden when backface visible', function () {
-        expect(this.$parentsWithBackfaceVisibilityHidden.find('#back')).to.be.hidden
       })
     })
 
