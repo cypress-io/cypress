@@ -211,6 +211,29 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
+      it('can be chained', () => {
+        cy.wrap('ab')
+        .should((subject) => {
+          expect(subject).to.be.a('string')
+          expect(subject).to.contain('a')
+        })
+        .should((subject) => {
+          expect(subject).to.contain('b')
+          expect(subject).to.have.length(2)
+        })
+        .and((subject) => {
+          expect(subject).to.eq('ab')
+          expect(subject).not.to.contain('c')
+        })
+        .then(function () {
+          expect(this.logs.length).to.eq(8)
+
+          this.logs.slice(1).forEach((log) => {
+            expect(log.get('name')).to.eq('assert')
+          })
+        })
+      })
+
       context('remote jQuery instances', () => {
         beforeEach(function () {
           this.remoteWindow = cy.state('window')
