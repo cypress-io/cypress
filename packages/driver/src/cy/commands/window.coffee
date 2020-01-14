@@ -29,22 +29,42 @@ validOrientations = ["landscape", "portrait"]
 ## refresh would cause viewport to hang
 currentViewport = null
 
+
 module.exports = (Commands, Cypress, cy, state, config) ->
   defaultViewport = _.pick(config(), "viewportWidth", "viewportHeight")
 
   ## currentViewport could already be set due to previous runs
   currentViewport ?= defaultViewport
 
+  cyVisitedInLastTest = false
+  testsSinceLastForcedGc = 0
+
+  Cypress.on "command:start", (cmd) ->
+    if cmd.get('name') is 'visit'
+      cyVisitedInLastTest = true
+
   Cypress.on "test:before:run:async", (testAttrs) ->
     { order } = testAttrs
 
-    if Cypress.isBrowser('firefox')
-      ## TODO: add !isInteractive here too
-      shouldRunCc = (order % config("firefoxCcInterval") is 0)
-      shouldRunGc = (order % config("firefoxGcInterval") is 0)
+    testsSinceLastForcedGc++
 
-      if shouldRunCc or shouldRunGc
-        Cypress.backend("reduce:memory:pressure", { shouldRunCc, shouldRunGc })
+    ## if we're not in FF, this is the first test, the last test didn't run a cy.visit,
+    ## or we are in `open` mode and the user has not explicitly opted in to forced GC in `open`...
+    if not Cypress.isBrowser('firefox') or
+        order is 0 or
+        not cyVisitedInLastTest or
+        (not config('firefoxGcInOpenMode') and config('isInteractive'))
+      ## reset state and skip forced GC
+      cyVisitedInLastTest = false
+      return
+
+    cyVisitedInLastTest = false
+
+    shouldRunGc = config("firefoxGcInterval") and testsSinceLastForcedGc >= config("firefoxGcInterval")
+
+    if shouldRunGc
+      testsSinceLastForcedGc = 0
+      Cypress.backend("firefox:force:gc")
 
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means

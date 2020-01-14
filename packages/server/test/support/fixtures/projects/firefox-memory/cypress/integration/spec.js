@@ -1,9 +1,8 @@
-const NUM_TESTS = Cypress.env('NUM_TESTS') || 500
-const REDUCTION_INTERVAL = Cypress.env('REDUCTION_INTERVAL') || 0
+const NUM_TESTS = Cypress.env('NUM_TESTS') || 100
+
 let lastSample = parse(window.performance.memory)
 const samples = []
 
-Cypress.config('firefoxMemoryReductionInterval', REDUCTION_INTERVAL)
 Cypress.on('test:after:run', (attrs) => {
   if (window.gc) {
     // window.gc()
@@ -27,10 +26,11 @@ function parse (obj) {
   return JSON.parse(str)
 }
 const stats = () => {
-  const { firefoxMemoryReductionInterval } = Cypress.config()
+  const { firefoxGcInterval, firefoxGcInOpenMode } = Cypress.config()
 
   cy.task('console', {
-    firefoxMemoryReductionInterval,
+    firefoxGcInterval,
+    firefoxGcInOpenMode,
     numTests: NUM_TESTS,
   })
 }

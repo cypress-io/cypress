@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
@@ -10,12 +8,7 @@ import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import protocol from './protocol'
 
-type CollectGarbageArgs = {
-  shouldRunGc: boolean
-  shouldRunCc: boolean
-}
-
-const debug = Debug('cypress:server:browsers')
+const debug = Debug('cypress:server:browsers:firefox-util')
 
 const promisify = (fn) => {
   return (...args) => {
@@ -31,9 +24,7 @@ const promisify = (fn) => {
   }
 }
 
-let sendMarionette
-
-let cb: (args: CollectGarbageArgs) => Promise<void>
+let forceGcCc: () => Promise<void>
 
 let timings = {
   gc: [] as any[],
@@ -41,7 +32,7 @@ let timings = {
   collections: [] as any[],
 }
 
-const log = () => {
+const logGcDetails = () => {
   const reducedTimings = {
     ...timings,
     collections: _.map(timings.collections, (event) => {
@@ -63,25 +54,25 @@ const log = () => {
     }),
   }
 
-  console.log('timings', util.inspect(reducedTimings, {
+  debug('forced GC timings %o', util.inspect(reducedTimings, {
     breakLength: Infinity,
     maxArrayLength: Infinity,
   }))
 
-  console.log('times', {
+  debug('forced GC times %o', {
     gc: reducedTimings.gc.length,
     cc: reducedTimings.cc.length,
     collections: reducedTimings.collections.length,
   })
 
-  console.log('average', {
+  debug('forced GC averages %o', {
     gc: _.chain(reducedTimings.gc).sum().divide(reducedTimings.gc.length).value(),
     cc: _.chain(reducedTimings.cc).sum().divide(reducedTimings.cc.length).value(),
     collections: _.chain(reducedTimings.collections).sumBy('duration').divide(reducedTimings.collections.length).value(),
     spread: _.chain(reducedTimings.collections).sumBy('spread').divide(reducedTimings.collections.length).value(),
   })
 
-  console.log('total', {
+  debug('forced GC totals %o', {
     gc: _.sum(reducedTimings.gc),
     cc: _.sum(reducedTimings.cc),
     collections: _.sumBy(reducedTimings.collections, 'duration'),
@@ -98,11 +89,11 @@ const log = () => {
 
 export default {
   log () {
-    log()
+    logGcDetails()
   },
 
-  collectGarbage (args: CollectGarbageArgs) {
-    return cb(args)
+  collectGarbage () {
+    return forceGcCc()
   },
 
   setup (extensions, url) {
@@ -138,7 +129,7 @@ export default {
         tab.memory.on('garbage-collection', ({ data }) => {
           data.num = timings.collections.length + 1
           timings.collections.push(data)
-          console.log('received garbage-collection', data)
+          debug('received garbage-collection event %o', data)
         })
 
         return tab.memory.attach()
@@ -175,44 +166,34 @@ export default {
       })
     })
 
-    cb = (args: CollectGarbageArgs) => {
-      let duration
+    forceGcCc = () => {
+      let gcDuration; let ccDuration
 
       const gc = (tab) => {
         return () => {
-          if (!args.shouldRunGc) {
-            return
-          }
-
-          console.time('garbage collection')
-          duration = Date.now()
+          let start = Date.now()
 
           return tab.memory.forceGarbageCollection()
           .then(() => {
-            console.timeEnd('garbage collection')
-
-            timings.gc.push(Date.now() - duration)
+            gcDuration = Date.now() - start
+            timings.gc.push(gcDuration)
           })
         }
       }
 
       const cc = (tab) => {
         return () => {
-          if (!args.shouldRunCc) {
-            return
-          }
-
-          console.time('cycle collection')
-          duration = Date.now()
+          let start = Date.now()
 
           return tab.memory.forceCycleCollection()
           .then(() => {
-            console.timeEnd('cycle collection')
-
-            timings.cc.push(Date.now() - duration)
+            ccDuration = Date.now() - start
+            timings.cc.push(ccDuration)
           })
         }
       }
+
+      debug('forcing GC and CC...')
 
       return getPrimaryTab(browser)
       .then((tab) => {
@@ -220,8 +201,11 @@ export default {
         .then(gc(tab))
         .then(cc(tab))
       })
+      .then(() => {
+        debug('forced GC and CC completed %o', { ccDuration, gcDuration })
+      })
       .tapCatch((err) => {
-        console.log('firefox RDP error', err.stack)
+        debug('firefox RDP error while forcing GC and CC %o', err)
       })
     }
   },
@@ -232,7 +216,7 @@ export default {
     const connect = Bluebird.promisify(driver.connect.bind(driver))
     const driverSend = promisify(driver.send.bind(driver))
 
-    sendMarionette = (data) => {
+    const sendMarionette = (data) => {
       return driverSend(new Command(data))
     }
 
@@ -245,7 +229,7 @@ export default {
         parameters: { acceptInsecureCerts: true },
       })
     })
-    .then(({ sessionId }) => {
+    .then(({ sessionId }: any) => {
       return Bluebird.all(_.map(extensions, (path) => {
         return sendMarionette({
           name: 'Addon:Install',

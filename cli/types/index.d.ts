@@ -2204,6 +2204,17 @@ declare namespace Cypress {
      * @default true
      */
     waitForAnimations: boolean
+    /**
+     * Firefox-only: The number of tests that will run between forced garbage collections.
+     * Set to 0 to disable forced garbage collections.
+     * @default 1
+     */
+    firefoxGcInterval: number
+    /**
+     * Firefox-only: Should forced garbage collections run while in `cypress open`?
+     * @default false
+     */
+    firefoxGcInOpenMode: boolean
   }
 
   interface DebugOptions {
