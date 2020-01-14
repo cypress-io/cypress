@@ -29,7 +29,6 @@ validOrientations = ["landscape", "portrait"]
 ## refresh would cause viewport to hang
 currentViewport = null
 
-
 module.exports = (Commands, Cypress, cy, state, config) ->
   defaultViewport = _.pick(config(), "viewportWidth", "viewportHeight")
 

@@ -119,18 +119,6 @@ const defaultPreferences = {
 
   'dom.min_background_timeout_value': 4,
   'dom.timeout.enable_budget_timer_throttling': false,
-
-  'javascript.options.gc_delay': Number(process.env.GC_DELAY) || 4000,
-  'javascript.options.gc_delay.first': Number(process.env.GC_DELAY_FIRST) || 10000,
-  'javascript.options.gc_delay.full': Number(process.env.GC_DELAY_FULL) || 60000,
-  'javascript.options.gc_delay.interslice': Number(process.env.GC_DELAY_INTERSLICE) || 100,
-  'javascript.options.gc_on_memory_pressure': !process.env.DISABLE_GC_ON_MEMORY_PRESSURE,
-  'javascript.options.mem.gc_per_zone': !process.env.DISABLE_GC_PER_ZONE,
-  'javascript.options.mem.gc_incremental': !process.env.DISABLE_GC_INCREMENTAL,
-
-  'browser.history.maxStateObjectSize': Number(process.env.HISTORY_MAX_SIZE) || 2097152,
-  'browser.sessionhistory.max_entries': Number(process.env.SESSION_HISTORY_MAX_ENTRIES) || 50,
-  'places.history.enabled': !process.env.DISABLE_PLACES_HISTORY,
 }
 
 export async function open (browser: Browser, url, options: any = {}) {
