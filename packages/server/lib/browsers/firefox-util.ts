@@ -109,8 +109,6 @@ export default {
       port: 2929,
     })
 
-    console.log('_connectAsync')
-
     const foxdriver = await Foxdriver.attach('127.0.0.1', 2929)
 
     const { browser } = foxdriver

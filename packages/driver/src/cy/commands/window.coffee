@@ -63,7 +63,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     if shouldRunGc
       testsSinceLastForcedGc = 0
+
+      Cypress.emit("before:firefox:force:gc")
+
       Cypress.backend("firefox:force:gc")
+      .then =>
+        Cypress.emit("after:firefox:force:gc")
 
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means

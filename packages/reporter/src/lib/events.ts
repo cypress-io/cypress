@@ -125,6 +125,14 @@ const events: Events = {
       appState.pinnedSnapshotId = null
     }))
 
+    runner.on('before:firefox:force:gc', action('before:firefox:force:gc', () => {
+      appState.setForcingGc(true)
+    }))
+
+    runner.on('after:firefox:force:gc', action('after:firefox:force:gc', () => {
+      appState.setForcingGc(false)
+    }))
+
     localBus.on('resume', action('resume', () => {
       appState.resume()
       statsStore.resume()
