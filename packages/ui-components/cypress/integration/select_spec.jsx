@@ -171,7 +171,9 @@ describe('<Select />', () => {
               <SelectItem value="v2" />
               <SelectItem value="v3" />
               <SelectItem value="v4" />
-              <SelectItem value="v5" />
+              <SelectItem value="v5">
+                <input data-cy="input" type="text" />
+              </SelectItem>
             </Select>
           )
         }
@@ -229,6 +231,28 @@ describe('<Select />', () => {
         cy.get('@items').first().click().trigger('keydown', { keyCode: down, which: down })
         cy.get('@values').eq(1).should('be.checked')
         cy.wrap(onChange).should('be.calledWith', 'v2')
+      })
+
+      describe('when keydown comes from inner element', () => {
+        it('does not move on left', () => {
+          cy.get('[data-cy="input"]').type('{leftarrow}')
+          cy.get('@values').last().should('be.checked')
+        })
+
+        it('does not move on right', () => {
+          cy.get('[data-cy="input"]').type('{rightarrow}')
+          cy.get('@values').last().should('be.checked')
+        })
+
+        it('does not move on up', () => {
+          cy.get('[data-cy="input"]').type('{uparrow}')
+          cy.get('@values').last().should('be.checked')
+        })
+
+        it('does not move on down', () => {
+          cy.get('[data-cy="input"]').type('{downarrow}')
+          cy.get('@values').last().should('be.checked')
+        })
       })
     })
   })
