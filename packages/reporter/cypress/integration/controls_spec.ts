@@ -26,6 +26,11 @@ describe('controls', function () {
 
   describe('responsive design', function () {
     describe('>= 400px wide', () => {
+      beforeEach(() => {
+        // 900 below is to make screen long enough to remove scrollbar on the right
+        cy.viewport(400, 900)
+      })
+
       it('shows \'Tests\'', () => {
         cy.get('.focus-tests span').should('be.visible')
       })

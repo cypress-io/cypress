@@ -3,6 +3,7 @@ import _ from 'lodash'
 import React, { ReactNode, MouseEvent, useState } from 'react'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
+import Cypress from '@packages/driver'
 // @ts-ignore
 import { ObjectInspector, chromeLight, ObjectRootLabel, ObjectLabel, InspectorProps } from 'react-inspector'
 
@@ -34,38 +35,40 @@ interface MessageProps {
   toggleActual: (e: MouseEvent) => void
 }
 
-export const Message = observer(({ model, toggleSubject, toggleExpected, toggleActual }: MessageProps) => (
-  <span>
-    <span className='command-message-text-wrap'>
-      <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
-      {
-        (!model.subject && !model.expected && !model.actual)
-          ? <span
-            className='command-message-text'
-            dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
+export const Message = observer(({ model, toggleSubject, toggleExpected, toggleActual }: MessageProps) => {
+  return (
+    <span>
+      <span className='command-message-text-wrap'>
+        <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
+        {
+          (!model.subject && !model.expected && !model.actual)
+            ? <span
+              className='command-message-text'
+              dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
+            />
+            : <SummarizedMessage
+              model={model}
+              toggleSubject={toggleSubject}
+              toggleExpected={toggleExpected}
+              toggleActual={toggleActual}
+            />
+        }
+      </span>
+      { model.options && Object.keys(model.options).length > 0
+        ?
+        <span className="command-message-options" onClick={(e) => e.stopPropagation()}>
+          <ObjectInspector
+            theme={inspectorTheme('#999', '#777')}
+            data={model.options}
+            // @ts-ignore
+            expandLevel={Cypress && Cypress.config && Cypress.config('isInteractive') ? 0 : 10} // 10 here is an arbitrary big number
           />
-          : <SummarizedMessage
-            model={model}
-            toggleSubject={toggleSubject}
-            toggleExpected={toggleExpected}
-            toggleActual={toggleActual}
-          />
+        </span>
+        : null
       }
     </span>
-    { model.options && Object.keys(model.options).length > 0
-      ?
-      <span className="command-message-options" onClick={(e) => e.stopPropagation()}>
-        <ObjectInspector
-          theme={inspectorTheme('#999', '#777')}
-          data={model.options}
-          // @ts-ignore
-          expandLevel={Cypress && Cypress.config('isInteractive') ? 0 : 10} // 10 here is an arbitrary big number
-        />
-      </span>
-      : null
-    }
-  </span>
-))
+  )
+})
 
 type SummarizedMessageProps = MessageProps
 
