@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import prompts from 'prompts'
 import { optionInfo } from './options'
 
@@ -26,16 +27,38 @@ export const prompt = async (options: any) => {
     message: 'Generate examples?',
   })
 
+  const eslintChoices = [
+    { title: 'Default', value: 'default' },
+    { title: 'No', value: 'no' },
+    { title: 'Chai friendly', value: 'chai-friendly' },
+  ]
+
   const { installEslint } = await prompts({
     type: 'select',
     name: 'installEslint',
-    message: 'Install Eslint?',
-    choices: [
-      { title: 'Default', value: 'default' },
-      { title: 'No', value: 'no' },
-      { title: 'Chai friendly', value: 'chai-friendly' },
-    ],
+    message: 'Install Eslint rules for Cypress?',
+    choices: eslintChoices,
   })
+
+  const configStr = JSON.stringify(config, null, 2)
+
+  log('')
+  log('About to do these things:')
+  log(`* Write to ${options.projectRoot}/cypress.json`)
+  log(configStr)
+  log(`* Use TypeScript: ${useTypeScript ? 'yes' : 'no'}`)
+  log(`* Generate Examples: ${generateExamples ? 'yes' : 'no'}`)
+  log(`* Install Eslint Rules for Cypress: ${_.find(eslintChoices, { value: installEslint })!.title}`)
+
+  const { proceed } = await prompts({
+    type: 'confirm',
+    name: 'proceed',
+    message: 'Is it OK?',
+  })
+
+  if (proceed) {
+    console.log('generate things')
+  }
 }
 
 const configPrompts = async (optionInfo) => {
@@ -141,4 +164,9 @@ const objectPrompt = async (option) => {
   }
 
   return null
+}
+
+const log = (text: string) => {
+  // eslint-disable-next-line no-console
+  console.log(text)
 }
