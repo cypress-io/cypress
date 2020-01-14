@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import prompts from 'prompts'
 import { optionInfo } from './options'
+import fs from '../../util/fs'
 
 export const prompt = async (options: any) => {
   const { customize } = await prompts({
@@ -41,10 +42,11 @@ export const prompt = async (options: any) => {
   })
 
   const configStr = JSON.stringify(config, null, 2)
+  const configPath = `${options.cwd}/cypress.json`
 
   log('')
   log('About to do these things:')
-  log(`* Write to ${options.projectRoot}/cypress.json`)
+  log(`* Write to ${configPath}`)
   log(configStr)
   log(`* Use TypeScript: ${useTypeScript ? 'yes' : 'no'}`)
   log(`* Generate Examples: ${generateExamples ? 'yes' : 'no'}`)
@@ -57,7 +59,7 @@ export const prompt = async (options: any) => {
   })
 
   if (proceed) {
-    console.log('generate things')
+    await fs.writeFile(configPath, configStr)
   }
 }
 
