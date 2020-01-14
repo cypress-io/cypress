@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import extension from '@packages/extension'
@@ -103,7 +103,7 @@ const defaultArgs = [
   '--use-mock-keychain',
 ]
 
-const getRemoteDebuggingPort = Promise.method(() => {
+const getRemoteDebuggingPort = Bluebird.method(() => {
   let port
 
   port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
@@ -365,13 +365,13 @@ module.exports = {
     defaultArgs.push(`--remote-debugging-port=${port}`)
     defaultArgs.push('--remote-debugging-address=127.0.0.1')
 
-    const [cacheDir, afterPluginsArgs] = await Promise.all([
+    const [cacheDir, afterPluginsArgs] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
       pluginsBeforeBrowserLaunch(options.browser, defaultArgs),
     ])
-    const [extDest] = await Promise.all([
+    const [extDest] = await Bluebird.all([
       this._writeExtension(
         browser,
         options
