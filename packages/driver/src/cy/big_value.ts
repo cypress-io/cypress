@@ -97,7 +97,7 @@ const summarizeValue = (value: any) => {
     let summaryStr = ''
 
     Object.keys(summaryObj).forEach((key) => {
-      const val = stringifyValue(value)
+      const val = stringifyValue(value[key])
 
       summaryStr += `${key}: ${val}, `
     })
