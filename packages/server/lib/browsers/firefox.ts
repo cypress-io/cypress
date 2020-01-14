@@ -5,7 +5,7 @@ import Debug from 'debug'
 import path from 'path'
 import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
-import * as firefoxUtil from './firefox-util'
+import firefoxUtil from './firefox-util'
 // @ts-ignore
 import plugins from '../plugins'
 import utils from './utils'

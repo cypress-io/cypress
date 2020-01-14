@@ -13,7 +13,7 @@ plugins = require("#{root}../lib/plugins")
 protocol = require("#{root}../lib/browsers/protocol")
 specUtil = require('../../specUtils')
 extension = require("@packages/extension")
-firefoxUtil = require("#{root}../lib/browsers/firefox-util")
+firefoxUtil = require("#{root}../lib/browsers/firefox-util").default
 
 firefox = require("#{root}../lib/browsers/firefox")
 
@@ -34,6 +34,8 @@ describe "lib/browsers/firefox", ->
       }
 
       sinon.stub(process, 'pid').value(1111)
+
+      protocol.foo = 'bar'
       sinon.stub(protocol, '_connectAsync').resolves(null)
 
       sinon.stub(Foxdriver, 'attach').resolves({listTabs: -> []})
@@ -109,6 +111,7 @@ describe "lib/browsers/firefox", ->
       firefox.open(@browser, "http://", @options).then =>
         expect(utils.writeExtension).to.be.calledWith(@options.browser, @options.isTextTerminal, @options.proxyUrl, @options.socketIoRoute, @options.onScreencastFrame)
 
+    ## TODO: pick open port for debugger
     it.skip "finds remote port for firefox debugger", ->
       firefox.open(@browser, "http://", @options).then =>
         expect(firefoxUtil.findRemotePort).to.be.called

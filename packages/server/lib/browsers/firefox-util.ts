@@ -8,7 +8,7 @@ import Exception from 'marionette-client/lib/marionette/error'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
-import * as protocol from './protocol'
+import protocol from './protocol'
 
 type CollectGarbageArgs = {
   shouldRunGc: boolean
@@ -96,7 +96,7 @@ const log = () => {
   }
 }
 
-module.exports = {
+export default {
   log () {
     log()
   },
@@ -117,6 +117,8 @@ module.exports = {
       host: '127.0.0.1',
       port: 2929,
     })
+
+    console.log('_connectAsync')
 
     const foxdriver = await Foxdriver.attach('127.0.0.1', 2929)
 

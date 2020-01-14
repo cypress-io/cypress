@@ -8,7 +8,7 @@ export const logFs = () => {
   console.dir(getFs(), { depth: null })
 }
 
-export const getFsPath = (pathStr) => {
+export const getFsPath = (pathStr: string) => {
   return _.get(getFs(), _.compact(pathStr.split(path.sep)))
 }
 
