@@ -4,6 +4,7 @@ import $dom from '../dom'
 const LOGGED_ARRAY_SIZE = 10
 const LOGGED_OBJ_SIZE = 10
 const LONG_STRING_LENGTH = 100
+const MESSAGE_STRING_MAX = 30
 
 interface Values {
   subject: any
@@ -118,7 +119,9 @@ const stringifyValue = (value: any) => {
   }
 
   if (typeof (value) === 'string') {
-    return `"${value}"`
+    return value.length > MESSAGE_STRING_MAX
+      ? `"${value.substring(0, MESSAGE_STRING_MAX)} [...more]"`
+      : `"${value}"`
   }
 
   return value
