@@ -38,13 +38,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Cypress.on "test:before:run:async", (testAttrs) ->
     { order } = testAttrs
 
-    if Cypress.isBrowser('firefox')
+    if Cypress.isBrowser('firefox') and order > 0
       ## TODO: add !isInteractive here too
       shouldRunCc = (order % config("firefoxCcInterval") is 0)
       shouldRunGc = (order % config("firefoxGcInterval") is 0)
 
       if shouldRunCc or shouldRunGc
-        Cypress.backend("reduce:memory:pressure", { shouldRunCc, shouldRunGc })
+        Cypress.emit("before:force:gc")
+
+        Cypress.backend("force:gc", { shouldRunCc, shouldRunGc })
+        .then =>
+          Cypress.emit("after:force:gc")
 
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means

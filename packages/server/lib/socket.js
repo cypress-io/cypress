@@ -372,7 +372,7 @@ class Socket {
               return options.onResetServerState()
             case 'log:memory:pressure':
               return firefoxUtil.log()
-            case 'reduce:memory:pressure':
+            case 'force:gc':
               return firefoxUtil.collectGarbage(args[0])
             case 'incoming:xhr':
               return options.onIncomingXhr(args[0], args[1])
