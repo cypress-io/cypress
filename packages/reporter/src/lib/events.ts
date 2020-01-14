@@ -125,14 +125,6 @@ const events: Events = {
       appState.pinnedSnapshotId = null
     }))
 
-    runner.on('before:force:gc', () => {
-      appState.forcingGc = true
-    })
-
-    runner.on('after:force:gc', () => {
-      appState.forcingGc = false
-    })
-
     localBus.on('resume', action('resume', () => {
       appState.resume()
       statsStore.resume()

@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { observable } from 'mobx'
 
 interface DefaultAppState {
-  forcingGc: boolean
   isPaused: boolean
   isRunning: boolean
   nextCommandName: string | null | undefined
@@ -10,7 +9,6 @@ interface DefaultAppState {
 }
 
 const defaults: DefaultAppState = {
-  forcingGc: false,
   isPaused: false,
   isRunning: false,
   nextCommandName: null,
@@ -19,7 +17,6 @@ const defaults: DefaultAppState = {
 
 class AppState {
   @observable autoScrollingEnabled = true
-  @observable forcingGc = defaults.forcingGc
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName

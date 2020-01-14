@@ -20,7 +20,7 @@ ws.on('connect', () => {
   ws.emit('runner:connected')
 })
 
-const driverToReporterEvents = 'paused before:force:gc after:force:gc'.split(' ')
+const driverToReporterEvents = 'paused'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
