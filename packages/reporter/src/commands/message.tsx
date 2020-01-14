@@ -176,7 +176,7 @@ const ValueInspector = ({ value, summary: summaryText }: ValueInspectorProps) =>
         return depth === 0
           ? <span>{`(${valueLength(summarizedData)}/${valueLength(value)}) ${summaryText}`}</span>
           : data && typeof (data) === 'string' && data.startsWith(VALUE_SUMMARY_PREFIX)
-            ? <a onClick={(e: MouseEvent) => {
+            ? <a className="load-more" onClick={(e: MouseEvent) => {
               e.preventDefault()
               e.stopPropagation()
 
