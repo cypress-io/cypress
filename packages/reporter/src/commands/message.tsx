@@ -153,6 +153,7 @@ export const DetailViewer = ({ name, value }: DetailViewerProps) => {
 }
 
 const LOAD_SIZE = 100
+const VALUE_SUMMARY_PREFIX = 'cypress_value_summary:'
 
 interface ValueInspectorProps {
   value: any
@@ -171,12 +172,12 @@ const ValueInspector = ({ value }: ValueInspectorProps) => {
       nodeRenderer={({ depth, name, data, isNonenumerable }: InspectorProps) => {
         return depth === 0
           ? <ObjectRootLabel name={name} data={data} />
-          : data && data.cypress_value_summary_pos !== undefined
+          : data && typeof (data) === 'string' && data.startsWith(VALUE_SUMMARY_PREFIX)
             ? <a onClick={(e: MouseEvent) => {
               e.preventDefault()
               e.stopPropagation()
 
-              const updated = updateSummary(summary, data.cypress_value_summary_pos)
+              const updated = updateSummary(summary, data)
 
               setSummary(updated)
               setData(generateDataFromSummary(value, updated))
@@ -226,12 +227,13 @@ const initialSummary = (value: any): ValueSummary => {
 }
 
 const updateSummary = (summary: ValueSummary, pos: string) => {
-  if (pos === '') {
+  if (pos === VALUE_SUMMARY_PREFIX) {
     summary.__length = summary.__length + LOAD_SIZE
 
     return summary
   }
 
+  pos = pos.substring(VALUE_SUMMARY_PREFIX.length)
   pos = pos[0] === '.' ? pos.substring(1) : pos
 
   const val = _.get(summary, `${pos}.__length`)
@@ -239,16 +241,14 @@ const updateSummary = (summary: ValueSummary, pos: string) => {
   return _.set(summary, `${pos}.__length`, val + LOAD_SIZE)
 }
 
-const generateDataFromSummary = (value: any, summary: ValueSummary, pos: string = '') => {
+const generateDataFromSummary = (value: any, summary: ValueSummary, pos: string = VALUE_SUMMARY_PREFIX) => {
   let result: any
 
   if (Array.isArray(value)) {
     result = partialArray(value, summary.__length)
 
     if (result.length < value.length) {
-      result.push({
-        cypress_value_summary_pos: pos,
-      })
+      result.push(pos)
     }
 
     const copy = Object.assign({}, summary)
@@ -268,9 +268,7 @@ const generateDataFromSummary = (value: any, summary: ValueSummary, pos: string 
     result = partialObject(value, summary.__length)
 
     if (Object.keys(result).length < Object.keys(value).length) {
-      result['__cypress_value_summary_pos'] = {
-        cypress_value_summary_pos: pos,
-      }
+      result['__cypress_value_summary_pos'] = pos
     }
 
     const copy = Object.assign({}, summary)
