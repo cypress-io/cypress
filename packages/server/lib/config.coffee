@@ -76,7 +76,7 @@ configKeys = toWords """
   watchForFileChanges
   waitForAnimations               resolvedNodeVersion
   nodeVersion                     resolvedNodePath
-  firefoxGcInterval               firefoxGcInOpenMode
+  firefoxGcInterval
 """
 
 # Deprecated and retired public configuration properties
@@ -141,8 +141,7 @@ CONFIG_DEFAULTS = {
   pluginsFile:                   "cypress/plugins"
   nodeVersion:                   "default"
   configFile:                    "cypress.json"
-  firefoxGcInterval:             1
-  firefoxGcInOpenMode:           false
+  firefoxGcInterval:             { runMode: 1, openMode: 0 }
 
   ## deprecated
   javascripts:                   []
@@ -184,8 +183,7 @@ validationRules = {
   viewportWidth: v.isNumber
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
-  firefoxGcInterval: v.isNumber
-  firefoxGcInOpenMode: v.isBoolean
+  firefoxGcInterval: v.isValidFirefoxGcInterval
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->

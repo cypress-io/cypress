@@ -102,10 +102,25 @@ const isValidBrowserList = (key, browsers) => {
   return true
 }
 
+const isValidFirefoxGcInterval = (key, value) => {
+  const _isNumber = (val) => val == null || isNumber(val)
+
+  if (_isNumber(value)
+      || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
+          && _isNumber(value.runMode)
+          && _isNumber(value.openMode))) {
+    return true
+  }
+
+  return errMsg(key, value, 'a number or an object with "openMode" and "runMode" as keys and numbers as values')
+}
+
 module.exports = {
   isValidBrowser,
 
   isValidBrowserList,
+
+  isValidFirefoxGcInterval,
 
   isNumber (key, value) {
     if (value == null || isNumber(value)) {

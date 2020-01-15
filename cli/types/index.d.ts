@@ -33,6 +33,8 @@
 // Cypress, cy, Log inherits EventEmitter.
 type EventEmitter2 = import("eventemitter2").EventEmitter2
 
+type Nullable<T> = T | null
+
 interface EventEmitter extends EventEmitter2 {
   proxyTo: (cy: Cypress.cy) => null
   emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
@@ -2215,15 +2217,11 @@ declare namespace Cypress {
     waitForAnimations: boolean
     /**
      * Firefox-only: The number of tests that will run between forced garbage collections.
-     * Set to 0 to disable forced garbage collections.
-     * @default 1
+     * If a number is supplied, it will apply to `run` mode and `open` mode.
+     * Set the interval to `null` to disable forced garbage collections.
+     * @default { runMode: 1, openMode: 0 }
      */
-    firefoxGcInterval: number
-    /**
-     * Firefox-only: Should forced garbage collections run while in `cypress open`?
-     * @default false
-     */
-    firefoxGcInOpenMode: boolean
+    firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
   }
 
   interface DebugOptions {
