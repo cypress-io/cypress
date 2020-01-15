@@ -11,7 +11,7 @@
     "lint": "eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prerelease": "yarn build",
     "release": "cd build && releaser --no-node --no-changelog",
-    "size": "t=\"$(yarn pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "size": "t=\"$(yarn pack)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-debug": "node --inspect --debug-brk $(yarn bin mocha)",
     "test-dependencies": "dependency-check . --no-dev",

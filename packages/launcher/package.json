@@ -10,7 +10,7 @@
     "clean": "node scripts/clean.js || true",
     "clean-deps": "rm -rf node_modules",
     "clean-js": "yarn clean",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "size": "t=\"$(yarn pack)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "yarn test-unit",
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
