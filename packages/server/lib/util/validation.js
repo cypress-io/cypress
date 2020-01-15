@@ -47,7 +47,7 @@ const isValidBrowser = (browser) => {
     return errMsg('name', browser, 'a non-empty string')
   }
 
-  const knownBrowserFamilies = ['electron', 'chrome', 'firefox']
+  const knownBrowserFamilies = ['electron', 'chrome', 'firefox', 'electron-app']
 
   if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
     return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
