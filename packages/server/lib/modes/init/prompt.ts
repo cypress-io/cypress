@@ -1,7 +1,10 @@
 import _ from 'lodash'
 import prompts from 'prompts'
+import path from 'path'
+
 import { optionInfo } from './options'
 import fs from '../../util/fs'
+import { Config } from './config'
 
 export const prompt = async (options: any) => {
   const { customize } = await prompts({
@@ -10,7 +13,7 @@ export const prompt = async (options: any) => {
     message: 'Customize settings?',
   })
 
-  let config = {}
+  let config: Config = {}
 
   if (customize) {
     config = await configPrompts(optionInfo)
@@ -60,6 +63,9 @@ export const prompt = async (options: any) => {
 
   if (proceed) {
     await fs.writeFile(configPath, configStr)
+    log(`cypress.json generated at ${configPath}`)
+
+    await generateDirsAndFiles(options.cwd, config)
   }
 }
 
@@ -72,6 +78,7 @@ const configPrompts = async (optionInfo) => {
       type: 'confirm',
       name: 'customizeCategory',
       message: ``, // required
+      // @ts-ignore
       onRender ({ yellow }) {
         this.msg = `  Customize ${yellow(`${option.name}`)}?`
       },
@@ -87,6 +94,7 @@ const configPrompts = async (optionInfo) => {
             name,
             initial: defaultVal,
             message: '', // required
+            // @ts-ignore
             onRender ({ underline, reset }) {
               this.msg = `  - ${underline().yellow(`${name}:`)} ${reset().dim(`${description}`)}\n      Your value:`
             },
@@ -118,6 +126,7 @@ const objectPrompt = async (option) => {
     type: 'confirm',
     name: 'addObject',
     message: '', // required
+    // @ts-ignore
     onRender ({ underline, reset }) {
       this.msg = `  - ${underline().yellow(`${name}`)} object: ${reset().dim(`${description}`)}\n      Add this object?:`
     },
@@ -132,6 +141,7 @@ const objectPrompt = async (option) => {
         type: 'text',
         name: 'key',
         message: '', // required
+        // @ts-ignore
         onRender ({ reset }) {
           if (showInitialMessage) {
             this.msg = `    ${showInitialMessage ? reset().dim('Leave key field empty to exit') : ''}\n      - KEY:`
@@ -171,4 +181,84 @@ const objectPrompt = async (option) => {
 const log = (text: string) => {
   // eslint-disable-next-line no-console
   console.log(text)
+}
+
+const generateDirsAndFiles = async (projectDir: string, config: Config) => {
+  const {
+    fixturesFolder,
+    integrationFolder,
+    pluginsFile,
+    screenshotsFolder,
+    supportFile,
+    video,
+    videosFolder,
+  } = config
+
+  // fixturesFolder
+  if (fixturesFolder !== false) {
+    const dir = path.join(
+      projectDir,
+      fixturesFolder ||
+        _.find(optionInfo[2].options, { name: 'fixturesFolder' })!.default
+    )
+
+    await fs.ensureDir(dir)
+    log(`fixtures folder generated at ${dir}`)
+  }
+
+  // integrationFolder
+  const integrationDir = path.join(
+    projectDir,
+    integrationFolder ||
+      _.find(optionInfo[2].options, { name: 'integrationFolder' })!.default
+  )
+
+  await fs.ensureDir(integrationDir)
+  log(`integration folder generated at ${integrationDir}`)
+
+  // pluginsFile
+  if (pluginsFile !== false) {
+    const file = path.join(
+      projectDir,
+      pluginsFile ||
+        _.find(optionInfo[2].options, { name: 'pluginsFile' })!.default
+    )
+
+    await fs.ensureFile(file) // change it to scaffold.js
+    log(`plugins file generated at ${file}`)
+  }
+
+  // screenshotsDir
+  const screenshotsDir = path.join(
+    projectDir,
+    screenshotsFolder ||
+      _.find(optionInfo[2].options, { name: 'screenshotsFolder' })!.default
+  )
+
+  await fs.ensureDir(screenshotsDir)
+  log(`screenshots folder generated at ${screenshotsDir}`)
+
+  // supportFile
+  if (supportFile !== false) {
+    const file = path.join(
+      projectDir,
+      supportFile ||
+        _.find(optionInfo[2].options, { name: 'supportFile' })!.default
+    )
+
+    await fs.ensureFile(file) // change it to scaffold.js
+    log(`support file generated at ${file}`)
+  }
+
+  // videosFolder
+  if (video !== false) {
+    const dir = path.join(
+      projectDir,
+      videosFolder ||
+        _.find(optionInfo[2].options, { name: 'videosFolder' })!.default
+    )
+
+    await fs.ensureDir(dir)
+    log(`videos folder generated at ${dir}`)
+  }
 }
