@@ -264,7 +264,7 @@ We try to tag all issues with a `pkg/` tag describing the appropriate package th
 
 ### Requirements
 
-You must have [`node`](https://nodejs.org/en/) and [`yarn`](https://yarnpkg.com/en/docs/install) installed to run the project. We use [avn](https://github.com/wbyoung/avn), a utility to switch to the right node version, in each folder. Currently, Cypress should be developed using the version specified in root [.node-version](.node-version) file.
+You must have [`node`](https://nodejs.org/en/) and [`yarn`](https://yarnpkg.com/en/docs/install) installed to run the project. Currently, Cypress should be developed using the Node.js version specified in the root [.node-version](.node-version) file. You can use [avn](https://github.com/wbyoung/avn) to automatically use the right version of Node.js for this repo.
 
 ### Getting Started
 
