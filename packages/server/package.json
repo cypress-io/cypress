@@ -21,7 +21,7 @@
     "test-performance": "node ./test/scripts/run.js test/performance",
     "test-unit": "node ./test/scripts/run.js test/unit",
     "test-unit-watch": "./test/support/watch test/unit",
-    "test-watch": "./test/support/watch test"
+    "test-watch": "./test/support/watch test-unit"
   },
   "dependencies": {
     "@cypress/browserify-preprocessor": "1.1.2",
