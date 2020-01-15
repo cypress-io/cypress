@@ -49,7 +49,7 @@ This creates `build` folder.
 
 - `cd build; npm pack`
 
-This creates an archive, usually named `cypress-<version>.tgz`. You can install this archive from other projects, but because there is no corresponding binary yet (probably), skip binary download. For example from inside `cypress-example-kitchensink` folder
+This creates an archive, usually named `cypress-v<version>.tgz`. You can install this archive from other projects, but because there is no corresponding binary yet (probably), skip binary download. For example from inside `cypress-example-kitchensink` folder
 
 ```shell
 npm i ~/{your-dirs}/cypress/cli/build/cypress-3.3.1.tgz --ignore-scripts

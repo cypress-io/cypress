@@ -46,7 +46,7 @@ if (!shouldBuildBinary()) {
 
 console.log('building Windows binary')
 
-const filename = `cypress-${process.env.NEXT_DEV_VERSION}.tgz`
+const filename = `cypress-v${process.env.NEXT_DEV_VERSION}.tgz`
 const version = process.env.NEXT_DEV_VERSION
 
 la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
