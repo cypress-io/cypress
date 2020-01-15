@@ -7,7 +7,7 @@ const errors = require('../errors')
 const check = require('check-more-types')
 
 // returns true if the passed string is a known browser family name
-const isBrowserFamily = check.oneOf(['electron', 'chrome'])
+const isBrowserFamily = check.oneOf(['electron', 'chrome', 'electron-app'])
 
 let instance = null
 

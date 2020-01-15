@@ -231,8 +231,7 @@ const _maybeRecordVideo = (options) => {
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
 const _navigateUsingCRI = function (url) {
-  // @ts-ignore
-  la(check.url(url), 'missing url to navigate to', url)
+  la(check.unemptyString(url), 'missing url to navigate to', url)
 
   return function (client) {
     la(client, 'could not get CRI client')
@@ -346,6 +345,8 @@ module.exports = {
   },
 
   open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
+    debug('opening browser %o url %s options %o', browser, url, options)
+
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
