@@ -1252,6 +1252,13 @@ describe('src/cy/commands/actions/type', () => {
           .should('have.value', '-123.12')
         })
 
+        // https://github.com/cypress-io/cypress/issues/6055
+        it('can type negative numbers and dismiss invalid characters', () => {
+          cy.get('#number-without-value')
+          .type('-a42')
+          .should('have.value', '-42')
+        })
+
         it('can type {del}', () => {
           cy.get('#number-with-value')
           .type('{selectAll}{del}')
@@ -1301,6 +1308,20 @@ describe('src/cy/commands/actions/type', () => {
           .then(() => {
             expect(blurred).to.be.calledOnce
           })
+        })
+
+        // https://github.com/cypress-io/cypress/issues/5997
+        it('type=number can accept values with commas (,)', () => {
+          cy.get('#number-without-value')
+          .type('1,000')
+          .should('have.value', '1000')
+        })
+
+        // https://github.com/cypress-io/cypress/issues/5968
+        it('type=number can include {enter}', () => {
+          cy.get('#number-without-value')
+          .type('100{enter}')
+          .should('have.value', '100')
         })
       })
 

@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const md5 = require('md5')
 const path = require('path')
 const debug = require('debug')('cypress:server:saved_state')
@@ -13,7 +6,7 @@ const sanitize = require('sanitize-filename')
 const cwd = require('../cwd')
 const fs = require('../util/fs')
 
-const toHashName = function (projectRoot) {
+const toHashName = (projectRoot) => {
   if (!projectRoot) {
     throw new Error('Missing project path')
   }

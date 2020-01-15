@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const cp = require('child_process')
@@ -34,7 +35,11 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
       return yauzl.open(zipFilePath, (err, zipFile) => {
         yauzlDoneTime = Date.now()
 
-        if (err) return reject(err)
+        if (err) {
+          debug('error using yauzl %s', err.message)
+
+          return reject(err)
+        }
 
         const total = zipFile.entryCount
 
@@ -67,8 +72,12 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
           const endFn = (err) => {
             if (err) {
+              debug('error %s', err.message)
+
               return reject(err)
             }
+
+            debug('node unzip finished')
 
             return resolve()
           }
@@ -78,8 +87,12 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
             onEntry: tick,
           }
 
+          debug('calling Node extract tool %s %o', zipFilePath, opts)
+
           return unzipTools.extract(zipFilePath, opts, endFn)
         }
+
+        const unzipFallback = _.once(unzipWithNode)
 
         const unzipWithUnzipTool = () => {
           debug('unzipping via `unzip`')
@@ -88,9 +101,13 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
           const sp = cp.spawn('unzip', ['-o', zipFilePath, '-d', installDir])
 
-          sp.on('error', unzipWithNode)
+          sp.on('error', (err) => {
+            debug('unzip tool error: %s', err.message)
+            unzipFallback()
+          })
 
           sp.on('close', (code) => {
+            debug('unzip tool close with code %d', code)
             if (code === 0) {
               percent = 100
               notify(percent)
@@ -100,7 +117,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
             debug('`unzip` failed %o', { code })
 
-            return unzipWithNode()
+            return unzipFallback()
           })
 
           sp.stdout.on('data', (data) => {
@@ -127,7 +144,10 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
           const sp = cp.spawn('ditto', ['-xkV', zipFilePath, installDir])
 
           // f-it just unzip with node
-          sp.on('error', unzipWithNode)
+          sp.on('error', (err) => {
+            debug(err.message)
+            unzipFallback()
+          })
 
           sp.on('close', (code) => {
             if (code === 0) {
@@ -141,7 +161,7 @@ const unzip = ({ zipFilePath, installDir, progress }) => {
 
             debug('`ditto` failed %o', { code })
 
-            return unzipWithNode()
+            return unzipFallback()
           })
 
           return readline.createInterface({

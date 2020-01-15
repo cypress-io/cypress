@@ -99,8 +99,8 @@ describe('src/cy/commands/assertions', () => {
       cy.noop(obj).its('requestJSON').should('have.property', 'teamIds').should('deep.eq', [2])
     })
 
-    //# TODO: make cy.then retry
-    //# https://github.com/cypress-io/cypress/issues/627
+    // TODO: make cy.then retry
+    // https://github.com/cypress-io/cypress/issues/627
     it.skip('outer assertions retry on cy.then', () => {
       const obj = { foo: 'bar' }
 
@@ -150,7 +150,7 @@ describe('src/cy/commands/assertions', () => {
         cy.wrap(obj).should((o) => {
           expect(o).to.have.property('foo').and.eq('bar')
         }).then(function () {
-          //# wrap + have property + and eq
+          // wrap + have property + and eq
           expect(this.logs.length).to.eq(3)
         })
       })
@@ -176,8 +176,8 @@ describe('src/cy/commands/assertions', () => {
 
           expect(this.logs.length).to.eq(3)
 
-          //# the messages should have been updated to reflect
-          //# the current state of the <body> element
+          // the messages should have been updated to reflect
+          // the current state of the <body> element
           expect(this.logs[1].get('message')).to.eq('expected **<body#bar.foo>** to have class **foo**')
 
           expect(this.logs[2].get('message')).to.eq('expected **<body#bar.foo>** to have id **bar**')
@@ -208,6 +208,29 @@ describe('src/cy/commands/assertions', () => {
           expect(types).to.deep.eq(['parent', 'child', 'child'])
 
           expect(this.logs.length).to.eq(4)
+        })
+      })
+
+      it('can be chained', () => {
+        cy.wrap('ab')
+        .should((subject) => {
+          expect(subject).to.be.a('string')
+          expect(subject).to.contain('a')
+        })
+        .should((subject) => {
+          expect(subject).to.contain('b')
+          expect(subject).to.have.length(2)
+        })
+        .and((subject) => {
+          expect(subject).to.eq('ab')
+          expect(subject).not.to.contain('c')
+        })
+        .then(function () {
+          expect(this.logs.length).to.eq(8)
+
+          this.logs.slice(1).forEach((log) => {
+            expect(log.get('name')).to.eq('assert')
+          })
         })
       })
 
@@ -436,9 +459,9 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           const names = _.invokeMap(this.logs, 'get', 'name')
 
-          //# the 'should' is not here because based on
-          //# when we check for the element to be detached
-          //# it never actually runs the assertion
+          // the 'should' is not here because based on
+          // when we check for the element to be detached
+          // it never actually runs the assertion
           expect(names).to.deep.eq(['get', 'click'])
           expect(err.message).to.include('cy.should() failed because this element is detached')
 
@@ -462,7 +485,7 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           const names = _.invokeMap(this.logs, 'get', 'name')
 
-          //# should is present here due to the retry
+          // should is present here due to the retry
           expect(names).to.deep.eq(['get', 'click', 'assert'])
           expect(err.message).to.include('cy.should() failed because this element is detached')
 
@@ -475,8 +498,8 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('throws when should(\'have.length\') isnt a number', function (done) {
-        //# we specifically turn off logging have.length validation errors
-        //# because the assertion will already be logged
+        // we specifically turn off logging have.length validation errors
+        // because the assertion will already be logged
         cy.on('fail', (err) => {
           const { lastLog } = this
 
@@ -889,7 +912,7 @@ describe('src/cy/commands/assertions', () => {
               }
             })
 
-            //# prepend an empty div so it has no id or class
+            // prepend an empty div so it has no id or class
             cy.$$('body').prepend($('<div />'))
 
             // expect($div).to.match("div")
@@ -909,7 +932,7 @@ describe('src/cy/commands/assertions', () => {
               }
             })
 
-            //# prepend an empty div so it has no id or class
+            // prepend an empty div so it has no id or class
             cy.$$('body').prepend($('<input />'))
 
             cy.get('input').eq(0).then(($div) => {
@@ -1102,7 +1125,7 @@ describe('src/cy/commands/assertions', () => {
         cy.noop('foobar').should('contain', 'oob')
       })
 
-      //# https://github.com/cypress-io/cypress/issues/3549
+      // https://github.com/cypress-io/cypress/issues/3549
       it('is true when DOM el and not jQuery el contains text', () => {
         cy.get('div').then(($el) => {
           cy.wrap($el[1]).should('contain', 'Nested Find')
@@ -1264,11 +1287,11 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('no prop, with prop, negation, and chainable', function () {
-        expect(this.$div).to.have.data('foo') //# 1
-        expect(this.$div).to.have.data('foo', 'bar') //# 2,3
-        expect(this.$div).to.have.data('foo').and.eq('bar') //# 4,5
-        expect(this.$div).to.have.data('foo').and.match(/bar/) //# 6,7
-        expect(this.$div).not.to.have.data('baz') //# 8
+        expect(this.$div).to.have.data('foo') // 1
+        expect(this.$div).to.have.data('foo', 'bar') // 2,3
+        expect(this.$div).to.have.data('foo').and.eq('bar') // 4,5
+        expect(this.$div).to.have.data('foo').and.match(/bar/) // 6,7
+        expect(this.$div).not.to.have.data('baz') // 8
 
         expect(this.logs.length).to.eq(8)
       })
@@ -1296,9 +1319,9 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('class, not class', function () {
-        expect(this.$div).to.have.class('foo') //# 1
-        expect(this.$div).to.have.class('bar') //# 2
-        expect(this.$div).not.to.have.class('baz') //# 3
+        expect(this.$div).to.have.class('foo') // 1
+        expect(this.$div).to.have.class('bar') // 2
+        expect(this.$div).not.to.have.class('baz') // 3
 
         expect(this.logs.length).to.eq(3)
 
@@ -1364,12 +1387,12 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('id, not id', function () {
-        expect(this.$div).to.have.id('foo') //# 1
-        expect(this.$div).not.to.have.id('bar') //# 2
+        expect(this.$div).to.have.id('foo') // 1
+        expect(this.$div).not.to.have.id('bar') // 2
 
-        expect(this.$div2).to.have.id('foo') //# 3
+        expect(this.$div2).to.have.id('foo') // 3
 
-        expect(this.$div3).to.have.id('foo') //# 4
+        expect(this.$div3).to.have.id('foo') // 4
 
         expect(this.logs.length).to.eq(4)
 
@@ -1411,8 +1434,8 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('html, not html, contain html', function () {
-        expect(this.$div).to.have.html('<button>button</button>') //# 1
-        expect(this.$div).not.to.have.html('foo') //# 2
+        expect(this.$div).to.have.html('<button>button</button>') // 1
+        expect(this.$div).not.to.have.html('foo') // 2
         expect(this.logs.length).to.eq(2)
 
         const l1 = this.logs[0]
@@ -1433,7 +1456,7 @@ describe('src/cy/commands/assertions', () => {
         )
 
         this.clearLogs()
-        expect(this.$div).to.not.contain.html('foo') //# 4
+        expect(this.$div).to.not.contain.html('foo') // 4
         expect(this.logs[0].get('message')).to.eq(
           'expected **<div>** not to contain HTML **foo**'
         )
@@ -1491,8 +1514,8 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('text, not text, contain text', function () {
-        expect(this.$div).to.have.text('foo') //# 1
-        expect(this.$div).not.to.have.text('bar') //# 2
+        expect(this.$div).to.have.text('foo') // 1
+        expect(this.$div).not.to.have.text('bar') // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -1573,8 +1596,8 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('value, not value, contain value', function () {
-        expect(this.$input).to.have.value('foo') //# 1
-        expect(this.$input).not.to.have.value('bar') //# 2
+        expect(this.$input).to.have.value('foo') // 1
+        expect(this.$input).not.to.have.value('bar') // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -1639,7 +1662,7 @@ describe('src/cy/commands/assertions', () => {
       it('partial match', function () {
         expect(this.$input).to.contain.value('oo')
         expect(this.$input).to.not.contain.value('oof')
-        //# make sure "includes" is an alias of "include"
+        // make sure "includes" is an alias of "include"
         expect(this.$input).to.includes.value('oo')
         cy.get('input')
         .invoke('val', 'foobar')
@@ -1671,8 +1694,8 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('descendants, not descendants', function () {
-        expect(this.$div).to.have.descendants('button') //# 1
-        expect(this.$div).not.to.have.descendants('input') //# 2
+        expect(this.$div).to.have.descendants('button') // 1
+        expect(this.$div).not.to.have.descendants('input') // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -1725,8 +1748,8 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('visible, not visible, adds to error', function () {
-        expect(this.$div).to.be.visible //# 1
-        expect(this.$div2).not.to.be.visible //# 2
+        expect(this.$div).to.be.visible // 1
+        expect(this.$div2).not.to.be.visible // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -1746,7 +1769,7 @@ describe('src/cy/commands/assertions', () => {
         } catch (err) {
           const l6 = this.logs[5]
 
-          //# the error on this log should have this message appended to it
+          // the error on this log should have this message appended to it
           expect(l6.get('error').message).to.eq(
             `\
 expected '<div>' to be 'visible'
@@ -1794,8 +1817,8 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('hidden, not hidden, adds to error', function () {
-        expect(this.$div).to.be.hidden //# 1
-        expect(this.$div2).not.to.be.hidden //# 2
+        expect(this.$div).to.be.hidden // 1
+        expect(this.$div2).not.to.be.hidden // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -1815,7 +1838,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         } catch (err) {
           const l6 = this.logs[5]
 
-          //# the error on this log should have this message appended to it
+          // the error on this log should have this message appended to it
           expect(l6.get('error').message).to.eq('expected \'<div>\' to be \'hidden\'')
         }
       })
@@ -1851,8 +1874,8 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('selected, not selected', function () {
-        expect(this.$option).to.be.selected //# 1
-        expect(this.$option2).not.to.be.selected //# 2
+        expect(this.$option).to.be.selected // 1
+        expect(this.$option2).not.to.be.selected // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -1899,8 +1922,8 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('checked, not checked', function () {
-        expect(this.$input).to.be.checked //# 1
-        expect(this.$input2).not.to.be.checked //# 2
+        expect(this.$input).to.be.checked // 1
+        expect(this.$input2).not.to.be.checked // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -1947,8 +1970,8 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('enabled, not enabled', function () {
-        expect(this.$input).to.be.enabled //# 1
-        expect(this.$input2).not.to.be.enabled //# 2
+        expect(this.$input).to.be.enabled // 1
+        expect(this.$input2).not.to.be.enabled // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -1995,8 +2018,8 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('disabled, not disabled', function () {
-        expect(this.$input).to.be.disabled //# 1
-        expect(this.$input2).not.to.be.disabled //# 2
+        expect(this.$input).to.be.disabled // 1
+        expect(this.$input2).not.to.be.disabled // 2
 
         expect(this.logs.length).to.eq(2)
 
@@ -2093,11 +2116,11 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('empty, not empty, raw dom documents', function () {
-        expect(this.div).to.be.empty //# 1
-        expect(this.div2).not.to.be.empty //# 2
+        expect(this.div).to.be.empty // 1
+        expect(this.div2).not.to.be.empty // 2
 
-        expect(this.div.get(0)).to.be.empty //# 3
-        expect(this.div2.get(0)).not.to.be.empty //# 4
+        expect(this.div.get(0)).to.be.empty // 3
+        expect(this.div2.get(0)).not.to.be.empty // 4
 
         expect(this.logs.length).to.eq(4)
 
@@ -2248,11 +2271,11 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('match, not match, raw dom documents', function () {
-        expect(this.div).to.match('div') //# 1
-        expect(this.div).not.to.match('button') //# 2
+        expect(this.div).to.match('div') // 1
+        expect(this.div).not.to.match('button') // 2
 
-        expect(this.div.get(0)).to.match('div') //# 3
-        expect(this.div.get(0)).not.to.match('button') //# 4
+        expect(this.div.get(0)).to.match('div') // 3
+        expect(this.div.get(0)).not.to.match('button') // 4
 
         expect(this.logs.length).to.eq(4)
 
@@ -2281,9 +2304,9 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
 
     context('contain', () => {
       it('passes thru non DOM', function () {
-        expect(['foo']).to.contain('foo') //# 1
-        expect({ foo: 'bar', baz: 'quux' }).to.contain({ foo: 'bar' }) //# 2, 3
-        expect('foo').to.contain('fo') //# 4
+        expect(['foo']).to.contain('foo') // 1
+        expect({ foo: 'bar', baz: 'quux' }).to.contain({ foo: 'bar' }) // 2, 3
+        expect('foo').to.contain('fo') // 4
 
         expect(this.logs.length).to.eq(4)
 
@@ -2324,19 +2347,19 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('attr, not attr', function () {
-        expect(this.$div).to.have.attr('foo') //# 1
-        expect(this.$div).to.have.attr('foo', 'bar') //# 2
-        expect(this.$div).not.to.have.attr('bar') //# 3
-        expect(this.$div).not.to.have.attr('bar', 'baz') //# 4
-        expect(this.$div).not.to.have.attr('foo', 'baz') //# 5
+        expect(this.$div).to.have.attr('foo') // 1
+        expect(this.$div).to.have.attr('foo', 'bar') // 2
+        expect(this.$div).not.to.have.attr('bar') // 3
+        expect(this.$div).not.to.have.attr('bar', 'baz') // 4
+        expect(this.$div).not.to.have.attr('foo', 'baz') // 5
 
-        expect(this.$a).to.have.attr('href').and.match(/google/) //# 6, 7
+        expect(this.$a).to.have.attr('href').and.match(/google/) // 6, 7
         expect(this.$a)
-        .to.have.attr('href', 'https://google.com') //# 8
-        .and.have.text('google') //# 9
+        .to.have.attr('href', 'https://google.com') // 8
+        .and.have.text('google') // 9
 
         try {
-          expect(this.$a).not.to.have.attr('href', 'https://google.com') //# 10
+          expect(this.$a).not.to.have.attr('href', 'https://google.com') // 10
         } catch (error) {} // eslint-disable-line no-empty
 
         expect(this.logs.length).to.eq(10)
@@ -2425,21 +2448,21 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('prop, not prop', function () {
-        expect(this.$input).to.have.prop('checked') //# 1
-        expect(this.$input).to.have.prop('checked', true) //# 2
-        expect(this.$input).not.to.have.prop('bar') //# 3
-        expect(this.$input).not.to.have.prop('bar', 'baz') //# 4
-        expect(this.$input).not.to.have.prop('checked', 'baz') //# 5
+        expect(this.$input).to.have.prop('checked') // 1
+        expect(this.$input).to.have.prop('checked', true) // 2
+        expect(this.$input).not.to.have.prop('bar') // 3
+        expect(this.$input).not.to.have.prop('bar', 'baz') // 4
+        expect(this.$input).not.to.have.prop('checked', 'baz') // 5
 
         const href = `${window.location.origin}/foo`
 
-        expect(this.$a).to.have.prop('href').and.match(/foo/) //# 6, 7
+        expect(this.$a).to.have.prop('href').and.match(/foo/) // 6, 7
         expect(this.$a)
-        .to.have.prop('href', href) //# 8
-        .and.have.text('google') //# 9
+        .to.have.prop('href', href) // 8
+        .and.have.text('google') // 9
 
         try {
-          expect(this.$a).not.to.have.prop('href', href) //# 10
+          expect(this.$a).not.to.have.prop('href', href) // 10
         } catch (error) {} // eslint-disable-line no-empty
 
         expect(this.logs.length).to.eq(10)
@@ -2522,14 +2545,14 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
       })
 
       it('css, not css', function () {
-        expect(this.$div).to.have.css('display') //# 1
-        expect(this.$div).to.have.css('display', 'none') //# 2
-        expect(this.$div).not.to.have.css('bar') //# 3
-        expect(this.$div).not.to.have.css('bar', 'baz') //# 4
-        expect(this.$div).not.to.have.css('display', 'inline') //# 5
+        expect(this.$div).to.have.css('display') // 1
+        expect(this.$div).to.have.css('display', 'none') // 2
+        expect(this.$div).not.to.have.css('bar') // 3
+        expect(this.$div).not.to.have.css('bar', 'baz') // 4
+        expect(this.$div).not.to.have.css('display', 'inline') // 5
 
         try {
-          expect(this.$div).not.to.have.css('display', 'none') //# 6
+          expect(this.$div).not.to.have.css('display', 'none') // 6
         } catch (error) {} // eslint-disable-line no-empty
 
         expect(this.logs.length).to.eq(6)

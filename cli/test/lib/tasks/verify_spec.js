@@ -1,5 +1,6 @@
 require('../../spec_helper')
 
+const path = require('path')
 const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
@@ -23,7 +24,7 @@ const snapshot = require('../../support/snapshot')
 const packageVersion = '1.2.3'
 const cacheDir = '/cache/Cypress'
 const executablePath = '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
-const binaryStatePath = '/cache/Cypress/1.2.3/Cypress.app/binary_state.json'
+const binaryStatePath = '/cache/Cypress/1.2.3/binary_state.json'
 
 let stdout
 let spawnedProcess
@@ -747,9 +748,24 @@ context('lib/tasks/verify', () => {
 
 // TODO this needs documentation with examples badly.
 function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
+  if (!customDir) {
+    customDir = '/cache/Cypress/1.2.3/Cypress.app'
+  }
+
+  // binary state is stored one folder higher than the runner itself
+  // see https://github.com/cypress-io/cypress/issues/6089
+  const binaryStateFolder = path.join(customDir, '..')
+
+  const binaryState = {
+    verified: alreadyVerified,
+  }
+  const binaryStateText = JSON.stringify(binaryState)
+
   let mockFiles = {
-    [customDir ? customDir : '/cache/Cypress/1.2.3/Cypress.app']: {
-      'binary_state.json': `{"verified": ${alreadyVerified}}`,
+    [binaryStateFolder]: {
+      'binary_state.json': binaryStateText,
+    },
+    [customDir]: {
       Contents: {
         MacOS: executable
           ? {
