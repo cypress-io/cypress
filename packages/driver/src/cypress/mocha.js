@@ -199,6 +199,8 @@ const create = (specWindow, Cypress, reporter) => {
 
   const _runner = getRunner(_mocha)
 
+  _mocha.suite.file = Cypress.spec.relative
+
   return {
     _mocha,
 
