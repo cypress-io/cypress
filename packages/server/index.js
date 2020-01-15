@@ -15,6 +15,10 @@ require('graceful-fs').gracefulify(require('fs'))
 require('@packages/ts/register')
 require('@packages/coffee/register')
 
+if (process.env.CYPRESS_ENV) {
+  require('./lib/util/process_profiler').start()
+}
+
 require && require.extensions && delete require.extensions['.litcoffee']
 require && require.extensions && delete require.extensions['.coffee.md']
 
