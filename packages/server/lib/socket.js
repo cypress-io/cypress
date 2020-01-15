@@ -11,7 +11,7 @@ const files = require('./files')
 const fixture = require('./fixture')
 const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
-const firefoxUtil = require('./browsers/firefox-util')
+const firefoxUtil = require('./browsers/firefox-util').default
 
 const runnerEvents = [
   'reporter:restart:test:run',
