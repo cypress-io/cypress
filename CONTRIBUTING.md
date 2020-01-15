@@ -325,7 +325,7 @@ $ yarn lerna add --scope cypress --scope @packages/server my-new-dep1
 
 #### Tasks
 
-> Scripts are intended to be **run** from the **root of the repo**. **Do not install or run scripts from within a sub-directory.**
+> Scripts are intended to be **run** from the **root of the repo**. **Do not install dependencies or run scripts from within a sub-directory.**
 
 ##### Common Top Level Tasks
 
