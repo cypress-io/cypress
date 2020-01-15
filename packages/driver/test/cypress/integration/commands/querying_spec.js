@@ -1881,6 +1881,16 @@ space
 `).appendTo(cy.$$('body'))
 
         cy.contains('White space').should('not.match', 'pre')
+        cy.get('#whitespace5').contains('White\nspace')
+      })
+
+      it('finds el with leading/trailing spaces', () => {
+        const btn = $(`<button id="whitespace6">        White   space             </button>`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace6').contains('White space')
+        cy.contains('White space').then(($btn) => {
+          expect($btn.get(0)).to.eq(btn.get(0))
+        })
       })
     })
 
