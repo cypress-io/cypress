@@ -2001,7 +2001,7 @@ declare namespace Cypress {
   interface CaseMatchable {
     /**
      * Check case sensitivity
-     * 
+     *
      * @default true
      */
     matchCase: boolean
