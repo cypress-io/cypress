@@ -169,10 +169,9 @@ module.exports = {
         if (options.webmInput) {
           cmd
           .inputFormat('webm')
-          .withFpsInput(18)
+          .videoFilters(`crop='floor(in_w/2)*2:floor(in_h/2)*2'`)
+          // same as above but scales instead of crops
           // .videoFilters("scale=trunc(iw/2)*2:trunc(ih/2)*2")
-          // same as above
-          .videoFilters('crop=\'floor(in_w/2)*2:floor(in_h/2)*2\'')
         } else {
           cmd
           .inputFormat('image2pipe')
