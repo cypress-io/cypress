@@ -573,8 +573,7 @@ jobs:
           working_directory: cli/build
       - run:
           name: list NPM package contents
-          working_directory: cli/build
-          command: yarn size
+          command: yarn lerna run --scope cypress size
       - run:
           name: pack NPM package
           working_directory: cli/build
