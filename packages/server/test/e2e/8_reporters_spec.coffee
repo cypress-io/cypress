@@ -63,6 +63,16 @@ describe "e2e reporters", ->
       reporter: "reporters/custom.js"
     })
 
+  it "sends file to reporter", ->
+    e2e.exec(@, {
+      spec: "simple_passing_spec.coffee"
+      expectedExitCode: 0
+      reporter: "reporters/uses-file.js"
+    })
+    .get("stdout")
+    .then (stdout) ->
+      expect(stdout).to.include("suite.file: cypress/integration/simple_passing_spec.coffee")
+
   describe "mochawesome", ->
     mochaAwesomes.forEach (ma) ->
       it "passes with #{ma} npm custom reporter", ->
