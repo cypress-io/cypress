@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const R = require('ramda')
 const CRI = require('chrome-remote-interface')
 const { connect } = require('@packages/network')
 const errors = require('../errors')
@@ -42,40 +43,38 @@ function _connectAsync (opts) {
  *
  * @returns {string} web socket debugger url
  */
-const findStartPage = (targets) => {
-  debug('CRI List %o', { numTargets: targets.length, targets })
-  // activate the first available id
-  // find the first target page that's a real tab
-  // and not the dev tools or background page.
-  // since we open a blank page first, it has a special url
-  const newTabTargetFields = {
-    type: 'page',
-    url: 'about:blank',
+const findStartPage = (newTabTargetFields) => {
+  return (targets) => {
+    debug('CRI List %o', { numTargets: targets.length, targets })
+
+    const target = _.find(targets, newTabTargetFields)
+
+    la(target, 'could not find CRI target')
+
+    debug('found CRI target %o', target)
+
+    return target
   }
-
-  const target = _.find(targets, newTabTargetFields)
-
-  la(target, 'could not find CRI target')
-
-  debug('found CRI target %o', target)
-
-  return target.webSocketDebuggerUrl
 }
 
 const findStartPageTarget = (connectOpts) => {
-  debug('CRI.List %o', connectOpts)
+  debug('find target options %o', connectOpts)
+  la(connectOpts.newTabTargetFields, 'missing new tab target props to look for', connectOpts)
 
   // what happens if the next call throws an error?
   // it seems to leave the browser instance open
   // need to clone connectOpts, CRI modifies it
-  return CRI.List(_.clone(connectOpts)).then(findStartPage)
+  return CRI.List(_.clone(connectOpts))
+  .then(findStartPage(connectOpts.newTabTargetFields))
+  .then(R.prop('webSocketDebuggerUrl'))
 }
 
 /**
  * Waits for the port to respond with connection to Chrome Remote Interface
  * @param {number} port Port number to connect to
+ * @param {Object} newTabTargetFields properties of new tab to find it by among CRI targets
  */
-const getWsTargetFor = (port) => {
+const getWsTargetFor = (port, newTabTargetFields) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
@@ -86,6 +85,7 @@ const getWsTargetFor = (port) => {
   const connectOpts = {
     host: '127.0.0.1',
     port,
+    newTabTargetFields,
     getDelayMsForRetry: (i) => {
       retryIndex = i
 

@@ -194,13 +194,14 @@ const _disableRestorePagesPrompt = function (userDir) {
 
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port) {
+const _connectToChromeRemoteInterface = function (port, newTabTargetFields) {
   // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
+  la(check.object(newTabTargetFields), 'expected new tab props', newTabTargetFields)
 
-  debug('connecting to Chrome remote interface at random port %d', port)
+  debug('connecting to Chrome remote interface at random port %d, looking for %o', port, newTabTargetFields)
 
-  return protocol.getWsTargetFor(port)
+  return protocol.getWsTargetFor(port, newTabTargetFields)
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
@@ -375,6 +376,13 @@ module.exports = {
         ])
       })
     }).spread((cacheDir, args: string[], port) => {
+      // by default we will open a blank page
+      // before navigating to the real page
+      const newPageTarget = {
+        url: 'about:blank',
+        type: 'page',
+      }
+
       return Promise.all([
         this._writeExtension(
           browser,
@@ -399,14 +407,17 @@ module.exports = {
         // first allows us to connect the remote interface,
         // start video recording and then
         // we will load the actual page
-        return utils.launch(browser, 'about:blank', args)
+
+        // in Chrome the start url should be 'about:blank
+        // in Electron the start url should be blank string
+        return utils.launch(browser, newPageTarget.url, args)
       }).then((launchedBrowser) => {
         la(launchedBrowser, 'did not get launched browser instance')
 
         // SECOND connect to the Chrome remote interface
         // and when the connection is ready
         // navigate to the actual url
-        return this._connectToChromeRemoteInterface(port)
+        return this._connectToChromeRemoteInterface(port, newPageTarget)
         .then((criClient) => {
           la(criClient, 'expected Chrome remote interface reference', criClient)
 
