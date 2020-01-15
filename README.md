@@ -136,7 +136,7 @@ module.exports = (on) => {
 
 ## Contributing
 
-Use the [version of Node that matches Cypress](https://github.com/cypress-io/cypress/blob/develop/.node-version). Currently that's `8.2.1`.
+Use the [version of Node that matches Cypress](https://github.com/cypress-io/cypress/blob/develop/.node-version).
 
 Run all tests once:
 
