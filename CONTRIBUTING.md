@@ -316,11 +316,8 @@ yarn dev --run-project /project/folder --record --key <key>
 $ yarn add -W my-new-dep1
 
 # add a new dep to a specific package
-$ yarn lerna add --scope cypress my-new-dep1
-$ yarn lerna add --scope cypress my-new-dep2
-
-# deps can be added to multiple scopes (if necessary)
-$ yarn lerna add --scope cypress --scope @packages/server my-new-dep1
+$ yarn workspace @packages/server add my-new-dep1
+$ yarn workspace @packages/server add --dev my-new-dep1
 ```
 
 #### Tasks
