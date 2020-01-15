@@ -476,7 +476,7 @@ You can also use Docker to simulate and debug the built binary. In a temporary f
 $ docker run -it -w /app -v $PWD:/app cypress/base:8 /bin/bash
 ```
 
-Point the installation at a specific binary and yarn (if needed) and _set local cache folder_ to unzip the downloaded binary into a subfolder.
+Point the installation at a specific beta binary and NPM package archive (if needed) and _set local cache folder_ to unzip the downloaded binary into a subfolder.
 
 ```shell
 $ export CYPRESS_INSTALL_BINARY=https://cdn.cypress.io/beta/.../cypress.zip
