@@ -1936,6 +1936,10 @@ space
           matchCase: true,
         })
       })
+
+      it('passes when "i" flag is used with undefined option', () => {
+        cy.get('#test-button').contains(/Test/i)
+      })
     })
 
     describe('subject contains text nodes', () => {
