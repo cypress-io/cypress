@@ -35,13 +35,8 @@ const validate = (chosenEditor) => {
   }
 }
 
-// TODO: need to clear 'chosenEditor' state
-const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) => {
+const EditorPickerModal = observer(({ chosenEditor, editors, isOpen, onClose, onSetChosenEditor, onSetEditor }) => {
   const state = useLocalStore((external) => ({
-    chosenEditor: {},
-    setChosenEditor: action((editor) => {
-      state.chosenEditor = editor
-    }),
     setOtherPath: action((otherPath) => {
       const otherOption = _.find(external.editors, { isOther: true })
 
@@ -50,17 +45,16 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
   }), { editors })
 
   const setEditor = () => {
-    const editor = state.chosenEditor
-    const { isValid } = validate(editor)
+    const { isValid } = validate(chosenEditor)
 
     if (!isValid) return
 
-    onSetEditor(editor)
+    onSetEditor(chosenEditor)
   }
 
   if (!editors.length) return null
 
-  const { isValid, validationMessage } = validate(state.chosenEditor)
+  const { isValid, validationMessage } = validate(chosenEditor)
 
   return (
     <Dialog
@@ -74,9 +68,9 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
         <p>Please select your preference for opening files on your system.</p>
         <p>We will use your selected preference to open files in the future. You can change your preference in the <b>Settings</b> tab of the Cypress Test Runner.</p>
         <EditorPicker
-          chosen={state.chosenEditor}
+          chosen={chosenEditor}
           editors={editors}
-          onSelect={state.setChosenEditor}
+          onSelect={onSetChosenEditor}
           onUpdateOtherPath={state.setOtherPath}
         />
       </div>
@@ -99,8 +93,12 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
 const ErrorFilePath = observer(({ fileDetails }) => {
   const state = useLocalStore(() => ({
     editors: [],
+    chosenEditor: {},
     isLoadingEditor: false,
     isModalOpen: false,
+    setChosenEditor: action((editor) => {
+      state.chosenEditor = editor
+    }),
     setEditors: action((editors) => {
       state.editors = editors
     }),
@@ -136,6 +134,7 @@ const ErrorFilePath = observer(({ fileDetails }) => {
   const setEditor = (editor) => {
     events.emit('set:user:editor', editor)
     state.setIsModalOpen(false)
+    state.setChosenEditor({})
     openFile(editor, fileDetails)
   }
 
@@ -145,9 +144,11 @@ const ErrorFilePath = observer(({ fileDetails }) => {
     <a className='runnable-err-file-path' onClick={attemptOpenFile} href='#'>
       {relativeFile}:{line}:{column}
       <EditorPickerModal
+        chosenEditor={state.chosenEditor}
         editors={state.editors}
         isOpen={state.isModalOpen}
         onSetEditor={setEditor}
+        onSetChosenEditor={state.setChosenEditor}
         onClose={_.partial(state.setIsModalOpen, false)}
       />
     </a>
