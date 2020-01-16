@@ -66,13 +66,13 @@ const EditorPickerModal = observer(({ chosenEditor, editors, isOpen, onClose, on
       <div className='content'>
         <h1>File Opener Preference</h1>
         <p>Please select your preference for opening files on your system.</p>
-        <p>We will use your selected preference to open files in the future. You can change your preference in the <b>Settings</b> tab of the Cypress Test Runner.</p>
         <EditorPicker
           chosen={chosenEditor}
           editors={editors}
           onSelect={onSetChosenEditor}
           onUpdateOtherPath={state.setOtherPath}
         />
+        <p>We will use your selected preference to open files in the future. You can change your preference in the <b>Settings</b> tab of the Cypress Test Runner.</p>
       </div>
       <div className='controls'>
         <Tooltip title={validationMessage} visible={isValid ? false : undefined} className='cy-tooltip'>

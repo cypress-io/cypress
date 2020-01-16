@@ -205,6 +205,10 @@
 .editor-picker-modal {
   max-width: 40em;
 
+  .editor-picker {
+    margin-bottom: 1em;
+  }
+
   .controls {
     > span:first-child {
       order: 1;
@@ -218,7 +222,6 @@
       opacity: 0.5;
     }
 
-    margin-top: 0;
-    padding: 1em;
+    padding: 1em 1em 1em;
   }
 }
