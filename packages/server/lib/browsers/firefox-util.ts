@@ -109,6 +109,8 @@ export default {
       port: 2929,
     })
 
+    // TODO: properly handle error events here or unhandled errors will cause a crash
+
     const foxdriver = await Foxdriver.attach('127.0.0.1', 2929)
 
     const { browser } = foxdriver
@@ -220,6 +222,7 @@ export default {
 
     debug('firefox: navigating page with webdriver')
 
+    // TODO: properly handle error events here or unhandled errors will cause a crash
     return connect()
     .then(() => {
       return sendMarionette({
