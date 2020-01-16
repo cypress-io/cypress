@@ -59,7 +59,7 @@ describe('<EditorPicker />', () => {
     cy.render(render, <EditorPicker {...defaultProps} />)
 
     cy.get('.fa-info-circle').trigger('mouseover')
-    cy.get('.tooltip')
+    cy.get('.cy-tooltip')
     .should('be.visible')
     .should('have.text', 'Opens on computer etc etc')
   })

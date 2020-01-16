@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { Dialog } from '@reach/dialog'
 import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
+import Tooltip from '@cypress/react-tooltip'
 
 import cs from 'classnames'
 import React from 'react'
@@ -25,7 +26,7 @@ const validate = (chosenEditor) => {
 
   if (isValid && chosenEditor.isOther && !chosenEditor.openerId) {
     isValid = false
-    validationMessage = 'Please enter the path to your editor'
+    validationMessage = 'Please enter the path for the "Other" editor'
   }
 
   return {
@@ -34,12 +35,11 @@ const validate = (chosenEditor) => {
   }
 }
 
+// TODO: need to clear 'chosenEditor' state
 const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) => {
   const state = useLocalStore((external) => ({
     chosenEditor: {},
-    shouldShowValidation: false,
     setChosenEditor: action((editor) => {
-      state.setShouldShowValidation(false)
       state.chosenEditor = editor
     }),
     setOtherPath: action((otherPath) => {
@@ -47,27 +47,20 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
 
       otherOption.openerId = otherPath
     }),
-    setShouldShowValidation: action((shouldShow) => {
-      state.shouldShowValidation = shouldShow
-    }),
   }), { editors })
-
-  const { isValid, validationMessage } = validate(state.chosenEditor)
 
   const setEditor = () => {
     const editor = state.chosenEditor
     const { isValid } = validate(editor)
 
-    if (!isValid) {
-      state.setShouldShowValidation(true)
-
-      return
-    }
+    if (!isValid) return
 
     onSetEditor(editor)
   }
 
   if (!editors.length) return null
+
+  const { isValid, validationMessage } = validate(state.chosenEditor)
 
   return (
     <Dialog
@@ -87,14 +80,10 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
           onUpdateOtherPath={state.setOtherPath}
         />
       </div>
-      {state.shouldShowValidation && !isValid && (
-        <p className='validation-error'>
-          <i className='fas fa-exclamation-triangle' />
-          {validationMessage}
-        </p>
-      )}
       <div className='controls'>
-        <button className='submit' onClick={setEditor}>Set preference and open file</button>
+        <Tooltip title={validationMessage} visible={isValid ? false : undefined} className='cy-tooltip'>
+          <button className={cs('submit', { 'is-disabled': !isValid })} onClick={setEditor}>Set preference and open file</button>
+        </Tooltip>
         <button className='cancel' onClick={onClose}>Cancel</button>
       </div>
       <button className='close-button' onClick={onClose}>
@@ -130,6 +119,8 @@ const ErrorFilePath = observer(({ fileDetails }) => {
 
     state.setIsLoadingEditor(true)
 
+    // TODO: instead of the back-n-forth, send 'open:file' or similar, and if the
+    // user editor isn't set, it should send back the available editors
     events.emit('get:user:editor', (result) => {
       state.setIsLoadingEditor(false)
 

@@ -195,18 +195,19 @@
 .editor-picker-modal {
   max-width: 40em;
 
-  .validation-error {
-    color: darken($fail, 30%);
-    margin-bottom: 0;
-    padding: 0 1em;
-    text-align: right;
-
-    i {
-      margin-right: 0.4em;
-    }
-  }
-
   .controls {
+    > span:first-child {
+      order: 1;
+    }
+
+    button.is-disabled,
+    button.is-disabled:hover,
+    button.is-disabled:focus {
+      background: $pass !important;
+      cursor: default !important;
+      opacity: 0.5;
+    }
+
     margin-top: 0;
     padding: 1em;
   }

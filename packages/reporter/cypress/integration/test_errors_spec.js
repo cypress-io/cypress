@@ -63,38 +63,40 @@ const itHandlesFileOpening = (containerSelector) => {
       .should('have.value', '/path/to/editor')
     })
 
-    it('does not show error message when first shown', function () {
-      cy.contains('Please select a preference').should('not.exist')
+    describe('when editor is not selected', function () {
+      it('disables submit button', function () {
+        cy.contains('Set preference and open file')
+        .should('have.class', 'is-disabled')
+        .click()
+
+        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
+        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
+      })
+
+      it('shows validation message when hovering over submit button', function () {
+        cy.get('.editor-picker-modal .submit').trigger('mouseover')
+        cy.get('.cy-tooltip').should('have.text', 'Please select a preference')
+      })
     })
 
-    it('shows error message when user clicks "Set preference and open file" without selecting an editor', function () {
-      cy.contains('Set preference and open file').click()
+    describe('when Other is selected but path is not entered', function () {
+      beforeEach(function () {
+        cy.contains('Other').click()
+      })
 
-      cy.contains('Set preference and open file').should('be.visible')
-      cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
-      cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
+      it('disables submit button', function () {
+        cy.contains('Set preference and open file')
+        .should('have.class', 'is-disabled')
+        .click()
 
-      cy.get('.validation-error').should('have.text', 'Please select a preference')
-    })
+        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
+        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
+      })
 
-    it('shows error message when user selects "Other" and does not input path', function () {
-      cy.contains('Other').click()
-      cy.contains('Set preference and open file').click()
-
-      cy.contains('Set preference and open file').should('be.visible')
-      cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
-      cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
-
-      cy.get('.validation-error').should('have.text', 'Please enter the path to your editor')
-    })
-
-    it('hides error message when submitting "Other" then selecting different option', function () {
-      cy.contains('Other').click()
-      cy.contains('Set preference and open file').click()
-
-      cy.get('.validation-error').should('have.text', 'Please enter the path to your editor')
-      cy.contains('Atom').click()
-      cy.get('.validation-error').should('not.exist')
+      it('shows validation message when hovering over submit button', function () {
+        cy.get('.editor-picker-modal .submit').trigger('mouseover')
+        cy.get('.cy-tooltip').should('have.text', 'Please enter the path for the "Other" editor')
+      })
     })
 
     describe('when editor is set', function () {
@@ -205,7 +207,7 @@ describe('test errors', function () {
 
     it('hovering shows tooltip', function () {
       cy.get('.runnable-err-print').trigger('mouseover')
-      cy.get('.tooltip').should('have.text', 'Print error to console')
+      cy.get('.cy-tooltip').should('have.text', 'Print error to console')
     })
 
     it('clicking prints to console', function () {
