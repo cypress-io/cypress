@@ -1924,6 +1924,18 @@ space
           matchCase: false,
         })
       })
+
+      it('throws when content has "i" flag while matchCase: true', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('cy.contains() content has i flag and matchCase is true. What is intended?')
+
+          done()
+        })
+
+        cy.get('#test-button').contains(/Test/i, {
+          matchCase: true,
+        })
+      })
     })
 
     describe('subject contains text nodes', () => {

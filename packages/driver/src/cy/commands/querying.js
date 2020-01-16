@@ -491,10 +491,12 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       if (_.isRegExp(text)) {
-        if (!options.matchCase) {
-          if (!text.flags.includes('i')) {
-            text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
-          }
+        if (options.matchCase === false && !text.flags.includes('i')) {
+          text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
+        }
+
+        if (options.matchCase === true && text.flags.includes('i')) {
+          throw new Error('cy.contains() content has i flag and matchCase is true. What is intended?')
         }
 
         // taken from jquery's normal contains method
