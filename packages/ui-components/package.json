@@ -14,7 +14,6 @@
   },
   "devDependencies": {
     "@cypress/eslint-plugin-dev": "5.0.0",
-    "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@reach/visually-hidden": "0.6.2",
     "chai-subset": "1.6.0",

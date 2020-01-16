@@ -13,7 +13,6 @@ interface CyEditor {
   name: string
   openerId: string
   isOther: boolean
-  description?: string
 }
 
 interface EditorsResult {
@@ -42,7 +41,6 @@ const getOtherEditor = (preferredOpener?: CyEditor) => {
     name: 'Other',
     openerId: '',
     isOther: true,
-    description: 'The full path to the editor\'s executable',
   }
 }
 

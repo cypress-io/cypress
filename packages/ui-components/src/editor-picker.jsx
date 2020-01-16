@@ -2,7 +2,6 @@ import _ from 'lodash'
 import PropTypes from 'prop-types'
 import { observer, PropTypes as MobxPropTypes } from 'mobx-react'
 import React from 'react'
-import Tooltip from '@cypress/react-tooltip'
 
 import { Select, SelectItem } from './select'
 
@@ -30,26 +29,16 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
     />
   )
 
-  const description = ({ description }) => {
-    if (!description) return null
-
-    return (
-      <Tooltip title={description} className='cy-tooltip'>
-        <i className='description fas fa-info-circle' />
-      </Tooltip>
-    )
-  }
-
   return (
     <Select value={chosen.id} className='editor-picker' name='editor-picker' onChange={onChange}>
       {_.map(editorOptions, (editor) => (
         <SelectItem key={editor.id} value={editor.id}>
-          {editor.name} {description(editor)}
+          {editor.name}
         </SelectItem>
       ))}
       <SelectItem value={otherOption.id}>
         {otherOption.name}: {otherInput}
-        {chosen.isOther && <span className='description'>{otherOption.description}</span>}
+        {chosen.isOther && <span className='description'>Enter the full path to your editor's executable</span>}
       </SelectItem>
     </Select>
   )
