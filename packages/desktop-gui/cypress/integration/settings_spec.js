@@ -421,7 +421,7 @@ describe('Settings', () => {
       })
     })
 
-    describe('when global settings panel is opened', () => {
+    describe('when file preference panel is opened', () => {
       const availableEditors = [
         { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
         { id: 'vim', name: 'Vim', isOther: false, openerId: 'vim' },
@@ -435,16 +435,16 @@ describe('Settings', () => {
         cy.stub(this.ipc, 'getUserEditor').returns(this.getUserEditor.promise)
         cy.stub(this.ipc, 'setUserEditor').resolves()
 
-        cy.contains('Global Settings').click()
+        cy.contains('File Preference').click()
       })
 
-      it('displays global settings section', () => {
+      it('displays file preference section', () => {
         cy.contains('Global settings take effect')
       })
 
-      it('opens global setttings guide when learn more is clicked', () => {
-        cy.get('.global-settings').contains('Learn more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/global-settings')
+      it('opens file preference guide when learn more is clicked', () => {
+        cy.get('.file-preference').contains('Learn more').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/file-preference')
         })
       })
 

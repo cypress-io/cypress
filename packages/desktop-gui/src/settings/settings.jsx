@@ -8,7 +8,7 @@ import ProjectId from './project-id'
 import RecordKey from './record-key'
 import ProxySettings from './proxy-settings'
 import NodeVersion from './node-version'
-import GlobalSettings from './global-settings'
+import FilePreference from './file-preference'
 
 const Settings = observer(({ project, app }) => {
   const { resolvedNodeVersion } = project
@@ -35,8 +35,8 @@ const Settings = observer(({ project, app }) => {
           <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
             <ProxySettings app={app} />
           </Panel>
-          <Panel header='Global Settings' key='global-settings' className='form-horizontal settings-global'>
-            <GlobalSettings />
+          <Panel header='File Preference' key='file-preference' className='form-horizontal settings-file-preference'>
+            <FilePreference />
           </Panel>
         </Collapse>
       </div>

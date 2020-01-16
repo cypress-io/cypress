@@ -8,7 +8,7 @@ import ipc from '../lib/ipc'
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/global-settings')
+  ipc.externalOpen('https://on.cypress.io/file-preference')
 }
 
 const save = _.debounce((editor) => {
@@ -16,7 +16,7 @@ const save = _.debounce((editor) => {
   .catch(() => {}) // ignore errors
 }, 500)
 
-const GlobalSettings = observer(() => {
+const FilePreference = observer(() => {
   const state = useLocalStore(() => ({
     editors: [],
     isLoadingEditor: true,
@@ -48,14 +48,15 @@ const GlobalSettings = observer(() => {
   }, [true])
 
   return (
-    <div className="global-settings">
+    <div className='file-preference'>
       <a href='#' className='learn-more' onClick={openHelp}>
         <i className='fas fa-info-circle'></i> Learn more
       </a>
 
-      <p className='text-muted'>Global settings take effect for every project on your system. Changing them here will change them for other projects as well.</p>
-      <p><b>File Opener Preference</b></p>
-      <p>Your file opener preference is used to open files from the Test Runner <em>(e.g. when clicking links in error stack traces)</em></p>
+      <p>Your file preference is used to open files from the Test Runner <em>(e.g. when clicking links in error stack traces)</em></p>
+      <p className='text-muted'>
+        <i className='fas fa-exclamation-triangle' /> This setting takes effect for every project on your system. Changing it here will change it for other projects as well.
+      </p>
       {state.isLoadingEditor ?
         <p className='loading-editors'>
           <i className='fas fa-spinner fa-spin'></i> Loading Editors...
@@ -71,4 +72,4 @@ const GlobalSettings = observer(() => {
   )
 })
 
-export default GlobalSettings
+export default FilePreference
