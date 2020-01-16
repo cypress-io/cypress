@@ -53,6 +53,7 @@
   }
 
   .runnable-err-wrapper {
+    cursor: default;
     margin: 5px 0 5px 5px;
     padding-left: 10px;
     border-left: 1px dotted #DDD;
@@ -118,11 +119,11 @@
       margin-left: 5px;
     }
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       cursor: pointer;
-      color: $err-text;
+      color: lighten($err-text, 10%);
     }
-
   }
 
   .runnable-err-message {
@@ -144,11 +145,12 @@
   }
 
   .runnable-err-stack-expander {
+    cursor: pointer;
     outline: none;
-    padding: 0 10px 0 5px;
-    padding-bottom: 2px;
+    padding: 0 10px 2px 5px;
 
-    &:hover {
+    &:hover,
+    &:focus {
       color: lighten($err-text, 10%);
     }
 
@@ -168,8 +170,15 @@
   }
 
   .runnable-err-stack-trace {
+    background: lighten($err-header-background, 2%);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    overflow-x: auto;
     padding: 10px;
     font-family: $monospace;
+
+    .err-stack-line {
+      white-space: nowrap;
+    }
   }
 
   .test-err-code-frame {
@@ -188,6 +197,7 @@
     pre {
       background-color: #fff;
       border: 0;
+      padding-left: 10px;
     }
   }
 }
