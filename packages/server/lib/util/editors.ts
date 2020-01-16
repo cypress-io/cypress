@@ -46,6 +46,21 @@ const getOtherEditor = (preferredOpener?: CyEditor) => {
   }
 }
 
+const computerOpener = (): CyEditor => {
+  const names = {
+    darwin: 'Finder',
+    win32: 'File Explorer',
+    linux: 'File System',
+  }
+
+  return {
+    id: 'computer',
+    name: names[process.platform] || names.linux,
+    openerId: 'computer',
+    isOther: false,
+  }
+}
+
 const getUserEditors = (): Bluebird<CyEditor[]> => {
   return Bluebird.filter(getEnvEditors(), (editor) => {
     debug('check if user has editor %s with binary %s', editor.name, editor.binary)
@@ -62,17 +77,10 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
     .then((preferredOpener?: CyEditor) => {
       debug('saved preferred editor: %o', preferredOpener)
 
-      const onComputer = {
-        id: 'computer',
-        name: 'On Computer',
-        openerId: 'computer',
-        isOther: false,
-        description: 'Opens the file in your system\'s file management application (e.g. Finder, File Explorer)',
-      }
       const cyEditors = _.map(editors, createEditor)
 
       // @ts-ignore
-      return [onComputer].concat(cyEditors).concat([getOtherEditor(preferredOpener)])
+      return [computerOpener()].concat(cyEditors).concat([getOtherEditor(preferredOpener)])
     })
   })
 }
