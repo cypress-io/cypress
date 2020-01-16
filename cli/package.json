@@ -9,6 +9,7 @@
     "check-deps": "node ../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "dtslint": "dtslint types",
+    "postinstall": "node ./scripts/post-install.js",
     "lint": "bin-up eslint --fix *.js scripts/*.js bin/* lib/*.js lib/**/*.js test/*.js test/**/*.js",
     "prerelease": "npm run build",
     "release": "cd build && releaser --no-node --no-changelog",
