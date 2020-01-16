@@ -1,6 +1,7 @@
+$cy-tooltip-class: 'cy-tooltip';
 @import 'node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 
-.tooltip {
+.cy-tooltip {
   font-family: $muli;
   word-wrap: break-word;
   background-color: #242424;
