@@ -1,6 +1,5 @@
 {
   "eslint.alwaysShowStatus": true,
-  "eslint.autoFixOnSave": true,
   "eslint.validate": [
     {
       "language": "javascript",
@@ -45,6 +44,6 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": false
     }
-  }
+  },
   "debug.node.autoAttach": "on"
 }
