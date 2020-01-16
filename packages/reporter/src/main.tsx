@@ -86,7 +86,7 @@ class Reporter extends Component<ReporterProps> {
           scroller={this.props.scroller}
           specPath={this.props.specPath}
         />
-        <ForcedGcWarning show={appState.forcingGc}/>
+        <ForcedGcWarning forcingGc={appState.forcingGc}/>
       </div>
     )
   }
