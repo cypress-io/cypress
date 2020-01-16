@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const cache = require('./cache')
 const path = require('path')
 const debug = require('debug')('cypress:server:socket')
 const Promise = require('bluebird')
@@ -422,6 +423,10 @@ class Socket {
         if (cb) {
           return cb()
         }
+      })
+
+      socket.on('set:has:dismissed:forced:gc:warning', () => {
+        return cache.setHasDismissedForcedGcWarning()
       })
 
       socket.on('external:open', (url) => {

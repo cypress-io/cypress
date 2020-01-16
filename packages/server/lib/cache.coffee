@@ -31,6 +31,7 @@ module.exports = {
     {
       USER: {}
       PROJECTS: []
+      HAS_DISMISSED_FORCED_GC_WARNING: false
     }
 
   _applyRewriteRules: (obj = {}) ->
@@ -103,6 +104,12 @@ module.exports = {
 
   removeUser: ->
     fileUtil.set({USER: {}})
+
+  setHasDismissedForcedGcWarning: ->
+    fileUtil.set({ HAS_DISMISSED_FORCED_GC_WARNING: true })
+
+  getHasDismissedForcedGcWarning: ->
+    fileUtil.get('HAS_DISMISSED_FORCED_GC_WARNING', false)
 
   remove: ->
     fileUtil.remove()

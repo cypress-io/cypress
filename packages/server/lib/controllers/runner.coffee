@@ -1,4 +1,5 @@
 _      = require("lodash")
+cache  = require("../cache")
 send   = require("send")
 os     = require("os")
 debug  = require("debug")("cypress:server:runner")
@@ -25,14 +26,17 @@ module.exports = {
     # log the env object's keys without values to avoid leaking sensitive info
     debug("env object has the following keys: %s", _.keys(config.env).join(", "))
 
-    ## base64 before embedding so user-supplied contents can't break out of <script>
-    ## https://github.com/cypress-io/cypress/issues/4952
-    base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+    cache.getHasDismissedForcedGcWarning().then (hasDismissedForcedGcWarning) =>
+      config.hasDismissedForcedGcWarning = hasDismissedForcedGcWarning
 
-    res.render(runner.getPathToIndex(), {
-      base64Config
-      projectName: config.projectName
-    })
+      ## base64 before embedding so user-supplied contents can't break out of <script>
+      ## https://github.com/cypress-io/cypress/issues/4952
+      base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+
+      res.render(runner.getPathToIndex(), {
+        base64Config
+        projectName: config.projectName
+      })
 
   handle: (req, res) ->
     pathToFile = runner.getPathToDist(req.params[0])

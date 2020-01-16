@@ -1,24 +1,58 @@
 import { round } from 'lodash'
 import React from 'react'
+import { Events } from './events'
 
 interface Props {
   forcingGc: boolean
+  hasDismissedForcedGcWarning: boolean
+  events: Events
+}
+
+interface State {
+  autoExpandWarning: boolean
+  expanded: boolean
 }
 
 class ForcedGcWarning extends React.Component<Props> {
   gcStartMs: number | null = null
   gcTotalMs: number = 0
+  persisted = false
+  state: State
 
-  state = {
-    expanded: false,
+  constructor (props: Props) {
+    super(props)
+    this.state = {
+      autoExpandWarning: !props.hasDismissedForcedGcWarning,
+      expanded: false,
+    }
+  }
+
+  _setHasDismissedForcedGcWarning () {
+    if (this.persisted) {
+      return
+    }
+
+    this.props.events.emit('set:has:dismissed:forced:gc:warning')
+    this.persisted = true
+    this.setState({ autoExpandWarning: false })
   }
 
   _toggleExpando () {
     if (this.state.expanded) {
       // user is toggling it to closed, persist this to preferences
+      this._setHasDismissedForcedGcWarning()
     }
 
     this.setState({ expanded: !this.state.expanded })
+  }
+
+  static getDerivedStateFromProps (nextProps: Props, prevState: State) {
+    // if we start forcing GC, the expando is closed, and we can autoshow...
+    if (nextProps.forcingGc && !prevState.expanded && prevState.autoExpandWarning) {
+      return { expanded: true }
+    }
+
+    return {}
   }
 
   render () {
