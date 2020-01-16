@@ -52,7 +52,7 @@ const itHandlesFileOpening = (containerSelector) => {
       })
 
       cy.contains('Other')
-      cy.contains('Set editor and open file')
+      cy.contains('Set preference and open file')
     })
 
     // NOTE: this fails because mobx doesn't make the editors observable, so
@@ -67,10 +67,10 @@ const itHandlesFileOpening = (containerSelector) => {
       cy.contains('Please select a preference').should('not.exist')
     })
 
-    it('shows error message when user clicks "Set editor and open file" without selecting an editor', function () {
-      cy.contains('Set editor and open file').click()
+    it('shows error message when user clicks "Set preference and open file" without selecting an editor', function () {
+      cy.contains('Set preference and open file').click()
 
-      cy.contains('Set editor and open file').should('be.visible')
+      cy.contains('Set preference and open file').should('be.visible')
       cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
       cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
 
@@ -79,9 +79,9 @@ const itHandlesFileOpening = (containerSelector) => {
 
     it('shows error message when user selects "Other" and does not input path', function () {
       cy.contains('Other').click()
-      cy.contains('Set editor and open file').click()
+      cy.contains('Set preference and open file').click()
 
-      cy.contains('Set editor and open file').should('be.visible')
+      cy.contains('Set preference and open file').should('be.visible')
       cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
       cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
 
@@ -90,7 +90,7 @@ const itHandlesFileOpening = (containerSelector) => {
 
     it('hides error message when submitting "Other" then selecting different option', function () {
       cy.contains('Other').click()
-      cy.contains('Set editor and open file').click()
+      cy.contains('Set preference and open file').click()
 
       cy.get('.validation-error').should('have.text', 'Please enter the path to your editor')
       cy.contains('Atom').click()
@@ -100,11 +100,11 @@ const itHandlesFileOpening = (containerSelector) => {
     describe('when editor is set', function () {
       beforeEach(function () {
         cy.contains('Visual Studio Code').click()
-        cy.contains('Set editor and open file').click()
+        cy.contains('Set preference and open file').click()
       })
 
       it('closes modal', function () {
-        cy.contains('Set editor and open file').should('not.be.visible')
+        cy.contains('Set preference and open file').should('not.be.visible')
       })
 
       it('emits set:user:editor', function () {
