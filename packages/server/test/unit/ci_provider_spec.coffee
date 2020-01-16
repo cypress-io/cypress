@@ -106,9 +106,7 @@ describe "lib/util/ci_provider", ->
       "bamboo_buildNumber": "bambooBuildNumber"
       "bamboo_buildResultsUrl": "bambooBuildResultsUrl"
       "bamboo_planRepository_repositoryUrl": "bambooPlanRepositoryRepositoryUrl"
-      "bamboo_planKey": "bambooPlanKey"
       "bamboo_buildKey": "bambooBuildKey"
-      "bamboo_agentId": "bambooAgentId"
       "bamboo_planRepository_revision": "gitSha"
       "bamboo_planRepository_branch": "gitBranch"
       "bamboo_planRepository_username": "gitAuthor"
@@ -120,9 +118,7 @@ describe "lib/util/ci_provider", ->
       bambooBuildNumber: "bambooBuildNumber"
       bambooBuildResultsUrl: "bambooBuildResultsUrl"
       bambooPlanRepositoryRepositoryUrl: "bambooPlanRepositoryRepositoryUrl"
-      bambooPlanKey: "bambooPlanKey"
       bambooBuildKey: "bambooBuildKey"
-      bambooAgentId: "bambooAgentId"
     })
     expectsCommitParams({
       sha: "gitSha"

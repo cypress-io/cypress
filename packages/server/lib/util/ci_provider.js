@@ -142,9 +142,7 @@ const _providerCiParams = () => {
       'bamboo_buildNumber',
       'bamboo_buildResultsUrl',
       'bamboo_planRepository_repositoryUrl',
-      'bamboo_planKey',
       'bamboo_buildKey',
-      'bamboo_agentId',
     ]),
     bitbucket: extract([
       'BITBUCKET_REPO_SLUG',
