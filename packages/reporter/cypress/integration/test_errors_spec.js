@@ -64,7 +64,7 @@ const itHandlesFileOpening = (containerSelector) => {
     })
 
     it('does not show error message when first shown', function () {
-      cy.contains('Please select an editor').should('not.exist')
+      cy.contains('Please select a preference').should('not.exist')
     })
 
     it('shows error message when user clicks "Set editor and open file" without selecting an editor', function () {
@@ -74,7 +74,7 @@ const itHandlesFileOpening = (containerSelector) => {
       cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
       cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
 
-      cy.get('.validation-error').should('have.text', 'Please select an editor')
+      cy.get('.validation-error').should('have.text', 'Please select a preference')
     })
 
     it('shows error message when user selects "Other" and does not input path', function () {

@@ -5,7 +5,6 @@ import { observer, useLocalStore } from 'mobx-react'
 
 import cs from 'classnames'
 import React from 'react'
-import Tooltip from '@cypress/react-tooltip'
 import VisuallyHidden from '@reach/visually-hidden'
 import { EditorPicker } from '@packages/ui-components'
 
@@ -22,7 +21,7 @@ const openFile = (where, { absoluteFile: file, line, column }) => {
 
 const validate = (chosenEditor) => {
   let isValid = !!chosenEditor && !!chosenEditor.id
-  let validationMessage = 'Please select an editor'
+  let validationMessage = 'Please select a preference'
 
   if (isValid && chosenEditor.isOther && !chosenEditor.openerId) {
     isValid = false
@@ -78,9 +77,9 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
       onDismiss={onClose}
     >
       <div className='content'>
-        <h1>Select Editor Preference</h1>
-        <p>Please select your editor from the editors we found on your system. </p>
-        <p>We will use your selected editor to open files in the future. You can change your editor preference in the <b>Settings</b> tab of the Cypress Test Runner.</p>
+        <h1>File Opener Preference</h1>
+        <p>Please select your preference for opening files on your system.</p>
+        <p>We will use your selected preference to open files in the future. You can change your preference in the <b>Settings</b> tab of the Cypress Test Runner.</p>
         <EditorPicker
           chosen={state.chosenEditor}
           editors={editors}
@@ -95,7 +94,7 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
         </p>
       )}
       <div className='controls'>
-        <button className='submit' onClick={setEditor}>Set editor and open file</button>
+        <button className='submit' onClick={setEditor}>Set preference and open file</button>
         <button className='cancel' onClick={onClose}>Cancel</button>
       </div>
       <button className='close-button' onClick={onClose}>
