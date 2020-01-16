@@ -34,7 +34,7 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
     if (!description) return null
 
     return (
-      <Tooltip title={description}>
+      <Tooltip title={description} className='cy-tooltip'>
         <i className='description fas fa-info-circle' />
       </Tooltip>
     )
