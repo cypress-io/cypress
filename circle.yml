@@ -331,7 +331,7 @@ jobs:
           command: npm run dtslint
           working_directory: cli
       - run:
-          command: npm run type_check -- --ignore-progress
+          command: npm run type-check -- --ignore-progress
       - store-npm-logs
 
   "server-unit-tests":
