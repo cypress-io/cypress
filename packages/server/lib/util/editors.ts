@@ -13,10 +13,11 @@ interface CyEditor {
   name: string
   openerId: string
   isOther: boolean
+  description?: string
 }
 
 interface EditorsResult {
-  preferredEditor?: CyEditor
+  preferredOpener?: CyEditor
   availableEditors?: CyEditor[]
 }
 
@@ -29,11 +30,11 @@ const createEditor = (editor: Editor): CyEditor => {
   }
 }
 
-const getOtherEditor = (preferredEditor?: CyEditor) => {
+const getOtherEditor = (preferredOpener?: CyEditor) => {
   // if preferred editor is the 'other' option, use it since it has the
   // path (openerId) saved with it
-  if (preferredEditor && preferredEditor.isOther) {
-    return preferredEditor
+  if (preferredOpener && preferredOpener.isOther) {
+    return preferredOpener
   }
 
   return {
@@ -41,6 +42,7 @@ const getOtherEditor = (preferredEditor?: CyEditor) => {
     name: 'Other',
     openerId: '',
     isOther: true,
+    description: 'Enter the full path to your editor\'s executable',
   }
 }
 
@@ -55,12 +57,22 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
 
     return savedState.create()
     .then((state) => {
-      return state.get('preferredEditor')
+      return state.get('preferredOpener')
     })
-    .then((preferredEditor?: CyEditor) => {
-      debug('saved preferred editor: %o', preferredEditor)
+    .then((preferredOpener?: CyEditor) => {
+      debug('saved preferred editor: %o', preferredOpener)
 
-      return _.map(editors, createEditor).concat([getOtherEditor(preferredEditor)])
+      const onComputer = {
+        id: 'computer',
+        name: 'On Computer',
+        openerId: 'computer',
+        isOther: false,
+        description: 'Opens the file in your system\'s file management application (e.g. Finder, File Explorer)',
+      }
+      const cyEditors = _.map(editors, createEditor)
+
+      // @ts-ignore
+      return [onComputer].concat(cyEditors).concat([getOtherEditor(preferredOpener)])
     })
   })
 }
@@ -69,19 +81,19 @@ export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsRes
   return savedState.create()
   .then((state) => state.get())
   .then((state) => {
-    const preferredEditor = state.preferredEditor
+    const preferredOpener = state.preferredOpener
 
-    if (preferredEditor) {
-      debug('return preferred editor: %o', preferredEditor)
+    if (preferredOpener) {
+      debug('return preferred editor: %o', preferredOpener)
       if (!alwaysIncludeEditors) {
-        return { preferredEditor }
+        return { preferredOpener }
       }
     }
 
     return getUserEditors().then((availableEditors) => {
       debug('return available editors: %o', availableEditors)
 
-      return { availableEditors, preferredEditor }
+      return { availableEditors, preferredOpener }
     })
   })
 }
@@ -89,6 +101,6 @@ export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsRes
 export const setUserEditor = (editor) => {
   return savedState.create()
   .then((state) => {
-    state.set('preferredEditor', editor)
+    state.set('preferredOpener', editor)
   })
 }

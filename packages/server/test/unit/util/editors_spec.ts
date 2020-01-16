@@ -32,16 +32,25 @@ describe('lib/util/editors', () => {
       sinon.restore()
     })
 
-    it('returns a list of editors on the user\'s system with an "Other" option appended', () => {
+    it('returns a list of editors on the user\'s system with an "On Computer" option prepended and an "Other" option appended', () => {
       return getUserEditor().then(({ availableEditors }) => {
         const names = _.map(availableEditors, 'name')
 
-        expect(names).to.eql(['Sublime Text', 'Visual Studio Code', 'Vim', 'Other'])
-        expect(availableEditors[3]).to.eql({
+        expect(names).to.eql(['On Computer', 'Sublime Text', 'Visual Studio Code', 'Vim', 'Other'])
+        expect(availableEditors[0]).to.eql({
+          id: 'computer',
+          name: 'On Computer',
+          isOther: false,
+          openerId: 'computer',
+          description: 'Opens the file in your system\'s file management application (e.g. Finder, File Explorer)',
+        })
+
+        expect(availableEditors[4]).to.eql({
           id: 'other',
           name: 'Other',
           isOther: true,
           openerId: '',
+          description: 'Enter the full path to your editor\'s executable',
         })
       })
     })
@@ -55,56 +64,56 @@ describe('lib/util/editors', () => {
       })
 
       return getUserEditor().then(({ availableEditors }) => {
-        expect(availableEditors[3].openerId).to.equal('/path/to/editor')
+        expect(availableEditors[4].openerId).to.equal('/path/to/editor')
       })
     })
 
     describe('when alwaysIncludeEditors is true', () => {
-      it('returns editors along with preferred editor', () => {
-        const preferredEditor = {}
+      it('returns editors along with preferred opener', () => {
+        const preferredOpener = {}
 
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return { preferredEditor }
+            return { preferredOpener }
           },
         })
 
-        return getUserEditor(true).then(({ availableEditors, preferredEditor }) => {
-          expect(availableEditors).to.have.length(4)
-          expect(preferredEditor).to.equal(preferredEditor)
+        return getUserEditor(true).then(({ availableEditors, preferredOpener }) => {
+          expect(availableEditors).to.have.length(5)
+          expect(preferredOpener).to.equal(preferredOpener)
         })
       })
     })
 
     describe('when alwaysIncludeEditors is false', () => {
-      it('only returns preferred editor if one has been saved', () => {
-        const preferredEditor = {}
+      it('only returns preferred opener if one has been saved', () => {
+        const preferredOpener = {}
 
         // @ts-ignore
         savedState.create.resolves({
           get () {
-            return { preferredEditor }
+            return { preferredOpener }
           },
         })
 
-        return getUserEditor(false).then(({ availableEditors, preferredEditor }) => {
+        return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
           expect(availableEditors).to.be.undefined
-          expect(preferredEditor).to.equal(preferredEditor)
+          expect(preferredOpener).to.equal(preferredOpener)
         })
       })
 
-      it('returns available editors if preferred editor has not been saved', () => {
-        return getUserEditor(false).then(({ availableEditors, preferredEditor }) => {
-          expect(availableEditors).to.have.length(4)
-          expect(preferredEditor).to.be.undefined
+      it('returns available editors if preferred opener has not been saved', () => {
+        return getUserEditor(false).then(({ availableEditors, preferredOpener }) => {
+          expect(availableEditors).to.have.length(5)
+          expect(preferredOpener).to.be.undefined
         })
       })
 
       it('is default', () => {
-        return getUserEditor().then(({ availableEditors, preferredEditor }) => {
-          expect(availableEditors).to.have.length(4)
-          expect(preferredEditor).to.be.undefined
+        return getUserEditor().then(({ availableEditors, preferredOpener }) => {
+          expect(availableEditors).to.have.length(5)
+          expect(preferredOpener).to.be.undefined
         })
       })
     })

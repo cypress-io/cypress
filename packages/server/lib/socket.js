@@ -437,22 +437,22 @@ class Socket {
       socket.on('open:file', (fileDetails) => {
         debug('open file: %o', fileDetails)
 
-        switch (fileDetails.where) {
+        const openerId = fileDetails.where.openerId
+
+        switch (openerId) {
           case 'computer':
             require('electron').shell.showItemInFolder(fileDetails.file)
             break
-          case 'editor':
+          default:
             try {
               const files = [].concat(fileDetails)
-              const editor = fileDetails.editor.openerId
 
-              debug('open with editor: %s', editor)
-              openEditor(files, { editor })
+              debug('open with editor: %s', openerId)
+              openEditor(files, { editor: openerId })
             } catch (err) {
               debug('error opening file: %s', err.stack)
             }
             break
-          default:
         }
       })
 

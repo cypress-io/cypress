@@ -458,7 +458,7 @@ describe('Settings', () => {
 
       describe('when editors load with preferred editor', () => {
         beforeEach(function () {
-          this.getUserEditor.resolve({ availableEditors, preferredEditor: availableEditors[3] })
+          this.getUserEditor.resolve({ availableEditors, preferredOpener: availableEditors[3] })
         })
 
         it('displays available editors with preferred one selected', () => {

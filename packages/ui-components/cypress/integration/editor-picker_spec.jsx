@@ -15,12 +15,13 @@ describe('<EditorPicker />', () => {
 
   beforeEach(() => {
     defaultProps = {
-      chosen: { id: 'vscode', name: 'VS Code', openerId: 'vscode' },
+      chosen: { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
       editors: [
-        { id: 'atom', name: 'Atom', openerId: 'atom' },
-        { id: 'sublime', name: 'Sublime Text', openerId: 'sublime' },
-        { id: 'vscode', name: 'VS Code', openerId: 'vscode' },
-        { id: 'other', name: 'Other', openerId: '', isOther: true },
+        { id: 'computer', name: 'On Computer', openerId: 'computer', isOther: false, description: 'Opens on computer etc etc' },
+        { id: 'atom', name: 'Atom', openerId: 'atom', isOther: false },
+        { id: 'sublime', name: 'Sublime Text', openerId: 'sublime', isOther: false },
+        { id: 'vscode', name: 'VS Code', openerId: 'vscode', isOther: false },
+        { id: 'other', name: 'Other', openerId: '', isOther: true, description: 'Enter the full path etc etc' },
       ],
       onSelect: () => {},
     }
@@ -32,6 +33,7 @@ describe('<EditorPicker />', () => {
   it('renders each specified editor', () => {
     cy.render(render, <EditorPicker {...defaultProps} />)
 
+    cy.contains('On Computer')
     cy.contains('Atom')
     cy.contains('Sublime Text')
     cy.contains('VS Code')
@@ -50,11 +52,16 @@ describe('<EditorPicker />', () => {
     cy.get('input[type="radio"]').should('not.be.checked')
   })
 
-  it('shows special message when no editors specified', () => {
-    cy.render(render, <EditorPicker {...defaultProps} editors={defaultProps.editors.slice(3)} chosen={undefined} />)
+  // this doesn't work currently because the tooltip renders in the spec
+  // iframe and not the AUT iframe. need to switch to cypress-react-unit-test
+  // or something similar to get this to work
+  it.skip('shows info circle with desciption tooltip when specified', () => {
+    cy.render(render, <EditorPicker {...defaultProps} />)
 
-    cy.contains('We could not find any editors on your system')
-    cy.get('input')
+    cy.get('.fa-info-circle').trigger('mouseover')
+    cy.get('.tooltip')
+    .should('be.visible')
+    .should('have.text', 'Opens on computer etc etc')
   })
 
   it('calls onSelect when option is chosen', () => {
@@ -63,27 +70,27 @@ describe('<EditorPicker />', () => {
     cy.render(render, <EditorPicker {...defaultProps} onSelect={onSelect}/>)
 
     cy.contains('Sublime Text').click().then(() => {
-      expect(onSelect).to.be.calledWith({ id: 'sublime', name: 'Sublime Text', openerId: 'sublime' })
+      expect(onSelect).to.be.calledWith(defaultProps.editors[2])
     })
   })
 
   describe('"Other" handling', () => {
     it('shows description when chosen', () => {
-      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[3]}/>)
+      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]}/>)
 
       cy.contains('Enter the full path').should('be.visible')
     })
 
     it('selects item when focusing text input', () => {
-      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[3]}/>)
+      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]}/>)
 
       cy.contains('Other').find('input[type="text"]').focus()
       cy.contains('Other').find('input[type="radio"]').should('be.checked')
     })
 
     it('populates path if specified', () => {
-      defaultProps.editors[3].openerId = '/path/to/my/editor'
-      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[3]}/>)
+      defaultProps.editors[4].openerId = '/path/to/my/editor'
+      cy.render(render, <EditorPicker {...defaultProps} chosen={defaultProps.editors[4]}/>)
 
       cy.contains('Other').find('input[type="text"]').should('have.value', '/path/to/my/editor')
     })

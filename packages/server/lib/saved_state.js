@@ -26,7 +26,7 @@ isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
 showedOnBoardingModal
-preferredEditor
+preferredOpener
 `.trim().split(/\s+/)
 
 const toHashName = function (projectRoot) {

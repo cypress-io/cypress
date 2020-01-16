@@ -2,6 +2,7 @@ import _ from 'lodash'
 import PropTypes from 'prop-types'
 import { observer, PropTypes as MobxPropTypes } from 'mobx-react'
 import React from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import { Select, SelectItem } from './select'
 
@@ -29,12 +30,13 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
     />
   )
 
-  if (!editorOptions.length) {
+  const description = ({ description }) => {
+    if (!description) return null
+
     return (
-      <div className='editor-picker-empty'>
-        <p>We could not find any editors on your system. Please enter the full path to your preferred editor's executable.</p>
-        <p>{otherInput}</p>
-      </div>
+      <Tooltip title={description}>
+        <i className='description fas fa-info-circle' />
+      </Tooltip>
     )
   }
 
@@ -42,12 +44,12 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
     <Select value={chosen.id} className='editor-picker' name='editor-picker' onChange={onChange}>
       {_.map(editorOptions, (editor) => (
         <SelectItem key={editor.id} value={editor.id}>
-          {editor.name}
+          {editor.name} {description(editor)}
         </SelectItem>
       ))}
       <SelectItem value={otherOption.id}>
         {otherOption.name}: {otherInput}
-        {chosen.isOther && <span className='description'>Enter the full path to your editor's executable</span>}
+        {chosen.isOther && <span className='description'>{otherOption.description}</span>}
       </SelectItem>
     </Select>
   )
@@ -58,6 +60,7 @@ const editorType = PropTypes.shape({
   name: PropTypes.string.isRequired,
   openerId: PropTypes.string.isRequired,
   isOther: PropTypes.bool.isRequired,
+  description: PropTypes.string,
 })
 
 EditorPicker.propTypes = {

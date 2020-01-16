@@ -43,14 +43,14 @@ describe('various failures', () => {
           .should('match', regex)
 
           cy
-          .get('.test-error-code-frame .runnable-err-file-path')
+          .get('.test-err-code-frame .runnable-err-file-path')
           .invoke('text')
           .should('match', regex)
 
           // most code frames will have the `testName` in them but for some
           // it's cut off due to the code frame only showing 2 lines before
           // and after the highlighted, so we prefer the `codeFrameText`
-          cy.get('.test-error-code-frame pre span').should('include.text', codeFrameText || testName)
+          cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText || testName)
         })
       })
     })

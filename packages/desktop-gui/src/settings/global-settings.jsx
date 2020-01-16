@@ -38,9 +38,9 @@ const GlobalSettings = observer(() => {
   }))
 
   useEffect(() => {
-    ipc.getUserEditor().then(({ preferredEditor, availableEditors }) => {
-      if (preferredEditor) {
-        state.setChosenEditor(preferredEditor)
+    ipc.getUserEditor().then(({ preferredOpener, availableEditors }) => {
+      if (preferredOpener) {
+        state.setChosenEditor(preferredOpener)
       }
 
       state.setEditors(availableEditors)
@@ -54,8 +54,8 @@ const GlobalSettings = observer(() => {
       </a>
 
       <p className='text-muted'>Global settings take effect for every project on your system. Changing them here will change them for other projects as well.</p>
-      <p><b>Editor Preference</b></p>
-      <p>Your preferred editor is used to open files from the Test Runner <em>(e.g. when clicking links in error stack traces)</em></p>
+      <p><b>File Opener Preference</b></p>
+      <p>Your file opener preference is used to open files from the Test Runner <em>(e.g. when clicking links in error stack traces)</em></p>
       {state.isLoadingEditor ?
         <p className='loading-editors'>
           <i className='fas fa-spinner fa-spin'></i> Loading Editors...

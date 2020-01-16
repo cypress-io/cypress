@@ -11,13 +11,12 @@ import { EditorPicker } from '@packages/ui-components'
 
 import events from '../lib/events'
 
-const openFile = (where, { absoluteFile: file, line, column }, editor) => {
+const openFile = (where, { absoluteFile: file, line, column }) => {
   events.emit('open:file', {
     where,
     file,
     line,
     column,
-    editor,
   })
 }
 
@@ -37,7 +36,7 @@ const validate = (chosenEditor) => {
 }
 
 const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) => {
-  const state = useLocalStore(() => ({
+  const state = useLocalStore((external) => ({
     chosenEditor: {},
     shouldShowValidation: false,
     setChosenEditor: action((editor) => {
@@ -45,14 +44,14 @@ const EditorPickerModal = observer(({ editors, isOpen, onClose, onSetEditor }) =
       state.chosenEditor = editor
     }),
     setOtherPath: action((otherPath) => {
-      const otherOption = _.find(editors, { isOther: true })
+      const otherOption = _.find(external.editors, { isOther: true })
 
       otherOption.openerId = otherPath
     }),
     setShouldShowValidation: action((shouldShow) => {
       state.shouldShowValidation = shouldShow
     }),
-  }))
+  }), { editors })
 
   const { isValid, validationMessage } = validate(state.chosenEditor)
 
@@ -125,14 +124,18 @@ const ErrorFilePath = observer(({ fileDetails }) => {
     }),
   }))
 
-  const openFileInEditor = () => {
+  const attemptOpenFile = (e) => {
+    e.preventDefault()
+
+    if (state.isLoadingEditor) return
+
     state.setIsLoadingEditor(true)
 
     events.emit('get:user:editor', (result) => {
       state.setIsLoadingEditor(false)
 
-      if (result.preferredEditor) {
-        return openFile('editor', fileDetails, result.preferredEditor)
+      if (result.preferredOpener) {
+        return openFile(result.preferredOpener, fileDetails)
       }
 
       state.setEditors(result.availableEditors)
@@ -143,43 +146,21 @@ const ErrorFilePath = observer(({ fileDetails }) => {
   const setEditor = (editor) => {
     events.emit('set:user:editor', editor)
     state.setIsModalOpen(false)
-    openFile('editor', fileDetails, editor)
-  }
-
-  const openFileOnComputer = () => {
-    openFile('computer', fileDetails)
+    openFile(editor, fileDetails)
   }
 
   const { relativeFile, line, column } = fileDetails
 
-  const tooltipContent = (<>
-    <button onClick={openFileOnComputer}>
-      <span>Open on Computer</span>
-    </button>
-    <button
-      className={cs({ 'is-loading': state.isLoadingEditor })}
-      disabled={state.isLoadingEditor}
-      onClick={openFileInEditor}
-    >
-      <span className='text'>Open in Editor</span>
-      <span className='loader'>
-        <i className='fas fa-spinner fa-spin'></i>
-      </span>
-    </button>
-  </>)
-
   return (
-    <span className='runnable-err-file-path'>
-      <Tooltip title={tooltipContent} className='err-file-options tooltip'>
-        <span>{relativeFile}:{line}:{column}</span>
-      </Tooltip>
+    <a className='runnable-err-file-path' onClick={attemptOpenFile} href='#'>
+      {relativeFile}:{line}:{column}
       <EditorPickerModal
         editors={state.editors}
         isOpen={state.isModalOpen}
         onSetEditor={setEditor}
         onClose={_.partial(state.setIsModalOpen, false)}
       />
-    </span>
+    </a>
   )
 })
 

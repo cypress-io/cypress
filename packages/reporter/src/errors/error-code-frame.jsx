@@ -18,7 +18,7 @@ class ErrorCodeFrame extends Component {
     const highlightLine = line < 3 ? line : 3
 
     return (
-      <div className='test-error-code-frame'>
+      <div className='test-err-code-frame'>
         <ErrorFilePath fileDetails={this.props.codeFrame} />
         <pre ref='codeFrame' data-line={highlightLine}>
           <code className={`language-${language || 'text'}`}>{frame}</code>
