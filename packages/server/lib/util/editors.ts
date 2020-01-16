@@ -1,8 +1,8 @@
 import _ from 'lodash'
-import { allEditors, Editor } from 'env-editor'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 
+import { getEnvEditors, Editor } from './env-editors'
 import shell from './shell'
 import savedState from '../saved_state'
 
@@ -25,7 +25,7 @@ const createEditor = (editor: Editor): CyEditor => {
   return {
     id: editor.id,
     name: editor.name,
-    openerId: editor.id,
+    openerId: editor.binary,
     isOther: false,
   }
 }
@@ -42,12 +42,12 @@ const getOtherEditor = (preferredOpener?: CyEditor) => {
     name: 'Other',
     openerId: '',
     isOther: true,
-    description: 'Enter the full path to your editor\'s executable',
+    description: 'The full path to the editor\'s executable',
   }
 }
 
 const getUserEditors = (): Bluebird<CyEditor[]> => {
-  return Bluebird.filter(allEditors(), (editor) => {
+  return Bluebird.filter(getEnvEditors(), (editor) => {
     debug('check if user has editor %s with binary %s', editor.name, editor.binary)
 
     return shell.commandExists(editor.binary)
@@ -78,6 +78,8 @@ const getUserEditors = (): Bluebird<CyEditor[]> => {
 }
 
 export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsResult> => {
+  debug('get user editor')
+
   return savedState.create()
   .then((state) => state.get())
   .then((state) => {
@@ -99,6 +101,8 @@ export const getUserEditor = (alwaysIncludeEditors = false): Bluebird<EditorsRes
 }
 
 export const setUserEditor = (editor) => {
+  debug('set user editor: %o', editor)
+
   return savedState.create()
   .then((state) => {
     state.set('preferredOpener', editor)

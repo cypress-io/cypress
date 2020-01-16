@@ -3,9 +3,9 @@ const path = require('path')
 const debug = require('debug')('cypress:server:socket')
 const Promise = require('bluebird')
 const socketIo = require('@packages/socket')
-const openEditor = require('open-editor')
 
 const editors = require('./util/editors')
+const { openFile } = require('./util/file-opener')
 const fs = require('./util/fs')
 const open = require('./util/open')
 const exec = require('./exec')
@@ -422,38 +422,16 @@ class Socket {
       })
 
       socket.on('get:user:editor', (cb) => {
-        debug('get user editor')
-
         editors.getUserEditor(false)
         .then(cb)
       })
 
       socket.on('set:user:editor', (editor) => {
-        debug('set user editor: %o', editor)
-
         editors.setUserEditor(editor)
       })
 
       socket.on('open:file', (fileDetails) => {
-        debug('open file: %o', fileDetails)
-
-        const openerId = fileDetails.where.openerId
-
-        switch (openerId) {
-          case 'computer':
-            require('electron').shell.showItemInFolder(fileDetails.file)
-            break
-          default:
-            try {
-              const files = [].concat(fileDetails)
-
-              debug('open with editor: %s', openerId)
-              openEditor(files, { editor: openerId })
-            } catch (err) {
-              debug('error opening file: %s', err.stack)
-            }
-            break
-        }
+        openFile(fileDetails)
       })
 
       reporterEvents.forEach((event) => {
