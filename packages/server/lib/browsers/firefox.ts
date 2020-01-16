@@ -215,10 +215,11 @@ export async function open (browser: Browser, url, options: any = {}) {
   const userCSSPath = path.join(profileDir, 'chrome')
 
   if (!await fs.pathExists(path.join(userCSSPath, 'userChrome.css'))) {
-    // TODO: this hides the tab bar, possibly we might not want to do this
     await fs.mkdir(userCSSPath)
-    await fs.writeFile(path.join(profileDir, 'chrome', 'userChrome.css'), `#tabbrowser-tabs {
-        visibility: collapse !important;
+    await fs.writeFile(path.join(profileDir, 'chrome', 'userChrome.css'), `
+      #urlbar:not(.megabar), #urlbar.megabar > #urlbar-background, #searchbar {
+        background: -moz-Field !important;
+        color: -moz-FieldText !important;
       }
     `)
   }
