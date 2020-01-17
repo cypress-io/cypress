@@ -11,7 +11,10 @@ const outputPath = path.join(e2ePath, 'output.json')
 describe('e2e firefox', function () {
   e2e.setup()
 
-  e2e.it('can run a lot of tests', {
+  // NOTE: This can be used to demonstrate the Firefox out-of-memory issue, but it is skipped
+  // because it takes forever and is redundant since we test `services` against Cypress prereleases.
+  // @see https://github.com/cypress-io/cypress/issues/6187
+  e2e.it.skip('can run a lot of tests', {
     outputPath,
     project: Fixtures.projectPath('firefox-memory'),
     spec: 'spec.js',
