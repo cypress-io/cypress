@@ -291,8 +291,9 @@ declare namespace Cypress {
     isCy(obj: any): obj is Chainable
 
     /**
-     * Checks if you're running in the supplied browser.
-     * @param name browser name to check
+     * Checks if you're running in the supplied browser family.
+     * e.g. 'Chrome' will be true for the browser 'Canary' 
+     * @param name browser family name to check
      */
     isBrowser(name: string): boolean
 
