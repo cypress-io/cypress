@@ -87,7 +87,7 @@ class ForcedGcWarning extends React.Component<Props> {
             <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
           </div>
           <div>
-            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress can force garbage collection between tests. This is enabled in <code>run</code> mode and disabled in <code>open</code> mode by default. See <a href='https://github.com/cypress-io/cypress/issues/6187' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
+            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress can force garbage collection between tests. This is enabled in <code>run</code> mode and disabled in <code>open</code> mode by default. See <a href='https://link.cypress.io/firefox-gc-interval-issue' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
           </div>
         </div>
         <div className='gc-status-bar clickable gc-not-running' onClick={() => this._toggleExpando()}>
@@ -114,7 +114,7 @@ class ForcedGcWarning extends React.Component<Props> {
             <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
           </div>
           <div>
-            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress must force the browser to run garbage collection routines periodically, which causes the UI to freeze. See <a href='https://github.com/cypress-io/cypress/issues/6187' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
+            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress must force the browser to run garbage collection routines periodically, which causes the UI to freeze. See <a href='https://link.cypress.io/firefox-gc-interval-issue' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
           </div>
         </div>
         <div className={`gc-status-bar clickable ${forcingGc ? 'gc-running' : 'gc-not-running'}`} onClick={() => this._toggleExpando()}>
