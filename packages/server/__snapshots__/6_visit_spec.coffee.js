@@ -21,6 +21,7 @@ exports['e2e visit / low response timeout / passes'] = `
     ✓ scrolls automatically to div with id=foo
     ✓ can load an http page with a huge amount of elements without timing out
     ✓ can load a local file with a huge amount of elements without timing out
+    ✓ can load a site via TLSv1
     issue #225: hash urls
       ✓ can visit a hash url and loads
       ✓ can visit the same hash url and loads
@@ -35,14 +36,14 @@ exports['e2e visit / low response timeout / passes'] = `
       ✓ sets accept header to text/html,*/*
 
 
-  11 passing
+  12 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        11                                                                               │
-  │ Passing:      11                                                                               │
+  │ Tests:        12                                                                               │
+  │ Passing:      12                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -66,9 +67,9 @@ exports['e2e visit / low response timeout / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  visit_spec.coffee                        XX:XX       11       11        -        -        - │
+  │ ✔  visit_spec.coffee                        XX:XX       12       12        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       11       11        -        -        -  
+    ✔  All specs passed!                        XX:XX       12       12        -        -        -  
 
 
 `

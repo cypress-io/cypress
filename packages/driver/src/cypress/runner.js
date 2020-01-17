@@ -18,7 +18,7 @@ const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
-const RUNNABLE_PROPS = 'id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings'.split(' ')
+const RUNNABLE_PROPS = 'id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file'.split(' ')
 
 // ## initial payload
 // {
