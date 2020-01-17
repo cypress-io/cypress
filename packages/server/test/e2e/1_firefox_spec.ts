@@ -59,6 +59,5 @@ describe('e2e firefox', function () {
       },
     },
     spec: 'firefox_windowSize.js',
-    exit: false,
   })
 })
