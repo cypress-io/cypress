@@ -102,12 +102,14 @@ describe('Project', function () {
       })
     })
 
-    it('show/hides warning on retry', function () {
+    it('shows warning if baseUrl still unreachable', function () {
       cy.get('.retry-button').click().then(function () {
         this.pingBaseUrl.reject(this.baseUrlWarning)
         cy.get('.alert-warning').should('be.visible')
       })
+    })
 
+    it('does not show warning if baseUrl is reachable', function () {
       cy.get('.retry-button').click().then(function () {
         cy.get('.alert-warning').should('not.be.visible')
       })

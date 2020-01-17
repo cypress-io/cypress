@@ -38,7 +38,7 @@ describe('Warning Message', function () {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
 
-    cy.get('.alert-warning button').click()
+    cy.get('button.btn.btn-link.close').click()
 
     cy.get('.alert-warning').should('not.exist')
   })
@@ -48,7 +48,7 @@ describe('Warning Message', function () {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
 
-    cy.get('.alert-warning button').click()
+    cy.get('button.btn.btn-link.close').click()
     cy.get('.alert-warning').should('not.exist').then(() => {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
@@ -61,7 +61,7 @@ describe('Warning Message', function () {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
 
-    cy.get('.alert-warning button').click()
+    cy.get('button.btn.btn-link.close').click()
     cy.get('.alert-warning').should('not.exist').then(() => {
       this.ipc.onProjectWarning.yield(null, {
         type: 'PRETTY_BAD_WARNING',
@@ -166,12 +166,12 @@ describe('Warning Message', function () {
       .should('contain', 'Some warning')
       .should('contain', 'Other message')
 
-      cy.get('.alert-warning button').first().click()
+      cy.get('button.btn.btn-link.close').first().click()
       cy.get('.alert-warning')
       .should('not.contain', 'Some warning')
       .should('contain', 'Other message')
 
-      cy.get('.alert-warning button').click()
+      cy.get('button.btn.btn-link.close').click()
       cy.get('.alert-warning')
       .should('not.contain', 'Some warning')
       .should('not.contain', 'Other message')
