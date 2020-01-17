@@ -52,11 +52,7 @@ const FilePreference = observer(() => {
       <a href='#' className='learn-more' onClick={openHelp}>
         <i className='fas fa-info-circle'></i> Learn more
       </a>
-
-      <p>Your file preference is used to open files from the Test Runner <em>(e.g. when clicking links in error stack traces)</em></p>
-      <p className='text-muted'>
-        <i className='fas fa-exclamation-triangle' /> This setting takes effect for every project on your system. Changing it here will change it for other projects as well.
-      </p>
+      <p>Your preference is used to open files from the Test Runner <em>(e.g. when clicking links in error stack traces)</em></p>
       {state.isLoadingEditor ?
         <p className='loading-editors'>
           <i className='fas fa-spinner fa-spin'></i> Loading Editors...

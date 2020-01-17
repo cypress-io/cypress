@@ -35,7 +35,7 @@ const Settings = observer(({ project, app }) => {
           <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
             <ProxySettings app={app} />
           </Panel>
-          <Panel header='File Preference' key='file-preference' className='form-horizontal settings-file-preference'>
+          <Panel header='File Opener Preference' key='file-preference' className='form-horizontal settings-file-preference'>
             <FilePreference />
           </Panel>
         </Collapse>

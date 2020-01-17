@@ -435,7 +435,7 @@ describe('Settings', () => {
         cy.stub(this.ipc, 'getUserEditor').returns(this.getUserEditor.promise)
         cy.stub(this.ipc, 'setUserEditor').resolves()
 
-        cy.contains('File Preference').click()
+        cy.contains('File Opener Preference').click()
       })
 
       it('displays file preference section', () => {
