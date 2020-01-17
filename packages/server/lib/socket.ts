@@ -275,18 +275,6 @@ class Socket {
         })
       })
 
-      socket.on('reporter:connected', () => {
-        if (socket.inReporterRoom) {
-          return
-        }
-
-        socket.inReporterRoom = true
-
-        return socket.join('reporter')
-      })
-
-      // TODO: what to do about reporter disconnections?
-
       socket.on('runner:connected', () => {
         if (socket.inRunnerRoom) {
           return
