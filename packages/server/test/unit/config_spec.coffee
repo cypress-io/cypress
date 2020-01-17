@@ -466,11 +466,11 @@ describe "lib/config", ->
 
         it "fails if string", ->
           @setup({ firefoxGcInterval: 'foo' })
-          @expectValidationFails("be a number or an object with \"openMode\" and \"runMode\" as keys and numbers as values")
+          @expectValidationFails("a positive, non-zero number or null or an object")
 
         it "fails if invalid object", ->
           @setup({ firefoxGcInterval: { foo: 'bar' } })
-          @expectValidationFails("be a number or an object with \"openMode\" and \"runMode\" as keys and numbers as values")
+          @expectValidationFails("a positive, non-zero number or null or an object")
 
   context ".getConfigKeys", ->
     beforeEach ->
