@@ -528,21 +528,20 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
     when "RENDERER_CRASHED"
       """
-      We detected that the Chromium Renderer process just crashed.
-
-      This is the equivalent to seeing the 'sad face' when Chrome dies.
+      We detected that the #{arg1} renderer process running your tests just exited unexpectedly.
 
       This can happen for a number of different reasons:
 
-      - You wrote an endless loop and you must fix your own code
-      - There is a memory leak in Cypress (unlikely but possible)
-      - You are running Docker (there is an easy fix for this: see link below)
-      - You are running lots of tests on a memory intense application
+      - The browser was exited manually
+      - There is an infinite loop in your test suite or website code
       - You are running in a memory starved VM environment
+      - You are running lots of tests on a memory intense application
+      - You are running Docker (there is an easy fix for this: see link below)
       - There are problems with your GPU / GPU drivers
-      - There are browser bugs in Chromium
+      - There are browser bugs in #{arg1}
+      - There is a memory leak in Cypress
 
-      You can learn more including how to fix Docker here:
+      You can learn more here:
 
       https://on.cypress.io/renderer-process-crashed
       """

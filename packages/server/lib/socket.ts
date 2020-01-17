@@ -162,6 +162,7 @@ class Socket {
       checkForAppErrors () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
+      onUnexpectedDisconnect () {},
     })
 
     let automationClient: any = null
@@ -195,6 +196,8 @@ class Socket {
       // them at any time
       const headers = (socket.request != null ? socket.request.headers : undefined) != null ? (socket.request != null ? socket.request.headers : undefined) : {}
 
+      let pendingDcPromise: Promise<void> | undefined
+
       socket.on('automation:client:connected', () => {
         if (automationClient === socket) {
           return
@@ -225,6 +228,8 @@ class Socket {
             if (automationClient.connected) {
               return
             }
+
+            options.onUnexpectedDisconnect()
 
             // TODO: if all of our clients have also disconnected
             // then don't warn anything
@@ -264,12 +269,58 @@ class Socket {
           return
         }
 
+        if (pendingDcPromise) {
+          // any pending disconnection check is invalid now, since a new runner has connected
+          pendingDcPromise.cancel()
+          pendingDcPromise = undefined
+        }
+
+        socket.on('disconnect', () => {
+          debug('runner socket disconnected %o', { now: Date.now(), lastVisitResolvedAt: socket.lastVisitResolvedAt, ended: this.ended })
+
+          // if we've stopped then don't do anything
+          if (this.ended) {
+            return
+          }
+
+          const assertNewRunnerConnected = () => {
+            pendingDcPromise = undefined
+
+            const sockets = this.io.sockets.connected
+
+            const hasNewRunnerConnected = _.some(_.values(sockets).map((sock) => {
+              // socket.io should remove d/c'd sockets from the room, but check just in case
+              return sock.inRunnerRoom && sock !== socket
+            }))
+
+            debug('checking to see if a new runner socket is available... %o', { hasNewRunnerConnected, sockets })
+
+            if (!hasNewRunnerConnected) {
+              options.onUnexpectedDisconnect()
+            }
+          }
+
+          if (socket.lastVisitResolvedAt) {
+            const msSinceLastVisitResolved = Date.now() - socket.lastVisitResolvedAt
+            const delay = 30000 - msSinceLastVisitResolved
+
+            if (delay > 0) {
+              // we are resolving a cy.visit, wait up to 30 seconds then check to see if there is a new `runner`
+              pendingDcPromise = Promise.delay(delay)
+              .then(assertNewRunnerConnected)
+
+              return
+            }
+          }
+
+          // in any other case, assert immediately
+          return assertNewRunnerConnected()
+        })
+
         socket.inRunnerRoom = true
 
         return socket.join('runner')
       })
-
-      // TODO: what to do about runner disconnections?
 
       socket.on('spec:changed', (spec) => {
         return options.onSpecChanged(spec)
@@ -344,7 +395,7 @@ class Socket {
 
         debug('backend:request %o', { eventName, args })
 
-        const backendRequest = function () {
+        const backendRequest = () => {
           switch (eventName) {
             case 'preserve:run:state':
               existingState = args[0]
@@ -354,6 +405,9 @@ class Socket {
               const [url, resolveOpts] = args
 
               return options.onResolveUrl(url, headers, automationRequest, resolveOpts)
+              .finally(() => {
+                socket.lastVisitResolvedAt = Date.now()
+              })
             }
             case 'http:request':
               return options.onRequest(headers, automationRequest, args[0])

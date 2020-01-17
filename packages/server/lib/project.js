@@ -368,6 +368,18 @@ class Project extends EE {
           })
         }
       },
+
+      onUnexpectedDisconnect: () => {
+        const err = errors.get('RENDERER_CRASHED', this.browser.displayName)
+
+        browsers.close(true)
+
+        if (cfg.isTextTerminal) {
+          throw err
+        }
+
+        this.onWarning(err)
+      },
     })
   }
 
