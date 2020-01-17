@@ -2220,7 +2220,7 @@ declare namespace Cypress {
      * Firefox-only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.
      * Set the interval to `null` to disable forced garbage collections.
-     * @default { runMode: 1, openMode: 0 }
+     * @default { runMode: 1, openMode: null }
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
   }

@@ -141,7 +141,7 @@ CONFIG_DEFAULTS = {
   pluginsFile:                   "cypress/plugins"
   nodeVersion:                   "default"
   configFile:                    "cypress.json"
-  firefoxGcInterval:             { runMode: 1, openMode: 0 }
+  firefoxGcInterval:             { runMode: 1, openMode: null }
 
   ## deprecated
   javascripts:                   []
