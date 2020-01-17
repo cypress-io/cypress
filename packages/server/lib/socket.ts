@@ -1,16 +1,20 @@
-const _ = require('lodash')
-const path = require('path')
-const debug = require('debug')('cypress:server:socket')
-const Promise = require('bluebird')
-const socketIo = require('@packages/socket')
-const fs = require('./util/fs')
-const open = require('./util/open')
+import _ from 'lodash'
+import path from 'path'
+import Debug from 'debug'
+import Promise from 'bluebird'
+import socketIo from '@packages/socket'
+import { SocketIO } from '@packages/socket/types'
+import fs from './util/fs'
+import open from './util/open'
+
 const exec = require('./exec')
 const task = require('./task')
 const files = require('./files')
 const fixture = require('./fixture')
 const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
+
+const debug = Debug('cypress:server:socket')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -44,9 +48,12 @@ const isSpecialSpec = (name) => {
 }
 
 class Socket {
-  constructor (config) {
-    this.ended = false
+  io: SocketIO.Server
+  ended: boolean = false
+  testFilePath?: string
+  testsDir?: string
 
+  constructor (config) {
     this.onTestFileChange = this.onTestFileChange.bind(this)
 
     if (config.watchForFileChanges) {
@@ -67,7 +74,7 @@ class Socket {
 
   // TODO: clean this up by sending the spec object instead of
   // the url path
-  watchTestFileByPath (config, originalFilePath, options) {
+  watchTestFileByPath (config, originalFilePath) {
     // files are always sent as integration/foo_spec.js
     // need to take into account integrationFolder may be different so
     // integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
@@ -161,7 +168,7 @@ class Socket {
       onTestFileChange () {},
     })
 
-    let automationClient = null
+    let automationClient: any = null
 
     const { integrationFolder, socketIoRoute, socketIoCookie } = config
 
@@ -183,7 +190,7 @@ class Socket {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
-    return this.io.on('connection', (socket) => {
+    return this.io.on('connection', (socket: SocketIO.Client) => {
       debug('socket connected')
 
       // cache the headers so we can access
@@ -283,7 +290,7 @@ class Socket {
       })
 
       socket.on('watch:test:file', (filePath, cb = function () {}) => {
-        this.watchTestFileByPath(config, filePath, options)
+        this.watchTestFileByPath(config, filePath)
 
         // callback is only for testing purposes
         return cb()
@@ -339,6 +346,8 @@ class Socket {
         .then(() => {
           return cb(true)
         }).catch(Promise.TimeoutError, (err) => {
+          debug('is:automation:client:connected timed out %o', { err })
+
           return cb(false)
         })
       })
