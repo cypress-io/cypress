@@ -302,10 +302,10 @@ class Socket {
 
           if (socket.lastVisitResolvedAt) {
             const msSinceLastVisitResolved = Date.now() - socket.lastVisitResolvedAt
-            const delay = 30000 - msSinceLastVisitResolved
+            const delay = 10000 - msSinceLastVisitResolved
 
             if (delay > 0) {
-              // we are resolving a cy.visit, wait up to 30 seconds then check to see if there is a new `runner`
+              // we are resolving a cy.visit, wait up to 10 seconds then check to see if there is a new `runner`
               pendingDcPromise = Promise.delay(delay)
               .then(assertNewRunnerConnected)
 
