@@ -3,32 +3,67 @@ import Bluebird from 'bluebird'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import chaiSubset from 'chai-subset'
+import sinonChai from '@cypress/sinon-chai'
 import sinon from 'sinon'
 
 import shellUtil from '../../../lib/util/shell.js'
-import { getUserEditor } from '../../../lib/util/editors'
+import * as envEditors from '../../../lib/util/env-editors'
 import savedState from '../../../lib/saved_state'
+
+import { getUserEditor, setUserEditor } from '../../../lib/util/editors'
 
 chai.use(chaiAsPromised)
 chai.use(chaiSubset)
+chai.use(sinonChai)
+
+const setPlatform = (platform) => {
+  Object.defineProperty(process, 'platform', {
+    value: platform,
+  })
+}
 
 describe('lib/util/editors', () => {
+  let stateMock
+
+  beforeEach(() => {
+    stateMock = {
+      get: sinon.stub().returns({}),
+      set: sinon.spy(),
+    }
+
+    sinon.stub(savedState, 'create').resolves(stateMock)
+  })
+
   context('#getUserEditor', () => {
+    let platform
+
     beforeEach(() => {
-      sinon.stub(savedState, 'create').resolves({
-        get () {
-          return {}
-        },
-      })
+      sinon.stub(envEditors, 'getEnvEditors').returns([{
+        id: 'sublimetext',
+        binary: 'subl',
+        name: 'Sublime Text',
+      }, {
+        id: 'code',
+        binary: 'code',
+        name: 'Visual Studio Code',
+      }, {
+        id: 'vim',
+        binary: 'vim',
+        name: 'Vim',
+      }])
 
       sinon.stub(shellUtil, 'commandExists').callsFake((command) => {
         const exists = ['code', 'subl', 'vim'].includes(command)
 
         return Bluebird.resolve(exists)
       })
+
+      platform = process.platform
+      setPlatform('darwin')
     })
 
     afterEach(() => {
+      setPlatform(platform)
       sinon.restore()
     })
 
@@ -36,13 +71,12 @@ describe('lib/util/editors', () => {
       return getUserEditor().then(({ availableEditors }) => {
         const names = _.map(availableEditors, 'name')
 
-        expect(names).to.eql(['On Computer', 'Sublime Text', 'Visual Studio Code', 'Vim', 'Other'])
+        expect(names).to.eql(['Finder', 'Sublime Text', 'Visual Studio Code', 'Vim', 'Other'])
         expect(availableEditors[0]).to.eql({
           id: 'computer',
-          name: 'On Computer',
+          name: 'Finder',
           isOther: false,
           openerId: 'computer',
-          description: 'Opens the file in your system\'s file management application (e.g. Finder, File Explorer)',
         })
 
         expect(availableEditors[4]).to.eql({
@@ -50,7 +84,6 @@ describe('lib/util/editors', () => {
           name: 'Other',
           isOther: true,
           openerId: '',
-          description: 'Enter the full path to your editor\'s executable',
         })
       })
     })
@@ -65,6 +98,36 @@ describe('lib/util/editors', () => {
 
       return getUserEditor().then(({ availableEditors }) => {
         expect(availableEditors[4].openerId).to.equal('/path/to/editor')
+      })
+    })
+
+    it('computer option is Finder on MacOS', () => {
+      return getUserEditor().then(({ availableEditors }) => {
+        expect(availableEditors[0].name).to.equal('Finder')
+      })
+    })
+
+    it('computer option is File System on Linux', () => {
+      setPlatform('linux')
+
+      return getUserEditor().then(({ availableEditors }) => {
+        expect(availableEditors[0].name).to.equal('File System')
+      })
+    })
+
+    it('computer option is File Explorer on Windows', () => {
+      setPlatform('win32')
+
+      return getUserEditor().then(({ availableEditors }) => {
+        expect(availableEditors[0].name).to.equal('File Explorer')
+      })
+    })
+
+    it('computer option defaults to File System', () => {
+      setPlatform('unknown')
+
+      return getUserEditor().then(({ availableEditors }) => {
+        expect(availableEditors[0].name).to.equal('File System')
       })
     })
 
@@ -115,6 +178,16 @@ describe('lib/util/editors', () => {
           expect(availableEditors).to.have.length(5)
           expect(preferredOpener).to.be.undefined
         })
+      })
+    })
+  })
+
+  context('#setUserEditor', () => {
+    it('sets the preferred editor', () => {
+      const editor = {}
+
+      return setUserEditor(editor).then(() => {
+        expect(stateMock.set).to.be.calledWith('preferredOpener', editor)
       })
     })
   })

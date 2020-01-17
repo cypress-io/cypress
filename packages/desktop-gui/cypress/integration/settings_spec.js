@@ -439,7 +439,7 @@ describe('Settings', () => {
       })
 
       it('displays file preference section', () => {
-        cy.contains('Global settings take effect')
+        cy.contains('Your preference is used to open files')
       })
 
       it('opens file preference guide when learn more is clicked', () => {
