@@ -15,6 +15,7 @@ const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
 
 const debug = Debug('cypress:server:socket')
+const debugVerbose = Debug('cypress-verbose:server:socket')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -45,6 +46,17 @@ const retry = (fn) => {
 
 const isSpecialSpec = (name) => {
   return name.endsWith('__all')
+}
+
+const _attachDebugLogger = (socket: SocketIO.Socket) => {
+  if (!debugVerbose.enabled) {
+    return
+  }
+
+  socket.use((packet, next) => {
+    debugVerbose('packet received %o', { socketRooms: _.values(socket.rooms), packet })
+    next()
+  })
 }
 
 class Socket {
@@ -192,6 +204,8 @@ class Socket {
 
     return this.io.on('connection', (socket: SocketIO.Client) => {
       debug('socket connected')
+
+      _attachDebugLogger(socket)
 
       // cache the headers so we can access
       // them at any time
