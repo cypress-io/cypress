@@ -98,7 +98,8 @@ const defaultPreferences = {
   // prevent going into safe mode after crash
   'toolkit.startup.max_resumed_crashes': -1,
   'toolkit.legacyUserProfileCustomizations.stylesheets': true,
-  'browser.tabs.drawInTitlebar': true,
+  // setting to true hides system window bar, but causes weird resizing issues.
+  'browser.tabs.drawInTitlebar': false,
 
   'geo.provider.testing': true,
 
