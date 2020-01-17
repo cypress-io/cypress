@@ -324,6 +324,7 @@ const eventManager = {
     })
 
     reporterBus.emit('reporter:start', {
+      firefoxGcInterval: Cypress.getFirefoxGcInterval(),
       startTime: Cypress.getStartTime(),
       numPassed: state.passed,
       numFailed: state.failed,

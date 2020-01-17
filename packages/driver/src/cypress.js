@@ -16,6 +16,7 @@ const $Commands = require('./cypress/commands')
 const $Cookies = require('./cypress/cookies')
 const $Cy = require('./cypress/cy')
 const $Events = require('./cypress/events')
+const $GetFirefoxGcInterval = require('./util/get_firefox_gc_interval')
 const $Keyboard = require('./cy/keyboard')
 const $SetterGetter = require('./cypress/setter_getter')
 const $Log = require('./cypress/log')
@@ -159,6 +160,7 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
+    this.getFirefoxGcInterval = $GetFirefoxGcInterval.create(this.config)
 
     this.Cookies = $Cookies.create(config.namespace, d)
 

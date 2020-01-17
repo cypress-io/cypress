@@ -23,26 +23,13 @@
   }
 
   >.gc-status-bar {
-    >.status {
-      >i {
-        margin-right: .3em;
-      }
-    }
-
-    &.gc-running {
-    }
-
-    &.gc-not-running {
-      >.status {
-        opacity: .7;
-      }
+    .status-text {
+      float: right;
     }
 
     >.total-time {
-      float: right;
-
       >i {
-        margin-left: .3em;
+        margin-right: .3em;
       }
     }
   }

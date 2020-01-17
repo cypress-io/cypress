@@ -88,9 +88,9 @@ class Reporter extends Component<ReporterProps> {
           specPath={this.props.specPath}
         />
         <ForcedGcWarning
-          forcingGc={appState.forcingGc}
+          appState={appState}
           hasDismissedForcedGcWarning={this.props.hasDismissedForcedGcWarning}
-          events={this.props.events} />
+          events={this.props.events}/>
       </div>
     )
   }

@@ -49,30 +49,23 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       testsSinceLastForcedGc++
 
       ## if this is the first test, or the last test didn't run a cy.visit...
-      if not Cypress.isBrowser('firefox') or
-          order is 0 or
-          not cyVisitedInLastTest
+      if order is 0 or not cyVisitedInLastTest
         ## reset state and skip forced GC
         cyVisitedInLastTest = false
         return
 
-      gcInterval = do =>
-        interval = config("firefoxGcInterval")
-        if _.isNumber(interval)
-          return interval
-
-        interval[if config("isInteractive") then "openMode" else "runMode"]
+      gcInterval = Cypress.getFirefoxGcInterval()
 
       cyVisitedInLastTest = false
 
       if gcInterval and testsSinceLastForcedGc >= gcInterval
         testsSinceLastForcedGc = 0
 
-        Cypress.emit("before:firefox:force:gc")
+        Cypress.emit("before:firefox:force:gc", { gcInterval })
 
         Cypress.backend("firefox:force:gc")
         .then =>
-          Cypress.emit("after:firefox:force:gc")
+          Cypress.emit("after:firefox:force:gc", { gcInterval })
 
   Cypress.on "test:before:run:async", ->
     ## if we have viewportDefaults it means

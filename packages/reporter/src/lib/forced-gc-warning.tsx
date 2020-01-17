@@ -1,11 +1,13 @@
-import { round } from 'lodash'
+import { isUndefined, round } from 'lodash'
 import React from 'react'
 import { Events } from './events'
+import { AppState } from './app-state'
+import { observer } from 'mobx-react'
 
 interface Props {
-  forcingGc: boolean
-  hasDismissedForcedGcWarning: boolean
+  appState: AppState
   events: Events
+  hasDismissedForcedGcWarning: boolean
 }
 
 interface State {
@@ -13,6 +15,7 @@ interface State {
   expanded: boolean
 }
 
+@observer
 class ForcedGcWarning extends React.Component<Props> {
   gcStartMs: number | null = null
   gcTotalMs: number = 0
@@ -46,17 +49,8 @@ class ForcedGcWarning extends React.Component<Props> {
     this.setState({ expanded: !this.state.expanded })
   }
 
-  static getDerivedStateFromProps (nextProps: Props, prevState: State) {
-    // if we start forcing GC, the expando is closed, and we can autoshow...
-    if (nextProps.forcingGc && !prevState.expanded && prevState.autoExpandWarning) {
-      return { expanded: true }
-    }
-
-    return {}
-  }
-
-  render () {
-    const { forcingGc } = this.props
+  _updateGcTimer () {
+    const { forcingGc } = this.props.appState
 
     if (!forcingGc) {
       if (this.gcStartMs) {
@@ -70,6 +64,44 @@ class ForcedGcWarning extends React.Component<Props> {
     if (forcingGc && !this.gcStartMs) {
       this.gcStartMs = Date.now()
     }
+  }
+
+  static getDerivedStateFromProps (nextProps: Props | any, prevState: State) {
+    // if we start forcing GC, the expando is closed, and we can autoexpand...
+    if (nextProps.appState.forcingGc && !prevState.expanded && prevState.autoExpandWarning) {
+      return { expanded: true }
+    }
+
+    return {}
+  }
+
+  _renderDisabled () {
+    return (
+      <div className='forced-gc-warning'>
+        <div className={`gc-expando ${this.state.expanded ? 'expanded' : ''}`}>
+          <div>
+            <strong>
+              <i className='fas fa-info-circle'></i>{' '}
+              What is this?
+            </strong>
+            <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
+          </div>
+          <div>
+            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress can force garbage collection between tests. This is enabled in <code>run</code> mode and disabled in <code>open</code> mode by default. See <a href='https://github.com/cypress-io/cypress/issues/6187' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
+          </div>
+        </div>
+        <div className='gc-status-bar clickable gc-not-running' onClick={() => this._toggleExpando()}>
+          <span className='total-time'>
+            <i className='fas fa-ws fa-info-circle clickable'></i>
+            Forced GC is disabled.
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  _renderForcedGcWarning () {
+    const { forcingGc } = this.props.appState
 
     return (
       <div className='forced-gc-warning'>
@@ -82,20 +114,38 @@ class ForcedGcWarning extends React.Component<Props> {
             <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
           </div>
           <div>
-            Due to <a href='https://bugzilla.mozilla.org/show_bug.cgi?id=1608501' target='_blank' rel='noopener noreferrer'>Firefox bug #1608501</a>, Cypress must force the browser to run garbage collection routines periodically, which causes the UI to freeze. See <a href='https://github.com/cypress-io/cypress/issues/XXXX' target='_blank' rel='noopener noreferrer'>Cypress bug #XXXX</a> for details.
+            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress must force the browser to run garbage collection routines periodically, which causes the UI to freeze. See <a href='https://github.com/cypress-io/cypress/issues/6187' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
           </div>
         </div>
-        <div className={`gc-status-bar ${forcingGc ? 'gc-running' : 'gc-not-running'}`}>
-          <span className='status'>
-            <i className='fa fa-trash'></i> Forced GC is {!forcingGc && 'not '}currently running
-          </span>
+        <div className={`gc-status-bar clickable ${forcingGc ? 'gc-running' : 'gc-not-running'}`} onClick={() => this._toggleExpando()}>
           <span className='total-time' title='Total time spent in forced GC during this session'>
-            GC timer: {round(this.gcTotalMs / 1000, 2)}s
-            <i className='fas fa-info-circle clickable' onClick={() => this._toggleExpando()}></i>
+            <i className='fas fa-ws fa-info-circle'></i>
+            GC Duration: {round(this.gcTotalMs / 1000, 2)}
           </span>
+
+          {forcingGc && <span className='status-text'>
+            <i className='fas fa-spinner fa-spin'></i> Running GC...
+          </span>}
         </div>
       </div>
     )
+  }
+
+  render () {
+    const { firefoxGcInterval } = this.props.appState
+
+    if (isUndefined(firefoxGcInterval)) {
+      // we're either still loading or it is disabled
+      return null
+    }
+
+    if (firefoxGcInterval === 0 || firefoxGcInterval == null) {
+      return this._renderDisabled()
+    }
+
+    this._updateGcTimer()
+
+    return this._renderForcedGcWarning()
   }
 }
 

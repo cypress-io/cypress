@@ -3,6 +3,7 @@ import { observable } from 'mobx'
 
 interface DefaultAppState {
   forcingGc: boolean
+  firefoxGcInterval: number | null | undefined
   isPaused: boolean
   isRunning: boolean
   nextCommandName: string | null | undefined
@@ -11,6 +12,7 @@ interface DefaultAppState {
 
 const defaults: DefaultAppState = {
   forcingGc: false,
+  firefoxGcInterval: undefined,
   isPaused: false,
   isRunning: false,
   nextCommandName: null,
@@ -24,6 +26,7 @@ class AppState {
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
+  @observable firefoxGcInterval = defaults.firefoxGcInterval
 
   isStopped = false;
   _resetAutoScrollingEnabledTo = true;
@@ -55,6 +58,10 @@ class AppState {
 
   setForcingGc (forcingGc: boolean) {
     this.forcingGc = forcingGc
+  }
+
+  setFirefoxGcInterval (firefoxGcInterval: DefaultAppState['firefoxGcInterval']) {
+    this.firefoxGcInterval = firefoxGcInterval
   }
 
   temporarilySetAutoScrolling (isEnabled?: boolean | null) {
