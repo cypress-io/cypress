@@ -48,7 +48,7 @@ describe('e2e firefox', function () {
     // snapshot: true,
   })
 
-  e2e.it.only('launches maximized by default', {
+  e2e.it('launches maximized by default', {
     browser: 'firefox',
     config: {
       video: false,
