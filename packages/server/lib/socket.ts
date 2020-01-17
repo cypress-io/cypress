@@ -17,18 +17,6 @@ const preprocessor = require('./plugins/preprocessor')
 const debug = Debug('cypress:server:socket')
 const debugVerbose = Debug('cypress-verbose:server:socket')
 
-const runnerEvents = [
-  'reporter:restart:test:run',
-  'runnables:ready',
-  'run:start',
-  'test:before:run:async',
-  'reporter:log:add',
-  'reporter:log:state:changed',
-  'paused',
-  'test:after:hooks',
-  'run:end',
-]
-
 const reporterEvents = [
   // "go:to:file"
   'runner:restart',
@@ -119,10 +107,6 @@ class Socket {
     // ignore errors b/c we're just setting up the watching. errors
     // are handled by the spec controller
     .catch(() => {})
-  }
-
-  toReporter (event, data) {
-    return this.io && this.io.to('reporter').emit(event, data)
   }
 
   toRunner (event, data) {
@@ -432,12 +416,6 @@ class Socket {
       reporterEvents.forEach((event) => {
         return socket.on(event, (data) => {
           return this.toRunner(event, data)
-        })
-      })
-
-      return runnerEvents.forEach((event) => {
-        return socket.on(event, (data) => {
-          return this.toReporter(event, data)
         })
       })
     })
