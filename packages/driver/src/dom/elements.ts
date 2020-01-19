@@ -605,7 +605,7 @@ const isAttached = function ($el) {
   // is technically bound to a differnet document
   // but c'mon
   const isIn = (el) => {
-    return $.contains((doc as unknown) as Element, el)
+    return $jquery.contains((doc as unknown) as Element, el)
   }
 
   // make sure the document is currently
@@ -864,6 +864,11 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
     return $el
   }
 
+  // the current element is in a shadowDom
+  if ($el.offsetParent().length > 0 && !$el.offsetParent()[0].contains($el[0])) {
+    return getFirstFixedOrStickyPositionParent($el.offsetParent())
+  }
+
   // else recursively continue to walk up the parent node chain
   return getFirstFixedOrStickyPositionParent($el.parent())
 }
@@ -878,6 +883,11 @@ const getFirstStickyPositionParent = ($el) => {
   // if we have sticky position return ourselves
   if ($el.css('position') === 'sticky') {
     return $el
+  }
+
+  // the current element is in a shadowDom
+  if ($el.offsetParent().length > 0 && !$el.offsetParent()[0].contains($el[0])) {
+    return getFirstStickyPositionParent($el.offsetParent())
   }
 
   // else recursively continue to walk up the parent node chain
@@ -965,7 +975,7 @@ const getFirstDeepestElement = (elements, index = 0) => {
   }
 
   // does current contain next?
-  if ($.contains($current.get(0), $next.get(0))) {
+  if ($jquery.contains($current.get(0), $next.get(0))) {
     return getFirstDeepestElement(elements, index + 1)
   }
 

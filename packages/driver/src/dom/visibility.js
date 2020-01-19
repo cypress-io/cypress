@@ -79,9 +79,19 @@ const isHidden = (el, name = 'isHidden()') => {
     return elIsNotElementFromPoint($el)
   }
 
+  // Current element is in a shadowDom
+  if (elIsInShadowDOM($el)) {
+    return isHidden($el.offsetParent())
+  }
+
+
   // else check if el is outside the bounds
   // of its ancestors overflow
   return elIsOutOfBoundsOfAncestorsOverflow($el)
+}
+
+const elIsInShadowDOM = ($el) => {
+  return $el.offsetParent().length > 0 && !$el.offsetParent()[0].contains($el[0])
 }
 
 const elHasNoEffectiveWidthOrHeight = ($el) => {

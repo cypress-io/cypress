@@ -35,7 +35,7 @@ interface TransformInfo {
 const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []): TransformInfo[] => {
   list.push(extractTransformInfo($el))
 
-  const $parent = $el.parent()
+  const $parent = $el.parent() || $el.offsetParent()
 
   if (!$parent.length || isDocument($parent)) {
     return list
@@ -209,7 +209,7 @@ const toUnitVector = (v: Vector3): Vector3 => {
 
 // This function checks 2 things that can happen: scale and rotate to 0 in width or height.
 const elIsTransformedToZero = (list: TransformInfo[]) => {
-  if (list[1].transformStyle === 'preserve-3d') {
+  if (list.length > 1 && list[1].transformStyle === 'preserve-3d') {
     const normal = finalNormal(0, list)
 
     return isElementOrthogonalWithView(normal)

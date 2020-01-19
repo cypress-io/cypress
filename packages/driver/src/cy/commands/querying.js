@@ -618,4 +618,29 @@ module.exports = (Commands, Cypress, cy) => {
       return subject
     },
   })
+
+  Commands.add('shadow', {prevSubject: ['element']}, getFromShadow = (subject, selector, options) => {
+    Cypress.log({
+      el: subject,
+      name: 'Shadow',
+      message: selector,
+      consoleProps: () => { return {selector}}
+    })
+
+    function findInShadow() {
+      let results = Cypress.$()
+      let i = 0
+
+      while (subject[i]) {
+        results = results.add(Cypress.$(subject[i].shadowRoot).find(selector))
+        i++
+      }
+
+      return cy.verifyUpcomingAssertions(results, options, {
+        onRetry: findInShadow
+      })
+    }
+
+    return findInShadow()
+  })
 }

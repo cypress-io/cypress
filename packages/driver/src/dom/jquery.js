@@ -1,6 +1,12 @@
 const $ = require('jquery')
 const _ = require('lodash')
 
+// Check if element contains a child element
+const contains = (doc, obj) => {
+  // offsetParent works with shadowDom (parent is in dom)
+  return $.contains(doc, obj) || $.contains(doc, obj.offsetParent)
+}
+
 // wrap the object in jquery
 const wrap = (obj) => {
   return $(obj)
@@ -30,6 +36,8 @@ const isJquery = (obj) => {
 // doing a little jiggle wiggle here
 // to avoid circular dependencies
 module.exports = {
+  contains,
+
   wrap,
 
   query,
