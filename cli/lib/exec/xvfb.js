@@ -9,6 +9,7 @@ const util = require('../util')
 
 const xvfb = Promise.promisifyAll(new Xvfb({
   timeout: 30000, // milliseconds
+  xvfb_args: ['-screen', '0', '1280x1024x24'], // need to explicitly define screen otherwise electron will crash
   onStderrData (data) {
     if (debugXvfb.enabled) {
       debugXvfb(data.toString())
