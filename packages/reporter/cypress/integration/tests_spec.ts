@@ -125,6 +125,7 @@ describe('controls', function () {
       it('shows option', () => {
         cy.get('.command-name-visit .command-message-options').should('be.visible')
         cy.get('.command-name-set-cookie .command-message-options').should('not.be.visible')
+        cy.get('.command-name-empty-option-obj .command-message-options').should('not.be.visible')
       })
     })
   })

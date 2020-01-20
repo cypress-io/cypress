@@ -3,7 +3,6 @@ import _ from 'lodash'
 import React, { ReactNode, MouseEvent, useState } from 'react'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
-import Cypress from '@packages/driver'
 // @ts-ignore
 import { ObjectInspector, chromeLight, ObjectRootLabel, ObjectLabel, InspectorProps } from 'react-inspector'
 
@@ -61,7 +60,7 @@ export const Message = observer(({ model, toggleSubject, toggleExpected, toggleA
             theme={inspectorTheme('#999', '#777')}
             data={model.options}
             // @ts-ignore
-            expandLevel={Cypress && Cypress.config && Cypress.config('isInteractive') ? 0 : 10} // 10 here is an arbitrary big number
+            expandLevel={Cypress && Cypress.config('isInteractive') ? 0 : 10} // 10 here is an arbitrary big number
           />
         </span>
         : null

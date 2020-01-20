@@ -183,26 +183,6 @@ describe('<Command />', () => {
 
       expect(component.find(Message).first().shallow().find('.bad')).to.exist
     })
-
-    describe('options', () => {
-      it('does not show options when it is null', () => {
-        const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
-
-        expect(component.find(Message).first().shallow().find('.command-message-options')).to.not.exist
-      })
-
-      it('shows options when it exists', () => {
-        const component = shallow(<Command model={model({ options: { foo: 'bar' } })} aliasesWithDuplicates={null} />)
-
-        expect(component.find(Message).first().shallow().find('.command-message-options').html()).to.contain('{foo: bar}')
-      })
-
-      it('does not show options when option object is empty', () => {
-        const component = shallow(<Command model={model({ options: {} })} aliasesWithDuplicates={null} />)
-
-        expect(component.find(Message).first().shallow().find('.command-message-options')).to.exist
-      })
-    })
   })
 
   context('clicking', () => {

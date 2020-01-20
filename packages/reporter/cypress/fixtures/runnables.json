@@ -119,6 +119,17 @@
               "state": "passed",
               "testId": "r4",
               "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c6",
+              "instrument": "command",
+              "message": "value",
+              "name": "empty option obj",
+              "state": "passed",
+              "testId": "r4",
+              "options": {},
+              "type": "parent"
             }
           ]
         }
