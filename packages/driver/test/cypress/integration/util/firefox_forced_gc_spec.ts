@@ -61,7 +61,8 @@ describe('driver/src/util/firefox_forced_gc', () => {
       const real = Cypress.getFirefoxGcInterval
       const fake = createIntervalGetter(Cypress.config)
 
-      expect(real()).to.eq(fake()).and.eq(5)
+      // conditional, so it can pass in non-ff browsers
+      expect(real()).to.eq(fake()).and.eq(Cypress.isBrowser('firefox') ? 5 : undefined)
 
       Cypress.config('firefoxGcInterval', oldGcInterval)
     })
