@@ -406,7 +406,7 @@ describe('Project Nav', function () {
 
     describe('browser with info', function () {
       beforeEach(function () {
-        this.info = 'foo info bar'
+        this.info = 'foo info bar [baz](http://example.com/)'
         this.config.browsers = [{
           name: 'electron',
           family: 'electron',
@@ -420,12 +420,13 @@ describe('Project Nav', function () {
         this.openProject.resolve(this.config)
       })
 
-      it('shows info icon with tooltip', function () {
-        cy.get('.browsers .fa-info-circle')
-        .trigger('mouseover')
+      it('shows info icon with linkified tooltip', function () {
+        cy.get('.browsers .fa-info-circle').trigger('mouseover')
 
-        cy.get('.cy-tooltip')
-        .should('contain', this.info)
+        cy.get('.cy-tooltip').should('contain', 'foo info bar baz')
+        cy.get('.cy-tooltip a').should('have.text', 'baz').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
+        })
       })
     })
   })
