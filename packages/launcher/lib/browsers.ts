@@ -2,6 +2,8 @@ import { log } from './log'
 import * as cp from 'child_process'
 import { Browser, FoundBrowser } from './types'
 
+const firefoxInfo = 'Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).'
+
 /** list of the browsers we can detect and use by default */
 export const browsers: Browser[] = [
   {
@@ -32,6 +34,7 @@ export const browsers: Browser[] = [
     name: 'firefox',
     family: 'firefox',
     displayName: 'Firefox',
+    info: firefoxInfo,
     versionRegex: /Firefox (\S+)/,
     profile: true,
     binary: 'firefox',
@@ -40,6 +43,7 @@ export const browsers: Browser[] = [
     name: 'firefoxDeveloperEdition',
     family: 'firefox',
     displayName: 'Firefox Developer Edition',
+    info: firefoxInfo,
     versionRegex: /Firefox Developer Edition (\S+)/,
     profile: true,
     binary: 'firefox-developer-edition',
@@ -48,6 +52,7 @@ export const browsers: Browser[] = [
     name: 'firefoxNightly',
     family: 'firefox',
     displayName: 'Firefox Nightly',
+    info: firefoxInfo,
     versionRegex: /Firefox Nightly (\S+)/,
     profile: true,
     binary: 'firefox-nightly',

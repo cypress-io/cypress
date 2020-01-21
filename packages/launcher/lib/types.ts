@@ -21,6 +21,10 @@ export type Browser = {
   profile: boolean
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
   binary: string | string[]
+  /** optional warning that will be shown in the GUI */
+  warning?: string
+  /** optional info that will be shown in the GUI */
+  info?: string
 }
 
 /**
@@ -33,10 +37,6 @@ export type FoundBrowser = Browser & {
   majorVersion?: string
   /** user-supplied browser? */
   custom?: boolean
-  /** optional info that will be shown in the GUI */
-  info?: string
-  /** optional warning that will be shown in the GUI */
-  warning?: string
 }
 
 // all common type definition for this module

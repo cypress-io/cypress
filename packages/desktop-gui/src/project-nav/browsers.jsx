@@ -74,6 +74,7 @@ export default class Browsers extends Component {
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
+        {browser.family === 'firefox' && ' (beta)'}
         {this._warn(browser)}
         {this._info(browser)}
       </span>
@@ -102,7 +103,7 @@ export default class Browsers extends Component {
     return (
       <span className='browser-info'>
         <Tooltip
-          title={browser.info}
+          title={<MarkdownRenderer markdown={browser.info}/>}
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
