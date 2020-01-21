@@ -318,7 +318,8 @@ describe "app/background", ->
         .resolves(
           {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: false}
         )
-        .withArgs({name: "foo", value: "bar", secure: true, domain: "localhost", path: "/foo", url: "https://localhost/foo"})
+        ## 'domain' cannot not set when it's localhost
+        .withArgs({name: "foo", value: "bar", secure: true, path: "/foo", url: "https://localhost/foo"})
         .rejects({message: "some error"})
 
       it "resolves with the cookie details", (done) ->
@@ -479,7 +480,7 @@ describe "app/background", ->
       it "resolves with screenshot", (done) ->
         sinon.stub(browser.tabs, "captureVisibleTab")
         .withArgs(1, {format: "png"})
-        .yieldsAsync("foobarbaz")
+        .resolves("foobarbaz")
 
         @socket.on "automation:response", (id, obj = {}) ->
           expect(id).to.eq(123)
@@ -489,8 +490,7 @@ describe "app/background", ->
         @server.emit("automation:request", 123, "take:screenshot")
 
       it "rejects with browser.runtime.lastError", (done) ->
-        browser.runtime.lastError = {message: "some error"}
-        sinon.stub(browser.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).yieldsAsync(undefined)
+        sinon.stub(browser.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).rejects(new Error("some error"))
 
         @socket.on "automation:response", (id, obj) ->
           expect(id).to.eq(123)

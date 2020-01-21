@@ -292,7 +292,7 @@ declare namespace Cypress {
 
     /**
      * Checks if you're running in the supplied browser family.
-     * e.g. 'Chrome' will be true for the browser 'Canary' 
+     * e.g. 'Chrome' will be true for the browser 'Canary'
      * @param name browser family name to check
      */
     isBrowser(name: string): boolean
@@ -1102,7 +1102,7 @@ declare namespace Cypress {
     parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Stop cy commands from running and allow interaction with the application under test. You can then “resume” running all commands or choose to step through the “next” commands from the Command Log.
+     * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
      * This does not set a `debugger` in your code, unlike `.debug()`
      *
      * @see https://on.cypress.io/pause
@@ -1245,7 +1245,7 @@ declare namespace Cypress {
      * Get the root DOM element.
      * The root element yielded is `<html>` by default.
      * However, when calling `.root()` from a `.within()` command,
-     * the root element will point to the element you are “within”.
+     * the root element will point to the element you are "within".
      *
      * @see https://on.cypress.io/root
      */
