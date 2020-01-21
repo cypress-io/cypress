@@ -1,6 +1,6 @@
 import { get, isNumber } from 'lodash'
 
-export function create (config) {
+export function createIntervalGetter (config) {
   return () => {
     if (get(config('browser'), 'family') !== 'firefox') {
       return undefined

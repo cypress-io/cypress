@@ -1,15 +1,15 @@
-import { create } from '../../../../src/util/get_firefox_gc_interval'
+import { createIntervalGetter } from '../../../../src/util/firefox_forced_gc'
 
-const run = (configObj) => {
-  const configFn = (key) => {
-    return key ? configObj[key] : configObj
-  }
+describe('driver/src/util/firefox_forced_gc', () => {
+  describe('#createIntervalGetter returns a function that', () => {
+    const run = (configObj) => {
+      const configFn = (key) => {
+        return key ? configObj[key] : configObj
+      }
 
-  return create(configFn)()
-}
+      return createIntervalGetter(configFn)()
+    }
 
-describe('driver/src/util/get_firefox_gc_interval', () => {
-  describe('#create returns a function that', () => {
     it('returns undefined if not in Firefox', () => {
       expect(run({
         browser: {
