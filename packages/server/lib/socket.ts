@@ -231,8 +231,7 @@ class Socket {
 
             options.onUnexpectedDisconnect()
 
-            // TODO: if all of our clients have also disconnected
-            // then don't warn anything
+            // TODO: since onUnexpectedDisconnect() warns appropriately, this can be removed most likely?
             errors.warning('AUTOMATION_SERVER_DISCONNECTED')
 
             // TODO: no longer emit this, just close the browser and display message in reporter
@@ -276,7 +275,7 @@ class Socket {
         }
 
         socket.on('disconnect', () => {
-          debug('runner socket disconnected %o', { now: Date.now(), lastVisitResolvedAt: socket.lastVisitResolvedAt, ended: this.ended })
+          debug('runner socket disconnected %o', { now: Date.now(), runStatePreservedAt: socket.runStatePreservedAt, ended: this.ended })
 
           // if we've stopped then don't do anything
           if (this.ended) {
@@ -300,8 +299,8 @@ class Socket {
             }
           }
 
-          if (socket.lastVisitResolvedAt) {
-            const msSinceLastVisitResolved = Date.now() - socket.lastVisitResolvedAt
+          if (socket.runStatePreservedAt) {
+            const msSinceLastVisitResolved = Date.now() - socket.runStatePreservedAt
             const delay = 10000 - msSinceLastVisitResolved
 
             if (delay > 0) {
@@ -400,14 +399,14 @@ class Socket {
             case 'preserve:run:state':
               existingState = args[0]
 
+              // run state is preserved before navigation events, so use this to determine if socket is expected to disconnect
+              socket.runStatePreservedAt = Date.now()
+
               return null
             case 'resolve:url': {
               const [url, resolveOpts] = args
 
               return options.onResolveUrl(url, headers, automationRequest, resolveOpts)
-              .finally(() => {
-                socket.lastVisitResolvedAt = Date.now()
-              })
             }
             case 'http:request':
               return options.onRequest(headers, automationRequest, args[0])
