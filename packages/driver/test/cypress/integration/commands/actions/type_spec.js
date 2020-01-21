@@ -3314,6 +3314,18 @@ describe('src/cy/commands/actions/type', () => {
             done()
           })
         })
+
+        it('moves the cursor to start position', () => {
+          cy
+          .get('input:first').type('123{moveToStart}456')
+          .should('have.value', '456123')
+        })
+
+        it('moves the cursor in-between start and end position', () => {
+          cy
+          .get('input:first').type('123{moveToStart}456{moveToEnd}789')
+          .should('have.value', '456123789')
+        })
       })
 
       describe('release: false', () => {
