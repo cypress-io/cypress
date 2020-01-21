@@ -1,4 +1,4 @@
-import { createIntervalGetter } from '../../../../src/util/firefox_forced_gc'
+import { createIntervalGetter, install } from '../../../../src/util/firefox_forced_gc'
 
 describe('driver/src/util/firefox_forced_gc', () => {
   describe('#createIntervalGetter returns a function that', () => {
@@ -51,6 +51,153 @@ describe('driver/src/util/firefox_forced_gc', () => {
         },
         isInteractive: false,
       })).to.eq(10)
+    })
+  })
+
+  describe('#install', () => {
+    let MockCypress: any
+    let commandStartFn: any
+    let testBeforeRunAsyncFn: any
+
+    beforeEach(() => {
+      MockCypress = {
+        on: cy.stub().throws(),
+        emit: cy.stub().throws(),
+        isBrowser: cy.stub().throws(),
+        getFirefoxGcInterval: cy.stub().throws(),
+        backend: cy.stub().throws(),
+      }
+
+      commandStartFn = testBeforeRunAsyncFn = undefined
+
+      MockCypress.on.withArgs('command:start').callsFake((_, fn) => {
+        commandStartFn = fn
+      })
+
+      MockCypress.on.withArgs('test:before:run:async').callsFake((_, fn) => {
+        testBeforeRunAsyncFn = fn
+      })
+    })
+
+    const fakeVisit = () => {
+      commandStartFn({ get: cy.stub().throws().withArgs('name').returns('visit') })
+    }
+
+    const fakeBeforeTestRun = (order) => {
+      return testBeforeRunAsyncFn({ order }) || Promise.resolve()
+    }
+
+    it('registers no event handlers if not in Firefox', () => {
+      MockCypress.isBrowser.withArgs('firefox').returns(false)
+
+      install(MockCypress)
+
+      expect(MockCypress.on).to.not.be.called
+    })
+
+    it('triggers a forced GC correctly with interval = 1', () => {
+      MockCypress.isBrowser.withArgs('firefox').returns(true)
+      MockCypress.getFirefoxGcInterval.returns(1)
+
+      const forceGc = MockCypress.backend.withArgs('firefox:force:gc').resolves()
+      const emitBefore = MockCypress.emit.withArgs('before:firefox:force:gc').returns()
+      const emitAfter = MockCypress.emit.withArgs('after:firefox:force:gc').returns()
+
+      install(MockCypress)
+
+      return fakeBeforeTestRun(0).then(() => {
+        fakeVisit()
+
+        return fakeBeforeTestRun(1)
+      })
+      .then(() => {
+        expect(forceGc).to.be.calledOnce
+        expect(emitBefore).to.be.calledOnce
+        expect(emitAfter).to.be.calledOnce
+      })
+      .then(() => {
+        return fakeBeforeTestRun(2)
+      })
+      .then(() => {
+        return fakeBeforeTestRun(3)
+      })
+      .then(() => {
+        expect(forceGc).to.be.calledOnce
+        expect(emitBefore).to.be.calledOnce
+        expect(emitAfter).to.be.calledOnce
+
+        fakeVisit()
+
+        return fakeBeforeTestRun(4)
+      })
+      .then(() => {
+        expect(forceGc).to.be.calledTwice
+        expect(emitBefore).to.be.calledTwice
+        expect(emitAfter).to.be.calledTwice
+      })
+    })
+
+    it('triggers a forced GC correctly with interval = 3', () => {
+      MockCypress.isBrowser.withArgs('firefox').returns(true)
+      MockCypress.getFirefoxGcInterval.returns(3)
+
+      const forceGc = MockCypress.backend.withArgs('firefox:force:gc').resolves()
+      const emitBefore = MockCypress.emit.withArgs('before:firefox:force:gc').returns()
+      const emitAfter = MockCypress.emit.withArgs('after:firefox:force:gc').returns()
+
+      install(MockCypress)
+
+      return fakeBeforeTestRun(0).then(() => {
+        return fakeBeforeTestRun(1)
+      })
+      .then(() => {
+        expect(forceGc).to.not.be.called
+        expect(emitBefore).to.not.be.called
+        expect(emitAfter).to.not.be.called
+
+        fakeVisit()
+      })
+      .then(() => {
+        return fakeBeforeTestRun(2)
+      })
+      .then(() => {
+        return fakeBeforeTestRun(3)
+      })
+      .then(() => {
+        expect(forceGc).to.be.calledOnce
+        expect(emitBefore).to.be.calledOnce
+        expect(emitAfter).to.be.calledOnce
+      })
+    })
+
+    it('does not trigger any forced GC with falsy interval', () => {
+      MockCypress.isBrowser.withArgs('firefox').returns(true)
+      MockCypress.getFirefoxGcInterval.returns(false)
+
+      const forceGc = MockCypress.backend.withArgs('firefox:force:gc').resolves()
+      const emitBefore = MockCypress.emit.withArgs('before:firefox:force:gc').returns()
+      const emitAfter = MockCypress.emit.withArgs('after:firefox:force:gc').returns()
+
+      install(MockCypress)
+
+      return fakeBeforeTestRun(0).then(() => {
+        return fakeBeforeTestRun(1)
+      })
+      .then(() => {
+        expect(forceGc).to.not.be.called
+        expect(emitBefore).to.not.be.called
+        expect(emitAfter).to.not.be.called
+
+        fakeVisit()
+      })
+      .then(() => {
+        return fakeBeforeTestRun(2)
+      })
+      .then(() => {
+        expect(forceGc).to.not.be.called
+        expect(emitBefore).to.not.be.called
+        expect(emitAfter).to.not.be.called
+      })
     })
   })
 })

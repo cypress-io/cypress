@@ -21,12 +21,12 @@ export function install (Cypress: Cypress.Cypress & EventEmitter) {
     return
   }
 
-  let cyVisitedInLastTest = false
+  let cyVisitedSinceLastGc = false
   let testsSinceLastForcedGc = 0
 
   Cypress.on('command:start', function (cmd) {
     if (cmd.get('name') === 'visit') {
-      cyVisitedInLastTest = true
+      cyVisitedSinceLastGc = true
     }
   })
 
@@ -36,16 +36,13 @@ export function install (Cypress: Cypress.Cypress & EventEmitter) {
     testsSinceLastForcedGc++
 
     // if this is the first test, or the last test didn't run a cy.visit...
-    if (order === 0 || !cyVisitedInLastTest) {
-      // reset state and skip forced GC
-      cyVisitedInLastTest = false
-
+    if (order === 0 || !cyVisitedSinceLastGc) {
       return
     }
 
     const gcInterval = Cypress.getFirefoxGcInterval()
 
-    cyVisitedInLastTest = false
+    cyVisitedSinceLastGc = false
 
     if (gcInterval && gcInterval > 0 && testsSinceLastForcedGc >= gcInterval) {
       testsSinceLastForcedGc = 0
