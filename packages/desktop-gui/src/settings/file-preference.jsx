@@ -8,7 +8,7 @@ import ipc from '../lib/ipc'
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/file-preference')
+  ipc.externalOpen('https://on.cypress.io/file-opener-preference')
 }
 
 const save = _.debounce((editor) => {
