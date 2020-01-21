@@ -64,6 +64,16 @@ declare namespace Cypress {
     password: string
   }
 
+  interface Backend {
+    /**
+     * Firefox only: Force Cypress to run garbage collection routines.
+     * No-op if not running in Firefox.
+     *
+     * @see https://on.cypress.io/firefox-gc-issue
+     */
+    (task: 'firefox:force:gc'): Promise<void>
+  }
+
   /**
    * Describes a browser Cypress can control
    */
@@ -207,6 +217,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Promise wrapper for certain internal tasks.
+     */
+    backend: Backend
+
+    /**
      * Returns all configuration objects.
      * @see https://on.cypress.io/config
      * @example
@@ -279,6 +294,15 @@ declare namespace Cypress {
      *    Cypress.env({ host: "http://server.dev.local", foo: "foo" })
      */
     env(object: ObjectLike): void
+
+    /**
+     * Firefox only: Get the current number of tests that will run between forced garbage collections.
+     *
+     * Returns undefined if not in Firefox, returns a null if forced GC is disabled.
+     *
+     * @see https://on.cypress.io/firefox-gc-issue
+     */
+    getFirefoxGcInterval(): number | null | undefined
 
     /**
      * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
@@ -4363,6 +4387,10 @@ declare namespace Cypress {
      */
     (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
     /**
+     * Fires before the test and all **before** and **beforeEach** hooks run. If a `Promise` is returned, it will be awaited before proceeding.
+     */
+    (action: 'test:before:run:async', fn: (attributes: ObjectLike, test: Mocha.ITest) => void | Promise<any>): void
+    /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -4374,6 +4402,7 @@ declare namespace Cypress {
     logs(filters: any): any
     add(obj: any): any
     get(): any
+    get<K extends keyof CommandQueue>(key: string): CommandQueue[K]
     toJSON(): string[]
     create(): CommandQueue
   }

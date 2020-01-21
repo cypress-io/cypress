@@ -206,6 +206,8 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
+    $FirefoxForcedGc.install(this)
+
     return null
   }
 
