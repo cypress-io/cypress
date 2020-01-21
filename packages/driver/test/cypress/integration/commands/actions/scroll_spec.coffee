@@ -494,7 +494,7 @@ describe "src/cy/commands/actions/scroll", ->
       cy.get("#scroll-into-view-win-vertical div").scrollIntoView()
       cy.window().then (win) ->
         expect(win.pageYOffset).not.to.eq(0)
-        expect(Math.floor(win.pageXOffset)).to.eq(200)
+        expect(Math.floor(win.pageXOffset)).closeTo(200, 2)
 
     it "scrolls both axes of window to element", ->
       expect(@win.scrollY).to.eq(0)
