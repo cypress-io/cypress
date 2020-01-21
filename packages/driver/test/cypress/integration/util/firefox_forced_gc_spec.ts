@@ -52,6 +52,19 @@ describe('driver/src/util/firefox_forced_gc', () => {
         isInteractive: false,
       })).to.eq(10)
     })
+
+    it('has been correctly mounted at Cypress.getFirefoxGcInterval', () => {
+      const oldGcInterval = Cypress.config('firefoxGcInterval')
+
+      Cypress.config('firefoxGcInterval', 5)
+
+      const real = Cypress.getFirefoxGcInterval
+      const fake = createIntervalGetter(Cypress.config)
+
+      expect(real()).to.eq(fake()).and.eq(5)
+
+      Cypress.config('firefoxGcInterval', oldGcInterval)
+    })
   })
 
   describe('#install', () => {
