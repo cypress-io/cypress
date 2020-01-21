@@ -86,12 +86,17 @@ const getSourceDetails = (generatedDetails) => {
   if (!sourceDetails) return generatedDetails
 
   const { line, column, file } = sourceDetails
+  let fn = generatedDetails.function
+
+  if (fn === 'Context.eval') {
+    fn = 'Test.run'
+  }
 
   return {
     line,
     column,
     file,
-    function: generatedDetails.function,
+    function: fn,
   }
 }
 
