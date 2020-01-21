@@ -4,7 +4,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:driver:actionability')
 
 const $dom = require('../dom')
-const $utils = require('../cypress/utils')
+const $errUtils = require('../cypress/error_utils')
 
 const delay = 50
 
@@ -251,7 +251,7 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
   // if we dont have at least 2 points
   // then automatically retry
   if (coordsHistory.length < 2) {
-    throw $utils.cypressErr('coordsHistory must be at least 2 sets of coords')
+    throw $errUtils.cypressErr('coordsHistory must be at least 2 sets of coords')
   }
 
   // verify that our element is not currently animating
