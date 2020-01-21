@@ -119,9 +119,6 @@ module.exports = {
           electronArgs.unshift('--no-sandbox')
         }
 
-        // docker containers have 64M by default, sometimes even less
-        electronArgs.push('--disable-dev-shm-usage')
-
         // strip dev out of child process options
         let stdioOptions = _.pick(options, 'env', 'detached', 'stdio')
 
