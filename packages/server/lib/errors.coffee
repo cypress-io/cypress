@@ -530,20 +530,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       We detected that the #{arg1} renderer process running your tests just exited unexpectedly.
 
-      This can happen for a number of different reasons:
+      This error can occur whenever Cypress detects that the browser that was launched for running tests has exited or crashed before the tests could finish running, or without the user manually stopping the tests in Cypress.
 
-      - The browser was exited manually
-      - There is an infinite loop in your test suite or website code
-      - You are running in a memory starved VM environment
-      - You are running lots of tests on a memory intense application
-      - You are running Docker (there is an easy fix for this: see link below)
-      - There are problems with your GPU / GPU drivers
-      - There are browser bugs in #{arg1}
-      - There is a memory leak in Cypress
-
-      You can learn more here:
-
-      https://on.cypress.io/renderer-process-crashed
+      Learn more at https://on.cypress.io/renderer-process-crashed
       """
     when "AUTOMATION_SERVER_DISCONNECTED"
       "The automation client disconnected. Cannot continue running tests."
