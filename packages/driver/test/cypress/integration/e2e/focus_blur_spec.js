@@ -77,10 +77,10 @@ it('can intercept blur/focus events', () => {
   const handleBlur = cy.stub().as('handleBlur')
 
   const resetStubs = () => {
-    focus.reset()
-    blur.reset()
-    handleFocus.reset()
-    handleBlur.reset()
+    focus.resetHistory()
+    blur.resetHistory()
+    handleFocus.resetHistory()
+    handleBlur.resetHistory()
   }
 
   cy
@@ -297,7 +297,7 @@ describe('polyfill programmatic blur events', () => {
         })
       })
       .then(() => {
-        stub.reset()
+        stub.resetHistory()
 
         setActiveElement($two.get(0))
 
@@ -349,7 +349,7 @@ describe('polyfill programmatic blur events', () => {
       })
 
       .then(() => {
-        stub.reset()
+        stub.resetHistory()
 
         setActiveElement(cy.$$('body').get(0))
 
@@ -417,7 +417,7 @@ describe('polyfill programmatic blur events', () => {
         })
       })
       .then(() => {
-        stub.reset()
+        stub.resetHistory()
 
         setActiveElement($two.get(0))
 
@@ -473,7 +473,7 @@ describe('polyfill programmatic blur events', () => {
       })
 
       .then(() => {
-        stub.reset()
+        stub.resetHistory()
 
         setActiveElement(cy.$$('body').get(0))
 
@@ -607,7 +607,7 @@ describe('intercept blur methods correctly', () => {
 
     cy.get('input:first').focus()
     .wait(0)
-    .get('@selectionchange').then((stub) => stub.reset())
+    .get('@selectionchange').then((stub) => stub.resetHistory())
 
     cy.wrap(inner).should(($el) => $el.focus)
     .wait(0)

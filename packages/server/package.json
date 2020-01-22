@@ -40,7 +40,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
-    "@cypress/browserify-preprocessor": "1.1.2",
+    "@cypress/browserify-preprocessor": "2.1.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.0",
     "@cypress/icons": "0.7.0",
@@ -154,6 +154,8 @@
     "chokidar-cli": "1.2.2",
     "chrome-har-capturer": "0.13.4",
     "coffee-coverage": "3.0.1",
+    "coffeeify": "3.0.1",
+    "coffeescript": "1.12.7",
     "cors": "2.8.5",
     "cross-env": "6.0.3",
     "devtools-protocol": "0.0.725104",
