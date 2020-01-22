@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Bluebird from 'bluebird'
 import fs from 'fs-extra'
 import Debug from 'debug'
+import getPort from 'get-port'
 import path from 'path'
 import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
@@ -11,13 +12,17 @@ import plugins from '../plugins'
 import utils from './utils'
 import { Browser } from '@packages/launcher'
 
-const debug = Debug('cypress:server:browsers')
+const debug = Debug('cypress:server:browsers:firefox')
 
 const defaultPreferences = {
   'network.proxy.type': 1,
 
   // necessary for adding extensions
   'devtools.debugger.remote-enabled': true,
+  // bind foxdriver to 127.0.0.1
+  'devtools.debugger.remote-host': '127.0.0.1',
+  // devtools.debugger.remote-port is set per-launch
+
   'devtools.debugger.prompt-connection': false,
   // "devtools.debugger.remote-websocket": true
   'devtools.chrome.enabled': true,
@@ -129,8 +134,7 @@ export async function open (browser: Browser, url, options: any = {}) {
     '-marionette',
     '-new-instance',
     '-foreground',
-    // TODO: ensure binding to 127.0.0.1 for RDP and Marionette and use rand port
-    '-start-debugger-server', '2929',
+    '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
   ]
 
   debug('firefox open %o', options)
@@ -160,6 +164,16 @@ export async function open (browser: Browser, url, options: any = {}) {
     preferences['general.useragent.override'] = ua
   }
 
+  const [
+    foxdriverPort,
+    marionettePort,
+  ] = await Bluebird.all([getPort(), getPort()])
+
+  preferences['devtools.debugger.remote-port'] = foxdriverPort
+  preferences['marionette.port'] = marionettePort
+
+  debug('available ports: %o', { foxdriverPort, marionettePort })
+
   if (plugins.has('before:browser:launch')) {
     const result = await plugins.execute('before:browser:launch', browser, { preferences, args, extensions })
 
@@ -182,7 +196,10 @@ export async function open (browser: Browser, url, options: any = {}) {
     }
   }
 
-  const [cacheDir, extensionDest] = await Bluebird.all([
+  const [
+    cacheDir,
+    extensionDest,
+  ] = await Bluebird.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
     utils.writeExtension(options.browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute, options.onScreencastFrame),
   ])
@@ -194,7 +211,7 @@ export async function open (browser: Browser, url, options: any = {}) {
     destinationDirectory: profileDir,
   })
 
-  debug('firefox profile dir %o', { path: profile.path() })
+  debug('firefox directories %o', { path: profile.path(), cacheDir, extensionDest })
 
   preferences['browser.cache.disk.parent_directory'] = cacheDir
   for (let pref in preferences) {
@@ -202,6 +219,8 @@ export async function open (browser: Browser, url, options: any = {}) {
 
     profile.setPreference(pref, value)
   }
+
+  // TOOD: fix this - synchronous FS operation
   profile.updatePreferences()
 
   const xulStorePath = path.join(profile.path(), 'xulstore.json')
@@ -234,7 +253,7 @@ export async function open (browser: Browser, url, options: any = {}) {
 
   const browserInstance = await utils.launch(browser, null, args)
 
-  await firefoxUtil.setup(extensions, url)
+  await firefoxUtil.setup({ extensions, url, foxdriverPort, marionettePort })
 
   return browserInstance
 }

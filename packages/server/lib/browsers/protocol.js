@@ -25,10 +25,7 @@ function _getDelayMsForRetry (i) {
 
 function _connectAsync (opts) {
   return Promise.fromCallback((cb) => {
-    connect.createRetryingSocket({
-      ...opts,
-      getDelayMsForRetry: _getDelayMsForRetry,
-    }, cb)
+    connect.createRetryingSocket(opts, cb)
   })
   .then((sock) => {
     // can be closed, just needed to test the connection

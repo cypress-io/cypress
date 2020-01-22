@@ -96,22 +96,28 @@ export default {
     return forceGcCc()
   },
 
-  setup (extensions, url) {
+  setup ({
+    extensions,
+    url,
+    marionettePort,
+    foxdriverPort,
+  }) {
     return Bluebird.all([
-      this.setupFoxdriver(),
-      this.setupMarionette(extensions, url),
+      this.setupFoxdriver(foxdriverPort),
+      this.setupMarionette(extensions, url, marionettePort),
     ])
   },
 
-  async setupFoxdriver () {
+  async setupFoxdriver (port) {
     await protocol._connectAsync({
       host: '127.0.0.1',
-      port: 2929,
+      port,
+      getDelayMsForRetry: protocol._getDelayMsForRetry,
     })
 
     // TODO: properly handle error events here or unhandled errors will cause a crash
 
-    const foxdriver = await Foxdriver.attach('127.0.0.1', 2929)
+    const foxdriver = await Foxdriver.attach('127.0.0.1', port)
 
     const { browser } = foxdriver
 
@@ -210,8 +216,8 @@ export default {
     }
   },
 
-  setupMarionette (extensions, url) {
-    const driver = new Marionette.Drivers.Tcp({})
+  setupMarionette (extensions, url, port) {
+    const driver = new Marionette.Drivers.Tcp({ port })
 
     const connect = Bluebird.promisify(driver.connect.bind(driver))
     const driverSend = promisify(driver.send.bind(driver))
