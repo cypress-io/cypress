@@ -472,7 +472,7 @@ const getChromeProps = (isHeaded, project, writeVideoFrame) => {
   return _
   .chain({})
   .tap((props) => {
-    if (isHeaded && writeVideoFrame) {
+    if (writeVideoFrame) {
       props.screencastFrame = (e) => {
         // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
         writeVideoFrame(Buffer.from(e.data, 'base64'))
@@ -620,11 +620,12 @@ const trashAssets = Promise.method((config = {}) => {
 
 // if we've been told to record and we're not spawning a headed browser
 const browserCanBeRecorded = (browser) => {
+  // TODO: enable recording Electron in headed mode too
   if (browser.family === 'electron' && browser.isHeadless) {
     return true
   }
 
-  if (browser.family === 'chrome' && browser.isHeaded) {
+  if (browser.family === 'chrome') {
     return true
   }
 
@@ -1116,9 +1117,14 @@ module.exports = {
   },
 
   runSpecs (options = {}) {
+    _.defaults(options, {
+      // only non-Electron browsers run headed by default
+      headed: options.browser.family !== 'electron',
+    })
+
     const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
 
-    const isHeadless = browser.family === 'electron' && !headed
+    const isHeadless = !headed
 
     browser.isHeadless = isHeadless
     browser.isHeaded = !isHeadless
