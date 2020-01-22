@@ -112,10 +112,22 @@ export default {
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
-      getDelayMsForRetry: protocol._getDelayMsForRetry,
-    })
+      getDelayMsForRetry: (i) => {
+        if (i < 10) {
+          return 100
+        }
 
-    // TODO: properly handle error events here or unhandled errors will cause a crash
+        if (i < 18) {
+          return 500
+        }
+
+        if (i < 33) {
+          return 1000
+        }
+
+        return
+      },
+    })
 
     const foxdriver = await Foxdriver.attach('127.0.0.1', port)
 
@@ -261,9 +273,8 @@ export default {
       .then(resolve)
       .catch(onError('commands'))
     })
-    .finally(() => {
-      // currently Marionette is only used for initial setup, we can close this when we're done
-      driver.close()
-    })
+
+    // even though Marionette is not used past this point, we have to keep the session open
+    // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
   },
 }
