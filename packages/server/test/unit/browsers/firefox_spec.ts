@@ -2,13 +2,14 @@ require('../../spec_helper')
 
 import { expect } from 'chai'
 import sinon from 'sinon'
+import 'chai-as-promised'
 
 const appData = require('../../../lib/util/app_data')
 
 sinon.stub(appData, 'path').returns('/path/to/appData')
 
 const mockfs = require('mock-fs')
-const Marionette = require('marionette-client')
+import Marionette from 'marionette-client'
 const Foxdriver = require('@benmalka/foxdriver')
 const FirefoxProfile = require('firefox-profile')
 
@@ -17,12 +18,42 @@ const plugins = require('../../../lib/plugins')
 const protocol = require('../../../lib/browsers/protocol')
 const specUtil = require('../../specUtils')
 
-// import firefoxUtil from '../../../lib/browsers/firefox-util'
+import firefoxUtil from '../../../lib/browsers/firefox-util'
 import * as firefox from '../../../lib/browsers/firefox'
+import { EventEmitter } from 'events'
 
 describe('lib/browsers/firefox', () => {
+  const port = 3333
+  let marionetteDriver: any
+  let marionetteSendCb: any
+
   afterEach(() => {
     return mockfs.restore()
+  })
+
+  beforeEach(() => {
+    marionetteSendCb = null
+
+    const connect = sinon.stub().callsArg(0)
+
+    const send = sinon.stub().callsFake((opts, cb) => {
+      if (marionetteSendCb) {
+        return marionetteSendCb(opts, cb)
+      }
+
+      return cb({})
+    })
+
+    const close = sinon.stub()
+
+    const socket = new EventEmitter()
+    const client = new EventEmitter()
+
+    marionetteDriver = {
+      socket, client, connect, send, close,
+    }
+
+    sinon.stub(Marionette.Drivers, 'Tcp').returns(marionetteDriver)
   })
 
   context('#open', () => {
@@ -49,8 +80,6 @@ describe('lib/browsers/firefox', () => {
 
       sinon.stub(plugins, 'has')
       sinon.stub(plugins, 'execute')
-      sinon.stub(Marionette.Drivers.Tcp.prototype, 'connect').yields(null)
-      sinon.stub(Marionette.Drivers.Tcp.prototype, 'send').yields({ sessionId: 'fooSessionId' })
       sinon.stub(utils, 'writeExtension').resolves('/path/to/ext')
       this.browserInstance = {}
       sinon.stub(utils, 'launch').resolves(this.browserInstance)
@@ -115,9 +144,9 @@ describe('lib/browsers/firefox', () => {
       })
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(Marionette.Drivers.Tcp.prototype.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
+        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
 
-        expect(Marionette.Drivers.Tcp.prototype.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
+        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
       })
     })
 
@@ -128,9 +157,9 @@ describe('lib/browsers/firefox', () => {
       })
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(Marionette.Drivers.Tcp.prototype.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
+        expect(marionetteDriver.send).calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/ext' } })
 
-        expect(Marionette.Drivers.Tcp.prototype.send).not.calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
+        expect(marionetteDriver.send).not.calledWithMatch({ name: 'Addon:Install', params: { path: '/path/to/user/ext' } })
       })
     })
 
@@ -192,7 +221,6 @@ describe('lib/browsers/firefox', () => {
           '-new-instance',
           '-foreground',
           '-start-debugger-server',
-          '2929',
           '-profile',
           '/path/to/appData/firefox/interactive',
         ])
@@ -251,6 +279,32 @@ describe('lib/browsers/firefox', () => {
         expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
           'CypressCache': {},
         })
+      })
+    })
+  })
+
+  context('firefox-util', () => {
+    context('#setupMarionette', () => {
+      it('rejects on errors on socket', async () => {
+        marionetteSendCb = () => {
+          marionetteDriver.socket.emit('error', new Error('foo error'))
+        }
+
+        await expect(firefoxUtil.setupMarionette([], '', port))
+        .to.be.rejectedWith('Unexpected error from Marionette Socket: Error: foo error')
+
+        expect(marionetteDriver.close).to.be.calledOnce
+      })
+
+      it('rejects on errors from marionette commands', async () => {
+        marionetteSendCb = (opts, cb) => {
+          cb({ error: true })
+        }
+
+        await expect(firefoxUtil.setupMarionette([], '', port))
+        .to.be.rejectedWith('Unexpected error from Marionette commands: GenericError')
+
+        expect(marionetteDriver.close).to.be.calledOnce
       })
     })
   })

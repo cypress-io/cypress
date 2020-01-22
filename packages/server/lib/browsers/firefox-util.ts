@@ -216,7 +216,7 @@ export default {
     }
   },
 
-  setupMarionette (extensions, url, port) {
+  async setupMarionette (extensions, url, port) {
     const driver = new Marionette.Drivers.Tcp({ port })
 
     const connect = Bluebird.promisify(driver.connect.bind(driver))
@@ -228,29 +228,42 @@ export default {
 
     debug('firefox: navigating page with webdriver')
 
-    // TODO: properly handle error events here or unhandled errors will cause a crash
-    return connect()
-    .then(() => {
-      return sendMarionette({
+    await connect()
+
+    await new Bluebird((resolve, reject) => {
+      const onError = (from) => {
+        return (err) => {
+          debug('error in marionette %o', { from, err })
+          reject(new Error(`Unexpected error from Marionette ${from}: ${err}`))
+        }
+      }
+
+      driver.socket.on('error', onError('Socket'))
+      driver.client.on('error', onError('CommandStream'))
+
+      sendMarionette({
         name: 'WebDriver:NewSession',
         parameters: { acceptInsecureCerts: true },
+      }).then(() => {
+        return Bluebird.all(_.map(extensions, (path) => {
+          return sendMarionette({
+            name: 'Addon:Install',
+            parameters: { path, temporary: true },
+          })
+        }))
       })
-    })
-    .then(({ sessionId }: any) => {
-      return Bluebird.all(_.map(extensions, (path) => {
-        return sendMarionette({
-          name: 'Addon:Install',
-          sessionId,
-          parameters: { path, temporary: true },
-        })
-      }))
       .then(() => {
         return sendMarionette({
           name: 'WebDriver:Navigate',
-          sessionId,
           parameters: { url },
         })
       })
+      .then(resolve)
+      .catch(onError('commands'))
+    })
+    .finally(() => {
+      // currently Marionette is only used for initial setup, we can close this when we're done
+      driver.close()
     })
   },
 }
