@@ -1,6 +1,9 @@
 require('../../spec_helper')
 
-const appData = require(`${root}../lib/util/app_data`)
+import { expect } from 'chai'
+import sinon from 'sinon'
+
+const appData = require('../../../lib/util/app_data')
 
 sinon.stub(appData, 'path').returns('/path/to/appData')
 
@@ -9,13 +12,13 @@ const Marionette = require('marionette-client')
 const Foxdriver = require('@benmalka/foxdriver')
 const FirefoxProfile = require('firefox-profile')
 
-const utils = require(`${root}../lib/browsers/utils`)
-const plugins = require(`${root}../lib/plugins`)
-const protocol = require(`${root}../lib/browsers/protocol`)
+const utils = require('../../../lib/browsers/utils')
+const plugins = require('../../../lib/plugins')
+const protocol = require('../../../lib/browsers/protocol')
 const specUtil = require('../../specUtils')
-const firefoxUtil = require(`${root}../lib/browsers/firefox-util`).default
 
-const firefox = require(`${root}../lib/browsers/firefox`)
+// import firefoxUtil from '../../../lib/browsers/firefox-util'
+import * as firefox from '../../../lib/browsers/firefox'
 
 describe('lib/browsers/firefox', () => {
   afterEach(() => {
@@ -148,7 +151,7 @@ describe('lib/browsers/firefox', () => {
     // TODO: pick open port for debugger
     it.skip('finds remote port for firefox debugger', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(firefoxUtil.findRemotePort).to.be.called
+        // expect(firefoxUtil.findRemotePort).to.be.called
       })
     })
 
@@ -211,6 +214,7 @@ describe('lib/browsers/firefox', () => {
       })
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
+        // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
           'xulstore.json': '[foo xulstore.json]',
           'chrome': { 'userChrome.css': '[foo userChrome.css]' },
@@ -220,6 +224,7 @@ describe('lib/browsers/firefox', () => {
 
     it('creates xulstore.json if not exist', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
+        // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
           'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":720,"sizemode":"maximized"}}}\n',
         })
@@ -242,6 +247,7 @@ describe('lib/browsers/firefox', () => {
       this.options.isTextTerminal = false
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
+        // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
           'CypressCache': {},
         })
