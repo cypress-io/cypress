@@ -526,13 +526,13 @@ getMsgByType = (type, arg1 = {}, arg2) ->
         #{chalk.blue(arg2)}
         """
 
-    when "RENDERER_CRASHED"
+    when "BROWSER_CRASHED"
       """
-      We detected that the #{arg1} renderer process running your tests just exited unexpectedly.
+      We detected that the #{arg1} process running your tests just exited unexpectedly.
 
       This error can occur whenever Cypress detects that the browser that was launched for running tests has exited or crashed before the tests could finish running, or without the user manually stopping the tests in Cypress.
 
-      Learn more at https://on.cypress.io/renderer-process-crashed
+      Learn more at https://on.cypress.io/browser-process-crashed
       """
     when "AUTOMATION_SERVER_DISCONNECTED"
       "The automation client disconnected. Cannot continue running tests."

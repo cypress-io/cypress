@@ -229,10 +229,7 @@ class Socket {
               return
             }
 
-            options.onUnexpectedDisconnect()
-
-            // TODO: since onUnexpectedDisconnect() warns appropriately, this can be removed most likely?
-            errors.warning('AUTOMATION_SERVER_DISCONNECTED')
+            options.onUnexpectedDisconnect('AUTOMATION_SERVER_DISCONNECTED')
 
             // TODO: no longer emit this, just close the browser and display message in reporter
             return this.io.emit('automation:disconnected')
@@ -295,7 +292,7 @@ class Socket {
             debug('checking to see if a new runner socket is available... %o', { hasNewRunnerConnected, sockets })
 
             if (!hasNewRunnerConnected) {
-              options.onUnexpectedDisconnect()
+              options.onUnexpectedDisconnect('BROWSER_CRASHED')
             }
           }
 
@@ -312,8 +309,9 @@ class Socket {
             }
           }
 
-          // in any other case, assert immediately
-          return assertNewRunnerConnected()
+          // in any other case, assert after 5 seconds
+          return Promise.delay(5000)
+          .then(assertNewRunnerConnected)
         })
 
         socket.inRunnerRoom = true

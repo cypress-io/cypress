@@ -489,7 +489,7 @@ const getElectronProps = (isHeaded, project, writeVideoFrame) => {
     height: 720,
     show: isHeaded,
     onCrashed () {
-      const err = errors.get('RENDERER_CRASHED', 'Electron')
+      const err = errors.get('BROWSER_CRASHED', 'Electron')
 
       errors.log(err)
 

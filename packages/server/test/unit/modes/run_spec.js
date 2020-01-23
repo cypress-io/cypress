@@ -149,7 +149,7 @@ describe('lib/modes/run', () => {
 
       props.onCrashed()
 
-      expect(errors.get).to.be.calledWith('RENDERER_CRASHED')
+      expect(errors.get).to.be.calledWith('BROWSER_CRASHED')
       expect(errors.log).to.be.calledOnce
 
       expect(emit).to.be.calledWithMatch('exitEarlyWithErr', 'We detected that the Chromium Renderer process just crashed.')
