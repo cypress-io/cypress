@@ -298,7 +298,7 @@ declare namespace Cypress {
     /**
      * Firefox only: Get the current number of tests that will run between forced garbage collections.
      *
-     * Returns undefined if not in Firefox, returns a null if forced GC is disabled.
+     * Returns undefined if not in Firefox, returns a null or 0 if forced GC is disabled.
      *
      * @see https://on.cypress.io/firefox-gc-issue
      */
@@ -2243,7 +2243,7 @@ declare namespace Cypress {
     /**
      * Firefox-only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.
-     * Set the interval to `null` to disable forced garbage collections.
+     * Set the interval to `null` or 0 to disable forced garbage collections.
      * @default { runMode: 1, openMode: null }
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
