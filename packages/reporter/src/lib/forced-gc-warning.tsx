@@ -1,8 +1,8 @@
 import { isUndefined, round } from 'lodash'
-import React from 'react'
-import { Events } from './events'
-import { AppState } from './app-state'
 import { observer } from 'mobx-react'
+import React from 'react'
+import { AppState } from './app-state'
+import { Events } from './events'
 
 export interface Props {
   appState: Pick<AppState, 'forcingGc' | 'firefoxGcInterval'>
@@ -52,28 +52,39 @@ class ForcedGcWarning extends React.Component<Props> {
     return (
       <div className='forced-gc-warning'>
         <div className={`gc-expando ${this.state.expanded ? 'expanded' : ''}`}>
-          <div>
+          <p>
             <strong>
-              <i className='fas fa-info-circle'></i>{' '}
-              What is this?
+              <i className='fas fa-trash-alt'></i>{' '}
+              GC Cleanup (disabled)
             </strong>
             <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
-          </div>
+          </p>
           <div>
-            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress can force garbage collection (GC) between tests. This is enabled in <code>run</code> mode and disabled in <code>open</code> mode by default. See <a onClick={(e) => this._handleLink(e)} href='https://on.cypress.io/firefox-gc-issue'>issue #6187</a> for details.
+            <p>
+              When <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> is enabled, Cypress forces Firefox to run Garbage Collection (GC) between tests.
+            </p>
+            <p>
+              Forcibly running GC prevents a known bug in Firefox causing it to run out of memory when running many tests.
+            </p>
+            <p>
+              By default GC cleanup is enabled in <strong>runMode</strong> and disabled in <strong>openMode</strong>.
+            </p>
+            <p>
+              Read <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'>issue #6187</a> for more details.
+            </p>
           </div>
         </div>
         <div className='gc-status-bar clickable gc-not-running' onClick={() => this._toggleExpando()}>
           <span className='total-time'>
             <i className='fas fa-ws fa-info-circle'></i>
-            Forced GC is disabled.
+            GC Cleanup: <span className='gc-status'>disabled</span>
           </span>
         </div>
       </div>
     )
   }
 
-  _handleLink (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+  _handleLink = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (!e.currentTarget || !e.currentTarget.href) {
       return
     }

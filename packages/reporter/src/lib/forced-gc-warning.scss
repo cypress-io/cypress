@@ -8,6 +8,18 @@
   box-shadow: 0 -1px 3px #ccc;
   border-right: 1px solid #ddd;
 
+  p {
+    line-height: 1.5 !important;
+  }
+
+  code {
+    background: #f9f2f4;
+    color: #c7254e;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+    padding: 2px 4px;
+  }
+
   >.gc-expando {
     display: none;
 
@@ -20,6 +32,11 @@
         font-size: 16px;
       }
     }
+  }
+
+  .gc-status {
+    color: #888;
+    border-bottom: 1px dotted;
   }
 
   >.gc-status-bar {
