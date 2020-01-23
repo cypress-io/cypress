@@ -25,7 +25,7 @@ konfig   = require("#{root}../lib/konfig")
 
 describe "lib/gui/events", ->
   beforeEach ->
-    @send    = sinon.spy()
+    @send    = sinon.stub()
     @options = {}
     @cookies = sinon.stub({
       get: ->
@@ -493,42 +493,6 @@ describe "lib/gui/events", ->
                   },
                   {
                     family: "some other"
-                  }
-                ]
-              }
-            }
-          )
-
-      it "attaches warning to non-chrome browsers when chromeWebSecurity:false", ->
-        sinon.stub(openProject, "create").resolves()
-        @options.browser = "/foo"
-        @options.config = {chromeWebSecurity: false}
-
-
-        browsers.getAllBrowsersWith.withArgs("/foo").resolves([{family: 'chrome', name: 'Canary'}, {family: 'some-other-family', name: 'some-other-name'}])
-
-        sinon.stub(chromePolicyCheck, "run")
-
-        @handleEvent("open:project", "/_test-output/path/to/project").then =>
-          expect(browsers.getAllBrowsersWith).to.be.calledWith(@options.browser)
-          expect(openProject.create).to.be.calledWithMatch(
-            "/_test-output/path/to/project",
-            {
-              browser: "/foo",
-              config: {
-                browsers: [
-                  {
-                    family: "chrome",
-                    name: "Canary",
-                  },
-                  {
-                    family: "some-other-family"
-                    name: "some-other-name"
-                    warning:       """
-      Browser: 'some-other-name' does not support the configuration value "chromeWebSecurity: false"
-      
-      Tests that require "chromeWebSecurity: false" will not run as expected.
-      """
                   }
                 ]
               }
