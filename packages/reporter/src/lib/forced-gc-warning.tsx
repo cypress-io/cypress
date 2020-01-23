@@ -100,14 +100,30 @@ class ForcedGcWarning extends React.Component<Props> {
       <div className='forced-gc-warning'>
         <div className={`gc-expando ${this.state.expanded ? 'expanded' : ''}`}>
           <div>
-            <strong>
-              <i className='fas fa-exclamation-triangle'></i>{' '}
-              Why is Cypress freezing between tests?
-            </strong>
-            <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
+            <p>
+              <strong>
+                <i className='fas fa-trash-alt'></i>{' '}
+                GC Cleanup (enabled)
+              </strong>
+              <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
+            </p>
           </div>
           <div>
-            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress forces the browser to run garbage collection (GC) routines between tests, which causes the UI to freeze. See <a onClick={(e) => this._handleLink(e)} href='https://on.cypress.io/firefox-gc-issue'>issue #6187</a> for details.
+            <p>
+              Because <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> is enabled, Cypress will force Firefox to run Garbage Collection (GC) between tests.
+            </p>
+            <p>
+              Forcibly running GC prevents a known bug in Firefox causing it to run out of memory when running many tests.
+            </p>
+            <p>
+              GC Cleanup is an expensive operation that can take up to a few seconds to complete. During this time Firefox may "freeze" and become unresponsive to user input.
+            </p>
+            <p>
+              To improve performance, you can try setting <code>firefoxGcInterval</code> to a higher value, which will result in running GC cleanup less frequently.
+            </p>
+            <p>
+              Read <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'>issue #6187</a> for more details.
+            </p>
           </div>
         </div>
         <div className={`gc-status-bar clickable ${forcingGc ? 'gc-running' : 'gc-not-running'}`} onClick={() => this._toggleExpando()}>
