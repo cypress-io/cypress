@@ -10,7 +10,15 @@ import protocol from './protocol'
 
 const debug = Debug('cypress:server:browsers:firefox-util')
 
-const promisify = (fn) => {
+let forceGcCc: () => Promise<void>
+
+let timings = {
+  gc: [] as any[],
+  cc: [] as any[],
+  collections: [] as any[],
+}
+
+const promisifyFoxdriver = (fn) => {
   return (...args) => {
     return new Bluebird((resolve, reject) => {
       fn(...args, (data) => {
@@ -24,13 +32,60 @@ const promisify = (fn) => {
   }
 }
 
-let forceGcCc: () => Promise<void>
-
-let timings = {
-  gc: [] as any[],
-  cc: [] as any[],
-  collections: [] as any[],
+const getTabId = (tab) => {
+  return _.get(tab, 'browsingContextID')
 }
+
+const getPrimaryTab = Bluebird.method((browser) => {
+  const setPrimaryTab = () => {
+    return browser.listTabs()
+    .then((tabs) => {
+      browser.tabs = tabs
+
+      return browser.primaryTab = _.first(tabs)
+    })
+  }
+
+  // on first connection
+  if (!browser.primaryTab) {
+    return setPrimaryTab()
+  }
+
+  // `listTabs` will set some internal state, including marking attached tabs
+  // as detached. so use the raw `request` here:
+  return browser.request('listTabs')
+  .then(({ tabs }) => {
+    const firstTab = _.first(tabs)
+
+    // primaryTab has changed, get all tabs and rediscover first tab
+    if (getTabId(browser.primaryTab.data) !== getTabId(firstTab)) {
+      return setPrimaryTab()
+    }
+
+    return browser.primaryTab
+  })
+})
+
+const attachToTabMemory = Bluebird.method((tab) => {
+  if (tab.memory.isAttached) {
+    return
+  }
+
+  return tab.memory.getState()
+  .then((state) => {
+    if (state === 'attached') {
+      return
+    }
+
+    tab.memory.on('garbage-collection', ({ data }) => {
+      data.num = timings.collections.length + 1
+      timings.collections.push(data)
+      debug('received garbage-collection event %o', data)
+    })
+
+    return tab.memory.attach()
+  })
+})
 
 const logGcDetails = () => {
   const reducedTimings = {
@@ -133,57 +188,6 @@ export default {
 
     const { browser } = foxdriver
 
-    const attach = Bluebird.method((tab) => {
-      if (tab.memory.isAttached) {
-        return
-      }
-
-      return tab.memory.getState()
-      .then((state) => {
-        if (state === 'attached') {
-          return
-        }
-
-        tab.memory.on('garbage-collection', ({ data }) => {
-          data.num = timings.collections.length + 1
-          timings.collections.push(data)
-          debug('received garbage-collection event %o', data)
-        })
-
-        return tab.memory.attach()
-      })
-    })
-
-    const getTabId = (tab) => {
-      return _.get(tab, 'browsingContextID')
-    }
-
-    const getPrimaryTab = Bluebird.method((browser) => {
-      const setPrimaryTab = () => {
-        return browser.listTabs()
-        .then((tabs) => {
-          browser.tabs = tabs
-
-          return browser.primaryTab = _.first(tabs)
-        })
-      }
-
-      if (!browser.primaryTab) {
-        return setPrimaryTab()
-      }
-
-      return browser.request('listTabs')
-      .then(({ tabs }) => {
-        const firstTab = _.first(tabs)
-
-        if (getTabId(browser.primaryTab.data) !== getTabId(firstTab)) {
-          return setPrimaryTab()
-        }
-
-        return browser.primaryTab
-      })
-    })
-
     forceGcCc = () => {
       let gcDuration; let ccDuration
 
@@ -215,7 +219,7 @@ export default {
 
       return getPrimaryTab(browser)
       .then((tab) => {
-        return attach(tab)
+        return attachToTabMemory(tab)
         .then(gc(tab))
         .then(cc(tab))
       })
@@ -232,7 +236,7 @@ export default {
     const driver = new Marionette.Drivers.Tcp({ port })
 
     const connect = Bluebird.promisify(driver.connect.bind(driver))
-    const driverSend = promisify(driver.send.bind(driver))
+    const driverSend = promisifyFoxdriver(driver.send.bind(driver))
 
     const sendMarionette = (data) => {
       return driverSend(new Command(data))

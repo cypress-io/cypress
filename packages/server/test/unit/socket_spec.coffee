@@ -13,6 +13,7 @@ Socket       = require("#{root}lib/socket")
 Server       = require("#{root}lib/server")
 Automation   = require("#{root}lib/automation")
 exec         = require("#{root}lib/exec")
+firefoxUtil  = require("#{root}lib/browsers/firefox-util").default
 savedState   = require("#{root}lib/saved_state")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 fs           = require("#{root}lib/util/fs")
@@ -394,6 +395,24 @@ describe "lib/socket", ->
         @client.emit "backend:request", "exec", { cmd: "lsd" }, (resp) =>
           expect(resp.error.message).to.equal("command not found: lsd")
           expect(resp.error.timedOut).to.be.true
+          done()
+
+    context "on(firefox:force:gc)", ->
+      it "calls firefoxUtil#collectGarbage", (done) ->
+        sinon.stub(firefoxUtil, "collectGarbage").resolves()
+
+        @client.emit "backend:request", "firefox:force:gc", (resp) =>
+          expect(firefoxUtil.collectGarbage).to.be.calledOnce
+          expect(resp.error).to.be.undefined
+          done()
+
+      it "errors when collectGarbage throws", (done) ->
+        err = new Error('foo')
+        sinon.stub(firefoxUtil, "collectGarbage").throws(err)
+
+        @client.emit "backend:request", "firefox:force:gc", (resp) =>
+          expect(firefoxUtil.collectGarbage).to.be.calledOnce
+          expect(resp.error.message).to.eq(err.message)
           done()
 
     context "on(save:app:state)", ->

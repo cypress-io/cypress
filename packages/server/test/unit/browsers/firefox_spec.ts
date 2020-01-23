@@ -10,7 +10,7 @@ sinon.stub(appData, 'path').returns('/path/to/appData')
 
 const mockfs = require('mock-fs')
 import Marionette from 'marionette-client'
-const Foxdriver = require('@benmalka/foxdriver')
+import Foxdriver from '@benmalka/foxdriver'
 const FirefoxProfile = require('firefox-profile')
 
 const utils = require('../../../lib/browsers/utils')
@@ -26,12 +26,10 @@ describe('lib/browsers/firefox', () => {
   const port = 3333
   let marionetteDriver: any
   let marionetteSendCb: any
+  let foxdriver: any
+  let foxdriverTab: any
 
-  afterEach(() => {
-    return mockfs.restore()
-  })
-
-  beforeEach(() => {
+  const stubMarionette = () => {
     marionetteSendCb = null
 
     const connect = sinon.stub().callsArg(0)
@@ -54,6 +52,42 @@ describe('lib/browsers/firefox', () => {
     }
 
     sinon.stub(Marionette.Drivers, 'Tcp').returns(marionetteDriver)
+  }
+
+  const stubFoxdriver = () => {
+    foxdriverTab = {
+      data: '',
+      memory: {
+        isAttached: false,
+        getState: sinon.stub().resolves(),
+        attach: sinon.stub().resolves(),
+        on: sinon.stub(),
+        forceGarbageCollection: sinon.stub().resolves(),
+        forceCycleCollection: sinon.stub().resolves(),
+      },
+    }
+
+    const browser = {
+      listTabs: sinon.stub().resolves([foxdriverTab]),
+      request: sinon.stub().withArgs('listTabs').resolves({ tabs: [foxdriverTab] }),
+    }
+
+    foxdriver = {
+      browser,
+    }
+
+    sinon.stub(Foxdriver, 'attach').resolves(foxdriver)
+  }
+
+  afterEach(() => {
+    return mockfs.restore()
+  })
+
+  beforeEach(() => {
+    sinon.stub(protocol, '_connectAsync').resolves(null)
+
+    stubMarionette()
+    stubFoxdriver()
   })
 
   context('#open', () => {
@@ -72,11 +106,6 @@ describe('lib/browsers/firefox', () => {
       sinon.stub(process, 'pid').value(1111)
 
       protocol.foo = 'bar'
-      sinon.stub(protocol, '_connectAsync').resolves(null)
-
-      sinon.stub(Foxdriver, 'attach').resolves({ listTabs () {
-        return []
-      } })
 
       sinon.stub(plugins, 'has')
       sinon.stub(plugins, 'execute')
@@ -216,7 +245,7 @@ describe('lib/browsers/firefox', () => {
 
     it('launches with the url and args', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(utils.launch).to.be.calledWith(this.browser, null, [
+        expect(utils.launch).to.be.calledWith(this.browser, 'about:blank', [
           '-marionette',
           '-new-instance',
           '-foreground',
@@ -292,8 +321,6 @@ describe('lib/browsers/firefox', () => {
 
         await expect(firefoxUtil.setupMarionette([], '', port))
         .to.be.rejectedWith('Unexpected error from Marionette Socket: Error: foo error')
-
-        expect(marionetteDriver.close).to.be.calledOnce
       })
 
       it('rejects on errors from marionette commands', async () => {
@@ -303,8 +330,38 @@ describe('lib/browsers/firefox', () => {
 
         await expect(firefoxUtil.setupMarionette([], '', port))
         .to.be.rejectedWith('Unexpected error from Marionette commands: GenericError')
+      })
+    })
 
-        expect(marionetteDriver.close).to.be.calledOnce
+    context('#setupFoxdriver', () => {
+      it('attaches foxdriver after testing connection', async () => {
+        await firefoxUtil.setupFoxdriver(port)
+
+        expect(Foxdriver.attach).to.be.calledWith('127.0.0.1', port)
+        expect(protocol._connectAsync).to.be.calledWith({
+          host: '127.0.0.1',
+          port,
+          getDelayMsForRetry: sinon.match.func,
+        })
+      })
+
+      it('sets the collectGarbage callback which can be used to force GC+CC', async () => {
+        await firefoxUtil.setupFoxdriver(port)
+
+        const { memory } = foxdriverTab
+
+        expect(memory.forceCycleCollection).to.not.be.called
+        expect(memory.forceGarbageCollection).to.not.be.called
+
+        await firefoxUtil.collectGarbage()
+
+        expect(memory.forceCycleCollection).to.be.calledOnce
+        expect(memory.forceGarbageCollection).to.be.calledOnce
+
+        await firefoxUtil.collectGarbage()
+
+        expect(memory.forceCycleCollection).to.be.calledTwice
+        expect(memory.forceGarbageCollection).to.be.calledTwice
       })
     })
   })
