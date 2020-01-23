@@ -34,6 +34,7 @@ exports['browsers returns the expected list of browsers 1'] = [
     "name": "firefox",
     "family": "firefox",
     "displayName": "Firefox",
+    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "profile": true,
     "binary": "firefox"
@@ -42,6 +43,7 @@ exports['browsers returns the expected list of browsers 1'] = [
     "name": "firefoxDeveloperEdition",
     "family": "firefox",
     "displayName": "Firefox Developer Edition",
+    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "profile": true,
     "binary": "firefox-developer-edition"
@@ -50,6 +52,7 @@ exports['browsers returns the expected list of browsers 1'] = [
     "name": "firefoxNightly",
     "family": "firefox",
     "displayName": "Firefox Nightly",
+    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "profile": true,
     "binary": "firefox-nightly"
