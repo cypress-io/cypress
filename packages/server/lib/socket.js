@@ -425,6 +425,8 @@ class Socket {
       })
 
       socket.on('external:open', (url) => {
+        debug('received external:open %o', { url })
+
         return require('electron').shell.openExternal(url)
       })
 
