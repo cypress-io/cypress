@@ -4,8 +4,8 @@ import { Events } from './events'
 import { AppState } from './app-state'
 import { observer } from 'mobx-react'
 
-interface Props {
-  appState: AppState
+export interface Props {
+  appState: Pick<AppState, 'forcingGc' | 'firefoxGcInterval'>
   events: Events
 }
 
@@ -65,7 +65,7 @@ class ForcedGcWarning extends React.Component<Props> {
         </div>
         <div className='gc-status-bar clickable gc-not-running' onClick={() => this._toggleExpando()}>
           <span className='total-time'>
-            <i className='fas fa-ws fa-info-circle clickable'></i>
+            <i className='fas fa-ws fa-info-circle'></i>
             Forced GC is disabled.
           </span>
         </div>
@@ -74,7 +74,7 @@ class ForcedGcWarning extends React.Component<Props> {
   }
 
   _handleLink (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
-    if (!e.target || !e.currentTarget.href) {
+    if (!e.currentTarget || !e.currentTarget.href) {
       return
     }
 
