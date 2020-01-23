@@ -98,9 +98,8 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "CHROME_WEB_SECURITY_NOT_SUPPORTED"
       """
-      Browser: '#{arg1}' does not support the configuration value "chromeWebSecurity: false"
-      
-      Tests that require "chromeWebSecurity: false" will not run as expected.
+      Your project has set the configuration option: `chromeWebSecurity: false`
+      This option will not have an effect in #{_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.
       """
     when "BROWSER_NOT_FOUND_BY_NAME"
       """
@@ -886,6 +885,19 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "CDP_RETRYING_CONNECTION"
       """
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
+      """
+    when "DEPRECATED_BEFOREBROWSERLAUNCH_ARGS"
+      """
+        Deprecation Warning: The "before:browser:launch" handler now has the signature
+        (
+          browser: object,
+          options: {
+            args: string[]
+            extensions: string[]
+            preferences: object
+          }
+        )
+        Accessing the object as an array will cease to work in future Cypress versions. See [docs link] for reference.
       """
 
 get = (type, arg1, arg2) ->

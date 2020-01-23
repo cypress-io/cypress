@@ -13,6 +13,7 @@ import utils from './utils'
 import protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
+import errors from '../errors'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -115,7 +116,10 @@ const getRemoteDebuggingPort = Bluebird.method(() => {
   return utils.getPort()
 })
 
-const pluginsBeforeBrowserLaunch = function (browser, args) {
+const pluginsBeforeBrowserLaunch = function (browser, args): string[] | {
+  args: string[]
+  extensions: string[]
+} {
   // bail if we're not registered to this event
   if (!plugins.has('before:browser:launch')) {
     return args
@@ -138,12 +142,12 @@ const pluginsBeforeBrowserLaunch = function (browser, args) {
  * @param browser the current browser being launched
  * @returns the modified list of arguments
  */
-const _normalizeArgExtensions = function (extPath, args, browser: Browser): string[] {
+const _normalizeArgExtensions = function (extPath, args, pluginExtensions, browser: Browser): string[] {
   if (browser.isHeadless) {
     return args
   }
 
-  let userExtensions
+  let userExtensions = []
   const loadExtension = _.find(args, (arg) => {
     return arg.includes(LOAD_EXTENSION)
   })
@@ -152,7 +156,11 @@ const _normalizeArgExtensions = function (extPath, args, browser: Browser): stri
     args = _.without(args, loadExtension)
 
     // form into array, enabling users to pass multiple extensions
-    userExtensions = loadExtension.replace(LOAD_EXTENSION, '').split(',')
+    userExtensions = userExtensions.concat(loadExtension.replace(LOAD_EXTENSION, '').split(','))
+  }
+
+  if (pluginExtensions) {
+    userExtensions = userExtensions.concat(pluginExtensions)
   }
 
   const extensions = [].concat(userExtensions, extPath, pathToTheme)
@@ -233,17 +241,15 @@ const _navigateUsingCRI = function (url) {
   // @ts-ignore
   la(check.url(url), 'missing url to navigate to', url)
 
-  return function (client) {
+  return async function (client) {
     la(client, 'could not get CRI client')
     debug('received CRI client')
     debug('navigating to page %s', url)
 
     // when opening the blank page and trying to navigate
     // the focus gets lost. Restore it and then navigate.
-    return client.send('Page.bringToFront')
-    .then(() => {
-      return client.send('Page.navigate', { url })
-    })
+    await client.send('Page.bringToFront')
+    await client.send('Page.navigate', { url })
   }
 }
 
@@ -272,7 +278,7 @@ module.exports = {
 
   _setAutomation,
 
-  _writeExtension (browser: Browser, options) {
+  async _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
       debug('chrome is running headlessly, not installing extension')
 
@@ -280,24 +286,21 @@ module.exports = {
     }
 
     // get the string bytes for the final extension file
-    return extension.setHostAndPath(options.proxyUrl, options.socketIoRoute).then(function (str) {
-      let extensionBg; let extensionDest
+    const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
+    let extensionBg; let extensionDest
 
-      extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
-      extensionBg = path.join(extensionDest, 'background.js')
+    extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
+    extensionBg = path.join(extensionDest, 'background.js')
 
-      // copy the extension src to the extension dist
-      return utils
-      .copyExtension(pathToExtension, extensionDest)
-      .then(function () {
-        // and overwrite background.js with the final string bytes
-        return fs.writeFileAsync(extensionBg, str)
-      })
-      .return(extensionDest)
-    })
+    // copy the extension src to the extension dist
+    await utils.copyExtension(pathToExtension, extensionDest)
+    await fs.writeFileAsync(extensionBg, str)
+
+    return extensionDest
   },
 
-  _getArgs (options: CypressConfiguration = {}) {
+  // expose for stubbing during tests
+  _getArgs (options: CypressConfiguration = {}, port: string) {
     let ps; let ua
 
     _.defaults(options, {
@@ -344,6 +347,15 @@ module.exports = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
+    if (options.browser.isHeadless) {
+      args.push('--headless')
+    }
+
+    // force ipv4
+    // https://github.com/cypress-io/cypress/issues/5912
+    args.push(`--remote-debugging-port=${port}`)
+    args.push('--remote-debugging-address=127.0.0.1')
+
     return args
   },
 
@@ -352,25 +364,53 @@ module.exports = {
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    let defaultArgs = this._getArgs(options)
-
-    if (browser.isHeadless) {
-      defaultArgs.push('--headless')
-    }
-
     const port = await getRemoteDebuggingPort()
 
-    // force ipv4
-    // https://github.com/cypress-io/cypress/issues/5912
-    defaultArgs.push(`--remote-debugging-port=${port}`)
-    defaultArgs.push('--remote-debugging-address=127.0.0.1')
+    let defaultArgs = this._getArgs(options, port)
 
-    const [cacheDir, afterPluginsArgs] = await Bluebird.all([
+    let pluginConfig = {
+      args: defaultArgs,
+      extensions: [],
+    }
+
+    // TODO: remove in next breaking release
+    // define array-like functions on this object so we can warn about using deprecated array API
+    // while still fufiling desired behavior
+    ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice'].forEach((name) => {
+      const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
+
+      pluginConfig[name] = function () {
+        errors.warning(
+          'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
+        )
+
+        // eslint-disable-next-line prefer-rest-params
+        return boundFn.apply(this, arguments)
+      }
+    })
+
+    const [cacheDir, pluginConfigResult] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      pluginsBeforeBrowserLaunch(options.browser, defaultArgs),
+      pluginsBeforeBrowserLaunch(options.browser, pluginConfig),
     ])
+
+    if (pluginConfigResult && pluginConfigResult !== pluginConfig) {
+      // use whatever the user returns as pluginConfig
+      // @ts-ignore
+      pluginConfig = pluginConfigResult
+    }
+
+    if (pluginConfig && pluginConfig[0]) {
+      errors.warning(
+        'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
+      )
+
+      pluginConfig.args = _.filter(pluginConfig, (_val, key) => _.isNumber(key))
+      pluginConfig.extensions = []
+    }
+
     const [extDest] = await Bluebird.all([
       this._writeExtension(
         browser,
@@ -381,7 +421,7 @@ module.exports = {
     ])
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own
-    const args = _normalizeArgExtensions(extDest, afterPluginsArgs, browser)
+    const args = _normalizeArgExtensions(extDest, pluginConfig.args, pluginConfig.extensions, browser)
 
     // this overrides any previous user-data-dir args
     // by being the last one
@@ -415,19 +455,17 @@ module.exports = {
     // monkey-patch the .kill method to that the CDP connection is closed
     const originalBrowserKill = launchedBrowser.kill
 
-    launchedBrowser.kill = (...args) => {
+    launchedBrowser.kill = async (...args) => {
       debug('closing remote interface client')
 
-      return criClient.close()
-      .then(() => {
-        debug('closing chrome')
+      await criClient.close()
+      debug('closing chrome')
 
-        return originalBrowserKill.apply(launchedBrowser, args)
-      })
+      await originalBrowserKill.apply(launchedBrowser, args)
     }
 
-    this._maybeRecordVideo(options)(criClient)
-    this._navigateUsingCRI(url)(criClient)
+    await this._maybeRecordVideo(options)(criClient)
+    await this._navigateUsingCRI(url)(criClient)
 
     // return the launched browser process
     // with additional method to close the remote connection
