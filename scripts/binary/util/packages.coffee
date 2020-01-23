@@ -40,7 +40,7 @@ createCLIExecutable = (command) ->
 yarn = createCLIExecutable('yarn')
 npx = createCLIExecutable('npx')
 
-runAllBuildJs = _.partial(npx, ["lerna", "run", "build-js", "--ignore", "cli"])
+runAllBuildJs = _.partial(npx, ["lerna", "run", "build", "--ignore", "cli"])
 
 # removes transpiled JS files in the original package folders
 runAllCleanJs = _.partial(npx, ["lerna", "run", "clean-js", "--ignore", "cli"])

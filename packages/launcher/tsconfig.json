@@ -9,5 +9,6 @@
   ],
   "exclude": [
     "test"
-  ]
+  ],
+  "types": ["mocha", "node", "chai"]
 }

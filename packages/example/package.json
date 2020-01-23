@@ -6,12 +6,19 @@
   "scripts": {
     "build-prod": "yarn build",
     "build": "node ./bin/build.js && gulp build",
+    "clean": "rm -rf dist",
     "clean-deps": "rm -rf node_modules",
     "deploy": "gulp deploy",
     "postinstall": "echo '@packages/example needs: yarn build'",
     "predeploy": "yarn build",
     "test": "cross-env NODE_ENV=test mocha",
-    "test-e2e": "cypress run"
+    "test-e2e": "cypress run",
+    "test-e2e:ci": "cypress run",
+    "test-integration": "exit 0",
+    "test-integration:ci": "exit 0",
+    "test-unit": "exit 0",
+    "test-unit:ci": "exit 0"
+
   },
   "files": [
     "cypress",

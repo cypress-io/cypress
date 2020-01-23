@@ -4,7 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-js": "tsc --project .",
+    "build": "tsc --project .",
+    "clean": "find lib -type f -name '*.js' -exec rm -rf {} \\;",
     "clean-deps": "rm -rf node_modules",
     "test-e2e": "exit 0",
     "test-e2e:ci": "exit 0",

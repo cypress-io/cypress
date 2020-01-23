@@ -5,9 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc --project .",
-    "build-js": "tsc --project .",
     "build-prod": "yarn build",
-    "clean": "node scripts/clean.js || true",
+    "clean": "find lib -type f -name '*.js' -exec rm -rf {} \\;",
     "clean-deps": "rm -rf node_modules",
     "clean-js": "yarn clean",
     "size": "t=\"cypress-v0.0.0.tgz\"; yarn pack --filename \"${t}\"; wc -c \"cli/${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
@@ -30,6 +29,7 @@
   "devDependencies": {
     "@packages/coffee": "*",
     "@packages/ts": "*",
+    "@types/chai": "4.2.7",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",

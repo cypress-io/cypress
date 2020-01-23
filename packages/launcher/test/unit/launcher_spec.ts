@@ -1,3 +1,5 @@
+import { expect } from 'chai'
+
 require('../spec_helper')
 
 const api = require('../..')

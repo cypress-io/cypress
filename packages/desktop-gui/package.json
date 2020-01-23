@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
+    "clean": "rm -rf dist",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project .",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",

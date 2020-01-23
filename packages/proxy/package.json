@@ -4,9 +4,15 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-js": "tsc --project .",
+    "build": "tsc --project .",
+    "clean": "find lib -type f -name '*.js' -exec rm -rf {} \\;",
     "clean-deps": "rm -rf node_modules",
-    "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "test-e2e": "exit 0",
+    "test-e2e:ci": "exit 0",
+    "test-integration": "exit 0",
+    "test-integration:ci": "exit 0",
+    "test-unit": "yarn test-unit:ci --watch --inspect",
+    "test-unit:ci": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
     "bluebird": "3.5.3",

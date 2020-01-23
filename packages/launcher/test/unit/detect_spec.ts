@@ -1,8 +1,10 @@
 require('../spec_helper')
+import { expect } from 'chai'
 import { detect, setMajorVersion } from '../../lib/detect'
 const os = require('os')
 import { log } from '../log'
 import { project } from 'ramda'
+import { FoundBrowser } from '../../lib/types'
 
 const isWindows = () => {
   return os.platform() === 'win32'
@@ -35,9 +37,18 @@ describe('browser detection', () => {
   })
 
   context('setMajorVersion', () => {
-    const foundBrowser = {
+    const foundBrowser: FoundBrowser = {
       name: 'test browser',
+      path: 'a path',
       version: '11.22.33',
+      family: 'chrome',
+      /** Optional display name */
+      displayName: '',
+      /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
+      versionRegex: new RegExp(''),
+      profile: false,
+      /** A single binary name or array of binary names for this browser. Not used on Windows. */
+      binary: '',
     }
 
     setMajorVersion(foundBrowser)

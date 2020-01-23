@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
+    "clean": "rm -rf dist",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "test-e2e": "exit 0",

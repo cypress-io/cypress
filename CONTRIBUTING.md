@@ -241,24 +241,25 @@ This repository is made up of various packages. They are discrete modules with d
 
 Here is a list of the core packages in this repository with a short description, located within the [`packages`](./packages) directory:
 
- | Folder Name                           | Package Name            | Purpose                                                                      |
- | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
- | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
- | [coffee](./packages/coffee)           | `@packages/coffee`      | A centralized version of CoffeeScript used for other packages.               |
- | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI.                              |
- | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
- | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
- | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
- | [extension](./packages/extension)     | `@packages/extension`   | The Cypress Chrome browser extension                                         |
- | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
- | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
- | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
- | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
- | [runner](./packages/runner)           | `@packages/runner`      | The runner is the minimal "chrome" around the user's application under test. |
- | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
- | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
- | [static](./packages/static)           | `@packages/static`      | Serves static assets used in the Cypress GUI.                                |
- | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
+ | Folder Name                                                           | Package Name                            | Purpose                                                                      |
+ | :-------------------------------------------------------------------- | :-------------------------------------- | :--------------------------------------------------------------------------- |
+ | [cli](./cli)                                                          | `cypress`                               | The command-line tool that is packaged as an `npm` module.                   |
+ | [coffee](./packages/coffee)                                           | `@packages/coffee`                      | A centralized version of CoffeeScript used for other packages.               |
+ | [desktop-gui](./packages/desktop-gui)                                 | `@packages/desktop-gui`                 | The front-end code for the Cypress Desktop GUI.                              |
+ | [driver](./packages/driver)                                           | `@packages/driver`                      | The code that is used to drive the behavior of the API commands.             |
+ | [electron](./packages/electron)                                       | `@packages/electron`                    | The Cypress implementation of Electron.                                      |
+ | [example](./packages/example)                                         | `@packages/example`                     | Our example kitchen-sink application.                                        |
+ | [extension](./packages/extension)                                     | `@packages/extension`                   | The Cypress Chrome browser extension                                         |
+ | [https-proxy](./packages/https-proxy)                                 | `@packages/https-proxy`                 | This does https proxy for handling http certs and traffic.                   |
+ | [launcher](./packages/launcher)                                       | `@packages/launcher`                    | Finds and launches browsers installed on your system.                        |
+ | [reporter](./packages/reporter)                                       | `@packages/reporter`                    | The reporter shows the running results of the tests (The Command Log UI).    |
+ | [root](./packages/root)                                               | `@packages/root`                        | Dummy package pointing at the root of the repository.                        |
+ | [runner](./packages/runner)                                           | `@packages/runner`                      | The runner is the minimal "chrome" around the user's application under test. |
+ | [server](./packages/server)                                           | `@packages/server`                      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
+ | [socket](./packages/socket)                                           | `@packages/socket`                      | A wrapper around socket.io to provide common libraries.                      |
+ | [static](./packages/static)                                           | `@packages/static`                      | Serves static assets used in the Cypress GUI.                                |
+ | [ts](./packages/ts)                                                   | `@packages/ts`                          | A centralized version of typescript.                                         |
+ | [webpack-plugin-post-compile](./packages/webpack-plugin-post-compile) | `@packages/webpack-plugin-post-compile` | Provides a hook into webpack's compilation completion                        |
 
 We try to tag all issues with a `pkg/` tag describing the appropriate package the work is required in. For example, the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label is tagged on issues that require work in the `driver` package.
 

@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack",
     "build-prod": "yarn build",
+    "clean": "rm -rf dist",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",

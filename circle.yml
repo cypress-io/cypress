@@ -157,7 +157,7 @@ jobs:
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
-      - run: yarn lerna run build-js --parallel --stream
+      - run: yarn build
       # run unit tests from each individual package (10 total)
       - run: yarn test-unit:ci --ignore @packages/server
       - store_test_results:
