@@ -7,11 +7,9 @@ import { observer } from 'mobx-react'
 interface Props {
   appState: AppState
   events: Events
-  hasDismissedForcedGcWarning: boolean
 }
 
 interface State {
-  autoExpandWarning: boolean
   expanded: boolean
 }
 
@@ -25,27 +23,11 @@ class ForcedGcWarning extends React.Component<Props> {
   constructor (props: Props) {
     super(props)
     this.state = {
-      autoExpandWarning: !props.hasDismissedForcedGcWarning,
       expanded: false,
     }
   }
 
-  _setHasDismissedForcedGcWarning () {
-    if (this.persisted) {
-      return
-    }
-
-    this.props.events.emit('set:has:dismissed:forced:gc:warning')
-    this.persisted = true
-    this.setState({ autoExpandWarning: false })
-  }
-
   _toggleExpando () {
-    if (this.state.expanded) {
-      // user is toggling it to closed, persist this to preferences
-      this._setHasDismissedForcedGcWarning()
-    }
-
     this.setState({ expanded: !this.state.expanded })
   }
 
@@ -66,15 +48,6 @@ class ForcedGcWarning extends React.Component<Props> {
     }
   }
 
-  static getDerivedStateFromProps (nextProps: Props | any, prevState: State) {
-    // if we start forcing GC, the expando is closed, and we can autoexpand...
-    if (nextProps.appState.forcingGc && !prevState.expanded && prevState.autoExpandWarning) {
-      return { expanded: true }
-    }
-
-    return {}
-  }
-
   _renderDisabled () {
     return (
       <div className='forced-gc-warning'>
@@ -87,7 +60,7 @@ class ForcedGcWarning extends React.Component<Props> {
             <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
           </div>
           <div>
-            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress can force garbage collection between tests. This is enabled in <code>run</code> mode and disabled in <code>open</code> mode by default. See <a href='https://on.cypress.io/firefox-gc-issue' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
+            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress can force garbage collection (GC) between tests. This is enabled in <code>run</code> mode and disabled in <code>open</code> mode by default. See <a href='https://on.cypress.io/firefox-gc-issue' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
           </div>
         </div>
         <div className='gc-status-bar clickable gc-not-running' onClick={() => this._toggleExpando()}>
@@ -114,7 +87,7 @@ class ForcedGcWarning extends React.Component<Props> {
             <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
           </div>
           <div>
-            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress must force the browser to run garbage collection routines periodically, which causes the UI to freeze. See <a href='https://on.cypress.io/firefox-gc-issue' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
+            To prevent a bug in Firefox from causing it to use up all available RAM, Cypress forces the browser to run garbage collection (GC) routines between tests, which causes the UI to freeze. See <a href='https://on.cypress.io/firefox-gc-issue' target='_blank' rel='noopener noreferrer'>issue #6187</a> for details.
           </div>
         </div>
         <div className={`gc-status-bar clickable ${forcingGc ? 'gc-running' : 'gc-not-running'}`} onClick={() => this._toggleExpando()}>

@@ -40,7 +40,6 @@ class App extends Component {
             specPath={specPath}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
-            hasDismissedForcedGcWarning={this.props.config.hasDismissedForcedGcWarning}
             firefoxGcInterval={this.props.config.firefoxGcInterval}
           />
         </div>

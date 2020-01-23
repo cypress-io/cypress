@@ -29,7 +29,6 @@ export interface ReporterProps {
   events: Events
   error?: Error
   specPath: string
-  hasDismissedForcedGcWarning: boolean
 }
 
 @observer
@@ -89,7 +88,6 @@ class Reporter extends Component<ReporterProps> {
         />
         <ForcedGcWarning
           appState={appState}
-          hasDismissedForcedGcWarning={this.props.hasDismissedForcedGcWarning}
           events={this.props.events}/>
       </div>
     )

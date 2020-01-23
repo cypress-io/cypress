@@ -141,10 +141,6 @@ const eventManager = {
       this.saveState(state)
     })
 
-    reporterBus.on('set:has:dismissed:forced:gc:warning', () => {
-      ws.emit('set:has:dismissed:forced:gc:warning')
-    })
-
     reporterBus.on('external:open', (url) => {
       ws.emit('external:open', url)
     })

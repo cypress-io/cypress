@@ -194,10 +194,6 @@ const events: Events = {
       runner.emit('focus:tests')
     })
 
-    localBus.on('set:has:dismissed:forced:gc:warning', () => {
-      runner.emit('set:has:dismissed:forced:gc:warning')
-    })
-
     localBus.on('save:state', () => {
       runner.emit('save:state', {
         autoScrollingEnabled: appState.autoScrollingEnabled,
