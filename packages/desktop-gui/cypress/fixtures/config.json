@@ -33,7 +33,8 @@
       "family": "electron",
       "version": "73.0.3683.121",
       "path": "",
-      "majorVersion": "73"
+      "majorVersion": "73",
+      "info": "Info about electron browser"
     },
     {
       "name": "firefox",
@@ -42,6 +43,14 @@
       "version": "69.0.1",
       "path": "/Applications/Firefox/Contents/MacOS/Firefox",
       "majorVersion": "69"
+    },
+    {
+      "name": "custom",
+      "displayName": "Custom",
+      "family": "custom",
+      "version": "4.3.2",
+      "path": "/Applications/Custom/Contents/MacOS/Custom",
+      "majorVersion": "4"
     }
   ],
   "clientRoute": "/__/",
