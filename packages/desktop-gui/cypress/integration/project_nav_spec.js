@@ -144,7 +144,7 @@ describe('Project Nav', function () {
               return name
             }
 
-            expect($icon).to.have.attr('src', `./img/${imgName()}_16x16.png`)
+            cy.wrap($icon).should('have.attr', 'src').and('include', `./img/${imgName()}`)
           })
         })
 
@@ -168,9 +168,11 @@ describe('Project Nav', function () {
             .should('contain', 'Chrome')
           })
 
-          it('displays default browser icon in chosen', () => {
+          it('displays default browser icon if chosen', () => {
             cy.get('.browsers-list .dropdown-chosen')
-            .find('.browser-icon').should('have.attr', 'src', './img/chrome_16x16.png')
+            .find('.browser-icon')
+            .should('have.attr', 'src')
+            .and('include', './img/chrome')
           })
         })
       })
@@ -277,7 +279,9 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list .dropdown-chosen')
-            .find('.browser-icon').should('have.attr', 'src', './img/chrome_16x16.png')
+            .find('.browser-icon')
+            .should('have.attr', 'src')
+            .and('include', './img/chrome')
           })
         })
 
@@ -297,7 +301,8 @@ describe('Project Nav', function () {
 
           it('displays default browser icon', () => {
             cy.get('.browsers-list .dropdown-chosen .browser-icon')
-            .should('have.attr', 'src', './img/chrome_16x16.png')
+            .should('have.attr', 'src')
+            .and('include', './img/chrome')
           })
         })
       })
@@ -321,7 +326,8 @@ describe('Project Nav', function () {
 
       it('displays local storage browser icon in chosen', () => {
         cy.get('.browsers-list .dropdown-chosen .browser-icon')
-        .should('have.attr', 'src', './img/chromium_16x16.png')
+        .should('have.attr', 'src')
+        .and('include', './img/chromium')
       })
     })
 

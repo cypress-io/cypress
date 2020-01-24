@@ -5,12 +5,12 @@ const edgeRe = /^edge/
 const firefoxRe = /^firefox/
 
 const logoPaths = {
-  canary: require('browser-logos/src/chrome-canary/chrome-canary_16x16.png'),
-  chrome: require('browser-logos/src/chrome/chrome_16x16.png'),
-  chromium: require('browser-logos/src/chromium/chromium_16x16.png'),
-  edge: require('browser-logos/src/edge/edge_16x16.png'),
-  electron: require('browser-logos/src/electron/electron_16x16.png'),
-  firefox: require('browser-logos/src/firefox/firefox_16x16.png'),
+  canary: require('browser-logos/src/chrome-canary/chrome-canary_32x32.png'),
+  chrome: require('browser-logos/src/chrome/chrome_32x32.png'),
+  chromium: require('browser-logos/src/chromium/chromium_32x32.png'),
+  edge: require('browser-logos/src/edge/edge_32x32.png'),
+  electron: require('browser-logos/src/electron/electron_32x32.png'),
+  firefox: require('browser-logos/src/firefox/firefox_32x32.png'),
 }
 
 const logoPath = (browserName) => {
