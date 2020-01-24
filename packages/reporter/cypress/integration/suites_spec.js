@@ -102,5 +102,41 @@ describe('controls', function () {
         })
       })
     })
+
+    describe('filtering suites list', () => {
+      it('filters by successful suites', () => {
+        cy.get('button.passed').click()
+        cy.contains('suite 3').should('be.visible')
+        cy.contains('suite 1').should('not.be.visible')
+        cy.contains('suite 4').should('not.be.visible')
+        cy.contains('nested suite 1').should('not.be.visible')
+      })
+
+      it('filters by failing suites when the successful button is clicked', () => {
+        cy.get('button.failed').click()
+        cy.contains('suite 3').should('not.be.visible')
+        cy.contains('suite 1').should('be.visible')
+        cy.contains('suite 4').should('not.be.visible')
+        cy.contains('nested suite 1').should('not.be.visible')
+      })
+
+      it('filters by pending suites when the pending button is clicked', () => {
+        cy.get('button.pending').click()
+        cy.contains('suite 3').should('not.be.visible')
+        cy.contains('suite 1').should('not.be.visible')
+        cy.contains('suite 4').should('be.visible')
+        cy.contains('nested suite 1').should('not.be.visible')
+      })
+
+      it('clears the filter when the clear filter button is clicked', () => {
+        cy.get('button.passed').click()
+        cy.get('button.clear').click()
+
+        cy.contains('suite 3').should('be.visible')
+        cy.contains('suite 1').should('be.visible')
+        cy.contains('suite 4').should('be.visible')
+        cy.contains('nested suite 1').should('be.visible')
+      })
+    })
   })
 })

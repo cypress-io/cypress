@@ -7,16 +7,16 @@ import CommandModel, { CommandProps } from '../commands/command-model'
 import RouteModel, { RouteProps } from '../routes/route-model'
 import scroller, { Scroller } from '../lib/scroller'
 import SuiteModel, { SuiteProps } from './suite-model'
-import TestModel, { TestProps, UpdateTestCallback } from '../test/test-model'
+import TestModel, { TestProps, UpdateTestCallback, TestState } from '../test/test-model'
 import RunnableModel from './runnable-model'
 
 const defaults = {
   hasSingleTest: false,
   hasTests: false,
   isReady: false,
-
   attemptingShowSnapshot: false,
   showingSnapshot: false,
+  activeFilter: null,
 }
 
 interface Props {
@@ -39,6 +39,7 @@ type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
 class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables: Array<TestModel | SuiteModel> = []
+  @observable activeFilter: TestState | null = defaults.activeFilter
   hasTests: boolean = false
   hasSingleTest: boolean = false
 
@@ -68,6 +69,11 @@ class RunnablesStore {
     this.hasSingleTest = numTests === 1
 
     this._startRendering()
+  }
+
+  @action
+  setFilter (nextActiveFilter: TestState | null) {
+    this.activeFilter = nextActiveFilter
   }
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {

@@ -61,14 +61,21 @@
     margin-bottom: 0;
     padding: 0;
 
-    li {
+
+    button, .duration {
       display: block;
       font-size: 16px;
       font-weight: 500;
       height: 46px;
       line-height: 26px;
       list-style-type: none;
-      padding: 10px 5px;
+      padding: 10px;
+      width: auto;
+
+      &:disabled {
+        pointer-events: none; 
+        background-color: #e4e4e4;
+      }
 
       &.passed {
         color: #23AE89;
@@ -85,6 +92,10 @@
       i {
         margin: 5px;
       }
+    }
+
+    li {
+      list-style-type: none;
     }
 
     .duration {
@@ -157,16 +168,8 @@
   // utilizing element size queries: https://github.com/marcj/css-element-queries
   // styles take effect when width is greater than or equal to the specified amount
   &[min-width~="400px"] {
-    header button {
-      width: 50px;
-    }
-
     .focus-tests button span {
       display: inline;
-    }
-
-    .stats li {
-      padding: 10px;
     }
   }
 }

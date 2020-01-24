@@ -216,7 +216,7 @@ describe "aliases", ->
           .within ->
             cy.contains('.command-alias-count', '1')
             cy.contains('.command-alias', '@getPosts')
-              .trigger("mouseover")
+              .trigger("mouseover", { force: true })
 
         cy.get(".tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found 1st alias for: 'getPosts'")

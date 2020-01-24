@@ -41,6 +41,35 @@
           ]
         }
       ]
+    },
+    {
+      "id": "r8",
+      "title": "suite 3",
+      "root": false,
+      "tests": [
+        {
+          "id": "r9",
+          "title": "test 3",
+          "state": "passed"
+        },
+        {
+          "id": "r10",
+          "title": "test 4",
+          "state": "passed"
+        }
+      ]
+    },
+    {
+      "id": "r9",
+      "title": "suite 4",
+      "root": false,
+      "tests": [
+        {
+          "id": "r10",
+          "title": "test 3",
+          "state": "processing"
+        }
+      ]
     }
   ]
 }
