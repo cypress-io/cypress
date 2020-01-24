@@ -179,7 +179,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         consoleProps: ->
           Subject: subject
 
-    if not str
+    ## check for false positive (negative?) with 0 given as index
+    if not str and str isnt 0
       $utils.throwErrByPath("invoke_its.null_or_undefined_property_name", {
         onFail: options._log
         args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
@@ -251,9 +252,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       previousProp = pathsArray[index - 1]
       valIsNullOrUndefined = _.isNil(acc)
 
+      ## to allow the falsy value 0 to be used
+      propIsValid = !!prop or prop is 0
+
       ## if we're attempting to tunnel into
       ## a null or undefined object...
-      if prop and valIsNullOrUndefined
+      if propIsValid and valIsNullOrUndefined
         if index is 0
           ## give an error stating the current subject is nil
           traversalErr = subjectNullOrUndefinedErr(prop, acc)
@@ -265,7 +269,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return acc
 
       ## if we have no more properties to traverse
-      if not prop
+      if not propIsValid
         if valIsNullOrUndefined
           ## set traversal error that the final value is null or undefined
           traversalErr = propertyValueNullOrUndefinedErr(previousProp, acc)

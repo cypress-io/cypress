@@ -813,6 +813,11 @@ describe "src/cy/commands/connectors", ->
       it "works with numerical indexes", ->
         cy.wrap(['foo', 'bar']).its(1).should('eq', 'bar')
 
+      it "works with 0 as a value if object has property 0", ->
+        cy.wrap(["foo", "bar"]).its(0).should("eq", "foo")
+        cy.wrap({"0": "whoa"}).its(0).should("eq", "whoa")
+        cy.wrap([###empty###, "spooky"]).its(0).should("not.exist")
+
       it "reduces into dot separated values", ->
         obj = {
           foo: {
