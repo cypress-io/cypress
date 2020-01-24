@@ -1,8 +1,9 @@
-import _ from 'lodash'
-import { concatStream } from '@packages/network'
 import Debug from 'debug'
 import la from 'lazy-ass'
+import _ from 'lodash'
 import si from 'systeminformation'
+import util from 'util'
+import { concatStream } from '@packages/network'
 
 const debug = Debug('cypress:server:util:process_profiler')
 const debugVerbose = Debug('cypress-verbose:server:util:process_profiler')
@@ -12,8 +13,15 @@ let started = false
 
 let groupsOverTime = {}
 
+const formatPidDisplay = (groupedProcesses) => {
+  const pids = _.chain(groupedProcesses).map('pid').map(_.toNumber).value()
+
+  // slice off the starting '[ ' and the ending '] ' array brackets
+  return util.inspect(pids, { maxArrayLength: 10 }).slice(2, -2)
+}
+
 function checkProcesses () {
-  si.processes()
+  return si.processes()
   .then(({ list }) => {
     let knownParents: number[] = [process.pid]
     let cyProcesses: Set<si.Systeminformation.ProcessesProcessData> = new Set()
@@ -55,24 +63,24 @@ function checkProcesses () {
       return {
         groupName,
         processCount: groupedProcesses.length,
-        pids: _.map(groupedProcesses, _.property('pid')),
-        totalCpuPercent: _.sumBy(groupedProcesses, 'pcpu'),
-        totalMemRssMb: _.sumBy(groupedProcesses, 'mem_rss') / 1024,
+        pids: formatPidDisplay(groupedProcesses),
+        cpuPercent: _.sumBy(groupedProcesses, 'pcpu'),
+        memRssMb: _.sumBy(groupedProcesses, 'mem_rss') / 1024,
       }
     })
     .values()
-    .sortBy('totalMemRssMb')
+    .sortBy('memRssMb')
     .reverse()
     .value()
 
     buffedConsole.log('current & mean memory and CPU usage by process group:')
     groupTotals.push(_.reduce(groupTotals, (acc, val) => {
       acc.processCount += val.processCount
-      acc.totalCpuPercent += val.totalCpuPercent
-      acc.totalMemRssMb += val.totalMemRssMb
+      acc.cpuPercent += val.cpuPercent
+      acc.memRssMb += val.memRssMb
 
       return acc
-    }, { groupName: '[TOTAL]', processCount: 0, pids: [], totalCpuPercent: 0, totalMemRssMb: 0 }))
+    }, { groupName: 'TOTAL', processCount: 0, pids: '-', cpuPercent: 0, memRssMb: 0 }))
 
     groupTotals.forEach((total) => {
       if (!groupsOverTime[total.groupName]) {
@@ -84,10 +92,9 @@ function checkProcesses () {
       measurements.push(total)
 
       _.merge(total, {
-        meanProcessCount: _.meanBy(measurements, 'processCount'),
-        meanCpuPercent: _.meanBy(measurements, 'totalCpuPercent'),
-        meanMemRssMb: _.meanBy(measurements, 'totalMemRssMb'),
-        maxMemRssMb: _.max(_.map(measurements, _.property('totalMemRssMb'))),
+        meanCpuPercent: _.meanBy(measurements, 'cpuPercent'),
+        meanMemRssMb: _.meanBy(measurements, 'memRssMb'),
+        maxMemRssMb: _.max(_.map(measurements, _.property('memRssMb'))),
       })
 
       _.forEach(total, (v, k) => {
@@ -101,11 +108,10 @@ function checkProcesses () {
     buffedConsole.table(groupTotals, [
       'groupName',
       'processCount',
-      'meanProcessCount',
       'pids',
-      'totalCpuPercent',
+      'cpuPercent',
       'meanCpuPercent',
-      'totalMemRssMb',
+      'memRssMb',
       'meanMemRssMb',
       'maxMemRssMb',
     ])
@@ -124,7 +130,7 @@ function scheduleProcessCheck () {
 }
 
 export function start () {
-  if (!debug.enabled) {
+  if (!debug.enabled && !debugVerbose.enabled) {
     debug('process profiler not enabled')
 
     return
