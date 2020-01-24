@@ -123,7 +123,7 @@ const pluginsBeforeBrowserLaunch = function (browser, args) {
 
   return plugins.execute('before:browser:launch', browser, args)
   .then((newArgs) => {
-    debug('got user args for \'before:browser:launch\'', newArgs)
+    debug('got user args for \'before:browser:launch\' %o', { newArgs })
 
     // reset args if we got 'em
     return newArgs != null ? newArgs : args
@@ -392,7 +392,7 @@ module.exports = {
         args.push(`--user-data-dir=${userDir}`)
         args.push(`--disk-cache-dir=${cacheDir}`)
 
-        debug('launching in chrome with debugging port', { url, args, port })
+        debug('launching in chrome with debugging port %o', { url, args, port })
 
         // FIRST load the blank page
         // first allows us to connect the remote interface,
