@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "build": "tsc --project .",
     "build-js": "tsc --project .",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn test-unit",

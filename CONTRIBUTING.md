@@ -309,8 +309,6 @@ yarn dev --run-project /project/folder --record --key <key>
 
 #### Adding new Dependencies
 
-> Scope values are based on **package names** and not the directory structure.
-
 ```shell
 # add a new dep to the root of the repo
 $ yarn add -W my-new-dep1
@@ -326,20 +324,21 @@ $ yarn workspace @packages/server add --dev my-new-dep1
 
 ##### Common Top Level Tasks
 
-| Task               | Purpose                                                                                        |
-| :----------------- | :--------------------------------------------------------------------------------------------- |
-| `build`            | Build all packages                                                                             |
-| `start`            | Open Cypress in dev and global mode                                                            |
-| `watch`            | Run `yarn watch` in every package; piping the output back to the terminal                      |
-| `clean`            | Run `yarn clean` in every package; used to remove build artifacts from all packages            |
-| `clean-deps`       | Remove all dependencies installed (in root and in every package)                               |
-| `test`             | Runs `yarn test` in every package except those without a `test` script                         |
-| `test-unit`        | Runs `yarn test-unit` in every package except those without a `test-unit` script               |
-| `test-integration` | Runs `yarn test-integration` in every package except those without a `test-integration` script |
-| `test-e2e`         | Runs `yarn test-e2e` in every package except those without a `test-e2e` script                 |
-| `test-watch`       | Runs `yarn test-watch` in every package except those without a `test-watch` script             |
+By default, top level tasks will execute for all packages. However, most scripts can be provided one or more scopes. Providing a scope will execute tasks within the provided packages. Scope values are based on **package names** and not the directory structure.
 
-When run as-is, top level tasks will run across all packages. However, most scripts can be provided one or more scopes. Providing a scope will execute tasks within the provided packages. Scope values are based on **package names** and not the directory structure.
+| Task               | Purpose                                                          |
+| :----------------- | :--------------------------------------------------------------- |
+| `build`            | Compile non-node code (coffeescript/typescript)                  |
+| `start`            | Open Cypress in dev and global mode                              |
+| `watch`            | Auto-rebuild on file changes                                     |
+| `clean`            | Remove build artifacts                                           |
+| `clean-deps`       | Remove all installed dependencies (in root and in every package) |
+| `test`             | Run the default set of tests (may be package dependent)          |
+| `test-debug`       | Run unit/integration tests with inspect node CLI flags           |
+| `test-unit`        | Run unit tests                                                   |
+| `test-integration` | Run integration tests                                            |
+| `test-e2e`         | Run end-to-end tests                                             |
+| `test-watch`       | Run unit tests and rebuild/rerun on file changes                 |
 
 > Most of the time you will only want to run a task within a specific package; this can be done by providing the package name as a scope to the top level task.
 
@@ -360,8 +359,6 @@ $ yarn test-unit --scope @packages/*
 
 Each package is responsible for building itself and testing itself and can do so using whatever tools are appropriate, but each conforms to a standard set of scripts so that building, watching, testing, etc. can be orchestrated from the root of this repo. Here are the scripts supported and what they mean:
 
-> In order to simplify top level tasks, if a package does not need a script, it is still included and simply exits 0 (`exit 0`).
-
 | Task               | Purpose                                                                                                                                                  |
 | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `build`            | Build the package                                                                                                                                        |
@@ -380,7 +377,7 @@ Each package is responsible for building itself and testing itself and can do so
 
 Some packages use [debug](https://github.com/visionmedia/debug#readme) to
 log debug messages to the console. The naming scheme should be
-`cypress:<package name>`. For example to see launcher messages during unit
+`cypress:<package name>`; where package name is without the `@packages` scope. For example to see launcher messages during unit
 tests start it using
 
 ```bash
