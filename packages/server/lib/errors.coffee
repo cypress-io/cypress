@@ -536,7 +536,10 @@ getMsgByType = (type, arg1 = {}, arg2) ->
         """
       }
     when "AUTOMATION_SERVER_DISCONNECTED"
-      "The automation client disconnected. Cannot continue running tests."
+      {
+        msg: "The automation client disconnected. Cannot continue running tests."
+        details: "" ## empty details to avoid printing stack traces
+      }
     when "SUPPORT_FILE_NOT_FOUND"
       """
       The support file is missing or invalid.

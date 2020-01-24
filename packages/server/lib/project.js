@@ -369,7 +369,7 @@ class Project extends EE {
         }
       },
 
-      onUnexpectedDisconnect: (errorName) => {
+      onUnexpectedDisconnect: _.once((errorName) => {
         if (cfg.isTextTerminal) {
           const err = errors.get(errorName, this.browser.displayName)
 
@@ -377,7 +377,7 @@ class Project extends EE {
         }
 
         errors.warning(errorName, this.browser.displayName)
-      },
+      }),
     })
   }
 
