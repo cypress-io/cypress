@@ -10,7 +10,9 @@ describe('<BrowserIcon />', () => {
     'Chrome',
     'Chromium',
     'Edge',
+    'Edge Beta',
     'Edge Canary',
+    'Edge Dev',
     'Electron',
     'Firefox',
     'Firefox Developer Edition',
@@ -23,17 +25,42 @@ describe('<BrowserIcon />', () => {
   })
 
   it('displays correct logo for supported browsers', () => {
-    cy.render(render, <div>
+    cy.render(render, <>
       {_.map(browsers, (browser) => (
         <BrowserIcon browserName={browser} key={browser} />
       ))}
-    </div>)
+    </>)
 
     _.each(browsers, (browser, i) => {
       cy.get('.browser-icon').eq(i)
       .should('have.attr', 'src')
       .and('include', _.kebabCase(browser))
     })
+  })
+
+  it('displays family logo for other variants', () => {
+    cy.render(render, <>
+      <BrowserIcon browserName='Chrome Custom' />
+      <BrowserIcon browserName='Edge Custom' />
+      <BrowserIcon browserName='Electron Custom' />
+      <BrowserIcon browserName='Firefox Custom' />
+    </>)
+
+    cy.get('.browser-icon').eq(0)
+    .should('have.attr', 'src')
+    .and('include', 'chrome')
+
+    cy.get('.browser-icon').eq(1)
+    .should('have.attr', 'src')
+    .and('include', 'edge')
+
+    cy.get('.browser-icon').eq(2)
+    .should('have.attr', 'src')
+    .and('include', 'electron')
+
+    cy.get('.browser-icon').eq(3)
+    .should('have.attr', 'src')
+    .and('include', 'firefox')
   })
 
   it('displays generic logo for unsupported browsers', () => {
