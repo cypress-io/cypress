@@ -1,7 +1,12 @@
 require('../../spec_helper')
 require('mocha-banner').register()
 
-process.env.FORCE_COLOR = 1
+const _CI = process.env.CI
+
+delete process.env.CI
+const chalk = require('chalk').default
+
+process.env.CI = _CI
 
 const _ = require('lodash')
 let cp = require('child_process')
@@ -11,7 +16,6 @@ const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
 const stream = require('stream')
-const chalk = require('chalk').default
 const express = require('express')
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
