@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import React from 'React'
+import React from 'react'
 
 const edgeRe = /^edge/
 const firefoxRe = /^firefox/
