@@ -1,6 +1,9 @@
 describe('Project Nav', function () {
   const _ = Cypress._
 
+  const edgeRe = /^edge/
+  const firefoxRe = /^firefox/
+
   beforeEach(function () {
     cy.fixture('user').as('user')
     cy.fixture('config').as('config')
@@ -125,9 +128,23 @@ describe('Project Nav', function () {
               return
             }
 
-            const imgName = name === 'canary' ? 'chrome-canary' : name
+            const imgName = () => {
+              if (name === 'canary') {
+                return 'chrome-canary'
+              }
 
-            expect($icon).to.have.attr('src', `./img/${imgName}_16x16.png`)
+              if (edgeRe.test(name)) {
+                return 'edge'
+              }
+
+              if (firefoxRe.test(name)) {
+                return 'firefox'
+              }
+
+              return name
+            }
+
+            expect($icon).to.have.attr('src', `./img/${imgName()}_16x16.png`)
           })
         })
 
@@ -179,7 +196,7 @@ describe('Project Nav', function () {
           .find('li').should('have.length', this.config.browsers.length - 1)
           .each(function ($li, i) {
             const dropdownBrowsers = Cypress._.filter(this.config.browsers, (b) => {
-              // Chrome is shown in selection, so skip it
+              // Chromium is shown in selection, so skip it
               return b.displayName !== 'Chromium'
             })
 

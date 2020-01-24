@@ -36,11 +36,19 @@
       "majorVersion": "79"
     },
     {
+      "name": "edgeBeta",
+      "displayName": "Edge Beta",
+      "family": "chrome",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta",
+      "majorVersion": "79"
+    },
+    {
       "name": "edgeCanary",
       "displayName": "Edge Canary",
       "family": "chrome",
       "version": "79.0.309.71",
-      "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "path": "/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary",
       "majorVersion": "79"
     },
     {
@@ -48,7 +56,7 @@
       "displayName": "Edge Dev",
       "family": "chrome",
       "version": "79.0.309.71",
-      "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "path": "/Applications/Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev",
       "majorVersion": "79"
     },
     {
@@ -68,6 +76,23 @@
       "path": "/Applications/Firefox/Contents/MacOS/Firefox",
       "majorVersion": "69"
     },
+    {
+      "name": "firefoxDeveloperEdition",
+      "displayName": "Firefox Developer Edition",
+      "family": "firefox",
+      "version": "69.0.1",
+      "path": "/Applications/Firefox Developer/Contents/MacOS/Firefox Developer",
+      "majorVersion": "69"
+    },
+    {
+      "name": "firefoxNightly",
+      "displayName": "Firefox Nightly",
+      "family": "firefox",
+      "version": "69.0.1",
+      "path": "/Applications/Firefox Nightly/Contents/MacOS/Firefox Nightly",
+      "majorVersion": "69"
+    },
+
     {
       "name": "custom",
       "displayName": "Custom",
