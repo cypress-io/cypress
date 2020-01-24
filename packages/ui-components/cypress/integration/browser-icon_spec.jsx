@@ -10,8 +10,11 @@ describe('<BrowserIcon />', () => {
     'Chrome',
     'Chromium',
     'Edge',
+    'Edge Canary',
     'Electron',
     'Firefox',
+    'Firefox Developer Edition',
+    'Firefox Nightly',
   ]
 
   beforeEach(() => {
