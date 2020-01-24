@@ -28,7 +28,7 @@ const Stats = observer(({ stats }: Props) => (
       <span className='num'>{count(stats.numPending)}</span>
     </li>
     <li className='duration'>
-      <span className='num'>{count(parseFloat(formatDuration(stats.duration)))}</span>
+      <span className='num'>{String(count(parseFloat(formatDuration(stats.duration)))).padStart(5, '0')}</span>
     </li>
   </ul>
 ))
