@@ -152,7 +152,7 @@ describe('lib/modes/run', () => {
       expect(errors.get).to.be.calledWith('BROWSER_CRASHED')
       expect(errors.log).to.be.calledOnce
 
-      expect(emit).to.be.calledWithMatch('exitEarlyWithErr', 'We detected that the Chromium Renderer process just crashed.')
+      expect(emit).to.be.calledWithMatch('exitEarlyWithErr', /^We detected that the Electron process running your tests just exited unexpectedly/)
     })
   })
 
