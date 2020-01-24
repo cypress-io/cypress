@@ -45,7 +45,7 @@ const exitErr = (err) => {
 
 module.exports = {
   isCurrentlyRunningElectron () {
-    return !!(process.versions && process.versions.electron)
+    return require('./util/electron-app').isRunning()
   },
 
   runElectron (mode, options) {
@@ -170,7 +170,7 @@ module.exports = {
       // to force retina screens to not
       // upsample their images when offscreen
       // rendering
-      require('./util/electron_app').scale()
+      require('./util/electron-app').scale()
     }
 
     // make sure we have the appData folder

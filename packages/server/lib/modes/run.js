@@ -26,7 +26,7 @@ const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
 const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
-const electronApp = require('../util/electron_app')
+const electronApp = require('../util/electron-app')
 const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 
@@ -1395,7 +1395,7 @@ module.exports = {
 
   run (options) {
     return electronApp
-    .ready()
+    .waitForReady()
     .then(() => {
       return this.ready(options)
     })
