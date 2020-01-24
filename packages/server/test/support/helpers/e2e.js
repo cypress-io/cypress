@@ -1,6 +1,8 @@
 require('../../spec_helper')
 require('mocha-banner').register()
 
+process.env.FORCE_COLOR = 2
+
 const _ = require('lodash')
 let cp = require('child_process')
 const niv = require('npm-install-version')
