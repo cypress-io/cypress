@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const path = require('path')
 const check = require('check-more-types')
 const Debug = require('debug')
+const Promise = require('bluebird')
 const minimatch = require('minimatch')
 const glob = require('./glob')
 
