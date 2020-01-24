@@ -124,7 +124,9 @@ describe('Runs List', function () {
             cy.contains(this.runs[1].instances[0].platform.osVersionFormatted)
             cy.contains(this.runs[1].instances[0].platform.browserName)
             cy.get('.fa-apple')
-            cy.get('.browser-icon').should('have.attr', 'src', './img/electron_16x16.png')
+            cy.get('.browser-icon')
+            .should('have.attr', 'src')
+            .and('include', './img/chrome')
           })
         })
 
