@@ -49,7 +49,6 @@ platform:
 install:
   - ps: Install-Product node $env:nodejs_version $env:platform
   # upgrade npm
-  - choco install yarn
   - yarn global add @bahmutov/print-env@1
   # Output useful info for debugging.
   - node --version
