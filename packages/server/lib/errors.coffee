@@ -527,13 +527,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
         """
 
     when "BROWSER_CRASHED"
-      """
-      We detected that the #{arg1} process running your tests just exited unexpectedly.
+      {
+        msg: "We detected that the #{arg1} process running your tests just exited unexpectedly."
+        details: """
+        This error can occur whenever Cypress detects that the browser that was launched for running tests has exited or crashed before the tests could finish running, or without the user manually stopping the tests in Cypress.
 
-      This error can occur whenever Cypress detects that the browser that was launched for running tests has exited or crashed before the tests could finish running, or without the user manually stopping the tests in Cypress.
-
-      Learn more at https://on.cypress.io/browser-process-crashed
-      """
+        Learn more at https://on.cypress.io/browser-process-crashed
+        """
+      }
     when "AUTOMATION_SERVER_DISCONNECTED"
       "The automation client disconnected. Cannot continue running tests."
     when "SUPPORT_FILE_NOT_FOUND"

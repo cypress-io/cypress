@@ -370,9 +370,13 @@ class Project extends EE {
       },
 
       onUnexpectedDisconnect: (errorName) => {
-        const fn = cfg.isTextTerminal ? errors.throwErr : errors.warning
+        if (cfg.isTextTerminal) {
+          const err = errors.get(errorName, this.browser.displayName)
 
-        fn(errorName, this.browser.displayName)
+          return options.onError(err)
+        }
+
+        errors.warning(errorName, this.browser.displayName)
       },
     })
   }
