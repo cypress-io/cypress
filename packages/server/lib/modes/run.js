@@ -946,10 +946,14 @@ module.exports = {
           },
         }
 
+        debug('project received exitEarlyWithErr', { errMsg })
+
         return resolve(obj)
       }
 
       const onEnd = (obj) => {
+        debug('project received end event')
+
         return resolve(obj)
       }
 

@@ -2,10 +2,12 @@ const _ = require('lodash')
 const la = require('lazy-ass')
 const path = require('path')
 const check = require('check-more-types')
-const debug = require('debug')('cypress:server:specs')
+const Debug = require('debug')
 const minimatch = require('minimatch')
-const Promise = require('bluebird')
 const glob = require('./glob')
+
+const debug = Debug('cypress:server:specs')
+const debugVerbose = Debug('cypress-verbose:server:specs')
 
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
@@ -25,16 +27,7 @@ const find = function findSpecs (config, specPattern) {
 
   const integrationFolderPath = config.integrationFolder
 
-  debug(
-    'looking for test specs in the folder:',
-    integrationFolderPath
-  )
-
-  if (specPattern) {
-    debug('spec pattern "%s"', specPattern)
-  } else {
-    debug('there is no spec pattern')
-  }
+  debug('looking for test specs in %o', { specPattern, integrationFolderPath })
 
   // support files are not automatically
   // ignored because only _fixtures are hard
@@ -143,7 +136,9 @@ const find = function findSpecs (config, specPattern) {
    */
   const findOnePattern = (pattern) => {
     return glob(pattern, options)
-    .tap(debug)
+    .tap((files) => {
+      debugVerbose('found spec files via glob:', { files })
+    })
 
     // filter out anything that matches our
     // ignored test files glob
