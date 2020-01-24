@@ -176,6 +176,14 @@
   .browser-icon {
     color: #4573d9;
     margin-right: 3px;
+    position: relative;
+    top: -1px;
+    width: 15px;
+    height: 15px;
+
+    &.fa-globe {
+      top: 0;
+    }
   }
 
   .dropdown-menu {

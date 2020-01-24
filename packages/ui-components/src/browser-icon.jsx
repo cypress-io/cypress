@@ -17,7 +17,7 @@ const BrowserIcon = ({ browserName }) => {
     return <img className='browser-icon' src={logoPath} />
   }
 
-  return <i className='browser-icon fas fa-globe' />
+  return <i className='browser-icon fas fa-fw fa-globe' />
 }
 
 export default BrowserIcon
