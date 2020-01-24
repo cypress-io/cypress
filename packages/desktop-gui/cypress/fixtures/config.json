@@ -28,6 +28,30 @@
       "majorVersion": "80"
     },
     {
+      "name": "edge",
+      "displayName": "Edge",
+      "family": "chrome",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "majorVersion": "79"
+    },
+    {
+      "name": "edgeCanary",
+      "displayName": "Edge Canary",
+      "family": "chrome",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "majorVersion": "79"
+    },
+    {
+      "name": "edgeDev",
+      "displayName": "Edge Dev",
+      "family": "chrome",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "majorVersion": "79"
+    },
+    {
       "name": "electron",
       "displayName": "Electron",
       "family": "electron",
