@@ -83,6 +83,11 @@ describe('src/cy/commands/actions/type', () => {
       })
     })
 
+    it('types in readonly if force is enabled', () => {
+      cy.get('#readonly-attr').type('foo', { force: true })
+      .should('have.value', 'foo')
+    })
+
     it('appends subsequent type commands', () => {
       cy
       .get('input:first').type('123')
