@@ -11,10 +11,18 @@ const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
-interface RequestOptionsWithProxy extends http.RequestOptions {
+type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
   shouldRetry?: boolean
 }
+
+type RequestOptionsWithProxy = WithProxyOpts<http.RequestOptions>
+
+type HttpsRequestOptions = https.RequestOptions & {
+  minVersion?: 'TLSv1'
+}
+
+type HttpsRequestOptionsWithProxy = WithProxyOpts<HttpsRequestOptions>
 
 type FamilyCache = {
   [host: string]: 4 | 6
@@ -253,14 +261,18 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  createConnection (options: http.RequestOptions, cb: http.SocketCallback) {
+  createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
+    // allow requests to use older TLS versions
+    // https://github.com/cypress-io/cypress/issues/5446
+    options.minVersion = 'TLSv1'
+
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
       if (proxy) {
         options.proxy = <string>proxy
 
-        return this.createUpstreamProxyConnection(<RequestOptionsWithProxy>options, cb)
+        return this.createUpstreamProxyConnection(<HttpsRequestOptionsWithProxy>options, cb)
       }
     }
 
@@ -268,7 +280,7 @@ class HttpsAgent extends https.Agent {
     cb(null, super.createConnection(options))
   }
 
-  createUpstreamProxyConnection (options: RequestOptionsWithProxy, cb: http.SocketCallback) {
+  createUpstreamProxyConnection (options: HttpsRequestOptionsWithProxy, cb: http.SocketCallback) {
     // heavily inspired by
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
