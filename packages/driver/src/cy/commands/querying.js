@@ -617,30 +617,119 @@ module.exports = (Commands, Cypress, cy) => {
 
       return subject
     },
-  })
+    shadow (subject, selector, options) {
+      const ctx = this
 
-  Commands.add('shadow', {prevSubject: ['element']}, getFromShadow = (subject, selector, options) => {
-    Cypress.log({
-      el: subject,
-      name: 'Shadow',
-      message: selector,
-      consoleProps: () => { return {selector}}
-    })
-
-    function findInShadow() {
-      let results = Cypress.$()
-      let i = 0
-
-      while (subject[i]) {
-        results = results.add(Cypress.$(subject[i].shadowRoot).find(selector))
-        i++
+      if (_.isUndefined(selector)) {
+        selector = options
+        options = {}
       }
 
-      return cy.verifyUpcomingAssertions(results, options, {
-        onRetry: findInShadow
-      })
-    }
+      if (_.isUndefined(options)) {
+        options = {}
+      }
 
-    return findInShadow()
+      _.defaults(options, { log: true })
+
+      if (options.log) {
+        options._log = Cypress.log()
+      }
+
+      const consoleProps = {}
+      const log = ($el) => {
+        if (options.log === false) {
+          return
+        }
+
+        options._log.set({
+          $el,
+          consoleProps () {
+            return consoleProps
+          },
+        })
+      }
+
+      if (!_.isString(selector)) {
+        $utils.throwErrByPath('within.invalid_argument', { onFail: options._log })
+      }
+
+      const setEl = ($el) => {
+        if (options.log === false) {
+          return
+        }
+
+        consoleProps.Yielded = $dom.getElements($el)
+        consoleProps.Elements = $el != null ? $el.length : undefined
+
+        options._log.set({ $el })
+      }
+
+      const getElements = () => {
+        // attempt to query for the elements by withinSubject context
+        // and catch any sizzle errors!
+        let $el = cy.$$()
+
+        try {
+          let i = 0
+
+          // Walk over all subjects to search within the shadowRoot
+          while (subject[i]) {
+            $el = $el.add(Cypress.$(subject[i].shadowRoot).find(selector))
+            i++
+          }
+
+          // jQuery v3 has removed its deprecated properties like ".selector"
+          // https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
+          // but our error messages use this property to actually show the missing element
+          // so let's put it back
+          if ($el.selector == null) {
+            $el.selector = selector
+          }
+        } catch (e) {
+          e.onFail = () => {
+            if (options.log === false) {
+              return e
+            }
+
+            options._log.error(e)
+          }
+
+          throw e
+        }
+
+        // store the $el now in case we fail
+        setEl($el)
+
+        // allow retry to be a function which we ensure
+        // returns truthy before returning its
+        if (_.isFunction(options.onRetry)) {
+          const ret = options.onRetry.call(ctx, $el)
+
+          if (ret) {
+            log($el)
+
+            return ret
+          }
+        } else {
+          log($el)
+
+          return $el
+        }
+      }
+
+      const resolveElements = () => {
+        return Promise.try(getElements).then(($el) => {
+          if (options.verify === false) {
+            return $el
+          }
+
+          return cy.verifyUpcomingAssertions($el, options, {
+            onRetry: resolveElements,
+          })
+        })
+      }
+
+      return resolveElements()
+    },
   })
 }

@@ -84,7 +84,6 @@ const isHidden = (el, name = 'isHidden()') => {
     return isHidden($el.offsetParent())
   }
 
-
   // else check if el is outside the bounds
   // of its ancestors overflow
   return elIsOutOfBoundsOfAncestorsOverflow($el)
