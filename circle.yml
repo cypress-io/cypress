@@ -75,10 +75,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - unless:
-          condition: <<parameters.browser>>
-          steps:
-            - install-latest-chrome
+      - install-latest-chrome
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
