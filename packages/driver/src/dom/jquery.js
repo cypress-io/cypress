@@ -3,6 +3,10 @@ const _ = require('lodash')
 
 // Check if element contains a child element
 const contains = (doc, obj) => {
+  if (!doc || !obj) {
+    return false
+  }
+
   // offsetParent works with shadowDom (parent is in dom)
   return $.contains(doc, obj) || $.contains(doc, obj.offsetParent)
 }
