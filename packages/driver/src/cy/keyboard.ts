@@ -243,7 +243,7 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
   const noneSelected = bounds.start === bounds.end
 
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
-    if ($elements.isReadOnlyInputOrTextarea(el)) {
+    if ($elements.isReadOnlyInputOrTextarea(el) && !options.force) {
       return false
     }
 
