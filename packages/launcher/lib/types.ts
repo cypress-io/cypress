@@ -3,7 +3,9 @@ import * as Bluebird from 'bluebird'
 
 export type BrowserName = 'chrome' | 'chromium' | 'canary' | string
 
-export type BrowserFamily = 'chrome' | 'electron'
+export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | string
+
+export type BrowserFamily = 'chromium'
 
 export type PlatformName = 'darwin' | 'linux' | 'win32'
 
@@ -13,8 +15,11 @@ export type PlatformName = 'darwin' | 'linux' | 'win32'
 export type Browser = {
   /** short browser name */
   name: BrowserName
+  /** family is used to describe the underlying type of the browsr */
   family: BrowserFamily
-  /** Optional display name */
+  /** channel describes the stability of this browser **/
+  channel: BrowserChannel
+  /** Display name */
   displayName: string
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
   versionRegex: RegExp
@@ -27,11 +32,10 @@ export type Browser = {
  * Represents a real browser that exists on the user's system.
  */
 export type FoundBrowser = Browser & {
-  name: string
   path: string
   version: string
   majorVersion?: string
-  /** user-supplied browser? */
+  /** is this a user-supplied browser? */
   custom?: boolean
   /** optional info that will be shown in the GUI */
   info?: string
