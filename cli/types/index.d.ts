@@ -65,6 +65,7 @@ declare namespace Cypress {
   /**
    * Describes a browser Cypress can control
    */
+  // TODO in this PR: update this
   interface Browser {
     name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
     displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
