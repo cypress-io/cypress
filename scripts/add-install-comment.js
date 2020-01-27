@@ -52,28 +52,13 @@ const preamble = stripIndent`
   You will need to use custom \`CYPRESS_INSTALL_BINARY\` url and install Cypress using an url instead of the version.
 `
 
-const getLinuxInstallMessage = () => {
+const getInstallMessage = () => {
   return stripIndent`
     ${preamble}
 
     export CYPRESS_INSTALL_BINARY=${binary}
     npm install ${npm}
   `
-}
-
-const getWindowsInstallMessage = () => {
-  return stripIndent`
-    ${preamble}
-
-    set CYPRESS_INSTALL_BINARY=${binary}
-    npm install ${binary}
-  `
-}
-
-const getInstallMessage = () => {
-  return platform === 'win32'
-    ? getWindowsInstallMessage()
-    : getLinuxInstallMessage()
 }
 
 addCommitComment({
