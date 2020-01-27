@@ -26,7 +26,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  return branch === 'issue-5477-replace-npm-with-yarn' || shouldForceBinaryBuild
+  return branch === 'develop' || shouldForceBinaryBuild
 }
 
 const isForkedPullRequest = () => {

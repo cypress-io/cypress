@@ -2,7 +2,6 @@ branches:
   only:
     - master
     - develop
-    - issue-5477-replace-npm-with-yarn
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
