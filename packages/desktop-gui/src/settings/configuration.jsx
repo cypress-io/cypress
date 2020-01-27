@@ -1,5 +1,4 @@
 import _ from 'lodash'
-import { defaultTo, get, flow, isEmpty, join, map, reduce, take, toPairs, toPath } from 'lodash/fp'
 import cn from 'classnames'
 import { observer } from 'mobx-react'
 import React from 'react'
@@ -8,23 +7,22 @@ import { ObjectInspector, ObjectName } from 'react-inspector'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
-const joinWithCommas = join(', ')
-const objToString = (v) => flow([
-  defaultTo(v.name),
-  defaultTo(_.isObject(v) ? joinWithCommas(Object.keys(v)) : undefined),
-  defaultTo(String(v)),
-])(v.displayName)
+const valueToString = (value) => {
+  return (
+    value.displayName ||
+    value.name ||
+    (_.isObject(value) && _.keys(value).join(', ')) ||
+    String(value)
+  )
+}
 
 const formatValue = (value) => {
   if (Array.isArray(value)) {
-    return flow([
-      map(objToString),
-      joinWithCommas,
-    ])(value)
+    return _.map(value, valueToString).join(', ')
   }
 
   if (_.isObject(value)) {
-    return objToString(value)
+    return valueToString(value)
   }
 
   const excludedFromQuotations = ['null', 'undefined']
@@ -36,20 +34,18 @@ const formatValue = (value) => {
   return String(value)
 }
 
-const normalizeWithoutMeta = flow([
-  defaultTo({}),
-  toPairs,
-  reduce((acc, [key, value]) => _.merge({}, acc, {
+const normalizeWithoutMeta = (value = {}) => {
+  const pairs = _.toPairs(value)
+  const values = _.reduce(pairs, (acc, [key, value]) => _.merge({}, acc, {
     [key]: value ? value.value : {},
-  }), {}),
-  (v) => {
-    if (isEmpty(v)) {
-      return null
-    }
+  }), {})
 
-    return v
-  },
-])
+  if (_.isEmpty(values)) {
+    return null
+  }
+
+  return values
+}
 
 const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
   const formattedData = formatValue(data)
@@ -87,17 +83,12 @@ ObjectLabel.defaultProps = {
 
 const computeFromValue = (obj, name, path) => {
   const normalizedPath = path.replace('$.', '').replace(name, `['${name}']`)
-  const getValueForPath = flow([
-    toPath,
-    _.partialRight(get, obj),
-  ])
-
-  let value = getValueForPath(normalizedPath)
+  let value = _.get(obj, normalizedPath)
 
   if (!value) {
-    const onlyFirstKeyInPath = flow([toPath, take(1)])
+    const firstKeyInPath = _.toPath(normalizedPath)[0]
 
-    value = getValueForPath(onlyFirstKeyInPath(normalizedPath))
+    value = _.get(obj, firstKeyInPath)
   }
 
   if (!value) {
