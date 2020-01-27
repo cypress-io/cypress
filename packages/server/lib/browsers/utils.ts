@@ -121,7 +121,7 @@ export = {
       }
 
       // the internal version of Electron, which won't be detected by `launcher`
-      debug('adding Electron browser with version %s', version)
+      debug('adding Electron browser %o', electronBrowser)
 
       return browsers.concat(electronBrowser)
     })

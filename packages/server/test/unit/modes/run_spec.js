@@ -171,7 +171,7 @@ describe('lib/modes/run', () => {
 
       const browser = {
         name: 'electron',
-        family: 'electron',
+        family: 'chromium',
         isHeaded: false,
       }
 
@@ -632,7 +632,7 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('disables video recording on interactive mode runs', () => {
+    it('disables video recording on headed runs', () => {
       return runMode.run({ headed: true })
       .then(() => {
         expect(errors.warning).to.be.calledWith('CANNOT_RECORD_VIDEO_HEADED')
@@ -683,7 +683,7 @@ describe('lib/modes/run', () => {
         name: 'fooBrowser',
         path: 'path/to/browser',
         version: '777',
-        family: 'electron',
+        family: 'chromium',
       })
 
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
@@ -748,7 +748,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes headed to openProject.launch', () => {
-      const browser = { name: 'electron', family: 'electron' }
+      const browser = { name: 'electron', family: 'chromium' }
 
       browsers.ensureAndGetByNameOrPath.resolves(browser)
 
