@@ -1,7 +1,7 @@
 branches:
   only:
     - master
-    - fix-win-install-message
+    - develop
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

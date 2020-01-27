@@ -26,7 +26,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  return branch === 'fix-win-install-message' || shouldForceBinaryBuild
+  return branch === 'develop' || shouldForceBinaryBuild
 }
 
 const isForkedPullRequest = () => {
