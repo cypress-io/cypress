@@ -23,7 +23,7 @@ export type Browser = {
   displayName: string
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
   versionRegex: RegExp
-  profile: boolean
+  profile?: boolean
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
   binary: string | string[]
 }
@@ -31,7 +31,7 @@ export type Browser = {
 /**
  * Represents a real browser that exists on the user's system.
  */
-export type FoundBrowser = Browser & {
+export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary'> & {
   path: string
   version: string
   majorVersion?: string
