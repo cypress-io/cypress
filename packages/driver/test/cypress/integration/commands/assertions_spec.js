@@ -310,7 +310,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws when should(\'have.length\') isnt a number', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('You must provide a valid number to a length assertion. You passed: \'asdf\'')
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
           done()
         })
@@ -463,7 +463,7 @@ describe('src/cy/commands/assertions', () => {
           // when we check for the element to be detached
           // it never actually runs the assertion
           expect(names).to.deep.eq(['get', 'click'])
-          expect(err.message).to.include('cy.should() failed because this element is detached')
+          expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
         })
@@ -487,7 +487,7 @@ describe('src/cy/commands/assertions', () => {
 
           // should is present here due to the retry
           expect(names).to.deep.eq(['get', 'click', 'assert'])
-          expect(err.message).to.include('cy.should() failed because this element is detached')
+          expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
         })
@@ -504,7 +504,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(3)
-          expect(err.message).to.eq('You must provide a valid number to a length assertion. You passed: \'foo\'')
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `foo`')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -560,7 +560,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('\'match\' requires its argument be a \'RegExp\'. You passed: \'foo\'')
+          expect(err.message).to.eq('`match` requires its argument be a `RegExp`. You passed: `foo`')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -1151,12 +1151,12 @@ describe('src/cy/commands/assertions', () => {
           expect('foo').to.match('foo')
         }
 
-        expect(fn).to.throw('\'match\' requires its argument be a \'RegExp\'. You passed: \'foo\'')
+        expect(fn).to.throw('`match` requires its argument be a `RegExp`. You passed: `foo`')
       })
 
       it('throws with cy.should', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('\'match\' requires its argument be a \'RegExp\'. You passed: \'bar\'')
+          expect(err.message).to.eq('`match` requires its argument be a `RegExp`. You passed: `bar`')
 
           done()
         })
@@ -1770,13 +1770,7 @@ describe('src/cy/commands/assertions', () => {
           const l6 = this.logs[5]
 
           // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.eq(
-            `\
-expected '<div>' to be 'visible'
-
-This element '<div>' is not visible because it has CSS property: 'display: none'\
-`
-          )
+          expect(l6.get('error').message).to.eq(`expected '<div>' to be 'visible'\n\nThis element \`<div>\` is not visible because it has CSS property: \`display: none\``)
         }
       })
 

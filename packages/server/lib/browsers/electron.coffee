@@ -9,7 +9,7 @@ Windows       = require("../gui/windows")
 appData       = require("../util/app_data")
 { CdpAutomation } = require("./cdp_automation")
 plugins       = require("../plugins")
-savedState    = require("../saved_state")
+savedState = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 
 ## additional events that are nice to know about to be logged
@@ -210,7 +210,7 @@ module.exports = {
 
     debug("open %o", { browser, url })
 
-    savedState(projectRoot, isTextTerminal)
+    savedState.create(projectRoot, isTextTerminal)
     .then (state) ->
       state.get()
     .then (state) =>

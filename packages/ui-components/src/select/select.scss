@@ -1,0 +1,42 @@
+.select-item {
+  border-radius: 3px;
+  border: solid 2px transparent;
+  cursor: pointer;
+  margin: 0.2em 0;
+  padding: 0.2em 0.4em;
+
+  label {
+    cursor: pointer;
+  }
+
+  .select-item-indicator {
+    @extend .far;
+    @extend .#{$fa-css-prefix}-circle;
+    color: #999;
+    margin-right: 0.5em;
+    position: relative;
+    top: 3px;
+  }
+
+  &:hover,
+  &:focus {
+    background: #fff;
+
+    .select-item-indicator {
+      @extend .fas;
+      @extend .#{$fa-css-prefix}-circle;
+      color: #999;
+    }
+  }
+
+  &.is-selected {
+    background: #fff;
+    border-color: #08c18d;
+
+    .select-item-indicator {
+      @extend .fas;
+      @extend .#{$fa-css-prefix}-circle;
+      color: #08c18d;
+    }
+  }
+}

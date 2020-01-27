@@ -113,7 +113,7 @@ describe('gui/interactive', () => {
       sinon.stub(Windows, 'open').resolves(this.win)
       sinon.stub(Windows, 'trackState')
 
-      const state = savedState()
+      const state = savedState.create()
 
       sinon.stub(state, 'get').resolves(this.state)
     })

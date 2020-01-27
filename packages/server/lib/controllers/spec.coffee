@@ -1,5 +1,6 @@
 debug = require("debug")("cypress:server:controllers:spec")
 Promise = require("bluebird")
+fs = require("../util/fs")
 errors = require("../errors")
 preprocessor = require("../plugins/preprocessor")
 

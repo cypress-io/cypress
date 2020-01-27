@@ -16,15 +16,15 @@ const noTestsError = (specPath: string) => ({
   message: 'We could not detect any tests in the above file. Write some tests and re-run.',
 })
 
-const RunnablesList = observer(({ runnables }) => (
+const RunnablesList = observer(({ runnables, config }) => (
   <div className='wrap'>
     <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} config={config} />)}
     </ul>
   </div>
 ))
 
-function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
+function content ({ isReady, runnables }: RunnablesStore, specPath: string, config: object, error?: Error) {
   if (!isReady) return null
 
   // show error if there are no tests, but only if there
@@ -33,7 +33,7 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, erro
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
+  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} config={config} />
 }
 
 interface RunnablesProps {
@@ -42,16 +42,17 @@ interface RunnablesProps {
   specPath: string
   scroller: Scroller
   appState?: AppState
+  config: object
 }
 
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, specPath } = this.props
+    const { error, runnablesStore, specPath, config } = this.props
 
     return (
       <div ref='container' className='container'>
-        {content(runnablesStore, specPath, error)}
+        {content(runnablesStore, specPath, config, error)}
       </div>
     )
   }

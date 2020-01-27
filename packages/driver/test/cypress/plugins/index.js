@@ -9,7 +9,10 @@ const webpack = require('@cypress/webpack-preprocessor')
 
 const webpackOptions = require('@packages/runner/webpack.config.ts').default
 
-module.exports = (on, config) => {
+// get rid of prismjs plugin. the driver doesn't need it
+webpackOptions.module.rules[1].use.options.plugins.pop()
+
+module.exports = (on) => {
   on('file:preprocessor', webpack({ webpackOptions }))
 
   on('task', {

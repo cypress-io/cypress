@@ -5,6 +5,7 @@ const Promise = require('bluebird')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 const $Chai = require('../cy/chai')
 const $Xhrs = require('../cy/xhrs')
 const $jQuery = require('../cy/jquery')
@@ -104,9 +105,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const warnMixingPromisesAndCommands = function () {
     const title = state('runnable').fullTitle()
 
-    const msg = $utils.errMessageByPath('miscellaneous.mixing_promises_and_commands', title)
-
-    return $utils.warning(msg)
+    $errUtils.warnByPath('miscellaneous.mixing_promises_and_commands', {
+      args: { title },
+    })
   }
 
   const $$ = function (selector, context) {
@@ -132,7 +133,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create()
 
-  const { expect } = $Chai.create(specWindow, assertions.assert)
+  const { expect } = $Chai.create(specWindow, config, assertions.assert)
 
   const xhrs = $Xhrs.create(state)
   const aliases = $Aliases.create(state)
@@ -362,7 +363,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       if (!(!enqueuedCmd || !isPromiseLike(ret))) {
-        return $utils.throwErrByPath(
+        return $errUtils.throwErrByPath(
           'miscellaneous.command_returned_promise_and_commands', {
             args: {
               current: command.get('name'),
@@ -383,7 +384,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         // if we got a return value and we enqueued
         // a new command and we didn't return cy
         // or an undefined value then throw
-        return $utils.throwErrByPath(
+        return $errUtils.throwErrByPath(
           'miscellaneous.returned_value_and_commands_from_custom_command', {
             args: {
               current: command.get('name'),
@@ -452,6 +453,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // and set the subject
       // TODO DRY THIS LOGIC UP
       if (command && command.get('skip')) {
+        if (command.is('assertion')) {
+          state('assertionStack', command.get('invocationStack'))
+        }
+
         // must set prev + next since other
         // operations depend on this state being correct
         command.set({ prev: queue.at(index - 1), next: queue.at(index + 1) })
@@ -599,7 +604,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       if (prevSubject && ((needle = 'optional', ![].concat(prevSubject).includes(needle)))) {
         const stringifiedArg = $utils.stringifyActual(args[0])
 
-        $utils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
+        $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
           args: {
             cmd: name,
             args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
@@ -672,10 +677,39 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return state('index', queue.length)
   }
 
-  const fail = function (err, runnable) {
+  const getInvocationStack = (err) => {
+    const current = state('current')
+    const currentName = current && current.get('name')
+
+    if (err.stack && (
+      // cy.then will not error on its own, but will have an
+      // invocation stack, so we need to prefer the actual error's stack
+      (currentName === 'then') ||
+      // cy.should does not register as the current command at all
+      // so we ignore the current command's invocation stack if cy.should
+      // is used with a callback
+      (current && current.get('followedByShouldCallback')) ||
+      // calling a custom command gets set as current, so if it's just wrapping
+      // an assertion or a synchronous error occurs, we prefer that
+      (current && current.get('isCustom'))
+    )) {
+      return err.stack
+    }
+
+    // cy.should without a callback will assign its invocation stack to the
+    // current command since it does not register as the current command itself
+    const currentAssertion = current && current.get('currentAssertion')
+    const withInvocationStack = currentAssertion || current
+
+    return withInvocationStack && withInvocationStack.get('invocationStack')
+  }
+
+  const fail = (err) => {
     let rets
 
     stopped = true
+
+    // TODO: move a bunch of the below into error utils
 
     let stack = err.stack || ''
 
@@ -696,6 +730,16 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     // reset stack by replacing the original first line
     // with the new one
     err.stack = stack.replace(str, err.toString())
+
+    const invocationStack = getInvocationStack(err)
+
+    err = $errUtils.enhanceStack({
+      err,
+      stack: invocationStack || err.stack,
+      projectRoot: config('projectRoot'),
+    })
+
+    err = $errUtils.processErr(err, config)
 
     // store the error on state now
     state('error', err)
@@ -734,6 +778,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // collect all of the callbacks for 'fail'
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
+      // TODO: move into error utils
       const e = err2
       const errString = e.toString()
       const errStack = e.stack
@@ -747,7 +792,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     }
 
     // bail if we had callbacks attached
-    if (rets.length) {
+    if (rets && rets.length) {
       return
     }
 
@@ -953,7 +998,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return $Chainer.add(name, fn)
     },
 
-    addCommand ({ name, fn, type, prevSubject }) {
+    addCommand ({ name, fn, type, prevSubject, isCustom }) {
       // TODO: prob don't need this anymore
       commandFns[name] = fn
 
@@ -983,13 +1028,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
+        const invocationStack = specWindow.__getSpecFrameStack('command invocation stack')
         let ret
 
         ensures.ensureRunnable(name)
 
         // this is the first call on cypress
         // so create a new chainer instance
-        const chain = $Chainer.create(name, args)
+        const chain = $Chainer.create(name, invocationStack, specWindow, args)
 
         // store the chain so we can access it later
         state('chain', chain)
@@ -1006,7 +1052,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
           // if this is a custom promise
           if (isPromiseLike(ret) && noArgsAreAFunction(current.get('args'))) {
-            $utils.throwErrByPath(
+            $errUtils.throwErrByPath(
               'miscellaneous.command_returned_promise_and_commands', {
                 args: {
                   current: current.get('name'),
@@ -1030,7 +1076,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         return chain
       }
 
-      return cy.addChainer(name, (chainer, args) => {
+      return cy.addChainer(name, (chainer, invocationStack, args) => {
         const { firstCall, chainerId } = chainer
 
         // dont enqueue / inject any new commands if
@@ -1048,6 +1094,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           args,
           type,
           chainerId,
+          invocationStack,
+          isCustom,
           fn: wrap(firstCall),
         })
 
@@ -1275,25 +1323,25 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
             state('done', done)
           }
 
-          let ret = fn.apply(this, arguments)
+          let returned = fn.apply(this, arguments)
 
           // if we returned a value from fn
           // and enqueued some new commands
           // and the value isnt currently cy
           // or a promise
-          if (ret &&
+          if (returned &&
             (queue.length > currentLength) &&
-              (!isCy(ret)) &&
-                (!isPromiseLike(ret))) {
+              (!isCy(returned)) &&
+                (!isPromiseLike(returned))) {
             // TODO: clean this up in the utility function
             // to conditionally stringify functions
-            ret = _.isFunction(ret) ?
-              ret.toString()
+            returned = _.isFunction(returned) ?
+              returned.toString()
               :
-              $utils.stringify(ret)
+              $utils.stringify(returned)
 
-            $utils.throwErrByPath('miscellaneous.returned_value_and_commands', {
-              args: ret,
+            $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands', {
+              args: { returned },
             })
           }
 
@@ -1305,12 +1353,12 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // due to overspecifying a resolution.
           // in those cases we need to remove
           // returning a promise
-          if (fn.length && ret && ret.catch) {
-            ret = ret.catch(done)
+          if (fn.length && returned && returned.catch) {
+            returned = returned.catch(done)
           }
 
           // if we returned a promise like object
-          if ((!isCy(ret)) && isPromiseLike(ret)) {
+          if ((!isCy(returned)) && isPromiseLike(returned)) {
             // indicate we've returned a custom promise
             state('returnedCustomPromise', true)
 
@@ -1321,18 +1369,18 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               warnMixingPromisesAndCommands()
             }
 
-            return ret
+            return returned
           }
 
           // if we're cy or we've enqueued commands
-          if (isCy(ret) || (queue.length > currentLength)) {
+          if (isCy(returned) || (queue.length > currentLength)) {
             // the run should already be kicked off
             // by now and return this promise
             return state('promise')
           }
 
           // else just return ret
-          return ret
+          return returned
         } catch (error) {
           // if our runnable.fn throw synchronously
           // then it didnt fail from a cypress command
@@ -1349,7 +1397,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   _.each(privateProps, (obj, key) => {
     return Object.defineProperty(cy, key, {
       get () {
-        return $utils.throwErrByPath('miscellaneous.private_property', {
+        return $errUtils.throwErrByPath('miscellaneous.private_property', {
           args: obj,
         })
       },

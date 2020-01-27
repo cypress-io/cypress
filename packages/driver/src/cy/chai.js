@@ -8,6 +8,7 @@ const sinonChai = require('@cypress/sinon-chai')
 
 const $dom = require('../dom')
 const $utils = require('../cypress/utils')
+const $errUtils = require('../cypress/error_utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 const chaiInspect = require('./chai/inspect')
 
@@ -48,8 +49,8 @@ chai.use((chai, u) => {
 
   $chaiJquery(chai, chaiUtils, {
     onInvalid (method, obj) {
-      const err = $utils.cypressErr(
-        $utils.errMessageByPath(
+      const err = $errUtils.cypressErr(
+        $errUtils.errMsgByPath(
           'chai.invalid_jquery_obj', {
             assertion: method,
             subject: $utils.stringifyActual(obj),
@@ -196,8 +197,8 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideChaiAsserts = function (assertFn) {
-    chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
+  const overrideChaiAsserts = function (specWindow, config, assertFn) {
+    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, config, assertFn)
 
     const _origGetmessage = function (obj, args) {
       const negate = chaiUtils.flag(obj, 'negate')
@@ -251,7 +252,7 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const err = $utils.cypressErr($utils.errMessageByPath('chai.match_invalid_argument', { regExp }))
+        const err = $errUtils.cypressErr($errUtils.errMsgByPath('chai.match_invalid_argument', { regExp }))
 
         err.retry = false
         throw err
@@ -338,11 +339,11 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.displayMessage = getLongLengthMessage(obj.length, length)
+              e1.message = getLongLengthMessage(obj.length, length)
               throw e1
             }
 
-            const e2 = $utils.cypressErr($utils.errMessageByPath('chai.length_invalid_argument', { length }))
+            const e2 = $errUtils.cypressErr($errUtils.errMsgByPath('chai.length_invalid_argument', { length }))
 
             e2.retry = false
             throw e2
@@ -395,10 +396,10 @@ chai.use((chai, u) => {
                 return `Expected ${node} not to exist in the DOM, but it was continuously found.`
               }
 
-              return `Expected to find element: '${obj.selector}', but never found it.`
+              return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.displayMessage = getLongExistsMessage(obj)
+            e1.message = getLongExistsMessage(obj)
             throw e1
           }
         }
@@ -406,7 +407,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const createPatchedAssert = (assertFn) => {
+  const createPatchedAssert = (specWindow, config, assertFn) => {
     return (function (...args) {
       let err
       const passed = chaiUtils.test(this, args)
@@ -429,6 +430,12 @@ chai.use((chai, u) => {
       assertFn(passed, message, value, actual, expected, err)
 
       if (err) {
+        err = $errUtils.enhanceStack({
+          err,
+          stack: specWindow.__getSpecFrameStack('assertion invocation stack'),
+          projectRoot: config('projectRoot'),
+        })
+
         throw err
       }
     })
@@ -475,13 +482,13 @@ chai.use((chai, u) => {
     }
   }
 
-  const create = function (specWindow, assertFn) {
+  const create = function (specWindow, config, assertFn) {
     // restoreOverrides()
     restoreAsserts()
 
     overrideChaiInspect()
     overrideChaiObjDisplay()
-    overrideChaiAsserts(assertFn)
+    overrideChaiAsserts(specWindow, config, assertFn)
 
     return setSpecWindowGlobals(specWindow)
   }

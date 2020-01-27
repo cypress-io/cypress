@@ -468,7 +468,7 @@ class Project extends EE {
 
     const newState = _.merge({}, this.cfg.state, stateChanges)
 
-    return savedState(this.projectRoot, this.cfg.isTextTerminal)
+    return savedState.create(this.projectRoot, this.cfg.isTextTerminal)
     .then((state) => state.set(newState))
     .then(() => {
       this.cfg.state = newState
@@ -480,7 +480,7 @@ class Project extends EE {
   _setSavedState (cfg) {
     debug('get saved state')
 
-    return savedState(this.projectRoot, cfg.isTextTerminal)
+    return savedState.create(this.projectRoot, cfg.isTextTerminal)
     .then((state) => state.get())
     .then((state) => {
       cfg.state = state

@@ -30,6 +30,8 @@ const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const browserInfo = require('./cypress/browser')
+const $errUtils = require('./cypress/error_utils')
+const $scriptUtils = require('./cypress/script_utils')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
@@ -38,7 +40,7 @@ const proxies = {
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
-    $utils.throwErrByPath('miscellaneous.no_cy')
+    $errUtils.throwErrByPath('miscellaneous.no_cy')
   }
 
   return this.cy.$$.apply(this.cy, args)
@@ -49,10 +51,10 @@ _.extend(jqueryProxyFn, $)
 // provide the old interface and
 // throw a deprecation message
 $Log.command = () => {
-  return $utils.throwErrByPath('miscellaneous.command_log_renamed')
+  return $errUtils.throwErrByPath('miscellaneous.command_log_renamed')
 }
 
-const throwDeprecatedCommandInterface = (key, method) => {
+const throwDeprecatedCommandInterface = (key = 'commandName', method) => {
   let signature = ''
 
   switch (method) {
@@ -69,13 +71,13 @@ const throwDeprecatedCommandInterface = (key, method) => {
       break
   }
 
-  $utils.throwErrByPath('miscellaneous.custom_command_interface_changed', {
+  $errUtils.throwErrByPath('miscellaneous.custom_command_interface_changed', {
     args: { method, signature },
   })
 }
 
 const throwPrivateCommandInterface = (method) => {
-  $utils.throwErrByPath('miscellaneous.private_custom_command_interface', {
+  $errUtils.throwErrByPath('miscellaneous.private_custom_command_interface', {
     args: { method },
   })
 }
@@ -88,6 +90,8 @@ class $Cypress {
     this.runner = null
     this.Commands = null
     this._RESUMED_AT_TEST = null
+    this.$autIframe = null
+    this.onSpecReady = null
 
     this.events = $Events.extend(this)
 
@@ -167,17 +171,14 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ($autIframe) {
-    // push down the options
-    // to the runner
-    this.mocha.options(this.runner)
-
-    return this.cy.initialize($autIframe)
+  initialize ({ $autIframe, onSpecReady }) {
+    this.$autIframe = $autIframe
+    this.onSpecReady = onSpecReady
   }
 
   run (fn) {
     if (!this.runner) {
-      $utils.throwErrByPath('miscellaneous.no_runner')
+      $errUtils.throwErrByPath('miscellaneous.no_runner')
     }
 
     return this.runner.run(fn)
@@ -188,7 +189,7 @@ class $Cypress {
   // specs or support files have been downloaded
   // or parsed. we have not received any custom commands
   // at this point
-  onSpecWindow (specWindow) {
+  onSpecWindow (specWindow, scripts) {
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
@@ -207,6 +208,19 @@ class $Cypress {
     this.events.proxyTo(this.cy)
 
     $FirefoxForcedGc.install(this)
+
+    $scriptUtils.runScripts(specWindow, scripts)
+    .catch((err) => {
+      this.runner.onScriptError(err)
+    })
+    .then(() => {
+      // push down the options to the runner
+      this.mocha.options(this.runner)
+
+      this.cy.initialize(this.$autIframe)
+
+      this.onSpecReady()
+    })
 
     return null
   }
@@ -505,7 +519,7 @@ class $Cypress {
           // attaching long stace traces
           // which otherwise make this err
           // unusably long
-          const err = $utils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.__stackCleaned__ = true
           err.backend = true
@@ -527,7 +541,7 @@ class $Cypress {
         const e = reply.error
 
         if (e) {
-          const err = $utils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.automation = true
 

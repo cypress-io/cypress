@@ -8,21 +8,17 @@
     <script type="text/javascript">
       document.domain = '{{domain}}';
 
+      window.__getSpecFrameStack = function (message) {
+        return (new Error(message)).stack
+      };
+
       (function(parent) {
         var Cypress = window.Cypress = parent.Cypress;
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.onSpecWindow(window);
+        return Cypress.onSpecWindow(window, {{scripts | safe}});
       })(window.opener || window.parent);
     </script>
-
-    {{each(options.javascripts)}}
-      <script type="text/javascript" src="{{@this}}"></script>
-    {{/each}}
-
-    {{each(options.specs)}}
-      <script type="text/javascript" src="{{@this}}"></script>
-    {{/each}}
   </body>
 </html>

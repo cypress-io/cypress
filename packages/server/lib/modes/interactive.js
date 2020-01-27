@@ -92,7 +92,7 @@ module.exports = {
       },
     })
 
-    return savedState(projectRoot, false)
+    return savedState.create(projectRoot, false)
     .then((state) => {
       return state.get()
     })

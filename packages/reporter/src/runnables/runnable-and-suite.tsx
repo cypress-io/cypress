@@ -36,6 +36,7 @@ const Suite = observer(({ model }: SuiteProps) => {
 
 export interface RunnableProps {
   model: TestModel | SuiteModel
+  config?: object
 }
 
 @observer

@@ -8,7 +8,7 @@ BrowserWindow = require("electron").BrowserWindow
 debug         = require("debug")("cypress:server:windows")
 cwd           = require("../cwd")
 user          = require("../user")
-savedState    = require("../saved_state")
+savedState = require("../saved_state")
 
 windows               = {}
 recentlyCreatedWindow = false
@@ -229,7 +229,7 @@ module.exports = {
       newState[keys.height] = height
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectRoot, isTextTerminal)
+      savedState.create(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -241,7 +241,7 @@ module.exports = {
       newState = {}
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectRoot, isTextTerminal)
+      savedState.create(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -249,14 +249,14 @@ module.exports = {
     win.webContents.on "devtools-opened", ->
       newState = {}
       newState[keys.devTools] = true
-      savedState(projectRoot, isTextTerminal)
+      savedState.create(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 
     win.webContents.on "devtools-closed", ->
       newState = {}
       newState[keys.devTools] = false
-      savedState(projectRoot, isTextTerminal)
+      savedState.create(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 

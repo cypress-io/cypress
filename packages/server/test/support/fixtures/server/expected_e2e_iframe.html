@@ -8,16 +8,17 @@
     <script type="text/javascript">
       document.domain = 'localhost';
 
+      window.__getSpecFrameStack = function (message) {
+        return (new Error(message)).stack
+      };
+
       (function(parent) {
         var Cypress = window.Cypress = parent.Cypress;
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.onSpecWindow(window);
+        return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/e2e/cypress/support/commands.js","relative":"cypress/support/commands.js","relativeUrl":"/__cypress/tests?p=cypress/support/commands.js"},{"absolute":"/<path-to-project>/e2e/cypress/integration/app_spec.coffee","relative":"cypress/integration/app_spec.coffee","relativeUrl":"/__cypress/tests?p=cypress/integration/app_spec.coffee"}]);
       })(window.opener || window.parent);
     </script>
-
-      <script type="text/javascript" src="/__cypress/tests?p=cypress/support/commands.js-123"></script>
-      <script type="text/javascript" src="/__cypress/tests?p=cypress/integration/app_spec.coffee-123"></script>
   </body>
 </html>

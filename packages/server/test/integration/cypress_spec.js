@@ -44,7 +44,7 @@ const env = require(`${root}lib/util/env`)
 const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
-const { formStatePath } = require(`${root}lib/util/saved_state`)
+const { formStatePath } = require(`${root}lib/saved_state`)
 
 const TYPICAL_BROWSERS = [
   {

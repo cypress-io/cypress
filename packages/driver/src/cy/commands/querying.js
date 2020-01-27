@@ -3,7 +3,7 @@ const $ = require('jquery')
 const Promise = require('bluebird')
 
 const $dom = require('../../dom')
-const $utils = require('../../cypress/utils')
+const $errUtils = require('../../cypress/error_utils')
 
 const $expr = $.expr[':']
 
@@ -84,8 +84,8 @@ module.exports = (Commands, Cypress, cy) => {
     get (selector, options = {}) {
       const ctx = this
 
-      if ((options === null) || Array.isArray(options) || (typeof options !== 'object')) {
-        return $utils.throwErrByPath('get.invalid_options', {
+      if ((options === null) || _.isArray(options) || !_.isPlainObject(options)) {
+        return $errUtils.throwErrByPath('get.invalid_options', {
           args: { options },
         })
       }
@@ -410,11 +410,11 @@ module.exports = (Commands, Cypress, cy) => {
       _.defaults(options, { log: true })
 
       if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
-        $utils.throwErrByPath('contains.invalid_argument')
+        $errUtils.throwErrByPath('contains.invalid_argument')
       }
 
       if (_.isBlank(text)) {
-        $utils.throwErrByPath('contains.empty_string')
+        $errUtils.throwErrByPath('contains.empty_string')
       }
 
       const getPhrase = () => {
@@ -511,12 +511,12 @@ module.exports = (Commands, Cypress, cy) => {
               switch (err.type) {
                 case 'length':
                   if (err.expected > 1) {
-                    return $utils.throwErrByPath('contains.length_option', { onFail: options._log })
+                    return $errUtils.throwErrByPath('contains.length_option', { onFail: options._log })
                   }
 
                   break
                 case 'existence':
-                  return err.displayMessage = getErr(err)
+                  return err.message = getErr(err)
                 default:
                   break
               }
@@ -554,7 +554,7 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       if (!_.isFunction(fn)) {
-        $utils.throwErrByPath('within.invalid_argument', { onFail: options._log })
+        $errUtils.throwErrByPath('within.invalid_argument', { onFail: options._log })
       }
 
       // reference the next command after this

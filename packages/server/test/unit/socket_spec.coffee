@@ -14,7 +14,6 @@ Server       = require("#{root}lib/server")
 Automation   = require("#{root}lib/automation")
 exec         = require("#{root}lib/exec")
 firefoxUtil  = require("#{root}lib/browsers/firefox-util").default
-savedState   = require("#{root}lib/saved_state")
 preprocessor = require("#{root}lib/plugins/preprocessor")
 fs           = require("#{root}lib/util/fs")
 open         = require("#{root}lib/util/open")

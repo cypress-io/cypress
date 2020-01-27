@@ -1,8 +1,20 @@
-import commonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
+import webpack from 'webpack'
 
-const config: typeof commonConfig = {
-  ...commonConfig,
+const lessCommonConfig = getCommonConfig()
+
+// @ts-ignore
+lessCommonConfig.module.rules[1].use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
+  'languages': ['javascript'],
+  'plugins': ['line-numbers', 'line-highlight'],
+  'theme': 'default',
+  'css': false,
+}])
+
+// @ts-ignore
+const config: webpack.Configuration = {
+  ...lessCommonConfig,
   entry: {
     cypress_runner: [path.resolve(__dirname, 'src/index.js')],
   },

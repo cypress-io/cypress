@@ -7,6 +7,7 @@ const Pending = require('mocha/lib/pending')
 
 const $Log = require('./log')
 const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 
 const defaultGrepRe = /.*/
 const mochaCtxKeysRe = /^(_runnable|test)$/
@@ -16,7 +17,6 @@ const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
-const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
 const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file'.split(' ')
 
@@ -158,35 +158,20 @@ const setWallClockDuration = (test) => {
   return test.wallClockDuration = new Date() - test.wallClockStartedAt
 }
 
-const reduceProps = (obj, props) => {
-  return _.reduce(props, (memo, prop) => {
-    if (_.has(obj, prop) || (obj[prop] !== undefined)) {
-      memo[prop] = obj[prop]
-    }
-
-    return memo
-  }
-  , {})
-}
-
 // we need to optimize wrap by converting
 // tests to an id-based object which prevents
 // us from recursively iterating through every
 // parent since we could just return the found test
 const wrap = (runnable) => {
-  return reduceProps(runnable, RUNNABLE_PROPS)
+  return $utils.reduceProps(runnable, RUNNABLE_PROPS)
 }
 
 const wrapAll = (runnable) => {
   return _.extend(
     {},
-    reduceProps(runnable, RUNNABLE_PROPS),
-    reduceProps(runnable, RUNNABLE_LOGS)
+    $utils.reduceProps(runnable, RUNNABLE_PROPS),
+    $utils.reduceProps(runnable, RUNNABLE_LOGS)
   )
-}
-
-const wrapErr = (err) => {
-  return reduceProps(err, ERROR_PROPS)
 }
 
 const getHookName = function (hook) {
@@ -779,9 +764,9 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
 
       // append a friendly message to the error indicating
       // we're skipping the remaining tests in this suite
-      err = $utils.appendErrMsg(
+      err = $errUtils.appendErrMsg(
         err,
-        $utils.errMessageByPath('uncaught.error_in_hook', {
+        $errUtils.errMsgByPath('uncaught.error_in_hook', {
           parentTitle,
           hookName,
         })
@@ -790,7 +775,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
 
     // always set runnable err so we can tap into
     // taking a screenshot on error
-    runnable.err = wrapErr(err)
+    runnable.err = $errUtils.wrapErr(err)
 
     if (!runnable.alreadyEmittedMocha) {
       // do not double emit this event
@@ -825,9 +810,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   _runner.suite = mocha.getRootSuite()
 
-  specWindow.onerror = function () {
-    let err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
-
+  const onScriptError = (err) => {
     // err will not be returned if cy can associate this
     // uncaught exception to an existing runnable
     if (!err) {
@@ -848,10 +831,11 @@ const create = function (specWindow, mocha, Cypress, cy) {
       ])
       .compact()
       .join('\n\n')
+      .value()
     }
 
     // else  do the same thing as mocha here
-    err = $utils.appendErrMsg(err, append())
+    err = $errUtils.appendErrMsg(err, append())
 
     // remove this error's stack since it gives no valuable context
     err.stack = ''
@@ -867,6 +851,12 @@ const create = function (specWindow, mocha, Cypress, cy) {
     // return undefined so the browser does its default
     // uncaught exception behavior (logging to console)
     return undefined
+  }
+
+  specWindow.onerror = function () {
+    const err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
+
+    onScriptError(err)
   }
 
   // hold onto the _runnables for faster lookup later
@@ -933,6 +923,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
+    onScriptError,
+
     grep (re) {
       if (arguments.length) {
         _runner._grep = re
@@ -1119,7 +1111,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
             err.isPending = true
           }
 
-          runnable.err = wrapErr(err)
+          runnable.err = $errUtils.wrapErr(err)
         }
 
         return runnableAfterRunAsync(runnable, Cypress)
@@ -1299,7 +1291,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
       test = getTestById(testId)
 
       if (test) {
-        return wrapErr(test.err)
+        return $errUtils.wrapErr(test.err)
       }
     },
 

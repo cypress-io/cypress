@@ -239,25 +239,25 @@ exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom repor
   1) simple failing hook spec
        beforeEach hooks
          "before each" hook for "never gets here":
-     Error: fail1
+     fail1
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
       [stack trace lines]
 
   2) simple failing hook spec
        afterEach hooks
          "after each" hook for "runs this":
-     Error: fail2
+     fail2
 
-Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
       [stack trace lines]
 
   3) simple failing hook spec
        after hooks
          "after all" hook for "fails on this":
-     Error: fail3
+     fail3
 
-Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: 'after hooks'
       [stack trace lines]
 
 
@@ -419,25 +419,25 @@ exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom repor
   1) simple failing hook spec
        beforeEach hooks
          "before each" hook for "never gets here":
-     Error: fail1
+     fail1
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
       [stack trace lines]
 
   2) simple failing hook spec
        afterEach hooks
          "after each" hook for "runs this":
-     Error: fail2
+     fail2
 
-Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
       [stack trace lines]
 
   3) simple failing hook spec
        after hooks
          "after all" hook for "fails on this":
-     Error: fail3
+     fail3
 
-Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: 'after hooks'
       [stack trace lines]
 
 
@@ -599,25 +599,25 @@ exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom repor
   1) simple failing hook spec
        beforeEach hooks
          "before each" hook for "never gets here":
-     Error: fail1
+     fail1
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
       [stack trace lines]
 
   2) simple failing hook spec
        afterEach hooks
          "after each" hook for "runs this":
-     Error: fail2
+     fail2
 
-Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
       [stack trace lines]
 
   3) simple failing hook spec
        after hooks
          "after all" hook for "fails on this":
-     Error: fail3
+     fail3
 
-Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: 'after hooks'
       [stack trace lines]
 
 

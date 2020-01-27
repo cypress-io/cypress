@@ -75,9 +75,9 @@ Fix the error in your code and re-run your tests.
   1 failing
 
   1) record fails "before each" hook for "fails 1":
-     Error: foo
+     foo
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'record fails'
       [stack trace lines]
 
 
@@ -168,11 +168,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught Error: instantly fails
-
-This error originated from your test code, not from Cypress.
-
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+     instantly fails
 
 Cypress could not associate this error to any specific test.
 
@@ -999,9 +995,9 @@ Fix the error in your code and re-run your tests.
   1 failing
 
   1) record fails "before each" hook for "fails 1":
-     Error: foo
+     foo
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'record fails'
       [stack trace lines]
 
 
@@ -1052,11 +1048,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught Error: instantly fails
-
-This error originated from your test code, not from Cypress.
-
-When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+     instantly fails
 
 Cypress could not associate this error to any specific test.
 

@@ -1,4 +1,3 @@
-import Promise from 'bluebird'
 import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
@@ -105,33 +104,31 @@ export default class Iframes extends Component {
 
     this.props.eventManager.setup(config, specPath)
 
-    this._loadIframes(specPath)
-    .then(($autIframe) => {
-      this.props.eventManager.initialize($autIframe, config)
-    })
+    const $autIframe = this._loadIframes(specPath)
+
+    this.props.eventManager.initialize($autIframe, config)
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specPath) {
-    return new Promise((resolve) => {
-      // TODO: config should have "iframeUrl": "/__cypress/iframes"
-      const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
+    // return new Promise((resolve) => {
+    // TODO: config should have "iframeUrl": "/__cypress/iframes"
+    const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
 
-      const $container = $(this.refs.container).empty()
-      const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
+    const $container = $(this.refs.container).empty()
+    const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
-      this.autIframe.showBlankContents()
+    this.autIframe.showBlankContents()
 
-      const $specIframe = $('<iframe />', {
-        id: `Your Spec: '${specSrc}'`,
-        class: 'spec-iframe',
-      }).appendTo($container)
+    const $specIframe = $('<iframe />', {
+      id: `Your Spec: '${specSrc}'`,
+      class: 'spec-iframe',
+    }).appendTo($container)
 
-      $specIframe.prop('src', specSrc).one('load', () => {
-        resolve($autIframe)
-      })
-    })
+    $specIframe.prop('src', specSrc)
+
+    return $autIframe
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {

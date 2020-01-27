@@ -1,5 +1,6 @@
 _ = require("lodash")
-$utils = require("./utils")
+
+$errUtils = require("./error_utils")
 
 builtInCommands = [
   require("../cy/commands/actions/check")
@@ -64,7 +65,7 @@ create = (Cypress, cy, state, config) ->
     original = commandBackups[name] or commands[name]
 
     if not original
-      $utils.throwErrByPath("miscellaneous.invalid_overwrite", {
+      $errUtils.throwErrByPath("miscellaneous.invalid_overwrite", {
         args: {
           name: name
         }
@@ -115,6 +116,12 @@ create = (Cypress, cy, state, config) ->
         obj = options
         options = {}
 
+      ## this is a bit of a hack. we need to know if a command is built-in or
+      ## custom for error display purposes. almost all built-in commands go through
+      ## this method and it's undocumented for users, so we use it to mark them
+      ## as not being custom
+      options.isCustom = false
+
       ## perf loop
       for name, fn of obj
         Commands.add(name, options, fn)
@@ -127,7 +134,9 @@ create = (Cypress, cy, state, config) ->
         fn = options
         options = {}
 
-      { prevSubject } = options
+      { prevSubject, isCustom } = options
+
+      isCustom ?= true
 
       ## normalize type by how they validate their
       ## previous subject (unless they're explicitly set)
@@ -138,6 +147,7 @@ create = (Cypress, cy, state, config) ->
         fn
         type
         prevSubject
+        isCustom
       })
 
     addChainer: (obj) ->

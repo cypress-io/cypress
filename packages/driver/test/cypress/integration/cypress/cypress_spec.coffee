@@ -82,11 +82,53 @@ describe "driver/src/cypress/index", ->
       fn = ->
         Cypress.log('My Log')
 
-      expect(fn).to.throw(/Cypress.log() can only be called with an options object. Your argument was/)
-      expect(fn).to.throw(/My Log/)
+      expect(fn).to.throw().with.property("message")
+        .and.include("`Cypress.log()` can only be called with an options object. Your argument was: `My Log`")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/cypress-log")
 
     it "does not throw when Cypress.log() called outside of command", ->
       fn = ->
         Cypress.log({ message: 'My Log' })
 
       expect(fn).to.not.throw()
+
+  context "DeprecatedCommandInterface", ->
+    it "throws when using Cypress.add...Command", ->
+      fn = ->
+        Cypress.addParentCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("Cypress.addParentCommand(...) has been removed and replaced")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/custom-command-interface-changed")
+
+      fn = ->
+        Cypress.addChildCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("Cypress.addChildCommand(...) has been removed and replaced")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/custom-command-interface-changed")
+
+      fn = ->
+        Cypress.addDualCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("Cypress.addDualCommand(...) has been removed and replaced")
+      expect(fn).to.throw().with.property("docsUrl")
+        .and.eq("https://on.cypress.io/custom-command-interface-changed")
+
+  context "PrivateCommandInterface", ->
+    it "throws when using addAssertionCommand or addUtilityCommand", ->
+      fn = ->
+        Cypress.addAssertionCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("You cannot use the undocumented private command interface: `addAssertionCommand`")
+
+      fn = ->
+        Cypress.addUtilityCommand()
+
+      expect(fn).to.throw().with.property("message")
+        .and.include("You cannot use the undocumented private command interface: `addUtilityCommand`")

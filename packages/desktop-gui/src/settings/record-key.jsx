@@ -74,8 +74,7 @@ class RecordKey extends Component {
     return (
       <div>
         <a href='#' className='learn-more' onClick={openRecordKeyGuide}>
-          <i className='fas fa-info-circle'></i>{' '}
-          Learn More
+          <i className='fas fa-info-circle'></i> Learn more
         </a>
         <p className='text-muted'>
           A Record Key sends your failing tests, screenshots, and videos to your{' '}

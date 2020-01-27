@@ -1,4 +1,4 @@
-const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 
 // in the browser mocha is coming back
 // as window
@@ -24,7 +24,7 @@ const ui = (specWindow, _mocha) => {
     this._ui = Mocha.interfaces[name]
 
     if (!this._ui) {
-      $utils.throwErrByPath('mocha.invalid_interface', { args: { name } })
+      $errUtils.throwErrByPath('mocha.invalid_interface', { args: { name } })
     }
 
     this._ui = this._ui(this.suite)
@@ -164,7 +164,7 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
-      const errMessage = $utils.errMessageByPath(getErrPath(), { ms })
+      const errMessage = $errUtils.errMsgByPath(getErrPath(), { ms })
 
       runnable.callback(new Error(errMessage))
       runnable.timedOut = true

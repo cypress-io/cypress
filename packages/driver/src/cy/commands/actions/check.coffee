@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$errUtils = require("../../../cypress/error_utils")
 $elements = require("../../../dom/elements")
 
 checkOrUncheck = (type, subject, values = [], options = {}) ->
@@ -57,8 +58,8 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
     if not isAcceptableElement($el)
       node   = $dom.stringify($el)
       word   = $utils.plural(options.$el, "contains", "is")
-      phrase = if type is "check" then " and :radio" else ""
-      $utils.throwErrByPath "check_uncheck.invalid_element", {
+      phrase = if type is "check" then " and `:radio`" else ""
+      $errUtils.throwErrByPath "check_uncheck.invalid_element", {
         onFail: options._log
         args: { node, word, phrase, cmd: type }
       }

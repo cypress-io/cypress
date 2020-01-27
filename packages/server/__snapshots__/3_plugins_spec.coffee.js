@@ -323,7 +323,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   1 failing
 
   1)  failure screenshot - rename:
-     Error: test error
+     test error
       [stack trace lines]
 
 

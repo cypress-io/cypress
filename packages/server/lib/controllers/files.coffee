@@ -28,8 +28,7 @@ module.exports = {
           title:        @getTitle(test)
           domain:       getRemoteState().domainName
           # stylesheets:  @getStylesheets(config)
-          javascripts:  js
-          specs:        specs
+          scripts:  JSON.stringify(js.concat(specs))
         }
 
   getSpecs: (spec, config) ->
@@ -57,12 +56,15 @@ module.exports = {
       getSpecs()
 
   prepareForBrowser: (filePath, projectRoot) ->
-    filePath = path.relative(projectRoot, filePath)
+    relativeFilePath = path.relative(projectRoot, filePath)
 
-    @getTestUrl(filePath)
+    {
+      absolute: filePath
+      relative: relativeFilePath
+      relativeUrl: @getTestUrl(relativeFilePath)
+    }
 
   getTestUrl: (file) ->
-    file += CacheBuster.get()
     "/__cypress/tests?p=#{file}"
 
   getTitle: (test) ->

@@ -133,7 +133,7 @@
 }
 
 .settings-wrapper {
-  padding: 20px 20px 0;
+  padding: 20px;
 
   pre {
     border-radius: 3px;
@@ -242,5 +242,19 @@
 
   td, th {
     padding: 3px;
+  }
+}
+
+.editor-picker {
+  margin: 0;
+  padding: 0;
+
+  li {
+    list-style: none;
+  }
+
+  label {
+    margin: 0;
+    font-weight: normal;
   }
 }
