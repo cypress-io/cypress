@@ -68,14 +68,16 @@ commands:
       browser:
         description: browser shortname to target
         type: string
-        default: electron
       chunk:
         description: e2e test chunk number
         type: integer
     steps:
       - attach_workspace:
           at: ~/
-      - install-latest-chrome
+      - when:
+          condition: <<parameters.browser>>
+          steps:
+            - install-latest-chrome
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
@@ -440,48 +442,56 @@ jobs:
     <<: *defaults
     steps:
       - run-e2e-tests:
+          browser: electron
           chunk: 1
 
   "server-e2e-tests-electron-2":
     <<: *defaults
     steps:
       - run-e2e-tests:
+          browser: electron
           chunk: 2
 
   "server-e2e-tests-electron-3":
     <<: *defaults
     steps:
       - run-e2e-tests:
+          browser: electron
           chunk: 3
 
   "server-e2e-tests-electron-4":
     <<: *defaults
     steps:
       - run-e2e-tests:
+          browser: electron
           chunk: 4
 
   "server-e2e-tests-electron-5":
     <<: *defaults
     steps:
       - run-e2e-tests:
+          browser: electron
           chunk: 5
 
   "server-e2e-tests-electron-6":
     <<: *defaults
     steps:
       - run-e2e-tests:
+          browser: electron
           chunk: 6
 
   "server-e2e-tests-electron-7":
     <<: *defaults
     steps:
       - run-e2e-tests:
+          browser: electron
           chunk: 7
 
   "server-e2e-tests-electron-8":
     <<: *defaults
     steps:
       - run-e2e-tests:
+          browser: electron
           chunk: 8
 
   "driver-integration-tests-chrome":
