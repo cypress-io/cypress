@@ -7,7 +7,7 @@ describe('e2e headless spec', function () {
   })
 
   it('has expected HeadlessChrome useragent', function () {
-    if (Cypress.browser.family !== 'chrome') {
+    if (Cypress.browser.family !== 'chromium') {
       return
     }
 
@@ -16,7 +16,7 @@ describe('e2e headless spec', function () {
   })
 
   it('has expected launch args', function () {
-    if (Cypress.browser.family !== 'chrome') {
+    if (Cypress.browser.family !== 'chromium') {
       return
     }
 

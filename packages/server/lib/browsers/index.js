@@ -7,7 +7,7 @@ const errors = require('../errors')
 const check = require('check-more-types')
 
 // returns true if the passed string is a known browser family name
-const isBrowserFamily = check.oneOf(['electron', 'chrome'])
+const isBrowserFamily = check.oneOf(['chromium'])
 
 let instance = null
 
@@ -41,19 +41,18 @@ const cleanup = () => {
   return instance = null
 }
 
-const getBrowserLauncherByFamily = function (family) {
-  debug('getBrowserLauncherByFamily %o', { family })
-  if (!isBrowserFamily(family)) {
-    debug('unknown browser family', family)
+const getBrowserLauncher = function (browser) {
+  debug('getBrowserLauncher %o', { browser })
+  if (!isBrowserFamily(browser.family)) {
+    debug('unknown browser family', browser.family)
   }
 
-  switch (family) {
-    case 'electron':
-      return require('./electron')
-    case 'chrome':
-      return require('./chrome')
-    default:
-      break
+  if (browser.name === 'electron') {
+    return require('./electron')
+  }
+
+  if (browser.family === 'chromium') {
+    return require('./chrome')
   }
 }
 
@@ -144,7 +143,7 @@ module.exports = {
         onBrowserClose () {},
       })
 
-      if (!(browserLauncher = getBrowserLauncherByFamily(browser.family))) {
+      if (!(browserLauncher = getBrowserLauncher(browser))) {
         return throwBrowserNotFound(browser.name, options.browsers)
       }
 

@@ -1,7 +1,7 @@
 import { ChildProcess } from 'child_process'
 import * as Bluebird from 'bluebird'
 
-export type BrowserName = 'chrome' | 'chromium' | 'canary' | string
+export type BrowserName = 'chrome' | 'chromium' | string
 
 export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | string
 

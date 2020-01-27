@@ -39,7 +39,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n  if (Cypress.browser.family === 'chrome') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+          "body": "function () {\n  if (Cypress.browser.family === 'chromium') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
         },
         {
           "hookId": "h2",
@@ -286,7 +286,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n  if (Cypress.browser.family === 'chrome') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+          "body": "function () {\n  if (Cypress.browser.family === 'chromium') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
         }
       ],
       "tests": [
@@ -401,7 +401,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n  if (Cypress.browser.family === 'chrome') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+          "body": "function () {\n  if (Cypress.browser.family === 'chromium') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
         },
         {
           "hookId": "h2",
@@ -605,7 +605,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n  if (Cypress.browser.family === 'chrome') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+          "body": "function () {\n  if (Cypress.browser.family === 'chromium') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
         },
         {
           "hookId": "h2",

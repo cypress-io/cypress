@@ -67,7 +67,7 @@ declare namespace Cypress {
    */
   // TODO in this PR: update this
   interface Browser {
-    name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
+    name: "electron" | "chrome" | "chromium" | "firefox"
     displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
     version: string
     majorVersion: number

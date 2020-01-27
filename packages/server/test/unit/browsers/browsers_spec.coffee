@@ -8,7 +8,8 @@ utils = require("#{root}../lib/browsers/utils")
 describe "lib/browsers/index", ->
   context ".isBrowserFamily", ->
     it "allows only known browsers", ->
-      expect(browsers.isBrowserFamily("chrome")).to.be.true
+      expect(browsers.isBrowserFamily("chromium")).to.be.true
+      expect(browsers.isBrowserFamily("chrome")).to.be.false
       expect(browsers.isBrowserFamily("electron")).to.be.true
       expect(browsers.isBrowserFamily("my-favorite-browser")).to.be.false
 

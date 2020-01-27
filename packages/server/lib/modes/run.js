@@ -453,11 +453,11 @@ const getProjectId = Promise.method((project, id) => {
 const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
 
-  if (browser.family === 'electron') {
+  if (browser.name === 'electron') {
     return getElectronProps(browser.isHeaded, project, writeVideoFrame)
   }
 
-  if (browser.family === 'chrome') {
+  if (browser.family === 'chromium') {
     return getChromeProps(browser.isHeaded, project, writeVideoFrame)
   }
 
@@ -625,7 +625,7 @@ const browserCanBeRecorded = (browser) => {
     return true
   }
 
-  if (browser.family === 'chrome') {
+  if (browser.family === 'chromium') {
     return true
   }
 
@@ -1333,7 +1333,7 @@ module.exports = {
             errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
           }
 
-          if (browser.family === 'chrome') {
+          if (browser.family === 'chromium') {
             chromePolicyCheck.run(onWarning)
           }
 

@@ -29,7 +29,7 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
       "given": {
         "name": "Chrome",
         "displayName": "Chrome Browser",
-        "family": "chrome",
+        "family": "chromium",
         "path": "/path/to/chrome",
         "version": "1.2.3",
         "majorVersion": 1
@@ -71,7 +71,7 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
         "displayName": "Bad family browser",
         "family": "unknown family"
       },
-      "expect": "Expected `family` to be either electron, chrome or firefox. Instead the value was: `{\"name\":\"bad family\",\"displayName\":\"Bad family browser\",\"family\":\"unknown family\"}`"
+      "expect": "Expected `family` to be chromium or firefox. Instead the value was: `{\"name\":\"bad family\",\"displayName\":\"Bad family browser\",\"family\":\"unknown family\"}`"
     }
   ]
 }

@@ -256,7 +256,7 @@ describe('Project Nav', function () {
           ])
 
           expect(browserArg.path).to.include('/')
-          expect(browserArg.family).to.equal('chrome')
+          expect(browserArg.family).to.equal('chromium')
         })
 
         describe('stop browser', function () {
@@ -370,7 +370,7 @@ describe('Project Nav', function () {
           {
             'name': 'chromium',
             'displayName': 'Chromium',
-            'family': 'chrome',
+            'family': 'chromium',
             'version': '49.0.2609.0',
             'path': '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
             'majorVersion': '49',

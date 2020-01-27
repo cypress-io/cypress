@@ -204,7 +204,7 @@ describe('lib/modes/run', () => {
 
       const browser = {
         name: 'chrome',
-        family: 'chrome',
+        family: 'chromium',
         isHeaded: true,
       }
 

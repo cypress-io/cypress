@@ -49,22 +49,22 @@ const { formStatePath } = require(`${root}lib/util/saved_state`)
 const TYPICAL_BROWSERS = [
   {
     name: 'chrome',
-    family: 'chrome',
+    family: 'chromium',
     displayName: 'Chrome',
     version: '60.0.3112.101',
     path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     majorVersion: '60',
   }, {
     name: 'chromium',
-    family: 'chrome',
+    family: 'chromium',
     displayName: 'Chromium',
     version: '49.0.2609.0',
     path: '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
     majorVersion: '49',
   }, {
-    name: 'canary',
-    family: 'chrome',
-    displayName: 'Canary',
+    name: 'chrome',
+    family: 'chromium',
+    displayName: 'Chrome Canary',
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
     majorVersion: '62',
@@ -172,7 +172,7 @@ describe('lib/cypress', () => {
     it('allows browser major to be a number', () => {
       const browser = {
         name: 'Edge Beta',
-        family: 'chrome',
+        family: 'chromium',
         displayName: 'Edge Beta',
         version: '80.0.328.2',
         path: '/some/path',
