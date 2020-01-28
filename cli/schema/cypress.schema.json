@@ -103,6 +103,14 @@
       "default": "cypress/integration",
       "description": "Path to folder containing integration test files"
     },
+    "componentFolder": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "default": false,
+      "description": "Path to folder containing component test files (Pass false to disable)"
+    },
     "pluginsFile": {
       "type": [
         "string",
@@ -210,11 +218,6 @@
       ],
       "default": "bundled",
       "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
-    },
-    "mountMode": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enable component-based tests mode. If set to 'true' Cypress will load application code to the same frame where an application renders."
     }
   }
 }

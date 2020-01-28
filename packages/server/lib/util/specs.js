@@ -9,18 +9,22 @@ const Promise = require('bluebird')
 const pluralize = require('pluralize')
 const glob = require('./glob')
 const Table = require('cli-table3')
+const experiments = require('../experiments').getExperiments()
 
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
 /**
  * Enums to help keep track of what types of spec files we find.
- * By default, every spec file is assumed to be integration,
- * component tests are new beasts, and they change how we mount the
- * code into the test frame.
+ * By default, every spec file is assumed to be integration.
 */
 const SPEC_TYPES = {
   INTEGRATION: 'integration',
-  COMPONENT: 'component',
+}
+
+// component tests are new beasts, and they change how we mount the
+// code into the test frame.
+if (experiments.componentTesting) {
+  SPEC_TYPES.COMPONENT = 'component'
 }
 
 const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
@@ -197,12 +201,29 @@ const find = (config, specPattern) => {
   }
 
   const findComponentSpecs = () => {
+    if (!experiments.componentTesting) {
+      return []
+    }
+
     const searchOptions = _.pick(config, commonSearchOptions)
 
     searchOptions.searchFolder = config.componentFolder
 
     return findSpecsOfType(searchOptions, specPattern)
     .then(setTestType(SPEC_TYPES.COMPONENT))
+  }
+
+  const printFoundSpecs = (foundSpecs) => {
+    const table = new Table({
+      head: ['relative', 'specType'],
+    })
+
+    foundSpecs.forEach((spec) => {
+      table.push([spec.relative, spec.specType])
+    })
+
+    /* eslint-disable no-console */
+    console.log(table.toString())
   }
 
   return Promise.all([
@@ -212,16 +233,7 @@ const find = (config, specPattern) => {
   .spread(R.concat)
   .tap((foundSpecs) => {
     if (debug.enabled) {
-      const table = new Table({
-        head: ['relative', 'specType'],
-      })
-
-      foundSpecs.forEach((spec) => {
-        table.push([spec.relative, spec.specType])
-      })
-
-      /* eslint-disable no-console */
-      console.log(table.toString())
+      printFoundSpecs(foundSpecs)
     }
   })
 }
