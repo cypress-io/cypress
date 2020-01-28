@@ -162,7 +162,7 @@
         "error": "The tests couldn't run.",
         "estimatedWallClockDuration": null,
         "failed": 0,
-        "groupId": "darwin-Electron-53-737bbfc285",
+        "groupId": "darwin-Chrome-53-737bbfc285",
         "groupName": null,
         "id": "565a8be7-4576-509d-b75b-ec7f6d715993",
         "integrationFolder": "/Users/jane/Dev/Projects/webAppOnline/cypress/integration",
@@ -171,8 +171,8 @@
         "passed": 0,
         "pending": 0,
         "platform": {
-          "browserName": "Electron",
-          "browserVersion": "54.0.2785.143",
+          "browserName": "Chrome",
+          "browserVersion": "80.2.1092.1",
           "osCpus": [],
           "osMemory": {
             "free": 985665536,
@@ -200,7 +200,7 @@
         "error": "The tests couldn't run.",
         "estimatedWallClockDuration": null,
         "failed": 0,
-        "groupId": "darwin-Electron-53-737bbfc285",
+        "groupId": "darwin-Chrome-80-737bbfc285",
         "groupName": null,
         "id": "c4683fa8-426a-5279-b9e2-f851094cf86b",
         "integrationFolder": "/Users/jane/Dev/Projects/webAppOnline/cypress/integration",
@@ -209,8 +209,8 @@
         "passed": 0,
         "pending": 0,
         "platform": {
-          "browserName": "Electron",
-          "browserVersion": "54.0.2785.143",
+          "browserName": "Chrome",
+          "browserVersion": "80.2.1092.1",
           "osCpus": [],
           "osMemory": {
             "free": 985665536,
