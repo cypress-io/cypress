@@ -161,7 +161,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
 
       screenshot
 
-describe "e2e spec_isolation", ->
+describe.only "e2e spec_isolation", ->
   e2e.setup()
 
   e2e.it "fails", {

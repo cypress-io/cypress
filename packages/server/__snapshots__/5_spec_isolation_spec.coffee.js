@@ -252,7 +252,8 @@ exports['e2e spec isolation fails'] = {
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee"
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "specType": "integration"
       },
       "shouldUploadVideo": true
     },
@@ -367,7 +368,8 @@ exports['e2e spec isolation fails'] = {
       "spec": {
         "name": "simple_failing_spec.coffee",
         "relative": "cypress/integration/simple_failing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee"
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
+        "specType": "integration"
       },
       "shouldUploadVideo": true
     },
@@ -571,7 +573,8 @@ exports['e2e spec isolation fails'] = {
       "spec": {
         "name": "simple_hooks_spec.coffee",
         "relative": "cypress/integration/simple_hooks_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee"
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee",
+        "specType": "integration"
       },
       "shouldUploadVideo": true
     },
@@ -660,7 +663,8 @@ exports['e2e spec isolation fails'] = {
       "spec": {
         "name": "simple_passing_spec.coffee",
         "relative": "cypress/integration/simple_passing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee"
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee",
+        "specType": "integration"
       },
       "shouldUploadVideo": true
     }
