@@ -16,6 +16,7 @@ v        = require("./util/validation")
 debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 findSystemNode = require("./util/find_system_node")
+experiments = require('./experiments').getExperiments()
 
 CYPRESS_ENV_PREFIX = "CYPRESS_"
 CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
@@ -48,8 +49,10 @@ folders = toWords """
   fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
   screenshotsFolder  supportFile      supportFolder       unitFolder
   videosFolder
-  componentFolder
 """
+
+if experiments.componentTesting
+  folders.push("componentFolder")
 
 # Public configuration properties, like "cypress.json" fields
 configKeys = toWords """
@@ -58,7 +61,6 @@ configKeys = toWords """
   blacklistHosts
   chromeWebSecurity
   modifyObstructiveCode           integrationFolder
-  componentFolder
   env                             pluginsFile
   hosts                           screenshotsFolder
   numTestsKeptInMemory            supportFile
@@ -79,6 +81,9 @@ configKeys = toWords """
   waitForAnimations               resolvedNodeVersion
   nodeVersion                     resolvedNodePath
 """
+
+if experiments.componentTesting
+  configKeys.push("componentFolder")
 
 # Deprecated and retired public configuration properties
 breakingConfigKeys = toWords """
@@ -137,7 +142,6 @@ CONFIG_DEFAULTS = {
   supportFile:                   "cypress/support"
   fixturesFolder:                "cypress/fixtures"
   integrationFolder:             "cypress/integration"
-  componentFolder:               "cypress/component"
   screenshotsFolder:             "cypress/screenshots"
   namespace:                     "__cypress"
   pluginsFile:                   "cypress/plugins"
@@ -147,6 +151,8 @@ CONFIG_DEFAULTS = {
   ## deprecated
   javascripts:                   []
 }
+if experiments.componentTesting
+  CONFIG_DEFAULTS.componentFolder = "cypress/component"
 
 validationRules = {
   animationDistanceThreshold: v.isNumber
@@ -162,7 +168,6 @@ validationRules = {
   fixturesFolder: v.isStringOrFalse
   ignoreTestFiles: v.isStringOrArrayOfStrings
   integrationFolder: v.isString
-  componentFolder: v.isString
   modifyObstructiveCode: v.isBoolean
   nodeVersion: v.isOneOf("default", "bundled", "system")
   numTestsKeptInMemory: v.isNumber
@@ -186,6 +191,9 @@ validationRules = {
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
 }
+
+if experiments.componentTesting
+  validationRules.componentFolder = v.isStringOrFalse
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
