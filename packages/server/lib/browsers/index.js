@@ -61,12 +61,9 @@ const isValidPathToBrowser = (str) => {
 }
 
 const parseBrowserOption = (opt) => {
-  // hard-coded for backwards compatibility
+  // for backwards compatibility pre-4.x
   if (opt === 'canary') {
-    return {
-      name: 'chrome',
-      channel: 'canary',
-    }
+    opt = 'chrome:canary'
   }
 
   // it's a name or a path
