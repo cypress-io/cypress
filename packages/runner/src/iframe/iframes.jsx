@@ -124,6 +124,8 @@ export default class Iframes extends Component {
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
     this.autIframe.showBlankContents()
+
+    // specs with type "component" can only arrive if the server has "componentTesting" experiment on
     if (this.props.config.spec.specType === 'component') {
       // In mount mode we need to render something right from spec file
       // So load application tests to the aut frame

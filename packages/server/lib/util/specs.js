@@ -205,6 +205,10 @@ const find = (config, specPattern) => {
       return []
     }
 
+    if (!config.componentFolder) {
+      return []
+    }
+
     const searchOptions = _.pick(config, commonSearchOptions)
 
     searchOptions.searchFolder = config.componentFolder
