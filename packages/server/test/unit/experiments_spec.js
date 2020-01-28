@@ -1,6 +1,6 @@
 require('../spec_helper')
 
-const { parseFlags, getExperiments, EXPERIMENTS_ENV_FLAG_NAME } = require(`${root}lib/experiments.ts`)
+const { parseFlags, getExperiments, EXPERIMENTS_ENV_FLAG_NAME, formatExperiments } = require(`${root}lib/experiments.ts`)
 const mockedEnv = require('mocked-env')
 
 describe('experiments', () => {
@@ -27,6 +27,19 @@ describe('experiments', () => {
       ]
 
       expect(parsed).to.deep.equal(expected)
+    })
+  })
+
+  context('#formatExperiments', () => {
+    it('forms single string with all values', () => {
+      const exp = {
+        featureA: true,
+        featureB: false,
+        featureC: true,
+      }
+      const result = formatExperiments(exp)
+
+      expect(result).to.equal('featureA=true,featureB=false,featureC=true')
     })
   })
 

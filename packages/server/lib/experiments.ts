@@ -88,3 +88,35 @@ export const parseExperiments = (experimentsEnv: string = ''): CypressExperiment
 export const getExperiments = (): CypressExperiments => {
   return parseExperiments(process.env[EXPERIMENTS_ENV_FLAG_NAME])
 }
+
+/**
+ * Returns an object of experiments, but only the keys that are different from default values.
+  ```
+  const myExperiments = getExperiments()
+  const nonDefault = currentExperiments(myExperiments)
+  console.log(nonDefault)
+  ```
+ */
+export const currentExperiments = (experiments: CypressExperiments): Partial<CypressExperiments> => {
+  const result = {}
+
+  Object.keys(defaultExperiments).forEach((key) => {
+    // our values are only boolean, so simple equality check works
+    if (experiments[key] !== defaultExperiments[key]) {
+      result[key] = experiments[key]
+    }
+  })
+
+  return result
+}
+
+/**
+ * Returns a single string with human-readable experiments.
+  ```
+  formatExperiments(getExperiments())
+  // "componentsTesting=true,featureB=false"
+  ```
+ */
+export const formatExperiments = (exp: Partial<CypressExperiments>) => {
+  return Object.keys(exp).map((name) => `${name}=${exp[name]}`).join(',')
+}
