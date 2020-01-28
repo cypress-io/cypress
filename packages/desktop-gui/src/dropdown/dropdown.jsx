@@ -49,7 +49,7 @@ class Dropdown extends Component {
   _button () {
     if (this.props.others.length) {
       return (
-        <a onClick={this._toggleOpen} className={this.props.disabled ? 'disabled' : ''}>
+        <a onClick={this._toggleOpen} className={cs('dropdown-chosen', { disabled: this.props.disabled })}>
           {this._buttonContent()}
         </a>
       )
