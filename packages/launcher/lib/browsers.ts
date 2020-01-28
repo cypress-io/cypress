@@ -16,7 +16,8 @@ export const browsers: Browser[] = [
   {
     name: 'chromium',
     family: 'chromium',
-    channel: 'dev',
+    // technically Chromium is always in development
+    channel: 'stable',
     displayName: 'Chromium',
     versionRegex: /Chromium (\S+)/,
     profile: true,

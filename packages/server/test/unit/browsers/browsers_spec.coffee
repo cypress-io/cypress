@@ -16,13 +16,13 @@ describe "lib/browsers/index", ->
   context ".ensureAndGetByNameOrPath", ->
     it "returns browser by name", ->
       sinon.stub(utils, "getBrowsers").resolves([
-        { name: "foo" }
-        { name: "bar" }
+        { name: "foo", channel: "stable" }
+        { name: "bar", channel: "stable" }
       ])
 
       browsers.ensureAndGetByNameOrPath("foo")
       .then (browser) ->
-        expect(browser).to.deep.eq({ name: "foo" })
+        expect(browser).to.deep.eq({ name: "foo", channel: "stable" })
 
     it "throws when no browser can be found", ->
       browsers.ensureAndGetByNameOrPath("browserNotGonnaBeFound")

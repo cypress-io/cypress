@@ -50,6 +50,7 @@ const TYPICAL_BROWSERS = [
   {
     name: 'chrome',
     family: 'chromium',
+    channel: 'stable',
     displayName: 'Chrome',
     version: '60.0.3112.101',
     path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -57,6 +58,7 @@ const TYPICAL_BROWSERS = [
   }, {
     name: 'chromium',
     family: 'chromium',
+    channel: 'stable',
     displayName: 'Chromium',
     version: '49.0.2609.0',
     path: '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
@@ -64,6 +66,7 @@ const TYPICAL_BROWSERS = [
   }, {
     name: 'chrome',
     family: 'chromium',
+    channel: 'canary',
     displayName: 'Chrome Canary',
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
@@ -73,7 +76,7 @@ const TYPICAL_BROWSERS = [
 
 const ELECTRON_BROWSER = {
   name: 'electron',
-  family: 'electron',
+  family: 'chromium',
   displayName: 'Electron',
   path: '',
   version: '99.101.1234',
@@ -761,7 +764,7 @@ describe('lib/cypress', () => {
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Available browsers found are: chrome, chromium, canary, electron'
+              'Available browsers found are: chrome, chromium, chrome:canary, electron'
             )
           })
         })

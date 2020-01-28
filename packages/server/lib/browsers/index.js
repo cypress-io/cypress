@@ -60,19 +60,45 @@ const isValidPathToBrowser = (str) => {
   return path.basename(str) !== str
 }
 
+const parseBrowserOption = (opt) => {
+  // hard-coded for backwards compatibility
+  if (opt === 'canary') {
+    return {
+      name: 'chrome',
+      channel: 'canary',
+    }
+  }
+
+  // it's a name or a path
+  if (!_.isString(opt) || !opt.includes(':')) {
+    return {
+      name: opt,
+      channel: 'stable',
+    }
+  }
+
+  // it's in name:channel format
+  const split = opt.indexOf(':')
+
+  return {
+    name: opt.slice(0, split),
+    channel: opt.slice(split + 1),
+  }
+}
+
 const ensureAndGetByNameOrPath = function (nameOrPath, returnAll = false, browsers = null) {
   const findBrowsers = Array.isArray(browsers) ? Promise.resolve(browsers) : utils.getBrowsers()
 
   return findBrowsers
   .then((browsers = []) => {
-    let browser
+    const filter = parseBrowserOption(nameOrPath)
 
-    debug('searching for browser %o', { nameOrPath, knownBrowsers: browsers })
+    debug('searching for browser %o', { nameOrPath, filter, knownBrowsers: browsers })
 
     // try to find the browser by name with the highest version property
     const sortedBrowsers = _.sortBy(browsers, ['version'])
 
-    browser = _.findLast(sortedBrowsers, { name: nameOrPath })
+    const browser = _.findLast(sortedBrowsers, filter)
 
     if (browser) {
       // short circuit if found
@@ -103,8 +129,18 @@ const ensureAndGetByNameOrPath = function (nameOrPath, returnAll = false, browse
   })
 }
 
+const formatBrowsersToOptions = (browsers) => {
+  return browsers.map((browser) => {
+    if (browser.channel !== 'stable') {
+      return [browser.name, browser.channel].join(':')
+    }
+
+    return browser.name
+  })
+}
+
 const throwBrowserNotFound = function (browserName, browsers = []) {
-  const names = _.map(browsers, 'name').join(', ')
+  const names = formatBrowsersToOptions(browsers).join(', ')
 
   return errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, names)
 }
