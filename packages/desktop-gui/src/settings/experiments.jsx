@@ -25,7 +25,20 @@ const Experiments = observer(({ project }) => {
       </a>
 
       <div>
-        <h3><input type="checkbox" readOnly defaultChecked={experiments.componentTesting} /> Component testing</h3>
+        <p>
+        You can enable some beta features still under development by setting a special environment variable while running
+        Cypress. For example to enable experiments "featureA" and "featureB", open or run Cypress with:
+        </p>
+
+        <pre className='line-nums'>
+          <span>CYPRESS_EXPERIMENTS=featureA,featureB cypress open</span>
+          <span># or</span>
+          <span>CYPRESS_EXPERIMENTS=featureA,featureB cypress run</span>
+        </pre>
+      </div>
+
+      <div>
+        <h3><input type="checkbox" readOnly defaultChecked={experiments.componentTesting} /> component testing</h3>
         <p className="text-muted">
           Changes how certain spec files are mounted. Instead of <code>cy.visit</code> you would use
           framework-specific <code>cypress-X-unit-test</code> library to mount your component directly from the spec file.
