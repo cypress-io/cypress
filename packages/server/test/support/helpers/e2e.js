@@ -1,13 +1,7 @@
 require('../../spec_helper')
 require('mocha-banner').register()
 
-const _CI = process.env.CI
-
-delete process.env.CI
 const chalk = require('chalk').default
-
-process.env.CI = _CI
-
 const _ = require('lodash')
 let cp = require('child_process')
 const niv = require('npm-install-version')

@@ -15,6 +15,11 @@ exports['e2e cdp / fails when remote debugging port cannot be connected to'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  spec.ts                                                                         (1 of 1)
+Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
+
+The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
+
+Your code will cease to work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args
 Failed to connect to Chrome, retrying in 1 second (attempt 18/32)
 Failed to connect to Chrome, retrying in 1 second (attempt 19/32)
 Failed to connect to Chrome, retrying in 1 second (attempt 20/32)

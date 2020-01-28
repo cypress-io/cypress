@@ -101,7 +101,7 @@ const execute = (ipc, event, ids, args = []) => {
       // while still fufiling desired behavior
       const pluginConfig = args[1]
 
-      ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice'].forEach((name) => {
+      ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes'].forEach((name) => {
         const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
 
         pluginConfig[name] = function () {
@@ -113,6 +113,12 @@ const execute = (ipc, event, ids, args = []) => {
           // eslint-disable-next-line prefer-rest-params
           return boundFn.apply(this, arguments)
         }
+      })
+
+      Object.defineProperty(pluginConfig, 'length', {
+        get () {
+          return this.args.length
+        },
       })
 
       pluginConfig[Symbol.iterator] = pluginConfig.args[Symbol.iterator].bind(pluginConfig.args)
