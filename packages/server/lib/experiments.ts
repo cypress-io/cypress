@@ -57,13 +57,7 @@ export const parseFlags = (experiments: string): FlagToken[] => {
   return flagTokens
 }
 
-/**
- * Returns an object with boolean flags corresponding to the enabled experiments.
- * @see https://on.cypress.io/experiments
- */
-export const getExperiments = (): CypressExperiments => {
-  const experimentsEnv: string = process.env[EXPERIMENTS_ENV_FLAG_NAME] || ''
-
+export const parseExperiments = (experimentsEnv: string = ''): CypressExperiments => {
   if (!experimentsEnv) {
     return defaultExperiments
   }
@@ -85,4 +79,12 @@ export const getExperiments = (): CypressExperiments => {
   }
 
   return experiments
+}
+
+/**
+ * Returns an object with boolean flags corresponding to the enabled experiments.
+ * @see https://on.cypress.io/experiments
+ */
+export const getExperiments = (): CypressExperiments => {
+  return parseExperiments(process.env[EXPERIMENTS_ENV_FLAG_NAME])
 }
