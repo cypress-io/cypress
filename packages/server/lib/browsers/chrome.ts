@@ -116,22 +116,13 @@ const getRemoteDebuggingPort = Bluebird.method(() => {
   return utils.getPort()
 })
 
-const pluginsBeforeBrowserLaunch = function (browser, args): string[] | {
-  args: string[]
-  extensions: string[]
-} {
+const pluginsBeforeBrowserLaunch = async function (browser, options) {
   // bail if we're not registered to this event
   if (!plugins.has('before:browser:launch')) {
-    return args
+    return null
   }
 
-  return plugins.execute('before:browser:launch', browser, args)
-  .then((newArgs) => {
-    debug('got user args for \'before:browser:launch\'', newArgs)
-
-    // reset args if we got 'em
-    return newArgs != null ? newArgs : args
-  })
+  return plugins.execute('before:browser:launch', browser, options)
 }
 
 /**
@@ -368,47 +359,43 @@ module.exports = {
 
     let defaultArgs = this._getArgs(options, port)
 
-    let pluginConfig = {
+    let launchOptions = {
       args: defaultArgs,
       extensions: [],
     }
 
-    // TODO: remove in next breaking release
-    // define array-like functions on this object so we can warn about using deprecated array API
-    // while still fufiling desired behavior
-    ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice'].forEach((name) => {
-      const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
-
-      pluginConfig[name] = function () {
-        errors.warning(
-          'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
-        )
-
-        // eslint-disable-next-line prefer-rest-params
-        return boundFn.apply(this, arguments)
-      }
-    })
-
-    const [cacheDir, pluginConfigResult] = await Bluebird.all([
+    let [cacheDir, pluginConfigResult] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      pluginsBeforeBrowserLaunch(options.browser, pluginConfig),
+      pluginsBeforeBrowserLaunch(options.browser, launchOptions),
     ])
 
-    if (pluginConfigResult && pluginConfigResult !== pluginConfig) {
+    if (pluginConfigResult) {
+      if (pluginConfigResult[0]) {
+        options.onWarning(errors.get(
+          'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
+        ))
+
+        pluginConfigResult = {
+          args: _.filter(pluginConfigResult, (_val, key) => _.isNumber(key)),
+          extensions: [],
+        }
+      }
+
       // use whatever the user returns as pluginConfig
       // @ts-ignore
-      pluginConfig = pluginConfigResult
-    }
+      if (pluginConfigResult.args) {
+        launchOptions.args = pluginConfigResult.args
+      }
 
-    if (pluginConfig && pluginConfig[0]) {
-      errors.warning(
-        'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
-      )
+      if (pluginConfigResult.extensions) {
+        launchOptions.extensions = pluginConfigResult.extensions
+      }
 
-      pluginConfig.args = _.filter(pluginConfig, (_val, key) => _.isNumber(key))
-      pluginConfig.extensions = []
+      if (pluginConfigResult.preferences) {
+        // _.extend(launchOptions.preferences, pluginConfigResult.preferences)
+      }
     }
 
     const [extDest] = await Bluebird.all([
@@ -421,7 +408,7 @@ module.exports = {
     ])
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own
-    const args = _normalizeArgExtensions(extDest, pluginConfig.args, pluginConfig.extensions, browser)
+    const args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
 
     // this overrides any previous user-data-dir args
     // by being the last one

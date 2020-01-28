@@ -139,7 +139,8 @@ describe "lib/browsers/chrome", ->
       ## this should get obliterated
       @args.push("--something=else")
 
-      chrome.open("chrome", "http://", {}, @automation)
+      onWarning = sinon.stub()
+      chrome.open("chrome", "http://", {onWarning}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
@@ -150,7 +151,7 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
-        expect(errors.warning).calledOnce
+        expect(onWarning).calledOnce
 
     it "normalizes multiple extensions from plugins", ->
       plugins.register 'before:browser:launch', (browser, config) ->

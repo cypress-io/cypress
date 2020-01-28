@@ -176,6 +176,7 @@ class Project extends EE {
 
         options.onError(err)
       },
+      onWarning: options.onWarning,
     })
   }
 

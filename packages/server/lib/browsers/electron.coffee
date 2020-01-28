@@ -229,13 +229,15 @@ module.exports = {
         ## bail if we're not registered to this event
         return options if not plugins.has("before:browser:launch")
 
-        plugins.execute("before:browser:launch", options.browser, options)
+        plugins.execute("before:browser:launch", options.browser, {preferences: options, extensions: [], args: []})
         .then (newOptions) ->
           if newOptions
             debug("received new options from plugin event %o", newOptions)
             _.extend(options, newOptions)
 
           return options
+
+      ## TODO: add extensions to BrowserWindow object
     .then (options) =>
       debug("launching browser window to url: %s", url)
 

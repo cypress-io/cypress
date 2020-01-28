@@ -347,7 +347,11 @@ const localItFn = function (title, opts = {}) {
 
       const execFn = (overrides = {}) => e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
 
-      return options.onRun(execFn, browser, ctx)
+      return Promise.all([
+        psInclude(options.psInclude),
+        options.onRun(execFn, browser, ctx),
+      ])
+      // .then(options.afterRun)
     })
   }
 
@@ -364,6 +368,43 @@ localItFn.skip = function (title, options) {
   options.skip = true
 
   return localItFn(title, options)
+}
+
+async function psInclude (str) {
+  if (!str) return
+
+  if (!_.isArray(str)) {
+    str = [str]
+  }
+
+  let lastError = null
+
+  async function retry () {
+    try {
+      const psOutput = (await cp.execAsync('ps -f')).toString()
+
+      // console.log(psOutput)
+      // return /^.*chrome.*--no-first-run.*run-\d+/.exec(v)
+      _.forEach(str, (v) => {
+        expect(psOutput).contain(v)
+      })
+
+      let colorAssertion = psOutput.split('\n').find((v) => v.includes(str[0]))
+
+      _.forEach(str, (v) => colorAssertion = colorAssertion.replace(v, chalk.bgGreen.black(v)))
+
+      // eslint-disable-next-line no-console
+      console.log(chalk.green(chalk.bold('Expected process tree:\n') + colorAssertion))
+    } catch (e) {
+      lastError = e
+
+      return Promise.delay(400).then(() => retry())
+    }
+  }
+
+  return Promise.resolve(retry()).timeout(15000).catch(() => {
+    throw lastError
+  })
 }
 
 const e2e = {

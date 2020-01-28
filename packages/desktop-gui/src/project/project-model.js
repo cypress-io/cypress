@@ -56,7 +56,8 @@ export default class Project {
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
-  @observable warnings = []
+  /** @type {{[key: string] : {warning:Error, dismissed: boolean}}} */
+  @observable warnings = {}
   @observable apiError
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
@@ -215,23 +216,29 @@ export default class Project {
     this.error = null
   }
 
-  @action addWarning (warning) {
-    if (!this.dismissedWarnings[this._serializeWarning(warning)]) {
-      this.warnings.push(warning)
+  @action addWarning (warning, id) {
+    if (!id) {
+      id = warning.type
     }
+
+    const prevWarning = this.warnings[id]
+
+    if (prevWarning && !prevWarning.dismissed) {
+      return
+    }
+
+    this.warnings[id] = { warning }
   }
 
   @action clearWarning (warning) {
     if (!warning) {
       // calling with no warning clears all warnings
       return this.warnings.map((warning) => {
-        return this.clearWarning(warning)
+        return this.clearWarning(warning.warning)
       })
     }
 
-    this.dismissedWarnings[this._serializeWarning(warning)] = true
-
-    this.warnings = _.without(this.warnings, warning)
+    warning.dismissed = true
   }
 
   _serializeWarning (warning) {

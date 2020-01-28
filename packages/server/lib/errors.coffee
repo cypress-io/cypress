@@ -888,16 +888,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DEPRECATED_BEFOREBROWSERLAUNCH_ARGS"
       """
-        Deprecation Warning: The "before:browser:launch" handler now has the signature
-        (
-          browser: object,
-          options: {
-            args: string[]
-            extensions: string[]
-            preferences: object
-          }
-        )
-        Accessing the object as an array will cease to work in future Cypress versions. See [docs link] for reference.
+        Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`
+        
+        The `before:browser:launch` plugin event switched from yielding the second argument as an `array` of browser arguments to an options `object` with an `args` property.
+        
+        Your code will cease to work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow 'https://on.cypress.io/deprecated-before-browser-launch-args'}
       """
 
 get = (type, arg1, arg2) ->
