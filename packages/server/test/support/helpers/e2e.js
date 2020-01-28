@@ -402,7 +402,7 @@ async function psInclude (str) {
     }
   }
 
-  return Promise.resolve(retry()).timeout(15000).catch(() => {
+  return Promise.resolve(retry()).timeout(30000).catch(() => {
     throw lastError
   })
 }
