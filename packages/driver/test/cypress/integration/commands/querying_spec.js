@@ -1927,7 +1927,7 @@ space
 
       it('throws when content has "i" flag while matchCase: true', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('cy.contains() content has i flag and matchCase is true. What is intended?')
+          expect(err.message).to.eq('You passed a regular expression with the case-insensitive (i) flag and { matchCase: true } to cy.contains(). Those options conflict with each other, so please choose one or the other.')
 
           done()
         })

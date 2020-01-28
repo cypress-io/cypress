@@ -410,7 +410,7 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       if (options.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
-        throw new Error('cy.contains() content has i flag and matchCase is true. What is intended?')
+        $utils.throwErrByPath('contains.regex_conflict')
       }
 
       _.defaults(options, { log: true, matchCase: true })
