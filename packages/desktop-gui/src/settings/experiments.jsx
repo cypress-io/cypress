@@ -35,16 +35,27 @@ const Experiments = observer(({ project }) => {
           <span># or</span>
           <span>CYPRESS_EXPERIMENTS=featureA,featureB cypress run</span>
         </pre>
+
+        {resolvedEnv &&
+          <>
+            <p>The environment variable currently has the value</p>
+              <pre className='line-nums'>
+                <span>CYPRESS_EXPERIMENTS={resolvedEnv}</span>
+              </pre>
+          </>
+        }
       </div>
 
       <div>
-        <h3><input type="checkbox" readOnly defaultChecked={experiments.componentTesting} /> component testing</h3>
+        <h3>{experiments.componentTesting ? '✔️' : '🚫'} component testing</h3>
         <p className="text-muted">
           Changes how certain spec files are mounted. Instead of <code>cy.visit</code> you would use
           framework-specific <code>cypress-X-unit-test</code> library to mount your component directly from the spec file.
           See issue <a href='#' onClick={openIssue(5922)}>5922</a>
         </p>
-        <p>To enable this experiment start Cypress with environment variable</p>
+        <p>{experiments.componentTesting
+          ? 'This experiment was enabled with'
+          : 'To enable this experiment start Cypress with environment variable'}</p>
         <pre className='line-nums'>
           <span>CYPRESS_EXPERIMENTS=componentTesting cypress open</span>
           <span># or</span>
