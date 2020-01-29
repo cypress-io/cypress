@@ -211,6 +211,7 @@ describe('lib/modes/run', () => {
       runMode.launchBrowser({
         spec,
         browser,
+        project: {},
       })
 
       expect(this.launch).to.be.calledWithMatch(browser, spec, {})
