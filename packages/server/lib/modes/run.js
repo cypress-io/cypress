@@ -560,7 +560,7 @@ const writeOutput = (outputPath, results) => {
 const warnings = []
 const onWarning = (err) => {
   // if we've printed this exact warning before, skip it
-  if (err.type && warnings[err.type]) {
+  if (err.type && warnings[err.type] && warnings[err.type].message === err.message) {
     return
   }
 

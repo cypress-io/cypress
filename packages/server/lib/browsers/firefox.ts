@@ -11,7 +11,7 @@ import firefoxUtil from './firefox-util'
 import plugins from '../plugins'
 import utils from './utils'
 import { Browser } from '@packages/launcher'
-const errors = require('../errors.coffee')
+const errors = require('../errors')
 
 const debug = Debug('cypress:server:browsers:firefox')
 
