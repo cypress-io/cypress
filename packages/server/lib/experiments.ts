@@ -1,122 +1,59 @@
-import { trim, find, propEq } from 'ramda'
-
-interface CypressExperiments {
-  componentTesting: boolean
-}
-
-export const defaultExperiments: CypressExperiments = {
-  componentTesting: false,
-}
+import { get } from 'lodash'
 
 /**
- * The environment variable name used to grab the experiments
+ * Returns a single string with human-readable experiments.
+  ```
+  const experimental = getExperimentsFromResolved(config.resolved)
+  const enabledExperiments = _.pickBy(experimental, (experiment) => experiment.enabled)
+  formatExperiments(enabledExperiments)
+  // "componentsTesting=true,featureB=false"
+  ```
  */
-export const EXPERIMENTS_ENV_FLAG_NAME = 'CYPRESS_EXPERIMENTS'
-
-interface FlagToken {
-  name: string
-  value: boolean
+export const formatExperiments = (exp: CypressExperiments) => {
+  return Object.keys(exp).map((name) => `${name}=${exp[name].value}`).join(',')
 }
+
+type CypressProject = unknown
+
 /**
- * converts string like `flagA,flagB=false,flagC=true` into an array like
-  ```
-  [ {name: 'flagA', value: true},
-    {name: 'flagB', value: false},
-    {name: 'flagC', value: true}]
-  ```
-*/
-export const parseFlags = (experiments: string): FlagToken[] => {
-  const flagTokens = experiments.split(',').map(trim).map((flagToken) => {
-    if (flagToken.includes('=')) {
-      const [name, value] = flagToken.split('=').map(trim)
+ * Single experimental feature. Experiment is enabled
+ * if its value is different from the default value (coming from the config).
+ */
+interface CypressExperiment {
+  enabled: boolean // is the experiment enabled
+  value: unknown // current value
+}
 
-      if (value === 'true') {
-        return {
-          name,
-          value: true,
-        }
-      }
+/**
+ * Collection of Cypress experiments
+ */
+interface CypressExperiments {
+  [key: string]: CypressExperiment
+}
 
-      if (value === 'false') {
-        return {
-          name,
-          value: false,
-        }
-      }
+export const getExperimentsFromResolved = (resolvedConfig): CypressExperiments => {
+  const experimentalKeys = Object.keys(resolvedConfig).filter((key) => key.startsWith('experimental'))
 
-      throw new Error(`Could not parse flag token ${flagToken}`)
-    }
+  const experiments: CypressExperiments = {}
 
-    // boolean flag "flagA", automatic true
-    return {
-      name: flagToken,
-      value: true,
+  experimentalKeys.forEach((key) => {
+    // it would be nice to have default value in the resolved config
+    experiments[key] = {
+      value: resolvedConfig[key].value,
+      enabled: resolvedConfig[key].from !== 'default',
     }
   })
-
-  return flagTokens
-}
-
-export const parseExperiments = (experimentsEnv: string = ''): CypressExperiments => {
-  if (!experimentsEnv) {
-    return defaultExperiments
-  }
-
-  const flagTokens = parseFlags(experimentsEnv)
-
-  const flagValueOrDefault = (flagName, defaultValue) => {
-    const flagToken = find(propEq('name', flagName))(flagTokens)
-
-    if (flagToken) {
-      return flagToken.value
-    }
-
-    return defaultValue
-  }
-
-  const experiments: CypressExperiments = {
-    componentTesting: flagValueOrDefault('componentTesting', defaultExperiments.componentTesting),
-  }
 
   return experiments
 }
 
 /**
- * Returns an object with boolean flags corresponding to the enabled experiments.
- * @see https://on.cypress.io/experiments
+ * Looks at the resolved config, finds all keys that start with "experimental" prefix
+ * and have non-default values and returns a simple object with {key: {value, enabled}}
+ * where "on" is set to true if the value is different from default..
  */
-export const getExperiments = (): CypressExperiments => {
-  return parseExperiments(process.env[EXPERIMENTS_ENV_FLAG_NAME])
-}
+export const getExperiments = (project: CypressProject): CypressExperiments => {
+  const resolvedEnv = get(project, 'resolvedConfig', {})
 
-/**
- * Returns an object of experiments, but only the keys that are different from default values.
-  ```
-  const myExperiments = getExperiments()
-  const nonDefault = currentExperiments(myExperiments)
-  console.log(nonDefault)
-  ```
- */
-export const currentExperiments = (experiments: CypressExperiments): Partial<CypressExperiments> => {
-  const result = {}
-
-  Object.keys(defaultExperiments).forEach((key) => {
-    // our values are only boolean, so simple equality check works
-    if (experiments[key] !== defaultExperiments[key]) {
-      result[key] = experiments[key]
-    }
-  })
-
-  return result
-}
-
-/**
- * Returns a single string with human-readable experiments.
-  ```
-  formatExperiments(getExperiments())
-  // "componentsTesting=true,featureB=false"
-  ```
- */
-export const formatExperiments = (exp: Partial<CypressExperiments>) => {
-  return Object.keys(exp).map((name) => `${name}=${exp[name]}`).join(',')
+  return getExperimentsFromResolved(resolvedEnv)
 }
