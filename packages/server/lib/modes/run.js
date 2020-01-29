@@ -176,11 +176,9 @@ const displayRunStarting = function (options = {}) {
 
   console.log('')
 
-  const experimentsOn = experiments.currentExperiments(experiments.getExperiments())
-  const hasExperiments = !_.isEmpty(experimentsOn)
-  const formatExperiments = (exp) => {
-    return Object.keys(exp).map((name) => `${name}=${exp[name]}`).join(',')
-  }
+  const experimental = experiments.getExperimentsFromResolved(config.resolved)
+  const enabledExperiments = _.pickBy(experimental, _.property('enabled'))
+  const hasExperiments = !_.isEmpty(enabledExperiments)
 
   // if we show Node Version, then increase 1st column width
   // to include wider 'Node Version:'.
@@ -227,7 +225,7 @@ const displayRunStarting = function (options = {}) {
     [gray('Searched:'), formatSpecPattern(specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
-    [gray('Experiments:'), hasExperiments ? formatExperiments(experimentsOn) : ''],
+    [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
   ])
   .filter(_.property(1))
   .value()
