@@ -46,10 +46,9 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
 
   // is this a browser process launched to run Cypress tests?
   const isBrowserProcess = (proc: Process): boolean => {
+    const instance = browsers.getBrowserInstance()
     // electron will return a list of pids, since it's not a hierarchy
-    const pid: number | number[] = browsers.getBrowserPid()
-
-    debug({ pid })
+    const pid: number | number[] = instance && instance.pid
 
     return (Array.isArray(pid) ? (pid as number[]).includes(proc.pid) : proc.pid === pid)
       || isParentProcessInGroup(proc, 'browser')
@@ -128,6 +127,23 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
   return cyProcesses
 }
 
+export const _renameBrowserGroup = (processes) => {
+  const instance = browsers.getBrowserInstance()
+  const displayName = _.get(instance, 'browser.displayName')
+
+  processes.forEach((proc) => {
+    if (!displayName) {
+      return
+    }
+
+    if (proc.group === 'browser') {
+      proc.group = displayName
+    }
+  })
+
+  return processes
+}
+
 export const _printGroupedProcesses = (processes) => {
   debugVerbose('all Cypress-launched processes: %s', require('util').inspect(processes))
 
@@ -204,6 +220,7 @@ export const _printGroupedProcesses = (processes) => {
 function _checkProcesses () {
   return si.processes()
   .then(_groupCyProcesses)
+  .then(_renameBrowserGroup)
   .then(_printGroupedProcesses)
   .then(_scheduleProcessCheck)
   .catch((err) => {

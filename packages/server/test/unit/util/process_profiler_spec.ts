@@ -3,7 +3,7 @@ import '../../spec_helper'
 import _ from 'lodash'
 import si from 'systeminformation'
 import { expect } from 'chai'
-import { _groupCyProcesses } from '../../../lib/util/process_profiler'
+import { _groupCyProcesses, _renameBrowserGroup } from '../../../lib/util/process_profiler'
 import sinon from 'sinon'
 
 const browsers = require('../../../lib/browsers')
@@ -109,7 +109,7 @@ const PROCESSES: Partial<si.Systeminformation.ProcessesProcessData>[] = [
 describe('lib/util/process_profiler', function () {
   context('._groupCyProcesses', () => {
     it('groups correctly', () => {
-      sinon.stub(browsers, 'getBrowserPid').returns(BROWSER_PID)
+      sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
       sinon.stub(plugins, 'getPluginPid').returns(PLUGIN_PID)
       sinon.stub(videoCapture, 'getFfmpegPid').returns(FFMPEG_PID)
 
@@ -135,6 +135,28 @@ describe('lib/util/process_profiler', function () {
       checkGroup(SHARED_BROKER_PID, 'electron-shared')
       checkGroup(SHARED_UTILITY_PID, 'electron-shared')
       checkGroup(SHARED_ZYGOTE_PID, 'electron-shared')
+    })
+  })
+
+  context('._renameBrowserGroup', () => {
+    it('renames browser-grouped processes to correct name', () => {
+      sinon.stub(browsers, 'getBrowserInstance').returns({ browser: { displayName: 'FooBrowser' } })
+
+      const processes = [
+        { group: 'foo' },
+        { group: 'bar' },
+        { group: 'browser', pid: 1 },
+        { group: 'browser', pid: 2 },
+      ]
+
+      const expected = [
+        { group: 'foo' },
+        { group: 'bar' },
+        { group: 'FooBrowser', pid: 1 },
+        { group: 'FooBrowser', pid: 2 },
+      ]
+
+      expect(_renameBrowserGroup(processes)).to.deep.eq(expected)
     })
   })
 })
