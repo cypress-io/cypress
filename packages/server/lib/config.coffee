@@ -151,8 +151,7 @@ CONFIG_DEFAULTS = {
   ## deprecated
   javascripts:                   []
 
-  ## experimental
-  ##  example:
+  ## experimental keys (should all start with "experimental" prefix)
   experimentalComponentTesting:  false
 }
 
@@ -193,6 +192,7 @@ validationRules = {
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
   # experimental flag validation here
+  experimentalComponentTesting: v.isBoolean
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -237,8 +237,6 @@ hideSpecialVals = (val, key) ->
 
 module.exports = {
   getConfigKeys: -> configKeys.concat(experimentalConfigKeys)
-
-  getExperimentalConfigKeys: -> experimentalConfigKeys
 
   isValidCypressEnvValue: (value) ->
     # names of config environments, see "config/app.yml"
@@ -378,7 +376,7 @@ module.exports = {
   updateWithPluginValues: (cfg, overrides = {}) ->
     ## diff the overrides with cfg
     ## including nested objects (env)
-    debug("starting config %o", cfg.resolved)
+    debug("starting config %o", cfg)
     debug("overrides %o", overrides)
 
     # make sure every option returned from the plugins file
