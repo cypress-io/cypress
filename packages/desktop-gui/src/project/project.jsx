@@ -78,7 +78,7 @@ class Project extends Component {
   _renderWarnings = () => {
     const { warnings } = this.props.project
 
-    return _.map(warnings, (warning, i) => (!warning.dismissed && <WarningMessage key={i} warning={warning.warning} onClearWarning={() => this._removeWarning(warning)}/>))
+    return _.map(warnings, (warning, i) => (!warning.dismissed && <WarningMessage key={i} warning={warning} onClearWarning={() => this._removeWarning(warning)}/>))
   }
 
   _removeWarning = (warning) => {

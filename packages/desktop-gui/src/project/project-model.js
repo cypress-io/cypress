@@ -56,7 +56,7 @@ export default class Project {
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
-  /** @type {{[key: string] : {warning:Error, dismissed: boolean}}} */
+  /** @type {{[key: string] : {warning:Error & {dismissed: boolean}}}} */
   @observable warnings = {}
   @observable apiError
   @observable parentTestsFolderDisplay
@@ -227,14 +227,14 @@ export default class Project {
       return
     }
 
-    this.warnings[id] = { warning }
+    this.warnings[id] = warning
   }
 
   @action clearWarning (warning) {
     if (!warning) {
       // calling with no warning clears all warnings
       return _.each(this.warnings, ((warning) => {
-        return this.clearWarning(warning.warning)
+        return this.clearWarning(warning)
       }))
     }
 
