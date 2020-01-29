@@ -87,7 +87,7 @@ For some issues, there are places you can check for more information. This may h
 
 ### Fill out our Issue Template
 
-When opening an issue, there is a provided [issue template](./ISSUE_TEMPLATE.md). Fill out the information according to the template. This is information needed for Cypress to continue forward with your problem. Any issues that do not follow the issue template will be closed.
+When opening an issue, there is a provided [issue template](./.github/ISSUE_TEMPLATE.md). Fill out the information according to the template. This is information needed for Cypress to continue forward with your problem. Any issues that do not follow the issue template will be closed.
 
 ### Describe Problems
 
@@ -148,9 +148,9 @@ If an issue already exists you should:
 
 ### Does the issue provide all the information from our issue template?
 
-When opening an issue, there is a provided [issue template](./ISSUE_TEMPLATE.md). If the opened issue does not provide enough information asked from the issue template you should:
+When opening an issue, there is a provided [issue template](./.github/ISSUE_TEMPLATE.md). If the opened issue does not provide enough information asked from the issue template you should:
 
-- Explain that we require new issues follow our provided [issue template](./ISSUE_TEMPLATE.md) and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template).
+- Explain that we require new issues follow our provided [issue template](./.github/ISSUE_TEMPLATE.md) and that issues that are opened without this information are automatically closed per our [contributing guidelines](#fill-out-our-issue-template).
 - Close the issue.
 
 ### Are they running the current version of Cypress?
@@ -267,6 +267,17 @@ We try to tag all issues with a `pkg/` tag describing the appropriate package th
 You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/) installed to run the project. We use [avn](https://github.com/wbyoung/avn), a utility to switch to the right npm version, in each folder. Currently, Cypress should be developed using the version specified in root [.node-version](.node-version) file.
 
 ### Getting Started
+
+> **⚠ Running on Windows?**
+>
+> Many of the NPM scripts used during development use commands designed for a Linux-like shell.If you are running a Windows operating system, you may encounter many commands that are not working. To fix this behavior, you have to set a Linux-like shell as the default `npm` script shell. If you have Git for Windows installed, you can set Git Bash as the default script shell by using the following command:
+> ```bash
+> npm config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"  
+> ```
+> Git Bash may be installed in `Program Files`, if so, use the following command:
+>```bash
+>npm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"
+>```
 
 **Install all dependencies:**
 
@@ -464,7 +475,7 @@ The repository is setup with two main (protected) branches.
 
 ### Pull Requests
 
-- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./ISSUE_TEMPLATE.md)**.
+- When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./.github/ISSUE_TEMPLATE.md)**.
 - PR's can be opened before all the work is finished. In fact we encourage this! Please write `[WIP]` in the title of your Pull Request if your PR is not ready for review - someone will review your PR as soon as the `[WIP]` is removed.
 - Fill out the [Pull Request Tempalte](./PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleteing those sections. PR's will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.

@@ -292,9 +292,9 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
                                                                                                     
   Running:  simple_spec.coffee                                                              (1 of 1)
 
-Warning: Cypress can only record videos when running headlessly.
+Warning: Cypress can only record videos of Electron when running headlessly.
 
-You have set the 'electron' browser to run headed.
+You have set the Electron browser to run headed.
 
 A video will not be recorded when using this mode.
 

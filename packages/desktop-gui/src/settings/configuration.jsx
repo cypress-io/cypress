@@ -4,35 +4,51 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { ObjectInspector, ObjectName } from 'react-inspector'
-
 import { configFileFormatted } from '../lib/config-file-formatted'
 import ipc from '../lib/ipc'
 
-const formatData = (data) => {
-  if (Array.isArray(data)) {
-    return _.map(data, (v) => {
-      if (_.isObject(v) && (v.name || v.displayName)) {
-        return _.defaultTo(v.displayName, v.name)
-      }
+const valueToString = (value) => {
+  return (
+    value.displayName ||
+    value.name ||
+    (_.isObject(value) && _.keys(value).join(', ')) ||
+    String(value)
+  )
+}
 
-      return String(v)
-    }).join(', ')
+const formatValue = (value) => {
+  if (Array.isArray(value)) {
+    return _.map(value, valueToString).join(', ')
   }
 
-  if (_.isObject(data)) {
-    return _.defaultTo(_.defaultTo(data.displayName, data.name), String(Object.keys(data).join(', ')))
+  if (_.isObject(value)) {
+    return valueToString(value)
   }
 
   const excludedFromQuotations = ['null', 'undefined']
 
-  if (_.isString(data) && !excludedFromQuotations.includes(data)) {
-    return `"${data}"`
+  if (_.isString(value) && !excludedFromQuotations.includes(value)) {
+    return `"${value}"`
   }
 
-  return String(data)
+  return String(value)
 }
+
+const normalizeWithoutMeta = (value = {}) => {
+  const pairs = _.toPairs(value)
+  const values = _.reduce(pairs, (acc, [key, value]) => _.merge({}, acc, {
+    [key]: value ? value.value : {},
+  }), {})
+
+  if (_.isEmpty(values)) {
+    return null
+  }
+
+  return values
+}
+
 const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
-  const formattedData = formatData(data)
+  const formattedData = formatValue(data)
 
   return (
     <span className="line" key={name}>
@@ -40,11 +56,18 @@ const ObjectLabel = ({ name, data, expanded, from, isNonenumerable }) => {
       <span>:</span>
       {!expanded && (
         <>
-          <Tooltip title={from} placement='right' className='cy-tooltip'>
+          {from && (
+            <Tooltip title={from} placement='right' className='cy-tooltip'>
+              <span className={cn(from, 'key-value-pair-value')}>
+                <span>{formattedData}</span>
+              </span>
+            </Tooltip>
+          )}
+          {!from && (
             <span className={cn(from, 'key-value-pair-value')}>
               <span>{formattedData}</span>
             </span>
-          </Tooltip>
+          )}
         </>
       )}
       {expanded && Array.isArray(data) && (
@@ -58,25 +81,31 @@ ObjectLabel.defaultProps = {
   data: 'undefined',
 }
 
-const createComputeFromValue = (obj) => {
-  return (name, path) => {
-    const pathParts = path.split('.')
-    const pathDepth = pathParts.length
+const computeFromValue = (obj, name, path) => {
+  const normalizedPath = path.replace('$.', '').replace(name, `['${name}']`)
+  let value = _.get(obj, normalizedPath)
 
-    const rootKey = pathDepth <= 2 ? name : pathParts[1]
+  if (!value) {
+    const firstKeyInPath = _.toPath(normalizedPath)[0]
 
-    return obj[rootKey] ? obj[rootKey].from : undefined
+    value = _.get(obj, firstKeyInPath)
   }
+
+  if (!value) {
+    return undefined
+  }
+
+  return value.from ? value.from : undefined
 }
 
 const ConfigDisplay = ({ data: obj }) => {
-  const computeFromValue = createComputeFromValue(obj)
+  const getFromValue = _.partial(computeFromValue, obj)
   const renderNode = ({ depth, name, data, isNonenumerable, expanded, path }) => {
     if (depth === 0) {
       return null
     }
 
-    const from = computeFromValue(name, path)
+    const from = getFromValue(name, path)
 
     return (
       <ObjectLabel
@@ -89,9 +118,9 @@ const ConfigDisplay = ({ data: obj }) => {
     )
   }
 
-  const data = _.reduce(obj, (acc, value, key) => Object.assign(acc, {
-    [key]: value.value,
-  }), {})
+  const data = normalizeWithoutMeta(obj)
+
+  data.env = normalizeWithoutMeta(obj.env)
 
   return (
     <div className="config-vars">
@@ -136,7 +165,7 @@ const Configuration = observer(({ project }) => (
           <td>set from CLI arguments</td>
         </tr>
         <tr className='config-keys'>
-          <td><span className='plugins'>plugin</span></td>
+          <td><span className='plugin'>plugin</span></td>
           <td>set from plugin file</td>
         </tr>
       </tbody>

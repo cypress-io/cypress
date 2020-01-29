@@ -1,5 +1,14 @@
 version: 2.1
 
+# usually we don't build Mac app - it takes a long time
+# but sometimes we want to really confirm we are doing the right thing
+# so just add your branch to the list here to build and test on Mac
+macBuildFilters: &macBuildFilters
+  filters:
+    branches:
+      only:
+        - develop
+
 defaults: &defaults
   parallelism: 1
   working_directory: ~/cypress
@@ -19,11 +28,12 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.0.0-chrome73
+      - image: cypress/browsers:node12.8.1-chrome78-ff70
     environment:
       PLATFORM: linux
 
@@ -134,6 +144,8 @@ commands:
       - save-cache:
           packageName: ts
       - save-cache:
+          packageName: ui-components
+      - save-cache:
           packageName: web-config
 
   restore-cache:
@@ -207,6 +219,9 @@ commands:
       - restore-cache:
           packageName: ts
           packagePath: packages/ts/package.json
+      - restore-cache:
+          packageName: ui-components
+          packagePath: packages/ui-components/package.json
       - restore-cache:
           packageName: web-config
           packagePath: packages/web-config/package.json
@@ -557,6 +572,26 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             npm run cypress:run -- --record --parallel --group reporter
           working_directory: packages/reporter
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  "ui-components-integration-tests":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run build
+          working_directory: packages/ui-components
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group ui-components
+          working_directory: packages/ui-components
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -960,54 +995,71 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - server-performance-tests:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-1:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-2:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-3:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-4:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-5:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-6:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-7:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-8:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-1:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-2:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-3:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-4:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-5:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-6:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-7:
+        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-8:
+        context: test-runner:performance-tracking
         requires:
           - build
     - driver-integration-tests-chrome:
@@ -1021,6 +1073,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - reporter-integration-tests:
+        requires:
+          - build
+    - ui-components-integration-tests:
         requires:
           - build
     - run-launcher:
@@ -1059,6 +1114,7 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
     - build-binary:
+        context: test-runner:performance-tracking
         requires:
           - build
     - upload-binary:
@@ -1120,20 +1176,14 @@ mac-workflow: &mac-workflow
     - build:
         name: Mac build
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
 
     - lint:
         name: Mac lint
         executor: mac
+        <<: *macBuildFilters
         requires:
           - Mac build
-        filters:
-          branches:
-            only:
-              - develop
 
     # maybe run unit tests?
 
@@ -1162,10 +1212,7 @@ mac-workflow: &mac-workflow
         name: Mac binary
         context: org-global
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac build
 
@@ -1183,10 +1230,7 @@ mac-workflow: &mac-workflow
     - test-kitchensink:
         name: Test Mac Kitchensink
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac build
 

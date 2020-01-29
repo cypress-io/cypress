@@ -195,7 +195,7 @@ describe "src/cy/commands/navigation", ->
       it "does not log 'Page Load' events", ->
         cy.reload().then ->
           @logs.slice(0).forEach (log) ->
-            expect(log.get("event")).to.be.false
+            expect(log.get("name")).not.eq('page load')
 
       it "logs before + after", ->
         beforeunload = false
@@ -393,7 +393,7 @@ describe "src/cy/commands/navigation", ->
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
-              expect(log.get("event")).to.be.false
+              expect(log.get("name")).not.eq('page load')
 
       it "logs before + after", ->
         beforeunload = false
@@ -782,7 +782,7 @@ describe "src/cy/commands/navigation", ->
           .visit("/fixtures/jquery.html")
           .then ->
             @logs.slice(0).forEach (log) ->
-              expect(log.get("event")).to.be.false
+              expect(log.get("name")).not.eq('page load')
 
       it "logs immediately before resolving", ->
         expected = false
@@ -1555,7 +1555,8 @@ describe "src/cy/commands/navigation", ->
 
           expect(Cookie.get("__cypress.initial")).to.be.undefined
 
-    it "does not reset the timeout", (done) ->
+    ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973
+    it.skip "does not reset the timeout", (done) ->
       cy.timeout(1000)
 
       ## previously loading would reset the timeout

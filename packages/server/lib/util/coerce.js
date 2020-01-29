@@ -7,7 +7,7 @@ const isValue = (value) => {
   }
 }
 
-module.exports = function (value) {
+module.exports = (value) => {
   const num = _.toNumber(value)
   const bool = toBoolean(value)
 

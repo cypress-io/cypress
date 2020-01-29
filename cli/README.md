@@ -28,7 +28,7 @@ See `scripts/build.js`. Note that the built npm package will include [NPM_README
 
 ## Testing
 
-## Automated
+### Automated
 
 You can run unit tests with:
 

@@ -1,18 +1,19 @@
-<!-- Is this a question? Don't open an issue. Ask in our chat https://on.cypress.io/chat  -->
+<!-- Is this a question? Questions WILL BE CLOSED. Ask in our chat https://on.cypress.io/chat  -->
 
 ### Current behavior:
 
-<!-- images, stack traces, etc -->
+<!-- A description including screenshots, stack traces, DEBUG logs, etc -->
 
 ### Desired behavior:
 
-<!-- A clear concise description of what you want to happen -->
+<!-- A clear description of what you want to happen -->
 
-### Steps to reproduce: (app code and test code)
+### Test code to reproduce
 
-<!-- Issues without reproducible steps WILL BE CLOSED -->
+<!-- If we cannot fully run the tests as provided the issue WILL BE CLOSED -->
+<!-- Issues without a reproducible example WILL BE CLOSED -->
 
-<!-- You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then tell us the repo/branch to try. -->
+<!-- You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then link to your fork -->
 
 ### Versions
 

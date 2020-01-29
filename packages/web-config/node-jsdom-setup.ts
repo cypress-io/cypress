@@ -88,6 +88,10 @@ export const register = ({
         return {}
       }
 
+      if (args[0].endsWith('.png')) {
+        return args[0]
+      }
+
       const ret = _load.apply(this, browserPkg)
 
       return ret

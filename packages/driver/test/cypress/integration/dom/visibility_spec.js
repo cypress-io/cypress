@@ -444,15 +444,6 @@ describe('src/cypress/dom/visibility', () => {
 </div>\
 `)
 
-      this.$parentsWithBackfaceVisibilityHidden = add(`\
-<div style="position: absolute; width: 200px; height: 260px; background: red; backface-visibility: hidden;">
-  <span id="front">front</span>
-</div>
-<div style="position: absolute; width: 200px; height: 260px; background: blue; backface-visibility: hidden; transform: rotateY(180deg);">
-  <span id="back" >back</span>
-</div>\
-`)
-
       this.$ancestorTransformMakesElOutOfBoundsOfAncestor = add(`\
 <div style='margin-left: 100px; overflow: hidden; width: 100px;'>
   <div style='transform: translateX(-100px); width: 200px;'>
@@ -801,11 +792,11 @@ describe('src/cypress/dom/visibility', () => {
     })
 
     describe('css transform', () => {
-      describe('element visibility by css transform', () => {
-        const add = (el) => {
-          return $(el).appendTo(cy.$$('body'))
-        }
+      const add = (el) => {
+        return $(el).appendTo(cy.$$('body'))
+      }
 
+      describe('element visibility by css transform', () => {
         it('is visible when an element is translated a bit', () => {
           const el = add(`<div style="transform: translate(10px, 10px)">Translated</div>`)
 
@@ -899,6 +890,76 @@ describe('src/cypress/dom/visibility', () => {
         })
       })
 
+      describe('when height/width is set', () => {
+        it('is visible when transform is not 0, but height is 0', () => {
+          const el = add('<div style="transform: translate(0, 0); height: 0;">Text</div>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when transform is not 0, but width is 0', () => {
+          const el = add('<p style="transform: rotateX(30deg); width: 0;">Text</p>')
+
+          expect(el).to.be.visible
+        })
+
+        it('is visible when parent transform is not 0, but height is 0', () => {
+          const el = add('<div style="transform: translate(0, 0); height: 0;"><p id="tr-p-0">Text</p></div>')
+
+          expect(el.find('#tr-p-0')).to.be.visible
+        })
+
+        it('is visible when parent transform is not 0, but width is 0', () => {
+          const el = add('<div style="transform: translate(0, 0); height: 0%;"><p id="tr-p-1">Test</p></div>')
+
+          expect(el.find('#tr-p-1')).to.be.visible
+        })
+
+        it('is invisible when parent transform is 0, but height is not 0', () => {
+          const el = add('<div style="transform: scaleX(0); height: 10px"><p id="tr-p-2">Test</p></div>')
+
+          expect(el.find('#tr-p-2')).to.be.hidden
+        })
+
+        describe('invisible when overflow: hidden', () => {
+          it('height: 0 + overflow', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('height: 0 + overflow-x', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('height: 0 + overflow-y', () => {
+            const el = add('<div style="height: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow-x', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-x: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+
+          it('width: 0 + overflow-y', () => {
+            const el = add('<div style="width: 0px; transform: translate(1, 2); overflow-y: hidden"><p id="h0th">Test</p></div>')
+
+            expect(el.find('#h0th')).to.be.hidden
+          })
+        })
+      })
+
       it('is hidden when outside parents transform scale', function () {
         expect(this.$parentWithTransformScaleElOutsideScale.find('span')).to.be.hidden
       })
@@ -913,58 +974,6 @@ describe('src/cypress/dom/visibility', () => {
 
       it('is visible when in ancestor\'s bounds due to ancestor\'s transform', function () {
         expect(this.$ancestorTransformMakesElInBoundsOfAncestor.find('#inbounds')).to.be.visible
-      })
-    })
-
-    describe('css backface-visibility', () => {
-      describe('element visibility by backface-visibility and rotation', () => {
-        const add = (el) => {
-          return $(el).appendTo(cy.$$('body'))
-        }
-
-        it('is visible when there is no transform', () => {
-          const el = add('<div>No transform</div>')
-
-          expect(el).to.be.visible
-        })
-
-        it('is visible when an element is rotated < 90 degrees', () => {
-          const el = add('<div style="backface-visibility: hidden; transform: rotateX(45deg)">rotateX(45deg)</div>')
-
-          expect(el).to.be.visible
-
-          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-45deg)">rotateY(-45deg)</div>')
-
-          expect(el2).to.be.visible
-        })
-
-        it('is invisible when an element is rotated > 90 degrees', () => {
-          const el = add('<div style="backface-visibility: hidden; transform: rotateX(135deg)">rotateX(135deg)</div>')
-
-          expect(el).to.be.hidden
-
-          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-135deg)">rotateY(-135deg)</div>')
-
-          expect(el2).to.be.hidden
-        })
-
-        it('is invisible when an element is rotated in 90 degrees', () => {
-          const el = add('<div style="backface-visibility: hidden; transform: rotateX(90deg)">rotateX(90deg)</div>')
-
-          expect(el).to.be.hidden
-
-          const el2 = add('<div style="backface-visibility: hidden; transform: rotateY(-90deg)">rotateY(-90deg)</div>')
-
-          expect(el2).to.be.hidden
-        })
-      })
-
-      it('is visible when backface not visible', function () {
-        expect(this.$parentsWithBackfaceVisibilityHidden.find('#front')).to.be.visible
-      })
-
-      it('is hidden when backface visible', function () {
-        expect(this.$parentsWithBackfaceVisibilityHidden.find('#back')).to.be.hidden
       })
     })
 
@@ -1051,7 +1060,7 @@ This element '<div#coveredUpPosFixed>' is not visible because it has CSS propert
       })
 
       it('cannot determine why element is not visible', function () {
-        this.reasonIs(this.$btnOpacity, 'Cypress could not determine why this element \'<button>\' is not visible.')
+        this.reasonIs(this.$btnOpacity, 'This element \'<button>\' is not visible.')
       })
     })
   })

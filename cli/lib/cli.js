@@ -2,7 +2,7 @@ const _ = require('lodash')
 const commander = require('commander')
 const { stripIndent } = require('common-tags')
 const logSymbols = require('log-symbols')
-const debug = require('debug')('cypress:cli')
+const debug = require('debug')('cypress:cli:cli')
 const util = require('./util')
 const logger = require('./logger')
 const errors = require('./errors')
@@ -82,6 +82,8 @@ const parseVariableOpts = (fnArgs, args) => {
     })
   }
 
+  debug('variable-length opts parsed %o', { args, opts })
+
   return util.parseOpts(opts)
 }
 
@@ -101,7 +103,8 @@ const descriptions = {
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if its globally installed',
   group: 'a named group for recorded runs in the Cypress Dashboard',
-  headed: 'displays the Electron browser instead of running headlessly',
+  headed: 'displays the browser instead of running headlessly (defaults to true for Chrome-family browsers)',
+  headless: 'hide the browser instead of running headed (defaults to true for Electron)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
@@ -204,6 +207,7 @@ module.exports = {
     .option('--group <name>', text('group'))
     .option('-k, --key <record-key>', text('key'))
     .option('--headed', text('headed'))
+    .option('--headless', text('headless'))
     .option('--no-exit', text('exit'))
     .option('--parallel', text('parallel'))
     .option('-p, --port <port>', text('port'))
@@ -215,7 +219,7 @@ module.exports = {
     .option('-t, --tag <tag>', text('tag'))
     .option('--dev', text('dev'), coerceFalse)
     .action((...fnArgs) => {
-      debug('running Cypress')
+      debug('running Cypress with args %o', fnArgs)
       require('./exec/run')
       .start(parseVariableOpts(fnArgs, args))
       .then(util.exit)

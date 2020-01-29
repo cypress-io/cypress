@@ -14,9 +14,9 @@
     "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch"
   },
   "dependencies": {
-    "socket.io": "2.2.0",
+    "socket.io": "2.3.0",
     "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#8c61ca1475c741285f336d9ad5bc05cc561b1066",
-    "socket.io-client": "2.2.0"
+    "socket.io-client": "2.3.0"
   },
   "devDependencies": {
     "bin-up": "1.2.2",
