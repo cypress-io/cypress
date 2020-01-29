@@ -10,25 +10,12 @@ const osIconLookup = {
   linux: 'linux',
 }
 
-const browserIconLookup = {
-  chrome: 'chrome',
-  electron: 'chrome',
-  firefox: 'firefox',
-  safari: 'safari',
-}
-
 export const durationFormatted = duration.format
 
 export const osIcon = (osName) => {
   if (!osName) return ''
 
   return osIconLookup[osName] || 'desktop'
-}
-
-export const browserIcon = (browserName) => {
-  if (!browserName) return ''
-
-  return browserIconLookup[_.lowerCase(browserName)] || 'globe'
 }
 
 export const browserNameFormatted = (browserName) => {
