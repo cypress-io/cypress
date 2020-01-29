@@ -233,9 +233,9 @@ export default class Project {
   @action clearWarning (warning) {
     if (!warning) {
       // calling with no warning clears all warnings
-      return this.warnings.map((warning) => {
+      return _.each(this.warnings, ((warning) => {
         return this.clearWarning(warning.warning)
-      })
+      }))
     }
 
     warning.dismissed = true
