@@ -57,7 +57,6 @@
     "parse-domain": "bahmutov/parse-domain#fb60bd4",
     "setimmediate": "1.0.5",
     "sinon": "7.5.0",
-    "strict-cookie-parser": "3.1.0",
     "text-mask-addons": "3.8.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
