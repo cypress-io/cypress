@@ -13,7 +13,7 @@ import utils from './utils'
 import protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
-import errors from '../errors'
+import errors from '../errors.coffee'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any

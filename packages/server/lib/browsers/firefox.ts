@@ -11,7 +11,7 @@ import firefoxUtil from './firefox-util'
 import plugins from '../plugins'
 import utils from './utils'
 import { Browser } from '@packages/launcher'
-import errors from '../errors'
+import errors from '../errors.coffee'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -136,7 +136,7 @@ const firefoxOptionsDefaults = {
 
 export async function open (browser: Browser, url, options: any = {}) {
   let launchOptions = {
-    extensions: [],
+    extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
     firefoxOptions: _.extend({}, firefoxOptionsDefaults),
     args: [
