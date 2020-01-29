@@ -31,13 +31,14 @@ const testLinks = (component: ShallowWrapper<any, Readonly<{}>, React.Component<
   component.find('.gc-status-bar').simulate('click')
   expect(component.state('expanded')).to.be.true
 
-  const a = component.find('a')
-  const href = a.prop('href')
+  component.find('a').forEach((a) => {
+    const href = a.prop('href')
 
-  expect(href).to.eq('https://on.cypress.io/firefox-gc-issue')
-  a.simulate('click', { currentTarget: { href }, preventDefault: () => {} })
+    expect(href).to.eq('https://on.cypress.io/firefox-gc-issue')
+    a.simulate('click', { currentTarget: { href }, preventDefault: () => {} })
 
-  expect(props.events.emit).to.be.calledWith('external:open', href)
+    expect(props.events.emit).to.be.calledWith('external:open', href)
+  })
 }
 
 describe('<ForcedGcWarning />', () => {
