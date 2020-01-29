@@ -76,7 +76,8 @@ module.exports = {
               child.destroy()
 
           ## add this pid to list of pids
-          instance?.pid?.push(tryToCall(child.webContents, 'getOSProcessId'))
+          tryToCall child, ->
+            instance?.pid?.push(child.webContents.getOSProcessId())
     }
 
     _.defaultsDeep({}, options, defaults)
@@ -259,7 +260,7 @@ module.exports = {
           events.emit("exit")
 
         instance = _.extend events, {
-          pid:                [tryToCall(win.webContents, 'getOSProcessId')]
+          pid:                [tryToCall(win, -> win.webContents.getOSProcessId())]
           browserWindow:      win
           kill:               -> tryToCall(win, "destroy")
           removeAllListeners: -> tryToCall(win, "removeAllListeners")
