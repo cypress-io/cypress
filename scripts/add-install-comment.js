@@ -13,7 +13,7 @@ const {
   getCIBuildUrl,
 } = require('./utils')
 const { addCommitComment } = require('@cypress/github-commit-status-check')
-const { stripIndent } = require('common-tags')
+const { html, stripIndent } = require('common-tags')
 
 /* eslint-disable no-console */
 
@@ -62,11 +62,32 @@ const getLinuxInstallMessage = () => {
 }
 
 const getWindowsInstallMessage = () => {
-  return stripIndent`
+  return html`
     ${preamble}
 
-    set CYPRESS_INSTALL_BINARY=${binary}
-    npm install ${binary}
+    Instructions are included below, depending on the shell you are using.
+
+    #### In Command Prompt (\`cmd.exe\`):
+
+        set CYPRESS_INSTALL_BINARY=${binary}
+        npm install ${npm}
+
+    #### In PowerShell:
+
+        $env:CYPRESS_INSTALL_BINARY = ${binary}
+        npm install ${npm}
+
+    #### In Git Bash:
+
+        export CYPRESS_INSTALL_BINARY=${binary}
+        npm install ${npm}
+
+    #### Using \`cross-env\`:
+
+    If the above commands do not work for you, you can also try using \`cross-env\`:
+
+        npm i -g cross-env
+        cross-env CYPRESS_INSTALL_BINARY=${binary} npm install ${npm}
   `
 }
 

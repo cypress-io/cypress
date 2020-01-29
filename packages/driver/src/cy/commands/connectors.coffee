@@ -135,8 +135,26 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       }
     .finally(cleanup)
 
-  invokeFn = (subject, str, args...) ->
-    options = {}
+  invokeItsFn = (subject, str, options, args...) ->
+    return invokeBaseFn(options or { log: true }, subject, str, args...)
+
+  invokeFn = (subject, optionsOrStr, args...) ->
+    optionsPassed = _.isObject(optionsOrStr) and !_.isFunction(optionsOrStr)
+    options = null 
+    str = null
+
+    if not optionsPassed
+      str = optionsOrStr
+      options = { log: true }
+    else
+      options = optionsOrStr
+      if args.length > 0
+        str = args[0]
+        args = args.slice(1)
+
+    return invokeBaseFn(options, subject, str, args...)
+
+  invokeBaseFn = (options, subject, str, args...) ->
 
     ## name could be invoke or its!
     name = state("current").get("name")
@@ -150,25 +168,42 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       return ".#{str}(" + $utils.stringify(args) + ")"
 
+    ## to allow the falsy value 0 to be used
+    isProp = (str) -> !!str or str is 0
+
     message = getMessage()
 
     traversalErr = null
 
-    options._log = Cypress.log
-      message: message
-      $el: if $dom.isElement(subject) then subject else null
-      consoleProps: ->
-        Subject: subject
+    if options.log
+      options._log = Cypress.log
+        message: message
+        $el: if $dom.isElement(subject) then subject else null
+        consoleProps: ->
+          Subject: subject
 
-    if not _.isString(str)
-      $utils.throwErrByPath("invoke_its.invalid_1st_arg", {
+    ## check for false positive (negative?) with 0 given as index
+    if not isProp(str)
+      $utils.throwErrByPath("invoke_its.null_or_undefined_property_name", {
+        onFail: options._log
+        args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
+      })
+
+    if not _.isString(str) and not _.isNumber(str)
+      $utils.throwErrByPath("invoke_its.invalid_prop_name_arg", {
+        onFail: options._log
+        args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
+      })
+
+    if not _.isObject(options) or _.isFunction(options)
+      $utils.throwErrByPath("invoke_its.invalid_options_arg", {
         onFail: options._log
         args: { cmd: name }
       })
 
-    if isCmdIts and args.length > 0
-      $utils.throwErrByPath("invoke_its.invalid_num_of_args", {
-        onFail: options._log
+    if isCmdIts and args and args.length > 0	
+      $utils.throwErrByPath("invoke_its.invalid_num_of_args", {	
+        onFail: options._log	
         args: { cmd: name }
       })
 
@@ -222,7 +257,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       ## if we're attempting to tunnel into
       ## a null or undefined object...
-      if prop and valIsNullOrUndefined
+      if isProp(prop) and valIsNullOrUndefined
         if index is 0
           ## give an error stating the current subject is nil
           traversalErr = subjectNullOrUndefinedErr(prop, acc)
@@ -234,7 +269,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return acc
 
       ## if we have no more properties to traverse
-      if not prop
+      if not isProp(prop)
         if valIsNullOrUndefined
           ## set traversal error that the final value is null or undefined
           traversalErr = propertyValueNullOrUndefinedErr(previousProp, acc)
@@ -295,7 +330,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       actualSubject = remoteSubject or subject
 
-      paths = str.split(".")
+      if _.isString(str)
+        paths = str.split(".")
+      else
+        paths = [str]
 
       prop = traverseObjectAtPath(actualSubject, paths)
 
@@ -446,9 +484,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## return values are undefined.  prob should rethink
     ## this and investigate why that is the default behavior
     ## of child commands
-    invoke: ->
-      invokeFn.apply(@, arguments)
+    invoke: (subject, optionsOrStr, args...) ->
+      invokeFn.apply(@, [subject, optionsOrStr, args...])
 
-    its: ->
-      invokeFn.apply(@, arguments)
+    its: (subject, str, options, args...) ->
+      invokeItsFn.apply(@, [subject, str, options, args...])
   })

@@ -1,20 +1,10 @@
 import _ from 'lodash'
 import React from 'react'
+import { BrowserIcon } from '@packages/ui-components'
 
 import Dropdown from '../dropdown/dropdown'
 
 const displayName = (name) => _.capitalize(name)
-
-const icon = (browser) => {
-  switch (browser) {
-    case 'chrome':
-    case 'chromium':
-    case 'canary':
-      return 'chrome'
-    default:
-      return ''
-  }
-}
 
 const noBrowsers = () => (
   <div>
@@ -24,7 +14,7 @@ const noBrowsers = () => (
       </small>
     </p>
     <a href='https://www.google.com/chrome/browser/desktop' className='btn btn-primary btn-lg' target='_blank' rel='noopener noreferrer'>
-      <i className='fa fa-chrome'></i>
+      <i className='fas fa-chrome'></i>
       Download Chrome
     </a>
   </div>
@@ -32,7 +22,7 @@ const noBrowsers = () => (
 
 const browser = (browser) => (
   <span>
-    <i className={`fa fa-${icon(browser.name)}`}></i>
+    <BrowserIcon browserName={browser.name} />
     <span>Run {displayName(browser.name)} {browser.majorVersion}</span>
   </span>
 )
@@ -64,7 +54,7 @@ export default ({ browsers, onLaunchBrowser }) => (
       {browsers.length ? browserPicker(browsers, onLaunchBrowser) : noBrowsers()}
       <div className='helper-line'>
         <a className='helper-docs-link' href='https://on.cypress.io/launching-browsers' target='_blank'>
-          <i className='fa fa-question-circle'></i> Why am I seeing this message?
+          <i className='fas fa-question-circle'></i> Why am I seeing this message?
         </a>
       </div>
     </div>

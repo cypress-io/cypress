@@ -11,10 +11,10 @@ The error we received was:
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
 - lib/reporter.coffee
-- lib/project.coffee
+- lib/project.js
 - lib/modes/run.js
-- lib/modes/index.coffee
-- lib/cypress.coffee
+- lib/modes/index.js
+- lib/cypress.js
 - index.js
 - 
 

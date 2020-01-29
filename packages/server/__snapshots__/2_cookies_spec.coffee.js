@@ -31,21 +31,37 @@ exports['e2e cookies with baseurl'] = `
       ✓ issue: #2724 does not fail on invalid cookies
       ✓ can set and clear cookie
       in a cy.visit
-        ✓ can set cookies on way too many redirects with HTTP intermediary
-        ✓ can set cookies on way too many redirects with HTTPS intermediary
+        ✓ can successfully send cookies as a Cookie header
+        with Domain = superdomain
+          ✓ is set properly with no redirects
+          ✓ is set properly with redirects
+        when redirected to a HTTP URL
+          ✓ can set cookies on lots of redirects, ending with different domain
+          ✓ can set cookies on lots of redirects, ending with same domain
+        when redirected to a HTTPS URL
+          ✓ can set cookies on lots of redirects, ending with different domain
+          ✓ can set cookies on lots of redirects, ending with same domain
       in a cy.request
-        ✓ can set cookies on way too many redirects with HTTP intermediary
-        ✓ can set cookies on way too many redirects with HTTPS intermediary
+        ✓ can successfully send cookies as a Cookie header
+        with Domain = superdomain
+          ✓ is set properly with no redirects
+          ✓ is set properly with redirects
+        when redirected to a HTTP URL
+          ✓ can set cookies on lots of redirects, ending with different domain
+          ✓ can set cookies on lots of redirects, ending with same domain
+        when redirected to a HTTPS URL
+          ✓ can set cookies on lots of redirects, ending with different domain
+          ✓ can set cookies on lots of redirects, ending with same domain
 
 
-  14 passing
+  24 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        14                                                                               │
-  │ Passing:      14                                                                               │
+  │ Tests:        24                                                                               │
+  │ Passing:      24                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -69,9 +85,9 @@ exports['e2e cookies with baseurl'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec_baseurl.coffee              XX:XX       14       14        -        -        - │
+  │ ✔  cookies_spec_baseurl.coffee              XX:XX       24       24        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       14       14        -        -        -  
+    ✔  All specs passed!                        XX:XX       24       24        -        -        -  
 
 
 `

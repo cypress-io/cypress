@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
+import { BrowserIcon } from '@packages/ui-components'
+
 import Dropdown from '../dropdown/dropdown'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
@@ -35,7 +37,7 @@ export default class Browsers extends Component {
       return (
         <li className='close-browser'>
           <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
-            <i className='fa fa-fw fa-times'></i>
+            <i className='fas fa-fw fa-times'></i>
             Stop
           </button>
         </li>
@@ -58,25 +60,25 @@ export default class Browsers extends Component {
     let prefixText
 
     if (project.browserState === 'opening') {
-      icon = 'refresh fa-spin'
+      icon = <i className='browser-icon fas fa-sync-alt fa-spin' />
       prefixText = 'Opening'
     } else if (project.browserState === 'opened') {
-      icon = 'check-circle-o green'
+      icon = <i className='browser-icon fas fa-check-circle green far' />
       prefixText = 'Running'
     } else {
-      icon = browser.icon
+      icon = <BrowserIcon browserName={browser.name} />
       prefixText = ''
     }
 
     return (
-      <span className={browser.name}>
-        <i className={`fa fa-${icon}`}></i>{' '}
+      <>
+        {icon}{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
         {this._warn(browser)}
         {this._info(browser)}
-      </span>
+      </>
     )
   }
 
@@ -90,7 +92,7 @@ export default class Browsers extends Component {
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
-          <i className='fa fa-exclamation-triangle' />
+          <i className='fas fa-exclamation-triangle' />
         </Tooltip>
       </span>
     )
@@ -106,7 +108,7 @@ export default class Browsers extends Component {
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
-          <i className='fa fa-info-circle' />
+          <i className='fas fa-info-circle' />
         </Tooltip>
       </span>
     )
