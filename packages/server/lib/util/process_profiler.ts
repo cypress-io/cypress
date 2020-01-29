@@ -2,8 +2,16 @@ import Debug from 'debug'
 import la from 'lazy-ass'
 import _ from 'lodash'
 import si from 'systeminformation'
-import util from 'util'
 import { concatStream } from '@packages/network'
+
+const { getBrowserPid } = require('../browsers')
+const { getPluginPid } = require('../plugins')
+const { getFfmpegPid } = require('../video_capture')
+
+type Group = 'browser' | 'cypress' | 'plugin' | 'desktop-gui' | 'ffmpeg' | 'electron-shared' | 'other'
+type Process = si.Systeminformation.ProcessesProcessData & {
+  group?: Group
+}
 
 const debug = Debug('cypress:server:util:process_profiler')
 const debugVerbose = Debug('cypress-verbose:server:util:process_profiler')
@@ -14,54 +22,125 @@ let started = false
 let groupsOverTime = {}
 
 const formatPidDisplay = (groupedProcesses) => {
-  const pids = _.chain(groupedProcesses).map('pid').map(_.toNumber).value()
+  const pids = _.map(groupedProcesses, 'pid')
+  const maxArrayLength = 6
 
-  // slice off the starting '[ ' and the ending '] ' array brackets
-  return util.inspect(pids, { maxArrayLength: 10 }).slice(2, -2)
+  let display = pids.slice(0, maxArrayLength).join(', ')
+
+  if (pids.length > maxArrayLength) {
+    display += ` ... ${pids.length - maxArrayLength} more items`
+  }
+
+  return display
 }
 
 function checkProcesses () {
   return si.processes()
   .then(({ list }) => {
-    let knownParents: number[] = [process.pid]
-    let cyProcesses: Set<si.Systeminformation.ProcessesProcessData> = new Set()
-
-    const thisProcess = _.find(list, { pid: process.pid })
+    const cyProcesses: Process[] = []
+    const thisProcess: Process = _.find(list, { pid: process.pid })!
 
     la(thisProcess, 'expected to find current pid in process list')
-    cyProcesses.add(thisProcess!)
 
-    function findNewChildren () {
-      return _.filter(list, (v) => {
-        return knownParents.includes(v.parentPid) && !cyProcesses.has(v)
-      })
+    const isParentProcessInGroup = (proc: Process, group: Group) => {
+      return _.chain(cyProcesses).filter({ group }).map('pid').includes(proc.parentPid).value()
     }
 
-    let newChildren: si.Systeminformation.ProcessesProcessData[] = []
+    // is this a browser process launched to run Cypress tests?
+    const isBrowserProcess = (proc: Process): boolean => {
+      // electron will return a list of pids, since it's not a hierarchy
+      const pid: number | number[] = getBrowserPid()
 
-    // build the proc tree one layer at a time until no new children can be found
-    do {
-      newChildren = findNewChildren()
-      newChildren.forEach((child) => {
-        cyProcesses.add(child)
-        knownParents.push(child.pid)
-      })
-    } while (newChildren.length > 0)
+      debug({ pid })
 
-    return Array.from(cyProcesses.values())
+      return (Array.isArray(pid) ? (pid as number[]).includes(proc.pid) : proc.pid === pid)
+        || isParentProcessInGroup(proc, 'browser')
+    }
+
+    const isPluginProcess = (proc: Process): boolean => {
+      return proc.pid === getPluginPid()
+        || isParentProcessInGroup(proc, 'plugin')
+    }
+
+    // is this the renderer for the desktop-gui?
+    const isDesktopGuiProcess = (proc: Process): boolean => {
+      return proc.params.includes('--type=renderer')
+        && !isBrowserProcess(proc)
+    }
+
+    // these processes may be shared between the AUT and desktop-gui
+    // rather than treat them as part of the `browser` in `run` mode and have
+    // their usage in `open` mode be ambiguous, just put them in their own group
+    const isElectronSharedProcess = (proc: Process): boolean => {
+      return proc.params.includes('--type=broker')
+      || proc.params.includes('--type=gpu-process')
+      || proc.params.includes('--type=utility')
+      || proc.params.includes('--type=zygote')
+    }
+
+    const getProcessGroup = (proc: Process): Group => {
+      if (proc === thisProcess) {
+        return 'cypress'
+      }
+
+      if (isBrowserProcess(proc)) {
+        return 'browser'
+      }
+
+      if (isPluginProcess(proc)) {
+        return 'plugin'
+      }
+
+      if (isDesktopGuiProcess(proc)) {
+        return 'desktop-gui'
+      }
+
+      if (proc.pid === getFfmpegPid()) {
+        return 'ffmpeg'
+      }
+
+      if (isElectronSharedProcess(proc)) {
+        return 'electron-shared'
+      }
+
+      return 'other'
+    }
+
+    const classifyProcess = (proc: Process) => {
+      const classify = (group: Group) => {
+        proc.group = group
+        cyProcesses.push(proc)
+
+        // queue all children
+        _.chain(list)
+        .filter({ parentPid: proc.pid })
+        .map(classifyProcess)
+        .value()
+      }
+
+      classify(getProcessGroup(proc))
+    }
+
+    classifyProcess(thisProcess)
+
+    return cyProcesses
   })
   .then((processes) => {
-    debugVerbose('all Cypress-launched processes: %o', processes)
+    debugVerbose('all Cypress-launched processes: %s', require('util').inspect(processes))
 
-    const consoleBuffer = concatStream(debug)
+    const consoleBuffer = concatStream((buf) => {
+      // get rid of trailing newline
+      debug(String(buf).trim())
+    })
+
     // eslint-disable-next-line no-console
     const buffedConsole = new console.Console(consoleBuffer)
 
     const groupTotals = _.chain(processes)
-    .groupBy((proc) => proc!.name.split(' ')[0])
-    .mapValues((groupedProcesses, groupName) => {
+    .groupBy('group')
+    .mapValues((groupedProcesses, group) => {
       return {
-        groupName,
+        group,
         processCount: groupedProcesses.length,
         pids: formatPidDisplay(groupedProcesses),
         cpuPercent: _.sumBy(groupedProcesses, 'pcpu'),
@@ -80,14 +159,14 @@ function checkProcesses () {
       acc.memRssMb += val.memRssMb
 
       return acc
-    }, { groupName: 'TOTAL', processCount: 0, pids: '-', cpuPercent: 0, memRssMb: 0 }))
+    }, { group: 'TOTAL', processCount: 0, pids: '-', cpuPercent: 0, memRssMb: 0 }))
 
     groupTotals.forEach((total) => {
-      if (!groupsOverTime[total.groupName]) {
-        groupsOverTime[total.groupName] = []
+      if (!groupsOverTime[total.group]) {
+        groupsOverTime[total.group] = []
       }
 
-      const measurements = groupsOverTime[total.groupName]
+      const measurements = groupsOverTime[total.group]
 
       measurements.push(total)
 
@@ -106,7 +185,7 @@ function checkProcesses () {
     })
 
     buffedConsole.table(groupTotals, [
-      'groupName',
+      'group',
       'processCount',
       'pids',
       'cpuPercent',

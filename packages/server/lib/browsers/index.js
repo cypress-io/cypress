@@ -125,6 +125,12 @@ module.exports = {
 
   close: kill,
 
+  // note: does not guarantee that `browser` is still running
+  // note: electron will return a list of pids for each webContent
+  getBrowserPid () {
+    return instance ? instance.pid : undefined
+  },
+
   getAllBrowsersWith (nameOrPath) {
     debug('getAllBrowsersWith %o', { nameOrPath })
     if (nameOrPath) {

@@ -11,6 +11,8 @@ const fs = require('./util/fs')
 // extra verbose logs for logging individual frames
 const debugFrames = require('debug')('cypress-verbose:server:video:frames')
 
+let currentPid
+
 debug('using ffmpeg from %s', ffmpegPath)
 
 ffmpeg.setFfmpegPath(ffmpegPath)
@@ -27,6 +29,10 @@ const deferredPromise = function () {
 }
 
 module.exports = {
+  getFfmpegPid () {
+    return currentPid
+  },
+
   getMsFromDuration (duration) {
     return utils.timemarkToSeconds(duration) * 1000
   },
@@ -133,6 +139,8 @@ module.exports = {
         .videoCodec('libx264')
         .outputOptions('-preset ultrafast')
         .on('start', (command) => {
+          currentPid = cmd.ffmpegProc.pid
+
           debug('capture started %o', { command })
 
           return resolve({
@@ -180,7 +188,7 @@ module.exports = {
       debug('processing video from %s to %s video compression %o',
         name, cname, videoCompression)
 
-      ffmpeg()
+      const cmd = ffmpeg()
       .input(name)
       .videoCodec('libx264')
       .outputOptions([
@@ -188,6 +196,8 @@ module.exports = {
         `-crf ${videoCompression}`,
       ])
       .on('start', (command) => {
+        currentPid = cmd.ffmpegProc.pid
+
         return debug('compression started %o', { command })
       }).on('codecData', (data) => {
         debug('compression codec data: %o', data)

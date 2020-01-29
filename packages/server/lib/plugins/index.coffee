@@ -22,6 +22,10 @@ register = (event, callback) ->
   registeredEvents[event] = callback
 
 module.exports = {
+  getPluginPid: () ->
+    if pluginsProcess
+      return pluginsProcess.pid
+
   registerHandler: (handler) ->
     handlers.push(handler)
 
