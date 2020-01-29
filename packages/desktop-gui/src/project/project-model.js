@@ -223,7 +223,7 @@ export default class Project {
 
     const prevWarning = this.warnings[id]
 
-    if (prevWarning && !prevWarning.dismissed) {
+    if (prevWarning && prevWarning.dismissed) {
       return
     }
 
