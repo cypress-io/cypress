@@ -35,6 +35,7 @@ const getProps = (props?: Partial<ReporterPropsStub>) => {
     },
     appState: {
       setAutoScrolling: sinon.spy(),
+      setIsInteractive: sinon.spy(),
     },
     runnablesStore,
     scroller,
@@ -68,7 +69,6 @@ describe('<Reporter />', () => {
 
   it('sets appState.autoScrollingEnabled', () => {
     const props = getProps({
-      appState: { setAutoScrolling: sinon.spy() } as AppStateStub,
       autoScrollingEnabled: false,
     })
 
