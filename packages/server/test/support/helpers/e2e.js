@@ -375,10 +375,10 @@ async function psInclude (str) {
 
   async function retry () {
     try {
-      const psOutput = (await cp.execAsync('ps -f')).toString()
+      const psOutput = (await cp.execAsync('ps -fww')).toString()
 
       // eslint-disable-next-line
-      console.log(psOutput)
+      // console.log(psOutput)
 
       // return /^.*chrome.*--no-first-run.*run-\d+/.exec(v)
       _.forEach(str, (v) => {
