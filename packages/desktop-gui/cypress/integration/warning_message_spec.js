@@ -75,9 +75,11 @@ describe('Warning Message', function () {
 
   it('renders markdown', function () {
     const markdownWarningObj = {
-      type: 'NOT_GOOD_BUT_NOT_TOO_BAD',
-      name: 'Fairly serious warning',
-      message: 'Some warning\n**message**',
+      warning: {
+        type: 'NOT_GOOD_BUT_NOT_TOO_BAD',
+        name: 'Fairly serious warning',
+        message: 'Some warning\n**message**',
+      },
     }
 
     cy.shouldBeOnProjectSpecs().then(() => {
