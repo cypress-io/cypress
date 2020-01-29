@@ -125,6 +125,11 @@ module.exports = {
 
   close: kill,
 
+  _setInstance (_instance) {
+    // for testing
+    instance = _instance
+  },
+
   // note: does not guarantee that `browser` is still running
   // note: electron will return a list of pids for each webContent
   getBrowserPid () {

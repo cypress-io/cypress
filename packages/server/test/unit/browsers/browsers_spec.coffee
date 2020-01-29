@@ -6,6 +6,15 @@ browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
 
 describe "lib/browsers/index", ->
+  context ".getBrowserPid", ->
+    it "returns instance.pid if instance", ->
+      browsers._setInstance({ pid: 1234 })
+      expect(browsers.getBrowserPid()).to.eq(1234)
+
+    it "returns undefined if no instance", ->
+      browsers._setInstance(null)
+      expect(browsers.getBrowserPid()).to.be.undefined
+
   context ".isBrowserFamily", ->
     it "allows only known browsers", ->
       expect(browsers.isBrowserFamily("chrome")).to.be.true

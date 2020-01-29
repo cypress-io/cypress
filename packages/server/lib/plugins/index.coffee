@@ -22,6 +22,10 @@ register = (event, callback) ->
   registeredEvents[event] = callback
 
 module.exports = {
+  ## for testing
+  _setPluginsProcess: (_pluginsProcess) ->
+    pluginsProcess = _pluginsProcess
+
   getPluginPid: () ->
     if pluginsProcess
       return pluginsProcess.pid
