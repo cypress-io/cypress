@@ -164,9 +164,9 @@
 }
 
 .browsers-list {
-  > span {
+  li {
     padding: 9px 15px;
-    display: inline-block;
+    white-space: nowrap;
   }
 
   .browser-icon {
@@ -193,6 +193,22 @@
   }
   .firefox-nightly > i {
     color: #a752f7;
+  .dropdown-chosen img {
+    position: relative;
+    top: -1px;
+  }
+
+  .browser-icon {
+    color: #4573d9;
+    margin-right: 3px;
+    position: relative;
+    top: -1px;
+    width: 15px;
+    height: 15px;
+
+    &.fa-globe {
+      top: 0;
+    }
   }
 
   .dropdown-menu {
