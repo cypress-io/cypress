@@ -21,7 +21,10 @@ describe('e2e headless', function () {
   // cypress run --headed
   // currently, Electron differs because it displays a
   // "can not record video in headed mode" error
-  ;['electron', '!electron'].map((b) => {
+  ;[
+    'electron',
+    '!electron',
+  ].map((b) => {
     e2e.it(`tests in headed mode pass in ${b}`, {
       spec: 'headless_spec.js',
       config: {
