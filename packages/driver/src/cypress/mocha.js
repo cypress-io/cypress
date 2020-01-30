@@ -63,7 +63,7 @@ const globals = (specWindow, reporter) => {
 
   const _mocha = new Mocha({
     reporter,
-    enableTimeouts: false,
+    timeout: false,
   })
 
   // set mocha props on the specWindow
