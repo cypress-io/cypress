@@ -1,7 +1,9 @@
 import { ChildProcess } from 'child_process'
 import * as Bluebird from 'bluebird'
 
-export type BrowserName = 'chrome' | 'chromium' | string
+// TODO: some of these types can be combined with cli/types/index.d.ts
+
+export type BrowserName = 'electron' | 'chrome' | 'chromium' | string
 
 export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | string
 
@@ -13,14 +15,21 @@ export type PlatformName = 'darwin' | 'linux' | 'win32'
  * Represents a typical browser to try to detect and turn into a `FoundBrowser`.
  */
 export type Browser = {
-  /** short browser name */
+  /**
+   * Short browser name.
+   */
   name: BrowserName
-  /** family is used to describe the underlying type of the browsr */
+  /**
+   * The underlying engine for this browser.
+   */
   family: BrowserFamily
-  /** channel describes the stability of this browser **/
+  /**
+   * The release channel of the browser.
+   */
   channel: BrowserChannel
-  /** Display name */
-  displayName: string
+  /**
+   * Human-readable browser name.
+   */
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
   versionRegex: RegExp
   profile?: boolean
