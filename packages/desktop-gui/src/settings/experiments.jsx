@@ -43,7 +43,6 @@ const Experiments = observer(({ project }) => {
           ))
         }
       </ul>
-
     </div>
   )
 })
