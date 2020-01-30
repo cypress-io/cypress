@@ -274,12 +274,16 @@ class Socket {
         socket.on('disconnect', () => {
           debug('runner socket disconnected %o', { now: Date.now(), runStatePreservedAt: socket.runStatePreservedAt, ended: this.ended })
 
-          // if we've stopped then don't do anything
           if (this.ended) {
             return
           }
 
           const assertNewRunnerConnected = () => {
+            // if we've stopped then don't do anything
+            if (this.ended) {
+              return
+            }
+
             pendingDcPromise = undefined
 
             const sockets = this.io.sockets.connected
@@ -296,21 +300,16 @@ class Socket {
             }
           }
 
+          let delay = 5000
+
           if (socket.runStatePreservedAt) {
+            // we are resolving a cy.visit, wait up to 10 seconds
             const msSinceLastVisitResolved = Date.now() - socket.runStatePreservedAt
-            const delay = 10000 - msSinceLastVisitResolved
 
-            if (delay > 0) {
-              // we are resolving a cy.visit, wait up to 10 seconds then check to see if there is a new `runner`
-              pendingDcPromise = Promise.delay(delay)
-              .then(assertNewRunnerConnected)
-
-              return
-            }
+            delay = Math.max(delay, 10000 - msSinceLastVisitResolved)
           }
 
-          // in any other case, assert after 5 seconds
-          return Promise.delay(5000)
+          pendingDcPromise = Promise.delay(delay)
           .then(assertNewRunnerConnected)
         })
 
