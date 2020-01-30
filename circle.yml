@@ -56,28 +56,32 @@ executors:
 
 commands:
   install-latest-chrome:
+    description: Install latest Google Chrome (stable)
     parameters:
       browser:
+        default: "electron"
         description: browser shortname to target
-        type: string
-        default: ""
+        type: enum
+        enum: [ "chrome", "electron" ]
     steps:
       - run:
           command: |
             if [ << parameters.browser >> == "chrome" ]; then
-              echo "Running Chrome tests.  Installing latest stable version of Google Chrome."
+              echo "**** Running Chrome tests.  Installing latest stable version of Google Chrome. ****"
               apt-get update
               apt-get install google-chrome-stable -y
-              echo "Location of Google Chrome Installation: "`which google-chrome`
-              echo "Google Chrome Version: "`google-chrome --version`
+              echo "**** Location of Google Chrome Installation: "`which google-chrome`" ****"
+              echo "**** Google Chrome Version: "`google-chrome --version`" ****"
             else
-              echo "Not updating Chrome. Running tests in '<< parameters.browser >>''"
+              echo "**** Not updating Chrome. Running tests in '<< parameters.browser >>' ****"
             fi
   run-e2e-tests:
     parameters:
       browser:
+        default: "electron"
         description: browser shortname to target
-        type: string
+        type: enum
+        enum: [ "chrome", "electron" ]
       chunk:
         description: e2e test chunk number
         type: integer
