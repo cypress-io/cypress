@@ -16,7 +16,6 @@ v        = require("./util/validation")
 debug    = require("debug")("cypress:server:config")
 pathHelpers = require("./util/path_helpers")
 findSystemNode = require("./util/find_system_node")
-experiments = require('./experiments').getExperiments()
 
 CYPRESS_ENV_PREFIX = "CYPRESS_"
 CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
@@ -51,8 +50,8 @@ folders = toWords """
   videosFolder
 """
 
-if experiments.componentTesting
-  folders.push("componentFolder")
+# for experimentalComponentTesting
+folders.push("componentFolder")
 
 # Public configuration properties, like "cypress.json" fields
 configKeys = toWords """
@@ -82,8 +81,8 @@ configKeys = toWords """
   nodeVersion                     resolvedNodePath
 """
 
-if experiments.componentTesting
-  configKeys.push("componentFolder")
+# experimentalComponentTesting
+configKeys.push("componentFolder")
 
 # Deprecated and retired public configuration properties
 breakingConfigKeys = toWords """
@@ -160,9 +159,10 @@ CONFIG_DEFAULTS = {
 
   ## experimental keys (should all start with "experimental" prefix)
   experimentalComponentTesting:  false
+
+  ## setting related to component testing experiments
+  componentFolder:               "cypress/component"
 }
-if experiments.componentTesting
-  CONFIG_DEFAULTS.componentFolder = "cypress/component"
 
 validationRules = {
   animationDistanceThreshold: v.isNumber
@@ -202,10 +202,9 @@ validationRules = {
   watchForFileChanges: v.isBoolean
   # experimental flag validation here
   experimentalComponentTesting: v.isBoolean
+  # validation for component testing experiment
+  componentFolder: v.isStringOrFalse
 }
-
-if experiments.componentTesting
-  validationRules.componentFolder = v.isStringOrFalse
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
   _.reduce folders, (memo, folder) ->
