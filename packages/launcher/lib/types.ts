@@ -30,6 +30,7 @@ export type Browser = {
   /**
    * Human-readable browser name.
    */
+  displayName: string
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
   versionRegex: RegExp
   profile?: boolean
