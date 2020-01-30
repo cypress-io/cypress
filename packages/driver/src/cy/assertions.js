@@ -79,6 +79,16 @@ const parseValueActualAndExpected = (value, actual, expected) => {
   return obj
 }
 
+const logValues = (value, actual, expected) => {
+  return !$dom.isJquery(value)
+    ? {
+      subject: logBigValue(value),
+      actual: logBigValue(actual),
+      expected: logBigValue(expected),
+    }
+    : {}
+}
+
 const create = function (state, queue, retryFn) {
   const getUpcomingAssertions = () => {
     const index = state('index') + 1
@@ -479,7 +489,7 @@ const create = function (state, queue, retryFn) {
         functionHadArguments(current)
     }
 
-    _.extend(obj, {
+    _.extend(obj, logValues(value, actual, expected), {
       name: 'assert',
       subject: logBigValue(value),
       expected: logBigValue(expected),
