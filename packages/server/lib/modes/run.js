@@ -967,9 +967,17 @@ module.exports = {
     let attempts = 0
 
     const wait = () => {
+      debug('waiting for socket to connect and browser to launch...')
+
       return Promise.join(
-        this.waitForSocketConnection(project, socketId),
+        this.waitForSocketConnection(project, socketId)
+        .then(() => {
+          debug('socket connected', { socketId })
+        }),
         this.launchBrowser(options)
+        .then(() => {
+          debug('browser launched')
+        })
       )
       .timeout(timeout || 30000)
       .catch(Promise.TimeoutError, (err) => {
