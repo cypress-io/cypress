@@ -302,6 +302,7 @@ class Project extends EE {
     this.watchSettings(options.onSettingsChanged, options)
 
     let { reporter, projectRoot } = cfg
+    let hasUnexpectedlyDisconnectedInRunMode = false
 
     // if we've passed down reporter
     // then record these via mocha reporter
@@ -369,15 +370,23 @@ class Project extends EE {
         }
       },
 
-      onUnexpectedDisconnect: _.once((errorName) => {
+      // TODO: onceing this isn't quite right, since this is reused across runs in
+      onUnexpectedDisconnect: (errorName) => {
         if (cfg.isTextTerminal) {
+          if (hasUnexpectedlyDisconnectedInRunMode) {
+            // don't want to error twice
+            return
+          }
+
+          hasUnexpectedlyDisconnectedInRunMode = true
+
           const err = errors.get(errorName, this.browser.displayName)
 
           return options.onError(err)
         }
 
         errors.warning(errorName, this.browser.displayName)
-      }),
+      },
     })
   }
 
