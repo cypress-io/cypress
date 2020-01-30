@@ -591,7 +591,7 @@ describe('Settings', () => {
       })
 
       it('displays panel with no experiments', () => {
-        cy.get('.settings-experiments').contains('You can enable beta')
+        cy.get('.settings-experiments').contains('you can enable these beta')
       })
     })
 
