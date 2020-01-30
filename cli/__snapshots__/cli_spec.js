@@ -16,24 +16,24 @@ exports['shows help for open --foo 1'] = `
   Opens Cypress in the interactive GUI.
 
   Options:
-    -b, --browser <browser-path>     path to a custom browser to be added to the 
+    -b, --browser <browser-path>     path to a custom browser to be added to the
                                      list of available browsers in Cypress
-    -c, --config <config>            sets configuration values. separate multiple 
-                                     values with a comma. overrides any value in 
+    -c, --config <config>            sets configuration values. separate multiple
+                                     values with a comma. overrides any value in
                                      cypress.json.
-    -C, --config-file <config-file>  path to JSON file where configuration values 
-                                     are set. defaults to "cypress.json". pass 
+    -C, --config-file <config-file>  path to JSON file where configuration values
+                                     are set. defaults to "cypress.json". pass
                                      "false" to disable.
     -d, --detached [bool]            runs Cypress application in detached mode
-    -e, --env <env>                  sets environment variables. separate 
-                                     multiple values with a comma. overrides any 
+    -e, --env <env>                  sets environment variables. separate
+                                     multiple values with a comma. overrides any
                                      value in cypress.json or cypress.env.json
-    --global                         force Cypress into global mode as if its 
+    --global                         force Cypress into global mode as if its
                                      globally installed
-    -p, --port <port>                runs Cypress on a specific port. overrides 
+    -p, --port <port>                runs Cypress on a specific port. overrides
                                      any value in cypress.json.
     -P, --project <project-path>     path to the project
-    --dev                            runs cypress in development and bypasses 
+    --dev                            runs cypress in development and bypasses
                                      binary check
     -h, --help                       output usage information
   -------
@@ -198,9 +198,9 @@ exports['cli help command shows help 1'] = `
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
-    install [options]  Installs the Cypress executable matching this package's 
+    install [options]  Installs the Cypress executable matching this package's
                        version
-    verify [options]   Verifies that Cypress is installed correctly and 
+    verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
   -------
@@ -233,9 +233,9 @@ exports['cli help command shows help for -h 1'] = `
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
-    install [options]  Installs the Cypress executable matching this package's 
+    install [options]  Installs the Cypress executable matching this package's
                        version
-    verify [options]   Verifies that Cypress is installed correctly and 
+    verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
   -------
@@ -268,9 +268,9 @@ exports['cli help command shows help for --help 1'] = `
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
-    install [options]  Installs the Cypress executable matching this package's 
+    install [options]  Installs the Cypress executable matching this package's
                        version
-    verify [options]   Verifies that Cypress is installed correctly and 
+    verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
   -------
@@ -304,9 +304,9 @@ exports['cli unknown command shows usage and exits 1'] = `
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
-    install [options]  Installs the Cypress executable matching this package's 
+    install [options]  Installs the Cypress executable matching this package's
                        version
-    verify [options]   Verifies that Cypress is installed correctly and 
+    verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
   -------
