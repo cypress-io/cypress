@@ -38,9 +38,6 @@ let existProto = null
 let getMessage = null
 let chaiUtils = null
 
-const LOGGED_ARRAY_SIZE = 10
-const LOGGED_OBJ_SIZE = 10
-
 chai.use(sinonChai)
 
 chai.use((chai, u) => {
@@ -555,8 +552,5 @@ chai.use((chai, u) => {
     overrideChaiAsserts,
 
     create,
-
-    LOGGED_ARRAY_SIZE,
-    LOGGED_OBJ_SIZE,
   }
 })
