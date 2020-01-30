@@ -5,6 +5,7 @@ const minimist = require('minimist')
 const coerceUtil = require('./coerce')
 const configUtil = require('../config')
 const proxyUtil = require('./proxy')
+const errors = require('../errors')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
@@ -239,8 +240,16 @@ module.exports = {
 
     if (config) {
       // convert config to an object
-      // annd store the config
-      options.config = sanitizeAndConvertNestedArgs(config)
+      // and store the config
+      debug('parsing config:', config)
+      try {
+        options.config = sanitizeAndConvertNestedArgs(config)
+      } catch (err) {
+        debug('could not pass config %o', config)
+        debug('error %o', err)
+
+        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'invalid config', config)
+      }
     }
 
     // get a list of the available config keys

@@ -525,7 +525,6 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
         #{chalk.blue(arg2)}
         """
-
     when "RENDERER_CRASHED"
       """
       We detected that the Chromium Renderer process just crashed.
@@ -881,6 +880,21 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
+    when "COULD_NOT_PARSE_ARGUMENTS"
+      if arg2
+        """
+        Cypress could not parse its arguments
+
+        #{arg1}
+
+        #{chalk.yellow(arg2)}
+        """
+      else
+        """
+        Cypress could not parse its arguments
+
+        #{chalk.yellow(arg1)}
+        """
 
 get = (type, arg1, arg2) ->
   msg = getMsgByType(type, arg1, arg2)
