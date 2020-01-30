@@ -48,7 +48,7 @@ describe('<NoAutomation />', () => {
       const component = shallow(<NoAutomation browsers={browsersWithChosen} />)
       const browser = shallow(component.find('Dropdown').prop('renderItem')(browsersWithChosen[0]))
 
-      expect(browser.find('i')).to.have.className('fa-chrome')
+      expect(browser.find('BrowserIcon').prop('browserName')).to.equal('canary')
     })
 
     it('renders browser in <Dropdown /> with browser name and version', () => {
