@@ -95,5 +95,5 @@ context 'firefox', ->
     spec: "simple_passing_spec.coffee"
     snapshot: true
     browser: 'firefox'
-    stdoutInclude: '''Browser: 'firefox' does not support the configuration value "chromeWebSecurity: false"'''
+    stdoutInclude: 'Your project has set the configuration option: `chromeWebSecurity: false`\nThis option will not have an effect in Firefox.'
   }

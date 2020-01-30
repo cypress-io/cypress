@@ -227,7 +227,7 @@ export default class Project {
       return
     }
 
-    this.warnings[id] = warning
+    this.warnings[id] = { ...warning }
   }
 
   @action clearWarning (warning) {

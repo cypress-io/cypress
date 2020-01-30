@@ -413,7 +413,7 @@ describe('Project Nav', function () {
         cy.get('.browsers-list .dropdown-chosen')
         .should('contain', 'Custom')
 
-        cy.wrap(localStorage.getItem('chosenBrowser')).should('equal', 'electron')
+        cy.wrap(localStorage.getItem('chosenBrowser')).should('equal', 'Custom')
       })
     })
 
