@@ -19,11 +19,11 @@ const Experiments = observer(({ project }) => {
     const experiment = experiments.experimentalComponentTesting
 
     return (
-      <li className='experiment'>
+      <li className='experiment' data-cy="component-testing">
         <div className='experiment-desc'>
           <h5>Component Testing</h5>
           <p className="text-muted">
-                  Enables the use of component testing using framework-specific libraries to mount your component directly from the spec file.
+            Enables the use of component testing using framework-specific libraries to mount your component directly from the spec file.
           </p>
           <code>experimentalComponentTesting</code>
         </div>
@@ -37,7 +37,7 @@ const Experiments = observer(({ project }) => {
   }
 
   return (
-    <div>
+    <div data-cy="experiments">
       <a href='#' className='learn-more' onClick={openHelp}>
         <i className='fas fa-info-circle'></i> Learn more
       </a>

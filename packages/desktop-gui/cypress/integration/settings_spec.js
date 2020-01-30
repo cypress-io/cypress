@@ -580,6 +580,10 @@ describe('Settings', () => {
   })
 
   describe('experiments panel', () => {
+    beforeEach(() => {
+      cy.viewport(800, 800)
+    })
+
     describe('no experimental features turned on', () => {
       beforeEach(function () {
         this.openProject.resolve(this.config)
@@ -590,28 +594,58 @@ describe('Settings', () => {
         cy.contains('Experiments').click()
       })
 
+      it('has learn more link', () => {
+        cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
+        })
+      })
+
       it('displays panel with no experiments', () => {
         cy.get('.settings-experiments').contains('you can enable these beta')
       })
     })
 
-    describe('componentTesting', () => {
-      beforeEach(function () {
-        this.config.experimentalComponentTesting = true
-        this.config.resolved.experimentalComponentTesting = {
-          value: true,
-        }
+    describe('componentTesting', function () {
+      const openExperiments = (self) => {
+        self.openProject.resolve(self.config)
+        self.projectStatuses[0].id = self.config.projectId
+        self.getProjectStatus.resolve(self.projectStatuses[0])
 
-        this.openProject.resolve(this.config)
-        this.projectStatuses[0].id = this.config.projectId
-        this.getProjectStatus.resolve(this.projectStatuses[0])
-
-        this.goToSettings()
+        self.goToSettings()
         cy.contains('Experiments').click()
+      }
+
+      context('enabled', () => {
+        beforeEach(function () {
+          this.config.resolved.experimentalComponentTesting = {
+            value: true,
+            from: 'config', // anything but default means experiment was enabled
+          }
+
+          openExperiments(this)
+        })
+
+        it('displays experiment', () => {
+          cy.get('.settings-experiments').contains('Component Testing')
+          cy.get('[data-cy=component-testing]').find('.experiment-status').should('have.text', 'ON')
+        })
       })
 
-      it('displays experiment', () => {
-        cy.get('.settings-experiments').contains('Component Testing')
+      context('disabled', function () {
+        beforeEach(function () {
+          this.config.resolved.experimentalComponentTesting = {
+            value: true,
+            from: 'default', // default value means experiment was not enabled
+          }
+
+          openExperiments(this)
+        })
+
+        it('displays experiment', () => {
+          cy.get('.settings-experiments').contains('Component Testing')
+          cy.get('[data-cy=component-testing]').find('.experiment-status').should('have.text', 'OFF')
+        })
       })
     })
   })
