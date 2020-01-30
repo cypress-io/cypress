@@ -46,7 +46,7 @@ describe('Settings', () => {
     })
   })
 
-  describe('any case / project is set up for ci', () => {
+  describe('general functionality', () => {
     beforeEach(function () {
       this.openProject.resolve(this.config)
       this.projectStatuses[0].id = this.config.projectId
@@ -69,8 +69,25 @@ describe('Settings', () => {
       cy.contains(this.config.projectId).should('not.exist')
     })
 
-    describe('when config panel is opened', () => {
-      beforeEach(() => {
+    context('on:focus:tests clicked', () => {
+      beforeEach(function () {
+        this.ipc.onFocusTests.yield()
+      })
+
+      it('routes to specs page', () => {
+        cy.shouldBeOnProjectSpecs()
+      })
+    })
+  })
+
+  describe('configuration panel', () => {
+    describe('displays config', () => {
+      beforeEach(function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
         cy.contains('Configuration').click()
       })
 
@@ -260,18 +277,89 @@ describe('Settings', () => {
       })
     })
 
-    describe('when project id panel is opened', () => {
-      beforeEach(() => {
-        cy.contains('Project ID').click()
+    context('on config changes', () => {
+      beforeEach(function () {
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+        const newConfig = this.util.deepClone(this.config)
+
+        newConfig.clientUrl = 'http://localhost:8888'
+        newConfig.clientUrlDisplay = 'http://localhost:8888'
+        newConfig.browsers = this.browsers
+        this.openProject.resolve(newConfig)
+
+        this.goToSettings()
+
+        cy.contains('Configuration').click()
       })
 
-      it('displays project id section', function () {
-        cy.contains(this.config.projectId)
+      it('displays updated config', function () {
+        const newConfig = this.util.deepClone(this.config)
+
+        newConfig.resolved.baseUrl.value = 'http://localhost:7777'
+        this.ipc.openProject.onCall(1).resolves(newConfig)
+        this.ipc.onConfigChanged.yield()
+
+        cy.contains('http://localhost:7777')
       })
     })
 
-    describe('when record key panel is opened', () => {
-      beforeEach(() => {
+    context('when configFile is false', () => {
+      beforeEach(function () {
+        this.openProject.resolve(Cypress._.assign({
+          configFile: false,
+        }, this.config))
+
+        this.goToSettings()
+
+        cy.contains('Configuration').click()
+      })
+
+      it('notes that cypress.json is disabled', () => {
+        cy.contains('set from cypress.json file (currently disabled by --config-file false)')
+      })
+    })
+
+    context('when configFile is set', function () {
+      beforeEach(function () {
+        this.openProject.resolve(Cypress._.assign({
+          configFile: 'special-cypress.json',
+        }, this.config))
+
+        this.goToSettings()
+
+        cy.contains('Configuration').click()
+      })
+
+      it('notes that a custom config is in use', () => {
+        cy.contains('set from custom config file special-cypress.json')
+      })
+    })
+  })
+
+  describe('project id panel', () => {
+    beforeEach(function () {
+      this.openProject.resolve(this.config)
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+      cy.contains('Project ID').click()
+    })
+
+    it('displays project id section', function () {
+      cy.contains(this.config.projectId)
+    })
+  })
+
+  describe('record key panel', () => {
+    context('when project is set up and you have access', () => {
+      beforeEach(function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
         cy.contains('Record Key').click()
       })
 
@@ -359,97 +447,44 @@ describe('Settings', () => {
       })
     })
 
-    describe('when proxy settings panel is opened', () => {
-      beforeEach(() => {
-        cy.contains('Proxy Settings').click()
+    context('when project is not set up for CI', () => {
+      it('does not show ci Keys section when project has no id', function () {
+        const newConfig = this.util.deepClone(this.config)
+
+        newConfig.projectId = null
+        this.openProject.resolve(newConfig)
+        this.getProjectStatus.resolve(this.projectStatuses)
+        this.goToSettings()
+
+        cy.contains('h5', 'Record Keys').should('not.exist')
       })
 
-      it('with no proxy config set informs the user no proxy configuration is active', () => {
-        cy.get('.settings-proxy').should('contain', 'There is no active proxy configuration.')
-      })
+      it('does not show ci Keys section when project is invalid', function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].state = 'INVALID'
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+        this.goToSettings()
 
-      it('opens help link on click', () => {
-        cy.get('.settings-proxy .learn-more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/proxy-configuration')
-        })
-      })
-
-      it('with Windows proxy settings indicates proxy and the source', () => {
-        cy.setAppStore({
-          projectRoot: '/foo/bar',
-          proxySource: 'win32',
-          proxyServer: 'http://foo-bar.baz',
-          proxyBypassList: 'a,b,c,d',
-        })
-
-        cy.get('.settings-proxy').should('contain', 'from Windows system settings')
-        cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
-
-        cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
-      })
-
-      it('with environment proxy settings indicates proxy and the source', () => {
-        cy.setAppStore({
-          projectRoot: '/foo/bar',
-          proxyServer: 'http://foo-bar.baz',
-          proxyBypassList: 'a,b,c,d',
-        })
-
-        cy.get('.settings-proxy').should('contain', 'from environment variables')
-        cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
-
-        cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
-      })
-
-      it('with no bypass list but a proxy set shows \'none\' in bypass list', () => {
-        cy.setAppStore({
-          projectRoot: '/foo/bar',
-          proxyServer: 'http://foo-bar.baz',
-        })
-
-        cy.get('.settings-proxy tr:nth-child(2) > td').should('contain', 'none')
+        cy.contains('h5', 'Record Keys').should('not.exist')
       })
     })
 
-    context('on:focus:tests clicked', () => {
+    context('when you are not a user of this projects org', () => {
       beforeEach(function () {
-        this.ipc.onFocusTests.yield()
+        this.openProject.resolve(this.config)
       })
 
-      it('routes to specs page', () => {
-        cy.shouldBeOnProjectSpecs()
+      it('does not show record key', function () {
+        this.projectStatuses[0].state = 'UNAUTHORIZED'
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+        this.goToSettings()
+
+        cy.contains('h5', 'Record Keys').should('not.exist')
       })
     })
   })
 
-  context('on config changes', () => {
-    beforeEach(function () {
-      this.projectStatuses[0].id = this.config.projectId
-      this.getProjectStatus.resolve(this.projectStatuses[0])
-      const newConfig = this.util.deepClone(this.config)
-
-      newConfig.clientUrl = 'http://localhost:8888'
-      newConfig.clientUrlDisplay = 'http://localhost:8888'
-      newConfig.browsers = this.browsers
-      this.openProject.resolve(newConfig)
-
-      this.goToSettings()
-
-      cy.contains('Configuration').click()
-    })
-
-    it('displays updated config', function () {
-      const newConfig = this.util.deepClone(this.config)
-
-      newConfig.resolved.baseUrl.value = 'http://localhost:7777'
-      this.ipc.openProject.onCall(1).resolves(newConfig)
-      this.ipc.onConfigChanged.yield()
-
-      cy.contains('http://localhost:7777')
-    })
-  })
-
-  describe('when node version panel is opened', () => {
+  describe('node version panel', () => {
     const bundledNodeVersion = '1.2.3'
     const systemNodePath = '/foo/bar/node'
     const systemNodeVersion = '4.5.6'
@@ -484,6 +519,100 @@ describe('Settings', () => {
       .should('contain', systemNodePath)
       .should('contain', systemNodeVersion)
       .should('not.contain', bundledNodeVersion)
+    })
+  })
+
+  describe('proxy settings panel', () => {
+    beforeEach(function () {
+      this.openProject.resolve(this.config)
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+      cy.contains('Proxy Settings').click()
+    })
+
+    it('with no proxy config set informs the user no proxy configuration is active', () => {
+      cy.get('.settings-proxy').should('contain', 'There is no active proxy configuration.')
+    })
+
+    it('opens help link on click', () => {
+      cy.get('.settings-proxy .learn-more').click().then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/proxy-configuration')
+      })
+    })
+
+    it('with Windows proxy settings indicates proxy and the source', () => {
+      cy.setAppStore({
+        projectRoot: '/foo/bar',
+        proxySource: 'win32',
+        proxyServer: 'http://foo-bar.baz',
+        proxyBypassList: 'a,b,c,d',
+      })
+
+      cy.get('.settings-proxy').should('contain', 'from Windows system settings')
+      cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
+
+      cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
+    })
+
+    it('with environment proxy settings indicates proxy and the source', () => {
+      cy.setAppStore({
+        projectRoot: '/foo/bar',
+        proxyServer: 'http://foo-bar.baz',
+        proxyBypassList: 'a,b,c,d',
+      })
+
+      cy.get('.settings-proxy').should('contain', 'from environment variables')
+      cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
+
+      cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
+    })
+
+    it('with no bypass list but a proxy set shows \'none\' in bypass list', () => {
+      cy.setAppStore({
+        projectRoot: '/foo/bar',
+        proxyServer: 'http://foo-bar.baz',
+      })
+
+      cy.get('.settings-proxy tr:nth-child(2) > td').should('contain', 'none')
+    })
+  })
+
+  describe('experiments panel', () => {
+    describe('no experimental features turned on', () => {
+      beforeEach(function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
+        cy.contains('Experiments').click()
+      })
+
+      it('displays panel with no experiments', () => {
+        cy.get('.settings-experiments').contains('You can enable beta')
+      })
+    })
+
+    describe('componentTesting', () => {
+      beforeEach(function () {
+        this.config.experimentalComponentTesting = true
+        this.config.resolved.experimentalComponentTesting = {
+          value: true,
+        }
+
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
+        cy.contains('Experiments').click()
+      })
+
+      it('displays experiment', () => {
+        cy.get('.settings-experiments').contains('Component Testing')
+      })
     })
   })
 
@@ -525,74 +654,6 @@ describe('Settings', () => {
       })
 
       cy.contains('Configuration')
-    })
-  })
-
-  context('when project is not set up for CI', () => {
-    it('does not show ci Keys section when project has no id', function () {
-      const newConfig = this.util.deepClone(this.config)
-
-      newConfig.projectId = null
-      this.openProject.resolve(newConfig)
-      this.getProjectStatus.resolve(this.projectStatuses)
-      this.goToSettings()
-
-      cy.contains('h5', 'Record Keys').should('not.exist')
-    })
-
-    it('does not show ci Keys section when project is invalid', function () {
-      this.openProject.resolve(this.config)
-      this.projectStatuses[0].state = 'INVALID'
-      this.getProjectStatus.resolve(this.projectStatuses[0])
-      this.goToSettings()
-
-      cy.contains('h5', 'Record Keys').should('not.exist')
-    })
-  })
-
-  context('when you are not a user of this projects org', () => {
-    beforeEach(function () {
-      this.openProject.resolve(this.config)
-    })
-
-    it('does not show record key', function () {
-      this.projectStatuses[0].state = 'UNAUTHORIZED'
-      this.getProjectStatus.resolve(this.projectStatuses[0])
-      this.goToSettings()
-
-      cy.contains('h5', 'Record Keys').should('not.exist')
-    })
-  })
-
-  context('when configFile is false', () => {
-    beforeEach(function () {
-      this.openProject.resolve(Cypress._.assign({
-        configFile: false,
-      }, this.config))
-
-      this.goToSettings()
-
-      cy.contains('Configuration').click()
-    })
-
-    it('notes that cypress.json is disabled', () => {
-      cy.contains('set from cypress.json file (currently disabled by --config-file false)')
-    })
-  })
-
-  context('when configFile is set', function () {
-    beforeEach(function () {
-      this.openProject.resolve(Cypress._.assign({
-        configFile: 'special-cypress.json',
-      }, this.config))
-
-      this.goToSettings()
-
-      cy.contains('Configuration').click()
-    })
-
-    it('notes that a custom config is in use', () => {
-      cy.contains('set from custom config file special-cypress.json')
     })
   })
 })

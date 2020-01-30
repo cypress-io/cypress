@@ -8,11 +8,6 @@ const openHelp = (e) => {
   ipc.externalOpen('https://on.cypress.io/experiments')
 }
 
-const openIssue = (number) => (e) => {
-  e.preventDefault()
-  ipc.externalOpen(`https://github.com/cypress-io/cypress/issues/${number}`)
-}
-
 const Experiments = observer(({ project }) => {
   const experiments = getExperiments(project)
 
@@ -21,17 +16,23 @@ const Experiments = observer(({ project }) => {
       return null
     }
 
+    const experiment = experiments.experimentalComponentTesting
+
     return (
-      <div>
-        <h3>component testing <code>status: {experiments.experimentalComponentTesting.enabled ? 'enabled' : 'disabled'}</code></h3>
-        <p className="text-muted">
-          Changes how certain spec files are mounted. Instead of <code>cy.visit</code> you would use
-          framework-specific <code>cypress-X-unit-test</code> library to mount your component directly from the spec file.
-          See issue <a href='#' onClick={openIssue(5922)}>5922</a>
-        </p>
-        <p>config key <code>experimentalComponentTesting</code> default value <code>false</code> current
-        value <code>{experiments.experimentalComponentTesting.value.toString()}</code></p>
-      </div>
+      <li className='experiment'>
+        <div className='experiment-desc'>
+          <h5>Component Testing</h5>
+          <p className="text-muted">
+                  Enables the use of component testing using framework-specific libraries to mount your component directly from the spec file.
+          </p>
+          <code>experimentalComponentTesting</code>
+        </div>
+        <div className='experiment-status'>
+          <span className='experiment-status-sign'>
+            {experiment.enabled ? 'ON' : 'OFF'}
+          </span>
+        </div>
+      </li>
     )
   }
 
@@ -42,13 +43,13 @@ const Experiments = observer(({ project }) => {
       </a>
 
       <div>
-        <p>
-        You can enable some beta features still under development by setting a special config settings that start
-        with "experimental" prefix.
+        <p className='experiment-intro'>
+          If you'd like to try out what we're working on, you can enable these beta features for your project by setting configuration using the <code>experimental</code> prefix.
         </p>
       </div>
-
-      <ComponentTesting />
+      <ul className='experiments-list'>
+        <ComponentTesting />
+      </ul>
     </div>
   )
 })
