@@ -21,16 +21,18 @@ const Experiments = observer(({ project }) => {
       return null
     }
 
-    <div>
-      <h3>component testing <code>status: {experiments.experimentalComponentTesting.enabled ? 'enabled' : 'disabled'}</code></h3>
-      <p className="text-muted">
+    return (
+      <div>
+        <h3>component testing <code>status: {experiments.experimentalComponentTesting.enabled ? 'enabled' : 'disabled'}</code></h3>
+        <p className="text-muted">
           Changes how certain spec files are mounted. Instead of <code>cy.visit</code> you would use
           framework-specific <code>cypress-X-unit-test</code> library to mount your component directly from the spec file.
           See issue <a href='#' onClick={openIssue(5922)}>5922</a>
-      </p>
-      <p>config key <code>experimentalComponentTesting</code> default value <code>false</code> current
+        </p>
+        <p>config key <code>experimentalComponentTesting</code> default value <code>false</code> current
         value <code>{experiments.experimentalComponentTesting.value.toString()}</code></p>
-    </div>
+      </div>
+    )
   }
 
   return (
