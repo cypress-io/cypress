@@ -91,7 +91,7 @@ module.exports = {
       return ended.promise
     }
 
-    let prevLength = null
+    const lengths = {}
 
     const writeVideoFrame = function (data) {
       // make sure we haven't ended
@@ -107,11 +107,11 @@ module.exports = {
 
       debugFrames('writing video frame')
 
-      if (prevLength === data.length) {
+      if (lengths[data.length]) {
         return
       }
 
-      prevLength = data.length
+      lengths[data.length] = true
 
       if (wantsWrite) {
         if (!(wantsWrite = pt.write(data))) {
