@@ -28,7 +28,7 @@ exports['browsers returns the expected list of browsers 1'] = [
     "name": "chrome",
     "family": "chromium",
     "channel": "canary",
-    "displayName": "Chrome Canary",
+    "displayName": "Canary",
     "versionRegex": {},
     "profile": true,
     "binary": "google-chrome-canary"

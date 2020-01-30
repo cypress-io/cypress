@@ -67,7 +67,7 @@ const TYPICAL_BROWSERS = [
     name: 'chrome',
     family: 'chromium',
     channel: 'canary',
-    displayName: 'Chrome Canary',
+    displayName: 'Canary',
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
     majorVersion: '62',

@@ -21,7 +21,7 @@
     },
     {
       "name": "chrome",
-      "displayName": "Chrome Canary",
+      "displayName": "Canary",
       "family": "chromium",
       "version": "80.0.3977.4",
       "path": "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
@@ -274,7 +274,7 @@
         },
         {
           "name": "chrome",
-          "displayName": "Chrome Canary",
+          "displayName": "Canary",
           "family": "chromium",
           "version": "48.0",
           "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",

@@ -27,7 +27,7 @@ export const browsers: Browser[] = [
     name: 'chrome',
     family: 'chromium',
     channel: 'canary',
-    displayName: 'Chrome Canary',
+    displayName: 'Canary',
     versionRegex: /Google Chrome Canary (\S+)/,
     profile: true,
     binary: 'google-chrome-canary',

@@ -14,7 +14,7 @@ describe "Cypress static methods + props", ->
 
     expect(browser).to.be.an("object")
     expect(browser.name).to.be.oneOf(["electron", "chrome", "chromium"])
-    expect(browser.displayName).to.be.oneOf(["Electron", "Chrome", "Chrome Canary", "Chromium"])
+    expect(browser.displayName).to.be.oneOf(["Electron", "Chrome", "Canary", "Chromium"])
     expect(browser.version).to.be.a("string")
     # we are parsing major version, so it should be a number
     expect(browser.majorVersion).to.be.a("number")
