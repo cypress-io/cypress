@@ -345,9 +345,9 @@ class Project extends EE {
 
       onSavedStateChanged: options.onSavedStateChanged,
 
-      onCaptureExtensionVideoFrame: (data) => {
+      onCaptureVideoFrames: (data) => {
         // TODO: move this to browser automation middleware
-        this.emit('capture:extension:video:frame', data)
+        this.emit('capture:video:frames', data)
       },
 
       onConnect: (id) => {

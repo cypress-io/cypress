@@ -2884,7 +2884,7 @@ describe('src/cy/commands/actions/type', () => {
 
           cy.get('[contenteditable]:first')
           .type('{downarrow}22').then(($div) => {
-            if (Cypress.browser.family === 'firefox') {
+            if (Cypress.isBrowser('firefox')) {
               expect(trimInnerText($div)).to.eq('foo22\nbar\nbaz')
 
               return
@@ -3049,7 +3049,7 @@ describe('src/cy/commands/actions/type', () => {
           .type('bar{enter}baz{enter}{enter}{enter}quux').then(function ($div) {
             const conditionalNewLines = '\n\n'.repeat(this.multiplierNumNewLines)
 
-            if (Cypress.browser.family === 'firefox') {
+            if (Cypress.isBrowser('firefox')) {
               expect(trimInnerText($div)).to.eql(`foobar\nbaz\n\n\nquux`)
               expect($div.get(0).textContent).to.eql('foobarbazquux')
 
@@ -4003,7 +4003,8 @@ describe('src/cy/commands/actions/type', () => {
 
           sel.addRange(range)
 
-          cy.get('div:contains(bar):last').type('new text').should(($el) => {
+          cy.get('div:contains(bar):last').type('new text')
+          .should(($el) => {
             expect(trimInnerText($el)).eq('new text')
           })
         })

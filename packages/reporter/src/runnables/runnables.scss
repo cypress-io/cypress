@@ -175,7 +175,6 @@
     &.runnable-passed > .runnable-wrapper {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
-
         color: $pass;
       }
     }

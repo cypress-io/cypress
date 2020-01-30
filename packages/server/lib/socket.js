@@ -160,7 +160,7 @@ class Socket {
       checkForAppErrors () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
-      onCaptureExtensionVideoFrame () {},
+      onCaptureVideoFrames () {},
     })
 
     let automationClient = null
@@ -313,7 +313,7 @@ class Socket {
       })
 
       socket.on('recorder:frame', (data) => {
-        return options.onCaptureExtensionVideoFrame(data)
+        return options.onCaptureVideoFrames(data)
       })
 
       socket.on('reload:browser', (url, browser) => {

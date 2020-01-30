@@ -1584,12 +1584,7 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='/timeout?ms=500'>jquery</a>")
             .appendTo(win.document.body)
 
-            ## this causes a synchronous beforeunload event
-            ## unlike win.location.href setter
-            if Cypress.isBrowser('firefox')
-              win.location.href = $a[0].href
-            else $a.get(0).click()
-
+            causeSynchronousBeforeUnload($a)
 
           when 2
             ## on 2nd retry add the DOM element
@@ -1649,13 +1644,7 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='/timeout?ms=500'>jquery</a>")
             .appendTo(win.document.body)
 
-            ## this causes a synchronous beforeunload event
-            ## unlike win.location.href setter
-            if Cypress.isBrowser('firefox')
-              win.location.href = $a[0].href
-            else $a.get(0).click()
-
-
+            causeSynchronousBeforeUnload($a)
 
             null
           .wrap(null).then ->
@@ -1698,11 +1687,7 @@ describe "src/cy/commands/navigation", ->
               $a = win.$("<a href='/timeout?ms=400'>jquery</a>")
               .appendTo(win.document.body)
 
-              ## this causes a synchronous beforeunload event
-              ## unlike win.location.href setter
-              if Cypress.isBrowser('firefox')
-                win.location.href = $a[0].href
-              else $a.get(0).click()
+              causeSynchronousBeforeUnload($a)
 
               ## immediately logs pending state
               expect(logByName("page load").get("state")).to.eq("pending")
@@ -1722,8 +1707,7 @@ describe "src/cy/commands/navigation", ->
           ## make get timeout after only 200ms
           .get("#does-not-exist", { timeout: 200 }).should("have.class", "foo")
 
-      ## FIXME: (FIREFOX) hangs
-      it.skip "captures cross origin failures", (done) ->
+      it "captures cross origin failures", (done) ->
         cy.once "fail", (err) =>
           lastLog = @lastLog
 
@@ -1744,9 +1728,7 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='#{url}'>jquery</a>")
             .appendTo(win.document.body)
 
-            $a.get(0).click()
-
-            null
+            causeSynchronousBeforeUnload($a)
 
       null
 
@@ -2192,3 +2174,12 @@ describe "src/cy/commands/navigation", ->
               "Originated From": $form.get(0)
               "Args": event
             })
+
+
+causeSynchronousBeforeUnload = ($a) ->
+  ## this causes a synchronous beforeunload event
+  ## chrome & firefox behave differently
+  win = $a[0].ownerDocument.defaultView
+  if Cypress.isBrowser('firefox')
+    win.location.href = $a[0].href
+  else $a.get(0).click()

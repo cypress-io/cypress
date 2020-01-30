@@ -30,7 +30,6 @@ onServer = (app) ->
     })
     .send(buf)
 
-## FIREFOX FIXME: errors slightly different and stack trace lines not replaced in snapshot
 describe "e2e js error handling", ->
   e2e.setup({
     servers: [{

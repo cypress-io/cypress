@@ -117,9 +117,7 @@ if (Cypress.isBrowser('chrome')) {
 
         expect(firstXhr.canceled).not.to.be.true
         expect(firstXhr.aborted).not.to.be.true
-
         expect(firstXhr.readyState).to.eq(4)
-
         expect(firstLog.get('state')).to.eq('passed')
 
         // since we've canceled the underlying XHR

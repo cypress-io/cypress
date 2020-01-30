@@ -1,5 +1,5 @@
-import debugModule from 'debug'
 import _ from 'lodash'
+import debugModule from 'debug'
 import { blacklist, cors } from '@packages/network'
 import { HttpMiddleware } from './'
 

@@ -612,8 +612,6 @@ const create = (state, keyboard, focused, Cypress) => {
 
       el = forceEl || el
 
-      // debug(arguments)
-
       const win = $dom.getWindowByElement(el)
 
       const defaultOptions = mouse._getDefaultMouseOptions(fromElViewport.x, fromElViewport.y, win)

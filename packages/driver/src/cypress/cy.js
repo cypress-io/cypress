@@ -119,7 +119,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const queue = $CommandQueue.create()
 
-  $VideoRecorder.create(state, Cypress)
+  $VideoRecorder.create(Cypress)
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -677,25 +677,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
-    let stack = err.stack || ''
-
-    // preserve message
-    // and toString
-    const msg = err.message
-    const str = err.toString()
-
-    // Firefox stack does not include toString'd error, so normalize
-    // things by prepending it
-    if (!_.includes(stack, str)) {
-      stack = `${str}\n${stack}`
-    }
-
-    // set message
-    err.message = msg
-
-    // reset stack by replacing the original first line
-    // with the new one
-    err.stack = stack.replace(str, err.toString())
+    $utils.normalizeErrorStack(err)
 
     // store the error on state now
     state('error', err)
@@ -734,14 +716,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // collect all of the callbacks for 'fail'
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
-      const e = err2
-      const errString = e.toString()
-      const errStack = e.stack
-
-      if (!errStack.slice(0, errStack.indexOf('\n')).includes(errString)) {
-        e.stack = `${errString}\n${errStack}`
-      }
-
+      $utils.normalizeErrorStack(err2)
       // and if any of these throw synchronously immediately error
       finish(err2)
     }

@@ -479,7 +479,7 @@ const getFirefoxProps = (isHeaded, project, writeVideoFrame) => {
         writeVideoFrame(data)
       }
 
-      project.on('capture:extension:video:frame', onScreencastFrame)
+      project.on('capture:video:frames', onScreencastFrame)
 
       props.onScreencastFrame = true
     }
@@ -557,7 +557,7 @@ const writeOutput = (outputPath, results) => {
   })
 }
 
-const warnings = []
+const warnings = {}
 const onWarning = (err) => {
   // if we've printed this exact warning before, skip it
   if (err.type && warnings[err.type] && warnings[err.type].message === err.message) {

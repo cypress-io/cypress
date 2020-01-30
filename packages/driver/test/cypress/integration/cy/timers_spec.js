@@ -1,4 +1,4 @@
-const startingIndex = Cypress.browser.family === 'firefox' ? 1 : 0
+const startingIndex = Cypress.isBrowser('firefox') ? 1 : 0
 
 const timerNumber = (n) => n + startingIndex
 

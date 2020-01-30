@@ -92,6 +92,7 @@ chai.use((chai, u) => {
 
   const { inspect, setFormatValueHook } = chaiInspect.create(chai)
 
+  // prevent tunneling into Window objects (can throw cross-origin errors in firefox)
   setFormatValueHook((ctx, val) => {
     if (val && (getType(val) === 'Window')) {
       return '[window]'

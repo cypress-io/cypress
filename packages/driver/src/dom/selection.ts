@@ -71,7 +71,6 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
   const doc = $document.getDocumentFromElement(el)
 
   // NOTE: insertText will also handle '\n', and render newlines
-  // doc.execCommand('insertText', true, text)
   let nativeUI = true
 
   if (Cypress.browser.family === 'firefox') {

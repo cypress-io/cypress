@@ -523,7 +523,6 @@ describe('intercept blur methods correctly', () => {
 
       cy.get('@selectionchange').then((v) => {
         v.callsFake(function () {
-          // debugger
           if (called) return
 
           called = true
@@ -546,7 +545,7 @@ describe('intercept blur methods correctly', () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.browser.family === 'firefox') {
+    if (Cypress.isBrowser('firefox')) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -563,7 +562,7 @@ describe('intercept blur methods correctly', () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.browser.family === 'firefox') {
+    if (Cypress.isBrowser('firefox')) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -580,7 +579,7 @@ describe('intercept blur methods correctly', () => {
     cy.wrap($el[0]).focus()
     .should('have.focus')
 
-    if (Cypress.browser.family === 'firefox') {
+    if (Cypress.isBrowser('firefox')) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -606,7 +605,7 @@ describe('intercept blur methods correctly', () => {
     $el.appendTo(cy.$$('body'))
     $el[0].focus()
 
-    if (Cypress.browser.family === 'firefox') {
+    if (Cypress.isBrowser('firefox')) {
       cy.wait(0).get('@selectionchange').should('be.called')
 
       return
@@ -630,7 +629,6 @@ describe('intercept blur methods correctly', () => {
     const $el = cy.$$('<div contenteditable>contenteditable</div>')
 
     $el.appendTo(cy.$$('body'))
-
     $el[0].focus()
 
     cy.get('@selectionchange').should('be.called')

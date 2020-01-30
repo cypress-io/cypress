@@ -75,6 +75,7 @@ const getElementPositioning = ($el) => {
   // because its useful to any caller
   const rectCenter = getCenterCoordinates(rect)
 
+  // rounding needed for firefox, which returns floating numbers
   const topCenter = Math.ceil(rectCenter.y)
   const leftCenter = Math.ceil(rectCenter.x)
 

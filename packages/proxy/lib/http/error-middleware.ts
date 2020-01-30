@@ -1,6 +1,6 @@
 import debugModule from 'debug'
-import { Request } from 'request'
 import { Readable } from 'stream'
+import { Request } from 'request'
 import { HttpMiddleware } from './'
 
 const debug = debugModule('cypress:proxy:http:error-middleware')

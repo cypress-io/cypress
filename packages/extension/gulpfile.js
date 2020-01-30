@@ -40,16 +40,6 @@ const background = () => {
   .pipe(gulp.dest('dist'))
 }
 
-/* eslint-disable-next-line no-unused-vars */
-const content = () => {
-  return browserify({
-    entries: 'app/content.js',
-  })
-  .bundle()
-  .pipe(source('content-script.js'))
-  .pipe(gulp.dest('dist'))
-}
-
 const html = () => {
   return gulp.src('app/**/*.html')
   .pipe(gulp.dest('dist'))
@@ -86,7 +76,6 @@ const build = gulp.series(
     logos,
     manifest,
     background,
-    // content,
     html,
     css
   )

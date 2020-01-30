@@ -101,16 +101,18 @@ module.exports = {
     ## with the new one
     err.stack = stack.replace(str, err.toString())
 
-    ## normalize error message for firefox
-    ## TODO: cleanup this dup. logic and move it to common util
-    e = err
+    module.exports.normalizeErrorStack(err)
+    
+    return err
+  
+  normalizeErrorStack: (e) ->
+    ## normalize error message + stack for firefox
     errString = e.toString()
-    errStack = e.stack
+    errStack = e.stack || ''
 
     if !errStack.slice(0, errStack.indexOf('\n')).includes(errString.slice(0, errString.indexOf('\n')))
       e.stack = "#{errString}\n#{errStack}"
-
-    return err
+    return e
 
   cloneErr: (obj) ->
     err2 = new Error(obj.message)

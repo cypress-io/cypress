@@ -316,7 +316,7 @@ declare namespace Cypress {
 
     /**
      * Checks if you're running in the supplied browser family.
-     * e.g. 'Chrome' will be true for the browser 'Canary'
+     * e.g. isBrowser('Chrome') will be true for the browser 'Canary'
      * @param name browser family name to check
      */
     isBrowser(name: string): boolean

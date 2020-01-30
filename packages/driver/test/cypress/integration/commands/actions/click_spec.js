@@ -44,7 +44,7 @@ const getMidPoint = (el) => {
   return { x: midX, y: midY }
 }
 
-const isFirefox = Cypress.browser.family === 'firefox'
+const isFirefox = Cypress.isBrowser('firefox')
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
@@ -339,10 +339,31 @@ describe('src/cy/commands/actions/click', () => {
       cy.contains('button').click()
     })
 
+    it('events when element removed on pointerdown', () => {
+      const btn = cy.$$('button:first').css({ transform: 'translateY(-50px)' })
+      const div = cy.$$('div#tabindex')
+
+      attachFocusListeners({ btn })
+      attachMouseClickListeners({ btn, div })
+      attachMouseHoverListeners({ btn, div })
+
+      btn.on('pointerdown', () => {
+        // synchronously remove this button
+        btn.remove()
+      })
+
+      cy.contains('button').click()
+
+      cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
+      cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
+      cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
+    })
+
     it('events when element removed on pointerover', () => {
       const btn = cy.$$('button:first').css({ transform: 'translateY(-50px)' })
       const div = cy.$$('div#tabindex')
 
+      // attachFocusListeners({ btn })
       attachMouseClickListeners({ btn, div })
       attachMouseHoverListeners({ btn, div })
 
@@ -356,28 +377,6 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('btn', 'pointerover pointerenter').each(shouldBeCalled)
       cy.getAll('btn', 'pointerdown mousedown mouseover mouseenter').each(shouldNotBeCalled)
       cy.getAll('div', 'pointerover pointerenter pointerdown mousedown pointerup mouseup click').each(shouldBeCalled)
-    })
-
-    it('events when element removed on pointerdown', () => {
-      const btn = cy.$$('button:first').css({ transform: 'translateY(-50px)' })
-      const div = cy.$$('div#tabindex')
-
-      attachFocusListeners({ btn })
-      attachMouseClickListeners({ btn, div })
-      attachMouseHoverListeners({ div })
-
-      btn.on('pointerdown', () => {
-        // synchronously remove this button
-
-        btn.remove()
-      })
-
-      // return
-      cy.contains('button').click()
-
-      cy.getAll('btn', 'pointerdown').each(shouldBeCalled)
-      cy.getAll('btn', 'mousedown mouseup').each(shouldNotBeCalled)
-      cy.getAll('div', 'pointerover pointerenter mouseover mouseenter pointerup mouseup').each(shouldBeCalled)
     })
 
     // https://github.com/cypress-io/cypress/issues/5459
@@ -801,7 +800,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       cy.get('[contenteditable]:first')
-      // prevent contenteditable from disappearing (dont set to empty)
+      // firefox: prevent contenteditable from disappearing (dont set to empty)
       .invoke('html', '<br>').click()
       .then(($el) => {
         const el = $el.get(0)
@@ -1830,23 +1829,6 @@ describe('src/cy/commands/actions/click', () => {
         cy
         .get('#button-covered-in-span').click()
         .focused().should('have.id', 'button-covered-in-span')
-      })
-
-      it('focus window', () => {
-        const stub = cy.stub()
-        .callsFake(() => {
-          // debugger
-        })
-        // const win = cy.state('window')
-        const win = cy.$$('*')
-
-        cy.$$(cy.state('window')).on('focus', cy.stub().as('win'))
-
-        cy.$$(cy.state('document')).on('focus', cy.stub().as('doc'))
-
-        win.on('focus', stub)
-
-        cy.get('li').first().then((el) => el.focus().focus().focus())
       })
 
       it('will not fire focus events when nothing can receive focus', () => {
@@ -3603,10 +3585,10 @@ describe('src/cy/commands/actions/click', () => {
           this.log = log
         })
 
-        cy.get('button').first().rightclick().then(function () {
+        cy.get('button').first().rightclick().then(function ($btn) {
           const { lastLog } = this
 
-          const midpoint = getMidPoint(cy.$$('button')[0])
+          const midpoint = getMidPoint($btn[0])
           const consoleProps = lastLog.invoke('consoleProps')
 
           expect(consoleProps).to.containSubset({

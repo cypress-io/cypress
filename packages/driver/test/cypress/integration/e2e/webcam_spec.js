@@ -1,7 +1,7 @@
 // https://github.com/cypress-io/cypress/issues/2704
 
 describe('webcam support', () => {
-  if (Cypress.browser.family === 'firefox') {
+  if (Cypress.isBrowser('firefox')) {
     // TODO: (firefox) allow auto-bypass webcam prompt
     it.skip('navigator.mediaDevices.getUserMedia resolves with fake media stream')
 

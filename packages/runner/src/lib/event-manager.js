@@ -187,10 +187,10 @@ const eventManager = {
     ws.emit('watch:test:file', specPath)
   },
 
-  isBrowserType (browserName) {
+  isBrowser (browserName) {
     if (!this.Cypress) return false
 
-    return this.Cypress.isBrowserType(browserName)
+    return this.Cypress.isBrowser(browserName)
   },
 
   initialize ($autIframe, config) {

@@ -1074,7 +1074,7 @@ describe('lib/cypress', () => {
           // the "returns(resolves)" stub is due to curried method
           // it accepts URL to visit and then waits for actual CRI client reference
           // and only then navigates to that URL
-          sinon.stub(chromeBrowser, '_navigateUsingCRI').returns(sinon.stub().resolves())
+          sinon.stub(chromeBrowser, '_navigateUsingCRI').resolves()
 
           sinon.stub(chromeBrowser, '_setAutomation').returns()
 

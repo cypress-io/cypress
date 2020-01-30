@@ -104,7 +104,7 @@ const defaultArgs = [
   '--use-mock-keychain',
 ]
 
-const getRemoteDebuggingPort = Bluebird.method(() => {
+const getRemoteDebuggingPort = async () => {
   let port
 
   port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
@@ -114,7 +114,7 @@ const getRemoteDebuggingPort = Bluebird.method(() => {
   }
 
   return utils.getPort()
-})
+}
 
 const pluginsBeforeBrowserLaunch = async function (browser, options) {
   // bail if we're not registered to this event
@@ -207,41 +207,37 @@ const _connectToChromeRemoteInterface = function (port) {
   })
 }
 
-const _maybeRecordVideo = (options) => {
-  return (function (client) {
-    if (!options.onScreencastFrame) {
-      debug('options.onScreencastFrame is false')
+const _maybeRecordVideo = async function (client, options) {
+  if (!options.onScreencastFrame) {
+    debug('options.onScreencastFrame is false')
 
-      return client
-    }
+    return client
+  }
 
-    debug('starting screencast')
+  debug('starting screencast')
 
-    client.on('Page.screencastFrame', options.onScreencastFrame)
+  client.on('Page.screencastFrame', options.onScreencastFrame)
 
-    return client.send('Page.startScreencast', {
-      format: 'jpeg',
-    })
-    .return(client)
+  await client.send('Page.startScreencast', {
+    format: 'jpeg',
   })
+
+  return client
 }
 
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
-const _navigateUsingCRI = function (url) {
+const _navigateUsingCRI = async function (client, url) {
   // @ts-ignore
   la(check.url(url), 'missing url to navigate to', url)
+  la(client, 'could not get CRI client')
+  debug('received CRI client')
+  debug('navigating to page %s', url)
 
-  return async function (client) {
-    la(client, 'could not get CRI client')
-    debug('received CRI client')
-    debug('navigating to page %s', url)
-
-    // when opening the blank page and trying to navigate
-    // the focus gets lost. Restore it and then navigate.
-    await client.send('Page.bringToFront')
-    await client.send('Page.navigate', { url })
-  }
+  // when opening the blank page and trying to navigate
+  // the focus gets lost. Restore it and then navigate.
+  await client.send('Page.bringToFront')
+  await client.send('Page.navigate', { url })
 }
 
 const _setAutomation = (client, automation) => {
@@ -451,8 +447,8 @@ module.exports = {
       await originalBrowserKill.apply(launchedBrowser, args)
     }
 
-    await this._maybeRecordVideo(options)(criClient)
-    await this._navigateUsingCRI(url)(criClient)
+    await this._maybeRecordVideo(criClient, options)
+    await this._navigateUsingCRI(criClient, url)
 
     // return the launched browser process
     // with additional method to close the remote connection

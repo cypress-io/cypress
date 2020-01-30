@@ -111,7 +111,6 @@ otherDomain = "quux.bar.net"
 otherUrl = "http://#{otherDomain}#{if haveRoot then '' else ":#{httpPort}"}"
 otherHttpsUrl = "https://#{otherDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
 
-## FIREFOX FIXME: tests all fail
 describe "e2e cookies", ->
   e2e.setup({
     servers: [{
@@ -176,7 +175,6 @@ describe "e2e cookies", ->
             exec({
               originalTitle: "e2e cookies with baseurl"
             })
-          # exit: false
         }
 
       e2e.it "passes with no baseurl", {

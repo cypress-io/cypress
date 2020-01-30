@@ -1,13 +1,13 @@
-import Promise from 'bluebird'
-import debugModule from 'debug'
-import { Request, Response } from 'express'
-import { IncomingMessage } from 'http'
 import _ from 'lodash'
-import { Readable } from 'stream'
+import debugModule from 'debug'
 import ErrorMiddleware from './error-middleware'
+import { HttpBuffers } from './util/buffers'
+import { IncomingMessage } from 'http'
+import Promise from 'bluebird'
+import { Readable } from 'stream'
+import { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
-import { HttpBuffers } from './util/buffers'
 
 const debug = debugModule('cypress:proxy:http')
 

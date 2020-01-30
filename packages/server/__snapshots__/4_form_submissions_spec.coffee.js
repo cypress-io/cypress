@@ -138,7 +138,7 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
 
 `
 
-exports['e2e forms submissions with jquery XHR POST failing 1'] = `
+exports['e2e forms / submissions with jquery XHR POST / failing'] = `
 
 ====================================================================================================
 
@@ -214,7 +214,7 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
 `
 
-exports['e2e forms submissions with jquery XHR POST passing 1'] = `
+exports['e2e forms / submissions with jquery XHR POST / passing'] = `
 
 ====================================================================================================
 

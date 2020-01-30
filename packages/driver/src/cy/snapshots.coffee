@@ -129,9 +129,8 @@ create = ($$, state) ->
         $elToHighlight.attr(HIGHLIGHT_ATTR, true)
 
       ## TODO: throw error here if cy is undefined!
+    
       $body = $$("body").clone()
-    
-    
 
       ## for the head and body, get an array of all CSS,
       ## whether it's links or style tags
@@ -176,7 +175,7 @@ create = ($$, state) ->
       return snapshot
 
     catch e
-      # console.log('cross origin object accessed')
+      null
 
   return {
     createSnapshot

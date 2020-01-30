@@ -65,10 +65,11 @@ const moduleFactory = () => {
           options.userAgent = cfg.userAgent
           options.proxyServer = cfg.proxyUrl
           options.socketIoRoute = cfg.socketIoRoute
-          options.isTextTerminal = cfg.isTextTerminal
           options.chromeWebSecurity = cfg.chromeWebSecurity
 
           options.url = url
+
+          options.isTextTerminal = cfg.isTextTerminal
 
           // if we don't have the isHeaded property
           // then we're in interactive mode and we

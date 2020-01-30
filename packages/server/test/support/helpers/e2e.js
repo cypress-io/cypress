@@ -86,22 +86,22 @@ const replaceDurationSeconds = function (str, p1, p2, p3, p4) {
   return p1 + _.padEnd('X seconds', lengthOfExistingDuration)
 }
 
+// duration='1589'
 const replaceDurationFromReporter = (str, p1, p2, p3) => {
-  // duration='1589'
   return p1 + _.padEnd('X', p2.length, 'X') + p3
 }
 
 const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
 
-const replaceDurationInTables = (str, p1, p2) => {
 // when swapping out the duration, ensure we pad the
 // full length of the duration so it doesn't shift content
+const replaceDurationInTables = (str, p1, p2) => {
   return _.padStart('XX:XX', p1.length + p2.length)
 }
 
-const replaceParenTime = (str, p1) => {
 // could be (1 second) or (10 seconds)
 // need to account for shortest and longest
+const replaceParenTime = (str, p1) => {
   return _.padStart('(X second)', p1.length)
 }
 
@@ -277,8 +277,6 @@ function getBrowsers (browserPattern) {
     throw new Error(`options.browser: "${browserPattern}" matched no browsers`)
   }
 
-  // console.log(chalk.green(selected))
-
   return selected
 }
 
@@ -345,7 +343,6 @@ const localItFn = function (title, opts = {}) {
         psInclude(options.psInclude),
         options.onRun(execFn, browser, ctx),
       ])
-      // .then(options.afterRun)
     })
   }
 
@@ -377,10 +374,6 @@ async function psInclude (str) {
     try {
       const psOutput = (await cp.execAsync('ps -fww')).toString()
 
-      // eslint-disable-next-line
-      // console.log(psOutput)
-
-      // return /^.*chrome.*--no-first-run.*run-\d+/.exec(v)
       _.forEach(str, (v) => {
         expect(psOutput).contain(v)
       })

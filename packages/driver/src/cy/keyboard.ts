@@ -605,9 +605,8 @@ export interface typeOptions {
 }
 
 export class Keyboard {
-  private state
-  constructor (state: State) {
-    this.state = state
+  constructor (private state: State) {
+    null
   }
 
   type (opts: typeOptions) {

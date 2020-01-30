@@ -9,7 +9,6 @@ Fixtures = require("../support/helpers/fixtures")
 
 HTTPS_PORT = 11443
 HTTP_PORT = 11180
-## FIREFOX FIXME: errors slightly different and stack trace lines not replaced in snapshot
 describe "e2e form submissions", ->
   e2e.setup()
 
@@ -85,19 +84,17 @@ describe "e2e forms", ->
   context "submissions with jquery XHR POST", ->
     e2e.setup()
 
-    it "passing", ->
-      e2e.exec(@, {
-        spec: "form_submission_passing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 0
-      })
+    e2e.it "passing", {
+      spec: "form_submission_passing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 0
+    }
 
-    it "failing", ->
-      e2e.exec(@, {
-        spec: "form_submission_failing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 1
-      })
+    e2e.it "failing", {
+      spec: "form_submission_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+    }
 
   context "<form> submissions", ->
     e2e.setup({

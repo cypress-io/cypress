@@ -18,7 +18,7 @@ module.exports = {
     return path.join(__dirname, '..')
   },
 
-  setHostAndPath (host, path, onScreencastFrame) {
+  setHostAndPath (host, path) {
     const src = this.getPathToExtension('background.js')
 
     return fs.readFileAsync(src, 'utf8')
@@ -26,7 +26,6 @@ module.exports = {
       return str
       .replace('CHANGE_ME_HOST', host)
       .replace('CHANGE_ME_PATH', path)
-      .replace('\'CHANGE_ME_SCREENCAST_FRAME\'', onScreencastFrame)
     })
   },
 

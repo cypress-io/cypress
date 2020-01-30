@@ -216,14 +216,10 @@ export default class Project {
     this.error = null
   }
 
-  @action addWarning (warning, id) {
-    if (!id) {
-      id = warning.type
-    }
+  @action addWarning (warning) {
+    const id = warning.type
 
-    const prevWarning = this.warnings[id]
-
-    if (prevWarning && prevWarning.dismissed) {
+    if (id && this.warnings[id] && this.warnings[id].dismissed) {
       return
     }
 

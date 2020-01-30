@@ -17,7 +17,7 @@ const firstOrNull = (cookies) => {
   return cookies[0] != null ? cookies[0] : null
 }
 
-const connect = function (host, path, onScreencastFrame) {
+const connect = function (host, path) {
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {

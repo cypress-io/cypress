@@ -56,14 +56,7 @@ create = (state, config, log) ->
         l.error(err)
 
     ## normalize error message for firefox
-    ## TODO: cleanup this dup. logic and move it to common util
-    e = err
-    errString = e.toString()
-    errStack = e.stack
-
-    if !errStack.slice(0, errStack.indexOf('\n')).includes(errString.slice(0, errString.indexOf('\n')))
-      e.stack = "#{errString}\n#{errStack}"
-    
+    $utils.normalizeErrorStack(err)
 
     return err
 
