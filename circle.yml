@@ -56,13 +56,23 @@ executors:
 
 commands:
   install-latest-chrome:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+        default: ""
     steps:
       - run:
           command: |
-            apt update ;
-            apt install google-chrome-stable -y ;
-            which google-chrome ;
-            google-chrome --version        
+            if [ << parameters.browser >> == "chrome" ]; then
+              echo "Running Chrome tests.  Installing latest stable version of Google Chrome."
+              apt-get update
+              apt-get install google-chrome-stable -y
+              echo "Location of Google Chrome Installation: "`which google-chrome`
+              echo "Google Chrome Version: "`google-chrome --version`
+            else
+              echo "Not updating Chrome. Running tests in '<< parameters.browser >>''"
+            fi
   run-e2e-tests:
     parameters:
       browser:
@@ -74,10 +84,8 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - when:
-          condition: <<parameters.browser>>
-          steps:
-            - install-latest-chrome
+      - install-latest-chrome:
+          browser: << parameters.browser >>
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
@@ -500,7 +508,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - install-latest-chrome
+      - install-latest-chrome:
+          browser: chrome
       - run:
           command: npm start
           background: true
