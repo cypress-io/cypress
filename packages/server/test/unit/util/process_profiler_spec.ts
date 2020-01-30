@@ -3,12 +3,17 @@ import '../../spec_helper'
 import _ from 'lodash'
 import si from 'systeminformation'
 import { expect } from 'chai'
-import { _groupCyProcesses, _renameBrowserGroup } from '../../../lib/util/process_profiler'
+import {
+  _groupCyProcesses,
+  _renameBrowserGroup,
+  _aggregateGroups,
+  _reset,
+} from '../../../lib/util/process_profiler'
 import sinon from 'sinon'
+import snapshot from 'snap-shot-it'
 
 const browsers = require('../../../lib/browsers')
 const plugins = require('../../../lib/plugins')
-const videoCapture = require('../../../lib/video_capture')
 
 const BROWSER_PID = 11111
 const SUB_BROWSER_PID = 11112
@@ -107,11 +112,14 @@ const PROCESSES: Partial<si.Systeminformation.ProcessesProcessData>[] = [
 ]
 
 describe('lib/util/process_profiler', function () {
+  beforeEach(() => {
+    _reset()
+  })
+
   context('._groupCyProcesses', () => {
     it('groups correctly', () => {
       sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
       sinon.stub(plugins, 'getPluginPid').returns(PLUGIN_PID)
-      sinon.stub(videoCapture, 'getFfmpegPid').returns(FFMPEG_PID)
 
       // @ts-ignore
       const groupedProcesses = _groupCyProcesses({ list: PROCESSES })
@@ -156,7 +164,33 @@ describe('lib/util/process_profiler', function () {
         { group: 'FooBrowser', pid: 2 },
       ]
 
+      // @ts-ignore
       expect(_renameBrowserGroup(processes)).to.deep.eq(expected)
+    })
+  })
+
+  context('._aggregateGroups', () => {
+    it('aggregates groups as expected', () => {
+      sinon.stub(browsers, 'getBrowserInstance').returns({ pid: BROWSER_PID })
+      sinon.stub(plugins, 'getPluginPid').returns(PLUGIN_PID)
+
+      const processes = _.cloneDeep(PROCESSES)
+      .map((proc) => {
+        // add some dummy measurements so there is data to aggregate
+        proc.mem_rss = 10 * 1024 // 10mb
+        proc.pcpu = 20
+
+        return proc
+      })
+
+      // @ts-ignore
+      const result = _aggregateGroups(_groupCyProcesses({ list: processes }))
+
+      // main process will have variable pid, replace it w constant for snapshotting
+      _.find(result, { pids: String(MAIN_PID) }).pids = '111111111'
+
+      // @ts-ignore
+      snapshot(result)
     })
   })
 })

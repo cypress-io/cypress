@@ -6,7 +6,6 @@ import { concatStream } from '@packages/network'
 
 const browsers = require('../browsers')
 const plugins = require('../plugins')
-const videoCapture = require('../video_capture')
 
 type Group = 'browser' | 'cypress' | 'plugin' | 'desktop-gui' | 'ffmpeg' | 'electron-shared' | 'other'
 type Process = si.Systeminformation.ProcessesProcessData & {
@@ -20,6 +19,10 @@ const interval = Number(process.env.CYPRESS_PROCESS_PROFILER_INTERVAL) || 10000
 let started = false
 
 let groupsOverTime = {}
+
+export const _reset = () => {
+  groupsOverTime = {}
+}
 
 const formatPidDisplay = (groupedProcesses) => {
   const pids = _.map(groupedProcesses, 'pid')
@@ -74,9 +77,14 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
     }
 
     return isType('broker')
-    || isType('gpu-process')
-    || isType('utility')
-    || isType('zygote')
+      || isType('gpu-process')
+      || isType('utility')
+      || isType('zygote')
+  }
+
+  const isFfmpegProcess = (proc: Process): boolean => {
+    return proc.parentPid === thisProcess.pid
+      && /ffmpeg/i.test(proc.name)
   }
 
   const getProcessGroup = (proc: Process): Group => {
@@ -96,7 +104,7 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
       return 'desktop-gui'
     }
 
-    if (proc.pid === videoCapture.getFfmpegPid()) {
+    if (isFfmpegProcess(proc)) {
       return 'ffmpeg'
     }
 
@@ -127,7 +135,7 @@ export const _groupCyProcesses = ({ list }: si.Systeminformation.ProcessesData) 
   return cyProcesses
 }
 
-export const _renameBrowserGroup = (processes) => {
+export const _renameBrowserGroup = (processes: Process[]) => {
   const instance = browsers.getBrowserInstance()
   const displayName = _.get(instance, 'browser.displayName')
 
@@ -144,16 +152,8 @@ export const _renameBrowserGroup = (processes) => {
   return processes
 }
 
-export const _printGroupedProcesses = (processes) => {
+export const _aggregateGroups = (processes: Process[]) => {
   debugVerbose('all Cypress-launched processes: %s', require('util').inspect(processes))
-
-  const consoleBuffer = concatStream((buf) => {
-    // get rid of trailing newline
-    debug(String(buf).trim())
-  })
-
-  // eslint-disable-next-line no-console
-  const buffedConsole = new console.Console(consoleBuffer)
 
   const groupTotals = _.chain(processes)
   .groupBy('group')
@@ -171,7 +171,6 @@ export const _printGroupedProcesses = (processes) => {
   .reverse()
   .value()
 
-  buffedConsole.log('current & mean memory and CPU usage by process group:')
   groupTotals.push(_.reduce(groupTotals, (acc, val) => {
     acc.processCount += val.processCount
     acc.cpuPercent += val.cpuPercent
@@ -203,6 +202,19 @@ export const _printGroupedProcesses = (processes) => {
     })
   })
 
+  return groupTotals
+}
+
+export const _printGroupedProcesses = (groupTotals) => {
+  const consoleBuffer = concatStream((buf) => {
+    // get rid of trailing newline
+    debug(String(buf).trim())
+  })
+
+  // eslint-disable-next-line no-console
+  const buffedConsole = new console.Console(consoleBuffer)
+
+  buffedConsole.log('current & mean memory and CPU usage by process group:')
   buffedConsole.table(groupTotals, [
     'group',
     'processCount',
@@ -221,6 +233,7 @@ function _checkProcesses () {
   return si.processes()
   .then(_groupCyProcesses)
   .then(_renameBrowserGroup)
+  .then(_aggregateGroups)
   .then(_printGroupedProcesses)
   .then(_scheduleProcessCheck)
   .catch((err) => {
