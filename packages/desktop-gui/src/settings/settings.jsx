@@ -35,7 +35,7 @@ const Settings = observer(({ project, app }) => {
           <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
             <ProxySettings app={app} />
           </Panel>
-          <Panel header='Experiments' key='experiments' className='form-horizontal settings-proxy'>
+          <Panel header='Experiments' key='experiments' className='form-horizontal settings-experiments'>
             <Experiments project={project} />
           </Panel>
         </Collapse>

@@ -133,7 +133,7 @@
 }
 
 .settings-wrapper {
-  padding: 20px 20px 0;
+  padding: 20px;
 
   pre {
     border-radius: 3px;
@@ -242,5 +242,52 @@
 
   td, th {
     padding: 3px;
+  }
+}
+
+.experiment-intro {
+  padding-bottom: 15px;
+  margin-bottom: 0px; 
+  border-bottom: 1px solid #ddd;
+}
+
+.experiments-list {
+  padding-left: 0;
+
+  .experiment {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .experiment-desc {
+    width: 80%;
+
+    h5 {
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    p {
+      margin-bottom: 5px; 
+    }
+  }
+
+  .experiment-status {
+    margin-left: auto;
+  }
+  
+  .experiment-status-sign {
+    background-color: #1aae73;
+    line-height: 28px;
+    height: 28px;
+    width: 40px;
+    border-radius: 14px;
+    color: white;
+    vertical-align: center;
+    display: inline-block;
+    font-weight: bold;
+    text-align: center;
   }
 }

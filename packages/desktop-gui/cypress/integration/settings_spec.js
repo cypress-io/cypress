@@ -579,6 +579,43 @@ describe('Settings', () => {
     })
   })
 
+  describe('experiments panel', () => {
+    describe('no experimental features turned on', () => {
+      beforeEach(function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
+        cy.contains('Experiments').click()
+      })
+
+      it('displays panel with no experiments', () => {
+        cy.get('.settings-experiments').contains('You can enable beta')
+      })
+    })
+
+    describe('componentTesting', () => {
+      beforeEach(function () {
+        this.config.experimentalComponentTesting = true
+        this.config.resolved.experimentalComponentTesting = {
+          value: true,
+        }
+
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
+        cy.contains('Experiments').click()
+      })
+
+      it('displays experiment', () => {
+        cy.get('.settings-experiments').contains('Component Testing')
+      })
+    })
+  })
+
   describe('errors', () => {
     beforeEach(function () {
       this.err = {
