@@ -32,9 +32,15 @@ interface CypressExperiments {
 }
 
 export const getExperimentsFromResolved = (resolvedConfig): CypressExperiments => {
-  const experimentalKeys = Object.keys(resolvedConfig).filter((key) => key.startsWith('experimental'))
-
   const experiments: CypressExperiments = {}
+
+  if (!resolvedConfig) {
+    // no config - no experiments
+    // this is likely to happen during unit testing
+    return experiments
+  }
+
+  const experimentalKeys = Object.keys(resolvedConfig).filter((key) => key.startsWith('experimental'))
 
   experimentalKeys.forEach((key) => {
     // it would be nice to have default value in the resolved config
