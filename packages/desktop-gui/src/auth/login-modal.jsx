@@ -80,7 +80,7 @@ class LoginContent extends Component {
       <div className='modal-body login'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
         <h1><i className='fas fa-check'></i> Login Successful</h1>
-        <p>You are now logged in as {authStore.user.name}.</p>
+        <p>You are now logged in{authStore.user ? ` as ${authStore.user.name}` : ''}.</p>
         <div className='login-content'>
           <button
             className='btn btn-login btn-black btn-block'
