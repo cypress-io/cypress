@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('./fs')
 const debug = require('debug')('cypress:server:path_helpers')
-const experiments = require('../experiments').getExperiments()
+const _ = require('lodash')
 
 const isIntegrationTestRe = /^integration/
 // TODO THIS IS A HACK, WE MUST DETERMINE PATH TO LOAD BETTER
@@ -60,6 +60,8 @@ module.exports = {
   getAbsolutePathToSpec (spec, config) {
     debug('get absolute path to spec %o', { spec })
 
+    const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+
     let resolved
 
     switch (false) {
@@ -87,14 +89,7 @@ module.exports = {
         // // which makes it an absolute path
         // path.join(config.unitFolder, spec)
 
-      case !isComponentTestRe.test(spec):
-        if (!experiments.componentTesting) {
-          // without component testing experiment, we do the default thing
-          debug('returning default path %s', spec)
-
-          return spec
-        }
-
+      case experimentalComponentTestingEnabled && !isComponentTestRe.test(spec):
         resolved = path.join(config.parentTestsFolder, spec)
 
         debug('resolved component path %s', resolved)

@@ -9,7 +9,6 @@ const Promise = require('bluebird')
 const pluralize = require('pluralize')
 const glob = require('./glob')
 const Table = require('cli-table3')
-const experiments = require('../experiments').getExperiments()
 
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 
@@ -19,12 +18,6 @@ const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
 */
 const SPEC_TYPES = {
   INTEGRATION: 'integration',
-}
-
-// component tests are new beasts, and they change how we mount the
-// code into the test frame.
-if (experiments.componentTesting) {
-  SPEC_TYPES.COMPONENT = 'component'
 }
 
 const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
@@ -186,6 +179,16 @@ function findSpecsOfType (searchOptions, specPattern) {
 const find = (config, specPattern) => {
   const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
 
+  const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+
+  debug('experimentalComponentTesting %o', experimentalComponentTestingEnabled)
+  if (experimentalComponentTestingEnabled) {
+    debug('component folder %o', config.componentFolder)
+    // component tests are new beasts, and they change how we mount the
+    // code into the test frame.
+    SPEC_TYPES.COMPONENT = 'component'
+  }
+
   /**
    * Sets "testType: integration|component" on each object in a list
   */
@@ -194,6 +197,7 @@ const find = (config, specPattern) => {
   const findIntegrationSpecs = () => {
     const searchOptions = _.pick(config, commonSearchOptions)
 
+    // ? should we always use config.resolved instead of config?
     searchOptions.searchFolder = config.integrationFolder
 
     return findSpecsOfType(searchOptions, specPattern)
@@ -201,10 +205,11 @@ const find = (config, specPattern) => {
   }
 
   const findComponentSpecs = () => {
-    if (!experiments.componentTesting) {
+    if (!experimentalComponentTestingEnabled) {
       return []
     }
 
+    // ? should we always use config.resolved instead of config?
     if (!config.componentFolder) {
       return []
     }
