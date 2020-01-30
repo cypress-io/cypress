@@ -4,7 +4,7 @@ import React from 'react'
 import { StatsStore } from './stats-store'
 
 const count = (num: number) => num > 0 ? num : '--'
-const formatDuration = (duration: number) => duration > 0 ? (duration / 1000).toFixed(2) : '0'
+const formatDuration = (duration: number) => duration ? String((duration / 1000).toFixed(2)).padStart(5, '0') : '--'
 
 interface Props {
   stats: StatsStore
@@ -28,7 +28,7 @@ const Stats = observer(({ stats }: Props) => (
       <span className='num'>{count(stats.numPending)}</span>
     </li>
     <li className='duration'>
-      <span className='num'>{count(parseFloat(formatDuration(stats.duration)))}</span>
+      <span className='num'>{formatDuration(stats.duration)}</span>
     </li>
   </ul>
 ))
