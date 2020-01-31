@@ -232,9 +232,13 @@ const displayRunStarting = function (options = {}) {
 
   table.push(...data)
 
-  console.log(table.toString())
+  const heading = table.toString()
 
-  return console.log('')
+  console.log(heading)
+
+  console.log('')
+
+  return heading
 }
 
 const displaySpecHeader = function (name, curr, total, estimated) {
@@ -732,6 +736,8 @@ module.exports = {
   getChromeProps,
 
   getElectronProps,
+
+  displayRunStarting,
 
   displayResults (obj = {}, estimated) {
     const results = collectTestResults(obj, estimated)

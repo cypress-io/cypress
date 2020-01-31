@@ -2,6 +2,9 @@ require('../../spec_helper')
 
 const Promise = require('bluebird')
 const electron = require('electron')
+const stripAnsi = require('strip-ansi')
+const snapshot = require('snap-shot-it')
+const pkg = require('@packages/root')
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const config = require(`${root}../lib/config`)
@@ -791,6 +794,102 @@ describe('lib/modes/run', () => {
           },
         })
       })
+    })
+  })
+
+  context('#displayRunStarting', () => {
+    // restore pkg.version property
+    // for some reason I cannot stub property value using Sinon
+    let version
+
+    before(() => {
+      version = pkg.version
+    })
+
+    afterEach(() => {
+      pkg.version = version
+    })
+
+    it('returns heading with experiments', () => {
+      pkg.version = '1.2.3'
+
+      const options = {
+        browser: {
+          displayName: 'Electron',
+          majorVersion: 99,
+          isHeadless: true,
+        },
+        config: {
+          resolved: {
+            experimentalFeatureA: {
+              value: true,
+              from: 'config',
+            },
+            experimentalFeatureB: {
+              value: 4,
+              from: 'cli',
+            },
+          },
+        },
+      }
+      const heading = runMode.displayRunStarting(options)
+
+      snapshot('enabled experiments', stripAnsi(heading))
+    })
+
+    it('returns heading with some enabled experiments', () => {
+      pkg.version = '1.2.3'
+
+      const options = {
+        browser: {
+          displayName: 'Electron',
+          majorVersion: 99,
+          isHeadless: true,
+        },
+        config: {
+          resolved: {
+            // means this feature is not enabled, should not appear in the heading
+            experimentalFeatureA: {
+              value: true,
+              from: 'default',
+            },
+            experimentalFeatureB: {
+              value: 4,
+              from: 'cli',
+            },
+          },
+        },
+      }
+      const heading = runMode.displayRunStarting(options)
+
+      const text = stripAnsi(heading)
+
+      snapshot('some enabled experiments', text)
+      // explicit assertions for test clarity
+      expect(text).to.not.include('experimentalFeatureA')
+      expect(text).to.include('experimentalFeatureB')
+    })
+
+    it('returns heading without experiments', () => {
+      pkg.version = '1.2.3'
+
+      const options = {
+        browser: {
+          displayName: 'Electron',
+          majorVersion: 99,
+          isHeadless: true,
+        },
+        config: {
+          resolved: {},
+        },
+      }
+      const heading = runMode.displayRunStarting(options)
+
+      snapshot('without enabled experiments', stripAnsi(heading))
+    })
+
+    it('restores pkg.version', () => {
+      expect(pkg.version).to.not.equal('1.2.3')
     })
   })
 })
