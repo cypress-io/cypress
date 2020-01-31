@@ -1,5 +1,3 @@
-const debug = require('debug')('cypress:server:electron_app')
-
 const scale = () => {
   try {
     const { app } = require('electron')
@@ -10,7 +8,9 @@ const scale = () => {
   }
 }
 
-const ready = () => {
+const waitForReady = () => {
+  const debug = require('debug')('cypress:server:electron-app')
+
   const Promise = require('bluebird')
   const { app } = require('electron')
 
@@ -21,20 +21,27 @@ const ready = () => {
     debug('all BrowserWindows closed, not exiting')
   })
 
-  const waitForReady = () => {
+  const onReadyEvent = () => {
     return new Promise((resolve) => {
       app.on('ready', resolve)
     })
   }
 
   return Promise.any([
-    waitForReady(),
+    onReadyEvent(),
     Promise.delay(500),
   ])
+}
+
+const isRunning = () => {
+  // are we in the electron or the node process?
+  return Boolean(process.versions && process.versions.electron)
 }
 
 module.exports = {
   scale,
 
-  ready,
+  waitForReady,
+
+  isRunning,
 }

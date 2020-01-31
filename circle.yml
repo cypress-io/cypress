@@ -55,9 +55,30 @@ executors:
       PLATFORM: mac
 
 commands:
+  install-latest-chrome:
+    description: Install latest Google Chrome (stable)
+    parameters:
+      browser:
+        default: "electron"
+        description: browser shortname to target
+        type: string
+    steps:
+      - run:
+          name: Install latest Google Chrome (stable)
+          command: |
+            if [ << parameters.browser >> == "chrome" ]; then
+              echo "**** Running Chrome tests.  Installing latest stable version of Google Chrome. ****"
+              apt-get update
+              apt-get install google-chrome-stable -y
+              echo "**** Location of Google Chrome Installation: "`which google-chrome`" ****"
+              echo "**** Google Chrome Version: "`google-chrome --version`" ****"
+            else
+              echo "**** Not updating Chrome. Running tests in '<< parameters.browser >>' ****"
+            fi
   run-e2e-tests:
     parameters:
       browser:
+        default: "electron"
         description: browser shortname to target
         type: string
       chunk:
@@ -66,6 +87,8 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - install-latest-chrome:
+          browser: << parameters.browser >>
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
@@ -493,6 +516,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-latest-chrome:
+          browser: chrome
       - run:
           command: npm start
           background: true
