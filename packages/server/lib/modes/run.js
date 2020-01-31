@@ -660,15 +660,12 @@ const getVideoRecordingDelay = function (startedVideoCapture) {
 const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const { spec, browser, video, videosFolder } = options
 
+  debug(`video recording has been ${video ? 'enabled' : 'disabled'}. video: %s`, video)
   // bail if we've been told not to capture
   // a video recording
   if (!video) {
-    debug('video recording has been disabled. video: %s', video)
-
     return
   }
-
-  debug('video recording has been enabled. video: %s', video)
 
   // handle if this browser cannot actually
   // be recorded
