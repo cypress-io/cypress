@@ -971,11 +971,11 @@ module.exports = {
 
       return Promise.join(
         this.waitForSocketConnection(project, socketId)
-        .then(() => {
+        .tap(() => {
           debug('socket connected', { socketId })
         }),
         this.launchBrowser(options)
-        .then(() => {
+        .tap(() => {
           debug('browser launched')
         })
       )
