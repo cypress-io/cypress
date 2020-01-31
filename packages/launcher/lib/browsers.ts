@@ -35,6 +35,15 @@ export const browsers: Browser[] = [
   {
     name: 'edge',
     family: 'chromium',
+    channel: 'stable',
+    displayName: 'Edge',
+    versionRegex: /Microsoft Edge (\S+)/,
+    profile: true,
+    binary: 'edge',
+  },
+  {
+    name: 'edge',
+    family: 'chromium',
     channel: 'canary',
     displayName: 'Edge Canary',
     versionRegex: /Microsoft Edge Canary (\S+)/,
@@ -58,15 +67,6 @@ export const browsers: Browser[] = [
     versionRegex: /Microsoft Edge Dev (\S+)/,
     profile: true,
     binary: 'edge-dev',
-  },
-  {
-    name: 'edge',
-    family: 'chromium',
-    channel: 'stable',
-    displayName: 'Edge',
-    versionRegex: /Microsoft Edge (\S+)/,
-    profile: true,
-    binary: 'edge',
   },
 ]
 
