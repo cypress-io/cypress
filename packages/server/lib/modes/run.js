@@ -453,11 +453,11 @@ const getProjectId = Promise.method((project, id) => {
 const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
 
-  if (browser.family === 'electron') {
+  if (browser.name === 'electron') {
     return getElectronProps(browser.isHeaded, project, writeVideoFrame)
   }
 
-  if (browser.family === 'chrome') {
+  if (browser.family === 'chromium') {
     return getChromeProps(browser.isHeaded, project, writeVideoFrame)
   }
 
@@ -621,11 +621,11 @@ const trashAssets = Promise.method((config = {}) => {
 // if we've been told to record and we're not spawning a headed browser
 const browserCanBeRecorded = (browser) => {
   // TODO: enable recording Electron in headed mode too
-  if (browser.family === 'electron' && browser.isHeadless) {
+  if (browser.name === 'electron' && browser.isHeadless) {
     return true
   }
 
-  if (browser.family === 'chrome') {
+  if (browser.name !== 'electron' && browser.family === 'chromium') {
     return true
   }
 
@@ -672,7 +672,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
     console.log('')
 
     // TODO update error messages and included browser name and headed mode
-    if (browser.family === 'electron' && browser.isHeaded) {
+    if (browser.name === 'electron' && browser.isHeaded) {
       errors.warning('CANNOT_RECORD_VIDEO_HEADED')
     } else {
       errors.warning('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER', browser.name)
@@ -967,9 +967,17 @@ module.exports = {
     let attempts = 0
 
     const wait = () => {
+      debug('waiting for socket to connect and browser to launch...')
+
       return Promise.join(
-        this.waitForSocketConnection(project, socketId),
+        this.waitForSocketConnection(project, socketId)
+        .tap(() => {
+          debug('socket connected', { socketId })
+        }),
         this.launchBrowser(options)
+        .tap(() => {
+          debug('browser launched')
+        })
       )
       .timeout(timeout || 30000)
       .catch(Promise.TimeoutError, (err) => {
@@ -1119,7 +1127,7 @@ module.exports = {
   runSpecs (options = {}) {
     _.defaults(options, {
       // only non-Electron browsers run headed by default
-      headed: options.browser.family !== 'electron',
+      headed: options.browser.name !== 'electron',
     })
 
     const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
@@ -1333,7 +1341,7 @@ module.exports = {
             errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
           }
 
-          if (browser.family === 'chrome') {
+          if (browser.family === 'chromium') {
             chromePolicyCheck.run(onWarning)
           }
 

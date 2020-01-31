@@ -216,7 +216,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then ->
         chromePolicyCheck.run (err) ->
           options.config.browsers.forEach (browser) ->
-            if browser.family == 'chrome'
+            if browser.family == 'chromium'
               browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
 
         openProject.create(arg, options, {

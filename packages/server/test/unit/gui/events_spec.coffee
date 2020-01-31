@@ -475,7 +475,7 @@ describe "lib/gui/events", ->
         sinon.stub(openProject, "create").resolves()
         @options.browser = "/foo"
 
-        browsers.getAllBrowsersWith.withArgs("/foo").resolves([{family: 'chrome'}, {family: 'some other'}])
+        browsers.getAllBrowsersWith.withArgs("/foo").resolves([{family: 'chromium'}, {family: 'some other'}])
 
         sinon.stub(chromePolicyCheck, "run").callsArgWith(0, new Error)
 
@@ -488,7 +488,7 @@ describe "lib/gui/events", ->
               config: {
                 browsers: [
                   {
-                    family: "chrome"
+                    family: "chromium"
                     warning: "Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy"
                   },
                   {
