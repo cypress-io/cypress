@@ -102,48 +102,6 @@ module.exports = {
     return require('./open_project').open(options.project, options)
   },
 
-  runServer (options) {
-    // args = {}
-    //
-    // _.defaults options, { autoOpen: true }
-    //
-    // if not options.project
-    //   throw new Error("Missing path to project:\n\nPlease pass 'npm run server -- --project /path/to/project'\n\n")
-    //
-    // if options.debug
-    //   args.debug = "--debug"
-    //
-    // ## just spawn our own index.js file again
-    // ## but put ourselves in project mode so
-    // ## we actually boot a project!
-    // _.extend(args, {
-    //   script:  "index.js"
-    //   watch:  ["--watch", "lib"]
-    //   ignore: ["--ignore", "lib/public"]
-    //   verbose: "--verbose"
-    //   exts:   ["-e", "coffee,js"]
-    //   args:   ["--", "--config", "port=2020", "--mode", "openProject", "--project", options.project]
-    // })
-    //
-    // args = _.chain(args).values().flatten().value()
-    //
-    // cp.spawn("nodemon", args, {stdio: "inherit"})
-    //
-    // ## auto open in dev mode directly to our
-    // ## default cypress web app client
-    // if options.autoOpen
-    //   _.delay ->
-    //     require("./browsers").launch("chrome", "http://localhost:2020/__", {
-    //       proxyServer: "http://localhost:2020"
-    //     })
-    //   , 2000
-    //
-    // if options.debug
-    //   cp.spawn("node-inspector", [], {stdio: "inherit"})
-    //
-    //   require("opn")("http://127.0.0.1:8080/debug?ws=127.0.0.1:8080&port=5858")
-  },
-
   start (argv = []) {
     debug('starting cypress with argv %o', argv)
 
@@ -284,9 +242,6 @@ module.exports = {
 
       case 'interactive':
         return this.runElectron(mode, options)
-
-      case 'server':
-        return this.runServer(options)
 
       case 'openProject':
         // open + start the project

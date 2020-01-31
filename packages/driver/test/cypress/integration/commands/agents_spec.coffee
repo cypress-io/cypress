@@ -230,7 +230,7 @@ describe "src/cy/commands/agents", ->
           expect(@myStub.displayName).to.eq("myStub")
 
         it "stores the lookup as an alias", ->
-          expect(cy.state("aliases").myStub).to.be.defined
+          expect(cy.state("aliases").myStub).to.exist
 
         it "stores the agent as the subject", ->
           expect(cy.state("aliases").myStub.subject).to.eq(@stub)
@@ -241,7 +241,7 @@ describe "src/cy/commands/agents", ->
         it "retries until assertions pass", ->
           cy.on "command:retry", _.after 2, =>
             @myStub("foo")
-          
+
           cy.get("@myStub").should("be.calledWith", "foo")
 
         describe "errors", ->
@@ -255,7 +255,7 @@ describe "src/cy/commands/agents", ->
           _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
             it "throws on a blacklisted word: #{blacklist}", ->
               expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
-      
+
       context "with dots", ->
         beforeEach ->
           @logs = []
@@ -285,7 +285,7 @@ describe "src/cy/commands/agents", ->
           expect(@["my.stub"].displayName).to.eq("my.stub")
 
         it "stores the lookup as an alias", ->
-          expect(cy.state("aliases")["my.stub"]).to.be.defined
+          expect(cy.state("aliases")["my.stub"]).to.exist
 
         it "stores the agent as the subject", ->
           expect(cy.state("aliases")["my.stub"].subject).to.eq(@stub)
@@ -296,7 +296,7 @@ describe "src/cy/commands/agents", ->
         it "retries until assertions pass", ->
           cy.on "command:retry", _.after 2, =>
             @["my.stub"]("foo")
-          
+
           cy.get("@my.stub").should("be.calledWith", "foo")
 
         describe "errors", ->

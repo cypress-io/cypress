@@ -74,18 +74,37 @@ declare namespace Cypress {
     (task: 'firefox:force:gc'): Promise<void>
   }
 
+  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
+
+  type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
+
+  type BrowserFamily = 'chromium' | 'firefox'
+
   /**
    * Describes a browser Cypress can control
    */
   interface Browser {
-    name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
-    displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
+    /**
+     * Short browser name.
+     */
+    name: BrowserName
+    /**
+     * The underlying engine for this browser.
+     */
+    family: BrowserFamily
+    /**
+     * The release channel of the browser.
+     */
+    channel: BrowserChannel
+    /**
+     * Human-readable browser name.
+     */
+    displayName: string
     version: string
     majorVersion: number
     path: string
     isHeaded: boolean
     isHeadless: boolean
-    family: string
   }
 
   interface LocalStorage {
@@ -628,7 +647,7 @@ declare namespace Cypress {
      *    // tries to find the given text for up to 1 second
      *    cy.contains('my text to find', {timeout: 1000})
      */
-    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
+    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<Subject>
     /**
      * Get the child DOM element that contains given text.
      *
@@ -646,7 +665,7 @@ declare namespace Cypress {
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
      */
-    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get the DOM element using CSS "selector" containing the text or regular expression.
      *
@@ -655,7 +674,7 @@ declare namespace Cypress {
      *    // yields <... class="foo">... apples ...</...>
      *    cy.contains('.foo', 'apples')
      */
-    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<E>>
 
     /**
      * Double-click a DOM element.
@@ -2027,6 +2046,18 @@ declare namespace Cypress {
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
     timeout: number
+  }
+
+  /**
+   * Options that check case sensitivity
+   */
+  interface CaseMatchable {
+    /**
+     * Check case sensitivity
+     *
+     * @default true
+     */
+    matchCase: boolean
   }
 
   /**

@@ -1053,7 +1053,7 @@ describe "lib/config", ->
     it "keeps the list of browsers if the plugins returns empty object", ->
       browser = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",
@@ -1085,7 +1085,7 @@ describe "lib/config", ->
     it "catches browsers=null returned from plugins", ->
       browser = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",
@@ -1113,7 +1113,7 @@ describe "lib/config", ->
     it "allows user to filter browsers", ->
       browserOne = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",

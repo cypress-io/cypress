@@ -543,7 +543,8 @@ const e2e = {
   },
 
   args (options = {}) {
-    let browser
+    debug('converting options to args %o', { options })
+
     const args = [
       // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
@@ -591,10 +592,8 @@ const e2e = {
       args.push(`--reporter-options=${options.reporterOptions}`)
     }
 
-    browser = options.browser
-
-    if (browser) {
-      args.push(`--browser=${browser}`)
+    if (options.browser) {
+      args.push(`--browser=${options.browser}`)
     }
 
     if (options.config) {
@@ -719,6 +718,7 @@ const e2e = {
     }
 
     return new Promise((resolve, reject) => {
+      debug('spawning Cypress %o', { args })
       const sp = cp.spawn('node', args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')

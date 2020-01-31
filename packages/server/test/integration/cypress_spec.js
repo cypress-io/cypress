@@ -49,21 +49,24 @@ const { formStatePath } = require(`${root}lib/util/saved_state`)
 const TYPICAL_BROWSERS = [
   {
     name: 'chrome',
-    family: 'chrome',
+    family: 'chromium',
+    channel: 'stable',
     displayName: 'Chrome',
     version: '60.0.3112.101',
     path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     majorVersion: '60',
   }, {
     name: 'chromium',
-    family: 'chrome',
+    family: 'chromium',
+    channel: 'stable',
     displayName: 'Chromium',
     version: '49.0.2609.0',
     path: '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
     majorVersion: '49',
   }, {
-    name: 'canary',
-    family: 'chrome',
+    name: 'chrome',
+    family: 'chromium',
+    channel: 'canary',
     displayName: 'Canary',
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
@@ -73,7 +76,7 @@ const TYPICAL_BROWSERS = [
 
 const ELECTRON_BROWSER = {
   name: 'electron',
-  family: 'electron',
+  family: 'chromium',
   displayName: 'Electron',
   path: '',
   version: '99.101.1234',
@@ -172,7 +175,7 @@ describe('lib/cypress', () => {
     it('allows browser major to be a number', () => {
       const browser = {
         name: 'Edge Beta',
-        family: 'chrome',
+        family: 'chromium',
         displayName: 'Edge Beta',
         version: '80.0.328.2',
         path: '/some/path',
@@ -334,7 +337,7 @@ describe('lib/cypress', () => {
   context('--run-project', () => {
     beforeEach(() => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
-      sinon.stub(runMode, 'waitForSocketConnection')
+      sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
@@ -761,7 +764,7 @@ describe('lib/cypress', () => {
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Available browsers found are: chrome, chromium, canary, electron'
+              'Available browsers found are: chrome, chromium, chrome:canary, electron'
             )
           })
         })
@@ -1255,7 +1258,7 @@ describe('lib/cypress', () => {
       sinon.stub(api, 'createRun').resolves()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(browsers, 'open')
-      sinon.stub(runMode, 'waitForSocketConnection')
+      sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
         stats: {
           tests: 1,

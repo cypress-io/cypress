@@ -8,20 +8,21 @@ utils = require("#{root}../lib/browsers/utils")
 describe "lib/browsers/index", ->
   context ".isBrowserFamily", ->
     it "allows only known browsers", ->
-      expect(browsers.isBrowserFamily("chrome")).to.be.true
-      expect(browsers.isBrowserFamily("electron")).to.be.true
+      expect(browsers.isBrowserFamily("chromium")).to.be.true
+      expect(browsers.isBrowserFamily("chrome")).to.be.false
+      expect(browsers.isBrowserFamily("electron")).to.be.false
       expect(browsers.isBrowserFamily("my-favorite-browser")).to.be.false
 
   context ".ensureAndGetByNameOrPath", ->
     it "returns browser by name", ->
       sinon.stub(utils, "getBrowsers").resolves([
-        { name: "foo" }
-        { name: "bar" }
+        { name: "foo", channel: "stable" }
+        { name: "bar", channel: "stable" }
       ])
 
       browsers.ensureAndGetByNameOrPath("foo")
       .then (browser) ->
-        expect(browser).to.deep.eq({ name: "foo" })
+        expect(browser).to.deep.eq({ name: "foo", channel: "stable" })
 
     it "throws when no browser can be found", ->
       browsers.ensureAndGetByNameOrPath("browserNotGonnaBeFound")

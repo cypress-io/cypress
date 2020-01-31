@@ -66,7 +66,7 @@ export default class Browsers extends Component {
       icon = <i className='browser-icon fas fa-check-circle green far' />
       prefixText = 'Running'
     } else {
-      icon = <BrowserIcon browserName={browser.name} />
+      icon = <BrowserIcon browserName={browser.displayName} />
       prefixText = ''
     }
 

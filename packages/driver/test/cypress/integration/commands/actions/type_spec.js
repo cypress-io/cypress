@@ -788,7 +788,7 @@ describe('src/cy/commands/actions/type', () => {
           expect(onInput).to.be.calledOnce
         })
         .then(() => {
-          onInput.reset()
+          onInput.resetHistory()
         })
 
         cy.get(':text:first')
@@ -798,7 +798,7 @@ describe('src/cy/commands/actions/type', () => {
           expect(onInput).to.be.calledOnce
         })
         .then(() => {
-          onInput.reset()
+          onInput.resetHistory()
         })
 
         cy.$$('[contenteditable]:first').on('input', onInput)
@@ -810,7 +810,7 @@ describe('src/cy/commands/actions/type', () => {
           expect(onInput).to.be.calledOnce
         })
         .then(() => {
-          onInput.reset()
+          onInput.resetHistory()
         })
 
         cy.get('[contenteditable]:first')

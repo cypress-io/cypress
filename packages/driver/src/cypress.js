@@ -168,10 +168,6 @@ class $Cypress {
   }
 
   initialize ($autIframe) {
-    // push down the options
-    // to the runner
-    this.mocha.options(this.runner)
-
     return this.cy.initialize($autIframe)
   }
 
@@ -620,6 +616,5 @@ _.each(proxies, (methods, key) => {
 // attaching these so they are accessible
 // via the runner + integration spec helper
 $Cypress.$ = $
-$Cypress.dom = $dom
 
 module.exports = $Cypress

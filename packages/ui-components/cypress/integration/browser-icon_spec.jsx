@@ -44,6 +44,7 @@ describe('<BrowserIcon />', () => {
       <BrowserIcon browserName='Edge Custom' />
       <BrowserIcon browserName='Electron Custom' />
       <BrowserIcon browserName='Firefox Custom' />
+      <BrowserIcon browserName='Chromium Custom' />
     </>)
 
     cy.get('.browser-icon').eq(0)
@@ -61,6 +62,10 @@ describe('<BrowserIcon />', () => {
     cy.get('.browser-icon').eq(3)
     .should('have.attr', 'src')
     .and('include', 'firefox')
+
+    cy.get('.browser-icon').eq(4)
+    .should('have.attr', 'src')
+    .and('include', 'chromium')
   })
 
   it('displays generic logo for unsupported browsers', () => {

@@ -51,9 +51,9 @@ const spaceDelimitedArgsMsg = (flag, args) => {
 }
 
 const parseVariableOpts = (fnArgs, args) => {
-  const opts = fnArgs.pop()
+  const [opts, unknownArgs] = fnArgs
 
-  if (fnArgs.length && (opts.spec || opts.tag)) {
+  if ((unknownArgs && unknownArgs.length) && (opts.spec || opts.tag)) {
     // this will capture space-delimited args after
     // flags that could have possible multiple args
     // but before the next option
@@ -72,7 +72,7 @@ const parseVariableOpts = (fnArgs, args) => {
       const endIndex = nextOptOffset !== -1 ? argIndex + nextOptOffset : args.length
 
       const maybeArgs = _.slice(args, argIndex, endIndex)
-      const extraArgs = _.intersection(maybeArgs, fnArgs)
+      const extraArgs = _.intersection(maybeArgs, unknownArgs)
 
       if (extraArgs.length) {
         opts[flag] = [opts[flag]].concat(extraArgs)

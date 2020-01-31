@@ -30,13 +30,13 @@ describe('/lib/tasks/install', function () {
 
     // allow simpler log message comparison without
     // chalk's terminal control strings
-    chalk.enabled = false
+    chalk.level = 0
   })
 
   afterEach(() => {
     stdout.restore()
 
-    chalk.enabled = true
+    chalk.level = 3
   })
 
   context('.start', function () {

@@ -8,7 +8,8 @@ const firefoxInfo = 'Firefox support is currently in beta! You can help us conti
 export const browsers: Browser[] = [
   {
     name: 'chrome',
-    family: 'chrome',
+    family: 'chromium',
+    channel: 'stable',
     displayName: 'Chrome',
     versionRegex: /Google Chrome (\S+)/,
     profile: true,
@@ -16,15 +17,18 @@ export const browsers: Browser[] = [
   },
   {
     name: 'chromium',
-    family: 'chrome',
+    family: 'chromium',
+    // technically Chromium is always in development
+    channel: 'stable',
     displayName: 'Chromium',
     versionRegex: /Chromium (\S+)/,
     profile: true,
     binary: ['chromium-browser', 'chromium'],
   },
   {
-    name: 'canary',
-    family: 'chrome',
+    name: 'chrome',
+    family: 'chromium',
+    channel: 'canary',
     displayName: 'Canary',
     versionRegex: /Google Chrome Canary (\S+)/,
     profile: true,
