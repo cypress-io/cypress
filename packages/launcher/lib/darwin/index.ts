@@ -3,6 +3,7 @@ import { FoundBrowser, Browser } from '../types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
 import { merge, partial } from 'ramda'
+import { get } from 'lodash'
 
 const detectCanary = partial(findApp, [
   'Google Chrome Canary.app',
@@ -42,16 +43,24 @@ const detectFirefoxNightly = partial(findApp, [
 ])
 
 type Detectors = {
-  [index: string]: Function
+  [name: string]: {
+    [channel: string]: Function
+  }
 }
 
 const browsers: Detectors = {
-  chrome: detectChrome,
-  canary: detectCanary,
-  chromium: detectChromium,
-  firefox: detectFirefox,
-  firefoxDeveloperEdition: detectFirefoxDeveloperEdition,
-  firefoxNightly: detectFirefoxNightly,
+  chrome: {
+    stable: detectChrome,
+    canary: detectCanary,
+  },
+  chromium: {
+    stable: detectChromium,
+  },
+  firefox: {
+    stable: detectFirefox,
+    dev: detectFirefoxDeveloperEdition,
+    nightly: detectFirefoxNightly,
+  },
 }
 
 export function getVersionString (path: string) {
@@ -59,7 +68,7 @@ export function getVersionString (path: string) {
 }
 
 export function detect (browser: Browser): Promise<FoundBrowser> {
-  let fn = browsers[browser.name]
+  let fn = get(browsers, [browser.name, browser.channel])
 
   if (!fn) {
     // ok, maybe it is custom alias?
