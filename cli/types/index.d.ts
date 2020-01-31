@@ -62,12 +62,32 @@ declare namespace Cypress {
     password: string
   }
 
+  type BrowserName = 'electron' | 'chrome' | 'chromium' | string
+
+  type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | string
+
+  type BrowserFamily = 'chromium'
+
   /**
    * Describes a browser Cypress can control
    */
   interface Browser {
-    name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
-    displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
+    /**
+     * Short browser name.
+     */
+    name: BrowserName
+    /**
+     * The underlying engine for this browser.
+     */
+    family: BrowserFamily
+    /**
+     * The release channel of the browser.
+     */
+    channel: BrowserChannel
+    /**
+     * Human-readable browser name.
+     */
+    displayName: string
     version: string
     majorVersion: number
     path: string

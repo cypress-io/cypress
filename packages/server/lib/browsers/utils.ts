@@ -1,3 +1,5 @@
+import { FoundBrowser } from '@packages/launcher'
+
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
 const Promise = require('bluebird')
@@ -74,7 +76,7 @@ const removeOldProfiles = function () {
   ])
 }
 
-module.exports = {
+export = {
   getPort,
 
   copyExtension,
@@ -100,15 +102,17 @@ module.exports = {
 
       debug('found browsers %o', { browsers })
 
+      // @ts-ignore
       const version = process.versions.chrome || ''
 
       if (version) {
         majorVersion = parseInt(version.split('.')[0])
       }
 
-      const electronBrowser = {
+      const electronBrowser: FoundBrowser = {
         name: 'electron',
-        family: 'electron',
+        channel: 'stable',
+        family: 'chromium',
         displayName: 'Electron',
         version,
         path: '',
@@ -117,7 +121,7 @@ module.exports = {
       }
 
       // the internal version of Electron, which won't be detected by `launcher`
-      debug('adding Electron browser with version %s', version)
+      debug('adding Electron browser %o', electronBrowser)
 
       return browsers.concat(electronBrowser)
     })

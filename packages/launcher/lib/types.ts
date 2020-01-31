@@ -1,9 +1,13 @@
 import { ChildProcess } from 'child_process'
 import * as Bluebird from 'bluebird'
 
-export type BrowserName = 'chrome' | 'chromium' | 'canary' | string
+// TODO: some of these types can be combined with cli/types/index.d.ts
 
-export type BrowserFamily = 'chrome' | 'electron'
+export type BrowserName = 'electron' | 'chrome' | 'chromium' | string
+
+export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | string
+
+export type BrowserFamily = 'chromium'
 
 export type PlatformName = 'darwin' | 'linux' | 'win32'
 
@@ -11,14 +15,25 @@ export type PlatformName = 'darwin' | 'linux' | 'win32'
  * Represents a typical browser to try to detect and turn into a `FoundBrowser`.
  */
 export type Browser = {
-  /** short browser name */
+  /**
+   * Short browser name.
+   */
   name: BrowserName
+  /**
+   * The underlying engine for this browser.
+   */
   family: BrowserFamily
-  /** Optional display name */
+  /**
+   * The release channel of the browser.
+   */
+  channel: BrowserChannel
+  /**
+   * Human-readable browser name.
+   */
   displayName: string
   /** RegExp to use to extract version from something like "Google Chrome 58.0.3029.110" */
   versionRegex: RegExp
-  profile: boolean
+  profile?: boolean
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
   binary: string | string[]
 }
@@ -26,12 +41,11 @@ export type Browser = {
 /**
  * Represents a real browser that exists on the user's system.
  */
-export type FoundBrowser = Browser & {
-  name: string
+export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary'> & {
   path: string
   version: string
   majorVersion?: string
-  /** user-supplied browser? */
+  /** is this a user-supplied browser? */
   custom?: boolean
   /** optional info that will be shown in the GUI */
   info?: string

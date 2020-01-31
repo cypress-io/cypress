@@ -93,6 +93,7 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   const pickBrowserProps = pick([
     'name',
     'family',
+    'channel',
     'displayName',
     'type',
     'version',
