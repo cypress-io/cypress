@@ -162,7 +162,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         ```
     - Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release`:
         ```shell
-        cd issues-in-release && npm run do:comment -- --version X.Y.Z
+        cd issues-in-release && npm run do:comment -- --release X.Y.Z
         ```
 17. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
 18. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
