@@ -287,7 +287,7 @@ describe('lib/project', () => {
 
     it('attaches warning to non-chrome browsers when chromeWebSecurity:false', function () {
       Object.assign(this.config, {
-        browsers: [{ family: 'chrome', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
         chromeWebSecurity: false,
       })
 
@@ -297,7 +297,7 @@ describe('lib/project', () => {
         expect(config.chromeWebSecurity).eq(false)
         expect(config.browsers).deep.eq([
           {
-            family: 'chrome',
+            family: 'chromium',
             name: 'Canary',
           },
           {

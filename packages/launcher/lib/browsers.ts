@@ -37,6 +37,7 @@ export const browsers: Browser[] = [
   {
     name: 'firefox',
     family: 'firefox',
+    channel: 'stable',
     displayName: 'Firefox',
     info: firefoxInfo,
     versionRegex: /Firefox (\S+)/,
@@ -44,8 +45,9 @@ export const browsers: Browser[] = [
     binary: 'firefox',
   },
   {
-    name: 'firefoxDeveloperEdition',
+    name: 'firefox',
     family: 'firefox',
+    channel: 'dev',
     displayName: 'Firefox Developer Edition',
     info: firefoxInfo,
     versionRegex: /Firefox Developer Edition (\S+)/,
@@ -53,8 +55,9 @@ export const browsers: Browser[] = [
     binary: 'firefox-developer-edition',
   },
   {
-    name: 'firefoxNightly',
+    name: 'firefox',
     family: 'firefox',
+    channel: 'nightly',
     displayName: 'Firefox Nightly',
     info: firefoxInfo,
     versionRegex: /Firefox Nightly (\S+)/,

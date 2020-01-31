@@ -96,7 +96,7 @@ class Project extends EE {
       // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
       if (cfg.chromeWebSecurity === false) {
         _.chain(cfg.browsers)
-        .filter((browser) => !(browser.family === 'chrome' || browser.family === 'electron'))
+        .filter((browser) => browser.family !== 'chromium')
         .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
         .value()
       }
