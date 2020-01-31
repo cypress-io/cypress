@@ -104,7 +104,7 @@ describe('controls', function () {
     })
 
     describe('filtering suites list', () => {
-      it('filters by successful suites', () => {
+      it('filters by successful suites when the "Passing" filter is checked ', () => {
         cy.get('#passed').click()
         cy.contains('suite 3').should('be.visible')
         cy.contains('suite 1').should('not.be.visible')
@@ -112,7 +112,7 @@ describe('controls', function () {
         cy.contains('nested suite 1').should('not.be.visible')
       })
 
-      it('filters by failing suites when the successful button is clicked', () => {
+      it('filters by failing suites when the "Failing" filter is checked', () => {
         cy.get('#failed').click()
         cy.contains('suite 3').should('not.be.visible')
         cy.contains('suite 1').should('be.visible')
@@ -120,7 +120,7 @@ describe('controls', function () {
         cy.contains('nested suite 1').should('not.be.visible')
       })
 
-      it('filters by processing suites when the processing button is clicked', () => {
+      it('filters by processing suites when the "Processing" filter is checked', () => {
         cy.get('#processing').click()
         cy.contains('suite 3').should('not.be.visible')
         cy.contains('suite 1').should('not.be.visible')
@@ -128,7 +128,7 @@ describe('controls', function () {
         cy.contains('nested suite 1').should('not.be.visible')
       })
 
-      it('clears the filter when the clear filter button is clicked', () => {
+      it('clears the filter when the "No filters" filter is checked', () => {
         cy.get('#passed').click()
         cy.get('#no-filters').click()
 
