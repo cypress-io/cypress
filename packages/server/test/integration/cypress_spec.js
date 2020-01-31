@@ -140,13 +140,19 @@ describe('lib/cypress', () => {
       expect(process.exit).to.be.calledWith(code)
     }
 
-    this.expectExitWithErr = (type, msg) => {
-      expect(errors.log).to.be.calledWithMatch({ type })
-      expect(process.exit).to.be.calledWith(1)
-      if (msg) {
+    this.expectExitWithErr = (type, msg1, msg2) => {
+      expect(errors.log, 'error was logged').to.be.calledWithMatch({ type })
+      expect(process.exit, 'process.exit was called').to.be.calledWith(1)
+      if (msg1) {
         const err = errors.log.getCall(0).args[0]
 
-        expect(err.message).to.include(msg)
+        expect(err.message, 'error text').to.include(msg1)
+      }
+
+      if (msg2) {
+        const err = errors.log.getCall(0).args[0]
+
+        expect(err.message, 'second error text').to.include(msg2)
       }
     }
   })
@@ -186,6 +192,17 @@ describe('lib/cypress', () => {
     it('validates returned list', () => {
       return browserUtils.getBrowsers().then((list) => {
         expect(v.isValidBrowserList('browsers', list)).to.be.true
+      })
+    })
+  })
+
+  context('error handling', function () {
+    it('exits if config cannot be parsed', function () {
+      return cypress.start(['--config', 'xyz'])
+      .then(() => {
+        // error message includes both "why" the error happened (invalid config)
+        // and the original config details ("xyz")
+        this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS', 'invalid config', 'xyz')
       })
     })
   })
