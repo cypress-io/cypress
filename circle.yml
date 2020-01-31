@@ -61,10 +61,10 @@ commands:
       browser:
         default: "electron"
         description: browser shortname to target
-        type: enum
-        enum: [ "chrome", "electron" ]
+        type: string
     steps:
       - run:
+          name: Install latest Google Chrome (stable)
           command: |
             if [ << parameters.browser >> == "chrome" ]; then
               echo "**** Running Chrome tests.  Installing latest stable version of Google Chrome. ****"
@@ -80,8 +80,7 @@ commands:
       browser:
         default: "electron"
         description: browser shortname to target
-        type: enum
-        enum: [ "chrome", "electron" ]
+        type: string
       chunk:
         description: e2e test chunk number
         type: integer
