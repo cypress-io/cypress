@@ -94,6 +94,9 @@ describe "e2e forms", ->
       spec: "form_submission_failing_spec.coffee"
       snapshot: true
       expectedExitCode: 1
+      onStdout: (stdout) =>
+        stdout
+        .replace(/((?:      -)+[^\n]+\n)/gm, '') ## remove variable diff
     }
 
   context "<form> submissions", ->
