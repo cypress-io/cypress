@@ -3,6 +3,7 @@ import { pathExists } from 'fs-extra'
 import { homedir } from 'os'
 import { join, normalize } from 'path'
 import { tap, trim } from 'ramda'
+import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import { log } from '../log'
 import { Browser, FoundBrowser } from '../types'
@@ -54,26 +55,30 @@ function formEdgeAppPath () {
 
   return normalize(exe)
 }
+
 type NameToPath = (name: string) => string
 
-interface WindowsBrowserPaths {
-  [index: string]: NameToPath
-  chrome: NameToPath
-  canary: NameToPath
-  chromium: NameToPath
-  edge: NameToPath
-  edgeCanary: NameToPath
+type WindowsBrowserPaths = {
+  [name: string]: {
+    [channel: string]: NameToPath
+  }
 }
 
 const formPaths: WindowsBrowserPaths = {
-  chrome: formFullAppPath,
-  canary: formChromeCanaryAppPath,
-  chromium: formChromiumAppPath,
-  edge: formEdgeAppPath,
-  edgeCanary: formEdgeCanaryAppPath,
+  chrome: {
+    stable: formFullAppPath,
+    canary: formChromeCanaryAppPath,
+  },
+  chromium: {
+    stable: formChromiumAppPath,
+  },
+  edge: {
+    stable: formEdgeAppPath,
+    canary: formEdgeCanaryAppPath,
+  },
 }
 
-function getWindowsBrowser (name: string): Promise<FoundBrowser> {
+function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
   const getVersion = (stdout: string): string => {
     // result from wmic datafile
     // "Version=61.0.3163.100"
@@ -85,11 +90,12 @@ function getWindowsBrowser (name: string): Promise<FoundBrowser> {
     }
 
     log('Could not extract version from %s using regex %s', stdout, wmicVersion)
-    throw notInstalledErr(name)
+    throw notInstalledErr(browser.name)
   }
 
-  const formFullAppPathFn: any = formPaths[name] || formFullAppPath
-  const exePath = formFullAppPathFn(name)
+  const formFullAppPathFn: any = get(formPaths, [browser.name, browser.channel], formFullAppPath)
+
+  const exePath = formFullAppPathFn(browser.name)
 
   log('exe path %s', exePath)
 
@@ -98,24 +104,24 @@ function getWindowsBrowser (name: string): Promise<FoundBrowser> {
     log('found %s ?', exePath, exists)
 
     if (!exists) {
-      throw notInstalledErr(`Browser ${name} file not found at ${exePath}`)
+      throw notInstalledErr(`Browser ${browser.name} file not found at ${exePath}`)
     }
 
     return getVersionString(exePath)
     .then(tap(log))
     .then(getVersion)
     .then((version: string) => {
-      log('browser %s at \'%s\' version %s', name, exePath, version)
+      log('browser %s at \'%s\' version %s', browser.name, exePath, version)
 
       return {
-        name,
+        name: browser.name,
         version,
         path: exePath,
       } as FoundBrowser
     })
   })
   .catch(() => {
-    throw notInstalledErr(name)
+    throw notInstalledErr(browser.name)
   })
 }
 
@@ -140,5 +146,5 @@ export function getVersionString (path: string) {
 }
 
 export function detect (browser: Browser) {
-  return getWindowsBrowser(browser.name)
+  return getWindowsBrowser(browser)
 }
