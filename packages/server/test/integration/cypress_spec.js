@@ -337,7 +337,7 @@ describe('lib/cypress', () => {
   context('--run-project', () => {
     beforeEach(() => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
-      sinon.stub(runMode, 'waitForSocketConnection')
+      sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
@@ -1258,7 +1258,7 @@ describe('lib/cypress', () => {
       sinon.stub(api, 'createRun').resolves()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(browsers, 'open')
-      sinon.stub(runMode, 'waitForSocketConnection')
+      sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
         stats: {
           tests: 1,
