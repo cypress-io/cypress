@@ -1,52 +1,25 @@
-exports['RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+exports['could not parse config error'] = `
+Cypress encountered an error while parsing the argument config
 
-The --ci-build-id flag you passed was: ciBuildId123
+You passed: xyz
 
-These flags can only be used when recording to the Cypress Dashboard service.
-
-https://on.cypress.io/record-params-without-recording
+The error was: Cannot read property 'split' of undefined
 `
 
-exports['INCORRECT_CI_BUILD_ID_USAGE 1'] = `
-You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
+exports['could not parse env error'] = `
+Cypress encountered an error while parsing the argument env
 
-The --ci-build-id flag you passed was: ciBuildId123
+You passed: a123
 
-The --ci-build-id flag is used to either group or parallelize multiple runs together.
-
-https://on.cypress.io/incorrect-ci-build-id-usage
+The error was: Cannot read property 'split' of undefined
 `
 
-exports['RECORD_PARAMS_WITHOUT_RECORDING-group 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+exports['could not parse reporter options error'] = `
+Cypress encountered an error while parsing the argument reporter options
 
-The --group flag you passed was: e2e-tests
+You passed: nonono
 
-These flags can only be used when recording to the Cypress Dashboard service.
-
-https://on.cypress.io/record-params-without-recording
-`
-
-exports['RECORD_PARAMS_WITHOUT_RECORDING-parallel 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
-
-The --parallel flag you passed was: true
-
-These flags can only be used when recording to the Cypress Dashboard service.
-
-https://on.cypress.io/record-params-without-recording
-`
-
-exports['RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
-
-The --group flag you passed was: electron-smoke-tests
-The --parallel flag you passed was: true
-
-These flags can only be used when recording to the Cypress Dashboard service.
-
-https://on.cypress.io/record-params-without-recording
+The error was: Cannot read property 'split' of undefined
 `
 
 exports['INDETERMINATE_CI_BUILD_ID-group 1'] = `
@@ -152,6 +125,65 @@ Because the ciBuildId could not be auto-detected you must pass the --ci-build-id
 https://on.cypress.io/indeterminate-ci-build-id
 `
 
+exports['INCORRECT_CI_BUILD_ID_USAGE 1'] = `
+You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
+
+The --ci-build-id flag you passed was: ciBuildId123
+
+The --ci-build-id flag is used to either group or parallelize multiple runs together.
+
+https://on.cypress.io/incorrect-ci-build-id-usage
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-ciBuildId 1'] = `
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+
+The --ci-build-id flag you passed was: ciBuildId123
+
+These flags can only be used when recording to the Cypress Dashboard service.
+
+https://on.cypress.io/record-params-without-recording
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-group 1'] = `
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+
+The --group flag you passed was: e2e-tests
+
+These flags can only be used when recording to the Cypress Dashboard service.
+
+https://on.cypress.io/record-params-without-recording
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-parallel 1'] = `
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+
+The --parallel flag you passed was: true
+
+These flags can only be used when recording to the Cypress Dashboard service.
+
+https://on.cypress.io/record-params-without-recording
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-tag 1'] = `
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+
+These flags can only be used when recording to the Cypress Dashboard service.
+
+https://on.cypress.io/record-params-without-recording
+`
+
+exports['RECORD_PARAMS_WITHOUT_RECORDING-group-parallel 1'] = `
+You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
+
+The --group flag you passed was: electron-smoke-tests
+The --parallel flag you passed was: true
+
+These flags can only be used when recording to the Cypress Dashboard service.
+
+https://on.cypress.io/record-params-without-recording
+`
+
 exports['DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE 1'] = `
 You passed the --group flag, but this group name has already been used for this run.
 
@@ -255,12 +287,4 @@ The --parallel flag you passed was: true
 The --ciBuildId flag you passed was: ciBuildId123
 
 https://on.cypress.io/stale-run
-`
-
-exports['RECORD_PARAMS_WITHOUT_RECORDING-tag 1'] = `
-You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
-
-These flags can only be used when recording to the Cypress Dashboard service.
-
-https://on.cypress.io/record-params-without-recording
 `

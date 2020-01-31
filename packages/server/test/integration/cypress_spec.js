@@ -140,20 +140,22 @@ describe('lib/cypress', () => {
       expect(process.exit).to.be.calledWith(code)
     }
 
+    // returns error object
     this.expectExitWithErr = (type, msg1, msg2) => {
       expect(errors.log, 'error was logged').to.be.calledWithMatch({ type })
       expect(process.exit, 'process.exit was called').to.be.calledWith(1)
-      if (msg1) {
-        const err = errors.log.getCall(0).args[0]
 
+      const err = errors.log.getCall(0).args[0]
+
+      if (msg1) {
         expect(err.message, 'error text').to.include(msg1)
       }
 
       if (msg2) {
-        const err = errors.log.getCall(0).args[0]
-
         expect(err.message, 'second error text').to.include(msg2)
       }
+
+      return err
     }
   })
 
@@ -200,9 +202,27 @@ describe('lib/cypress', () => {
     it('exits if config cannot be parsed', function () {
       return cypress.start(['--config', 'xyz'])
       .then(() => {
-        // error message includes both "why" the error happened (invalid config)
-        // and the original config details ("xyz")
-        this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS', 'invalid config', 'xyz')
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse config error', stripAnsi(err.message))
+      })
+    })
+
+    it('exits if env cannot be parsed', function () {
+      return cypress.start(['--env', 'a123'])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse env error', stripAnsi(err.message))
+      })
+    })
+
+    it('exits if reporter options cannot be parsed', function () {
+      return cypress.start(['--reporterOptions', 'nonono'])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse reporter options error', stripAnsi(err.message))
       })
     })
   })

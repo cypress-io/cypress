@@ -1,4 +1,6 @@
 const _ = require('lodash')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
@@ -108,32 +110,41 @@ const JSONOrCoerce = (str) => {
   return coerceUtil(str)
 }
 
-const sanitizeAndConvertNestedArgs = (str) => {
+const sanitizeAndConvertNestedArgs = (str, argname) => {
+  la(is.unemptyString(argname), 'missing config argname to be parsed')
+
+  try {
   // if this is valid JSON then just
   // parse it and call it a day
-  const parsed = tryJSONParse(str)
+    const parsed = tryJSONParse(str)
 
-  if (parsed) {
-    return parsed
+    if (parsed) {
+      return parsed
+    }
+
+    // invalid JSON, so assume mixed usage
+    // first find foo={a:b,b:c} and bar=[1,2,3]
+    // syntax and turn those into
+    // foo: a:b|b:c
+    // bar: 1|2|3
+
+    return _
+    .chain(str)
+    .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
+    .replace(nestedArraysInSquareBracketsRe, commasToPipes)
+    .split(',')
+    .map((pair) => {
+      return pair.split(everythingAfterFirstEqualRe)
+    })
+    .fromPairs()
+    .mapValues(JSONOrCoerce)
+    .value()
+  } catch (err) {
+    debug('could not pass config %s value %s', argname, str)
+    debug('error %o', err)
+
+    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, err.message)
   }
-
-  // invalid JSON, so assume mixed usage
-  // first find foo={a:b,b:c} and bar=[1,2,3]
-  // syntax and turn those into
-  // foo: a:b|b:c
-  // bar: 1|2|3
-
-  return _
-  .chain(str)
-  .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
-  .replace(nestedArraysInSquareBracketsRe, commasToPipes)
-  .split(',')
-  .map((pair) => {
-    return pair.split(everythingAfterFirstEqualRe)
-  })
-  .fromPairs()
-  .mapValues(JSONOrCoerce)
-  .value()
 }
 
 module.exports = {
@@ -220,7 +231,7 @@ module.exports = {
     }
 
     if (env) {
-      options.env = sanitizeAndConvertNestedArgs(env)
+      options.env = sanitizeAndConvertNestedArgs(env, 'env')
     }
 
     const proxySource = proxyUtil.loadSystemProxySettings()
@@ -235,21 +246,13 @@ module.exports = {
     }
 
     if (reporterOptions) {
-      options.reporterOptions = sanitizeAndConvertNestedArgs(reporterOptions)
+      options.reporterOptions = sanitizeAndConvertNestedArgs(reporterOptions, 'reporter options')
     }
 
     if (config) {
       // convert config to an object
       // and store the config
-      debug('parsing config:', config)
-      try {
-        options.config = sanitizeAndConvertNestedArgs(config)
-      } catch (err) {
-        debug('could not pass config %o', config)
-        debug('error %o', err)
-
-        return errors.throw('COULD_NOT_PARSE_ARGUMENTS', 'invalid config', config)
-      }
+      options.config = sanitizeAndConvertNestedArgs(config, 'config')
     }
 
     // get a list of the available config keys

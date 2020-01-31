@@ -62,7 +62,7 @@ trimMultipleNewLines = (str) ->
 isCypressErr = (err) ->
   Boolean(err.isCypressErr)
 
-getMsgByType = (type, arg1 = {}, arg2) ->
+getMsgByType = (type, arg1 = {}, arg2, arg3) ->
   switch type
     when "CANNOT_TRASH_ASSETS"
       """
@@ -881,23 +881,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
     when "COULD_NOT_PARSE_ARGUMENTS"
-      if arg2
         """
-        Cypress could not parse its arguments
+        Cypress encountered an error while parsing the argument #{chalk.gray(arg1)}
 
-        #{arg1}
+        You passed: #{arg2}
 
-        #{chalk.yellow(arg2)}
-        """
-      else
-        """
-        Cypress could not parse its arguments
-
-        #{chalk.yellow(arg1)}
+        The error was: #{arg3}
         """
 
-get = (type, arg1, arg2) ->
-  msg = getMsgByType(type, arg1, arg2)
+get = (type, arg1, arg2, arg3) ->
+  msg = getMsgByType(type, arg1, arg2, arg3)
 
   if _.isObject(msg)
     details = msg.details
@@ -918,8 +911,8 @@ warning = (type, arg1, arg2) ->
 
   return null
 
-throwErr = (type, arg1, arg2) ->
-  throw get(type, arg1, arg2)
+throwErr = (type, arg1, arg2, arg3) ->
+  throw get(type, arg1, arg2, arg3)
 
 clone = (err, options = {}) ->
   _.defaults options, {
