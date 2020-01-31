@@ -50,12 +50,6 @@ function formEdgeCanaryAppPath () {
   return normalize(exe)
 }
 
-function formEdgeAppPath () {
-  const exe = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'
-
-  return normalize(exe)
-}
-
 type NameToPath = (name: string) => string
 
 type WindowsBrowserPaths = {
@@ -73,7 +67,9 @@ const formPaths: WindowsBrowserPaths = {
     stable: formChromiumAppPath,
   },
   edge: {
-    stable: formEdgeAppPath,
+    stable: () => normalize('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'),
+    beta: () => normalize('C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe'),
+    dev: () => normalize('C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe'),
     canary: formEdgeCanaryAppPath,
   },
 }
