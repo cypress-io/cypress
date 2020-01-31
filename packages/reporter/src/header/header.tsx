@@ -9,6 +9,8 @@ import { AppState } from '../lib/app-state'
 import Controls from './controls'
 import Stats from './stats'
 import { StatsStore } from './stats-store'
+import runnablesStore from '../runnables/runnables-store'
+import { SuiteFilter } from './suite-filter'
 
 interface Props {
   appState: AppState
@@ -27,6 +29,8 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Props
     <Stats stats={statsStore} />
     <div className='spacer' />
     <Controls appState={appState} />
+
+    <SuiteFilter onSelectFilter={(filter) => runnablesStore.setFilter(filter)} activeFilter={runnablesStore.activeFilter}/>
   </header>
 ))
 
