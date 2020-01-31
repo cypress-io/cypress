@@ -44,6 +44,7 @@ const env = require(`${root}lib/util/env`)
 const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
+const electronApp = require('../../lib/util/electron-app')
 const { formStatePath } = require(`${root}lib/util/saved_state`)
 
 const TYPICAL_BROWSERS = [
@@ -118,7 +119,7 @@ describe('lib/cypress', () => {
     // spawning a separate process
     sinon.stub(videoCapture, 'start').resolves({})
     sinon.stub(plugins, 'init').resolves(undefined)
-    sinon.stub(cypress, 'isCurrentlyRunningElectron').returns(true)
+    sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')

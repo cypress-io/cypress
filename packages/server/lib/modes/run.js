@@ -26,7 +26,7 @@ const newlines = require('../util/newlines')
 const terminal = require('../util/terminal')
 const specsUtil = require('../util/specs')
 const humanTime = require('../util/human_time')
-const electronApp = require('../util/electron_app')
+const electronApp = require('../util/electron-app')
 const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
@@ -673,6 +673,7 @@ const getVideoRecordingDelay = function (startedVideoCapture) {
 const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const { spec, browser, video, videosFolder } = options
 
+  debug(`video recording has been ${video ? 'enabled' : 'disabled'}. video: %s`, video)
   // bail if we've been told not to capture
   // a video recording
   if (!video) {
@@ -1410,7 +1411,7 @@ module.exports = {
 
   run (options) {
     return electronApp
-    .ready()
+    .waitForReady()
     .then(() => {
       return this.ready(options)
     })

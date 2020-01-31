@@ -55,7 +55,6 @@ class Project extends EE {
     this.spec = null
     this.browser = null
     this.server = null
-    this.memoryCheck = null
     this.automation = null
     this.getConfig = this.getConfig.bind(this)
 
@@ -77,15 +76,6 @@ class Project extends EE {
 
     debug('project options %o', options)
     this.options = options
-
-    if (process.env.CYPRESS_MEMORY) {
-      const logMemory = () => {
-        // eslint-disable-next-line no-console
-        return console.log('memory info', process.memoryUsage())
-      }
-
-      this.memoryCheck = setInterval(logMemory, 1000)
-    }
 
     this.onWarning = options.onWarning
 
@@ -204,10 +194,6 @@ class Project extends EE {
 
   close () {
     debug('closing project instance %s', this.projectRoot)
-
-    if (this.memoryCheck) {
-      clearInterval(this.memoryCheck)
-    }
 
     this.cfg = null
     this.spec = null
