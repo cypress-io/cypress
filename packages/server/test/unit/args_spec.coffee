@@ -172,6 +172,18 @@ describe "lib/util/args", ->
       options = @setup("--port", 2222)
       expect(options.config.port).to.eq(2222)
 
+    it "throws if config string cannot be parsed", ->
+      expect () =>
+        @setup("--config", "xyz")
+      .to.throw
+
+      # now look at the error
+      try
+        @setup("--config", "xyz")
+      catch err
+        expect(err.message, "specifies config").to.include("invalid config")
+        expect(err.message, "tells invalid string").to.include("xyz")
+
   context ".toArray", ->
     beforeEach ->
       @obj = {config: {foo: "bar"}, project: "foo/bar"}
