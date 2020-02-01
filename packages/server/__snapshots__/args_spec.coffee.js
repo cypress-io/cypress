@@ -7,7 +7,7 @@ The error was: Cannot read property 'split' of undefined
 `
 
 exports['invalid reporter options error'] = `
-Cypress encountered an error while parsing the argument reporter options
+Cypress encountered an error while parsing the argument reporterOptions
 
 You passed: abc
 

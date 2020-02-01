@@ -246,7 +246,7 @@ module.exports = {
     }
 
     if (reporterOptions) {
-      options.reporterOptions = sanitizeAndConvertNestedArgs(reporterOptions, 'reporter options')
+      options.reporterOptions = sanitizeAndConvertNestedArgs(reporterOptions, 'reporterOptions')
     }
 
     if (config) {
