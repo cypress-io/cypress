@@ -79,18 +79,25 @@ const isHidden = (el, name = 'isHidden()') => {
     return elIsNotElementFromPoint($el)
   }
 
-  // Current element is in a shadowDom
-  if (elIsInShadowDOM($el)) {
-    return isHidden($el.offsetParent())
-  }
-
   // else check if el is outside the bounds
   // of its ancestors overflow
-  return elIsOutOfBoundsOfAncestorsOverflow($el)
+  if (elIsOutOfBoundsOfAncestorsOverflow($el)) {
+    return true
+  }
+
+  // Current element is in a shadowDom
+  if (elIsInShadowDOM($el)) {
+    return isHidden($el[0].getRootNode().host)
+  }
+
+  return false
 }
 
 const elIsInShadowDOM = ($el) => {
-  return $el.offsetParent().length > 0 && !$el.offsetParent()[0].contains($el[0])
+  return $el[0] &&
+      $el[0].getRootNode() &&
+      $el[0].getRootNode().host &&
+      !$el[0].getRootNode().host.contains($el[0])
 }
 
 const elHasNoEffectiveWidthOrHeight = ($el) => {
@@ -253,6 +260,11 @@ const elIsNotElementFromPoint = function ($el) {
 }
 
 const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent()) {
+  // shadowdom, not out of bounds
+  if (($el[0] && $el[0].getRootNode() instanceof ShadowRoot) || ($el[0] && $el[0].getRootNode() && $el[0].getRootNode().host && $el[0].getRootNode().host.shadowRoot)) {
+    return false
+  }
+
   // no ancestor, not out of bounds!
   if (!$ancestor) {
     return false

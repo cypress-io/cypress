@@ -658,7 +658,7 @@ module.exports = (Commands, Cypress, cy) => {
           return
         }
 
-        consoleProps.Yielded = $dom.getElements($el)
+        consoleProps.Yielded = $el //$dom.getElements($el)
         consoleProps.Elements = $el != null ? $el.length : undefined
 
         options._log.set({ $el })
@@ -702,6 +702,7 @@ module.exports = (Commands, Cypress, cy) => {
 
         // allow retry to be a function which we ensure
         // returns truthy before returning its
+
         if (_.isFunction(options.onRetry)) {
           const ret = options.onRetry.call(ctx, $el)
 

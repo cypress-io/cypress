@@ -7,8 +7,9 @@ const contains = (doc, obj) => {
     return false
   }
 
-  // offsetParent works with shadowDom (parent is in dom)
-  return $.contains(doc, obj) || $.contains(doc, obj.offsetParent)
+  return $.contains(doc, obj) ||
+      $.contains(doc, obj.getRootNode().host) ||
+      $.contains(doc.shadowRoot, obj)
 }
 
 // wrap the object in jquery

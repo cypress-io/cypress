@@ -8,7 +8,7 @@ import * as $selection from './selection'
 import { parentHasDisplayNone } from './visibility'
 import * as $window from './window'
 
-const { wrap } = $jquery
+const { wrap, contains } = $jquery
 
 const fixedOrStickyRe = /(fixed|sticky)/
 
@@ -781,7 +781,7 @@ const isDescendent = ($el1, $el2) => {
     return false
   }
 
-  return !!($el1.get(0) === $el2.get(0) || $el1.has($el2).length)
+  return !!($el1.get(0) === $el2.get(0) || contains($el2.get(0), $el1.get(0)))
 }
 
 const findParent = (el, fn) => {
@@ -855,7 +855,7 @@ const getFirstParentWithTagName = ($el, tagName) => {
 const getFirstFixedOrStickyPositionParent = ($el) => {
   // return null if we're at body/html/document
   // cuz that means nothing has fixed position
-  if (!$el || $el.is('body,html') || $document.isDocument($el)) {
+  if (!$el || $el.length === 0 || $el.is('body,html') || $document.isDocument($el)) {
     return null
   }
 
@@ -865,8 +865,8 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
   }
 
   // the current element is in a shadowDom
-  if ($el.offsetParent().length > 0 && !$el.offsetParent()[0].contains($el[0])) {
-    return getFirstFixedOrStickyPositionParent($el.offsetParent())
+  if ($el[0] && $el[0].getRootNode() instanceof ShadowRoot) {
+    return getFirstFixedOrStickyPositionParent($el[0].getRootNode().host)
   }
 
   // else recursively continue to walk up the parent node chain
