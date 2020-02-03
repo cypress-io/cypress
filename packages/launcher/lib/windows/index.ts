@@ -50,6 +50,18 @@ function formFirefoxDeveloperEditionAppPath () {
 function formFirefoxNightlyAppPath () {
   const exe = 'C:/Program Files (x86)/Firefox Nightly/firefox.exe'
 
+function formEdgeCanaryAppPath () {
+  const home = homedir()
+  const exe = join(
+    home,
+    'AppData',
+    'Local',
+    'Microsoft',
+    'Edge SxS',
+    'Application',
+    'msedge.exe'
+  )
+
   return normalize(exe)
 }
 
@@ -74,6 +86,12 @@ const formPaths: WindowsBrowserPaths = {
     dev: formFirefoxDeveloperEditionAppPath,
     nightly: formFirefoxNightlyAppPath,
   },
+  edge: {
+    stable: () => normalize('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'),
+    beta: () => normalize('C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe'),
+    dev: () => normalize('C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe'),
+    canary: formEdgeCanaryAppPath,
+  },
 }
 
 function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
@@ -92,6 +110,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
   }
 
   const formFullAppPathFn: any = get(formPaths, [browser.name, browser.channel], formFullAppPath)
+
   const exePath = formFullAppPathFn(browser.name)
 
   log('exe path %s', exePath)

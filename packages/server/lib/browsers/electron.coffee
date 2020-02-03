@@ -21,6 +21,8 @@ ELECTRON_DEBUG_EVENTS = [
   'unresponsive'
 ]
 
+instance = null
+
 tryToCall = (win, method) ->
   try
     if not win.isDestroyed()
@@ -72,6 +74,10 @@ module.exports = {
           _win.on "close", ->
             if not child.isDestroyed()
               child.destroy()
+
+          ## add this pid to list of pids
+          tryToCall child, ->
+            instance?.pid?.push(child.webContents.getOSProcessId())
     }
 
     _.defaultsDeep({}, options, defaults)
@@ -255,9 +261,12 @@ module.exports = {
 
           events.emit("exit")
 
-        return _.extend events, {
+        instance = _.extend events, {
+          pid:                [tryToCall(win, -> win.webContents.getOSProcessId())]
           browserWindow:      win
           kill:               -> tryToCall(win, "destroy")
           removeAllListeners: -> tryToCall(win, "removeAllListeners")
         }
+
+        return instance
 }

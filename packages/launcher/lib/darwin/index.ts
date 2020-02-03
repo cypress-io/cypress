@@ -39,6 +39,24 @@ const detectFirefoxNightly = partial(findApp, [
   'Firefox Nightly.app',
   'Contents/MacOS/firefox-bin',
   'org.mozilla.nightly',
+const detectEdgeCanary = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge Canary',
+  'com.microsoft.Edge.Canary',
+  'CFBundleShortVersionString',
+])
+const detectEdgeBeta = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge Beta',
+  'com.microsoft.Edge.Beta',
+  'CFBundleShortVersionString',
+])
+const detectEdgeDev = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge Dev',
+  'com.microsoft.Edge.Dev',
+  'CFBundleShortVersionString',
+])
+const detectEdge = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge',
+  'com.microsoft.Edge',
   'CFBundleShortVersionString',
 ])
 
@@ -60,6 +78,12 @@ const browsers: Detectors = {
     stable: detectFirefox,
     dev: detectFirefoxDeveloperEdition,
     nightly: detectFirefoxNightly,
+  },
+  edge: {
+    stable: detectEdge,
+    canary: detectEdgeCanary,
+    beta: detectEdgeBeta,
+    dev: detectEdgeDev,
   },
 }
 
