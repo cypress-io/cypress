@@ -121,11 +121,17 @@ const defaultArgs = [
  * @param userDir
  */
 const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
+  debug('reading chrome preferences... %o', { userDir, CHROME_PREFERENCE_PATHS })
+
   return Bluebird.props(_.mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
     return fs.readJson(path.join(userDir, prefPath))
-    .catch({ code: 'ENOENT' }, () => {
+    .catch((err) => {
       // return empty obj if it doesn't exist
-      return {}
+      if (err.code === 'ENOENT') {
+        return {}
+      }
+
+      throw err
     })
   }))
 }
