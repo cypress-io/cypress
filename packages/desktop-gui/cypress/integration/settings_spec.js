@@ -590,15 +590,23 @@ describe('Settings', () => {
         cy.contains('Experiments').click()
       })
 
+      it('has learn more link', () => {
+        cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
+        })
+      })
+
       it('displays panel with no experiments', () => {
         cy.get('.settings-experiments').contains('you can enable these beta')
+        cy.get('.experiment').should('have.length', 0)
       })
     })
 
-    describe('componentTesting', () => {
+    describe('unknown experiments', () => {
       beforeEach(function () {
-        this.config.experimentalComponentTesting = true
-        this.config.resolved.experimentalComponentTesting = {
+        this.config.experimentalFoo = true
+        this.config.resolved.experimentalFoo = {
           value: true,
         }
 
@@ -610,8 +618,55 @@ describe('Settings', () => {
         cy.contains('Experiments').click()
       })
 
-      it('displays experiment', () => {
-        cy.get('.settings-experiments').contains('Component Testing')
+      it('are not shown', () => {
+        cy.get('.experiment').should('have.length', 0)
+      })
+    })
+
+    describe('componentTesting', () => {
+      context('enabled', () => {
+        beforeEach(function () {
+          this.config.experimentalComponentTesting = true
+          this.config.resolved.experimentalComponentTesting = {
+            value: true,
+          }
+
+          this.openProject.resolve(this.config)
+          this.projectStatuses[0].id = this.config.projectId
+          this.getProjectStatus.resolve(this.projectStatuses[0])
+
+          this.goToSettings()
+          cy.contains('Experiments').click()
+        })
+
+        it('displays experiment', () => {
+          cy.get('.settings-experiments').contains('Component Testing')
+          cy.get('.experiment-status-sign').should('have.class', 'enabled')
+          .and('have.text', 'ON')
+        })
+      })
+
+      context('disabled', () => {
+        beforeEach(function () {
+          this.config.experimentalComponentTesting = false
+          this.config.resolved.experimentalComponentTesting = {
+            value: false,
+            from: 'default',
+          }
+
+          this.openProject.resolve(this.config)
+          this.projectStatuses[0].id = this.config.projectId
+          this.getProjectStatus.resolve(this.projectStatuses[0])
+
+          this.goToSettings()
+          cy.contains('Experiments').click()
+        })
+
+        it('displays experiment', () => {
+          cy.get('.settings-experiments').contains('Component Testing')
+          cy.get('.experiment-status-sign').should('not.have.class', 'disabled')
+          .and('have.text', 'OFF')
+        })
       })
     })
   })

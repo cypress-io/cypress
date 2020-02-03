@@ -9,12 +9,17 @@ const openHelp = (e) => {
   ipc.externalOpen('https://on.cypress.io/experiments')
 }
 
+// whilelist known experiments here. Note that "experimental*" keys are also
+// whitelisted in the config code
+const isKnownExperiment = (experiment, key) =>
+  ['experimentalComponentTesting'].includes(key)
+
 const Experiments = observer(({ project }) => {
-  const experiments = getExperiments(project)
+  const experiments = _.pickBy(getExperiments(project), isKnownExperiment)
 
   return (
     <div>
-      <a href='#' className='learn-more' onClick={openHelp}>
+      <a href='#' className='learn-more' data-cy='experiments' onClick={openHelp}>
         <i className='fas fa-info-circle'></i> Learn more
       </a>
 
