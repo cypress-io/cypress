@@ -42,7 +42,7 @@ This typically happens in one of three ways:
 2. You submitted a form and your server redirected you outside of your application
 3. You used a javascript redirect to a page outside of your application
 
-Cypress does not allow you to change to a non same-origin domain within a single test.
+Cypress does not allow you navigate to different origin domains within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
