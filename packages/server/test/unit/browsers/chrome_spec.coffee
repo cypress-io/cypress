@@ -7,6 +7,7 @@ plugins = require("#{root}../lib/plugins")
 utils = require("#{root}../lib/browsers/utils")
 chrome = require("#{root}../lib/browsers/chrome")
 fs = require("#{root}../lib/util/fs")
+errors = require("#{root}../lib/errors")
 
 describe "lib/browsers/chrome", ->
   context "#open", ->
@@ -29,11 +30,11 @@ describe "lib/browsers/chrome", ->
         kill: sinon.stub().returns()
       }
 
+      sinon.spy(errors, "warning")
       sinon.stub(chrome, "_getArgs").returns(@args)
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
       sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(@criClient)
-      sinon.stub(plugins, "has")
-      sinon.stub(plugins, "execute")
+      sinon.spy(plugins, "execute")
       sinon.stub(utils, "launch").resolves(@launchedBrowser)
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
@@ -52,15 +53,13 @@ describe "lib/browsers/chrome", ->
         expect(@criClient.send).to.have.been.calledWith("Page.navigate")
 
     it "is noop without before:browser:launch", ->
-      plugins.has.returns(false)
-
       chrome.open("chrome", "http://", {}, @automation)
       .then ->
         expect(plugins.execute).not.to.be.called
 
     it "is noop if newArgs are not returned", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves(null)
+      plugins.register 'before:browser:launch', (browser, config) ->
+        Promise.resolve(null)
 
       chrome.open("chrome", "http://", {}, @automation)
       .then =>
@@ -69,7 +68,6 @@ describe "lib/browsers/chrome", ->
         expect(utils.launch).to.be.calledWith("chrome", "about:blank", @args)
 
     it "does not load extension in headless mode", ->
-      plugins.has.returns(false)
       chrome._writeExtension.restore()
 
       pathToTheme = extension.getPathToTheme()
@@ -86,11 +84,32 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
+    it "DEPRECATED: normalizes --load-extension if provided in plugin", ->
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve(["--foo=bar", "--load-extension=/foo/bar/baz.js"])
+
+      pathToTheme = extension.getPathToTheme()
+
+      ## this should get obliterated
+      @args.push("--something=else")
+      
+      chrome.open("chrome", "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.deep.eq([
+          "--foo=bar"
+          "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
+        expect(errors.warning).calledOnce
+
     it "normalizes --load-extension if provided in plugin", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves([
-        "--foo=bar", "--load-extension=/foo/bar/baz.js"
-      ])
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve({args: ["--foo=bar", "--load-extension=/foo/bar/baz.js"]})
+
 
       pathToTheme = extension.getPathToTheme()
 
@@ -108,12 +127,36 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
-    it "normalizes multiple extensions from plugins", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves([
-        "--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"
-      ])
+        expect(errors.warning).not.calledOnce
 
+    it "DEPRECATED: normalizes multiple extensions from plugins", ->
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]
+      
+
+      pathToTheme = extension.getPathToTheme()
+
+      ## this should get obliterated
+      @args.push("--something=else")
+
+      onWarning = sinon.stub()
+      chrome.open("chrome", "http://", {onWarning}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.deep.eq([
+          "--foo=bar"
+          "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
+        expect(onWarning).calledOnce
+
+    it "normalizes multiple extensions from plugins", ->
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve {args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]}
+      
       pathToTheme = extension.getPathToTheme()
 
       ## this should get obliterated
@@ -129,6 +172,35 @@ describe "lib/browsers/chrome", ->
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
+
+        expect(errors.warning).not.calledOnce
+
+    it "prints depecration message if before:browser:launch argument is mutated as array", ->
+      plugins.register 'before:browser:launch', (browser, config) ->
+        config.concat([])
+        config.push("--foo=bar")
+        config.unshift("--load-extension=/foo/bar/baz.js")
+        return Promise.resolve()
+
+      pathToTheme = extension.getPathToTheme()
+
+      ## this should be persisted
+      @args.push("--something=else")
+
+      chrome.open("chrome", "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.deep.eq([
+          "--something=else"
+          "--foo=bar"
+          "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
+        expect(errors.warning).calledOnce
+
 
     it "cleans up an unclean browser profile exit status", ->
       sinon.stub(fs, "readJson").withArgs("/profile/dir/Default/Preferences").resolves({

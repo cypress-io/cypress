@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import extension from '@packages/extension'
@@ -13,6 +13,7 @@ import utils from './utils'
 import protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
+const errors = require('../errors')
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -103,7 +104,7 @@ const defaultArgs = [
   '--use-mock-keychain',
 ]
 
-const getRemoteDebuggingPort = Promise.method(() => {
+const getRemoteDebuggingPort = async () => {
   let port
 
   port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
@@ -113,21 +114,15 @@ const getRemoteDebuggingPort = Promise.method(() => {
   }
 
   return utils.getPort()
-})
+}
 
-const pluginsBeforeBrowserLaunch = function (browser, args) {
+const pluginsBeforeBrowserLaunch = async function (browser, options) {
   // bail if we're not registered to this event
   if (!plugins.has('before:browser:launch')) {
-    return args
+    return null
   }
 
-  return plugins.execute('before:browser:launch', browser, args)
-  .then((newArgs) => {
-    debug('got user args for \'before:browser:launch\'', newArgs)
-
-    // reset args if we got 'em
-    return newArgs != null ? newArgs : args
-  })
+  return plugins.execute('before:browser:launch', browser, options)
 }
 
 /**
@@ -138,12 +133,12 @@ const pluginsBeforeBrowserLaunch = function (browser, args) {
  * @param browser the current browser being launched
  * @returns the modified list of arguments
  */
-const _normalizeArgExtensions = function (extPath, args, browser: Browser): string[] {
+const _normalizeArgExtensions = function (extPath, args, pluginExtensions, browser: Browser): string[] {
   if (browser.isHeadless) {
     return args
   }
 
-  let userExtensions
+  let userExtensions = []
   const loadExtension = _.find(args, (arg) => {
     return arg.includes(LOAD_EXTENSION)
   })
@@ -152,7 +147,11 @@ const _normalizeArgExtensions = function (extPath, args, browser: Browser): stri
     args = _.without(args, loadExtension)
 
     // form into array, enabling users to pass multiple extensions
-    userExtensions = loadExtension.replace(LOAD_EXTENSION, '').split(',')
+    userExtensions = userExtensions.concat(loadExtension.replace(LOAD_EXTENSION, '').split(','))
+  }
+
+  if (pluginExtensions) {
+    userExtensions = userExtensions.concat(pluginExtensions)
   }
 
   const extensions = [].concat(userExtensions, extPath, pathToTheme)
@@ -208,44 +207,36 @@ const _connectToChromeRemoteInterface = function (port) {
   })
 }
 
-const _maybeRecordVideo = (options) => {
-  return (function (client) {
-    if (!options.screencastFrame) {
-      debug('screencastFrame is false')
+const _maybeRecordVideo = async function (client, options) {
+  if (!options.onScreencastFrame) {
+    debug('options.onScreencastFrame is false')
 
-      return client
-    }
+    return client
+  }
 
-    debug('starting screencast')
-    client.on('Page.screencastFrame', options.screencastFrame)
+  debug('starting screencast')
+  client.on('Page.screencastFrame', options.onScreencastFrame)
 
-    return client.send('Page.startScreencast', {
-      format: 'jpeg',
-    })
-    .then(() => {
-      return client
-    })
+  await client.send('Page.startScreencast', {
+    format: 'jpeg',
   })
+
+  return client
 }
 
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
-const _navigateUsingCRI = function (url) {
+const _navigateUsingCRI = async function (client, url) {
   // @ts-ignore
   la(check.url(url), 'missing url to navigate to', url)
+  la(client, 'could not get CRI client')
+  debug('received CRI client')
+  debug('navigating to page %s', url)
 
-  return function (client) {
-    la(client, 'could not get CRI client')
-    debug('received CRI client')
-    debug('navigating to page %s', url)
-
-    // when opening the blank page and trying to navigate
-    // the focus gets lost. Restore it and then navigate.
-    return client.send('Page.bringToFront')
-    .then(() => {
-      return client.send('Page.navigate', { url })
-    })
-  }
+  // when opening the blank page and trying to navigate
+  // the focus gets lost. Restore it and then navigate.
+  await client.send('Page.bringToFront')
+  await client.send('Page.navigate', { url })
 }
 
 const _setAutomation = (client, automation) => {
@@ -273,7 +264,7 @@ module.exports = {
 
   _setAutomation,
 
-  _writeExtension (browser: Browser, options) {
+  async _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
       debug('chrome is running headlessly, not installing extension')
 
@@ -281,21 +272,21 @@ module.exports = {
     }
 
     // get the string bytes for the final extension file
-    return extension.setHostAndPath(options.proxyUrl, options.socketIoRoute).then(function (str) {
-      let extensionBg; let extensionDest
+    const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
+    let extensionBg; let extensionDest
 
-      extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
-      extensionBg = path.join(extensionDest, 'background.js')
+    extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
+    extensionBg = path.join(extensionDest, 'background.js')
 
-      // copy the extension src to the extension dist
-      return utils.copyExtension(pathToExtension, extensionDest).then(function () {
-        // and overwrite background.js with the final string bytes
-        return fs.writeFileAsync(extensionBg, str)
-      }).return(extensionDest)
-    })
+    // copy the extension src to the extension dist
+    await utils.copyExtension(pathToExtension, extensionDest)
+    await fs.writeFileAsync(extensionBg, str)
+
+    return extensionDest
   },
 
-  _getArgs (options: CypressConfiguration = {}) {
+  // expose for stubbing during tests
+  _getArgs (options: CypressConfiguration = {}, port: string) {
     let ps; let ua
 
     _.defaults(options, {
@@ -342,101 +333,124 @@ module.exports = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
+    if (options.browser.isHeadless) {
+      args.push('--headless')
+    }
+
+    // force ipv4
+    // https://github.com/cypress-io/cypress/issues/5912
+    args.push(`--remote-debugging-port=${port}`)
+    args.push('--remote-debugging-address=127.0.0.1')
+
     return args
   },
 
-  open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    return Promise
-    .try(() => {
-      const args = this._getArgs(options)
+    const port = await getRemoteDebuggingPort()
 
-      if (browser.isHeadless) {
-        args.push('--headless')
+    let defaultArgs = this._getArgs(options, port)
+
+    let launchOptions = {
+      args: defaultArgs,
+      extensions: [],
+    }
+
+    let [cacheDir, pluginConfigResult] = await Bluebird.all([
+      // ensure that we have a clean cache dir
+      // before launching the browser every time
+      utils.ensureCleanCache(browser, isTextTerminal),
+      pluginsBeforeBrowserLaunch(options.browser, launchOptions),
+    ])
+
+    if (pluginConfigResult) {
+      if (pluginConfigResult[0]) {
+        options.onWarning(errors.get(
+          'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
+        ))
+
+        pluginConfigResult = {
+          args: _.filter(pluginConfigResult, (_val, key) => _.isNumber(key)),
+          extensions: [],
+        }
       }
 
-      return getRemoteDebuggingPort()
-      .then((port) => {
-        // force ipv4
-        // https://github.com/cypress-io/cypress/issues/5912
-        args.push(`--remote-debugging-port=${port}`)
-        args.push('--remote-debugging-address=127.0.0.1')
+      // use whatever the user returns as pluginConfig
+      // @ts-ignore
+      if (pluginConfigResult.args) {
+        launchOptions.args = pluginConfigResult.args
+      }
 
-        return Promise.all([
-          // ensure that we have a clean cache dir
-          // before launching the browser every time
-          utils.ensureCleanCache(browser, isTextTerminal),
-          pluginsBeforeBrowserLaunch(options.browser, args),
-          port,
-        ])
-      })
-    }).spread((cacheDir, args: string[], port) => {
-      return Promise.all([
-        this._writeExtension(
-          browser,
-          options
-        ),
-        _removeRootExtension(),
-        _disableRestorePagesPrompt(userDir),
-      ])
-      .spread((extDest) => {
-        // normalize the --load-extensions argument by
-        // massaging what the user passed into our own
-        args = _normalizeArgExtensions(extDest, args, browser)
+      if (pluginConfigResult.extensions) {
+        launchOptions.extensions = pluginConfigResult.extensions
+      }
 
-        // this overrides any previous user-data-dir args
-        // by being the last one
-        args.push(`--user-data-dir=${userDir}`)
-        args.push(`--disk-cache-dir=${cacheDir}`)
+      if (pluginConfigResult.preferences) {
+        // _.extend(launchOptions.preferences, pluginConfigResult.preferences)
+      }
+    }
 
-        debug('launching in chrome with debugging port', { url, args, port })
+    const [extDest] = await Bluebird.all([
+      this._writeExtension(
+        browser,
+        options
+      ),
+      _removeRootExtension(),
+      _disableRestorePagesPrompt(userDir),
+    ])
+    // normalize the --load-extensions argument by
+    // massaging what the user passed into our own
+    const args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
 
-        // FIRST load the blank page
-        // first allows us to connect the remote interface,
-        // start video recording and then
-        // we will load the actual page
-        return utils.launch(browser, 'about:blank', args)
-      }).then((launchedBrowser) => {
-        la(launchedBrowser, 'did not get launched browser instance')
+    // this overrides any previous user-data-dir args
+    // by being the last one
+    args.push(`--user-data-dir=${userDir}`)
+    args.push(`--disk-cache-dir=${cacheDir}`)
 
-        // SECOND connect to the Chrome remote interface
-        // and when the connection is ready
-        // navigate to the actual url
-        return this._connectToChromeRemoteInterface(port)
-        .then((criClient) => {
-          la(criClient, 'expected Chrome remote interface reference', criClient)
+    debug('launching in chrome with debugging port', { url, args, port })
 
-          return criClient.ensureMinimumProtocolVersion('1.3')
-          .catch((err) => {
-            throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-          }).then(() => {
-            this._setAutomation(criClient, automation)
+    // FIRST load the blank page
+    // first allows us to connect the remote interface,
+    // start video recording and then
+    // we will load the actual page
+    const launchedBrowser = await utils.launch(browser, 'about:blank', args)
 
-            // monkey-patch the .kill method to that the CDP connection is closed
-            const originalBrowserKill = launchedBrowser.kill
+    la(launchedBrowser, 'did not get launched browser instance')
 
-            launchedBrowser.kill = (...args) => {
-              debug('closing remote interface client')
+    // SECOND connect to the Chrome remote interface
+    // and when the connection is ready
+    // navigate to the actual url
+    const criClient = await this._connectToChromeRemoteInterface(port)
 
-              return criClient.close()
-              .then(() => {
-                debug('closing chrome')
+    la(criClient, 'expected Chrome remote interface reference', criClient)
 
-                return originalBrowserKill.apply(launchedBrowser, args)
-              })
-            }
-
-            return criClient
-          })
-        }).then(this._maybeRecordVideo(options))
-        .then(this._navigateUsingCRI(url))
-        // return the launched browser process
-        // with additional method to close the remote connection
-        .return(launchedBrowser)
-      })
+    await criClient.ensureMinimumProtocolVersion('1.3')
+    .catch((err) => {
+      throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
+
+    this._setAutomation(criClient, automation)
+
+    // monkey-patch the .kill method to that the CDP connection is closed
+    const originalBrowserKill = launchedBrowser.kill
+
+    launchedBrowser.kill = async (...args) => {
+      debug('closing remote interface client')
+
+      await criClient.close()
+      debug('closing chrome')
+
+      await originalBrowserKill.apply(launchedBrowser, args)
+    }
+
+    await this._maybeRecordVideo(criClient, options)
+    await this._navigateUsingCRI(criClient, url)
+
+    // return the launched browser process
+    // with additional method to close the remote connection
+    return launchedBrowser
   },
 }

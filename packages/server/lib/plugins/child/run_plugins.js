@@ -7,6 +7,7 @@ const Promise = require('bluebird')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
+const errors = require('../../errors')
 
 const registeredEvents = {}
 
@@ -24,6 +25,10 @@ const invoke = (eventId, args = []) => {
 
 const sendError = (ipc, err) => {
   ipc.send('error', util.serializeError(err))
+}
+
+const sendWarning = (ipc, warningErr) => {
+  ipc.send('warning', util.serializeError(warningErr))
 }
 
 let plugins
@@ -89,10 +94,40 @@ const execute = (ipc, event, ids, args = []) => {
       preprocessor.wrap(ipc, invoke, ids, args)
 
       return
-    case 'before:browser:launch':
+    case 'before:browser:launch': {
+      // TODO: remove in next breaking release
+      // This will send a warning message when a deprecated API is used
+      // define array-like functions on this object so we can warn about using deprecated array API
+      // while still fufiling desired behavior
+      const pluginConfig = args[1]
+
+      ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes'].forEach((name) => {
+        const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
+
+        pluginConfig[name] = function () {
+          sendWarning(ipc,
+            errors.get(
+              'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
+            ))
+
+          // eslint-disable-next-line prefer-rest-params
+          return boundFn.apply(this, arguments)
+        }
+      })
+
+      Object.defineProperty(pluginConfig, 'length', {
+        get () {
+          return this.args.length
+        },
+      })
+
+      pluginConfig[Symbol.iterator] = pluginConfig.args[Symbol.iterator].bind(pluginConfig.args)
+
       util.wrapChildPromise(ipc, invoke, ids, args)
 
       return
+    }
+
     case 'task':
       task.wrap(ipc, registeredEvents, ids, args)
 

@@ -50,6 +50,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
+  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -4243,6 +4244,18 @@ declare namespace Cypress {
    * These are the most useful events for you to listen to.
    * @see https://on.cypress.io/catalog-of-events#App-Events
    */
+
+   interface browserLaunchOptions {
+      extensions: string[],
+      preferences: {[key: string]: any}
+    }
+
+   interface PluginEvents {
+     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: browserLaunchOptions) => browserLaunchOptions): void
+     (action: 'after:screenshot', fn: Function): void
+     (action: 'file:preprocessor', fn: Function): void
+     (action: 'task', fn: Function): void
+   }
   interface Actions {
     /**
      * Fires when an uncaught exception occurs in your application.

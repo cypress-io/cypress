@@ -31,10 +31,10 @@ module.exports = (on) => {
     screenshotsTaken.push(details)
   })
 
-  on('before:browser:launch', (browser, args) => {
-    browserArgs = args
+  on('before:browser:launch', (browser, options) => {
+    browserArgs = options.args
 
-    return args
+    return options
   })
 
   on('task', {

@@ -230,18 +230,23 @@ module.exports = {
 
       debug("browser window options %o", _.omitBy(options, _.isFunction))
 
+      launchOptions = {preferences: options, extensions: [], args: []}
       Bluebird
       .try =>
         ## bail if we're not registered to this event
         return options if not plugins.has("before:browser:launch")
 
-        plugins.execute("before:browser:launch", options.browser, options)
-        .then (newOptions) ->
-          if newOptions
-            debug("received new options from plugin event %o", newOptions)
-            _.extend(options, newOptions)
+        plugins.execute("before:browser:launch", options.browser, launchOptions)
+        .then (pluginResultLaunchOptions) ->
+          if pluginResultLaunchOptions
+            if pluginResultLaunchOptions.preferences
+              debug("received new options from plugin event %o", pluginResultLaunchOptions.preferences)
+              _.extend(options, pluginResultLaunchOptions.preferences)
+
 
           return options
+
+      ## TODO: add extensions to BrowserWindow object
     .then (options) =>
       debug("launching browser window to url: %s", url)
 

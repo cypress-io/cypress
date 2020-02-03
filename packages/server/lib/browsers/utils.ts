@@ -2,14 +2,16 @@ import { FoundBrowser } from '@packages/launcher'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
-const Promise = require('bluebird')
+const Bluebird = require('bluebird')
 const getPort = require('get-port')
 const launcher = require('@packages/launcher')
 const fs = require('../util/fs')
+const extension = require('@packages/extension')
 const appData = require('../util/app_data')
 const profileCleaner = require('../util/profile_cleaner')
 
 const PATH_TO_BROWSERS = appData.path('browsers')
+const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
 
 const getBrowserPath = (browser) => {
   return path.join(
@@ -44,37 +46,43 @@ const getExtensionDir = (browser, isTextTerminal) => {
   )
 }
 
-const ensureCleanCache = function (browser, isTextTerminal) {
+const ensureCleanCache = async function (browser, isTextTerminal) {
   const p = path.join(
     getProfileDir(browser, isTextTerminal),
     'CypressCache'
   )
 
-  return fs
-  .removeAsync(p)
-  .then(() => {
-    return fs.ensureDirAsync(p)
-  }).return(p)
+  await fs.removeAsync(p)
+  await fs.ensureDirAsync(p)
+
+  return p
+}
+
+// we now store profiles inside the Cypress binary folder
+// so we need to remove the legacy root profiles that existed before
+function removeLegacyProfiles () {
+  return profileCleaner.removeRootProfile(pathToProfiles, [
+    path.join(pathToProfiles, 'run-*'),
+    path.join(pathToProfiles, 'interactive'),
+  ])
 }
 
 const removeOldProfiles = function () {
   // a profile is considered old if it was used
   // in a previous run for a PID that is either
   // no longer active, or isnt a cypress related process
-  const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
   const pathToPartitions = appData.electronPartitionsPath()
 
-  return Promise.all([
-    // we now store profiles in either interactive or run-* folders
-    // so we need to remove the old root profiles that existed before
-    profileCleaner.removeRootProfile(pathToProfiles, [
-      path.join(pathToProfiles, 'run-*'),
-      path.join(pathToProfiles, 'interactive'),
-    ]),
+  return Bluebird.all([
+    removeLegacyProfiles(),
     profileCleaner.removeInactiveByPid(pathToProfiles, 'run-'),
     profileCleaner.removeInactiveByPid(pathToPartitions, 'run-'),
   ])
 }
+
+const pathToExtension = extension.getPathToExtension()
+let extensionDest = appData.path('web-extension')
+let extensionBg = appData.path('web-extension', 'background.js')
 
 export = {
   getPort,
@@ -92,6 +100,27 @@ export = {
   getBrowserByPath: launcher.detectByPath,
 
   launch: launcher.launch,
+
+  writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute, onScreencastFrame) {
+    debug('writing extension')
+
+    // debug('writing extension to chrome browser')
+    // get the string bytes for the final extension file
+    return extension.setHostAndPath(proxyUrl, socketIoRoute, onScreencastFrame)
+    .then((str) => {
+      extensionDest = getExtensionDir(browser, isTextTerminal)
+      extensionBg = path.join(extensionDest, 'background.js')
+
+      // copy the extension src to the extension dist
+      return copyExtension(pathToExtension, extensionDest)
+      .then(() => {
+        debug('copied extension')
+
+        // and overwrite background.js with the final string bytes
+        return fs.writeFileAsync(extensionBg, str)
+      }).return(extensionDest)
+    })
+  },
 
   getBrowsers () {
     debug('getBrowsers')

@@ -1,5 +1,5 @@
 module.exports = (onFn, config) ->
-  onFn 'before:browser:launch', (browser = {}, args) ->
+  onFn 'before:browser:launch', (browser, options) ->
     { name } = browser
 
     switch name
