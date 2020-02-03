@@ -31,6 +31,18 @@ const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
 const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 
+const CHROME_PREFERENCE_PATHS = {
+  default: path.join('Default', 'Preferences'),
+  defaultSecure: path.join('Default', 'Secure Preferences'),
+  localState: 'Local State',
+}
+
+type ChromePreferences = {
+  default: object
+  defaultSecure: object
+  localState: object
+}
+
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
@@ -103,6 +115,59 @@ const defaultArgs = [
   '--password-store=basic',
   '--use-mock-keychain',
 ]
+
+/**
+ * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and retur
+ * @param userDir
+ */
+const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
+  return Bluebird.props(_.mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
+    return fs.readJson(path.join(userDir, prefPath))
+    .catch({ code: 'ENOENT' }, () => {
+      // return empty obj if it doesn't exist
+      return {}
+    })
+  }))
+}
+
+const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: ChromePreferences): ChromePreferences => {
+  return _.mapValues(CHROME_PREFERENCE_PATHS, (_v, prefPath) => {
+    const original = _.cloneDeep(originalPrefs[prefPath])
+
+    if (!newPrefs[prefPath]) {
+      return original
+    }
+
+    let deletions: any[] = []
+
+    _.mergeWith(original, newPrefs[prefPath], (_objValue, newValue, key, obj) => {
+      if (newValue == null) {
+        // setting a key to null should remove it
+        deletions.push([obj, key])
+      }
+    })
+
+    deletions.forEach(([obj, key]) => {
+      delete obj[key]
+    })
+
+    return original
+  })
+}
+
+const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferences, newPrefs: ChromePreferences) => {
+  return Bluebird.map(_.keys(originalPrefs), (key) => {
+    const originalJson = originalPrefs[key]
+    const newJson = newPrefs[key]
+
+    if (!newJson || _.isEqual(originalJson, newJson)) {
+      return
+    }
+
+    return fs.outputJson(path.join(userDir, CHROME_PREFERENCE_PATHS[key]), newJson)
+  })
+  .thenReturn()
+}
 
 const getRemoteDebuggingPort = async () => {
   let port
@@ -245,7 +310,7 @@ const _setAutomation = (client, automation) => {
   )
 }
 
-module.exports = {
+export = {
   //
   // tip:
   //   by adding utility functions that start with "_"
@@ -263,6 +328,12 @@ module.exports = {
   _navigateUsingCRI,
 
   _setAutomation,
+
+  _getChromePreferences,
+
+  _mergeChromePreferences,
+
+  _writeChromePreferences,
 
   async _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
@@ -350,13 +421,17 @@ module.exports = {
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    const port = await getRemoteDebuggingPort()
+    const [port, preferences] = await Bluebird.all([
+      getRemoteDebuggingPort(),
+      _getChromePreferences(userDir),
+    ])
 
     let defaultArgs = this._getArgs(options, port)
 
     let launchOptions = {
       args: defaultArgs,
       extensions: [],
+      preferences,
     }
 
     let [cacheDir, pluginConfigResult] = await Bluebird.all([
@@ -389,7 +464,7 @@ module.exports = {
       }
 
       if (pluginConfigResult.preferences) {
-        // _.extend(launchOptions.preferences, pluginConfigResult.preferences)
+        launchOptions.preferences = _mergeChromePreferences(preferences, pluginConfigResult.preferences)
       }
     }
 
@@ -400,6 +475,7 @@ module.exports = {
       ),
       _removeRootExtension(),
       _disableRestorePagesPrompt(userDir),
+      _writeChromePreferences(userDir, preferences, launchOptions.preferences),
     ])
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own

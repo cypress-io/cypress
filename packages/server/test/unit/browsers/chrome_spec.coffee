@@ -38,6 +38,12 @@ describe "lib/browsers/chrome", ->
       sinon.stub(utils, "launch").resolves(@launchedBrowser)
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
+
+      readJson = sinon.stub(fs, 'readJson')
+      readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
+      readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
+
       # port for Chrome remote interface communication
       sinon.stub(utils, "getPort").resolves(50505)
 
@@ -92,7 +98,7 @@ describe "lib/browsers/chrome", ->
 
       ## this should get obliterated
       @args.push("--something=else")
-      
+
       chrome.open("chrome", "http://", {}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
@@ -132,7 +138,7 @@ describe "lib/browsers/chrome", ->
     it "DEPRECATED: normalizes multiple extensions from plugins", ->
       plugins.register 'before:browser:launch', (browser, config) ->
         return Promise.resolve ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]
-      
+
 
       pathToTheme = extension.getPathToTheme()
 
@@ -156,7 +162,7 @@ describe "lib/browsers/chrome", ->
     it "normalizes multiple extensions from plugins", ->
       plugins.register 'before:browser:launch', (browser, config) ->
         return Promise.resolve {args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]}
-      
+
       pathToTheme = extension.getPathToTheme()
 
       ## this should get obliterated
@@ -317,3 +323,106 @@ describe "lib/browsers/chrome", ->
       chromeVersionHasLoopback("71", false)
       chromeVersionHasLoopback("72", true)
       chromeVersionHasLoopback("73", true)
+
+  context "#_getChromePreferences", ->
+    it "returns map of empty if the files do not exist", ->
+      readJson = sinon.stub(fs, 'readJson')
+      readJson.withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
+      readJson.withArgs('/foo/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      readJson.withArgs('/foo/Local State').rejects({ code: 'ENOENT' })
+      expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
+        default: {},
+        defaultSecure: {},
+        localState: {}
+      })
+
+    it "returns map of json objects if the files do exist", ->
+      readJson = sinon.stub(fs, 'readJson')
+      readJson.withArgs('/foo/Default/Preferences').resolves({ foo: 'bar' })
+      readJson.withArgs('/foo/Default/Secure Preferences').resolves({ bar: 'baz' })
+      readJson.withArgs('/foo/Local State').resolves({ baz: 'quux' })
+      expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
+        default: { foo: 'bar' },
+        defaultSecure: { bar: 'baz' },
+        localState: { baz: 'quux' }
+      })
+
+  context "#_mergeChromePreferences", ->
+    it "merges as expected", ->
+      originalPrefs = {
+        default: {},
+        defaultSecure: {
+          foo: 'bar'
+          deleteThis: 'nephew'
+        },
+        localState: {}
+      }
+
+      newPrefs = {
+        default: {
+          something: {
+            nested: 'here'
+          },
+        },
+        defaultSecure: {
+          deleteThis: null
+        },
+        someGarbage: true
+      }
+
+      expected = {
+        default: {
+          something: {
+            nested: 'here'
+          }
+        },
+        defaultSecure: {
+          foo: 'bar'
+        },
+        localState: {}
+      }
+
+      expect(chrome._mergeChromePreferences(originalPrefs, newPrefs)).to.deep.eq(expected)
+
+  context "#_writeChromePreferences", ->
+    it "writes json as expected", ->
+      outputJson = sinon.stub(fs, 'outputJson')
+      defaultPrefs = outputJson.withArgs('/foo/Default/Preferences').resolves()
+      securePrefs = outputJson.withArgs('/foo/Default/Secure Preferences').resolves()
+      statePrefs = outputJson.withArgs('/foo/Local State').resolves()
+
+      originalPrefs = {
+        default: {},
+        defaultSecure: {
+          foo: 'bar'
+          deleteThis: 'nephew'
+        },
+        localState: {}
+      }
+
+      newPrefs = chrome._mergeChromePreferences(originalPrefs, {
+        default: {
+          something: {
+            nested: 'here'
+          },
+        },
+        defaultSecure: {
+          deleteThis: null
+        },
+        someGarbage: true
+      })
+
+      expect(chrome._writeChromePreferences('/foo', originalPrefs, newPrefs)).to.eventually.equal()
+      .then ->
+        expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
+          something: {
+            nested: 'here'
+          },
+        })
+
+        expect(securePrefs).to.be.calledWith('/foo/Default/Secure Preferences', {
+          foo: 'bar'
+        })
+
+        ## no changes were made
+        expect(statePrefs).to.not.be.called
