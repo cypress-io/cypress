@@ -55,19 +55,19 @@ class ForcedGcWarning extends React.Component<Props> {
           <p>
             <strong>
               <i className='fas fa-trash-alt'></i>{' '}
-              GC Cleanup (disabled)
+              Garbage Collection Interval: (disabled)
             </strong>
             <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
           </p>
           <div>
             <p>
-              When <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> is enabled, Cypress forces Firefox to run Garbage Collection (GC) between tests.
+              Cypress can force Firefox to run Garbage Collection (GC) between tests by enabling: <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a>
             </p>
             <p>
-              Forcibly running GC prevents a known bug in Firefox causing it to run out of memory when running many tests.
+              By default, <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> is only enabled in  <strong>run mode</strong>.
             </p>
             <p>
-              By default GC cleanup is enabled in <strong>runMode</strong> and disabled in <strong>openMode</strong>.
+              Running GC prevents Firefox from running out of memory during longer test runs.
             </p>
             <p>
               Read <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'>issue #6187</a> for more details.
@@ -77,7 +77,7 @@ class ForcedGcWarning extends React.Component<Props> {
         <div className='gc-status-bar clickable gc-not-running' onClick={() => this._toggleExpando()}>
           <span className='total-time'>
             <i className='fas fa-ws fa-info-circle'></i>
-            GC Cleanup: <span className='gc-status'>disabled</span>
+            GC Interval: <span className='gc-status'>disabled</span>
           </span>
         </div>
       </div>
@@ -103,23 +103,23 @@ class ForcedGcWarning extends React.Component<Props> {
             <p>
               <strong>
                 <i className='fas fa-trash-alt'></i>{' '}
-                GC Cleanup (enabled)
+                Garbage Collection Interval: (enabled)
               </strong>
               <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
             </p>
           </div>
           <div>
             <p>
-              Because <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> is enabled, Cypress will force Firefox to run Garbage Collection (GC) between tests.
+              Cypress will force Firefox to run Garbage Collection (GC) between tests based on the value of: <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a>
             </p>
             <p>
-              Forcibly running GC prevents a known bug in Firefox causing it to run out of memory when running many tests.
+              Running GC prevents Firefox from running out of memory during longer test runs.
             </p>
             <p>
-              GC Cleanup is an expensive operation that can take up to a few seconds to complete. During this time Firefox may "freeze" and become unresponsive to user input.
+              Running GC is an expensive operation that can take up to a few seconds to complete. During this time Firefox may "freeze" and become unresponsive to user input.
             </p>
             <p>
-              To improve performance, you can try setting <code>firefoxGcInterval</code> to a higher value, which will result in running GC cleanup less frequently.
+              To improve performance, you can try setting <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> to a higher value, which will result in running GC less frequently.
             </p>
             <p>
               Read <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'>issue #6187</a> for more details.
@@ -127,9 +127,9 @@ class ForcedGcWarning extends React.Component<Props> {
           </div>
         </div>
         <div className={`gc-status-bar clickable ${forcingGc ? 'gc-running' : 'gc-not-running'}`} onClick={() => this._toggleExpando()}>
-          <span className='total-time' title='Total time spent in forced GC during this session'>
+          <span className='total-time' title='Total time spent running GC throughout this run'>
             <i className='fas fa-ws fa-info-circle'></i>
-            GC Duration: {round(this.gcTotalMs / 1000, 2)}
+            GC Duration: <span className='gc-status'>{round(this.gcTotalMs / 1000, 2).toFixed(2)}</span>
           </span>
 
           {forcingGc && <span className='status-text'>
