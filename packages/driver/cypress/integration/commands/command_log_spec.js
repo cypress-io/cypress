@@ -224,7 +224,7 @@ describe('command log', () => {
         duration: 100,
       })
 
-      cy.get('select').select('apples', {
+      cy.get('#fruits').select('apples', {
         force: false,
       })
 
@@ -516,7 +516,7 @@ describe('command log', () => {
       })
 
       testOptions('select', { force: false }, 1, (options) => {
-        cy.get('select').select('apples', options)
+        cy.get('#fruits').select('apples', options)
       })
 
       // Ignore cy.server() because it doesn't log to reporter.
