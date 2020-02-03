@@ -10,6 +10,7 @@
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project ./test",
     "cypress:run": "node ../../scripts/cypress run --project ./test",
+    "postinstall": "npx patch-package",
     "prestart": "npm run check-deps-pre",
     "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee"
   },
