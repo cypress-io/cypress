@@ -4248,6 +4248,8 @@ declare namespace Cypress {
    interface browserLaunchOptions {
       extensions: string[],
       preferences: {[key: string]: any}
+      args: string[],
+      windowSize: 'maximized' | 'fullscreen'
     }
 
    interface PluginEvents {

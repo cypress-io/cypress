@@ -11,6 +11,7 @@ appData       = require("../util/app_data")
 plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
+utils         = require('./utils')
 
 ## additional events that are nice to know about to be logged
 ## https://electronjs.org/docs/api/browser-window#instance-events
@@ -223,6 +224,7 @@ module.exports = {
       debug("received saved state %o", state)
 
       ## get our electron default options
+      ## TODO: this is bad, don't mutate the options object
       options = @_defaultOptions(projectRoot, state, options)
 
       ## get the GUI window defaults now
@@ -230,24 +232,18 @@ module.exports = {
 
       debug("browser window options %o", _.omitBy(options, _.isFunction))
 
-      launchOptions = {preferences: options, extensions: [], args: []}
-      Bluebird
-      .try =>
-        ## bail if we're not registered to this event
-        return options if not plugins.has("before:browser:launch")
-
-        plugins.execute("before:browser:launch", options.browser, launchOptions)
-        .then (pluginResultLaunchOptions) ->
-          if pluginResultLaunchOptions
-            if pluginResultLaunchOptions.preferences
-              debug("received new options from plugin event %o", pluginResultLaunchOptions.preferences)
-              _.extend(options, pluginResultLaunchOptions.preferences)
-
-
-          return options
+      launchOptions = _.defaults({preferences: options, extensions: [], args: []}, utils.defaultLaunchOptions)
+      
+      return utils.executeBeforeBrowserLaunch(options.browser, launchOptions, options)
+        
+    .then (launchOptions) =>
+      options = launchOptions.preferences
 
       ## TODO: add extensions to BrowserWindow object
-    .then (options) =>
+
+      if launchOptions.windowSize is 'fullscreen'
+        options['fullscreen'] = true
+
       debug("launching browser window to url: %s", url)
 
       @_render(url, projectRoot, automation, options)

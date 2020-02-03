@@ -13,7 +13,6 @@ import utils from './utils'
 import protocol from './protocol'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
-const errors = require('../errors')
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -22,8 +21,6 @@ type Browser = FoundBrowser & {
   isHeadless: boolean
   isHeaded: boolean
 }
-
-const plugins = require('../plugins')
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -49,7 +46,6 @@ const pathToTheme = extension.getPathToTheme()
 const defaultArgs = [
   '--test-type',
   '--ignore-certificate-errors',
-  '--start-maximized',
   '--silent-debugger-extension-api',
   '--no-default-browser-check',
   '--no-first-run',
@@ -185,15 +181,6 @@ const getRemoteDebuggingPort = async () => {
   }
 
   return utils.getPort()
-}
-
-const pluginsBeforeBrowserLaunch = async function (browser, options) {
-  // bail if we're not registered to this event
-  if (!plugins.has('before:browser:launch')) {
-    return null
-  }
-
-  return plugins.execute('before:browser:launch', browser, options)
 }
 
 /**
@@ -434,44 +421,34 @@ export = {
 
     let defaultArgs = this._getArgs(options, port)
 
-    let launchOptions = {
+    let _launchOptions = _.defaults({
       args: defaultArgs,
       extensions: [],
       preferences,
-    }
+    }, utils.defaultLaunchOptions)
 
-    let [cacheDir, pluginConfigResult] = await Bluebird.all([
+    let [cacheDir, launchOptions] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      pluginsBeforeBrowserLaunch(options.browser, launchOptions),
+      utils.executeBeforeBrowserLaunch(options.browser, _launchOptions, options),
     ])
 
-    if (pluginConfigResult) {
-      if (pluginConfigResult[0]) {
-        options.onWarning(errors.get(
-          'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
-        ))
+    if (launchOptions.windowSize) {
+      switch (launchOptions.windowSize) {
+        case 'fullscreen':
+          launchOptions.args.push('--start-fullscreen')
+          break
 
-        pluginConfigResult = {
-          args: _.filter(pluginConfigResult, (_val, key) => _.isNumber(key)),
-          extensions: [],
-        }
+        case 'maximized':
+          launchOptions.args.push('--start-maximized')
+          break
+        default: null
       }
+    }
 
-      // use whatever the user returns as pluginConfig
-      // @ts-ignore
-      if (pluginConfigResult.args) {
-        launchOptions.args = pluginConfigResult.args
-      }
-
-      if (pluginConfigResult.extensions) {
-        launchOptions.extensions = pluginConfigResult.extensions
-      }
-
-      if (pluginConfigResult.preferences) {
-        launchOptions.preferences = _mergeChromePreferences(preferences, pluginConfigResult.preferences)
-      }
+    if (launchOptions.preferences) {
+      launchOptions.preferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
     }
 
     const [extDest] = await Bluebird.all([
@@ -481,7 +458,7 @@ export = {
       ),
       _removeRootExtension(),
       _disableRestorePagesPrompt(userDir),
-      _writeChromePreferences(userDir, preferences, launchOptions.preferences),
+      _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),
     ])
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own

@@ -1,4 +1,9 @@
 import { FoundBrowser } from '@packages/launcher'
+// @ts-ignore
+import errors from '../errors'
+// @ts-ignore
+import plugins from '../plugins'
+import _ from 'lodash'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
@@ -18,6 +23,18 @@ const getBrowserPath = (browser) => {
     PATH_TO_BROWSERS,
     `${browser.name}`
   )
+}
+
+const defaultLaunchOptions: {
+  preferences: {[key: string]: any}
+  extensions: string[]
+  args: string[]
+  windowSize: 'fullscreen' | 'maximized'
+} = {
+  preferences: {},
+  extensions: [],
+  args: [],
+  windowSize: 'maximized',
 }
 
 const copyExtension = (src, dest) => {
@@ -84,7 +101,54 @@ const pathToExtension = extension.getPathToExtension()
 let extensionDest = appData.path('web-extension')
 let extensionBg = appData.path('web-extension', 'background.js')
 
+async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaultLaunchOptions, options) {
+  if (plugins.has('before:browser:launch')) {
+    let pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
+
+    if (pluginConfigResult) {
+      extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
+    }
+  }
+
+  return launchOptions
+}
+
+function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
+  if (pluginConfigResult[0]) {
+    options.onWarning(errors.get(
+      'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
+    ))
+
+    _.extend(pluginConfigResult, {
+      args: _.filter(pluginConfigResult, (_val, key) => _.isNumber(key)),
+      extensions: [],
+    })
+  }
+
+  _.forEach(launchOptions, (val, key) => {
+    const pluginResultValue = pluginConfigResult[key]
+
+    if (pluginResultValue) {
+      if (_.isPlainObject(val)) {
+        launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
+
+        return
+      }
+
+      launchOptions[key] = pluginResultValue
+
+      return
+    }
+  })
+
+  return launchOptions
+}
+
 export = {
+  executeBeforeBrowserLaunch,
+
+  defaultLaunchOptions,
+
   getPort,
 
   copyExtension,
