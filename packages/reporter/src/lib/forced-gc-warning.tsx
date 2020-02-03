@@ -61,10 +61,10 @@ class ForcedGcWarning extends React.Component<Props> {
           </p>
           <div>
             <p>
-              Cypress can force Firefox to run Garbage Collection (GC) between tests by enabling: <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a>
+              Cypress can force Firefox to run Garbage Collection (GC) between tests by enabling: <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a>
             </p>
             <p>
-              By default, <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> is only enabled in  <strong>run mode</strong>.
+              By default, <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> is only enabled in  <strong>run mode</strong>.
             </p>
             <p>
               Running GC prevents Firefox from running out of memory during longer test runs.

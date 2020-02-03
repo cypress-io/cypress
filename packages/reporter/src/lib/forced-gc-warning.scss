@@ -1,7 +1,6 @@
 .forced-gc-warning {
   background-color: $yellow-lightest;
   padding: 1em;
-  // position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -12,8 +11,26 @@
     line-height: 1.5 !important;
   }
 
+  a.code-link {
+    &>code {
+      color: #1079c3;
+      background: #f7f7f7;
+    }
+    
+    &:hover, &:focus, &:active {
+      text-decoration: none;
+
+      &>code {
+        background-color: #e5f1f6;
+        text-decoration: none;
+      }
+    }
+
+
+  }
+
   code {
-    background: #f9f2f4;
+    background-color: #f9f2f4;
     color: #c7254e;
     border-radius: 2px;
     letter-spacing: 0.5px;
