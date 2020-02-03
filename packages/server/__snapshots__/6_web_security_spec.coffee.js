@@ -234,6 +234,7 @@ exports['firefox / displays warning when firefox and chromeWebSecurity:false'] =
   Running:  simple_passing_spec.coffee                                                      (1 of 1)
 
 Your project has set the configuration option: \`chromeWebSecurity: false\`
+
 This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
 
 

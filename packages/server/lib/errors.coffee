@@ -99,6 +99,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
     when "CHROME_WEB_SECURITY_NOT_SUPPORTED"
       """
       Your project has set the configuration option: `chromeWebSecurity: false`
+      
       This option will not have an effect in #{_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.
       """
     when "BROWSER_NOT_FOUND_BY_NAME"

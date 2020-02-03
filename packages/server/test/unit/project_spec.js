@@ -305,6 +305,7 @@ describe('lib/project', () => {
             name: 'some-other-name',
             warning: `\
 Your project has set the configuration option: \`chromeWebSecurity: false\`
+
 This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
 `,
           },
