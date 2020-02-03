@@ -279,7 +279,7 @@
   }
   
   .experiment-status-sign {
-    background-color: #1aae73;
+    background-color: #9d9ea9;
     line-height: 28px;
     height: 28px;
     width: 40px;
@@ -289,5 +289,9 @@
     display: inline-block;
     font-weight: bold;
     text-align: center;
+
+    &.enabled {
+      background-color: #1aae73;
+    }
   }
 }

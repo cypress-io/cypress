@@ -35,7 +35,7 @@ const Experiments = observer(({ project }) => {
                 <code>experimentalComponentTesting</code>
               </div>
               <div className='experiment-status'>
-                <span className='experiment-status-sign'>
+                <span className={`experiment-status-sign ${experiment.enabled ? 'enabled' : ''}`}>
                   {experiment.enabled ? 'ON' : 'OFF'}
                 </span>
               </div>
