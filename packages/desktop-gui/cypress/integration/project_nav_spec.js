@@ -148,6 +148,11 @@ describe('Project Nav', function () {
           })
         })
 
+        it('shows beta text for firefox', function () {
+          cy.get('.browsers li').contains('Firefox')
+          .contains('beta')
+        })
+
         it('shows info icon with tooltip for browsder with info', function () {
           const browserWithInfo = _.find(this.config.browsers, (b) => !!b.info)
 

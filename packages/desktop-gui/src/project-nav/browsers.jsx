@@ -76,13 +76,7 @@ export default class Browsers extends Component {
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
-        {browser.family === 'firefox' &&
-        <span style={{
-          fontSize: 12,
-          verticalAlign: 'super',
-          marginLeft: 4,
-          color: '#d87b0b',
-        }}>beta</span>}
+        {browser.family === 'firefox' && <span className='browser-beta'>beta</span>}
         {this._info(browser)}
         {this._warn(browser)}
 
