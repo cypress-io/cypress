@@ -6,7 +6,7 @@ import State from './lib/state'
 import Container from './app/container'
 import util from './lib/util'
 
-configure({ enforceActions: 'strict' })
+configure({ enforceActions: 'always' })
 
 const Runner = {
   start (el, base64Config) {

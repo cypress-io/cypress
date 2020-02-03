@@ -1,5 +1,4 @@
-import { computed, observable } from 'mobx'
-import { browserIcon } from '../lib/utils'
+import { observable } from 'mobx'
 
 export default class Browser {
   @observable displayName
@@ -23,9 +22,5 @@ export default class Browser {
     this.info = browser.info
     this.custom = browser.custom
     this.warning = browser.warning
-  }
-
-  @computed get icon () {
-    return browserIcon(this.family)
   }
 }

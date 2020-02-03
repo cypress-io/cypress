@@ -1,5 +1,28 @@
+_         = require("lodash")
+Bluebird  = require("bluebird")
+cert      = require("https-pem")
+https     = require("https")
 useragent = require("express-useragent")
+{ allowDestroy } = require("@packages/network")
 e2e       = require("../support/helpers/e2e")
+
+## create an HTTPS server that forces TLSv1
+startTlsV1Server = (port) ->
+  Bluebird.fromCallback (cb) ->
+    opts = _.merge({
+      secureProtocol: "TLSv1_server_method",
+    }, cert)
+
+    serv = https.createServer opts, (req, res) =>
+      res.setHeader('content-type', 'text/html')
+      res.end('foo')
+
+    allowDestroy(serv)
+
+    serv.listen port, (err) =>
+      cb(null, serv)
+
+    serv.on('error', cb)
 
 onServer = (app) ->
   app.get "/agent.json", (req, res) ->
@@ -75,6 +98,12 @@ describe "e2e visit", ->
       spec: "visit_spec.coffee"
       snapshot: true
       expectedExitCode: 0
+      onRun: (exec) ->
+        startTlsV1Server(6776)
+        .then (serv) ->
+          exec()
+          .then ->
+            serv.destroy()
     }
 
     e2e.it "fails when network connection immediately fails", {
