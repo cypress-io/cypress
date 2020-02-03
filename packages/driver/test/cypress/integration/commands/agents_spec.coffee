@@ -36,6 +36,11 @@ describe "src/cy/commands/agents", ->
         @obj.foo()
         expect(@originalCalled).to.be.false
 
+      it "can callThrough on constructors", ->
+        cy.stub(window, 'Notification').callThroughWithNew().as('Notification')
+        new Notification('Hello')
+        cy.get('@Notification').should('have.been.calledWith', 'Hello')
+
     describe ".stub(obj, 'method', replacerFn)", ->
       beforeEach ->
         @originalCalled = false
@@ -477,6 +482,11 @@ describe "src/cy/commands/agents", ->
     it "does not replace method", ->
       @obj.foo()
       expect(@originalCalled).to.be.true
+
+    it "can spy on constructors", ->
+      cy.spy(window, 'Notification').as('Notification')
+      new Notification('Hello')
+      cy.get('@Notification').should('have.been.calledWith', 'Hello')
 
     context "#as", ->
       ## same as cy.stub(), so just some smoke tests here
