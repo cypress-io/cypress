@@ -36,6 +36,11 @@ describe "src/cy/commands/agents", ->
         @obj.foo()
         expect(@originalCalled).to.be.false
 
+      it "can callThrough on constructors", ->
+        cy.stub(window, 'Notification').callThroughWithNew().as('Notification')
+        new Notification('Hello')
+        cy.get('@Notification').should('have.been.calledWith', 'Hello')
+
     describe ".stub(obj, 'method', replacerFn)", ->
       beforeEach ->
         @originalCalled = false
