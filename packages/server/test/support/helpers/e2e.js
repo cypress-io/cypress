@@ -39,34 +39,15 @@ const pathUpToProjectName = Fixtures.projectPath('')
 
 const DEFAULT_BROWSERS = ['electron', 'chrome']
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
+const stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g
-const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
 // 'at' will be present in chrome stack trace lines
-const replaceStackTraceLines = (str) => {
-  return str.replace(stackTraceLinesRe, (match, ...parts) => {
-    let pre = parts[0]
-    const isFirefoxStack = parts[1] === '@'
-    let post = parts[4]
-
-    if (isFirefoxStack) {
-      if (pre === '\n') {
-        pre = '\n    '
-      } else {
-        pre += pre.slice(1).repeat(2)
-      }
-
-      post = post.slice(-1)
-    }
-
-    return `${pre}[stack trace lines]${post}`
-  })
-}
+const replaceStackTraceLines = (str) => str.replace(stackTraceLinesRe, '$1[stack trace lines]$5')
 
 const replaceBrowserName = function (str, key, customBrowserPath, browserName, version, headless, whitespace) {
   // get the padding for the existing browser string
@@ -156,8 +137,6 @@ const normalizeStdout = function (str, options = {}) {
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
   // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
-  // Different browsers have different cross-origin error messages
-  .replace(crossOriginErrorRe, '[Cross origin error message]')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions

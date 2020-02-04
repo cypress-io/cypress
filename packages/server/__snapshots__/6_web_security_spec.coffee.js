@@ -29,7 +29,7 @@ exports['e2e web security / when enabled / fails'] = `
   1) web security fails when clicking <a> to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > [Cross origin error message]
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
@@ -55,7 +55,7 @@ https://on.cypress.io/cross-origin-violation
   2) web security fails when submitted a form and being redirected to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > [Cross origin error message]
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
@@ -81,7 +81,7 @@ https://on.cypress.io/cross-origin-violation
   3) web security fails when using a javascript redirect to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > [Cross origin error message]
+  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
 
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
