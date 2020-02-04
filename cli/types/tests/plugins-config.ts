@@ -29,3 +29,10 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
     baseUrl: 'http://localhost:3000'
   })
 }
+
+// does not allow returning unknown properties
+const pluginConfig5: Cypress.PluginConfig = (on, config) => { // $ExpectError
+  return {
+    unknownKey: 42
+  }
+}
