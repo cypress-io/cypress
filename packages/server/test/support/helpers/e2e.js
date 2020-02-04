@@ -350,14 +350,14 @@ localItFn.skip = function (title, options) {
   return localItFn(title, options)
 }
 
-function expectExitCode (expectedExitCode) {
-  // only ignore this check if expectedExitCode is set explicitly to
-  if (expectedExitCode === null) return
+const maybeVerifyExitCode = (expectedExitCode, fn) => {
+  // only call the callback if we were given
+  // an expected exit code as a number
+  if (!_.isNumber(expectedExitCode)) {
+    return
+  }
 
-  // if no expectedExitCode is given, assert it's 0 (no errors)
-  expectedExitCode = expectedExitCode || 0
-
-  return expect(process.exit).to.be.calledWith(expectedExitCode)
+  return fn()
 }
 
 const e2e = {
@@ -580,7 +580,11 @@ const e2e = {
 
     return cypress.start(args)
     .then(() => {
-      expectExitCode(process.exit, options.expectedExitCode)
+      const { expectedExitCode } = options
+
+      maybeVerifyExitCode(expectedExitCode, () => {
+        expect(process.exit).to.be.calledWith(expectedExitCode)
+      })
     })
   },
 
@@ -594,7 +598,11 @@ const e2e = {
     let stderr = ''
 
     const exit = function (code) {
-      expectExitCode(code, options.expectedExitCode)
+      const { expectedExitCode } = options
+
+      maybeVerifyExitCode(expectedExitCode, () => {
+        expect(code).to.eq(expectedExitCode, 'expected exit code')
+      })
 
       // snapshot the stdout!
       if (options.snapshot) {
