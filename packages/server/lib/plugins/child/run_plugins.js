@@ -101,6 +101,8 @@ const execute = (ipc, event, ids, args = []) => {
       // while still fufiling desired behavior
       const pluginConfig = args[1]
 
+      console.log('*******8sdfsd****8')
+
       ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes'].forEach((name) => {
         const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
 

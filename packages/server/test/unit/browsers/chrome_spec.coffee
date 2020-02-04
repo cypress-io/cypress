@@ -33,7 +33,7 @@ describe "lib/browsers/chrome", ->
       sinon.spy(errors, "warning")
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
       sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(@criClient)
-      sinon.spy(plugins, "execute")
+      sinon.stub(plugins, "execute").callThrough()
       sinon.stub(utils, "launch").resolves(@launchedBrowser)
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
@@ -65,7 +65,7 @@ describe "lib/browsers/chrome", ->
     it "is noop if newArgs are not returned", ->
       sinon.stub(chrome, "_getArgs").returns(@args)
 
-      plugins.has.returns(true)
+      sinon.stub(plugins, 'has').returns(true)
       plugins.execute.resolves(null)
 
       chrome.open("chrome", "http://", {}, @automation)
@@ -100,18 +100,19 @@ describe "lib/browsers/chrome", ->
       ## this should get obliterated
       @args.push("--something=else")
 
-      chrome.open("chrome", "http://", {}, @automation)
+      onWarning = sinon.stub()
+      chrome.open("chrome", "http://", {onWarning}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
-        expect(args).to.deep.eq([
+        expect(args).to.include.members([
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
-        expect(errors.warning).calledOnce
+        expect(onWarning).calledOnce
 
     it "normalizes --load-extension if provided in plugin", ->
       plugins.register 'before:browser:launch', (browser, config) ->
@@ -127,7 +128,7 @@ describe "lib/browsers/chrome", ->
       .then =>
         args = utils.launch.firstCall.args[2]
 
-        expect(args).to.deep.eq([
+        expect(args).to.include.members([
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
@@ -151,12 +152,14 @@ describe "lib/browsers/chrome", ->
       .then =>
         args = utils.launch.firstCall.args[2]
 
-        expect(args).to.deep.eq([
+        expect(args).to.include.members([
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
+
+        console.log(args)
 
         expect(onWarning).calledOnce
 
@@ -173,7 +176,7 @@ describe "lib/browsers/chrome", ->
       .then =>
         args = utils.launch.firstCall.args[2]
 
-        expect(args).to.deep.eq([
+        expect(args).to.include.members([
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
@@ -182,8 +185,10 @@ describe "lib/browsers/chrome", ->
 
         expect(errors.warning).not.calledOnce
 
-    it "prints depecration message if before:browser:launch argument is mutated as array", ->
+    it.only "prints depecration message if before:browser:launch argument is mutated as array", ->
       plugins.register 'before:browser:launch', (browser, config) ->
+
+        console.log("***",{config})
         config.concat([])
         config.push("--foo=bar")
         config.unshift("--load-extension=/foo/bar/baz.js")
@@ -198,7 +203,7 @@ describe "lib/browsers/chrome", ->
       .then =>
         args = utils.launch.firstCall.args[2]
 
-        expect(args).to.deep.eq([
+        expect(args).to.include.members([
           "--something=else"
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
