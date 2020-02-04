@@ -15,7 +15,7 @@ describe('e2e before:browser:launch', () => {
     spec: 'spec.js',
   })
 
-  e2e.it.only('can set fullscreen', {
+  e2e.it('can set fullscreen', {
     project: Fixtures.projectPath('plugin-event-fullscreen'),
     spec: '*',
     expectedExitCode: 0,
