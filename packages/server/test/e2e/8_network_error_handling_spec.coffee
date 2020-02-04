@@ -405,7 +405,6 @@ describe "e2e network error handling", ->
         e2e.exec(@, {
           spec: "https_passthru_spec.js"
           snapshot: true
-          expectedExitCode: 0
         })
         .then ->
           console.log("connect counts are", connectCounts)
@@ -430,7 +429,6 @@ describe "e2e network error handling", ->
         e2e.exec(@, {
           spec: "https_passthru_spec.js"
           snapshot: true
-          expectedExitCode: 0
           config: {
             baseUrl: "https://localhost:#{HTTPS_PORT}"
           }
@@ -460,7 +458,6 @@ describe "e2e network error handling", ->
             baseUrl: "http://localhost:#{PORT}"
             pageLoadTimeout: 4000
           }
-          expectedExitCode: 0
           snapshot: true
         })
 
@@ -480,7 +477,6 @@ describe "e2e network error handling", ->
               baseUrl: "http://localhost:#{PORT}"
               pageLoadTimeout: 4000
             }
-            expectedExitCode: 0
             snapshot: true
           })
 
@@ -510,6 +506,5 @@ describe "e2e network error handling", ->
             baseUrl: "http://localhost:#{PORT}"
             pageLoadTimeout: 4000
           }
-          expectedExitCode: 0
           snapshot: true
         })

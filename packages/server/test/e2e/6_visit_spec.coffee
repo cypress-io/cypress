@@ -97,7 +97,6 @@ describe "e2e visit", ->
     e2e.it "passes", {
       spec: "visit_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
       onRun: (exec) ->
         startTlsV1Server(6776)
         .then (serv) ->

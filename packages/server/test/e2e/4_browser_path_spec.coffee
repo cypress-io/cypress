@@ -46,5 +46,4 @@ describe "e2e launching browsers by path", ->
         spec: "simple_spec.coffee"
         browser: foundPath
         snapshot: true
-        expectedExitCode: 0
       })

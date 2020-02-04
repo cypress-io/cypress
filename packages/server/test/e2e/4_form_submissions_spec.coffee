@@ -86,7 +86,6 @@ describe "e2e forms", ->
       e2e.exec(@, {
         spec: "form_submission_passing_spec.coffee"
         snapshot: true
-        expectedExitCode: 0
       })
 
     it "failing", ->
@@ -132,7 +131,6 @@ describe "e2e forms", ->
       }
       spec: "form_submission_multipart_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     }
 
     e2e.it "passes with http on localhost", {
@@ -141,5 +139,4 @@ describe "e2e forms", ->
       }
       spec: "form_submission_multipart_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     }

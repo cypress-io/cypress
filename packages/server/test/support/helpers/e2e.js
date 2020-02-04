@@ -350,9 +350,9 @@ localItFn.skip = function (title, options) {
 }
 
 const maybeVerifyExitCode = (expectedExitCode, fn) => {
-  // only call the callback if we were given
-  // an expected exit code as a number
-  if (!_.isNumber(expectedExitCode)) {
+  // bail if this is explicitly null so
+  // devs can turn off checking the exit code
+  if (expectedExitCode === null) {
     return
   }
 
@@ -467,6 +467,7 @@ const e2e = {
       project: e2ePath,
       timeout: options.exit === false ? 3000000 : 120000,
       originalTitle: null,
+      expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
     })

@@ -23,7 +23,6 @@ describe "e2e plugins", ->
       project: workingPreprocessor
       sanitizeScreenshotDimensions: true
       snapshot: true
-      expectedExitCode: 0
     })
 
   it "fails", ->
@@ -43,7 +42,6 @@ describe "e2e plugins", ->
       project: pluginConfig
       sanitizeScreenshotDimensions: true
       snapshot: true
-      expectedExitCode: 0
     })
 
   it "catches invalid viewportWidth returned from plugins", ->
@@ -90,7 +88,6 @@ describe "e2e plugins", ->
     project: pluginExtension
     sanitizeScreenshotDimensions: true
     snapshot: true
-    expectedExitCode: 0
   }
 
   it "handles absolute path to pluginsFile", ->
@@ -105,7 +102,6 @@ describe "e2e plugins", ->
       project: pluginsAbsolutePath
       sanitizeScreenshotDimensions: true
       snapshot: true
-      expectedExitCode: 0
     })
 
   it "calls after:screenshot for cy.screenshot() and failure screenshots", ->

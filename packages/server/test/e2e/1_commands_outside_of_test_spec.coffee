@@ -18,5 +18,4 @@ describe "e2e commands outside of test", ->
   e2e.it "passes on passing assertions", {
     spec: "assertions_passing_outside_of_test_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }
