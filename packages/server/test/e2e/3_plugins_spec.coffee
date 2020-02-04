@@ -80,7 +80,7 @@ describe "e2e plugins", ->
       snapshot: true
       # we are interested in the actual filtered available browser name
       # which should be "electron"
-      normalizeAvailableBrowsers: false
+      normalizeStdoutAvailableBrowsers: false
     })
 
   e2e.it "works with user extensions", {

@@ -45,8 +45,6 @@ const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Ch
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 
-let currentOptions = {}
-
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
@@ -118,8 +116,8 @@ const replaceUploadingResults = function (orig, ...rest) {
   return ret
 }
 
-const normalizeStdout = function (str) {
-  const options = _.defaults({}, currentOptions, { normalizeAvailableBrowsers: true })
+const normalizeStdout = function (str, options = {}) {
+  const { normalizeStdoutAvailableBrowsers } = options
 
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
@@ -128,10 +126,12 @@ const normalizeStdout = function (str) {
   // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join('/foo/bar/.projects')
 
-  if (options.normalizeAvailableBrowsers) {
+  // unless normalization is explicitly turned off then
+  // always normalize the stdout replacing the browser text
+  if (normalizeStdoutAvailableBrowsers !== false) {
     // usually we are not interested in the browsers detected on this particular system
     // but some tests might filter / change the list of browsers
-    // in that case the test should pass "normalizeAvailableBrowsers:false" as options
+    // in that case the test should pass "normalizeStdoutAvailableBrowsers: false" as options
     str = str.replace(availableBrowsersRe, '$1browser1, browser2, browser3')
   }
 
@@ -371,12 +371,6 @@ const e2e = {
   snapshot (...args) {
     args = _.compact(args)
 
-    // grab the last element in index
-    const index = args.length - 1
-
-    // normalize the stdout of it
-    args[index] = normalizeStdout(args[index])
-
     return snapshot.apply(null, args)
   },
 
@@ -475,6 +469,7 @@ const e2e = {
       timeout: options.exit === false ? 3000000 : 120000,
       originalTitle: null,
       sanitizeScreenshotDimensions: false,
+      normalizeStdoutAvailableBrowsers: true,
     })
 
     ctx.timeout(options.timeout)
@@ -494,8 +489,6 @@ const e2e = {
       // normalize the path to the spec
       options.spec = specs.join(',')
     }
-
-    currentOptions = options
 
     return options
   },
