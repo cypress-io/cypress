@@ -9,7 +9,6 @@
   "scripts": {
     "format": "prettier --write --single-quote --trailing-comma es5",
     "format:all": "yarn format \"./**/*.js\"",
-    "precommit": "lint-staged",
     "test": "jest"
   },
   "license": "MIT",
@@ -26,17 +25,21 @@
     "semantic-release-plugin-decorators": "^1.2.1"
   },
   "devDependencies": {
-    "husky": "^0.14.3",
-    "jest": "^21.2.1",
-    "lint-staged": "^6.0.0",
-    "prettier": "^1.9.2",
+    "husky": "^4.2.1",
+    "jest": "^25.1.0",
+    "lint-staged": "^10.0.7",
+    "prettier": "^1.19.1",
     "semantic-release": "^15.0.0",
     "semantic-release-github-pr": "^5.0.5"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "lint-staged": {
     "*.js": [
-      "yarn format",
-      "git add"
+      "yarn format"
     ]
   }
 }
