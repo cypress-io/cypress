@@ -623,7 +623,7 @@ module.exports = {
       2. You submitted a form and your server redirected you outside of your application
       3. You used a javascript redirect to a page outside of your application
 
-      Cypress does not allow you to navigate to different origin domain within a single test.
+      Cypress does not allow you to navigate to different origin within a single test.
 
       You may need to restructure some of your test code to avoid this problem.
 
