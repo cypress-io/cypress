@@ -15,11 +15,13 @@ exports['deprecated before:browser:launch args / push and no return - warns user
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec.coffee                                                                 (1 of 1)
+
 Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
 
 The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
 
 Your code will cease to work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args
+
 
 
   ✓ noop test
@@ -126,11 +128,20 @@ exports['deprecated before:browser:launch args / concat return'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec.coffee                                                                 (1 of 1)
+
 Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
 
 The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
 
 Your code will cease to work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args
+
+
+Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
+
+The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
+
+Your code will cease to work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args
+
 
 
   ✓ noop test
@@ -184,11 +195,13 @@ exports['deprecated before:browser:launch args / no mutate return'] = `
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec.coffee                                                                 (1 of 1)
+
 Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
 
 The \`before:browser:launch\` plugin event switched from yielding the second argument as an \`array\` of browser arguments to an options \`object\` with an \`args\` property.
 
 Your code will cease to work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args
+
 
 
   ✓ noop test

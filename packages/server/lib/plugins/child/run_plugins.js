@@ -104,7 +104,12 @@ const execute = (ipc, event, ids, args = []) => {
       ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes'].forEach((name) => {
         const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
 
+        let hasEmittedWarning = false
+
         pluginConfig[name] = function () {
+          if (hasEmittedWarning) return
+
+          hasEmittedWarning = true
           sendWarning(ipc,
             errors.get(
               'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
