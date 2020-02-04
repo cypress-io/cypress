@@ -23,6 +23,7 @@ We've detected that your code is still using the previous, deprecated interface 
 
 This code will not work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args
 
+
   ✓ asserts on browser args
 
   1 passing
@@ -188,6 +189,7 @@ We've detected that your code is still using the previous, deprecated interface 
 
 This code will not work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args
 
+
   ✓ asserts on browser args
 
   1 passing
@@ -218,6 +220,7 @@ The \`before:browser:launch\` plugin event switched from yielding the second arg
 We've detected that your code is still using the previous, deprecated interface signature.
 
 This code will not work in a future version of Cypress. Please see the upgrade guide: https://on.cypress.io/deprecated-before-browser-launch-args
+
 
   ✓ 2 - asserts on browser args
 
@@ -252,5 +255,39 @@ This code will not work in a future version of Cypress. Please see the upgrade g
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
+
+`
+
+exports['deprecated before:browser:launch args / fails when adding unknown properties to launchOptions'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app_spec.js                                                                     (1 of 1)
+The \`launchOptions\` object returned by your plugin's \`browser:before:launch\` handler contained unexpected properties:
+
+- foo
+- width
+- height
+
+\`launchOptions\` may only contain the properties:
+
+- preferences
+- extensions
+- args
+- windowSize
+
+https://on.cypress.io/browser-launch-api
 
 `

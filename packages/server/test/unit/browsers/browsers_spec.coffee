@@ -64,10 +64,8 @@ describe "lib/browsers/index", ->
       fn = ->
         utils.extendLaunchOptionsFromPlugins({}, { foo: 'bar' })
 
-      expect(fn)
-      .to.throw({ type: "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES" })
-      .and.satisfy (err) ->
-        snapshot(err.message)
+      ## this error is snapshotted in an e2e test, no need to do it here
+      expect(fn).to.throw({ type: "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES" })
 
     it "warns if array passed and changes it to args", ->
       onWarning = sinon.stub()
@@ -78,9 +76,9 @@ describe "lib/browsers/index", ->
         args: ['foo']
       })
 
+      ## this error is snapshotted in e2e tests, no need to do it here
       expect(onWarning).to.be.calledOnce
-
-      snapshot(onWarning.firstCall.args[0].message)
+      expect(onWarning).to.be.calledWithMatch({ type: "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS" })
 
     # Ooo, browser clean up tests are disabled?!!
 

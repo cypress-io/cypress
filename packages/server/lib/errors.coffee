@@ -902,7 +902,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
       The `launchOptions` object returned by your plugin's `browser:before:launch` handler contained unexpected properties:
 
-       #{listItems(arg1)}
+      #{listItems(arg1)}
 
       `launchOptions` may only contain the properties:
 

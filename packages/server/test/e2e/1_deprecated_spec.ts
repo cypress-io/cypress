@@ -24,6 +24,20 @@ describe('deprecated before:browser:launch args', () => {
     // psInclude: ['--foo', '--bar'],
   })
 
+  e2e.it('fails when adding unknown properties to launchOptions', {
+    browser: '!electron',
+    config: {
+      video: false,
+      env: {
+        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-unknown-properties',
+      },
+    },
+    project: beforeBrowserLaunchProject,
+    spec: 'app_spec.js',
+    expectedExitCode: 1,
+    snapshot: true,
+  })
+
   e2e.it('push and no return - warns user exactly once', {
     browser: '!electron',
     config: {
@@ -45,7 +59,7 @@ describe('deprecated before:browser:launch args', () => {
     config: {
       video: false,
       env: {
-        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-options-mutate-only-args-property',
+        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-launch-options-mutate-only-args-property',
       },
     },
     project: beforeBrowserLaunchProject,

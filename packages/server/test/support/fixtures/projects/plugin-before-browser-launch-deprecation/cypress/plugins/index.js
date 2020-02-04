@@ -8,9 +8,8 @@ const assertPsOutput = (strs) => {
 
   return () => {
     return cp.execAsync('ps -fww')
-    .then((_output) => {
-      const psOutput = _output.toString()
-
+    .call('toString')
+    .then((psOutput) => {
       _.forEach(strs, (str) => {
         expect(psOutput, 'ps output').contain(str)
       })
@@ -24,37 +23,37 @@ const getHandlersByType = (type) => {
   switch (type) {
     case 'return-array-mutation':
       return {
-        onBeforeBrowserLaunch (browser, options) {
+        onBeforeBrowserLaunch (browser, launchOptions) {
           // this will emit a warning but only once
-          options = options.concat(['--foo'])
-          options.push('--foo=bar')
-          options.unshift('--load-extension=/foo/bar/baz.js')
+          launchOptions = launchOptions.concat(['--foo'])
+          launchOptions.push('--foo=bar')
+          launchOptions.unshift('--load-extension=/foo/bar/baz.js')
 
-          return options
+          return launchOptions
         },
         onTask: { assertPsOutput: assertPsOutput(['--foo', '--foo=bar']) },
       }
 
     case 'return-new-array-without-mutation':
       return {
-        onBeforeBrowserLaunch (browser, options) {
+        onBeforeBrowserLaunch (browser, launchOptions) {
           // this will emit a warning
-          options = [...options, '--foo']
+          launchOptions = [...launchOptions, '--foo']
 
-          return options
+          return launchOptions
         },
         onTask: { assertPsOutput: assertPsOutput('--foo') },
 
       }
 
-    case 'return-options-mutate-only-args-property':
+    case 'return-launch-options-mutate-only-args-property':
       return {
-        onBeforeBrowserLaunch (browser, options) {
+        onBeforeBrowserLaunch (browser, launchOptions) {
           // this will NOT emit a warning
-          options.args.push('--foo')
-          options.args.unshift('--bar')
+          launchOptions.args.push('--foo')
+          launchOptions.args.unshift('--bar')
 
-          return options
+          return launchOptions
         },
         onTask: { assertPsOutput: assertPsOutput(['--foo', '--bar']) },
 
@@ -62,15 +61,27 @@ const getHandlersByType = (type) => {
 
     case 'return-undefined-mutate-array':
       return {
-        onBeforeBrowserLaunch (browser, options) {
+        onBeforeBrowserLaunch (browser, launchOptions) {
           // this will emit a warning
-          options.push('--foo')
-          options.push('--bar')
+          launchOptions.push('--foo')
+          launchOptions.push('--bar')
 
           return
         },
         onTask: { assertPsOutput: assertPsOutput([]) },
 
+      }
+
+    case 'return-unknown-properties':
+      return {
+        onBeforeBrowserLaunch (browser, launchOptions) {
+          // this will fail with an error
+          launchOptions.foo = 'foo'
+          launchOptions.width = 800
+          launchOptions.height = 600
+
+          return launchOptions
+        },
       }
 
     default: () => {
