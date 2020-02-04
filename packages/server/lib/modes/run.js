@@ -535,7 +535,7 @@ const writeOutput = (outputPath, results) => {
 }
 
 const onWarning = (err) => {
-  console.log(`\n${chalk.yellow(err.message)}\n`)
+  console.log(chalk.yellow(err.message))
 }
 
 const openProjectCreate = (projectRoot, socketId, args) => {
