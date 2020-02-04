@@ -122,7 +122,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
     options.onWarning(errors.get(
-      'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
+      'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS'
     ))
 
     _.extend(pluginConfigResult, {

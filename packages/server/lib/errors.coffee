@@ -888,7 +888,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
-    when "DEPRECATED_BEFOREBROWSERLAUNCH_ARGS"
+    when "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS"
       """
       Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`
 
