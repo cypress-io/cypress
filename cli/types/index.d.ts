@@ -4252,11 +4252,47 @@ declare namespace Cypress {
     windowSize: 'maximized' | 'fullscreen'
   }
 
+  interface dimensions {
+    width: number
+    height: number
+  }
+
+  interface screenshotDetails {
+    size: number
+    takenAt: string
+    duration: number
+    dimensions: dimensions
+    multipart: boolean
+    pixelRatio: number
+    name: string
+    specName: string
+    testFailure: boolean
+    path: string
+    scaled: boolean
+    blackout: string[]
+  }
+
+  interface afterScreenshotReturnObject {
+    path?: string
+    size?: number
+    dimensions?: dimensions
+  }
+
+  interface fileObject {
+    filePath: string
+    outputPath: string
+    shouldWatch: boolean
+  }
+
+  interface tasks {
+    [key: string]: (value: any) => any
+  }
+
   interface PluginEvents {
     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: browserLaunchOptions) => browserLaunchOptions): void
-    (action: 'after:screenshot', fn: Function): void
-    (action: 'file:preprocessor', fn: Function): void
-    (action: 'task', fn: Function): void
+    (action: 'after:screenshot', fn: (details: screenshotDetails) => afterScreenshotReturnObject | Promise<afterScreenshotReturnObject>): void
+    (action: 'file:preprocessor', fn: (file: fileObject) => string | Promise<string>): void
+    (action: 'task', tasks: tasks): void
   }
 
   interface Actions {
