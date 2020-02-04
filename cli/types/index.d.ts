@@ -4269,10 +4269,11 @@ declare namespace Cypress {
   }
 
   /**
-   * Individual task callback. Receives a single argument
-   * and should return `null` or a Promise.
+   * Individual task callback. Receives a single argument and _should_ return
+   * anything but `undefined` or a promise that resolves anything but `undefined`
+   * TODO: find a way to express "anything but undefined" in TypeScript
    */
-  type Task = (value: any) => null | Promise<any>
+  type Task = (value: any) => any | Promise<any>
 
   interface Tasks {
     [key: string]: Task
