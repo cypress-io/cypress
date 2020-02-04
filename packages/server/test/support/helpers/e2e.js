@@ -37,7 +37,7 @@ Promise.config({
 const e2ePath = Fixtures.projectPath('e2e')
 const pathUpToProjectName = Fixtures.projectPath('')
 
-const AVAILABLE_BROWSERS = ['electron', 'chrome', 'firefox']
+const AVAILABLE_BROWSERS = ['electron', 'chrome']
 const DEFAULT_BROWSERS = AVAILABLE_BROWSERS
 
 const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
