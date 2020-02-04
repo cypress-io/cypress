@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../spec_helper')
 
 const cp = require('child_process')
@@ -15,36 +8,53 @@ const plugins = require(`${root}../lib/plugins`)
 const PLUGIN_PID = 77777
 
 describe('lib/plugins/index', () => {
-  beforeEach(function () {
+  let pluginsProcess
+  let ipc
+  let env
+  let getOptions
+
+  beforeEach(() => {
     plugins._reset()
 
-    this.pluginsProcess = {
+    env = {
+      projectRoot: '/path/to/project/root',
+      configFile: '/path/to/project/root/cypress.json',
+    }
+
+    getOptions = (overrides = {}) => {
+      return {
+        ...env,
+        ...overrides,
+      }
+    }
+
+    pluginsProcess = {
       send: sinon.spy(),
       on: sinon.stub(),
       kill: sinon.spy(),
       pid: PLUGIN_PID,
     }
 
-    sinon.stub(cp, 'fork').returns(this.pluginsProcess)
+    sinon.stub(cp, 'fork').returns(pluginsProcess)
 
-    this.ipc = {
+    ipc = {
       send: sinon.spy(),
       on: sinon.stub(),
     }
 
-    return sinon.stub(util, 'wrapIpc').returns(this.ipc)
+    sinon.stub(util, 'wrapIpc').returns(ipc)
   })
 
   context('#init', () => {
     it('is noop if no pluginsFile', () => {
-      return plugins.init({})
-    }) // doesn't reject or time out
+      return plugins.init({}, getOptions()) // doesn't reject or time out
+    })
 
-    it('forks child process', function () {
+    it('forks child process', () => {
       // have to fire "loaded" message, otherwise plugins.init promise never resolves
-      this.ipc.on.withArgs('loaded').yields([])
+      ipc.on.withArgs('loaded').yields([])
 
-      return plugins.init({ pluginsFile: 'cypress-plugin' })
+      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
       .then(() => {
         expect(cp.fork).to.be.called
         expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
@@ -53,8 +63,8 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    it('uses system Node when available', function () {
-      this.ipc.on.withArgs('loaded').yields([])
+    it('uses system Node when available', () => {
+      ipc.on.withArgs('loaded').yields([])
       const systemNode = '/my/path/to/system/node'
       const config = {
         pluginsFile: 'cypress-plugin',
@@ -63,7 +73,7 @@ describe('lib/plugins/index', () => {
         resolvedNodePath: systemNode,
       }
 
-      return plugins.init(config)
+      return plugins.init(config, getOptions())
       .then(() => {
         const options = {
           stdio: 'inherit',
@@ -74,15 +84,15 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    it('uses bundled Node when cannot find system Node', function () {
-      this.ipc.on.withArgs('loaded').yields([])
+    it('uses bundled Node when cannot find system Node', () => {
+      ipc.on.withArgs('loaded').yields([])
       const config = {
         pluginsFile: 'cypress-plugin',
         nodeVersion: 'system',
         resolvedNodeVersion: 'v1.2.3',
       }
 
-      return plugins.init(config)
+      return plugins.init(config, getOptions())
       .then(() => {
         const options = {
           stdio: 'inherit',
@@ -92,13 +102,13 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    it('calls any handlers registered with the wrapped ipc', function () {
-      this.ipc.on.withArgs('loaded').yields([])
+    it('calls any handlers registered with the wrapped ipc', () => {
+      ipc.on.withArgs('loaded').yields([])
       const handler = sinon.spy()
 
       plugins.registerHandler(handler)
 
-      return plugins.init({ pluginsFile: 'cypress-plugin' })
+      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
       .then(() => {
         expect(handler).to.be.called
         expect(handler.lastCall.args[0].send).to.be.a('function')
@@ -107,51 +117,53 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    it('sends config via ipc', function () {
-      this.ipc.on.withArgs('loaded').yields([])
+    it('sends \'load\' event with config and env and via ipc', () => {
+      ipc.on.withArgs('loaded').yields([])
       const config = { pluginsFile: 'cypress-plugin' }
 
-      return plugins.init(config).then(() => {
-        expect(this.ipc.send).to.be.calledWith('load', config)
+      return plugins.init(config, getOptions()).then(() => {
+        expect(ipc.send).to.be.calledWith('load', config, env)
       })
     })
 
-    it('resolves once it receives \'loaded\' message', function () {
-      this.ipc.on.withArgs('loaded').yields([])
+    it('resolves once it receives \'loaded\' message', () => {
+      ipc.on.withArgs('loaded').yields([])
 
       // should resolve and not time out
-      return plugins.init({ pluginsFile: 'cypress-plugin' })
+      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
     })
 
-    it('kills child process if it already exists', function () {
-      this.ipc.on.withArgs('loaded').yields([])
+    it('kills child process if it already exists', () => {
+      ipc.on.withArgs('loaded').yields([])
 
-      return plugins.init({ pluginsFile: 'cypress-plugin' })
+      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
       .then(() => {
-        return plugins.init({ pluginsFile: 'cypress-plugin' })
+        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
       }).then(() => {
-        expect(this.pluginsProcess.kill).to.be.calledOnce
+        expect(pluginsProcess.kill).to.be.calledOnce
       })
     })
 
     describe('loaded message', () => {
-      beforeEach(function () {
-        this.config = {}
+      let config
 
-        this.ipc.on.withArgs('loaded').yields(this.config, [{
+      beforeEach(() => {
+        config = {}
+
+        ipc.on.withArgs('loaded').yields(config, [{
           event: 'some:event',
           eventId: 0,
         }])
 
-        return plugins.init({ pluginsFile: 'cypress-plugin' })
+        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
       })
 
-      it('sends \'execute\' message when event is executed, wrapped in promise', function () {
+      it('sends \'execute\' message when event is executed, wrapped in promise', () => {
         sinon.stub(util, 'wrapParentPromise').resolves('value').yields('00')
 
         return plugins.execute('some:event', 'foo', 'bar').then((value) => {
           expect(util.wrapParentPromise).to.be.called
-          expect(this.ipc.send).to.be.calledWith(
+          expect(ipc.send).to.be.calledWith(
             'execute',
             'some:event',
             { eventId: 0, invocationId: '00' },
@@ -165,12 +177,12 @@ describe('lib/plugins/index', () => {
 
     describe('load:error message', () => {
       context('PLUGINS_FILE_ERROR', () => {
-        beforeEach(function () {
-          return this.ipc.on.withArgs('load:error').yields('PLUGINS_FILE_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+        beforeEach(() => {
+          return ipc.on.withArgs('load:error').yields('PLUGINS_FILE_ERROR', 'path/to/pluginsFile.js', 'error message stack')
         })
 
         it('rejects plugins.init', () => {
-          return plugins.init({ pluginsFile: 'cypress-plugin' })
+          return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
           .catch((err) => {
             expect(err.message).to.contain('The plugins file is missing or invalid')
             expect(err.message).to.contain('path/to/pluginsFile.js')
@@ -181,12 +193,12 @@ describe('lib/plugins/index', () => {
       })
 
       context('PLUGINS_FUNCTION_ERROR', () => {
-        beforeEach(function () {
-          return this.ipc.on.withArgs('load:error').yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+        beforeEach(() => {
+          return ipc.on.withArgs('load:error').yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
         })
 
         it('rejects plugins.init', () => {
-          return plugins.init({ pluginsFile: 'cypress-plugin' })
+          return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
           .catch((err) => {
             expect(err.message).to.contain('The function exported by the plugins file threw an error.')
             expect(err.message).to.contain('path/to/pluginsFile.js')
@@ -198,46 +210,49 @@ describe('lib/plugins/index', () => {
     })
 
     describe('error message', () => {
-      beforeEach(function () {
-        this.err = {
+      let err
+      let onError
+
+      beforeEach(() => {
+        err = {
           name: 'error name',
           message: 'error message',
         }
 
-        this.onError = sinon.spy()
-        this.ipc.on.withArgs('loaded').yields([])
+        onError = sinon.spy()
+        ipc.on.withArgs('loaded').yields([])
 
-        return plugins.init({ pluginsFile: 'cypress-plugin' }, { onError: this.onError })
+        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions({ onError }))
       })
 
-      it('kills the plugins process when plugins process errors', function () {
-        this.pluginsProcess.on.withArgs('error').yield(this.err)
+      it('kills the plugins process when plugins process errors', () => {
+        pluginsProcess.on.withArgs('error').yield(err)
 
-        expect(this.pluginsProcess.kill).to.be.called
+        expect(pluginsProcess.kill).to.be.called
       })
 
-      it('kills the plugins process when ipc sends error', function () {
-        this.ipc.on.withArgs('error').yield(this.err)
+      it('kills the plugins process when ipc sends error', () => {
+        ipc.on.withArgs('error').yield(err)
 
-        expect(this.pluginsProcess.kill).to.be.called
+        expect(pluginsProcess.kill).to.be.called
       })
 
-      it('calls onError when plugins process errors', function () {
-        this.pluginsProcess.on.withArgs('error').yield(this.err)
-        expect(this.onError).to.be.called
-        expect(this.onError.lastCall.args[0].title).to.equal('Error running plugin')
-        expect(this.onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
+      it('calls onError when plugins process errors', () => {
+        pluginsProcess.on.withArgs('error').yield(err)
+        expect(onError).to.be.called
+        expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
+        expect(onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
 
-        expect(this.onError.lastCall.args[0].details).to.include(this.err.message)
+        expect(onError.lastCall.args[0].details).to.include(err.message)
       })
 
-      it('calls onError when ipc sends error', function () {
-        this.ipc.on.withArgs('error').yield(this.err)
-        expect(this.onError).to.be.called
-        expect(this.onError.lastCall.args[0].title).to.equal('Error running plugin')
-        expect(this.onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
+      it('calls onError when ipc sends error', () => {
+        ipc.on.withArgs('error').yield(err)
+        expect(onError).to.be.called
+        expect(onError.lastCall.args[0].title).to.equal('Error running plugin')
+        expect(onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
 
-        expect(this.onError.lastCall.args[0].details).to.include(this.err.message)
+        expect(onError.lastCall.args[0].details).to.include(err.message)
       })
     })
   })
@@ -254,13 +269,13 @@ describe('lib/plugins/index', () => {
 
     it('throws if event is not a string', () => {
       expect(() => {
-        return plugins.register()
+        plugins.register()
       }).to.throw('must be called with an event as its 1st argument')
     })
 
     it('throws if callback is not a function', () => {
       expect(() => {
-        return plugins.register('foo')
+        plugins.register('foo')
       }).to.throw('must be called with a callback function as its 2nd argument')
     })
   })
@@ -293,10 +308,10 @@ describe('lib/plugins/index', () => {
       return plugins._setPluginsProcess(null)
     })
 
-    it('returns the pid if there is a plugins process', function () {
-      this.ipc.on.withArgs('loaded').yields([])
+    it('returns the pid if there is a plugins process', () => {
+      ipc.on.withArgs('loaded').yields([])
 
-      return plugins.init({ pluginsFile: 'cypress-plugin' })
+      return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
       .then(() => {
         expect(plugins.getPluginPid()).to.eq(PLUGIN_PID)
       })
