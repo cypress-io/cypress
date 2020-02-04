@@ -22,7 +22,7 @@ describe('e2e before:browser:launch', () => {
     headed: true,
   })
 
-  e2e.it.only('can add extensions', {
+  e2e.it('can add extensions', {
     spec: 'spec.js',
     config: {
       video: false,
