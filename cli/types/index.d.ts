@@ -4245,19 +4245,20 @@ declare namespace Cypress {
    * @see https://on.cypress.io/catalog-of-events#App-Events
    */
 
-   interface browserLaunchOptions {
-      extensions: string[],
-      preferences: {[key: string]: any}
-      args: string[],
-      windowSize: 'maximized' | 'fullscreen'
-    }
+  interface browserLaunchOptions {
+    extensions: string[],
+    preferences: {[key: string]: any}
+    args: string[],
+    windowSize: 'maximized' | 'fullscreen'
+  }
 
-   interface PluginEvents {
-     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: browserLaunchOptions) => browserLaunchOptions): void
-     (action: 'after:screenshot', fn: Function): void
-     (action: 'file:preprocessor', fn: Function): void
-     (action: 'task', fn: Function): void
-   }
+  interface PluginEvents {
+    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: browserLaunchOptions) => browserLaunchOptions): void
+    (action: 'after:screenshot', fn: Function): void
+    (action: 'file:preprocessor', fn: Function): void
+    (action: 'task', fn: Function): void
+  }
+
   interface Actions {
     /**
      * Fires when an uncaught exception occurs in your application.
