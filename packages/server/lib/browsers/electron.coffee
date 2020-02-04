@@ -12,6 +12,7 @@ plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
 utils         = require('./utils')
+errors        = require('../errors')
 
 ## additional events that are nice to know about to be logged
 ## https://electronjs.org/docs/api/browser-window#instance-events
@@ -41,6 +42,13 @@ getAutomation = (win) ->
       .apply(win.webContents.debugger, args)
 
   CdpAutomation(sendCommand)
+
+_installExtensions = (extensionPaths = [], options) ->
+  extensionPaths.forEach (path) ->
+    try
+      Windows.installExtension(path)
+    catch
+      options.onWarning(errors.get('EXTENSION_NOT_LOADED', 'Electron', path))
 
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
@@ -240,12 +248,12 @@ module.exports = {
     .then (launchOptions) =>
       { preferences } = launchOptions
 
-      ## TODO: add extensions to BrowserWindow object
-
       if launchOptions.windowSize is 'fullscreen'
         preferences['fullscreen'] = true
 
       debug("launching browser window to url: %s", url)
+
+      _installExtensions(launchOptions.extensions, options)
 
       @_render(url, projectRoot, automation, preferences)
       .then (win) =>
@@ -258,6 +266,8 @@ module.exports = {
 
         win.once "closed", ->
           debug("closed event fired")
+
+          Windows.resetExtensions()
 
           events.emit("exit")
 

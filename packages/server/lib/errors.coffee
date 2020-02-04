@@ -844,6 +844,14 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
       Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
+    when "EXTENSION_NOT_LOADED"
+      """
+      #{arg1} could not install the extension at path:
+
+       > #{arg2}
+
+      Please verify that this is the path to a valid, unpacked WebExtension.
+      """
     when "COULD_NOT_FIND_SYSTEM_NODE"
       """
       `nodeVersion` is set to `system`, but Cypress could not find a usable Node executable on your PATH.
@@ -883,9 +891,9 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
     when "DEPRECATED_BEFOREBROWSERLAUNCH_ARGS"
       """
       Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`
-      
+
       The `before:browser:launch` plugin event switched from yielding the second argument as an `array` of browser arguments to an options `object` with an `args` property.
-      
+
       Your code will cease to work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow 'https://on.cypress.io/deprecated-before-browser-launch-args'}
       """
     when "COULD_NOT_PARSE_ARGUMENTS"
