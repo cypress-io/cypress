@@ -12,10 +12,20 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
 
 // listens to browser launch event
 const pluginConfig3: Cypress.PluginConfig = (on, config) => {
+  config // $ExpectType ConfigOptions
+  config.baseUrl // $ExpectType: string
+
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string
 
     console.log('launching browser', browser.displayName)
     return options
+  })
+}
+
+// returns changed base url asynchronously
+const pluginConfig4: Cypress.PluginConfig = (on, config) => {
+  return Promise.resolve({
+    baseUrl: 'http://localhost:3000'
   })
 }
