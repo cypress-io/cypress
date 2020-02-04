@@ -39,6 +39,7 @@ const detectFirefoxNightly = partial(findApp, [
   'Firefox Nightly.app',
   'Contents/MacOS/firefox-bin',
   'org.mozilla.nightly',
+])
 const detectEdgeCanary = partial(findApp, [
   'Contents/MacOS/Microsoft Edge Canary',
   'com.microsoft.Edge.Canary',

@@ -50,6 +50,9 @@ function formFirefoxDeveloperEditionAppPath () {
 function formFirefoxNightlyAppPath () {
   const exe = 'C:/Program Files (x86)/Firefox Nightly/firefox.exe'
 
+  return normalize(exe)
+}
+
 function formEdgeCanaryAppPath () {
   const home = homedir()
   const exe = join(

@@ -63,6 +63,8 @@ export const browsers: Browser[] = [
     versionRegex: /Firefox Nightly (\S+)/,
     profile: true,
     binary: 'firefox-nightly',
+  },
+  {
     name: 'edge',
     family: 'chromium',
     channel: 'stable',
