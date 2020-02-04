@@ -21,6 +21,9 @@ describe('deprecated before:browser:launch args', () => {
     browser: '!electron',
     config: {
       video: false,
+      env: {
+        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-array-mutation',
+      },
     },
     project: Fixtures.projectPath('plugin-before-browser-launch-deprecation'),
     spec: '*',

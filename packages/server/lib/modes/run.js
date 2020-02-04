@@ -915,9 +915,24 @@ module.exports = {
       },
     }
 
+    const warnings = {}
+
     browserOpts.projectRoot = projectRoot
 
-    browserOpts.onWarning = project.onWarning
+    browserOpts.onWarning = (err) => {
+      const { message } = err
+
+      // if this warning has already been
+      // seen for this browser launch then
+      // suppress it
+      if (warnings[message]) {
+        return
+      }
+
+      warnings[message] = err
+
+      return project.onWarning
+    }
 
     return openProject.launch(browser, spec, browserOpts)
   },

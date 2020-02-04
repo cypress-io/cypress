@@ -114,6 +114,10 @@ async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaul
 }
 
 function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
+  // if we returned an array from the plugin
+  // then we know the user is using the deprecated
+  // interface and we need to warn them
+  // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
     options.onWarning(errors.get(
       'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'

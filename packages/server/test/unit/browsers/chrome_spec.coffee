@@ -38,10 +38,10 @@ describe "lib/browsers/chrome", ->
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
 
-      readJson = sinon.stub(fs, 'readJson')
-      readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
-      readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
-      readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
+      @readJson = sinon.stub(fs, 'readJson')
+      @readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
+      @readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      @readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
 
       # port for Chrome remote interface communication
       sinon.stub(utils, "getPort").resolves(50505)
@@ -91,141 +91,18 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
-    it "DEPRECATED: normalizes --load-extension if provided in plugin", ->
-      plugins.register 'before:browser:launch', (browser, config) ->
-        return Promise.resolve(["--foo=bar", "--load-extension=/foo/bar/baz.js"])
-
-      pathToTheme = extension.getPathToTheme()
-
-      ## this should get obliterated
-      @args.push("--something=else")
-
-      onWarning = sinon.stub()
-      chrome.open("chrome", "http://", {onWarning}, @automation)
-      .then =>
-        args = utils.launch.firstCall.args[2]
-
-        expect(args).to.include.members([
-          "--foo=bar"
-          "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
-          "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ])
-
-        expect(onWarning).calledOnce
-
-    it "normalizes --load-extension if provided in plugin", ->
-      plugins.register 'before:browser:launch', (browser, config) ->
-        return Promise.resolve({args: ["--foo=bar", "--load-extension=/foo/bar/baz.js"]})
-
-
-      pathToTheme = extension.getPathToTheme()
-
-      ## this should get obliterated
-      @args.push("--something=else")
-
-      chrome.open("chrome", "http://", {}, @automation)
-      .then =>
-        args = utils.launch.firstCall.args[2]
-
-        expect(args).to.include.members([
-          "--foo=bar"
-          "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
-          "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ])
-
-        expect(errors.warning).not.calledOnce
-
-    it "DEPRECATED: normalizes multiple extensions from plugins", ->
-      plugins.register 'before:browser:launch', (browser, config) ->
-        return Promise.resolve ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]
-
-
-      pathToTheme = extension.getPathToTheme()
-
-      ## this should get obliterated
-      @args.push("--something=else")
-
-      onWarning = sinon.stub()
-      chrome.open("chrome", "http://", {onWarning}, @automation)
-      .then =>
-        args = utils.launch.firstCall.args[2]
-
-        expect(args).to.include.members([
-          "--foo=bar"
-          "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
-          "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ])
-
-        console.log(args)
-
-        expect(onWarning).calledOnce
-
-    it "normalizes multiple extensions from plugins", ->
-      plugins.register 'before:browser:launch', (browser, config) ->
-        return Promise.resolve {args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]}
-
-      pathToTheme = extension.getPathToTheme()
-
-      ## this should get obliterated
-      @args.push("--something=else")
-
-      chrome.open("chrome", "http://", {}, @automation)
-      .then =>
-        args = utils.launch.firstCall.args[2]
-
-        expect(args).to.include.members([
-          "--foo=bar"
-          "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
-          "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ])
-
-        expect(errors.warning).not.calledOnce
-
-    it.only "prints depecration message if before:browser:launch argument is mutated as array", ->
-      plugins.register 'before:browser:launch', (browser, config) ->
-
-        console.log("***",{config})
-        config.concat([])
-        config.push("--foo=bar")
-        config.unshift("--load-extension=/foo/bar/baz.js")
-        return Promise.resolve()
-
-      pathToTheme = extension.getPathToTheme()
-
-      ## this should be persisted
-      @args.push("--something=else")
-
-      chrome.open("chrome", "http://", {}, @automation)
-      .then =>
-        args = utils.launch.firstCall.args[2]
-
-        expect(args).to.include.members([
-          "--something=else"
-          "--foo=bar"
-          "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
-          "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ])
-
-        expect(errors.warning).calledOnce
-
-
     it "cleans up an unclean browser profile exit status", ->
-      sinon.stub(fs, "readJson").withArgs("/profile/dir/Default/Preferences").resolves({
+      @readJson.withArgs("/profile/dir/Default/Preferences").resolves({
         profile: {
           exit_type: "Abnormal"
           exited_cleanly: false
         }
       })
-      sinon.stub(fs, "writeJson")
+      sinon.stub(fs, "outputJson").resolves()
 
       chrome.open("chrome", "http://", {}, @automation)
       .then ->
-        expect(fs.writeJson).to.be.calledWith("/profile/dir/Default/Preferences", {
+        expect(fs.outputJson).to.be.calledWith("/profile/dir/Default/Preferences", {
           profile: {
             exit_type: "Normal"
             exited_cleanly: true
@@ -328,10 +205,11 @@ describe "lib/browsers/chrome", ->
 
   context "#_getChromePreferences", ->
     it "returns map of empty if the files do not exist", ->
-      readJson = sinon.stub(fs, 'readJson')
-      readJson.withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
-      readJson.withArgs('/foo/Default/Secure Preferences').rejects({ code: 'ENOENT' })
-      readJson.withArgs('/foo/Local State').rejects({ code: 'ENOENT' })
+      sinon.stub(fs, 'readJson')
+      .withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
+      .withArgs('/foo/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      .withArgs('/foo/Local State').rejects({ code: 'ENOENT' })
+
       expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
         default: {},
         defaultSecure: {},
@@ -339,10 +217,11 @@ describe "lib/browsers/chrome", ->
       })
 
     it "returns map of json objects if the files do exist", ->
-      readJson = sinon.stub(fs, 'readJson')
-      readJson.withArgs('/foo/Default/Preferences').resolves({ foo: 'bar' })
-      readJson.withArgs('/foo/Default/Secure Preferences').resolves({ bar: 'baz' })
-      readJson.withArgs('/foo/Local State').resolves({ baz: 'quux' })
+      sinon.stub(fs, 'readJson')
+      .withArgs('/foo/Default/Preferences').resolves({ foo: 'bar' })
+      .withArgs('/foo/Default/Secure Preferences').resolves({ bar: 'baz' })
+      .withArgs('/foo/Local State').resolves({ baz: 'quux' })
+
       expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
         default: { foo: 'bar' },
         defaultSecure: { bar: 'baz' },

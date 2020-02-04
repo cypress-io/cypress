@@ -169,7 +169,7 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
 
     return fs.outputJson(path.join(userDir, CHROME_PREFERENCE_PATHS[key]), newJson)
   })
-  .thenReturn()
+  .return()
 }
 
 const getRemoteDebuggingPort = async () => {
@@ -238,10 +238,11 @@ const _disableRestorePagesPrompt = function (userDir) {
         profile['exit_type'] = 'Normal'
         profile['exited_cleanly'] = true
 
-        return fs.writeJson(prefsPath, preferences)
+        return fs.outputJson(prefsPath, preferences)
       }
     }
-  }).catch(() => {})
+  })
+  .catch(() => { })
 }
 
 // After the browser has been opened, we can connect to

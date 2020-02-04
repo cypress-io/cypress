@@ -9,6 +9,8 @@ const task = require('./task')
 const util = require('../util')
 const errors = require('../../errors')
 
+const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
+
 const registeredEvents = {}
 
 const invoke = (eventId, args = []) => {
@@ -101,17 +103,16 @@ const execute = (ipc, event, ids, args = []) => {
       // while still fufiling desired behavior
       const pluginConfig = args[1]
 
-      console.log('*******8sdfsd****8')
+      let hasEmittedWarning = false
 
-      ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes'].forEach((name) => {
+      ARRAY_METHODS.forEach((name) => {
         const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
-
-        let hasEmittedWarning = false
 
         pluginConfig[name] = function () {
           if (hasEmittedWarning) return
 
           hasEmittedWarning = true
+
           sendWarning(ipc,
             errors.get(
               'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
