@@ -441,9 +441,10 @@ exports['lib/scaffold .plugins creates pluginsFile when pluginsFolder does not e
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
-module.exports = (on, config) => {
+module.exports = (on, config, env) => {
   // <backtick>on<backtick> is used to hook into various events Cypress emits
   // <backtick>config<backtick> is the resolved Cypress config
+  // <backtick>env<backtick> are properties of the environment, including <backtick>projectRoot<backtick> and <backtick>configFile<backtick>
 }
 
 `
