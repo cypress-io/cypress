@@ -75,7 +75,7 @@ const init = (config, options) => {
         debug('register plugins process event', registration.event, 'with id', registration.eventId)
 
         register(registration.event, (...args) => {
-          util.wrapParentPromise(ipc, registration.eventId, (invocationId) => {
+          return util.wrapParentPromise(ipc, registration.eventId, (invocationId) => {
             debug('call event', registration.event, 'for invocation id', invocationId)
             const ids = {
               eventId: registration.eventId,
