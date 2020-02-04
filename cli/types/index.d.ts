@@ -50,6 +50,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
+  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -4233,6 +4234,49 @@ declare namespace Cypress {
      * @see https://on.cypress.io/should
      */
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
+  }
+
+  interface Dimensions {
+    width: number
+    height: number
+  }
+
+  interface ScreenshotDetails {
+    size: number
+    takenAt: string
+    duration: number
+    dimensions: Dimensions
+    multipart: boolean
+    pixelRatio: number
+    name: string
+    specName: string
+    testFailure: boolean
+    path: string
+    scaled: boolean
+    blackout: string[]
+  }
+
+  interface AfterScreenshotReturnObject {
+    path?: string
+    size?: number
+    dimensions?: Dimensions
+  }
+
+  interface FileObject {
+    filePath: string
+    outputPath: string
+    shouldWatch: boolean
+  }
+
+  interface Tasks {
+    [key: string]: (value: any) => any
+  }
+
+  interface PluginEvents {
+    (action: 'before:browser:launch', fn: (browser: Browser, args: string[]) => string[] | Promise<string[]>): void
+    (action: 'after:screenshot', fn: (details: ScreenshotDetails) => AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
+    (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
+    (action: 'task', tasks: Tasks): void
   }
 
   // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
