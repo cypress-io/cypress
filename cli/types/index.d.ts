@@ -50,7 +50,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void
+  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -4273,8 +4273,8 @@ declare namespace Cypress {
   }
 
   interface PluginEvents {
-    (action: 'before:browser:launch', fn: (browser: Browser, args: string[]) => string[] | Promise<string[]>): void
-    (action: 'after:screenshot', fn: (details: ScreenshotDetails) => AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
+    (action: 'before:browser:launch', fn: (browser: Browser, args: string[]) => void | string[] | Promise<string[]>): void
+    (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
     (action: 'task', tasks: Tasks): void
   }
