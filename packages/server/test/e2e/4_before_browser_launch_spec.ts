@@ -22,9 +22,11 @@ describe('e2e before:browser:launch', () => {
     headed: true,
   })
 
-  e2e.it('can add extensions', {
+  e2e.it.only('can add extensions', {
     spec: 'spec.js',
-    browser: ['firefox', 'chrome'],
+    config: {
+      video: false,
+    },
     headed: true,
     expectedExitCode: 0,
     project: Fixtures.projectPath('browser-extensions'),

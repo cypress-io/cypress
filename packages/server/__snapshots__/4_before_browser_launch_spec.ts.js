@@ -72,7 +72,7 @@ exports['e2e before:browser:launch / can add extensions'] = `
   Running:  spec.js                                                                         (1 of 1)
 
 
-  browser extension e2e
+  before:browser:launch extension e2e
     ✓ has the expected extension
 
 
@@ -88,16 +88,10 @@ exports['e2e before:browser:launch / can add extensions'] = `
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     spec.js                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.js.mp4                         (X second)
 
 
 ====================================================================================================
