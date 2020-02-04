@@ -1,9 +1,9 @@
+import _ from 'lodash'
 import { FoundBrowser } from '@packages/launcher'
 // @ts-ignore
 import errors from '../errors'
 // @ts-ignore
 import plugins from '../plugins'
-import _ from 'lodash'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
@@ -98,12 +98,10 @@ const removeOldProfiles = function () {
 }
 
 const pathToExtension = extension.getPathToExtension()
-let extensionDest = appData.path('web-extension')
-let extensionBg = appData.path('web-extension', 'background.js')
 
 async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaultLaunchOptions, options) {
   if (plugins.has('before:browser:launch')) {
-    let pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
+    const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
 
     if (pluginConfigResult) {
       extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
@@ -176,8 +174,8 @@ export = {
     // get the string bytes for the final extension file
     return extension.setHostAndPath(proxyUrl, socketIoRoute, onScreencastFrame)
     .then((str) => {
-      extensionDest = getExtensionDir(browser, isTextTerminal)
-      extensionBg = path.join(extensionDest, 'background.js')
+      const extensionDest = getExtensionDir(browser, isTextTerminal)
+      const extensionBg = path.join(extensionDest, 'background.js')
 
       // copy the extension src to the extension dist
       return copyExtension(pathToExtension, extensionDest)
@@ -186,7 +184,8 @@ export = {
 
         // and overwrite background.js with the final string bytes
         return fs.writeFileAsync(extensionBg, str)
-      }).return(extensionDest)
+      })
+      .return(extensionDest)
     })
   },
 
@@ -203,7 +202,7 @@ export = {
       const version = process.versions.chrome || ''
 
       if (version) {
-        majorVersion = parseInt(version.split('.')[0])
+        majorVersion = parseFloat(version.split('.')[0])
       }
 
       const electronBrowser: FoundBrowser = {
