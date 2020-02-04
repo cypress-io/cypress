@@ -34,7 +34,7 @@ exports['e2e web security / when enabled / fails'] = `
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
 
-A cross origin error happens when your application navigates to a new domain which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
 This typically happens in one of three ways:
 
@@ -42,7 +42,7 @@ This typically happens in one of three ways:
 2. You submitted a form and your server redirected you outside of your application
 3. You used a javascript redirect to a page outside of your application
 
-Cypress does not allow you to navigate to different origin domain within a single test.
+Cypress does not allow you to navigate to different origin within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
@@ -60,7 +60,7 @@ https://on.cypress.io/cross-origin-violation
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
 
-A cross origin error happens when your application navigates to a new domain which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
 This typically happens in one of three ways:
 
@@ -68,7 +68,7 @@ This typically happens in one of three ways:
 2. You submitted a form and your server redirected you outside of your application
 3. You used a javascript redirect to a page outside of your application
 
-Cypress does not allow you to navigate to different origin domain within a single test.
+Cypress does not allow you to navigate to different origin within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
@@ -86,7 +86,7 @@ https://on.cypress.io/cross-origin-violation
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
 
-A cross origin error happens when your application navigates to a new domain which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
 This typically happens in one of three ways:
 
@@ -94,7 +94,7 @@ This typically happens in one of three ways:
 2. You submitted a form and your server redirected you outside of your application
 3. You used a javascript redirect to a page outside of your application
 
-Cypress does not allow you to navigate to different origin domain within a single test.
+Cypress does not allow you to navigate to different origin within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
