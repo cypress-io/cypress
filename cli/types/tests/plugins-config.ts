@@ -49,7 +49,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    'foo' () {
+    foo() {
       return true
     }
   })
@@ -68,7 +68,7 @@ const pluginConfig3: Cypress.PluginConfig = (on, config) => {
   on('after:screenshot', () => {})
 
   on('task', {
-    'foo' () {}
+    foo() {}
   })
 }
 
@@ -87,7 +87,7 @@ const pluginConfig4: Cypress.PluginConfig = (on, config) => {
   })
 
   on('task', {
-    'foo' () {
+    foo() {
       return Promise.resolve([])
     }
   })
