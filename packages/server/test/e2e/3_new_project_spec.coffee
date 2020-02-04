@@ -22,7 +22,6 @@ describe "e2e new project", ->
         project: noScaffoldingPath
         sanitizeScreenshotDimensions: true
         snapshot: true
-        expectedExitCode: 0
       })
       .then ->
         fs.statAsync(supportPath)

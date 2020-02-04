@@ -11,5 +11,4 @@ describe "e2e viewport", ->
   e2e.it "passes", {
     spec: "viewport_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }

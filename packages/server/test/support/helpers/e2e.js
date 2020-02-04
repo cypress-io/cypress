@@ -1,7 +1,7 @@
-let e2e
-
 require('../../spec_helper')
+require('mocha-banner').register()
 
+const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
 const niv = require('npm-install-version')
@@ -9,6 +9,7 @@ const path = require('path')
 const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
+const stream = require('stream')
 const express = require('express')
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
@@ -96,7 +97,7 @@ const replaceUploadingResults = function (orig, ...rest) {
 }
 
 const normalizeStdout = function (str, options = {}) {
-  const normalizeOptions = _.defaults({}, options, { normalizeAvailableBrowsers: true })
+  const { normalizeStdoutAvailableBrowsers } = options
 
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
@@ -105,10 +106,12 @@ const normalizeStdout = function (str, options = {}) {
   // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join('/foo/bar/.projects')
 
-  if (normalizeOptions.normalizeAvailableBrowsers) {
+  // unless normalization is explicitly turned off then
+  // always normalize the stdout replacing the browser text
+  if (normalizeStdoutAvailableBrowsers !== false) {
     // usually we are not interested in the browsers detected on this particular system
     // but some tests might filter / change the list of browsers
-    // in that case the test should pass "normalizeAvailableBrowsers:false" as options
+    // in that case the test should pass "normalizeStdoutAvailableBrowsers: false" as options
     str = str.replace(availableBrowsersRe, '$1browser1, browser2, browser3')
   }
 
@@ -150,24 +153,19 @@ const ensurePort = function (port) {
 }
 
 const startServer = function (obj) {
-  let s; let srv
   const { onServer, port, https } = obj
 
   ensurePort(port)
 
   const app = express()
 
-  if (https) {
-    srv = httpsProxy.httpsServer(app)
-  } else {
-    srv = http.Server(app)
-  }
+  const srv = https ? httpsProxy.httpsServer(app) : new http.Server(app)
 
   allowDestroy(srv)
 
   app.use(morgan('dev'))
 
-  s = obj.static
+  const s = obj.static
 
   if (s) {
     const opts = _.isObject(s) ? s : {}
@@ -232,60 +230,71 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   return it
 }
 
-const getBrowsers = function (generateTestsForDefaultBrowsers, browser, defaultBrowsers) {
-  // if we're generating tests for default browsers
-  if (generateTestsForDefaultBrowsers) {
-    // then return an array of default browsers
-    return defaultBrowsers
+function getBrowsers (browserPattern) {
+  if (!browserPattern.length) {
+    return DEFAULT_BROWSERS
   }
 
-  // but if we haven't been told to generate tests for default browsers
-  // and weren't provided a specified browser then throw
-  if (!browser) {
-    throw new Error('A browser must be specified when { generateTestsForDefaultBrowsers: false }.')
+  let selected = []
+
+  const addBrowsers = _.clone(browserPattern)
+  const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
+
+  if (removeBrowsers.length) {
+    selected = _.without(DEFAULT_BROWSERS, ...removeBrowsers)
+  } else {
+    selected = _.intersection(DEFAULT_BROWSERS, addBrowsers)
   }
 
-  // otherwise return the specified browser
-  return [browser]
+  if (!selected.length) {
+    throw new Error(`options.browser: "${browserPattern}" matched no browsers`)
+  }
+
+  return selected
 }
 
-const localItFn = function (title, options = {}) {
-  options = _
-  .chain(options)
-  .clone()
-  .defaults({
+const normalizeToArray = (value) => {
+  if (value && !_.isArray(value)) {
+    return [value]
+  }
+
+  return value
+}
+
+const localItFn = function (title, opts = {}) {
+  opts.browser = normalizeToArray(opts.browser)
+
+  const DEFAULT_OPTIONS = {
     only: false,
     skip: false,
-    browser: process.env.BROWSER,
-    generateTestsForDefaultBrowsers: true,
-    useSeparateBrowserSnapshots: false,
+    browser: [],
+    snapshot: false,
+    spec: 'no spec name supplied!',
+    onStdout: _.identity,
     onRun (execFn, browser, ctx) {
       return execFn()
     },
-  })
-  .value()
+  }
 
-  const { only, skip, browser, generateTestsForDefaultBrowsers, onRun } = options
+  const options = _.defaults({}, opts, DEFAULT_OPTIONS)
 
   if (!title) {
     throw new Error('e2e.it(...) must be passed a title as the first argument')
   }
 
   // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
-  // - if generateTestsForDefaultBrowsers
-  //   - create multiple tests for each default browser
-  //   - if browser is specified in options:
-  //     ...skip the tests for each default browser if that browser
-  //     ...does not match the specified one (used in CI)
-  // - else only generate a single test with the specified browser
+  // - create multiple tests for each default browser
+  // - if browser is specified in options:
+  //   ...skip the tests for each default browser if that browser
+  //   ...does not match the specified one (used in CI)
 
   // run the tests for all the default browsers, or if a browser
   // has been specified, only run it for that
-  const specifiedBrowser = browser
-  const browsersToTest = getBrowsers(generateTestsForDefaultBrowsers, browser, DEFAULT_BROWSERS)
+  const specifiedBrowser = process.env.BROWSER
+  const browsersToTest = getBrowsers(options.browser)
 
   const browserToTest = function (browser) {
-    const mochaItFn = getMochaItFn(only, skip, browser, specifiedBrowser)
+    const mochaItFn = getMochaItFn(options.only, options.skip, browser, specifiedBrowser)
 
     const testTitle = `${title} [${browser}]`
 
@@ -298,9 +307,11 @@ const localItFn = function (title, options = {}) {
 
       const ctx = this
 
-      const execFn = (overrides = {}) => e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+      const execFn = (overrides = {}) => {
+        return e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+      }
 
-      return onRun(execFn, browser, ctx)
+      return options.onRun(execFn, browser, ctx)
     })
   }
 
@@ -319,19 +330,26 @@ localItFn.skip = function (title, options) {
   return localItFn(title, options)
 }
 
-module.exports = (e2e = {
+const maybeVerifyExitCode = (expectedExitCode, fn) => {
+  // bail if this is explicitly null so
+  // devs can turn off checking the exit code
+  if (expectedExitCode === null) {
+    return
+  }
+
+  return fn()
+}
+
+const e2e = {
+
+  replaceStackTraceLines,
+
   normalizeStdout,
 
   it: localItFn,
 
   snapshot (...args) {
     args = _.compact(args)
-
-    // grab the last element in index
-    const index = args.length - 1
-
-    // normalize the stdout of it
-    args[index] = normalizeStdout(args[index])
 
     return snapshot.apply(null, args)
   },
@@ -401,9 +419,7 @@ module.exports = (e2e = {
 
         this.servers = null
       }).then(() => {
-        let s
-
-        s = options.settings
+        const s = options.settings
 
         if (s) {
           return settings.write(e2ePath, s)
@@ -412,15 +428,13 @@ module.exports = (e2e = {
     })
 
     return afterEach(function () {
-      let s
-
       process.env = _.clone(env)
 
       this.timeout(human('2 minutes'))
 
       Fixtures.remove()
 
-      s = this.servers
+      const s = this.servers
 
       if (s) {
         return Promise.map(s, stopServer)
@@ -429,19 +443,19 @@ module.exports = (e2e = {
   },
 
   options (ctx, options = {}) {
-    let spec
-
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
       timeout: options.exit === false ? 3000000 : 120000,
       originalTitle: null,
+      expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
+      normalizeStdoutAvailableBrowsers: true,
     })
 
     ctx.timeout(options.timeout)
 
-    spec = options.spec
+    const { spec } = options
 
     if (spec) {
       // normalize into array and then prefix
@@ -547,11 +561,11 @@ module.exports = (e2e = {
 
     return cypress.start(args)
     .then(() => {
-      let code
+      const { expectedExitCode } = options
 
-      if ((code = options.expectedExitCode) != null) {
-        return expect(process.exit).to.be.calledWith(code)
-      }
+      maybeVerifyExitCode(expectedExitCode, () => {
+        expect(process.exit).to.be.calledWith(expectedExitCode)
+      })
     })
   },
 
@@ -565,18 +579,16 @@ module.exports = (e2e = {
     let stderr = ''
 
     const exit = function (code) {
-      let expected
+      const { expectedExitCode } = options
 
-      if ((expected = options.expectedExitCode) != null) {
-        expect(code).to.eq(expected, 'expected exit code')
-      }
+      maybeVerifyExitCode(expectedExitCode, () => {
+        expect(code).to.eq(expectedExitCode, 'expected exit code')
+      })
 
       // snapshot the stdout!
       if (options.snapshot) {
         // enable callback to modify stdout
-        let matches; let ostd; let str
-
-        ostd = options.onStdout
+        const ostd = options.onStdout
 
         if (ostd) {
           stdout = ostd(stdout)
@@ -584,7 +596,7 @@ module.exports = (e2e = {
 
         // if we have browser in the stdout make
         // sure its legit
-        matches = browserNameVersionRe.exec(stdout)
+        const matches = browserNameVersionRe.exec(stdout)
 
         if (matches) {
           // eslint-disable-next-line no-unused-vars
@@ -607,7 +619,7 @@ module.exports = (e2e = {
           }
         }
 
-        str = normalizeStdout(stdout, options)
+        const str = normalizeStdout(stdout, options)
 
         if (options.originalTitle) {
           snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
@@ -647,10 +659,19 @@ module.exports = (e2e = {
         .value(),
       })
 
+      const ColorOutput = function () {
+        const colorOutput = new stream.Transform()
+
+        colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
+
+        return colorOutput
+      }
+
       // pipe these to our current process
       // so we can see them in the terminal
-      sp.stdout.pipe(process.stdout)
-      sp.stderr.pipe(process.stderr)
+      // color it so we can tell which is test output
+      sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
+      sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
 
       sp.stdout.on('data', (buf) => stdout += buf.toString())
       sp.stderr.on('data', (buf) => stderr += buf.toString())
@@ -675,4 +696,6 @@ module.exports = (e2e = {
 `)
     }
   },
-})
+}
+
+module.exports = e2e

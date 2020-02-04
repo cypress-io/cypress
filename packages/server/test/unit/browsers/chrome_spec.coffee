@@ -29,7 +29,6 @@ describe "lib/browsers/chrome", ->
         kill: sinon.stub().returns()
       }
 
-      sinon.stub(chrome, "_getArgs").returns(@args)
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
       sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(@criClient)
       sinon.stub(plugins, "has")
@@ -59,6 +58,8 @@ describe "lib/browsers/chrome", ->
         expect(plugins.execute).not.to.be.called
 
     it "is noop if newArgs are not returned", ->
+      sinon.stub(chrome, "_getArgs").returns(@args)
+
       plugins.has.returns(true)
       plugins.execute.resolves(null)
 
@@ -78,7 +79,7 @@ describe "lib/browsers/chrome", ->
       .then =>
         args = utils.launch.firstCall.args[2]
 
-        expect(args).to.deep.eq([
+        expect(args).to.include.members([
           "--headless"
           "--remote-debugging-port=50505"
           "--remote-debugging-address=127.0.0.1"
@@ -169,40 +170,40 @@ describe "lib/browsers/chrome", ->
     it "disables gpu when linux", ->
       sinon.stub(os, "platform").returns("linux")
 
-      args = chrome._getArgs()
+      args = chrome._getArgs({}, {})
 
       expect(args).to.include("--disable-gpu")
 
     it "does not disable gpu when not linux", ->
       sinon.stub(os, "platform").returns("darwin")
 
-      args = chrome._getArgs()
+      args = chrome._getArgs({}, {})
 
       expect(args).not.to.include("--disable-gpu")
 
     it "turns off sandbox when linux", ->
       sinon.stub(os, "platform").returns("linux")
 
-      args = chrome._getArgs()
+      args = chrome._getArgs({}, {})
 
       expect(args).to.include("--no-sandbox")
 
     it "does not turn off sandbox when not linux", ->
       sinon.stub(os, "platform").returns("win32")
 
-      args = chrome._getArgs()
+      args = chrome._getArgs({}, {})
 
       expect(args).not.to.include("--no-sandbox")
 
     it "adds user agent when options.userAgent", ->
-      args = chrome._getArgs({
+      args = chrome._getArgs({}, {
         userAgent: "foo"
       })
 
       expect(args).to.include("--user-agent=foo")
 
     it "does not add user agent", ->
-      args = chrome._getArgs()
+      args = chrome._getArgs({}, {})
 
       expect(args).not.to.include("--user-agent=foo")
 
@@ -211,10 +212,8 @@ describe "lib/browsers/chrome", ->
 
       disabledRootLayerScrolling = (version, bool) ->
         args = chrome._getArgs({
-          browser: {
-            majorVersion: version
-          }
-        })
+          majorVersion: version
+        }, {})
 
         if bool
           expect(args).to.include(arg)
@@ -232,10 +231,8 @@ describe "lib/browsers/chrome", ->
 
       chromeVersionHasLoopback = (version, bool) ->
         args = chrome._getArgs({
-          browser: {
-            majorVersion: version
-          }
-        })
+          majorVersion: version
+        }, {})
 
         if bool
           expect(args).to.include(arg)

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import la from 'lazy-ass'
 import check from 'check-more-types'
 import extension from '@packages/extension'
@@ -18,6 +18,7 @@ import * as CriClient from './cri-client'
 type CypressConfiguration = any
 
 type Browser = FoundBrowser & {
+  majorVersion: number
   isHeadless: boolean
   isHeaded: boolean
 }
@@ -33,7 +34,7 @@ const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
-const defaultArgs = [
+const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
   '--start-maximized',
@@ -103,16 +104,10 @@ const defaultArgs = [
   '--use-mock-keychain',
 ]
 
-const getRemoteDebuggingPort = Promise.method(() => {
-  let port
+const getRemoteDebuggingPort = Bluebird.method(() => {
+  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
 
-  port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  if (port) {
-    return port
-  }
-
-  return utils.getPort()
+  return port || utils.getPort()
 })
 
 const pluginsBeforeBrowserLaunch = function (browser, args) {
@@ -208,44 +203,36 @@ const _connectToChromeRemoteInterface = function (port) {
   })
 }
 
-const _maybeRecordVideo = (options) => {
-  return (function (client) {
-    if (!options.screencastFrame) {
-      debug('screencastFrame is false')
+const _maybeRecordVideo = async function (client, options) {
+  if (!options.screencastFrame) {
+    debug('screencastFrame is false')
 
-      return client
-    }
+    return client
+  }
 
-    debug('starting screencast')
-    client.on('Page.screencastFrame', options.screencastFrame)
+  debug('starting screencast')
+  client.on('Page.screencastFrame', options.screencastFrame)
 
-    return client.send('Page.startScreencast', {
-      format: 'jpeg',
-    })
-    .then(() => {
-      return client
-    })
+  await client.send('Page.startScreencast', {
+    format: 'jpeg',
   })
+
+  return client
 }
 
 // a utility function that navigates to the given URL
 // once Chrome remote interface client is passed to it.
-const _navigateUsingCRI = function (url) {
+const _navigateUsingCRI = async function (client, url) {
   // @ts-ignore
   la(check.url(url), 'missing url to navigate to', url)
+  la(client, 'could not get CRI client')
+  debug('received CRI client')
+  debug('navigating to page %s', url)
 
-  return function (client) {
-    la(client, 'could not get CRI client')
-    debug('received CRI client')
-    debug('navigating to page %s', url)
-
-    // when opening the blank page and trying to navigate
-    // the focus gets lost. Restore it and then navigate.
-    return client.send('Page.bringToFront')
-    .then(() => {
-      return client.send('Page.navigate', { url })
-    })
-  }
+  // when opening the blank page and trying to navigate
+  // the focus gets lost. Restore it and then navigate.
+  await client.send('Page.bringToFront')
+  await client.send('Page.navigate', { url })
 }
 
 const _setAutomation = (client, automation) => {
@@ -254,7 +241,7 @@ const _setAutomation = (client, automation) => {
   )
 }
 
-module.exports = {
+export = {
   //
   // tip:
   //   by adding utility functions that start with "_"
@@ -273,7 +260,7 @@ module.exports = {
 
   _setAutomation,
 
-  _writeExtension (browser: Browser, options) {
+  async _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
       debug('chrome is running headlessly, not installing extension')
 
@@ -281,41 +268,35 @@ module.exports = {
     }
 
     // get the string bytes for the final extension file
-    return extension.setHostAndPath(options.proxyUrl, options.socketIoRoute).then(function (str) {
-      let extensionBg; let extensionDest
+    const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
 
-      extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
-      extensionBg = path.join(extensionDest, 'background.js')
+    const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
+    const extensionBg = path.join(extensionDest, 'background.js')
 
-      // copy the extension src to the extension dist
-      return utils.copyExtension(pathToExtension, extensionDest).then(function () {
-        // and overwrite background.js with the final string bytes
-        return fs.writeFileAsync(extensionBg, str)
-      }).return(extensionDest)
-    })
+    // copy the extension src to the extension dist
+    await utils.copyExtension(pathToExtension, extensionDest)
+
+    // and overwrite background.js with the final string bytes
+    await fs.writeFileAsync(extensionBg, str)
+
+    return extensionDest
   },
 
-  _getArgs (options: CypressConfiguration = {}) {
-    let ps; let ua
-
-    _.defaults(options, {
-      browser: {},
-    })
-
-    const args = ([] as string[]).concat(defaultArgs)
+  _getArgs (browser: Browser, options: CypressConfiguration, port: string) {
+    const args = ([] as string[]).concat(DEFAULT_ARGS)
 
     if (os.platform() === 'linux') {
       args.push('--disable-gpu')
       args.push('--no-sandbox')
     }
 
-    ua = options.userAgent
+    const ua = options.userAgent
 
     if (ua) {
       args.push(`--user-agent=${ua}`)
     }
 
-    ps = options.proxyServer
+    const ps = options.proxyServer
 
     if (ps) {
       args.push(`--proxy-server=${ps}`)
@@ -330,7 +311,7 @@ module.exports = {
     // https://github.com/cypress-io/cypress/issues/2037
     // https://github.com/cypress-io/cypress/issues/2215
     // https://github.com/cypress-io/cypress/issues/2223
-    const { majorVersion } = options.browser
+    const { majorVersion, isHeadless } = browser
 
     if (CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING.includes(majorVersion)) {
       args.push('--disable-blink-features=RootLayerScrolling')
@@ -342,101 +323,92 @@ module.exports = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
+    if (isHeadless) {
+      args.push('--headless')
+    }
+
+    // force ipv4
+    // https://github.com/cypress-io/cypress/issues/5912
+    args.push(`--remote-debugging-port=${port}`)
+    args.push('--remote-debugging-address=127.0.0.1')
+
     return args
   },
 
-  open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
+  async open (browser: Browser, url, options: CypressConfiguration = {}, automation) {
     const { isTextTerminal } = options
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    return Promise
-    .try(() => {
-      const args = this._getArgs(options)
+    const port = await getRemoteDebuggingPort()
 
-      if (browser.isHeadless) {
-        args.push('--headless')
-      }
+    const defaultArgs = this._getArgs(browser, options, port)
 
-      return getRemoteDebuggingPort()
-      .then((port) => {
-        // force ipv4
-        // https://github.com/cypress-io/cypress/issues/5912
-        args.push(`--remote-debugging-port=${port}`)
-        args.push('--remote-debugging-address=127.0.0.1')
+    const [cacheDir, launchArgs] = await Bluebird.all([
+      // ensure that we have a clean cache dir
+      // before launching the browser every time
+      utils.ensureCleanCache(browser, isTextTerminal),
+      pluginsBeforeBrowserLaunch(browser, defaultArgs),
+    ])
 
-        return Promise.all([
-          // ensure that we have a clean cache dir
-          // before launching the browser every time
-          utils.ensureCleanCache(browser, isTextTerminal),
-          pluginsBeforeBrowserLaunch(options.browser, args),
-          port,
-        ])
-      })
-    }).spread((cacheDir, args: string[], port) => {
-      return Promise.all([
-        this._writeExtension(
-          browser,
-          options
-        ),
-        _removeRootExtension(),
-        _disableRestorePagesPrompt(userDir),
-      ])
-      .spread((extDest) => {
-        // normalize the --load-extensions argument by
-        // massaging what the user passed into our own
-        args = _normalizeArgExtensions(extDest, args, browser)
+    const [extDest] = await Bluebird.all([
+      this._writeExtension(
+        browser,
+        options
+      ),
+      _removeRootExtension(),
+      _disableRestorePagesPrompt(userDir),
+    ])
+    // normalize the --load-extensions argument by
+    // massaging what the user passed into our own
+    const args = _normalizeArgExtensions(extDest, launchArgs, browser)
 
-        // this overrides any previous user-data-dir args
-        // by being the last one
-        args.push(`--user-data-dir=${userDir}`)
-        args.push(`--disk-cache-dir=${cacheDir}`)
+    // this overrides any previous user-data-dir args
+    // by being the last one
+    args.push(`--user-data-dir=${userDir}`)
+    args.push(`--disk-cache-dir=${cacheDir}`)
 
-        debug('launching in chrome with debugging port', { url, args, port })
+    debug('launching in chrome with debugging port', { url, args, port })
 
-        // FIRST load the blank page
-        // first allows us to connect the remote interface,
-        // start video recording and then
-        // we will load the actual page
-        return utils.launch(browser, 'about:blank', args)
-      }).then((launchedBrowser) => {
-        la(launchedBrowser, 'did not get launched browser instance')
+    // FIRST load the blank page
+    // first allows us to connect the remote interface,
+    // start video recording and then
+    // we will load the actual page
+    const launchedBrowser = await utils.launch(browser, 'about:blank', args)
 
-        // SECOND connect to the Chrome remote interface
-        // and when the connection is ready
-        // navigate to the actual url
-        return this._connectToChromeRemoteInterface(port)
-        .then((criClient) => {
-          la(criClient, 'expected Chrome remote interface reference', criClient)
+    la(launchedBrowser, 'did not get launched browser instance')
 
-          return criClient.ensureMinimumProtocolVersion('1.3')
-          .catch((err) => {
-            throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
-          }).then(() => {
-            this._setAutomation(criClient, automation)
+    // SECOND connect to the Chrome remote interface
+    // and when the connection is ready
+    // navigate to the actual url
+    const criClient = await this._connectToChromeRemoteInterface(port)
 
-            // monkey-patch the .kill method to that the CDP connection is closed
-            const originalBrowserKill = launchedBrowser.kill
+    la(criClient, 'expected Chrome remote interface reference', criClient)
 
-            launchedBrowser.kill = (...args) => {
-              debug('closing remote interface client')
-
-              return criClient.close()
-              .then(() => {
-                debug('closing chrome')
-
-                return originalBrowserKill.apply(launchedBrowser, args)
-              })
-            }
-
-            return criClient
-          })
-        }).then(this._maybeRecordVideo(options))
-        .then(this._navigateUsingCRI(url))
-        // return the launched browser process
-        // with additional method to close the remote connection
-        .return(launchedBrowser)
-      })
+    await criClient.ensureMinimumProtocolVersion('1.3')
+    .catch((err) => {
+      throw new Error(`Cypress requires at least Chrome 64.\n\nDetails:\n${err.message}`)
     })
+
+    this._setAutomation(criClient, automation)
+
+    // monkey-patch the .kill method to that the CDP connection is closed
+    const originalBrowserKill = launchedBrowser.kill
+
+    launchedBrowser.kill = async (...args) => {
+      debug('closing remote interface client')
+
+      await criClient.close()
+      debug('closing chrome')
+
+      await originalBrowserKill.apply(launchedBrowser, args)
+    }
+
+    await this._maybeRecordVideo(criClient, options)
+    await this._navigateUsingCRI(criClient, url)
+
+    // return the launched browser process
+    // with additional method to close the remote connection
+    return launchedBrowser
   },
 }
