@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const cp = require('bluebird').promisifyAll(require('child_process'))
 const { expect } = require('chai')
+
 const assertPsOutput = (strs) => {
   if (!_.isArray(strs)) {
     strs = [strs]
@@ -81,6 +82,24 @@ const getHandlersByType = (type) => {
           launchOptions.height = 600
 
           return launchOptions
+        },
+      }
+
+    case 'throw-explicit-error':
+      return {
+        onBeforeBrowserLaunch (browser, launchOptions) {
+          throw new Error('Error thrown from plugins handler')
+        },
+      }
+
+    case 'reject-promise':
+      return {
+        onBeforeBrowserLaunch (browser, launchOptions) {
+          return Promise
+          .resolve(null)
+          .then(() => {
+            throw new Error('Promise rejected from plugins handler')
+          })
         },
       }
 
