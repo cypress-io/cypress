@@ -3,15 +3,8 @@
 // does nothing
 const pluginConfig: Cypress.PluginConfig = (on, config) => {}
 
-// returns changed base url
+// allows synchronous returns
 const pluginConfig2: Cypress.PluginConfig = (on, config) => {
-  return {
-    baseUrl: 'http://localhost:3000'
-  }
-}
-
-// listens to browser launch event
-const pluginConfig3: Cypress.PluginConfig = (on, config) => {
   config // $ExpectType ConfigOptions
   config.baseUrl // $ExpectType: string
 
@@ -21,10 +14,84 @@ const pluginConfig3: Cypress.PluginConfig = (on, config) => {
     console.log('launching browser', browser.displayName)
     return options
   })
+
+  on('file:preprocessor', (file) => {
+    file.filePath // $ExpectType string
+    file.outputPath // $ExpectType string
+    file.shouldWatch // $ExpectType boolean
+
+    return file.outputPath
+  })
+
+  on('after:screenshot', (details) => {
+    details.size // $ExpectType number
+    details.takenAt // $ExpectType string
+    details.duration // $ExpectType number
+    details.dimensions // $ExpectType Dimensions
+    details.multipart // $ExpectType boolean
+    details.pixelRatio // $ExpectType number
+    details.name // $ExpectType string
+    details.specName // $ExpectType string
+    details.testFailure // $ExpectType boolean
+    details.path // $ExpectType string
+    details.scaled // $ExpectType boolean
+    details.blackout // $ExpectType string[]
+
+    return {
+      path: '/path/to/screenshot',
+      size: 1000,
+      // FIXME: why can't dimensions be included?
+      // dimensions: {
+      //   width: 100,
+      //   height: 100,
+      // }
+    }
+  })
+
+  on('task', {
+    'foo' () {
+      return true
+    }
+  })
+
+  return {
+    baseUrl: 'http://localhost:3000'
+  }
 }
 
-// returns changed base url asynchronously
+// allows/disallows void returns
+const pluginConfig3: Cypress.PluginConfig = (on, config) => {
+  on('before:browser:launch', (browser, options) => {})
+
+  on('file:preprocessor', (file) => {}) // $ExpectError
+
+  on('after:screenshot', () => {})
+
+  on('task', {
+    'foo' () {}
+  })
+}
+
+// allows async returns
 const pluginConfig4: Cypress.PluginConfig = (on, config) => {
+  on('before:browser:launch', (browser, options) => {
+    return Promise.resolve(options)
+  })
+
+  on('file:preprocessor', (file) => {
+    return Promise.resolve(file.outputPath)
+  })
+
+  on('after:screenshot', () => {
+    return Promise.resolve({})
+  })
+
+  on('task', {
+    'foo' () {
+      return Promise.resolve([])
+    }
+  })
+
   return Promise.resolve({
     baseUrl: 'http://localhost:3000'
   })
