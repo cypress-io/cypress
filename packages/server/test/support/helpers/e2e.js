@@ -598,7 +598,7 @@ const e2e = {
 
     return cypress.start(args)
     .then(() => {
-      expectExitCode(options.expectedExitCode)
+      expectExitCode(process.exit, options.expectedExitCode)
     })
   },
 
@@ -612,7 +612,7 @@ const e2e = {
     let stderr = ''
 
     const exit = function (code) {
-      expectExitCode(code)
+      expectExitCode(code, options.expectedExitCode)
 
       // snapshot the stdout!
       if (options.snapshot) {
