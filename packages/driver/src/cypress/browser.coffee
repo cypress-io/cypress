@@ -1,32 +1,19 @@
 _ = require("lodash")
 $utils = require("./utils")
 
-browserFamilyMap = {
-  chrome: "chrome"
-  canary: "chrome"
-  chromium: "chrome"
-  electron: "chrome"
+isBrowser = (config, obj='') ->
+  if _.isString(obj)
+    name = obj.toLowerCase()
+    currentName = config.browser.name.toLowerCase()
 
-  firefox: "firefox"
-  firefoxDeveloperEdition: "firefox"
-  firefoxNightly: "firefox"
+    return name == currentName
 
-  ie: 'ie'
-}
+  if _.isObject(obj)
+    return _.isMatch(config.browser, obj)
 
-isBrowser = (config, browserName='') ->
-  if not _.isString(browserName)
-    $utils.throwErrByPath("browser.invalid_arg", {
-      args: { method: 'isBrowser', browserName: $utils.stringify(browserName) }
-    })
-
-  browserName = browserName.toLowerCase()
-  currentBrowser = config.browser.name.toLowerCase()
-  ## use browser family if we have it, otherwise use browser name
-  currentBrowser = browserFamilyMap[currentBrowser] || currentBrowser
-
-
-  return browserName is currentBrowser
+  $utils.throwErrByPath("browser.invalid_arg", {
+    args: { method: 'isBrowser', obj: $utils.stringify(obj) }
+  })
 
 module.exports = (config) ->
   {
