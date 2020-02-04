@@ -1,15 +1,22 @@
 const e2e = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
 
+const beforeBrowserLaunchProject = Fixtures.projectPath('plugin-before-browser-launch-deprecation')
+
 describe('deprecated before:browser:launch args', () => {
   e2e.setup()
 
-  e2e.it('warn in electron, but ignore arguments', {
+  // NOTE: @bkucera im not sure what you were trying to
+  // do in this test, but i don't believe you ever wrote
+  // the before:browser:launch callback in the project's
+  // plugin file.
+  // theres no saved snapshot content either
+  e2e.it.skip('warn in electron, but ignore arguments', {
     browser: 'electron',
     config: {
       video: false,
     },
-    project: Fixtures.projectPath('plugin-before-browser-launch-deprecation'),
+    project: beforeBrowserLaunchProject,
     spec: '*',
     expectedExitCode: 0,
     snapshot: true,
@@ -22,11 +29,11 @@ describe('deprecated before:browser:launch args', () => {
     config: {
       video: false,
       env: {
-        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-array-mutation',
+        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-undefined-mutate-array',
       },
     },
-    project: Fixtures.projectPath('plugin-before-browser-launch-deprecation'),
-    spec: '*',
+    project: beforeBrowserLaunchProject,
+    spec: 'app_spec.coffee',
     expectedExitCode: 0,
     snapshot: true,
     stdoutInclude: 'Deprecation Warning:',
@@ -37,24 +44,28 @@ describe('deprecated before:browser:launch args', () => {
     browser: '!electron',
     config: {
       video: false,
-      env: { 'NO_WARNING': 1 },
+      env: {
+        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-options-mutate-only-args-property',
+      },
     },
-    project: Fixtures.projectPath('plugin-before-browser-launch-deprecation'),
-    spec: '*',
+    project: beforeBrowserLaunchProject,
+    spec: 'app_spec.coffee',
     expectedExitCode: 0,
     snapshot: true,
     stdoutExclude: 'Deprecation Warning:',
     psInclude: ['--foo', '--bar'],
   })
 
-  e2e.it('concat return', {
+  e2e.it('concat return returns once per spec', {
     browser: '!electron',
     config: {
       video: false,
-      env: { 'CONCAT_RETURN': 1 },
+      env: {
+        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-array-mutation',
+      },
     },
-    project: Fixtures.projectPath('plugin-before-browser-launch-deprecation'),
-    spec: '*',
+    project: beforeBrowserLaunchProject,
+    spec: 'app_spec.coffee,app_spec2.coffee',
     expectedExitCode: 0,
     snapshot: true,
     stdoutInclude: 'Deprecation Warning:',
@@ -65,10 +76,12 @@ describe('deprecated before:browser:launch args', () => {
     browser: '!electron',
     config: {
       video: false,
-      env: { 'NO_MUTATE_RETURN': 1 },
+      env: {
+        BEFORE_BROWSER_LAUNCH_HANDLER: 'return-new-array-without-mutation',
+      },
     },
-    project: Fixtures.projectPath('plugin-before-browser-launch-deprecation'),
-    spec: '*',
+    project: beforeBrowserLaunchProject,
+    spec: 'app_spec.coffee',
     expectedExitCode: 0,
     snapshot: true,
     stdoutInclude: 'Deprecation Warning:',

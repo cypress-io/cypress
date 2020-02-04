@@ -53,6 +53,10 @@ const getHandlersByType = (type) => {
 module.exports = (on, config) => {
   const beforeBrowserLaunchHandler = config.env.BEFORE_BROWSER_LAUNCH_HANDLER
 
+  if (!beforeBrowserLaunchHandler) {
+    throw new Error('config.env.BEFORE_BROWSER_LAUNCH_HANDLER must be set to a valid handler type')
+  }
+
   const { onBeforeBrowserLaunch, onTask } = getHandlersByType(beforeBrowserLaunchHandler)
 
   on('before:browser:launch', onBeforeBrowserLaunch)
