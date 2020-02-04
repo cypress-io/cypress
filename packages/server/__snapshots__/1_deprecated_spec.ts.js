@@ -7,14 +7,14 @@ exports['deprecated before:browser:launch args / push and no return - warns user
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 1)
+  Running:  app_spec.js                                                                     (1 of 1)
 
 Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
 
@@ -24,7 +24,7 @@ Your code will cease to work in a future version of Cypress. Please see the upgr
 
 
 
-  ✓ noop test
+  ✓ asserts on browser args
 
   1 passing
 
@@ -40,7 +40,7 @@ Your code will cease to work in a future version of Cypress. Please see the upgr
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -51,7 +51,7 @@ Your code will cease to work in a future version of Cypress. Please see the upgr
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
+  │ ✔  app_spec.js                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -67,17 +67,17 @@ exports['deprecated before:browser:launch args / using non-deprecated API - no w
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 1)
+  Running:  app_spec.js                                                                     (1 of 1)
 
 
-  ✓ noop test
+  ✓ asserts on browser args
 
   1 passing
 
@@ -93,7 +93,7 @@ exports['deprecated before:browser:launch args / using non-deprecated API - no w
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -104,7 +104,7 @@ exports['deprecated before:browser:launch args / using non-deprecated API - no w
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
+  │ ✔  app_spec.js                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -120,17 +120,17 @@ exports['deprecated before:browser:launch args / no mutate return'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 1)
+  Running:  app_spec.js                                                                     (1 of 1)
 
 
-  ✓ noop test
+  ✓ asserts on browser args
 
   1 passing
 
@@ -146,7 +146,7 @@ exports['deprecated before:browser:launch args / no mutate return'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -157,7 +157,7 @@ exports['deprecated before:browser:launch args / no mutate return'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
+  │ ✔  app_spec.js                              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -173,14 +173,14 @@ exports['deprecated before:browser:launch args / concat return returns once per 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (app_spec.coffee, app_spec2.coffee)                                        │
-  │ Searched:   cypress/integration/app_spec.coffee, cypress/integration/app_spec2.coffee          │
+  │ Specs:      2 found (app_spec.js, app_spec2.js)                                                │
+  │ Searched:   cypress/integration/app_spec.js, cypress/integration/app_spec2.js                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 2)
+  Running:  app_spec.js                                                                     (1 of 2)
 
 Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
 
@@ -190,7 +190,7 @@ Your code will cease to work in a future version of Cypress. Please see the upgr
 
 
 
-  ✓ noop test
+  ✓ asserts on browser args
 
   1 passing
 
@@ -206,13 +206,13 @@ Your code will cease to work in a future version of Cypress. Please see the upgr
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec2.coffee                                                                (2 of 2)
+  Running:  app_spec2.js                                                                    (2 of 2)
 
 Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
 
@@ -222,7 +222,7 @@ Your code will cease to work in a future version of Cypress. Please see the upgr
 
 
 
-  ✓ noop test2
+  ✓ 2 - asserts on browser args
 
   1 passing
 
@@ -238,7 +238,7 @@ Your code will cease to work in a future version of Cypress. Please see the upgr
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec2.coffee                                                                 │
+  │ Spec Ran:     app_spec2.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -249,9 +249,9 @@ Your code will cease to work in a future version of Cypress. Please see the upgr
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
+  │ ✔  app_spec.js                              XX:XX        1        1        -        -        - │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  app_spec2.coffee                         XX:XX        1        1        -        -        - │
+  │ ✔  app_spec2.js                             XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 

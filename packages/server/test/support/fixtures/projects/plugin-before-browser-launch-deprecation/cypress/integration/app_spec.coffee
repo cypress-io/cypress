@@ -1,2 +1,0 @@
-it "noop test", ->
-  return

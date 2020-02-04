@@ -1,3 +1,25 @@
+const _ = require('lodash')
+const cp = require('bluebird').promisifyAll(require('child_process'))
+const { expect } = require('chai')
+const assertPsOutput = (strs) => {
+  if (!_.isArray(strs)) {
+    strs = [strs]
+  }
+
+  return () => {
+    return cp.execAsync('ps -fww')
+    .then((_output) => {
+      const psOutput = _output.toString()
+
+      _.forEach(strs, (str) => {
+        expect(psOutput, 'ps output').contain(str)
+      })
+
+      return null
+    })
+  }
+}
+
 const getHandlersByType = (type) => {
   switch (type) {
     case 'return-array-mutation':
@@ -10,6 +32,7 @@ const getHandlersByType = (type) => {
 
           return options
         },
+        onTask: { assertPsOutput: assertPsOutput(['--foo', '--foo=bar']) },
       }
 
     case 'return-new-array-without-mutation':
@@ -20,6 +43,8 @@ const getHandlersByType = (type) => {
 
           return options
         },
+        onTask: { assertPsOutput: assertPsOutput('--foo') },
+
       }
 
     case 'return-options-mutate-only-args-property':
@@ -31,6 +56,8 @@ const getHandlersByType = (type) => {
 
           return options
         },
+        onTask: { assertPsOutput: assertPsOutput(['--foo', '--bar']) },
+
       }
 
     case 'return-undefined-mutate-array':
@@ -42,6 +69,8 @@ const getHandlersByType = (type) => {
 
           return
         },
+        onTask: { assertPsOutput: assertPsOutput([]) },
+
       }
 
     default: () => {
