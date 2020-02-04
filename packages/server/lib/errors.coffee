@@ -62,7 +62,7 @@ trimMultipleNewLines = (str) ->
 isCypressErr = (err) ->
   Boolean(err.isCypressErr)
 
-getMsgByType = (type, arg1 = {}, arg2) ->
+getMsgByType = (type, arg1 = {}, arg2, arg3) ->
   switch type
     when "CANNOT_TRASH_ASSETS"
       """
@@ -531,7 +531,6 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
         #{chalk.blue(arg2)}
         """
-
     when "RENDERER_CRASHED"
       """
       We detected that the Chromium Renderer process just crashed.
@@ -889,15 +888,23 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "DEPRECATED_BEFOREBROWSERLAUNCH_ARGS"
       """
-        Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`
+      Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`
         
-        The `before:browser:launch` plugin event switched from yielding the second argument as an `array` of browser arguments to an options `object` with an `args` property.
+      The `before:browser:launch` plugin event switched from yielding the second argument as an `array` of browser arguments to an options `object` with an `args` property.
         
-        Your code will cease to work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow 'https://on.cypress.io/deprecated-before-browser-launch-args'}
+      Your code will cease to work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow 'https://on.cypress.io/deprecated-before-browser-launch-args'}
+      """
+    when "COULD_NOT_PARSE_ARGUMENTS"
+      """
+      Cypress encountered an error while parsing the argument #{chalk.gray(arg1)}
+
+      You passed: #{arg2}
+
+      The error was: #{arg3}
       """
 
-get = (type, arg1, arg2) ->
-  msg = getMsgByType(type, arg1, arg2)
+get = (type, arg1, arg2, arg3) ->
+  msg = getMsgByType(type, arg1, arg2, arg3)
 
   if _.isObject(msg)
     details = msg.details
@@ -918,8 +925,8 @@ warning = (type, arg1, arg2) ->
 
   return null
 
-throwErr = (type, arg1, arg2) ->
-  throw get(type, arg1, arg2)
+throwErr = (type, arg1, arg2, arg3) ->
+  throw get(type, arg1, arg2, arg3)
 
 clone = (err, options = {}) ->
   _.defaults options, {

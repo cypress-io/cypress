@@ -47,9 +47,7 @@
         font-size: 13px;
         color: #444;
         padding: 1px 20px 0 20px;
-        line-height: 35px;
-
-
+        line-height: 40px;
       }
 
       > a  {
@@ -164,14 +162,24 @@
 }
 
 .browsers-list {
+  margin: 5px;
+  border: 1px solid #c7c7c7;
+  border-radius: 4px;
+
   li {
     padding: 9px 15px;
     white-space: nowrap;
   }
 
-  .dropdown-chosen img {
-    position: relative;
-    top: -1px;
+  &>a.dropdown-chosen {
+    border-radius: 4px;
+    line-height: 28px !important;
+    background-color: #f6f6f6;
+
+    img {
+      position: relative;
+      top: -1px;
+    }
   }
 
   .browser-icon {
