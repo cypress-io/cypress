@@ -153,19 +153,23 @@ const defaults = function (state, config, obj) {
       },
     })
 
-    let args = current != null ? current.get('args') : undefined
+    if (obj.message) {
+      obj.message = $utils.stringify(obj.message)
+    } else {
+      let args = current != null ? current.get('args') : undefined
 
-    if (args) {
-      const optionsIndex = getIndexOfUserOptions(current.get('name'), args)
+      if (args) {
+        const optionsIndex = getIndexOfUserOptions(current.get('name'), args)
 
-      if (optionsIndex !== -1) {
-        args = _.remove(args, (v, i) => {
-          return i === optionsIndex
-        })
+        if (optionsIndex !== -1 && optionsIndex < args.length) {
+          args = _.remove(args, (v, i) => {
+            return i === optionsIndex
+          })
+        }
       }
-    }
 
-    obj.message = $utils.stringify(obj.message != null ? obj.message : args)
+      obj.message = $utils.stringify(args)
+    }
 
     // allow type to by a dynamic function
     // so it can conditionally return either
