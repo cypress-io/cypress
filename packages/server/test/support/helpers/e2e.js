@@ -291,7 +291,7 @@ const localItFn = function (title, opts = {}) {
     browser: [],
     snapshot: false,
     spec: 'no spec name supplied!',
-    onStdout () {},
+    onStdout: _.identity,
     onRun (execFn, browser, ctx) {
       return execFn()
     },
