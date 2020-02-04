@@ -129,6 +129,19 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
       args: _.filter(pluginConfigResult, (_val, key) => _.isNumber(key)),
       extensions: [],
     })
+  } else {
+    // either warn about the array or potentially error on invalid props, but not both
+    const unexpectedProperties: string[] = []
+
+    for (const key in pluginConfigResult) {
+      if (!_.keys(defaultLaunchOptions).includes(key)) {
+        unexpectedProperties.push(key)
+      }
+    }
+
+    if (unexpectedProperties.length) {
+      errors.throw('UNEXPECTED_BEFOREBROWSERLAUNCH_PROPERTY', unexpectedProperties)
+    }
   }
 
   _.forEach(launchOptions, (val, key) => {
@@ -151,6 +164,8 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
 }
 
 export = {
+  extendLaunchOptionsFromPlugins,
+
   executeBeforeBrowserLaunch,
 
   defaultLaunchOptions,

@@ -898,6 +898,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       This code will not work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}
       """
+    when "UNEXPECTED_BEFOREBROWSERLAUNCH_PROPERTY"
+      """
+      The `launchOptions` returned by your plugin's `browser:before:launch` handler contained unexpected properties:
+
+       > #{arg1.join(', ')}
+
+      `before:browser:launch` only expects `launchOptions` to have `args`, `preferences`, `extensions`, and `fullscreen`.
+
+      Please refer to the documentation for `before:browser:launch`: #{chalk.yellow 'https://on.cypress.io/browser-launch-api'}
+      """
     when "COULD_NOT_PARSE_ARGUMENTS"
       """
       Cypress encountered an error while parsing the argument #{chalk.gray(arg1)}
