@@ -4,6 +4,7 @@ Promise = require("bluebird")
 Windows = require("#{root}../lib/gui/windows")
 browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
+snapshot = require('snap-shot-it')
 
 describe "lib/browsers/index", ->
   context ".getBrowserInstance", ->
@@ -58,6 +59,27 @@ describe "lib/browsers/index", ->
         # we will get good error message that includes the "err" object
         expect(err).to.have.property("type").to.eq("BROWSER_NOT_FOUND_BY_NAME")
         expect(err).to.have.property("message").to.contain("'foo-bad-bang' was not found on your system")
+
+  context ".extendLaunchOptionsFromPlugins", ->
+    it "throws an error if unexpected property passed", ->
+      try
+        utils.extendLaunchOptionsFromPlugins({}, { foo: 'bar' })
+        throw new Error
+      catch e
+        snapshot(e.message)
+
+    it "warns if array passed and changes it to args", ->
+      onWarning = sinon.stub()
+
+      result = utils.extendLaunchOptionsFromPlugins({ args: [] }, ['foo'], { onWarning })
+
+      expect(result).to.deep.eq({
+        args: ['foo']
+      })
+
+      expect(onWarning).to.be.calledOnce
+
+      snapshot(onWarning.firstCall.args[0].message)
 
     # Ooo, browser clean up tests are disabled?!!
 
