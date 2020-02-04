@@ -1060,7 +1060,7 @@ module.exports = {
       URL from the `url` parameter: {{url}}
     """
     cannot_visit_2nd_domain: """
-      #{cmd('visit')} failed because you are attempting to visit a domain that is of a different origin.
+      #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
       You may only visit same-origin domains within a single test.
 
