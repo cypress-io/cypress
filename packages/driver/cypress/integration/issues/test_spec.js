@@ -48,7 +48,7 @@ describe('last arg can be an object, but not an option', () => {
 
   it('contains', () => {
     cy.on('fail', () => {
-      expect(this.logs[0].get('options')).to.deep.eq(null)
+      expect(this.logs[0].get('options')).to.deep.eq({})
     })
 
     cy.contains('', /app-/)
@@ -56,7 +56,7 @@ describe('last arg can be an object, but not an option', () => {
 
   it('invoke', () => {
     cy.on('fail', () => {
-      expect(this.logs[0].get('options')).to.deep.eq({
+      expect(this.logs[1].get('options')).to.deep.eq({
         log: true,
       })
     })
@@ -92,9 +92,10 @@ describe('last arg can be an object, but not an option', () => {
   })
 
   it('select', () => {
-    cy.on('log:added', () => {
-      cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('options')).to.eq(null)
+    cy.on('log:added', (attrs) => {
+      if (attrs.name === 'select') {
+        expect(this.logs[1].get('options')).to.deep.eq({})
+      }
     })
 
     cy.get('#auto-test').select(['Cypress', 'Jest'])
@@ -102,7 +103,7 @@ describe('last arg can be an object, but not an option', () => {
 
   it('spread', () => {
     cy.on('fail', () => {
-      expect(this.logs[0].get('options')).to.deep.eq({
+      expect(this.logs[1].get('options')).to.deep.eq({
         timeout: 1000,
       })
     })
@@ -113,9 +114,8 @@ describe('last arg can be an object, but not an option', () => {
   })
 
   it('task', () => {
-    cy.on('log:added', () => {
-      cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('options')).to.eq(null)
+    cy.on('fail', () => {
+      expect(this.logs[0].get('options')).to.deep.eq({})
     })
 
     cy.task('throw', { a: 1, b: 2 })
@@ -123,7 +123,7 @@ describe('last arg can be an object, but not an option', () => {
 
   it('then', () => {
     cy.on('fail', () => {
-      expect(this.logs[0].get('options')).to.deep.eq({
+      expect(this.logs[1].get('options')).to.deep.eq({
         timeout: 1000,
       })
     })
@@ -139,9 +139,5 @@ describe('last arg can be an object, but not an option', () => {
     })
 
     cy.get('#b').uncheck(['us', 'ca'])
-  })
-
-  it('wait', () => {
-    cy.request('POST', 'http://localhost:8080/users', { name: 'brian' })
   })
 })
