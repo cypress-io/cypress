@@ -138,6 +138,8 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   })
   const compactFalse = (browsers: any[]) => compact(browsers) as FoundBrowser[]
 
+  log('detecting if the following browsers are present %o', goalBrowsers)
+
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
   .then(flatten)
   .then(compactFalse)

@@ -39,6 +39,8 @@ const exitErr = (err) => {
 
   return require('./errors').logException(err)
   .then(() => {
+    debug('calling exit 1')
+
     return exit(1)
   })
 }
@@ -109,7 +111,16 @@ module.exports = {
     // for https://github.com/cypress-io/cypress/issues/5466
     argv = R.without('--', argv)
 
-    const options = argsUtils.toObject(argv)
+    let options
+
+    try {
+      options = argsUtils.toObject(argv)
+    } catch (argumentsError) {
+      debug('could not parse CLI arguments: %o', argv)
+
+      // note - this is promise-returned call
+      return exitErr(argumentsError)
+    }
 
     debug('from argv %o got options %o', argv, options)
 

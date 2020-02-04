@@ -15,7 +15,7 @@ exports['browsers returns the expected list of browsers 1'] = [
   {
     "name": "chromium",
     "family": "chromium",
-    "channel": "dev",
+    "channel": "stable",
     "displayName": "Chromium",
     "versionRegex": {},
     "profile": true,
@@ -32,5 +32,23 @@ exports['browsers returns the expected list of browsers 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "google-chrome-canary"
+  },
+  {
+    "name": "edge",
+    "family": "chromium",
+    "channel": "canary",
+    "displayName": "Edge Canary",
+    "versionRegex": {},
+    "profile": true,
+    "binary": "edge-canary"
+  },
+  {
+    "name": "edge",
+    "family": "chromium",
+    "channel": "stable",
+    "displayName": "Edge",
+    "versionRegex": {},
+    "profile": true,
+    "binary": "edge"
   }
 ]
