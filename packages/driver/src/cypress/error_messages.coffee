@@ -1066,7 +1066,7 @@ module.exports = {
 
       The previous domain you visited was: '{{previousDomain}}'
 
-      You're attempting to visit this domain: '{{attemptedDomain}}'
+      You're attempting to visit this URL: '{{attemptedDomain}}'
 
       You may need to restructure some of your test code to avoid this problem.
 
