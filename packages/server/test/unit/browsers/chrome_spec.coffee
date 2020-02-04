@@ -11,7 +11,6 @@ fs = require("#{root}../lib/util/fs")
 describe "lib/browsers/chrome", ->
   context "#open", ->
     beforeEach ->
-      @args = []
       # mock CRI client during testing
       @criClient = {
         ensureMinimumProtocolVersion: sinon.stub().resolves()
@@ -61,7 +60,9 @@ describe "lib/browsers/chrome", ->
         expect(plugins.execute).not.to.be.called
 
     it "is noop if newArgs are not returned", ->
-      sinon.stub(chrome, "_getArgs").returns(@args)
+      args = []
+
+      sinon.stub(chrome, "_getArgs").returns(args)
       sinon.stub(plugins, 'has').returns(true)
 
       plugins.execute.resolves(null)
@@ -70,7 +71,7 @@ describe "lib/browsers/chrome", ->
       .then =>
         # to initialize remote interface client and prepare for true tests
         # we load the browser with blank page first
-        expect(utils.launch).to.be.calledWith("chrome", "about:blank", @args)
+        expect(utils.launch).to.be.calledWith("chrome", "about:blank", args)
 
     it "does not load extension in headless mode", ->
       chrome._writeExtension.restore()
@@ -85,6 +86,44 @@ describe "lib/browsers/chrome", ->
           "--headless"
           "--remote-debugging-port=50505"
           "--remote-debugging-address=127.0.0.1"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
+    it "normalizes --load-extension if provided in plugin", ->
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve({
+          args: ["--foo=bar", "--load-extension=/foo/bar/baz.js"]
+        })
+
+      pathToTheme = extension.getPathToTheme()
+
+      chrome.open("chrome", "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.include.members([
+          "--foo=bar"
+          "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
+    it "normalizes multiple extensions from plugins", ->
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve {
+          args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]
+        }
+
+      pathToTheme = extension.getPathToTheme()
+
+      chrome.open("chrome", "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.include.members([
+          "--foo=bar"
+          "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
