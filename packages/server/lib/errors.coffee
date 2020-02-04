@@ -554,6 +554,8 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       Correct your `#{arg2}`, create the appropriate file, or set `supportFile` to `false` if a support file is not necessary for your project.
 
+      Or you might have renamed the extension of your `supportFile` to `.ts`. If that's the case, restart the test runner.
+
       Learn more at https://on.cypress.io/support-file-missing-or-invalid
       """
     when "PLUGINS_FILE_ERROR"
