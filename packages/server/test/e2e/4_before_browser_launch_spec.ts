@@ -21,4 +21,14 @@ describe('e2e before:browser:launch', () => {
     expectedExitCode: 0,
     headed: true,
   })
+
+  e2e.it('can add extensions', {
+    spec: 'spec.js',
+    browser: ['firefox', 'chrome'],
+    headed: true,
+    expectedExitCode: 0,
+    project: Fixtures.projectPath('browser-extensions'),
+    sanitizeScreenshotDimensions: true,
+    snapshot: true,
+  })
 })
