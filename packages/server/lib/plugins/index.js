@@ -68,7 +68,12 @@ const init = (config, options) => {
       handler(ipc)
     }
 
-    ipc.send('load', config)
+    const env = {
+      projectRoot: options.projectRoot,
+      configFile: options.configFile,
+    }
+
+    ipc.send('load', config, env)
 
     ipc.on('loaded', (newCfg, registrations) => {
       _.each(registrations, (registration) => {

@@ -3,6 +3,7 @@ const path = require('path')
 const e2e = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
 
+const e2eProject = Fixtures.projectPath('e2e')
 const pluginExtension = Fixtures.projectPath('plugin-extension')
 const pluginConfig = Fixtures.projectPath('plugin-config')
 const pluginFilterBrowsers = Fixtures.projectPath('plugin-filter-browsers')
@@ -123,6 +124,52 @@ describe('e2e plugins', function () {
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
+    })
+  })
+
+  describe('env', function () {
+    it('passes projectRoot and default configFile to plugins function', function () {
+      return e2e.exec(this, {
+        spec: 'plugins_env_spec.js',
+        project: e2eProject,
+        config: {
+          env: {
+            projectRoot: e2eProject,
+            configFile: path.join(e2eProject, 'cypress.json'),
+          },
+        },
+        expectedExitCode: 0,
+      })
+    })
+
+    it('passes custom configFile to plugins function', function () {
+      return e2e.exec(this, {
+        spec: 'plugins_env_spec.js',
+        project: e2eProject,
+        configFile: 'cypress-alt.json',
+        config: {
+          env: {
+            projectRoot: e2eProject,
+            configFile: path.join(e2eProject, 'cypress-alt.json'),
+          },
+        },
+        expectedExitCode: 0,
+      })
+    })
+
+    it('passes false configFile to plugins function', function () {
+      return e2e.exec(this, {
+        spec: 'plugins_env_spec.js',
+        project: e2eProject,
+        configFile: 'false',
+        config: {
+          env: {
+            projectRoot: e2eProject,
+            configFile: false,
+          },
+        },
+        expectedExitCode: 0,
+      })
     })
   })
 })
