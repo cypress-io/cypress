@@ -1,6 +1,8 @@
 import _ from 'lodash'
 
-export const getIndexOfUserOptions = (name: string, args: any[]): number => {
+export const getIndexOfUserOptions = (name: string, args: any[] | undefined): number => {
+  if (!args) return -1
+
   const lastIndex = args.length - 1
   const lastArg = args[lastIndex]
 
