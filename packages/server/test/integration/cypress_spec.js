@@ -1100,7 +1100,7 @@ describe('lib/cypress', () => {
 
             const browserArgs = args[2]
 
-            expect(browserArgs, 'two arguments to Chrome').to.have.length(7)
+            expect(browserArgs, 'two arguments to Chrome').to.have.length(8)
 
             expect(browserArgs.slice(0, 4), 'arguments to Chrome').to.deep.eq([
               'chrome', 'foo', 'bar', 'baz',
