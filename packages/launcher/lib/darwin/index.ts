@@ -3,6 +3,7 @@ import { FoundBrowser, Browser } from '../types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
 import { merge, partial } from 'ramda'
+import { get } from 'lodash'
 
 const detectCanary = partial(findApp, [
   'Contents/MacOS/Google Chrome Canary',
@@ -19,15 +20,47 @@ const detectChromium = partial(findApp, [
   'org.chromium.Chromium',
   'CFBundleShortVersionString',
 ])
+const detectEdgeCanary = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge Canary',
+  'com.microsoft.Edge.Canary',
+  'CFBundleShortVersionString',
+])
+const detectEdgeBeta = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge Beta',
+  'com.microsoft.Edge.Beta',
+  'CFBundleShortVersionString',
+])
+const detectEdgeDev = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge Dev',
+  'com.microsoft.Edge.Dev',
+  'CFBundleShortVersionString',
+])
+const detectEdge = partial(findApp, [
+  'Contents/MacOS/Microsoft Edge',
+  'com.microsoft.Edge',
+  'CFBundleShortVersionString',
+])
 
 type Detectors = {
-  [index: string]: Function
+  [name: string]: {
+    [channel: string]: Function
+  }
 }
 
 const browsers: Detectors = {
-  chrome: detectChrome,
-  canary: detectCanary,
-  chromium: detectChromium,
+  chrome: {
+    stable: detectChrome,
+    canary: detectCanary,
+  },
+  chromium: {
+    stable: detectChromium,
+  },
+  edge: {
+    stable: detectEdge,
+    canary: detectEdgeCanary,
+    beta: detectEdgeBeta,
+    dev: detectEdgeDev,
+  },
 }
 
 export function getVersionString (path: string) {
@@ -35,7 +68,7 @@ export function getVersionString (path: string) {
 }
 
 export function detect (browser: Browser): Promise<FoundBrowser> {
-  let fn = browsers[browser.name]
+  let fn = get(browsers, [browser.name, browser.channel])
 
   if (!fn) {
     // ok, maybe it is custom alias?
