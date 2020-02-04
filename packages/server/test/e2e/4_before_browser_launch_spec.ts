@@ -10,7 +10,6 @@ describe('e2e before:browser:launch', () => {
       video: false,
     },
     project: Fixtures.projectPath('chrome-browser-preferences'),
-    expectedExitCode: 0,
     snapshot: true,
     spec: 'spec.js',
   })
@@ -18,7 +17,6 @@ describe('e2e before:browser:launch', () => {
   e2e.it('can set fullscreen', {
     project: Fixtures.projectPath('plugin-event-fullscreen'),
     spec: '*',
-    expectedExitCode: 0,
     headed: true,
   })
 
@@ -28,7 +26,6 @@ describe('e2e before:browser:launch', () => {
       video: false,
     },
     headed: true,
-    expectedExitCode: 0,
     project: Fixtures.projectPath('browser-extensions'),
     sanitizeScreenshotDimensions: true,
     snapshot: true,
