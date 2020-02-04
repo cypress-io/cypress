@@ -1062,7 +1062,7 @@ module.exports = {
     cannot_visit_2nd_domain: """
       #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-      You may only visit same-origin domains within a single test.
+      You may only 'cy.visit()' same-origin URLs within a single test.
 
       The previous domain you visited was: '{{previousDomain}}'
 
