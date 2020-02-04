@@ -41,9 +41,7 @@ launchBrowser = (url, opts = {}) ->
       ## headless breaks automatic retries
       ## "--headless"
     ].concat(
-      chrome._getArgs({
-        browser: browser
-      })
+      chrome._getArgs(browser)
     ).filter (arg) ->
       ![
         ## seems to break chrome's automatic retries

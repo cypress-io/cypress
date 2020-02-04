@@ -104,15 +104,6 @@ const TEST_CASES = [
   })
 })
 
-let defaultArgs = _getArgs()
-
-// additionally...
-defaultArgs = defaultArgs.concat([
-  '--headless',
-  '--disable-background-networking',
-  '--no-sandbox', // allows us to run as root, for CI
-])
-
 const average = (arr) => {
   return _.sum(arr) / arr.length
 }
@@ -188,8 +179,16 @@ const getResultsFromHar = (har) => {
 const runBrowserTest = (urlUnderTest, testCase) => {
   const cdpPort = CDP_PORT + Math.round(Math.random() * 10000)
 
-  let args = defaultArgs.concat([
-    `--remote-debugging-port=${cdpPort}`,
+  const browser = {
+    isHeadless: true,
+  }
+
+  const options = {}
+
+  const args = _getArgs(browser, options, cdpPort).concat([
+    // additionally...
+    '--disable-background-networking',
+    '--no-sandbox', // allows us to run as root, for CI
     `--user-data-dir=${fse.mkdtempSync(path.join(os.tmpdir(), 'cy-perf-'))}`,
   ])
 

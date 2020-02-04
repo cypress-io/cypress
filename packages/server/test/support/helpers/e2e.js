@@ -328,7 +328,9 @@ const localItFn = function (title, opts = {}) {
 
       const ctx = this
 
-      const execFn = (overrides = {}) => e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+      const execFn = (overrides = {}) => {
+        return e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+      }
 
       return options.onRun(execFn, browser, ctx)
     })
