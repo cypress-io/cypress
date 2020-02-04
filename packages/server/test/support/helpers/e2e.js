@@ -1,7 +1,7 @@
-let e2e
-
 require('../../spec_helper')
+require('mocha-banner').register()
 
+const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
 const niv = require('npm-install-version')
@@ -9,6 +9,7 @@ const path = require('path')
 const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
+const stream = require('stream')
 const express = require('express')
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
@@ -36,17 +37,39 @@ Promise.config({
 const e2ePath = Fixtures.projectPath('e2e')
 const pathUpToProjectName = Fixtures.projectPath('')
 
-const DEFAULT_BROWSERS = ['electron', 'chrome']
+const AVAILABLE_BROWSERS = ['electron', 'chrome', 'firefox']
+const DEFAULT_BROWSERS = AVAILABLE_BROWSERS
 
-const stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
+const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g
+const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
+
+let currentOptions = {}
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
 // 'at' will be present in chrome stack trace lines
-const replaceStackTraceLines = (str) => str.replace(stackTraceLinesRe, '$1[stack trace lines]$5')
+const replaceStackTraceLines = (str) => {
+  return str.replace(stackTraceLinesRe, (match, ...parts) => {
+    let pre = parts[0]
+    const isFirefoxStack = parts[1] === '@'
+    let post = parts[4]
+
+    if (isFirefoxStack) {
+      if (pre === '\n') {
+        pre = '\n    '
+      } else {
+        pre += pre.slice(1).repeat(2)
+      }
+
+      post = post.slice(-1)
+    }
+
+    return `${pre}[stack trace lines]${post}`
+  })
+}
 
 const replaceBrowserName = function (str, key, customBrowserPath, browserName, version, headless, whitespace) {
   // get the padding for the existing browser string
@@ -95,8 +118,8 @@ const replaceUploadingResults = function (orig, ...rest) {
   return ret
 }
 
-const normalizeStdout = function (str, options = {}) {
-  const normalizeOptions = _.defaults({}, options, { normalizeAvailableBrowsers: true })
+const normalizeStdout = function (str) {
+  const options = _.defaults({}, currentOptions, { normalizeAvailableBrowsers: true })
 
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
@@ -105,7 +128,7 @@ const normalizeStdout = function (str, options = {}) {
   // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join('/foo/bar/.projects')
 
-  if (normalizeOptions.normalizeAvailableBrowsers) {
+  if (options.normalizeAvailableBrowsers) {
     // usually we are not interested in the browsers detected on this particular system
     // but some tests might filter / change the list of browsers
     // in that case the test should pass "normalizeAvailableBrowsers:false" as options
@@ -134,6 +157,8 @@ const normalizeStdout = function (str, options = {}) {
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
   // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
+  // Different browsers have different cross-origin error messages
+  .replace(crossOriginErrorRe, '[Cross origin error message]')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
@@ -232,60 +257,71 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   return it
 }
 
-const getBrowsers = function (generateTestsForDefaultBrowsers, browser, defaultBrowsers) {
-  // if we're generating tests for default browsers
-  if (generateTestsForDefaultBrowsers) {
-    // then return an array of default browsers
-    return defaultBrowsers
+function getBrowsers (browserPattern) {
+  if (!browserPattern.length) {
+    return DEFAULT_BROWSERS
   }
 
-  // but if we haven't been told to generate tests for default browsers
-  // and weren't provided a specified browser then throw
-  if (!browser) {
-    throw new Error('A browser must be specified when { generateTestsForDefaultBrowsers: false }.')
+  let selected = []
+
+  const addBrowsers = _.clone(browserPattern)
+  const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
+
+  if (removeBrowsers.length) {
+    selected = _.without(AVAILABLE_BROWSERS, ...removeBrowsers)
+  } else {
+    selected = _.intersection(AVAILABLE_BROWSERS, addBrowsers)
   }
 
-  // otherwise return the specified browser
-  return [browser]
+  if (!selected.length) {
+    throw new Error(`options.browser: "${browserPattern}" matched no browsers`)
+  }
+
+  return selected
 }
 
-const localItFn = function (title, options = {}) {
-  options = _
-  .chain(options)
-  .clone()
-  .defaults({
+const normalizeToArray = (value) => {
+  if (value && !_.isArray(value)) {
+    return [value]
+  }
+
+  return value
+}
+
+const localItFn = function (title, opts = {}) {
+  opts.browser = normalizeToArray(opts.browser)
+
+  const DEFAULT_OPTIONS = {
     only: false,
     skip: false,
-    browser: process.env.BROWSER,
-    generateTestsForDefaultBrowsers: true,
-    useSeparateBrowserSnapshots: false,
+    browser: [],
+    snapshot: false,
+    spec: 'no spec name supplied!',
+    onStdout () {},
     onRun (execFn, browser, ctx) {
       return execFn()
     },
-  })
-  .value()
+  }
 
-  const { only, skip, browser, generateTestsForDefaultBrowsers, onRun } = options
+  const options = _.defaults({}, opts, DEFAULT_OPTIONS)
 
   if (!title) {
     throw new Error('e2e.it(...) must be passed a title as the first argument')
   }
 
   // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
-  // - if generateTestsForDefaultBrowsers
-  //   - create multiple tests for each default browser
-  //   - if browser is specified in options:
-  //     ...skip the tests for each default browser if that browser
-  //     ...does not match the specified one (used in CI)
-  // - else only generate a single test with the specified browser
+  // - create multiple tests for each default browser
+  // - if browser is specified in options:
+  //   ...skip the tests for each default browser if that browser
+  //   ...does not match the specified one (used in CI)
 
   // run the tests for all the default browsers, or if a browser
   // has been specified, only run it for that
-  const specifiedBrowser = browser
-  const browsersToTest = getBrowsers(generateTestsForDefaultBrowsers, browser, DEFAULT_BROWSERS)
+  const specifiedBrowser = process.env.BROWSER
+  const browsersToTest = getBrowsers(options.browser)
 
   const browserToTest = function (browser) {
-    const mochaItFn = getMochaItFn(only, skip, browser, specifiedBrowser)
+    const mochaItFn = getMochaItFn(options.only, options.skip, browser, specifiedBrowser)
 
     const testTitle = `${title} [${browser}]`
 
@@ -300,7 +336,10 @@ const localItFn = function (title, options = {}) {
 
       const execFn = (overrides = {}) => e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
 
-      return onRun(execFn, browser, ctx)
+      return Promise.all([
+        psInclude(options.psInclude),
+        options.onRun(execFn, browser, ctx),
+      ])
     })
   }
 
@@ -319,7 +358,55 @@ localItFn.skip = function (title, options) {
   return localItFn(title, options)
 }
 
-module.exports = (e2e = {
+async function psInclude (str) {
+  if (!str) return
+
+  if (!_.isArray(str)) {
+    str = [str]
+  }
+
+  let lastError = null
+
+  async function retry () {
+    try {
+      const psOutput = (await cp.execAsync('ps -fww')).toString()
+
+      _.forEach(str, (v) => {
+        expect(psOutput).contain(v)
+      })
+
+      let colorAssertion = psOutput.split('\n').find((v) => v.includes(str[0]))
+
+      _.forEach(str, (v) => colorAssertion = colorAssertion.replace(v, chalk.bgGreen.black(v)))
+
+      // eslint-disable-next-line no-console
+      console.log(chalk.green(chalk.bold('Expected process tree:\n') + colorAssertion))
+    } catch (e) {
+      lastError = e
+
+      return Promise.delay(400).then(() => retry())
+    }
+  }
+
+  return Promise.resolve(retry()).timeout(30000).catch(() => {
+    throw lastError
+  })
+}
+
+function expectExitCode (expectedExitCode) {
+  // only ignore this check if expectedExitCode is set explicitly to null
+  if (expectedExitCode === null) return
+
+  // if no expectedExitCode is given, assert it's 0 (no errors)
+  expectedExitCode = expectedExitCode || 0
+
+  return expect(process.exit).to.be.calledWith(expectedExitCode)
+}
+
+const e2e = {
+
+  replaceStackTraceLines,
+
   normalizeStdout,
 
   it: localItFn,
@@ -457,6 +544,8 @@ module.exports = (e2e = {
       options.spec = specs.join(',')
     }
 
+    currentOptions = options
+
     return options
   },
 
@@ -547,11 +636,7 @@ module.exports = (e2e = {
 
     return cypress.start(args)
     .then(() => {
-      let code
-
-      if ((code = options.expectedExitCode) != null) {
-        return expect(process.exit).to.be.calledWith(code)
-      }
+      expectExitCode(options.expectedExitCode)
     })
   },
 
@@ -565,11 +650,7 @@ module.exports = (e2e = {
     let stderr = ''
 
     const exit = function (code) {
-      let expected
-
-      if ((expected = options.expectedExitCode) != null) {
-        expect(code).to.eq(expected, 'expected exit code')
-      }
+      expectExitCode(code)
 
       // snapshot the stdout!
       if (options.snapshot) {
@@ -607,7 +688,7 @@ module.exports = (e2e = {
           }
         }
 
-        str = normalizeStdout(stdout, options)
+        str = normalizeStdout(stdout)
 
         if (options.originalTitle) {
           snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
@@ -647,10 +728,19 @@ module.exports = (e2e = {
         .value(),
       })
 
+      const ColorOutput = function () {
+        const colorOutput = new stream.Transform()
+
+        colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
+
+        return colorOutput
+      }
+
       // pipe these to our current process
       // so we can see them in the terminal
-      sp.stdout.pipe(process.stdout)
-      sp.stderr.pipe(process.stderr)
+      // color it so we can tell which is test output
+      sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
+      sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
 
       sp.stdout.on('data', (buf) => stdout += buf.toString())
       sp.stderr.on('data', (buf) => stderr += buf.toString())
@@ -675,4 +765,6 @@ module.exports = (e2e = {
 `)
     }
   },
-})
+}
+
+module.exports = e2e
