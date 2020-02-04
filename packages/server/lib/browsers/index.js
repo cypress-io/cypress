@@ -125,6 +125,17 @@ module.exports = {
 
   close: kill,
 
+  _setInstance (_instance) {
+    // for testing
+    instance = _instance
+  },
+
+  // note: does not guarantee that `browser` is still running
+  // note: electron will return a list of pids for each webContent
+  getBrowserInstance () {
+    return instance
+  },
+
   getAllBrowsersWith (nameOrPath) {
     debug('getAllBrowsersWith %o', { nameOrPath })
     if (nameOrPath) {
@@ -159,6 +170,8 @@ module.exports = {
         debug('browser opened')
         // TODO: bind to process.exit here
         // or move this functionality into cypress-core-launder
+
+        i.browser = browser
 
         instance = i
 
