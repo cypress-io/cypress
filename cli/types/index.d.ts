@@ -50,7 +50,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void
+  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
