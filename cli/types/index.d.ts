@@ -4273,7 +4273,7 @@ declare namespace Cypress {
    * anything but `undefined` or a promise that resolves anything but `undefined`
    * TODO: find a way to express "anything but undefined" in TypeScript
    */
-  type Task = (value: any) => any | Promise<any>
+  type Task = (value: any) => any
 
   interface Tasks {
     [key: string]: Task
