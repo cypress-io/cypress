@@ -337,7 +337,6 @@ const localItFn = function (title, opts = {}) {
       const execFn = (overrides = {}) => e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
 
       return Promise.all([
-        psInclude(options.psInclude),
         options.onRun(execFn, browser, ctx),
       ])
     })
@@ -358,43 +357,8 @@ localItFn.skip = function (title, options) {
   return localItFn(title, options)
 }
 
-async function psInclude (str) {
-  if (!str) return
-
-  if (!_.isArray(str)) {
-    str = [str]
-  }
-
-  let lastError = null
-
-  async function retry () {
-    try {
-      const psOutput = (await cp.execAsync('ps -fww')).toString()
-
-      _.forEach(str, (v) => {
-        expect(psOutput).contain(v)
-      })
-
-      let colorAssertion = psOutput.split('\n').find((v) => v.includes(str[0]))
-
-      _.forEach(str, (v) => colorAssertion = colorAssertion.replace(v, chalk.bgGreen.black(v)))
-
-      // eslint-disable-next-line no-console
-      console.log(chalk.green(chalk.bold('Expected process tree:\n') + colorAssertion))
-    } catch (e) {
-      lastError = e
-
-      return Promise.delay(400).then(() => retry())
-    }
-  }
-
-  return Promise.resolve(retry()).timeout(30000).catch(() => {
-    throw lastError
-  })
-}
-
 function expectExitCode (expectedExitCode) {
-  // only ignore this check if expectedExitCode is set explicitly to null
+  // only ignore this check if expectedExitCode is set explicitly to
   if (expectedExitCode === null) return
 
   // if no expectedExitCode is given, assert it's 0 (no errors)
