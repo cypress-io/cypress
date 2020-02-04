@@ -409,17 +409,16 @@ export = {
 
     const defaultArgs = this._getArgs(browser, options, port)
 
-    const _launchOptions = _.defaults({
-      args: defaultArgs,
-      extensions: [],
+    const defaultLaunchOptions = utils.getDefaultLaunchOptions({
       preferences,
-    }, utils.defaultLaunchOptions)
+      args: defaultArgs,
+    })
 
     const [cacheDir, launchOptions] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      utils.executeBeforeBrowserLaunch(browser, _launchOptions, options),
+      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
     ])
 
     if (launchOptions.windowSize) {

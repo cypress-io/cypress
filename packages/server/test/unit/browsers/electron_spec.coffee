@@ -96,9 +96,13 @@ describe "lib/browsers/electron", ->
         expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
 
     ## https://github.com/cypress-io/cypress/issues/1992
-    it "it merges in options without removing essential options", ->
+    it "it merges in user preferences without removing essential options", ->
       plugins.has.returns(true)
-      plugins.execute.resolves({foo: "bar"})
+      plugins.execute.withArgs("before:browser:launch").resolves({
+        preferences: {
+          foo: "bar"
+        }
+      })
 
       electron.open("electron", @url, @options, @automation)
       .then =>

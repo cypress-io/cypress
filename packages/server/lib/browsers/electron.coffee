@@ -232,21 +232,22 @@ module.exports = {
 
       debug("browser window options %o", _.omitBy(options, _.isFunction))
 
-      launchOptions = _.defaults({preferences: options, extensions: [], args: []}, utils.defaultLaunchOptions)
-      
-      return utils.executeBeforeBrowserLaunch(options.browser, launchOptions, options)
-        
+      defaultLaunchOptions = utils.getDefaultLaunchOptions({
+        preferences: options,
+      })
+
+      return utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)
     .then (launchOptions) =>
-      options = launchOptions.preferences
+      { preferences } = launchOptions
 
       ## TODO: add extensions to BrowserWindow object
 
       if launchOptions.windowSize is 'fullscreen'
-        options['fullscreen'] = true
+        preferences['fullscreen'] = true
 
       debug("launching browser window to url: %s", url)
 
-      @_render(url, projectRoot, automation, options)
+      @_render(url, projectRoot, automation, preferences)
       .then (win) =>
         ## cause the webview to receive focus so that
         ## native browser focus + blur events fire correctly

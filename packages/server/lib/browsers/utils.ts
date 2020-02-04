@@ -37,6 +37,10 @@ const defaultLaunchOptions: {
   windowSize: 'maximized',
 }
 
+const getDefaultLaunchOptions = (options) => {
+  return _.defaultsDeep(options, defaultLaunchOptions)
+}
+
 const copyExtension = (src, dest) => {
   return fs.copyAsync(src, dest)
 }
@@ -150,6 +154,8 @@ export = {
   executeBeforeBrowserLaunch,
 
   defaultLaunchOptions,
+
+  getDefaultLaunchOptions,
 
   getPort,
 
