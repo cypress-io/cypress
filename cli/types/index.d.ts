@@ -4268,8 +4268,14 @@ declare namespace Cypress {
     shouldWatch: boolean
   }
 
+  /**
+   * Individual task callback. Receives a single argument
+   * and should return `null` or a Promise.
+   */
+  type Task = (value: any) => null | Promise<any>
+
   interface Tasks {
-    [key: string]: (value: any) => any
+    [key: string]: Task
   }
 
   interface PluginEvents {

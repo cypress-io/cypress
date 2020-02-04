@@ -36,3 +36,27 @@ const pluginConfig5: Cypress.PluginConfig = (on, config) => { // $ExpectError
     unknownKey: 42
   }
 }
+
+// registers task that forgets to return a null or a Promise
+const pluginConfig6: Cypress.PluginConfig = (on, config) => {
+  const tasks = {
+    hello() {
+      // oops, returning undefined
+    },
+  }
+  on('task', tasks) // $ExpectError
+}
+
+// good tasks
+const pluginConfig7: Cypress.PluginConfig = (on, config) => {
+  on('task', {
+    bye() {
+      // a Task should return null
+      return null
+    },
+    load() {
+      // or a promise
+      return Promise.resolve()
+    }
+  })
+}
