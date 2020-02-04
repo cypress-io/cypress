@@ -37,6 +37,8 @@ const defaultLaunchOptions: {
   windowSize: 'maximized',
 }
 
+const KNOWN_LAUNCH_OPTION_PROPERTIES = _.keys(defaultLaunchOptions)
+
 const getDefaultLaunchOptions = (options) => {
   return _.defaultsDeep(options, defaultLaunchOptions)
 }
@@ -131,16 +133,16 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
     })
   } else {
     // either warn about the array or potentially error on invalid props, but not both
-    const unexpectedProperties: string[] = []
 
-    for (const key in pluginConfigResult) {
-      if (!_.keys(defaultLaunchOptions).includes(key)) {
-        unexpectedProperties.push(key)
-      }
-    }
+    // strip out all the known launch option properties from the resulting object
+    const unexpectedProperties: string[] = _
+    .chain(pluginConfigResult)
+    .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
+    .keys()
+    .value()
 
     if (unexpectedProperties.length) {
-      errors.throw('UNEXPECTED_BEFOREBROWSERLAUNCH_PROPERTY', unexpectedProperties)
+      errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
     }
   }
 

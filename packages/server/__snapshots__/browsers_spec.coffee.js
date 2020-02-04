@@ -1,11 +1,16 @@
 exports['lib/browsers/index .extendLaunchOptionsFromPlugins throws an error if unexpected property passed 1'] = `
-The \`launchOptions\` returned by your plugin's \`browser:before:launch\` handler contained unexpected properties:
+The \`launchOptions\` object returned by your plugin's \`browser:before:launch\` handler contained unexpected properties:
 
- > foo
+ - [34mfoo[39m
 
-\`before:browser:launch\` only expects \`launchOptions\` to have \`args\`, \`preferences\`, \`extensions\`, and \`fullscreen\`.
+\`launchOptions\` may only contain the properties:
 
-Please refer to the documentation for \`before:browser:launch\`: [33mhttps://on.cypress.io/browser-launch-api[39m
+- [34mpreferences[39m
+- [34mextensions[39m
+- [34margs[39m
+- [34mwindowSize[39m
+
+https://on.cypress.io/browser-launch-api
 `
 
 exports['lib/browsers/index .extendLaunchOptionsFromPlugins warns if array passed and changes it to args 1'] = `

@@ -52,9 +52,8 @@ describe "lib/browsers/index", ->
         browsers: []
       })
       .then (e) ->
-        console.error(e)
         throw new Error("should've failed")
-      , (err) ->
+      .catch (err) ->
         # by being explicit with assertions, if something is unexpected
         # we will get good error message that includes the "err" object
         expect(err).to.have.property("type").to.eq("BROWSER_NOT_FOUND_BY_NAME")
@@ -62,11 +61,13 @@ describe "lib/browsers/index", ->
 
   context ".extendLaunchOptionsFromPlugins", ->
     it "throws an error if unexpected property passed", ->
-      try
+      fn = ->
         utils.extendLaunchOptionsFromPlugins({}, { foo: 'bar' })
-        throw new Error
-      catch e
-        snapshot(e.message)
+
+      expect(fn)
+      .to.throw({ type: "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES" })
+      .and.satisfy (err) ->
+        snapshot(err.message)
 
     it "warns if array passed and changes it to args", ->
       onWarning = sinon.stub()
