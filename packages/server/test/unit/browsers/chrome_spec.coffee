@@ -7,7 +7,6 @@ plugins = require("#{root}../lib/plugins")
 utils = require("#{root}../lib/browsers/utils")
 chrome = require("#{root}../lib/browsers/chrome")
 fs = require("#{root}../lib/util/fs")
-errors = require("#{root}../lib/errors")
 
 describe "lib/browsers/chrome", ->
   context "#open", ->
@@ -30,7 +29,6 @@ describe "lib/browsers/chrome", ->
         kill: sinon.stub().returns()
       }
 
-      sinon.spy(errors, "warning")
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
       sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(@criClient)
       sinon.stub(plugins, "execute").callThrough()
@@ -64,8 +62,8 @@ describe "lib/browsers/chrome", ->
 
     it "is noop if newArgs are not returned", ->
       sinon.stub(chrome, "_getArgs").returns(@args)
-
       sinon.stub(plugins, 'has').returns(true)
+
       plugins.execute.resolves(null)
 
       chrome.open("chrome", "http://", {}, @automation)
