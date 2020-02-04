@@ -6,6 +6,7 @@
   "scripts": {
     "build-js": "bin-up tsc --project .",
     "clean-deps": "rm -rf node_modules",
+    "postinstall": "cd node_modules/parse-domain && npm run postinstall",
     "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
@@ -13,7 +14,7 @@
     "concat-stream": "1.6.2",
     "debug": "4.1.1",
     "lodash": "4.17.15",
-    "parse-domain": "2.3.4",
+    "parse-domain": "bahmutov/parse-domain#fb60bd4",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {

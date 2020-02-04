@@ -103,24 +103,28 @@ describe "lib/util/ci_provider", ->
 
   it "bamboo", ->
     resetEnv = mockedEnv({
-      "bamboo.buildNumber": "123"
-
-      "bamboo.resultsUrl": "bamboo.resultsUrl"
-      "bamboo.buildResultsUrl": "bamboo.buildResultsUrl"
-      "bamboo.planRepository.repositoryUrl": "bamboo.planRepository.repositoryUrl"
-
-      "bamboo.planRepository.branch": "bamboo.planRepository.branch"
+      "bamboo_buildNumber": "bambooBuildNumber"
+      "bamboo_buildResultsUrl": "bambooBuildResultsUrl"
+      "bamboo_planRepository_repositoryUrl": "bambooPlanRepositoryRepositoryUrl"
+      "bamboo_buildKey": "bambooBuildKey"
+      "bamboo_planRepository_revision": "gitSha"
+      "bamboo_planRepository_branch": "gitBranch"
+      "bamboo_planRepository_username": "gitAuthor"
+      "bamboo_planRepository_repositoryURL": "gitRemoteOrigin"
     }, {clear: true})
 
     expectsName("bamboo")
     expectsCiParams({
-      bambooResultsUrl: "bamboo.resultsUrl"
-      bambooBuildNumber: "123"
-      bambooBuildResultsUrl: "bamboo.buildResultsUrl"
-      bambooPlanRepositoryRepositoryUrl: "bamboo.planRepository.repositoryUrl"
+      bambooBuildNumber: "bambooBuildNumber"
+      bambooBuildResultsUrl: "bambooBuildResultsUrl"
+      bambooPlanRepositoryRepositoryUrl: "bambooPlanRepositoryRepositoryUrl"
+      bambooBuildKey: "bambooBuildKey"
     })
     expectsCommitParams({
-      branch: "bamboo.planRepository.branch"
+      sha: "gitSha"
+      branch: "gitBranch"
+      authorName: "gitAuthor"
+      remoteOrigin: "gitRemoteOrigin"
     })
 
   it "bitbucket", ->
@@ -411,6 +415,7 @@ describe "lib/util/ci_provider", ->
       CI_BUILD_ID: "ciJobId"
       CI_JOB_ID: "ciJobId"
       CI_JOB_URL: "ciJobUrl"
+      CI_JOB_NAME: "ciJobName"
 
       CI_PIPELINE_ID: "ciPipelineId"
       CI_PIPELINE_URL: "ciPipelineUrl"
@@ -432,6 +437,7 @@ describe "lib/util/ci_provider", ->
     expectsCiParams({
       ciJobId: "ciJobId"
       ciJobUrl: "ciJobUrl"
+      ciJobName: "ciJobName"
       ciBuildId: "ciJobId"
       ciPipelineId: "ciPipelineId"
       ciPipelineUrl: "ciPipelineUrl"

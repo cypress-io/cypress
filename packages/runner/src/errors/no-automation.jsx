@@ -1,21 +1,10 @@
 import _ from 'lodash'
 import React from 'react'
+import { BrowserIcon } from '@packages/ui-components'
 
 import Dropdown from '../dropdown/dropdown'
 
 const displayName = (name) => _.capitalize(name)
-
-const icon = (browser) => {
-  switch (browser) {
-    case 'chrome':
-    case 'chromium':
-    case 'canary':
-    case 'electron':
-      return 'fab fa-chrome'
-    default:
-      return 'fas fa-globe'
-  }
-}
 
 const noBrowsers = () => (
   <div>
@@ -33,7 +22,7 @@ const noBrowsers = () => (
 
 const browser = (browser) => (
   <span>
-    <i className={icon(browser.name)}></i>
+    <BrowserIcon browserName={browser.name} />
     <span>Run {displayName(browser.name)} {browser.majorVersion}</span>
   </span>
 )

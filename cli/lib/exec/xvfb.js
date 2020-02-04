@@ -7,19 +7,26 @@ const debugXvfb = require('debug')('cypress:xvfb')
 const { throwFormErrorText, errors } = require('../errors')
 const util = require('../util')
 
-const xvfb = Promise.promisifyAll(new Xvfb({
+const xvfbOptions = {
   timeout: 30000, // milliseconds
+  // need to explicitly define screen otherwise electron will crash
+  // https://github.com/cypress-io/cypress/issues/6184
+  xvfb_args: ['-screen', '0', '1280x1024x24'],
   onStderrData (data) {
     if (debugXvfb.enabled) {
       debugXvfb(data.toString())
     }
   },
-}))
+}
+
+const xvfb = Promise.promisifyAll(new Xvfb(xvfbOptions))
 
 module.exports = {
   _debugXvfb: debugXvfb, // expose for testing
 
   _xvfb: xvfb, // expose for testing
+
+  _xvfbOptions: xvfbOptions, // expose for testing
 
   start () {
     debug('Starting Xvfb')

@@ -38,5 +38,13 @@
     "typescript",
     "typescriptreact",
     "json"
-  ]
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "[coffeescript]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": false
+    }
+  }
 }

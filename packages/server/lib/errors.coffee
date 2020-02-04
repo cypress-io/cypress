@@ -1,8 +1,11 @@
-_       = require("lodash")
-strip   = require("strip-ansi")
-chalk   = require("chalk")
-ansi_up = require("ansi_up")
+_ = require("lodash")
+strip = require("strip-ansi")
+chalk = require("chalk")
+AU = require('ansi_up')
 Promise = require("bluebird")
+
+ansi_up = new AU.default
+ansi_up.use_classes = true
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
@@ -59,7 +62,7 @@ trimMultipleNewLines = (str) ->
 isCypressErr = (err) ->
   Boolean(err.isCypressErr)
 
-getMsgByType = (type, arg1 = {}, arg2) ->
+getMsgByType = (type, arg1 = {}, arg2, arg3) ->
   switch type
     when "CANNOT_TRASH_ASSETS"
       """
@@ -522,7 +525,6 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
         #{chalk.blue(arg2)}
         """
-
     when "RENDERER_CRASHED"
       """
       We detected that the Chromium Renderer process just crashed.
@@ -878,9 +880,17 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
+    when "COULD_NOT_PARSE_ARGUMENTS"
+        """
+        Cypress encountered an error while parsing the argument #{chalk.gray(arg1)}
 
-get = (type, arg1, arg2) ->
-  msg = getMsgByType(type, arg1, arg2)
+        You passed: #{arg2}
+
+        The error was: #{arg3}
+        """
+
+get = (type, arg1, arg2, arg3) ->
+  msg = getMsgByType(type, arg1, arg2, arg3)
 
   if _.isObject(msg)
     details = msg.details
@@ -901,8 +911,8 @@ warning = (type, arg1, arg2) ->
 
   return null
 
-throwErr = (type, arg1, arg2) ->
-  throw get(type, arg1, arg2)
+throwErr = (type, arg1, arg2, arg3) ->
+  throw get(type, arg1, arg2, arg3)
 
 clone = (err, options = {}) ->
   _.defaults options, {
@@ -913,9 +923,7 @@ clone = (err, options = {}) ->
   obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
 
   if options.html
-    obj.message = ansi_up.ansi_to_html(err.message, {
-      use_classes: true
-    })
+    obj.message = ansi_up.ansi_to_html(err.message)
   else
     obj.message = err.message
 
