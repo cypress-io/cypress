@@ -101,14 +101,14 @@ const execute = (ipc, event, ids, args = []) => {
       // This will send a warning message when a deprecated API is used
       // define array-like functions on this object so we can warn about using deprecated array API
       // while still fufiling desired behavior
-      const pluginConfig = args[1]
+      const [, launchOptions] = args
 
       let hasEmittedWarning = false
 
       ARRAY_METHODS.forEach((name) => {
-        const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
+        const boundFn = launchOptions.args[name].bind(launchOptions.args)
 
-        pluginConfig[name] = function () {
+        launchOptions[name] = function () {
           if (hasEmittedWarning) return
 
           hasEmittedWarning = true
@@ -123,13 +123,13 @@ const execute = (ipc, event, ids, args = []) => {
         }
       })
 
-      Object.defineProperty(pluginConfig, 'length', {
+      Object.defineProperty(launchOptions, 'length', {
         get () {
           return this.args.length
         },
       })
 
-      pluginConfig[Symbol.iterator] = pluginConfig.args[Symbol.iterator].bind(pluginConfig.args)
+      launchOptions[Symbol.iterator] = launchOptions.args[Symbol.iterator].bind(launchOptions.args)
 
       util.wrapChildPromise(ipc, invoke, ids, args)
 
