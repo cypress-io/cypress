@@ -562,6 +562,8 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       Your `pluginsFile` is set to `#{arg1}`, but either the file is missing, it contains a syntax error, or threw an error when required. The `pluginsFile` must be a `.js` or `.coffee` file.
 
+      Or you might have renamed the extension of your `pluginsFile` to `.ts`. If that's the case, restart the test runner.
+
       Please fix this, or set `pluginsFile` to `false` if a plugins file is not necessary for your project.
       """.trim()
 
