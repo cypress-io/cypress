@@ -18,6 +18,7 @@ import * as CriClient from './cri-client'
 type CypressConfiguration = any
 
 type Browser = FoundBrowser & {
+  majorVersion: number
   isHeadless: boolean
   isHeaded: boolean
 }
@@ -33,7 +34,7 @@ const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
-const defaultArgs = [
+const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
   '--start-maximized',
@@ -288,14 +289,10 @@ export = {
     return extensionDest
   },
 
-  _getArgs (options: CypressConfiguration = {}, port: string) {
+  _getArgs (browser: Browser, options: CypressConfiguration, port: string) {
     let ps; let ua
 
-    _.defaults(options, {
-      browser: {},
-    })
-
-    const args = ([] as string[]).concat(defaultArgs)
+    const args = ([] as string[]).concat(DEFAULT_ARGS)
 
     if (os.platform() === 'linux') {
       args.push('--disable-gpu')
@@ -323,7 +320,7 @@ export = {
     // https://github.com/cypress-io/cypress/issues/2037
     // https://github.com/cypress-io/cypress/issues/2215
     // https://github.com/cypress-io/cypress/issues/2223
-    const { majorVersion } = options.browser
+    const { majorVersion, isHeadless } = browser
 
     if (CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING.includes(majorVersion)) {
       args.push('--disable-blink-features=RootLayerScrolling')
@@ -335,7 +332,7 @@ export = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
-    if (options.browser.isHeadless) {
+    if (isHeadless) {
       args.push('--headless')
     }
 
@@ -354,13 +351,13 @@ export = {
 
     const port = await getRemoteDebuggingPort()
 
-    const defaultArgs = this._getArgs(options, port)
+    const defaultArgs = this._getArgs(browser, options, port)
 
     const [cacheDir, launchArgs] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      pluginsBeforeBrowserLaunch(options.browser, defaultArgs),
+      pluginsBeforeBrowserLaunch(browser, defaultArgs),
     ])
 
     const [extDest] = await Bluebird.all([
