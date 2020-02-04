@@ -37,8 +37,7 @@ Promise.config({
 const e2ePath = Fixtures.projectPath('e2e')
 const pathUpToProjectName = Fixtures.projectPath('')
 
-const AVAILABLE_BROWSERS = ['electron', 'chrome']
-const DEFAULT_BROWSERS = AVAILABLE_BROWSERS
+const DEFAULT_BROWSERS = ['electron', 'chrome']
 
 const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
@@ -263,9 +262,9 @@ function getBrowsers (browserPattern) {
   const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
 
   if (removeBrowsers.length) {
-    selected = _.without(AVAILABLE_BROWSERS, ...removeBrowsers)
+    selected = _.without(DEFAULT_BROWSERS, ...removeBrowsers)
   } else {
-    selected = _.intersection(AVAILABLE_BROWSERS, addBrowsers)
+    selected = _.intersection(DEFAULT_BROWSERS, addBrowsers)
   }
 
   if (!selected.length) {
