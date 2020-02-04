@@ -1,4 +1,4 @@
-exports['e2e plugins fails 1'] = `
+exports['e2e plugins / works with user extensions'] = `
 
 ====================================================================================================
 
@@ -16,18 +16,18 @@ exports['e2e plugins fails 1'] = `
                                                                                                     
   Running:  app_spec.coffee                                                                 (1 of 1)
 
-The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
 
-Error: Async error from plugins file
-    [stack trace lines]
+  ✓ can inject text from an extension
+
+  1 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
@@ -50,14 +50,14 @@ Error: Async error from plugins file
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  app_spec.coffee                          XX:XX        -        -        1        -        - │
+  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `
 
-exports['e2e plugins passes 1'] = `
+exports['e2e plugins passes with working preprocessor 1'] = `
 
 ====================================================================================================
 
@@ -113,6 +113,65 @@ exports['e2e plugins passes 1'] = `
   │ ✔  app_spec.coffee                          XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
+
+
+`
+
+exports['e2e plugins fails with async error 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app_spec.coffee                                                                 (1 of 1)
+
+The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+
+Error: Async error from plugins file
+    [stack trace lines]
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.coffee                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  app_spec.coffee                          XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `
@@ -177,62 +236,24 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
 `
 
-exports['e2e plugins / works with user extensions'] = `
+exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
 
-====================================================================================================
+Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
-  (Run Starting)
+`
 
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+exports['e2e plugins catches invalid browsers list returned from plugins 2'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
 
+Expected at list one browser
 
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  app_spec.coffee                                                                 (1 of 1)
+`
 
+exports['e2e plugins catches invalid browser returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
 
-  ✓ can inject text from an extension
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
+Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chrome"}\`
 
 `
 
@@ -379,26 +400,5 @@ Can't run because you've entered an invalid browser name.
 Browser: 'chrome' was not found on your system.
 
 Available browsers found are: electron
-
-`
-
-exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
-
-Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
-
-`
-
-exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
-
-Expected at list one browser
-
-`
-
-exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
-
-Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chrome"}\`
 
 `

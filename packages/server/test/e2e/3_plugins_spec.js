@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const path = require('path')
 
 const e2e = require('../support/helpers/e2e')
@@ -21,10 +14,10 @@ const pluginReturnsBadConfig = Fixtures.projectPath('plugin-returns-bad-config')
 const pluginReturnsEmptyBrowsersList = Fixtures.projectPath('plugin-returns-empty-browsers-list')
 const pluginReturnsInvalidBrowser = Fixtures.projectPath('plugin-returns-invalid-browser')
 
-describe('e2e plugins', () => {
+describe('e2e plugins', function () {
   e2e.setup()
 
-  it('passes', function () {
+  it('passes with working preprocessor', function () {
     return e2e.exec(this, {
       spec: 'app_spec.coffee',
       project: workingPreprocessor,
@@ -34,7 +27,7 @@ describe('e2e plugins', () => {
     })
   })
 
-  it('fails', function () {
+  it('fails with async error', function () {
     return e2e.exec(this, {
       spec: 'app_spec.coffee',
       project: pluginsAsyncError,
@@ -58,7 +51,7 @@ describe('e2e plugins', () => {
 
   it('catches invalid viewportWidth returned from plugins', function () {
     // the test project returns config object with a bad value
-    return e2e.exec(this, {
+    e2e.exec(this, {
       project: pluginReturnsBadConfig,
       expectedExitCode: 1,
       snapshot: true,
