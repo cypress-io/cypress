@@ -175,24 +175,19 @@ const ensurePort = function (port) {
 }
 
 const startServer = function (obj) {
-  let s; let srv
   const { onServer, port, https } = obj
 
   ensurePort(port)
 
   const app = express()
 
-  if (https) {
-    srv = httpsProxy.httpsServer(app)
-  } else {
-    srv = http.Server(app)
-  }
+  const srv = https ? httpsProxy.httpsServer(app) : new http.Server(app)
 
   allowDestroy(srv)
 
   app.use(morgan('dev'))
 
-  s = obj.static
+  const s = obj.static
 
   if (s) {
     const opts = _.isObject(s) ? s : {}
@@ -450,9 +445,7 @@ const e2e = {
 
         this.servers = null
       }).then(() => {
-        let s
-
-        s = options.settings
+        const s = options.settings
 
         if (s) {
           return settings.write(e2ePath, s)
@@ -461,15 +454,13 @@ const e2e = {
     })
 
     return afterEach(function () {
-      let s
-
       process.env = _.clone(env)
 
       this.timeout(human('2 minutes'))
 
       Fixtures.remove()
 
-      s = this.servers
+      const s = this.servers
 
       if (s) {
         return Promise.map(s, stopServer)
@@ -478,8 +469,6 @@ const e2e = {
   },
 
   options (ctx, options = {}) {
-    let spec
-
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
@@ -490,7 +479,7 @@ const e2e = {
 
     ctx.timeout(options.timeout)
 
-    spec = options.spec
+    const { spec } = options
 
     if (spec) {
       // normalize into array and then prefix
@@ -617,9 +606,7 @@ const e2e = {
       // snapshot the stdout!
       if (options.snapshot) {
         // enable callback to modify stdout
-        let matches; let ostd; let str
-
-        ostd = options.onStdout
+        const ostd = options.onStdout
 
         if (ostd) {
           stdout = ostd(stdout)
@@ -627,7 +614,7 @@ const e2e = {
 
         // if we have browser in the stdout make
         // sure its legit
-        matches = browserNameVersionRe.exec(stdout)
+        const matches = browserNameVersionRe.exec(stdout)
 
         if (matches) {
           // eslint-disable-next-line no-unused-vars
@@ -650,7 +637,7 @@ const e2e = {
           }
         }
 
-        str = normalizeStdout(stdout)
+        const str = normalizeStdout(stdout, options)
 
         if (options.originalTitle) {
           snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
