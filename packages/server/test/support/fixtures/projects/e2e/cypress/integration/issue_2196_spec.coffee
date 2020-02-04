@@ -1,7 +1,9 @@
-onBeforeLoad = cy.stub()
-onLoad = cy.stub()
+onLoad = onBeforeLoad = null
 
 Cypress.Commands.overwrite "visit", (originalVisit, url, options) ->
+  onBeforeLoad = cy.stub().as('onBeforeLoad')
+  onLoad = cy.stub().as('onLoad')
+
   return originalVisit(url, { onBeforeLoad, onLoad })
 
 context "issue #2196: overwriting visit", ->

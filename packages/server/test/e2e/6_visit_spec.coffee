@@ -130,6 +130,7 @@ describe "e2e visit", ->
     }
 
     e2e.it "calls onBeforeLoad when overwriting cy.visit", {
+      snapshot: true
       spec: "issue_2196_spec.coffee"
     }
 
