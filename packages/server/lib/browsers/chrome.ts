@@ -105,15 +105,9 @@ const DEFAULT_ARGS = [
 ]
 
 const getRemoteDebuggingPort = Bluebird.method(() => {
-  let port
+  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
 
-  port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  if (port) {
-    return port
-  }
-
-  return utils.getPort()
+  return port || utils.getPort()
 })
 
 const pluginsBeforeBrowserLaunch = function (browser, args) {
@@ -275,10 +269,9 @@ export = {
 
     // get the string bytes for the final extension file
     const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
-    let extensionBg; let extensionDest
 
-    extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
-    extensionBg = path.join(extensionDest, 'background.js')
+    const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
+    const extensionBg = path.join(extensionDest, 'background.js')
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
@@ -290,8 +283,6 @@ export = {
   },
 
   _getArgs (browser: Browser, options: CypressConfiguration, port: string) {
-    let ps; let ua
-
     const args = ([] as string[]).concat(DEFAULT_ARGS)
 
     if (os.platform() === 'linux') {
@@ -299,13 +290,13 @@ export = {
       args.push('--no-sandbox')
     }
 
-    ua = options.userAgent
+    const ua = options.userAgent
 
     if (ua) {
       args.push(`--user-agent=${ua}`)
     }
 
-    ps = options.proxyServer
+    const ps = options.proxyServer
 
     if (ps) {
       args.push(`--proxy-server=${ps}`)
