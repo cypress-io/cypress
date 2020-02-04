@@ -894,7 +894,9 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       The `before:browser:launch` plugin event switched from yielding the second argument as an `array` of browser arguments to an options `object` with an `args` property.
 
-      Your code will cease to work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow 'https://on.cypress.io/deprecated-before-browser-launch-args'}
+      We've detected that your code is still using the previous, deprecated interface signature.
+
+      This code will not work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}
       """
     when "COULD_NOT_PARSE_ARGUMENTS"
       """
