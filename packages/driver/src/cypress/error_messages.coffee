@@ -615,7 +615,7 @@ module.exports = {
       Before the page load, you were bound to the origin policy:
         > #{originPolicy}
 
-      A cross origin error happens when your application navigates to a new domain which does not match the origin policy above.
+      A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
       This typically happens in one of three ways:
 
