@@ -227,9 +227,7 @@ const _disableRestorePagesPrompt = function (userDir) {
 
   return fs.readJson(prefsPath)
   .then((preferences) => {
-    let profile
-
-    profile = preferences.profile
+    const profile = preferences.profile
 
     if (profile) {
       if ((profile['exit_type'] !== 'Normal') || (profile['exited_cleanly'] !== true)) {
@@ -409,15 +407,15 @@ export = {
       _getChromePreferences(userDir),
     ])
 
-    let defaultArgs = this._getArgs(browser, options, port)
+    const defaultArgs = this._getArgs(browser, options, port)
 
-    let _launchOptions = _.defaults({
+    const _launchOptions = _.defaults({
       args: defaultArgs,
       extensions: [],
       preferences,
     }, utils.defaultLaunchOptions)
 
-    let [cacheDir, launchOptions] = await Bluebird.all([
+    const [cacheDir, launchOptions] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
