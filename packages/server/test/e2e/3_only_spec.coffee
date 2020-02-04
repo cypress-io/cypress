@@ -7,5 +7,4 @@ describe "e2e only spec", ->
     e2e.exec(@, {
       spec: "only*.coffee"
       snapshot: true
-      expectedExitCode: 0
     })

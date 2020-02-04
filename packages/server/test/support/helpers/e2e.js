@@ -37,39 +37,17 @@ Promise.config({
 const e2ePath = Fixtures.projectPath('e2e')
 const pathUpToProjectName = Fixtures.projectPath('')
 
-const AVAILABLE_BROWSERS = ['electron', 'chrome', 'firefox']
-const DEFAULT_BROWSERS = AVAILABLE_BROWSERS
+const DEFAULT_BROWSERS = ['electron', 'chrome']
 
-const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
+const stackTraceLinesRe = /(\n?\s*).*?(@|at).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g
-const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
-
-let currentOptions = {}
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
 // 'at' will be present in chrome stack trace lines
-const replaceStackTraceLines = (str) => {
-  return str.replace(stackTraceLinesRe, (match, ...parts) => {
-    let pre = parts[0]
-    const isFirefoxStack = parts[1] === '@'
-    let post = parts[4]
-
-    if (isFirefoxStack) {
-      if (pre === '\n') {
-        pre = '\n    '
-      } else {
-        pre += pre.slice(1).repeat(2)
-      }
-
-      post = post.slice(-1)
-    }
-
-    return `${pre}[stack trace lines]${post}`
-  })
-}
+const replaceStackTraceLines = (str) => str.replace(stackTraceLinesRe, '$1[stack trace lines]$5')
 
 const replaceBrowserName = function (str, key, customBrowserPath, browserName, version, headless, whitespace) {
   // get the padding for the existing browser string
@@ -118,8 +96,8 @@ const replaceUploadingResults = function (orig, ...rest) {
   return ret
 }
 
-const normalizeStdout = function (str) {
-  const options = _.defaults({}, currentOptions, { normalizeAvailableBrowsers: true })
+const normalizeStdout = function (str, options = {}) {
+  const { normalizeStdoutAvailableBrowsers } = options
 
   // remove all of the dynamic parts of stdout
   // to normalize against what we expected
@@ -128,10 +106,12 @@ const normalizeStdout = function (str) {
   // (Required when paths are printed outside of our own formatting)
   .split(pathUpToProjectName).join('/foo/bar/.projects')
 
-  if (options.normalizeAvailableBrowsers) {
+  // unless normalization is explicitly turned off then
+  // always normalize the stdout replacing the browser text
+  if (normalizeStdoutAvailableBrowsers !== false) {
     // usually we are not interested in the browsers detected on this particular system
     // but some tests might filter / change the list of browsers
-    // in that case the test should pass "normalizeAvailableBrowsers:false" as options
+    // in that case the test should pass "normalizeStdoutAvailableBrowsers: false" as options
     str = str.replace(availableBrowsersRe, '$1browser1, browser2, browser3')
   }
 
@@ -157,8 +137,6 @@ const normalizeStdout = function (str) {
   .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
   // fix "Require stacks" for CI
   .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
-  // Different browsers have different cross-origin error messages
-  .replace(crossOriginErrorRe, '[Cross origin error message]')
 
   if (options.sanitizeScreenshotDimensions) {
     // screenshot dimensions
@@ -175,24 +153,19 @@ const ensurePort = function (port) {
 }
 
 const startServer = function (obj) {
-  let s; let srv
   const { onServer, port, https } = obj
 
   ensurePort(port)
 
   const app = express()
 
-  if (https) {
-    srv = httpsProxy.httpsServer(app)
-  } else {
-    srv = http.Server(app)
-  }
+  const srv = https ? httpsProxy.httpsServer(app) : new http.Server(app)
 
   allowDestroy(srv)
 
   app.use(morgan('dev'))
 
-  s = obj.static
+  const s = obj.static
 
   if (s) {
     const opts = _.isObject(s) ? s : {}
@@ -268,9 +241,9 @@ function getBrowsers (browserPattern) {
   const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
 
   if (removeBrowsers.length) {
-    selected = _.without(AVAILABLE_BROWSERS, ...removeBrowsers)
+    selected = _.without(DEFAULT_BROWSERS, ...removeBrowsers)
   } else {
-    selected = _.intersection(AVAILABLE_BROWSERS, addBrowsers)
+    selected = _.intersection(DEFAULT_BROWSERS, addBrowsers)
   }
 
   if (!selected.length) {
@@ -290,17 +263,14 @@ const normalizeToArray = (value) => {
 
 const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
-  opts.stdoutInclude = normalizeToArray(opts.stdoutInclude)
-  opts.stdoutExclude = normalizeToArray(opts.stdoutExclude)
 
   const DEFAULT_OPTIONS = {
-    stdoutInclude: [],
-    stdoutExclude: [],
     only: false,
     skip: false,
     browser: [],
     snapshot: false,
     spec: 'no spec name supplied!',
+    onStdout: _.identity,
     onRun (execFn, browser, ctx) {
       return execFn()
     },
@@ -337,12 +307,11 @@ const localItFn = function (title, opts = {}) {
 
       const ctx = this
 
-      const execFn = (overrides = {}) => e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+      const execFn = (overrides = {}) => {
+        return e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+      }
 
-      return Promise.all([
-        psInclude(options.psInclude),
-        options.onRun(execFn, browser, ctx),
-      ])
+      return options.onRun(execFn, browser, ctx)
     })
   }
 
@@ -361,39 +330,14 @@ localItFn.skip = function (title, options) {
   return localItFn(title, options)
 }
 
-async function psInclude (str) {
-  if (!str) return
-
-  if (!_.isArray(str)) {
-    str = [str]
+const maybeVerifyExitCode = (expectedExitCode, fn) => {
+  // bail if this is explicitly null so
+  // devs can turn off checking the exit code
+  if (expectedExitCode === null) {
+    return
   }
 
-  let lastError = null
-
-  async function retry () {
-    try {
-      const psOutput = (await cp.execAsync('ps -fww')).toString()
-
-      _.forEach(str, (v) => {
-        expect(psOutput).contain(v)
-      })
-
-      let colorAssertion = psOutput.split('\n').find((v) => v.includes(str[0]))
-
-      _.forEach(str, (v) => colorAssertion = colorAssertion.replace(v, chalk.bgGreen.black(v)))
-
-      // eslint-disable-next-line no-console
-      console.log(chalk.green(chalk.bold('Expected process tree:\n') + colorAssertion))
-    } catch (e) {
-      lastError = e
-
-      return Promise.delay(400).then(() => retry())
-    }
-  }
-
-  return Promise.resolve(retry()).timeout(30000).catch(() => {
-    throw lastError
-  })
+  return fn()
 }
 
 const e2e = {
@@ -406,12 +350,6 @@ const e2e = {
 
   snapshot (...args) {
     args = _.compact(args)
-
-    // grab the last element in index
-    const index = args.length - 1
-
-    // normalize the stdout of it
-    args[index] = normalizeStdout(args[index])
 
     return snapshot.apply(null, args)
   },
@@ -481,9 +419,7 @@ const e2e = {
 
         this.servers = null
       }).then(() => {
-        let s
-
-        s = options.settings
+        const s = options.settings
 
         if (s) {
           return settings.write(e2ePath, s)
@@ -492,15 +428,13 @@ const e2e = {
     })
 
     return afterEach(function () {
-      let s
-
       process.env = _.clone(env)
 
       this.timeout(human('2 minutes'))
 
       Fixtures.remove()
 
-      s = this.servers
+      const s = this.servers
 
       if (s) {
         return Promise.map(s, stopServer)
@@ -509,19 +443,19 @@ const e2e = {
   },
 
   options (ctx, options = {}) {
-    let spec
-
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
       timeout: options.exit === false ? 3000000 : 120000,
       originalTitle: null,
+      expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
+      normalizeStdoutAvailableBrowsers: true,
     })
 
     ctx.timeout(options.timeout)
 
-    spec = options.spec
+    const { spec } = options
 
     if (spec) {
       // normalize into array and then prefix
@@ -536,8 +470,6 @@ const e2e = {
       // normalize the path to the spec
       options.spec = specs.join(',')
     }
-
-    currentOptions = options
 
     return options
   },
@@ -629,11 +561,11 @@ const e2e = {
 
     return cypress.start(args)
     .then(() => {
-      let code
+      const { expectedExitCode } = options
 
-      if ((code = options.expectedExitCode) != null) {
-        return expect(process.exit).to.be.calledWith(code)
-      }
+      maybeVerifyExitCode(expectedExitCode, () => {
+        expect(process.exit).to.be.calledWith(expectedExitCode)
+      })
     })
   },
 
@@ -647,18 +579,16 @@ const e2e = {
     let stderr = ''
 
     const exit = function (code) {
-      let expected
+      const { expectedExitCode } = options
 
-      if ((expected = options.expectedExitCode) != null) {
-        expect(code).to.eq(expected, 'expected exit code')
-      }
+      maybeVerifyExitCode(expectedExitCode, () => {
+        expect(code).to.eq(expectedExitCode, 'expected exit code')
+      })
 
       // snapshot the stdout!
       if (options.snapshot) {
         // enable callback to modify stdout
-        let matches; let ostd; let str
-
-        ostd = options.onStdout
+        const ostd = options.onStdout
 
         if (ostd) {
           stdout = ostd(stdout)
@@ -666,7 +596,7 @@ const e2e = {
 
         // if we have browser in the stdout make
         // sure its legit
-        matches = browserNameVersionRe.exec(stdout)
+        const matches = browserNameVersionRe.exec(stdout)
 
         if (matches) {
           // eslint-disable-next-line no-unused-vars
@@ -689,24 +619,12 @@ const e2e = {
           }
         }
 
-        str = normalizeStdout(stdout)
+        const str = normalizeStdout(stdout, options)
 
         if (options.originalTitle) {
           snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
         } else {
           snapshot(str)
-        }
-
-        if (options.stdoutInclude && options.stdoutInclude.length) {
-          options.stdoutInclude.forEach((v) => {
-            expect(str).contain(v)
-          })
-        }
-
-        if (options.stdoutExclude && options.stdoutExclude.length) {
-          options.stdoutExclude.forEach((v) => {
-            expect(str).not.contain(v)
-          })
         }
       }
 

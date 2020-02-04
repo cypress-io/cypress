@@ -12,7 +12,6 @@ describe('e2e headless', function () {
         'EXPECT_HEADLESS': '1',
       },
     },
-    expectedExitCode: 0,
     headed: false,
     snapshot: true,
   })
@@ -25,7 +24,6 @@ describe('e2e headless', function () {
         'CI': process.env.CI,
       },
     },
-    expectedExitCode: 0,
     headed: true,
     snapshot: true,
     // currently, Electron differs because it displays a

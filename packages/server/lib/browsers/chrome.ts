@@ -18,6 +18,7 @@ import * as CriClient from './cri-client'
 type CypressConfiguration = any
 
 type Browser = FoundBrowser & {
+  majorVersion: number
   isHeadless: boolean
   isHeaded: boolean
 }
@@ -43,7 +44,7 @@ type ChromePreferences = {
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
-const defaultArgs = [
+const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
   '--silent-debugger-extension-api',
@@ -172,15 +173,9 @@ const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferenc
 }
 
 const getRemoteDebuggingPort = async () => {
-  let port
+  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
 
-  port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  if (port) {
-    return port
-  }
-
-  return utils.getPort()
+  return port || utils.getPort()
 }
 
 /**
@@ -337,40 +332,34 @@ export = {
 
     // get the string bytes for the final extension file
     const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
-    let extensionBg; let extensionDest
 
-    extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
-    extensionBg = path.join(extensionDest, 'background.js')
+    const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
+    const extensionBg = path.join(extensionDest, 'background.js')
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
+
+    // and overwrite background.js with the final string bytes
     await fs.writeFileAsync(extensionBg, str)
 
     return extensionDest
   },
 
-  // expose for stubbing during tests
-  _getArgs (options: CypressConfiguration = {}, port: string) {
-    let ps; let ua
-
-    _.defaults(options, {
-      browser: {},
-    })
-
-    const args = ([] as string[]).concat(defaultArgs)
+  _getArgs (browser: Browser, options: CypressConfiguration, port: string) {
+    const args = ([] as string[]).concat(DEFAULT_ARGS)
 
     if (os.platform() === 'linux') {
       args.push('--disable-gpu')
       args.push('--no-sandbox')
     }
 
-    ua = options.userAgent
+    const ua = options.userAgent
 
     if (ua) {
       args.push(`--user-agent=${ua}`)
     }
 
-    ps = options.proxyServer
+    const ps = options.proxyServer
 
     if (ps) {
       args.push(`--proxy-server=${ps}`)
@@ -385,7 +374,7 @@ export = {
     // https://github.com/cypress-io/cypress/issues/2037
     // https://github.com/cypress-io/cypress/issues/2215
     // https://github.com/cypress-io/cypress/issues/2223
-    const { majorVersion } = options.browser
+    const { majorVersion, isHeadless } = browser
 
     if (CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING.includes(majorVersion)) {
       args.push('--disable-blink-features=RootLayerScrolling')
@@ -397,7 +386,7 @@ export = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
-    if (options.browser.isHeadless) {
+    if (isHeadless) {
       args.push('--headless')
     }
 
@@ -419,7 +408,7 @@ export = {
       _getChromePreferences(userDir),
     ])
 
-    let defaultArgs = this._getArgs(options, port)
+    let defaultArgs = this._getArgs(browser, options, port)
 
     let _launchOptions = _.defaults({
       args: defaultArgs,
@@ -431,7 +420,7 @@ export = {
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      utils.executeBeforeBrowserLaunch(options.browser, _launchOptions, options),
+      utils.executeBeforeBrowserLaunch(browser, _launchOptions, options),
     ])
 
     if (launchOptions.windowSize) {
