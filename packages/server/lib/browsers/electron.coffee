@@ -44,6 +44,8 @@ getAutomation = (win) ->
   CdpAutomation(sendCommand)
 
 _installExtensions = (extensionPaths = [], options) ->
+  Windows.removeAllExtensions()
+
   extensionPaths.forEach (path) ->
     try
       Windows.installExtension(path)
@@ -264,7 +266,7 @@ module.exports = {
         win.once "closed", ->
           debug("closed event fired")
 
-          Windows.resetExtensions()
+          Windows.removeAllExtensions()
 
           events.emit("exit")
 

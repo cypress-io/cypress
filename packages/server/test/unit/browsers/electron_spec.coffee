@@ -47,7 +47,7 @@ describe "lib/browsers/electron", ->
     })
 
     sinon.stub(Windows, 'installExtension').returns()
-    sinon.stub(Windows, 'resetExtensions').returns()
+    sinon.stub(Windows, 'removeAllExtensions').returns()
 
     @stubForOpen = ->
       sinon.stub(electron, "_render").resolves(@win)
@@ -122,6 +122,8 @@ describe "lib/browsers/electron", ->
 
       electron.open("electron", @url, @options, @automation)
       .then =>
+        expect(Windows.removeAllExtensions).to.be.calledOnce
+
         expect(Windows.installExtension).to.be.calledTwice
         expect(Windows.installExtension).to.be.calledWith('foo')
         expect(Windows.installExtension).to.be.calledWith('bar')
@@ -130,6 +132,11 @@ describe "lib/browsers/electron", ->
 
         warning = @options.onWarning.firstCall.args[0].message
         expect(warning).to.contain('Electron').and.contain('bar')
+
+        @win.emit('closed')
+
+        ## called once before installing extensions, once on exit
+        expect(Windows.removeAllExtensions).to.be.calledTwice
 
   context "._launch", ->
     beforeEach ->

@@ -49,7 +49,7 @@ module.exports = {
     if !name
       throw new Error('Extension could not be installed.')
 
-  resetExtensions: ->
+  removeAllExtensions: ->
     ## remove all extensions
     extensions = _.keys(BrowserWindow.getExtensions())
 
