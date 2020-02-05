@@ -84,11 +84,10 @@ describe "e2e forms", ->
   context "submissions with jquery XHR POST", ->
     e2e.setup()
 
-    it "passing", ->
-      e2e.exec(@, {
-        spec: "form_submission_passing_spec.coffee"
-        snapshot: true
-      })
+    e2e.it "passing", {
+      spec: "form_submission_passing_spec.coffee"
+      snapshot: true
+    }
 
     e2e.it "failing", {
       spec: "form_submission_failing_spec.coffee"
