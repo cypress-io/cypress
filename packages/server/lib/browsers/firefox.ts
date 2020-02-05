@@ -7,11 +7,8 @@ import path from 'path'
 import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
-// @ts-ignore
-import plugins from '../plugins'
 import utils from './utils'
 import { Browser } from '@packages/launcher'
-const errors = require('../errors')
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -128,24 +125,17 @@ const defaultPreferences = {
   'dom.timeout.enable_budget_timer_throttling': false,
 }
 
-const firefoxOptionsDefaults = {
-  // controls how we set xulstore.json to modify windowSize
-  windowSizeMode: null,
-  userCss: null,
-}
-
 export async function open (browser: Browser, url, options: any = {}) {
-  let launchOptions = {
+  const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
-    firefoxOptions: _.extend({}, firefoxOptionsDefaults),
     args: [
       '-marionette',
       '-new-instance',
       '-foreground',
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
     ],
-  }
+  })
 
   debug('firefox open %o', options)
 
@@ -158,7 +148,7 @@ export async function open (browser: Browser, url, options: any = {}) {
       port = protocol === 'https:' ? '443' : '80'
     }
 
-    _.extend(launchOptions.preferences, {
+    _.extend(defaultLaunchOptions.preferences, {
       'network.proxy.allow_hijacking_localhost': true,
       'network.proxy.http': hostname,
       'network.proxy.ssl': hostname,
@@ -171,7 +161,7 @@ export async function open (browser: Browser, url, options: any = {}) {
   const ua = options.userAgent
 
   if (ua) {
-    launchOptions.preferences['general.useragent.override'] = ua
+    defaultLaunchOptions.preferences['general.useragent.override'] = ua
   }
 
   const [
@@ -179,52 +169,19 @@ export async function open (browser: Browser, url, options: any = {}) {
     marionettePort,
   ] = await Bluebird.all([getPort(), getPort()])
 
-  launchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
-  launchOptions.preferences['marionette.port'] = marionettePort
+  defaultLaunchOptions.preferences['devtools.debugger.remote-port'] = foxdriverPort
+  defaultLaunchOptions.preferences['marionette.port'] = marionettePort
 
   debug('available ports: %o', { foxdriverPort, marionettePort })
-
-  if (plugins.has('before:browser:launch')) {
-    let pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
-
-    if (pluginConfigResult) {
-      if (pluginConfigResult[0]) {
-        options.onWarning(errors.get(
-          'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
-        ))
-
-        pluginConfigResult = {
-          args: _.filter(pluginConfigResult, (_val, key) => _.isNumber(key)),
-          extensions: [],
-        }
-      }
-
-      // use whatever the user returns as pluginConfig
-      // @ts-ignore
-      if (pluginConfigResult.args) {
-        launchOptions.args = pluginConfigResult.args
-      }
-
-      if (pluginConfigResult.extensions) {
-        launchOptions.extensions = pluginConfigResult.extensions
-      }
-
-      if (pluginConfigResult.preferences) {
-        _.extend(launchOptions.preferences, pluginConfigResult.preferences)
-      }
-
-      if (pluginConfigResult.firefoxOptions) {
-        _.extend(launchOptions.firefoxOptions, pluginConfigResult.firefoxOptions)
-      }
-    }
-  }
 
   const [
     cacheDir,
     extensionDest,
+    launchOptions,
   ] = await Bluebird.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
-    utils.writeExtension(options.browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute, options.onScreencastFrame),
+    utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute, options.onScreencastFrame),
+    utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
   ])
 
   launchOptions.extensions.push(extensionDest)
@@ -239,11 +196,11 @@ export async function open (browser: Browser, url, options: any = {}) {
   const xulStorePath = path.join(profile.path(), 'xulstore.json')
 
   // if user has set custom window.sizemode pref or it's the first time launching on this profile, write to xulStore.
-  if (launchOptions.firefoxOptions['window.sizemode'] || !await fs.pathExists(xulStorePath)) {
+  if (!await fs.pathExists(xulStorePath)) {
     // this causes the browser to launch maximized, which chrome does by default
     // otherwise an arbitrary size will be picked for the window size
     // this will not have an effect after first launch in 'interactive' mode
-    const sizemode = launchOptions.firefoxOptions['window.sizemode'] || 'maximized'
+    const sizemode = 'maximized'
 
     await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 720, sizemode } } })
   }
@@ -260,8 +217,8 @@ export async function open (browser: Browser, url, options: any = {}) {
 
   const userCSSPath = path.join(profileDir, 'chrome')
 
-  if (launchOptions.firefoxOptions.userCss || !await fs.pathExists(path.join(userCSSPath, 'userChrome.css'))) {
-    const userCss = launchOptions.firefoxOptions.userCss || `
+  if (!await fs.pathExists(path.join(userCSSPath, 'userChrome.css'))) {
+    const userCss = `
     #urlbar:not(.megabar), #urlbar.megabar > #urlbar-background, #searchbar {
       background: -moz-Field !important;
       color: -moz-FieldText !important;
