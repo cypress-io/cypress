@@ -39,6 +39,17 @@
     .dropdown-menu li i {
       margin-right: 5px;
     }
+
+    .browser-icon {
+      width: 15px;
+      height: 15px;
+      position: relative;
+      top: -1px;
+
+      &.fa-globe {
+        top: 0; 
+      }
+    }
   }
 
   .automation-disconnected button {

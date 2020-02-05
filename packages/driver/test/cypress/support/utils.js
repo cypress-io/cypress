@@ -50,7 +50,7 @@ export const withMutableReporterState = (fn) => {
 
   return Cypress.Promise.try(fn)
   .then(() => {
-    top.Runner.configureMobx({ enforceActions: 'strict' })
+    top.Runner.configureMobx({ enforceActions: 'always' })
   })
 }
 
