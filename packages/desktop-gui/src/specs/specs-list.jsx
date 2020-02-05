@@ -113,9 +113,9 @@ class SpecsList extends Component {
   }
 
   _executeSearch = (e) => {
-    if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
-      document.querySelector('#filter').focus()
-    }
+    return (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70))
+      ? document.querySelector('#filter').focus()
+      : ''
   }
 
   _selectSpec (spec, e) {
