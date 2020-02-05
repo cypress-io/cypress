@@ -31,7 +31,7 @@ export const getIndexOfUserOptions = (name: string, args: any[] | undefined): nu
     return args.length === 3 ? 2 : -1
   }
 
-  // Handle most common case
+  // Handle common cases
 
   if (_.isObject(lastArg) && !_.isArray(lastArg) && !_.isRegExp(lastArg)) {
     return lastIndex
