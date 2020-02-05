@@ -4249,7 +4249,8 @@ declare namespace Cypress {
     extensions: string[],
     preferences: {[key: string]: any}
     args: string[],
-    windowSize: 'maximized' | 'fullscreen'
+    // NOTE: temporarily commenting out
+    // windowSize: 'maximized' | 'fullscreen'
   }
 
   interface dimensions {

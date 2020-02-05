@@ -248,8 +248,9 @@ module.exports = {
     .then (launchOptions) =>
       { preferences } = launchOptions
 
-      if launchOptions.windowSize is 'fullscreen'
-        preferences['fullscreen'] = true
+      ## NOTE: temporarily commenting out
+      # if launchOptions.windowSize is 'fullscreen'
+        # preferences['fullscreen'] = true
 
       debug("launching browser window to url: %s", url)
 

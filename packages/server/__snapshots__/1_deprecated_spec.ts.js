@@ -286,7 +286,6 @@ The \`launchOptions\` object returned by your plugin's \`browser:before:launch\`
 - preferences
 - extensions
 - args
-- windowSize
 
 https://on.cypress.io/browser-launch-api
 

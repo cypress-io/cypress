@@ -29,12 +29,14 @@ const defaultLaunchOptions: {
   preferences: {[key: string]: any}
   extensions: string[]
   args: string[]
-  windowSize: 'fullscreen' | 'maximized'
+  // NOTE: temporarily commenting out
+  // windowSize: 'fullscreen' | 'maximized'
 } = {
   preferences: {},
   extensions: [],
   args: [],
-  windowSize: 'maximized',
+  // NOTE: temporarily commenting out
+  // windowSize: 'maximized',
 }
 
 const KNOWN_LAUNCH_OPTION_PROPERTIES = _.keys(defaultLaunchOptions)
