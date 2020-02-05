@@ -13,14 +13,15 @@ describe('e2e headless', function () {
         'EXPECT_HEADLESS': '1',
       },
     },
-    expectedExitCode: 0,
     headed: false,
     snapshot: true,
   })
 
-  // cypress run --headed
+  // NOTE: cypress run --headed
   // currently, Electron differs because it displays a
   // "can not record video in headed mode" error
+  // this trick allows us to have 1 snapshot for electron
+  // and 1 for every other browser
   ;[
     'electron',
     '!electron',

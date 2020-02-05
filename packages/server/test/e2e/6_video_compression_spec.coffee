@@ -21,7 +21,6 @@ describe "e2e video compression", ->
         MS_PER_TEST
       }
     }
-    expectedExitCode: 0
     onRun: (exec) ->
       process.env.VIDEO_COMPRESSION_THROTTLE = 10
 

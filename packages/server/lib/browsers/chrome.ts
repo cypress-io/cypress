@@ -19,6 +19,7 @@ const errors = require('../errors')
 type CypressConfiguration = any
 
 type Browser = FoundBrowser & {
+  majorVersion: number
   isHeadless: boolean
   isHeaded: boolean
 }
@@ -34,7 +35,7 @@ const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
 
-const defaultArgs = [
+const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
   '--start-maximized',
@@ -105,15 +106,9 @@ const defaultArgs = [
 ]
 
 const getRemoteDebuggingPort = async () => {
-  let port
+  const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
 
-  port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
-
-  if (port) {
-    return port
-  }
-
-  return utils.getPort()
+  return port || utils.getPort()
 }
 
 const pluginsBeforeBrowserLaunch = async function (browser, options) {
@@ -246,7 +241,7 @@ const _setAutomation = (client, automation) => {
   )
 }
 
-module.exports = {
+export = {
   //
   // tip:
   //   by adding utility functions that start with "_"
@@ -274,10 +269,8 @@ module.exports = {
 
     // get the string bytes for the final extension file
     const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
-    let extensionBg; let extensionDest
-
-    extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
-    extensionBg = path.join(extensionDest, 'background.js')
+    const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
+    const extensionBg = path.join(extensionDest, 'background.js')
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
@@ -286,28 +279,21 @@ module.exports = {
     return extensionDest
   },
 
-  // expose for stubbing during tests
-  _getArgs (options: CypressConfiguration = {}, port: string) {
-    let ps; let ua
-
-    _.defaults(options, {
-      browser: {},
-    })
-
-    const args = ([] as string[]).concat(defaultArgs)
+  _getArgs (browser: Browser, options: CypressConfiguration, port: string) {
+    const args = ([] as string[]).concat(DEFAULT_ARGS)
 
     if (os.platform() === 'linux') {
       args.push('--disable-gpu')
       args.push('--no-sandbox')
     }
 
-    ua = options.userAgent
+    const ua = options.userAgent
 
     if (ua) {
       args.push(`--user-agent=${ua}`)
     }
 
-    ps = options.proxyServer
+    const ps = options.proxyServer
 
     if (ps) {
       args.push(`--proxy-server=${ps}`)
@@ -322,7 +308,7 @@ module.exports = {
     // https://github.com/cypress-io/cypress/issues/2037
     // https://github.com/cypress-io/cypress/issues/2215
     // https://github.com/cypress-io/cypress/issues/2223
-    const { majorVersion } = options.browser
+    const { majorVersion, isHeadless } = browser
 
     if (CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING.includes(majorVersion)) {
       args.push('--disable-blink-features=RootLayerScrolling')
@@ -334,7 +320,7 @@ module.exports = {
       args.push('--proxy-bypass-list=<-loopback>')
     }
 
-    if (options.browser.isHeadless) {
+    if (isHeadless) {
       args.push('--headless')
     }
 
@@ -353,11 +339,12 @@ module.exports = {
 
     const port = await getRemoteDebuggingPort()
 
-    let defaultArgs = this._getArgs(options, port)
+    const defaultArgs = this._getArgs(browser, options, port)
 
-    let launchOptions = {
+    const launchOptions = {
       args: defaultArgs,
       extensions: [],
+      preferences: {},
     }
 
     let [cacheDir, pluginConfigResult] = await Bluebird.all([

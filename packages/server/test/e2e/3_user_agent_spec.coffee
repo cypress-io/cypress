@@ -26,5 +26,4 @@ describe "e2e user agent", ->
   e2e.it "passes", {
     spec: "user_agent_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }

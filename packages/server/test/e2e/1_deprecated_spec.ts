@@ -12,8 +12,9 @@ describe('deprecated before:browser:launch args', () => {
     spec: '*',
     expectedExitCode: 0,
     snapshot: true,
-    stdoutInclude: 'Deprecation Warning:',
-    psInclude: ['--foo', '--bar'],
+    onStdout: (stdout) => {
+      expect(stdout).include('Deprecation Warning:')
+    },
   })
 
   e2e.it('using non-deprecated API - no warning', {
@@ -26,8 +27,9 @@ describe('deprecated before:browser:launch args', () => {
     spec: '*',
     expectedExitCode: 0,
     snapshot: true,
-    stdoutExclude: 'Deprecation Warning:',
-    psInclude: ['--foo', '--bar'],
+    onStdout: (stdout) => {
+      expect(stdout).not.include('Deprecation Warning:')
+    },
   })
 
   e2e.it('concat return', {
@@ -40,8 +42,9 @@ describe('deprecated before:browser:launch args', () => {
     spec: '*',
     expectedExitCode: 0,
     snapshot: true,
-    stdoutInclude: 'Deprecation Warning:',
-    psInclude: '--foo',
+    onStdout: (stdout) => {
+      expect(stdout).include('Deprecation Warning:')
+    },
   })
 
   e2e.it('no mutate return', {
@@ -54,7 +57,8 @@ describe('deprecated before:browser:launch args', () => {
     spec: '*',
     expectedExitCode: 0,
     snapshot: true,
-    stdoutInclude: 'Deprecation Warning:',
-    psInclude: '--foo',
+    onStdout: (stdout) => {
+      expect(stdout).include('Deprecation Warning:')
+    },
   })
 })

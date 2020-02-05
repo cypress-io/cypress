@@ -81,7 +81,6 @@ describe "e2e web security", ->
     e2e.it "passes", {
       spec: "web_security_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
       browser: ['chrome', 'electron']
     }
 
@@ -95,5 +94,6 @@ context 'firefox', ->
     spec: "simple_passing_spec.coffee"
     snapshot: true
     browser: 'firefox'
-    stdoutInclude: 'Your project has set the configuration option: `chromeWebSecurity: false`\n\nThis option will not have an effect in Firefox.'
+    onStdout: (stdout) ->
+      expect(stdout).includes('Your project has set the configuration option: `chromeWebSecurity: false`\n\nThis option will not have an effect in Firefox.')
   }
