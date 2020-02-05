@@ -422,20 +422,6 @@ export = {
       utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
     ])
 
-    // NOTE: temporarily commenting out
-    // if (launchOptions.windowSize) {
-    //   switch (launchOptions.windowSize) {
-    //     case 'fullscreen':
-    //       launchOptions.args.push('--start-fullscreen')
-    //       break
-
-    //     case 'maximized':
-    //       launchOptions.args.push('--start-maximized')
-    //       break
-    //     default: null
-    //   }
-    // }
-
     if (launchOptions.preferences) {
       launchOptions.preferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
     }
