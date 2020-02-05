@@ -1,6 +1,5 @@
 require("../../spec_helper")
 
-_ = require("lodash")
 Promise = require("bluebird")
 Windows = require("#{root}../lib/gui/windows")
 browsers = require("#{root}../lib/browsers")
