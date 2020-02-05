@@ -96,8 +96,8 @@ module.exports = {
         options.onError(err)
 
       handleWarning = (warningErr) ->
-        debug("plugins process error:", warningErr.stack)
-        return if not pluginsProcess ## prevent repeating this in case of multiple errors
+        debug("plugins process warning:", warningErr.stack)
+        return if not pluginsProcess ## prevent repeating this in case of multiple warnings
         options.onWarning(warningErr)
 
       pluginsProcess.on("error", handleError)

@@ -21,6 +21,7 @@ describe "lib/browsers/electron", ->
     @options = {
       some: "var"
       projectRoot: "/foo/"
+      onWarning: sinon.stub().returns()
     }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
@@ -44,6 +45,9 @@ describe "lib/browsers/electron", ->
         }
       }
     })
+
+    sinon.stub(Windows, 'installExtension').returns()
+    sinon.stub(Windows, 'resetExtensions').returns()
 
     @stubForOpen = ->
       sinon.stub(electron, "_render").resolves(@win)
@@ -96,15 +100,36 @@ describe "lib/browsers/electron", ->
         expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
 
     ## https://github.com/cypress-io/cypress/issues/1992
-    it "it merges in options without removing essential options", ->
+    it "it merges in user preferences without removing essential options", ->
       plugins.has.returns(true)
-      plugins.execute.resolves({foo: "bar"})
+      plugins.execute.withArgs("before:browser:launch").resolves({
+        preferences: {
+          foo: "bar"
+        }
+      })
 
       electron.open("electron", @url, @options, @automation)
       .then =>
         options = electron._render.firstCall.args[3]
 
         expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
+
+    it "installs supplied extensions from before:browser:launch and warns on failure", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({ extensions: ['foo', 'bar'] })
+
+      Windows.installExtension.withArgs('bar').throws()
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        expect(Windows.installExtension).to.be.calledTwice
+        expect(Windows.installExtension).to.be.calledWith('foo')
+        expect(Windows.installExtension).to.be.calledWith('bar')
+
+        expect(@options.onWarning).to.be.calledOnce
+
+        warning = @options.onWarning.firstCall.args[0].message
+        expect(warning).to.contain('Electron').and.contain('bar')
 
   context "._launch", ->
     beforeEach ->

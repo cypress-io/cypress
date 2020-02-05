@@ -9,6 +9,8 @@ const task = require('./task')
 const util = require('../util')
 const errors = require('../../errors')
 
+const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
+
 const registeredEvents = {}
 
 const invoke = (eventId, args = []) => {
@@ -99,15 +101,21 @@ const execute = (ipc, event, ids, args = []) => {
       // This will send a warning message when a deprecated API is used
       // define array-like functions on this object so we can warn about using deprecated array API
       // while still fufiling desired behavior
-      const pluginConfig = args[1]
+      const [, launchOptions] = args
 
-      ;['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes'].forEach((name) => {
-        const boundFn = pluginConfig.args[name].bind(pluginConfig.args)
+      let hasEmittedWarning = false
 
-        pluginConfig[name] = function () {
+      ARRAY_METHODS.forEach((name) => {
+        const boundFn = launchOptions.args[name].bind(launchOptions.args)
+
+        launchOptions[name] = function () {
+          if (hasEmittedWarning) return
+
+          hasEmittedWarning = true
+
           sendWarning(ipc,
             errors.get(
-              'DEPRECATED_BEFOREBROWSERLAUNCH_ARGS'
+              'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS'
             ))
 
           // eslint-disable-next-line prefer-rest-params
@@ -115,13 +123,13 @@ const execute = (ipc, event, ids, args = []) => {
         }
       })
 
-      Object.defineProperty(pluginConfig, 'length', {
+      Object.defineProperty(launchOptions, 'length', {
         get () {
           return this.args.length
         },
       })
 
-      pluginConfig[Symbol.iterator] = pluginConfig.args[Symbol.iterator].bind(pluginConfig.args)
+      launchOptions[Symbol.iterator] = launchOptions.args[Symbol.iterator].bind(launchOptions.args)
 
       util.wrapChildPromise(ipc, invoke, ids, args)
 
