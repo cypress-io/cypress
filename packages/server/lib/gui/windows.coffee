@@ -50,7 +50,6 @@ module.exports = {
       throw new Error('Extension could not be installed.')
 
   removeAllExtensions: ->
-    ## remove all extensions
     extensions = _.keys(BrowserWindow.getExtensions())
 
     debug('removing all electron extensions %o', extensions)
