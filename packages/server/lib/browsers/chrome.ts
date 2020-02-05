@@ -47,6 +47,7 @@ const pathToTheme = extension.getPathToTheme()
 const DEFAULT_ARGS = [
   '--test-type',
   '--ignore-certificate-errors',
+  '--start-maximized',
   '--silent-debugger-extension-api',
   '--no-default-browser-check',
   '--no-first-run',
