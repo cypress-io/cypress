@@ -166,7 +166,7 @@ module.exports = {
 
       originalSendCommand.call(webContents.debugger, message, data)
       .then (res) ->
-        if debug.enabled && res.data && res.data.length > 100
+        if debug.enabled && _.get(res, 'data.length') > 100
           res = _.clone(res)
           res.data = res.data.slice(0, 100) + ' [truncated]'
         debug('debugger: received response to %s: %o', message, res)

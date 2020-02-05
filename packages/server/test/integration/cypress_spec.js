@@ -1090,6 +1090,7 @@ describe('lib/cypress', () => {
             attach: sinon.stub(),
             sendCommand: sinon.stub().resolves(),
           },
+          getOSProcessId: sinon.stub(),
           setUserAgent: sinon.stub(),
           session: {
             clearCache: sinon.stub().resolves(),
