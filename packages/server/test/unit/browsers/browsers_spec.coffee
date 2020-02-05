@@ -36,12 +36,22 @@ describe "lib/browsers/index", ->
         expect(browser).to.deep.eq({ name: "foo", channel: "stable" })
 
     it "throws when no browser can be found", ->
-      browsers.ensureAndGetByNameOrPath("browserNotGonnaBeFound")
-      .then ->
-        throw new Error("should have failed")
-      .catch (err) ->
-        expect(err.type).to.eq("BROWSER_NOT_FOUND_BY_NAME")
-        expect(err.message).to.contain("'browserNotGonnaBeFound' was not found on your system")
+      expect(browsers.ensureAndGetByNameOrPath("browserNotGonnaBeFound"))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+      .then (err) ->
+        snapshot(err.message)
+
+    it "throws a special error when canary is passed", ->
+      sinon.stub(utils, "getBrowsers").resolves([
+        { name: "chrome", channel: "stable" }
+        { name: "chrome", channel: "canary" }
+        { name: "firefox", channel: "stable" }
+      ])
+
+      expect(browsers.ensureAndGetByNameOrPath("canary"))
+      .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
+      .then (err) ->
+        snapshot(err.message)
 
   context ".open", ->
     it "throws an error if browser family doesn't exist", ->
