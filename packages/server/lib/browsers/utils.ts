@@ -1,4 +1,9 @@
+import _ from 'lodash'
 import { FoundBrowser } from '@packages/launcher'
+// @ts-ignore
+import errors from '../errors'
+// @ts-ignore
+import plugins from '../plugins'
 
 const path = require('path')
 const debug = require('debug')('cypress:server:browsers:utils')
@@ -18,6 +23,22 @@ const getBrowserPath = (browser) => {
     PATH_TO_BROWSERS,
     `${browser.name}`
   )
+}
+
+const defaultLaunchOptions: {
+  preferences: {[key: string]: any}
+  extensions: string[]
+  args: string[]
+} = {
+  preferences: {},
+  extensions: [],
+  args: [],
+}
+
+const KNOWN_LAUNCH_OPTION_PROPERTIES = _.keys(defaultLaunchOptions)
+
+const getDefaultLaunchOptions = (options) => {
+  return _.defaultsDeep(options, defaultLaunchOptions)
 }
 
 const copyExtension = (src, dest) => {
@@ -81,10 +102,76 @@ const removeOldProfiles = function () {
 }
 
 const pathToExtension = extension.getPathToExtension()
-let extensionDest = appData.path('web-extension')
-let extensionBg = appData.path('web-extension', 'background.js')
+
+async function executeBeforeBrowserLaunch (browser, launchOptions: typeof defaultLaunchOptions, options) {
+  if (plugins.has('before:browser:launch')) {
+    const pluginConfigResult = await plugins.execute('before:browser:launch', browser, launchOptions)
+
+    if (pluginConfigResult) {
+      extendLaunchOptionsFromPlugins(launchOptions, pluginConfigResult, options)
+    }
+  }
+
+  return launchOptions
+}
+
+function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, options) {
+  // if we returned an array from the plugin
+  // then we know the user is using the deprecated
+  // interface and we need to warn them
+  // TODO: remove this logic in >= v5.0.0
+  if (pluginConfigResult[0]) {
+    options.onWarning(errors.get(
+      'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS'
+    ))
+
+    _.extend(pluginConfigResult, {
+      args: _.filter(pluginConfigResult, (_val, key) => _.isNumber(key)),
+      extensions: [],
+    })
+  } else {
+    // either warn about the array or potentially error on invalid props, but not both
+
+    // strip out all the known launch option properties from the resulting object
+    const unexpectedProperties: string[] = _
+    .chain(pluginConfigResult)
+    .omit(KNOWN_LAUNCH_OPTION_PROPERTIES)
+    .keys()
+    .value()
+
+    if (unexpectedProperties.length) {
+      errors.throw('UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES', unexpectedProperties, KNOWN_LAUNCH_OPTION_PROPERTIES)
+    }
+  }
+
+  _.forEach(launchOptions, (val, key) => {
+    const pluginResultValue = pluginConfigResult[key]
+
+    if (pluginResultValue) {
+      if (_.isPlainObject(val)) {
+        launchOptions[key] = _.extend({}, launchOptions[key], pluginResultValue)
+
+        return
+      }
+
+      launchOptions[key] = pluginResultValue
+
+      return
+    }
+  })
+
+  return launchOptions
+}
 
 export = {
+  extendLaunchOptionsFromPlugins,
+
+  executeBeforeBrowserLaunch,
+
+  defaultLaunchOptions,
+
+  getDefaultLaunchOptions,
+
   getPort,
 
   copyExtension,
@@ -108,8 +195,8 @@ export = {
     // get the string bytes for the final extension file
     return extension.setHostAndPath(proxyUrl, socketIoRoute, onScreencastFrame)
     .then((str) => {
-      extensionDest = getExtensionDir(browser, isTextTerminal)
-      extensionBg = path.join(extensionDest, 'background.js')
+      const extensionDest = getExtensionDir(browser, isTextTerminal)
+      const extensionBg = path.join(extensionDest, 'background.js')
 
       // copy the extension src to the extension dist
       return copyExtension(pathToExtension, extensionDest)
@@ -118,7 +205,8 @@ export = {
 
         // and overwrite background.js with the final string bytes
         return fs.writeFileAsync(extensionBg, str)
-      }).return(extensionDest)
+      })
+      .return(extensionDest)
     })
   },
 
@@ -135,7 +223,7 @@ export = {
       const version = process.versions.chrome || ''
 
       if (version) {
-        majorVersion = parseInt(version.split('.')[0])
+        majorVersion = parseFloat(version.split('.')[0])
       }
 
       const electronBrowser: FoundBrowser = {

@@ -1090,6 +1090,7 @@ describe('lib/cypress', () => {
             attach: sinon.stub(),
             sendCommand: sinon.stub().resolves(),
           },
+          getOSProcessId: sinon.stub(),
           setUserAgent: sinon.stub(),
           session: {
             clearCache: sinon.stub().resolves(),
@@ -1137,9 +1138,7 @@ describe('lib/cypress', () => {
 
             const browserArgs = args[2]
 
-            expect(browserArgs, 'two arguments to Chrome').to.have.length(7)
-
-            expect(browserArgs.slice(0, 4), 'arguments to Chrome').to.deep.eq([
+            expect(browserArgs.slice(0, 4), 'first 4 custom launch arguments to Chrome').to.deep.eq([
               'chrome', 'foo', 'bar', 'baz',
             ])
 
@@ -1180,15 +1179,15 @@ describe('lib/cypress', () => {
         return runMode.listenForProjectEnd.resolves({ stats: { failures: 0 } })
       })
 
-      it('can change the default port to 5555', function () {
+      it('can change the default port to 5544', function () {
         const listen = sinon.spy(http.Server.prototype, 'listen')
         const open = sinon.spy(Server.prototype, 'open')
 
-        return cypress.start([`--run-project=${this.todosPath}`, '--port=5555'])
+        return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         .then(() => {
-          expect(openProject.getProject().cfg.port).to.eq(5555)
-          expect(listen).to.be.calledWith(5555)
-          expect(open).to.be.calledWithMatch({ port: 5555 })
+          expect(openProject.getProject().cfg.port).to.eq(5544)
+          expect(listen).to.be.calledWith(5544)
+          expect(open).to.be.calledWithMatch({ port: 5544 })
           this.expectExitWith(0)
         })
       })
@@ -1199,11 +1198,11 @@ describe('lib/cypress', () => {
 
         server = Promise.promisifyAll(server)
 
-        return server.listenAsync(5555, '127.0.0.1')
+        return server.listenAsync(5544, '127.0.0.1')
         .then(() => {
-          return cypress.start([`--run-project=${this.todosPath}`, '--port=5555'])
+          return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         }).then(() => {
-          this.expectExitWithErr('PORT_IN_USE_LONG', '5555')
+          this.expectExitWithErr('PORT_IN_USE_LONG', '5544')
         })
       })
     })

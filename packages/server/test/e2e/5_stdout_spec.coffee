@@ -24,7 +24,6 @@ describe "e2e stdout", ->
       spec: "stdout_passing_spec.coffee"
       timeout: 120000
       snapshot: true
-      expectedExitCode: 0
     })
 
   it "logs that electron cannot be recorded in headed mode", ->
@@ -32,14 +31,12 @@ describe "e2e stdout", ->
       spec: "simple_spec.coffee"
       headed: true
       snapshot: true
-      expectedExitCode: 0
     })
 
   e2e.it "logs that chrome cannot be recorded", {
     spec: "simple_spec.coffee"
     browser: "chrome"
     snapshot: true
-    expectedExitCode: 0
   }
 
   it "displays fullname of nested specfile", ->
@@ -47,5 +44,4 @@ describe "e2e stdout", ->
       port: 2020
       snapshot: true
       spec: "nested-1/nested-2/nested-3/*"
-      expectedExitCode: 0
     })
