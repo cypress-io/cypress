@@ -87,8 +87,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - install-latest-chrome:
-          browser: << parameters.browser >>
       - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
@@ -516,8 +514,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - install-latest-chrome:
-          browser: chrome
       - run:
           command: npm start
           background: true
