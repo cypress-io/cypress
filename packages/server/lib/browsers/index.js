@@ -23,7 +23,7 @@ const kill = function (unbind) {
       instance.removeAllListeners()
     }
 
-    instance.once('exit', function (...args) {
+    instance.once('exit', (...args) => {
       debug('browser process killed')
 
       return resolve.apply(null, args)
@@ -61,11 +61,6 @@ const isValidPathToBrowser = (str) => {
 }
 
 const parseBrowserOption = (opt) => {
-  // for backwards compatibility pre-4.x
-  if (opt === 'canary') {
-    opt = 'chrome:canary'
-  }
-
   // it's a name or a path
   if (!_.isString(opt) || !opt.includes(':')) {
     return {
