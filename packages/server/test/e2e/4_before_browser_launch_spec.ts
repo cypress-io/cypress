@@ -1,5 +1,12 @@
+const browserUtils = require('../../lib/browsers/utils')
 const e2e = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
+
+const browser = {
+  name: 'chrome',
+}
+const isTextTerminal = true // we're always in run mode
+const PATH_TO_CHROME_PROFILE = browserUtils.getProfileDir(browser, isTextTerminal)
 
 describe('e2e before:browser:launch', () => {
   e2e.setup()
@@ -8,6 +15,9 @@ describe('e2e before:browser:launch', () => {
     browser: 'chrome',
     config: {
       video: false,
+      env: {
+        PATH_TO_CHROME_PROFILE,
+      },
     },
     project: Fixtures.projectPath('chrome-browser-preferences'),
     snapshot: true,
