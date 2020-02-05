@@ -10,6 +10,8 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
 
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string
+    options.extensions // $ExpectType string[]
+    options.args // $ExpectType string[]
 
     console.log('launching browser', browser.displayName)
     return options
