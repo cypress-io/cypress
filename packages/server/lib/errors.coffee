@@ -99,7 +99,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
     when "CHROME_WEB_SECURITY_NOT_SUPPORTED"
       """
       Your project has set the configuration option: `chromeWebSecurity: false`
-      
+
       This option will not have an effect in #{_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.
       """
     when "BROWSER_NOT_FOUND_BY_NAME"
@@ -126,8 +126,9 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       A video will not be recorded when using this mode.
       """
     when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
+      ## TODO: can this error be removed? what other family of browsers would we support....?
       """
-      Warning: Cypress can only record videos when using an Electron or Chrome-family browser.
+      Warning: Cypress can only record videos when using Firefox, Electron, or a Chromium-family browser.
 
       You have set the browser to: '#{arg1}'
 

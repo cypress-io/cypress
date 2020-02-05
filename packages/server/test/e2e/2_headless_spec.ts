@@ -6,7 +6,6 @@ describe('e2e headless', function () {
   // cypress run --headless
   e2e.it('tests in headless mode pass', {
     spec: 'headless_spec.js',
-    browser: ['chrome', 'electron'],
     config: {
       env: {
         'CI': process.env.CI,
