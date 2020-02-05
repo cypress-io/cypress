@@ -11,7 +11,8 @@ import fs from '../util/fs'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
 import protocol from './protocol'
-import utils, { Browser } from './utils'
+import utils from './utils'
+import { Browser } from './types'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any

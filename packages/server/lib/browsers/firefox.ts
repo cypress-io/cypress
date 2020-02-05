@@ -7,7 +7,8 @@ import path from 'path'
 import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
-import utils, { Browser } from './utils'
+import utils from './utils'
+import { Browser } from './types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
