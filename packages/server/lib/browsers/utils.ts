@@ -25,6 +25,12 @@ const getBrowserPath = (browser) => {
   )
 }
 
+export type Browser = FoundBrowser & {
+  majorVersion: number
+  isHeadless: boolean
+  isHeaded: boolean
+}
+
 const defaultLaunchOptions: {
   preferences: {[key: string]: any}
   extensions: string[]

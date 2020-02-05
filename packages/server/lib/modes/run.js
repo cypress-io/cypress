@@ -652,7 +652,7 @@ const browserCanBeRecorded = (browser) => {
     return true
   }
 
-  if (browser.family === 'firefox' && browser.isHeaded) {
+  if (browser.family === 'firefox') {
     return true
   }
 
