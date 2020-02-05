@@ -50,7 +50,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void
+  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -4236,31 +4236,22 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
-  // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
-  // a user callback function. Others probably only need a callback function.
-
-  /**
-   * These events come from the application currently under test (your application).
-   * These are the most useful events for you to listen to.
-   * @see https://on.cypress.io/catalog-of-events#App-Events
-   */
-
-  interface browserLaunchOptions {
+  interface BrowserLaunchOptions {
     extensions: string[],
-    preferences: {[key: string]: any}
+    preferences: { [key: string]: any }
     args: string[],
   }
 
-  interface dimensions {
+  interface Dimensions {
     width: number
     height: number
   }
 
-  interface screenshotDetails {
+  interface ScreenshotDetails {
     size: number
     takenAt: string
     duration: number
-    dimensions: dimensions
+    dimensions: Dimensions
     multipart: boolean
     pixelRatio: number
     name: string
@@ -4271,29 +4262,44 @@ declare namespace Cypress {
     blackout: string[]
   }
 
-  interface afterScreenshotReturnObject {
+  interface AfterScreenshotReturnObject {
     path?: string
     size?: number
-    dimensions?: dimensions
+    dimensions?: Dimensions
   }
 
-  interface fileObject {
+  interface FileObject {
     filePath: string
     outputPath: string
     shouldWatch: boolean
   }
 
-  interface tasks {
-    [key: string]: (value: any) => any
+  /**
+   * Individual task callback. Receives a single argument and _should_ return
+   * anything but `undefined` or a promise that resolves anything but `undefined`
+   * TODO: find a way to express "anything but undefined" in TypeScript
+   */
+  type Task = (value: any) => any
+
+  interface Tasks {
+    [key: string]: Task
   }
 
   interface PluginEvents {
-    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: browserLaunchOptions) => browserLaunchOptions): void
-    (action: 'after:screenshot', fn: (details: screenshotDetails) => afterScreenshotReturnObject | Promise<afterScreenshotReturnObject>): void
-    (action: 'file:preprocessor', fn: (file: fileObject) => string | Promise<string>): void
-    (action: 'task', tasks: tasks): void
+    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
+    (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
+    (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
+    (action: 'task', tasks: Tasks): void
   }
 
+  // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
+  // a user callback function. Others probably only need a callback function.
+
+  /**
+   * These events come from the application currently under test (your application).
+   * These are the most useful events for you to listen to.
+   * @see https://on.cypress.io/catalog-of-events#App-Events
+   */
   interface Actions {
     /**
      * Fires when an uncaught exception occurs in your application.
