@@ -3,6 +3,7 @@ ipc         = require("electron").ipcMain
 shell       = require("electron").shell
 debug       = require('debug')('cypress:server:events')
 pluralize   = require("pluralize")
+stripAnsi   = require("strip-ansi")
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
@@ -207,6 +208,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
         bus.emit("project:error", errors.clone(err, {html: true}))
 
       onWarning = (warning) ->
+        warning.message = stripAnsi(warning.message)
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
       browsers.getAllBrowsersWith(options.browser)

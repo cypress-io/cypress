@@ -11,7 +11,6 @@ fs = require("#{root}../lib/util/fs")
 describe "lib/browsers/chrome", ->
   context "#open", ->
     beforeEach ->
-      @args = []
       # mock CRI client during testing
       @criClient = {
         ensureMinimumProtocolVersion: sinon.stub().resolves()
@@ -31,11 +30,16 @@ describe "lib/browsers/chrome", ->
 
       sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext")
       sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(@criClient)
-      sinon.stub(plugins, "has")
-      sinon.stub(plugins, "execute")
+      sinon.stub(plugins, "execute").callThrough()
       sinon.stub(utils, "launch").resolves(@launchedBrowser)
       sinon.stub(utils, "getProfileDir").returns("/profile/dir")
       sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache")
+
+      @readJson = sinon.stub(fs, 'readJson')
+      @readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
+      @readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      @readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
+
       # port for Chrome remote interface communication
       sinon.stub(utils, "getPort").resolves(50505)
 
@@ -51,26 +55,25 @@ describe "lib/browsers/chrome", ->
         expect(@criClient.send).to.have.been.calledWith("Page.navigate")
 
     it "is noop without before:browser:launch", ->
-      plugins.has.returns(false)
-
       chrome.open("chrome", "http://", {}, @automation)
       .then ->
         expect(plugins.execute).not.to.be.called
 
     it "is noop if newArgs are not returned", ->
-      sinon.stub(chrome, "_getArgs").returns(@args)
+      args = []
 
-      plugins.has.returns(true)
+      sinon.stub(chrome, "_getArgs").returns(args)
+      sinon.stub(plugins, 'has').returns(true)
+
       plugins.execute.resolves(null)
 
       chrome.open("chrome", "http://", {}, @automation)
       .then =>
         # to initialize remote interface client and prepare for true tests
         # we load the browser with blank page first
-        expect(utils.launch).to.be.calledWith("chrome", "about:blank", @args)
+        expect(utils.launch).to.be.calledWith("chrome", "about:blank", args)
 
     it "does not load extension in headless mode", ->
-      plugins.has.returns(false)
       chrome._writeExtension.restore()
 
       pathToTheme = extension.getPathToTheme()
@@ -88,21 +91,18 @@ describe "lib/browsers/chrome", ->
         ])
 
     it "normalizes --load-extension if provided in plugin", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves([
-        "--foo=bar", "--load-extension=/foo/bar/baz.js"
-      ])
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve({
+          args: ["--foo=bar", "--load-extension=/foo/bar/baz.js"]
+        })
 
       pathToTheme = extension.getPathToTheme()
-
-      ## this should get obliterated
-      @args.push("--something=else")
 
       chrome.open("chrome", "http://", {}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
-        expect(args).to.deep.eq([
+        expect(args).to.include.members([
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
@@ -110,21 +110,18 @@ describe "lib/browsers/chrome", ->
         ])
 
     it "normalizes multiple extensions from plugins", ->
-      plugins.has.returns(true)
-      plugins.execute.resolves([
-        "--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"
-      ])
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve {
+          args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]
+        }
 
       pathToTheme = extension.getPathToTheme()
-
-      ## this should get obliterated
-      @args.push("--something=else")
 
       chrome.open("chrome", "http://", {}, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
-        expect(args).to.deep.eq([
+        expect(args).to.include.members([
           "--foo=bar"
           "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
           "--user-data-dir=/profile/dir"
@@ -132,17 +129,17 @@ describe "lib/browsers/chrome", ->
         ])
 
     it "cleans up an unclean browser profile exit status", ->
-      sinon.stub(fs, "readJson").withArgs("/profile/dir/Default/Preferences").resolves({
+      @readJson.withArgs("/profile/dir/Default/Preferences").resolves({
         profile: {
           exit_type: "Abnormal"
           exited_cleanly: false
         }
       })
-      sinon.stub(fs, "writeJson")
+      sinon.stub(fs, "outputJson").resolves()
 
       chrome.open("chrome", "http://", {}, @automation)
       .then ->
-        expect(fs.writeJson).to.be.calledWith("/profile/dir/Default/Preferences", {
+        expect(fs.outputJson).to.be.calledWith("/profile/dir/Default/Preferences", {
           profile: {
             exit_type: "Normal"
             exited_cleanly: true
@@ -242,3 +239,108 @@ describe "lib/browsers/chrome", ->
       chromeVersionHasLoopback("71", false)
       chromeVersionHasLoopback("72", true)
       chromeVersionHasLoopback("73", true)
+
+  context "#_getChromePreferences", ->
+    it "returns map of empty if the files do not exist", ->
+      sinon.stub(fs, 'readJson')
+      .withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
+      .withArgs('/foo/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      .withArgs('/foo/Local State').rejects({ code: 'ENOENT' })
+
+      expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
+        default: {},
+        defaultSecure: {},
+        localState: {}
+      })
+
+    it "returns map of json objects if the files do exist", ->
+      sinon.stub(fs, 'readJson')
+      .withArgs('/foo/Default/Preferences').resolves({ foo: 'bar' })
+      .withArgs('/foo/Default/Secure Preferences').resolves({ bar: 'baz' })
+      .withArgs('/foo/Local State').resolves({ baz: 'quux' })
+
+      expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
+        default: { foo: 'bar' },
+        defaultSecure: { bar: 'baz' },
+        localState: { baz: 'quux' }
+      })
+
+  context "#_mergeChromePreferences", ->
+    it "merges as expected", ->
+      originalPrefs = {
+        default: {},
+        defaultSecure: {
+          foo: 'bar'
+          deleteThis: 'nephew'
+        },
+        localState: {}
+      }
+
+      newPrefs = {
+        default: {
+          something: {
+            nested: 'here'
+          },
+        },
+        defaultSecure: {
+          deleteThis: null
+        },
+        someGarbage: true
+      }
+
+      expected = {
+        default: {
+          something: {
+            nested: 'here'
+          }
+        },
+        defaultSecure: {
+          foo: 'bar'
+        },
+        localState: {}
+      }
+
+      expect(chrome._mergeChromePreferences(originalPrefs, newPrefs)).to.deep.eq(expected)
+
+  context "#_writeChromePreferences", ->
+    it "writes json as expected", ->
+      outputJson = sinon.stub(fs, 'outputJson')
+      defaultPrefs = outputJson.withArgs('/foo/Default/Preferences').resolves()
+      securePrefs = outputJson.withArgs('/foo/Default/Secure Preferences').resolves()
+      statePrefs = outputJson.withArgs('/foo/Local State').resolves()
+
+      originalPrefs = {
+        default: {},
+        defaultSecure: {
+          foo: 'bar'
+          deleteThis: 'nephew'
+        },
+        localState: {}
+      }
+
+      newPrefs = chrome._mergeChromePreferences(originalPrefs, {
+        default: {
+          something: {
+            nested: 'here'
+          },
+        },
+        defaultSecure: {
+          deleteThis: null
+        },
+        someGarbage: true
+      })
+
+      expect(chrome._writeChromePreferences('/foo', originalPrefs, newPrefs)).to.eventually.equal()
+      .then ->
+        expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
+          something: {
+            nested: 'here'
+          },
+        })
+
+        expect(securePrefs).to.be.calledWith('/foo/Default/Secure Preferences', {
+          foo: 'bar'
+        })
+
+        ## no changes were made
+        expect(statePrefs).to.not.be.called

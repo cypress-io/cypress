@@ -4,6 +4,7 @@ Promise = require("bluebird")
 Windows = require("#{root}../lib/gui/windows")
 browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
+snapshot = require('snap-shot-it')
 
 describe "lib/browsers/index", ->
   context ".getBrowserInstance", ->
@@ -51,13 +52,33 @@ describe "lib/browsers/index", ->
         browsers: []
       })
       .then (e) ->
-        console.error(e)
         throw new Error("should've failed")
-      , (err) ->
+      .catch (err) ->
         # by being explicit with assertions, if something is unexpected
         # we will get good error message that includes the "err" object
         expect(err).to.have.property("type").to.eq("BROWSER_NOT_FOUND_BY_NAME")
         expect(err).to.have.property("message").to.contain("'foo-bad-bang' was not found on your system")
+
+  context ".extendLaunchOptionsFromPlugins", ->
+    it "throws an error if unexpected property passed", ->
+      fn = ->
+        utils.extendLaunchOptionsFromPlugins({}, { foo: 'bar' })
+
+      ## this error is snapshotted in an e2e test, no need to do it here
+      expect(fn).to.throw({ type: "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES" })
+
+    it "warns if array passed and changes it to args", ->
+      onWarning = sinon.stub()
+
+      result = utils.extendLaunchOptionsFromPlugins({ args: [] }, ['foo'], { onWarning })
+
+      expect(result).to.deep.eq({
+        args: ['foo']
+      })
+
+      ## this error is snapshotted in e2e tests, no need to do it here
+      expect(onWarning).to.be.calledOnce
+      expect(onWarning).to.be.calledWithMatch({ type: "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS" })
 
     # Ooo, browser clean up tests are disabled?!!
 

@@ -473,7 +473,7 @@ const getChromeProps = (isHeaded, project, writeVideoFrame) => {
   .chain({})
   .tap((props) => {
     if (writeVideoFrame) {
-      props.screencastFrame = (e) => {
+      props.onScreencastFrame = (e) => {
         // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
         writeVideoFrame(Buffer.from(e.data, 'base64'))
       }
@@ -915,7 +915,24 @@ module.exports = {
       },
     }
 
+    const warnings = {}
+
     browserOpts.projectRoot = projectRoot
+
+    browserOpts.onWarning = (err) => {
+      const { message } = err
+
+      // if this warning has already been
+      // seen for this browser launch then
+      // suppress it
+      if (warnings[message]) {
+        return
+      }
+
+      warnings[message] = err
+
+      return project.onWarning
+    }
 
     return openProject.launch(browser, spec, browserOpts)
   },

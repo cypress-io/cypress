@@ -50,6 +50,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
+  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -4243,6 +4244,56 @@ declare namespace Cypress {
    * These are the most useful events for you to listen to.
    * @see https://on.cypress.io/catalog-of-events#App-Events
    */
+
+  interface browserLaunchOptions {
+    extensions: string[],
+    preferences: {[key: string]: any}
+    args: string[],
+  }
+
+  interface dimensions {
+    width: number
+    height: number
+  }
+
+  interface screenshotDetails {
+    size: number
+    takenAt: string
+    duration: number
+    dimensions: dimensions
+    multipart: boolean
+    pixelRatio: number
+    name: string
+    specName: string
+    testFailure: boolean
+    path: string
+    scaled: boolean
+    blackout: string[]
+  }
+
+  interface afterScreenshotReturnObject {
+    path?: string
+    size?: number
+    dimensions?: dimensions
+  }
+
+  interface fileObject {
+    filePath: string
+    outputPath: string
+    shouldWatch: boolean
+  }
+
+  interface tasks {
+    [key: string]: (value: any) => any
+  }
+
+  interface PluginEvents {
+    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: browserLaunchOptions) => browserLaunchOptions): void
+    (action: 'after:screenshot', fn: (details: screenshotDetails) => afterScreenshotReturnObject | Promise<afterScreenshotReturnObject>): void
+    (action: 'file:preprocessor', fn: (file: fileObject) => string | Promise<string>): void
+    (action: 'task', tasks: tasks): void
+  }
+
   interface Actions {
     /**
      * Fires when an uncaught exception occurs in your application.
