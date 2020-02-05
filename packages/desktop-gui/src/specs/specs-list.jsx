@@ -39,6 +39,9 @@ class SpecsList extends Component {
               onChange={this._updateFilter}
               onKeyUp={this._executeFilterAction}
             />
+
+            { window.addEventListener('keydown', this._executeSearch) }
+
             <Tooltip
               title='Clear search'
               className='browser-info-tooltip cy-tooltip'
@@ -106,6 +109,12 @@ class SpecsList extends Component {
   _executeFilterAction = (e) => {
     if (e.key === 'Escape') {
       this._clearFilter()
+    }
+  }
+
+  _executeSearch = (e) => {
+    if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+      document.querySelector('#filter').focus()
     }
   }
 
