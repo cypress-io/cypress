@@ -50,7 +50,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
+  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -4236,6 +4236,12 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
+  interface BrowserLaunchOptions {
+    extensions: string[],
+    preferences: { [key: string]: any }
+    args: string[],
+  }
+
   interface Dimensions {
     width: number
     height: number
@@ -4280,7 +4286,7 @@ declare namespace Cypress {
   }
 
   interface PluginEvents {
-    (action: 'before:browser:launch', fn: (browser: Browser, args: string[]) => void | string[] | Promise<string[]>): void
+    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
     (action: 'task', tasks: Tasks): void

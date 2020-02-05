@@ -1,18 +1,18 @@
+import Bluebird from 'bluebird'
+import check from 'check-more-types'
+import debugModule from 'debug'
+import la from 'lazy-ass'
 import _ from 'lodash'
 import os from 'os'
 import path from 'path'
-import Bluebird from 'bluebird'
-import la from 'lazy-ass'
-import check from 'check-more-types'
 import extension from '@packages/extension'
 import { FoundBrowser } from '@packages/launcher'
-import debugModule from 'debug'
-import fs from '../util/fs'
 import appData from '../util/app_data'
-import utils from './utils'
-import protocol from './protocol'
+import fs from '../util/fs'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
+import protocol from './protocol'
+import utils from './utils'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -23,13 +23,23 @@ type Browser = FoundBrowser & {
   isHeaded: boolean
 }
 
-const plugins = require('../plugins')
-
 const debug = debugModule('cypress:server:browsers:chrome')
 
 const LOAD_EXTENSION = '--load-extension='
 const CHROME_VERSIONS_WITH_BUGGY_ROOT_LAYER_SCROLLING = '66 67'.split(' ')
 const CHROME_VERSION_INTRODUCING_PROXY_BYPASS_ON_LOOPBACK = 72
+
+const CHROME_PREFERENCE_PATHS = {
+  default: path.join('Default', 'Preferences'),
+  defaultSecure: path.join('Default', 'Secure Preferences'),
+  localState: 'Local State',
+}
+
+type ChromePreferences = {
+  default: object
+  defaultSecure: object
+  localState: object
+}
 
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
@@ -104,25 +114,69 @@ const DEFAULT_ARGS = [
   '--use-mock-keychain',
 ]
 
-const getRemoteDebuggingPort = Bluebird.method(() => {
+/**
+ * Reads all known preference files (CHROME_PREFERENCE_PATHS) from disk and retur
+ * @param userDir
+ */
+const _getChromePreferences = (userDir: string): Bluebird<ChromePreferences> => {
+  debug('reading chrome preferences... %o', { userDir, CHROME_PREFERENCE_PATHS })
+
+  return Bluebird.props(_.mapValues(CHROME_PREFERENCE_PATHS, (prefPath) => {
+    return fs.readJson(path.join(userDir, prefPath))
+    .catch((err) => {
+      // return empty obj if it doesn't exist
+      if (err.code === 'ENOENT') {
+        return {}
+      }
+
+      throw err
+    })
+  }))
+}
+
+const _mergeChromePreferences = (originalPrefs: ChromePreferences, newPrefs: ChromePreferences): ChromePreferences => {
+  return _.mapValues(CHROME_PREFERENCE_PATHS, (_v, prefPath) => {
+    const original = _.cloneDeep(originalPrefs[prefPath])
+
+    if (!newPrefs[prefPath]) {
+      return original
+    }
+
+    let deletions: any[] = []
+
+    _.mergeWith(original, newPrefs[prefPath], (_objValue, newValue, key, obj) => {
+      if (newValue == null) {
+        // setting a key to null should remove it
+        deletions.push([obj, key])
+      }
+    })
+
+    deletions.forEach(([obj, key]) => {
+      delete obj[key]
+    })
+
+    return original
+  })
+}
+
+const _writeChromePreferences = (userDir: string, originalPrefs: ChromePreferences, newPrefs: ChromePreferences) => {
+  return Bluebird.map(_.keys(originalPrefs), (key) => {
+    const originalJson = originalPrefs[key]
+    const newJson = newPrefs[key]
+
+    if (!newJson || _.isEqual(originalJson, newJson)) {
+      return
+    }
+
+    return fs.outputJson(path.join(userDir, CHROME_PREFERENCE_PATHS[key]), newJson)
+  })
+  .return()
+}
+
+const getRemoteDebuggingPort = async () => {
   const port = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
 
   return port || utils.getPort()
-})
-
-const pluginsBeforeBrowserLaunch = function (browser, args) {
-  // bail if we're not registered to this event
-  if (!plugins.has('before:browser:launch')) {
-    return args
-  }
-
-  return plugins.execute('before:browser:launch', browser, args)
-  .then((newArgs) => {
-    debug('got user args for \'before:browser:launch\'', newArgs)
-
-    // reset args if we got 'em
-    return newArgs != null ? newArgs : args
-  })
 }
 
 /**
@@ -133,12 +187,12 @@ const pluginsBeforeBrowserLaunch = function (browser, args) {
  * @param browser the current browser being launched
  * @returns the modified list of arguments
  */
-const _normalizeArgExtensions = function (extPath, args, browser: Browser): string[] {
+const _normalizeArgExtensions = function (extPath, args, pluginExtensions, browser: Browser): string[] {
   if (browser.isHeadless) {
     return args
   }
 
-  let userExtensions
+  let userExtensions = []
   const loadExtension = _.find(args, (arg) => {
     return arg.includes(LOAD_EXTENSION)
   })
@@ -147,7 +201,11 @@ const _normalizeArgExtensions = function (extPath, args, browser: Browser): stri
     args = _.without(args, loadExtension)
 
     // form into array, enabling users to pass multiple extensions
-    userExtensions = loadExtension.replace(LOAD_EXTENSION, '').split(',')
+    userExtensions = userExtensions.concat(loadExtension.replace(LOAD_EXTENSION, '').split(','))
+  }
+
+  if (pluginExtensions) {
+    userExtensions = userExtensions.concat(pluginExtensions)
   }
 
   const extensions = [].concat(userExtensions, extPath, pathToTheme)
@@ -170,9 +228,7 @@ const _disableRestorePagesPrompt = function (userDir) {
 
   return fs.readJson(prefsPath)
   .then((preferences) => {
-    let profile
-
-    profile = preferences.profile
+    const profile = preferences.profile
 
     if (profile) {
       if ((profile['exit_type'] !== 'Normal') || (profile['exited_cleanly'] !== true)) {
@@ -181,10 +237,11 @@ const _disableRestorePagesPrompt = function (userDir) {
         profile['exit_type'] = 'Normal'
         profile['exited_cleanly'] = true
 
-        return fs.writeJson(prefsPath, preferences)
+        return fs.outputJson(prefsPath, preferences)
       }
     }
-  }).catch(() => {})
+  })
+  .catch(() => { })
 }
 
 // After the browser has been opened, we can connect to
@@ -204,14 +261,14 @@ const _connectToChromeRemoteInterface = function (port) {
 }
 
 const _maybeRecordVideo = async function (client, options) {
-  if (!options.screencastFrame) {
-    debug('screencastFrame is false')
+  if (!options.onScreencastFrame) {
+    debug('options.onScreencastFrame is false')
 
     return client
   }
 
   debug('starting screencast')
-  client.on('Page.screencastFrame', options.screencastFrame)
+  client.on('Page.screencastFrame', options.onScreencastFrame)
 
   await client.send('Page.startScreencast', {
     format: 'jpeg',
@@ -259,6 +316,12 @@ export = {
   _navigateUsingCRI,
 
   _setAutomation,
+
+  _getChromePreferences,
+
+  _mergeChromePreferences,
+
+  _writeChromePreferences,
 
   async _writeExtension (browser: Browser, options) {
     if (browser.isHeadless) {
@@ -340,16 +403,28 @@ export = {
 
     const userDir = utils.getProfileDir(browser, isTextTerminal)
 
-    const port = await getRemoteDebuggingPort()
+    const [port, preferences] = await Bluebird.all([
+      getRemoteDebuggingPort(),
+      _getChromePreferences(userDir),
+    ])
 
     const defaultArgs = this._getArgs(browser, options, port)
 
-    const [cacheDir, launchArgs] = await Bluebird.all([
+    const defaultLaunchOptions = utils.getDefaultLaunchOptions({
+      preferences,
+      args: defaultArgs,
+    })
+
+    const [cacheDir, launchOptions] = await Bluebird.all([
       // ensure that we have a clean cache dir
       // before launching the browser every time
       utils.ensureCleanCache(browser, isTextTerminal),
-      pluginsBeforeBrowserLaunch(browser, defaultArgs),
+      utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
     ])
+
+    if (launchOptions.preferences) {
+      launchOptions.preferences = _mergeChromePreferences(preferences, launchOptions.preferences as ChromePreferences)
+    }
 
     const [extDest] = await Bluebird.all([
       this._writeExtension(
@@ -358,10 +433,11 @@ export = {
       ),
       _removeRootExtension(),
       _disableRestorePagesPrompt(userDir),
+      _writeChromePreferences(userDir, preferences, launchOptions.preferences as ChromePreferences),
     ])
     // normalize the --load-extensions argument by
     // massaging what the user passed into our own
-    const args = _normalizeArgExtensions(extDest, launchArgs, browser)
+    const args = _normalizeArgExtensions(extDest, launchOptions.args, launchOptions.extensions, browser)
 
     // this overrides any previous user-data-dir args
     // by being the last one

@@ -844,6 +844,14 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
       Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
+    when "EXTENSION_NOT_LOADED"
+      """
+      #{arg1} could not install the extension at path:
+
+       > #{arg2}
+
+      Please verify that this is the path to a valid, unpacked WebExtension.
+      """
     when "COULD_NOT_FIND_SYSTEM_NODE"
       """
       `nodeVersion` is set to `system`, but Cypress could not find a usable Node executable on your PATH.
@@ -880,14 +888,36 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
+    when "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS"
+      """
+      Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`
+
+      The `before:browser:launch` plugin event switched from yielding the second argument as an `array` of browser arguments to an options `object` with an `args` property.
+
+      We've detected that your code is still using the previous, deprecated interface signature.
+
+      This code will not work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}
+      """
+    when "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES"
+      """
+      The `launchOptions` object returned by your plugin's `browser:before:launch` handler contained unexpected properties:
+
+      #{listItems(arg1)}
+
+      `launchOptions` may only contain the properties:
+
+      #{listItems(arg2)}
+
+      https://on.cypress.io/browser-launch-api
+      """
     when "COULD_NOT_PARSE_ARGUMENTS"
-        """
-        Cypress encountered an error while parsing the argument #{chalk.gray(arg1)}
+      """
+      Cypress encountered an error while parsing the argument #{chalk.gray(arg1)}
 
-        You passed: #{arg2}
+      You passed: #{arg2}
 
-        The error was: #{arg3}
-        """
+      The error was: #{arg3}
+      """
 
 get = (type, arg1, arg2, arg3) ->
   msg = getMsgByType(type, arg1, arg2, arg3)
