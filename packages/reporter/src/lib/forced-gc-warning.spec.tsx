@@ -34,7 +34,7 @@ const testLinks = (component: ShallowWrapper<any, Readonly<{}>, React.Component<
   component.find('a').forEach((a) => {
     const href = a.prop('href')
 
-    expect(href).to.eq('https://on.cypress.io/firefox-gc-issue')
+    expect(href).to.eq('https://on.cypress.io/firefox-gc-interval')
     a.simulate('click', { currentTarget: { href }, preventDefault: () => {} })
 
     expect(props.events.emit).to.be.calledWith('external:open', href)
