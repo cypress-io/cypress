@@ -209,7 +209,7 @@ export async function open (browser: Browser, url, options: any = {}) {
     // this will not have an effect after first launch in 'interactive' mode
     const sizemode = 'maximized'
 
-    await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 720, sizemode } } })
+    await fs.writeJSON(xulStorePath, { 'chrome://browser/content/browser.xhtml': { 'main-window': { 'width': 1280, 'height': 1024, sizemode } } })
   }
 
   launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir

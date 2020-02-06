@@ -53,14 +53,6 @@ describe('e2e firefox', function () {
 
   e2e.it('launches maximized by default', {
     browser: 'firefox',
-    config: {
-      video: false,
-      env: {
-        // normally e2e tests spawn at fixed size
-        // we'll tell our plugins file not to pass custom window size using this env var.
-        NO_RESIZE: '1',
-      },
-    },
-    spec: 'firefox_windowSize.js',
+    project: Fixtures.projectPath('screen-size'),
   })
 })
