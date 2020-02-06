@@ -54,23 +54,22 @@ class ForcedGcWarning extends React.Component<Props> {
         <div className={`gc-expando ${this.state.expanded ? 'expanded' : ''}`}>
           <p>
             <strong>
-              <i className='fas fa-trash-alt'></i>{' '}
               Garbage Collection Interval: (disabled)
             </strong>
             <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
           </p>
           <div>
             <p>
-              Cypress can force Firefox to run Garbage Collection (GC) between tests by enabling: <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a>
+              Cypress can force Firefox to run Garbage Collection (GC) between tests by enabling: <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a>
             </p>
             <p>
-              By default, <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> is only enabled in  <strong>run mode</strong>.
+              By default, <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a> is only enabled in  <strong>run mode</strong>.
             </p>
             <p>
               Running GC prevents Firefox from running out of memory during longer test runs.
             </p>
             <p>
-              Read <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'>issue #6187</a> for more details.
+              <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'>Learn more</a>.
             </p>
           </div>
         </div>
@@ -102,7 +101,6 @@ class ForcedGcWarning extends React.Component<Props> {
           <div>
             <p>
               <strong>
-                <i className='fas fa-trash-alt'></i>{' '}
                 Garbage Collection Interval: (enabled)
               </strong>
               <i className='fas fa-times clickable' onClick={() => this._toggleExpando()}></i>
@@ -110,7 +108,7 @@ class ForcedGcWarning extends React.Component<Props> {
           </div>
           <div>
             <p>
-              Cypress will force Firefox to run Garbage Collection (GC) between tests based on the value of: <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a>
+              Cypress will force Firefox to run Garbage Collection (GC) between tests based on the value of: <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a>
             </p>
             <p>
               Running GC prevents Firefox from running out of memory during longer test runs.
@@ -119,10 +117,10 @@ class ForcedGcWarning extends React.Component<Props> {
               Running GC is an expensive operation that can take up to a few seconds to complete. During this time Firefox may "freeze" and become unresponsive to user input.
             </p>
             <p>
-              To improve performance, you can try setting <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a> to a higher value, which will result in running GC less frequently.
+              To improve performance, you can try setting <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a> to a higher value, which will result in running GC less frequently.
             </p>
             <p>
-              <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'>Learn more about <code>firefoxGcInterval</code></a>.
+              <a className='code-link' onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'>Learn more</a>.
             </p>
           </div>
         </div>
