@@ -123,6 +123,9 @@ const defaultPreferences = {
 
   'dom.min_background_timeout_value': 4,
   'dom.timeout.enable_budget_timer_throttling': false,
+
+  'media.devices.insecure.enabled':	true,
+  'media.getusermedia.insecure.enabled': true,
 }
 
 export async function open (browser: Browser, url, options: any = {}) {

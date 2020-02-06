@@ -5,7 +5,7 @@ export function create (Cypress) {
     Cypress.isBrowser('firefox')
     && Cypress.config('video')
     && !Cypress.config('isInteractive')
-    // navigator.mediaDevices will be undefined if video capture from previous navigation is still recording
+    // navigator.mediaDevices will be undefined if the browser does not support display capture
     && window.navigator.mediaDevices
   ) {
     window.navigator.mediaDevices.getUserMedia({
