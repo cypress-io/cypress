@@ -54,5 +54,6 @@ describe('e2e firefox', function () {
   e2e.it('launches maximized by default', {
     browser: 'firefox',
     project: Fixtures.projectPath('screen-size'),
+    spec: '*',
   })
 })
