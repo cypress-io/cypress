@@ -275,7 +275,7 @@ exports['deprecated before:browser:launch args / fails when adding unknown prope
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec.js                                                                     (1 of 1)
-The \`launchOptions\` object returned by your plugin's \`browser:before:launch\` handler contained unexpected properties:
+The \`launchOptions\` object returned by your plugin's \`before:browser:launch\` handler contained unexpected properties:
 
 - foo
 - width

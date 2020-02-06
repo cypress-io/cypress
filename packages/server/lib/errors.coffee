@@ -907,7 +907,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
     when "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES"
       """
-      The `launchOptions` object returned by your plugin's `browser:before:launch` handler contained unexpected properties:
+      The `launchOptions` object returned by your plugin's `before:browser:launch` handler contained unexpected properties:
 
       #{listItems(arg1)}
 
