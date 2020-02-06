@@ -28,26 +28,32 @@ export default class Suite extends Runnable {
     return 'processing'
   }
 
-  @computed get _childStates () {
-    return _.map(this.children, 'state')
-  }
-
   @computed get _anyChildrenFailed () {
-    return _.some(this._childStates, (state) => {
+    return _.some(this.children, ({ state }) => {
       return state === 'failed'
     })
   }
 
   @computed get _allChildrenPassedOrPending () {
-    return !this._childStates.length || _.every(this._childStates, (state) => {
+    return !this.children.length || _.every(this.children, ({ state }) => {
       return state === 'passed' || state === 'pending'
     })
   }
 
   @computed get _allChildrenPending () {
-    return !!this._childStates.length
-            && _.every(this._childStates, (state) => {
-              return state === 'pending'
-            })
+    return (
+      !!this.children.length &&
+      _.every(this.children, ({ state }) => {
+        return state === 'pending'
+      })
+    )
+  }
+
+  matchesFilter (filter: TestState | null): boolean {
+    if (!filter || !this.children.length) return true
+
+    return _.some(this.children, (child) => {
+      return child.matchesFilter(filter)
+    })
   }
 }

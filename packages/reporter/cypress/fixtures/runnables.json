@@ -3,7 +3,7 @@
   "title": "",
   "root": true,
   "tests": [
-    
+
   ],
   "suites": [
     {
@@ -25,17 +25,17 @@
       "suites": [
         {
           "id": "r5",
-          "title": "nested suite 1",
+          "title": "suite (nested) 1",
           "root": false,
           "tests": [
             {
               "id": "r6",
-              "title": "test 1",
+              "title": "test (nested) 1",
               "state": "pending"
             },
             {
               "id": "r7",
-              "title": "test 2",
+              "title": "test (nested) 2",
               "state": "active"
             }
           ]
@@ -66,7 +66,7 @@
       "tests": [
         {
           "id": "r10",
-          "title": "test 3",
+          "title": "test 5",
           "state": "processing"
         }
       ]

@@ -155,6 +155,12 @@ export default class Test extends Runnable {
     .last()
   }
 
+  matchesFilter (filter: TestState | null) {
+    if (!filter) return true
+
+    return this.state === filter
+  }
+
   _findOrCreateHook (name: string) {
     const hook = _.find(this.hooks, { name })
 

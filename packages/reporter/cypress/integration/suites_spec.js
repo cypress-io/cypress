@@ -1,6 +1,6 @@
 const { EventEmitter } = require('events')
 
-describe('controls', function () {
+describe('suites', function () {
   beforeEach(function () {
     cy.fixture('runnables').as('runnables')
 
@@ -14,129 +14,149 @@ describe('controls', function () {
     })
 
     cy.get('.reporter').then(() => {
+      this.suiteTitle = this.runnables.suites[0].title
+
       this.runner.emit('runnables:ready', this.runnables)
 
       this.runner.emit('reporter:start', {})
     })
   })
 
-  describe('suites', function () {
-    beforeEach(function () {
-      this.suiteTitle = this.runnables.suites[0].title
+  describe('expand and collapse', function () {
+    it('is expanded by default', function () {
+      cy.contains(this.suiteTitle)
+      .parents('.collapsible').as('suiteWrapper')
+      .should('have.class', 'is-open')
+      .find('.collapsible-content').eq(0)
+      .should('be.visible')
     })
 
-    describe('expand and collapse', function () {
-      it('is expanded by default', function () {
+    describe('expand/collapse suite manually', function () {
+      beforeEach(function () {
         cy.contains(this.suiteTitle)
         .parents('.collapsible').as('suiteWrapper')
+        .should('have.class', 'is-open')
+        .find('.collapsible-content')
+        .should('be.visible')
+      })
+
+      it('expands/collapses on click', function () {
+        cy.contains(this.suiteTitle)
+        .click()
+
+        cy.get('@suiteWrapper')
+        .should('not.have.class', 'is-open')
+        .find('.collapsible-content').eq(0)
+        .should('not.be.visible')
+
+        cy.contains(this.suiteTitle)
+        .click()
+
+        cy.get('@suiteWrapper')
         .should('have.class', 'is-open')
         .find('.collapsible-content').eq(0)
         .should('be.visible')
       })
 
-      describe('expand/collapse suite manually', function () {
-        beforeEach(function () {
-          cy.contains(this.suiteTitle)
-          .parents('.collapsible').as('suiteWrapper')
-          .should('have.class', 'is-open')
-          .find('.collapsible-content')
-          .should('be.visible')
-        })
+      it('expands/collapses on enter', function () {
+        cy.contains(this.suiteTitle)
+        .parents('.collapsible-header')
+        .focus().type('{enter}')
 
-        it('expands/collapses on click', function () {
-          cy.contains(this.suiteTitle)
-          .click()
+        cy.get('@suiteWrapper')
+        .should('not.have.class', 'is-open')
+        .find('.collapsible-content').eq(0)
+        .should('not.be.visible')
 
-          cy.get('@suiteWrapper')
-          .should('not.have.class', 'is-open')
-          .find('.collapsible-content').eq(0)
-          .should('not.be.visible')
+        cy.contains(this.suiteTitle)
+        .parents('.collapsible-header')
+        .focus().type('{enter}')
 
-          cy.contains(this.suiteTitle)
-          .click()
+        cy.get('@suiteWrapper')
+        .should('have.class', 'is-open')
+        .find('.collapsible-content').eq(0)
+        .should('be.visible')
+      })
 
-          cy.get('@suiteWrapper')
-          .should('have.class', 'is-open')
-          .find('.collapsible-content').eq(0)
-          .should('be.visible')
-        })
+      it('expands/collapses on space', function () {
+        cy.contains(this.suiteTitle)
+        .parents('.collapsible-header')
+        .focus().type(' ')
 
-        it('expands/collapses on enter', function () {
-          cy.contains(this.suiteTitle)
-          .parents('.collapsible-header')
-          .focus().type('{enter}')
+        cy.get('@suiteWrapper')
+        .should('not.have.class', 'is-open')
+        .find('.collapsible-content').eq(0)
+        .should('not.be.visible')
 
-          cy.get('@suiteWrapper')
-          .should('not.have.class', 'is-open')
-          .find('.collapsible-content').eq(0)
-          .should('not.be.visible')
+        cy.contains(this.suiteTitle)
+        .parents('.collapsible-header')
+        .focus().type(' ')
 
-          cy.contains(this.suiteTitle)
-          .parents('.collapsible-header')
-          .focus().type('{enter}')
-
-          cy.get('@suiteWrapper')
-          .should('have.class', 'is-open')
-          .find('.collapsible-content').eq(0)
-          .should('be.visible')
-        })
-
-        it('expands/collapses on space', function () {
-          cy.contains(this.suiteTitle)
-          .parents('.collapsible-header')
-          .focus().type(' ')
-
-          cy.get('@suiteWrapper')
-          .should('not.have.class', 'is-open')
-          .find('.collapsible-content').eq(0)
-          .should('not.be.visible')
-
-          cy.contains(this.suiteTitle)
-          .parents('.collapsible-header')
-          .focus().type(' ')
-
-          cy.get('@suiteWrapper')
-          .should('have.class', 'is-open')
-          .find('.collapsible-content').eq(0)
-          .should('be.visible')
-        })
+        cy.get('@suiteWrapper')
+        .should('have.class', 'is-open')
+        .find('.collapsible-content').eq(0)
+        .should('be.visible')
       })
     })
+  })
 
-    describe('filtering suites list', () => {
-      it('filters by successful suites when the "Passing" filter is checked ', () => {
-        cy.get('#passed').click()
-        cy.contains('suite 3').should('be.visible')
-        cy.contains('suite 1').should('not.be.visible')
-        cy.contains('suite 4').should('not.be.visible')
-        cy.contains('nested suite 1').should('not.be.visible')
-      })
+  describe('filtering', () => {
+    it('displays when the "Running" filter is selected and it contains active tests', () => {
+      cy.get('[value="active"]').click()
+      cy.contains('suite 1').should('be.visible')
+      cy.contains('suite (nested) 1').should('be.visible')
+    })
 
-      it('filters by failing suites when the "Failing" filter is checked', () => {
-        cy.get('#failed').click()
-        cy.contains('suite 3').should('not.be.visible')
-        cy.contains('suite 1').should('be.visible')
-        cy.contains('suite 4').should('not.be.visible')
-        cy.contains('nested suite 1').should('not.be.visible')
-      })
+    it('does not display when the "Running" filter is selected and it does not contain active tests', () => {
+      cy.get('[value="active"]').click()
+      cy.contains('suite 3').should('not.exist')
+      cy.contains('suite 4').should('not.exist')
+    })
 
-      it('filters by processing suites when the "Processing" filter is checked', () => {
-        cy.get('#processing').click()
-        cy.contains('suite 3').should('not.be.visible')
-        cy.contains('suite 1').should('not.be.visible')
-        cy.contains('suite 4').should('be.visible')
-        cy.contains('nested suite 1').should('not.be.visible')
-      })
+    it('displays when the "Passing" filter is selected and it contains passing tests', () => {
+      cy.get('[value="passed"]').click()
+      cy.contains('suite 1').should('be.visible')
+      cy.contains('suite 3').should('be.visible')
+    })
 
-      it('clears the filter when the "No filters" filter is checked', () => {
-        cy.get('#passed').click()
-        cy.get('#no-filters').click()
+    it('does not display when the "Passing" filter is selected and it does not contain passing tests', () => {
+      cy.get('[value="passed"]').click()
+      cy.contains('suite 4').should('not.exist')
+      cy.contains('suite (nested) 1').should('not.exist')
+    })
 
-        cy.contains('suite 3').should('be.visible')
-        cy.contains('suite 1').should('be.visible')
-        cy.contains('suite 4').should('be.visible')
-        cy.contains('nested suite 1').should('be.visible')
-      })
+    it('displays when the "Failing" filter is selected and it contains failing tests', () => {
+      cy.get('[value="failed"]').click()
+      cy.contains('suite 1').should('be.visible')
+    })
+
+    it('does not display when the "Failing" filter is selected and it does not contain failing tests', () => {
+      cy.get('[value="failed"]').click()
+      cy.contains('suite 3').should('not.exist')
+      cy.contains('suite 4').should('not.exist')
+      cy.contains('suite (nested) 1').should('not.exist')
+    })
+
+    it('displays when the "Pending" filter is selected and it contains pending tests', () => {
+      cy.get('[value="pending"]').click()
+      cy.contains('suite 1').should('be.visible')
+      cy.contains('suite (nested) 1').should('be.visible')
+    })
+
+    it('does not display when the "Pending" filter is selected and it does not contain pending tests', () => {
+      cy.get('[value="pending"]').click()
+      cy.contains('suite 3').should('not.exist')
+      cy.contains('suite 4').should('not.exist')
+    })
+
+    it('displays when the "No filters" filter is selected', () => {
+      cy.get('[value="passed"]').click()
+      cy.get('[value=""]').click()
+
+      cy.contains('suite 1').should('be.visible')
+      cy.contains('suite 3').should('be.visible')
+      cy.contains('suite 4').should('be.visible')
+      cy.contains('suite (nested) 1').should('be.visible')
     })
   })
 })

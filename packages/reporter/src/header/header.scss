@@ -170,31 +170,39 @@
     }
   }
 
-  .suite-filter {
+  .test-filter {
     width: 100%;
     border-top: 1px solid #ddd;
     padding: .5rem 1rem;
 
-    & p {
+    p {
       margin: 0;
       padding: 0;
     }
 
-    & legend {
+    legend {
       margin-bottom: .5rem;
     }
 
-    & fieldset div {
+    fieldset div {
       display: flex;
       flex-direction: row;
     }
 
-    & label {
+    label {
       background-color: unset;
       color: #999;
       font-size: 1em;
-      margin: 0 1rem 0 .3rem;
       padding: 0;
+    }
+
+    input {
+      margin-left: 1em;
+      margin-right: 0.5em;
+    }
+
+    label:nth-of-type(1) input {
+      margin-left: 0;
     }
   }
 }

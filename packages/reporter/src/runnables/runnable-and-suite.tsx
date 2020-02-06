@@ -11,19 +11,15 @@ import Collapsible from '../collapsible/collapsible'
 
 import SuiteModel from './suite-model'
 import TestModel from '../test/test-model'
-import runnablesStoreDefault, { RunnablesStore } from './runnables-store'
+import runnablesStore, { RunnablesStore } from './runnables-store'
 
 interface SuiteProps {
   model: SuiteModel
   runnablesStore?: RunnablesStore
 }
 
-const Suite = observer(({ model, runnablesStore = runnablesStoreDefault }: SuiteProps) => {
+const Suite = observer(({ model }: SuiteProps) => {
   if (!model.shouldRender) return null
-
-  if (runnablesStore.activeFilter !== null && runnablesStore.activeFilter !== model.state) {
-    return null
-  }
 
   return (
     <Collapsible
@@ -50,6 +46,10 @@ class Runnable extends Component<RunnableProps> {
 
   render () {
     const { model } = this.props
+
+    if (!model.matchesFilter(runnablesStore.activeFilter)) {
+      return null
+    }
 
     return (
       <li

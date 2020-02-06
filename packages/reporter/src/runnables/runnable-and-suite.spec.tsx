@@ -13,6 +13,9 @@ const model = (props?: Partial<SuiteModel>) => {
     type: 'suite',
     shouldRender: true,
     title: 'some title',
+    matchesFilter () {
+      return true
+    },
   }, props)
 }
 
