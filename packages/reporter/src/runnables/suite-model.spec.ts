@@ -47,7 +47,7 @@ describe('Suite model', () => {
       expect(suite.state).to.equal('processing')
     })
 
-    it('is processing when there are active tests with passing tests', () => {
+    it('is processing when there are active tests with passed tests', () => {
       const suite = suiteWithChildren([{ state: 'active' }, { state: 'passed' }])
 
       expect(suite.state).to.equal('processing')
@@ -65,7 +65,7 @@ describe('Suite model', () => {
       expect(suite.state).to.equal('processing')
     })
 
-    it('is processing when there are processing tests with passing tests', () => {
+    it('is processing when there are processing tests with passed tests', () => {
       const suite = suiteWithChildren([{ state: 'processing' }, { state: 'passed' }])
 
       expect(suite.state).to.equal('processing')

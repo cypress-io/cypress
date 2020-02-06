@@ -26,11 +26,11 @@ export const TestFilter: React.FC = observer(() => {
           </label>
           <label>
             <input type='radio' value='passed' checked={filter === 'passed'} onChange={setFilter('passed')} />
-            Passing
+            Passed
           </label>
           <label>
             <input type='radio' value='failed' checked={filter === 'failed'} onChange={setFilter('failed')} />
-            Failing
+            Failed
           </label>
           <label>
             <input type='radio' value='pending' checked={filter === 'pending'} onChange={setFilter('pending')} />

@@ -113,24 +113,24 @@ describe('suites', function () {
       cy.contains('suite 4').should('not.exist')
     })
 
-    it('displays when the "Passing" filter is selected and it contains passing tests', () => {
+    it('displays when the "Passed" filter is selected and it contains passed tests', () => {
       cy.get('[value="passed"]').click()
       cy.contains('suite 1').should('be.visible')
       cy.contains('suite 3').should('be.visible')
     })
 
-    it('does not display when the "Passing" filter is selected and it does not contain passing tests', () => {
+    it('does not display when the "Passed" filter is selected and it does not contain passed tests', () => {
       cy.get('[value="passed"]').click()
       cy.contains('suite 4').should('not.exist')
       cy.contains('suite (nested) 1').should('not.exist')
     })
 
-    it('displays when the "Failing" filter is selected and it contains failing tests', () => {
+    it('displays when the "Failed" filter is selected and it contains failed tests', () => {
       cy.get('[value="failed"]').click()
       cy.contains('suite 1').should('be.visible')
     })
 
-    it('does not display when the "Failing" filter is selected and it does not contain failing tests', () => {
+    it('does not display when the "Failed" filter is selected and it does not contain failed tests', () => {
       cy.get('[value="failed"]').click()
       cy.contains('suite 3').should('not.exist')
       cy.contains('suite 4').should('not.exist')

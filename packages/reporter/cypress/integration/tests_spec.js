@@ -14,8 +14,8 @@ describe('tests', function () {
     })
 
     cy.get('.reporter').then(() => {
-      this.passingTestTitle = this.runnables.suites[0].tests[0].title
-      this.failingTestTitle = this.runnables.suites[0].tests[1].title
+      this.passedTestTitle = this.runnables.suites[0].tests[0].title
+      this.failedTestTitle = this.runnables.suites[0].tests[1].title
 
       this.runner.emit('runnables:ready', this.runnables)
 
@@ -25,7 +25,7 @@ describe('tests', function () {
 
   describe('expand and collapse', function () {
     it('is collapsed by default', function () {
-      cy.contains(this.passingTestTitle)
+      cy.contains(this.passedTestTitle)
       .parents('.runnable-wrapper').as('testWrapper')
       .should('not.have.class', 'is-open')
       .find('.collapsible-content')
@@ -33,7 +33,7 @@ describe('tests', function () {
     })
 
     it('failed tests expand automatically', function () {
-      cy.contains(this.failingTestTitle)
+      cy.contains(this.failedTestTitle)
       .parents('.runnable-wrapper').as('testWrapper')
       .should('have.class', 'is-open')
       .find('.collapsible-content')
@@ -42,7 +42,7 @@ describe('tests', function () {
 
     describe('expand/collapse test manually', function () {
       beforeEach(function () {
-        cy.contains(this.passingTestTitle)
+        cy.contains(this.passedTestTitle)
         .parents('.runnable-wrapper').as('testWrapper')
         .should('not.have.class', 'is-open')
         .find('.collapsible-content')
@@ -50,14 +50,14 @@ describe('tests', function () {
       })
 
       it('expands/collapses on click', function () {
-        cy.contains(this.passingTestTitle)
+        cy.contains(this.passedTestTitle)
         .click()
 
         cy.get('@testWrapper')
         .should('have.class', 'is-open')
         .find('.collapsible-content').should('be.visible')
 
-        cy.contains(this.passingTestTitle)
+        cy.contains(this.passedTestTitle)
         .click()
 
         cy.get('@testWrapper')
@@ -66,14 +66,14 @@ describe('tests', function () {
       })
 
       it('expands/collapses on enter', function () {
-        cy.contains(this.passingTestTitle)
+        cy.contains(this.passedTestTitle)
         .focus().type('{enter}')
 
         cy.get('@testWrapper')
         .should('have.class', 'is-open')
         .find('.collapsible-content').should('be.visible')
 
-        cy.contains(this.passingTestTitle)
+        cy.contains(this.passedTestTitle)
         .focus().type('{enter}')
 
         cy.get('@testWrapper')
@@ -82,14 +82,14 @@ describe('tests', function () {
       })
 
       it('expands/collapses on space', function () {
-        cy.contains(this.passingTestTitle)
+        cy.contains(this.passedTestTitle)
         .focus().type(' ')
 
         cy.get('@testWrapper')
         .should('have.class', 'is-open')
         .find('.collapsible-content').should('be.visible')
 
-        cy.contains(this.passingTestTitle)
+        cy.contains(this.passedTestTitle)
         .focus().type(' ')
 
         cy.get('@testWrapper')
@@ -115,14 +115,14 @@ describe('tests', function () {
       cy.contains('test (nested) 1').should('not.exist')
     })
 
-    it('displays when the "Passing" filter is selected and it is passing', () => {
+    it('displays when the "Passed" filter is selected and it is passed', () => {
       cy.get('[value="passed"]').click()
       cy.contains('test 1').should('be.visible')
       cy.contains('test 3').should('be.visible')
       cy.contains('test 4').should('be.visible')
     })
 
-    it('does not display when the "Passing" filter is selected and it is not passing', () => {
+    it('does not display when the "Passed" filter is selected and it is not passed', () => {
       cy.get('[value="passed"]').click()
       cy.contains('test 2').should('not.exist')
       cy.contains('test 5').should('not.exist')
@@ -130,12 +130,12 @@ describe('tests', function () {
       cy.contains('test (nested) 2').should('not.exist')
     })
 
-    it('displays when the "Failing" filter is selected and it is failing', () => {
+    it('displays when the "Failed" filter is selected and it is failed', () => {
       cy.get('[value="failed"]').click()
       cy.contains('test 2').should('be.visible')
     })
 
-    it('does not display when the "Failing" filter is selected and it is not failing', () => {
+    it('does not display when the "Failed" filter is selected and it is not failed', () => {
       cy.get('[value="failed"]').click()
       cy.contains('test 1').should('not.exist')
       cy.contains('test 3').should('not.exist')
