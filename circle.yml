@@ -98,6 +98,8 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
+          command: if [[ <parameters.browser>> = 'firefox' ]] then wget --no-verbose -O /tmp/firefox.tar.bz2 https://download-installer.cdn.mozilla.net/pub/firefox/releases/72.0.1/linux-x86_64/en-US/firefox-72.0.1.tar.bz2 && tar -C /opt -xjf /tmp/firefox.tar.bz2 && rm /tmp/firefox.tar.bz2 && ln -fs /opt/firefox/firefox /usr/bin/firefox; fi
+      - run:
           command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
           working_directory: packages/server
       - store_test_results:
