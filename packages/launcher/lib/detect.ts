@@ -93,11 +93,14 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   const pickBrowserProps = pick([
     'name',
     'family',
+    'channel',
     'displayName',
     'type',
     'version',
     'path',
     'custom',
+    'warning',
+    'info',
   ])
 
   const logBrowser = (props: any) => {
@@ -136,6 +139,8 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
     return props(['name', 'version'], browser)
   })
   const compactFalse = (browsers: any[]) => compact(browsers) as FoundBrowser[]
+
+  log('detecting if the following browsers are present %o', goalBrowsers)
 
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
   .then(flatten)

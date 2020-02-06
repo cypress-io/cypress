@@ -162,7 +162,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         ```
     - Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release`:
         ```shell
-        cd issues-in-release && npm run do:comment -- --version X.Y.Z
+        cd issues-in-release && npm run do:comment -- --release X.Y.Z
         ```
 17. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
 18. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
@@ -177,6 +177,27 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     - https://github.com/cypress-io/cypress-fiddle
     - https://github.com/cypress-io/cypress-example-piechopper
     - https://github.com/cypress-io/cypress-documentation
+20. Check if any test or example repositories have a branch for testing the features or fixes from the newly published version `x.y.z`. The branch should also be named `x.y.z`. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z`, merge it into `master`.
+
+    **Test Repos**
+
+    - [cypress-test-tiny](https://github.com/cypress-io/cypress-test-tiny)
+    - [cypress-test-nested-projects](https://github.com/cypress-io/cypress-test-nested-projects)
+    - [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos)
+    - [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions)
+    - [cypress-test-module-api](https://github.com/cypress-io/cypress-test-module-api)
+    - [cypress-test-ci-environments](https://github.com/cypress-io/cypress-test-ci-environments)
+
+    **Example Repos**
+
+    - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc)
+    - [cypress-example-todomvc-redux](https://github.com/cypress-io/cypress-example-todomvc-redux)
+    - [cypress-example-realworld](https://github.com/cypress-io/cypress-example-realworld)
+    - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes)
+    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose)
+    - [cypress-example-api-testing](https://github.com/cypress-io/cypress-example-api-testing)
+    - [cypress-example-piechopper](https://github.com/cypress-io/cypress-example-piechopper)
+    - [cypress-documentation](https://github.com/cypress-io/cypress-documentation)
 
 Take a break, you deserve it! :sunglasses:
 

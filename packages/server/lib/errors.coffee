@@ -62,7 +62,7 @@ trimMultipleNewLines = (str) ->
 isCypressErr = (err) ->
   Boolean(err.isCypressErr)
 
-getMsgByType = (type, arg1 = {}, arg2) ->
+getMsgByType = (type, arg1 = {}, arg2, arg3) ->
   switch type
     when "CANNOT_TRASH_ASSETS"
       """
@@ -96,14 +96,29 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1}
       """
-    when "BROWSER_NOT_FOUND_BY_NAME"
+    when "CHROME_WEB_SECURITY_NOT_SUPPORTED"
       """
+      Your project has set the configuration option: `chromeWebSecurity: false`
+
+      This option will not have an effect in #{_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.
+      """
+    when "BROWSER_NOT_FOUND_BY_NAME"
+      str = """
       Can't run because you've entered an invalid browser name.
 
       Browser: '#{arg1}' was not found on your system.
 
       Available browsers found are: #{arg2}
       """
+
+      if arg1 is 'canary'
+        str += """
+        \n\nNote: In Cypress 4.0, Canary must be launched as `chrome:canary`, not `canary`.
+
+        See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.
+        """
+
+      return str
     when "BROWSER_NOT_FOUND_BY_PATH"
       msg = """
       We could not identify a known browser at the path you provided: `#{arg1}`
@@ -120,8 +135,9 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       A video will not be recorded when using this mode.
       """
     when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
+      ## TODO: can this error be removed? what other family of browsers would we support....?
       """
-      Warning: Cypress can only record videos when using an Electron or Chrome-family browser.
+      Warning: Cypress can only record videos when using Firefox, Electron, or a Chromium-family browser.
 
       You have set the browser to: '#{arg1}'
 
@@ -525,7 +541,6 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
         #{chalk.blue(arg2)}
         """
-
     when "RENDERER_CRASHED"
       """
       We detected that the Chromium Renderer process just crashed.
@@ -845,6 +860,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
+    when "EXTENSION_NOT_LOADED"
+      """
+      #{arg1} could not install the extension at path:
+
+       > #{arg2}
+
+      Please verify that this is the path to a valid, unpacked WebExtension.
+      """
     when "COULD_NOT_FIND_SYSTEM_NODE"
       """
       `nodeVersion` is set to `system`, but Cypress could not find a usable Node executable on your PATH.
@@ -881,9 +904,39 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
       """
+    when "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS"
+      """
+      Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`
 
-get = (type, arg1, arg2) ->
-  msg = getMsgByType(type, arg1, arg2)
+      The `before:browser:launch` plugin event switched from yielding the second argument as an `array` of browser arguments to an options `object` with an `args` property.
+
+      We've detected that your code is still using the previous, deprecated interface signature.
+
+      This code will not work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}
+      """
+    when "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES"
+      """
+      The `launchOptions` object returned by your plugin's `before:browser:launch` handler contained unexpected properties:
+
+      #{listItems(arg1)}
+
+      `launchOptions` may only contain the properties:
+
+      #{listItems(arg2)}
+
+      https://on.cypress.io/browser-launch-api
+      """
+    when "COULD_NOT_PARSE_ARGUMENTS"
+      """
+      Cypress encountered an error while parsing the argument #{chalk.gray(arg1)}
+
+      You passed: #{arg2}
+
+      The error was: #{arg3}
+      """
+
+get = (type, arg1, arg2, arg3) ->
+  msg = getMsgByType(type, arg1, arg2, arg3)
 
   if _.isObject(msg)
     details = msg.details
@@ -904,8 +957,8 @@ warning = (type, arg1, arg2) ->
 
   return null
 
-throwErr = (type, arg1, arg2) ->
-  throw get(type, arg1, arg2)
+throwErr = (type, arg1, arg2, arg3) ->
+  throw get(type, arg1, arg2, arg3)
 
 clone = (err, options = {}) ->
   _.defaults options, {

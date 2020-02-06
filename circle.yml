@@ -28,6 +28,15 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+# filters and requires for testing binary with Firefox
+testBinaryFirefox: &testBinaryFirefox
+  filters:
+    branches:
+      only:
+        - develop
+  requires:
+    - build-npm-package
+    - build-binary
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -55,9 +64,30 @@ executors:
       PLATFORM: mac
 
 commands:
+  install-latest-chrome:
+    description: Install latest Google Chrome (stable)
+    parameters:
+      browser:
+        default: "electron"
+        description: browser shortname to target
+        type: string
+    steps:
+      - run:
+          name: Install latest Google Chrome (stable)
+          command: |
+            if [ << parameters.browser >> == "chrome" ]; then
+              echo "**** Running Chrome tests.  Installing latest stable version of Google Chrome. ****"
+              apt-get update
+              apt-get install google-chrome-stable -y
+              echo "**** Location of Google Chrome Installation: "`which google-chrome`" ****"
+              echo "**** Google Chrome Version: "`google-chrome --version`" ****"
+            else
+              echo "**** Not updating Chrome. Running tests in '<< parameters.browser >>' ****"
+            fi
   run-e2e-tests:
     parameters:
       browser:
+        default: "electron"
         description: browser shortname to target
         type: string
       chunk:
@@ -144,6 +174,8 @@ commands:
       - save-cache:
           packageName: ts
       - save-cache:
+          packageName: ui-components
+      - save-cache:
           packageName: web-config
 
   restore-cache:
@@ -218,8 +250,88 @@ commands:
           packageName: ts
           packagePath: packages/ts/package.json
       - restore-cache:
+          packageName: ui-components
+          packagePath: packages/ui-components/package.json
+      - restore-cache:
           packageName: web-config
           packagePath: packages/web-config/package.json
+
+  post-install-comment:
+    description: Post GitHub comment with a blurb on how to install pre-release version
+    steps:
+      - run: ls -la
+      # make sure JSON files with uploaded urls are present
+      - run: ls -la binary-url.json npm-package-url.json
+      - run: cat binary-url.json
+      - run: cat npm-package-url.json
+      - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm npm-package-url.json \
+              --binary binary-url.json
+
+  test-binary-against-repo:
+    description: |
+      Takes the built binary and NPM package, clones given example repo
+      and runs the new version of Cypress against it.
+    parameters:
+      repo:
+        description: Name of the repo like "cypress-example-kitchensink"
+        type: string
+      browser:
+        description: Name of the browser to use
+        type: enum
+        enum: ["electron", "chrome", "firefox"]
+        default: "electron"
+      command:
+        description: Test command to run to start Cypress tests
+        type: string
+        default: "npm run e2e"
+      wait-on:
+        description: Url to wait-on before starting tests
+        type: string
+        default: ""
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run:
+          name: Cloning project <<parameters.repo>>
+          command: git clone --depth 1 https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+      - run:
+          command: npm install
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/<<parameters.repo>>
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm run build --if-present
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm start --if-present
+          background: true
+      - when:
+          condition: <<parameters.wait-on>>
+          steps:
+            - run:
+                name: Wait-on <<parameters.wait-on>>
+                command: npx wait-on <<parameters.wait-on>> --timeout 120000
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: <<parameters.command>> -- --browser <<parameters.browser>>
+      - store-npm-logs
+      - store_artifacts:
+          name: screenshots
+          path: /tmp/<<parameters.repo>>/cypress/screenshots
+      - store_artifacts:
+          name: videos
+          path: /tmp/<<parameters.repo>>/cypress/videos
 
 jobs:
   ## code checkout and NPM installs
@@ -482,6 +594,62 @@ jobs:
           browser: electron
           chunk: 8
 
+  "server-e2e-tests-firefox-1":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 1
+
+  "server-e2e-tests-firefox-2":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 2
+
+  "server-e2e-tests-firefox-3":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 3
+
+  "server-e2e-tests-firefox-4":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 4
+
+  "server-e2e-tests-firefox-5":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 5
+
+  "server-e2e-tests-firefox-6":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 6
+
+  "server-e2e-tests-firefox-7":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 7
+
+  "server-e2e-tests-firefox-8":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 8
+
   "driver-integration-tests-chrome":
     <<: *defaults
     parallelism: 5
@@ -532,6 +700,30 @@ jobs:
   #         path: /tmp/artifacts
   #     - store-npm-logs
 
+  "driver-integration-tests-firefox":
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm start
+          background: true
+          working_directory: packages/driver
+      - run:
+          command: $(npm bin)/wait-on http://localhost:3500
+          working_directory: packages/driver
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group 5x-driver-firefox --browser firefox
+          working_directory: packages/driver
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+
   "desktop-gui-integration-tests-2x":
     <<: *defaults
     parallelism: 2
@@ -567,6 +759,26 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             npm run cypress:run -- --record --parallel --group reporter
           working_directory: packages/reporter
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  "ui-components-integration-tests":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: npm run build
+          working_directory: packages/ui-components
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            npm run cypress:run -- --record --parallel --group ui-components
+          working_directory: packages/ui-components
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -812,12 +1024,6 @@ jobs:
           working_directory: /tmp/testing
           command: $(npm bin)/cypress verify
       - run:
-          name: Post pre-release install comment
-          command: |
-            node scripts/add-install-comment.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json
-      - run:
           name: Running other test projects with new NPM package and binary
           command: |
             node scripts/test-other-projects.js \
@@ -825,6 +1031,15 @@ jobs:
               --binary binary-url.json \
               --provider circle
       - store-npm-logs
+
+  post-pre-release-install-comment:
+    <<: *defaults
+    steps:
+      # needs uploaded NPM and test binary
+      - attach_workspace:
+          at: ~/
+      - run: ls -la
+      - post-install-comment
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
@@ -878,36 +1093,76 @@ jobs:
             $(npm bin)/cypress run --record
       - store-npm-logs
 
+  "test-binary-against-recipes-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci:firefox
+
   "test-binary-against-kitchensink":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning kitchensink project
-          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
-      - run:
-          command: npm install
-          working_directory: /tmp/kitchensink
-      - run:
-          name: Install Cypress
-          working_directory: /tmp/kitchensink
-          # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm run build
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm start
-          background: true
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm run e2e
-      - store-npm-logs
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+
+  "test-binary-against-kitchensink-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: firefox
+
+  "test-binary-against-kitchensink-chrome":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: chrome
+
+  "test-binary-against-todomvc-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-todomvc
+          browser: firefox
+
+  "test-binary-against-documentation-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-documentation
+          browser: firefox
+          command: "npm run cypress:run"
+          wait-on: "http://localhost:2222"
+
+
+  "test-binary-against-realworld-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-realworld
+          browser: firefox
+          command: "npm run cypress:run"
+          wait-on: "http://localhost:4100"
+
+  "test-binary-against-api-testing-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-api-testing
+          browser: firefox
+          command: "npm run cy:run"
+          wait-on: "http://localhost:3000"
+
+  "test-binary-against-piechopper-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-piechopper
+          browser: firefox
+          command: "npm run cypress:run"
+          wait-on: "http://localhost:8080"
 
   test-binary-as-specific-user:
     <<: *defaults
@@ -1037,7 +1292,34 @@ linux-workflow: &linux-workflow
         context: test-runner:performance-tracking
         requires:
           - build
+    - server-e2e-tests-firefox-1:
+        requires:
+          - build
+    - server-e2e-tests-firefox-2:
+        requires:
+          - build
+    - server-e2e-tests-firefox-3:
+        requires:
+          - build
+    - server-e2e-tests-firefox-4:
+        requires:
+          - build
+    - server-e2e-tests-firefox-5:
+        requires:
+          - build
+    - server-e2e-tests-firefox-6:
+        requires:
+          - build
+    - server-e2e-tests-firefox-7:
+        requires:
+          - build
+    - server-e2e-tests-firefox-8:
+        requires:
+          - build
     - driver-integration-tests-chrome:
+        requires:
+          - build
+    - driver-integration-tests-firefox:
         requires:
           - build
     ## TODO: add these back in when flaky tests are fixed
@@ -1048,6 +1330,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - reporter-integration-tests:
+        requires:
+          - build
+    - ui-components-integration-tests:
         requires:
           - build
     - run-launcher:
@@ -1097,6 +1382,15 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build-binary
+    - post-pre-release-install-comment:
+        context: test-runner:commit-status-checks
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - upload-npm-package
+          - upload-binary
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         filters:
@@ -1123,14 +1417,26 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
           - build-binary
+
+    - test-binary-against-recipes-firefox:
+        <<: *testBinaryFirefox
     - test-binary-against-kitchensink:
-        filters:
-          branches:
-            only:
-              - develop
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
+    - test-binary-against-kitchensink-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-kitchensink-chrome:
+        <<: *testBinaryFirefox
+    - test-binary-against-todomvc-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-documentation-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-api-testing-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-realworld-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-piechopper-firefox:
+        <<: *testBinaryFirefox
+
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
@@ -1228,6 +1534,17 @@ mac-workflow: &mac-workflow
         requires:
           - Mac NPM package
           - Mac binary
+
+    - post-pre-release-install-comment:
+        context: test-runner:commit-status-checks
+        name: Post Mac pre-release install comment
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac NPM package upload
+          - Mac binary upload
 
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs

@@ -28,7 +28,7 @@ if (!module.parent) {
         console.log(` 👍 Found "${filename}":`, foundBrowser)
       })
       .catch((err) => {
-        console.log(` 👎 Couldn't find "${filename}:`, err.message)
+        console.log(` 👎 Couldn't find "${filename}:"`, err.message)
       })
     })
   } else {

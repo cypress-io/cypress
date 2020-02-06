@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
+import { BrowserIcon } from '@packages/ui-components'
+
 import Dropdown from '../dropdown/dropdown'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
@@ -58,25 +60,27 @@ export default class Browsers extends Component {
     let prefixText
 
     if (project.browserState === 'opening') {
-      icon = 'fas fa-sync-alt fa-spin'
+      icon = <i className='fas fa-sync-alt fa-spin' />
       prefixText = 'Opening'
     } else if (project.browserState === 'opened') {
-      icon = 'fas fa-check-circle green far'
+      icon = <i className='fas fa-check-circle green far' />
       prefixText = 'Running'
     } else {
-      icon = `fab fa-${browser.icon}`
+      icon = <BrowserIcon browserName={browser.displayName} />
       prefixText = ''
     }
 
     return (
-      <span className={browser.name}>
-        <i className={`browser-icon ${icon}`}></i>{' '}
+      <>
+        {icon}{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
-        {this._warn(browser)}
+        {browser.family === 'firefox' && <span className='browser-beta'>beta</span>}
         {this._info(browser)}
-      </span>
+        {this._warn(browser)}
+
+      </>
     )
   }
 
@@ -102,7 +106,7 @@ export default class Browsers extends Component {
     return (
       <span className='browser-info'>
         <Tooltip
-          title={browser.info}
+          title={<MarkdownRenderer markdown={browser.info}/>}
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
