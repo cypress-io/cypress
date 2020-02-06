@@ -149,6 +149,17 @@ describe('suites', function () {
       cy.contains('suite 4').should('not.exist')
     })
 
+    it('does not display when any filter and no children', () => {
+      cy.get('[value="active"]').click()
+      cy.contains('suite 5').should('not.exist')
+      cy.get('[value="passed"]').click()
+      cy.contains('suite 5').should('not.exist')
+      cy.get('[value="failed"]').click()
+      cy.contains('suite 5').should('not.exist')
+      cy.get('[value="pending"]').click()
+      cy.contains('suite 5').should('not.exist')
+    })
+
     it('displays when the "No filters" filter is selected', () => {
       cy.get('[value="passed"]').click()
       cy.get('[value=""]').click()
@@ -156,6 +167,7 @@ describe('suites', function () {
       cy.contains('suite 1').should('be.visible')
       cy.contains('suite 3').should('be.visible')
       cy.contains('suite 4').should('be.visible')
+      cy.contains('suite 5').should('be.visible')
       cy.contains('suite (nested) 1').should('be.visible')
     })
   })

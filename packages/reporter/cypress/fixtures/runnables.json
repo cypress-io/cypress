@@ -60,14 +60,28 @@
       ]
     },
     {
-      "id": "r9",
+      "id": "r11",
       "title": "suite 4",
       "root": false,
       "tests": [
         {
-          "id": "r10",
+          "id": "r12",
           "title": "test 5",
           "state": "processing"
+        }
+      ]
+    },
+    {
+      "id": "r13",
+      "title": "suite 5",
+      "root": false,
+      "tests": [],
+      "suites": [
+        {
+          "id": "r5",
+          "title": "suite (nested) 2",
+          "root": false,
+          "tests": []
         }
       ]
     }

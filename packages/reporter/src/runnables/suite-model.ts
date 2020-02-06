@@ -50,7 +50,9 @@ export default class Suite extends Runnable {
   }
 
   matchesFilter (filter: TestState | null): boolean {
-    if (!filter || !this.children.length) return true
+    if (!filter) return true
+
+    if (!this.children.length) return false
 
     return _.some(this.children, (child) => {
       return child.matchesFilter(filter)
