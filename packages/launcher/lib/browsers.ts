@@ -40,7 +40,8 @@ export const browsers: Browser[] = [
     channel: 'stable',
     displayName: 'Firefox',
     info: firefoxInfo,
-    versionRegex: /Firefox (\S+)/,
+    // Mozilla Firefox 70.0.1
+    versionRegex: /^Mozilla Firefox ([^\sab]+)$/,
     profile: true,
     binary: 'firefox',
   },
@@ -50,9 +51,11 @@ export const browsers: Browser[] = [
     channel: 'dev',
     displayName: 'Firefox Developer Edition',
     info: firefoxInfo,
-    versionRegex: /Firefox Developer Edition (\S+)/,
+    // Mozilla Firefox 73.0b12
+    versionRegex: /^Mozilla Firefox (\S+b\S*)$/,
     profile: true,
-    binary: 'firefox-developer-edition',
+    // ubuntu PPAs install it as firefox
+    binary: ['firefox-developer-edition', 'firefox'],
   },
   {
     name: 'firefox',
@@ -60,9 +63,11 @@ export const browsers: Browser[] = [
     channel: 'nightly',
     displayName: 'Firefox Nightly',
     info: firefoxInfo,
-    versionRegex: /Firefox Nightly (\S+)/,
+    // Mozilla Firefox 74.0a1
+    versionRegex: /^Mozilla Firefox (\S+a\S*)$/,
     profile: true,
-    binary: 'firefox-nightly',
+    // ubuntu PPAs install it as firefox-trunk
+    binary: ['firefox-nightly', 'firefox-trunk'],
   },
   {
     name: 'edge',
