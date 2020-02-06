@@ -61,7 +61,7 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
       [stack trace lines]
 
   3)  errors when not invoking commands, invoking done callback, and returning a promise:
-     Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+     Error: Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
 
 Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callback
 

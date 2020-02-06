@@ -99,6 +99,8 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
     'version',
     'path',
     'custom',
+    'warning',
+    'info',
   ])
 
   const logBrowser = (props: any) => {

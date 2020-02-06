@@ -103,7 +103,7 @@ const descriptions = {
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if its globally installed',
   group: 'a named group for recorded runs in the Cypress Dashboard',
-  headed: 'displays the browser instead of running headlessly (defaults to true for Chrome-family browsers)',
+  headed: 'displays the browser instead of running headlessly (defaults to true for Firefox and Chromium-family browsers)',
   headless: 'hide the browser instead of running headed (defaults to true for Electron)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',

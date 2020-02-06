@@ -451,6 +451,27 @@ describe "lib/config", ->
           @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
 
+      context "firefoxGcInterval", ->
+        it "passes if a number", ->
+          @setup({ firefoxGcInterval: 1 })
+          @expectValidationPasses()
+
+        it "passes if null", ->
+          @setup({ firefoxGcInterval: null })
+          @expectValidationPasses()
+
+        it "passes if correctly shaped object", ->
+          @setup({ firefoxGcInterval: { runMode: 1, openMode: null } })
+          @expectValidationPasses()
+
+        it "fails if string", ->
+          @setup({ firefoxGcInterval: 'foo' })
+          @expectValidationFails("a positive, non-zero number or null or an object")
+
+        it "fails if invalid object", ->
+          @setup({ firefoxGcInterval: { foo: 'bar' } })
+          @expectValidationFails("a positive, non-zero number or null or an object")
+
   context ".getConfigKeys", ->
     beforeEach ->
       @includes = (key) ->

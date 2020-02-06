@@ -26,6 +26,7 @@ const $Stability = require('../cy/stability')
 const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
+const $VideoRecorder = require('../cy/video-recorder')
 
 const privateProps = {
   props: { name: 'state', url: true },
@@ -118,6 +119,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const queue = $CommandQueue.create()
 
+  $VideoRecorder.create(Cypress)
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -127,7 +129,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const location = $Location.create(state)
   const focused = $Focused.create(state)
   const keyboard = $Keyboard.create(state)
-  const mouse = $Mouse.create(state, keyboard, focused)
+  const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create()
 
   const { expect } = $Chai.create(specWindow, assertions.assert)
@@ -675,6 +677,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
+    $utils.normalizeErrorStack(err)
+
     // store the error on state now
     state('error', err)
 
@@ -712,6 +716,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // collect all of the callbacks for 'fail'
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
+      $utils.normalizeErrorStack(err2)
       // and if any of these throw synchronously immediately error
       finish(err2)
     }

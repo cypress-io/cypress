@@ -7,7 +7,7 @@ const errors = require('../errors')
 const check = require('check-more-types')
 
 // returns true if the passed string is a known browser family name
-const isBrowserFamily = check.oneOf(['chromium'])
+const isBrowserFamily = check.oneOf(['chromium', 'firefox'])
 
 let instance = null
 
@@ -53,6 +53,10 @@ const getBrowserLauncher = function (browser) {
 
   if (browser.family === 'chromium') {
     return require('./chrome')
+  }
+
+  if (browser.family === 'firefox') {
+    return require('./firefox')
   }
 }
 

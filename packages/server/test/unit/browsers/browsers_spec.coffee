@@ -20,6 +20,7 @@ describe "lib/browsers/index", ->
   context ".isBrowserFamily", ->
     it "allows only known browsers", ->
       expect(browsers.isBrowserFamily("chromium")).to.be.true
+      expect(browsers.isBrowserFamily("firefox")).to.be.true
       expect(browsers.isBrowserFamily("chrome")).to.be.false
       expect(browsers.isBrowserFamily("electron")).to.be.false
       expect(browsers.isBrowserFamily("my-favorite-browser")).to.be.false

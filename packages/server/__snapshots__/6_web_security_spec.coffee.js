@@ -29,7 +29,7 @@ exports['e2e web security / when enabled / fails'] = `
   1) web security fails when clicking <a> to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
+  > [Cross origin error message]
 
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
@@ -55,7 +55,7 @@ https://on.cypress.io/cross-origin-violation
   2) web security fails when submitted a form and being redirected to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
+  > [Cross origin error message]
 
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
@@ -81,7 +81,7 @@ https://on.cypress.io/cross-origin-violation
   3) web security fails when using a javascript redirect to another origin:
      CypressError: Cypress detected a cross origin error happened on page load:
 
-  > Blocked a frame with origin "http://localhost:4466" from accessing a cross-origin frame.
+  > [Cross origin error message]
 
 Before the page load, you were bound to the origin policy:
   > http://localhost:4466
@@ -211,6 +211,71 @@ exports['e2e web security / when disabled / passes'] = `
   │ ✔  web_security_spec.coffee                 XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+
+
+`
+
+exports['firefox / displays warning when firefox and chromeWebSecurity:false'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
+  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_passing_spec.coffee                                                      (1 of 1)
+
+Your project has set the configuration option: \`chromeWebSecurity: false\`
+
+This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
+
+
+  simple passing spec
+    ✓ passes
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_passing_spec.coffee                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4      (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

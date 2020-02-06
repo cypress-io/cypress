@@ -33,6 +33,8 @@
 // Cypress, cy, Log inherits EventEmitter.
 type EventEmitter2 = import("eventemitter2").EventEmitter2
 
+type Nullable<T> = T | null
+
 interface EventEmitter extends EventEmitter2 {
   proxyTo: (cy: Cypress.cy) => null
   emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
@@ -63,11 +65,21 @@ declare namespace Cypress {
     password: string
   }
 
-  type BrowserName = 'electron' | 'chrome' | 'chromium' | string
+  interface Backend {
+    /**
+     * Firefox only: Force Cypress to run garbage collection routines.
+     * No-op if not running in Firefox.
+     *
+     * @see https://on.cypress.io/firefox-gc-issue
+     */
+    (task: 'firefox:force:gc'): Promise<void>
+  }
 
-  type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | string
+  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
 
-  type BrowserFamily = 'chromium'
+  type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
+
+  type BrowserFamily = 'chromium' | 'firefox'
 
   /**
    * Describes a browser Cypress can control
@@ -225,6 +237,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Promise wrapper for certain internal tasks.
+     */
+    backend: Backend
+
+    /**
      * Returns all configuration objects.
      * @see https://on.cypress.io/config
      * @example
@@ -299,6 +316,15 @@ declare namespace Cypress {
     env(object: ObjectLike): void
 
     /**
+     * Firefox only: Get the current number of tests that will run between forced garbage collections.
+     *
+     * Returns undefined if not in Firefox, returns a null or 0 if forced GC is disabled.
+     *
+     * @see https://on.cypress.io/firefox-gc-issue
+     */
+    getFirefoxGcInterval(): number | null | undefined
+
+    /**
      * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
      *
      * @see https://on.cypress.io/iscy
@@ -307,6 +333,13 @@ declare namespace Cypress {
      */
     isCy<TSubject = any>(obj: Chainable<TSubject>): obj is Chainable<TSubject>
     isCy(obj: any): obj is Chainable
+
+    /**
+     * Checks if you're running in the supplied browser family.
+     * e.g. isBrowser('Chrome') will be true for the browser 'Canary'
+     * @param name browser family name to check
+     */
+    isBrowser(name: string): boolean
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -1113,7 +1146,7 @@ declare namespace Cypress {
     parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Stop cy commands from running and allow interaction with the application under test. You can then “resume” running all commands or choose to step through the “next” commands from the Command Log.
+     * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
      * This does not set a `debugger` in your code, unlike `.debug()`
      *
      * @see https://on.cypress.io/pause
@@ -1256,7 +1289,7 @@ declare namespace Cypress {
      * Get the root DOM element.
      * The root element yielded is `<html>` by default.
      * However, when calling `.root()` from a `.within()` command,
-     * the root element will point to the element you are “within”.
+     * the root element will point to the element you are "within".
      *
      * @see https://on.cypress.io/root
      */
@@ -2239,6 +2272,13 @@ declare namespace Cypress {
      * @default true
      */
     waitForAnimations: boolean
+    /**
+     * Firefox-only: The number of tests that will run between forced garbage collections.
+     * If a number is supplied, it will apply to `run` mode and `open` mode.
+     * Set the interval to `null` or 0 to disable forced garbage collections.
+     * @default { runMode: 1, openMode: null }
+     */
+    firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
   }
 
   interface DebugOptions {
@@ -4435,6 +4475,10 @@ declare namespace Cypress {
      */
     (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
     /**
+     * Fires before the test and all **before** and **beforeEach** hooks run. If a `Promise` is returned, it will be awaited before proceeding.
+     */
+    (action: 'test:before:run:async', fn: (attributes: ObjectLike, test: Mocha.ITest) => void | Promise<any>): void
+    /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -4446,6 +4490,7 @@ declare namespace Cypress {
     logs(filters: any): any
     add(obj: any): any
     get(): any
+    get<K extends keyof CommandQueue>(key: string): CommandQueue[K]
     toJSON(): string[]
     create(): CommandQueue
   }

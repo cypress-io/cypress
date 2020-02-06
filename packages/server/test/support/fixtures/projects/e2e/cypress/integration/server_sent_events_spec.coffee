@@ -14,7 +14,7 @@ describe "server sent events", ->
     cy.visit("http://localhost:3038/foo")
 
   it "does not crash", ->
-    cy.window().then (win) ->
+    cy.window().then {timeout: 15000}, (win) ->
       Cypress.Promise.all([
         urlErrors(win, "http://localhost:3038/sse")
         urlErrors(win, "https://localhost:3040/sse")

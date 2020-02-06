@@ -36,7 +36,7 @@ describe "e2e video compression", ->
           .then ({ duration }) ->
             durationMs = videoCapture.getMsFromDuration(duration)
             expect(durationMs).to.be.ok
-            expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, humanInterval('10 seconds'))
+            expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, humanInterval('15 seconds'))
 
       .get("stdout")
       .then (stdout) ->

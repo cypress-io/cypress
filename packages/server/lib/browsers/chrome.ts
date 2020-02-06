@@ -6,22 +6,16 @@ import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
-import { FoundBrowser } from '@packages/launcher'
 import appData from '../util/app_data'
 import fs from '../util/fs'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
 import protocol from './protocol'
 import utils from './utils'
+import { Browser } from './types'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
-
-type Browser = FoundBrowser & {
-  majorVersion: number
-  isHeadless: boolean
-  isHeaded: boolean
-}
 
 const debug = debugModule('cypress:server:browsers:chrome')
 
@@ -332,14 +326,11 @@ export = {
 
     // get the string bytes for the final extension file
     const str = await extension.setHostAndPath(options.proxyUrl, options.socketIoRoute)
-
     const extensionDest = utils.getExtensionDir(browser, options.isTextTerminal)
     const extensionBg = path.join(extensionDest, 'background.js')
 
     // copy the extension src to the extension dist
     await utils.copyExtension(pathToExtension, extensionDest)
-
-    // and overwrite background.js with the final string bytes
     await fs.writeFileAsync(extensionBg, str)
 
     return extensionDest

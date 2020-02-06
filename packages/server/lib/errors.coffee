@@ -96,6 +96,12 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       #{arg1}
       """
+    when "CHROME_WEB_SECURITY_NOT_SUPPORTED"
+      """
+      Your project has set the configuration option: `chromeWebSecurity: false`
+
+      This option will not have an effect in #{_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.
+      """
     when "BROWSER_NOT_FOUND_BY_NAME"
       str = """
       Can't run because you've entered an invalid browser name.
@@ -129,8 +135,9 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       A video will not be recorded when using this mode.
       """
     when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
+      ## TODO: can this error be removed? what other family of browsers would we support....?
       """
-      Warning: Cypress can only record videos when using an Electron or Chrome-family browser.
+      Warning: Cypress can only record videos when using Firefox, Electron, or a Chromium-family browser.
 
       You have set the browser to: '#{arg1}'
 
@@ -909,7 +916,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
     when "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES"
       """
-      The `launchOptions` object returned by your plugin's `browser:before:launch` handler contained unexpected properties:
+      The `launchOptions` object returned by your plugin's `before:browser:launch` handler contained unexpected properties:
 
       #{listItems(arg1)}
 

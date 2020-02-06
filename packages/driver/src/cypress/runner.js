@@ -17,7 +17,7 @@ const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
-const RUNNABLE_PROPS = 'id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file'.split(' ')
+const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file'.split(' ')
 
 // ## initial payload
 // {
@@ -474,8 +474,16 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   }
 
   if (setTests) {
+    let i = 0
+
+    const testsArr = _.map(tests, (test) => {
+      test.order = i += 1
+
+      return test
+    })
+
     // same pattern here
-    setTests(_.values(tests))
+    setTests(testsArr)
   }
 
   return normalizedSuite
@@ -736,6 +744,8 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     let hookName
     const isHook = runnable.type === 'hook'
 
+    $utils.normalizeErrorStack(err)
+
     if (isHook) {
       const parentTitle = runnable.parent.title
 
@@ -816,6 +826,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     // else  do the same thing as mocha here
     err = $utils.appendErrMsg(err, append())
+
+    // remove this error's stack since it gives no valuable context
+    err.stack = ''
 
     const throwErr = function () {
       throw err

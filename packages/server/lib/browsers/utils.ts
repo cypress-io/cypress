@@ -164,8 +164,6 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
 }
 
 export = {
-  extendLaunchOptionsFromPlugins,
-
   executeBeforeBrowserLaunch,
 
   defaultLaunchOptions,

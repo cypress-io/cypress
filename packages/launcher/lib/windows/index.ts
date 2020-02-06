@@ -35,6 +35,24 @@ function formChromeCanaryAppPath () {
   return normalize(exe)
 }
 
+function formFirefoxAppPath () {
+  const exe = 'C:/Program Files (x86)/Mozilla Firefox/firefox.exe'
+
+  return normalize(exe)
+}
+
+function formFirefoxDeveloperEditionAppPath () {
+  const exe = 'C:/Program Files (x86)/Firefox Developer Edition/firefox.exe'
+
+  return normalize(exe)
+}
+
+function formFirefoxNightlyAppPath () {
+  const exe = 'C:/Program Files (x86)/Firefox Nightly/firefox.exe'
+
+  return normalize(exe)
+}
+
 function formEdgeCanaryAppPath () {
   const home = homedir()
   const exe = join(
@@ -65,6 +83,11 @@ const formPaths: WindowsBrowserPaths = {
   },
   chromium: {
     stable: formChromiumAppPath,
+  },
+  firefox: {
+    stable: formFirefoxAppPath,
+    dev: formFirefoxDeveloperEditionAppPath,
+    nightly: formFirefoxNightlyAppPath,
   },
   edge: {
     stable: () => normalize('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'),

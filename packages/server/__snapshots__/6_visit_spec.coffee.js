@@ -122,7 +122,7 @@ The stack trace for this error is:
 Error: connect ECONNREFUSED 127.0.0.1:16795
     [stack trace lines]
 
-      [stack trace lines]
+  
 
 
 
@@ -579,7 +579,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-      [stack trace lines]
+  
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
      CypressError: cy.visit() failed trying to load:
@@ -603,7 +603,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-      [stack trace lines]
+  
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
      CypressError: cy.visit() failed trying to load:
@@ -627,7 +627,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-      [stack trace lines]
+  
 
 
 

@@ -3,11 +3,11 @@ import * as Bluebird from 'bluebird'
 
 // TODO: some of these types can be combined with cli/types/index.d.ts
 
-export type BrowserName = 'electron' | 'chrome' | 'chromium' | string
+type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
 
-export type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | string
+type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
-export type BrowserFamily = 'chromium'
+type BrowserFamily = 'chromium' | 'firefox'
 
 export type PlatformName = 'darwin' | 'linux' | 'win32'
 
@@ -36,6 +36,10 @@ export type Browser = {
   profile?: boolean
   /** A single binary name or array of binary names for this browser. Not used on Windows. */
   binary: string | string[]
+  /** optional warning that will be shown in the GUI */
+  warning?: string
+  /** optional info that will be shown in the GUI */
+  info?: string
 }
 
 /**
@@ -47,10 +51,6 @@ export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary'> & {
   majorVersion?: string
   /** is this a user-supplied browser? */
   custom?: boolean
-  /** optional info that will be shown in the GUI */
-  info?: string
-  /** optional warning that will be shown in the GUI */
-  warning?: string
 }
 
 // all common type definition for this module

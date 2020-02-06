@@ -458,16 +458,39 @@ const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   }
 
   if (browser.family === 'chromium') {
-    return getChromeProps(browser.isHeaded, project, writeVideoFrame)
+    return getChromeProps(writeVideoFrame)
+  }
+
+  if (browser.family === 'firefox') {
+    return getFirefoxProps(project, writeVideoFrame)
   }
 
   return {}
 }
 
-const getChromeProps = (isHeaded, project, writeVideoFrame) => {
+const getFirefoxProps = (project, writeVideoFrame) => {
+  debug('setting Firefox properties')
+
+  return _
+  .chain({})
+  .tap((props) => {
+    if (writeVideoFrame) {
+      const onScreencastFrame = (data) => {
+        writeVideoFrame(data)
+      }
+
+      project.on('capture:video:frames', onScreencastFrame)
+
+      props.onScreencastFrame = true
+    }
+  })
+  .value()
+}
+
+const getChromeProps = (writeVideoFrame) => {
   const shouldWriteVideo = Boolean(writeVideoFrame)
 
-  debug('setting Chrome properties %o', { isHeaded, shouldWriteVideo })
+  debug('setting Chrome properties %o', { shouldWriteVideo })
 
   return _
   .chain({})
@@ -629,23 +652,27 @@ const browserCanBeRecorded = (browser) => {
     return true
   }
 
+  if (browser.family === 'firefox') {
+    return true
+  }
+
   return false
 }
 
-const createVideoRecording = function (videoName) {
+const createVideoRecording = function (videoName, options = {}) {
   const outputDir = path.dirname(videoName)
 
   return fs
   .ensureDirAsync(outputDir)
   .then(() => {
     return videoCapture
-    .start(videoName, {
+    .start(videoName, _.extend({}, options, {
       onError (err) {
         // catch video recording failures and log them out
         // but don't let this affect the run at all
         return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
       },
-    })
+    }))
   })
 }
 
@@ -694,7 +721,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const videoName = videoPath('.mp4')
   const compressedVideoName = videoPath('-compressed.mp4')
 
-  return this.createVideoRecording(videoName)
+  return this.createVideoRecording(videoName, { webmInput: browser.family === 'firefox' })
   .then((props = {}) => {
     return {
       videoName,
@@ -997,7 +1024,7 @@ module.exports = {
           debug('browser launched')
         })
       )
-      .timeout(timeout || 30000)
+      .timeout(timeout || 60000)
       .catch(Promise.TimeoutError, (err) => {
         attempts += 1
 
@@ -1233,6 +1260,11 @@ module.exports = {
       isHeadless,
       browser,
     })
+
+    if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
+      console.log()
+      errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
+    }
 
     const screenshots = []
 

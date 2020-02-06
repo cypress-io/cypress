@@ -6,7 +6,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const performance = require('../../../../test/support/helpers/performance')
 
-module.exports = (on) => {
+module.exports = (on, config) => {
   // save some time by only reading the originals once
   let cache = {}
 
@@ -32,6 +32,14 @@ module.exports = (on) => {
   })
 
   on('before:browser:launch', (browser, options) => {
+    if (browser.family === 'firefox' && !config.env['NO_RESIZE']) {
+      // this is needed to ensure correct error screenshot / video recording
+      // resolution of exactly 1280x720 (height must account for firefox url bar)
+      options.args = options.args.concat(
+        ['-width', '1280', '-height', '794']
+      )
+    }
+
     browserArgs = options.args
 
     return options

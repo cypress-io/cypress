@@ -101,7 +101,18 @@ module.exports = {
     ## with the new one
     err.stack = stack.replace(str, err.toString())
 
+    module.exports.normalizeErrorStack(err)
+    
     return err
+  
+  normalizeErrorStack: (e) ->
+    ## normalize error message + stack for firefox
+    errString = e.toString()
+    errStack = e.stack || ''
+
+    if !errStack.slice(0, errStack.indexOf('\n')).includes(errString.slice(0, errString.indexOf('\n')))
+      e.stack = "#{errString}\n#{errStack}"
+    return e
 
   cloneErr: (obj) ->
     err2 = new Error(obj.message)
@@ -117,6 +128,8 @@ module.exports = {
   throwErr: (err, options = {}) ->
     if _.isString(err)
       err = @cypressErr(err)
+      if options.noStackTrace
+        err.stack = ''
 
     onFail = options.onFail
     errProps = options.errProps

@@ -25,7 +25,7 @@ konfig   = require("#{root}../lib/konfig")
 
 describe "lib/gui/events", ->
   beforeEach ->
-    @send    = sinon.spy()
+    @send    = sinon.stub()
     @options = {}
     @cookies = sinon.stub({
       get: ->

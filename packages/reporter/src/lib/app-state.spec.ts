@@ -141,6 +141,28 @@ describe('app state', () => {
     })
   })
 
+  context('#setForcingGc', () => {
+    it('sets forcingGc', () => {
+      const instance = new AppState()
+
+      instance.setForcingGc(false)
+      expect(instance.forcingGc).to.be.false
+      instance.setForcingGc(true)
+      expect(instance.forcingGc).to.be.true
+    })
+  })
+
+  context('#setFirefoxGcInterval', () => {
+    it('sets forcingGc', () => {
+      const instance = new AppState()
+
+      instance.setFirefoxGcInterval(111)
+      expect(instance.firefoxGcInterval).to.eq(111)
+      instance.setFirefoxGcInterval(222)
+      expect(instance.firefoxGcInterval).to.eq(222)
+    })
+  })
+
   context('#reset', () => {
     it('resets autoScrollingEnabled when it has not been toggled', () => {
       const instance = new AppState()

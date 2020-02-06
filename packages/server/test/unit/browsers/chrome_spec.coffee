@@ -7,6 +7,7 @@ plugins = require("#{root}../lib/plugins")
 utils = require("#{root}../lib/browsers/utils")
 chrome = require("#{root}../lib/browsers/chrome")
 fs = require("#{root}../lib/util/fs")
+errors = require("#{root}../lib/errors")
 
 describe "lib/browsers/chrome", ->
   context "#open", ->
@@ -90,6 +91,28 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
+    it "DEPRECATED: normalizes --load-extension if provided in plugin", ->
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve(["--foo=bar", "--load-extension=/foo/bar/baz.js"])
+
+      pathToTheme = extension.getPathToTheme()
+
+      ## this should get obliterated
+      @args.push("--something=else")
+      
+      chrome.open("chrome", "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.deep.eq([
+          "--foo=bar"
+          "--load-extension=/foo/bar/baz.js,/path/to/ext,#{pathToTheme}"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
+        expect(errors.warning).calledOnce
+
     it "normalizes --load-extension if provided in plugin", ->
       plugins.register 'before:browser:launch', (browser, config) ->
         return Promise.resolve({
@@ -115,6 +138,19 @@ describe "lib/browsers/chrome", ->
           args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]
         }
 
+        expect(args).to.deep.eq([
+          "--foo=bar"
+          "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
+          "--user-data-dir=/profile/dir"
+          "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
+        expect(onWarning).calledOnce
+
+    it "normalizes multiple extensions from plugins", ->
+      plugins.register 'before:browser:launch', (browser, config) ->
+        return Promise.resolve {args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]}
+      
       pathToTheme = extension.getPathToTheme()
 
       chrome.open("chrome", "http://", {}, @automation)
@@ -127,6 +163,8 @@ describe "lib/browsers/chrome", ->
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
+
+        expect(errors.warning).not.calledOnce
 
     it "cleans up an unclean browser profile exit status", ->
       @readJson.withArgs("/profile/dir/Default/Preferences").resolves({

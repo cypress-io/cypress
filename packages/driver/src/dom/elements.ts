@@ -7,6 +7,9 @@ import * as $jquery from './jquery'
 import * as $selection from './selection'
 import { parentHasDisplayNone } from './visibility'
 import * as $window from './window'
+import Debug from 'debug'
+
+const debug = Debug('cypress:driver:elements')
 
 const { wrap } = $jquery
 
@@ -331,7 +334,7 @@ const isNeedSingleValueChangeInputElement = (el: HTMLElement): el is HTMLSingleV
     return false
   }
 
-  return inputTypeNeedSingleValueChangeRe.test(el.type)
+  return inputTypeNeedSingleValueChangeRe.test((el.getAttribute('type') || '').toLocaleLowerCase())
 }
 
 const canSetSelectionRangeElement = (el): el is HTMLElementCanSetSelectionRange => {
@@ -350,7 +353,7 @@ const getTagName = (el) => {
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
 const isContentEditable = (el: any): el is HTMLContentEditableElement => {
-  return getNativeProp(el, 'isContentEditable')
+  return getNativeProp(el, 'isContentEditable') || $document.getDocumentFromElement(el).designMode === 'on'
 }
 
 const isTextarea = (el): el is HTMLTextAreaElement => {
@@ -602,10 +605,10 @@ const isAttached = function ($el) {
   const doc = $document.getDocumentFromElement(els[0])
 
   // TODO: i guess its possible each element
-  // is technically bound to a differnet document
+  // is technically bound to a different document
   // but c'mon
   const isIn = (el) => {
-    return $.contains((doc as unknown) as Element, el)
+    return $.contains(doc, el)
   }
 
   // make sure the document is currently
@@ -730,11 +733,15 @@ const isScrollable = ($el) => {
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
     if (win.innerHeight < documentElement.scrollHeight) {
+      debug('isScrollable: window scrollable on Y')
+
       return true
     }
 
     // Check if body width is higher than window width
     if (win.innerWidth < documentElement.scrollWidth) {
+      debug('isScrollable: window scrollable on X')
+
       return true
     }
 
@@ -762,6 +769,8 @@ const isScrollable = ($el) => {
   if (el.clientHeight < el.scrollHeight) {
     // and our element has scroll or auto overflow or overflowX
     if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowY)) {
+      debug('isScrollable: clientHeight < scrollHeight and scroll/auto overflow')
+
       return true
     }
   }
@@ -769,6 +778,8 @@ const isScrollable = ($el) => {
   // x axis
   if (el.clientWidth < el.scrollWidth) {
     if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowX)) {
+      debug('isScrollable: clientWidth < scrollWidth and scroll/auto overflow')
+
       return true
     }
   }

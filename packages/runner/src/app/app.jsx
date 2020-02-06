@@ -38,6 +38,7 @@ class App extends Component {
             specPath={specPath}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
+            firefoxGcInterval={this.props.config.firefoxGcInterval}
           />
         </div>
         <div
@@ -153,6 +154,8 @@ class App extends Component {
       iframesSizeNode.style.marginLeft = 0
 
       containerNode.style.left = 0
+      iframesNode.style.left = 0
+
       containerNode.className += ' screenshotting'
 
       if (!config.scale) {
@@ -173,6 +176,7 @@ class App extends Component {
 
       containerNode.className = containerNode.className.replace(' screenshotting', '')
       containerNode.style.left = prevAttrs.left
+      iframesNode.style.left = prevAttrs.left
 
       iframesNode.style.top = prevAttrs.top
       iframesNode.style.backgroundColor = null
