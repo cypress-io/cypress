@@ -257,7 +257,7 @@ describe('Project Nav', function () {
           const browserArg = this.ipc.launchBrowser.getCall(0).args[0].browser
 
           expect(browserArg).to.have.keys([
-            'family', 'name', 'path', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning',
+            'family', 'name', 'path', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning', 'channel',
           ])
 
           expect(browserArg.path).to.include('/')
