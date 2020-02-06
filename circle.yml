@@ -34,7 +34,6 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
-        - issue-1096-firefox-support
   requires:
     - build-npm-package
     - build-binary
@@ -1369,7 +1368,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-1096-firefox-support
         requires:
           - build-npm-package
     - build-binary:
@@ -1382,7 +1380,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-1096-firefox-support
         requires:
           - build-binary
     - post-pre-release-install-comment:
@@ -1391,7 +1388,6 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - issue-1096-firefox-support
         requires:
           - upload-npm-package
           - upload-binary
