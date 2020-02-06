@@ -119,10 +119,10 @@ class ForcedGcWarning extends React.Component<Props> {
               Running GC is an expensive operation that can take up to a few seconds to complete. During this time Firefox may "freeze" and become unresponsive to user input.
             </p>
             <p>
-              To improve performance, you can try setting <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'><code>firefoxGcInterval</code></a> to a higher value, which will result in running GC less frequently.
+              To improve performance, you can try setting <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'><code>firefoxGcInterval</code></a> to a higher value, which will result in running GC less frequently.
             </p>
             <p>
-              Read <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-issue'>issue #6187</a> for more details.
+              <a onClick={this._handleLink} href='https://on.cypress.io/firefox-gc-interval'>Learn more about <code>firefoxGcInterval</code></a>.
             </p>
           </div>
         </div>
