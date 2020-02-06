@@ -44,6 +44,7 @@ const env = require(`${root}lib/util/env`)
 const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
+const electronApp = require('../../lib/util/electron-app')
 const { formStatePath } = require(`${root}lib/util/saved_state`)
 
 const TYPICAL_BROWSERS = [
@@ -118,7 +119,7 @@ describe('lib/cypress', () => {
     // spawning a separate process
     sinon.stub(videoCapture, 'start').resolves({})
     sinon.stub(plugins, 'init').resolves(undefined)
-    sinon.stub(cypress, 'isCurrentlyRunningElectron').returns(true)
+    sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')
@@ -139,14 +140,22 @@ describe('lib/cypress', () => {
       expect(process.exit).to.be.calledWith(code)
     }
 
-    this.expectExitWithErr = (type, msg) => {
-      expect(errors.log).to.be.calledWithMatch({ type })
-      expect(process.exit).to.be.calledWith(1)
-      if (msg) {
-        const err = errors.log.getCall(0).args[0]
+    // returns error object
+    this.expectExitWithErr = (type, msg1, msg2) => {
+      expect(errors.log, 'error was logged').to.be.calledWithMatch({ type })
+      expect(process.exit, 'process.exit was called').to.be.calledWith(1)
 
-        expect(err.message).to.include(msg)
+      const err = errors.log.getCall(0).args[0]
+
+      if (msg1) {
+        expect(err.message, 'error text').to.include(msg1)
       }
+
+      if (msg2) {
+        expect(err.message, 'second error text').to.include(msg2)
+      }
+
+      return err
     }
   })
 
@@ -185,6 +194,35 @@ describe('lib/cypress', () => {
     it('validates returned list', () => {
       return browserUtils.getBrowsers().then((list) => {
         expect(v.isValidBrowserList('browsers', list)).to.be.true
+      })
+    })
+  })
+
+  context('error handling', function () {
+    it('exits if config cannot be parsed', function () {
+      return cypress.start(['--config', 'xyz'])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse config error', stripAnsi(err.message))
+      })
+    })
+
+    it('exits if env cannot be parsed', function () {
+      return cypress.start(['--env', 'a123'])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse env error', stripAnsi(err.message))
+      })
+    })
+
+    it('exits if reporter options cannot be parsed', function () {
+      return cypress.start(['--reporterOptions', 'nonono'])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse reporter options error', stripAnsi(err.message))
       })
     })
   })
