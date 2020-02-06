@@ -9,12 +9,11 @@
   "scripts": {
     "format": "prettier --write --single-quote --trailing-comma es5",
     "format:all": "yarn format \"./**/*.js\"",
-    "precommit": "lint-staged",
     "test": "jest"
   },
   "license": "MIT",
   "peerDependencies": {
-    "semantic-release": "13.4.1 - 15.x.x"
+    "semantic-release": ">=15.11.x"
   },
   "dependencies": {
     "debug": "^3.1.0",
@@ -23,20 +22,24 @@
     "pkg-up": "^2.0.0",
     "ramda": "^0.25.0",
     "read-pkg": "^3.0.0",
-    "semantic-release-plugin-decorators": "^1.2.1"
+    "semantic-release-plugin-decorators": "^2.1.0"
   },
   "devDependencies": {
-    "husky": "^0.14.3",
-    "jest": "^21.2.1",
-    "lint-staged": "^6.0.0",
-    "prettier": "^1.9.2",
-    "semantic-release": "^15.0.0",
-    "semantic-release-github-pr": "^5.0.5"
+    "husky": "^4.2.1",
+    "jest": "^25.1.0",
+    "lint-staged": "^10.0.7",
+    "prettier": "^1.19.1",
+    "semantic-release": "^17.0.2",
+    "semantic-release-github-pr": "^6.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "lint-staged": {
     "*.js": [
-      "yarn format",
-      "git add"
+      "yarn format"
     ]
   }
 }

@@ -1,6 +1,6 @@
 # semantic-release-monorepo
 
-[![Build Status](https://travis-ci.org/Updater/semantic-release-monorepo.svg?branch=master)](https://travis-ci.org/Updater/semantic-release-monorepo) [![npm](https://img.shields.io/npm/v/semantic-release-monorepo.svg)](https://www.npmjs.com/package/semantic-release-monorepo) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![Build Status](https://travis-ci.org/pmowrer/semantic-release-monorepo.svg?branch=master)](https://travis-ci.org/pmowrer/semantic-release-monorepo) [![npm](https://img.shields.io/npm/v/semantic-release-monorepo.svg)](https://www.npmjs.com/package/semantic-release-monorepo) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
 Apply [`semantic-release`'s](https://github.com/semantic-release/semantic-release) automatic publishing to a monorepo.
 
@@ -45,37 +45,6 @@ lerna exec --concurrency 1 -- npx --no-install semantic-release -e semantic-rele
 Note that this requires installing `semantic-release` and `semantic-release-monorepo` for each package.
 
 Alternatively, thanks to how [`npx's package resolution works`](https://github.com/zkat/npx#description), if the repository root is in `$PATH` (typically true on CI), `semantic-release` and `semantic-release-monorepo` can be installed once in the repo root instead of in each individual package, likely saving both time and disk space.
-
-## Configuration
-
-The set of plugins in this package wrap other `semantic-release` plugins to modify their behavior. By default, the same plugin configuration as `semantic-release` is used, but any plugin configuration should be compatible.
-
-### Release config
-
-Plugins can be configured in the [release config](https://github.com/semantic-release/semantic-release/blob/caribou/docs/usage/configuration.md#configuration), with one important caveat:
-
-Due to limitations in how plugins may be composed ([discussion](https://github.com/semantic-release/semantic-release/issues/550)), `semantic-release-monorepo` must unfortunately "hard-code" the set of plugins it wraps: `analyze-commits` and `generateNotes`.
-
-Users may still want to define a custom versions of the plugin set, or want to pass options to the default versions. To work around this problem, set the desired plugin configuration under the `monorepo` property instead.
-
-#### Example of use with non-default set of plugins
-
-`package.json`
-
-```json
-{
-  "release": {
-    "monorepo": {
-      "analyzeCommits": {
-        "format": "atom"
-      },
-      "generateNotes": "myNotesGenerator"
-    },
-    "prepare": ["@semantic-release/npm", "@semantic-release/git"],
-    "verifyConditions": ["@semantic-release/git"]
-  }
-}
-```
 
 ### Performance
 Naturally, the more packages in a monorepo, the longer it takes `semantic-release` to run against all of them. If total runtime becomes a problem, consider the following optimization:
