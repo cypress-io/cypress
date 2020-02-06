@@ -103,13 +103,22 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       This option will not have an effect in #{_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.
       """
     when "BROWSER_NOT_FOUND_BY_NAME"
-      """
+      str = """
       Can't run because you've entered an invalid browser name.
 
       Browser: '#{arg1}' was not found on your system.
 
       Available browsers found are: #{arg2}
       """
+
+      if arg1 is 'canary'
+        str += """
+        \n\nNote: In Cypress 4.0, Canary must be launched as `chrome:canary`, not `canary`.
+
+        See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.
+        """
+
+      return str
     when "BROWSER_NOT_FOUND_BY_PATH"
       msg = """
       We could not identify a known browser at the path you provided: `#{arg1}`
