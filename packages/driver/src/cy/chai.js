@@ -94,6 +94,16 @@ chai.use((chai, u) => {
     if (val && (getType(val) === 'Window')) {
       return '[window]'
     }
+
+    // Chrome doesn't return [object Window] even if val is a Window object.
+    // So, we're checking the error message here.
+    try {
+      val && val.document
+    } catch (e) {
+      if (e.stack.indexOf('cross-origin') !== -1) {
+        return `[window]`
+      }
+    }
   })
 
   // remove any single quotes between our **,
