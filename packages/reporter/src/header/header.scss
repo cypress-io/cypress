@@ -148,7 +148,7 @@
         i:first-child {
           @extend .fas;
           @extend .#{$fa-css-prefix}-circle;
-          color: #FFB61C;
+          color: $yellow-dark;
         }
       }
     }

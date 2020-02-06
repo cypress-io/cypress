@@ -10,6 +10,7 @@ import EQ from 'css-element-queries/src/ElementQueries'
 import { Error } from './errors/an-error'
 import appState, { AppState } from './lib/app-state'
 import events, { Runner, Events } from './lib/events'
+import ForcedGcWarning from './lib/forced-gc-warning'
 import runnablesStore, { RunnablesStore } from './runnables/runnables-store'
 import scroller, { Scroller } from './lib/scroller'
 import statsStore, { StatsStore } from './header/stats-store'
@@ -85,6 +86,9 @@ class Reporter extends Component<ReporterProps> {
           scroller={this.props.scroller}
           specPath={this.props.specPath}
         />
+        <ForcedGcWarning
+          appState={appState}
+          events={this.props.events}/>
       </div>
     )
   }

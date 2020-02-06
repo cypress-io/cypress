@@ -1,6 +1,6 @@
 foo = require("../../lib/foo")
-bar = require("../../lib/bar")
-dom = require("../../lib/dom")
+bar = require("../../lib/bar").default
+dom = require("../../lib/dom").default
 
 describe "imports work", ->
   it "foo coffee", ->

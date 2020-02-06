@@ -79,6 +79,9 @@ module.exports = {
     timed_out:  "#{cmd('blur')} timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
     wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: {{node}}"
 
+  browser:
+    invalid_arg: "Cypress.{{method}}() must be passed the name of a browser or an object to filter with. You passed: {{obj}}"
+
   chai:
     length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
     match_invalid_argument: "'match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
@@ -148,6 +151,7 @@ module.exports = {
     empty_string: "#{cmd('contains')} cannot be passed an empty string."
     invalid_argument: "#{cmd('contains')} can only accept a string, number or regular expression."
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
+    regex_conflict: "You passed a regular expression with the case-insensitive (i) flag and { matchCase: true } to #{cmd('contains')}. Those options conflict with each other, so please choose one or the other."
 
   cookies:
     backend_error: """
@@ -605,6 +609,17 @@ module.exports = {
     async_timed_out: "Timed out after '{{ms}}ms'. The done() callback was never invoked!"
     invalid_interface: "Invalid mocha interface '{{name}}'"
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
+    overspecified: """
+    Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+
+    Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callback
+
+    #{divider(60, '-')}
+
+    Original mocha error:
+
+    {{error}}
+    """
 
   navigation:
     cross_origin: ({ message, originPolicy, configFile }) -> """

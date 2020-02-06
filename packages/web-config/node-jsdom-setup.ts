@@ -14,6 +14,7 @@ export const register = ({
   enzyme,
   EnzymeAdapter,
   chaiEnzyme,
+  requireOverride,
 }) => {
   const jsdom = new JSDOM('<!doctype html><html><body></body></html>')
   const { window } = jsdom
@@ -64,6 +65,14 @@ export const register = ({
 
     Module._load = function (...args) {
       let browserPkg = args
+
+      if (requireOverride) {
+        const mockedDependency = requireOverride(...args)
+
+        if (mockedDependency != null) {
+          return mockedDependency
+        }
+      }
 
       // Follow browser-field spec for importing modules
       if (!['path'].includes(args[0])) {

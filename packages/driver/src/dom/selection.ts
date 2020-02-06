@@ -71,7 +71,13 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
   const doc = $document.getDocumentFromElement(el)
 
   // NOTE: insertText will also handle '\n', and render newlines
-  $elements.callNativeMethod(doc, 'execCommand', 'insertText', true, text)
+  let nativeUI = true
+
+  if (Cypress.browser.family === 'firefox') {
+    nativeUI = false
+  }
+
+  $elements.callNativeMethod(doc, 'execCommand', 'insertText', nativeUI, text)
 }
 
 // Keeping around native implementation
@@ -340,15 +346,7 @@ const moveCursorRight = function (el) {
   }
 }
 
-const moveCursorUp = (el) => {
-  return _moveCursorUpOrDown(el, true)
-}
-
-const moveCursorDown = (el) => {
-  return _moveCursorUpOrDown(el, false)
-}
-
-const _moveCursorUpOrDown = function (el, up) {
+const _moveCursorUpOrDown = function (up: boolean, el: HTMLElement) {
   if ($elements.isInput(el)) {
     // on an input, instead of moving the cursor
     // we want to perform the native browser action
@@ -370,8 +368,43 @@ const _moveCursorUpOrDown = function (el, up) {
 
   const isTextarea = $elements.isTextarea(el)
 
+  if (isTextarea && Cypress.browser.family === 'firefox') {
+    const val = $elements.getNativeProp(el as HTMLTextAreaElement, 'value')
+    const bounds = _getSelectionBoundsFromTextarea(el as HTMLTextAreaElement)
+    let toPos
+
+    if (up) {
+      const partial = val.slice(0, bounds.start)
+      const lastEOL = partial.lastIndexOf('\n')
+      const offset = partial.length - lastEOL - 1
+      const SOL = partial.slice(0, lastEOL).lastIndexOf('\n') + 1
+      const toLineLen = partial.slice(SOL, lastEOL).length
+
+      toPos = SOL + Math.min(toLineLen, offset)
+
+      // const baseLen = arr.slice(0, -2).join().length - 1
+      // toPos = baseLen + arr.slice(-1)[0].length
+    } else {
+      const partial = val.slice(bounds.end)
+      const arr = partial.split('\n')
+      const baseLen = arr.slice(0, 1).join('\n').length + bounds.end
+
+      toPos = baseLen + (bounds.end - val.slice(0, bounds.end).lastIndexOf('\n'))
+    }
+
+    setSelectionRange(el, toPos, toPos)
+
+    return
+  }
+
   if (isTextarea || $elements.isContentEditable(el)) {
     const selection = _getSelectionByEl(el)
+
+    if (Cypress.browser.family === 'firefox' && !selection.isCollapsed) {
+      up ? selection.collapseToStart() : selection.collapseToEnd()
+
+      return
+    }
 
     return $elements.callNativeMethod(selection, 'modify',
       'move',
@@ -380,15 +413,10 @@ const _moveCursorUpOrDown = function (el, up) {
   }
 }
 
-const moveCursorToLineStart = (el) => {
-  return _moveCursorToLineStartOrEnd(el, true)
-}
+const moveCursorUp = _.curry(_moveCursorUpOrDown)(true)
+const moveCursorDown = _.curry(_moveCursorUpOrDown)(false)
 
-const moveCursorToLineEnd = (el) => {
-  return _moveCursorToLineStartOrEnd(el, false)
-}
-
-const _moveCursorToLineStartOrEnd = function (el: HTMLElement, toStart) {
+const _moveCursorToLineStartOrEnd = function (toStart: boolean, el: HTMLElement) {
   const isInput = $elements.isInput(el)
   const isTextarea = $elements.isTextarea(el)
   const isInputOrTextArea = isInput || isTextarea
@@ -396,11 +424,54 @@ const _moveCursorToLineStartOrEnd = function (el: HTMLElement, toStart) {
   if ($elements.isContentEditable(el) || isInputOrTextArea) {
     const selection = _getSelectionByEl(el)
 
+    if (Cypress.browser.family === 'firefox' && isInputOrTextArea) {
+      if (isInput) {
+        let toPos = 0
+
+        if (!toStart) {
+          toPos = $elements.getNativeProp(el as HTMLInputElement, 'value').length
+        }
+
+        setSelectionRange(el, toPos, toPos)
+
+        return
+      }
+      // const doc = $document.getDocumentFromElement(el)
+      // console.log(doc.activeElement)
+      // $elements.callNativeMethod(doc, 'execCommand', 'selectall', false)
+      // $elements.callNativeMethod(el, 'select')
+      // _getSelectionByEl(el).ca
+      // toStart ? _getSelectionByEl(el).collapseToStart : _getSelectionByEl(el).collapseToEnd()
+
+      if (isTextarea) {
+        const bounds = _getSelectionBoundsFromTextarea(el)
+        const value = $elements.getNativeProp(el as HTMLTextAreaElement, 'value')
+        let toPos: number
+
+        if (toStart) {
+          toPos = value.slice(0, bounds.start).lastIndexOf('\n') + 1
+        } else {
+          const valSlice = value.slice(bounds.end)
+          const EOLNewline = valSlice.indexOf('\n')
+          const EOL = EOLNewline === -1 ? valSlice.length : EOLNewline
+
+          toPos = bounds.end + EOL
+        }
+
+        setSelectionRange(el, toPos, toPos)
+
+        return
+      }
+    }
+
     // the selection.modify API is non-standard, may work differently in other browsers, and is not in IE11.
     // https://developer.mozilla.org/en-US/docs/Web/API/Selection/modify
     return $elements.callNativeMethod(selection, 'modify', 'move', toStart ? 'backward' : 'forward', 'lineboundary')
   }
 }
+
+const moveCursorToLineStart = _.curry(_moveCursorToLineStartOrEnd)(true)
+const moveCursorToLineEnd = _.curry(_moveCursorToLineStartOrEnd)(false)
 
 const isCollapsed = function (el) {
   if ($elements.isTextarea(el) || $elements.isInput(el)) {

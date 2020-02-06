@@ -75,8 +75,9 @@ const getElementPositioning = ($el) => {
   // because its useful to any caller
   const rectCenter = getCenterCoordinates(rect)
 
-  const topCenter = rectCenter.y
-  const leftCenter = rectCenter.x
+  // rounding needed for firefox, which returns floating numbers
+  const topCenter = Math.ceil(rectCenter.y)
+  const leftCenter = Math.ceil(rectCenter.x)
 
   return {
     scrollTop: el.scrollTop,
@@ -93,15 +94,15 @@ const getElementPositioning = ($el) => {
       leftCenter,
     },
     fromElWindow: {
-      top: rect.top + win.scrollY,
+      top: Math.ceil(rect.top + win.scrollY),
       left: rect.left + win.scrollX,
-      topCenter: topCenter + win.scrollY,
+      topCenter: Math.ceil(topCenter + win.scrollY),
       leftCenter: leftCenter + win.scrollX,
     },
     fromAutWindow: {
-      top: rectFromAut.top + autFrame.scrollY,
+      top: Math.ceil(rectFromAut.top + autFrame.scrollY),
       left: rectFromAut.left + autFrame.scrollX,
-      topCenter: rectFromAutCenter.y + autFrame.scrollY,
+      topCenter: Math.ceil(rectFromAutCenter.y + autFrame.scrollY),
       leftCenter: rectFromAutCenter.x + autFrame.scrollX,
     },
   }

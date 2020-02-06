@@ -51,9 +51,9 @@ const spaceDelimitedArgsMsg = (flag, args) => {
 }
 
 const parseVariableOpts = (fnArgs, args) => {
-  const opts = fnArgs.pop()
+  const [opts, unknownArgs] = fnArgs
 
-  if (fnArgs.length && (opts.spec || opts.tag)) {
+  if ((unknownArgs && unknownArgs.length) && (opts.spec || opts.tag)) {
     // this will capture space-delimited args after
     // flags that could have possible multiple args
     // but before the next option
@@ -72,7 +72,7 @@ const parseVariableOpts = (fnArgs, args) => {
       const endIndex = nextOptOffset !== -1 ? argIndex + nextOptOffset : args.length
 
       const maybeArgs = _.slice(args, argIndex, endIndex)
-      const extraArgs = _.intersection(maybeArgs, fnArgs)
+      const extraArgs = _.intersection(maybeArgs, unknownArgs)
 
       if (extraArgs.length) {
         opts[flag] = [opts[flag]].concat(extraArgs)
@@ -103,7 +103,7 @@ const descriptions = {
   forceInstall: 'force install the Cypress binary',
   global: 'force Cypress into global mode as if its globally installed',
   group: 'a named group for recorded runs in the Cypress Dashboard',
-  headed: 'displays the browser instead of running headlessly (defaults to true for Chrome-family browsers)',
+  headed: 'displays the browser instead of running headlessly (defaults to true for Firefox and Chromium-family browsers)',
   headless: 'hide the browser instead of running headed (defaults to true for Electron)',
   key: 'your secret Record Key. you can omit this if you set a CYPRESS_RECORD_KEY environment variable.',
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
