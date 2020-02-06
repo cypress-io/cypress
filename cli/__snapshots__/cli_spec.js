@@ -131,6 +131,8 @@ exports['cli unknown option shows help for cache command - unknown sub-command f
 
   stdout:
   -------
+  error: unknown command: cache foo
+
   Usage: cypress cache [command]
 
   Manages the Cypress binary cache

@@ -283,17 +283,19 @@ module.exports = {
     .option('list', text('cacheList'))
     .option('path', text('cachePath'))
     .option('clear', text('cacheClear'))
-    .action(function (opts) {
-      if (!_.isString(opts)) {
+    .action(function (opts, args) {
+      if (!args || !args.length) {
         this.outputHelp()
         util.exit(1)
       }
 
-      if (opts.command || !_.includes(['list', 'path', 'clear'], opts)) {
-        unknownOption.call(this, `cache ${opts}`, 'command')
+      const [command] = args
+
+      if (!_.includes(['list', 'path', 'clear'], command)) {
+        unknownOption.call(this, `cache ${command}`, 'command')
       }
 
-      cache[opts]()
+      cache[command]()
     })
 
     debug('cli starts with arguments %j', args)
