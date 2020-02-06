@@ -6,22 +6,16 @@ import _ from 'lodash'
 import os from 'os'
 import path from 'path'
 import extension from '@packages/extension'
-import { FoundBrowser } from '@packages/launcher'
 import appData from '../util/app_data'
 import fs from '../util/fs'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
 import protocol from './protocol'
 import utils from './utils'
+import { Browser } from './types'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
-
-type Browser = FoundBrowser & {
-  majorVersion: number
-  isHeadless: boolean
-  isHeaded: boolean
-}
 
 const debug = debugModule('cypress:server:browsers:chrome')
 

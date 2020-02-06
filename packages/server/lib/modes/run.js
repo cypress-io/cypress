@@ -458,23 +458,23 @@ const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   }
 
   if (browser.family === 'chromium') {
-    return getChromeProps(browser.isHeaded, project, writeVideoFrame)
+    return getChromeProps(writeVideoFrame)
   }
 
   if (browser.family === 'firefox') {
-    return getFirefoxProps(browser.isHeaded, project, writeVideoFrame)
+    return getFirefoxProps(project, writeVideoFrame)
   }
 
   return {}
 }
 
-const getFirefoxProps = (isHeaded, project, writeVideoFrame) => {
-  debug('setting Firefox properties %o', { isHeaded })
+const getFirefoxProps = (project, writeVideoFrame) => {
+  debug('setting Firefox properties')
 
   return _
   .chain({})
   .tap((props) => {
-    if (isHeaded && writeVideoFrame) {
+    if (writeVideoFrame) {
       const onScreencastFrame = (data) => {
         writeVideoFrame(data)
       }
@@ -487,10 +487,10 @@ const getFirefoxProps = (isHeaded, project, writeVideoFrame) => {
   .value()
 }
 
-const getChromeProps = (isHeaded, project, writeVideoFrame) => {
+const getChromeProps = (writeVideoFrame) => {
   const shouldWriteVideo = Boolean(writeVideoFrame)
 
-  debug('setting Chrome properties %o', { isHeaded, shouldWriteVideo })
+  debug('setting Chrome properties %o', { shouldWriteVideo })
 
   return _
   .chain({})
@@ -652,7 +652,7 @@ const browserCanBeRecorded = (browser) => {
     return true
   }
 
-  if (browser.family === 'firefox' && browser.isHeaded) {
+  if (browser.family === 'firefox') {
     return true
   }
 

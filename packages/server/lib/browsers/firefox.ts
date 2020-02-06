@@ -8,7 +8,7 @@ import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
-import { Browser } from '@packages/launcher'
+import { Browser } from './types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -139,6 +139,10 @@ export async function open (browser: Browser, url, options: any = {}) {
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
     ],
   })
+
+  if (browser.isHeadless) {
+    defaultLaunchOptions.args.push('-headless')
+  }
 
   debug('firefox open %o', options)
 
