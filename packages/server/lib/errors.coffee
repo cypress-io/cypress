@@ -934,6 +934,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       The error was: #{arg3}
       """
+    when "FIREFOX_MARIONETTE_FAILURE"
+      """
+      Cypress could not connect to Firefox.
+
+      An unexpected error was received from Marionette #{arg1}:
+
+      #{arg2}
+
+      To avoid this error, ensure sure that there are no other instances of Firefox launched by Cypress running.
+      """
 
 get = (type, arg1, arg2, arg3) ->
   msg = getMsgByType(type, arg1, arg2, arg3)

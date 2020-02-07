@@ -191,7 +191,12 @@ export async function open (browser: Browser, url, options: any = {}) {
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
   ])
 
-  launchOptions.extensions.push(extensionDest)
+  if (Array.isArray(launchOptions.extensions)) {
+    launchOptions.extensions.push(extensionDest)
+  } else {
+    launchOptions.extensions = [extensionDest]
+  }
+
   const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
 
   const profile = new FirefoxProfile({
