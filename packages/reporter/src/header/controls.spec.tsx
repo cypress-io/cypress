@@ -26,52 +26,6 @@ const appStateStub = (props?: Partial<AppState>) => {
 
 describe('<Controls />', () => {
   describe('when running, not paused, and/or without next command', () => {
-    it('renders toggle auto-scrolling button', () => {
-      const component = shallow(<Controls events={eventsStub()} appState={appStateStub()} />)
-
-      expect(component.find('.toggle-auto-scrolling')).to.exist
-    })
-
-    it('renders toggle auto-scrolling button with auto-scrolling-enabled class when auto-scrolling is enabled', () => {
-      const component = shallow(<Controls events={eventsStub()} appState={appStateStub()} />)
-
-      expect(component.find('.toggle-auto-scrolling')).to.have.className('auto-scrolling-enabled')
-    })
-
-    it('renders toggle auto-scrolling button without auto-scrolling-enabled class when auto-scrolling is disabled', () => {
-      const component = shallow(<Controls events={eventsStub()} appState={appStateStub({ autoScrollingEnabled: false })} />)
-
-      expect(component.find('.toggle-auto-scrolling')).not.to.have.className('auto-scrolling-enabled')
-    })
-
-    it('renders tooltip around toggle auto-scrolling button with right title when auto-scrolling is enabled', () => {
-      const component = shallow(<Controls events={eventsStub()} appState={appStateStub()} />)
-
-      expect(component.find('.toggle-auto-scrolling').parent()).to.have.prop('title', 'Disable Auto-scrolling')
-    })
-
-    it('renders tooltip around toggle auto-scrolling button with right title when auto-scrolling is disabled', () => {
-      const component = shallow(<Controls events={eventsStub()} appState={appStateStub({ autoScrollingEnabled: false })} />)
-
-      expect(component.find('.toggle-auto-scrolling').parent()).to.have.prop('title', 'Enable Auto-scrolling')
-    })
-
-    it('toggles appState.autoScrollingEnabled when auto-scrolling button is clicked', () => {
-      const appState = appStateStub()
-      const component = shallow(<Controls events={eventsStub()} appState={appState} />)
-
-      component.find('.toggle-auto-scrolling').simulate('click')
-      expect(appState.toggleAutoScrolling).to.have.been.called
-    })
-
-    it('emits save:state event when auto-scrolling button is clicked', () => {
-      const events = eventsStub()
-      const component = shallow(<Controls events={events} appState={appStateStub()} />)
-
-      component.find('.toggle-auto-scrolling').simulate('click')
-      expect(events.emit).to.have.been.calledWith('save:state')
-    })
-
     it('renders stop button', () => {
       const component = shallow(<Controls events={eventsStub()} appState={appStateStub()} />)
 

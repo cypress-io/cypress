@@ -1,8 +1,10 @@
 const { EventEmitter } = require('events')
 
 describe('controls', () => {
+  let runner
+
   beforeEach(() => {
-    const runner = new EventEmitter()
+    runner = new EventEmitter()
 
     cy.visit('/dist').then((win) => {
       win.render({
@@ -82,6 +84,22 @@ describe('controls', () => {
       .click()
       .should('have.attr', 'aria-label')
       .and('equal', 'Enable Auto-scrolling')
+    })
+
+    it('emits save:state when clicked', () => {
+      cy.spy(runner, 'emit')
+
+      cy.get('.toggle-auto-scrolling').click().then(() => {
+        expect(runner.emit).to.have.been.calledWith('save:state', {
+          autoScrollingEnabled: false,
+        })
+      })
+
+      cy.get('.toggle-auto-scrolling').click().then(() => {
+        expect(runner.emit).to.have.been.calledWith('save:state', {
+          autoScrollingEnabled: true,
+        })
+      })
     })
   })
 
