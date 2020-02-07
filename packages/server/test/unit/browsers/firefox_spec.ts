@@ -4,10 +4,6 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import 'chai-as-promised'
 
-const appData = require('../../../lib/util/app_data')
-
-sinon.stub(appData, 'path').returns('/path/to/appData')
-
 const mockfs = require('mock-fs')
 import Marionette from 'marionette-client'
 import Foxdriver from '@benmalka/foxdriver'
@@ -84,6 +80,12 @@ describe('lib/browsers/firefox', () => {
   })
 
   beforeEach(() => {
+    sinon.stub(utils, 'getProfileDir').returns('/path/to/appData/firefox/interactive')
+
+    mockfs({
+      '/path/to/appData/firefox/interactive': {},
+    })
+
     sinon.stub(protocol, '_connectAsync').resolves(null)
 
     stubMarionette()
@@ -92,10 +94,6 @@ describe('lib/browsers/firefox', () => {
 
   context('#open', () => {
     beforeEach(function () {
-      mockfs({
-        '/path/to/appData': {},
-      })
-
       this.browser = { name: 'firefox' }
       this.options = {
         proxyUrl: 'http://proxy-url',
@@ -283,7 +281,7 @@ describe('lib/browsers/firefox', () => {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
         expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
-          'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":720,"sizemode":"maximized"}}}\n',
+          'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
         })
       })
     })
