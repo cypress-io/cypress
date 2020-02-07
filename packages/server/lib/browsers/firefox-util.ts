@@ -268,7 +268,7 @@ export default {
         })
       })
       .then(resolve)
-      .catch(onError('commands'))
+      .catch(_onError('commands'))
     })
 
     // even though Marionette is not used past this point, we have to keep the session open

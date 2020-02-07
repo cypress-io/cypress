@@ -32,14 +32,14 @@ describe('lib/browsers/firefox', () => {
   const stubMarionette = () => {
     marionetteSendCb = null
 
-    const connect = sinon.stub().callsArg(0)
+    const connect = sinon.stub().resolves()
 
-    const send = sinon.stub().callsFake((opts, cb) => {
+    const send = sinon.stub().callsFake((opts) => {
       if (marionetteSendCb) {
-        return marionetteSendCb(opts, cb)
+        return marionetteSendCb(opts)
       }
 
-      return cb({})
+      return Promise.resolve()
     })
 
     const close = sinon.stub()
@@ -51,7 +51,7 @@ describe('lib/browsers/firefox', () => {
       socket, client, connect, send, close,
     }
 
-    sinon.stub(Marionette.Drivers, 'Tcp').returns(marionetteDriver)
+    sinon.stub(Marionette.Drivers, 'Promises').returns(marionetteDriver)
   }
 
   const stubFoxdriver = () => {
@@ -317,6 +317,8 @@ describe('lib/browsers/firefox', () => {
       it('rejects on errors on socket', async () => {
         marionetteSendCb = () => {
           marionetteDriver.socket.emit('error', new Error('foo error'))
+
+          return Promise.resolve()
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
@@ -324,12 +326,12 @@ describe('lib/browsers/firefox', () => {
       })
 
       it('rejects on errors from marionette commands', async () => {
-        marionetteSendCb = (opts, cb) => {
-          cb({ error: true })
+        marionetteSendCb = () => {
+          return Promise.reject(new Error('foo'))
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('Unexpected error from Marionette commands: GenericError')
+        .to.be.rejectedWith('Cannot connect to Firefox. Unexpected error from Marionette commands: Error: foo')
       })
     })
 
