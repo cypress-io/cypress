@@ -2,7 +2,6 @@ import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
 import Marionette from 'marionette-client'
-import Exception from 'marionette-client/lib/marionette/error'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
@@ -16,20 +15,6 @@ let timings = {
   gc: [] as any[],
   cc: [] as any[],
   collections: [] as any[],
-}
-
-const promisifyFoxdriver = (fn) => {
-  return (...args) => {
-    return new Bluebird((resolve, reject) => {
-      fn(...args, (data) => {
-        if ('error' in data) {
-          reject(new Exception(data, data))
-        } else {
-          resolve(data)
-        }
-      })
-    })
-  }
 }
 
 const getTabId = (tab) => {
@@ -233,29 +218,37 @@ export default {
   },
 
   async setupMarionette (extensions, url, port) {
-    const driver = new Marionette.Drivers.Tcp({ port })
-
-    const connect = Bluebird.promisify(driver.connect.bind(driver))
-    const driverSend = promisifyFoxdriver(driver.send.bind(driver))
+    const driver = new Marionette.Drivers.Promises({ port })
 
     const sendMarionette = (data) => {
-      return driverSend(new Command(data))
+      return driver.send(new Command(data))
     }
 
     debug('firefox: navigating page with webdriver')
 
-    await connect()
-
-    await new Bluebird((resolve, reject) => {
-      const onError = (from) => {
-        return (err) => {
-          debug('error in marionette %o', { from, err })
-          reject(new Error(`Unexpected error from Marionette ${from}: ${err}`))
+    const onError = (from, reject?) => {
+      if (!reject) {
+        reject = (err) => {
+          throw err
         }
       }
 
-      driver.socket.on('error', onError('Socket'))
-      driver.client.on('error', onError('CommandStream'))
+      return (err) => {
+        debug('error in marionette %o', { from, err })
+        reject(new Error(`Cannot connect to Firefox. Unexpected error from Marionette ${from}: ${err}`))
+      }
+    }
+
+    await driver.connect()
+    .catch(onError('connection'))
+
+    await new Bluebird((resolve, reject) => {
+      const _onError = (from) => {
+        return onError(from, reject)
+      }
+
+      driver.socket.on('error', _onError('Socket'))
+      driver.client.on('error', _onError('CommandStream'))
 
       sendMarionette({
         name: 'WebDriver:NewSession',
