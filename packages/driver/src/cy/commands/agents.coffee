@@ -10,7 +10,7 @@ counts = null
 sinon.setFormatter($utils.stringifyArg.bind($utils))
 
 createSandbox = ->
-  sinon.sandbox.create().usingPromise(Promise)
+  sinon.createSandbox().usingPromise(Promise)
 
 display = (name) ->
   switch name

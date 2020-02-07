@@ -170,7 +170,6 @@ describe "e2e cookies", ->
           }
           spec: "cookies_spec_baseurl.coffee"
           snapshot: true
-          expectedExitCode: 0
           onRun: (exec) =>
             exec({
               originalTitle: "e2e cookies with baseurl"
@@ -187,5 +186,4 @@ describe "e2e cookies", ->
         originalTitle: "e2e cookies with no baseurl"
         spec: "cookies_spec_no_baseurl.coffee"
         snapshot: true
-        expectedExitCode: 0
       }

@@ -9,6 +9,9 @@ const webpack = require('@cypress/webpack-preprocessor')
 
 const webpackOptions = require('@packages/runner/webpack.config.ts').default
 
+/**
+ * @type {Cypress.PluginConfig}
+ */
 module.exports = (on) => {
   on('file:preprocessor', webpack({ webpackOptions }))
 

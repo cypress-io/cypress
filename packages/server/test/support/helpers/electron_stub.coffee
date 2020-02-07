@@ -25,6 +25,9 @@ module.exports = {
   }
   BrowserWindow: {
     fromWebContents: ->
+    getExtensions: ->
+    removeExtension: ->
+    addExtension: ->
   }
   Menu: {
     buildFromTemplate: ->

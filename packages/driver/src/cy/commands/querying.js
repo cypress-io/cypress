@@ -13,6 +13,8 @@ const restoreContains = () => {
   return $expr.contains = $contains
 }
 
+const whitespaces = /\s+/g
+
 module.exports = (Commands, Cypress, cy) => {
   // restore initially when a run starts
   restoreContains()
@@ -407,7 +409,11 @@ module.exports = (Commands, Cypress, cy) => {
         filter = ''
       }
 
-      _.defaults(options, { log: true })
+      if (options.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
+        $utils.throwErrByPath('contains.regex_conflict')
+      }
+
+      _.defaults(options, { log: true, matchCase: true })
 
       if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
         $utils.throwErrByPath('contains.invalid_argument')
@@ -477,10 +483,40 @@ module.exports = (Commands, Cypress, cy) => {
         options._log.set({ $el })
       }
 
+      // When multiple space characters are considered as a single whitespace in all tags except <pre>.
+      const normalizeWhitespaces = (elem) => {
+        let testText = elem.textContent || elem.innerText || $.text(elem)
+
+        if (elem.tagName === 'PRE') {
+          return testText
+        }
+
+        return testText.replace(whitespaces, ' ')
+      }
+
       if (_.isRegExp(text)) {
+        if (options.matchCase === false && !text.flags.includes('i')) {
+          text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
+        }
+
         // taken from jquery's normal contains method
         $expr.contains = (elem) => {
-          return text.test(elem.textContent || elem.innerText || $.text(elem))
+          let testText = normalizeWhitespaces(elem)
+
+          return text.test(testText)
+        }
+      }
+
+      if (_.isString(text)) {
+        $expr.contains = (elem) => {
+          let testText = normalizeWhitespaces(elem)
+
+          if (!options.matchCase) {
+            testText = testText.toLowerCase()
+            text = text.toLowerCase()
+          }
+
+          return testText.includes(text)
         }
       }
 

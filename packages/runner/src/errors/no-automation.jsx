@@ -22,8 +22,8 @@ const noBrowsers = () => (
 
 const browser = (browser) => (
   <span>
-    <BrowserIcon browserName={browser.name} />
-    <span>Run {displayName(browser.name)} {browser.majorVersion}</span>
+    <BrowserIcon browserName={browser.displayName} />
+    <span>Run {displayName(browser.displayName)} {browser.majorVersion}</span>
   </span>
 )
 
