@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 
 import AnError, { Error } from '../errors/an-error'
 import Runnable from './runnable-and-suite'
-import { RunnablesStore, RunnablesList as RunnablesListType } from './runnables-store'
+import { RunnablesStore } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
 
@@ -17,18 +17,32 @@ const noTestsError = (specPath: string) => ({
 })
 
 interface Props {
-  runnables: RunnablesListType
+  runnablesStore: RunnablesStore
 }
 
-const RunnablesList = observer(({ runnables }: Props) => (
-  <div className='wrap'>
-    <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
-    </ul>
-  </div>
-))
+const RunnablesList = observer(({ runnablesStore }: Props) => {
+  const filter = runnablesStore.activeFilter
 
-function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
+  if (filter && runnablesStore.noneMatchFilter) {
+    return (
+      <div className='filter-empty-message'>
+        <p>No tests match the filter "{filter === 'active' ? 'Running' : _.startCase(filter)}"</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className='wrap'>
+      <ul className='runnables'>
+        {_.map(runnablesStore.runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
+      </ul>
+    </div>
+  )
+})
+
+function content (runnablesStore: RunnablesStore, specPath: string, error?: Error) {
+  const { isReady, runnables } = runnablesStore
+
   if (!isReady) return null
 
   // show error if there are no tests, but only if there
@@ -37,7 +51,7 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, erro
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
+  return error ? <AnError error={error} /> : <RunnablesList runnablesStore={runnablesStore} />
 }
 
 interface RunnablesProps {

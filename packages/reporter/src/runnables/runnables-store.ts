@@ -35,11 +35,10 @@ export interface RootRunnable {
 
 type RunnableType = 'test' | 'suite'
 type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
-export type RunnablesList = Array<TestModel | SuiteModel>
 
 class RunnablesStore {
   @observable isReady = defaults.isReady
-  @observable runnables: RunnablesList = []
+  @observable runnables: Array<TestModel | SuiteModel> = []
   @observable _activeFilter: TestState | null = defaults._activeFilter
   hasTests: boolean = false
   hasSingleTest: boolean = false

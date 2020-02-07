@@ -173,15 +173,5 @@ describe('suites', function () {
       cy.contains('suite 5').should('be.visible')
       cy.contains('suite (nested) 1').should('be.visible')
     })
-
-    it('displays empty message when none match', function () {
-      this.runnables.suites = [this.runnables.suites[2]]
-      this.runner.emit('runnables:ready', this.runnables)
-
-      cy.get('[value="passed"]').click()
-      cy.get('.filter-empty-message')
-      .should('be.visible')
-      .should('have.text', 'No tests match the filter "Passed"')
-    })
   })
 })

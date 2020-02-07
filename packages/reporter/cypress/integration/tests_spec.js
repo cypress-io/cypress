@@ -100,6 +100,10 @@ describe('tests', function () {
   })
 
   describe('filtering', () => {
+    beforeEach(() => {
+      cy.get('.toggle-options').click()
+    })
+
     it('displays when the "Running" filter is selected and it is active', () => {
       cy.get('[value="active"]').click()
       cy.contains('test (nested) 2').should('be.visible')
@@ -171,6 +175,28 @@ describe('tests', function () {
       cy.contains('test 5').should('be.visible')
       cy.contains('test (nested) 1').should('be.visible')
       cy.contains('test (nested) 2').should('be.visible')
+    })
+
+    it('displays empty message when none match', function () {
+      this.runnables.suites = []
+      this.runnables.tests = [{
+        'id': 'r1',
+        'title': 'test 1',
+      }, {
+        'id': 'r2',
+        'title': 'test 2',
+      }, {
+        'id': 'r3',
+        'title': 'test 3',
+      }]
+
+      this.runner.emit('runnables:ready', this.runnables)
+
+      cy.get('[value="passed"]').click()
+      cy.get('.filter-empty-message')
+      .should('be.visible')
+      .should('have.length', 1)
+      .should('have.text', 'No tests match the filter "Passed"')
     })
   })
 })
