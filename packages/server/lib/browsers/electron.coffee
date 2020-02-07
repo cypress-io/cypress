@@ -11,6 +11,8 @@ appData       = require("../util/app_data")
 plugins       = require("../plugins")
 savedState    = require("../saved_state")
 profileCleaner = require("../util/profile_cleaner")
+utils         = require('./utils')
+errors        = require('../errors')
 
 ## additional events that are nice to know about to be logged
 ## https://electronjs.org/docs/api/browser-window#instance-events
@@ -40,6 +42,15 @@ getAutomation = (win) ->
       .apply(win.webContents.debugger, args)
 
   CdpAutomation(sendCommand)
+
+_installExtensions = (extensionPaths = [], options) ->
+  Windows.removeAllExtensions()
+
+  extensionPaths.forEach (path) ->
+    try
+      Windows.installExtension(path)
+    catch
+      options.onWarning(errors.get('EXTENSION_NOT_LOADED', 'Electron', path))
 
 module.exports = {
   _defaultOptions: (projectRoot, state, options) ->
@@ -157,7 +168,7 @@ module.exports = {
 
       originalSendCommand.call(webContents.debugger, message, data)
       .then (res) ->
-        if debug.enabled && res.data && res.data.length > 100
+        if debug.enabled && _.get(res, 'data.length') > 100
           res = _.clone(res)
           res.data = res.data.slice(0, 100) + ' [truncated]'
         debug('debugger: received response to %s: %o', message, res)
@@ -223,6 +234,7 @@ module.exports = {
       debug("received saved state %o", state)
 
       ## get our electron default options
+      ## TODO: this is bad, don't mutate the options object
       options = @_defaultOptions(projectRoot, state, options)
 
       ## get the GUI window defaults now
@@ -230,22 +242,19 @@ module.exports = {
 
       debug("browser window options %o", _.omitBy(options, _.isFunction))
 
-      Bluebird
-      .try =>
-        ## bail if we're not registered to this event
-        return options if not plugins.has("before:browser:launch")
+      defaultLaunchOptions = utils.getDefaultLaunchOptions({
+        preferences: options,
+      })
 
-        plugins.execute("before:browser:launch", options.browser, options)
-        .then (newOptions) ->
-          if newOptions
-            debug("received new options from plugin event %o", newOptions)
-            _.extend(options, newOptions)
+      return utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options)
+    .then (launchOptions) =>
+      { preferences } = launchOptions
 
-          return options
-    .then (options) =>
       debug("launching browser window to url: %s", url)
 
-      @_render(url, projectRoot, automation, options)
+      _installExtensions(launchOptions.extensions, options)
+
+      @_render(url, projectRoot, automation, preferences)
       .then (win) =>
         ## cause the webview to receive focus so that
         ## native browser focus + blur events fire correctly
@@ -256,6 +265,8 @@ module.exports = {
 
         win.once "closed", ->
           debug("closed event fired")
+
+          Windows.removeAllExtensions()
 
           events.emit("exit")
 

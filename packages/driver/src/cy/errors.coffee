@@ -55,6 +55,9 @@ create = (state, config, log) ->
       if l = current and current.getLastLog()
         l.error(err)
 
+    ## normalize error message for firefox
+    $utils.normalizeErrorStack(err)
+
     return err
 
   commandRunningFailed = (err) ->

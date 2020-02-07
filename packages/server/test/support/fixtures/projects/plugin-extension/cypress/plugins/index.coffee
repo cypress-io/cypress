@@ -1,8 +1,8 @@
 path = require("path")
 
 module.exports = (onFn, config) ->
-  onFn "before:browser:launch", (browser = {}, args) ->
+  onFn "before:browser:launch", (browser = {}, options) ->
     pathToExt = path.resolve("ext")
 
-    args.push("--load-extension=#{pathToExt}")
-    args
+    options.args.push("--load-extension=#{pathToExt}")
+    options
