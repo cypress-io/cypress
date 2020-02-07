@@ -171,7 +171,7 @@ module.exports = {
           // assume 18 fps. This number comes from manual measurement of avg fps coming from firefox.
           .inputFPS(18)
 
-          // 'vsync vfr' (variable framerate) works perfectly but fails on page navigation
+          // 'vsync vfr' (variable framerate) works perfectly but fails on top page navigation
           // since video timestamp resets to 0, timestamps already written will be dropped
           // .outputOption('-vsync vfr')
 
