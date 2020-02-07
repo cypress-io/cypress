@@ -45,8 +45,10 @@ describe('lib/browsers/firefox', () => {
     const socket = new EventEmitter()
     const client = new EventEmitter()
 
+    const tcp = { socket, client }
+
     marionetteDriver = {
-      socket, client, connect, send, close,
+      tcp, connect, send, close,
     }
 
     sinon.stub(Marionette.Drivers, 'Promises').returns(marionetteDriver)
@@ -316,7 +318,7 @@ describe('lib/browsers/firefox', () => {
     context('#setupMarionette', () => {
       it('rejects on errors on socket', async () => {
         marionetteSendCb = () => {
-          marionetteDriver.socket.emit('error', new Error('foo error'))
+          marionetteDriver.tcp.socket.emit('error', new Error('foo error'))
 
           return Promise.resolve()
         }
