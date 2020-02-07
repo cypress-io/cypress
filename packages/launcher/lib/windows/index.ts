@@ -1,6 +1,6 @@
 import execa from 'execa'
-import { pathExists } from 'fs-extra'
-import { homedir } from 'os'
+import fse from 'fs-extra'
+import os from 'os'
 import { join, normalize } from 'path'
 import { tap, trim } from 'ramda'
 import { get } from 'lodash'
@@ -21,7 +21,7 @@ function formChromiumAppPath () {
 }
 
 function formChromeCanaryAppPath () {
-  const home = homedir()
+  const home = os.homedir()
   const exe = join(
     home,
     'AppData',
@@ -45,7 +45,7 @@ function getFirefoxPaths (editionFolder) {
 }
 
 function formEdgeCanaryAppPath () {
-  const home = homedir()
+  const home = os.homedir()
   const exe = join(
     home,
     'AppData',
@@ -124,7 +124,7 @@ function getWindowsBrowser (browser: Browser): Promise<FoundBrowser> {
       throw notInstalledErr(browser.name)
     }
 
-    return pathExists(exePath)
+    return fse.pathExists(exePath)
     .then((exists) => {
       log('found %s ?', exePath, exists)
 
