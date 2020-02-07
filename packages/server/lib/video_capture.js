@@ -169,6 +169,7 @@ module.exports = {
           .inputFormat('webm')
 
           // assume 18 fps. This number comes from manual measurement of avg fps coming from firefox.
+          // TODO: replace this with the 'vfr' option below when dropped frames issue is fixed.
           .inputFPS(18)
 
           // 'vsync vfr' (variable framerate) works perfectly but fails on top page navigation
