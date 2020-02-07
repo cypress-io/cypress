@@ -19,7 +19,7 @@ const detectChrome = partial(findApp, [
 ])
 const detectChromium = partial(findApp, [
   'Chromium.app',
-  'Contents/DMacOS/Chromium',
+  'Contents/MacOS/Chromium',
   'org.chromium.Chromium',
   'CFBundleShortVersionString',
 ])
