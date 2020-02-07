@@ -46,8 +46,17 @@ class Runnable extends Component<RunnableProps> {
 
   render () {
     const { model } = this.props
+    const filter = runnablesStore.activeFilter
 
-    if (!model.matchesFilter(runnablesStore.activeFilter)) {
+    if (filter && runnablesStore.noneMatchFilter) {
+      return (
+        <div className='filter-empty-message'>
+          <p>No tests match the filter "{filter === 'active' ? 'Running' : _.startCase(filter)}"</p>
+        </div>
+      )
+    }
+
+    if (!model.matchesFilter(filter)) {
       return null
     }
 

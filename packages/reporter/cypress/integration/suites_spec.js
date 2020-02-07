@@ -17,7 +17,6 @@ describe('suites', function () {
       this.suiteTitle = this.runnables.suites[0].title
 
       this.runner.emit('runnables:ready', this.runnables)
-
       this.runner.emit('reporter:start', {})
     })
   })
@@ -100,7 +99,11 @@ describe('suites', function () {
     })
   })
 
-  describe('filtering', () => {
+  describe('filtering', function () {
+    beforeEach(() => {
+      cy.get('.toggle-options').click()
+    })
+
     it('displays when the "Running" filter is selected and it contains active tests', () => {
       cy.get('[value="active"]').click()
       cy.contains('suite 1').should('be.visible')
@@ -169,6 +172,16 @@ describe('suites', function () {
       cy.contains('suite 4').should('be.visible')
       cy.contains('suite 5').should('be.visible')
       cy.contains('suite (nested) 1').should('be.visible')
+    })
+
+    it('displays empty message when none match', function () {
+      this.runnables.suites = [this.runnables.suites[2]]
+      this.runner.emit('runnables:ready', this.runnables)
+
+      cy.get('[value="passed"]').click()
+      cy.get('.filter-empty-message')
+      .should('be.visible')
+      .should('have.text', 'No tests match the filter "Passed"')
     })
   })
 })

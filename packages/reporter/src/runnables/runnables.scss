@@ -17,6 +17,18 @@
     padding-left: 0;
   }
 
+  .filter-empty-message {
+    padding: 1em;
+
+    p {
+      background: #eee;
+      border-radius: 3px;
+      border: solid 1px #d3d3d3;
+      margin: 0;
+      padding: 1em;
+    }
+  }
+
   .runnable {
     width: 100%;
     color: #6c6c6c;

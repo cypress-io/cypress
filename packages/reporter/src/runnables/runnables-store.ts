@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 
 import appState, { AppState } from '../lib/app-state'
 import AgentModel, { AgentProps } from '../agents/agent-model'
@@ -35,10 +35,11 @@ export interface RootRunnable {
 
 type RunnableType = 'test' | 'suite'
 type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
+export type RunnablesList = Array<TestModel | SuiteModel>
 
 class RunnablesStore {
   @observable isReady = defaults.isReady
-  @observable runnables: Array<TestModel | SuiteModel> = []
+  @observable runnables: RunnablesList = []
   @observable activeFilter: TestState | null = defaults.activeFilter
   hasTests: boolean = false
   hasSingleTest: boolean = false
@@ -57,6 +58,12 @@ class RunnablesStore {
   constructor ({ appState, scroller }: Props) {
     this.appState = appState
     this.scroller = scroller
+  }
+
+  @computed get noneMatchFilter () {
+    return _.every(this.runnables, (runnable) => {
+      return !runnable.matchesFilter(this.activeFilter)
+    })
   }
 
   setRunnables (rootRunnable: RootRunnable) {
