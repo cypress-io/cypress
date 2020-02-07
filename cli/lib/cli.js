@@ -303,9 +303,11 @@ module.exports = {
     .command('info')
     .usage('[command]')
     .description('Prints locally detected browsers')
-    .action(() => {
-      require('./tasks/info')
-      .start()
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      require('./exec/info')
+      .start(opts)
+      .then(util.exit)
       .catch(util.logErrorExit1)
     })
 
