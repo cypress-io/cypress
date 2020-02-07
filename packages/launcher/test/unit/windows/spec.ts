@@ -32,6 +32,8 @@ describe('windows browser detection', () => {
 
   afterEach(() => {
     execa.stdout.restore()
+    os.homedir.restore()
+    fse.pathExists.restore()
   })
 
   it('detects browsers as expected', async () => {

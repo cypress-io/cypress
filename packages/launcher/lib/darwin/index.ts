@@ -11,7 +11,7 @@ type Detectors = {
   }
 }
 
-const browsers: Detectors = {
+export const browsers: Detectors = {
   chrome: {
     stable: {
       appName: 'Google Chrome.app',
