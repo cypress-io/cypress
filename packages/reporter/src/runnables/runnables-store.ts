@@ -16,7 +16,7 @@ const defaults = {
   isReady: false,
   attemptingShowSnapshot: false,
   showingSnapshot: false,
-  activeFilter: null,
+  _activeFilter: null,
 }
 
 interface Props {
@@ -40,7 +40,7 @@ export type RunnablesList = Array<TestModel | SuiteModel>
 class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables: RunnablesList = []
-  @observable activeFilter: TestState | null = defaults.activeFilter
+  @observable _activeFilter: TestState | null = defaults._activeFilter
   hasTests: boolean = false
   hasSingleTest: boolean = false
 
@@ -58,6 +58,10 @@ class RunnablesStore {
   constructor ({ appState, scroller }: Props) {
     this.appState = appState
     this.scroller = scroller
+  }
+
+  @computed get activeFilter () {
+    return this.appState.isPaused ? null : this._activeFilter
   }
 
   @computed get noneMatchFilter () {
@@ -78,9 +82,8 @@ class RunnablesStore {
     this._startRendering()
   }
 
-  @action
-  setFilter (nextActiveFilter: TestState | null) {
-    this.activeFilter = nextActiveFilter
+  @action setFilter (filter: TestState | null) {
+    this._activeFilter = filter
   }
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {

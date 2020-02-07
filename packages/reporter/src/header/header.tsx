@@ -26,6 +26,8 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Props
     }),
   }))
 
+  const showOptions = appState.isPaused ? false : state.isShowingOptions
+
   return (
     <header>
       <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests'>
@@ -36,8 +38,8 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Props
       </Tooltip>
       <Stats stats={statsStore} />
       <div className='spacer' />
-      <Controls appState={appState} isShowingOptions={state.isShowingOptions} onToggleOptions={state.toggleShowingOptions} />
-      {state.isShowingOptions && <Options appState={appState} />}
+      <Controls appState={appState} isShowingOptions={showOptions} onToggleOptions={state.toggleShowingOptions} />
+      {showOptions && <Options appState={appState} />}
     </header>
   )
 })
