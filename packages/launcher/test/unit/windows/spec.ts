@@ -63,7 +63,6 @@ describe('windows browser detection', () => {
       .then((foundBrowser) => {
         return _.merge(browser, foundBrowser)
       })
-      .catch(() => {})
     }))
 
     snapshot(detected)
