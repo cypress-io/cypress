@@ -580,6 +580,11 @@ describe('Settings', () => {
   })
 
   describe('experiments panel', () => {
+    const noExperimentsShown = () => {
+      cy.get('.settings-experiments').find('.experiment-intro-empty').should('be.visible')
+      cy.get('.experiment').should('have.length', 0)
+    }
+
     describe('no experimental features turned on', () => {
       beforeEach(function () {
         this.openProject.resolve(this.config)
@@ -598,8 +603,7 @@ describe('Settings', () => {
       })
 
       it('displays panel with no experiments', () => {
-        cy.get('.settings-experiments').contains('you can enable these beta')
-        cy.get('.experiment').should('have.length', 0)
+        noExperimentsShown()
       })
     })
 
@@ -619,7 +623,7 @@ describe('Settings', () => {
       })
 
       it('are not shown', () => {
-        cy.get('.experiment').should('have.length', 0)
+        noExperimentsShown()
       })
     })
 
