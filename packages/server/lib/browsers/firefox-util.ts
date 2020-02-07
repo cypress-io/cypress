@@ -7,6 +7,8 @@ import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import protocol from './protocol'
 
+const errors = require('../errors')
+
 const debug = Debug('cypress:server:browsers:firefox-util')
 
 let forceGcCc: () => Promise<void>
@@ -235,7 +237,7 @@ export default {
 
       return (err) => {
         debug('error in marionette %o', { from, err })
-        reject(new Error(`Cannot connect to Firefox. Unexpected error from Marionette ${from}: ${err}`))
+        reject(errors.get('FIREFOX_MARIONETTE_FAILURE', from, err))
       }
     }
 
