@@ -96,7 +96,7 @@ chai.use((chai, u) => {
     }
 
     // Chrome doesn't return [object Window] even if val is a Window object.
-    // So, we're checking the error message here.
+    // So, we try throwing an error and check the error message.
     try {
       val && val.document
     } catch (e) {
