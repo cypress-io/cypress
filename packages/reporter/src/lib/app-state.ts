@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable } from 'mobx'
+import { action, observable } from 'mobx'
 
 interface DefaultAppState {
   isPaused: boolean
@@ -56,7 +56,7 @@ class AppState {
     }
   }
 
-  toggleAutoScrolling () {
+  @action toggleAutoScrolling () {
     this.setAutoScrolling(!this.autoScrollingEnabled)
   }
 

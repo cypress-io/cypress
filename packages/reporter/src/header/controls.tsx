@@ -1,5 +1,4 @@
-import cs from 'classnames'
-import { action } from 'mobx'
+import { IAction } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
 // @ts-ignore
@@ -15,14 +14,14 @@ const ifThen = (condition: boolean, component: React.ReactNode) => (
 interface Props {
   events?: Events
   appState: AppState
+  isShowingOptions: boolean
+  onToggleOptions: (() => void) & IAction
 }
 
-const Controls = observer(({ events = defaultEvents, appState }: Props) => {
+const Controls = observer(({ events = defaultEvents, appState, isShowingOptions, onToggleOptions }: Props) => {
   const emit = (event: string) => () => events.emit(event)
-  const toggleAutoScrolling = () => {
-    appState.toggleAutoScrolling()
-    events.emit('save:state')
-  }
+
+  const optionsLabel = `${isShowingOptions ? 'Hide' : 'Show'} Options`
 
   return (
     <div className='controls'>
@@ -39,14 +38,9 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         </Tooltip>
       ))}
       {ifThen(!appState.isPaused, (
-        <Tooltip placement='bottom' title={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}>
-          <button
-            aria-label={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
-            className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
-            onClick={action('toggle:auto:scrolling', toggleAutoScrolling)}
-          >
-            <i />
-            <i className='fas fa-arrows-alt-v'></i>
+        <Tooltip placement='bottom' title={optionsLabel}>
+          <button aria-label={optionsLabel} className='toggle-options' onClick={onToggleOptions}>
+            <i className='fas fa-sliders-h'></i>
           </button>
         </Tooltip>
       ))}

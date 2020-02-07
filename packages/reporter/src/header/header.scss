@@ -127,29 +127,73 @@
       }
     }
 
-    .toggle-auto-scrolling {
-      line-height: 25px;
+    .toggle-options i {
+      font-size: 100%;
+    }
+  }
 
-      i {
-        font-size: 100%;
+  .options {
+    width: 100%;
+    border-top: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+
+    .toggle-auto-scrolling {
+      font-weight: normal;
+      margin-bottom: 1em;
+      padding: 0;
+      width: auto;
+
+      &:hover,
+      &:active {
+        background: none;
+        box-shadow: none;
       }
 
-      i:first-child {
-        @extend .far;
-        @extend .#{$fa-css-prefix}-circle;
+      .auto-scrolling-indicator {
+        @extend .#{$fa-css-prefix}-toggle-off;
         color: #999;
-        font-size: 80%;
-        margin-right: 3px;
-        position: relative;
-        top: -1px;
+        font-size: 110%;
+        margin-right: 0.3em;
       }
 
       &.auto-scrolling-enabled {
-        i:first-child {
-          @extend .fas;
-          @extend .#{$fa-css-prefix}-circle;
+        .auto-scrolling-indicator {
+          @extend .#{$fa-css-prefix}-toggle-on;
           color: #FFB61C;
         }
+      }
+
+      .fa-info-circle {
+        color: #777;
+        margin-left: 0.3em;
+      }
+    }
+
+    .test-filter {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+
+      legend {
+        color: #333;
+        font-size: 14px;
+        font-weight: normal;
+        margin-bottom: 0.5em;
+      }
+
+      label {
+        background-color: unset;
+        color: #777;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 1em;
+        margin-bottom: 0.5em;
+        margin-left: 1em;
+        padding: 0;
+      }
+
+      input {
+        margin-right: 0.5em;
       }
     }
   }
@@ -167,42 +211,6 @@
 
     .stats li {
       padding: 10px;
-    }
-  }
-
-  .test-filter {
-    width: 100%;
-    border-top: 1px solid #ddd;
-    padding: .5rem 1rem;
-
-    p {
-      margin: 0;
-      padding: 0;
-    }
-
-    legend {
-      margin-bottom: .5rem;
-    }
-
-    fieldset div {
-      display: flex;
-      flex-direction: row;
-    }
-
-    label {
-      background-color: unset;
-      color: #999;
-      font-size: 1em;
-      padding: 0;
-    }
-
-    input {
-      margin-left: 1em;
-      margin-right: 0.5em;
-    }
-
-    label:nth-of-type(1) input {
-      margin-left: 0;
     }
   }
 }
