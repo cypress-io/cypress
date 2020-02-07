@@ -129,6 +129,7 @@ const knownCommands = [
   '-v',
   '--version',
   'version',
+  'info',
 ]
 
 const text = (description) => {
@@ -296,6 +297,16 @@ module.exports = {
       }
 
       cache[command]()
+    })
+
+    program
+    .command('info')
+    .usage('[command]')
+    .description('Prints locally detected browsers')
+    .action(() => {
+      require('./tasks/info')
+      .start()
+      .catch(util.logErrorExit1)
     })
 
     debug('cli starts with arguments %j', args)
