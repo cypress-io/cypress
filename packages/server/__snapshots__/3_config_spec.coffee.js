@@ -149,6 +149,6 @@ Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 exports['e2e config catches invalid browser in the configuration file 1'] = `
 We found an invalid value in the file: \`cypress.json\`
 
-Found an error while validating the \`browsers\` list. Expected \`family\` to be either electron, chrome or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
+Found an error while validating the \`browsers\` list. Expected \`family\` to be either electron, chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
 
 `

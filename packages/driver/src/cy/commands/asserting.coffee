@@ -92,7 +92,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     ## are we doing a length assertion?
     if reHaveLength.test(chainers) or reExistence.test(chainers)
-      exp.isCheckingExistence = true
+      isCheckingExistence = true
 
     applyChainer = (memo, value) ->
       if value is lastChainer
@@ -108,6 +108,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               throwAndLogErr(err)
             else
               throw err
+        else
+          memo[value]
       else
         memo[value]
 
@@ -118,10 +120,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## because its possible we're asserting about an
       ## element which has left the DOM and we always
       ## want to auto-fail on those
-      if not exp.isCheckingExistence and $dom.isElement(subject)
+      if not isCheckingExistence and $dom.isElement(subject)
         cy.ensureAttached(subject, "should")
 
-      _.reduce chainers, (memo, value) =>
+      newExp = _.reduce chainers, (memo, value) =>
         if value not of memo
           err = $utils.cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
           err.retry = false
@@ -130,6 +132,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         applyChainer(memo, value)
 
       , exp
+
+      exp = newExp ? exp
 
     Promise.try(applyChainers).then ->
       ## if the _obj has been mutated then we

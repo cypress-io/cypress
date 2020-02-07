@@ -4,6 +4,6 @@ module.exports = (onFn, config) ->
   {
     browsers: [{
       name: "browser name",
-      family: "chrome"
+      family: "chromium"
     }]
   }

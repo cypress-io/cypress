@@ -91,6 +91,8 @@ module.exports = {
       return ended.promise
     }
 
+    const lengths = {}
+
     const writeVideoFrame = function (data) {
       // make sure we haven't ended
       // our stream yet because paint
@@ -104,6 +106,12 @@ module.exports = {
       written = true
 
       debugFrames('writing video frame')
+
+      if (lengths[data.length]) {
+        return
+      }
+
+      lengths[data.length] = true
 
       if (wantsWrite) {
         if (!(wantsWrite = pt.write(data))) {
@@ -122,14 +130,10 @@ module.exports = {
 
     const startCapturing = () => {
       return new Promise((resolve) => {
-        let cmd
-
-        cmd = ffmpeg({
+        const cmd = ffmpeg({
           source: pt,
           priority: 20,
         })
-        .inputFormat('image2pipe')
-        .inputOptions('-use_wallclock_as_timestamps 1')
         .videoCodec('libx264')
         .outputOptions('-preset ultrafast')
         .on('start', (command) => {
@@ -158,7 +162,24 @@ module.exports = {
           debug('capture ended')
 
           return ended.resolve()
-        }).save(name)
+        })
+
+        if (options.webmInput) {
+          cmd
+          .inputFormat('webm')
+          .outputOption('-vsync vfr')
+          // this is to prevent the error "invalid data input" error
+          // when input frames have an odd resolution
+          .videoFilters(`crop='floor(in_w/2)*2:floor(in_h/2)*2'`)
+          // same as above but scales instead of crops
+          // .videoFilters("scale=trunc(iw/2)*2:trunc(ih/2)*2")
+        } else {
+          cmd
+          .inputFormat('image2pipe')
+          .inputOptions('-use_wallclock_as_timestamps 1')
+        }
+
+        return cmd.save(name)
       })
     }
 
@@ -187,6 +208,7 @@ module.exports = {
         '-preset fast',
         `-crf ${videoCompression}`,
       ])
+      // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
       .on('start', (command) => {
         return debug('compression started %o', { command })
       }).on('codecData', (data) => {
@@ -205,7 +227,11 @@ module.exports = {
 
         const progressed = utils.timemarkToSeconds(progress.timemark)
 
-        return onProgress(progressed / total)
+        const percent = progressed / total
+
+        if (percent < 1) {
+          return onProgress(percent)
+        }
       }).on('error', (err, stdout, stderr) => {
         debug('compression errored: %o', { error: err.message, stdout, stderr })
 

@@ -69,17 +69,14 @@
 
   .script-error {
     background-color: #f8f8f8;
-    bottom: 0;
     border: none;
     border-radius: 0;
     color: #ec6573;
-    left: 0;
     overflow: auto;
     margin: 0;
     padding: 2em;
-    position: absolute;
-    right: 0;
-    top: 0;
+    width: 100%;
+    height: 100%;
 
     &:empty {
       display: none;

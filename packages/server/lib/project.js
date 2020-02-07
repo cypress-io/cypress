@@ -83,6 +83,14 @@ class Project extends EE {
     .tap((cfg) => {
       process.chdir(this.projectRoot)
 
+      // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
+      if (cfg.chromeWebSecurity === false) {
+        _.chain(cfg.browsers)
+        .filter((browser) => browser.family !== 'chromium')
+        .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
+        .value()
+      }
+
       // TODO: we currently always scaffold the plugins file
       // even when headlessly or else it will cause an error when
       // we try to load it and it's not there. We must do this here
@@ -158,6 +166,7 @@ class Project extends EE {
 
         options.onError(err)
       },
+      onWarning: options.onWarning,
     })
   }
 
@@ -321,6 +330,11 @@ class Project extends EE {
       onSpecChanged: options.onSpecChanged,
 
       onSavedStateChanged: options.onSavedStateChanged,
+
+      onCaptureVideoFrames: (data) => {
+        // TODO: move this to browser automation middleware
+        this.emit('capture:video:frames', data)
+      },
 
       onConnect: (id) => {
         this.emit('socket:connected', id)

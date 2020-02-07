@@ -148,6 +148,11 @@ describe('Project Nav', function () {
           })
         })
 
+        it('shows beta text for firefox', function () {
+          cy.get('.browsers li').contains('Firefox')
+          .contains('beta')
+        })
+
         it('shows info icon with tooltip for browsder with info', function () {
           const browserWithInfo = _.find(this.config.browsers, (b) => !!b.info)
 
@@ -252,11 +257,11 @@ describe('Project Nav', function () {
           const browserArg = this.ipc.launchBrowser.getCall(0).args[0].browser
 
           expect(browserArg).to.have.keys([
-            'family', 'name', 'path', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning',
+            'family', 'name', 'path', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning', 'channel',
           ])
 
           expect(browserArg.path).to.include('/')
-          expect(browserArg.family).to.equal('chrome')
+          expect(browserArg.family).to.equal('chromium')
         })
 
         describe('stop browser', function () {
@@ -370,7 +375,7 @@ describe('Project Nav', function () {
           {
             'name': 'chromium',
             'displayName': 'Chromium',
-            'family': 'chrome',
+            'family': 'chromium',
             'version': '49.0.2609.0',
             'path': '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
             'majorVersion': '49',
@@ -412,6 +417,34 @@ describe('Project Nav', function () {
         localStorage.setItem('chosenBrowser', 'Custom')
         cy.get('.browsers-list .dropdown-chosen')
         .should('contain', 'Custom')
+
+        cy.wrap(localStorage.getItem('chosenBrowser')).should('equal', 'Custom')
+      })
+    })
+
+    describe('browser with info', function () {
+      beforeEach(function () {
+        this.info = 'foo info bar [baz](http://example.com/)'
+        this.config.browsers = [{
+          name: 'electron',
+          family: 'electron',
+          displayName: 'Electron',
+          version: '50.0.2661.86',
+          path: '',
+          majorVersion: '50',
+          info: this.info,
+        }]
+
+        this.openProject.resolve(this.config)
+      })
+
+      it('shows info icon with linkified tooltip', function () {
+        cy.get('.browsers .fa-info-circle').trigger('mouseover')
+
+        cy.get('.cy-tooltip').should('contain', 'foo info bar baz')
+        cy.get('.cy-tooltip a').should('have.text', 'baz').click().then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
+        })
       })
     })
   })

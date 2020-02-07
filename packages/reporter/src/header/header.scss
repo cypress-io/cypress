@@ -159,7 +159,7 @@
       &.auto-scrolling-enabled {
         .auto-scrolling-indicator {
           @extend .#{$fa-css-prefix}-toggle-on;
-          color: #FFB61C;
+          color: $yellow-dark;
         }
       }
 

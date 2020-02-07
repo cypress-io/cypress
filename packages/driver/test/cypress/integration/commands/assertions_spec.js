@@ -795,7 +795,7 @@ describe('src/cy/commands/assertions', () => {
           expect(log.invoke('consoleProps')).to.deep.eq({
             Command: 'assert',
             subject: log.get('subject'),
-            Message: 'expected <body> to have a property length',
+            Message: 'expected <body> to have property length',
           })
 
           done()
@@ -947,7 +947,7 @@ describe('src/cy/commands/assertions', () => {
               if (attrs.name === 'assert') {
                 cy.removeAllListeners('log:added')
 
-                expect(log.get('message')).to.eq('expected **<button>** to have a property **length**')
+                expect(log.get('message')).to.eq('expected **<button>** to have property **length**')
 
                 done()
               }
@@ -2245,7 +2245,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
 
         cy.get('button:first').should('have.focus')
         .then(() => {
-          expect(stub).to.be.calledTwice
+          expect(stub).to.be.calledThrice
         })
       })
     })
@@ -2320,11 +2320,11 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **{ foo: bar, baz: quux }** to have a property **foo**'
+          'expected **{ foo: bar, baz: quux }** to have property **foo**'
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **{ foo: bar, baz: quux }** to have a property **foo** of **bar**'
+          'expected **{ foo: bar, baz: quux }** to have property **foo** of **bar**'
         )
 
         expect(l4.get('message')).to.eq(

@@ -8,7 +8,6 @@ const Pending = require('mocha/lib/pending')
 const $Log = require('./log')
 const $utils = require('./utils')
 
-const defaultGrepRe = /.*/
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
 
@@ -18,7 +17,7 @@ const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
-const RUNNABLE_PROPS = 'id title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file'.split(' ')
+const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file'.split(' ')
 
 // ## initial payload
 // {
@@ -210,23 +209,6 @@ const forceGc = function (obj) {
   }
 }
 
-const anyTestInSuite = function (suite, fn) {
-  for (let test of suite.tests) {
-    if (fn(test) === true) {
-      return true
-    }
-  }
-
-  for (suite of suite.suites) {
-    if (anyTestInSuite(suite, fn) === true) {
-      return true
-    }
-  }
-
-  // else return false
-  return false
-}
-
 const eachHookInSuite = function (suite, fn) {
   for (let type of HOOKS) {
     for (let hook of suite[`_${type}`]) {
@@ -263,7 +245,7 @@ const getAllSiblingTests = function (suite, getTestById) {
     // iterate through each of our suites tests.
     // this will iterate through all nested tests
     // as well.  and then we add it only if its
-    // in our grepp'd tests array
+    // in our filtered tests array
     if (getTestById(test.id)) {
       return tests.push(test)
     }
@@ -295,7 +277,7 @@ const getTestFromHook = function (hook, suite, getTestById) {
   }
 
   // returns us the very first test
-  // which is in our grepped tests array
+  // which is in our filtered tests array
   // based on walking down the current suite
   // iterating through each test until it matches
   found = onFirstTest(suite, (test) => {
@@ -316,13 +298,13 @@ const getTestFromHook = function (hook, suite, getTestById) {
 
 // we have to see if this is the last suite amongst
 // its siblings.  but first we have to filter out
-// suites which dont have a grep'd test in them
+// suites which dont have a filtered test in them
 const isLastSuite = function (suite, tests) {
   if (suite.root) {
     return false
   }
 
-  // grab all of the suites from our grep'd tests
+  // grab all of the suites from our filtered tests
   // including all of their ancestor suites!
   const suites = _.reduce(tests, (memo, test) => {
     let parent
@@ -395,12 +377,12 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
       case 'afterEach': {
         const t = getTest()
 
-        // find all of the grep'd _tests which share
+        // find all of the filtered _tests which share
         // the same parent suite as our current _test
         const tests = getAllSiblingTests(t.parent, getTestById)
 
         // make sure this test isnt the last test overall but also
-        // isnt the last test in our grep'd parent suite's tests array
+        // isnt the last test in our filtered parent suite's tests array
         if (this.suite.root && (t !== _.last(allTests)) && (t !== _.last(tests))) {
           changeFnToRunAfterHooks()
         }
@@ -409,7 +391,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
       }
 
       case 'afterAll': {
-        // find all of the grep'd allTests which share
+        // find all of the filtered allTests which share
         // the same parent suite as our current _test
         const t = getTest()
 
@@ -443,19 +425,6 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
   }
 }
 
-const matchesGrep = function (runnable, grep) {
-  // we have optimized this iteration to the maximum.
-  // we memoize the existential matchesGrep property
-  // so we dont regex again needlessly when going
-  // through tests which have already been set earlier
-  if (((runnable.matchesGrep == null)) || (!_.isEqual(runnable.grepRe, grep))) {
-    runnable.grepRe = grep
-    runnable.matchesGrep = grep.test(runnable.fullTitle())
-  }
-
-  return runnable.matchesGrep
-}
-
 const getTestResults = (tests) => {
   return _.map(tests, (test) => {
     const obj = _.pick(test, 'id', 'duration', 'state')
@@ -470,7 +439,15 @@ const getTestResults = (tests) => {
   })
 }
 
-const normalizeAll = function (suite, initialTests = {}, grep, setTestsById, setTests, onRunnable, onLogsById, getTestId) {
+const hasOnly = (suite) => {
+  return (
+    suite._onlyTests.length ||
+    suite._onlySuites.length ||
+    _.some(suite.suites, hasOnly)
+  )
+}
+
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getTestId) => {
   let hasTests = false
 
   // only loop until we find the first test
@@ -488,9 +465,7 @@ const normalizeAll = function (suite, initialTests = {}, grep, setTestsById, set
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests = {}
-  const grepIsDefault = _.isEqual(grep, defaultGrepRe)
-
-  const obj = normalize(suite, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
+  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -499,15 +474,23 @@ const normalizeAll = function (suite, initialTests = {}, grep, setTestsById, set
   }
 
   if (setTests) {
+    let i = 0
+
+    const testsArr = _.map(tests, (test) => {
+      test.order = i += 1
+
+      return test
+    })
+
     // same pattern here
-    setTests(_.values(tests))
+    setTests(testsArr)
   }
 
-  return obj
+  return normalizedSuite
 }
 
-const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId) {
-  const normalizer = (runnable) => {
+const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTestId) => {
+  const normalizeRunnable = (runnable) => {
     let i
 
     runnable.id = getTestId()
@@ -524,7 +507,6 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
     // if we have a runnable in the initial state
     // then merge in existing properties into the runnable
     i = initialTests[runnable.id]
-
     if (i) {
       _.each(RUNNABLE_LOGS, (type) => {
         return _.each(i[type], onLogsById)
@@ -542,68 +524,66 @@ const normalize = function (runnable, tests, initialTests, grep, grepIsDefault, 
     return tests[test.id] != null ? tests[test.id] : (tests[test.id] = test)
   }
 
-  const obj = normalizer(runnable)
+  const normalizedRunnable = normalizeRunnable(runnable)
 
-  // if we have a default grep then avoid
-  // grepping altogether and just push
-  // tests into the array of tests
-  if (grepIsDefault) {
+  if ((runnable.type !== 'suite') || !hasOnly(runnable)) {
     if (runnable.type === 'test') {
       push(runnable)
     }
 
-    // and recursively iterate and normalize all other _runnables
-    _.each({ tests: runnable.tests, suites: runnable.suites }, (_runnables, key) => {
-      if (runnable[key]) {
-        obj[key] = _.map(_runnables, (runnable) => {
-          return normalize(runnable, tests, initialTests, grep, grepIsDefault, onRunnable, onLogsById, getTestId)
+    // recursively iterate and normalize all other _runnables
+    _.each({ tests: runnable.tests, suites: runnable.suites }, (_runnables, type) => {
+      if (runnable[type]) {
+        return normalizedRunnable[type] = _.map(_runnables, (runnable) => {
+          return normalize(runnable, tests, initialTests, onRunnable, onLogsById, getTestId)
         })
       }
     })
-  } else {
-    // iterate through all tests and only push them in
-    // if they match the current grep
-    obj.tests = _.reduce(runnable.tests != null ? runnable.tests : [], (memo, test) => {
-      // only push in the test if it matches
-      // our grep
-      if (matchesGrep(test, grep)) {
-        memo.push(normalizer(test))
-        push(test)
-      }
 
-      return memo
-    }
-    , [])
-
-    // and go through the suites
-    obj.suites = _.reduce(runnable.suites != null ? runnable.suites : [], (memo, suite) => {
-      // but only add them if a single nested test
-      // actually matches the grep
-      const any = anyTestInSuite(suite, (test) => {
-        return matchesGrep(test, grep)
-      })
-
-      if (any) {
-        memo.push(
-          normalize(
-            suite,
-            tests,
-            initialTests,
-            grep,
-            grepIsDefault,
-            onRunnable,
-            onLogsById,
-            getTestId
-          )
-        )
-      }
-
-      return memo
-    }
-    , [])
+    return normalizedRunnable
   }
 
-  return obj
+  // this follows how mocha filters onlys. its runner#filterOnly
+  // is pretty much the same minus the normalization part
+  const filterOnly = (normalizedSuite, suite) => {
+    if (suite._onlyTests.length) {
+      suite.tests = suite._onlyTests
+      normalizedSuite.tests = _.map(suite._onlyTests, (test) => {
+        const normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById, getTestId)
+
+        push(normalizedTest)
+
+        return normalizedTest
+      })
+
+      suite.suites = []
+      normalizedSuite.suites = []
+    } else {
+      suite.tests = []
+      normalizedSuite.tests = []
+      _.each(suite._onlySuites, (onlySuite) => {
+        const normalizedOnlySuite = normalizeRunnable(onlySuite, initialTests, onRunnable, onLogsById, getTestId)
+
+        if (hasOnly(onlySuite)) {
+          return filterOnly(normalizedOnlySuite, onlySuite)
+        }
+      })
+
+      suite.suites = _.filter(suite.suites, (childSuite) => {
+        const normalizedChildSuite = normalizeRunnable(childSuite, initialTests, onRunnable, onLogsById, getTestId)
+
+        return (suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)
+      })
+
+      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getTestId))
+    }
+
+    return suite.tests.length || suite.suites.length
+  }
+
+  filterOnly(normalizedRunnable, runnable)
+
+  return normalizedRunnable
 }
 
 const hookFailed = function (hook, err, hookName, getTestById, getTest) {
@@ -764,6 +744,8 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     let hookName
     const isHook = runnable.type === 'hook'
 
+    $utils.normalizeErrorStack(err)
+
     if (isHook) {
       const parentTitle = runnable.parent.title
 
@@ -845,6 +827,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
     // else  do the same thing as mocha here
     err = $utils.appendErrMsg(err, append())
 
+    // remove this error's stack since it gives no valuable context
+    err.stack = ''
+
     const throwErr = function () {
       throw err
     }
@@ -922,31 +907,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
-    grep (re) {
-      if (arguments.length) {
-        _runner._grep = re
-      } else {
-        // grab grep from the mocha _runner
-        // or just set it to all in case
-        // there is a mocha regression
-        return _runner._grep != null ? _runner._grep : (_runner._grep = defaultGrepRe)
-      }
-    },
-
-    options (options = {}) {
-      // TODO
-      // need to handle
-      // ignoreLeaks, asyncOnly, globals
-
-      let re
-
-      re = options.grep
-
-      if (re) {
-        return this.grep(re)
-      }
-    },
-
     normalizeAll (tests) {
       // if we have an uncaught error then slice out
       // all of the tests and suites and just generate
@@ -964,7 +924,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
       return normalizeAll(
         _runner.suite,
         tests,
-        this.grep(),
         setTestsById,
         setTests,
         onRunnable,

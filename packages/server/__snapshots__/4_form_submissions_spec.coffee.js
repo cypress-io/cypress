@@ -138,7 +138,7 @@ exports['e2e forms / <form> submissions / passes with http on localhost'] = `
 
 `
 
-exports['e2e forms submissions with jquery XHR POST failing 1'] = `
+exports['e2e forms / submissions with jquery XHR POST / failing'] = `
 
 ====================================================================================================
 
@@ -165,7 +165,12 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
   1 failing
 
   1) form submission fails fails without an explicit wait when an element is immediately found:
-     AssertionError: expected '<form>' to contain 'form success!'
+
+      AssertionError: expected '<form>' to contain 'form success!'
+      + expected - actual
+
+      +'form success!'
+      
       [stack trace lines]
 
 
@@ -207,14 +212,12 @@ exports['e2e forms submissions with jquery XHR POST failing 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  form_submission_failing_spec.coffee      XX:XX        1        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
-
+  │ ✖  form_submission_failing_spec.coffee      XX:XX        1    └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        1  
 
 `
 
-exports['e2e forms submissions with jquery XHR POST passing 1'] = `
+exports['e2e forms / submissions with jquery XHR POST / passing'] = `
 
 ====================================================================================================
 

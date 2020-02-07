@@ -40,7 +40,7 @@ describe('<Controls />', () => {
 
       const component = shallow(title)
 
-      expect(component.text()).to.contain('Stop Running')
+      expect(component.text()).to.contain('Stop Running ')
     })
 
     it('emits stop event when stop button is clicked', () => {
@@ -157,7 +157,7 @@ describe('<Controls />', () => {
 
       const component = shallow(title)
 
-      expect(component.text()).to.contain('Run All Tests')
+      expect(component.text()).to.contain('Run All Tests ')
     })
 
     it('emits restart event when restart button is clicked', () => {

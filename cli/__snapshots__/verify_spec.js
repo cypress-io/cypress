@@ -20,7 +20,7 @@ Cypress Version: 1.2.3
 exports['current version has not been verified 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
+  ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -57,7 +57,7 @@ Found binary version 7.8.9 installed in: /cache/Cypress/1.2.3/Cypress.app
 
 It looks like this is your first time using Cypress: 7.8.9
 
- ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
+  ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -105,7 +105,7 @@ Cypress Version: 1.2.3
 exports['fails verifying Cypress 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
 Error: Cypress failed to start.
 
@@ -153,7 +153,7 @@ Cypress Version: 1.2.3
 exports['lib/tasks/verify logs error when child process hangs 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
 Error: Cypress verification timed out.
 
@@ -175,7 +175,7 @@ Cypress Version: 1.2.3
 exports['lib/tasks/verify logs error when child process returns incorrect stdout (stderr when exists) 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
 Error: Cypress verification failed.
 
@@ -197,7 +197,7 @@ Cypress Version: 1.2.3
 exports['lib/tasks/verify logs error when child process returns incorrect stdout (stdout when no stderr) 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
 Error: Cypress verification failed.
 
@@ -293,7 +293,7 @@ This overrides the default Cypress binary path used.
 
 It looks like this is your first time using Cypress: 1.2.3
 
- ✔  Verified Cypress! /real/custom
+  ✔  Verified Cypress! /real/custom
 
 Opening Cypress...
 
@@ -302,7 +302,7 @@ Opening Cypress...
 exports['verbose stdout output 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
+  ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -311,7 +311,7 @@ Opening Cypress...
 exports['verification with executable 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
+  ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 
 Opening Cypress...
 
@@ -362,7 +362,7 @@ Cypress Version: 1.2.3
 exports['xvfb fails 1'] = `
 It looks like this is your first time using Cypress: 1.2.3
 
- ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
+  ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
 Error: Xvfb exited with a non zero exit code.
 
