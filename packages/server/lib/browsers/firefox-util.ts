@@ -249,8 +249,10 @@ export default {
         return onError(from, reject)
       }
 
-      driver.socket.on('error', _onError('Socket'))
-      driver.client.on('error', _onError('CommandStream'))
+      const { tcp } = driver
+
+      tcp.socket.on('error', _onError('Socket'))
+      tcp.client.on('error', _onError('CommandStream'))
 
       sendMarionette({
         name: 'WebDriver:NewSession',
