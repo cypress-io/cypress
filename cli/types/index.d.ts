@@ -381,7 +381,7 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/api/screenshot-api
+     * @see https://on.cypress.io/screenshot-api
      */
     Screenshot: {
       defaults(options: Partial<ScreenshotDefaultsOptions>): void

@@ -19,7 +19,7 @@ const detectChrome = partial(findApp, [
 ])
 const detectChromium = partial(findApp, [
   'Chromium.app',
-  'Contents/DMacOS/Chromium',
+  'Contents/MacOS/Chromium',
   'org.chromium.Chromium',
   'CFBundleShortVersionString',
 ])
@@ -39,23 +39,28 @@ const detectFirefoxNightly = partial(findApp, [
   'Firefox Nightly.app',
   'Contents/MacOS/firefox-bin',
   'org.mozilla.nightly',
+  'CFBundleShortVersionString',
 ])
 const detectEdgeCanary = partial(findApp, [
+  'Microsoft Edge Canary.app',
   'Contents/MacOS/Microsoft Edge Canary',
   'com.microsoft.Edge.Canary',
   'CFBundleShortVersionString',
 ])
 const detectEdgeBeta = partial(findApp, [
+  'Microsoft Edge Beta.app',
   'Contents/MacOS/Microsoft Edge Beta',
   'com.microsoft.Edge.Beta',
   'CFBundleShortVersionString',
 ])
 const detectEdgeDev = partial(findApp, [
+  'Microsoft Edge Dev.app',
   'Contents/MacOS/Microsoft Edge Dev',
   'com.microsoft.Edge.Dev',
   'CFBundleShortVersionString',
 ])
 const detectEdge = partial(findApp, [
+  'Microsoft Edge.app',
   'Contents/MacOS/Microsoft Edge',
   'com.microsoft.Edge',
   'CFBundleShortVersionString',
