@@ -347,6 +347,12 @@ describe('Specs List', function () {
             expect(JSON.parse(win.localStorage[`specsFilter-${this.config.projectId}-/foo/bar`])).to.equal('new')
           })
         })
+
+        it('sets focus on search filters if user presses Ctrl + F', () => {
+          cy.get('body').click()
+          cy.get('.filter').type('{ctrl}F')
+          cy.get('.filter').should('to.be.focus')
+        })
       })
 
       describe('when there\'s a saved filter', function () {
