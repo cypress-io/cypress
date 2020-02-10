@@ -12,6 +12,12 @@ import { Browser } from './types'
 
 const debug = Debug('cypress:server:browsers:firefox')
 
+// Firefox warns when the profile is from a newer version
+// to help avoid this, use a different profile dir for every channel
+const _getProfileDir = (browser, isTextTerminal) => {
+  return utils.getProfileDir({ name: `${browser.name}-${browser.channel}` }, isTextTerminal)
+}
+
 const defaultPreferences = {
   /**
    * Taken from https://github.com/puppeteer/puppeteer/blob/8b49dc62a62282543ead43541316e23d3450ff3c/lib/Launcher.js#L520
@@ -353,7 +359,7 @@ export async function open (browser: Browser, url, options: any = {}) {
     launchOptions.extensions = [extensionDest]
   }
 
-  const profileDir = utils.getProfileDir(browser, options.isTextTerminal)
+  const profileDir = _getProfileDir(browser, options.isTextTerminal)
 
   const profile = new FirefoxProfile({
     destinationDirectory: profileDir,
