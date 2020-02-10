@@ -1,8 +1,9 @@
 import * as linuxHelper from '../../../lib/linux'
 import { log } from '../../log'
 import { detect, detectByPath } from '../../../lib/detect'
+import { expect } from 'chai'
 import execa from 'execa'
-import sinon from 'sinon'
+import sinon, { SinonStub } from 'sinon'
 
 const goalBrowsers = [
   {
@@ -22,8 +23,10 @@ const goalBrowsers = [
 ]
 
 describe('linux browser detection', () => {
-  beforeEach(function stubShell () {
-    const stdout = sinon.stub(execa, 'stdout')
+  let stdout: SinonStub
+
+  beforeEach(() => {
+    stdout = sinon.stub(execa, 'stdout')
 
     stdout.withArgs('test-browser', ['--version'])
     .resolves('test-browser v100.1.2.3')
@@ -48,7 +51,7 @@ describe('linux browser detection', () => {
   })
 
   afterEach(() => {
-    execa.stdout.restore()
+    stdout.restore()
   })
 
   it('detects browser by running --version', () => {
@@ -61,6 +64,7 @@ describe('linux browser detection', () => {
       })
     }
 
+    // @ts-ignore
     return linuxHelper.detect(goal).then(checkBrowser)
   })
 
@@ -85,6 +89,7 @@ describe('linux browser detection', () => {
       },
     ]
 
+    // @ts-ignore
     return detect(goalBrowsers).then((browsers) => {
       log('Browsers: %o', browsers)
       log('Expected browsers: %o', expected)
@@ -111,6 +116,7 @@ describe('linux browser detection', () => {
       },
     ]
 
+    // @ts-ignore
     return detect(goalBrowsers).then((browsers) => {
       log('Browsers: %o', browsers)
       log('Expected browsers: %o', expected)
@@ -120,9 +126,10 @@ describe('linux browser detection', () => {
 
   describe('detectByPath', () => {
     it('detects by path', () => {
+      // @ts-ignore
       return detectByPath('/foo/bar/browser', goalBrowsers)
       .then((browser) => {
-        return expect(browser).to.deep.equal(
+        expect(browser).to.deep.equal(
           Object.assign({}, goalBrowsers.find((gb) => {
             return gb.name === 'foo-browser'
           }), {
@@ -138,6 +145,7 @@ describe('linux browser detection', () => {
     })
 
     it('rejects when there was no matching versionRegex', () => {
+      // @ts-ignore
       return detectByPath('/not/a/browser', goalBrowsers)
       .then(() => {
         throw Error('Should not find a browser')
@@ -148,6 +156,7 @@ describe('linux browser detection', () => {
     })
 
     it('rejects when there was an error executing the command', () => {
+      // @ts-ignore
       return detectByPath('/not/a/real/path', goalBrowsers)
       .then(() => {
         throw Error('Should not find a browser')
@@ -158,9 +167,10 @@ describe('linux browser detection', () => {
     })
 
     it('works with spaces in the path', () => {
+      // @ts-ignore
       return detectByPath('/Applications/My Shiny New Browser.app', goalBrowsers)
       .then((browser) => {
-        return expect(browser).to.deep.equal(
+        expect(browser).to.deep.equal(
           Object.assign({}, goalBrowsers.find((gb) => {
             return gb.name === 'foo-browser'
           }), {
