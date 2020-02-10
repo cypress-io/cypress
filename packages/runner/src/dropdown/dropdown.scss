@@ -10,12 +10,17 @@
 
     .dropdown-toggle {
       border-radius: 0 6px 6px 0;
-      padding-left: 12px;
-      padding-right: 12px;
 
       &:focus {
         outline: 0;
       }
+    }
+
+    .browser-icon {
+      margin-right: 5px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
     }
   }
 

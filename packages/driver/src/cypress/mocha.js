@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const $utils = require('./utils')
 
 // in the browser mocha is coming back
@@ -62,7 +63,7 @@ const globals = (specWindow, reporter) => {
 
   const _mocha = new Mocha({
     reporter,
-    enableTimeouts: false,
+    timeout: false,
   })
 
   // set mocha props on the specWindow
@@ -110,6 +111,12 @@ const restoreRunnableRun = () => {
 // changing the logic for determing whether this is a valid err
 const patchRunnerFail = () => {
   Runner.prototype.fail = function (runnable, err) {
+    const errMessage = _.get(err, 'message')
+
+    if (errMessage && errMessage.indexOf('Resolution method is overspecified') > -1) {
+      err.message = $utils.errMessageByPath('mocha.overspecified', { error: err.stack })
+    }
+
     // if this isnt a correct error object then just bail
     // and call the original function
     if (Object.prototype.toString.call(err) !== '[object Error]') {
@@ -218,10 +225,6 @@ const create = (specWindow, Cypress, reporter) => {
 
     getRootSuite () {
       return _mocha.suite
-    },
-
-    options (runner) {
-      return runner.options(_mocha.options)
     },
   }
 }

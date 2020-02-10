@@ -286,17 +286,11 @@ describe "src/cy/commands/files", ->
           }
         )
 
-    it "sets the contents as the subject", ->
+    it "yields null", ->
       Cypress.backend.resolves(okResponse)
 
       cy.writeFile("foo.txt", "contents").then (subject) ->
-        expect(subject).to.equal("contents")
-       
-    it "sets a JSON as the subject", ->
-      Cypress.backend.resolves(okResponse)
-
-      cy.writeFile("foo.json", { name: "Test" }).then (subject) ->
-        expect(subject.name).to.equal("Test")
+        expect(subject).to.not.exist
 
     it "can write a string", ->
       Cypress.backend.resolves(okResponse)

@@ -10,7 +10,6 @@ describe "e2e browserify, babel, es2015", ->
     e2e.exec(@, {
       spec: "browserify_babel_es2015_passing_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     })
 
   it "fails", ->

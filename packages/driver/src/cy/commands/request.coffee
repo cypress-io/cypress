@@ -269,6 +269,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             stack:   err.stack
             method:  requestOpts.method
             url:     requestOpts.url
-          }
+          },
+          noStackTrace: true
         })
   })

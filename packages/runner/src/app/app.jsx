@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
-import $Cypress from '@packages/driver'
+import { $ } from '@packages/driver'
 
 import errorMessages from '../errors/error-messages'
 import util from '../lib/util'
@@ -15,8 +15,6 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import Resizer from './resizer'
-
-const $ = $Cypress.$
 
 @observer
 class App extends Component {
@@ -40,6 +38,7 @@ class App extends Component {
             specPath={specPath}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
+            firefoxGcInterval={this.props.config.firefoxGcInterval}
           />
         </div>
         <div
@@ -155,6 +154,8 @@ class App extends Component {
       iframesSizeNode.style.marginLeft = 0
 
       containerNode.style.left = 0
+      iframesNode.style.left = 0
+
       containerNode.className += ' screenshotting'
 
       if (!config.scale) {
@@ -175,6 +176,7 @@ class App extends Component {
 
       containerNode.className = containerNode.className.replace(' screenshotting', '')
       containerNode.style.left = prevAttrs.left
+      iframesNode.style.left = prevAttrs.left
 
       iframesNode.style.top = prevAttrs.top
       iframesNode.style.backgroundColor = null

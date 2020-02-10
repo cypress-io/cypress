@@ -1,4 +1,4 @@
-urlClosesWithCode1006 = (win, url) ->
+shouldCloseUrlWithCode = (win, url, code) ->
   new Promise (resolve, reject) ->
     ws = new win.WebSocket(url)
 
@@ -6,10 +6,10 @@ urlClosesWithCode1006 = (win, url) ->
       # debugger
 
     ws.onclose = (evt) ->
-      if evt.code is 1006
+      if evt.code is code
         resolve()
       else
-        reject("websocket connection should have been closed with code 1006 for url: #{url} but was instead closed with code: #{evt.code}")
+        reject("websocket connection should have been closed with code #{code} for url: #{url} but was instead closed with code: #{evt.code}")
 
     ws.onopen = (evt) ->
       reject("websocket connection should not have opened for url: #{url}")
@@ -19,9 +19,11 @@ describe "websockets", ->
     cy.visit("http://localhost:3038/foo")
     cy.log("should not crash on ECONNRESET websocket upgrade")
     cy.window().then (win) ->
+      ## Firefox should close with code 1015 when using SSL, chrome should close with 1006
+      ## see https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent
       Cypress.Promise.all([
-        urlClosesWithCode1006(win, "ws://localhost:3038/websocket")
-        urlClosesWithCode1006(win, "wss://localhost:3040/websocket")
+        shouldCloseUrlWithCode(win, "ws://localhost:3038/websocket", 1006)
+        shouldCloseUrlWithCode(win, "wss://localhost:3040/websocket", if Cypress.browser.family is 'firefox' then 1015 else 1006)
       ])
 
     cy.log("should be able to send websocket messages")

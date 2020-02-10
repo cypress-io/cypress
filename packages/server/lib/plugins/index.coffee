@@ -22,6 +22,14 @@ register = (event, callback) ->
   registeredEvents[event] = callback
 
 module.exports = {
+  ## for testing
+  _setPluginsProcess: (_pluginsProcess) ->
+    pluginsProcess = _pluginsProcess
+
+  getPluginPid: () ->
+    if pluginsProcess
+      return pluginsProcess.pid
+
   registerHandler: (handler) ->
     handlers.push(handler)
 
@@ -87,8 +95,14 @@ module.exports = {
         err.title = "Error running plugin"
         options.onError(err)
 
+      handleWarning = (warningErr) ->
+        debug("plugins process warning:", warningErr.stack)
+        return if not pluginsProcess ## prevent repeating this in case of multiple warnings
+        options.onWarning(warningErr)
+
       pluginsProcess.on("error", handleError)
       ipc.on("error", handleError)
+      ipc.on("warning", handleWarning)
 
       ## see timers/parent.js line #93 for why this is necessary
       process.on("exit", killPluginsProcess)

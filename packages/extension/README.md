@@ -1,6 +1,6 @@
 # Extension
 
-This is the Chrome Extension responsible for automating Chrome
+This is the WebExtension responsible for automating the browser
 
 ## Developing
 
@@ -26,6 +26,8 @@ yarn lerna run test-debug --scope @packages/extension --stream
 
 ## Debugging
 
+### In Chrome
+
 1. Open Chrome
 2. Go into Extensions
 3. Check **Developer Mode**
@@ -33,3 +35,7 @@ yarn lerna run test-debug --scope @packages/extension --stream
 5. Choose **packages/extension/dist** directory
 6. Click **background page** to debug `background.js`
 7. Click **Reload (⌘R)** to pull in changes to `manifest.json`
+
+### In Firefox
+
+To be written...

@@ -44,26 +44,30 @@ const env = require(`${root}lib/util/env`)
 const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
+const electronApp = require('../../lib/util/electron-app')
 const { formStatePath } = require(`${root}lib/util/saved_state`)
 
 const TYPICAL_BROWSERS = [
   {
     name: 'chrome',
-    family: 'chrome',
+    family: 'chromium',
+    channel: 'stable',
     displayName: 'Chrome',
     version: '60.0.3112.101',
     path: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     majorVersion: '60',
   }, {
     name: 'chromium',
-    family: 'chrome',
+    family: 'chromium',
+    channel: 'stable',
     displayName: 'Chromium',
     version: '49.0.2609.0',
     path: '/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium',
     majorVersion: '49',
   }, {
-    name: 'canary',
-    family: 'chrome',
+    name: 'chrome',
+    family: 'chromium',
+    channel: 'canary',
     displayName: 'Canary',
     version: '62.0.3197.0',
     path: '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
@@ -73,7 +77,7 @@ const TYPICAL_BROWSERS = [
 
 const ELECTRON_BROWSER = {
   name: 'electron',
-  family: 'electron',
+  family: 'chromium',
   displayName: 'Electron',
   path: '',
   version: '99.101.1234',
@@ -118,7 +122,7 @@ describe('lib/cypress', () => {
     // spawning a separate process
     sinon.stub(videoCapture, 'start').resolves({})
     sinon.stub(plugins, 'init').resolves(undefined)
-    sinon.stub(cypress, 'isCurrentlyRunningElectron').returns(true)
+    sinon.stub(electronApp, 'isRunning').returns(true)
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')
@@ -139,14 +143,22 @@ describe('lib/cypress', () => {
       expect(process.exit).to.be.calledWith(code)
     }
 
-    this.expectExitWithErr = (type, msg) => {
-      expect(errors.log).to.be.calledWithMatch({ type })
-      expect(process.exit).to.be.calledWith(1)
-      if (msg) {
-        const err = errors.log.getCall(0).args[0]
+    // returns error object
+    this.expectExitWithErr = (type, msg1, msg2) => {
+      expect(errors.log, 'error was logged').to.be.calledWithMatch({ type })
+      expect(process.exit, 'process.exit was called').to.be.calledWith(1)
 
-        expect(err.message).to.include(msg)
+      const err = errors.log.getCall(0).args[0]
+
+      if (msg1) {
+        expect(err.message, 'error text').to.include(msg1)
       }
+
+      if (msg2) {
+        expect(err.message, 'second error text').to.include(msg2)
+      }
+
+      return err
     }
   })
 
@@ -172,7 +184,7 @@ describe('lib/cypress', () => {
     it('allows browser major to be a number', () => {
       const browser = {
         name: 'Edge Beta',
-        family: 'chrome',
+        family: 'chromium',
         displayName: 'Edge Beta',
         version: '80.0.328.2',
         path: '/some/path',
@@ -185,6 +197,35 @@ describe('lib/cypress', () => {
     it('validates returned list', () => {
       return browserUtils.getBrowsers().then((list) => {
         expect(v.isValidBrowserList('browsers', list)).to.be.true
+      })
+    })
+  })
+
+  context('error handling', function () {
+    it('exits if config cannot be parsed', function () {
+      return cypress.start(['--config', 'xyz'])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse config error', stripAnsi(err.message))
+      })
+    })
+
+    it('exits if env cannot be parsed', function () {
+      return cypress.start(['--env', 'a123'])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse env error', stripAnsi(err.message))
+      })
+    })
+
+    it('exits if reporter options cannot be parsed', function () {
+      return cypress.start(['--reporterOptions', 'nonono'])
+      .then(() => {
+        const err = this.expectExitWithErr('COULD_NOT_PARSE_ARGUMENTS')
+
+        snapshot('could not parse reporter options error', stripAnsi(err.message))
       })
     })
   })
@@ -334,7 +375,7 @@ describe('lib/cypress', () => {
   context('--run-project', () => {
     beforeEach(() => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
-      sinon.stub(runMode, 'waitForSocketConnection')
+      sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
@@ -761,7 +802,7 @@ describe('lib/cypress', () => {
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Available browsers found are: chrome, chromium, canary, electron'
+              'Available browsers found are: chrome, chromium, chrome:canary, electron'
             )
           })
         })
@@ -1049,6 +1090,7 @@ describe('lib/cypress', () => {
             attach: sinon.stub(),
             sendCommand: sinon.stub().resolves(),
           },
+          getOSProcessId: sinon.stub(),
           setUserAgent: sinon.stub(),
           session: {
             clearCache: sinon.stub().resolves(),
@@ -1096,9 +1138,7 @@ describe('lib/cypress', () => {
 
             const browserArgs = args[2]
 
-            expect(browserArgs, 'two arguments to Chrome').to.have.length(7)
-
-            expect(browserArgs.slice(0, 4), 'arguments to Chrome').to.deep.eq([
+            expect(browserArgs.slice(0, 4), 'first 4 custom launch arguments to Chrome').to.deep.eq([
               'chrome', 'foo', 'bar', 'baz',
             ])
 
@@ -1139,15 +1179,15 @@ describe('lib/cypress', () => {
         return runMode.listenForProjectEnd.resolves({ stats: { failures: 0 } })
       })
 
-      it('can change the default port to 5555', function () {
+      it('can change the default port to 5544', function () {
         const listen = sinon.spy(http.Server.prototype, 'listen')
         const open = sinon.spy(Server.prototype, 'open')
 
-        return cypress.start([`--run-project=${this.todosPath}`, '--port=5555'])
+        return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         .then(() => {
-          expect(openProject.getProject().cfg.port).to.eq(5555)
-          expect(listen).to.be.calledWith(5555)
-          expect(open).to.be.calledWithMatch({ port: 5555 })
+          expect(openProject.getProject().cfg.port).to.eq(5544)
+          expect(listen).to.be.calledWith(5544)
+          expect(open).to.be.calledWithMatch({ port: 5544 })
           this.expectExitWith(0)
         })
       })
@@ -1158,11 +1198,11 @@ describe('lib/cypress', () => {
 
         server = Promise.promisifyAll(server)
 
-        return server.listenAsync(5555, '127.0.0.1')
+        return server.listenAsync(5544, '127.0.0.1')
         .then(() => {
-          return cypress.start([`--run-project=${this.todosPath}`, '--port=5555'])
+          return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         }).then(() => {
-          this.expectExitWithErr('PORT_IN_USE_LONG', '5555')
+          this.expectExitWithErr('PORT_IN_USE_LONG', '5544')
         })
       })
     })
@@ -1255,7 +1295,7 @@ describe('lib/cypress', () => {
       sinon.stub(api, 'createRun').resolves()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(browsers, 'open')
-      sinon.stub(runMode, 'waitForSocketConnection')
+      sinon.stub(runMode, 'waitForSocketConnection').resolves()
       sinon.stub(runMode, 'waitForTestsToFinishRunning').resolves({
         stats: {
           tests: 1,

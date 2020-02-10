@@ -451,6 +451,27 @@ describe "lib/config", ->
           @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
 
+      context "firefoxGcInterval", ->
+        it "passes if a number", ->
+          @setup({ firefoxGcInterval: 1 })
+          @expectValidationPasses()
+
+        it "passes if null", ->
+          @setup({ firefoxGcInterval: null })
+          @expectValidationPasses()
+
+        it "passes if correctly shaped object", ->
+          @setup({ firefoxGcInterval: { runMode: 1, openMode: null } })
+          @expectValidationPasses()
+
+        it "fails if string", ->
+          @setup({ firefoxGcInterval: 'foo' })
+          @expectValidationFails("a positive number or null or an object")
+
+        it "fails if invalid object", ->
+          @setup({ firefoxGcInterval: { foo: 'bar' } })
+          @expectValidationFails("a positive number or null or an object")
+
   context ".getConfigKeys", ->
     beforeEach ->
       @includes = (key) ->
@@ -787,6 +808,7 @@ describe "lib/config", ->
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },
             fileServerFolder:           { value: "", from: "default" },
+            firefoxGcInterval:          { value: { openMode: null, runMode: 1 }, from: "default" },
             video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
             videoUploadOnPasses:        { value: true, from: "default" }
@@ -861,6 +883,7 @@ describe "lib/config", ->
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
+            firefoxGcInterval:          { value: { openMode: null, runMode: 1 }, from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
@@ -1032,7 +1055,7 @@ describe "lib/config", ->
     it "keeps the list of browsers if the plugins returns empty object", ->
       browser = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",
@@ -1064,7 +1087,7 @@ describe "lib/config", ->
     it "catches browsers=null returned from plugins", ->
       browser = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",
@@ -1092,7 +1115,7 @@ describe "lib/config", ->
     it "allows user to filter browsers", ->
       browserOne = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",

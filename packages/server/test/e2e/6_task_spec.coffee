@@ -23,5 +23,4 @@ describe "e2e task", ->
       spec: "multiple_task_registrations_spec.coffee"
       sanitizeScreenshotDimensions: true
       snapshot: true
-      expectedExitCode: 0
     })
