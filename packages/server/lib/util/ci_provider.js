@@ -209,7 +209,8 @@ const _providerCiParams = () => {
       'GITHUB_ACTION',
       'GITHUB_EVENT_NAME',
       'GITHUB_RUN_NUMBER',
-      'GITHUB_RUN_ID'
+      'GITHUB_RUN_ID',
+      'GITHUB_REPOSITORY'
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
