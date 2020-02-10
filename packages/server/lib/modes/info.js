@@ -18,7 +18,7 @@ const pickRandomItem = (list) => {
     }
   }
 
-  const item = list[_.random(0, list.length, false)]
+  const item = list[_.random(0, list.length - 1, false)]
   const remaining = _.without(list, item)
 
   return {
@@ -58,16 +58,16 @@ const print = (browsers = []) => {
     console.log('Note: To use these browsers, pass their name and channel to the \'--browser\' field')
     console.log('')
 
-    const firstRandom = pickRandomItem(browsers)
+    const firstDraw = pickRandomItem(browsers)
 
-    if (firstRandom.item) {
+    if (firstDraw.item) {
       console.log('Examples:')
-      console.log(`- cypress run --browser ${firstRandom.item.name}:${firstRandom.item.channel}`)
+      console.log(`- cypress run --browser ${firstDraw.item.name}:${firstDraw.item.channel}`)
 
-      const secondRandom = pickRandomItem(firstRandom.remaining)
+      const secondDraw = pickRandomItem(firstDraw.remaining)
 
-      if (secondRandom.item) {
-        console.log(`- cypress run --browser ${secondRandom.item.name}:${secondRandom.item.channel}`)
+      if (secondDraw.item) {
+        console.log(`- cypress run --browser ${secondDraw.item.name}:${secondDraw.item.channel}`)
       }
     }
   }
