@@ -4,6 +4,7 @@ const util = require('../util')
 const state = require('../tasks/state')
 const os = require('os')
 const chalk = require('chalk')
+const prettyBytes = require('pretty-bytes')
 
 // color for numbers and show values
 const g = chalk.green
@@ -21,7 +22,7 @@ const start = (options = {}) => {
     return util.getOsVersionAsync().then((osVersion) => {
       console.log('Cypress Version: %s', g(util.pkgVersion()))
       console.log('System Platform: %s (%s)', g(os.platform()), g(osVersion))
-      console.log('System Memory: %s free %s', g(os.totalmem()), g(os.freemem()))
+      console.log('System Memory: %s free %s', g(prettyBytes(os.totalmem())), g(prettyBytes(os.freemem())))
     })
   })
   .then(() => {

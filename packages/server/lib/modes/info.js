@@ -71,7 +71,7 @@ const addProfilePath = async (browsers = []) => {
 const print = (browsers = []) => {
   console.log('Displaying Cypress info...')
   console.log('')
-  console.log('Detected %s installed', pluralize('Browser', browsers.length, true))
+  console.log('Detected %s %s installed', n(browsers.length), pluralize('browser', browsers.length))
   console.log('')
 
   const sortByNameAndMajor = sortWith([
@@ -98,7 +98,7 @@ const print = (browsers = []) => {
   if (browsers.length) {
     const highlightedBrowser = a('--browser')
 
-    console.log('Note: To use these browsers, pass their name and channel to the \'%s\' field',
+    console.log('Note: to run these browsers, pass <name>:<channel> to the \'%s\' field',
       highlightedBrowser)
 
     console.log('')
