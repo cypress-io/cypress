@@ -252,6 +252,7 @@ describe('lib/browsers/firefox', () => {
           '-new-instance',
           '-foreground',
           '-start-debugger-server',
+          '-no-remote',
           '-profile',
           '/path/to/appData/firefox/interactive',
         ])
