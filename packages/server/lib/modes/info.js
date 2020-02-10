@@ -3,7 +3,6 @@ const launcher = require('@packages/launcher')
 const pluralize = require('pluralize')
 const { stripIndent } = require('common-tags')
 const { sortWith, ascend, prop } = require('ramda')
-const appData = require('../util/app_data')
 const browserUtils = require('../browsers/utils')
 const _ = require('lodash')
 
@@ -70,12 +69,8 @@ const print = (browsers = []) => {
       if (secondRandom.item) {
         console.log(`- cypress run --browser ${secondRandom.item.name}:${secondRandom.item.channel}`)
       }
-
-      console.log('')
     }
   }
-
-  console.log('Application data stored in folder: %s', appData.path())
 }
 
 const info = () => {

@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const ospath = require('ospath')
 const crypto = require('crypto')
 const la = require('lazy-ass')
 const is = require('check-more-types')
@@ -223,6 +224,26 @@ const parseOpts = (opts) => {
   debug('parsed cli options %o', cleanOpts)
 
   return cleanOpts
+}
+
+/**
+ * Copy of packages/server/lib/browsers/utils.ts
+ * because we need same functionality in CLI to show the path :(
+ */
+const getApplicationDataFolder = (...paths) => {
+  const { env } = process
+
+  // allow overriding the app_data folder
+  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_ENV || 'development'
+
+  const PRODUCT_NAME = pkg.productName || pkg.name
+  const OS_DATA_PATH = ospath.data()
+
+  const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
+
+  return p
 }
 
 const util = {
@@ -466,6 +487,8 @@ const util = {
   getFileChecksum,
 
   getFileSize,
+
+  getApplicationDataFolder,
 }
 
 module.exports = util

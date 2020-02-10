@@ -12,16 +12,17 @@ const start = (options = {}) => {
   }).then(() => {
     console.log()
 
-    return util.getPlatformInfo().then((platform) => {
-      console.log(platform)
-      // should we do human-friendly conversion?
-      console.log('Total memory: %d free %d', os.totalmem(), os.freemem())
+    return util.getOsVersionAsync().then((osVersion) => {
+      console.log('Cypress Version: %s', util.pkgVersion())
+      console.log('System Platform: %s (%s)', os.platform(), osVersion)
+      console.log('System Memory: %d free %d', os.totalmem(), os.freemem())
     })
   })
   .then(() => {
     console.log()
-
-    console.log('Cypress binary cached in folder: %s', state.getCacheDir())
+    console.log('Application Data:', util.getApplicationDataFolder())
+    console.log('Browser Profiles:', util.getApplicationDataFolder('browsers'))
+    console.log('Binary Caches: %s', state.getCacheDir())
   })
 }
 
