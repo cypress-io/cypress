@@ -292,6 +292,7 @@ export async function open (browser: Browser, url, options: any = {}) {
       '-new-instance',
       '-foreground',
       '-start-debugger-server', // uses the port+host defined in devtools.debugger.remote
+      '-no-remote', // @see https://github.com/cypress-io/cypress/issues/6380
     ],
   })
 
