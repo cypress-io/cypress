@@ -4,10 +4,6 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import 'chai-as-promised'
 
-const appData = require('../../../lib/util/app_data')
-
-sinon.stub(appData, 'path').returns('/path/to/appData')
-
 const mockfs = require('mock-fs')
 import Marionette from 'marionette-client'
 import Foxdriver from '@benmalka/foxdriver'
@@ -32,14 +28,16 @@ describe('lib/browsers/firefox', () => {
   const stubMarionette = () => {
     marionetteSendCb = null
 
-    const connect = sinon.stub().callsArg(0)
+    const connect = sinon.stub()
 
-    const send = sinon.stub().callsFake((opts, cb) => {
+    connect.resolves()
+
+    const send = sinon.stub().callsFake((opts) => {
       if (marionetteSendCb) {
-        return marionetteSendCb(opts, cb)
+        return marionetteSendCb(opts)
       }
 
-      return cb({})
+      return Promise.resolve()
     })
 
     const close = sinon.stub()
@@ -47,11 +45,13 @@ describe('lib/browsers/firefox', () => {
     const socket = new EventEmitter()
     const client = new EventEmitter()
 
+    const tcp = { socket, client }
+
     marionetteDriver = {
-      socket, client, connect, send, close,
+      tcp, connect, send, close,
     }
 
-    sinon.stub(Marionette.Drivers, 'Tcp').returns(marionetteDriver)
+    sinon.stub(Marionette.Drivers, 'Promises').returns(marionetteDriver)
   }
 
   const stubFoxdriver = () => {
@@ -84,6 +84,12 @@ describe('lib/browsers/firefox', () => {
   })
 
   beforeEach(() => {
+    sinon.stub(utils, 'getProfileDir').returns('/path/to/appData/firefox-stable/interactive')
+
+    mockfs({
+      '/path/to/appData/firefox-stable/interactive': {},
+    })
+
     sinon.stub(protocol, '_connectAsync').resolves(null)
 
     stubMarionette()
@@ -92,11 +98,7 @@ describe('lib/browsers/firefox', () => {
 
   context('#open', () => {
     beforeEach(function () {
-      mockfs({
-        '/path/to/appData': {},
-      })
-
-      this.browser = { name: 'firefox' }
+      this.browser = { name: 'firefox', channel: 'stable' }
       this.options = {
         proxyUrl: 'http://proxy-url',
         socketIoRoute: 'socket/io/route',
@@ -250,8 +252,9 @@ describe('lib/browsers/firefox', () => {
           '-new-instance',
           '-foreground',
           '-start-debugger-server',
+          '-no-remote',
           '-profile',
-          '/path/to/appData/firefox/interactive',
+          '/path/to/appData/firefox-stable/interactive',
         ])
       })
     })
@@ -264,7 +267,7 @@ describe('lib/browsers/firefox', () => {
 
     it('does not clear user profile if already exists', function () {
       mockfs({
-        '/path/to/appData/firefox/interactive/': {
+        '/path/to/appData/firefox-stable/interactive/': {
           'xulstore.json': '[foo xulstore.json]',
           'chrome': { 'userChrome.css': '[foo userChrome.css]' },
         },
@@ -272,7 +275,7 @@ describe('lib/browsers/firefox', () => {
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
-        expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'xulstore.json': '[foo xulstore.json]',
           'chrome': { 'userChrome.css': '[foo userChrome.css]' },
         })
@@ -282,21 +285,21 @@ describe('lib/browsers/firefox', () => {
     it('creates xulstore.json if not exist', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
-        expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
-          'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":720,"sizemode":"maximized"}}}\n',
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
+          'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
         })
       })
     })
 
     it('creates chrome/userChrome.css if not exist', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(specUtil.getFsPath('/path/to/appData/firefox/interactive/chrome/userChrome.css')).ok
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/chrome/userChrome.css')).ok
       })
     })
 
     it('clears browser cache', function () {
       mockfs({
-        '/path/to/appData/firefox/interactive/': {
+        '/path/to/appData/firefox-stable/interactive/': {
           'CypressCache': { 'foo': 'bar' },
         },
       })
@@ -305,7 +308,7 @@ describe('lib/browsers/firefox', () => {
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
-        expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'CypressCache': {},
         })
       })
@@ -316,20 +319,29 @@ describe('lib/browsers/firefox', () => {
     context('#setupMarionette', () => {
       it('rejects on errors on socket', async () => {
         marionetteSendCb = () => {
-          marionetteDriver.socket.emit('error', new Error('foo error'))
+          marionetteDriver.tcp.socket.emit('error', new Error('foo error'))
+
+          return Promise.resolve()
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('Unexpected error from Marionette Socket: Error: foo error')
+        .to.be.rejectedWith('An unexpected error was received from Marionette Socket:\n\nError: foo error')
       })
 
       it('rejects on errors from marionette commands', async () => {
-        marionetteSendCb = (opts, cb) => {
-          cb({ error: true })
+        marionetteSendCb = () => {
+          return Promise.reject(new Error('foo error'))
         }
 
         await expect(firefoxUtil.setupMarionette([], '', port))
-        .to.be.rejectedWith('Unexpected error from Marionette commands: GenericError')
+        .to.be.rejectedWith('An unexpected error was received from Marionette commands:\n\nError: foo error')
+      })
+
+      it('rejects on errors during initial Marionette connection', async () => {
+        marionetteDriver.connect.rejects(new Error('not connectable'))
+
+        await expect(firefoxUtil.setupMarionette([], '', port))
+        .to.be.rejectedWith('An unexpected error was received from Marionette connection:\n\nError: not connectable')
       })
     })
 
