@@ -84,13 +84,20 @@ test_script:
   - node --version
   - npm --version
   - 7z
+  - echo *** Browsers installed on this system ***
   - cd packages/launcher && node index.js && cd ../..
+
+  - echo *** Kitchensink tests run on Chrome browser ***
+  - npm run dev -- --run-project %CD%/packages/example --browser chrome
+  - echo *** Kitchensink tests run on Edge browser ***
+  - npm run dev -- --run-project %CD%/packages/example --browser edge
+
   # make sure mocha runs
   - npm run test-mocha
   # make sure our snapshots are compared correctly
   # - npm run test-mocha-snapshot
   # the other larger tests
-  - echo Building Windows NPM package %NEXT_DEV_VERSION%
+  - echo *** Building Windows NPM package %NEXT_DEV_VERSION% ***
   - npm --no-git-tag-version version %NEXT_DEV_VERSION%
   - cd cli
   - npm install

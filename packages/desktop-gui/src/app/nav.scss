@@ -47,9 +47,7 @@
         font-size: 13px;
         color: #444;
         padding: 1px 20px 0 20px;
-        line-height: 35px;
-
-
+        line-height: 40px;
       }
 
       > a  {
@@ -164,14 +162,28 @@
 }
 
 .browsers-list {
+  margin: 5px;
+  border: 1px solid #c7c7c7;
+  border-radius: 4px;
+
   li {
     padding: 9px 15px;
     white-space: nowrap;
   }
 
-  .dropdown-chosen img {
-    position: relative;
-    top: -1px;
+  &>a.dropdown-chosen {
+    border-radius: 4px;
+    line-height: 28px !important;
+    background-color: #f6f6f6;
+
+    img {
+      position: relative;
+      top: -1px;
+    }
+  }
+
+  .fa-check-circle, .fa-sync-alt {
+    margin-right: 3px;
   }
 
   .browser-icon {
@@ -205,6 +217,14 @@
   margin-right: 4px;
 }
 
+.browser-beta {
+  font-size: 12px;
+  top: -5px;
+  position: relative;
+  margin-left: 4px;
+  color: #d87b0b;
+}
+
 .browser-info-tooltip {
   background: #ececec;
   border-color: #c7c7c7;
@@ -222,6 +242,12 @@
 
 .close-browser {
   .btn {
-    margin-top: 7px;
+    margin-top: 5px;
+    line-height: 28px;
+    padding: 0 9px 0 7px;
+    font-size: 13px;
+    i {
+      margin-right: 3px;
+    }
   }
 }

@@ -29,5 +29,4 @@ describe "e2e blacklist", ->
     e2e.exec(@, {
       spec: "blacklist_hosts_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     })

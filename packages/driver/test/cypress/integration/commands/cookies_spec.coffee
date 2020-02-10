@@ -5,9 +5,14 @@ describe "src/cy/commands/cookies", ->
   beforeEach ->
     ## call through normally on everything
 
-    cy.stub(Cypress, "automation").callThrough()
+    cy.stub(Cypress, "automation").rejects(new Error('Cypress.automation was not stubbed'))
 
   context "test:before:run:async", ->
+
+    it "can test unstubbed, real server", ->
+      Cypress.automation.restore()
+      cy.setCookie('foo', 'bar')
+
     it "clears cookies before each test run", ->
       Cypress.automation
       .withArgs("get:cookies", { domain: "localhost" })
@@ -379,14 +384,12 @@ describe "src/cy/commands/cookies", ->
           { domain: "brian.dev.local", name: "foo", value: "bar", path: "/foo", secure: true, httpOnly: true, expiry: 987 }
         )
 
-    it "can set multiple cookies with the same options", ->
-      Cypress.utils.addTwentyYears.restore()
+    it "does not mutate options", ->
+      Cypress.automation.resolves()
       options = {}
 
-      cy.setCookie("foo", "bar", options)
-      cy.setCookie("bing", "bong", options)
-
-      cy.getCookie("bing").its("value").should("equal", "bong")
+      cy.setCookie("foo", "bar", {}).then ->
+        expect(options).deep.eq({})
 
     describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
