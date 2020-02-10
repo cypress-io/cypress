@@ -4,29 +4,28 @@ $errorMessages = require("../../../../src/cypress/error_messages")
 
 describe "driver/src/cypress/error_utils", ->
   context ".modifyErrMsg", ->
-    originalErr = {
-      name: 'FooError',
-      message: 'simple foo message'
-    }
-    newErrMsg = 'new message'
-    modifier = (msg1, msg2) ->
-      return "#{msg2} #{msg1}"
+    beforeEach ->
+      @originalErr = new Error("simple foo message")
+      @originalErr.name = "FooError"
+      @newErrMsg = 'new message'
+      @modifier = (msg1, msg2) ->
+        return "#{msg2} #{msg1}"
 
     it "returns new error object with message modified by callback", ->
-      err = $errUtils.modifyErrMsg(originalErr, newErrMsg, modifier)
+      err = $errUtils.modifyErrMsg(@originalErr, @newErrMsg, @modifier)
 
       expect(err.name).to.eq("FooError")
       expect(err.message).to.eq("new message simple foo message")
 
     it "replaces stack error message", ->
-      originalErr.stack = "#{originalErr.message}\nline 2\nline 3"
-      err = $errUtils.modifyErrMsg(originalErr, newErrMsg, modifier)
+      @originalErr.stack = "#{@originalErr.message}\nline 2\nline 3"
+      err = $errUtils.modifyErrMsg(@originalErr, @newErrMsg, @modifier)
       expect(err.stack).to.equal("new message simple foo message\nline 2\nline 3")
 
     it "keeps other properties in place from original error", ->
-      originalErr.actual = "foo"
-      originalErr.expected = "bar"
-      err = $errUtils.modifyErrMsg(originalErr, newErrMsg, modifier)
+      @originalErr.actual = "foo"
+      @originalErr.expected = "bar"
+      err = $errUtils.modifyErrMsg(@originalErr, @newErrMsg, @modifier)
       expect(err.actual).to.equal("foo")
       expect(err.expected).to.equal("bar")
 

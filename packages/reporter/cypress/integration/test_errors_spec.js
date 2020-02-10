@@ -294,7 +294,9 @@ describe('test errors', function () {
 
       // renders `foo` as <code>foo</code>
       .contains('code', 'foo')
-      .and('not.contain', '`foo`')
+      .then((content) => {
+        expect(content).not.to.contain('`foo`')
+      })
 
       // renders /`bar/` as `bar`
       cy.get('.runnable-err-message')
@@ -303,12 +305,16 @@ describe('test errors', function () {
       // renders **baz** as <strong>baz</strong>
       cy.get('.runnable-err-message')
       .contains('strong', 'baz')
-      .and('not.contain', '**baz**')
+      .then((content) => {
+        expect(content).not.to.contain('**baz**')
+      })
 
       // renders *fizz* as <em>fizz</em>
       cy.get('.runnable-err-message')
       .contains('em', 'fizz')
-      .and('not.contain', '*fizz*')
+      .then((content) => {
+        expect(content).not.to.contain('*fizz*')
+      })
     })
 
     // NOTE: still needs to be implemented

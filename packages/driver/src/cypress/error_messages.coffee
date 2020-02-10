@@ -109,7 +109,7 @@ module.exports = {
     }
 
   browser:
-    invalid_arg: "Cypress.{{method}}() must be passed the name of a browser or an object to filter with. You passed: {{obj}}"
+    invalid_arg: "`Cypress.{{method}}()` must be passed the name of a browser or an object to filter with. You passed: `{{obj}}`"
 
   chai:
     length_invalid_argument: "You must provide a valid number to a `length` assertion. You passed: `{{length}}`"
@@ -701,6 +701,28 @@ module.exports = {
         Cy commands themselves are already promise like, and you can likely avoid the use of the separate Promise.
       """
       docsUrl: "https://on.cypress.io/returning-promise-and-commands-in-test"
+    }
+    command_log_renamed: """
+      `Cypress.Log.command()` has been renamed to `Cypress.log()`
+
+      Please update your code. You should be able to safely do a find/replace.
+    """
+    dangling_commands: {
+      message: """
+        Oops, Cypress detected something wrong with your test code.
+
+        The test has finished but Cypress still has commands in its queue.
+        The {{numCommands}} queued commands that have not yet run are:
+
+        {{commands}}
+
+        In every situation we've seen, this has been caused by programmer error.
+
+        Most often this indicates a race condition due to a forgotten 'return' or from commands in a previously run test bleeding into the current test.
+
+        For a much more thorough explanation including examples please review this error here:
+      """
+      docsUrl: "https://on.cypress.io/command-queue-ended-early"
     }
     invalid_command: {
       message: "Could not find a command for: `{{name}}`.\n\nAvailable commands are: {{cmds}}.\n"

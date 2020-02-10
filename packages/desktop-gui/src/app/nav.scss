@@ -202,6 +202,14 @@
   .dropdown-menu {
     left: auto;
     right: 0;
+
+    .browser-beta {
+      font-size: 12px;
+      top: -5px;
+      position: relative;
+      margin-left: 4px;
+      color: #d8a10b;
+    }
   }
 }
 
@@ -215,14 +223,6 @@
   color: $red-primary;
   margin-left: 6px;
   margin-right: 4px;
-}
-
-.browser-beta {
-  font-size: 12px;
-  top: -5px;
-  position: relative;
-  margin-left: 4px;
-  color: #d87b0b;
 }
 
 .browser-info-tooltip {

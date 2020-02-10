@@ -1,5 +1,6 @@
 _ = require("lodash")
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 
 isBrowser = (config, obj='') ->
   if _.isString(obj)

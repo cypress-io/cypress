@@ -22,8 +22,10 @@ const mergeErrProps = (origErr, newProps) => {
   return _.extend(origErr, newProps)
 }
 
-const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
-  let { stack, message } = origErrObj
+const modifyErrMsg = (err, newErrMsg, cb) => {
+  let { stack, message } = err
+
+  err = normalizeErrorStack(err)
 
   // preserve message
   const originalErrMsg = message
@@ -37,12 +39,10 @@ const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
     stack = stack.replace(originalErrMsg, message)
   }
 
-  const err = _.extend({}, origErrObj, {
-    message,
-    stack,
-  })
+  err.message = message
+  err.stack = stack
 
-  return normalizeErrorStack(err)
+  return err
 }
 
 const appendErrMsg = (err, messageOrObj) => {
