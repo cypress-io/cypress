@@ -34,6 +34,17 @@ const pickRandomItem = (list) => {
   }
 }
 
+// Usually the full browser name to pass via --browser
+// is <name>:<channel>. If the channel is stable, you
+// can just do "--browser <name>"
+const formBrowserName = (browser) => {
+  if (browser.channel === 'stable') {
+    return browser.name
+  }
+
+  return `${browser.name}:${browser.channel}`
+}
+
 const print = (browsers = []) => {
   console.log('Displaying Cypress info...')
   console.log('')
@@ -72,12 +83,12 @@ const print = (browsers = []) => {
 
     if (firstDraw.item) {
       console.log('Examples:')
-      console.log(a(`- cypress run --browser ${firstDraw.item.name}:${firstDraw.item.channel}`))
+      console.log(a(`- cypress run --browser ${formBrowserName(firstDraw.item)}`))
 
       const secondDraw = pickRandomItem(firstDraw.remaining)
 
       if (secondDraw.item) {
-        console.log(a(`- cypress run --browser ${secondDraw.item.name}:${secondDraw.item.channel}`))
+        console.log(a(`- cypress run --browser ${formBrowserName(secondDraw.item)}`))
       }
     }
   }
