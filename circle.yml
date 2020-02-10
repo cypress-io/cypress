@@ -1225,7 +1225,6 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - server-performance-tests:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-1:
