@@ -380,6 +380,15 @@ const util = {
     })
   },
 
+  getPlatformInfo () {
+    return util.getOsVersionAsync().then((version) => {
+      return stripIndent`
+        Platform: ${os.platform()} (${version})
+        Cypress Version: ${util.pkgVersion()}
+      `
+    })
+  },
+
   // attention:
   // when passing relative path to NPM post install hook, the current working
   // directory is set to the `node_modules/cypress` folder
