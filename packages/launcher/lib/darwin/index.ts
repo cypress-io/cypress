@@ -82,9 +82,7 @@ export const browsers: Detectors = {
   },
 }
 
-export function getVersionString (path: string) {
-  return linuxHelper.getVersionString(path)
-}
+export const getVersionString = linuxHelper.getVersionString
 
 export function detect (browser: Browser): Promise<DetectedBrowser> {
   let findAppParams = get(browsers, [browser.name, browser.channel])

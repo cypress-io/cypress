@@ -1,7 +1,10 @@
-import * as linuxHelper from '../../../lib/linux'
-import { log } from '../../log'
-import { detect } from '../../../lib/detect'
-import { goalBrowsers } from '../../fixtures'
+require('../spec_helper')
+
+import * as linuxHelper from '../../lib/linux'
+import 'chai-as-promised'
+import { log } from '../log'
+import { detect } from '../../lib/detect'
+import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import execa from 'execa'
 import sinon, { SinonStub } from 'sinon'
@@ -92,6 +95,22 @@ describe('linux browser detection', () => {
       log('Browsers: %o', browsers)
       log('Expected browsers: %o', expected)
       expect(browsers).to.deep.equal(expected)
+    })
+  })
+
+  context('#getVersionString', () => {
+    it('runs the command with `--version` and returns trimmed output', async () => {
+      stdout.withArgs('foo', ['--version']).resolves('  bar  ')
+
+      expect(await linuxHelper.getVersionString('foo')).to.eq('bar')
+    })
+
+    it('rejects with errors', async () => {
+      const err = new Error()
+
+      stdout.withArgs('foo', ['--version']).rejects(err)
+
+      await expect(linuxHelper.getVersionString('foo')).to.be.rejectedWith(err)
     })
   })
 })

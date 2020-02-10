@@ -1,9 +1,11 @@
 import _ from 'lodash'
-import * as darwinHelper from '../../../lib/darwin'
-import * as darwinUtil from '../../../lib/darwin/util'
+import * as darwinHelper from '../../lib/darwin'
+import * as linuxHelper from '../../lib/linux'
+import * as darwinUtil from '../../lib/darwin/util'
 import execa from 'execa'
+import { expect } from 'chai'
 import sinon, { SinonStub } from 'sinon'
-import { browsers } from '../../../lib/browsers'
+import { browsers } from '../../lib/browsers'
 import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import snapshot from 'snap-shot-it'
@@ -54,5 +56,9 @@ describe('darwin browser detection', () => {
     }))
 
     snapshot(detected)
+  })
+
+  it('getVersionString is re-exported from linuxHelper', () => {
+    expect(darwinHelper.getVersionString).to.eq(linuxHelper.getVersionString)
   })
 })
