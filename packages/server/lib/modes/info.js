@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+const debug = require('debug')('cypress:server:info')
 const launcher = require('@packages/launcher')
 const pluralize = require('pluralize')
 const { stripIndent } = require('common-tags')
@@ -6,6 +7,7 @@ const { sortWith, ascend, prop } = require('ramda')
 const browserUtils = require('../browsers/utils')
 const _ = require('lodash')
 const chalk = require('chalk')
+const fs = require('../util/fs')
 
 // color for numbers and short values
 const n = chalk.green
@@ -47,6 +49,25 @@ const formBrowserName = (browser) => {
   return `${browser.name}:${browser.channel}`
 }
 
+// for each browser computes the profile folder
+// and checks if the folder exists. If exists,
+// adds it to the browser object as a property
+const addProfilePath = async (browsers = []) => {
+  await browsers.forEach(async (browser) => {
+    const profilePath = browserUtils.getBrowserPath(browser)
+
+    debug('checking profile path %s for browser %s:%s', profilePath, browser.name, browser.channel)
+    const profileExists = await fs.statAsync(profilePath)
+
+    if (profileExists && profileExists.isDirectory()) {
+      debug('profile folder exists %s', profilePath)
+      browser.profilePath = profilePath
+    }
+  })
+
+  return browsers
+}
+
 const print = (browsers = []) => {
   console.log('Displaying Cypress info...')
   console.log('')
@@ -60,14 +81,13 @@ const print = (browsers = []) => {
   const sortedByNameAndMajorVersion = sortByNameAndMajor(browsers)
 
   sortedByNameAndMajorVersion.forEach((browser, k) => {
-    const profilePath = browserUtils.getBrowserPath(browser)
     const text = stripIndent`
       ${k + 1}. ${a(browser.displayName)}
         - Name: ${browser.name}
         - Channel: ${browser.channel}
         - Version: ${n(browser.version)}
-        - Path: ${p(browser.path)}
-        - Profile path: ${profilePath}
+        - Executable: ${p(browser.path)}
+        ${browser.profilePath ? `- Profile: ${browser.profilePath}` : ''}
     `
 
     console.log(text)
@@ -78,8 +98,8 @@ const print = (browsers = []) => {
   if (browsers.length) {
     const highlightedBrowser = a('--browser')
 
-    console.log('Note: To use these browsers, pass their name and channel to the \'%s\' field, consult %s',
-      highlightedBrowser, link('https://on.cypress.io/launching-browsers'))
+    console.log('Note: To use these browsers, pass their name and channel to the \'%s\' field',
+      highlightedBrowser)
 
     console.log('')
 
@@ -95,11 +115,15 @@ const print = (browsers = []) => {
         console.log(a(`- cypress run --browser ${formBrowserName(secondDraw.item)}`))
       }
     }
+
+    console.log('')
+    console.log('Learn More: %s', link('https://on.cypress.io/launching-browsers'))
   }
 }
 
 const info = () => {
   return launcher.detect()
+  .then(addProfilePath)
   .then(print)
 }
 
