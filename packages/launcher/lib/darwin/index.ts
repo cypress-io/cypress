@@ -1,5 +1,5 @@
 import { findApp, FindAppParams } from './util'
-import { FoundBrowser, Browser } from '../types'
+import { Browser, DetectedBrowser } from '../types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
 import { merge } from 'ramda'
@@ -86,7 +86,7 @@ export function getVersionString (path: string) {
   return linuxHelper.getVersionString(path)
 }
 
-export function detect (browser: Browser): Promise<Partial<FoundBrowser>> {
+export function detect (browser: Browser): Promise<DetectedBrowser> {
   let findAppParams = get(browsers, [browser.name, browser.channel])
 
   if (!findAppParams) {
