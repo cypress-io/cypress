@@ -13,6 +13,8 @@ const n = chalk.green
 const p = chalk.cyan
 // color for accents and examples
 const a = chalk.yellow
+// urls
+const link = chalk.blue.underline
 
 /**
  * If the list has at least 1 item, picks a random item
@@ -76,7 +78,9 @@ const print = (browsers = []) => {
   if (browsers.length) {
     const highlightedBrowser = a('--browser')
 
-    console.log('Note: To use these browsers, pass their name and channel to the \'%s\' field', highlightedBrowser)
+    console.log('Note: To use these browsers, pass their name and channel to the \'%s\' field, consult %s',
+      highlightedBrowser, link('https://on.cypress.io/launching-browsers'))
+
     console.log('')
 
     const firstDraw = pickRandomItem(browsers)
