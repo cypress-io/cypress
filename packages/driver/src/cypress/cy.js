@@ -27,6 +27,7 @@ const $Stability = require('../cy/stability')
 const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
+const $VideoRecorder = require('../cy/video-recorder')
 
 const privateProps = {
   props: { name: 'state', url: true },
@@ -119,6 +120,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const queue = $CommandQueue.create()
 
+  $VideoRecorder.create(Cypress)
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -128,7 +130,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const location = $Location.create(state)
   const focused = $Focused.create(state)
   const keyboard = $Keyboard.create(state)
-  const mouse = $Mouse.create(state, keyboard, focused)
+  const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create()
 
   const { expect } = $Chai.create(specWindow, config, assertions.assert)
@@ -707,6 +709,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
+    $errUtils.normalizeErrorStack(err)
+
     const stack = getInvocationStack(err)
 
     err = $errUtils.enhanceStack({
@@ -755,7 +759,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
       // and if any of these throw synchronously immediately error
-      finish(err2)
+      finish($errUtils.normalizeErrorStack(err2))
     }
 
     // bail if we had callbacks attached
@@ -1341,8 +1345,13 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
           // if we're cy or we've enqueued commands
           if (isCy(returned) || (queue.length > currentLength)) {
-            // the run should already be kicked off
-            // by now and return this promise
+            if (fn.length) {
+              // if user has passed done callback don't return anything
+              // so we don't get an 'overspecified' error from mocha
+              return
+            }
+
+            // otherwise, return the 'queue promise', so mocha awaits it
             return state('promise')
           }
 

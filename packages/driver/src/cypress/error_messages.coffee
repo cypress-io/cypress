@@ -108,6 +108,9 @@ module.exports = {
       docsUrl: "https://on.cypress.io/blur"
     }
 
+  browser:
+    invalid_arg: "Cypress.{{method}}() must be passed the name of a browser or an object to filter with. You passed: {{obj}}"
+
   chai:
     length_invalid_argument: "You must provide a valid number to a `length` assertion. You passed: `{{length}}`"
     match_invalid_argument: "`match` requires its argument be a `RegExp`. You passed: `{{regExp}}`"
@@ -200,6 +203,10 @@ module.exports = {
     }
     length_option: {
       message: "#{cmd('contains')} cannot be passed a `length` option because it will only ever return 1 element."
+      docsUrl: "https://on.cypress.io/contains"
+    }
+    regex_conflict: {
+      message: "You passed a regular expression with the case-insensitive (_i_) flag and `{ matchCase: true }` to #{cmd('contains')}. Those options conflict with each other, so please choose one or the other."
       docsUrl: "https://on.cypress.io/contains"
     }
 
@@ -760,6 +767,16 @@ module.exports = {
     async_timed_out: "Timed out after `{{ms}}ms`. The `done()` callback was never invoked!"
     invalid_interface: "Invalid mocha interface `{{name}}`"
     timed_out: "Cypress command timeout of `{{ms}}ms` exceeded."
+    overspecified: {
+      message: """
+      Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+
+      Original mocha error:
+
+      {{error}}
+      """
+      docsUrl: "https://on.cypress.io/returning-promise-and-invoking-done-callback"
+    }
 
   navigation:
     cross_origin: ({ message, originPolicy, configFile }) -> {

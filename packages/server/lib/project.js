@@ -55,7 +55,6 @@ class Project extends EE {
     this.spec = null
     this.browser = null
     this.server = null
-    this.memoryCheck = null
     this.automation = null
     this.getConfig = this.getConfig.bind(this)
 
@@ -78,20 +77,19 @@ class Project extends EE {
     debug('project options %o', options)
     this.options = options
 
-    if (process.env.CYPRESS_MEMORY) {
-      const logMemory = () => {
-        // eslint-disable-next-line no-console
-        return console.log('memory info', process.memoryUsage())
-      }
-
-      this.memoryCheck = setInterval(logMemory, 1000)
-    }
-
     this.onWarning = options.onWarning
 
     return this.getConfig(options)
     .tap((cfg) => {
       process.chdir(this.projectRoot)
+
+      // attach warning message if user has "chromeWebSecurity: false" for unsupported browser
+      if (cfg.chromeWebSecurity === false) {
+        _.chain(cfg.browsers)
+        .filter((browser) => browser.family !== 'chromium')
+        .each((browser) => browser.warning = errors.getMsgByType('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.name))
+        .value()
+      }
 
       // TODO: we currently always scaffold the plugins file
       // even when headlessly or else it will cause an error when
@@ -168,6 +166,7 @@ class Project extends EE {
 
         options.onError(err)
       },
+      onWarning: options.onWarning,
     })
   }
 
@@ -204,10 +203,6 @@ class Project extends EE {
 
   close () {
     debug('closing project instance %s', this.projectRoot)
-
-    if (this.memoryCheck) {
-      clearInterval(this.memoryCheck)
-    }
 
     this.cfg = null
     this.spec = null
@@ -335,6 +330,11 @@ class Project extends EE {
       onSpecChanged: options.onSpecChanged,
 
       onSavedStateChanged: options.onSavedStateChanged,
+
+      onCaptureVideoFrames: (data) => {
+        // TODO: move this to browser automation middleware
+        this.emit('capture:video:frames', data)
+      },
 
       onConnect: (id) => {
         this.emit('socket:connected', id)

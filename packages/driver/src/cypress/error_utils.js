@@ -37,10 +37,12 @@ const modifyErrMsg = (origErrObj, newErrMsg, cb) => {
     stack = stack.replace(originalErrMsg, message)
   }
 
-  return _.extend({}, origErrObj, {
+  const err = _.extend({}, origErrObj, {
     message,
     stack,
   })
+
+  return normalizeErrorStack(err)
 }
 
 const appendErrMsg = (err, messageOrObj) => {
@@ -73,6 +75,10 @@ const makeErrFromObj = (obj) => {
 const throwErr = (err, options = {}) => {
   if (_.isString(err)) {
     err = cypressErr(err)
+
+    if (options.noStackTrace) {
+      err.stack = ''
+    }
   }
 
   let { onFail, errProps } = options
@@ -232,6 +238,18 @@ const getErrStack = (err) => {
   return err.stack
 }
 
+const normalizeErrorStack = (err) => {
+  // normalize error message + stack for firefox
+  const errString = err.toString()
+  const errStack = err.stack || ''
+
+  if (!errStack.slice(0, errStack.indexOf('\n')).includes(errString.slice(0, errString.indexOf('\n')))) {
+    err.stack = `${errString}\n${errStack}`
+  }
+
+  return err
+}
+
 const escapeErrMarkdown = (text) => {
   if (!_.isString(text)) {
     return text
@@ -291,26 +309,27 @@ const processErr = (errObj = {}, config) => {
 }
 
 module.exports = {
-  CypressErrorRe,
-  wrapErr,
-  modifyErrMsg,
-  mergeErrProps,
   appendErrMsg,
+  cypressErr,
+  cypressErrObj,
+  CypressErrorRe,
+  enhanceStack,
+  errMsgByPath,
+  errObjByPath,
+  escapeErrMarkdown,
+  getErrMessage,
+  getErrMsgWithObjByPath,
+  getErrStack,
+  getObjValueByPath,
+  internalErr,
   makeErrFromObj,
+  mergeErrProps,
+  modifyErrMsg,
+  normalizeErrorStack,
+  normalizeMsgNewLines,
+  processErr,
   throwErr,
   throwErrByPath,
   warnByPath,
-  internalErr,
-  cypressErr,
-  cypressErrObj,
-  normalizeMsgNewLines,
-  errObjByPath,
-  getErrMsgWithObjByPath,
-  getErrMessage,
-  errMsgByPath,
-  getErrStack,
-  enhanceStack,
-  escapeErrMarkdown,
-  getObjValueByPath,
-  processErr,
+  wrapErr,
 }

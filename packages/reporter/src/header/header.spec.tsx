@@ -28,7 +28,7 @@ describe('<Header />', () => {
 
     const component = shallow(title)
 
-    expect(component.text()).to.contain('View All Tests')
+    expect(component.text()).to.contain('View All Tests ')
   })
 
   it('emits the focus:tests event when the focus tests button is clicked', () => {

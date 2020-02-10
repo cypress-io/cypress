@@ -3,6 +3,9 @@ LimitedMap = require("../../../../src/util/limited_map")
 _ = Cypress._
 $utils = Cypress.utils
 
+stackWithoutMessage = (err) ->
+  err.stack.replace("#{err.toString()}\n", "")
+
 describe "driver/src/cypress/utils", ->
   context ".reduceProps", ->
     it "reduces obj to only include props in props", ->

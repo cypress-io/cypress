@@ -284,6 +284,36 @@ describe('lib/project', () => {
         expect(startListening.getCall(0).args[1]).to.eq(options)
       })
     })
+
+    it('attaches warning to non-chrome browsers when chromeWebSecurity:false', function () {
+      Object.assign(this.config, {
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        chromeWebSecurity: false,
+      })
+
+      return this.project.open()
+      .then(() => this.project.getConfig())
+      .then((config) => {
+        expect(config.chromeWebSecurity).eq(false)
+        expect(config.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+            warning: `\
+Your project has set the configuration option: \`chromeWebSecurity: false\`
+
+This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
+`,
+          },
+        ])
+
+        expect(config).ok
+      })
+    })
   })
 
   context('#close', () => {

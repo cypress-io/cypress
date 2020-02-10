@@ -275,7 +275,7 @@ const logFs = () => {
 }
 
 const getFs = () => {
-  const cwd = process.cwd().split('/').slice(1)
+  const cwd = process.cwd().split(path.sep).slice(1)
 
   const recurse = (dir, d) => {
     if (_.isString(dir)) {

@@ -23,7 +23,8 @@ exports['e2e commands outside of test / fails on cy commands'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Cannot call \`cy.viewport()\` outside a running test.
+     [object Object]
+Cannot call \`cy.viewport()\` outside a running test.
 
 This usually happens when you accidentally write commands outside an \`it(...)\` test.
 
@@ -37,7 +38,7 @@ We dynamically generated a new test to display this failure.
 
 https://on.cypress.io/cannot-execute-commands-outside-test
 
-      [stack trace lines]
+  
 
 
 
@@ -110,12 +111,13 @@ exports['e2e commands outside of test / fails on failing assertions'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     expected true to be false
+     [object Object]
+expected true to be false
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      [stack trace lines]
+  
 
 
 

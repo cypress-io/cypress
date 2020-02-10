@@ -81,6 +81,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
   const handleBackendError = (command, action, onFail) => {
     return (err) => {
+      if (!_.includes(err.stack, err.message)) {
+        err.stack = `${err.message}\n${err.stack}`
+      }
+
       if (err.name === 'CypressError') {
         throw err
       }

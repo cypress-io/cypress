@@ -64,6 +64,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## re-throw if timedOut error from above
         throw error if error.name is "CypressError"
 
+        error = $errUtils.normalizeErrorStack(error)
+
         if error?.isKnownError
           $errUtils.throwErrByPath("task.known_error", {
             onFail: options._log

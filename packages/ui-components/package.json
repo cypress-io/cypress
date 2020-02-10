@@ -13,20 +13,25 @@
     "watch": "npm run build -- --watch --progress"
   },
   "devDependencies": {
+    "@babel/preset-env": "7.8.3",
+    "@babel/preset-react": "7.8.3",
     "@cypress/eslint-plugin-dev": "5.0.0",
+    "@cypress/webpack-preprocessor": "4.1.1",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@reach/visually-hidden": "0.6.2",
+    "browser-logos": "github:alrra/browser-logos",
     "chai-subset": "1.6.0",
     "classnames": "2.2.6",
     "eslint-plugin-cypress": "2.7.0",
     "eslint-plugin-react": "7.16.0",
+    "file-loader": "5.0.2",
     "lodash": "4.17.15",
     "mobx": "5.15.2",
     "mobx-react": "6.1.5",
     "node-sass": "4.13.0",
     "prop-types": "15.7.2",
-    "react": "16.12.0",
-    "react-dom": "16.12.0",
+    "react": "16.8.6",
+    "react-dom": "16.8.6",
     "webpack": "4.41.2",
     "webpack-cli": "3.3.10"
   }

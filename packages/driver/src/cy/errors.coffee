@@ -1,6 +1,5 @@
 _ = require("lodash")
 $dom = require("../dom")
-$utils = require("../cypress/utils")
 $errUtils = require("../cypress/error_utils")
 $errorMessages = require('../cypress/error_messages')
 
@@ -66,6 +65,9 @@ create = (state, config, log) ->
     uncaughtErr.onFail = ->
       if l = current and current.getLastLog()
         l.error(uncaughtErr)
+
+    ## normalize error message for firefox
+    $errUtils.normalizeErrorStack(uncaughtErr)
 
     return uncaughtErr
 

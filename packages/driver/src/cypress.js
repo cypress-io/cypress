@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const $ = require('jquery')
+const chai = require('chai')
 const blobUtil = require('blob-util')
 const minimatch = require('minimatch')
 const moment = require('moment')
@@ -15,6 +16,7 @@ const $Commands = require('./cypress/commands')
 const $Cookies = require('./cypress/cookies')
 const $Cy = require('./cypress/cy')
 const $Events = require('./cypress/events')
+const $FirefoxForcedGc = require('./util/firefox_forced_gc')
 const $Keyboard = require('./cy/keyboard')
 const $SetterGetter = require('./cypress/setter_getter')
 const $Log = require('./cypress/log')
@@ -29,6 +31,7 @@ const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
 const $scriptUtils = require('./cypress/script_utils')
+const browserInfo = require('./cypress/browser')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
@@ -156,9 +159,12 @@ class $Cypress {
 
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state')
 
+    _.extend(this, browserInfo(config))
+
     this.state = $SetterGetter.create({})
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
+    this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this.config)
 
     this.Cookies = $Cookies.create(config.namespace, d)
 
@@ -201,14 +207,13 @@ class $Cypress {
 
     this.events.proxyTo(this.cy)
 
+    $FirefoxForcedGc.install(this)
+
     $scriptUtils.runScripts(specWindow, scripts)
     .catch((err) => {
       this.runner.onScriptError(err)
     })
     .then(() => {
-      // push down the options to the runner
-      this.mocha.options(this.runner)
-
       this.cy.initialize(this.$autIframe)
 
       this.onSpecReady()
@@ -220,6 +225,9 @@ class $Cypress {
     // other objects communicate intent
     // and 'action' to Cypress
     switch (eventName) {
+      case 'recorder:frame':
+        return this.emit('recorder:frame', args[0])
+
       case 'cypress:stop':
         return this.emit('stop')
 
@@ -326,13 +334,25 @@ class $Cypress {
 
         break
 
-      case 'runner:fail':
+      case 'runner:fail': {
         // mocha runner calculated a failure
+
+        const err = args[0].err
+
+        if (err.actual) {
+          err.actual = chai.util.inspect(err.actual)
+        }
+
+        if (err.expected) {
+          err.expected = chai.util.inspect(err.expected)
+        }
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'fail', ...args)
         }
 
         break
+      }
 
       case 'mocha:runnable:run':
         return this.runner.onRunnableRun(...args)
@@ -609,6 +629,5 @@ _.each(proxies, (methods, key) => {
 // attaching these so they are accessible
 // via the runner + integration spec helper
 $Cypress.$ = $
-$Cypress.dom = $dom
 
 module.exports = $Cypress

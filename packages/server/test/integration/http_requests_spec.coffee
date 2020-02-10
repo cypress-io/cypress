@@ -57,11 +57,18 @@ cleanResponseBody = (body) ->
 
 browserifyFile = (filePath) ->
   streamToPromise(
-    browserify(filePath)
-    .transform(coffeeify)
-    .transform(babelify, {
-      plugins: ["add-module-exports", "@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-runtime"],
-      presets: ["@babel/preset-env", "@babel/preset-react"],
+    browserify({
+      entries: [filePath]
+      extensions: ['.js', '.jsx', '.coffee']
+      cache: {}
+      packageCache: {}
+      transform: [
+        [coffeeify, {}]
+        [babelify, {
+          plugins: ["add-module-exports", "@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-runtime"],
+          presets: ["@babel/preset-env", "@babel/preset-react"],
+        }]
+      ]
     })
     .bundle()
   )

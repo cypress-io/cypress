@@ -34,6 +34,7 @@ export interface Events {
 
 interface StartInfo extends StatsStoreStartInfo {
   autoScrollingEnabled: boolean
+  firefoxGcInterval: number
   scrollTop: number
 }
 
@@ -85,6 +86,7 @@ const events: Events = {
 
     runner.on('reporter:start', action('start', (startInfo: StartInfo) => {
       appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
+      appState.setFirefoxGcInterval(startInfo.firefoxGcInterval)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
       if (runnablesStore.hasTests) {
         statsStore.start(startInfo)
@@ -123,6 +125,16 @@ const events: Events = {
 
     runner.on('reporter:snapshot:unpinned', action('snapshot:unpinned', () => {
       appState.pinnedSnapshotId = null
+    }))
+
+    runner.on('before:firefox:force:gc', action('before:firefox:force:gc', ({ gcInterval }) => {
+      appState.setForcingGc(true)
+      appState.setFirefoxGcInterval(gcInterval)
+    }))
+
+    runner.on('after:firefox:force:gc', action('after:firefox:force:gc', ({ gcInterval }) => {
+      appState.setForcingGc(false)
+      appState.setFirefoxGcInterval(gcInterval)
     }))
 
     localBus.on('resume', action('resume', () => {

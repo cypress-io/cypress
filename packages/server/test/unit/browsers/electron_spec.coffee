@@ -12,6 +12,8 @@ electron = require("#{root}../lib/browsers/electron")
 savedState = require("#{root}../lib/saved_state")
 Automation = require("#{root}../lib/automation")
 
+ELECTRON_PID = 10001
+
 describe "lib/browsers/electron", ->
   beforeEach ->
     @url = "https://foo.com"
@@ -19,6 +21,7 @@ describe "lib/browsers/electron", ->
     @options = {
       some: "var"
       projectRoot: "/foo/"
+      onWarning: sinon.stub().returns()
     }
     @automation = Automation.create("foo", "bar", "baz")
     @win = _.extend(new EE(), {
@@ -34,6 +37,7 @@ describe "lib/browsers/electron", ->
             remove: sinon.stub()
           }
         }
+        getOSProcessId: sinon.stub().returns(ELECTRON_PID)
         "debugger": {
           attach: sinon.stub().returns()
           sendCommand: sinon.stub().resolves()
@@ -42,8 +46,10 @@ describe "lib/browsers/electron", ->
       }
     })
 
-  context ".open", ->
-    beforeEach ->
+    sinon.stub(Windows, 'installExtension').returns()
+    sinon.stub(Windows, 'removeAllExtensions').returns()
+
+    @stubForOpen = ->
       sinon.stub(electron, "_render").resolves(@win)
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
@@ -52,6 +58,10 @@ describe "lib/browsers/electron", ->
       .then (state) =>
         la(check.fn(state.get), "state is missing .get to stub", state)
         sinon.stub(state, "get").resolves(@state)
+
+  context ".open", ->
+    beforeEach ->
+      @stubForOpen()
 
     it "calls render with url, state, and options", ->
       electron.open("electron", @url, @options, @automation)
@@ -76,6 +86,9 @@ describe "lib/browsers/electron", ->
         expect(obj.kill).to.be.a("function")
         expect(obj.removeAllListeners).to.be.a("function")
 
+        expect(@win.webContents.getOSProcessId).to.be.calledOnce
+        expect(obj.pid).to.deep.eq([ELECTRON_PID])
+
     it "is noop when before:browser:launch yields null", ->
       plugins.has.returns(true)
       plugins.execute.resolves(null)
@@ -87,15 +100,43 @@ describe "lib/browsers/electron", ->
         expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
 
     ## https://github.com/cypress-io/cypress/issues/1992
-    it "it merges in options without removing essential options", ->
+    it "it merges in user preferences without removing essential options", ->
       plugins.has.returns(true)
-      plugins.execute.resolves({foo: "bar"})
+      plugins.execute.withArgs("before:browser:launch").resolves({
+        preferences: {
+          foo: "bar"
+        }
+      })
 
       electron.open("electron", @url, @options, @automation)
       .then =>
         options = electron._render.firstCall.args[3]
 
         expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
+
+    it "installs supplied extensions from before:browser:launch and warns on failure", ->
+      plugins.has.returns(true)
+      plugins.execute.resolves({ extensions: ['foo', 'bar'] })
+
+      Windows.installExtension.withArgs('bar').throws()
+
+      electron.open("electron", @url, @options, @automation)
+      .then =>
+        expect(Windows.removeAllExtensions).to.be.calledOnce
+
+        expect(Windows.installExtension).to.be.calledTwice
+        expect(Windows.installExtension).to.be.calledWith('foo')
+        expect(Windows.installExtension).to.be.calledWith('bar')
+
+        expect(@options.onWarning).to.be.calledOnce
+
+        warning = @options.onWarning.firstCall.args[0].message
+        expect(warning).to.contain('Electron').and.contain('bar')
+
+        @win.emit('closed')
+
+        ## called once before installing extensions, once on exit
+        expect(Windows.removeAllExtensions).to.be.calledTwice
 
   context "._launch", ->
     beforeEach ->
@@ -238,6 +279,24 @@ describe "lib/browsers/electron", ->
         expect(electron._launchChild).to.be.calledWith(
           event, @url, parentWindow, @options.projectRoot, @state, @options
         )
+
+      it "adds pid of new BrowserWindow to pid list", ->
+        opts = electron._defaultOptions(@options.projectRoot, @state, @options)
+
+        NEW_WINDOW_PID = ELECTRON_PID * 2
+
+        child = _.cloneDeep(@win)
+        child.webContents.getOSProcessId = sinon.stub().returns(NEW_WINDOW_PID)
+
+        electron._launchChild.resolves(child)
+
+        @stubForOpen()
+        .then =>
+          electron.open("electron", @url, opts, @automation)
+        .then (instance) =>
+          opts.onNewWindow.call(@win, {}, @url)
+          .then ->
+            expect(instance.pid).to.deep.eq([ELECTRON_PID, NEW_WINDOW_PID])
 
   ## TODO: these all need to be updated
   context.skip "._launchChild", ->

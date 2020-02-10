@@ -428,6 +428,7 @@ exports['lib/scaffold .fileTree leaves out plugins if configured to false 1'] = 
 ]
 
 exports['lib/scaffold .plugins creates pluginsFile when pluginsFolder does not exist 1'] = `
+/// <reference types="cypress" />
 // ***********************************************************
 // This example plugins/index.js can be used to load plugins
 //
@@ -441,6 +442,9 @@ exports['lib/scaffold .plugins creates pluginsFile when pluginsFolder does not e
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
+/**
+ * @type {Cypress.PluginConfig}
+ */
 module.exports = (on, config) => {
   // <backtick>on<backtick> is used to hook into various events Cypress emits
   // <backtick>config<backtick> is the resolved Cypress config

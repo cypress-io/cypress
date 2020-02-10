@@ -16,7 +16,6 @@ describe "e2e domain", ->
   e2e.it "passes", {
     spec: "domain*"
     snapshot: true
-    expectedExitCode: 0
     config: {
       hosts
     }

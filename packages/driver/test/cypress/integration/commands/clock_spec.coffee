@@ -72,16 +72,13 @@ describe "src/cy/commands/clock", ->
         expect(new win.Date()).to.be.an.instanceof(win.Date)
         expect(new win.Date() instanceof win.Date).to.be.true
 
+    ## this test was written to catch a bug in lolex (dep) 3 and is fixed by lolex 4 upgrade,
     it "doesn't override window.performance members", ->
       cy.clock()
       .then (clock) ->
         cy.window().then (win) ->
-          expect(win.performance.getEntriesByType("paint")).to.deep.eq([])
           expect(win.performance.getEntries()).to.deep.eq([])
-
           clock.restore()
-
-          expect(win.performance.getEntriesByType("paint").length).to.be.at.least(1)
           expect(win.performance.getEntries().length).to.be.at.least(1)
 
     context "errors", ->

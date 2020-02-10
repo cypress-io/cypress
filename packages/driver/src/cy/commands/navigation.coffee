@@ -9,6 +9,8 @@ $errUtils = require("../../cypress/error_utils")
 $Log = require("../../cypress/log")
 $Location = require("../../cypress/location")
 
+debug = require('debug')('cypress:driver:navigation')
+
 id                    = null
 previousDomainVisited = null
 hasVisitedAboutBlank  = null
@@ -43,6 +45,7 @@ isValidVisitMethod = (method) ->
   _.includes(VALID_VISIT_METHODS, method)
 
 timedOutWaitingForPageLoad = (ms, log) ->
+  debug('timedOutWaitingForPageLoad')
   $errUtils.throwErrByPath("navigation.timed_out", {
     args: {
       configFile: Cypress.config("configFile")
@@ -92,6 +95,7 @@ aboutBlank = (win) ->
 navigationChanged = (Cypress, cy, state, source, arg) ->
   ## get the current url of our remote application
   url = cy.getRemoteLocation("href")
+  debug('navigation changed:', url)
 
   ## dont trigger for empty url's or about:blank
   return if _.isEmpty(url) or url is "about:blank"
@@ -165,6 +169,7 @@ pageLoading = (bool, state) ->
   Cypress.action("app:page:loading", bool)
 
 stabilityChanged = (Cypress, state, config, stable, event) ->
+  debug('stabilityChanged:', stable)
   if currentlyVisitingAboutBlank
     if stable is false
       ## if we're currently visiting about blank
@@ -236,6 +241,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
   state("onPageLoadErr", onPageLoadErr)
 
   loading = ->
+    debug('waiting for window:load')
     new Promise (resolve, reject) ->
       cy.once "window:load", ->
         cy.state("onPageLoadErr", null)
@@ -794,6 +800,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                     error: err
                     stack: err.stack
                   }
+                  noStackTrace: true
                 })
 
       visit = ->

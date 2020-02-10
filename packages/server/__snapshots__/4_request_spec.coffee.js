@@ -98,7 +98,8 @@ exports['e2e requests fails when network immediately fails 1'] = `
   1 failing
 
   1) when network connection cannot be established fails:
-     \`cy.request()\` failed trying to load:
+     [object Object]
+\`cy.request()\` failed trying to load:
 
 http://localhost:16795/
 
@@ -206,7 +207,8 @@ exports['e2e requests fails on status code 1'] = `
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
-     \`cy.request()\` failed on:
+     [object Object]
+\`cy.request()\` failed on:
 
 http://localhost:2294/statusCode?code=503
 
@@ -324,7 +326,8 @@ exports['e2e requests prints long http props on fail 1'] = `
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
-     \`cy.request()\` failed on:
+     [object Object]
+\`cy.request()\` failed on:
 
 http://localhost:2294/myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong
 

@@ -173,7 +173,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      [stack trace lines]
+  
 
 
 
@@ -1053,7 +1053,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      [stack trace lines]
+  
 
 
 

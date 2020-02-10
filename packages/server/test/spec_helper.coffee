@@ -1,9 +1,12 @@
 require("../lib/environment")
 
+chai = require('chai')
+chai.use(require('chai-subset'))
+
 global.root      = "../../"
 global.supertest = require("supertest")
 global.nock      = require("nock")
-global.expect    = require("chai").expect
+global.expect    = chai.expect
 global.mockery   = require("mockery")
 global.proxyquire = require("proxyquire")
 global.sinon     = require("sinon")
@@ -77,7 +80,7 @@ before ->
   if hasOnly
     @test.parent._onlyTests = [true]
 
-  appData.ensure()
+  # appData.ensure()
 
 beforeEach ->
   @originalEnv = originalEnv

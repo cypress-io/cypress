@@ -28,7 +28,7 @@ exports['e2e uncaught errors / failing1'] = `
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      [stack trace lines]
+  
 
 
 
@@ -106,7 +106,7 @@ exports['e2e uncaught errors / failing2'] = `
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      [stack trace lines]
+  
 
 
 

@@ -1,4 +1,5 @@
 _      = require("lodash")
+cache  = require("../cache")
 send   = require("send")
 os     = require("os")
 debug  = require("debug")("cypress:server:runner")

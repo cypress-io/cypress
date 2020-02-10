@@ -25,6 +25,8 @@ type AppStateStub = AppState & {
   resume: SinonSpy
   end: SinonSpy
   temporarilySetAutoScrolling: SinonSpy
+  setFirefoxGcInterval: SinonSpy
+  setForcingGc: SinonSpy
   stop: SinonSpy
 }
 
@@ -36,6 +38,8 @@ const appStateStub = () => {
     resume: sinon.spy(),
     end: sinon.spy(),
     temporarilySetAutoScrolling: sinon.spy(),
+    setFirefoxGcInterval: sinon.spy(),
+    setForcingGc: sinon.spy(),
     stop: sinon.spy(),
   } as AppStateStub
 }
@@ -179,6 +183,23 @@ describe('events', () => {
     it('sets autoScrollingEnabled on the app state on reporter:start', () => {
       runner.on.withArgs('reporter:start').callArgWith(1, { autoScrollingEnabled: false })
       expect(appState.temporarilySetAutoScrolling).to.have.been.calledWith(false)
+    })
+
+    it('sets firefoxGcInterval on the app state on reporter:start', () => {
+      runner.on.withArgs('reporter:start').callArgWith(1, { firefoxGcInterval: 111 })
+      expect(appState.setFirefoxGcInterval).to.have.been.calledWith(111)
+    })
+
+    it('sets forcingGc & firefoxGcInterval on the app state on before:firefox:force:gc', () => {
+      runner.on.withArgs('before:firefox:force:gc').callArgWith(1, { gcInterval: 222 })
+      expect(appState.setFirefoxGcInterval).to.have.been.calledWith(222)
+      expect(appState.setForcingGc).to.have.been.calledWith(true)
+    })
+
+    it('sets forcingGc & firefoxGcInterval on the app state on after:firefox:force:gc', () => {
+      runner.on.withArgs('after:firefox:force:gc').callArgWith(1, { gcInterval: 333 })
+      expect(appState.setFirefoxGcInterval).to.have.been.calledWith(333)
+      expect(appState.setForcingGc).to.have.been.calledWith(false)
     })
 
     it('sets initial crollTop on the scroller on reporter:start', () => {
