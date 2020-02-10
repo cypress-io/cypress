@@ -259,7 +259,7 @@ jobs:
       - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
       - run: yarn lerna run build-js --stream
-      # run unit tests from each individual package (10 total)
+      # run unit tests from each individual package
       - run: yarn test
       - store_test_results:
           path: /tmp/cypress
