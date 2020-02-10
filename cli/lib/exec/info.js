@@ -6,6 +6,7 @@ const os = require('os')
 const chalk = require('chalk')
 const prettyBytes = require('pretty-bytes')
 const _ = require('lodash')
+const R = require('ramda')
 
 // color for numbers and show values
 const g = chalk.green
@@ -16,6 +17,16 @@ const link = chalk.blue.underline
 
 const findProxyEnvironmentVariables = () => {
   return _.pick(process.env, ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'])
+}
+
+const maskSensitiveVariables = R.evolve({
+  CYPRESS_RECORD_KEY: R.always('<redacted>'),
+})
+
+const findCypressEnvironmentVariables = () => {
+  const isCyVariable = (val, key) => key.startsWith('CYPRESS_')
+
+  return maskSensitiveVariables(R.pickBy(isCyVariable)(process.env))
 }
 
 const start = (options = {}) => {
@@ -51,6 +62,18 @@ const start = (options = {}) => {
 
       console.log()
       console.log('Learn More: %s', link('https://on.cypress.io/proxy-configuration'))
+    }
+
+    console.log()
+    const cyVars = findCypressEnvironmentVariables()
+
+    if (_.isEmpty(cyVars)) {
+      console.log('Did not detect any additional Cypress environment variables')
+    } else {
+      console.log('Cypress environment variables:')
+      _.forEach(cyVars, (value, key) => {
+        console.log('%s: %s', key, g(value))
+      })
     }
   })
 }
