@@ -63,7 +63,9 @@ const print = (browsers = []) => {
 
   // randomly a few detected browsers to use as examples
   if (browsers.length) {
-    console.log('Note: To use these browsers, pass their name and channel to the \'--browser\' field')
+    const highlightedBrowser = a('--browser')
+
+    console.log('Note: To use these browsers, pass their name and channel to the \'%s\' field', highlightedBrowser)
     console.log('')
 
     const firstDraw = pickRandomItem(browsers)

@@ -2,6 +2,7 @@
 const spawn = require('./spawn')
 const util = require('../util')
 const state = require('../tasks/state')
+const cache = require('../tasks/cache')
 const os = require('os')
 const chalk = require('chalk')
 
@@ -9,6 +10,8 @@ const chalk = require('chalk')
 const g = chalk.green
 // color for paths
 const p = chalk.cyan
+// accents
+const a = chalk.yellow
 
 const start = (options = {}) => {
   const args = ['--mode=info']
@@ -29,6 +32,10 @@ const start = (options = {}) => {
     console.log('Application Data:', p(util.getApplicationDataFolder()))
     console.log('Browser Profiles:', p(util.getApplicationDataFolder('browsers')))
     console.log('Binary Caches: %s', p(state.getCacheDir()))
+  })
+  .then(cache.getCachedVersions)
+  .then((list) => {
+    console.log('Cached Binaries: %s', a(list.join(', ')))
   })
 }
 
