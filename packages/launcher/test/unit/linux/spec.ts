@@ -25,10 +25,6 @@ describe('linux browser detection', () => {
     .resolves('foo-browser v9001.1.2.3')
   })
 
-  afterEach(() => {
-    stdout.restore()
-  })
-
   it('detects browser by running --version', () => {
     const goal = goalBrowsers[0]
     const checkBrowser = (browser) => {

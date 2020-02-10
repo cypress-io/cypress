@@ -68,10 +68,6 @@ describe('browser detection', () => {
       .rejects()
     })
 
-    afterEach(() => {
-      stdout.restore()
-    })
-
     it('detects by path', () => {
       // @ts-ignore
       return detectByPath('/foo/bar/browser', goalBrowsers)

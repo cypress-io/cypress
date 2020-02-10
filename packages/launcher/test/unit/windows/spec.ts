@@ -30,12 +30,6 @@ describe('windows browser detection', () => {
     sinon.stub(execa, 'stdout').resolves('')
   })
 
-  afterEach(() => {
-    execa.stdout.restore()
-    os.homedir.restore()
-    fse.pathExists.restore()
-  })
-
   it('detects browsers as expected', async () => {
     stubBrowser('C:/Program Files (x86)/Google/Chrome/Application/chrome.exe', '1.2.3')
     stubBrowser('C:/Program Files (x86)/Google/chrome-win32/chrome.exe', '2.3.4')

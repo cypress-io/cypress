@@ -37,11 +37,6 @@ describe('darwin browser detection', () => {
     sinon.stub(execa, 'stdout').resolves('')
   })
 
-  afterEach(() => {
-    execa.stdout.restore()
-    fse.readFile.restore()
-  })
-
   it('detects browsers as expected', async () => {
     // this test uses the macOS detectors to stub out the expected calls
     _.forEach(darwinHelper.browsers, (channels) => {
