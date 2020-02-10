@@ -1,4 +1,5 @@
 import React from 'react'
+import { get } from 'lodash'
 import { observer } from 'mobx-react'
 import ipc from '../lib/ipc'
 import { getExperiments } from '@packages/server/lib/experiments'
@@ -10,6 +11,7 @@ const openHelp = (e) => {
 
 const Experiments = observer(({ project }) => {
   const experiments = getExperiments(project)
+  const resolvedEnv = get(project, 'resolvedConfig', {})
 
   const ComponentTesting = () => {
     if (!experiments.experimentalComponentTesting) {
@@ -17,15 +19,20 @@ const Experiments = observer(({ project }) => {
     }
 
     const experiment = experiments.experimentalComponentTesting
+    const componentFolder = get(resolvedEnv, 'componentFolder.value', 'false')
 
     return (
       <li className='experiment' data-cy="component-testing">
         <div className='experiment-desc'>
           <h5>Component Testing</h5>
+          <p className="flag">
+            Experimental flag: <code>experimentalComponentTesting</code>
+          </p>
           <p className="text-muted">
             Enables the use of component testing using framework-specific libraries to mount your component directly from the spec file.
+            The component tests will be loaded from the folder specified in the project config under the key <code>componentFolder</code>,
+            currently it has the resolved value <code>{componentFolder}</code>.
           </p>
-          <code>experimentalComponentTesting</code>
         </div>
         <div className='experiment-status'>
           <span className='experiment-status-sign'>
