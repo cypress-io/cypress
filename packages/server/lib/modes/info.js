@@ -17,7 +17,7 @@ const print = (browsers = []) => {
   const sortedByNameAndMajorVersion = sortByNameAndMajor(browsers)
 
   sortedByNameAndMajorVersion.forEach((browser) => {
-    const profilePath = browserUtils.getProfileDir(browser)
+    const profilePath = browserUtils.getBrowserPath(browser)
     const text = stripIndent`
       ${browser.displayName}
         - Name: ${browser.name}
