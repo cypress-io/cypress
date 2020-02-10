@@ -2,6 +2,7 @@
 const spawn = require('./spawn')
 const util = require('../util')
 const state = require('../tasks/state')
+const os = require('os')
 
 const start = (options = {}) => {
   const args = ['--mode=info']
@@ -11,7 +12,11 @@ const start = (options = {}) => {
   }).then(() => {
     console.log()
 
-    return util.getPlatformInfo().then(console.log)
+    return util.getPlatformInfo().then((platform) => {
+      console.log(platform)
+      // should we do human-friendly conversion?
+      console.log('Total memory: %d free %d', os.totalmem(), os.freemem())
+    })
   })
   .then(() => {
     console.log()
