@@ -302,7 +302,7 @@ module.exports = {
     program
     .command('info')
     .usage('[command]')
-    .description('Prints locally detected browsers')
+    .description('Prints Cypress and system information')
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       require('./exec/info')

@@ -5,6 +5,14 @@ const { stripIndent } = require('common-tags')
 const { sortWith, ascend, prop } = require('ramda')
 const browserUtils = require('../browsers/utils')
 const _ = require('lodash')
+const chalk = require('chalk')
+
+// color for numbers and short values
+const n = chalk.green
+// color for paths
+const p = chalk.cyan
+// color for accents and examples
+const a = chalk.yellow
 
 /**
  * If the list has at least 1 item, picks a random item
@@ -41,11 +49,11 @@ const print = (browsers = []) => {
   sortedByNameAndMajorVersion.forEach((browser, k) => {
     const profilePath = browserUtils.getBrowserPath(browser)
     const text = stripIndent`
-      ${k + 1}. ${browser.displayName}
+      ${k + 1}. ${a(browser.displayName)}
         - Name: ${browser.name}
-        - Version: ${browser.version}
         - Channel: ${browser.channel}
-        - Path: ${browser.path}
+        - Version: ${n(browser.version)}
+        - Path: ${p(browser.path)}
         - Profile path: ${profilePath}
     `
 
@@ -62,12 +70,12 @@ const print = (browsers = []) => {
 
     if (firstDraw.item) {
       console.log('Examples:')
-      console.log(`- cypress run --browser ${firstDraw.item.name}:${firstDraw.item.channel}`)
+      console.log(a(`- cypress run --browser ${firstDraw.item.name}:${firstDraw.item.channel}`))
 
       const secondDraw = pickRandomItem(firstDraw.remaining)
 
       if (secondDraw.item) {
-        console.log(`- cypress run --browser ${secondDraw.item.name}:${secondDraw.item.channel}`)
+        console.log(a(`- cypress run --browser ${secondDraw.item.name}:${secondDraw.item.channel}`))
       }
     }
   }
