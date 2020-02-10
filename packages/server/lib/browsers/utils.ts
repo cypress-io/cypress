@@ -22,7 +22,7 @@ const getBrowserPath = (browser) => {
   // TODO need to check if browser.name is an unempty string
   return path.join(
     PATH_TO_BROWSERS,
-    `${browser.name}`
+    `${browser.name}-${browser.channel}`
   )
 }
 
