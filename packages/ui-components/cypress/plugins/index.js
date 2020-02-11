@@ -12,6 +12,10 @@ const webpackOptions = {
         use: {
           loader: require.resolve('babel-loader'),
           options: {
+            plugins: [
+              [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
+              [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+            ],
             presets: [
               require.resolve('@babel/preset-env'),
               require.resolve('@babel/preset-react'),
