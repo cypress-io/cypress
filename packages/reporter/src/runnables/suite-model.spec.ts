@@ -1,5 +1,3 @@
-import { expect } from 'chai'
-
 import Suite from './suite-model'
 import TestModel from '../test/test-model'
 

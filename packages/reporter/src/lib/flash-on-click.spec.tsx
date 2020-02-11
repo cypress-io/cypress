@@ -1,7 +1,6 @@
 import { shallow, ShallowWrapper } from 'enzyme'
 import React from 'react'
 import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
-import { expect } from 'chai'
 
 import FlashOnClick from './flash-on-click'
 

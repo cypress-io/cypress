@@ -1,5 +1,4 @@
 import sinon, { SinonSpy, SinonStub } from 'sinon'
-import { expect } from 'chai'
 
 import events from './events'
 import { AppState } from './app-state'

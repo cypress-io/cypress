@@ -1,5 +1,5 @@
 import sinon from 'sinon'
-import { expect } from 'chai'
+
 import Hook from './hook-model'
 
 import CommandModel from '../commands/command-model'

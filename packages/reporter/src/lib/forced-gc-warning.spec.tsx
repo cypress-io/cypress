@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { shallow, ShallowWrapper } from 'enzyme'
 import React from 'react'
 import sinon, { SinonStub } from 'sinon'
-import { expect } from 'chai'
 
 import ForcedGcWarning, { Props } from './forced-gc-warning'
 import { Events } from './events'

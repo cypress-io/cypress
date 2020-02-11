@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react'
 import { shallow } from 'enzyme'
 import sinon, { SinonSpy } from 'sinon'
-import { expect } from 'chai'
 
 import appState from '../lib/app-state'
 

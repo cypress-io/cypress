@@ -1,5 +1,4 @@
 import appState, { AppState } from './app-state'
-import { expect } from 'chai'
 
 describe('app state', () => {
   it('exports singleton by default', () => {

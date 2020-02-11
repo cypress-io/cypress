@@ -2,7 +2,6 @@ import _ from 'lodash'
 import { shallow } from 'enzyme'
 import React from 'react'
 import sinon, { SinonSpy } from 'sinon'
-import { expect } from 'chai'
 
 import { Reporter, ReporterProps } from './main'
 import Header from './header/header'

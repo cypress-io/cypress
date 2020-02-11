@@ -1,7 +1,6 @@
 import { shallow } from 'enzyme'
 import _ from 'lodash'
 import React from 'react'
-import { expect } from 'chai'
 
 import HookModel from './hook-model'
 import Hooks, { Hook, HookHeader, HooksModel } from './hooks'

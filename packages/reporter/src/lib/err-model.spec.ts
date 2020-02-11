@@ -1,5 +1,3 @@
-import { expect } from 'chai'
-
 import Err from './err-model'
 
 describe('Err model', () => {

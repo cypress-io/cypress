@@ -2,7 +2,6 @@ import _ from 'lodash'
 import React from 'react'
 import { mount, shallow, ReactWrapper } from 'enzyme'
 import sinon, { SinonSpy } from 'sinon'
-import { expect } from 'chai'
 
 import Hooks from '../hooks/hooks'
 

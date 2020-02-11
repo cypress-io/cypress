@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import sinon, { SinonFakeTimers } from 'sinon'
-import { expect } from 'chai'
 
 import CommandModel, { CommandProps as CommandModelProps } from './command-model'
 

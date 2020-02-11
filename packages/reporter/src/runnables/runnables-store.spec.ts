@@ -1,5 +1,4 @@
 import sinon, { SinonSpy } from 'sinon'
-import { expect } from 'chai'
 
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from './runnables-store'
 import SuiteModel, { SuiteProps } from './suite-model'

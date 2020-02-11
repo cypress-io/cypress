@@ -2,7 +2,6 @@ import { shallow, ShallowWrapper } from 'enzyme'
 import _ from 'lodash'
 import React from 'react'
 import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
-import { expect } from 'chai'
 
 import Command, { Message } from './command'
 import CommandModel from './command-model'

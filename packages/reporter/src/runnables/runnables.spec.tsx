@@ -2,7 +2,6 @@ import _ from 'lodash'
 import React from 'react'
 import { mount, shallow } from 'enzyme'
 import sinon, { SinonSpy } from 'sinon'
-import { expect } from 'chai'
 
 import Runnables, { RunnablesList } from './runnables'
 import AnError from '../errors/an-error'

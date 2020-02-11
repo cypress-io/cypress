@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
-import { expect } from 'chai'
 
 import Agents, { Agent, AgentsList, AgentsModel } from './agents'
 import AgentModel from './agent-model'
