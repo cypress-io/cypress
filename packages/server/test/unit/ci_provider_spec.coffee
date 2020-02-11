@@ -402,6 +402,9 @@ describe "lib/util/ci_provider", ->
       githubAction: "ciGitHubActionId"
       githubEventName: "ciEventName"
       githubWorkflow: "ciGitHubWorkflowName"
+      githubRepository: "ciGithubRepository"
+      githubRunId: "ciGithubRunId"
+      githubRunNumber: "ciGithubRunNumber"
     })
     expectsCommitParams({
       sha: "ciCommitSha"
