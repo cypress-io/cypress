@@ -213,7 +213,7 @@ const _providerCiParams = () => {
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
-      // pipeline is common among all jobs
+    // pipeline is common among all jobs
       'CI_PIPELINE_ID',
       'CI_PIPELINE_URL',
       // individual jobs
@@ -227,7 +227,7 @@ const _providerCiParams = () => {
       'CI_PROJECT_URL',
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
-      // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
+    // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
     goCD: extract([
@@ -296,7 +296,7 @@ const _providerCiParams = () => {
     ]),
     // see http://docs.shippable.com/ci/env-vars/
     shippable: extract([
-      // build variables
+    // build variables
       'SHIPPABLE_BUILD_ID', // "5b93354cabfabb07007f01fd"
       'SHIPPABLE_BUILD_NUMBER', // "4"
       'SHIPPABLE_COMMIT_RANGE', // "sha1...sha2"
@@ -519,11 +519,11 @@ const omitUndefined = (ret) => {
 
 const _get = (fn) => {
   return _
-    .chain(fn())
-    .get(provider())
-    .thru(omitUndefined)
-    .defaultTo(null)
-    .value()
+  .chain(fn())
+  .get(provider())
+  .thru(omitUndefined)
+  .defaultTo(null)
+  .value()
 }
 
 const ciParams = () => {
@@ -574,10 +574,10 @@ const list = () => {
 // that we can extract ciBuildId from
 const detectableCiBuildIdProviders = () => {
   return _
-    .chain(_providerCiParams())
-    .omitBy(_.isNull)
-    .keys()
-    .value()
+  .chain(_providerCiParams())
+  .omitBy(_.isNull)
+  .keys()
+  .value()
 }
 
 module.exports = {
