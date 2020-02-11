@@ -1,12 +1,13 @@
-/* global chrome */
 const map = require('lodash/map')
 const pick = require('lodash/pick')
 const once = require('lodash/once')
 const Promise = require('bluebird')
+const browser = require('webextension-polyfill')
 const client = require('./client')
+const { getCookieUrl } = require('../lib/util')
 
-const COOKIE_PROPS = ['url', 'name', 'domain', 'path', 'secure', 'storeId']
-const GET_ALL_PROPS = COOKIE_PROPS.concat(['session'])
+const COOKIE_PROPS = ['url', 'name', 'path', 'secure', 'domain']
+const GET_ALL_PROPS = COOKIE_PROPS.concat(['session', 'storeId'])
 const SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
 
 const httpRe = /^http/
@@ -18,7 +19,7 @@ const firstOrNull = (cookies) => {
 
 const connect = function (host, path) {
   const listenToCookieChanges = once(() => {
-    return chrome.cookies.onChanged.addListener((info) => {
+    return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {
         return ws.emit('automation:push:request', 'change:cookie', info)
       }
@@ -82,28 +83,26 @@ const connect = function (host, path) {
 const automation = {
   connect,
 
-  getUrl (cookie = {}) {
-    const prefix = cookie.secure ? 'https://' : 'http://'
-
-    return prefix + cookie.domain + cookie.path
-  },
+  getUrl: getCookieUrl,
 
   clear (filter = {}) {
     const clear = (cookie) => {
-      return new Promise((resolve, reject) => {
-        const url = this.getUrl(cookie)
-        const props = { url, name: cookie.name }
+      const url = this.getUrl(cookie)
+      const props = { url, name: cookie.name }
 
-        return chrome.cookies.remove(props, (details) => {
-          if (details) {
-            return resolve(cookie)
-          }
+      const throwError = function (err) {
+        throw (err != null ? err : new Error(`Removing cookie failed for: ${JSON.stringify(props)}`))
+      }
 
-          const err = new Error(`Removing cookie failed for: ${JSON.stringify(props)}`)
+      return Promise.try(() => {
+        return browser.cookies.remove(props)
+      }).then((details) => {
+        if (details) {
+          return cookie
+        }
 
-          return reject(chrome.runtime.lastError != null ? chrome.runtime.lastError : err)
-        })
-      })
+        return throwError()
+      }).catch(throwError)
     }
 
     return this.getAll(filter)
@@ -112,13 +111,10 @@ const automation = {
 
   getAll (filter = {}) {
     filter = pick(filter, GET_ALL_PROPS)
-    const get = () => {
-      return new Promise((resolve) => {
-        return chrome.cookies.getAll(filter, resolve)
-      })
-    }
 
-    return get()
+    return Promise.try(() => {
+      return browser.cookies.getAll(filter)
+    })
   },
 
   getCookies (filter, fn) {
@@ -133,35 +129,28 @@ const automation = {
   },
 
   setCookie (props = {}, fn) {
-    const set = () => {
-      return new Promise((resolve, reject) => {
-        // only get the url if its not already set
-        if (props.url == null) {
-          props.url = this.getUrl(props)
-        }
-
-        props = pick(props, SET_PROPS)
-
-        return chrome.cookies.set(props, (details) => {
-          if (details) {
-            return resolve(details)
-          }
-
-          let err = chrome.runtime.lastError
-
-          if (err) {
-            return reject(err)
-          }
-
-          // the cookie callback could be null such as the
-          // case when expirationDate is before now
-          return resolve(null)
-        })
-      })
+    // only get the url if its not already set
+    if (props.url == null) {
+      props.url = this.getUrl(props)
     }
 
-    return set()
-    .then(fn)
+    if (props.hostOnly) {
+      delete props.domain
+    }
+
+    if (props.domain === 'localhost') {
+      delete props.domain
+    }
+
+    props = pick(props, SET_PROPS)
+
+    return Promise.try(() => {
+      return browser.cookies.set(props)
+      // the cookie callback could be null such as the
+      // case when expirationDate is before now
+    }).then((details) => {
+      return fn(details || null)
+    })
   },
 
   clearCookie (filter, fn) {
@@ -182,36 +171,29 @@ const automation = {
     // TODO: if we REALLY want to be nice its possible we can
     // figure out the exact window that's running Cypress but
     // that's too much work with too little value at the moment
-    return chrome.windows.getCurrent((window) => {
-      return chrome.windows.update(window.id, { focused: true }, () => {
-        return fn()
-      })
-    })
+    return Promise.try(() => {
+      return browser.windows.getCurrent()
+    }).then((window) => {
+      return browser.windows.update(window.id, { focused: true })
+    }).then(fn)
   },
 
   query (data) {
     const code = `var s; (s = document.getElementById('${data.element}')) && s.textContent`
 
-    const query = () => {
-      return new Promise((resolve) => {
-        return chrome.tabs.query({ windowType: 'normal' }, resolve)
-      })
-    }
-
     const queryTab = (tab) => {
-      return new Promise((resolve, reject) => {
-        return chrome.tabs.executeScript(tab.id, { code }, (result) => {
-          if (result && (result[0] === data.string)) {
-            return resolve()
-          }
-
-          return reject(new Error)
-        })
+      return Promise.try(() => {
+        return browser.tabs.executeScript(tab.id, { code })
+      }).then((results) => {
+        if (!results || (results[0] !== data.string)) {
+          throw new Error('Executed script did not return result')
+        }
       })
     }
 
-    return query()
-    .filter((tab) => {
+    return Promise.try(() => {
+      return browser.tabs.query({ windowType: 'normal' })
+    }).filter((tab) => {
       // the tab's url must begin with
       // http or https so that we filter out
       // about:blank and chrome:// urls
@@ -229,25 +211,19 @@ const automation = {
   },
 
   lastFocusedWindow () {
-    return new Promise((resolve) => {
-      return chrome.windows.getLastFocused(resolve)
+    return Promise.try(() => {
+      return browser.windows.getLastFocused()
     })
   },
 
   takeScreenshot (fn) {
     return this.lastFocusedWindow()
     .then((win) => {
-      return new Promise((resolve, reject) => {
-        return chrome.tabs.captureVisibleTab(win.id, { format: 'png' }, (dataUrl) => {
-          if (dataUrl) {
-            return resolve(dataUrl)
-          }
-
-          return reject(chrome.runtime.lastError)
-        })
-      })
-    }).then(fn)
+      return browser.tabs.captureVisibleTab(win.id, { format: 'png' })
+    })
+    .then(fn)
   },
+
 }
 
 module.exports = automation

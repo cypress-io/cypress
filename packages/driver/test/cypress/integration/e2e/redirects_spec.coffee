@@ -34,7 +34,7 @@ describe "redirection", ->
           expect(@logs[2].get("name")).to.eq("page load")
           expect(@logs[3].get("name")).to.eq("new url")
 
-  ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973
+  ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973 (chrome76+ and firefox)
   context.skip "javascript", ->
     it "binds to the new page after a timeout", ->
       cy
@@ -61,3 +61,4 @@ describe "redirection", ->
           expect(@logs[1].get("name")).to.eq("get")
           expect(@logs[2].get("name")).to.eq("page load")
           expect(@logs[3].get("name")).to.eq("new url")
+  null

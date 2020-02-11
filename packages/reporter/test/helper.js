@@ -1,4 +1,4 @@
-import { returnMockRequire, register } from '@packages/web-config/node-jsdom-setup'
+import { register } from '@packages/web-config/node-jsdom-setup'
 
 register({
   enzyme: require('enzyme'),
@@ -7,15 +7,6 @@ register({
 })
 
 const sinon = require('sinon')
-const driver = returnMockRequire('@packages/driver')
-const io = returnMockRequire('@packages/socket/lib/browser', { client: {} })
-
-io.client.connect = sinon.stub().returns({ emit: () => {}, on: () => {} })
-
-beforeEach(() => {
-  driver.$ = sinon.stub().throws('$ called without being stubbed')
-  io.connect = sinon.stub().throws('connect called without being stubbed')
-})
 
 afterEach(() => {
   sinon.restore()

@@ -3,6 +3,7 @@
 const { includeTypes } = require('./utils')
 const shell = require('shelljs')
 const { join } = require('path')
+const resolvePkg = require('resolve-pkg')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -15,7 +16,7 @@ shell.set('-e') // any error is fatal
 // because they can conflict with user's own libraries
 
 includeTypes.forEach((folder) => {
-  const source = join('node_modules', '@types', folder)
+  const source = resolvePkg(`@types/${folder}`, { cwd: join(__dirname, '..', '..') })
 
   shell.cp('-R', source, 'types')
 })

@@ -345,6 +345,16 @@ describe "src/cy/commands/connectors", ->
 
           cy.noop([_.noop, fn]).invoke(1).should('be.true')
 
+        it "works with 0 as a value if object has property 0", ->
+          i = 0
+          fn = ->
+            if i++ is 0 then "cy.noop is undocumented"
+            else "and I don't understand what it is"
+
+          cy.wrap([fn, "bar"]).invoke(0).should("eq", "cy.noop is undocumented")
+          cy.wrap({"0": fn}).invoke(0).should("eq", "and I don't understand what it is")
+
+
         it "forwards any additional arguments", ->
           cy.noop(@obj).invoke("bar", 1, 2).then (num) ->
             expect(num).to.eq 3
@@ -813,6 +823,11 @@ describe "src/cy/commands/connectors", ->
       it "works with numerical indexes", ->
         cy.wrap(['foo', 'bar']).its(1).should('eq', 'bar')
 
+      it "works with 0 as a value if object has property 0", ->
+        cy.wrap(["foo", "bar"]).its(0).should("eq", "foo")
+        cy.wrap({"0": "whoa"}).its(0).should("eq", "whoa")
+        cy.wrap([###empty###, "spooky"]).its(0).should("not.exist")
+
       it "reduces into dot separated values", ->
         obj = {
           foo: {
@@ -855,7 +870,7 @@ describe "src/cy/commands/connectors", ->
           foo:  -> throw err
         }
 
-        cy.wrap(obj).its("foo").should("throw", err)
+        cy.wrap(obj).its("foo").should("throw", "nope cant access me")
 
       it "returns property", ->
         cy.noop({baz: "baz"}).its("baz").then (num) ->

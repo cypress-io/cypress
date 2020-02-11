@@ -44,13 +44,11 @@ describe "e2e cache", ->
     e2e.exec(@, {
       spec: "cache_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     })
 
   it "clears cache when browser is spawned", ->
     e2e.exec(@, {
       spec: "cache_clearing_spec.coffee"
-      expectedExitCode: 0
     })
     .then =>
       ## only 1 request should have gone out
@@ -58,7 +56,6 @@ describe "e2e cache", ->
 
       e2e.exec(@, {
         spec: "cache_clearing_spec.coffee"
-        expectedExitCode: 0
       })
       .then ->
         ## and after the cache is cleaned before

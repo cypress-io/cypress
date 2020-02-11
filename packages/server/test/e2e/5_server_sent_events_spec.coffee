@@ -59,5 +59,4 @@ describe "e2e server sent events", ->
   e2e.it "passes", {
     spec: "server_sent_events_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }

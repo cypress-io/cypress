@@ -6,7 +6,7 @@
     {
       "name": "chrome",
       "displayName": "Chrome",
-      "family": "chrome",
+      "family": "chromium",
       "version": "78.0.3904.108",
       "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       "majorVersion": "78"
@@ -14,26 +14,59 @@
     {
       "name": "chromium",
       "displayName": "Chromium",
-      "family": "chrome",
+      "family": "chromium",
       "version": "74.0.3729.0",
       "path": "/Applications/Chromium.app/Contents/MacOS/Chromium",
       "majorVersion": "74"
     },
     {
-      "name": "canary",
+      "name": "chrome",
       "displayName": "Canary",
-      "family": "chrome",
+      "family": "chromium",
       "version": "80.0.3977.4",
       "path": "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
       "majorVersion": "80"
     },
     {
+      "name": "edge",
+      "displayName": "Edge",
+      "family": "chromium",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      "majorVersion": "79"
+    },
+    {
+      "name": "edge",
+      "displayName": "Edge Beta",
+      "family": "chromium",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta",
+      "majorVersion": "79"
+    },
+    {
+      "name": "edge",
+      "displayName": "Edge Canary",
+      "family": "chromium",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary",
+      "majorVersion": "79"
+    },
+    {
+      "name": "edge",
+      "displayName": "Edge Dev",
+      "family": "chromium",
+      "version": "79.0.309.71",
+      "path": "/Applications/Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev",
+      "majorVersion": "79"
+    },
+    {
       "name": "electron",
       "displayName": "Electron",
-      "family": "electron",
+      "family": "chromium",
       "version": "73.0.3683.121",
       "path": "",
-      "majorVersion": "73"
+      "majorVersion": "73",
+      "info": "Info about electron browser"
     },
     {
       "name": "firefox",
@@ -42,6 +75,31 @@
       "version": "69.0.1",
       "path": "/Applications/Firefox/Contents/MacOS/Firefox",
       "majorVersion": "69"
+    },
+    {
+      "name": "firefox",
+      "displayName": "Firefox Developer Edition",
+      "family": "firefox",
+      "version": "69.0.1",
+      "path": "/Applications/Firefox Developer/Contents/MacOS/Firefox Developer",
+      "majorVersion": "69"
+    },
+    {
+      "name": "firefox",
+      "displayName": "Firefox Nightly",
+      "family": "firefox",
+      "version": "69.0.1",
+      "path": "/Applications/Firefox Nightly/Contents/MacOS/Firefox Nightly",
+      "majorVersion": "69"
+    },
+
+    {
+      "name": "custom",
+      "displayName": "Custom",
+      "family": "custom",
+      "version": "4.3.2",
+      "path": "/Applications/Custom/Contents/MacOS/Custom",
+      "majorVersion": "4"
     }
   ],
   "clientRoute": "/__/",
@@ -201,7 +259,7 @@
         {
           "name": "chrome",
           "displayName": "Chrome",
-          "family": "chrome",
+          "family": "chromium",
           "version": "50.0.2661.86",
           "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
           "majorVersion": "50"
@@ -209,22 +267,22 @@
         {
           "name": "chromium",
           "displayName": "Chromium",
-          "family": "chrome",
+          "family": "chromium",
           "version": "49.0.2609.0",
           "path": "/Users/bmann/Downloads/chrome-mac/Chromium.app/Contents/MacOS/Chromium",
           "majorVersion": "49"
         },
         {
-          "name": "canary",
+          "name": "chrome",
           "displayName": "Canary",
-          "family": "chrome",
+          "family": "chromium",
           "version": "48.0",
           "path": "/Users/bmann/Downloads/chrome-mac/Canary.app/Contents/MacOS/Canary",
           "majorVersion": "48"
         },
         {
           "name": "electron",
-          "family": "electron",
+          "family": "chromium",
           "displayName": "Electron",
           "path": "",
           "version": "99.101.1234",

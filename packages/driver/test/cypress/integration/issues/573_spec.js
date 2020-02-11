@@ -5,7 +5,9 @@ const run = () => {
       const i = win.document.createElement('iframe')
 
       i.onload = resolve
-      i.src = '/basic_auth'
+      // ?foo is necessary for firefox b/c it won't load a nested
+      // iframe with an identical url
+      i.src = '/basic_auth?foo'
 
       return win.document.body.appendChild(i)
     })
