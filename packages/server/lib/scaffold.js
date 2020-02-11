@@ -111,6 +111,12 @@ const isNewProject = (integrationFolder) => {
   })
 }
 
+const { optionInfo } = require('./modes/init/options')
+
+const isDefault2 = (config, option) => {
+  return config[option] === undefined || config[option] === optionInfo[2][option]
+}
+
 module.exports = {
   isNewProject,
 
@@ -118,13 +124,21 @@ module.exports = {
     return exampleFolderName
   },
 
-  integration (folder, config) {
-    debug(`integration folder ${folder}`)
-
+  integration (projRoot, config) {
     // skip if user has explicitly set integrationFolder
-    if (!isDefault(config, 'integrationFolder')) {
+    if (!isDefault2(config, 'integrationFolder')) {
       return Promise.resolve()
     }
+
+    const folder = path.join(
+      projRoot,
+      config.integrationFolder ||
+        _.find(optionInfo[2].options, { name: 'integrationFolder' }).default
+    )
+
+    config.integrationFolder = folder
+
+    debug(`integration folder ${folder}`)
 
     return this.verifyScaffolding(folder, () => {
       debug(`copying examples into ${folder}`)

@@ -263,8 +263,8 @@ module.exports = {
 
       case 'init':
         return require('./modes/init').prompt(options)
-        .get(exit)
-        .catch(exitErr)
+        //.get(exit)
+        //.catch(exitErr)
 
       case 'openProject':
         // open + start the project

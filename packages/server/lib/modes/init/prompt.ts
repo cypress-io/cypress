@@ -1,10 +1,12 @@
 import _ from 'lodash'
 import prompts from 'prompts'
 import path from 'path'
+import Promise from 'bluebird'
 
 import { optionInfo } from './options'
 import fs from '../../util/fs'
 import { Config } from './config'
+import scaffold from '../../scaffold'
 
 export const prompt = async (options: any) => {
   const { customize } = await prompts({
@@ -13,10 +15,14 @@ export const prompt = async (options: any) => {
     message: 'Customize settings?',
   })
 
-  let config: Config = {}
+  let config: Config = {
+    projectRoot: options.cwd,
+  }
 
   if (customize) {
-    config = await configPrompts(optionInfo)
+    let obj = await configPrompts(optionInfo)
+
+    config = Object.assign({}, config, obj)
   }
 
   const { useTypeScript } = await prompts({
@@ -45,7 +51,7 @@ export const prompt = async (options: any) => {
   })
 
   const configStr = JSON.stringify(config, null, 2)
-  const configPath = `${options.cwd}/cypress.json`
+  const configPath = `${config.projectRoot}/cypress.json`
 
   log('')
   log('About to do these things:')
@@ -65,7 +71,7 @@ export const prompt = async (options: any) => {
     await fs.writeFile(configPath, configStr)
     log(`cypress.json generated at ${configPath}`)
 
-    await generateDirsAndFiles(options.cwd, config)
+    await generateDirsAndFiles(config)
   }
 }
 
@@ -183,18 +189,9 @@ const log = (text: string) => {
   console.log(text)
 }
 
-const generateDirsAndFiles = async (projectDir: string, config: Config) => {
-  const {
-    fixturesFolder,
-    integrationFolder,
-    pluginsFile,
-    screenshotsFolder,
-    supportFile,
-    video,
-    videosFolder,
-  } = config
+const genFixture = async (projectDir: string, config: Config) => {
+  const fixturesFolder = config.fixturesFolder
 
-  // fixturesFolder
   if (fixturesFolder !== false) {
     const dir = path.join(
       projectDir,
@@ -202,10 +199,19 @@ const generateDirsAndFiles = async (projectDir: string, config: Config) => {
         _.find(optionInfo[2].options, { name: 'fixturesFolder' })!.default
     )
 
-    await fs.ensureDir(dir)
+    await scaffold.fixture2(dir, config)
     log(`fixtures folder generated at ${dir}`)
   }
+}
 
+const generateDirsAndFiles = async (config: Config) => {
+  const {
+    integrationFolder,
+    pluginsFile,
+    supportFile,
+    projectRoot: projectDir,
+  } = config
+  /*
   // integrationFolder
   const integrationDir = path.join(
     projectDir,
@@ -228,16 +234,6 @@ const generateDirsAndFiles = async (projectDir: string, config: Config) => {
     log(`plugins file generated at ${file}`)
   }
 
-  // screenshotsDir
-  const screenshotsDir = path.join(
-    projectDir,
-    screenshotsFolder ||
-      _.find(optionInfo[2].options, { name: 'screenshotsFolder' })!.default
-  )
-
-  await fs.ensureDir(screenshotsDir)
-  log(`screenshots folder generated at ${screenshotsDir}`)
-
   // supportFile
   if (supportFile !== false) {
     const file = path.join(
@@ -248,17 +244,24 @@ const generateDirsAndFiles = async (projectDir: string, config: Config) => {
 
     await fs.ensureFile(file) // change it to scaffold.js
     log(`support file generated at ${file}`)
-  }
+  }*/
 
-  // videosFolder
-  if (video !== false) {
-    const dir = path.join(
-      projectDir,
-      videosFolder ||
-        _.find(optionInfo[2].options, { name: 'videosFolder' })!.default
-    )
+  // const integrationDir = path.join(
+  //   projectDir,
+  //   integrationFolder ||
+  //     _.find(optionInfo[2].options, { name: 'integrationFolder' })!.default
+  // )
 
-    await fs.ensureDir(dir)
-    log(`videos folder generated at ${dir}`)
-  }
+  // config.integrationFolder = integrationDir
+
+  // await genFixture(projectDir, config)
+  await scaffold.integration(projectDir, config)
+
+  // await Promise.all([
+  //   scaffold.integration(projectDir, config),
+  //   scaffold.plugins(projectDir, config),
+  //   scaffold.support(projectDir, config),
+  // ])
+
+  log(`Cypress scaffolding finished`)
 }
