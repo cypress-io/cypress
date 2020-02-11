@@ -4,17 +4,13 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "https": "node https.js",
-    "prestart": "npm run check-deps-pre",
     "start": "node index.js",
-    "pretest": "npm run check-deps-pre",
-    "test": "cross-env NODE_ENV=test bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-debug": "cross-env NODE_ENV=test bin-up mocha --inspect-brk --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "pretest-watch": "npm run check-deps-pre",
-    "test-watch": "cross-env NODE_ENV=test bin-up mocha --watch"
+    "test": "yarn test-unit",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -27,9 +23,12 @@
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "bin-up": "1.2.2",
+    "@packages/coffee": "*",
+    "@packages/network": "*",
+    "@packages/ts": "*",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
+    "mocha": "3.5.3",
     "request": "2.88.0",
     "request-promise": "4.2.4",
     "sinon": "1.17.7",

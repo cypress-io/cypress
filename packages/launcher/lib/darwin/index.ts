@@ -1,113 +1,100 @@
-import { findApp } from './util'
-import { FoundBrowser, Browser } from '../types'
+import { findApp, FindAppParams } from './util'
+import { Browser, DetectedBrowser } from '../types'
 import * as linuxHelper from '../linux'
 import { log } from '../log'
-import { merge, partial } from 'ramda'
+import { merge } from 'ramda'
 import { get } from 'lodash'
-
-const detectCanary = partial(findApp, [
-  'Google Chrome Canary.app',
-  'Contents/MacOS/Google Chrome Canary',
-  'com.google.Chrome.canary',
-  'KSVersion',
-])
-const detectChrome = partial(findApp, [
-  'Google Chrome.app',
-  'Contents/MacOS/Google Chrome',
-  'com.google.Chrome',
-  'KSVersion',
-])
-const detectChromium = partial(findApp, [
-  'Chromium.app',
-  'Contents/MacOS/Chromium',
-  'org.chromium.Chromium',
-  'CFBundleShortVersionString',
-])
-const detectFirefox = partial(findApp, [
-  'Firefox.app',
-  'Contents/MacOS/firefox-bin',
-  'org.mozilla.firefox',
-  'CFBundleShortVersionString',
-])
-const detectFirefoxDeveloperEdition = partial(findApp, [
-  'Firefox Developer Edition.app',
-  'Contents/MacOS/firefox-bin',
-  'org.mozilla.firefoxdeveloperedition',
-  'CFBundleShortVersionString',
-])
-const detectFirefoxNightly = partial(findApp, [
-  'Firefox Nightly.app',
-  'Contents/MacOS/firefox-bin',
-  'org.mozilla.nightly',
-  'CFBundleShortVersionString',
-])
-const detectEdgeCanary = partial(findApp, [
-  'Microsoft Edge Canary.app',
-  'Contents/MacOS/Microsoft Edge Canary',
-  'com.microsoft.Edge.Canary',
-  'CFBundleShortVersionString',
-])
-const detectEdgeBeta = partial(findApp, [
-  'Microsoft Edge Beta.app',
-  'Contents/MacOS/Microsoft Edge Beta',
-  'com.microsoft.Edge.Beta',
-  'CFBundleShortVersionString',
-])
-const detectEdgeDev = partial(findApp, [
-  'Microsoft Edge Dev.app',
-  'Contents/MacOS/Microsoft Edge Dev',
-  'com.microsoft.Edge.Dev',
-  'CFBundleShortVersionString',
-])
-const detectEdge = partial(findApp, [
-  'Microsoft Edge.app',
-  'Contents/MacOS/Microsoft Edge',
-  'com.microsoft.Edge',
-  'CFBundleShortVersionString',
-])
 
 type Detectors = {
   [name: string]: {
-    [channel: string]: Function
+    [channel: string]: FindAppParams
   }
 }
 
-const browsers: Detectors = {
+export const browsers: Detectors = {
   chrome: {
-    stable: detectChrome,
-    canary: detectCanary,
+    stable: {
+      appName: 'Google Chrome.app',
+      executable: 'Contents/MacOS/Google Chrome',
+      appId: 'com.google.Chrome',
+      versionProperty: 'KSVersion',
+    },
+    canary: {
+      appName: 'Google Chrome Canary.app',
+      executable: 'Contents/MacOS/Google Chrome Canary',
+      appId: 'com.google.Chrome.canary',
+      versionProperty: 'KSVersion',
+    },
   },
   chromium: {
-    stable: detectChromium,
+    stable: {
+      appName: 'Chromium.app',
+      executable: 'Contents/MacOS/Chromium',
+      appId: 'org.chromium.Chromium',
+      versionProperty: 'CFBundleShortVersionString',
+    },
   },
   firefox: {
-    stable: detectFirefox,
-    dev: detectFirefoxDeveloperEdition,
-    nightly: detectFirefoxNightly,
+    stable: {
+      appName: 'Firefox.app',
+      executable: 'Contents/MacOS/firefox-bin',
+      appId: 'org.mozilla.firefox',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+    dev: {
+      appName: 'Firefox Developer Edition.app',
+      executable: 'Contents/MacOS/firefox-bin',
+      appId: 'org.mozilla.firefoxdeveloperedition',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+    nightly: {
+      appName: 'Firefox Nightly.app',
+      executable: 'Contents/MacOS/firefox-bin',
+      appId: 'org.mozilla.nightly',
+      versionProperty: 'CFBundleShortVersionString',
+    },
   },
   edge: {
-    stable: detectEdge,
-    canary: detectEdgeCanary,
-    beta: detectEdgeBeta,
-    dev: detectEdgeDev,
+    stable: {
+      appName: 'Microsoft Edge.app',
+      executable: 'Contents/MacOS/Microsoft Edge',
+      appId: 'com.microsoft.Edge',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+    canary: {
+      appName: 'Microsoft Edge Canary.app',
+      executable: 'Contents/MacOS/Microsoft Edge Canary',
+      appId: 'com.microsoft.Edge.Canary',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+    beta: {
+      appName: 'Microsoft Edge Beta.app',
+      executable: 'Contents/MacOS/Microsoft Edge Beta',
+      appId: 'com.microsoft.Edge.Beta',
+      versionProperty: 'CFBundleShortVersionString',
+    },
+    dev: {
+      appName: 'Microsoft Edge Dev.app',
+      executable: 'Contents/MacOS/Microsoft Edge Dev',
+      appId: 'com.microsoft.Edge.Dev',
+      versionProperty: 'CFBundleShortVersionString',
+    },
   },
 }
 
-export function getVersionString (path: string) {
-  return linuxHelper.getVersionString(path)
-}
+export const getVersionString = linuxHelper.getVersionString
 
-export function detect (browser: Browser): Promise<FoundBrowser> {
-  let fn = get(browsers, [browser.name, browser.channel])
+export function detect (browser: Browser): Promise<DetectedBrowser> {
+  let findAppParams = get(browsers, [browser.name, browser.channel])
 
-  if (!fn) {
+  if (!findAppParams) {
     // ok, maybe it is custom alias?
     log('detecting custom browser %s on darwin', browser.name)
 
     return linuxHelper.detect(browser)
   }
 
-  return fn()
+  return findApp(findAppParams)
   .then(merge({ name: browser.name }))
   .catch(() => {
     log('could not detect %s using traditional Mac methods', browser.name)

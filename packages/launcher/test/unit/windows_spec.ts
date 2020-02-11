@@ -1,9 +1,10 @@
 import _ from 'lodash'
-import * as windowsHelper from '../../../lib/windows'
+import { expect } from 'chai'
+import * as windowsHelper from '../../lib/windows'
 import { normalize } from 'path'
 import execa from 'execa'
 import sinon, { SinonStub } from 'sinon'
-import { browsers } from '../../../lib/browsers'
+import { browsers } from '../../lib/browsers'
 import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import os from 'os'
@@ -28,10 +29,6 @@ describe('windows browser detection', () => {
     sinon.stub(fse, 'pathExists').resolves(false)
     sinon.stub(os, 'homedir').returns(HOMEDIR)
     sinon.stub(execa, 'stdout').resolves('')
-  })
-
-  afterEach(() => {
-    execa.stdout.restore()
   })
 
   it('detects browsers as expected', async () => {
@@ -66,5 +63,23 @@ describe('windows browser detection', () => {
     }))
 
     snapshot(detected)
+  })
+
+  context('#getVersionString', () => {
+    it('runs wmic and returns output', async () => {
+      stubBrowser('foo', 'bar')
+
+      expect(await windowsHelper.getVersionString('foo')).to.eq('Version=bar')
+    })
+
+    it('rejects with errors', async () => {
+      const err = new Error()
+
+      ;(execa.stdout as SinonStub)
+      .withArgs('wmic', ['datafile', 'where', 'name="foo"', 'get', 'Version', '/value'])
+      .rejects(err)
+
+      await expect(windowsHelper.getVersionString('foo')).to.be.rejectedWith(err)
+    })
   })
 })
