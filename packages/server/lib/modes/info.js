@@ -30,7 +30,7 @@ const pickRandomItem = (list) => {
     }
   }
 
-  const item = list[_.random(0, list.length - 1, false)]
+  const item = _.sample(list)
   const remaining = _.without(list, item)
 
   return {
