@@ -1,3 +1,5 @@
+require("@percy/cypress")
+
 BluebirdPromise = require("bluebird")
 
 beforeEach ->

@@ -67,6 +67,7 @@ describe('Settings', () => {
       cy.contains('Your project\'s configuration is displayed').should('not.exist')
       cy.contains('Record Keys allow you to').should('not.exist')
       cy.contains(this.config.projectId).should('not.exist')
+      cy.percySnapshot()
     })
 
     describe('when config panel is opened', () => {
