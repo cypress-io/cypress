@@ -202,14 +202,6 @@
   .dropdown-menu {
     left: auto;
     right: 0;
-
-    .browser-beta {
-      font-size: 12px;
-      top: -5px;
-      position: relative;
-      margin-left: 4px;
-      color: #d8a10b;
-    }
   }
 }
 
@@ -238,6 +230,14 @@
     fill: #ececec;
     stroke: #c7c7c7;
   }
+}
+
+.dropdown .browser-beta {
+  font-size: 12px;
+  top: -5px;
+  position: relative;
+  margin-left: 4px;
+  color: #d8a10b;
 }
 
 .close-browser {
