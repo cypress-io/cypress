@@ -4,6 +4,7 @@ const Fixtures = require('../support/helpers/fixtures')
 
 const browser = {
   name: 'chrome',
+  channel: 'stable',
 }
 const isTextTerminal = true // we're always in run mode
 const PATH_TO_CHROME_PROFILE = browserUtils.getProfileDir(browser, isTextTerminal)

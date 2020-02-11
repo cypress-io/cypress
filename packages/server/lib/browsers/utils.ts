@@ -21,7 +21,7 @@ const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
 const getBrowserPath = (browser) => {
   return path.join(
     PATH_TO_BROWSERS,
-    `${browser.name}`
+    `${browser.name}-${browser.channel}`
   )
 }
 

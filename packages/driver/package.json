@@ -3,16 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "cd node_modules/parse-domain && npm run postinstall",
-    "build-prod": "npm run build",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project ./test",
     "cypress:run": "node ../../scripts/cypress run --project ./test",
     "postinstall": "npx patch-package",
-    "prestart": "npm run check-deps-pre",
-    "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee"
+    "start": "$(yarn bin coffee) test/support/server.coffee"
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
@@ -21,6 +16,9 @@
     "@cypress/unique-selector": "0.4.2",
     "@cypress/webpack-preprocessor": "4.1.1",
     "@cypress/what-is-circular": "1.0.1",
+    "@packages/coffee": "*",
+    "@packages/runner": "*",
+    "@packages/ts": "*",
     "angular": "1.7.9",
     "backbone": "1.4.0",
     "basic-auth": "2.0.1",
