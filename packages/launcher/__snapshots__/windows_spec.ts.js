@@ -11,8 +11,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
       "chrome",
       "google-chrome-stable"
     ],
+    "path": "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
     "version": "1.2.3",
-    "path": "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
+    "findAppParams": {
+      "appName": "Google Chrome.app",
+      "executable": "Contents/MacOS/Google Chrome",
+      "appId": "com.google.Chrome",
+      "versionProperty": "KSVersion"
+    }
   },
   {
     "name": "chromium",
@@ -25,8 +31,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
       "chromium-browser",
       "chromium"
     ],
+    "path": "C:/Program Files (x86)/Google/chrome-win32/chrome.exe",
     "version": "2.3.4",
-    "path": "C:/Program Files (x86)/Google/chrome-win32/chrome.exe"
+    "findAppParams": {
+      "appName": "Chromium.app",
+      "executable": "Contents/MacOS/Chromium",
+      "appId": "org.chromium.Chromium",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "chrome",
@@ -36,8 +48,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "google-chrome-canary",
+    "path": "C:/Users/flotwig/AppData/Local/Google/Chrome SxS/Application/chrome.exe",
     "version": "3.4.5",
-    "path": "C:/Users/flotwig/AppData/Local/Google/Chrome SxS/Application/chrome.exe"
+    "findAppParams": {
+      "appName": "Google Chrome Canary.app",
+      "executable": "Contents/MacOS/Google Chrome Canary",
+      "appId": "com.google.Chrome.canary",
+      "versionProperty": "KSVersion"
+    }
   },
   {
     "name": "firefox",
@@ -48,8 +66,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "firefox",
+    "path": "C:/Program Files/Mozilla Firefox/firefox.exe",
     "version": "72",
-    "path": "C:/Program Files/Mozilla Firefox/firefox.exe"
+    "findAppParams": {
+      "appName": "Firefox.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.firefox",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "firefox",
@@ -63,8 +87,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
       "firefox-developer-edition",
       "firefox"
     ],
+    "path": "C:/Program Files (x86)/Firefox Developer Edition/firefox.exe",
     "version": "73",
-    "path": "C:/Program Files (x86)/Firefox Developer Edition/firefox.exe"
+    "findAppParams": {
+      "appName": "Firefox Developer Edition.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.firefoxdeveloperedition",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "firefox",
@@ -78,8 +108,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
       "firefox-nightly",
       "firefox-trunk"
     ],
+    "path": "C:/Program Files/Firefox Nightly/firefox.exe",
     "version": "74",
-    "path": "C:/Program Files/Firefox Nightly/firefox.exe"
+    "findAppParams": {
+      "appName": "Firefox Nightly.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.nightly",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "edge",
@@ -89,8 +125,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "edge",
+    "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
     "version": "11",
-    "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+    "findAppParams": {
+      "appName": "Microsoft Edge.app",
+      "executable": "Contents/MacOS/Microsoft Edge",
+      "appId": "com.microsoft.Edge",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "edge",
@@ -100,8 +142,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "edge-canary",
+    "path": "C:/Users/flotwig/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe",
     "version": "14",
-    "path": "C:/Users/flotwig/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe"
+    "findAppParams": {
+      "appName": "Microsoft Edge Canary.app",
+      "executable": "Contents/MacOS/Microsoft Edge Canary",
+      "appId": "com.microsoft.Edge.Canary",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "edge",
@@ -111,8 +159,14 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "edge-beta",
+    "path": "C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe",
     "version": "12",
-    "path": "C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe"
+    "findAppParams": {
+      "appName": "Microsoft Edge Beta.app",
+      "executable": "Contents/MacOS/Microsoft Edge Beta",
+      "appId": "com.microsoft.Edge.Beta",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "edge",
@@ -122,7 +176,13 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "versionRegex": {},
     "profile": true,
     "binary": "edge-dev",
+    "path": "C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe",
     "version": "13",
-    "path": "C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe"
+    "findAppParams": {
+      "appName": "Microsoft Edge Dev.app",
+      "executable": "Contents/MacOS/Microsoft Edge Dev",
+      "appId": "com.microsoft.Edge.Dev",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   }
 ]
