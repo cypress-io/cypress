@@ -82,8 +82,9 @@ describe "driver/src/cypress/utils", ->
 
     context "Elements", ->
       it "stringifyElement", ->
-        o = Cypress.$("div:first")
-        expect(@str(o)).to.eq "<div.container>"
+        cy.visit("/fixtures/dom.html").then ->
+          o = Cypress.$("#dom")
+          expect(@str(o)).to.eq "<div#dom>"
 
   context ".memoize", ->
     it "runs the function the first time", ->
