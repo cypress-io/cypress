@@ -1892,6 +1892,36 @@ space
           expect($btn.get(0)).to.eq(btn.get(0))
         })
       })
+
+      it('matches white spaces when matchWhitespace option is used', () => {
+        $(`<button id="whitespace">        White   space             </button>`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace').contains('        White   space             ', {
+          matchWhitespaces: true,
+        })
+      })
+
+      const styles = ['pre', 'pre-wrap', 'break-spaces']
+
+      styles.forEach((style) => {
+        it(`matches white spaces when white-space: ${style}`, () => {
+          $(`<button id="whitespace" style="white-space: ${style}">this
+      field should preserve all
+      whitespace   
+</button>`).appendTo(cy.$$('body'))
+
+          cy.get('#whitespace').contains('this\n      field should preserve all\n      whitespace   ')
+        })
+      })
+
+      it(`collapses white spaces when white-space: pre-line`, () => {
+        $(`<button id="whitespace" style="white-space: pre-line">   this
+      field    should preserve all
+      whitespace   
+</button>`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace').contains('this\nfield should preserve all\nwhitespace')
+      })
     })
 
     describe('case sensitivity', () => {
