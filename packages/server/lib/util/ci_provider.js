@@ -208,7 +208,6 @@ const _providerCiParams = () => {
       'GITHUB_WORKFLOW',
       'GITHUB_ACTION',
       'GITHUB_EVENT_NAME',
-      'GITHUB_RUN_NUMBER',
       'GITHUB_RUN_ID',
       'GITHUB_REPOSITORY',
     ]),

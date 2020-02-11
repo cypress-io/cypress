@@ -385,7 +385,6 @@ describe "lib/util/ci_provider", ->
       GITHUB_WORKFLOW: "ciGitHubWorkflowName"
       GITHUB_ACTION: "ciGitHubActionId"
       GITHUB_EVENT_NAME: "ciEventName"
-      GITHUB_RUN_NUMBER: "ciGithubRunNumber"
       GITHUB_RUN_ID: "ciGithubRunId"
       GITHUB_REPOSITORY: 'ciGithubRepository'
 
@@ -404,7 +403,6 @@ describe "lib/util/ci_provider", ->
       githubWorkflow: "ciGitHubWorkflowName"
       githubRepository: "ciGithubRepository"
       githubRunId: "ciGithubRunId"
-      githubRunNumber: "ciGithubRunNumber"
     })
     expectsCommitParams({
       sha: "ciCommitSha"
