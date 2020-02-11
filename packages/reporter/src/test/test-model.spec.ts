@@ -1,3 +1,5 @@
+import { expect } from 'chai'
+
 import Command, { CommandProps } from '../commands/command-model'
 import Agent from '../agents/agent-model'
 import Route from '../routes/route-model'

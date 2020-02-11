@@ -9,6 +9,8 @@ Fixtures = require("../support/helpers/fixtures")
 
 HTTPS_PORT = 11443
 HTTP_PORT = 11180
+describe "e2e form submissions", ->
+  e2e.setup()
 
 e2ePath = Fixtures.projectPath("e2e")
 pathToLargeImage = Fixtures.path("server/imgs/earth.jpg")
@@ -82,19 +84,19 @@ describe "e2e forms", ->
   context "submissions with jquery XHR POST", ->
     e2e.setup()
 
-    it "passing", ->
-      e2e.exec(@, {
-        spec: "form_submission_passing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 0
-      })
+    e2e.it "passing", {
+      spec: "form_submission_passing_spec.coffee"
+      snapshot: true
+    }
 
-    it "failing", ->
-      e2e.exec(@, {
-        spec: "form_submission_failing_spec.coffee"
-        snapshot: true
-        expectedExitCode: 1
-      })
+    e2e.it "failing", {
+      spec: "form_submission_failing_spec.coffee"
+      snapshot: true
+      expectedExitCode: 1
+      onStdout: (stdout) =>
+        stdout
+        .replace(/((?:      -)+[^\n]+\n)/gm, '') ## remove variable diff
+    }
 
   context "<form> submissions", ->
     e2e.setup({
@@ -132,7 +134,6 @@ describe "e2e forms", ->
       }
       spec: "form_submission_multipart_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     }
 
     e2e.it "passes with http on localhost", {
@@ -141,5 +142,4 @@ describe "e2e forms", ->
       }
       spec: "form_submission_multipart_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     }

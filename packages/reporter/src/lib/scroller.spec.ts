@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
+import { expect } from 'chai'
 
 import scroller from './scroller'
 

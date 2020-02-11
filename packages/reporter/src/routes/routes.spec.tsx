@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import { shallow } from 'enzyme'
 import React from 'react'
+import { expect } from 'chai'
 
 import Routes, { RoutesList, Route, RouteListModel } from './routes'
 import RouteModel from './route-model'

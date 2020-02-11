@@ -182,6 +182,10 @@
     }
   }
 
+  .fa-check-circle, .fa-sync-alt {
+    margin-right: 3px;
+  }
+
   .browser-icon {
     color: #4573d9;
     margin-right: 3px;
@@ -213,6 +217,14 @@
   margin-right: 4px;
 }
 
+.browser-beta {
+  font-size: 12px;
+  top: -5px;
+  position: relative;
+  margin-left: 4px;
+  color: #d87b0b;
+}
+
 .browser-info-tooltip {
   background: #ececec;
   border-color: #c7c7c7;
@@ -230,6 +242,12 @@
 
 .close-browser {
   .btn {
-    margin-top: 7px;
+    margin-top: 5px;
+    line-height: 28px;
+    padding: 0 9px 0 7px;
+    font-size: 13px;
+    i {
+      margin-right: 3px;
+    }
   }
 }

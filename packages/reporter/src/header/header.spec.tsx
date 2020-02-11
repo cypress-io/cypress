@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react'
 import { shallow } from 'enzyme'
 import sinon, { SinonSpy } from 'sinon'
+import { expect } from 'chai'
 
 import appState from '../lib/app-state'
 
@@ -28,7 +29,7 @@ describe('<Header />', () => {
 
     const component = shallow(title)
 
-    expect(component.text()).to.contain('View All Tests')
+    expect(component.text()).to.contain('View All Tests ')
   })
 
   it('emits the focus:tests event when the focus tests button is clicked', () => {

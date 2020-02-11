@@ -1,4 +1,5 @@
 import appState, { AppState } from './app-state'
+import { expect } from 'chai'
 
 describe('app state', () => {
   it('exports singleton by default', () => {
@@ -138,6 +139,28 @@ describe('app state', () => {
       instance.toggleAutoScrolling()
       instance.reset()
       expect(instance.autoScrollingEnabled).to.be.false
+    })
+  })
+
+  context('#setForcingGc', () => {
+    it('sets forcingGc', () => {
+      const instance = new AppState()
+
+      instance.setForcingGc(false)
+      expect(instance.forcingGc).to.be.false
+      instance.setForcingGc(true)
+      expect(instance.forcingGc).to.be.true
+    })
+  })
+
+  context('#setFirefoxGcInterval', () => {
+    it('sets forcingGc', () => {
+      const instance = new AppState()
+
+      instance.setFirefoxGcInterval(111)
+      expect(instance.firefoxGcInterval).to.eq(111)
+      instance.setFirefoxGcInterval(222)
+      expect(instance.firefoxGcInterval).to.eq(222)
     })
   })
 

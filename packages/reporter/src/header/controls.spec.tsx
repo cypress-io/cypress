@@ -3,6 +3,7 @@ import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon, { SinonSpy } from 'sinon'
+import { expect } from 'chai'
 
 import Controls from './controls'
 import { AppState } from '../lib/app-state'
@@ -86,7 +87,7 @@ describe('<Controls />', () => {
 
       const component = shallow(title)
 
-      expect(component.text()).to.contain('Stop Running')
+      expect(component.text()).to.contain('Stop Running ')
     })
 
     it('emits stop event when stop button is clicked', () => {
@@ -203,7 +204,7 @@ describe('<Controls />', () => {
 
       const component = shallow(title)
 
-      expect(component.text()).to.contain('Run All Tests')
+      expect(component.text()).to.contain('Run All Tests ')
     })
 
     it('emits restart event when restart button is clicked', () => {

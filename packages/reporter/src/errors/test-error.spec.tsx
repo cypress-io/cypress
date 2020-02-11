@@ -2,6 +2,7 @@ import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
 import sinon, { SinonSpy } from 'sinon'
+import { expect } from 'chai'
 
 import TestModel from '../test/test-model'
 import { Events } from '../lib/events'

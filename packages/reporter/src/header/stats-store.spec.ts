@@ -1,4 +1,5 @@
 import sinon, { SinonFakeTimers } from 'sinon'
+import { expect } from 'chai'
 
 import statsStore, { StatsStore } from './stats-store'
 

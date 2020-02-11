@@ -1,8 +1,7 @@
-import _ from 'lodash'
 import debugModule from 'debug'
-import { HttpMiddleware } from '.'
 import { Readable } from 'stream'
 import { Request } from 'request'
+import { HttpMiddleware } from './'
 
 const debug = debugModule('cypress:proxy:http:error-middleware')
 
@@ -13,7 +12,12 @@ export type ErrorMiddleware = HttpMiddleware<{
 }>
 
 const LogError: ErrorMiddleware = function () {
-  debug('error proxying request %o', _.pick(this, 'error', 'req', 'res', 'incomingRes', 'outgoingReq', 'incomingResStream'))
+  debug('error proxying request %o', {
+    error: this.error,
+    url: this.req.url,
+    headers: this.req.headers,
+  })
+
   this.next()
 }
 

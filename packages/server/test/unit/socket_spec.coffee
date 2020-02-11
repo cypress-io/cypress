@@ -18,6 +18,7 @@ preprocessor = require("#{root}lib/plugins/preprocessor")
 fs           = require("#{root}lib/util/fs")
 open         = require("#{root}lib/util/open")
 Fixtures     = require("#{root}/test/support/helpers/fixtures")
+firefoxUtil  = require("#{root}lib/browsers/firefox-util").default
 
 describe "lib/socket", ->
   beforeEach ->
@@ -89,6 +90,7 @@ describe "lib/socket", ->
 
     context "on(automation:request)", ->
       describe "#onAutomation", ->
+        extensionBackgroundPage = null
         before ->
           global.chrome = {
             cookies: {
@@ -107,13 +109,14 @@ describe "lib/socket", ->
               executeScript: ->
             }
           }
+          extensionBackgroundPage =  require('@packages/extension/app/background')
 
         beforeEach (done) ->
           @socket.io.on "connection", (@extClient) =>
             @extClient.on "automation:client:connected", ->
               done()
 
-          extension.connect(@cfg.proxyUrl, @cfg.socketIoRoute, socketIo.client)
+          extensionBackgroundPage.connect(@cfg.proxyUrl, @cfg.socketIoRoute, socketIo.client)
 
         afterEach ->
           @extClient.disconnect()
@@ -199,7 +202,7 @@ describe "lib/socket", ->
             done()
 
         it "returns true after retrying", (done) ->
-          sinon.stub(extension.app, "query").resolves(true)
+          sinon.stub(extensionBackgroundPage, "query").resolves(true)
 
           ## just force isSocketConnected to return false until the 4th retry
           iSC = sinon.stub(@socket, "isSocketConnected")
@@ -391,6 +394,24 @@ describe "lib/socket", ->
         @client.emit "backend:request", "exec", { cmd: "lsd" }, (resp) =>
           expect(resp.error.message).to.equal("command not found: lsd")
           expect(resp.error.timedOut).to.be.true
+          done()
+
+    context "on(firefox:force:gc)", ->
+      it "calls firefoxUtil#collectGarbage", (done) ->
+        sinon.stub(firefoxUtil, "collectGarbage").resolves()
+
+        @client.emit "backend:request", "firefox:force:gc", (resp) =>
+          expect(firefoxUtil.collectGarbage).to.be.calledOnce
+          expect(resp.error).to.be.undefined
+          done()
+
+      it "errors when collectGarbage throws", (done) ->
+        err = new Error('foo')
+        sinon.stub(firefoxUtil, "collectGarbage").throws(err)
+
+        @client.emit "backend:request", "firefox:force:gc", (resp) =>
+          expect(firefoxUtil.collectGarbage).to.be.calledOnce
+          expect(resp.error.message).to.eq(err.message)
           done()
 
     context "on(save:app:state)", ->
