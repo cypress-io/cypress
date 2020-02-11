@@ -4,17 +4,16 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "postinstall": "echo '@packages/example needs: npm run build'",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
+    "postinstall": "echo '@packages/example needs: yarn build'",
     "clean-deps": "rm -rf node_modules",
-    "pretest": "npm run check-deps-pre",
-    "test": "cross-env NODE_ENV=test mocha",
+    "test": "yarn test-unit",
     "test-e2e": "cypress run",
-    "prebuild": "npm run check-deps-pre",
+    "test-debug": "yarn test-unit --inspect-brk=5566",
+    "test-unit": "cross-env NODE_ENV=test mocha",
+    "test-watch": "yarn test-unit --watch",
     "build": "node ./bin/build.js && gulp build",
-    "build-prod": "npm run build",
-    "predeploy": "npm run build",
+    "build-prod": "yarn build",
+    "predeploy": "yarn build",
     "deploy": "gulp deploy"
   },
   "files": [
@@ -26,7 +25,6 @@
     "glob": "7.1.3"
   },
   "devDependencies": {
-    "bin-up": "1.2.2",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "cypress-example-kitchensink": "1.9.1",
@@ -35,6 +33,7 @@
     "gulp-gh-pages": "0.6.0-6",
     "gulp-rev-all": "2.0.2",
     "mocha": "2.5.3",
+    "resolve-pkg": "2.0.0",
     "shelljs": "0.8.3"
   }
 }
