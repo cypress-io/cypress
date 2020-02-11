@@ -16,18 +16,12 @@ You can see a list of the modules exported from this package in [./lib/index.ts]
 
 See the individual class files in [`./lib`](./lib) for more information.
 
-## Installing Dependencies
-
-```shell
-npm i
-```
-
 ## Building
 
 Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
 
 ```shell
-npm run build-js
+yarn lerna run build-js --scope @packages/network --stream
 ```
 
 ## Testing
@@ -37,7 +31,9 @@ Tests are located in [`./test`](./test)
 To run tests:
 
 ```shell
-npm run test
+yarn lerna run test --scope @packages/network --stream
+yarn lerna run test-watch --scope @packages/network --stream
+yarn lerna run test-debug --scope @packages/network --stream
 ```
 
 [1]: https://devdocs.io/node/http#http_class_http_agent

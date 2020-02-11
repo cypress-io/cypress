@@ -46,7 +46,7 @@ if (!shouldBuildBinary()) {
 
 console.log('building Windows binary')
 
-const filename = `cypress-${process.env.NEXT_DEV_VERSION}.tgz`
+const filename = `cypress-v${process.env.NEXT_DEV_VERSION}.tgz`
 const version = process.env.NEXT_DEV_VERSION
 
 la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
@@ -62,15 +62,15 @@ const arch = os.arch()
 shell.echo(`Building for win32 [${arch}]...`)
 
 shell.cat('npm-package-url.json')
-shell.exec(`npm run binary-build -- --platform windows --version ${version}`)
+shell.exec(`yarn binary-build --platform windows --version ${version}`)
 
 // make sure we are not including dev dependencies accidentally
 // TODO how to get the server package folder?
 const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
 
 shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
-shell.exec('npm ls --prod --depth 0 || true', { cwd: serverPackageFolder })
-const result = shell.exec('npm ls --dev --depth 0 || true', {
+shell.exec('yarn list --prod --depth 0 || true')
+const result = shell.exec('yarn list --dev --depth 0 || true', {
   cwd: serverPackageFolder,
 })
 
@@ -112,7 +112,7 @@ if (isPullRequest()) {
 } else {
   console.log('Zipping and upload binary')
 
-  shell.exec('npm run binary-zip')
+  shell.exec('yarn binary-zip')
   shell.ls('-l', '*.zip')
   shell.exec(
     `node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`
