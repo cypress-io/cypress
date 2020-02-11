@@ -34,7 +34,43 @@ const start = (options = {}) => {
 
   return spawn.start(args, {
     dev: options.dev,
-  }).then(() => {
+  })
+  .then(() => {
+    console.log()
+    const proxyVars = findProxyEnvironmentVariables()
+
+    if (_.isEmpty(proxyVars)) {
+      console.log('Proxy Settings: none detected')
+    } else {
+      console.log('Proxy Settings:')
+      _.forEach(proxyVars, (value, key) => {
+        console.log('%s: %s', key, g(value))
+      })
+
+      console.log()
+      console.log('Learn More: %s', link('https://on.cypress.io/proxy-configuration'))
+      console.log()
+    }
+  })
+  .then(() => {
+    const cyVars = findCypressEnvironmentVariables()
+
+    if (_.isEmpty(cyVars)) {
+      console.log('Environment Variables: none detected')
+    } else {
+      console.log('Environment Variables:')
+      _.forEach(cyVars, (value, key) => {
+        console.log('%s: %s', key, g(value))
+      })
+    }
+  })
+  .then(() => {
+    console.log()
+    console.log('Application Data:', p(util.getApplicationDataFolder()))
+    console.log('Browser Profiles:', p(util.getApplicationDataFolder('browsers')))
+    console.log('Binary Caches: %s', p(state.getCacheDir()))
+  })
+  .then(() => {
     console.log()
 
     return util.getOsVersionAsync().then((osVersion) => {
@@ -42,39 +78,6 @@ const start = (options = {}) => {
       console.log('System Platform: %s (%s)', g(os.platform()), g(osVersion))
       console.log('System Memory: %s free %s', g(prettyBytes(os.totalmem())), g(prettyBytes(os.freemem())))
     })
-  })
-  .then(() => {
-    console.log()
-    console.log('Application Data:', p(util.getApplicationDataFolder()))
-    console.log('Browser Profiles:', p(util.getApplicationDataFolder('browsers')))
-    console.log('Binary Caches: %s', p(state.getCacheDir()))
-
-    console.log()
-    const proxyVars = findProxyEnvironmentVariables()
-
-    if (_.isEmpty(proxyVars)) {
-      console.log('Did not detect any environment variables controlling proxy settings')
-    } else {
-      console.log('Proxy environment variables:')
-      _.forEach(proxyVars, (value, key) => {
-        console.log('%s: %s', key, g(value))
-      })
-
-      console.log()
-      console.log('Learn More: %s', link('https://on.cypress.io/proxy-configuration'))
-    }
-
-    console.log()
-    const cyVars = findCypressEnvironmentVariables()
-
-    if (_.isEmpty(cyVars)) {
-      console.log('Did not detect any additional Cypress environment variables')
-    } else {
-      console.log('Cypress environment variables:')
-      _.forEach(cyVars, (value, key) => {
-        console.log('%s: %s', key, g(value))
-      })
-    }
   })
 }
 
