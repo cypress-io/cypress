@@ -61,7 +61,7 @@ class ErrorMessage extends Component {
         <div className='full-alert alert alert-danger error'>
           <p className='header'>
             <i className='fas fa-exclamation-triangle'></i>{' '}
-            <strong>{err.title || 'Can\'t start server'}</strong>
+            <strong>{err.title || 'An unexpected error occurred'}</strong>
           </p>
           <span className='alert-content'>
             <div ref={(node) => this.errorMessageNode = node} dangerouslySetInnerHTML={{
