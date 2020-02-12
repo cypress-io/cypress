@@ -42,8 +42,8 @@ describe('Message', () => {
       })
 
       it('message has at least length 2', () => {
-        expect(message.validator && message.validator('a')).to.be.falsy
-        expect(message.validator && message.validator('aa')).to.be.truthy
+        expect(message.validator && message.validator('a')).to.be.not.ok
+        expect(message.validator && message.validator('aa')).to.be.ok
       })
     })
   })
@@ -64,7 +64,7 @@ describe('Message', () => {
         const stub = cy.spy()
         Cypress.vue.$on('message-clicked', stub)
         cy.get('.message').click().then(() => {
-          expect(stub).to.be.called.once
+          expect(stub).to.be.calledOnce
           expect(stub).to.be.calledWith('Cat')
         })
       })
