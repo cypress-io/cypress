@@ -9,16 +9,19 @@ import Markdown from 'markdown-it'
 
 const _copyErrorDetails = (err) => {
   let details = [
-    `Message: ${err.message}`,
-    `Details: ${err.details}`,
+    `**Message:** ${err.message}`,
   ]
 
+  if (err.details) {
+    details.push(`**Details:** ${err.details}`)
+  }
+
   if (err.title) {
-    details.unshift(`Title: ${err.title}`)
+    details.unshift(`**Title:** ${err.title}`)
   }
 
   if (err.stack2) {
-    details.push(`Stack trace: \`\`\`\n${err.stack2}\n\`\`\``)
+    details.push(`**Stack trace:**\n\`\`\`\n${err.stack2}\n\`\`\``)
   }
 
   ipc.setClipboardText(details.join('\n\n'))
