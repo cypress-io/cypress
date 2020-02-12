@@ -251,11 +251,23 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: FORCE_COLOR=2 node cli/bin/cypress info --dev | yarn --silent term-to-html > cypress-info.html
-      # TODO sanitize "cypress info" output to be consistent
+      - run: mkdir cli-snapshots
+      - run:
+          # TODO sanitize "cypress info" output to be consistent
+          command: node cli/bin/cypress info --dev | yarn --silent term-to-html > cli-snapshots/cypress-info.html
+          environment:
+            FORCE_COLOR: 2
+      - run:
+          command: node cli/bin/cypress help | yarn --silent term-to-html > cli-snapshots/cypress-help.html
+          environment:
+            FORCE_COLOR: 2
       - store_artifacts:
-          path: cypress-info.html
-      # TODO send generated HTML to visual diffing services
+          path: cli-snapshots
+      - run:
+          name: Upload CLI snapshots for diffing
+          command: |
+            PERCY_TOKEN=$PERCY_TOKEN_CLI \
+            yarn percy snapshot ./cli-snapshots
 
   unit-tests:
     <<: *defaults
