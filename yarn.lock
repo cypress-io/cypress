@@ -20891,34 +20891,9 @@ request@2.88.0, "request@>=2.76.0 <3.0.0", request@^2.74.0, request@^2.87.0, req
     tunnel-agent "^0.6.0"
     uuid "^3.0.0"
 
-request@cypress-io/request#47cdc67085c9fddc8d39d3172538f3f86c96bb8b:
+request@cypress-io/request#b5af0d1fa47eec97ba980cde90a13e69a2afcd16:
   version "2.88.1"
-  resolved "https://codeload.github.com/cypress-io/request/tar.gz/47cdc67085c9fddc8d39d3172538f3f86c96bb8b"
-  dependencies:
-    aws-sign2 "~0.7.0"
-    aws4 "^1.8.0"
-    caseless "~0.12.0"
-    combined-stream "~1.0.6"
-    extend "~3.0.2"
-    forever-agent "~0.6.1"
-    form-data "~2.3.2"
-    har-validator "~5.1.3"
-    http-signature "~1.2.0"
-    is-typedarray "~1.0.0"
-    isstream "~0.1.2"
-    json-stringify-safe "~5.0.1"
-    mime-types "~2.1.19"
-    oauth-sign "~0.9.0"
-    performance-now "^2.1.0"
-    qs "~6.5.2"
-    safe-buffer "^5.1.2"
-    tough-cookie "~2.5.0"
-    tunnel-agent "^0.6.0"
-    uuid "^3.3.2"
-
-request@cypress-io/request#61db79b1950911bc68ed0d7cd223650131b8d4d6:
-  version "2.88.1"
-  resolved "https://codeload.github.com/cypress-io/request/tar.gz/61db79b1950911bc68ed0d7cd223650131b8d4d6"
+  resolved "https://codeload.github.com/cypress-io/request/tar.gz/b5af0d1fa47eec97ba980cde90a13e69a2afcd16"
   dependencies:
     aws-sign2 "~0.7.0"
     aws4 "^1.8.0"
@@ -22124,10 +22099,11 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#4d3076af68ea8192c
   version "3.1.2-patch1"
   resolved "https://codeload.github.com/cypress-io/socket.io-circular-parser/tar.gz/4d3076af68ea8192c2e53f9d185eaa166359b4c5"
   dependencies:
-    circular-json "0.5.9"
+    circular-json "^0.4.0"
     component-emitter "1.2.1"
-    debug "~4.1.0"
+    debug "~2.6.4"
     has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
+    isarray "2.0.1"
 
 socket.io-client@2.3.0:
   version "2.3.0"
