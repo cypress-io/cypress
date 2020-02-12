@@ -492,7 +492,6 @@ describe "e2e record", ->
             snapshot: true
             tag: "nightly"
             ciBuildId: "ciBuildId123"
-            expectedExitCode: 0
             config: {
               trashAssetsBeforeRuns: false
             }
@@ -558,7 +557,6 @@ describe "e2e record", ->
         spec: "record_pass*"
         record: true
         snapshot: true
-        expectedExitCode: 0
       })
       .then ->
         console.log('GETREQUESTURLS', getRequestUrls())
@@ -577,7 +575,6 @@ describe "e2e record", ->
         record: true
         parallel: true
         snapshot: true
-        expectedExitCode: 0
       })
       .then ->
         expect(getRequestUrls()).to.be.empty
@@ -593,7 +590,6 @@ describe "e2e record", ->
         spec: "record_pass*"
         record: true
         snapshot: true
-        expectedExitCode: 0
       })
 
   context "api interaction errors", ->
@@ -657,7 +653,6 @@ describe "e2e record", ->
           spec: "record_pass*"
           record: true
           snapshot: true
-          expectedExitCode: 0
         })
         .then ->
           urls = getRequestUrls()
@@ -676,7 +671,6 @@ describe "e2e record", ->
           record: true
           snapshot: true
           ciBuildId: "ciBuildId123"
-          expectedExitCode: 0
         })
         .then ->
           urls = getRequestUrls()
@@ -996,7 +990,6 @@ describe "e2e record", ->
           spec: "record_pass*"
           record: true
           snapshot: true
-          expectedExitCode: 0
         })
         .then ->
           urls = getRequestUrls()
@@ -1038,7 +1031,6 @@ describe "e2e record", ->
           spec: "record_pass*"
           record: true
           snapshot: true
-          expectedExitCode: 0
         })
         .then ->
           urls = getRequestUrls()
@@ -1099,7 +1091,6 @@ describe "e2e record", ->
           spec: "record_pass*"
           record: true
           snapshot: true
-          expectedExitCode: 0
         })
         .then ->
           urls = getRequestUrls()
@@ -1161,7 +1152,6 @@ describe "e2e record", ->
           spec: "record_pass*"
           record: true
           snapshot: true
-          expectedExitCode: 0
         })
         .then ->
           urls = getRequestUrls()
@@ -1236,7 +1226,6 @@ describe "e2e record", ->
           parallel: true
           snapshot: true
           ciBuildId: "ciBuildId123"
-          expectedExitCode: 0
         })
         .then ->
           urls = getRequestUrls()
@@ -1289,7 +1278,6 @@ describe "e2e record", ->
             spec: "record_pass*"
             record: true
             snapshot: true
-            expectedExitCode: 0
           })
 
       describe "grace period - over tests limit", ->
@@ -1324,7 +1312,6 @@ describe "e2e record", ->
             spec: "record_pass*"
             record: true
             snapshot: true
-            expectedExitCode: 0
           })
 
       describe "grace period - parallel feature", ->
@@ -1358,7 +1345,6 @@ describe "e2e record", ->
             spec: "record_pass*"
             record: true
             snapshot: true
-            expectedExitCode: 0
           })
 
       describe "grace period - grouping feature", ->
@@ -1392,7 +1378,6 @@ describe "e2e record", ->
             spec: "record_pass*"
             record: true
             snapshot: true
-            expectedExitCode: 0
           })
 
       describe "paid plan - over private tests limit", ->
@@ -1427,7 +1412,6 @@ describe "e2e record", ->
             spec: "record_pass*"
             record: true
             snapshot: true
-            expectedExitCode: 0
           })
 
       describe "paid plan - over tests limit", ->
@@ -1462,7 +1446,6 @@ describe "e2e record", ->
             spec: "record_pass*"
             record: true
             snapshot: true
-            expectedExitCode: 0
           })
 
       describe "unknown warning", ->
@@ -1483,5 +1466,4 @@ describe "e2e record", ->
             spec: "record_pass*"
             record: true
             snapshot: true
-            expectedExitCode: 0
           })

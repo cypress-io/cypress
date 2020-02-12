@@ -37,7 +37,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
 type SimulatedDefault = (
   el: HTMLElement,
   key: KeyDetails,
-  options: any
+  options: typeOptions
 ) => void
 
 interface KeyDetails {
@@ -236,21 +236,21 @@ const shouldIgnoreEvent = <
   return options[eventName] === false
 }
 
-const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
+const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: typeOptions) => {
   if (!key.text) return false
 
   const bounds = $selection.getSelectionBounds(el)
   const noneSelected = bounds.start === bounds.end
 
   if ($elements.isInput(el) || $elements.isTextarea(el)) {
-    if ($elements.isReadOnlyInputOrTextarea(el)) {
+    if ($elements.isReadOnlyInputOrTextarea(el) && !options.force) {
       return false
     }
 
     const isNumberInputType = $elements.isInput(el) && $elements.isInputType(el, 'number')
 
     if (isNumberInputType) {
-      const needsValue = options.prevVal || ''
+      const needsValue = options.prevValue || ''
       const needsValueLength = (needsValue && needsValue.length) || 0
       const curVal = $elements.getNativeProp(el, 'value')
       const bounds = $selection.getSelectionBounds(el)
@@ -263,18 +263,19 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
         debug('skipping inserting value since number input would be invalid', key.text, potentialValue)
         // when typing in a number input, only certain whitelisted chars will insert text
         if (!key.text.match(isValidNumberInputChar)) {
-          options.prevVal = ''
+          // https://github.com/cypress-io/cypress/issues/6055
+          // Should not remove old valid values when a new one is not a valid number char, just dismiss it with return
 
           return
         }
 
-        options.prevVal = needsValue + key.text
+        options.prevValue = needsValue + key.text
 
         return
       }
 
-      key.text = (options.prevVal || '') + key.text
-      options.prevVal = null
+      key.text = (options.prevValue || '') + key.text
+      options.prevValue = undefined
     }
 
     if (noneSelected) {
@@ -490,7 +491,7 @@ const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
       $selection.replaceSelectionContents(el, '\n')
     }
 
-    options.onEnterPressed()
+    options.onEnterPressed && options.onEnterPressed()
   },
   Delete: (el, key) => {
     key.events.input = $selection.deleteRightOfCursor(el)
@@ -599,6 +600,8 @@ export interface typeOptions {
   onEnterPressed?: Function
   onNoMatchingSpecialChars?: Function
   onBeforeSpecialCharAction?: Function
+  prevValue?: string
+  id?: string
 }
 
 export class Keyboard {
@@ -775,11 +778,7 @@ export class Keyboard {
     el: HTMLElement,
     eventType: KeyEventType,
     keyDetails: KeyDetails,
-    opts: {
-      id: string
-      onEvent?: (...args) => boolean
-      onBeforeEvent?: (...args) => boolean
-    }
+    opts: typeOptions
   ) {
     debug('fireSimulatedEvent', eventType, keyDetails)
 
@@ -882,8 +881,7 @@ export class Keyboard {
     let event: Event
 
     debug('event options:', eventType, eventOptions)
-
-    if (eventConstructor === 'TextEvent') {
+    if (eventConstructor === 'TextEvent' && win[eventConstructor]) {
       event = document.createEvent('TextEvent')
       // @ts-ignore
       event.initTextEvent(
@@ -964,7 +962,7 @@ export class Keyboard {
     return true
   }
 
-  simulatedKeydown (el: HTMLElement, _key: KeyDetails, options: any) {
+  simulatedKeydown (el: HTMLElement, _key: KeyDetails, options: typeOptions) {
     if (isModifier(_key)) {
       const didFlag = this.flagModifier(_key)
 
@@ -1049,7 +1047,7 @@ export class Keyboard {
     this.simulatedKeyup(elToKeyup, key, options)
   }
 
-  simulatedKeyup (el: HTMLElement, _key: KeyDetails, options: any) {
+  simulatedKeyup (el: HTMLElement, _key: KeyDetails, options: typeOptions) {
     if (shouldIgnoreEvent('keyup', _key.events)) {
       debug('simulatedKeyup: ignoring event')
       delete _key.events.keyup

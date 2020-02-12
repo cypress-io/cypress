@@ -10,6 +10,10 @@ describe "visits", ->
   it "can load a local file with a huge amount of elements without timing out", ->
     cy.visit("/elements.html", {timeout: 5000})
 
+  ## https://github.com/cypress-io/cypress/issues/5446
+  it "can load a site via TLSv1", ->
+    cy.visit("https://localhost:6776")
+
   context "issue #225: hash urls", ->
     rand = Math.random()
 

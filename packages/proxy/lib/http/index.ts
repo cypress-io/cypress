@@ -99,7 +99,6 @@ export function _runStage (type: HttpStages, ctx: any) {
         .omit(READONLY_MIDDLEWARE_KEYS)
         .forEach((value, key) => {
           if (ctx[key] !== value) {
-            debug(`copying %o`, { [key]: value })
             ctx[key] = value
           }
         })
@@ -138,7 +137,7 @@ export function _runStage (type: HttpStages, ctx: any) {
           _end()
         },
         onError: (error: Error) => {
-          debug('Error in middleware %o', { stage, middlewareName, error, ctx })
+          debug('Error in middleware %o', { stage, middlewareName, error })
 
           if (type === HttpStages.Error) {
             return

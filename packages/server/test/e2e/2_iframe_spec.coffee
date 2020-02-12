@@ -69,7 +69,6 @@ describe "e2e iframes", ->
   e2e.it "passes", {
     spec: "iframe_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
     config: {
       hosts: {
         "*.foo.com": "127.0.0.1"

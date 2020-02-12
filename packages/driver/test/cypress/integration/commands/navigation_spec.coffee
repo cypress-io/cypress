@@ -1,6 +1,5 @@
 $ = Cypress.$.bind(Cypress)
-_ = Cypress._
-Promise = Cypress.Promise
+{ _, Promise } = Cypress
 
 Cookie = require("js-cookie")
 
@@ -102,7 +101,7 @@ describe "src/cy/commands/navigation", ->
 
     describe "errors", ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
@@ -195,7 +194,7 @@ describe "src/cy/commands/navigation", ->
       it "does not log 'Page Load' events", ->
         cy.reload().then ->
           @logs.slice(0).forEach (log) ->
-            expect(log.get("event")).to.be.false
+            expect(log.get("name")).not.eq('page load')
 
       it "logs before + after", ->
         beforeunload = false
@@ -393,7 +392,7 @@ describe "src/cy/commands/navigation", ->
           .visit("/fixtures/jquery.html")
           .go("back").then ->
             @logs.slice(0).forEach (log) ->
-              expect(log.get("event")).to.be.false
+              expect(log.get("name")).not.eq('page load')
 
       it "logs before + after", ->
         beforeunload = false
@@ -782,7 +781,7 @@ describe "src/cy/commands/navigation", ->
           .visit("/fixtures/jquery.html")
           .then ->
             @logs.slice(0).forEach (log) ->
-              expect(log.get("event")).to.be.false
+              expect(log.get("name")).not.eq('page load')
 
       it "logs immediately before resolving", ->
         expected = false
@@ -1555,7 +1554,7 @@ describe "src/cy/commands/navigation", ->
 
           expect(Cookie.get("__cypress.initial")).to.be.undefined
 
-    ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973
+    ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973 (chrome76+ and firefox)
     it.skip "does not reset the timeout", (done) ->
       cy.timeout(1000)
 
@@ -1585,9 +1584,7 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='/timeout?ms=500'>jquery</a>")
             .appendTo(win.document.body)
 
-            ## this causes a synchronous beforeunload event
-            ## unlike win.location.href setter
-            $a.get(0).click()
+            causeSynchronousBeforeUnload($a)
 
           when 2
             ## on 2nd retry add the DOM element
@@ -1647,9 +1644,7 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='/timeout?ms=500'>jquery</a>")
             .appendTo(win.document.body)
 
-            ## this causes a synchronous beforeunload event
-            ## unlike win.location.href setter
-            $a.get(0).click()
+            causeSynchronousBeforeUnload($a)
 
             null
           .wrap(null).then ->
@@ -1692,9 +1687,7 @@ describe "src/cy/commands/navigation", ->
               $a = win.$("<a href='/timeout?ms=400'>jquery</a>")
               .appendTo(win.document.body)
 
-              ## this causes a synchronous beforeunload event
-              ## unlike win.location.href setter
-              $a.get(0).click()
+              causeSynchronousBeforeUnload($a)
 
               ## immediately logs pending state
               expect(logByName("page load").get("state")).to.eq("pending")
@@ -1735,9 +1728,9 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='#{url}'>jquery</a>")
             .appendTo(win.document.body)
 
-            $a.get(0).click()
+            causeSynchronousBeforeUnload($a)
 
-            null
+      null
 
   ## this tests isLoading spinner
   ## and page load event
@@ -1800,7 +1793,7 @@ describe "src/cy/commands/navigation", ->
             expect(@lastLog).to.exist
             expect(@lastLog.get("state")).to.eq("pending")
             expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
-            expect(@lastLog.get("snapshots")).to.be.empty
+            expect(@lastLog.get("snapshots")).to.not.exist
 
         .get("#dimensions").click()
         .then ->
@@ -1825,7 +1818,7 @@ describe "src/cy/commands/navigation", ->
             expect(@lastLog).to.exist
             expect(@lastLog.get("state")).to.eq("pending")
             expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
-            expect(@lastLog.get("snapshots")).to.be.empty
+            expect(@lastLog.get("snapshots")).to.not.exist
 
           cy
             .get("form#click-me")
@@ -2181,3 +2174,12 @@ describe "src/cy/commands/navigation", ->
               "Originated From": $form.get(0)
               "Args": event
             })
+
+
+causeSynchronousBeforeUnload = ($a) ->
+  ## this causes a synchronous beforeunload event
+  ## chrome & firefox behave differently
+  win = $a[0].ownerDocument.defaultView
+  if Cypress.isBrowser('firefox')
+    win.location.href = $a[0].href
+  else $a.get(0).click()

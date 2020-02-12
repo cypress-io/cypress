@@ -165,6 +165,17 @@
     }
   }
 
+  .browser-icon {
+    width: 15px;
+    height: 15px;
+    position: relative;
+    top: -1px;
+
+    &.fa-globe {
+      top: 0;
+    }
+  }
+
   .user-avatar {
     position: relative;
     margin-right: 3px;

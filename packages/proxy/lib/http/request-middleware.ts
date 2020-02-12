@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { blacklist, cors } from '@packages/network'
 import debugModule from 'debug'
-import { HttpMiddleware } from '.'
+import { blacklist, cors } from '@packages/network'
+import { HttpMiddleware } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
@@ -72,7 +72,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   const buffer = this.buffers.take(this.req.proxiedUrl)
 
   if (buffer) {
-    debug('got a buffer %o', buffer)
+    debug('got a buffer %o', _.pick(buffer, 'url'))
     this.res.wantsInjection = 'full'
 
     return this.onResponse(buffer.response, buffer.stream)

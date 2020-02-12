@@ -47,9 +47,7 @@
         font-size: 13px;
         color: #444;
         padding: 1px 20px 0 20px;
-        line-height: 35px;
-
-
+        line-height: 40px;
       }
 
       > a  {
@@ -164,31 +162,42 @@
 }
 
 .browsers-list {
-  > span {
+  margin: 5px;
+  border: 1px solid #c7c7c7;
+  border-radius: 4px;
+
+  li {
     padding: 9px 15px;
-    display: inline-block;
+    white-space: nowrap;
   }
 
-  .browser-icon { 
-    color: #4573d9; 
+  &>a.dropdown-chosen {
+    border-radius: 4px;
+    line-height: 28px !important;
+    background-color: #f6f6f6;
+
+    img {
+      position: relative;
+      top: -1px;
+    }
   }
 
-  .chrome > .browser-icon { 
-    color: #1da261; 
-  }
-  .canary > .browser-icon { 
-    color: #f29b14; 
-  }
-  .chromium > .browser-icon { 
-    color: #4573d9; 
-  }
-  .electron > .browser-icon { 
-    color: #2b2e3a; 
-  }
-  .firefox > .browser-icon { 
-    color: #ff720d; 
+  .fa-check-circle, .fa-sync-alt {
+    margin-right: 3px;
   }
 
+  .browser-icon {
+    color: #4573d9;
+    margin-right: 3px;
+    position: relative;
+    top: -1px;
+    width: 15px;
+    height: 15px;
+
+    &.fa-globe {
+      top: 0;
+    }
+  }
 
   .dropdown-menu {
     left: auto;
@@ -208,6 +217,14 @@
   margin-right: 4px;
 }
 
+.browser-beta {
+  font-size: 12px;
+  top: -5px;
+  position: relative;
+  margin-left: 4px;
+  color: #d87b0b;
+}
+
 .browser-info-tooltip {
   background: #ececec;
   border-color: #c7c7c7;
@@ -225,6 +242,12 @@
 
 .close-browser {
   .btn {
-    margin-top: 7px;
+    margin-top: 5px;
+    line-height: 28px;
+    padding: 0 9px 0 7px;
+    font-size: 13px;
+    i {
+      margin-right: 3px;
+    }
   }
 }

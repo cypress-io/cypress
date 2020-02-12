@@ -399,6 +399,6 @@ Expected at list one browser
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
 An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
 
-Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chrome"}\`
+Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
 
 `

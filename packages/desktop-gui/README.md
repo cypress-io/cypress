@@ -17,29 +17,20 @@ The Desktop GUI is the react application that is rendered by Electron. This acts
 - Notify users of updates to Cypress and initialize update process.
 - Set up projects to be recorded.
 
-## Installing
-
-The Desktop GUI's dependencies can be installed with:
-
-```bash
-cd packages/desktop-gui
-npm install
-```
-
 ## Building
 
 ### For development
 
 ```bash
-## from 'cypress/packages/desktop-gui' dir
-npm run build
+## from repo root
+yarn build --scope @packages/desktop-gui
 ```
 
 ### For production
 
 ```bash
-## from 'cypress/packages/desktop-gui' dir
-npm run build-prod
+## from repo root
+yarn build-prod --scope @packages/desktop-gui
 ```
 
 ## Developing
@@ -56,8 +47,8 @@ This watches and compiles all changes as you make them.
 - Compiles `*.scss` files into `dist`
 
 ```bash
-## from 'cypress/packages/desktop-gui' dir
-npm run watch
+## from repo root
+yarn watch --scope @packages/desktop-gui
 ```
 
 ## Running
@@ -67,9 +58,8 @@ You can also run all of the Desktop GUI's tests locally. We don't really recomme
 It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
 
 ```bash
-## run all the tests 
-## from 'cypress/packages/desktop-gui' dir
-npm run cypress:run
+## from repo root
+yarn lerna run cypress:run --scope @packages/desktop-gui --stream
 ```
 
 ## Testing
@@ -79,6 +69,6 @@ npm run cypress:run
 This project is tested with Cypress itself. It acts exactly like any other Cypress project.
 
 ```bash
-## from 'cypress/packages/desktop-gui' dir
-npm run cypress:open
+## from repo root
+yarn lerna run cypress:open --scope @packages/desktop-gui --stream
 ```
