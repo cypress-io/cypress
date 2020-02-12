@@ -40,7 +40,7 @@ const ErrorDetails = observer(({ err }) => {
   if (detailsBody) {
     return (
       <pre>
-        <details>
+        <details className='details-body'>
           <summary>{detailsTitle}</summary>
           {detailsBody}
         </details>
@@ -97,7 +97,7 @@ class ErrorMessage extends Component {
               </div>
             )}
             {err.stack2 && (
-              <details>
+              <details className='stacktrace'>
                 <summary>Stack trace</summary>
                 <pre>{err.stack2}</pre>
               </details>
