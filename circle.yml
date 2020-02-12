@@ -561,6 +561,11 @@ jobs:
       - run:
           command: yarn lerna exec --scope @packages/desktop-gui "yarn build-prod"
       - run:
+          name: Desktop GUI server
+          command: yarn start
+          working_directory: packages/desktop-gui
+          background: true
+      - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -579,6 +584,11 @@ jobs:
           at: ~/
       - run:
           command: yarn lerna exec --scope @packages/desktop-gui "yarn build-prod"
+      - run:
+          name: Desktop GUI server
+          command: yarn start
+          working_directory: packages/desktop-gui
+          background: true
       - run:
           # will use PERCY_TOKEN environment variable if available
           command: |

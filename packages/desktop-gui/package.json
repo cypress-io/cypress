@@ -10,6 +10,7 @@
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project .",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",
     "postinstall": "echo '@packages/desktop-gui needs: yarn build'",
+    "start": "http-server -p 5005 dist",
     "watch": "yarn build -- --watch --progress"
   },
   "devDependencies": {
