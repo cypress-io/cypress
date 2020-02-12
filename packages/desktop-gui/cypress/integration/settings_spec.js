@@ -87,6 +87,8 @@ describe('Settings', () => {
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
         cy.get('.config-vars').invoke('text')
         .should('contain', '0:Chrome')
+
+        cy.percySnapshot()
       })
 
       it('removes the summary list of values once a key is expanded', () => {
@@ -356,6 +358,8 @@ describe('Settings', () => {
 
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
+
+          cy.percySnapshot()
         })
       })
     })
@@ -387,6 +391,7 @@ describe('Settings', () => {
         cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
 
         cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
+        cy.percySnapshot()
       })
 
       it('with environment proxy settings indicates proxy and the source', () => {
@@ -409,6 +414,7 @@ describe('Settings', () => {
         })
 
         cy.get('.settings-proxy tr:nth-child(2) > td').should('contain', 'none')
+        cy.percySnapshot()
       })
     })
 
