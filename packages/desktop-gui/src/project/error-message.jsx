@@ -76,6 +76,12 @@ class ErrorMessage extends Component {
                 <p>To fix, stop the other running process or change the port in {configFileFormatted(this.props.project.configFile)}</p>
               </div>
             )}
+            {err.stack2 && (
+              <details>
+                <summary>Stack trace</summary>
+                <pre>{err.stack2}</pre>
+              </details>
+            )}
           </span>
           <button
             className='btn btn-default btn-sm'
