@@ -138,6 +138,8 @@ class Server
       upstreamSocket.setNoDelay(true)
       upstreamSocket.on "error", onError
 
+      browserSocket.emit 'upstream-connected', upstreamSocket
+
       browserSocket.pipe(upstreamSocket)
       upstreamSocket.pipe(browserSocket)
       upstreamSocket.write(head)

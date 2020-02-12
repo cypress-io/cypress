@@ -70,6 +70,7 @@ class Server
     if not (@ instanceof Server)
       return new Server()
 
+    @_connectSockets = []
     @_request    = null
     @_middleware = null
     @_server     = null
@@ -189,6 +190,16 @@ class Server
 
       @_server.on "connect", (req, socket, head) =>
         debug("Got CONNECT request from %s", req.url)
+
+        socket.on 'upstream-connected', (upstreamSocket) =>
+          id = upstreamSocket.localPort
+
+          debug('upstream-connected %o', { reqUrl: req.url, id })
+
+          @_connectSockets.push(upstreamSocket)
+
+          upstreamSocket.on 'close', =>
+            _.remove(@_connectSockets, id)
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
@@ -607,7 +618,19 @@ class Server
 
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
-    return if req.url.startsWith(socketIoRoute)
+    if req.url.startsWith(socketIoRoute)
+      debug('reqUrl: ', req.url)
+      debug('@_connectSockets.length', @_connectSockets.length)
+      debug('request socket exists in connectSockets?', _.includes(@_connectSockets, req.socket))
+      debug('request socket remotePort exists in connectSockets localPorts?', !!_.find(@_connectSockets, { localPort: req.socket.remotePort }))
+      debug('remotePort', req.socket.remotePort)
+
+      ## TODO filter out non-ws requests
+      if !_.find(@_connectSockets, { localPort: req.socket.remotePort })
+        debug('not found')
+        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nrequest not made via Cypress :/')
+        socket.end()
+      return
 
     if (host = req.headers.host) and @_remoteProps and (remoteOrigin = @_remoteOrigin)
       ## get the port from @_remoteProps
