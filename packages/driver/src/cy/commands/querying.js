@@ -395,7 +395,7 @@ module.exports = (Commands, Cypress, cy) => {
         $errUtils.throwErrByPath('contains.regex_conflict')
       }
 
-      _.defaults(options, { log: true, matchCase: true, matchWhitespaces: false })
+      _.defaults(options, { log: true, matchCase: true, matchWhitespace: false })
 
       if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
         $errUtils.throwErrByPath('contains.invalid_argument')

@@ -1897,7 +1897,7 @@ space
         $(`<button id="whitespace">        White   space             </button>`).appendTo(cy.$$('body'))
 
         cy.get('#whitespace').contains('        White   space             ', {
-          matchWhitespaces: true,
+          matchWhitespace: true,
         })
       })
 

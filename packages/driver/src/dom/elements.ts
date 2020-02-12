@@ -984,13 +984,13 @@ const whitespaces = /\s+/g
 const spaces = /[ \t]+/g
 
 // When multiple space characters are considered as a single whitespace in all tags except <pre>.
-const normalizeWhitespaces = (elem, matchWhitespaces) => {
+const normalizeWhitespaces = (elem, matchWhitespace) => {
   let testText = elem.textContent || elem.innerText || $(elem).text()
 
   const whitespaceStyle = $(elem).css('white-space')
 
   if (elem.tagName === 'PRE' ||
-    matchWhitespaces ||
+    matchWhitespace ||
     whitespaceStyle === 'pre' ||
     whitespaceStyle === 'pre-wrap' ||
     whitespaceStyle === 'break-spaces') {
@@ -1010,7 +1010,7 @@ const normalizeWhitespaces = (elem, matchWhitespaces) => {
 
 const getContainsSelector = (text, filter = '', options: {
   matchCase?: boolean
-  matchWhitespaces?: boolean
+  matchWhitespace?: boolean
 } = {}) => {
   const $expr = $.expr[':']
 
@@ -1030,13 +1030,13 @@ const getContainsSelector = (text, filter = '', options: {
 
     // taken from jquery's normal contains method
     cyContainsSelector = function (elem) {
-      let testText = normalizeWhitespaces(elem, options.matchWhitespaces)
+      let testText = normalizeWhitespaces(elem, options.matchWhitespace)
 
       return text.test(testText)
     }
   } else if (_.isString(text)) {
     cyContainsSelector = function (elem) {
-      let testText = normalizeWhitespaces(elem, options.matchWhitespaces)
+      let testText = normalizeWhitespaces(elem, options.matchWhitespace)
 
       if (!options.matchCase) {
         testText = testText.toLowerCase()
