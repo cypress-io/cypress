@@ -29,12 +29,12 @@
     "eslint-plugin-react": "7.16.0",
     "file-loader": "5.0.2",
     "lodash": "4.17.15",
-    "mobx": "5.15.2",
-    "mobx-react": "6.1.5",
+    "mobx": "5.15.4",
+    "mobx-react": "6.1.7",
     "node-sass": "4.13.0",
     "prop-types": "15.7.2",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
+    "react": "16.12.0",
+    "react-dom": "16.12.0",
     "webpack": "4.41.2",
     "webpack-cli": "3.3.10"
   }

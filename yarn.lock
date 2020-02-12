@@ -17123,10 +17123,22 @@ mobx-react@6.1.5:
   dependencies:
     mobx-react-lite "^1.4.2"
 
+mobx-react@6.1.7:
+  version "6.1.7"
+  resolved "https://registry.yarnpkg.com/mobx-react/-/mobx-react-6.1.7.tgz#2fe620851ef33df38e50645101321830a07fc4e2"
+  integrity sha512-TXwqweY7yEbMl+0F5jOO5bHWUbgeNJr8o1or+1NdhWWg6duIqsGW1D6ojNmn2RO27vRJHkZrp4kjv6919nHS0A==
+  dependencies:
+    mobx-react-lite "^1.4.2"
+
 mobx@5.15.2:
   version "5.15.2"
   resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.15.2.tgz#010a6abf49add64a3372966d17a01416e7e40655"
   integrity sha512-eVmHGuSYd0ZU6x8gYMdgLEnCC9kfBJaf7/qJt+/yIxczVVUiVzHvTBjZH3xEa5FD5VJJSh1/Ba4SThE4ErEGjw==
+
+mobx@5.15.4:
+  version "5.15.4"
+  resolved "https://registry.yarnpkg.com/mobx/-/mobx-5.15.4.tgz#9da1a84e97ba624622f4e55a0bf3300fb931c2ab"
+  integrity sha512-xRFJxSU2Im3nrGCdjSuOTFmxVDGeqOHL+TyADCGbT0k4HHqGmx5u2yaHNryvoORpI4DfbzjJ5jPmuv+d7sioFw==
 
 mocha-banner@1.1.2:
   version "1.1.2"
