@@ -166,7 +166,7 @@
     "print-arch": "1.0.0",
     "proxyquire": "2.1.0",
     "ramda": "0.24.1",
-    "request": "cypress-io/request#47cdc67085c9fddc8d39d3172538f3f86c96bb8b",
+    "request": "cypress-io/request#b5af0d1fa47eec97ba980cde90a13e69a2afcd16",
     "request-promise": "4.2.4",
     "shelljs": "0.8.3",
     "shx": "0.3.2",

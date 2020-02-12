@@ -95,7 +95,7 @@
     "pluralize": "8.0.0",
     "ramda": "0.24.1",
     "randomstring": "1.1.5",
-    "request": "cypress-io/request#61db79b1950911bc68ed0d7cd223650131b8d4d6",
+    "request": "cypress-io/request#b5af0d1fa47eec97ba980cde90a13e69a2afcd16",
     "request-promise": "4.2.4",
     "return-deep-diff": "0.3.0",
     "sanitize-filename": "1.6.3",
