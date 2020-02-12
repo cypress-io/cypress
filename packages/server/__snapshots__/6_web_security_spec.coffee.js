@@ -39,7 +39,7 @@ A cross origin error happens when your application navigates to a new URL which 
 
 A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-Cypress does not allow you to navigate to different origin URL within a single test.
+Cypress does not allow you to navigate to a different origin URL within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
@@ -62,7 +62,7 @@ A cross origin error happens when your application navigates to a new URL which 
 
 A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-Cypress does not allow you to navigate to different origin URL within a single test.
+Cypress does not allow you to navigate to a different origin URL within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
@@ -85,7 +85,7 @@ A cross origin error happens when your application navigates to a new URL which 
 
 A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-Cypress does not allow you to navigate to different origin URL within a single test.
+Cypress does not allow you to navigate to a different origin URL within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
