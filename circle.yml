@@ -245,6 +245,18 @@ jobs:
       - run: yarn lint-all
       - store-npm-logs
 
+  cli-visual-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: FORCE_COLOR=2 node cli/bin/cypress info --dev | yarn --silent term-to-html > cypress-info.html
+      # TODO sanitize "cypress info" output to be consistent
+      - store_artifacts:
+          path: cypress-info.html
+      # TODO send generated HTML to visual diffing services
+
   unit-tests:
     <<: *defaults
     parallelism: 1
@@ -1032,6 +1044,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     # unit, integration and e2e tests
+    - cli-visual-tests:
+        requires:
+          - build
     - unit-tests:
         requires:
           - build
