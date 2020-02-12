@@ -7,6 +7,23 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 
 import Markdown from 'markdown-it'
 
+const _copyErrorDetails = (err) => {
+  let details = [
+    `Message: ${err.message}`,
+    `Details: ${err.details}`,
+  ]
+
+  if (err.title) {
+    details.unshift(`Title: ${err.title}`)
+  }
+
+  if (err.stack2) {
+    details.push(`Stack trace: \`\`\`\n${err.stack2}\n\`\`\``)
+  }
+
+  ipc.setClipboardText(details.join('\n\n'))
+}
+
 const md = new Markdown({
   html: true,
   linkify: true,
@@ -83,6 +100,15 @@ class ErrorMessage extends Component {
               </details>
             )}
           </span>
+          <button
+            className='btn btn-default btn-sm'
+            onClick={() => {
+              _copyErrorDetails(err)
+            }}
+          >
+            <i className='fas fa-copy'></i>{' '}
+            Copy to Clipboard
+          </button>
           <button
             className='btn btn-default btn-sm'
             onClick={this.props.onTryAgain}

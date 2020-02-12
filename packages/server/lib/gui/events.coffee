@@ -1,6 +1,7 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
-shell       = require("electron").shell
+
+{ shell, clipboard } = require('electron')
 debug       = require('debug')('cypress:server:events')
 pluralize   = require("pluralize")
 stripAnsi   = require("strip-ansi")
@@ -298,6 +299,10 @@ handleEvent = (options, bus, event, id, type, arg) ->
           err.message = subErr.message or "#{subErr.code} #{subErr.address}:#{subErr.port}"
         err.apiUrl = apiUrl
         sendErr(err)
+
+    when "set:clipboard:text"
+      clipboard.writeText(arg)
+      sendNull()
 
     else
       throw new Error("No ipc event registered for: '#{type}'")
