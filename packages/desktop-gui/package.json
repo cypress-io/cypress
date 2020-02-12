@@ -4,17 +4,13 @@
   "private": true,
   "main": "lib/gui.js",
   "scripts": {
-    "prebuild": "npm run check-deps-pre",
     "build": "webpack",
-    "build-prod": "cross-env NODE_ENV=production npm run build",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
+    "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "cross-env TZ=America/New_York node ../../scripts/cypress open --project .",
     "cypress:run": "cross-env TZ=America/New_York node ../../scripts/cypress run --project .",
-    "postinstall": "echo '@packages/desktop-gui needs: npm run build'",
-    "prewatch": "npm run check-deps-pre",
-    "watch": "npm run build -- --watch --progress"
+    "postinstall": "echo '@packages/desktop-gui needs: yarn build'",
+    "watch": "yarn build -- --watch --progress"
   },
   "devDependencies": {
     "@babel/polyfill": "7.7.0",
@@ -22,7 +18,7 @@
     "@cypress/json-schemas": "5.34.0",
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/fontawesome-free": "5.11.2",
-    "bin-up": "1.2.2",
+    "@packages/web-config": "*",
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
