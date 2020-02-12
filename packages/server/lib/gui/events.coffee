@@ -1,6 +1,5 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
-
 { shell, clipboard } = require('electron')
 debug       = require('debug')('cypress:server:events')
 pluralize   = require("pluralize")
