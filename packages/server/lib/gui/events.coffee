@@ -110,7 +110,10 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onBrowserClose: ->
           send({browserClosed: true})
       })
-      .catch(sendErr)
+      .catch (err) =>
+        err.title ?= 'Error launching browser'
+
+        sendErr(err)
 
     when "begin:auth"
       onMessage = (msg) ->
