@@ -254,7 +254,7 @@ jobs:
       - run: mkdir cli-snapshots
       - run:
           # TODO sanitize "cypress info" output to be consistent
-          command: node cli/bin/cypress info --dev | yarn --silent term-to-html > cli-snapshots/cypress-info.html
+          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli-snapshots/cypress-info.html
           environment:
             FORCE_COLOR: 2
       - run:
