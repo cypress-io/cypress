@@ -1131,16 +1131,6 @@
     "@babel/helper-plugin-utils" "^7.8.3"
     babel-plugin-dynamic-import-node "^2.3.0"
 
-"@babel/plugin-transform-modules-commonjs@7.8.3", "@babel/plugin-transform-modules-commonjs@^7.8.3":
-  version "7.8.3"
-  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.8.3.tgz#df251706ec331bd058a34bdd72613915f82928a5"
-  integrity sha512-JpdMEfA15HZ/1gNuB9XEDlZM1h/gF/YOH7zaZzQu2xCFRfwc01NXBMHHSTT6hRjlXJJs5x/bfODM3LiCk94Sxg==
-  dependencies:
-    "@babel/helper-module-transforms" "^7.8.3"
-    "@babel/helper-plugin-utils" "^7.8.3"
-    "@babel/helper-simple-access" "^7.8.3"
-    babel-plugin-dynamic-import-node "^2.3.0"
-
 "@babel/plugin-transform-modules-commonjs@^7.4.4", "@babel/plugin-transform-modules-commonjs@^7.5.0", "@babel/plugin-transform-modules-commonjs@^7.7.0":
   version "7.7.0"
   resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.7.0.tgz#3e5ffb4fd8c947feede69cbe24c9554ab4113fe3"
@@ -1149,6 +1139,16 @@
     "@babel/helper-module-transforms" "^7.7.0"
     "@babel/helper-plugin-utils" "^7.0.0"
     "@babel/helper-simple-access" "^7.7.0"
+    babel-plugin-dynamic-import-node "^2.3.0"
+
+"@babel/plugin-transform-modules-commonjs@^7.8.3":
+  version "7.8.3"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-transform-modules-commonjs/-/plugin-transform-modules-commonjs-7.8.3.tgz#df251706ec331bd058a34bdd72613915f82928a5"
+  integrity sha512-JpdMEfA15HZ/1gNuB9XEDlZM1h/gF/YOH7zaZzQu2xCFRfwc01NXBMHHSTT6hRjlXJJs5x/bfODM3LiCk94Sxg==
+  dependencies:
+    "@babel/helper-module-transforms" "^7.8.3"
+    "@babel/helper-plugin-utils" "^7.8.3"
+    "@babel/helper-simple-access" "^7.8.3"
     babel-plugin-dynamic-import-node "^2.3.0"
 
 "@babel/plugin-transform-modules-systemjs@^7.4.4", "@babel/plugin-transform-modules-systemjs@^7.5.0", "@babel/plugin-transform-modules-systemjs@^7.7.0":
@@ -2053,19 +2053,19 @@
   resolved "https://registry.yarnpkg.com/@cypress/bower-kendo-ui/-/bower-kendo-ui-0.0.2.tgz#62ea93d7f0653c0b91a7a4e5e9ede9d26d5990ea"
   integrity sha1-YuqT1/BlPAuRp6Tl6e3p0m1ZkOo=
 
-"@cypress/browserify-preprocessor@2.1.3":
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/@cypress/browserify-preprocessor/-/browserify-preprocessor-2.1.3.tgz#abbb8ba52ff33d70745c056e8fc675db2276a539"
-  integrity sha512-vZskc/EKejnmdm4fMGB1Fm39WelsF4HJHeI5q8I0LvGnrdvxSiCbn27TbhCM5Enq6Fkinf3f7oiHS/m2OUgzdA==
+"@cypress/browserify-preprocessor@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/@cypress/browserify-preprocessor/-/browserify-preprocessor-2.1.4.tgz#31f3e35969b591da0298eb801d6905c64c7151cf"
+  integrity sha512-149D1E2UzY7kCjnXDofx61MeJ6HQczj5XCAPjRUPpYr/A7T/O4C0IlTLZYV2xxnDD68d71NfT/cT8s0sfi27RQ==
   dependencies:
     "@babel/core" "7.4.5"
     "@babel/plugin-proposal-class-properties" "7.3.0"
     "@babel/plugin-proposal-object-rest-spread" "7.3.2"
-    "@babel/plugin-transform-modules-commonjs" "7.8.3"
     "@babel/plugin-transform-runtime" "7.2.0"
     "@babel/preset-env" "7.4.5"
     "@babel/preset-react" "7.0.0"
     "@babel/runtime" "7.3.1"
+    babel-plugin-add-module-exports "1.0.2"
     babelify "10.0.0"
     bluebird "3.5.3"
     browserify "16.2.3"
@@ -12068,13 +12068,6 @@ formatio@1.1.1:
   dependencies:
     samsam "~1.1"
 
-formatio@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/formatio/-/formatio-1.2.0.tgz#f3b2167d9068c4698a8d51f4f760a39a54d818eb"
-  integrity sha1-87IWfZBoxGmKjVH092CjmlTYGOs=
-  dependencies:
-    samsam "1.x"
-
 formidable@^1.2.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.2.1.tgz#70fb7ca0290ee6ff961090415f4b3df3d2082659"
@@ -16351,11 +16344,6 @@ lolex@4.1.0:
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-4.1.0.tgz#ecdd7b86539391d8237947a3419aa8ac975f0fe1"
   integrity sha512-BYxIEXiVq5lGIXeVHnsFzqa1TxN5acnKnPCdlZSpzm8viNEOhiigupA4vTQ9HEFQ6nLTQ9wQOgBknJgzUYQ9Aw==
 
-lolex@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/lolex/-/lolex-1.6.0.tgz#3a9a0283452a47d7439e72731b9e07d7386e49f6"
-  integrity sha1-OpoCg0UqR9dDnnJzG54H1zhuSfY=
-
 lolex@^2.4.2:
   version "2.7.5"
   resolved "https://registry.yarnpkg.com/lolex/-/lolex-2.7.5.tgz#113001d56bfc7e02d56e36291cc5c413d1aa0733"
@@ -17430,7 +17418,7 @@ native-or-lie@1.0.2:
   dependencies:
     lie "*"
 
-native-promise-only@^0.8.1, native-promise-only@~0.8.1:
+native-promise-only@~0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/native-promise-only/-/native-promise-only-0.8.1.tgz#20a318c30cb45f71fe7adfbf7b21c99c1472ef11"
   integrity sha1-IKMYwwy0X3H+et+/eyHJnBRy7xE=
@@ -21367,7 +21355,7 @@ samsam@1.1.2:
   resolved "https://registry.yarnpkg.com/samsam/-/samsam-1.1.2.tgz#bec11fdc83a9fda063401210e40176c3024d1567"
   integrity sha1-vsEf3IOp/aBjQBIQ5AF2wwJNFWc=
 
-samsam@1.3.0, samsam@1.x, samsam@^1.1.3:
+samsam@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/samsam/-/samsam-1.3.0.tgz#8d1d9350e25622da30de3e44ba692b5221ab7c50"
   integrity sha512-1HwIYD/8UlOtFS3QO3w7ey+SdSDFE4HRNLZoZRYVQefrOY3l17epswImeB1ijgJFQJodIaHcwkp3r/myBjFVbg==
@@ -21871,6 +21859,11 @@ sinon-chai@3.3.0:
   resolved "https://registry.yarnpkg.com/sinon-chai/-/sinon-chai-3.3.0.tgz#8084ff99451064910fbe2c2cb8ab540c00b740ea"
   integrity sha512-r2JhDY7gbbmh5z3Q62pNbrjxZdOAjpsqW/8yxAZRSqLZqowmfGZPGUZPFf3UX36NLis0cv8VEM5IJh9HgkSOAA==
 
+sinon-chai@3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/sinon-chai/-/sinon-chai-3.4.0.tgz#06fb88dee80decc565106a3061d380007f21e18d"
+  integrity sha512-BpVxsjEkGi6XPbDXrgWUe7Cb1ZzIfxKUbu/MmH5RoUnS7AXpKo3aIYIyQUg0FMvlUL05aPt7VZuAdaeQhEnWxg==
+
 sinon@1.17.7:
   version "1.17.7"
   resolved "https://registry.yarnpkg.com/sinon/-/sinon-1.17.7.tgz#4542a4f49ba0c45c05eb2e9dd9d203e2b8efe0bf"
@@ -21880,20 +21873,6 @@ sinon@1.17.7:
     lolex "1.3.2"
     samsam "1.1.2"
     util ">=0.10.3 <1"
-
-sinon@2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-2.4.1.tgz#021fd64b54cb77d9d2fb0d43cdedfae7629c3a36"
-  integrity sha512-vFTrO9Wt0ECffDYIPSP/E5bBugt0UjcBQOfQUMh66xzkyPEnhl/vM2LRZi2ajuTdkH07sA6DzrM6KvdvGIH8xw==
-  dependencies:
-    diff "^3.1.0"
-    formatio "1.2.0"
-    lolex "^1.6.0"
-    native-promise-only "^0.8.1"
-    path-to-regexp "^1.7.0"
-    samsam "^1.1.3"
-    text-encoding "0.6.4"
-    type-detect "^4.0.0"
 
 sinon@5.1.1:
   version "5.1.1"
@@ -22145,11 +22124,10 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#4d3076af68ea8192c
   version "3.1.2-patch1"
   resolved "https://codeload.github.com/cypress-io/socket.io-circular-parser/tar.gz/4d3076af68ea8192c2e53f9d185eaa166359b4c5"
   dependencies:
-    circular-json "^0.4.0"
+    circular-json "0.5.9"
     component-emitter "1.2.1"
-    debug "~2.6.4"
+    debug "~4.1.0"
     has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
-    isarray "2.0.1"
 
 socket.io-client@2.3.0:
   version "2.3.0"
@@ -23203,11 +23181,6 @@ test-exclude@^5.2.3:
     minimatch "^3.0.4"
     read-pkg-up "^4.0.0"
     require-main-filename "^2.0.0"
-
-text-encoding@0.6.4:
-  version "0.6.4"
-  resolved "https://registry.yarnpkg.com/text-encoding/-/text-encoding-0.6.4.tgz#e399a982257a276dae428bb92845cb71bdc26d19"
-  integrity sha1-45mpgiV6J22uQou5KEXLcb3CbRk=
 
 text-extensions@^1.0.0:
   version "1.9.0"
