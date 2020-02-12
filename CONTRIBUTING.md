@@ -5,8 +5,8 @@ Thanks for taking the time to contribute! :smile:
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
 - Join the [Cypress Gitter chat](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
-- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/.github/CONTRIBUTING.md#adding-examples).
-- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/.github/CONTRIBUTING.md).
+- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
+- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
 **Want to dive deeper into how Cypress works? There are several ways you can help with the development of Cypress:**
@@ -119,7 +119,7 @@ Some opened issue are questions, not bug reports or feature requests. Issues are
 
 #### Other open source repos
 
-Issues may be opened about wanting changes to our [documentation](), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
+Issues may be opened about wanting changes to our [documentation](https://github.com/cypress-io/cypress-documentation), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
 
 - Thank them for their contribution.
 - Explain that this repo is only for bugs or feature requests of the Cypress product.
@@ -225,7 +225,7 @@ Some issues are resolved by the community, by giving some guidance or a workarou
 ## Writing Documentation
 
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/.github/CONTRIBUTING.md).
+See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Writing code
 
@@ -401,7 +401,7 @@ DEBUG=cypress:launcher
 ### Coding Style
 
 We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rules specified in
-[@cypress/eslint-plugin-dev](https://github.com/cypress-io/cypress-eslint-plugin-dev) plugin.
+[@cypress/eslint-plugin-dev](https://github.com/cypress-io/eslint-plugin-cypress) plugin.
 
 When you edit files, you can quickly fix all changed files before you commit using
 
@@ -501,7 +501,7 @@ The repository is setup with two main (protected) branches.
 
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./.github/ISSUE_TEMPLATE.md)**.
 - PR's can be opened before all the work is finished. In fact we encourage this! Please write `[WIP]` in the title of your Pull Request if your PR is not ready for review - someone will review your PR as soon as the `[WIP]` is removed.
-- Fill out the [Pull Request Template](./PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
+- Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 

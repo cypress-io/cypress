@@ -27,11 +27,12 @@
     "@packages/coffee": "*",
     "@packages/ts": "*",
     "chai": "3.5.0",
+    "chai-as-promised": "7.1.1",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
     "shelljs": "0.8.3",
-    "sinon": "2.4.1",
-    "sinon-chai": "3.3.0",
+    "sinon": "5.1.1",
+    "sinon-chai": "3.4.0",
     "typescript": "3.5.3"
   },
   "files": [
