@@ -108,7 +108,6 @@ describe "driver/src/cypress/cy", ->
       .get("input:first")
       .then ->
         invocationStack = cy.queue.find({ name: "get" }).get("invocationStack")
-        expect(invocationStack).to.include("command invocation stack")
         expect(invocationStack).to.include("cy_spec.coffee")
 
     it "stores invocation stack for chained command", ->
@@ -117,7 +116,6 @@ describe "driver/src/cypress/cy", ->
       .find("input")
       .then ->
         invocationStack = cy.queue.find({ name: "find" }).get("invocationStack")
-        expect(invocationStack).to.include("command invocation stack")
         expect(invocationStack).to.include("cy_spec.coffee")
 
   context "custom commands", ->
@@ -159,7 +157,6 @@ describe "driver/src/cypress/cy", ->
         .getInput()
         .then ->
           invocationStack = cy.queue.find({ name: "getInput" }).get("invocationStack")
-          expect(invocationStack).to.include("command invocation stack")
           expect(invocationStack).to.include("cy_spec.coffee")
 
       it "stores invocation stack for chained command", ->
@@ -168,7 +165,6 @@ describe "driver/src/cypress/cy", ->
         .findInput()
         .then ->
           invocationStack = cy.queue.find({ name: "findInput" }).get("invocationStack")
-          expect(invocationStack).to.include("command invocation stack")
           expect(invocationStack).to.include("cy_spec.coffee")
 
     describe "parent commands", ->

@@ -1,11 +1,11 @@
 const _ = require('lodash')
 const { codeFrameColumns } = require('@babel/code-frame')
-const StackUtils = require('stack-utils')
+const errorStackParser = require('error-stack-parser')
 const path = require('path')
 
 const $sourceMapUtils = require('./source_map_utils')
 
-const stackLineRegex = /^(\s*)at /
+const stackLineRegex = /^((\s*)at )?.*@?.*\:\d+\:\d+$/
 
 // returns tuple of [message, stack]
 const splitStack = (stack) => {
@@ -100,9 +100,34 @@ const getSourceDetails = (generatedDetails) => {
   }
 }
 
-const getSourceDetailsForLine = (stackUtil, projectRoot, line) => {
+const functionExtrasRegex = /(\/<|<\/<)$/
+
+const cleanFunctionName = (functionName) => {
+  if (!_.isString(functionName)) return '<unknown>'
+
+  return functionName.replace(functionExtrasRegex, '')
+}
+
+const parseLine = (line) => {
+  const isStackLine = stackLineRegex.test(line)
+
+  if (!isStackLine) return
+
+  const parsed = errorStackParser.parse({ stack: line })[0]
+
+  if (!parsed) return
+
+  return {
+    line: parsed.lineNumber,
+    column: parsed.columnNumber,
+    file: parsed.fileName,
+    function: cleanFunctionName(parsed.functionName),
+  }
+}
+
+const getSourceDetailsForLine = (projectRoot, line) => {
   const whitespace = getWhitespace(line)
-  const generatedDetails = stackUtil.parseLine(line)
+  const generatedDetails = parseLine(line)
 
   // if it couldn't be parsed, it's a message line
   if (!generatedDetails) {
@@ -134,14 +159,14 @@ const reconstructStack = (parsedStack) => {
 
     const { whitespace, relativeFile, function: fn, line, column } = parsedLine
 
-    return `${whitespace}at ${fn || '<unknown>'} (${relativeFile || '<unknown>'}:${line}:${column})`
+    return `${whitespace}at ${fn} (${relativeFile || '<unknown>'}:${line}:${column})`
   }).join('\n')
 }
 
 const getSourceStack = (stack, projectRoot) => {
   if (!_.isString(stack)) return {}
 
-  const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, new StackUtils(), projectRoot)
+  const getSourceDetailsWithStackUtil = _.partial(getSourceDetailsForLine, projectRoot)
   const parsed = _.map(stack.split('\n'), getSourceDetailsWithStackUtil)
 
   return {
