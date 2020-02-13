@@ -163,22 +163,26 @@
 
 .browsers-list {
   margin: 5px;
-  border: 1px solid #c7c7c7;
-  border-radius: 4px;
 
   li {
     padding: 9px 15px;
     white-space: nowrap;
   }
 
-  &>a.dropdown-chosen {
+  .dropdown-chosen {
     border-radius: 4px;
+    border: 1px solid #c7c7c7;
     line-height: 28px !important;
     background-color: #f6f6f6;
 
     img {
       position: relative;
       top: -1px;
+    }
+
+    &.disabled,
+    &:active {
+      background-color: #dedede;
     }
   }
 

@@ -49,9 +49,9 @@ class Dropdown extends Component {
   _button () {
     if (this.props.others.length) {
       return (
-        <a onClick={this._toggleOpen} className={cs('dropdown-chosen', { disabled: this.props.disabled })}>
+        <button onClick={this._toggleOpen} className={cs('dropdown-chosen', { disabled: this.props.disabled })}>
           {this._buttonContent()}
-        </a>
+        </button>
       )
     }
 
@@ -64,10 +64,10 @@ class Dropdown extends Component {
 
   _buttonContent () {
     return (
-      <span>
+      <>
         {this.props.renderItem(this.props.chosen)}{' '}
         {this._caret()}
-      </span>
+      </>
     )
   }
 
