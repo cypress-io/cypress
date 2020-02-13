@@ -31,7 +31,6 @@ describe "lib/config", ->
       expect(errors.throw).have.been.calledOnce
 
     it "warns for non-production CYPRESS_ENV", ->
-      sinon.stub(errors, "throw")
       sinon.stub(errors, "warning").withArgs("NON_PRODUCTION_CYPRESS_ENV", "staging")
       process.env.CYPRESS_ENV = "staging"
       cfg = {
@@ -39,8 +38,7 @@ describe "lib/config", ->
       }
       options = {}
       config.mergeDefaults(cfg, options)
-      expect(errors.warning).have.been.calledOnce
-      expect(errors.throw).not.to.be.called
+      expect(errors.throw).have.been.calledOnce
 
     it "allows production CYPRESS_ENV", ->
       sinon.stub(errors, "throw")
@@ -50,7 +48,6 @@ describe "lib/config", ->
       }
       options = {}
       config.mergeDefaults(cfg, options)
-      expect(errors.warning).not.to.be.called
       expect(errors.throw).not.to.be.called
 
   context ".get", ->
