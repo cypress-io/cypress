@@ -53,6 +53,11 @@ export type FoundBrowser = Omit<Browser, 'versionRegex' | 'binary'> & {
   custom?: boolean
 }
 
+/**
+ * Partial browser object, returned by an OS-specific launcher helper.
+ */
+export type DetectedBrowser = Pick<FoundBrowser, 'name' | 'path' | 'version'>
+
 // all common type definition for this module
 
 export type NotInstalledError = Error & { notInstalled: boolean }

@@ -2,12 +2,12 @@ import { log } from '../log'
 import { notInstalledErr } from '../errors'
 import { prop, tap } from 'ramda'
 import execa from 'execa'
-import * as fs from 'fs-extra'
+import fs from 'fs-extra'
 import * as path from 'path'
 import * as plist from 'plist'
 
 /** parses Info.plist file from given application and returns a property */
-export function parse (p: string, property: string): Promise<string> {
+export function parsePlist (p: string, property: string): Promise<string> {
   const pl = path.join(p, 'Contents', 'Info.plist')
 
   log('reading property file "%s"', pl)
@@ -16,7 +16,7 @@ export function parse (p: string, property: string): Promise<string> {
     const msg = `Info.plist not found: ${pl}
     ${e.message}`
 
-    log('could not read Info.plist for %s', pl)
+    log('could not read Info.plist %o', { pl, e })
     throw notInstalledErr('', msg)
   }
 
@@ -46,8 +46,7 @@ export function mdfind (id: string): Promise<string> {
   }
 
   return execa
-  .shell(cmd)
-  .then((result) => result.stdout)
+  .stdout(cmd)
   .then(tap(logFound))
   .catch(failedToFind)
 }
@@ -57,21 +56,25 @@ export type AppInfo = {
   version: string
 }
 
+export type FindAppParams = {
+  appName: string
+  executable: string
+  appId: string
+  versionProperty: string
+}
+
 function formApplicationPath (appName: string) {
   return path.join('/Applications', appName)
 }
 
 /** finds an application and its version */
-export function findApp (
-  appName: string,
-  executable: string,
-  appId: string,
-  versionProperty: string
-): Promise<AppInfo> {
+export function findApp ({ appName, executable, appId, versionProperty }: FindAppParams): Promise<AppInfo> {
   log('looking for app %s id %s', executable, appId)
 
   const findVersion = (foundPath: string) => {
-    return parse(foundPath, versionProperty).then((version) => {
+    return parsePlist(foundPath, versionProperty).then((version) => {
+      log('got plist: %o', { foundPath, version })
+
       return {
         path: path.join(foundPath, executable),
         version,
