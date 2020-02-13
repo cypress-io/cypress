@@ -15,7 +15,7 @@ onRequest = (req, res, expectedToken, fileServerFolder) ->
   token = req.headers['x-cypress-authorization']
 
   if token != expectedToken
-    debug('authorization failed on file_server request', { reqUrl: req.url, expectedToken, token })
+    debug('authorization failed on file_server request %o', { reqUrl: req.url, expectedToken, token })
     res.statusCode = 401
     res.end()
     return

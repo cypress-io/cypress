@@ -38,6 +38,13 @@ templateEngine = require("./template_engine")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
+NON_PROXY_PATH_WHITELIST = [
+  '/__',
+  '/',
+  '/__cypress/runner/cypress_runner.css',
+  '/__cypress/static/favicon.ico'
+]
+
 isResponseHtml = (contentType, responseBuffer) ->
   if contentType
     return contentType is "text/html"
@@ -48,6 +55,12 @@ isResponseHtml = (contentType, responseBuffer) ->
   return false
 
 setProxiedUrl = (req) ->
+  ## proxiedUrl is the full URL with scheme, host, and port
+  ## it will only be fully-qualified if the request was proxied.
+
+  ## this function will set the URL of the request to be the path
+  ## only, which can then be used to proxy the request.
+
   ## bail if we've already proxied the url
   return if req.proxiedUrl
 
@@ -59,6 +72,12 @@ setProxiedUrl = (req) ->
   req.proxiedUrl = uri.removeDefaultPort(req.url).format()
 
   req.url = uri.getPath(req.url)
+
+_ensureInternalRequests = (req, res, next) ->
+  if req.proxiedUrl.startsWith('/') and !_.includes(NON_PROXY_PATH_WHITELIST, _.trimEnd(req.proxiedUrl, '/'))
+    return res.redirect('/__')
+
+  next()
 
 notSSE = (req, res) ->
   req.headers.accept isnt "text/event-stream" and compression.filter(req, res)
@@ -90,6 +109,8 @@ class Server
     ## since we use absolute paths, configure express-handlebars to not automatically find layouts
     ## https://github.com/cypress-io/cypress/issues/2891
     app.engine("html", templateEngine.render)
+
+    app.use _ensureInternalRequests
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
