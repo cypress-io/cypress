@@ -19,16 +19,18 @@ exports['e2e non-proxied spec / passes'] = `
 
   non proxied e2e
     ✓ has the expected look
+    ✓ cannot connect to ws
+    ✓ can connect to proxied ws
 
 
-  1 passing
+  3 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -46,9 +48,9 @@ exports['e2e non-proxied spec / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  spec.js                                  XX:XX        1        1        -        -        - │
+  │ ✔  spec.js                                  XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `
