@@ -355,7 +355,7 @@ class Server
   _onRequest: (headers, automationRequest, options) ->
     @_request.sendPromise(headers, automationRequest, options)
 
-  _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
+  _onResolveUrl: (urlStr, headers, automationRequest, options = { headers: {} }) ->
     debug("resolving visit %o", {
       url: urlStr
       headers
