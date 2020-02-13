@@ -385,6 +385,8 @@ class Server
       if not fullyQualifiedRe.test(urlStr)
         handlingLocalFile = true
 
+        options.headers['x-cypress-authorization'] = @_fileServer.token
+
         @_remoteVisitingUrl = true
 
         @_onDomainSet(urlStr, options)
