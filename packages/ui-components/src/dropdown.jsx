@@ -75,7 +75,7 @@ class Dropdown extends Component {
     if (!this.props.others.length || this.props.disabled) return null
 
     return (
-      <span>
+      <span className='dropdown-toggle'>
         <span className='dropdown-caret'></span>
         <span className='sr-only'>Toggle Dropdown</span>
       </span>
