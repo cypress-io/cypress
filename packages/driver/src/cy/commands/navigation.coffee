@@ -68,14 +68,22 @@ bothUrlsMatchAndRemoteHasHash = (current, remote) ->
         ## both must have the same query params
         (current.search is remote.search)
 
-cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
-  $utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
+cannotVisitDifferentOrigin = (origin, previousDomainVisited, reason, log) ->
+  errOpts = {
     onFail: log
     args: {
       previousDomain: previousDomainVisited
       attemptedDomain: origin
     }
-  })
+  } 
+
+  if reason is 'differentProtocol'
+    $utils.throwErrByPath("visit.cannot_visit_different_protocol", errOpts)
+
+  if reason is 'differentPort'
+    $utils.throwErrByPath("visit.cannot_visit_different_port", errOpts)
+
+  $utils.throwErrByPath("visit.cannot_visit_different_superdomain", errOpts)
 
 specifyFileByRelativePath = (url, log) ->
   $utils.throwErrByPath("visit.specify_file_by_relative_path", {
@@ -648,9 +656,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         existingAuth = remote.auth ? ""
 
         if previousDomainVisited and remote.originPolicy isnt existing.originPolicy
+          reason = ''
+
+          if remote.protocol isnt existing.protocol
+            reason = 'differentProtocol'
+          if remote.port isnt existing.port
+            reason = 'differentPort'
           ## if we've already visited a new superDomain
           ## then die else we'd be in a terrible endless loop
-          return cannotVisit2ndDomain(remote.origin, previousDomainVisited, options._log)
+          return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, reason, options._log)
 
         current = $Location.create(win.location.href)
 
@@ -718,10 +732,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             .then ->
               onLoad(resp)
           else
-            ## if we've already visited a new superDomain
+            ## if we've already visited a new origin
             ## then die else we'd be in a terrible endless loop
             if previousDomainVisited
-              return cannotVisit2ndDomain(remote.origin, previousDomainVisited, options._log)
+              reason = ''
+
+              if remote.protocol isnt existing.protocol
+                reason = 'differentProtocol'
+              if remote.port isnt existing.port
+                reason = 'differentPort'
+              
+              return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, reason, options._log)
 
             ## tell our backend we're changing domains
             ## TODO: add in other things we want to preserve

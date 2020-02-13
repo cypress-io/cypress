@@ -1071,10 +1071,40 @@ module.exports = {
       URL from the `options` object: {{optionsUrl}}
       URL from the `url` parameter: {{url}}
     """
-    cannot_visit_2nd_domain: """
+    cannot_visit_different_protocol: """
       #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-      A new URL is considered different origin if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+      The new URL is considered different origin because the 'protocol' is different.
+
+      You may only 'cy.visit()' same origin URLs within a single test.
+
+      The previous domain you visited was: '{{previousDomain}}'
+
+      You're attempting to visit this URL: '{{attemptedDomain}}'
+
+      You may need to restructure some of your test code to avoid this problem.
+
+      https://on.cypress.io/cannot-visit-different-origin-domain
+    """
+    cannot_visit_different_port: """
+      #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
+
+      The new URL is considered different origin because the 'port' is different.
+
+      You may only 'cy.visit()' same origin URLs within a single test.
+
+      The previous domain you visited was: '{{previousDomain}}'
+
+      You're attempting to visit this URL: '{{attemptedDomain}}'
+
+      You may need to restructure some of your test code to avoid this problem.
+
+      https://on.cypress.io/cannot-visit-different-origin-domain
+    """
+    cannot_visit_different_superdomain: """
+      #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
+
+      The new URL is considered different origin because the 'superdomain' is different.
 
       You may only 'cy.visit()' same origin URLs within a single test.
 

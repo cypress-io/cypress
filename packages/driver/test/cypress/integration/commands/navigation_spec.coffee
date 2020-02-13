@@ -1100,39 +1100,39 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("The new URL is considered different origin because the 'port' is different.")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy
-          .visit("http://localhost:3500/fixtures/generic.html")
-          .visit("http://localhost:3501/fixtures/generic.html")
+        cy.visit("http://localhost:3500/fixtures/generic.html")
+        cy.visit("http://localhost:3501/fixtures/generic.html")
 
       it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("The new URL is considered different origin because the 'protocol' is different.")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy
-          .visit("http://localhost:3500/fixtures/generic.html")
-          .visit("https://localhost:3500/fixtures/generic.html")
+        cy.visit("http://localhost:3500/fixtures/generic.html")
+        cy.visit("https://localhost:3500/fixtures/generic.html")
 
-      it "throws when attempting to visit a 2nd domain on different host", (done) ->
+      it "throws when attempting to visit a 2nd domain on different superdomain", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("The new URL is considered different origin because the 'superdomain' is different.")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy
-          .visit("http://localhost:3500/fixtures/generic.html")
-          .visit("http://google.com:3500/fixtures/generic.html")
+        cy.visit("http://localhost:3500/fixtures/generic.html")
+        cy.visit("http://google.com:3500/fixtures/generic.html")
 
       it "throws attemping to visit 2 unique ip addresses", (done) ->
         $autIframe = cy.state("$autIframe")
