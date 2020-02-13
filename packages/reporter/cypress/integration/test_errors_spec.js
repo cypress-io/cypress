@@ -213,10 +213,12 @@ describe('test errors', function () {
     it('clicking prints to console', function () {
       cy.spy(this.runner, 'emit')
       cy.get('.runnable-err-print').click().then(() => {
-        expect(this.runner.emit).to.be.calledWith('runner:console:error', {
-          commandId: undefined,
-          testId: 'r3',
-        })
+        expect(this.runner.emit).to.be.calledWith('runner:console:error')
+
+        const err = this.runner.emit.withArgs('runner:console:error').lastCall.args[1].err
+
+        expect(err.message).to.equal(this.commandErr.message)
+        expect(err.stack).to.equal(this.commandErr.stack)
       })
     })
   })
