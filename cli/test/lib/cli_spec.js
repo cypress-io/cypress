@@ -98,13 +98,12 @@ describe('cli', () => {
       .join(os.eol)
     }
 
-    it('allows staging environment', () => {
+    it('allows and warns when staging environment', () => {
       const options = {
         env: {
           CYPRESS_ENV: 'staging',
         },
-        // we are only interested in the exit code
-        filter: ['code', 'stderr'],
+        filter: ['code', 'stderr', 'stdout'],
       }
 
       return execa('bin/cypress', ['help'], options).then(snapshot)

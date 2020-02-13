@@ -139,6 +139,17 @@ function isValidCypressEnvValue (value) {
 }
 
 /**
+ * Confirms if given value is a non-production CYPRESS_ENV value.
+ * Undefined values are valid, because the system can set the default one.
+ *
+ * @param {string} value
+ * @example util.isNonProductionCypressEnvValue(process.env.CYPRESS_ENV)
+ */
+function isNonProductionCypressEnvValue (value) {
+  return !_.isUndefined(value) && value !== 'production'
+}
+
+/**
  * Prints NODE_OPTIONS using debug() module, but only
  * if DEBUG=cypress... is set
  */
@@ -229,6 +240,7 @@ const util = {
   normalizeModuleOptions,
   parseOpts,
   isValidCypressEnvValue,
+  isNonProductionCypressEnvValue,
   printNodeOptions,
 
   isCi () {
