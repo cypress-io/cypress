@@ -5,7 +5,8 @@ const path = require('path')
 
 const $sourceMapUtils = require('./source_map_utils')
 
-const stackLineRegex = /^((\s*)at )?.*@?.*\:\d+\:\d+$/
+const whitespaceRegex = /^(\s*)\S*/
+const stackLineRegex = /^\s*at ?.*@?\(?.*\:\d+\:\d+\)?$/
 
 // returns tuple of [message, stack]
 const splitStack = (stack) => {
@@ -75,7 +76,7 @@ const getWhitespace = (line) => {
   if (!line) return ''
 
   // eslint-disable-next-line no-unused-vars
-  const [__, whitespace] = line.match(stackLineRegex) || []
+  const [__, whitespace] = line.match(whitespaceRegex) || []
 
   return whitespace || ''
 }

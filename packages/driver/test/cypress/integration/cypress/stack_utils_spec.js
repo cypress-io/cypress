@@ -7,8 +7,8 @@ describe('driver/src/cypress/stack_utils', () => {
     const stack = `We do not want this message
 or this message
 or this one
-  at we (want/this/stack/line)
-  at and (this/line/too)
+  at we (want/this/stack/line:1:2)
+  at and (this/line/too:3:4)
 `
 
     it('returns stack if no error', () => {
@@ -19,8 +19,8 @@ or this one
       expect($stackUtils.combineMessageAndStack(err, stack)).to.equal(`We want this message
 
 and this line
-  at we (want/this/stack/line)
-  at and (this/line/too)
+  at we (want/this/stack/line:1:2)
+  at and (this/line/too:3:4)
 `)
     })
 
@@ -30,7 +30,7 @@ and this line
       expect($stackUtils.combineMessageAndStack(err, stack2)).to.equal(`We want this message
 
 and this line
-  at and (this/line/too)
+  at and (this/line/too:3:4)
 `)
     })
   })
