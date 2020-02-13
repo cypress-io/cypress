@@ -1,37 +1,46 @@
 const $stackUtils = require('../../../../src/cypress/stack_utils')
 const $sourceMapUtils = require('../../../../src/cypress/source_map_utils')
 
+const getError = (message) => {
+  return new Error(message)
+}
+
+const __getSpecFrameStack = (message) => {
+  return new Error(message)
+}
+
 describe('driver/src/cypress/stack_utils', () => {
   context('.combineMessageAndStack', () => {
-    const err = { message: 'We want this message\n\nand this line' }
-    const stack = `We do not want this message
-or this message
-or this one
-  at we (want/this/stack/line:1:2)
-  at and (this/line/too:3:4)
-`
+    const newMessage = 'We want this message\n\nand this line'
+    const message = 'not this line\n\n or this line'
 
     it('returns stack if no error', () => {
-      expect($stackUtils.combineMessageAndStack(undefined, stack)).to.equal(stack)
+      const err = getError(message)
+
+      expect($stackUtils.combineMessageAndStack(undefined, err.stack)).to.equal(err.stack)
     })
 
     it('returns message of error combined with stack', () => {
-      expect($stackUtils.combineMessageAndStack(err, stack)).to.equal(`We want this message
+      const err = getError(message)
+
+      const expectedStack = err.stack.replace(`Error: ${message}\n`, '')
+
+      expect($stackUtils.combineMessageAndStack(newMessage, err.stack)).to.equal(`We want this message
 
 and this line
-  at we (want/this/stack/line:1:2)
-  at and (this/line/too:3:4)
-`)
+${expectedStack}`)
     })
 
     it('removes lines with __getSpecFrameStack', () => {
-      const stack2 = stack.replace('at we', 'at __getSpecFrameStack')
+      const err = __getSpecFrameStack(message)
+      const expectedStack = err.stack.replace(`Error: ${message}\n`, '').split('\n').filter((line) => {
+        return line.indexOf('__getSpecFrameStack') === -1
+      }).join('\n')
 
-      expect($stackUtils.combineMessageAndStack(err, stack2)).to.equal(`We want this message
+      expect($stackUtils.combineMessageAndStack(newMessage, err.stack)).to.equal(`We want this message
 
 and this line
-  at and (this/line/too:3:4)
-`)
+${expectedStack}`)
     })
   })
 

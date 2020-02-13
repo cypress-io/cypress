@@ -6,7 +6,7 @@ const path = require('path')
 const $sourceMapUtils = require('./source_map_utils')
 
 const whitespaceRegex = /^(\s*)\S*/
-const stackLineRegex = /^\s*at ?.*@?\(?.*\:\d+\:\d+\)?$/
+const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 
 // returns tuple of [message, stack]
 const splitStack = (stack) => {
@@ -27,8 +27,8 @@ const splitStack = (stack) => {
 // stacks from command failures and assertion failures have the right message
 // but the stack points to cypress internals. here we combine the message
 // with the invocation stack, which points to the user's code
-const combineMessageAndStack = (err, stack = '') => {
-  if (!err || !err.message) return stack
+const combineMessageAndStack = (message, stack = '') => {
+  if (!message) return stack
 
   // eslint-disable-next-line no-unused-vars
   const [__, stackLines] = splitStack(stack)
@@ -36,7 +36,7 @@ const combineMessageAndStack = (err, stack = '') => {
     return line.indexOf('__getSpecFrameStack') > -1
   })
 
-  return [err.message].concat(relevantStackLines).join('\n')
+  return [message].concat(relevantStackLines).join('\n')
 }
 
 const getLanguageFromExtension = (filePath) => {

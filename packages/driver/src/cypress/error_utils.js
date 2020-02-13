@@ -286,7 +286,7 @@ const getObjValueByPath = (obj, keyPath) => {
 }
 
 const enhanceStack = ({ err, stack, projectRoot }) => {
-  err.stack = $stackUtils.combineMessageAndStack(err, stack)
+  err.stack = $stackUtils.combineMessageAndStack(err.message, stack)
 
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)
 
