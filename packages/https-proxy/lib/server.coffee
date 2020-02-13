@@ -97,11 +97,6 @@ class Server
     if fn
       return fn.call(@, req, res)
 
-    req.pipe(request(req.url))
-    .on "error", ->
-      res.statusCode = 500
-      res.end()
-    .pipe(res)
 
   _getProxyForUrl: (urlStr) ->
     port = Number(_.get(url.parse(urlStr), 'port'))
