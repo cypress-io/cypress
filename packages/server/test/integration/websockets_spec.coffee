@@ -182,7 +182,7 @@ describe "Web Sockets", ->
       context 'behind Cy proxy', ->
         beforeEach (done) ->
           ## force node into legit proxy mode like a browser
-          agent = new httpsProxyAgent("http://localhost:#{cyPort}")
+          @agent = new httpsProxyAgent("http://localhost:#{cyPort}")
 
           beforeFn?.call(@)
 
@@ -202,6 +202,37 @@ describe "Web Sockets", ->
           @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
             expect(data.response).to.deep.eq({foo: "bar"})
             done()
+
+      context 'without Cy proxy', ->
+        beforeEach ->
+          beforeFn?.call(@)
+
+        afterEach ->
+          @wsClient.disconnect()
+
+        it "fails to connect via websocket", (done) ->
+          @wsClient = socketIo.client(wsUrl || @cfg.proxyUrl, {
+            path: @cfg.socketIoRoute
+            transports: ["websocket"]
+            parser: socketIo.circularParser
+            rejectUnauthorized: false
+            reconnection: false
+          })
+
+          @wsClient.on "connect", -> done(new Error('should not have been able to connect'))
+          @wsClient.on "connect_error", -> done()
+
+        it "fails to connect via polling", (done) ->
+          @wsClient = socketIo.client(wsUrl || @cfg.proxyUrl, {
+            path: @cfg.socketIoRoute
+            transports: ["polling"]
+            parser: socketIo.circularParser
+            rejectUnauthorized: false
+            reconnection: false
+          })
+
+          @wsClient.on "connect", -> done(new Error('should not have been able to connect'))
+          @wsClient.on "connect_error", -> done()
 
     context "http", ->
       testSocketIo()

@@ -191,7 +191,7 @@ class Server
       @_server.on "connect", (req, socket, head) =>
         debug("Got CONNECT request from %s", req.url)
 
-        socket.on 'upstream-connected', (upstreamSocket) =>
+        socket.once 'upstream-connected', (upstreamSocket) =>
           localPort = upstreamSocket.localPort
 
           debug('upstream-connected %o', { reqUrl: req.url, localPort })
@@ -621,7 +621,7 @@ class Server
     ## bail if this is our own namespaced socket.io request
     if req.url.startsWith(socketIoRoute)
       isProxied = !!_.includes(@_connectSockets, socket.remotePort)
-      debug('internal socket.io request, ensuring that it originated from the https-proxy...', { reqUrl: req.url, remotePort: socket.remotePort, isProxied })
+      debug('internal socket.io request, ensuring that it originated from the https-proxy... %o', { reqUrl: req.url, remotePort: socket.remotePort, isProxied })
 
       if !isProxied
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via Cypress.')
