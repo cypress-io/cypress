@@ -166,12 +166,12 @@ describe('Warning Message', function () {
       .should('contain', 'Some warning')
       .should('contain', 'Other message')
 
-      cy.get('button.btn.btn-link.close').first().click()
+      cy.get('.alert-warning .close').first().click()
       cy.get('.alert-warning')
       .should('not.contain', 'Some warning')
       .should('contain', 'Other message')
 
-      cy.get('button.btn.btn-link.close').click()
+      cy.get('.alert-warning .close').click()
       cy.get('.alert-warning')
       .should('not.contain', 'Some warning')
       .should('not.contain', 'Other message')

@@ -203,6 +203,10 @@ const reopenProject = (project) => {
   })
 }
 
+const pingBaseUrl = (url) => {
+  return ipc.pingBaseUrl(url)
+}
+
 const removeProject = (project) => {
   ipc.removeProject(project.path)
   projectsStore.removeProject(project)
@@ -234,4 +238,5 @@ export default {
   runSpec,
   closeBrowser,
   getRecordKeys,
+  pingBaseUrl,
 }
