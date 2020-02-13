@@ -1330,6 +1330,20 @@ describe "Routes", ->
         .catch (err) ->
           expect(err.message).to.eq('Error: socket hang up')
 
+      it "sends back 401 when file server does not receive correct auth", ->
+        @setup("<root>", {
+          config: {
+            fileServerFolder: "/Users/bmann/Dev/projects"
+          }
+        })
+        .then =>
+          rp("http://localhost:#{@server._fileServer.port()}/foo/views/test/index.html", {
+            resolveWithFullResponse: true
+            simple: false
+          })
+        .then (res) =>
+          expect(res.statusCode).to.eq(401)
+
       it "sends back 404 when file does not exist locally", ->
         @setup("<root>", {
           config: {

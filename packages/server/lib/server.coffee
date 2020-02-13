@@ -146,7 +146,9 @@ class Server
 
       getRemoteState = => @_getRemoteState()
 
-      @_networkProxy = new NetworkProxy({ config, getRemoteState, request: @_request })
+      getFileServerToken = => @_fileServer.token
+
+      @_networkProxy = new NetworkProxy({ config, getRemoteState, getFileServerToken, request: @_request })
 
       @createHosts(config.hosts)
 

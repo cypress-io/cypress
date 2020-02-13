@@ -182,7 +182,7 @@ describe "Web Sockets", ->
       context 'behind Cy proxy', ->
         beforeEach (done) ->
           ## force node into legit proxy mode like a browser
-          @agent = new httpsProxyAgent("http://localhost:#{cyPort}")
+          agent = new httpsProxyAgent("http://localhost:#{cyPort}")
 
           beforeFn?.call(@)
 
