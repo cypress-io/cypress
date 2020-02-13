@@ -77,18 +77,14 @@ const eventManager = {
       logger.logFormatted(consoleProps)
     }
 
-    reporterBus.on('runner:console:error', ({ testId, commandId }) => {
+    reporterBus.on('runner:console:error', ({ err, commandId }) => {
       if (!Cypress) return
 
-      const err = Cypress.getErrorByTestId(testId)
+      if (commandId || err) logger.clearLog()
 
-      if (err) {
-        logger.clearLog()
-        commandId && logCommand(commandId)
-        logger.logError(err.stack)
-      } else {
-        logger.logError('No error found for test id', testId)
-      }
+      if (commandId) logCommand(commandId)
+
+      if (err) logger.logError(err.stack)
     })
 
     reporterBus.on('runner:console:log', (logId) => {

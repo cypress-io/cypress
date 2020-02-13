@@ -162,11 +162,11 @@ const events: Events = {
 
     localBus.on('show:error', (testId: number) => {
       const test = runnablesStore.testById(testId)
-      let command = test.err.isCommandErr && test.commandMatchingErr()
+      const command = test.err.isCommandErr && test.commandMatchingErr()
 
       runner.emit('runner:console:error', {
-        testId,
-        commandId: (command || {}).id,
+        err: test.err,
+        commandId: command ? command.id : undefined,
       })
     })
 
