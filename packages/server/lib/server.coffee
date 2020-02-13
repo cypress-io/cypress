@@ -73,12 +73,6 @@ setProxiedUrl = (req) ->
 
   req.url = uri.getPath(req.url)
 
-_ensureInternalRequests = (req, res, next) ->
-  if req.proxiedUrl.startsWith('/') and !_.includes(NON_PROXY_PATH_WHITELIST, _.trimEnd(req.proxiedUrl, '/'))
-    return res.redirect('/__')
-
-  next()
-
 notSSE = (req, res) ->
   req.headers.accept isnt "text/event-stream" and compression.filter(req, res)
 
@@ -100,7 +94,8 @@ class Server
     @_httpsProxy = null
     @_urlResolver = null
 
-  createExpressApp: (morgan) ->
+  createExpressApp: (config) ->
+    { morgan, clientRoute } = config
     app = express()
 
     ## set the cypress config from the cypress.json file
@@ -110,10 +105,8 @@ class Server
     ## https://github.com/cypress-io/cypress/issues/2891
     app.engine("html", templateEngine.render)
 
-    app.use _ensureInternalRequests
-
     ## handle the proxied url in case
-    ## we have not yet started our websocket server
+    ## we have not yet started our websocket serversss
     app.use (req, res, next) =>
       setProxiedUrl(req)
 
@@ -122,7 +115,15 @@ class Server
       if m = @_middleware
         m(req, res)
 
-      ## always continue on
+      ## always continue onsda
+
+      next()
+
+    app.use (req, res, next) ->
+      trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+      if req.proxiedUrl.startsWith('/') and !_.includes(NON_PROXY_PATH_WHITELIST, trimmedUrl) and trimmedUrl isnt _.trimEnd(clientRoute, '/')
+        ## redirect users to the clientRoute if they are not visiting via the proxy
+        return res.redirect(clientRoute)
 
       next()
 
@@ -154,7 +155,7 @@ class Server
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
-      app = @createExpressApp(config.morgan)
+      app = @createExpressApp(config)
 
       logger.setSettings(config)
 
