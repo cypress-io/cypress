@@ -192,14 +192,15 @@ class Server
         debug("Got CONNECT request from %s", req.url)
 
         socket.on 'upstream-connected', (upstreamSocket) =>
-          id = upstreamSocket.localPort
+          localPort = upstreamSocket.localPort
 
-          debug('upstream-connected %o', { reqUrl: req.url, id })
+          debug('upstream-connected %o', { reqUrl: req.url, localPort })
 
-          @_connectSockets.push(id)
+          @_connectSockets.push(localPort)
 
           upstreamSocket.on 'close', =>
-            _.remove(@_connectSockets, id)
+            debug('upstream closed, removing localPort', { localPort })
+            _.remove(@_connectSockets, localPort)
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
@@ -619,8 +620,8 @@ class Server
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
     if req.url.startsWith(socketIoRoute)
-      isProxied = _.find(@_connectSockets, { localPort: req.socket.remotePort })
-      debug('internal socket.io request, ensuring that it originated from the https-proxy...', { reqUrl: req.url, remotePort: req.socket.remotePort, isProxied })
+      isProxied = !!_.includes(@_connectSockets, socket.remotePort)
+      debug('internal socket.io request, ensuring that it originated from the https-proxy...', { reqUrl: req.url, remotePort: socket.remotePort, isProxied })
 
       if !isProxied
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via Cypress.')
