@@ -106,6 +106,11 @@ const DEFAULT_ARGS = [
   '--disable-breakpad',
   '--password-store=basic',
   '--use-mock-keychain',
+
+  // force strict samesite behavior
+  // https://cs.chromium.org/chromium/src/third_party/blink/renderer/platform/runtime_enabled_features.json5
+  // https://www.chromium.org/updates/same-site/test-debug
+  '--enable-blink-features=SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure',
 ]
 
 /**
