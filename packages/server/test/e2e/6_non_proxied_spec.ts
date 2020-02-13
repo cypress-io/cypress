@@ -9,6 +9,7 @@ describe('e2e non-proxied spec', () => {
     config: {
       video: false,
     },
+    browser: 'electron',
     project: Fixtures.projectPath('non-proxied'),
     snapshot: true,
   })
