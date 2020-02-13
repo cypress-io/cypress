@@ -95,7 +95,9 @@ chai.use((chai, u) => {
       return '[window]'
     }
 
-    // Chrome doesn't return [object Window] even if val is a Window object.
+    // https://github.com/cypress-io/cypress/issues/5270
+    // When name attribute exists in <iframe>,
+    // Firefox returns [object Window] but Chrome returns [object Object]
     // So, we try throwing an error and check the error message.
     try {
       val && val.document
