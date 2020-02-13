@@ -196,7 +196,7 @@ class Server
 
           debug('upstream-connected %o', { reqUrl: req.url, id })
 
-          @_connectSockets.push(upstreamSocket)
+          @_connectSockets.push(id)
 
           upstreamSocket.on 'close', =>
             _.remove(@_connectSockets, id)
@@ -619,17 +619,14 @@ class Server
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
     if req.url.startsWith(socketIoRoute)
-      debug('reqUrl: ', req.url)
-      debug('@_connectSockets.length', @_connectSockets.length)
-      debug('request socket exists in connectSockets?', _.includes(@_connectSockets, req.socket))
-      debug('request socket remotePort exists in connectSockets localPorts?', !!_.find(@_connectSockets, { localPort: req.socket.remotePort }))
-      debug('remotePort', req.socket.remotePort)
+      isProxied = _.find(@_connectSockets, { localPort: req.socket.remotePort })
+      debug('internal socket.io request, ensuring that it originated from the https-proxy...', { reqUrl: req.url, remotePort: req.socket.remotePort, isProxied })
 
-      ## TODO filter out non-ws requests
-      if !_.find(@_connectSockets, { localPort: req.socket.remotePort })
-        debug('not found')
-        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nrequest not made via Cypress :/')
+      if !isProxied
+        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via Cypress.')
         socket.end()
+
+      ## we can return here either way, if the socket is still valid socket.io will hook it up
       return
 
     if (host = req.headers.host) and @_remoteProps and (remoteOrigin = @_remoteOrigin)
