@@ -8,15 +8,6 @@ The runner is the minimal "chrome" around the user's app and has the following r
 - Managing the viewport size and scale
 - Showing the currently active URL
 
-## Installing
-
-The runner's dependencies can be installed with:
-
-```bash
-cd packages/runner
-npm install
-```
-
 ## Developing
 
 ### Watching
@@ -29,7 +20,7 @@ This watches and compiles all changes as you make them.
 - Additionally it compiles both the [`reporter`](../reporter) and [`driver`](../driver)
 
 ```bash
-npm run watch
+yarn lerna run watch --scope @packages/runner --stream
 ```
 
 ## Building
@@ -37,17 +28,17 @@ npm run watch
 ### For development
 
 ```bash
-npm run build
+yarn lerna run build --scope @packages/runner --stream
 ```
 
 ### For production
 
 ```bash
-npm run build-prod
+yarn lerna run build-prod --scope @packages/runner --stream
 ```
 
 ## Testing
 
 ```bash
-npm test
+yarn lerna run test --scope @packages/runner --stream
 ```

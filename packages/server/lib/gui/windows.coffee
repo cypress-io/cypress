@@ -40,6 +40,21 @@ setWindowProxy = (win) ->
   })
 
 module.exports = {
+  installExtension: (path) ->
+    ## extensions can only be installed for all BrowserWindows
+    name = BrowserWindow.addExtension(path)
+
+    debug('electron extension installed %o', { success: !!name, name, path })
+
+    if !name
+      throw new Error('Extension could not be installed.')
+
+  removeAllExtensions: ->
+    extensions = _.keys(BrowserWindow.getExtensions())
+
+    debug('removing all electron extensions %o', extensions)
+    extensions.forEach(BrowserWindow.removeExtension)
+
   reset: ->
     windows = {}
 

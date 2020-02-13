@@ -28,6 +28,9 @@ describe('lib/connect', function () {
           address: '127.0.0.1',
         })
       })
+      .then(() => {
+        server.close()
+      })
     })
 
     // Error: listen EADDRNOTAVAIL ::1
@@ -48,6 +51,9 @@ describe('lib/connect', function () {
           family: 6,
           address: '::1',
         })
+      })
+      .then(() => {
+        server.close()
       })
     })
   })

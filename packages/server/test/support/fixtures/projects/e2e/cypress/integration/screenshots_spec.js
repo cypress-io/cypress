@@ -153,7 +153,7 @@ describe('taking screenshots', () => {
         // because they will be identical to the first.
         // the 4th will also go quickly because it will not
         // match the 3rd
-        const first = (fourth = 250)
+        const first = (fourth = 200)
         const second = (third = 1500)
         const total = first + second + third + fourth
         const padding = 2000 // account for slower machines

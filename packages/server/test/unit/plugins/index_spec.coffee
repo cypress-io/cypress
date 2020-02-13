@@ -5,6 +5,8 @@ cp = require("child_process")
 util = require("#{root}../lib/plugins/util")
 plugins = require("#{root}../lib/plugins")
 
+PLUGIN_PID = 77777
+
 describe "lib/plugins/index", ->
   beforeEach ->
     plugins._reset()
@@ -13,6 +15,7 @@ describe "lib/plugins/index", ->
       send: sinon.spy()
       on: sinon.stub()
       kill: sinon.spy()
+      pid: PLUGIN_PID
     }
     sinon.stub(cp, "fork").returns(@pluginsProcess)
 
@@ -200,3 +203,16 @@ describe "lib/plugins/index", ->
       plugins.register("foo", foo)
       plugins.execute("foo", "arg1", "arg2")
       expect(foo).to.be.calledWith("arg1", "arg2")
+
+  context "#getPluginPid", ->
+    beforeEach ->
+      plugins._setPluginsProcess(null)
+
+    it "returns the pid if there is a plugins process", ->
+      @ipc.on.withArgs("loaded").yields([])
+      plugins.init({ pluginsFile: "cypress-plugin" })
+      .then ->
+        expect(plugins.getPluginPid()).to.eq(PLUGIN_PID)
+
+    it "returns undefined if there is no plugins process", ->
+      expect(plugins.getPluginPid()).to.be.undefined

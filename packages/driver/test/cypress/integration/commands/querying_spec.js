@@ -1817,20 +1817,128 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    // NOTE: not sure why this is skipped... last edit was 3 years ago...
-    // @bkucera maybe take a look at this
-    describe.skip('handles whitespace', () => {
+    describe('handles whitespace', () => {
       it('finds el with new lines', () => {
         const btn = $(`\
-<button id="whitespace">
+<button id="whitespace1">
 White
 space
 </button>\
 `).appendTo(cy.$$('body'))
 
+        cy.get('#whitespace1').contains('White space')
         cy.contains('White space').then(($btn) => {
           expect($btn.get(0)).to.eq(btn.get(0))
         })
+      })
+
+      it('finds el with new lines + spaces', () => {
+        const btn = $(`\
+<button id="whitespace2">
+White       
+space
+</button>\
+`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace2').contains('White space')
+        cy.contains('White space').then(($btn) => {
+          expect($btn.get(0)).to.eq(btn.get(0))
+        })
+      })
+
+      it('finds el with multiple spaces', () => {
+        const btn = $(`\
+<button id="whitespace3">
+White   space
+</button>\
+`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace3').contains('White space')
+        cy.contains('White space').then(($btn) => {
+          expect($btn.get(0)).to.eq(btn.get(0))
+        })
+      })
+
+      it('finds el with regex', () => {
+        const btn = $(`\
+<button id="whitespace4">
+White   space
+</button>\
+`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace4').contains('White space')
+        cy.contains(/White space/).then(($btn) => {
+          expect($btn.get(0)).to.eq(btn.get(0))
+        })
+      })
+
+      it('does not normalize text in pre tag', () => {
+        $(`\
+<pre id="whitespace5">
+White
+space
+</pre>\
+`).appendTo(cy.$$('body'))
+
+        cy.contains('White space').should('not.match', 'pre')
+        cy.get('#whitespace5').contains('White\nspace')
+      })
+
+      it('finds el with leading/trailing spaces', () => {
+        const btn = $(`<button id="whitespace6">        White   space             </button>`).appendTo(cy.$$('body'))
+
+        cy.get('#whitespace6').contains('White space')
+        cy.contains('White space').then(($btn) => {
+          expect($btn.get(0)).to.eq(btn.get(0))
+        })
+      })
+    })
+
+    describe('case sensitivity', () => {
+      beforeEach(() => {
+        $('<button id="test-button">Test</button>').appendTo(cy.$$('body'))
+      })
+
+      it('is case sensitive when matchCase is undefined', () => {
+        cy.get('#test-button').contains('Test')
+      })
+
+      it('is case sensitive when matchCase is true', () => {
+        cy.get('#test-button').contains('Test', {
+          matchCase: true,
+        })
+      })
+
+      it('is case insensitive when matchCase is false', () => {
+        cy.get('#test-button').contains('test', {
+          matchCase: false,
+        })
+
+        cy.get('#test-button').contains(/Test/, {
+          matchCase: false,
+        })
+      })
+
+      it('does not crash when matchCase: false is used with regex flag, i', () => {
+        cy.get('#test-button').contains(/Test/i, {
+          matchCase: false,
+        })
+      })
+
+      it('throws when content has "i" flag while matchCase: true', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('You passed a regular expression with the case-insensitive (i) flag and { matchCase: true } to cy.contains(). Those options conflict with each other, so please choose one or the other.')
+
+          done()
+        })
+
+        cy.get('#test-button').contains(/Test/i, {
+          matchCase: true,
+        })
+      })
+
+      it('passes when "i" flag is used with undefined option', () => {
+        cy.get('#test-button').contains(/Test/i)
       })
     })
 
