@@ -878,11 +878,23 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
     when "INVALID_CYPRESS_ENV"
       """
-      We have detected unknown or unsupported CYPRESS_ENV value
+      We have detected an unknown or unsupported "CYPRESS_ENV" value
 
         #{chalk.yellow(arg1)}
 
-      Please do not modify CYPRESS_ENV value.
+      "CYPRESS_ENV" is reserved and should only be used internally.
+
+      Do not modify the "CYPRESS_ENV" value.
+      """
+    when "NON_PRODUCTION_CYPRESS_ENV"
+      """
+      We have detected a set "CYPRESS_ENV" value
+
+        #{chalk.yellow(arg1)}
+
+      "CYPRESS_ENV" is reserved and should only be used internally.
+
+      Do not modify the "CYPRESS_ENV" value.
       """
     when "CDP_VERSION_TOO_OLD"
       """

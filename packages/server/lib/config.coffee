@@ -234,6 +234,10 @@ module.exports = {
     names = ["development", "test", "staging", "production"]
     _.includes(names, value)
 
+  isNonProductionCypressEnvValue: (value) -> 
+    if value != 'production'
+      return true
+
   whitelist: (obj = {}) ->
     propertyNames = configKeys.concat(breakingConfigKeys).concat(systemConfigKeys)
     _.pick(obj, propertyNames)
@@ -302,6 +306,8 @@ module.exports = {
     debug("using CYPRESS_ENV %s", config.cypressEnv)
     if not @isValidCypressEnvValue(config.cypressEnv)
       errors.throw("INVALID_CYPRESS_ENV", config.cypressEnv)
+    if not @isNonProductionCypressEnvValue(config.cypressEnv)
+      errors.warning("NON_PRODUCTION_CYPRESS_ENV", config.cypressEnv)
 
     delete config.envFile
 
