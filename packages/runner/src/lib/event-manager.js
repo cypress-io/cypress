@@ -30,6 +30,9 @@ const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
 
+/**
+ * @type {Cypress.Cypress}
+ */
 let Cypress
 
 const eventManager = {
@@ -236,6 +239,49 @@ const eventManager = {
   _addListeners () {
     Cypress.on('message', (msg, data, cb) => {
       ws.emit('client:request', msg, data, cb)
+    })
+
+    let restoreConfigurationFn = null
+
+    Cypress.on('test:before:run', (test) => {
+      /**
+       * @type {Cypress.TestConfigOptions}
+       */
+      const testConfig = test.testConfiguration
+
+      restoreConfigurationFn = null
+      if (!testConfig) return
+
+      const config = Cypress.config()
+
+      const backupConfig = _.clone(config)
+
+      _.extend(config, _.omit(testConfig, 'browser'))
+
+      let backupEnv
+      let env
+
+      if (testConfig.env) {
+        env = Cypress.env()
+        backupEnv = _.clone(env)
+        _.extend(env, testConfig.env)
+      }
+
+      restoreConfigurationFn = function () {
+        _.extend(config, backupConfig)
+        console.log(backupEnv)
+        if (env) {
+          Object.keys(env).forEach((key) => {
+            delete env[key]
+          })
+
+          _.extend(env, backupEnv)
+        }
+      }
+    })
+
+    Cypress.on('test:after:run', (test) => {
+      restoreConfigurationFn && restoreConfigurationFn()
     })
 
     _.each(driverToSocketEvents, (event) => {

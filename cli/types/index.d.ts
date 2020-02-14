@@ -75,7 +75,7 @@ declare namespace Cypress {
     (task: 'firefox:force:gc'): Promise<void>
   }
 
-  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
+  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | 'brave' | string
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
@@ -121,6 +121,8 @@ declare namespace Cypress {
      */
     clear: (keys?: string[]) => void
   }
+
+  type IsBrowserMatcher = BrowserName | Partial<Browser>
 
   /**
    * Several libraries are bundled with Cypress by default.
@@ -335,11 +337,12 @@ declare namespace Cypress {
     isCy(obj: any): obj is Chainable
 
     /**
-     * Checks if you're running in the supplied browser family.
-     * e.g. isBrowser('Chrome') will be true for the browser 'Canary'
-     * @param name browser family name to check
+     * Returns true if currently running the supplied browser name or matcher object.
+     * @example isBrowser('chrome') will be true for the browser 'chrome:canary' and 'chrome:stable'
+     * @example isBrowser({ name: 'firefox' channel: 'dev' }) will be true only for the browser 'firefox:dev' (Firefox Developer Edition)
+     * @param matcher browser name or matcher object to check.
      */
-    isBrowser(name: string): boolean
+    isBrowser(matcher: IsBrowserMatcher): boolean
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -2279,6 +2282,11 @@ declare namespace Cypress {
      * @default { runMode: 1, openMode: null }
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
+  }
+
+  interface TestConfigOptions extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
+    // retries?: number
+    browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
   interface DebugOptions {
@@ -4662,3 +4670,67 @@ Cypress._ // => Lodash _
 ```
  */
 declare const Cypress: Cypress.Cypress & EventEmitter
+
+declare namespace Mocha {
+  interface TestFunction {
+        /**
+         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * as a thunk.
+         *
+         * - _Only available when invoked via the mocha CLI._
+         */
+        (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * as a thunk.
+         *
+         * - _Only available when invoked via the mocha CLI._
+         */
+        (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
+  }
+  interface ExclusiveTestFunction {
+        /**
+         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * as a thunk.
+         *
+         * - _Only available when invoked via the mocha CLI._
+         */
+        (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * as a thunk.
+         *
+         * - _Only available when invoked via the mocha CLI._
+         */
+        (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
+  }
+  interface PendingTestFunction {
+        /**
+         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * as a thunk.
+         *
+         * - _Only available when invoked via the mocha CLI._
+         */
+        (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * as a thunk.
+         *
+         * - _Only available when invoked via the mocha CLI._
+         */
+        (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
+  }
+
+  interface SuiteFunction {
+    /**
+     * [bdd, tdd] Describe a "suite" with the given `title` and callback `fn` containing
+     * nested suites.
+     *
+     * - _Only available when invoked via the mocha CLI._
+     */
+    (title: string, config: Cypress.TestConfigOptions, fn: (this: Suite) => void): Suite
+  }
+}

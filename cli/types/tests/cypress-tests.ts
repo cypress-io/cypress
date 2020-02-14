@@ -338,3 +338,31 @@ namespace CypressLocationTests {
   cy.location('path') // $ExpectError
   cy.location('pathname') // $ExpectType Chainable<string>
 }
+
+namespace CypressBrowserTests {
+  Cypress.isBrowser('chrome')// $ExpectType boolean
+  Cypress.isBrowser('firefox')// $ExpectType boolean
+  Cypress.isBrowser('edge')// $ExpectType boolean
+  Cypress.isBrowser('brave')// $ExpectType boolean
+  Cypress.isBrowser({channel: 'stable'})// $ExpectType boolean
+  Cypress.isBrowser({family: 'chromium'})// $ExpectType boolean
+  Cypress.isBrowser({name: 'chrome'})// $ExpectType boolean
+  Cypress.isBrowser({family: 'foo'}) // $ExpectError
+  Cypress.isBrowser() // $ExpectError
+}
+
+namespace CypressTestConfigTests {
+  it('test', {
+    browser: {name: 'firefox'}
+  }, () => {})
+  it('test', {
+    browser: [{name: 'firefox'}, {name: 'chrome'}]
+  }, () => {})
+  it('test', {
+    baseUrl: 'www.foobar.com',
+    browser: 'firefox'
+  }, () => {})
+  it('test', {
+    browser: {foo: 'bar'} // $ExpectError
+  }, () => {})
+}

@@ -18,6 +18,69 @@ const runnableResetTimeout = Runnable.prototype.resetTimeout
 delete window.mocha
 delete window.Mocha
 
+function overrideMochaIt (specWindow) {
+  const _it = specWindow.it
+
+  function overrideIt (fn) {
+    specWindow.it = fn()
+    specWindow.it['only'] = fn('only')
+    specWindow.it['skip'] = fn('skip')
+  }
+
+  overrideIt(function (subFn) {
+    return function (...args) {
+      /**
+       * @type {Cypress.Cypress}
+       */
+      const Cypress = specWindow.Cypress
+
+      function shouldRunBrowser (browserlist, browser) {
+        if (browserlist === null) {
+          return true
+        }
+
+        if (!_.isArray(browserlist)) {
+          browserlist = [browserlist]
+        }
+
+        return _.some(browserlist, Cypress.isBrowser)
+      }
+
+      const origIt = subFn ? _it[subFn] : _it
+
+      if (args.length > 2 && _.isObject(args[1])) {
+        const opts = _.defaults({}, args[1], {
+          browser: null,
+        })
+
+        const mochaArgs = [args[0], args[2]]
+
+        if (!shouldRunBrowser(opts.browser)) {
+          mochaArgs[0] = `[browser skip (${opts.browser})]${mochaArgs[0]}`
+
+          if (subFn === 'only') {
+            mochaArgs[1] = function () {
+              this.skip()
+            }
+
+            return origIt.apply(this, mochaArgs)
+          }
+
+          return _it['skip'].apply(this, mochaArgs)
+        }
+
+        const ret = origIt.apply(this, mochaArgs)
+
+        ret.testConfiguration = opts
+
+        return ret
+      }
+
+      return origIt.apply(this, args)
+    }
+  })
+}
+
 const ui = (specWindow, _mocha) => {
   // Override mocha.ui so that the pre-require event is emitted
   // with the iframe's `window` reference, rather than the parent's.
@@ -34,13 +97,15 @@ const ui = (specWindow, _mocha) => {
     // such as describe, it, before, beforeEach, etc
     this.suite.emit('pre-require', specWindow, null, this)
 
+    overrideMochaIt(specWindow)
+
     return this
   }
 
   return _mocha.ui('bdd')
 }
 
-const set = (specWindow, _mocha) => {
+const setMochaProps = (specWindow, _mocha) => {
   // Mocha is usually defined in the spec when used normally
   // in the browser or node, so we add it as a global
   // for our users too
@@ -67,7 +132,7 @@ const globals = (specWindow, reporter) => {
   })
 
   // set mocha props on the specWindow
-  set(specWindow, _mocha)
+  setMochaProps(specWindow, _mocha)
 
   // return the newly created mocha instance
   return _mocha
