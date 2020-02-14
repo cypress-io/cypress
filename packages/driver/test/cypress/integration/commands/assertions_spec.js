@@ -356,6 +356,7 @@ describe('src/cy/commands/assertions', () => {
         cy.contains('Nested Find').should('have.length', 2)
       })
 
+      // https://github.com/cypress-io/cypress/issues/6384
       it('can chain contains assertions off of cy.contains', () => {
         cy.timeout(100)
         cy.contains('foo')
