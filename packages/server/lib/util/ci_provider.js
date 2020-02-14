@@ -208,6 +208,8 @@ const _providerCiParams = () => {
       'GITHUB_WORKFLOW',
       'GITHUB_ACTION',
       'GITHUB_EVENT_NAME',
+      'GITHUB_RUN_ID',
+      'GITHUB_REPOSITORY',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
@@ -433,7 +435,7 @@ const _providerCommitParams = () => {
     },
     githubActions: {
       sha: env.GITHUB_SHA,
-      branch: env.GITHUB_REF,
+      branch: env.GH_BRANCH || env.GITHUB_REF,
       defaultBranch: env.GITHUB_BASE_REF,
       remoteBranch: env.GITHUB_HEAD_REF,
     },
