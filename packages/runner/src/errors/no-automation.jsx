@@ -1,8 +1,6 @@
 import _ from 'lodash'
 import React from 'react'
-import { BrowserIcon } from '@packages/ui-components'
-
-import Dropdown from '../dropdown/dropdown'
+import { BrowserIcon, Dropdown } from '@packages/ui-components'
 
 const displayName = (name) => _.capitalize(name)
 
@@ -42,6 +40,7 @@ const browserPicker = (browsers, onLaunchBrowser) => {
         others={otherBrowsers}
         onSelect={onLaunchBrowser}
         renderItem={browser}
+        keyProperty='key'
       />
     </div>
   )
