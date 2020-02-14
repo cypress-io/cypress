@@ -70,6 +70,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({
     ng: (type, selector, options = {}) ->
+      userOptions = options
       ## what about requirejs / browserify?
       ## we need to intelligently check to see if we're using those
       ## and if angular is available through them.  throw a very specific
@@ -77,7 +78,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## system you're using
       $errUtils.throwErrByPath "ng.no_global" if not state("window").angular
 
-      _.defaults options, {log: true}
+      options = _.defaults {}, userOptions, {log: true}
 
       if options.log
         options._log = Cypress.log()

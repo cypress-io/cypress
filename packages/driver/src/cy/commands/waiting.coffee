@@ -20,6 +20,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   waitFunction = ->
     $errUtils.throwErrByPath("wait.fn_deprecated")
 
+  userOptions = null
+
   waitNumber = (subject, ms, options) ->
     ## increase the timeout by the delta
     cy.timeout(ms, true, "wait")
@@ -41,6 +43,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       log = options._log = Cypress.log({
         type: "parent"
         aliasType: "route"
+        options: userOptions
       })
 
     checkForXhr = (alias, type, index, num, options) ->
@@ -159,15 +162,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: "optional" }, {
     wait: (subject, msOrFnOrAlias, options = {}) ->
+      userOptions = options
+
       ## check to ensure options is an object
       ## if its a string the user most likely is trying
       ## to wait on multiple aliases and forget to make this
       ## an array
-      if _.isString(options)
+      if _.isString(userOptions)
         $errUtils.throwErrByPath("wait.invalid_arguments")
 
-      _.defaults options, {log: true}
-
+      options = _.defaults({}, userOptions, { log: true })
       args = [subject, msOrFnOrAlias, options]
 
       try

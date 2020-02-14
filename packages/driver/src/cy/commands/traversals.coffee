@@ -13,9 +13,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.isObject(arg2) and not _.isFunction(arg2)
         options = arg2
 
-      options ?= {}
+      if options 
+        userOptions = options
+      else 
+        userOptions = {}
 
-      _.defaults options, {log: true}
+      options = _.defaults({}, userOptions, {log: true})
 
       getSelector = ->
         args = _.chain([arg1, arg2]).reject(_.isFunction).reject(_.isObject).value()
@@ -28,9 +31,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       }
 
       if options.log isnt false
-        options._log = Cypress.log
+        options._log = Cypress.log({
           message: getSelector()
           consoleProps: -> consoleProps
+        })
 
       setEl = ($el) ->
         return if options.log is false

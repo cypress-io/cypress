@@ -20,9 +20,9 @@ dispatch = (target, eventName, options) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: ["element", "window", "document"] }, {
     trigger: (subject, eventName, positionOrX, y, options = {}) ->
-      {options, position, x, y} = $actionability.getPositionFromArguments(positionOrX, y, options)
+      {options: userOptions, position, x, y} = $actionability.getPositionFromArguments(positionOrX, y, userOptions)
 
-      _.defaults(options, {
+      options = _.extend({}, {
         log: true
         $el: subject
         bubbles: true
@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         y: y
         waitForAnimations: config("waitForAnimations")
         animationDistanceThreshold: config("animationDistanceThreshold")
-      })
+      }, userOptions, options)
 
       if $dom.isWindow(options.$el)
         ## get this into a jquery object

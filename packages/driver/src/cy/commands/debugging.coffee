@@ -42,7 +42,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## bail if we're headless
       return subject if not config("isInteractive")
 
-      _.defaults options, {log: true}
+      userOptions = options
+      options = _.defaults({}, userOptions, {log: true})
 
       if options.log
         options._log = Cypress.log({
@@ -85,7 +86,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       return subject
 
     debug: (subject, options = {}) ->
-      _.defaults(options, {
+      userOptions = options
+      options = _.defaults({}, userOptions, {
         log: true
       })
 

@@ -9,9 +9,11 @@ $actionability = require("../../actionability")
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
     submit: (subject, options = {}) ->
-      _.defaults options,
+      userOptions = options
+      options = _.defaults({}, userOptions, {
         log: true
         $el: subject
+      })
 
       ## changing this to a promise .map() causes submit events
       ## to break when they need to be triggered synchronously

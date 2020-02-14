@@ -10,9 +10,10 @@ $actionability = require("../../actionability")
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: ["element", "window"] }, {
     focus: (subject, options = {}) ->
+      userOptions = options
       ## we should throw errors by default!
       ## but allow them to be silenced
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         $el: subject
         error: true
         log: true
@@ -62,17 +63,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       cy.fireFocus(el)
 
-      # return options.$el if options.verify is false
-
       do verifyAssertions = ->
         cy.verifyUpcomingAssertions(options.$el, options, {
           onRetry: verifyAssertions
         })
 
     blur: (subject, options = {}) ->
+      userOptions = options
       ## we should throw errors by default!
       ## but allow them to be silenced
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         $el: subject
         $focused: cy.getFocused()
         error: true

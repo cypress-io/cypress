@@ -36,13 +36,13 @@ const formatMouseEvents = (events) => {
 module.exports = (Commands, Cypress, cy, state, config) => {
   const { mouse } = cy.devices
 
-  const mouseAction = (eventName, { subject, positionOrX, y, options, onReady, onTable, defaultOptions }) => {
+  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {
     let position
     let x
 
-    ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
+    ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
-    _.defaults(options, {
+    const options = _.defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -203,7 +203,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return mouseAction('click', {
         y,
         subject,
-        options,
+        userOptions: options,
         positionOrX,
         onReady (fromElViewport, forceEl) {
           const clickEvents = mouse.click(fromElViewport, forceEl)
@@ -232,7 +232,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return mouseAction('dblclick', {
         y,
         subject,
-        options,
+        userOptions: options,
         // TODO: 4.0 make this false by default
         defaultOptions: { multiple: true },
         positionOrX,
@@ -268,7 +268,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return mouseAction('rightclick', {
         y,
         subject,
-        options,
+        userOptions: options,
         positionOrX,
         onReady (fromElViewport, forceEl) {
           const { clickEvents, contextmenuEvent } = mouse.rightclick(fromElViewport, forceEl)

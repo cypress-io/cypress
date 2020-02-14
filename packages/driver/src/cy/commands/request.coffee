@@ -60,11 +60,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## METHOD / URL / BODY
     ## or object literal with all expanded options
     request: (args...) ->
-      options = o = {}
+      userOptions = o = {}
 
       switch
         when _.isObject(args[0])
-          _.extend options, args[0]
+          _.extend(userOptions, args[0])
 
         when args.length is 1
           o.url = args[0]
@@ -85,7 +85,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           o.url    = args[1]
           o.body   = args[2]
 
-      _.defaults(options, REQUEST_DEFAULTS, {
+      options = _.defaults({}, userOptions, REQUEST_DEFAULTS, {
         log: true
       })
 
