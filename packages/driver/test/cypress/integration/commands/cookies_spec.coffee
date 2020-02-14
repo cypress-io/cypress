@@ -494,12 +494,9 @@ describe "src/cy/commands/cookies", ->
       context "when setting an invalid cookie", ->
         it "throws an error if the backend responds with an error", (done) ->
           cy.on "fail", (err) =>
-            expect(errStub).to.be.calledOnce
+            expect(Cypress.automation.withArgs("set:cookie")).to.be.calledOnce
             expect(err.message).to.contain('unexpected error setting the requested cookie')
             done()
-
-          errStub = cy.stub(Cypress.utils, "throwErrByPath")
-          errStub.callThrough()
 
           ## browser backend should yell since this is invalid
           cy.setCookie("foo", " bar")
