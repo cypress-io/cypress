@@ -2,6 +2,7 @@ _ = require("lodash")
 minimatch = require("minimatch")
 
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 $XHR = require("./xml_http_request")
 
 regularResourcesRe       = /\.(jsx?|coffee|html|less|s?css|svg)(\?.*)?$/
@@ -41,11 +42,11 @@ isAbortedThroughUnload = (xhr) ->
 
 warnOnStubDeprecation = (obj, type) ->
   if _.has(obj, "stub")
-    $utils.warnByPath("server.stub_deprecated", { args: { type }})
+    $errUtils.warnByPath("server.stub_deprecated", { args: { type }})
 
 warnOnForce404Default = (obj) ->
   if obj.force404 is false
-    $utils.warnByPath("server.force404_deprecated")
+    $errUtils.warnByPath("server.force404_deprecated")
 
 whitelist = (xhr) ->
   ## whitelist if we're GET + looks like we're fetching regular resources
@@ -109,7 +110,7 @@ transformHeaders = (headers) ->
 
 normalizeStubUrl = (xhrUrl, url) ->
   if not xhrUrl
-    $utils.warnByPath("server.xhrurl_not_set")
+    $errUtils.warnByPath("server.xhrurl_not_set")
 
   ## always ensure this is an absolute-relative url
   ## and remove any double slashes
