@@ -1040,6 +1040,14 @@ jobs:
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: $(yarn bin)/cypress help
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(yarn bin)/cypress info
+      - run:
           name: Add Cypress demo
           working_directory: test-binary
           command: npx @bahmutov/cly init
