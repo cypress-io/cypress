@@ -45,7 +45,7 @@ const normalizeErrorStack = (e) => {
   }
 
   return e
-},
+}
 
 const cloneErr = (obj) => {
   const err2 = new Error(obj.message)
@@ -62,7 +62,7 @@ const cloneErr = (obj) => {
   }
 
   return err2
-},
+}
 
 const throwErr = (err, options) => {
   if (options == null) {
