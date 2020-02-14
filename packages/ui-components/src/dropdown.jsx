@@ -7,11 +7,11 @@ import { findDOMNode } from 'react-dom'
 class Dropdown extends Component {
   static defaultProps = {
     className: '',
+    document,
   }
 
   static propTypes = {
     className: PropTypes.string,
-    icon: PropTypes.string,
     chosen: PropTypes.object.isRequired,
     others: PropTypes.arrayOf(PropTypes.object).isRequired,
     onSelect: PropTypes.func.isRequired,
@@ -30,11 +30,11 @@ class Dropdown extends Component {
       }
     }
 
-    document.body.addEventListener('click', this.outsideClickHandler)
+    this.props.document.body.addEventListener('click', this.outsideClickHandler)
   }
 
   componentWillUnmount () {
-    document.body.removeEventListener('click', this.outsideClickHandler)
+    this.props.document.body.removeEventListener('click', this.outsideClickHandler)
   }
 
   render () {
@@ -49,9 +49,9 @@ class Dropdown extends Component {
   _button () {
     if (this.props.others.length) {
       return (
-        <a onClick={this._toggleOpen} className={cs('dropdown-chosen', { disabled: this.props.disabled })}>
+        <button onClick={this._toggleOpen} className={cs('dropdown-chosen', { disabled: this.props.disabled })}>
           {this._buttonContent()}
-        </a>
+        </button>
       )
     }
 
@@ -64,10 +64,10 @@ class Dropdown extends Component {
 
   _buttonContent () {
     return (
-      <span>
+      <>
         {this.props.renderItem(this.props.chosen)}{' '}
         {this._caret()}
-      </span>
+      </>
     )
   }
 
@@ -75,7 +75,7 @@ class Dropdown extends Component {
     if (!this.props.others.length || this.props.disabled) return null
 
     return (
-      <span>
+      <span className='dropdown-toggle'>
         <span className='dropdown-caret'></span>
         <span className='sr-only'>Toggle Dropdown</span>
       </span>
