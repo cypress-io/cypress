@@ -1,28 +1,10 @@
 const _ = require('lodash')
-const $ = require('jquery')
 const Promise = require('bluebird')
 
 const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
 
-const $expr = $.expr[':']
-
-const $contains = $expr.contains
-
-const restoreContains = () => {
-  return $expr.contains = $contains
-}
-
-const whitespaces = /\s+/g
-
 module.exports = (Commands, Cypress, cy) => {
-  // restore initially when a run starts
-  restoreContains()
-
-  // restore before each test and whenever we stop
-  Cypress.on('test:before:run', restoreContains)
-  Cypress.on('stop', restoreContains)
-
   Commands.addAll({
     focused (options = {}) {
       _.defaults(options, {
@@ -483,46 +465,9 @@ module.exports = (Commands, Cypress, cy) => {
         options._log.set({ $el })
       }
 
-      // When multiple space characters are considered as a single whitespace in all tags except <pre>.
-      const normalizeWhitespaces = (elem) => {
-        let testText = elem.textContent || elem.innerText || $.text(elem)
-
-        if (elem.tagName === 'PRE') {
-          return testText
-        }
-
-        return testText.replace(whitespaces, ' ')
-      }
-
-      if (_.isRegExp(text)) {
-        if (options.matchCase === false && !text.flags.includes('i')) {
-          text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
-        }
-
-        // taken from jquery's normal contains method
-        $expr.contains = (elem) => {
-          let testText = normalizeWhitespaces(elem)
-
-          return text.test(testText)
-        }
-      }
-
-      if (_.isString(text)) {
-        $expr.contains = (elem) => {
-          let testText = normalizeWhitespaces(elem)
-
-          if (!options.matchCase) {
-            testText = testText.toLowerCase()
-            text = text.toLowerCase()
-          }
-
-          return testText.includes(text)
-        }
-      }
-
-      // find elements by the :contains psuedo selector
+      // find elements by the :cy-contains psuedo selector
       // and any submit inputs with the attributeContainsWord selector
-      const selector = $dom.getContainsSelector(text, filter)
+      const selector = $dom.getContainsSelector(text, filter, options)
 
       const resolveElements = () => {
         const getOpts = _.extend(_.clone(options), {
@@ -563,11 +508,6 @@ module.exports = (Commands, Cypress, cy) => {
 
       return Promise
       .try(resolveElements)
-      // always restore contains in case
-      // we used a regexp!
-      .finally(() => {
-        restoreContains()
-      })
     },
   })
 
