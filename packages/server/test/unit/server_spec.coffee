@@ -250,13 +250,19 @@ describe "lib/server", ->
       @head   = {}
 
     it "is noop if req.url startsWith socketIoRoute", ->
-      remotePort = 8675309
+      socket = {
+        remotePort: 12345
+        remoteAddress: '127.0.0.1'
+      }
 
-      @server._connectSockets = [ remotePort ]
+      @server._socketWhitelist.add({
+        localPort: socket.remotePort,
+        once: _.noop
+      })
+
       noop = @server.proxyWebsockets(@proxy, "/foo", {
-        url: "/foobarbaz"
-      }, {
-        remotePort
+        url: "/foobarbaz",
+        socket
       })
 
       expect(noop).to.be.undefined
