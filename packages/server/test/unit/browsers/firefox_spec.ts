@@ -84,10 +84,10 @@ describe('lib/browsers/firefox', () => {
   })
 
   beforeEach(() => {
-    sinon.stub(utils, 'getProfileDir').returns('/path/to/appData/firefox/interactive')
+    sinon.stub(utils, 'getProfileDir').returns('/path/to/appData/firefox-stable/interactive')
 
     mockfs({
-      '/path/to/appData/firefox/interactive': {},
+      '/path/to/appData/firefox-stable/interactive': {},
     })
 
     sinon.stub(protocol, '_connectAsync').resolves(null)
@@ -98,7 +98,7 @@ describe('lib/browsers/firefox', () => {
 
   context('#open', () => {
     beforeEach(function () {
-      this.browser = { name: 'firefox' }
+      this.browser = { name: 'firefox', channel: 'stable' }
       this.options = {
         proxyUrl: 'http://proxy-url',
         socketIoRoute: 'socket/io/route',
@@ -252,8 +252,9 @@ describe('lib/browsers/firefox', () => {
           '-new-instance',
           '-foreground',
           '-start-debugger-server',
+          '-no-remote',
           '-profile',
-          '/path/to/appData/firefox/interactive',
+          '/path/to/appData/firefox-stable/interactive',
         ])
       })
     })
@@ -266,7 +267,7 @@ describe('lib/browsers/firefox', () => {
 
     it('does not clear user profile if already exists', function () {
       mockfs({
-        '/path/to/appData/firefox/interactive/': {
+        '/path/to/appData/firefox-stable/interactive/': {
           'xulstore.json': '[foo xulstore.json]',
           'chrome': { 'userChrome.css': '[foo userChrome.css]' },
         },
@@ -274,7 +275,7 @@ describe('lib/browsers/firefox', () => {
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
-        expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'xulstore.json': '[foo xulstore.json]',
           'chrome': { 'userChrome.css': '[foo userChrome.css]' },
         })
@@ -284,7 +285,7 @@ describe('lib/browsers/firefox', () => {
     it('creates xulstore.json if not exist', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
-        expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'xulstore.json': '{"chrome://browser/content/browser.xhtml":{"main-window":{"width":1280,"height":1024,"sizemode":"maximized"}}}\n',
         })
       })
@@ -292,13 +293,13 @@ describe('lib/browsers/firefox', () => {
 
     it('creates chrome/userChrome.css if not exist', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(specUtil.getFsPath('/path/to/appData/firefox/interactive/chrome/userChrome.css')).ok
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive/chrome/userChrome.css')).ok
       })
     })
 
     it('clears browser cache', function () {
       mockfs({
-        '/path/to/appData/firefox/interactive/': {
+        '/path/to/appData/firefox-stable/interactive/': {
           'CypressCache': { 'foo': 'bar' },
         },
       })
@@ -307,7 +308,7 @@ describe('lib/browsers/firefox', () => {
 
       return firefox.open(this.browser, 'http://', this.options).then(() => {
         // @ts-ignore
-        expect(specUtil.getFsPath('/path/to/appData/firefox/interactive')).containSubset({
+        expect(specUtil.getFsPath('/path/to/appData/firefox-stable/interactive')).containSubset({
           'CypressCache': {},
         })
       })

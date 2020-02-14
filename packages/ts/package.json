@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "test": "node test"
+    "test": "yarn test-unit",
+    "test-unit": "node test",
+    "test-watch": "echo 'no watching of tests'"
   },
   "dependencies": {
     "debug": "4.1.1"

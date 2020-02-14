@@ -1,5 +1,6 @@
 {
   "name": "@packages/ui-components",
+  "version": "0.0.0",
   "private": true,
   "main": "src/index.jsx",
   "scripts": {
@@ -13,6 +14,8 @@
     "watch": "npm run build -- --watch --progress"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "7.8.3",
+    "@babel/plugin-proposal-decorators": "7.8.3",
     "@babel/preset-env": "7.8.3",
     "@babel/preset-react": "7.8.3",
     "@cypress/eslint-plugin-dev": "5.0.0",

@@ -1,4 +1,5 @@
 $utils = require("./utils")
+$errUtils = require("./error_utils")
 
 isCypressHeaderRe = /^X-Cypress-/i
 
@@ -21,7 +22,7 @@ class XMLHttpRequest
     @response      = null
 
   _getXhr: ->
-    @xhr ? $utils.throwErrByPath("xhr.missing")
+    @xhr ? $errUtils.throwErrByPath("xhr.missing")
 
   _setDuration: (timeStart) ->
     @duration = (new Date) - timeStart
@@ -126,13 +127,13 @@ Object.defineProperties XMLHttpRequest.prototype,
 
   requestJSON: {
     get: ->
-      $utils.warnByPath("xhr.requestjson_deprecated")
+      $errUtils.warnByPath("xhr.requestjson_deprecated")
       @requestBody
   }
 
   responseJSON: {
     get: ->
-      $utils.warnByPath("xhr.responsejson_deprecated")
+      $errUtils.warnByPath("xhr.responsejson_deprecated")
       @responseBody
   }
 

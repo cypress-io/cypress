@@ -3,6 +3,7 @@ const $ = require('jquery')
 const Promise = require('bluebird')
 const $dom = require('../../../dom')
 const $utils = require('../../../cypress/utils')
+const $errUtils = require('../../../cypress/error_utils')
 const $actionability = require('../../actionability')
 
 const formatMouseEvents = (events) => {
@@ -59,7 +60,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     // throw if we're trying to click multiple elements
     // and we did not pass the multiple flag
     if ((options.multiple === false) && (options.$el.length > 1)) {
-      $utils.throwErrByPath('click.multiple_elements', {
+      $errUtils.throwErrByPath('click.multiple_elements', {
         args: { cmd: eventName, num: options.$el.length },
       })
     }
@@ -81,7 +82,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       if (options.errorOnSelect && $el.is('select')) {
-        $utils.throwErrByPath('click.on_select_element', {
+        $errUtils.throwErrByPath('click.on_select_element', {
           args: { cmd: eventName },
           onFail: options._log,
         })
@@ -176,7 +177,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
         // if we give up on waiting for actionability then
         // lets throw this error and log the command
-        return $utils.throwErr(err, { onFail: options._log })
+        return $errUtils.throwErr(err, { onFail: options._log })
       })
     }
 

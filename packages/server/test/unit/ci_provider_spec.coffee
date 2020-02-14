@@ -385,6 +385,9 @@ describe "lib/util/ci_provider", ->
       GITHUB_WORKFLOW: "ciGitHubWorkflowName"
       GITHUB_ACTION: "ciGitHubActionId"
       GITHUB_EVENT_NAME: "ciEventName"
+      GITHUB_RUN_ID: "ciGithubRunId"
+      GITHUB_REPOSITORY: 'ciGithubRepository'
+      GH_BRANCH: ""
 
       GITHUB_SHA: "ciCommitSha"
       GITHUB_REF: "ciCommitRef"
@@ -399,12 +402,24 @@ describe "lib/util/ci_provider", ->
       githubAction: "ciGitHubActionId"
       githubEventName: "ciEventName"
       githubWorkflow: "ciGitHubWorkflowName"
+      githubRepository: "ciGithubRepository"
+      githubRunId: "ciGithubRunId"
     })
     expectsCommitParams({
       sha: "ciCommitSha"
       defaultBranch: "ciBaseRef"
       remoteBranch: "ciHeadRef"
       branch: "ciCommitRef"
+    })
+
+    resetEnv = mockedEnv({
+      GITHUB_ACTIONS: "true"
+      GITHUB_REF: "ciCommitRef"
+      GH_BRANCH: "GHCommitBranch"
+    }, {clear: true})
+
+    expectsCommitParams({
+      branch: "GHCommitBranch"
     })
 
   it "gitlab", ->
