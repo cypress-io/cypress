@@ -10,17 +10,15 @@ const snapshot = require('../../support/snapshot')
 const stdout = require('../../support/stdout')
 const normalize = require('../../support/normalize')
 
-describe('exec info', function () {
+describe.only('exec info', function () {
   beforeEach(function () {
-    // sinon.stub(util, 'isInstalledGlobally').returns(true)
     sinon.stub(process, 'exit')
+
+    // common stubs
+    sinon.stub(spawn, 'start').resolves()
     os.platform.returns('linux')
     sinon.stub(os, 'totalmem').returns(1.2e+9)
     sinon.stub(os, 'freemem').returns(4e+8)
-  })
-
-  it('prints collected info without env vars', async () => {
-    sinon.stub(spawn, 'start').resolves()
     sinon.stub(info, 'findProxyEnvironmentVariables').returns({})
     sinon.stub(info, 'findCypressEnvironmentVariables').returns({})
     sinon.stub(util, 'getApplicationDataFolder')
@@ -28,12 +26,34 @@ describe('exec info', function () {
     .withArgs().returns('/user/app/data/path')
 
     sinon.stub(state, 'getCacheDir').returns('/user/path/to/binary/cache')
+  })
+
+  const startInfoAndSnapshot = async (snapshotName) => {
+    expect(snapshotName).to.be.a('string')
 
     const output = stdout.capture()
 
     await info.start()
     stdout.restore()
 
-    snapshot('cypress info without browsers or vars', normalize(output.toString()))
+    snapshot(snapshotName, normalize(output.toString()))
+  }
+
+  it('prints collected info without env vars', async () => {
+    await startInfoAndSnapshot('cypress info without browsers or vars')
+  })
+
+  it('prints proxy and cypress env vars', async () => {
+    info.findProxyEnvironmentVariables.returns({
+      PROXY_ENV_VAR1: 'some proxy variable',
+      PROXY_ENV_VAR2: 'another proxy variable',
+    })
+
+    info.findCypressEnvironmentVariables.returns({
+      CYPRESS_ENV_VAR1: 'my Cypress variable',
+      CYPRESS_ENV_VAR2: 'my other Cypress variable',
+    })
+
+    await startInfoAndSnapshot('cypress info with proxy and vars')
   })
 })
