@@ -5,7 +5,7 @@ $errUtils = require("../../cypress/error_utils")
 
 command = (ctx, name, args...) ->
   if not ctx[name]
-    cmds = _.keys($Chainer.prototype).join(", ")
+    cmds = "\`#{_.keys($Chainer.prototype).join("`, `")}\`"
     $errUtils.throwErrByPath("miscellaneous.invalid_command", {
       args: { name, cmds }
     })

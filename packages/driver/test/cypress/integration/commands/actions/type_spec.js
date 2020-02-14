@@ -4929,7 +4929,7 @@ describe('src/cy/commands/actions/type', () => {
 
         cy.on('fail', (err) => {
           expect(typed).to.be.calledOnce
-          expect(err.message).to.include('cy.type() failed because this element')
+          expect(err.message).to.include('`cy.type()` failed because this element')
 
           done()
         })
@@ -4947,10 +4947,10 @@ describe('src/cy/commands/actions/type', () => {
           cy.get(`#${attrs.id}`).type('foo')
 
           cy.on('fail', (err) => {
-            expect(err.message).to.include('cy.type() failed because this element is readonly:')
-            expect(err.message).to.include(`<input id="${attrs.id}" readonly="${attrs.val}">`)
-            expect(err.message).to.include('Fix this problem, or use {force: true} to disable error checking.')
-
+            expect(err.message).to.include('`cy.type()` failed because this element is readonly:')
+            expect(err.message).to.include(`\`<input id="${attrs.id}" readonly="${attrs.val}">\``)
+            expect(err.message).to.include('Fix this problem, or use `{force: true}` to disable error checking.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/element-cannot-be-interacted-with')
             done()
           })
         })
@@ -4961,10 +4961,11 @@ describe('src/cy/commands/actions/type', () => {
         cy.get('div#nested-find').type('foo')
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.type() failed because it requires a valid typeable element.')
+          expect(err.message).to.include('`cy.type()` failed because it requires a valid typeable element.')
           expect(err.message).to.include('The element typed into was:')
           expect(err.message).to.include('<div id="nested-find">Nested ...</div>')
           expect(err.message).to.include(`A typeable element matches one of the following selectors:`)
+          expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
         })
       })
@@ -4977,8 +4978,8 @@ describe('src/cy/commands/actions/type', () => {
         }).type('foo')
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include(`cy.type() can only be called on a single element. Your subject contained ${this.num} elements.`)
-
+          expect(err.message).to.include(`\`cy.type()\` can only be called on a single element. Your subject contained ${this.num} elements.`)
+          expect(err.docsUrl).to.include('https://on.cypress.io/type')
           done()
         })
       })
@@ -4991,7 +4992,7 @@ describe('src/cy/commands/actions/type', () => {
 
           expect(this.logs.length).to.eq(2)
           expect(lastLog.get('error')).to.eq(err)
-          expect(err.message).to.include('cy.type() failed because this element is not visible')
+          expect(err.message).to.include('`cy.type()` failed because this element is not visible')
 
           done()
         })
@@ -5005,7 +5006,7 @@ describe('src/cy/commands/actions/type', () => {
         cy.on('fail', (err) => {
           // get + type logs
           expect(this.logs.length).eq(2)
-          expect(err.message).to.include('cy.type() failed because this element is disabled:\n')
+          expect(err.message).to.include('`cy.type()` failed because this element is `disabled`:\n')
 
           done()
         })
@@ -5046,7 +5047,7 @@ describe('src/cy/commands/actions/type', () => {
 
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.include('cy.type() failed because this element')
+          expect(err.message).to.include('`cy.type()` failed because this element')
           expect(err.message).to.include('is being covered by another element')
 
           done()
@@ -5061,11 +5062,11 @@ describe('src/cy/commands/actions/type', () => {
 
           const allChars = _.keys(Cypress.Keyboard.getKeymap()).join(', ')
 
-          expect(err.message).to.eq(`Special character sequence: '{bar}' is not recognized. Available sequences are: ${allChars}
+          expect(err.message).to.eq(`Special character sequence: \`{bar}\` is not recognized. Available sequences are: \`${allChars}\`
 
-If you want to skip parsing special character sequences and type the text exactly as written, pass the option: {parseSpecialCharSequences: false}
+If you want to skip parsing special character sequences and type the text exactly as written, pass the option: \`{ parseSpecialCharSequences: false }\``)
 
-https://on.cypress.io/type`)
+          expect(err.docsUrl).to.eq('https://on.cypress.io/type')
 
           done()
         })
@@ -5073,10 +5074,11 @@ https://on.cypress.io/type`)
         cy.get(':text:first').type('foo{bar}')
       })
 
-      it('throws when attemping to type tab', function (done) {
+      it('throws when attempting to type tab', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('{tab} isn\'t a supported character sequence. You\'ll want to use the command cy.tab(), which is not ready yet, but when it is done that\'s what you\'ll use.')
+          expect(err.message).to.eq('`{tab}` isn\'t a supported character sequence.')
+
           done()
         })
 
@@ -5086,7 +5088,8 @@ https://on.cypress.io/type`)
       it('throws on an empty string', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('cy.type() cannot accept an empty String. You need to actually type something.')
+          expect(err.message).to.eq('`cy.type()` cannot accept an empty string. You need to actually type something.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/type')
           done()
         })
 
@@ -5150,7 +5153,8 @@ https://on.cypress.io/type`)
 
             cy.on('fail', (err) => {
               expect(this.logs.length).to.eq(2)
-              expect(err.message).to.eq(`cy.type() can only accept a String or Number. You passed in: '${val}'`)
+              expect(err.message).to.eq(`\`cy.type()\` can only accept a string or number. You passed in: \`${val}\``)
+              expect(err.docsUrl).to.eq('https://on.cypress.io/type')
               done()
             })
 
@@ -5171,7 +5175,8 @@ https://on.cypress.io/type`)
 
         cy.on('fail', (err) => {
           expect(keydown).not.to.be.called
-          expect(err.message).to.include('cy.type() could not be issued because this element is currently animating:\n')
+          expect(err.message).to.include('`cy.type()` could not be issued because this element is currently animating:\n')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/element-is-animating')
 
           done()
         })
@@ -5209,8 +5214,8 @@ https://on.cypress.io/type`)
         it('throws when chars is not a string', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a date input with cy.type() requires a valid date with the format \'yyyy-MM-dd\'. You passed: 1989')
-
+            expect(err.message).to.eq('Typing into a `date` input with `cy.type()` requires a valid date with the format `yyyy-MM-dd`. You passed: `1989`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5220,8 +5225,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid format', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a date input with cy.type() requires a valid date with the format \'yyyy-MM-dd\'. You passed: 01-01-1989')
-
+            expect(err.message).to.eq('Typing into a `date` input with `cy.type()` requires a valid date with the format `yyyy-MM-dd`. You passed: `01-01-1989`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5231,8 +5236,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid date', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a date input with cy.type() requires a valid date with the format \'yyyy-MM-dd\'. You passed: 1989-04-31')
-
+            expect(err.message).to.eq('Typing into a `date` input with `cy.type()` requires a valid date with the format `yyyy-MM-dd`. You passed: `1989-04-31`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5244,8 +5249,8 @@ https://on.cypress.io/type`)
         it('throws when chars is not a string', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a month input with cy.type() requires a valid month with the format \'yyyy-MM\'. You passed: 6')
-
+            expect(err.message).to.eq('Typing into a `month` input with `cy.type()` requires a valid month with the format `yyyy-MM`. You passed: `6`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5255,8 +5260,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid format', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a month input with cy.type() requires a valid month with the format \'yyyy-MM\'. You passed: 01/2000')
-
+            expect(err.message).to.eq('Typing into a `month` input with `cy.type()` requires a valid month with the format `yyyy-MM`. You passed: `01/2000`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5266,8 +5271,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid month', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a month input with cy.type() requires a valid month with the format \'yyyy-MM\'. You passed: 1989-13')
-
+            expect(err.message).to.eq('Typing into a `month` input with `cy.type()` requires a valid month with the format `yyyy-MM`. You passed: `1989-13`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5293,8 +5298,8 @@ https://on.cypress.io/type`)
         it('throws when chars is not a string', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a week input with cy.type() requires a valid week with the format \'yyyy-Www\', where W is the literal character \'W\' and ww is the week number (00-53). You passed: 23')
-
+            expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `23`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5304,8 +5309,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid format', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a week input with cy.type() requires a valid week with the format \'yyyy-Www\', where W is the literal character \'W\' and ww is the week number (00-53). You passed: 2005/W18')
-
+            expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `2005/W18`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5315,8 +5320,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid week', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.eq('Typing into a week input with cy.type() requires a valid week with the format \'yyyy-Www\', where W is the literal character \'W\' and ww is the week number (00-53). You passed: 1995-W60')
-
+            expect(err.message).to.eq('Typing into a `week` input with `cy.type()` requires a valid week with the format `yyyy-Www`, where `W` is the literal character `W` and `ww` is the week number (00-53). You passed: `1995-W60`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5328,8 +5333,8 @@ https://on.cypress.io/type`)
         it('throws when chars is not a string', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.equal(2)
-            expect(err.message).to.equal('Typing into a time input with cy.type() requires a valid time with the format \'HH:mm\', \'HH:mm:ss\' or \'HH:mm:ss.SSS\', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 9999')
-
+            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `9999`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5339,8 +5344,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid format (1:30)', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.equal(2)
-            expect(err.message).to.equal('Typing into a time input with cy.type() requires a valid time with the format \'HH:mm\', \'HH:mm:ss\' or \'HH:mm:ss.SSS\', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 1:30')
-
+            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `1:30`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5350,8 +5355,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid format (01:30pm)', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.equal(2)
-            expect(err.message).to.equal('Typing into a time input with cy.type() requires a valid time with the format \'HH:mm\', \'HH:mm:ss\' or \'HH:mm:ss.SSS\', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30pm')
-
+            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `01:30pm`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5361,8 +5366,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid format (01:30:30.3333)', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.equal(2)
-            expect(err.message).to.equal('Typing into a time input with cy.type() requires a valid time with the format \'HH:mm\', \'HH:mm:ss\' or \'HH:mm:ss.SSS\', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:30:30.3333')
-
+            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `01:30:30.3333`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5372,8 +5377,8 @@ https://on.cypress.io/type`)
         it('throws when chars is invalid time', function (done) {
           cy.on('fail', (err) => {
             expect(this.logs.length).to.equal(2)
-            expect(err.message).to.equal('Typing into a time input with cy.type() requires a valid time with the format \'HH:mm\', \'HH:mm:ss\' or \'HH:mm:ss.SSS\', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: 01:60')
-
+            expect(err.message).to.equal('Typing into a `time` input with `cy.type()` requires a valid time with the format `HH:mm`, `HH:mm:ss` or `HH:mm:ss.SSS`, where `HH` is 00-23, `mm` is 00-59, `ss` is 00-59, and `SSS` is 000-999. You passed: `01:60`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/type')
             done()
           })
 
@@ -5529,8 +5534,6 @@ https://on.cypress.io/type`)
             this.lastLog = log
           }
         })
-
-        null
       })
 
       it('eventually passes the assertion', () => {
@@ -5574,8 +5577,6 @@ https://on.cypress.io/type`)
 
           this.logs.push(log)
         })
-
-        null
       })
 
       it('throws when not a dom subject', (done) => {
@@ -5597,7 +5598,7 @@ https://on.cypress.io/type`)
 
         cy.on('fail', (err) => {
           expect(cleared).to.be.calledOnce
-          expect(err.message).to.include('cy.clear() failed because this element')
+          expect(err.message).to.include('`cy.clear()` failed because this element')
 
           done()
         })
@@ -5611,10 +5612,11 @@ https://on.cypress.io/type`)
 
           expect(this.logs.length).to.eq(3)
           expect(lastLog.get('error')).to.eq(err)
-          expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
+          expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
-          expect(err.message).to.include('<form id="checkboxes">...</form>')
+          expect(err.message).to.include('`<form id="checkboxes">...</form>`')
           expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+          expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
           done()
         })
@@ -5624,10 +5626,11 @@ https://on.cypress.io/type`)
 
       it('throws if any subject isnt a :text', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
+          expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
-          expect(err.message).to.include('<div id="dom">...</div>')
+          expect(err.message).to.include('`<div id="dom">...</div>`')
           expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+          expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
           done()
         })
@@ -5637,10 +5640,11 @@ https://on.cypress.io/type`)
 
       it('throws on an input radio', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
+          expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
-          expect(err.message).to.include('<input type="radio" name="gender" value="male">')
+          expect(err.message).to.include('`<input type="radio" name="gender" value="male">`')
           expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+          expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
           done()
         })
 
@@ -5649,10 +5653,11 @@ https://on.cypress.io/type`)
 
       it('throws on an input checkbox', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
+          expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
           expect(err.message).to.include('The element cleared was:')
-          expect(err.message).to.include('<input type="checkbox" name="colors" value="blue">')
+          expect(err.message).to.include('`<input type="checkbox" name="colors" value="blue">`')
           expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+          expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
           done()
         })
@@ -5664,7 +5669,7 @@ https://on.cypress.io/type`)
         cy.$$('input:text:first').show().hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.clear() failed because this element is not visible')
+          expect(err.message).to.include('`cy.clear()` failed because this element is not visible')
 
           done()
         })
@@ -5678,7 +5683,7 @@ https://on.cypress.io/type`)
         cy.on('fail', (err) => {
           // get + type logs
           expect(this.logs.length).eq(2)
-          expect(err.message).to.include('cy.clear() failed because this element is disabled:\n')
+          expect(err.message).to.include('`cy.clear()` failed because this element is `disabled`:\n')
 
           done()
         })
@@ -5718,7 +5723,7 @@ https://on.cypress.io/type`)
 
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.include('cy.clear() failed because this element')
+          expect(err.message).to.include('`cy.clear()` failed because this element')
           expect(err.message).to.include('is being covered by another element')
 
           done()

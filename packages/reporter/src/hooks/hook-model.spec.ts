@@ -87,7 +87,8 @@ describe('Hook model', () => {
   context('#commandMatchingErr', () => {
     it('returns last command to match the error', () => {
       const matchesButIsntLast: Partial<CommandModel> = {
-        err: { displayMessage: 'matching error message' } as ErrModel,
+        // @ts-ignore
+        err: { message: 'matching error message' } as ErrModel,
         isMatchingEvent: () => {
           return false
         },
@@ -96,7 +97,8 @@ describe('Hook model', () => {
       hook.addCommand(matchesButIsntLast as CommandModel)
 
       const doesntMatch: Partial<CommandModel> = {
-        err: { displayMessage: 'other error message' } as ErrModel,
+        // @ts-ignore
+        err: { message: 'other error message' } as ErrModel,
         isMatchingEvent: () => {
           return false
         },
@@ -105,17 +107,18 @@ describe('Hook model', () => {
       hook.addCommand(doesntMatch as CommandModel)
 
       const matches: Partial<CommandModel> = {
-        err: { displayMessage: 'matching error message' } as ErrModel,
+        err: { message: 'matching error message' } as ErrModel,
       }
 
       hook.addCommand(matches as CommandModel)
 
-      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' } as ErrModel)).to.eql(matches)
+      expect(hook.commandMatchingErr({ message: 'matching error message' } as ErrModel)).to.eql(matches)
     })
 
     it('returns undefined when no match', () => {
       const noMatch1: Partial<CommandModel> = {
-        err: { displayMessage: 'some error message' } as ErrModel,
+        // @ts-ignore
+        err: { message: 'some error message' } as ErrModel,
         isMatchingEvent: () => {
           return false
         },
@@ -124,12 +127,13 @@ describe('Hook model', () => {
       hook.addCommand(noMatch1 as CommandModel)
 
       const noMatch2: Partial<CommandModel> = {
-        err: { displayMessage: 'other error message' } as ErrModel,
+        // @ts-ignore
+        err: { message: 'other error message' } as ErrModel,
       }
 
       hook.addCommand(noMatch2 as CommandModel)
 
-      expect(hook.commandMatchingErr({ displayMessage: 'matching error message' } as ErrModel)).to.be.undefined
+      expect(hook.commandMatchingErr({ message: 'matching error message' } as ErrModel)).to.be.undefined
     })
   })
 

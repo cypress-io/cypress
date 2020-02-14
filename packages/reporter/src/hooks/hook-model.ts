@@ -73,7 +73,7 @@ export default class Hook {
   commandMatchingErr (errToMatch: Err) {
     return _(this.commands)
     .filter(({ err }) => {
-      return err && err.displayMessage === errToMatch.displayMessage
+      return err && err.message === errToMatch.message && err.message !== undefined
     })
     .last()
   }

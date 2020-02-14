@@ -291,6 +291,20 @@ describe "src/cy/commands/location", ->
 
         return null
 
+      it "throws when passed a non-existent key", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(err.message).to.include(lastLog.get("error").message)
+          expect(err.message).to.include("Location object does not have key: `ladida`")
+          expect(err.docsUrl).to.include("https://on.cypress.io/location")
+          expect(lastLog.get("name")).to.eq("location")
+          expect(lastLog.get("state")).to.eq("failed")
+
+          done()
+
+        cy.location('ladida')
+
       it "eventually fails the assertion", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog

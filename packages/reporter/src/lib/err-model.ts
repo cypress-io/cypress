@@ -3,33 +3,44 @@ import { computed, observable } from 'mobx'
 export interface ErrProps {
   name?: string
   message?: string
+  mdMessage?: string
   stack?: string
+  docsUrl?: string
 }
 
 export default class Err {
-  @observable name: string = ''
-  @observable message: string = ''
-  @observable stack: string = ''
+  @observable name = ''
+  @observable message = ''
+  @observable stack = ''
+  @observable mdMessage = ''
+  @observable docsUrl = ''
 
   constructor (props?: ErrProps) {
     this.update(props)
   }
 
   @computed get displayMessage () {
-    if (!this.name && !this.message) return ''
+    if (!this.name && !this.mdMessage) return ''
 
-    return `${this.name}: ${this.message}`
+    return `${this.name}: ${this.mdMessage}`
   }
 
   @computed get isCommandErr () {
     return /(AssertionError|CypressError)/.test(this.name)
   }
 
-  update (props?: ErrProps | null) {
+  update (props?: ErrProps) {
     if (!props) return
 
-    this.name = props.name || ''
-    this.message = props.message || ''
-    this.stack = props.stack || ''
+    if (props.name) this.name = props.name
+
+    if (props.message) this.message = props.message
+
+    // @ts-ignore
+    if (props.mdMessage || props.message) this.mdMessage = props.mdMessage || props.message
+
+    if (props.stack) this.stack = props.stack
+
+    if (props.docsUrl) this.docsUrl = props.docsUrl
   }
 }

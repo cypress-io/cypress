@@ -34,7 +34,7 @@
     "eslint": "6.1.0",
     "jsdom": "14.1.0",
     "lodash": "4.17.15",
-    "markdown-it": "6.1.1",
+    "markdown-it": "8.4.2",
     "mobx": "5.11.0",
     "mobx-react": "5.4.4",
     "mocha": "6.2.2",
