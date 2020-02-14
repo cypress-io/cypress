@@ -8,9 +8,6 @@ const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileN
 
 const CypressErrorRe = /(AssertionError|CypressError)/
 const twoOrMoreNewLinesRe = /\n{2,}/
-const mdReplacements = [
-  ['`', '\\`'],
-]
 
 const wrapErr = (err) => {
   if (!err) return
@@ -250,19 +247,6 @@ const normalizeErrorStack = (err) => {
   return err
 }
 
-const escapeErrMarkdown = (text) => {
-  if (!_.isString(text)) {
-    return text
-  }
-
-  // escape markdown syntax supported by reporter
-  return _.reduce(mdReplacements, (str, replacement) => {
-    const re = new RegExp(replacement[0], 'g')
-
-    return str.replace(re, replacement[1])
-  }, text)
-}
-
 const getObjValueByPath = (obj, keyPath) => {
   if (!_.isObject(obj)) {
     throw new Error('The first parameter to utils.getObjValueByPath() must be an object')
@@ -316,7 +300,6 @@ module.exports = {
   enhanceStack,
   errMsgByPath,
   errObjByPath,
-  escapeErrMarkdown,
   getErrMessage,
   getErrMsgWithObjByPath,
   getErrStack,

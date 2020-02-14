@@ -427,15 +427,6 @@ describe "driver/src/cypress/error_utils", ->
 
       expect(msg).to.eq("click simple error message")
 
-  context ".escapeErrMarkdown", ->
-    it "accepts non-strings", ->
-      text = 3
-      expect($errUtils.escapeErrMarkdown(text)).to.equal(3)
-
-    it "escapes backticks", ->
-      md = "`foo`"
-      expect($errUtils.escapeErrMarkdown(md)).to.equal("\\`foo\\`")
-
   context ".getObjValueByPath", ->
     beforeEach ->
       @obj =
