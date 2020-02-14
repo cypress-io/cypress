@@ -251,23 +251,23 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: mkdir cli-snapshots
+      - run: mkdir -p cli/visual-snapshots
       - run:
           # TODO sanitize "cypress info" output to be consistent
-          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli-snapshots/cypress-info.html
+          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
           environment:
             FORCE_COLOR: 2
       - run:
-          command: node cli/bin/cypress help | yarn --silent term-to-html > cli-snapshots/cypress-help.html
+          command: node cli/bin/cypress help | yarn --silent term-to-html > cli/visual-snapshots/cypress-help.html
           environment:
             FORCE_COLOR: 2
       - store_artifacts:
-          path: cli-snapshots
+          path: cli/visual-snapshots
       - run:
           name: Upload CLI snapshots for diffing
           command: |
             PERCY_TOKEN=$PERCY_TOKEN_CLI \
-            yarn percy snapshot ./cli-snapshots
+            yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
     <<: *defaults
