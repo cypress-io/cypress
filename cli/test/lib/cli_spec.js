@@ -462,7 +462,7 @@ describe('cli', () => {
       sinon.stub(util, 'exit').withArgs(0)
     })
 
-    it('collects and outputs all info', () => {
+    it('calls info start', () => {
       this.exec('info')
       expect(info.start).to.have.been.calledWith()
     })

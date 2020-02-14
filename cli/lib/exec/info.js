@@ -15,7 +15,10 @@ const p = chalk.cyan
 // urls
 const link = chalk.blue.underline
 
-const findProxyEnvironmentVariables = () => {
+// to be exported
+const methods = {}
+
+methods.findProxyEnvironmentVariables = () => {
   return _.pick(process.env, ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'])
 }
 
@@ -23,13 +26,13 @@ const maskSensitiveVariables = R.evolve({
   CYPRESS_RECORD_KEY: R.always('<redacted>'),
 })
 
-const findCypressEnvironmentVariables = () => {
+methods.findCypressEnvironmentVariables = () => {
   const isCyVariable = (val, key) => key.startsWith('CYPRESS_')
 
   return maskSensitiveVariables(R.pickBy(isCyVariable)(process.env))
 }
 
-const start = (options = {}) => {
+methods.start = (options = {}) => {
   const args = ['--mode=info']
 
   return spawn.start(args, {
@@ -37,7 +40,7 @@ const start = (options = {}) => {
   })
   .then(() => {
     console.log()
-    const proxyVars = findProxyEnvironmentVariables()
+    const proxyVars = methods.findProxyEnvironmentVariables()
 
     if (_.isEmpty(proxyVars)) {
       console.log('Proxy Settings: none detected')
@@ -53,7 +56,7 @@ const start = (options = {}) => {
     }
   })
   .then(() => {
-    const cyVars = findCypressEnvironmentVariables()
+    const cyVars = methods.findCypressEnvironmentVariables()
 
     if (_.isEmpty(cyVars)) {
       console.log('Environment Variables: none detected')
@@ -81,6 +84,4 @@ const start = (options = {}) => {
   })
 }
 
-module.exports = {
-  start,
-}
+module.exports = methods
