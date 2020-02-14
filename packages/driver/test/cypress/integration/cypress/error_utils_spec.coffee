@@ -1,5 +1,4 @@
 $errUtils = require("../../../../src/cypress/error_utils")
-$stackUtils = require("../../../../src/cypress/stack_utils")
 $errorMessages = require("../../../../src/cypress/error_messages")
 
 describe "driver/src/cypress/error_utils", ->
@@ -83,60 +82,9 @@ describe "driver/src/cypress/error_utils", ->
         try
           $errUtils.throwErrByPath("not.there")
         catch e
-          expect(e.message).to.include "Error message path: 'not.there' does not exist"
+          expect(e.message).to.include("Error message path 'not.there' does not exist")
 
     describe "when error message path exists", ->
-      context "error is object", ->
-        describe "when no args are provided for the error", ->
-          it "has an err.name of CypressError", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.obj")
-            catch e
-              expect(e.name).to.eq "CypressError"
-
-          it "has the right message and docs url", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.obj")
-            catch e
-              expect(e.message).to.include "This is a simple error message"
-              expect(e.docsUrl).to.include "https://on.link.io"
-
-        describe "when args are provided for the error", ->
-          it "uses them in the error message", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.obj_with_args", {
-                args: {
-                  foo: "foo", bar: ["bar", "qux"]
-                }
-              })
-            catch e
-              expect(e.message).to.include "This has args like 'foo' and bar,qux"
-              expect(e.docsUrl).to.include "https://on.link.io"
-
-        describe "when args are provided for the error and some are used multiple times in message", ->
-          it "uses them in the error message", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.obj_with_multi_args", {
-                args: {
-                  foo: "foo", bar: ["bar", "qux"]
-                }
-              })
-            catch e
-              expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
-              expect(e.docsUrl).to.include "https://on.link.io"
-
-        describe "when markdown and args", ->
-          it "formats markdown in the error message", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.obj_with_markdown", {
-                args: {
-                  foo: "foo", bar: ["bar", "qux"]
-                }
-              })
-            catch e
-              expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
-              expect(e.docsUrl).to.include "https://on.link.io"
-
       context "error is string", ->
         describe "when no args are provided for the error", ->
           it "has an err.name of CypressError", ->
@@ -150,7 +98,6 @@ describe "driver/src/cypress/error_utils", ->
               $errUtils.throwErrByPath("__test_errors.str")
             catch e
               expect(e.message).to.include "This is a simple error message"
-              expect(e.docsUrl).to.be.undefined
 
         describe "when args are provided for the error", ->
           it "uses them in the error message", ->
@@ -231,45 +178,6 @@ describe "driver/src/cypress/error_utils", ->
               })
             catch e
               expect(e.message).to.include "This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_"
-
-      context "error is function that returns an object", ->
-        describe "when no args are provided for the error", ->
-          it "has an err.name of CypressError", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.fn_returns_obj")
-            catch e
-              expect(e.name).to.eq "CypressError"
-
-          it "has the right message and docs url", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.fn_returns_obj")
-            catch e
-              expect(e.message).to.include "This is a simple error message"
-              expect(e.docsUrl).to.include "https://on.link.io"
-
-        describe "when args are provided for the error", ->
-          it "uses them in the error message", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.fn_returns_obj_with_args", {
-                args: {
-                  foo: "foo", bar: ["bar", "qux"]
-                }
-              })
-            catch e
-              expect(e.message).to.include "This has args like 'foo' and bar,qux"
-              expect(e.docsUrl).to.include "https://on.link.io"
-
-        describe "when args are provided for the error and some are used multiple times in message", ->
-          it "uses them in the error message", ->
-            try
-              $errUtils.throwErrByPath("__test_errors.fn_returns_obj_with_multi_args", {
-                args: {
-                  foo: "foo", bar: ["bar", "qux"]
-                }
-              })
-            catch e
-              expect(e.message).to.include "This has args like 'foo' and bar,qux, and 'foo' is used twice"
-              expect(e.docsUrl).to.include "https://on.link.io"
 
     describe "when onFail is provided as a function", ->
       it "attaches the function to the error", ->

@@ -220,4 +220,5 @@ module.exports = {
   errMsgByPath,
   serializeError,
   wrapErr,
+  getObjValueByPath,
 }
