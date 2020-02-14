@@ -2,6 +2,8 @@ require('../../spec_helper')
 
 const info = require(`${root}../lib/modes/info`)
 const capture = require(`${root}../lib/capture`)
+const browserUtils = require(`${root}../lib/browsers/utils`)
+const fs = require(`${root}../lib/util/fs`)
 const launcher = require('@packages/launcher')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
@@ -67,5 +69,28 @@ describe('lib/modes/info', () => {
 
     await infoAndSnapshot('two browsers')
     expect(sample, 'two browsers were picked to create examples').to.be.calledTwice
+  })
+
+  it('adds profile for browser if folder exists', async () => {
+    sinon.stub(launcher, 'detect').resolves([chromeStable, firefoxDev])
+    sinon.stub(browserUtils, 'getBrowserPath')
+    .withArgs(chromeStable).returns('/path/to/user/chrome/profile')
+    .withArgs(firefoxDev).returns('/path/to/user/firefox/profile')
+
+    sinon.stub(fs, 'statAsync')
+    .withArgs('/path/to/user/chrome/profile').throws('No Chrome profile folder')
+    .withArgs('/path/to/user/firefox/profile').resolves({
+      isDirectory: _.stubTrue,
+    })
+
+    // have to make sure random sampling from the browser list
+    // to create examples returns same order
+    // so Chrome will be picked first, Firefox will be second
+    const sample = sinon.stub(_, 'sample')
+
+    sample.onFirstCall().returns(chromeStable)
+    sample.onSecondCall().returns(firefoxDev)
+
+    await infoAndSnapshot('two browsers with firefox having profile folder')
   })
 })

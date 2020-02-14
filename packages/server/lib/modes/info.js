@@ -53,7 +53,7 @@ const formBrowserName = (browser) => {
 // and checks if the folder exists. If exists,
 // adds it to the browser object as a property
 const addProfilePath = async (browsers = []) => {
-  await browsers.forEach(async (browser) => {
+  for (const browser of browsers) {
     const profilePath = browserUtils.getBrowserPath(browser)
 
     debug('checking profile path %s for browser %s:%s', profilePath, browser.name, browser.channel)
@@ -67,7 +67,7 @@ const addProfilePath = async (browsers = []) => {
     } catch (e) {
       debug('problem checking profile folder %s %s', profilePath, e.message)
     }
-  })
+  }
 
   return browsers
 }
