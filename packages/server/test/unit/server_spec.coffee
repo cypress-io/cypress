@@ -41,12 +41,12 @@ describe "lib/server", ->
       @use = sinon.spy(express.application, "use")
 
     it "instantiates express instance without morgan", ->
-      app = @server.createExpressApp(false)
+      app = @server.createExpressApp({ morgan: false })
       expect(app.get("view engine")).to.eq("html")
       expect(@use).not.to.be.calledWith(morganFn)
 
     it "requires morgan if true", ->
-      @server.createExpressApp(true)
+      @server.createExpressApp({ morgan: true })
       expect(@use).to.be.calledWith(morganFn)
 
   context "#open", ->
@@ -60,7 +60,7 @@ describe "lib/server", ->
 
       @server.open(@config)
       .then =>
-        expect(@server.createExpressApp).to.be.calledWith(false)
+        expect(@server.createExpressApp).to.be.calledWithMatch({ morgan: false })
 
     it "calls #createServer with port", ->
       _.extend @config, {port: 54321}
@@ -104,7 +104,7 @@ describe "lib/server", ->
   context "#createServer", ->
     beforeEach ->
       @port = 54321
-      @app  = @server.createExpressApp(true)
+      @app  = @server.createExpressApp({ morgan: true })
 
     it "isListening=true", ->
       @server.createServer(@app, {port: @port})
