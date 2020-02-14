@@ -39,12 +39,29 @@ templateEngine = require("./template_engine")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
-NON_PROXY_PATH_WHITELIST = [
-  '/__',
+ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
   '/__cypress/static/favicon.ico'
 ]
+
+_isNonProxiedRequest = (req) ->
+  ## proxied HTTP requests have a URL like: "http://example.com/foo"
+  ## non-proxied HTTP requests have a URL like: "/foo"
+  req.proxiedUrl.startsWith('/')
+
+_forceProxyMiddleware = (clientRoute) ->
+  ## normalize clientRoute to help with comparison
+  trimmedClientRoute = _.trimEnd(clientRoute, '/')
+
+  (req, res, next) ->
+    trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+    if _isNonProxiedRequest(req) and !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) and trimmedUrl isnt trimmedClientRoute
+      ## this request is non-proxied and non-whitelisted, redirect to the runner error page
+      return res.redirect(clientRoute)
+
+    next()
 
 isResponseHtml = (contentType, responseBuffer) ->
   if contentType
@@ -107,7 +124,7 @@ class Server
     app.engine("html", templateEngine.render)
 
     ## handle the proxied url in case
-    ## we have not yet started our websocket serversss
+    ## we have not yet started our websocket server
     app.use (req, res, next) =>
       setProxiedUrl(req)
 
@@ -116,17 +133,11 @@ class Server
       if m = @_middleware
         m(req, res)
 
-      ## always continue onsda
+      ## always continue on
 
       next()
 
-    app.use (req, res, next) ->
-      trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
-      if req.proxiedUrl.startsWith('/') and !_.includes(NON_PROXY_PATH_WHITELIST, trimmedUrl) and trimmedUrl isnt _.trimEnd(clientRoute, '/')
-        ## redirect users to the clientRoute if they are not visiting via the proxy
-        return res.redirect(clientRoute)
-
-      next()
+    app.use _forceProxyMiddleware(clientRoute)
 
     app.use require("cookie-parser")()
     app.use compression({filter: notSSE})
@@ -639,7 +650,7 @@ class Server
     ## bail if this is our own namespaced socket.io request
     if req.url.startsWith(socketIoRoute)
       if not @_socketWhitelist.isRequestWhitelisted(req)
-        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via Cypress.')
+        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
 
       ## we can return here either way, if the socket is still valid socket.io will hook it up

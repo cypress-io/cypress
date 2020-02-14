@@ -2,38 +2,18 @@ _      = require("lodash")
 cache  = require("../cache")
 send   = require("send")
 os     = require("os")
+fs     = require("../util/fs")
+path   = require("path")
 debug  = require("debug")("cypress:server:runner")
 pkg    = require("@packages/root")
 runner = require("@packages/runner/lib/resolve-dist")
 
-NON_PROXIED_ERROR = """
-<html>
-  <head>
-    <meta http-equiv="content-type" content="text/html;charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cypress</title>
-
-    <link href="/__cypress/static/favicon.ico" rel="icon">
-
-    <link rel="stylesheet" href="/__cypress/runner/cypress_runner.css">
-  </head>
-  <body>
-    <div id="app">
-      <div class="runner automation-failure">
-        <div class="automation-message">
-          <p>Whoops, we can't run your tests.</p>
-          <div>
-            <p class="muted">This browser was not launched through Cypress. Tests cannot run.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </body>
-</html>
-"""
+PATH_TO_NON_PROXIED_ERROR = path.join(__dirname, "..", "html", "non_proxied_error.html")
 
 _serveNonProxiedError = (res) ->
-  res.type('html').end(NON_PROXIED_ERROR)
+  fs.readFile(PATH_TO_NON_PROXIED_ERROR)
+  .then (html) =>
+    res.type('html').end(html)
 
 module.exports = {
   serve: (req, res, options = {}) ->

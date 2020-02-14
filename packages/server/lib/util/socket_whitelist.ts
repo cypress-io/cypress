@@ -28,7 +28,7 @@ export class SocketWhitelist {
   }
 
   _remove (socket: net.Socket) {
-    _.remove(this.whitelistedLocalPorts, socket.localPort)
+    _.pull(this.whitelistedLocalPorts, socket.localPort)
   }
 
   /**

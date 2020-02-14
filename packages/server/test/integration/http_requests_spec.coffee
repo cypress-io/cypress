@@ -262,7 +262,7 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(/Runner.start\(.+\)/)
 
-    it "routes to 'not launched through Cypress' without a proxy set", ->
+    it "clientRoute routes to 'not launched through Cypress' without a proxy set", ->
       @rp({
         url: @proxy + "/__"
         proxy: null
@@ -270,6 +270,16 @@ describe "Routes", ->
       .then (res) ->
         expect(res.statusCode).to.eq(200)
         expect(res.body).to.match(/This browser was not launched through Cypress\./)
+
+    it "other URLs redirect to clientRoute without a proxy set", ->
+      ## test something that isn't the clientRoute
+      @rp({
+        url: @proxy + "/__cypress/xhrs/foo"
+        proxy: null
+      })
+      .then (res) ->
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers['location']).to.eq('/__/')
 
     it "routes when baseUrl is set", ->
       @setup({baseUrl: "http://localhost:9999/app"})
