@@ -344,13 +344,17 @@ namespace CypressBrowserTests {
   Cypress.isBrowser('firefox')// $ExpectType boolean
   Cypress.isBrowser('edge')// $ExpectType boolean
   Cypress.isBrowser('brave')// $ExpectType boolean
+
+  // does not error to allow for user supplied browsers
+  Cypress.isBrowser('safari')// $ExpectType boolean
+
   Cypress.isBrowser({channel: 'stable'})// $ExpectType boolean
   Cypress.isBrowser({family: 'chromium'})// $ExpectType boolean
   Cypress.isBrowser({name: 'chrome'})// $ExpectType boolean
+
   Cypress.isBrowser({family: 'foo'}) // $ExpectError
   Cypress.isBrowser() // $ExpectError
 }
-
 namespace CypressTestConfigTests {
   it('test', {
     browser: {name: 'firefox'}
