@@ -25,17 +25,17 @@ const PROXY_PORT = 31000
 const HTTP_PORT = 31080
 const HTTPS_PORT = 31443
 
-describe('lib/agent', function () {
-  beforeEach(function () {
+describe('lib/agent', () => {
+  beforeEach(() => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
   })
 
-  afterEach(function () {
+  afterEach(() => {
     process.env.NO_PROXY = process.env.HTTP_PROXY = process.env.HTTPS_PROXY = ''
     sinon.restore()
   })
 
-  context('CombinedAgent', function () {
+  context('CombinedAgent', () => {
     before(function () {
       this.servers = new Servers()
 
@@ -71,7 +71,7 @@ describe('lib/agent', function () {
         proxyAuth: true,
       },
     ].slice().map((testCase) => {
-      context(testCase.name, function () {
+      context(testCase.name, () => {
         beforeEach(function () {
           if (testCase.proxyUrl) {
             process.env.HTTP_PROXY = process.env.HTTPS_PROXY = testCase.proxyUrl
@@ -175,14 +175,12 @@ describe('lib/agent', function () {
         })
 
         it('HTTP websocket connections can be established and used', function () {
-          const socket = Io.client(`http://localhost:${HTTP_PORT}`, {
-            agent: this.agent,
-            transports: ['websocket'],
-            rejectUnauthorized: false,
-          })
-
           return new Bluebird((resolve) => {
-            socket.on('message', resolve)
+            Io.client(`http://localhost:${HTTP_PORT}`, {
+              agent: this.agent,
+              transports: ['websocket'],
+              rejectUnauthorized: false,
+            }).on('message', resolve)
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
@@ -190,20 +188,16 @@ describe('lib/agent', function () {
               expect(this.debugProxy.requests[0].ws).to.be.true
               expect(this.debugProxy.requests[0].url).to.include('http://localhost:31080')
             }
-
-            socket.close()
           })
         })
 
         it('HTTPS websocket connections can be established and used', function () {
-          const socket = Io.client(`https://localhost:${HTTPS_PORT}`, {
-            agent: this.agent,
-            transports: ['websocket'],
-            rejectUnauthorized: false,
-          })
-
           return new Bluebird((resolve) => {
-            socket.on('message', resolve)
+            Io.client(`https://localhost:${HTTPS_PORT}`, {
+              agent: this.agent,
+              transports: ['websocket'],
+              rejectUnauthorized: false,
+            }).on('message', resolve)
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
@@ -212,8 +206,6 @@ describe('lib/agent', function () {
                 url: 'localhost:31443',
               })
             }
-
-            socket.close()
           })
         })
 
@@ -231,7 +223,7 @@ describe('lib/agent', function () {
       })
     })
 
-    context('HttpsAgent', function () {
+    context('HttpsAgent', () => {
       beforeEach(function () {
         this.agent = new CombinedAgent()
 
@@ -323,7 +315,7 @@ describe('lib/agent', function () {
       })
     })
 
-    context('HttpAgent', function () {
+    context('HttpAgent', () => {
       beforeEach(function () {
         this.agent = new CombinedAgent()
 
@@ -359,8 +351,8 @@ describe('lib/agent', function () {
     })
   })
 
-  context('.buildConnectReqHead', function () {
-    it('builds the correct request', function () {
+  context('.buildConnectReqHead', () => {
+    it('builds the correct request', () => {
       const head = buildConnectReqHead('foo.bar', '1234', {})
 
       expect(head).to.eq([
@@ -370,7 +362,7 @@ describe('lib/agent', function () {
       ].join('\r\n'))
     })
 
-    it('can do Proxy-Authorization', function () {
+    it('can do Proxy-Authorization', () => {
       const head = buildConnectReqHead('foo.bar', '1234', {
         auth: 'baz:quux',
       })
@@ -384,8 +376,8 @@ describe('lib/agent', function () {
     })
   })
 
-  context('.createProxySock', function () {
-    it('creates a `net` socket for an http url', function (done) {
+  context('.createProxySock', () => {
+    it('creates a `net` socket for an http url', (done) => {
       sinon.spy(net, 'connect')
       const proxy = url.parse('http://foo.bar:1234')
 
@@ -395,7 +387,7 @@ describe('lib/agent', function () {
       })
     })
 
-    it('creates a `tls` socket for an https url', function (done) {
+    it('creates a `tls` socket for an https url', (done) => {
       sinon.spy(tls, 'connect')
       const proxy = url.parse('https://foo.bar:1234')
 
@@ -405,7 +397,7 @@ describe('lib/agent', function () {
       })
     })
 
-    it('throws on unsupported proxy protocol', function (done) {
+    it('throws on unsupported proxy protocol', (done) => {
       const proxy = url.parse('socksv5://foo.bar:1234')
 
       createProxySock({ proxy }, (err) => {
@@ -415,7 +407,7 @@ describe('lib/agent', function () {
     })
   })
 
-  context('.isRequestHttps', function () {
+  context('.isRequestHttps', () => {
     [
       {
         protocol: 'http',
@@ -447,15 +439,14 @@ describe('lib/agent', function () {
 
       it(`detects correctly from ${testCase.protocol} websocket requests`, () => {
         const spy = sinon.spy(testCase.agent, 'addRequest')
-        const socket = Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
-          agent: <any>testCase.agent,
-          transports: ['websocket'],
-          timeout: 1,
-          rejectUnauthorized: false,
-        })
 
         return new Bluebird((resolve, reject) => {
-          socket
+          Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
+            agent: <any>testCase.agent,
+            transports: ['websocket'],
+            timeout: 1,
+            rejectUnauthorized: false,
+          })
           .on('message', reject)
           .on('connect_error', resolve)
         })
@@ -463,28 +454,26 @@ describe('lib/agent', function () {
           const requestOptions = spy.getCall(0).args[1]
 
           expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
-
-          socket.close()
         })
       })
     })
   })
 
-  context('.isResponseStatusCode200', function () {
-    it('matches a 200 OK response correctly', function () {
+  context('.isResponseStatusCode200', () => {
+    it('matches a 200 OK response correctly', () => {
       const result = isResponseStatusCode200('HTTP/1.1 200 Connection established')
 
       expect(result).to.be.true
     })
 
-    it('matches a 500 error response correctly', function () {
+    it('matches a 500 error response correctly', () => {
       const result = isResponseStatusCode200('HTTP/1.1 500 Internal Server Error')
 
       expect(result).to.be.false
     })
   })
 
-  context('.regenerateRequestHead', function () {
+  context('.regenerateRequestHead', () => {
     it('regenerates changed request head', () => {
       const spy = sinon.spy(http.globalAgent, 'createSocket')
 

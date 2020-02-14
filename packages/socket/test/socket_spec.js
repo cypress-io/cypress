@@ -5,40 +5,39 @@ const client = require('socket.io-client')
 const expect = require('chai').expect
 const pkg = require('../package.json')
 const lib = require('../index')
-const resolvePkg = require('resolve-pkg')
 
-describe('Socket', function () {
-  it('exports server', function () {
+describe('Socket', () => {
+  it('exports server', () => {
     expect(lib.server).to.eq(server)
   })
 
-  it('exports client', function () {
+  it('exports client', () => {
     expect(lib.client).to.eq(client)
   })
 
-  context('.getPathToClientSource', function () {
-    it('returns path to socket.io.js', function () {
-      const clientPath = path.join(resolvePkg('socket.io-client', { cwd: path.join(__dirname, '..', '..', '..') }), 'dist', 'socket.io.js')
+  context('.getPathToClientSource', () => {
+    it('returns path to socket.io.js', () => {
+      const clientPath = path.join(process.cwd(), 'node_modules', 'socket.io-client', 'dist', 'socket.io.js')
 
       expect(lib.getPathToClientSource()).to.eq(clientPath)
     })
 
-    it('makes sure socket.io.js actually exists', function (done) {
+    it('makes sure socket.io.js actually exists', (done) => {
       fs.stat(lib.getPathToClientSource(), done)
     })
   })
 
-  context('.getClientVersion', function () {
-    it('returns client version', function () {
+  context('.getClientVersion', () => {
+    it('returns client version', () => {
       expect(lib.getClientVersion()).to.eq(pkg.dependencies['socket.io-client'])
     })
   })
 
-  context('.getClientSource', function () {
-    it('returns client source as a string', function (done) {
-      const clientPath = path.join(resolvePkg('socket.io-client', { cwd: path.join(__dirname, '..', '..', '..') }), 'dist', 'socket.io.js')
+  context('.getClientSource', () => {
+    it('returns client source as a string', (done) => {
+      const clientPath = path.join(process.cwd(), 'node_modules', 'socket.io-client', 'dist', 'socket.io.js')
 
-      fs.readFile(clientPath, 'utf8', function (err, str) {
+      fs.readFile(clientPath, 'utf8', (err, str) => {
         if (err) done(err)
 
         expect(lib.getClientSource()).to.eq(str)

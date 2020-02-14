@@ -1,5 +1,5 @@
-test/unit/**/*.ts
-test/integration/**/*.ts
---require ../web-config/node-register
+test/unit
+test/integration
+--compilers ts:@packages/ts/register,coffee:@packages/coffee/register
 --timeout 10000
 --recursive

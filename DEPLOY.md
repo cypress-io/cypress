@@ -12,7 +12,11 @@ We build the NPM package and binary on all major platforms (Linux, Mac, Windows)
 providers. In order to set the version while building we have to set the environment variable
 with the new version on each CI provider *before starting the build*.
 
-Use script command `yarn set-next-ci-version` to do this.
+Use the script command below to to do this.
+
+```shell
+npm run set-next-ci-version
+```
 
 ## Building
 
@@ -23,7 +27,7 @@ Use script command `yarn set-next-ci-version` to do this.
 Building a new NPM package is very quick.
 
 - Increment the version in the root `package.json`
-- `yarn build --scope cypress`
+- `cd cli && npm run build`
 
 The steps above:
 
@@ -44,22 +48,22 @@ First, you need to build, zip and upload the application binary to the Cypress s
 You can use a single command to do all tasks at once:
 
 ```shell
-yarn binary-deploy
+npm run binary-deploy
 ```
 
 Or you can specify each command separately:
 
 ```shell
-yarn binary-build
-yarn binary-zip
-yarn binary-upload
+npm run binary-build
+npm run binary-zip
+npm run binary-upload
 ```
 
 You can pass options to each command to avoid answering questions, for example
 
 ```shell
-yarn binary-deploy --platform darwin --version 0.20.0
-yarn binary-upload --platform darwin --version 0.20.0 --zip cypress.zip
+npm run binary-deploy -- --platform darwin --version 0.20.0
+npm run binary-upload -- --platform darwin --version 0.20.0 --zip cypress.zip
 ```
 
 If something goes wrong, see the debug messages using the `DEBUG=cypress:binary ...` environment
@@ -72,7 +76,7 @@ Because we had many problems reliably zipping the built binary, for now we need 
 If you are using a Mac you can build the linux binary if you have docker installed.
 
 ```shell
-yarn binary-build-linux
+npm run binary-build-linux
 ```
 
 ## Publishing
@@ -117,12 +121,11 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 2. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder
     for `<new target version>`
     ```shell
-    yarn move-binaries --sha <commit sha> --version <new target version>
+    npm run move-binaries -- --sha <commit sha> --version <new target version>
     ```
-3. Publish the new NPM package under the dev tag. The unique link to the package file `cypress.tgz`
-    is the one already tested above. You can publish to the NPM registry straight from the URL:
+3. Publish the new NPM package under the `dev` tag. The unique link to the package file `cypress.tgz` is the one already tested above. You can publish to the NPM registry straight from the URL:
     ```shell
-    yarn publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
+    npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
     ```
 4. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). Example output:
     ```shell
@@ -137,11 +140,11 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 7. Update and publish the changelog and any release-specific documentation changes in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
 8. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
-    yarn dist-tag add cypress@X.Y.Z
+    npm dist-tag add cypress@X.Y.Z
     ```
-8. Run `binary-release` to update the download server's manifest, set the next CI version, and create an empty version commit:
+9. Run `binary-release` to update the download the server's manifest, set the next CI version, and create an empty version commit:
     ```shell
-    yarn run binary-release --version X.Y.Z --commit
+    npm run binary-release -- --version X.Y.Z --commit
     ```
 10. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 11. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).

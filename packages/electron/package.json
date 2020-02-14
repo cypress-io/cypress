@@ -4,15 +4,17 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "prebuild": "npm run check-deps-pre",
     "build": "node ./bin/cypress-electron --install",
-    "build-prod": "yarn build",
+    "build-prod": "npm run build",
+    "check-deps": "node ../../scripts/check-deps.js --verbose",
+    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "echo '@packages/electron needs: yarn build'",
+    "postinstall": "echo '@packages/electron needs: npm run build'",
+    "prestart": "npm run check-deps-pre",
     "start": "./bin/cypress-electron",
-    "test": "yarn test-unit",
-    "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --compilers coffee:@packages/coffee/register",
-    "test-watch": "yarn test-unit --watch"
+    "pretest": "npm run check-deps-pre",
+    "test": "mocha --compilers coffee:@packages/coffee/register"
   },
   "dependencies": {
     "@cypress/icons": "0.7.0",
@@ -24,7 +26,6 @@
     "minimist": "1.2.0"
   },
   "devDependencies": {
-    "@packages/coffee": "*",
     "electron": "7.1.10",
     "mocha": "3.5.3"
   },

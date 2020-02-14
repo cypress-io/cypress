@@ -40,38 +40,49 @@ platform:
 # with installing over cached folder
 # https://github.com/npm/npm/issues/17747
 # cache:
-#   - node_modules -> yarn.lock
-#   - '%LOCALAPPDATA%/Yarn -> yarn.lock'
+#   - node_modules
 #   # todo: cache node_modules in each package
 
 # Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version $env:platform
   # upgrade npm
-  - yarn global add @bahmutov/print-env@1
+  - npm install -g npm@6
+  - npm install -g @bahmutov/print-env@1
   # Output useful info for debugging.
   - node --version
   - node --print process.arch
-  - yarn --version
-  - yarn check-next-dev-version
+  - npm --version
+  - npm run check-next-dev-version
   # prints all public variables relevant to the build
   - print-env Platform
-  - yarn check-node-version
+  - npm run check-node-version
   - print-env APPVEYOR
   # prints if we have sensitive variables that start with a prefix GH
   # which are used to trigger other projects
   - has-env GH
   # clean cache to prevent install permission issues
-  - yarn cache clean
-  - yarn || yarn || yarn
+  - npm cache clean --force
+  # install root modules only, and retry automatically if install fails
+  - npm run preinstall
+  - npm install --ignore-scripts || npm install --ignore-scripts || npm install --ignore-scripts
   - .\node_modules\.bin\print-arch
+  # because we skipped scripts, we need to do
+  # everything from "postinstall" script as commands
+  - npm run link
+  # install every package one by one
+  # try to do several attempts, because on AppVeyor random install errors happen
+  - npm run all install -- --serial || npm run all install -- --serial || npm run all install -- --serial
+  # - npm prune
+  # - npm run all prune -- --serial
+  - npm run all build -- --serial
 
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
   # beware of echo-ing environment variables that may have batch syntax (e.g. commit messages)
   - node --version
-  - yarn --version
+  - npm --version
   - 7z
   - echo *** Browsers installed on this system ***
   - cd packages/launcher && node index.js && cd ../..
@@ -82,17 +93,17 @@ test_script:
   - npm run dev -- --run-project %CD%/packages/example --browser edge
 
   # make sure mocha runs
-  - yarn test-mocha
+  - npm run test-mocha
   # make sure our snapshots are compared correctly
   # - npm run test-mocha-snapshot
   # the other larger tests
   - echo *** Building Windows NPM package %NEXT_DEV_VERSION% ***
   - npm --no-git-tag-version version %NEXT_DEV_VERSION%
   - cd cli
-  - yarn
-  - yarn build
+  - npm install
+  - npm run build
   - cd build
-  - yarn pack
+  - npm pack
   - cd ../..
 
   - node ./scripts/win-appveyor-build.js

@@ -2,26 +2,33 @@
 
 This is the WebExtension responsible for automating the browser
 
+## Installing
+
+The extension's dependencies can be installed with:
+
+```bash
+cd packages/extension
+npm install
+```
+
 ## Developing
 
 ### Watching
 
 ```bash
-yarn lerna run watch --scope @packages/extension --stream
+npm run watch
 ```
 
 ## Building
 
 ```bash
-yarn lerna run build --scope @packages/extension --stream
+npm run build
 ```
 
 ## Testing
 
 ```bash
-yarn lerna run test --scope @packages/extension --stream
-yarn lerna run test-watch --scope @packages/extension --stream
-yarn lerna run test-debug --scope @packages/extension --stream
+npm run test
 ```
 
 ## Debugging

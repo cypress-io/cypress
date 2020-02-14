@@ -2,6 +2,15 @@
 
 This is a shared lib for holding both the `socket.io` server and client.
 
+## Installing
+
+The sockets's dependencies can be installed with:
+
+```bash
+cd packages/socket
+npm install
+```
+
 ## Using
 
 ```javascript
@@ -40,5 +49,5 @@ socket.getPathToClientSource()
 ## Testing
 
 ```bash
-yarn lerna run test --scope @packages/socket --stream
+npm test
 ```

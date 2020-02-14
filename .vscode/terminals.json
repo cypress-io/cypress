@@ -6,14 +6,14 @@
       "focus": true,
       "onlySingle": true,
       "execute": true,
-      "command": "yarn cypress:open"
+      "command": "npm run cypress:open"
     },
     {
       "name": "cypress run",
       "focus": true,
       "onlySingle": true,
       "execute": false,
-      "command": "yarn cypress:run --project ../project"
+      "command": "npm run cypress:run -- --project ../project"
     },
     {
       "name": "packages/server test-watch",
@@ -21,7 +21,7 @@
       "onlySingle": true,
       "execute": false,
       "cwd": "[cwd]/packages/server",
-      "command": "yarn test-watch [file]"
+      "command": "npm run test-watch -- [file]"
     },
     {
       "name": "packages/server test-e2e",
@@ -29,35 +29,35 @@
       "onlySingle": true,
       "execute": false,
       "cwd": "[cwd]/packages/server",
-      "command": "yarn test-e2e --spec [fileBasename]"
+      "command": "npm run test-e2e -- --spec [fileBasename]"
     },
     {
       "name": "packages/runner watch",
       "focus": true,
       "onlySingle": true,
       "cwd": "[cwd]/packages/runner",
-      "command": "yarn watch"
+      "command": "npm run watch"
     },
     {
       "name": "packages/driver cypress open",
       "focus": true,
       "onlySingle": true,
       "cwd": "[cwd]/packages/driver",
-      "command": "yarn cypress:open"
+      "command": "npm run cypress:open"
     },
     {
       "name": "packages/desktop-gui cypress open",
       "focus": true,
       "onlySingle": true,
       "cwd": "[cwd]/packages/desktop-gui",
-      "command": "yarn cypress:open"
+      "command": "npm run cypress:open"
     },
     {
       "name": "packages/desktop-gui watch",
       "focus": true,
       "onlySingle": true,
       "cwd": "[cwd]/packages/desktop-gui",
-      "command": "yarn watch"
+      "command": "npm run watch"
     }
   ]
 }

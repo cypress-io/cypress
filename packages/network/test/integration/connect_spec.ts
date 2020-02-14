@@ -9,8 +9,8 @@ const expect = chai.expect
 
 chai.use(sinonChai)
 
-describe('lib/connect', function () {
-  context('.getAddress', function () {
+describe('lib/connect', () => {
+  context('.getAddress', () => {
     it('resolves localhost on 127.0.0.1 immediately', function () {
       this.timeout(50)
 
@@ -27,9 +27,6 @@ describe('lib/connect', function () {
           family: 4,
           address: '127.0.0.1',
         })
-      })
-      .then(() => {
-        server.close()
       })
     })
 
@@ -51,9 +48,6 @@ describe('lib/connect', function () {
           family: 6,
           address: '::1',
         })
-      })
-      .then(() => {
-        server.close()
       })
     })
   })
