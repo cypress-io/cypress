@@ -26,6 +26,7 @@ appData      = require("./util/app_data")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
+{ SocketWhitelist } = require("./util/socket_whitelist")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -83,7 +84,7 @@ class Server
     if not (@ instanceof Server)
       return new Server()
 
-    @_connectSockets = []
+    @_socketWhitelist = new SocketWhitelist()
     @_request    = null
     @_middleware = null
     @_server     = null
@@ -215,16 +216,7 @@ class Server
       @_server.on "connect", (req, socket, head) =>
         debug("Got CONNECT request from %s", req.url)
 
-        socket.once 'upstream-connected', (upstreamSocket) =>
-          localPort = upstreamSocket.localPort
-
-          debug('upstream-connected %o', { reqUrl: req.url, localPort })
-
-          @_connectSockets.push(localPort)
-
-          upstreamSocket.on 'close', =>
-            debug('upstream closed, removing localPort', { localPort })
-            _.remove(@_connectSockets, localPort)
+        socket.once 'upstream-connected', @_socketWhitelist.add
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
@@ -646,10 +638,7 @@ class Server
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
     if req.url.startsWith(socketIoRoute)
-      isProxied = !!_.includes(@_connectSockets, socket.remotePort)
-      debug('internal socket.io request, ensuring that it originated from the https-proxy... %o', { reqUrl: req.url, remotePort: socket.remotePort, isProxied })
-
-      if !isProxied
+      if not @_socketWhitelist.isRequestWhitelisted(req)
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via Cypress.')
         socket.end()
 
