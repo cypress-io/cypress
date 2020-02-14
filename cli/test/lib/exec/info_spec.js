@@ -10,7 +10,7 @@ const snapshot = require('../../support/snapshot')
 const stdout = require('../../support/stdout')
 const normalize = require('../../support/normalize')
 
-describe.only('exec info', function () {
+describe('exec info', function () {
   beforeEach(function () {
     sinon.stub(process, 'exit')
 
@@ -41,6 +41,7 @@ describe.only('exec info', function () {
 
   it('prints collected info without env vars', async () => {
     await startInfoAndSnapshot('cypress info without browsers or vars')
+    expect(spawn.start).to.have.been.calledOnce
   })
 
   it('prints proxy and cypress env vars', async () => {
@@ -55,5 +56,16 @@ describe.only('exec info', function () {
     })
 
     await startInfoAndSnapshot('cypress info with proxy and vars')
+  })
+
+  it('redacts sensitive cypress variables', async () => {
+    info.findCypressEnvironmentVariables.returns({
+      CYPRESS_ENV_VAR1: 'my Cypress variable',
+      CYPRESS_ENV_VAR2: 'my other Cypress variable',
+      CYPRESS_PROJECT_ID: 'abc123', // not sensitive
+      CYPRESS_RECORD_KEY: 'really really secret stuff', // should not be printed
+    })
+
+    await startInfoAndSnapshot('cypress redacts sensitive vars')
   })
 })

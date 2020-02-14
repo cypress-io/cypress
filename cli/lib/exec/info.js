@@ -29,7 +29,13 @@ const maskSensitiveVariables = R.evolve({
 methods.findCypressEnvironmentVariables = () => {
   const isCyVariable = (val, key) => key.startsWith('CYPRESS_')
 
-  return maskSensitiveVariables(R.pickBy(isCyVariable)(process.env))
+  return R.pickBy(isCyVariable)(process.env)
+}
+
+const formatCypressVariables = () => {
+  const vars = methods.findCypressEnvironmentVariables()
+
+  return maskSensitiveVariables(vars)
 }
 
 methods.start = (options = {}) => {
@@ -56,7 +62,7 @@ methods.start = (options = {}) => {
     }
   })
   .then(() => {
-    const cyVars = methods.findCypressEnvironmentVariables()
+    const cyVars = formatCypressVariables()
 
     if (_.isEmpty(cyVars)) {
       console.log('Environment Variables: none detected')
