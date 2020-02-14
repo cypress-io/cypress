@@ -41,7 +41,7 @@ describe('exec info', function () {
 
   it('prints collected info without env vars', async () => {
     await startInfoAndSnapshot('cypress info without browsers or vars')
-    expect(spawn.start).to.have.been.calledOnce
+    expect(spawn.start).to.be.calledWith(['--mode=info'], { dev: undefined })
   })
 
   it('prints proxy and cypress env vars', async () => {
