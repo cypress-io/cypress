@@ -52,12 +52,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## return our xhr object
       return Promise.resolve(xhr) if xhr
 
-      options.error = $errUtils.errMsgByPath "wait.timed_out", {
+      options.error = $errUtils.errMsgByPath("wait.timed_out", {
         timeout: options.timeout
         alias
         num
         type
-      }
+      })
 
       args = arguments
 

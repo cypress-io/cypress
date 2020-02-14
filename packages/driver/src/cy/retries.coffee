@@ -2,6 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 debug = require('debug')('cypress:driver:retries')
 
+$utils = require("../cypress/utils")
 $errUtils = require("../cypress/error_utils")
 
 create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->

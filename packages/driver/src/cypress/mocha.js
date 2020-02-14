@@ -114,7 +114,7 @@ const patchRunnerFail = () => {
     const errMessage = _.get(err, 'message')
 
     if (errMessage && errMessage.indexOf('Resolution method is overspecified') > -1) {
-      err.message = $errUtils.errMessageByPath('mocha.overspecified', { error: err.stack })
+      err.message = $errUtils.errMsgByPath('mocha.overspecified', { error: err.stack })
     }
 
     // if this isnt a correct error object then just bail

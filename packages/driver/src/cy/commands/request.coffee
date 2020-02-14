@@ -254,14 +254,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         return response
       .catch Promise.TimeoutError, (err) =>
-        $errUtils.throwErrByPath "request.timed_out", {
+        $errUtils.throwErrByPath("request.timed_out", {
           onFail: options._log
           args: {
             url:     requestOpts.url
             method:  requestOpts.method
             timeout: options.timeout
           }
-        }
+        })
       .catch { backend: true }, (err) ->
         $errUtils.throwErrByPath("request.loading_failed", {
           onFail: options._log

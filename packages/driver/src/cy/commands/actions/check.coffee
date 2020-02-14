@@ -59,10 +59,10 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
       node   = $dom.stringify($el)
       word   = $utils.plural(options.$el, "contains", "is")
       phrase = if type is "check" then " and `:radio`" else ""
-      $errUtils.throwErrByPath "check_uncheck.invalid_element", {
+      $errUtils.throwErrByPath("check_uncheck.invalid_element", {
         onFail: options._log
         args: { node, word, phrase, cmd: type }
-      }
+      })
 
     isElActionable = elHasMatchingValue($el)
 
