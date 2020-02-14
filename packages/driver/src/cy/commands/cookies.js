@@ -2,6 +2,7 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 
 const $utils = require('../../cypress/utils')
+const $errUtils = require('../../cypress/error_utils')
 const $Location = require('../../cypress/location')
 
 const COOKIE_PROPS = 'name value path secure httpOnly expiry domain'.split(' ')
@@ -37,7 +38,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     const automate = () => {
       return Cypress.automation(event, mergeDefaults(obj))
       .catch((err) => {
-        return $utils.throwErr(err, { onFail: log })
+        return $errUtils.throwErr(err, { onFail: log })
       })
     }
 
@@ -52,7 +53,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     return automate()
     .timeout(timeout)
     .catch(Promise.TimeoutError, (err) => {
-      return $utils.throwErrByPath('cookies.timed_out', {
+      return $errUtils.throwErrByPath('cookies.timed_out', {
         onFail: log,
         args: {
           cmd: getCommandFromEvent(event),
@@ -88,7 +89,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         throw err
       }
 
-      Cypress.utils.throwErrByPath('cookies.backend_error', {
+      $errUtils.throwErrByPath('cookies.backend_error', {
         args: {
           action,
           command,
@@ -140,7 +141,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const onFail = options._log
 
       if (!_.isString(name)) {
-        $utils.throwErrByPath('getCookie.invalid_argument', { onFail })
+        $errUtils.throwErrByPath('getCookie.invalid_argument', { onFail })
       }
 
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
@@ -225,7 +226,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const onFail = options._log
 
       if (!_.isString(name) || !_.isString(value)) {
-        Cypress.utils.throwErrByPath('setCookie.invalid_arguments', { onFail })
+        $errUtils.throwErrByPath('setCookie.invalid_arguments', { onFail })
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
@@ -268,7 +269,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const onFail = options._log
 
       if (!_.isString(name)) {
-        $utils.throwErrByPath('clearCookie.invalid_argument', { onFail })
+        $errUtils.throwErrByPath('clearCookie.invalid_argument', { onFail })
       }
 
       // TODO: prevent clearing a cypress namespace
