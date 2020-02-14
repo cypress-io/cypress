@@ -6,13 +6,12 @@ const $Snapshots = require('../cy/snapshots')
 const $Events = require('./events')
 const $dom = require('../dom')
 const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
-const CypressErrorRe = /(AssertionError|CypressError)/
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
-const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff'.split(' ')
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
 const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
@@ -224,29 +223,13 @@ const Log = function (cy, state, config, obj) {
       return invoke() || {}
     },
 
-    serializeError () {
-      let err = this.get('error')
-
-      if (err) {
-        return _.reduce(ERROR_PROPS, (memo, prop) => {
-          if (_.has(err, prop) || err[prop]) {
-            memo[prop] = err[prop]
-          }
-
-          return memo
-        }, {})
-      }
-
-      return null
-    },
-
     toJSON () {
       return _
       .chain(attributes)
       .omit('error')
       .omitBy(_.isFunction)
       .extend({
-        err: this.serializeError(),
+        err: $errUtils.serializeError(this.get('error')),
         consoleProps: this.invoke('consoleProps'),
         renderProps: this.invoke('renderProps'),
       })
@@ -378,7 +361,7 @@ const Log = function (cy, state, config, obj) {
     getError (err) {
       // dont log stack traces on cypress errors
       // or assertion errors
-      if (CypressErrorRe.test(err.name)) {
+      if ($errUtils.CypressErrorRe.test(err.name)) {
         return err.toString()
       }
 
@@ -538,7 +521,7 @@ const create = function (Cypress, cy, state, config) {
 
   const logFn = function (options = {}) {
     if (!_.isObject(options)) {
-      $utils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
+      $errUtils.throwErrByPath('log.invalid_argument', { args: { arg: options } })
     }
 
     const log = Log(cy, state, config, options)
@@ -610,8 +593,6 @@ const create = function (Cypress, cy, state, config) {
 }
 
 module.exports = {
-  CypressErrorRe,
-
   reduceMemory,
 
   toSerializedJSON,

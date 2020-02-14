@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../../dom")
 $utils = require("../../../cypress/utils")
+$errUtils = require("../../../cypress/error_utils")
 $actionability = require("../../actionability")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
@@ -31,13 +32,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if not options.$el.is("form")
         node = $dom.stringify(options.$el)
         word = $utils.plural(options.$el, "contains", "is")
-        $utils.throwErrByPath("submit.not_on_form", {
+        $errUtils.throwErrByPath("submit.not_on_form", {
           onFail: options._log
           args: { node, word }
         })
 
       if (num = options.$el.length) and num > 1
-        $utils.throwErrByPath("submit.multiple_forms", {
+        $errUtils.throwErrByPath("submit.multiple_forms", {
           onFail: options._log
           args: { num }
         })
