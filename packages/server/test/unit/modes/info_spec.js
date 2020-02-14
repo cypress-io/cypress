@@ -1,9 +1,21 @@
 require('../../spec_helper')
 
 const info = require(`${root}../lib/modes/info`)
+const capture = require(`${root}../lib/capture`)
 const launcher = require('@packages/launcher')
+const snapshot = require('snap-shot-it')
+const stripAnsi = require('strip-ansi')
+const _ = require('lodash')
 
-describe.only('lib/modes/info', () => {
+describe('lib/modes/info', () => {
+  beforeEach(() => {
+    capture.restore()
+  })
+
+  afterEach(() => {
+    capture.restore()
+  })
+
   const chromeStable = {
     displayName: 'Chrome',
     name: 'chrome',
@@ -13,15 +25,47 @@ describe.only('lib/modes/info', () => {
     path: '/path/to/google-chrome',
   }
 
-  const exampleBrowsers = [chromeStable]
+  const firefoxDev = {
+    displayName: 'Firefox Dev',
+    name: 'firefox',
+    channel: 'dev',
+    version: '79.0a1',
+    majorVersion: 79,
+    path: '/path/to/firefox',
+  }
+
+  const infoAndSnapshot = async (snapshotName) => {
+    expect(snapshotName, 'missing snapshot name').to.be.a('string')
+
+    const captured = capture.stdout()
+
+    await info()
+
+    capture.restore()
+    snapshot(snapshotName, stripAnsi(captured.toString()))
+  }
 
   it('prints no browsers', async () => {
     sinon.stub(launcher, 'detect').resolves([])
-    await info()
+    await infoAndSnapshot('output without any browsers')
   })
 
   it('prints 1 found browser', async () => {
-    sinon.stub(launcher, 'detect').resolves(exampleBrowsers)
-    await info()
+    sinon.stub(launcher, 'detect').resolves([chromeStable])
+    await infoAndSnapshot('single chrome:stable')
+  })
+
+  it('prints 2 found browsers', async () => {
+    sinon.stub(launcher, 'detect').resolves([chromeStable, firefoxDev])
+    // have to make sure random sampling from the browser list
+    // to create examples returns same order
+    // so Chrome will be picked first, Firefox will be second
+    const sample = sinon.stub(_, 'sample')
+
+    sample.onFirstCall().returns(chromeStable)
+    sample.onSecondCall().returns(firefoxDev)
+
+    await infoAndSnapshot('two browsers')
+    expect(sample, 'two browsers were picked to create examples').to.be.calledTwice
   })
 })

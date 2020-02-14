@@ -29,7 +29,7 @@ describe('exec info', function () {
   })
 
   const startInfoAndSnapshot = async (snapshotName) => {
-    expect(snapshotName).to.be.a('string')
+    expect(snapshotName, 'missing snapshot name').to.be.a('string')
 
     const output = stdout.capture()
 
