@@ -57,11 +57,15 @@ const addProfilePath = async (browsers = []) => {
     const profilePath = browserUtils.getBrowserPath(browser)
 
     debug('checking profile path %s for browser %s:%s', profilePath, browser.name, browser.channel)
-    const profileExists = await fs.statAsync(profilePath)
+    try {
+      const profileExists = await fs.statAsync(profilePath)
 
-    if (profileExists && profileExists.isDirectory()) {
-      debug('profile folder exists %s', profilePath)
-      browser.profilePath = profilePath
+      if (profileExists && profileExists.isDirectory()) {
+        debug('profile folder exists %s', profilePath)
+        browser.profilePath = profilePath
+      }
+    } catch (e) {
+      debug('problem checking profile folder %s %s', profilePath, e.message)
     }
   })
 
@@ -71,7 +75,12 @@ const addProfilePath = async (browsers = []) => {
 const print = (browsers = []) => {
   console.log('Displaying Cypress info...')
   console.log('')
-  console.log('Detected %s %s installed:', n(browsers.length), pluralize('browser', browsers.length))
+  if (browsers.length) {
+    console.log('Detected %s %s installed:', n(browsers.length), pluralize('browser', browsers.length))
+  } else {
+    console.log('Detected no known browsers installed')
+  }
+
   console.log('')
 
   const sortByNameAndMajor = sortWith([
