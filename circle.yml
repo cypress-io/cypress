@@ -905,6 +905,14 @@ jobs:
           name: Verify Cypress binary
           working_directory: test-binary
           command: $(yarn bin)/cypress verify
+      - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: $(yarn bin)/cypress help
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(yarn bin)/cypress info
       - store-npm-logs
 
   # install NPM + binary zip and run against staging API
