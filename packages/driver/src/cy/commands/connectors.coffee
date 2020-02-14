@@ -224,7 +224,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     propertyValueNullOrUndefinedErr = (prop, value) ->
       errMessagePath = if isCmdIts then "its" else "invoke"
 
-      $errUtils.cypressErrObj(
+      $errUtils.cypressErr(
         $errUtils.errMsgByPath("#{errMessagePath}.null_or_undefined_prop_value", {
           prop,
           value,
@@ -235,7 +235,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     subjectNullOrUndefinedErr = (prop, value) ->
       errMessagePath = if isCmdIts then "its" else "invoke"
 
-      $errUtils.cypressErrObj(
+      $errUtils.cypressErr(
         $errUtils.errMsgByPath("#{errMessagePath}.subject_null_or_undefined", {
           prop,
           value,
@@ -244,7 +244,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       )
 
     propertyNotOnPreviousNullOrUndefinedValueErr = (prop, value, previousProp) ->
-      $errUtils.cypressErrObj(
+      $errUtils.cypressErr(
         $errUtils.errMsgByPath("invoke_its.previous_prop_null_or_undefined", {
           prop,
           value,

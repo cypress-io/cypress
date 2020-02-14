@@ -2,6 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $dom = require("../../../dom")
+$utils = require("../../../cypress/utils")
 $errUtils = require("../../../cypress/error_utils")
 $elements = require("../../../dom/elements")
 
