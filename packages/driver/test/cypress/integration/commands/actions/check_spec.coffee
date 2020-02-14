@@ -2,6 +2,9 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Promise = Cypress.Promise
 
+const { beforeEachRestoreRunner } = require('../../../support/helpers.coffee')
+
+beforeEachRestoreRunner()
 describe "src/cy/commands/actions/check", ->
   before ->
     cy

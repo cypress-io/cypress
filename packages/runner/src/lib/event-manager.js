@@ -269,7 +269,6 @@ const eventManager = {
 
       restoreConfigurationFn = function () {
         _.extend(config, backupConfig)
-        console.log(backupEnv)
         if (env) {
           Object.keys(env).forEach((key) => {
             delete env[key]

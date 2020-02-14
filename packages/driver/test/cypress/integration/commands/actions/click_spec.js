@@ -9,6 +9,7 @@ const { getCommandLogWithText,
   shouldBeCalledOnce,
   shouldNotBeCalled,
 } = require('../../../support/utils')
+const { beforeEachRestoreRunner } = require('../../../support/helpers.coffee')
 
 const fail = function (str) {
   throw new Error(str)
@@ -45,6 +46,8 @@ const getMidPoint = (el) => {
 }
 
 const isFirefox = Cypress.isBrowser('firefox')
+
+beforeEachRestoreRunner()
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {

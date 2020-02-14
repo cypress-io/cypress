@@ -10,6 +10,8 @@ const { getCommandLogWithText,
   shouldNotBeCalled,
 } = require('../../../support/utils')
 
+const { beforeEachRestoreRunner } = require('../../../support/helpers.coffee')
+
 const keyEvents = [
   'keydown',
   'keyup',
@@ -19,84 +21,14 @@ const keyEvents = [
 ]
 const attachKeyListeners = attachListeners(keyEvents)
 
-const _it = it
-
-function overrideIt (fn) {
-  it = fn()
-  it['only'] = fn('only')
-  it['skip'] = fn('skip')
-}
-
-overrideIt(function (subFn) {
-  return function (...args) {
-    const origIt = subFn ? _it[subFn] : _it
-
-    if (args.length > 2 && _.isObject(args[1])) {
-      const opts = _.defaults({}, args[1], {
-        browsers: '*',
-      })
-
-      const mochaArgs = [args[0], args[2]]
-
-      // return origIt.apply(this, mochaArgs)
-
-      if (!shouldRunBrowser(opts.browsers, Cypress.browser.family)) {
-        mochaArgs[0] = `[browser skip (${opts.browsers})]${mochaArgs[0]}`
-
-        if (subFn === 'only') {
-          mochaArgs[1] = function () {
-            this.skip()
-          }
-
-          return origIt.apply(this, mochaArgs)
-        }
-
-        return _it['skip'].apply(this, mochaArgs)
-      }
-
-      return origIt.apply(this, mochaArgs)
-    }
-
-    return origIt.apply(this, args)
-  }
-})
-
-const shouldRunBrowser = (browserlist, browser) => {
-  // return true
-  let allEnabled = false
-  const exclude = []
-  const include = []
-
-  browserlist.split(/\s+,\s+/).forEach((v) => {
-    if (v === '*') {
-      allEnabled = true
-
-      return
-    }
-
-    if (v.includes('!')) {
-      allEnabled = true
-      exclude.push(v.slice(1))
-
-      return
-    }
-
-    include.push(v)
-  })
-
-  if (!allEnabled) {
-    return include.includes(browser)
-  }
-
-  return !exclude.includes(browser)
-}
-
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
 // this differently
 const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
+
+beforeEachRestoreRunner()
 
 describe('src/cy/commands/actions/type', () => {
   before(function () {

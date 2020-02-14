@@ -4,6 +4,8 @@ dom = Cypress.dom
 
 helpers = require("../../support/helpers")
 
+helpers.beforeEachRestoreRunner()
+
 describe "src/cy/commands/traversals", ->
   beforeEach ->
     cy.visit("/fixtures/dom.html")
