@@ -502,7 +502,7 @@ class $Cypress {
           // attaching long stace traces
           // which otherwise make this err
           // unusably long
-          const err = $errUtils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.__stackCleaned__ = true
           err.backend = true
@@ -524,7 +524,7 @@ class $Cypress {
         const e = reply.error
 
         if (e) {
-          const err = $errUtils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.automation = true
 
