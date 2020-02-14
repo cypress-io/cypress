@@ -7,4 +7,5 @@ $cy-tooltip-class: 'cy-tooltip';
 @import 'lib/shared';
 @import '!(lib)*/**/!(selector-playground.scss)';
 
+@import '../../ui-components/src/dropdown';
 @import '../../reporter/src/main-runner';

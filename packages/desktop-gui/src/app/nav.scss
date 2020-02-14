@@ -129,8 +129,8 @@
   }
 
   .nav {
-    > .open {
-      > a, > a:hover, > a:focus {
+    .dropdown-chosen {
+      &:hover, &:focus {
         background-color: #111;
         color: #fff;
       }
@@ -140,6 +140,13 @@
       font-size: 12px;
     }
 
+    .dropdown-menu > li {
+      line-height: 30px;
+      font-size: 14px;
+      padding: 5px 15px;
+    }
+
+    .dropdown-chosen,
     > li > div,
     > li > a,
     > li > span > a  {
@@ -150,6 +157,7 @@
       display: inline-block;
     }
 
+    .dropdown-chosen,
     > li > a,
     > li > span > a  {
       &:hover,
@@ -163,22 +171,26 @@
 
 .browsers-list {
   margin: 5px;
-  border: 1px solid #c7c7c7;
-  border-radius: 4px;
 
   li {
     padding: 9px 15px;
     white-space: nowrap;
   }
 
-  &>a.dropdown-chosen {
+  .dropdown-chosen {
     border-radius: 4px;
+    border: 1px solid #c7c7c7;
     line-height: 28px !important;
     background-color: #f6f6f6;
 
     img {
       position: relative;
       top: -1px;
+    }
+
+    &.disabled,
+    &:active {
+      background-color: #dedede;
     }
   }
 

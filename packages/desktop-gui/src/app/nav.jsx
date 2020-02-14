@@ -86,7 +86,7 @@ export default class Nav extends Component {
 
     return (
       <Dropdown
-        className='dropdown-toggle'
+        className='user-dropdown'
         chosen={{ id: 'user' }}
         others={[{ id: 'logout' }]}
         onSelect={this._select}

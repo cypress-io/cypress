@@ -2,8 +2,14 @@
   display: inline-block;
   position: relative;
   vertical-align: middle;
+}
 
-  &>a.disabled {
+.dropdown-chosen {
+  background: none;
+  border: none;
+  outline: none;
+
+  &.disabled {
     pointer-events: none;
     opacity: 0.65;
   }
@@ -54,16 +60,6 @@
       cursor: pointer;
       background-color: #f5f5f5;
       color: #262626;
-    }
-
-    > a {
-      color: #333;
-      cursor: pointer;
-      display: block;
-      font-weight: normal;
-      line-height: 1.8;
-      padding: 3px 20px;
-      white-space: nowrap;
     }
   }
 }
