@@ -5,6 +5,7 @@ const Promise = require('bluebird')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 const $Chai = require('../cy/chai')
 const $Xhrs = require('../cy/xhrs')
 const $jQuery = require('../cy/jquery')
@@ -104,7 +105,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const warnMixingPromisesAndCommands = function () {
     const title = state('runnable').fullTitle()
 
-    const msg = $utils.errMessageByPath('miscellaneous.mixing_promises_and_commands', title)
+    const msg = $errUtils.errMsgByPath('miscellaneous.mixing_promises_and_commands', title)
 
     return $utils.warning(msg)
   }
@@ -362,7 +363,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       if (!(!enqueuedCmd || !isPromiseLike(ret))) {
-        return $utils.throwErrByPath(
+        return $errUtils.throwErrByPath(
           'miscellaneous.command_returned_promise_and_commands', {
             args: {
               current: command.get('name'),
@@ -383,7 +384,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         // if we got a return value and we enqueued
         // a new command and we didn't return cy
         // or an undefined value then throw
-        return $utils.throwErrByPath(
+        return $errUtils.throwErrByPath(
           'miscellaneous.returned_value_and_commands_from_custom_command', {
             args: {
               current: command.get('name'),
@@ -599,7 +600,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       if (prevSubject && ((needle = 'optional', ![].concat(prevSubject).includes(needle)))) {
         const stringifiedArg = $utils.stringifyActual(args[0])
 
-        $utils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
+        $errUtils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
           args: {
             cmd: name,
             args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
@@ -677,7 +678,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
-    $utils.normalizeErrorStack(err)
+    $errUtils.normalizeErrorStack(err)
 
     // store the error on state now
     state('error', err)
@@ -716,7 +717,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // collect all of the callbacks for 'fail'
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
-      $utils.normalizeErrorStack(err2)
+      $errUtils.normalizeErrorStack(err2)
       // and if any of these throw synchronously immediately error
       finish(err2)
     }
@@ -981,7 +982,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
           // if this is a custom promise
           if (isPromiseLike(ret) && noArgsAreAFunction(current.get('args'))) {
-            $utils.throwErrByPath(
+            $errUtils.throwErrByPath(
               'miscellaneous.command_returned_promise_and_commands', {
                 args: {
                   current: current.get('name'),
@@ -1267,7 +1268,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               :
               $utils.stringify(ret)
 
-            $utils.throwErrByPath('miscellaneous.returned_value_and_commands', {
+            $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands', {
               args: ret,
             })
           }
@@ -1329,7 +1330,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   _.each(privateProps, (obj, key) => {
     return Object.defineProperty(cy, key, {
       get () {
-        return $utils.throwErrByPath('miscellaneous.private_property', {
+        return $errUtils.throwErrByPath('miscellaneous.private_property', {
           args: obj,
         })
       },
