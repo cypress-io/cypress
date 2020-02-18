@@ -2,7 +2,7 @@ import sinon from 'sinon'
 import Hook from './hook-model'
 
 import CommandModel from '../commands/command-model'
-import ErrModel from '../lib/err-model'
+import ErrModel from '../errors/err-model'
 
 describe('Hook model', () => {
   let hook: Hook

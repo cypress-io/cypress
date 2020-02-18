@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { observable, computed } from 'mobx'
 
 import { Alias } from '../instruments/instrument-model'
-import Err from '../lib/err-model'
+import Err from '../errors/err-model'
 import CommandModel from '../commands/command-model'
 
 export default class Hook {

@@ -1,7 +1,7 @@
 import Command, { CommandProps } from '../commands/command-model'
 import Agent from '../agents/agent-model'
 import Route from '../routes/route-model'
-import Err from '../lib/err-model'
+import Err from '../errors/err-model'
 
 import TestModel, { TestProps } from './test-model'
 
