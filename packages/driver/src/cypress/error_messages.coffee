@@ -1089,7 +1089,7 @@ module.exports = {
     cannot_visit_different_port: """
       #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-      The new URL is considered different origin because the 'port' is different.
+      The new URL is considered a different origin because the port is different.
 
       You may only #{cmd('visit')} same origin URLs within a single test.
 
