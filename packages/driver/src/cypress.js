@@ -53,7 +53,7 @@ $Log.command = () => {
   return $errUtils.throwErrByPath('miscellaneous.command_log_renamed')
 }
 
-const throwDeprecatedCommandInterface = (key, method) => {
+const throwDeprecatedCommandInterface = (key = 'commandName', method) => {
   let signature = ''
 
   switch (method) {

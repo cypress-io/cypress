@@ -86,7 +86,7 @@ module.exports = (Commands, Cypress, cy) => {
     get (selector, options = {}) {
       const ctx = this
 
-      if ((options === null) || Array.isArray(options) || (typeof options !== 'object')) {
+      if ((options === null) || _.isArray(options) || !_.isPlainObject(options)) {
         return $errUtils.throwErrByPath('get.invalid_options', {
           args: { options },
         })
@@ -552,7 +552,7 @@ module.exports = (Commands, Cypress, cy) => {
 
                   break
                 case 'existence':
-                  return err.displayMessage = getErr(err)
+                  return err.message = getErr(err)
                 default:
                   break
               }
