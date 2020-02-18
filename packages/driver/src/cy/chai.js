@@ -340,7 +340,7 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.displayMessage = getLongLengthMessage(obj.length, length)
+              e1.message = getLongLengthMessage(obj.length, length)
               throw e1
             }
 
@@ -397,10 +397,10 @@ chai.use((chai, u) => {
                 return `Expected ${node} not to exist in the DOM, but it was continuously found.`
               }
 
-              return `Expected to find element: '${obj.selector}', but never found it.`
+              return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.displayMessage = getLongExistsMessage(obj)
+            e1.message = getLongExistsMessage(obj)
             throw e1
           }
         }

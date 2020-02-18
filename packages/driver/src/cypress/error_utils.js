@@ -175,7 +175,7 @@ const errObjByPath = (errLookupObj, errPath, args) => {
   let errObjStrOrFn = getObjValueByPath(errLookupObj, errPath)
 
   if (!errObjStrOrFn) {
-    throw new Error(`Error message path: '${errPath}' does not exist`)
+    throw new Error(`Error message path '${errPath}' does not exist`)
   }
 
   let errObj = errObjStrOrFn

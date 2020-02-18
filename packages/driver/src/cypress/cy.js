@@ -1271,7 +1271,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               $utils.stringify(ret)
 
             $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands', {
-              args: ret,
+              args: { returned: ret },
             })
           }
 

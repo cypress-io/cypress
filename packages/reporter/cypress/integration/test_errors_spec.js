@@ -2,7 +2,7 @@ const { EventEmitter } = require('events')
 
 describe('test errors', function () {
   beforeEach(function () {
-    cy.fixture('runnables_error').as('runnablesErr')
+    cy.fixture('errors_runnables').as('runnablesErr')
 
     this.commandErr = {
       name: 'CommandError',
