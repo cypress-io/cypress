@@ -1076,7 +1076,7 @@ module.exports = {
 
       The new URL is considered a different origin because the following parts of the URL are different: {{differences}}
 
-      You may only #{cmd('visit')} same origin URLs within a single test.
+      You may only #{cmd('visit')} same-origin URLs within a single test.
 
       The previous URL you visited was: '{{previousUrl}}'
 
