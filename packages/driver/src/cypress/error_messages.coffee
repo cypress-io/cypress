@@ -1076,7 +1076,7 @@ module.exports = {
 
       The new URL is considered different origin because the 'protocol' is different.
 
-      You may only 'cy.visit()' same origin URLs within a single test.
+      You may only #{cmd('visit')} same origin URLs within a single test.
 
       The previous domain you visited was: '{{previousDomain}}'
 
