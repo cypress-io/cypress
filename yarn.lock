@@ -8213,10 +8213,10 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-circular-json@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.4.0.tgz#c448ea998b7fe31ecf472ec29c6b608e2e2a62fd"
-  integrity sha512-tKV502ADgm9Z37s6B1QOohegjJJrCl2iyMMb1+8ITHrh1fquW8Jdbkb4s5r4Iwutr1UfL1qvkqvc1wZZlLvwow==
+circular-json@0.5.9:
+  version "0.5.9"
+  resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.5.9.tgz#932763ae88f4f7dead7a0d09c8a51a4743a53b1d"
+  integrity sha512-4ivwqHpIFJZBuhN3g/pEcdbnGUywkBblloGbkglyloVjjR3uT6tieI89MVOfbP2tHX5sgb01FuLgAOzebNlJNQ==
 
 class-utils@^0.3.5:
   version "0.3.6"
@@ -9466,7 +9466,7 @@ debug@*, debug@4.1.1, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, de
   dependencies:
     ms "^2.1.1"
 
-debug@2, debug@2.6.9, debug@^2.1.1, debug@^2.2.0, debug@^2.3.3, debug@^2.6.8, debug@^2.6.9, debug@~2.6.4:
+debug@2, debug@2.6.9, debug@^2.1.1, debug@^2.2.0, debug@^2.3.3, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
   integrity sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==
@@ -15850,13 +15850,6 @@ linkify-it@^2.0.0:
   dependencies:
     uc.micro "^1.0.1"
 
-linkify-it@~1.2.2:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/linkify-it/-/linkify-it-1.2.4.tgz#0773526c317c8fd13bd534ee1d180ff88abf881a"
-  integrity sha1-B3NSbDF8j9E71TTuHRgP+Iq/iBo=
-  dependencies:
-    uc.micro "^1.0.1"
-
 lint-staged@9.4.1:
   version "9.4.1"
   resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-9.4.1.tgz#60c0f85745bd398e6460aa7f5adb3cad3a2b862c"
@@ -16586,17 +16579,6 @@ marionette-client@cypress-io/marionette-client#2cddf7d791cca7be5191d7fe103d58be7
     promise "7.0.4"
     socket-retry-connect "0.0.1"
 
-markdown-it@6.1.1:
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-6.1.1.tgz#ced037f4473ee9f5153ac414f77dc83c91ba927c"
-  integrity sha1-ztA39Ec+6fUVOsQU933IPJG6knw=
-  dependencies:
-    argparse "^1.0.7"
-    entities "~1.1.1"
-    linkify-it "~1.2.2"
-    mdurl "~1.0.1"
-    uc.micro "^1.0.1"
-
 markdown-it@8.4.2:
   version "8.4.2"
   resolved "https://registry.yarnpkg.com/markdown-it/-/markdown-it-8.4.2.tgz#386f98998dc15a37722aa7722084f4020bdd9b54"
@@ -16648,7 +16630,7 @@ md5@2.2.1, md5@^2.1.0:
     crypt "~0.0.1"
     is-buffer "~1.1.1"
 
-mdurl@^1.0.1, mdurl@~1.0.1:
+mdurl@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-1.0.1.tgz#fe85b2ec75a59037f2adfec100fd6c601761152e"
   integrity sha1-/oWy7HWlkDfyrf7BAP1sYBdhFS4=
