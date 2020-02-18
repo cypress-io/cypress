@@ -94,6 +94,7 @@ describe "src/cy/commands/xhr", ->
           expect(responseStatuses).to.be.gt(1)
           expect(xhr.status).to.eq(200)
 
+    ## https://github.com/cypress-io/cypress/issues/5864
     it "does not exceed max call stack", ->
       cy
         .server()
