@@ -3417,7 +3417,7 @@ describe('src/cy/commands/actions/type', () => {
           .should('have.value', '456123789')
 
           cy
-          .get('[contenteditable]:first').invoke('text', '').type('123{moveToStart}456{moveToEnd}789')
+          .get('#contenteditable').invoke('text', '').type('123{moveToStart}456{moveToEnd}789')
           .should('have.text', '456123789')
 
           cy
