@@ -66,6 +66,7 @@
     "test-unit": "lerna exec yarn test-unit --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
+    "verify:mocha:results": "node ./scripts/verify_mocha_results",
     "prewatch": "yarn ensure-deps",
     "watch": "lerna exec yarn watch --parallel --stream"
   },
