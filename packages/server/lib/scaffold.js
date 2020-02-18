@@ -152,13 +152,21 @@ module.exports = {
     })
   },
 
-  fixture (folder, config) {
-    debug(`fixture folder ${folder}`)
-
+  fixture (projRoot, config) {
     // skip if user has explicitly set fixturesFolder
-    if (!config.fixturesFolder || !isDefault(config, 'fixturesFolder')) {
+    if (!isDefault2(config, 'fixturesFolder')) {
       return Promise.resolve()
     }
+
+    const folder = path.join(
+      projRoot,
+      config.fixturesFolder ||
+        _.find(optionInfo[2].options, { name: 'fixturesFolder' }).default
+    )
+
+    config.fixturesFolder = folder
+
+    debug(`fixture folder ${folder}`)
 
     return this.verifyScaffolding(folder, () => {
       debug(`copying example.json into ${folder}`)
@@ -167,13 +175,25 @@ module.exports = {
     })
   },
 
-  support (folder, config) {
-    debug(`support folder ${folder}, support file ${config.supportFile}`)
-
+  support (projRoot, config) {
     // skip if user has explicitly set supportFile
-    if (!config.supportFile || !isDefault(config, 'supportFile')) {
+    if (!isDefault2(config, 'supportFile')) {
       return Promise.resolve()
     }
+
+    const supportFile = path.join(
+      projRoot,
+      config.supportFile ||
+        _.find(optionInfo[2].options, { name: 'supportFile' }).default
+    )
+
+    config.supportFile = supportFile
+
+    const folder = path.dirname(supportFile)
+
+    config.supportFolder = folder
+
+    debug(`support folder ${folder}, support file ${config.supportFile}`)
 
     return this.verifyScaffolding(folder, () => {
       debug(`copying commands.js and index.js to ${folder}`)

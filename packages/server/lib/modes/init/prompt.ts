@@ -1,7 +1,5 @@
 import _ from 'lodash'
 import prompts from 'prompts'
-import path from 'path'
-import Promise from 'bluebird'
 
 import { optionInfo } from './options'
 import fs from '../../util/fs'
@@ -15,9 +13,7 @@ export const prompt = async (options: any) => {
     message: 'Customize settings?',
   })
 
-  let config: Config = {
-    projectRoot: options.cwd,
-  }
+  let config: any = {}
 
   if (customize) {
     let obj = await configPrompts(optionInfo)
@@ -51,6 +47,9 @@ export const prompt = async (options: any) => {
   })
 
   const configStr = JSON.stringify(config, null, 2)
+
+  config.projectRoot = options.cwd
+
   const configPath = `${config.projectRoot}/cypress.json`
 
   log('')
@@ -189,79 +188,12 @@ const log = (text: string) => {
   console.log(text)
 }
 
-const genFixture = async (projectDir: string, config: Config) => {
-  const fixturesFolder = config.fixturesFolder
-
-  if (fixturesFolder !== false) {
-    const dir = path.join(
-      projectDir,
-      fixturesFolder ||
-        _.find(optionInfo[2].options, { name: 'fixturesFolder' })!.default
-    )
-
-    await scaffold.fixture2(dir, config)
-    log(`fixtures folder generated at ${dir}`)
-  }
-}
-
 const generateDirsAndFiles = async (config: Config) => {
-  const {
-    integrationFolder,
-    pluginsFile,
-    supportFile,
-    projectRoot: projectDir,
-  } = config
-  /*
-  // integrationFolder
-  const integrationDir = path.join(
-    projectDir,
-    integrationFolder ||
-      _.find(optionInfo[2].options, { name: 'integrationFolder' })!.default
-  )
+  const { projectRoot: projectDir } = config
 
-  await fs.ensureDir(integrationDir)
-  log(`integration folder generated at ${integrationDir}`)
-
-  // pluginsFile
-  if (pluginsFile !== false) {
-    const file = path.join(
-      projectDir,
-      pluginsFile ||
-        _.find(optionInfo[2].options, { name: 'pluginsFile' })!.default
-    )
-
-    await fs.ensureFile(file) // change it to scaffold.js
-    log(`plugins file generated at ${file}`)
-  }
-
-  // supportFile
-  if (supportFile !== false) {
-    const file = path.join(
-      projectDir,
-      supportFile ||
-        _.find(optionInfo[2].options, { name: 'supportFile' })!.default
-    )
-
-    await fs.ensureFile(file) // change it to scaffold.js
-    log(`support file generated at ${file}`)
-  }*/
-
-  // const integrationDir = path.join(
-  //   projectDir,
-  //   integrationFolder ||
-  //     _.find(optionInfo[2].options, { name: 'integrationFolder' })!.default
-  // )
-
-  // config.integrationFolder = integrationDir
-
-  // await genFixture(projectDir, config)
   await scaffold.integration(projectDir, config)
-
-  // await Promise.all([
-  //   scaffold.integration(projectDir, config),
-  //   scaffold.plugins(projectDir, config),
-  //   scaffold.support(projectDir, config),
-  // ])
+  await scaffold.fixture(projectDir, config)
+  await scaffold.support(projectDir, config)
 
   log(`Cypress scaffolding finished`)
 }
