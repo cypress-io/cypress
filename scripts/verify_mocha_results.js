@@ -35,8 +35,8 @@ fse.readdir(REPORTS_PATH)
 
   console.log(`Found ${resultCount} files in ${REPORTS_PATH}:`, files)
 
-  if (resultCount === -1) {
-    la(expectedResultCount > 0, 'Expected at least 1 report, but found', resultCount, '. Verify that all tests ran as expected.')
+  if (expectedResultCount === -1) {
+    la(resultCount > 0, 'Expected at least 1 report, but found', resultCount, '. Verify that all tests ran as expected.')
   } else {
     la(expectedResultCount === resultCount, 'Expected', expectedResultCount, 'reports, but found', resultCount, '. Verify that all tests ran as expected.')
   }
