@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 
 context('before:browser:launch preferences', () => {
+  // does not work for electron
   it('download location preference - downloads to the correct location', () => {
     const rows = [
       ['name1', 'city1', 'some other info'],
