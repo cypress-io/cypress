@@ -1078,7 +1078,7 @@ module.exports = {
 
       You may only #{cmd('visit')} same origin URLs within a single test.
 
-      The previous domain you visited was: '{{previousDomain}}'
+      The previous URL you visited was: '{{previousDomain}}'
 
       You're attempting to visit this URL: '{{attemptedDomain}}'
 
