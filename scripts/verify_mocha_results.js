@@ -44,9 +44,12 @@ fse.readdir(REPORTS_PATH)
     .catch((err) => {
       throw new Error(`Unable to read the report in ${file}: ${err.message}`)
     })
-    .then(parseResult)
-    .catch((err) => {
-      throw new Error(`Error parsing result: ${err.message}`)
+    .then((xml) => {
+      try {
+        return parseResult(xml)
+      } catch (err) {
+        throw new Error(`Error parsing result: ${err.message}. File contents:\n\n${xml}`)
+      }
     })
     .then(({ name, time, tests, failures }) => {
       console.log(`Report parsed successfully. Name: ${name}\tTests ran: ${tests}\tTests failing: ${failures}\tTotal time: ${time}`)
