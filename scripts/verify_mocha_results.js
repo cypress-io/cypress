@@ -9,7 +9,7 @@ const fse = Bluebird.promisifyAll(require('fs-extra'))
 const la = require('lazy-ass')
 const path = require('path')
 
-const RESULT_REGEX = /<testsuites name="([^"]+)" time="([^"]+)" tests="([^"]+)" failures="([^"]+)">/
+const RESULT_REGEX = /<testsuites name="([^"]+)" time="([^"]+)" tests="([^"]+)" failures="([^"]+)"(?: skipped="([^"]+)"|)>/
 const REPORTS_PATH = '/tmp/cypress/junit'
 
 const expectedResultCount = Number(process.argv[process.argv.length - 1])
@@ -17,10 +17,10 @@ const expectedResultCount = Number(process.argv[process.argv.length - 1])
 la(expectedResultCount, `Expected expectedResultCount to be a number, but got ${expectedResultCount} instead. Usage: yarn verify:mocha:results <expectedResultCount>`)
 
 const parseResult = (xml) => {
-  const [name, time, tests, failures] = RESULT_REGEX.exec(xml).slice(1)
+  const [name, time, tests, failures, skipped] = RESULT_REGEX.exec(xml).slice(1)
 
   return {
-    name, time, tests: Number(tests), failures: Number(failures),
+    name, time, tests: Number(tests), failures: Number(failures), skipped: Number(skipped),
   }
 }
 
@@ -55,8 +55,8 @@ fse.readdir(REPORTS_PATH)
         throw new Error(`Error parsing result: ${err.message}. File contents:\n\n${xml}`)
       }
     })
-    .then(({ name, time, tests, failures }) => {
-      console.log(`Report parsed successfully. Name: ${name}\tTests ran: ${tests}\tTests failing: ${failures}\tTotal time: ${time}`)
+    .then(({ name, time, tests, failures, skipped }) => {
+      console.log(`Report parsed successfully. Name: ${name}\tTests ran: ${tests}\tFailing: ${failures}\tSkipped: ${skipped}\tTotal time: ${time}`)
 
       la(tests > 0, 'Expected the total number of tests to be >0, but it was', tests, 'instead.')
       la(failures === 0, 'Expected the number of failures to be equal to 0, but it was', failures, '. This stage should not have been reached. Check why the failed test stage did not cause this entire build to fail.')
