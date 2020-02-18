@@ -1071,46 +1071,16 @@ module.exports = {
       URL from the `options` object: {{optionsUrl}}
       URL from the `url` parameter: {{url}}
     """
-    cannot_visit_different_protocol: """
+    cannot_visit_different_origin: """
       #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-      The new URL is considered a different origin because the URL's protocol is different.
+      The new URL is considered a different origin because the following parts of the URL are different: {{differences}}
 
       You may only #{cmd('visit')} same origin URLs within a single test.
 
-      The previous URL you visited was: '{{previousDomain}}'
+      The previous URL you visited was: '{{previousUrl}}'
 
-      You're attempting to visit this URL: '{{attemptedDomain}}'
-
-      You may need to restructure some of your test code to avoid this problem.
-
-      https://on.cypress.io/cannot-visit-different-origin-domain
-    """
-    cannot_visit_different_port: """
-      #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
-
-      The new URL is considered a different origin because the port is different.
-
-      You may only #{cmd('visit')} same origin URLs within a single test.
-
-      The previous domain you visited was: '{{previousDomain}}'
-
-      You're attempting to visit this URL: '{{attemptedDomain}}'
-
-      You may need to restructure some of your test code to avoid this problem.
-
-      https://on.cypress.io/cannot-visit-different-origin-domain
-    """
-    cannot_visit_different_superdomain: """
-      #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
-
-      The new URL is considered a different origin because the superdomain is different.
-
-      You may only #{cmd('visit')} same origin URLs within a single test.
-
-      The previous domain you visited was: '{{previousDomain}}'
-
-      You're attempting to visit this URL: '{{attemptedDomain}}'
+      You're attempting to visit this URL: '{{attemptedUrl}}'
 
       You may need to restructure some of your test code to avoid this problem.
 

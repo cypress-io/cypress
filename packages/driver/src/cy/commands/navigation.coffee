@@ -69,22 +69,26 @@ bothUrlsMatchAndRemoteHasHash = (current, remote) ->
         ## both must have the same query params
         (current.search is remote.search)
 
-cannotVisitDifferentOrigin = (origin, previousDomainVisited, reason, log) ->
+cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl, log) ->
+  differences = []
+
+  if remoteUrl.protocol isnt existingUrl.protocol
+    differences.push('protocol')
+  if remoteUrl.port isnt existingUrl.port
+    differences.push('port')
+  if remoteUrl.superDomain isnt existingUrl.superDomain
+    differences.push('superdomain')
+
   errOpts = {
     onFail: log
     args: {
-      previousDomain: previousDomainVisited
-      attemptedDomain: origin
+      differences: differences.join(', ')
+      previousUrl: previousUrlVisited
+      attemptedUrl: origin
     }
   } 
 
-  if reason is 'differentProtocol'
-    $errUtils.throwErrByPath("visit.cannot_visit_different_protocol", errOpts)
-
-  if reason is 'differentPort'
-    $errUtils.throwErrByPath("visit.cannot_visit_different_port", errOpts)
-
-  $errUtils.throwErrByPath("visit.cannot_visit_different_superdomain", errOpts)
+  $errUtils.throwErrByPath("visit.cannot_visit_different_origin", errOpts)
 
 specifyFileByRelativePath = (url, log) ->
   $errUtils.throwErrByPath("visit.specify_file_by_relative_path", {
@@ -657,15 +661,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         existingAuth = remote.auth ? ""
 
         if previousDomainVisited and remote.originPolicy isnt existing.originPolicy
-          reason = ''
-
-          if remote.protocol isnt existing.protocol
-            reason = 'differentProtocol'
-          if remote.port isnt existing.port
-            reason = 'differentPort'
           ## if we've already visited a new superDomain
           ## then die else we'd be in a terrible endless loop
-          return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, reason, options._log)
+          return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
 
         current = $Location.create(win.location.href)
 
@@ -736,14 +734,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             ## if we've already visited a new origin
             ## then die else we'd be in a terrible endless loop
             if previousDomainVisited
-              reason = ''
-
-              if remote.protocol isnt existing.protocol
-                reason = 'differentProtocol'
-              if remote.port isnt existing.port
-                reason = 'differentPort'
-              
-              return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, reason, options._log)
+              return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
 
             ## tell our backend we're changing domains
             ## TODO: add in other things we want to preserve
