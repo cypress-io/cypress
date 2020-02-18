@@ -33,6 +33,8 @@
 // Cypress, cy, Log inherits EventEmitter.
 type EventEmitter2 = import("eventemitter2").EventEmitter2
 
+type Nullable<T> = T | null
+
 interface EventEmitter extends EventEmitter2 {
   proxyTo: (cy: Cypress.cy) => null
   emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
@@ -50,6 +52,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
+  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -62,12 +65,42 @@ declare namespace Cypress {
     password: string
   }
 
+  interface Backend {
+    /**
+     * Firefox only: Force Cypress to run garbage collection routines.
+     * No-op if not running in Firefox.
+     *
+     * @see https://on.cypress.io/firefox-gc-issue
+     */
+    (task: 'firefox:force:gc'): Promise<void>
+  }
+
+  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
+
+  type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
+
+  type BrowserFamily = 'chromium' | 'firefox'
+
   /**
    * Describes a browser Cypress can control
    */
   interface Browser {
-    name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
-    displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
+    /**
+     * Short browser name.
+     */
+    name: BrowserName
+    /**
+     * The underlying engine for this browser.
+     */
+    family: BrowserFamily
+    /**
+     * The release channel of the browser.
+     */
+    channel: BrowserChannel
+    /**
+     * Human-readable browser name.
+     */
+    displayName: string
     version: string
     majorVersion: number
     path: string
@@ -204,6 +237,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Promise wrapper for certain internal tasks.
+     */
+    backend: Backend
+
+    /**
      * Returns all configuration objects.
      * @see https://on.cypress.io/config
      * @example
@@ -278,6 +316,15 @@ declare namespace Cypress {
     env(object: ObjectLike): void
 
     /**
+     * Firefox only: Get the current number of tests that will run between forced garbage collections.
+     *
+     * Returns undefined if not in Firefox, returns a null or 0 if forced GC is disabled.
+     *
+     * @see https://on.cypress.io/firefox-gc-issue
+     */
+    getFirefoxGcInterval(): number | null | undefined
+
+    /**
      * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
      *
      * @see https://on.cypress.io/iscy
@@ -286,6 +333,14 @@ declare namespace Cypress {
      */
     isCy<TSubject = any>(obj: Chainable<TSubject>): obj is Chainable<TSubject>
     isCy(obj: any): obj is Chainable
+
+    /**
+     * Returns true if currently running the supplied browser name or matcher object.
+     * @example isBrowser('chrome') will be true for the browser 'chrome:canary' and 'chrome:stable'
+     * @example isBrowser({ name: 'firefox', channel: 'dev' }) will be true only for the browser 'firefox:dev' (Firefox Developer Edition)
+     * @param matcher browser name or matcher object to check.
+     */
+    isBrowser(name: BrowserName | Partial<Browser>): boolean
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -327,7 +382,7 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/api/screenshot-api
+     * @see https://on.cypress.io/screenshot-api
      */
     Screenshot: {
       defaults(options: Partial<ScreenshotDefaultsOptions>): void
@@ -594,7 +649,7 @@ declare namespace Cypress {
      *    // tries to find the given text for up to 1 second
      *    cy.contains('my text to find', {timeout: 1000})
      */
-    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
+    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<Subject>
     /**
      * Get the child DOM element that contains given text.
      *
@@ -612,7 +667,7 @@ declare namespace Cypress {
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
      */
-    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get the DOM element using CSS "selector" containing the text or regular expression.
      *
@@ -621,7 +676,7 @@ declare namespace Cypress {
      *    // yields <... class="foo">... apples ...</...>
      *    cy.contains('.foo', 'apples')
      */
-    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<E>>
 
     /**
      * Double-click a DOM element.
@@ -1092,7 +1147,7 @@ declare namespace Cypress {
     parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Stop cy commands from running and allow interaction with the application under test. You can then “resume” running all commands or choose to step through the “next” commands from the Command Log.
+     * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
      * This does not set a `debugger` in your code, unlike `.debug()`
      *
      * @see https://on.cypress.io/pause
@@ -1235,7 +1290,7 @@ declare namespace Cypress {
      * Get the root DOM element.
      * The root element yielded is `<html>` by default.
      * However, when calling `.root()` from a `.within()` command,
-     * the root element will point to the element you are “within”.
+     * the root element will point to the element you are "within".
      *
      * @see https://on.cypress.io/root
      */
@@ -1996,6 +2051,18 @@ declare namespace Cypress {
   }
 
   /**
+   * Options that check case sensitivity
+   */
+  interface CaseMatchable {
+    /**
+     * Check case sensitivity
+     *
+     * @default true
+     */
+    matchCase: boolean
+  }
+
+  /**
    * Options that control how long the Test Runner waits for an XHR request and response to succeed
    */
   interface TimeoutableXHR {
@@ -2206,6 +2273,13 @@ declare namespace Cypress {
      * @default true
      */
     waitForAnimations: boolean
+    /**
+     * Firefox-only: The number of tests that will run between forced garbage collections.
+     * If a number is supplied, it will apply to `run` mode and `open` mode.
+     * Set the interval to `null` or 0 to disable forced garbage collections.
+     * @default { runMode: 1, openMode: null }
+     */
+    firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
   }
 
   interface DebugOptions {
@@ -4203,6 +4277,62 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
+  interface BrowserLaunchOptions {
+    extensions: string[],
+    preferences: { [key: string]: any }
+    args: string[],
+  }
+
+  interface Dimensions {
+    width: number
+    height: number
+  }
+
+  interface ScreenshotDetails {
+    size: number
+    takenAt: string
+    duration: number
+    dimensions: Dimensions
+    multipart: boolean
+    pixelRatio: number
+    name: string
+    specName: string
+    testFailure: boolean
+    path: string
+    scaled: boolean
+    blackout: string[]
+  }
+
+  interface AfterScreenshotReturnObject {
+    path?: string
+    size?: number
+    dimensions?: Dimensions
+  }
+
+  interface FileObject {
+    filePath: string
+    outputPath: string
+    shouldWatch: boolean
+  }
+
+  /**
+   * Individual task callback. Receives a single argument and _should_ return
+   * anything but `undefined` or a promise that resolves anything but `undefined`
+   * TODO: find a way to express "anything but undefined" in TypeScript
+   */
+  type Task = (value: any) => any
+
+  interface Tasks {
+    [key: string]: Task
+  }
+
+  interface PluginEvents {
+    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
+    (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
+    (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
+    (action: 'task', tasks: Tasks): void
+  }
+
   // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
@@ -4346,6 +4476,10 @@ declare namespace Cypress {
      */
     (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
     /**
+     * Fires before the test and all **before** and **beforeEach** hooks run. If a `Promise` is returned, it will be awaited before proceeding.
+     */
+    (action: 'test:before:run:async', fn: (attributes: ObjectLike, test: Mocha.ITest) => void | Promise<any>): void
+    /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -4357,6 +4491,7 @@ declare namespace Cypress {
     logs(filters: any): any
     add(obj: any): any
     get(): any
+    get<K extends keyof CommandQueue>(key: string): CommandQueue[K]
     toJSON(): string[]
     create(): CommandQueue
   }

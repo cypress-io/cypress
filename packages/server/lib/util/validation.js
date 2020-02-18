@@ -47,7 +47,8 @@ const isValidBrowser = (browser) => {
     return errMsg('name', browser, 'a non-empty string')
   }
 
-  const knownBrowserFamilies = ['electron', 'chrome', 'firefox']
+  // TODO: this is duplicated with browsers/index
+  const knownBrowserFamilies = ['electron', 'chromium', 'firefox']
 
   if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
     return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
@@ -102,10 +103,31 @@ const isValidBrowserList = (key, browsers) => {
   return true
 }
 
+const isValidFirefoxGcInterval = (key, value) => {
+  const isIntervalValue = (val) => {
+    if (isNumber(val)) {
+      return val >= 0
+    }
+
+    return val == null
+  }
+
+  if (isIntervalValue(value)
+      || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
+          && isIntervalValue(value.runMode)
+          && isIntervalValue(value.openMode))) {
+    return true
+  }
+
+  return errMsg(key, value, 'a positive number or null or an object with "openMode" and "runMode" as keys and positive numbers or nulls as values')
+}
+
 module.exports = {
   isValidBrowser,
 
   isValidBrowserList,
+
+  isValidFirefoxGcInterval,
 
   isNumber (key, value) {
     if (value == null || isNumber(value)) {

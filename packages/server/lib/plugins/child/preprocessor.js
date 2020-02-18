@@ -35,5 +35,7 @@ module.exports = {
   _clearFiles: () => {
     for (let file in fileObjects) delete fileObjects[file]
   },
-  _getFiles: () => fileObjects,
+  _getFiles: () => {
+    return fileObjects
+  },
 }

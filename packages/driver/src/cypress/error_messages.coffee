@@ -79,6 +79,9 @@ module.exports = {
     timed_out:  "#{cmd('blur')} timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
     wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: {{node}}"
 
+  browser:
+    invalid_arg: "Cypress.{{method}}() must be passed the name of a browser or an object to filter with. You passed: {{obj}}"
+
   chai:
     length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
     match_invalid_argument: "'match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
@@ -148,6 +151,7 @@ module.exports = {
     empty_string: "#{cmd('contains')} cannot be passed an empty string."
     invalid_argument: "#{cmd('contains')} can only accept a string, number or regular expression."
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
+    regex_conflict: "You passed a regular expression with the case-insensitive (i) flag and { matchCase: true } to #{cmd('contains')}. Those options conflict with each other, so please choose one or the other."
 
   cookies:
     backend_error: """
@@ -605,6 +609,17 @@ module.exports = {
     async_timed_out: "Timed out after '{{ms}}ms'. The done() callback was never invoked!"
     invalid_interface: "Invalid mocha interface '{{name}}'"
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
+    overspecified: """
+    Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+
+    Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callback
+
+    #{divider(60, '-')}
+
+    Original mocha error:
+
+    {{error}}
+    """
 
   navigation:
     cross_origin: ({ message, originPolicy, configFile }) -> """
@@ -950,7 +965,7 @@ module.exports = {
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
-    invalid_dateTime: "Typing into a datetime input with #{cmd('type')} requires a valid datetime with the format 'yyyy-MM-ddThh:mm', for example '2017-06-01T08:30'. You passed: {{chars}}"
+    invalid_datetime: "Typing into a datetime input with #{cmd('type')} requires a valid datetime with the format 'yyyy-MM-ddThh:mm', for example '2017-06-01T08:30'. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
     not_on_typeable_element: """
       #{cmd('type')} failed because it requires a valid typeable element.
