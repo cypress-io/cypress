@@ -83,7 +83,6 @@
     "mock-fs": "4.9.0",
     "mocked-env": "1.2.4",
     "nock": "9.6.1",
-    "postinstall-postinstall": "2.0.0",
     "proxyquire": "2.1.0",
     "resolve-pkg": "2.0.0",
     "shelljs": "0.8.3",
