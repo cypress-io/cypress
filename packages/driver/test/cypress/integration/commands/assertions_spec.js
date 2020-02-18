@@ -355,6 +355,26 @@ describe('src/cy/commands/assertions', () => {
 
         cy.contains('Nested Find').should('have.length', 2)
       })
+
+      // https://github.com/cypress-io/cypress/issues/6384
+      it('can chain contains assertions off of cy.contains', () => {
+        cy.timeout(100)
+        cy.contains('foo')
+        .should('not.contain', 'asdfasdf')
+
+        cy.contains('foo')
+        .should('contain', 'foo')
+
+        cy.contains(/foo/)
+        .should('not.contain', 'asdfsadf')
+
+        cy.contains(/foo/)
+        .should('contain', 'foo')
+
+        // this isn't valid: .should('contain') does not support regex
+        // cy.contains(/foo/)
+        // .should('contain', /foo/)
+      })
     })
 
     describe('have.class', () => {

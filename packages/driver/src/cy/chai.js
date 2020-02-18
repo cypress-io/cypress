@@ -8,6 +8,7 @@ const sinonChai = require('@cypress/sinon-chai')
 
 const $dom = require('../dom')
 const $utils = require('../cypress/utils')
+const $errUtils = require('../cypress/error_utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 const chaiInspect = require('./chai/inspect')
 
@@ -48,8 +49,8 @@ chai.use((chai, u) => {
 
   $chaiJquery(chai, chaiUtils, {
     onInvalid (method, obj) {
-      const err = $utils.cypressErr(
-        $utils.errMessageByPath(
+      const err = $errUtils.cypressErr(
+        $errUtils.errMsgByPath(
           'chai.invalid_jquery_obj', {
             assertion: method,
             subject: $utils.stringifyActual(obj),
@@ -252,7 +253,7 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const err = $utils.cypressErr($utils.errMessageByPath('chai.match_invalid_argument', { regExp }))
+        const err = $errUtils.cypressErr($errUtils.errMsgByPath('chai.match_invalid_argument', { regExp }))
 
         err.retry = false
         throw err
@@ -343,7 +344,7 @@ chai.use((chai, u) => {
               throw e1
             }
 
-            const e2 = $utils.cypressErr($utils.errMessageByPath('chai.length_invalid_argument', { length }))
+            const e2 = $errUtils.cypressErr($errUtils.errMsgByPath('chai.length_invalid_argument', { length }))
 
             e2.retry = false
             throw e2

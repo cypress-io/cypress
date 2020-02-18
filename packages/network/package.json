@@ -27,7 +27,7 @@
     "@types/concat-stream": "1.6.0",
     "express": "4.16.4",
     "mocha": "6.2.2",
-    "request": "cypress-io/request#47cdc67085c9fddc8d39d3172538f3f86c96bb8b",
+    "request": "cypress-io/request#b5af0d1fa47eec97ba980cde90a13e69a2afcd16",
     "request-promise": "4.2.4",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
