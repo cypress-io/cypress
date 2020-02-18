@@ -980,32 +980,18 @@ const getElements = ($el) => {
   return els
 }
 
-const whitespaces = /\s+/g
-const spaces = /[ \t]+/g
-
 // When multiple space characters are considered as a single whitespace in all tags except <pre>.
 const normalizeWhitespaces = (elem, matchWhitespace) => {
-  let testText = elem.textContent || elem.innerText || $(elem).text()
+  const innerTextFirst = elem.innerText || elem.textContent || $(elem).text()
+  const textContentFirst = elem.textContent || elem.innerText || $(elem).text()
 
-  const whitespaceStyle = $(elem).css('white-space')
+  if (matchWhitespace) {
+    const whitespaceStyle = $(elem).css('white-space')
 
-  if (elem.tagName === 'PRE' ||
-    matchWhitespace ||
-    whitespaceStyle === 'pre' ||
-    whitespaceStyle === 'pre-wrap' ||
-    whitespaceStyle === 'break-spaces') {
-    return testText
+    return whitespaceStyle === 'pre-line' ? innerTextFirst : textContentFirst
   }
 
-  if (whitespaceStyle === 'pre-line') {
-    const lines = testText.replace(spaces, ' ').split('\n').map((line) => {
-      return line.trim()
-    })
-
-    return lines.join('\n')
-  }
-
-  return testText.replace(whitespaces, ' ')
+  return innerTextFirst
 }
 
 const getContainsSelector = (text, filter = '', options: {

@@ -1567,13 +1567,13 @@ describe('src/cy/commands/querying', () => {
     it('will not find script elements', () => {
       cy.$$('<script>// some-script-content </script>').appendTo(cy.$$('body'))
 
-      cy.contains('some-script-content').should('not.match', 'script')
+      cy.contains('some-script-content').should('not.exist')
     })
 
     it('will not find style elements', () => {
       cy.$$('<style> some-style-content {} </style>').appendTo(cy.$$('body'))
 
-      cy.contains('some-style-content').should('not.match', 'style')
+      cy.contains('some-script-content').should('not.exist')
     })
 
     it('finds the nearest element by :contains selector', () => {
@@ -1880,7 +1880,7 @@ space
 </pre>\
 `).appendTo(cy.$$('body'))
 
-        cy.contains('White space').should('not.match', 'pre')
+        cy.contains('White space').should('not.exist')
         cy.get('#whitespace5').contains('White\nspace')
       })
 
@@ -1911,6 +1911,7 @@ space
 </button>`).appendTo(cy.$$('body'))
 
           cy.get('#whitespace').contains('this\n      field should preserve all\n      whitespace   ')
+          cy.contains('this field should preserve all whitespace').should('not.exist')
         })
       })
 
@@ -1920,7 +1921,9 @@ space
       whitespace   
 </button>`).appendTo(cy.$$('body'))
 
-        cy.get('#whitespace').contains('this\nfield should preserve all\nwhitespace')
+        cy.get('#whitespace').contains('this\nfield should preserve all\nwhitespace', {
+          matchWhitespace: true,
+        })
       })
     })
 
