@@ -9,6 +9,7 @@ import * as linuxHelper from './linux'
 import { log } from './log'
 import {
   Browser,
+  DetectedBrowser,
   FoundBrowser,
   NotDetectedAtPathError,
   NotInstalledError,
@@ -41,7 +42,7 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
 }
 
 type PlatformHelper = {
-  detect: (browser: Browser) => Promise<FoundBrowser>
+  detect: (browser: Browser) => Promise<DetectedBrowser>
   getVersionString: (path: string) => Promise<string>
 }
 
@@ -62,7 +63,7 @@ function getHelper (platform?: NodeJS.Platform): PlatformHelper {
 function lookup (
   platform: NodeJS.Platform,
   browser: Browser
-): Promise<FoundBrowser> {
+): Promise<DetectedBrowser> {
   log('looking up %s on %s platform', browser.name, platform)
   const helper = getHelper(platform)
 

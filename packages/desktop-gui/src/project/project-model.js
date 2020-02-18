@@ -209,6 +209,9 @@ export default class Project {
   }
 
   @action setError (err = {}) {
+    // for some reason, the original `stack` is unavailable on `err` once it is set on the model
+    // `stack2` remains usable though, for some reason
+    err.stack2 = err.stack
     this.error = err
   }
 

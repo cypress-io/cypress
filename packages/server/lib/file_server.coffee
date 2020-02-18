@@ -1,15 +1,25 @@
 ## TODO: move this to packages/core-file-server
 
 _            = require("lodash")
+debug        = require("debug")("cypress:server:file_server")
 url          = require("url")
 http         = require("http")
 path         = require("path")
 send         = require("send")
 errors       = require("./errors")
 allowDestroy = require("./util/server_destroy")
+random       = require("./util/random")
 networkFailures = require("./util/network_failures")
 
-onRequest = (req, res, fileServerFolder) ->
+onRequest = (req, res, expectedToken, fileServerFolder) ->
+  token = req.headers['x-cypress-authorization']
+
+  if token != expectedToken
+    debug('authorization failed on file_server request %o', { reqUrl: req.url, expectedToken, token })
+    res.statusCode = 401
+    res.end()
+    return
+
   args = _.compact([
     fileServerFolder,
     req.url
@@ -37,13 +47,17 @@ onRequest = (req, res, fileServerFolder) ->
 module.exports = {
   create: (fileServerFolder) ->
     new Promise (resolve) ->
+      token = random.id(64)
+
       srv = http.createServer (req, res) ->
-        onRequest(req, res, fileServerFolder)
+        onRequest(req, res, token, fileServerFolder)
 
       allowDestroy(srv)
 
       srv.listen 0, '127.0.0.1', ->
         resolve({
+          token
+
           port: ->
             srv.address().port
 

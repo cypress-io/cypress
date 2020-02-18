@@ -64,5 +64,6 @@ register('updater:run', false)
 register('window:open')
 register('window:close')
 register('onboarding:closed')
+register('set:clipboard:text')
 
 export default ipc
