@@ -55,7 +55,7 @@
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-e2e": "lerna run test-e2e --scope \"@packages/server\"",
-    "test-integration": "lerna run test-integration --scope \"@packages/server\"",
+    "test-integration": "lerna run test-integration",
     "test-jscodeshift": "jest ./scripts/decaff",
     "test-mocha": "mocha --reporter spec scripts/spec.js",
     "test-mocha-snapshot": "mocha scripts/mocha-snapshot-spec.js",
