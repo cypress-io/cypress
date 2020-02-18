@@ -35,4 +35,10 @@ describe('e2e before:browser:launch', () => {
     sanitizeScreenshotDimensions: true,
     snapshot: true,
   })
+
+  e2e.it('can change browser prefs (download dir)', {
+    spec: '*',
+    project: Fixtures.projectPath('browser-preferences'),
+    browser: ['chrome', 'firefox'],
+  })
 })

@@ -10,6 +10,10 @@ const options = minimist(process.argv.slice(2))
 
 let run = options._[0]
 
+if (run.startsWith('packages/server')) {
+  run = run.slice('packages/server'.length + 1)
+}
+
 if (run && run.includes('--inspect-brk')) {
   run = options._[1]
 }
@@ -134,7 +138,6 @@ const cmd = `${commandAndArguments.command} ${
 
 console.log('test command:')
 console.log(cmd)
-
 const child = execa.shell(cmd, { env, stdio: 'inherit' })
 
 child.on('exit', process.exit)
