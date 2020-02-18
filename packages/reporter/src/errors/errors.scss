@@ -91,6 +91,21 @@
     }
   }
 
+  .runnable-err-print {
+    background: none;
+    border: solid 2px $err-text;
+    border-radius: 3px;
+    color: $err-text;
+    font-size: 8px;
+    padding: 0.4em;
+
+    &:hover,
+    &:focus {
+      background: rgba(255, 255, 255, 0.6);
+      outline: none;
+    }
+  }
+
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
@@ -152,6 +167,17 @@
 
     .collapsible-more {
       display: none;
+    }
+  }
+
+  .runnable-err-stack-trace {
+    overflow: auto;
+    padding: 10px;
+    font-family: $monospace;
+    margin-left: 15px;
+
+    .err-stack-line {
+      white-space: pre;
     }
   }
 }
