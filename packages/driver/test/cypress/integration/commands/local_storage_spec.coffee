@@ -63,3 +63,17 @@ describe "src/cy/commands/local_storage", ->
 
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
+
+    describe "without log", ->
+      beforeEach ->
+        cy.on "log:added", (attrs, log) =>
+          @lastLog = log
+
+        return null
+        
+      it "log is disabled", ->
+        cy.clearLocalStorage('foo', {log: false}).then ->
+          lastLog = @lastLog
+
+          expect(lastLog).to.be.undefined
+
