@@ -456,3 +456,9 @@ cy.writeFile('../file.path', '', {
 cy.get('foo').click()
 cy.get('foo').rightclick()
 cy.get('foo').dblclick()
+
+// cy.$$() is not jQuery(). It only queries.
+// $ExpectError
+cy.$$.escapeSelector
+cy.$$('.warning')
+cy.$$('.warning', cy.$$('.notice'))

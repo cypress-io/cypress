@@ -139,7 +139,7 @@ commands:
       command:
         description: Test command to run to start Cypress tests
         type: string
-        default: "yarn test-e2e"
+        default: "npm run e2e"
       wait-on:
         description: Url to wait-on before starting tests
         type: string
@@ -163,10 +163,10 @@ commands:
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: yarn build
+          command: npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: yarn start
+          command: npm start --if-present
           background: true
       - when:
           condition: <<parameters.wait-on>>
