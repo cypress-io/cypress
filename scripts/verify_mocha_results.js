@@ -14,7 +14,7 @@ const REPORTS_PATH = '/tmp/cypress/junit'
 
 const expectedResultCount = Number(process.argv[process.argv.length - 1])
 
-la(expectedResultCount, `Expected expectedResultCount to be a number, but got ${expectedResultCount} instead. Usage: yarn verify:mocha:results <expectedResultCount>`)
+la(expectedResultCount, 'Expected expectedResultCount to be a number, but got', expectedResultCount, 'instead. Usage: yarn verify:mocha:results <expectedResultCount>')
 
 const parseResult = (xml) => {
   const [name, time, tests, failures, skipped] = RESULT_REGEX.exec(xml).slice(1)
