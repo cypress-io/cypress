@@ -10,7 +10,7 @@ set -e
 #   client contains public info that a client would have
 #   server contains private info that a server would have
 
-CA_PATH=../../../ca
+CA_PATH=../../../../ca
 
 # ensure regular root CA exists
 node -r "@packages/coffee/register" -e "require('@packages/https-proxy/lib/ca').create('$CA_PATH')"
@@ -19,12 +19,12 @@ echo "remove and relink test CA pems"
 for f in ca client server
 do
   rm -f $f/my-root-ca.crt.pem
-  ln $CA_PATH/certs/ca.pem $f/my-root-ca.crt.pem
+  ln -s $CA_PATH/certs/ca.pem $f/my-root-ca.crt.pem
 done
 
 echo "remove and relink test CA key"
 rm -f ca/my-root-ca.key.pem
-ln $CA_PATH/keys/ca.private.key ca/my-root-ca.key.pem
+ln -s $CA_PATH/keys/ca.private.key ca/my-root-ca.key.pem
 
 echo "reuse existing key and crt to generate a new server csr"
 openssl x509 -in server/my-server.crt.pem -signkey server/my-server.key.pem -x509toreq -out server/my-server.csr
