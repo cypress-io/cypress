@@ -13635,13 +13635,6 @@ https-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-1.0.0.tgz#ec06c10e0a34c0f2faf199f7fd7fc78fffd03c73"
   integrity sha1-7AbBDgo0wPL68Zn3/X/Hj//QPHM=
 
-https-pem@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/https-pem/-/https-pem-2.0.0.tgz#c50d6c1737b28a6c9308760bb0245124d3cbd269"
-  integrity sha512-EeJkZ9hIi1l5aQBDSBzxgES7Z748mNOf3cbN48j/lzq4vZhinqNtM1kyaw0orPaxHfJTBvy/oZbJkhsxg1UHCg==
-  dependencies:
-    selfsigned "^1.10.1"
-
 https-proxy-agent@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-3.0.0.tgz#0106efa5d63d6d6f3ab87c999fa4877a3fd1ff97"
@@ -21491,13 +21484,6 @@ self-signed-cert@^1.0.1:
   resolved "https://registry.yarnpkg.com/self-signed-cert/-/self-signed-cert-1.0.1.tgz#9e2fae07503f84fb910f4a87c5c5c6becc207bf6"
   integrity sha512-86d1jYydqaRdUEyR9tj5nQ0d059RUWB9gdZrzDy2MJaUHii1h9EyzbAepkV1rOLO2AkSkQbXtUrqWRH4FDYWHA==
 
-selfsigned@^1.10.1:
-  version "1.10.7"
-  resolved "https://registry.yarnpkg.com/selfsigned/-/selfsigned-1.10.7.tgz#da5819fd049d5574f28e88a9bcc6dbc6e6f3906b"
-  integrity sha512-8M3wBCzeWIJnQfl43IKwOmC4H/RAp50S8DF60znzjW5GVqTcSe2vWclt7hmYVPkKPlHWOu5EaWOMZ2Y6W8ZXTA==
-  dependencies:
-    node-forge "0.9.0"
-
 semaphore@1.1.0, semaphore@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/semaphore/-/semaphore-1.1.0.tgz#aaad8b86b20fe8e9b32b16dc2ee682a8cd26a8aa"
@@ -22128,10 +22114,11 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#4d3076af68ea8192c
   version "3.1.2-patch1"
   resolved "https://codeload.github.com/cypress-io/socket.io-circular-parser/tar.gz/4d3076af68ea8192c2e53f9d185eaa166359b4c5"
   dependencies:
-    circular-json "0.5.9"
+    circular-json "^0.4.0"
     component-emitter "1.2.1"
-    debug "~4.1.0"
+    debug "~2.6.4"
     has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
+    isarray "2.0.1"
 
 socket.io-client@2.3.0:
   version "2.3.0"
