@@ -476,6 +476,25 @@ describe('lib/exec/spawn', function () {
       })
     })
 
+    it('does write to process.stderr when from plugins', function () {
+      const buf1 = Buffer.from('asdf')
+
+      this.spawnedProcess.stderr.on
+      .withArgs('data')
+      .yields(buf1)
+
+      this.spawnedProcess.on.withArgs('close').yieldsAsync(0)
+
+      sinon.stub(process.stderr, 'write').withArgs(buf1)
+      os.platform.returns('linux')
+      xvfb.isNeeded.returns(true)
+
+      return spawn.start()
+      .then(() => {
+        expect(process.stderr.write).to.be.calledWith(buf1)
+      })
+    })
+
     it('does not write to process.stderr when from high sierra warnings', function () {
       const buf1 = Buffer.from('2018-05-19 15:30:30.287 Cypress[7850:32145] *** WARNING: Textured Window')
       const buf2 = Buffer.from('asdf')

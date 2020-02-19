@@ -4,7 +4,6 @@ const cp = require('child_process')
 const path = require('path')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:cli')
-const debugElectron = require('debug')('cypress:electron')
 
 const util = require('../util')
 const state = require('../tasks/state')
@@ -247,12 +246,7 @@ module.exports = {
               brokenGtkDisplay = true
             }
 
-            // we should attempt to always slurp up
-            // the stderr logs unless we've explicitly
-            // enabled the electron debug logging
-            if (!debugElectron.enabled) {
-              return false
-            }
+            return true
           },
         })
       }
