@@ -23,7 +23,7 @@ describe('konfig check', () => {
       !cwd.includes(join('packages', 'server')),
       'process CWD is set to',
       cwd,
-      'for some reason'
+      'for some reason',
     )
     // if the above assertion breaks, it means some script in binary scripts
     // loads "lib/konfig" directly, which unexpectedly changes the CWD.
@@ -38,7 +38,7 @@ describe('konfig check', () => {
       'previous cwd',
       cwd,
       'differs after loading konfig',
-      cwdAfter
+      cwdAfter,
     )
 
     la(is.fn(konfig), 'expected konfig to be a function', konfig)

@@ -29,7 +29,7 @@ function formChromeCanaryAppPath () {
     'Google',
     'Chrome SxS',
     'Application',
-    'chrome.exe'
+    'chrome.exe',
   )
 
   return [normalize(exe)]
@@ -53,7 +53,7 @@ function formEdgeCanaryAppPath () {
     'Microsoft',
     'Edge SxS',
     'Application',
-    'msedge.exe'
+    'msedge.exe',
   )
 
   return [normalize(exe)]

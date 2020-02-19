@@ -170,7 +170,7 @@ module.exports = {
       debug('invalid CYPRESS_ENV value', process.env.CYPRESS_ENV)
 
       return errors.exitWithError(errors.errors.invalidCypressEnv)(
-        `CYPRESS_ENV=${process.env.CYPRESS_ENV}`
+        `CYPRESS_ENV=${process.env.CYPRESS_ENV}`,
       )
     }
 
@@ -250,7 +250,7 @@ module.exports = {
     .command('install')
     .usage('[options]')
     .description(
-      'Installs the Cypress executable matching this package\'s version'
+      'Installs the Cypress executable matching this package\'s version',
     )
     .option('-f, --force', text('forceInstall'))
     .action((opts) => {
@@ -263,7 +263,7 @@ module.exports = {
     .command('verify')
     .usage('[options]')
     .description(
-      'Verifies that Cypress is installed correctly and executable'
+      'Verifies that Cypress is installed correctly and executable',
     )
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {

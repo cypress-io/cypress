@@ -17,6 +17,6 @@ module.exports = (str) => {
     .split('\n')
     .map(removeExcessWhiteSpace)
     .join('\n')
-    .replace(downloadQueryRe, '?platform=OS&arch=ARCH')
+    .replace(downloadQueryRe, '?platform=OS&arch=ARCH'),
   )
 }

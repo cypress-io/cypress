@@ -562,7 +562,7 @@ const isDisabled = ($el: JQuery) => {
 }
 
 const isReadOnlyInputOrTextarea = (
-  el: HTMLInputElement | HTMLTextAreaElement
+  el: HTMLInputElement | HTMLTextAreaElement,
 ) => {
   return el.readOnly
 }

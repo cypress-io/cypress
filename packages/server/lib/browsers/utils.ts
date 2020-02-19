@@ -21,7 +21,7 @@ const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
 const getBrowserPath = (browser) => {
   return path.join(
     PATH_TO_BROWSERS,
-    `${browser.name}-${browser.channel}`
+    `${browser.name}-${browser.channel}`,
   )
 }
 
@@ -56,21 +56,21 @@ const getPartition = function (isTextTerminal) {
 const getProfileDir = (browser, isTextTerminal) => {
   return path.join(
     getBrowserPath(browser),
-    getPartition(isTextTerminal)
+    getPartition(isTextTerminal),
   )
 }
 
 const getExtensionDir = (browser, isTextTerminal) => {
   return path.join(
     getProfileDir(browser, isTextTerminal),
-    'CypressExtension'
+    'CypressExtension',
   )
 }
 
 const ensureCleanCache = async function (browser, isTextTerminal) {
   const p = path.join(
     getProfileDir(browser, isTextTerminal),
-    'CypressCache'
+    'CypressCache',
   )
 
   await fs.removeAsync(p)
@@ -122,7 +122,7 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
   // TODO: remove this logic in >= v5.0.0
   if (pluginConfigResult[0]) {
     options.onWarning(errors.get(
-      'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS'
+      'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
     ))
 
     _.extend(pluginConfigResult, {

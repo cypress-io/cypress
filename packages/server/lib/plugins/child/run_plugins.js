@@ -115,7 +115,7 @@ const execute = (ipc, event, ids, args = []) => {
 
           sendWarning(ipc,
             errors.get(
-              'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS'
+              'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
             ))
 
           // eslint-disable-next-line prefer-rest-params
