@@ -98,6 +98,7 @@ commands:
           at: ~/
       - run:
           command: yarn lerna exec --scope @packages/server "yarn test-e2e --chunk << parameters.chunk >> --browser << parameters.browser >>"
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -122,6 +123,17 @@ commands:
             node scripts/add-install-comment.js \
               --npm npm-package-url.json \
               --binary binary-url.json
+
+  verify-mocha-results:
+    description: Double-check that Mocha tests ran as expected.
+    parameters:
+      expectedResultCount:
+        description: The number of result files to expect, ie, the number of Mocha test suites that ran.
+        type: integer
+        ## by default, assert that at least 1 test ran
+        default: 0
+    steps:
+      - run: yarn verify:mocha:results << parameters.expectedResultCount >>
 
   test-binary-against-repo:
     description: |
@@ -261,6 +273,8 @@ jobs:
       - run: yarn lerna run build-js --stream
       # run unit tests from each individual package
       - run: yarn test
+      - verify-mocha-results:
+          expectedResultCount: 6
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -288,6 +302,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: yarn test-unit --scope @packages/server
+      - verify-mocha-results:
+          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -299,6 +315,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: yarn test-integration --scope @packages/server
+      - verify-mocha-results:
+          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -310,6 +328,8 @@ jobs:
           at: ~/
       - run:
           command: yarn lerna exec --scope @packages/server "yarn test-performance"
+      - verify-mocha-results:
+          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:

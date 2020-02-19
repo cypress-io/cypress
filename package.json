@@ -51,7 +51,7 @@
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src --exclude e2e.coffee,e2e.js",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,network,reporter,runner,socket,static}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,network,reporter,runner,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-e2e": "lerna exec yarn test-e2e --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
@@ -66,6 +66,7 @@
     "test-unit": "lerna exec yarn test-unit --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
+    "verify:mocha:results": "node ./scripts/verify_mocha_results",
     "prewatch": "yarn ensure-deps",
     "watch": "lerna exec yarn watch --parallel --stream"
   },
