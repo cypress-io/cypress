@@ -39,8 +39,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       remote = clearLocalStorage(state, keys)
 
-      if options.log isnt false
-        options._log = Cypress.log
+      if options.log
+        Cypress.log
           name: "clear ls"
           snapshot: true
           end: true
