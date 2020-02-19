@@ -87,7 +87,7 @@ describe('test errors', function () {
 
     it('clicking prints to console', function () {
       cy.spy(this.runner, 'emit')
-      cy.get('.runnable-err-print').click().then(() => {
+      cy.get('.runnable-err-print').click().should(() => {
         expect(this.runner.emit).to.be.calledWith('runner:console:error')
 
         const err = this.runner.emit.withArgs('runner:console:error').lastCall.args[1].err
