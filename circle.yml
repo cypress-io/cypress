@@ -520,8 +520,6 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-chrome --browser chrome"
-      - verify-mocha-results:
-          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -569,8 +567,6 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-firefox --browser firefox"
-      - verify-mocha-results:
-          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -589,8 +585,6 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             yarn lerna exec --scope @packages/desktop-gui "yarn cypress:run --record --parallel --group 2x-desktop-gui"
-      - verify-mocha-results:
-          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -609,8 +603,6 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             yarn lerna exec  --scope @packages/reporter "yarn cypress:run --record --parallel --group reporter"
-      - verify-mocha-results:
-          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -629,8 +621,6 @@ jobs:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             yarn lerna exec --scope @packages/ui-components "yarn cypress:run --record --parallel --group ui-components"
-      - verify-mocha-results:
-          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
