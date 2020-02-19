@@ -59,10 +59,10 @@ describe "lib/socket", ->
         {proxyUrl, socketIoRoute} = @cfg
 
         ## force node into legit proxy mode like a browser
-        agent = new httpsAgent("http://localhost:#{@cfg.port}")
+        @agent = new httpsAgent("http://localhost:#{@cfg.port}")
 
         @client = socketIo.client(proxyUrl, {
-          agent: agent
+          agent: @agent
           path: socketIoRoute
           transports: ["websocket"]
           parser: socketIo.circularParser
@@ -116,7 +116,7 @@ describe "lib/socket", ->
             @extClient.on "automation:client:connected", ->
               done()
 
-          extensionBackgroundPage.connect(@cfg.proxyUrl, @cfg.socketIoRoute, socketIo.client)
+          extensionBackgroundPage.connect(@cfg.proxyUrl, @cfg.socketIoRoute, { agent: @agent })
 
         afterEach ->
           @extClient.disconnect()

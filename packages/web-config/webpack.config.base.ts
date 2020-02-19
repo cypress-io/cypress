@@ -15,7 +15,7 @@ execa.sync('rebuild-node-sass', { cwd: path.join(__dirname, './node_modules/.bin
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
-const liveReloadEnabled = !args.includes('--no-livereload')
+const liveReloadEnabled = !(args.includes('--no-livereload') || process.env.NO_LIVERELOAD)
 const watchModeEnabled = args.includes('--watch') || args.includes('-w')
 
 // opt out of livereload with arg --no-livereload
