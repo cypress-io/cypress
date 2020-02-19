@@ -54,9 +54,10 @@ if (isWindows()) {
   commandAndArguments.args = [run]
 } else {
   commandAndArguments.command = 'xvfb-maybe'
+  // this should always match cli/lib/exec/xvfb.js
   commandAndArguments.args = [
     '--xvfb-run-args ' +
-    '"-as \\"-screen 0 1280x1024x8\\""',
+    '"-as \\"-screen 0 1280x1024x24\\""',
     'node',
   ]
 }
