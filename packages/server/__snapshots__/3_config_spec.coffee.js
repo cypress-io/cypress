@@ -92,7 +92,11 @@ exports['e2e config fails 1'] = `
   1 failing
 
   1) config times out looking for a missing element:
-     CypressError: Timed out retrying: Expected to find element: '#bar', but never found it.
+
+      AssertionError: Timed out retrying: Expected to find element: \`#bar\`, but never found it.
+      + expected - actual
+
+      
       [stack trace lines]
 
 

@@ -277,7 +277,7 @@ This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
-Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 'foo'
       [stack trace lines]
 
 
@@ -371,7 +371,8 @@ exports['e2e uncaught errors / failing5'] = `
       [stack trace lines]
 
   4) foo quux2 fails:
-     ReferenceError: foo is not defined
+     ReferenceError: foo is not defined (and Mocha's done() called multiple times)
+  ReferenceError: foo is not defined
       [stack trace lines]
 
 
