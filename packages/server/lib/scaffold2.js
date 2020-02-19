@@ -56,7 +56,7 @@ const filesSizesAreSame = (files, index) => {
     Promise.all(_.map(files, getFileSize)),
     Promise.all(_.map(files, (file) => {
       return getFileSize(getIndexedExample(file, index))
-    })),
+    }))
   )
   .spread((fileSizes, originalFileSizes) => {
     return _.every(fileSizes, (size, i) => {
@@ -111,6 +111,12 @@ const isNewProject = (integrationFolder) => {
   })
 }
 
+const { optionInfo } = require('./modes/init/options')
+
+const isDefault2 = (config, option) => {
+  return config[option] === undefined || config[option] === optionInfo[2][option]
+}
+
 module.exports = {
   isNewProject,
 
@@ -118,13 +124,21 @@ module.exports = {
     return exampleFolderName
   },
 
-  integration (folder, config) {
-    debug(`integration folder ${folder}`)
-
+  integration (projRoot, config) {
     // skip if user has explicitly set integrationFolder
-    if (!isDefault(config, 'integrationFolder')) {
+    if (!isDefault2(config, 'integrationFolder')) {
       return Promise.resolve()
     }
+
+    const folder = path.join(
+      projRoot,
+      config.integrationFolder ||
+        _.find(optionInfo[2].options, { name: 'integrationFolder' }).default
+    )
+
+    config.integrationFolder = folder
+
+    debug(`integration folder ${folder}`)
 
     return this.verifyScaffolding(folder, () => {
       debug(`copying examples into ${folder}`)
@@ -138,13 +152,21 @@ module.exports = {
     })
   },
 
-  fixture (folder, config) {
-    debug(`fixture folder ${folder}`)
-
+  fixture (projRoot, config) {
     // skip if user has explicitly set fixturesFolder
-    if (!config.fixturesFolder || !isDefault(config, 'fixturesFolder')) {
+    if (!isDefault2(config, 'fixturesFolder')) {
       return Promise.resolve()
     }
+
+    const folder = path.join(
+      projRoot,
+      config.fixturesFolder ||
+        _.find(optionInfo[2].options, { name: 'fixturesFolder' }).default
+    )
+
+    config.fixturesFolder = folder
+
+    debug(`fixture folder ${folder}`)
 
     return this.verifyScaffolding(folder, () => {
       debug(`copying example.json into ${folder}`)
@@ -153,20 +175,32 @@ module.exports = {
     })
   },
 
-  support (folder, config) {
-    debug(`support folder ${folder}, support file ${config.supportFile}`)
-
+  support (projRoot, config) {
     // skip if user has explicitly set supportFile
-    if (!config.supportFile || !isDefault(config, 'supportFile')) {
+    if (!isDefault2(config, 'supportFile')) {
       return Promise.resolve()
     }
+
+    const supportFile = path.join(
+      projRoot,
+      config.supportFile ||
+        _.find(optionInfo[2].options, { name: 'supportFile' }).default
+    )
+
+    config.supportFile = supportFile
+
+    const folder = path.dirname(supportFile)
+
+    config.supportFolder = folder
+
+    debug(`support folder ${folder}, support file ${config.supportFile}`)
 
     return this.verifyScaffolding(folder, () => {
       debug(`copying commands.js and index.js to ${folder}`)
 
       return Promise.join(
         this._copy('support/commands.js', folder, config),
-        this._copy('support/index.js', folder, config),
+        this._copy('support/index.js', folder, config)
       )
     })
   },
