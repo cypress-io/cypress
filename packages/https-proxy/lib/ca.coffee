@@ -135,7 +135,7 @@ class CA
     sn
 
   generateCA: ->
-    generateKeyPairAsync({bits: 512})
+    generateKeyPairAsync({bits: 2048})
     .then (keys) =>
       cert = pki.createCertificate()
       cert.publicKey = keys.publicKey
@@ -176,7 +176,7 @@ class CA
     hosts = [].concat(hosts)
 
     mainHost   = hosts[0]
-    keysServer = pki.rsa.generateKeyPair(1024)
+    keysServer = pki.rsa.generateKeyPair(2048)
     certServer = pki.createCertificate()
 
     certServer.publicKey = keysServer.publicKey
