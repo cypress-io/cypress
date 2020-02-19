@@ -98,8 +98,7 @@ commands:
           at: ~/
       - run:
           command: yarn lerna exec --scope @packages/server "yarn test-e2e --chunk << parameters.chunk >> --browser << parameters.browser >>"
-      - verify-mocha-results:
-          expectedResultCount: -1
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -131,6 +130,8 @@ commands:
       expectedResultCount:
         description: The number of result files to expect, ie, the number of Mocha test suites that ran.
         type: integer
+        ## by default, assert that at least 1 test ran
+        default: 0
     steps:
       - run: yarn verify:mocha:results << parameters.expectedResultCount >>
 

@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 
 // this is a safety script to ensure that Mocha tests ran, by checking:
-// 1. that there are N test results in the reports dir (or at least 1, if N = -1)
+// 1. that there are N test results in the reports dir (or at least 1, if N is not set)
 // 2. each of them contains 0 failures and >0 tests
+// usage: yarn verify:mocha:results <N>
 
 const Bluebird = require('bluebird')
 const fse = Bluebird.promisifyAll(require('fs-extra'))
@@ -14,13 +15,11 @@ const REPORTS_PATH = '/tmp/cypress/junit'
 
 const expectedResultCount = Number(process.argv[process.argv.length - 1])
 
-la(expectedResultCount, 'Expected expectedResultCount to be a number, but got', expectedResultCount, 'instead. Usage: yarn verify:mocha:results <expectedResultCount>')
-
 const parseResult = (xml) => {
   const [name, time, tests, failures, skipped] = RESULT_REGEX.exec(xml).slice(1)
 
   return {
-    name, time, tests: Number(tests), failures: Number(failures), skipped: Number(skipped),
+    name, time, tests: Number(tests), failures: Number(failures), skipped: Number(skipped || 0),
   }
 }
 
@@ -35,7 +34,7 @@ fse.readdir(REPORTS_PATH)
 
   console.log(`Found ${resultCount} files in ${REPORTS_PATH}:`, files)
 
-  if (expectedResultCount === -1) {
+  if (!expectedResultCount) {
     la(resultCount > 0, 'Expected at least 1 report, but found', resultCount, '. Verify that all tests ran as expected.')
   } else {
     la(expectedResultCount === resultCount, 'Expected', expectedResultCount, 'reports, but found', resultCount, '. Verify that all tests ran as expected.')
