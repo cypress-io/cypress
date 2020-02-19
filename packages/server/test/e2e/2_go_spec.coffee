@@ -21,5 +21,4 @@ describe "e2e go", ->
   e2e.it "passes", {
     spec: "go_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }

@@ -1,26 +1,10 @@
 const _ = require('lodash')
-const $ = require('jquery')
 const Promise = require('bluebird')
 
 const $dom = require('../../dom')
-const $utils = require('../../cypress/utils')
-
-const $expr = $.expr[':']
-
-const $contains = $expr.contains
-
-const restoreContains = () => {
-  return $expr.contains = $contains
-}
+const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy) => {
-  // restore initially when a run starts
-  restoreContains()
-
-  // restore before each test and whenever we stop
-  Cypress.on('test:before:run', restoreContains)
-  Cypress.on('stop', restoreContains)
-
   Commands.addAll({
     focused (options = {}) {
       _.defaults(options, {
@@ -85,7 +69,7 @@ module.exports = (Commands, Cypress, cy) => {
       const ctx = this
 
       if ((options === null) || Array.isArray(options) || (typeof options !== 'object')) {
-        return $utils.throwErrByPath('get.invalid_options', {
+        return $errUtils.throwErrByPath('get.invalid_options', {
           args: { options },
         })
       }
@@ -407,14 +391,18 @@ module.exports = (Commands, Cypress, cy) => {
         filter = ''
       }
 
-      _.defaults(options, { log: true })
+      if (options.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
+        $errUtils.throwErrByPath('contains.regex_conflict')
+      }
+
+      _.defaults(options, { log: true, matchCase: true })
 
       if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
-        $utils.throwErrByPath('contains.invalid_argument')
+        $errUtils.throwErrByPath('contains.invalid_argument')
       }
 
       if (_.isBlank(text)) {
-        $utils.throwErrByPath('contains.empty_string')
+        $errUtils.throwErrByPath('contains.empty_string')
       }
 
       const getPhrase = () => {
@@ -477,16 +465,9 @@ module.exports = (Commands, Cypress, cy) => {
         options._log.set({ $el })
       }
 
-      if (_.isRegExp(text)) {
-        // taken from jquery's normal contains method
-        $expr.contains = (elem) => {
-          return text.test(elem.textContent || elem.innerText || $.text(elem))
-        }
-      }
-
-      // find elements by the :contains psuedo selector
+      // find elements by the :cy-contains psuedo selector
       // and any submit inputs with the attributeContainsWord selector
-      const selector = $dom.getContainsSelector(text, filter)
+      const selector = $dom.getContainsSelector(text, filter, options)
 
       const resolveElements = () => {
         const getOpts = _.extend(_.clone(options), {
@@ -511,7 +492,7 @@ module.exports = (Commands, Cypress, cy) => {
               switch (err.type) {
                 case 'length':
                   if (err.expected > 1) {
-                    return $utils.throwErrByPath('contains.length_option', { onFail: options._log })
+                    return $errUtils.throwErrByPath('contains.length_option', { onFail: options._log })
                   }
 
                   break
@@ -527,11 +508,6 @@ module.exports = (Commands, Cypress, cy) => {
 
       return Promise
       .try(resolveElements)
-      // always restore contains in case
-      // we used a regexp!
-      .finally(() => {
-        restoreContains()
-      })
     },
   })
 
@@ -554,7 +530,7 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       if (!_.isFunction(fn)) {
-        $utils.throwErrByPath('within.invalid_argument', { onFail: options._log })
+        $errUtils.throwErrByPath('within.invalid_argument', { onFail: options._log })
       }
 
       // reference the next command after this

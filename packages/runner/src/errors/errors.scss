@@ -47,8 +47,26 @@
       top: -1px;
 
       &.fa-globe {
-        top: 0; 
+        top: 0;
       }
+    }
+  }
+
+  &.automation-failure {
+    .browser-icon {
+      margin-right: 5px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+
+    .dropdown-toggle {
+      margin-left: 5px;
+    }
+
+    .dropdown-menu li {
+      padding: 8px 12px;
+      white-space: nowrap;
     }
   }
 
@@ -69,17 +87,14 @@
 
   .script-error {
     background-color: #f8f8f8;
-    bottom: 0;
     border: none;
     border-radius: 0;
     color: #ec6573;
-    left: 0;
     overflow: auto;
     margin: 0;
     padding: 2em;
-    position: absolute;
-    right: 0;
-    top: 0;
+    width: 100%;
+    height: 100%;
 
     &:empty {
       display: none;

@@ -6,7 +6,7 @@ Promise = require("bluebird")
 UNDEFINED_SERIALIZED = "__cypress_undefined__"
 
 serializeError = (err) ->
-  _.pick(err, "name", "message", "stack", "code", "annotated")
+  _.pick(err, "name", "message", "stack", "code", "annotated", "type")
 
 module.exports = {
   serializeError: serializeError

@@ -17,7 +17,6 @@ describe "e2e config", ->
     e2e.exec(@, {
       spec: "config_passing_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
       config: {
         env: {
           scriptlet: "<script>alert('this should not break')</script>"

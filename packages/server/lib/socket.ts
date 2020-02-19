@@ -13,6 +13,7 @@ const files = require('./files')
 const fixture = require('./fixture')
 const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
+const firefoxUtil = require('./browsers/firefox-util').default
 
 const debug = Debug('cypress:server:socket')
 const debugVerbose = Debug('cypress-verbose:server:socket')
@@ -140,6 +141,7 @@ class Socket {
       serveClient: false,
       cookie,
       parser: socketIo.circularParser,
+      transports: ['websocket'],
     })
   }
 
@@ -163,6 +165,7 @@ class Socket {
       onSavedStateChanged () {},
       onTestFileChange () {},
       onUnexpectedDisconnect () {},
+      onCaptureVideoFrames () {},
     })
 
     let automationClient: any = null
@@ -216,14 +219,14 @@ class Socket {
           }
 
           // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
-          return Promise.delay(500)
+          return Promise.delay(2000)
           .then(() => {
             // bail if we've swapped to a new automationClient
             if (automationClient !== socket) {
               return
             }
 
-            // give ourselves about 500ms to reconnected
+            // give ourselves about 2000ms to reconnect
             // and if we're connected its all good
             if (automationClient.connected) {
               return
@@ -350,6 +353,10 @@ class Socket {
         })
       })
 
+      socket.on('recorder:frame', (data) => {
+        return options.onCaptureVideoFrames(data)
+      })
+
       socket.on('reload:browser', (url, browser) => {
         return options.onReloadBrowser(url, browser)
       })
@@ -409,6 +416,10 @@ class Socket {
               return options.onRequest(headers, automationRequest, args[0])
             case 'reset:server:state':
               return options.onResetServerState()
+            case 'log:memory:pressure':
+              return firefoxUtil.log()
+            case 'firefox:force:gc':
+              return firefoxUtil.collectGarbage()
             case 'incoming:xhr':
               return options.onIncomingXhr(args[0], args[1])
             case 'get:fixture':
@@ -460,6 +471,8 @@ class Socket {
       })
 
       socket.on('external:open', (url) => {
+        debug('received external:open %o', { url })
+
         return require('electron').shell.openExternal(url)
       })
 

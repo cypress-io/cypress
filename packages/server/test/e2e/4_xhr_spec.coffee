@@ -29,5 +29,4 @@ describe "e2e xhr", ->
   e2e.it "passes", {
     spec: "xhr_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }
