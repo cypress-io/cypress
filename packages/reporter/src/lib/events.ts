@@ -161,6 +161,8 @@ const events: Events = {
     })
 
     localBus.on('show:error', (testId: number) => {
+      runner.emit('runner:console:error', {})
+
       const test = runnablesStore.testById(testId)
       const command = test.err.isCommandErr && test.commandMatchingErr()
 
