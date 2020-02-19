@@ -23,6 +23,8 @@ const parseResult = (xml) => {
   }
 }
 
+const total = { tests: 0, failures: 0, skipped: 0 }
+
 console.log(`Looking for reports in ${REPORTS_PATH}`)
 
 fse.readdir(REPORTS_PATH)
@@ -35,8 +37,10 @@ fse.readdir(REPORTS_PATH)
   console.log(`Found ${resultCount} files in ${REPORTS_PATH}:`, files)
 
   if (!expectedResultCount) {
+    console.log('Expecting at least 1 report...')
     la(resultCount > 0, 'Expected at least 1 report, but found', resultCount, '. Verify that all tests ran as expected.')
   } else {
+    console.log(`Expecting exactly ${expectedResultCount} reports...`)
     la(expectedResultCount === resultCount, 'Expected', expectedResultCount, 'reports, but found', resultCount, '. Verify that all tests ran as expected.')
   }
 
@@ -59,8 +63,16 @@ fse.readdir(REPORTS_PATH)
 
       la(tests > 0, 'Expected the total number of tests to be >0, but it was', tests, 'instead.')
       la(failures === 0, 'Expected the number of failures to be equal to 0, but it was', failures, '. This stage should not have been reached. Check why the failed test stage did not cause this entire build to fail.')
+
+      total.tests += tests
+      total.failures += failures
+      total.skipped += skipped
     })
   })
+})
+.then(() => {
+  console.log('All reports are valid.')
+  console.log(`Total tests ran: ${total.tests}\tTotal failing: ${total.failures}\tTotal skipped: ${total.skipped}`)
 })
 .catch((err) => {
   console.error(err)
