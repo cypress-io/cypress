@@ -1,14 +1,6 @@
 /* eslint-disable
     no-console,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const https = require('https')
 const Promise = require('bluebird')
 const { allowDestroy } = require('@packages/network')
@@ -21,7 +13,7 @@ const defaultOnRequest = function (req, res) {
   res.setHeader('Content-Type', 'text/html')
   res.writeHead(200)
 
-  return res.end('<html><head></head><body>https server</body></html>')
+  res.end('<html><head></head><body>https server</body></html>')
 }
 
 let servers = []
@@ -41,10 +33,10 @@ module.exports = {
 
       servers.push(srv)
 
-      return srv.listen(port, () => {
+      srv.listen(port, () => {
         console.log(`server listening on port: ${port}`)
 
-        return resolve(srv)
+        resolve(srv)
       })
     })
   },
@@ -52,13 +44,13 @@ module.exports = {
   stop () {
     const stop = (srv) => {
       return new Promise((resolve) => {
-        return srv.destroy(resolve)
+        srv.destroy(resolve)
       })
     }
 
     return Promise.map(servers, stop)
     .then(() => {
-      return servers = []
+      servers = []
     })
   },
 }

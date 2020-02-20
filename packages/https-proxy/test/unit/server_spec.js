@@ -1,18 +1,6 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-require('../spec_helper')
+const { expect } = require('../spec_helper')
 
 const EE = require('events')
-const Promise = require('bluebird')
-const proxy = require('../helpers/proxy')
 const Server = require('../../lib/server')
 
 describe('lib/server', () => {
@@ -28,7 +16,7 @@ describe('lib/server', () => {
   afterEach(() => {
     delete process.env.HTTPS_PROXY
 
-    return delete process.env.NO_PROXY
+    delete process.env.NO_PROXY
   })
 
   context('#listen', () => {
@@ -71,14 +59,12 @@ describe('lib/server', () => {
 
         expect(socket.destroy).to.be.calledOnce
 
-        return done()
+        done()
       }
 
       this.setup({ onError })
       .then((srv) => {
-        let conn
-
-        conn = srv._makeDirectConnection({ url: 'localhost:8444' }, socket, head)
+        srv._makeDirectConnection({ url: 'localhost:8444' }, socket, head)
       })
     })
 
@@ -98,14 +84,12 @@ describe('lib/server', () => {
 
         expect(socket.destroy).to.be.calledOnce
 
-        return done()
+        done()
       }
 
       this.setup({ onError })
       .then((srv) => {
-        let conn
-
-        conn = srv._makeDirectConnection({ url: '%7Balgolia_application_id%7D-dsn.algolia.net:443' }, socket, head)
+        srv._makeDirectConnection({ url: '%7Balgolia_application_id%7D-dsn.algolia.net:443' }, socket, head)
       })
     })
 
@@ -124,7 +108,7 @@ describe('lib/server', () => {
 
         expect(socket.destroy).to.be.calledOnce
 
-        return done()
+        done()
       }
 
       process.env.HTTPS_PROXY = 'http://localhost:8444'
@@ -132,9 +116,7 @@ describe('lib/server', () => {
 
       this.setup({ onError })
       .then((srv) => {
-        let conn
-
-        conn = srv._makeDirectConnection({ url: 'should-not-reach.invalid:11111' }, socket, head)
+        srv._makeDirectConnection({ url: 'should-not-reach.invalid:11111' }, socket, head)
       })
     })
   })

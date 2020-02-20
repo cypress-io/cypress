@@ -1,14 +1,5 @@
-/* eslint-disable
-    no-console,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-console */
+const { request } = require('../spec_helper')
 const { allowDestroy } = require('@packages/network')
 const http = require('http')
 const path = require('path')
@@ -22,7 +13,7 @@ const pipe = (req, res) => {
     console.log('**ERROR**', req.url)
     req.statusCode = 500
 
-    return res.end()
+    res.end()
   }).pipe(res)
 }
 
@@ -81,11 +72,11 @@ module.exports = {
       })
 
       return new Promise((resolve) => {
-        return prx.listen(port, () => {
+        prx.listen(port, () => {
           prx.proxy = proxy
           console.log(`server listening on port: ${port}`)
 
-          return resolve(proxy)
+          resolve(proxy)
         })
       })
     })

@@ -1,16 +1,9 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
-let fs = require('fs-extra')
 const os = require('os')
 const path = require('path')
 const Forge = require('node-forge')
 const Promise = require('bluebird')
+let fs = require('fs-extra')
 
 fs = Promise.promisifyAll(fs)
 
