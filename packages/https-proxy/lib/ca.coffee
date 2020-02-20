@@ -1,9 +1,15 @@
 _       = require("lodash")
+debug   = require("debug")("cypress:https-proxy:ca")
 fs      = require("fs-extra")
 os      = require("os")
 path    = require("path")
 Forge   = require("node-forge")
 Promise = require("bluebird")
+
+## if this is higher than the user's cached CA version, their Cypress
+## certificate cache will be cleared so that new certificates can
+## supersede older ones
+CA_VERSION = 1
 
 fs = Promise.promisifyAll(fs)
 
@@ -156,6 +162,7 @@ class CA
         fs.outputFileAsync(path.join(@certsFolder, "ca.pem"),        pki.certificateToPem(cert))
         fs.outputFileAsync(path.join(@keysFolder, "ca.private.key"), pki.privateKeyToPem(keys.privateKey))
         fs.outputFileAsync(path.join(@keysFolder, "ca.public.key"),  pki.publicKeyToPem(keys.publicKey))
+        @writeCaVersion()
       ])
 
   loadCA: ->
@@ -228,11 +235,39 @@ class CA
   getCACertPath: ->
     path.join(@certsFolder, "ca.pem")
 
+  getCAVersionPath: ->
+    path.join(@baseCAFolder, "ca_version.txt")
+
+  getCaVersion: ->
+    console.log('foo')
+    fs.readFileAsync(@getCAVersionPath())
+    .then Number
+    .catch (err) ->
+      debug('error reading cached CA version: %o', { err })
+      return 0
+
+  writeCaVersion: (caVersion = CA_VERSION) ->
+    fs.writeFileAsync(@getCAVersionPath(), caVersion)
+
+  assertMinimumCaVersion: (minimumVersion = CA_VERSION) -> =>
+    @getCaVersion()
+    .then (actualVersion) ->
+      debug('checking CA version %o', { actualVersion, minimumVersion })
+
+      if actualVersion >= minimumVersion
+        return
+
+      throw new Error("expected ca_version to be >= #{minimumVersion}, but it was #{actualVersion}")
+
   @create = (caFolder) ->
     ca = new CA(caFolder)
 
     fs.statAsync(path.join(ca.certsFolder, "ca.pem"))
     .bind(ca)
+    ## ca exists, let's check it has the minimum ca version...
+    .then(ca.assertMinimumCaVersion())
+    ## ...and if not, remove the existing CA before proceeding
+    .tapCatch(ca.removeAll)
     .then(ca.loadCA)
     .catch(ca.generateCA)
     .return(ca)
