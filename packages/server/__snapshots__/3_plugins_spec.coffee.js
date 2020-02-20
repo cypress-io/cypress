@@ -392,13 +392,13 @@ Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
 An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
 
-Expected at list one browser
+Expected at least one browser
 
 `
 
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
 An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
 
-Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chrome"}\`
+Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
 
 `

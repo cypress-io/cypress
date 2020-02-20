@@ -5,8 +5,11 @@ UrlParse = require("url-parse")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 $Log = require("../../cypress/log")
 $Location = require("../../cypress/location")
+
+debug = require('debug')('cypress:driver:navigation')
 
 id                    = null
 previousDomainVisited = null
@@ -42,7 +45,8 @@ isValidVisitMethod = (method) ->
   _.includes(VALID_VISIT_METHODS, method)
 
 timedOutWaitingForPageLoad = (ms, log) ->
-  $utils.throwErrByPath("navigation.timed_out", {
+  debug('timedOutWaitingForPageLoad')
+  $errUtils.throwErrByPath("navigation.timed_out", {
     args: {
       configFile: Cypress.config("configFile")
       ms
@@ -66,7 +70,7 @@ bothUrlsMatchAndRemoteHasHash = (current, remote) ->
         (current.search is remote.search)
 
 cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
-  $utils.throwErrByPath("visit.cannot_visit_2nd_domain", {
+  $errUtils.throwErrByPath("visit.cannot_visit_2nd_domain", {
     onFail: log
     args: {
       previousDomain: previousDomainVisited
@@ -75,7 +79,7 @@ cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
   })
 
 specifyFileByRelativePath = (url, log) ->
-  $utils.throwErrByPath("visit.specify_file_by_relative_path", {
+  $errUtils.throwErrByPath("visit.specify_file_by_relative_path", {
     onFail: log
     args: {
       attemptedUrl: url
@@ -91,6 +95,7 @@ aboutBlank = (win) ->
 navigationChanged = (Cypress, cy, state, source, arg) ->
   ## get the current url of our remote application
   url = cy.getRemoteLocation("href")
+  debug('navigation changed:', url)
 
   ## dont trigger for empty url's or about:blank
   return if _.isEmpty(url) or url is "about:blank"
@@ -164,6 +169,7 @@ pageLoading = (bool, state) ->
   Cypress.action("app:page:loading", bool)
 
 stabilityChanged = (Cypress, state, config, stable, event) ->
+  debug('stabilityChanged:', stable)
   if currentlyVisitingAboutBlank
     if stable is false
       ## if we're currently visiting about blank
@@ -221,7 +227,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
     { originPolicy } = $Location.create(window.location.href)
 
     try
-      $utils.throwErrByPath("navigation.cross_origin", {
+      $errUtils.throwErrByPath("navigation.cross_origin", {
         onFail: options._log
         args: {
           configFile: Cypress.config("configFile")
@@ -235,6 +241,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
   state("onPageLoadErr", onPageLoadErr)
 
   loading = ->
+    debug('waiting for window:load')
     new Promise (resolve, reject) ->
       cy.once "window:load", ->
         cy.state("onPageLoadErr", null)
@@ -339,7 +346,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     reload: (args...) ->
       throwArgsErr = =>
-        $utils.throwErrByPath("reload.invalid_arguments")
+        $errUtils.throwErrByPath("reload.invalid_arguments")
 
       switch args.length
         when 0
@@ -418,7 +425,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       goNumber = (num) ->
         if num is 0
-          $utils.throwErrByPath("go.invalid_number", { onFail: options._log })
+          $errUtils.throwErrByPath("go.invalid_number", { onFail: options._log })
 
         cleanup = null
 
@@ -483,7 +490,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           when "forward" then goNumber(1)
           when "back"    then goNumber(-1)
           else
-            $utils.throwErrByPath("go.invalid_direction", {
+            $errUtils.throwErrByPath("go.invalid_direction", {
               onFail: options._log
               args: { str }
             })
@@ -492,11 +499,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         when _.isFinite(numberOrString) then goNumber(numberOrString)
         when _.isString(numberOrString) then goString(numberOrString)
         else
-          $utils.throwErrByPath("go.invalid_argument", { onFail: options._log })
+          $errUtils.throwErrByPath("go.invalid_argument", { onFail: options._log })
 
     visit: (url, options = {}) ->
       if options.url and url
-        $utils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: options.url, url: url }})
+        $errUtils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: options.url, url: url }})
 
       if _.isObject(url) and _.isEqual(options, {})
         ## options specified as only argument
@@ -504,7 +511,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         url = options.url
 
       if not _.isString(url)
-        $utils.throwErrByPath("visit.invalid_1st_arg")
+        $errUtils.throwErrByPath("visit.invalid_1st_arg")
 
       consoleProps = {}
 
@@ -527,19 +534,19 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       })
 
       if !_.isUndefined(options.qs) and not _.isObject(options.qs)
-        $utils.throwErrByPath("visit.invalid_qs", { args: { qs: String(options.qs) }})
+        $errUtils.throwErrByPath("visit.invalid_qs", { args: { qs: String(options.qs) }})
 
       if options.retryOnStatusCodeFailure and not options.failOnStatusCode
-        $utils.throwErrByPath("visit.status_code_flags_invalid")
+        $errUtils.throwErrByPath("visit.status_code_flags_invalid")
 
       if not isValidVisitMethod(options.method)
-        $utils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
+        $errUtils.throwErrByPath("visit.invalid_method", { args: { method: options.method }})
 
       if not _.isObject(options.headers)
-        $utils.throwErrByPath("visit.invalid_headers")
+        $errUtils.throwErrByPath("visit.invalid_headers")
 
       if _.isObject(options.body) and path = whatIsCircular(options.body)
-        $utils.throwErrByPath("visit.body_circular", { args: { path }})
+        $errUtils.throwErrByPath("visit.body_circular", { args: { path }})
 
       if options.log
         message = url
@@ -780,19 +787,20 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   when err.invalidContentType
                     "visit.loading_invalid_content_type"
 
-                $utils.throwErrByPath(msg, {
+                $errUtils.throwErrByPath(msg, {
                   onFail: options._log
                   args: args
                 })
             else
               visitFailedByErr err, url, ->
-                $utils.throwErrByPath("visit.loading_network_failed", {
+                $errUtils.throwErrByPath("visit.loading_network_failed", {
                   onFail: options._log
                   args: {
                     url:   url
                     error: err
                     stack: err.stack
                   }
+                  noStackTrace: true
                 })
 
       visit = ->

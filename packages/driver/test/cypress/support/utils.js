@@ -50,7 +50,7 @@ export const withMutableReporterState = (fn) => {
 
   return Cypress.Promise.try(fn)
   .then(() => {
-    top.Runner.configureMobx({ enforceActions: 'strict' })
+    top.Runner.configureMobx({ enforceActions: 'always' })
   })
 }
 
@@ -82,7 +82,7 @@ const getAllFn = (...aliases) => {
   return Cypress.Promise.all(
     aliases[0].split(' ').map((alias) => {
       return cy.now('get', alias)
-    })
+    }),
   )
 }
 

@@ -3,7 +3,9 @@ require("../spec_helper")
 _        = require("lodash")
 path     = require("path")
 os       = require("os")
-argsUtil = require("#{root}lib/util/args")
+snapshot = require("snap-shot-it")
+stripAnsi = require("strip-ansi")
+argsUtil  = require("#{root}lib/util/args")
 proxyUtil = require("#{root}lib/util/proxy")
 getWindowsProxyUtil = require("#{root}lib/util/get-windows-proxy")
 
@@ -74,6 +76,17 @@ describe "lib/util/args", ->
         bar: "qux="
       })
 
+    it "throws if env string cannot be parsed", ->
+      expect () =>
+        @setup("--env", "nonono")
+      .to.throw
+
+      # now look at the error
+      try
+        @setup("--env", "nonono")
+      catch err
+        snapshot("invalid env error", stripAnsi(err.message))
+
   context "--reporterOptions", ->
     it "converts to object literal", ->
       reporterOpts = {
@@ -111,6 +124,17 @@ describe "lib/util/args", ->
           toConsole: true
         }
       })
+
+    it "throws if reporter string cannot be parsed", ->
+      expect () =>
+        @setup("--reporterOptions", "abc")
+      .to.throw
+
+      # now look at the error
+      try
+        @setup("--reporterOptions", "abc")
+      catch err
+        snapshot("invalid reporter options error", stripAnsi(err.message))
 
   context "--config", ->
     it "converts to object literal", ->
@@ -171,6 +195,17 @@ describe "lib/util/args", ->
 
       options = @setup("--port", 2222)
       expect(options.config.port).to.eq(2222)
+
+    it "throws if config string cannot be parsed", ->
+      expect () =>
+        @setup("--config", "xyz")
+      .to.throw
+
+      # now look at the error
+      try
+        @setup("--config", "xyz")
+      catch err
+        snapshot("invalid config error", stripAnsi(err.message))
 
   context ".toArray", ->
     beforeEach ->

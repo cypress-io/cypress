@@ -103,24 +103,28 @@ describe "lib/util/ci_provider", ->
 
   it "bamboo", ->
     resetEnv = mockedEnv({
-      "bamboo.buildNumber": "123"
-
-      "bamboo.resultsUrl": "bamboo.resultsUrl"
-      "bamboo.buildResultsUrl": "bamboo.buildResultsUrl"
-      "bamboo.planRepository.repositoryUrl": "bamboo.planRepository.repositoryUrl"
-
-      "bamboo.planRepository.branch": "bamboo.planRepository.branch"
+      "bamboo_buildNumber": "bambooBuildNumber"
+      "bamboo_buildResultsUrl": "bambooBuildResultsUrl"
+      "bamboo_planRepository_repositoryUrl": "bambooPlanRepositoryRepositoryUrl"
+      "bamboo_buildKey": "bambooBuildKey"
+      "bamboo_planRepository_revision": "gitSha"
+      "bamboo_planRepository_branch": "gitBranch"
+      "bamboo_planRepository_username": "gitAuthor"
+      "bamboo_planRepository_repositoryURL": "gitRemoteOrigin"
     }, {clear: true})
 
     expectsName("bamboo")
     expectsCiParams({
-      bambooResultsUrl: "bamboo.resultsUrl"
-      bambooBuildNumber: "123"
-      bambooBuildResultsUrl: "bamboo.buildResultsUrl"
-      bambooPlanRepositoryRepositoryUrl: "bamboo.planRepository.repositoryUrl"
+      bambooBuildNumber: "bambooBuildNumber"
+      bambooBuildResultsUrl: "bambooBuildResultsUrl"
+      bambooPlanRepositoryRepositoryUrl: "bambooPlanRepositoryRepositoryUrl"
+      bambooBuildKey: "bambooBuildKey"
     })
     expectsCommitParams({
-      branch: "bamboo.planRepository.branch"
+      sha: "gitSha"
+      branch: "gitBranch"
+      authorName: "gitAuthor"
+      remoteOrigin: "gitRemoteOrigin"
     })
 
   it "bitbucket", ->
@@ -381,6 +385,9 @@ describe "lib/util/ci_provider", ->
       GITHUB_WORKFLOW: "ciGitHubWorkflowName"
       GITHUB_ACTION: "ciGitHubActionId"
       GITHUB_EVENT_NAME: "ciEventName"
+      GITHUB_RUN_ID: "ciGithubRunId"
+      GITHUB_REPOSITORY: 'ciGithubRepository'
+      GH_BRANCH: ""
 
       GITHUB_SHA: "ciCommitSha"
       GITHUB_REF: "ciCommitRef"
@@ -395,12 +402,24 @@ describe "lib/util/ci_provider", ->
       githubAction: "ciGitHubActionId"
       githubEventName: "ciEventName"
       githubWorkflow: "ciGitHubWorkflowName"
+      githubRepository: "ciGithubRepository"
+      githubRunId: "ciGithubRunId"
     })
     expectsCommitParams({
       sha: "ciCommitSha"
       defaultBranch: "ciBaseRef"
       remoteBranch: "ciHeadRef"
       branch: "ciCommitRef"
+    })
+
+    resetEnv = mockedEnv({
+      GITHUB_ACTIONS: "true"
+      GITHUB_REF: "ciCommitRef"
+      GH_BRANCH: "GHCommitBranch"
+    }, {clear: true})
+
+    expectsCommitParams({
+      branch: "GHCommitBranch"
     })
 
   it "gitlab", ->

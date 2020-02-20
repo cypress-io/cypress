@@ -112,9 +112,9 @@ describe('Runs List', function () {
           cy.get('@firstRunRow').contains(this.runs[0].commit.message)
         })
 
-        it('display no info msg & doesn\'t display avatar', () => {
+        it('display no info msg & does not display avatar', () => {
           cy.get('@runRow').within(function () {
-            cy.get('img').should('not.exist')
+            cy.get('.user-avatar').should('not.exist')
             cy.contains('No commit info found')
           })
         })
@@ -124,14 +124,16 @@ describe('Runs List', function () {
             cy.contains(this.runs[1].instances[0].platform.osVersionFormatted)
             cy.contains(this.runs[1].instances[0].platform.browserName)
             cy.get('.fa-apple')
-            cy.get('.fa-chrome')
+            cy.get('.browser-icon')
+            .should('have.attr', 'src')
+            .and('include', './img/chrome')
           })
         })
 
         it('does not display browser when null', () => {
           cy.get('@firstRunRow').within(function () {
             cy.contains(this.runs[0].instances[0].platform.osVersionFormatted)
-            cy.get('.fa-chrome').should('not.exist')
+            cy.get('.browser-icon').should('not.exist')
           })
         })
 

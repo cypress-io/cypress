@@ -2,9 +2,10 @@ import _ from 'lodash'
 import moment from 'moment'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
+import { BrowserIcon } from '@packages/ui-components'
 
 import TimerDisplay from '../duration-timer/TimerDisplay'
-import { osIcon, browserIcon, gravatarUrl, getStatusIcon, durationFormatted, browserNameFormatted, browserVersionFormatted, stripLeadingCyDirs, stripSharedDirsFromDir2 } from '../lib/utils'
+import { osIcon, gravatarUrl, getStatusIcon, durationFormatted, browserNameFormatted, browserVersionFormatted, stripLeadingCyDirs, stripSharedDirsFromDir2 } from '../lib/utils'
 
 const RunDuration = ({ run }) => {
   // Run was blocked due to exceeding limit
@@ -142,7 +143,7 @@ export default class RunsListItem extends Component {
                   </div> :
                   // or did we only actual run it on one browser
                   <div className='env-msg'>
-                    <i className={`fa-fw ${this._browserIcon()}`}></i>{' '}
+                    {this._browserIcon()}{' '}
                     {this._browserDisplay()}
                   </div> :
                 null
@@ -219,12 +220,6 @@ export default class RunsListItem extends Component {
     return this._getUniqBrowsers().length
   }
 
-  _browserIcon () {
-    const icon = browserIcon(_.get(this.props.run, 'instances[0].platform.browserName', ''))
-
-    return icon === 'globe' ? `fas fa-${icon}` : `fab fa-${icon}`
-  }
-
   _osIcon () {
     const icon = osIcon(this.props.run.instances[0].platform.osName)
 
@@ -253,6 +248,12 @@ export default class RunsListItem extends Component {
         `${_.get(this.props.run, 'instances[0].platform.osVersionFormatted', this.props.run.instances[0].osFormatted)}`
       )
     }
+  }
+
+  _browserIcon = () => {
+    const browserName = _.get(this.props.run, 'instances[0].platform.browserName', '')
+
+    return browserName ? <BrowserIcon browserName={browserName} /> : null
   }
 
   _browserDisplay = () => {
