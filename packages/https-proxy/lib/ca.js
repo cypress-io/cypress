@@ -1,20 +1,27 @@
-_       = require("lodash")
-fs      = require("fs-extra")
-os      = require("os")
-path    = require("path")
-Forge   = require("node-forge")
-Promise = require("bluebird")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _       = require("lodash");
+let fs      = require("fs-extra");
+const os      = require("os");
+const path    = require("path");
+const Forge   = require("node-forge");
+const Promise = require("bluebird");
 
-fs = Promise.promisifyAll(fs)
+fs = Promise.promisifyAll(fs);
 
-pki   = Forge.pki
+const {
+  pki
+} = Forge;
 
-generateKeyPairAsync = Promise.promisify(pki.rsa.generateKeyPair)
+const generateKeyPairAsync = Promise.promisify(pki.rsa.generateKeyPair);
 
-ipAddressRe = /^[\d\.]+$/
-asterisksRe = /\*/g
+const ipAddressRe = /^[\d\.]+$/;
+const asterisksRe = /\*/g;
 
-CAattrs = [{
+const CAattrs = [{
   name: "commonName",
   value: "CypressProxyCA"
 }, {
@@ -32,9 +39,9 @@ CAattrs = [{
 }, {
   shortName: "OU",
   value: "CA"
-}]
+}];
 
-CAextensions = [{
+const CAextensions = [{
   name: "basicConstraints",
   cA: true
 }, {
@@ -62,9 +69,9 @@ CAextensions = [{
   objCA: true
 }, {
   name: "subjectKeyIdentifier"
-}]
+}];
 
-ServerAttrs = [{
+const ServerAttrs = [{
   name: "countryName",
   value: "Internet"
 }, {
@@ -79,9 +86,9 @@ ServerAttrs = [{
 }, {
   shortName: "OU",
   value: "Cypress Proxy Server Certificate"
-}]
+}];
 
-ServerExtensions = [{
+const ServerExtensions = [{
   name: "basicConstraints",
   cA: false
 }, {
@@ -109,132 +116,147 @@ ServerExtensions = [{
   objCA: false
 }, {
   name: "subjectKeyIdentifier"
-}]
+}];
 
-class CA
-  constructor: (caFolder) ->
-    if not caFolder
-      caFolder = path.join(os.tmpdir(), 'cy-ca')
+class CA {
+  constructor(caFolder) {
+    if (!caFolder) {
+      caFolder = path.join(os.tmpdir(), 'cy-ca');
+    }
 
-    @baseCAFolder = caFolder
-    @certsFolder  = path.join(@baseCAFolder, "certs")
-    @keysFolder   = path.join(@baseCAFolder, "keys")
+    this.baseCAFolder = caFolder;
+    this.certsFolder  = path.join(this.baseCAFolder, "certs");
+    this.keysFolder   = path.join(this.baseCAFolder, "keys");
+  }
 
-  removeAll: ->
-    fs
-    .removeAsync(@baseCAFolder)
-    .catchReturn({ code: "ENOENT" })
+  removeAll() {
+    return fs
+    .removeAsync(this.baseCAFolder)
+    .catchReturn({ code: "ENOENT" });
+  }
 
-  randomSerialNumber: ->
-    ## generate random 16 bytes hex string
-    sn = ""
+  randomSerialNumber() {
+    //# generate random 16 bytes hex string
+    let sn = "";
 
-    for i in [1..4]
-      sn += ("00000000" + Math.floor(Math.random()*Math.pow(256, 4)).toString(16)).slice(-8)
+    for (let i = 1; i <= 4; i++) {
+      sn += ("00000000" + Math.floor(Math.random()*Math.pow(256, 4)).toString(16)).slice(-8);
+    }
 
-    sn
+    return sn;
+  }
 
-  generateCA: ->
-    generateKeyPairAsync({bits: 512})
-    .then (keys) =>
-      cert = pki.createCertificate()
-      cert.publicKey = keys.publicKey
-      cert.serialNumber = @randomSerialNumber()
+  generateCA() {
+    return generateKeyPairAsync({bits: 512})
+    .then(keys => {
+      const cert = pki.createCertificate();
+      cert.publicKey = keys.publicKey;
+      cert.serialNumber = this.randomSerialNumber();
 
-      cert.validity.notBefore = new Date()
-      cert.validity.notAfter = new Date()
-      cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10)
-      cert.setSubject(CAattrs)
-      cert.setIssuer(CAattrs)
-      cert.setExtensions(CAextensions)
-      cert.sign(keys.privateKey, Forge.md.sha256.create())
+      cert.validity.notBefore = new Date();
+      cert.validity.notAfter = new Date();
+      cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 10);
+      cert.setSubject(CAattrs);
+      cert.setIssuer(CAattrs);
+      cert.setExtensions(CAextensions);
+      cert.sign(keys.privateKey, Forge.md.sha256.create());
 
-      @CAcert = cert
-      @CAkeys = keys
+      this.CAcert = cert;
+      this.CAkeys = keys;
 
-      Promise.all([
-        fs.outputFileAsync(path.join(@certsFolder, "ca.pem"),        pki.certificateToPem(cert))
-        fs.outputFileAsync(path.join(@keysFolder, "ca.private.key"), pki.privateKeyToPem(keys.privateKey))
-        fs.outputFileAsync(path.join(@keysFolder, "ca.public.key"),  pki.publicKeyToPem(keys.publicKey))
-      ])
+      return Promise.all([
+        fs.outputFileAsync(path.join(this.certsFolder, "ca.pem"),        pki.certificateToPem(cert)),
+        fs.outputFileAsync(path.join(this.keysFolder, "ca.private.key"), pki.privateKeyToPem(keys.privateKey)),
+        fs.outputFileAsync(path.join(this.keysFolder, "ca.public.key"),  pki.publicKeyToPem(keys.publicKey))
+      ]);
+    });
+  }
 
-  loadCA: ->
-    Promise.props({
-      certPEM:       fs.readFileAsync(path.join(@certsFolder, "ca.pem"),         "utf-8")
-      keyPrivatePEM: fs.readFileAsync(path.join(@keysFolder,  "ca.private.key"), "utf-8")
-      keyPublicPEM:  fs.readFileAsync(path.join(@keysFolder,  "ca.public.key"),  "utf-8")
+  loadCA() {
+    return Promise.props({
+      certPEM:       fs.readFileAsync(path.join(this.certsFolder, "ca.pem"),         "utf-8"),
+      keyPrivatePEM: fs.readFileAsync(path.join(this.keysFolder,  "ca.private.key"), "utf-8"),
+      keyPublicPEM:  fs.readFileAsync(path.join(this.keysFolder,  "ca.public.key"),  "utf-8")
     })
-    .then (results) =>
-      @CAcert = pki.certificateFromPem(results.certPEM)
-      @CAkeys = {
-        privateKey: pki.privateKeyFromPem(results.keyPrivatePEM)
+    .then(results => {
+      this.CAcert = pki.certificateFromPem(results.certPEM);
+      return this.CAkeys = {
+        privateKey: pki.privateKeyFromPem(results.keyPrivatePEM),
         publicKey:  pki.publicKeyFromPem(results.keyPublicPEM)
-      }
-    .return(undefined)
+      };
+  })
+    .return(undefined);
+  }
 
-  generateServerCertificateKeys: (hosts) ->
-    hosts = [].concat(hosts)
+  generateServerCertificateKeys(hosts) {
+    hosts = [].concat(hosts);
 
-    mainHost   = hosts[0]
-    keysServer = pki.rsa.generateKeyPair(1024)
-    certServer = pki.createCertificate()
+    const mainHost   = hosts[0];
+    const keysServer = pki.rsa.generateKeyPair(1024);
+    const certServer = pki.createCertificate();
 
-    certServer.publicKey = keysServer.publicKey
-    certServer.serialNumber = @randomSerialNumber()
-    certServer.validity.notBefore = new Date
-    certServer.validity.notAfter = new Date
-    certServer.validity.notAfter.setFullYear(certServer.validity.notBefore.getFullYear() + 2)
+    certServer.publicKey = keysServer.publicKey;
+    certServer.serialNumber = this.randomSerialNumber();
+    certServer.validity.notBefore = new Date;
+    certServer.validity.notAfter = new Date;
+    certServer.validity.notAfter.setFullYear(certServer.validity.notBefore.getFullYear() + 2);
 
-    attrsServer = _.clone(ServerAttrs)
+    const attrsServer = _.clone(ServerAttrs);
     attrsServer.unshift({
       name: "commonName",
       value: mainHost
-    })
+    });
 
-    certServer.setSubject(attrsServer)
-    certServer.setIssuer(@CAcert.issuer.attributes)
+    certServer.setSubject(attrsServer);
+    certServer.setIssuer(this.CAcert.issuer.attributes);
     certServer.setExtensions(ServerExtensions.concat([{
       name: "subjectAltName",
-      altNames: hosts.map (host) ->
-        if host.match(ipAddressRe)
-          {type: 7, ip: host}
-        else
-          {type: 2, value: host}
-    }]))
+      altNames: hosts.map(function(host) {
+        if (host.match(ipAddressRe)) {
+          return {type: 7, ip: host};
+        } else {
+          return {type: 2, value: host};
+        }})
+    }]));
 
-    certServer.sign(@CAkeys.privateKey, Forge.md.sha256.create())
+    certServer.sign(this.CAkeys.privateKey, Forge.md.sha256.create());
 
-    certPem       = pki.certificateToPem(certServer)
-    keyPrivatePem = pki.privateKeyToPem(keysServer.privateKey)
-    keyPublicPem  = pki.publicKeyToPem(keysServer.publicKey)
+    const certPem       = pki.certificateToPem(certServer);
+    const keyPrivatePem = pki.privateKeyToPem(keysServer.privateKey);
+    const keyPublicPem  = pki.publicKeyToPem(keysServer.publicKey);
 
-    dest = mainHost.replace(asterisksRe, "_")
+    const dest = mainHost.replace(asterisksRe, "_");
 
-    Promise.all([
-      fs.outputFileAsync(path.join(@certsFolder, dest + ".pem"),        certPem)
-      fs.outputFileAsync(path.join(@keysFolder,  dest + ".key"),        keyPrivatePem)
-      fs.outputFileAsync(path.join(@keysFolder,  dest + ".public.key"), keyPublicPem)
+    return Promise.all([
+      fs.outputFileAsync(path.join(this.certsFolder, dest + ".pem"),        certPem),
+      fs.outputFileAsync(path.join(this.keysFolder,  dest + ".key"),        keyPrivatePem),
+      fs.outputFileAsync(path.join(this.keysFolder,  dest + ".public.key"), keyPublicPem)
     ])
-    .return([certPem, keyPrivatePem])
+    .return([certPem, keyPrivatePem]);
+  }
 
-  getCertificateKeysForHostname: (hostname) ->
-    dest = hostname.replace(asterisksRe, "_")
+  getCertificateKeysForHostname(hostname) {
+    const dest = hostname.replace(asterisksRe, "_");
 
-    Promise.all([
-      fs.readFileAsync(path.join(@certsFolder, dest + ".pem"))
-      fs.readFileAsync(path.join(@keysFolder,  dest + ".key"))
-    ])
+    return Promise.all([
+      fs.readFileAsync(path.join(this.certsFolder, dest + ".pem")),
+      fs.readFileAsync(path.join(this.keysFolder,  dest + ".key"))
+    ]);
+  }
 
-  getCACertPath: ->
-    path.join(@certsFolder, "ca.pem")
+  getCACertPath() {
+    return path.join(this.certsFolder, "ca.pem");
+  }
 
-  @create = (caFolder) ->
-    ca = new CA(caFolder)
+  static create(caFolder) {
+    const ca = new CA(caFolder);
 
-    fs.statAsync(path.join(ca.certsFolder, "ca.pem"))
+    return fs.statAsync(path.join(ca.certsFolder, "ca.pem"))
     .bind(ca)
     .then(ca.loadCA)
     .catch(ca.generateCA)
-    .return(ca)
+    .return(ca);
+  }
+}
 
-module.exports = CA
+module.exports = CA;
