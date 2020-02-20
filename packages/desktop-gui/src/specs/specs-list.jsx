@@ -49,6 +49,11 @@ class SpecsList extends Component {
               <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
+
+          <label className='search-info'>
+            <i className='fas fa-info'></i>
+          </label>
+
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
             <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
             {allSpecsSpec.displayName}
