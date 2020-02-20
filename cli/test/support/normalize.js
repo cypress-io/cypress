@@ -8,9 +8,12 @@ const removeExcessWhiteSpace = (str) => {
   return str.replace(whitespaceAtEndOfLineRe, '')
 }
 
-module.exports = (str) => {
-  // strip dates and ansi codes
-  // and excess whitespace
+/**
+ * strip dates and ansi codes and excess whitespace
+ * @param {string} str input string
+ * @returns {string} cleaned output string
+ */
+const normalize = (str) => {
   return stripAnsi(
     str
     .replace(datesRe, 'xx:xx:xx')
@@ -20,3 +23,5 @@ module.exports = (str) => {
     .replace(downloadQueryRe, '?platform=OS&arch=ARCH')
   )
 }
+
+module.exports = normalize
