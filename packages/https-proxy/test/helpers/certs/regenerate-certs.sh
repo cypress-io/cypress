@@ -12,6 +12,8 @@ set -e
 
 CA_PATH=../../../ca
 
+rm -rf $CA_PATH
+
 # ensure regular root CA exists
 node -r "@packages/coffee/register" -e "require('@packages/https-proxy/lib/ca').create('$CA_PATH')"
 
