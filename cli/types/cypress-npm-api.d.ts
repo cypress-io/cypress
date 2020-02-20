@@ -475,29 +475,16 @@ declare module 'cypress' {
     cypressVersion: string
     // TODO add resolved object to the configuration
     config: CypressConfiguration
-    /**
+  }
+
+  /**
      * If Cypress fails to run at all (for example, if there are no spec files to run),
-     * then it will set failures to 1 and will have actual error message in the
-     * property "message". Check this property before checking other properties.
+     * then it will return a CypressFailedRunResult
      *
-     * @type {number}
-     * @example
-      ```
-      const result = await cypress.run()
-      if (result.failures) {
-        console.error(result.message)
-        process.exit(result.failures)
-      }
-      ```
-     */
-    failures?: number
-    /**
-     * If returned result has "failures" set, then this property gives
-     * the error message.
-     *
-     * @type {string}
-     */
-    message?: string
+  **/
+  interface CypressFailedRunResult {
+    failures: number
+    message: string
   }
 
   /**
@@ -524,7 +511,7 @@ declare module 'cypress' {
      })
      ```
      */
-    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult>,
+    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult | CypressFailedRunResult>,
     /**
      * Opens Cypress GUI. Resolves with void when the
      * GUI is closed.
