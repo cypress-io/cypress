@@ -81,7 +81,7 @@ Missing browsers list
 `
 
 exports['empty list of browsers'] = `
-Expected at list one browser
+Expected at least one browser
 `
 
 exports['browsers list with a string'] = `
