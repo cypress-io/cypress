@@ -61,7 +61,7 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
     {
       "given": {
         "name": "No display name",
-        "family": "electron"
+        "family": "chromium"
       },
       "expect": "Expected `displayName` to be a non-empty string. Instead the value was: `{\"name\":\"No display name\",\"family\":\"electron\"}`"
     },
