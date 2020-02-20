@@ -89,7 +89,7 @@ const isValidBrowserList = (key, browsers) => {
   }
 
   if (!browsers.length) {
-    return 'Expected at list one browser'
+    return 'Expected at least one browser'
   }
 
   for (let k = 0; k < browsers.length; k += 1) {

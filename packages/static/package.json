@@ -7,8 +7,7 @@
     "build": "gulp build",
     "build-prod": "yarn build",
     "clean-deps": "rm -rf node_modules",
-    "postinstall": "echo '@packages/static needs: yarn build'",
-    "test": "echo 'Nothing to test yet'"
+    "postinstall": "echo '@packages/static needs: yarn build'"
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
