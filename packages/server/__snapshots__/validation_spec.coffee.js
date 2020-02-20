@@ -71,7 +71,7 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
         "displayName": "Bad family browser",
         "family": "unknown family"
       },
-      "expect": "Expected `family` to be either electron, chromium or firefox. Instead the value was: `{\"name\":\"bad family\",\"displayName\":\"Bad family browser\",\"family\":\"unknown family\"}`"
+      "expect": "Expected `family` to be either chromium or firefox. Instead the value was: `{\"name\":\"bad family\",\"displayName\":\"Bad family browser\",\"family\":\"unknown family\"}`"
     }
   ]
 }
