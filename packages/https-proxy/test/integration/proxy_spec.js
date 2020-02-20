@@ -1,26 +1,10 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-require('../spec_helper')
-
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
-const _ = require('lodash')
+const { request, expect } = require('../spec_helper')
 const DebugProxy = require('@cypress/debugging-proxy')
-const fs = require('fs-extra')
 const https = require('https')
 const net = require('net')
 const network = require('@packages/network')
-const path = require('path')
 const Promise = require('bluebird')
 const proxy = require('../helpers/proxy')
 const httpServer = require('../helpers/http_server')
@@ -105,9 +89,9 @@ describe('Proxy', () => {
     })
   })
 
-  it('can pass directly through', () => // this will fail due to dynamic cert
+  // this will fail due to dynamic cert
   // generation when strict ssl is true
-  {
+  it('can pass directly through', () => {
     return request({
       strictSSL: false,
       url: 'https://localhost:8444/replace',
@@ -320,7 +304,7 @@ describe('Proxy', () => {
           return socket.on('close', () => {
             expect(socket.destroyed).to.be.true
 
-            return resolve()
+            resolve()
           })
         })
       })
@@ -355,7 +339,7 @@ describe('Proxy', () => {
       delete process.env.HTTP_PROXY
       delete process.env.HTTPS_PROXY
 
-      return delete process.env.NO_PROXY
+      delete process.env.NO_PROXY
     })
   })
 })

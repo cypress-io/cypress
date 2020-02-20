@@ -1,26 +1,13 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const chai = require('chai')
 const sinon = require('sinon')
 const Promise = require('bluebird')
 const sinonChai = require('sinon-chai')
-const sinonPromise = require('sinon-as-promised')(Promise)
+const request = require('request-promise')
+const supertest = require('supertest')
 
-global.request = require('request-promise')
-global.sinon = sinon
-global.supertest = require('supertest')
+require('sinon-as-promised')(Promise)
 
 chai.use(sinonChai)
-
-global.expect = chai.expect
 
 beforeEach(function () {
   this.sandbox = sinon.sandbox.create()
@@ -29,3 +16,5 @@ beforeEach(function () {
 afterEach(function () {
   return this.sandbox.restore()
 })
+
+module.exports = { request, sinon, supertest, expect: chai.expect }

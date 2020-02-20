@@ -1,18 +1,6 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const { agent, allowDestroy, connect } = require('@packages/network')
 const debug = require('debug')('cypress:https-proxy')
-let fs = require('fs-extra')
 const {
   getProxyForUrl,
 } = require('proxy-from-env')
@@ -22,8 +10,6 @@ const parse = require('./util/parse')
 const Promise = require('bluebird')
 const semaphore = require('semaphore')
 const url = require('url')
-
-fs = Promise.promisifyAll(fs)
 
 let sslServers = {}
 let sslIpServers = {}
@@ -35,8 +21,8 @@ const SSL_RECORD_TYPES = [
   128, 0, // TODO: what do these unknown types mean?
 ]
 
-let onError = (err) => // these need to be caught to avoid crashing but do not affect anything
-{
+let onError = (err) => {
+  // these need to be caught to avoid crashing but do not affect anything
   return debug('server error %o', { err })
 }
 
