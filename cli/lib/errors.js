@@ -1,4 +1,3 @@
-const os = require('os')
 const chalk = require('chalk')
 const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
@@ -245,17 +244,8 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-function getPlatformInfo () {
-  return util.getOsVersionAsync().then((version) => {
-    return stripIndent`
-    Platform: ${os.platform()} (${version})
-    Cypress Version: ${util.pkgVersion()}
-  `
-  })
-}
-
 function addPlatformInformation (info) {
-  return getPlatformInfo().then((platform) => {
+  return util.getPlatformInfo().then((platform) => {
     return merge(info, { platform })
   })
 }
