@@ -1,42 +1,49 @@
-https = require("https")
-Promise = require("bluebird")
-{ allowDestroy } = require("@packages/network")
-certs = require("./certs")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const https = require("https");
+const Promise = require("bluebird");
+const { allowDestroy } = require("@packages/network");
+const certs = require("./certs");
 
-defaultOnRequest = (req, res) ->
-  console.log "HTTPS SERVER REQUEST URL:", req.url
-  console.log "HTTPS SERVER REQUEST HEADERS:", req.headers
+const defaultOnRequest = function(req, res) {
+  console.log("HTTPS SERVER REQUEST URL:", req.url);
+  console.log("HTTPS SERVER REQUEST HEADERS:", req.headers);
 
-  res.setHeader("Content-Type", "text/html")
-  res.writeHead(200)
-  res.end("<html><head></head><body>https server</body></html>")
+  res.setHeader("Content-Type", "text/html");
+  res.writeHead(200);
+  return res.end("<html><head></head><body>https server</body></html>");
+};
 
-servers = []
+let servers = [];
 
-create = (onRequest) ->
-  https.createServer(certs, onRequest ? defaultOnRequest)
+const create = onRequest => https.createServer(certs, onRequest != null ? onRequest : defaultOnRequest);
 
 module.exports = {
-  create
+  create,
 
-  start: (port, onRequest) ->
-    new Promise (resolve) ->
-      srv = create(onRequest)
+  start(port, onRequest) {
+    return new Promise(function(resolve) {
+      const srv = create(onRequest);
 
-      allowDestroy(srv)
+      allowDestroy(srv);
 
-      servers.push(srv)
+      servers.push(srv);
 
-      srv.listen port, ->
-        console.log "server listening on port: #{port}"
-        resolve(srv)
+      return srv.listen(port, function() {
+        console.log(`server listening on port: ${port}`);
+        return resolve(srv);
+      });
+    });
+  },
 
-  stop: ->
-    stop = (srv) ->
-      new Promise (resolve) ->
-        srv.destroy(resolve)
+  stop() {
+    const stop = srv => new Promise(resolve => srv.destroy(resolve));
 
-    Promise.map(servers, stop)
-    .then ->
-      servers = []
-}
+    return Promise.map(servers, stop)
+    .then(() => servers = []);
+  }
+};

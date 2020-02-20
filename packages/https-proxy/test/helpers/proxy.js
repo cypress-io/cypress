@@ -1,70 +1,78 @@
-{ allowDestroy } = require("@packages/network")
-http       = require("http")
-path       = require("path")
-httpsProxy = require("../../lib/proxy")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const { allowDestroy } = require("@packages/network");
+const http       = require("http");
+const path       = require("path");
+const httpsProxy = require("../../lib/proxy");
 
-prx = null
+let prx = null;
 
-pipe = (req, res) ->
-  req.pipe(request(req.url))
-  .on "error", ->
-    console.log "**ERROR**", req.url
-    req.statusCode = 500
-    res.end()
-  .pipe(res)
+const pipe = (req, res) => req.pipe(request(req.url))
+.on("error", function() {
+  console.log("**ERROR**", req.url);
+  req.statusCode = 500;
+  return res.end();
+}).pipe(res);
 
-onConnect = (req, socket, head, proxy) ->
-  proxy.connect(req, socket, head, {
-    onDirectConnection: (req, socket, head) ->
-      ["localhost:8444", "localhost:12344"].includes(req.url)
-  })
+const onConnect = (req, socket, head, proxy) => proxy.connect(req, socket, head, {
+  onDirectConnection(req, socket, head) {
+    return ["localhost:8444", "localhost:12344"].includes(req.url);
+  }
+});
 
-onRequest = (req, res) ->
-  pipe(req, res)
+const onRequest = (req, res) => pipe(req, res);
 
 module.exports = {
-  reset: ->
-    httpsProxy.reset()
+  reset() {
+    return httpsProxy.reset();
+  },
 
-  start: (port) ->
-    prx = http.createServer()
+  start(port) {
+    prx = http.createServer();
 
-    allowDestroy(prx)
+    allowDestroy(prx);
 
-    dir = path.join(process.cwd(), "ca")
+    const dir = path.join(process.cwd(), "ca");
 
-    httpsProxy.create(dir, port, {
-      onUpgrade: (req, socket, head) ->
+    return httpsProxy.create(dir, port, {
+      onUpgrade(req, socket, head) {},
 
-      onRequest: (req, res) ->
-        console.log "ON REQUEST FROM OUTER PROXY", req.url, req.headers, req.method
+      onRequest(req, res) {
+        console.log("ON REQUEST FROM OUTER PROXY", req.url, req.headers, req.method);
 
-        if req.url.includes("replace")
-          write = res.write
-          res.write = (chunk) ->
-            chunk = Buffer.from(chunk.toString().replace("https server", "replaced content"))
+        if (req.url.includes("replace")) {
+          const {
+            write
+          } = res;
+          res.write = function(chunk) {
+            chunk = Buffer.from(chunk.toString().replace("https server", "replaced content"));
 
-            write.call(@, chunk)
+            return write.call(this, chunk);
+          };
 
-          pipe(req, res)
-        else
-          pipe(req, res)
+          return pipe(req, res);
+        } else {
+          return pipe(req, res);
+        }
+      }
     })
-    .then (proxy) =>
-      prx.on "request", onRequest
+    .then(proxy => {
+      prx.on("request", onRequest);
 
-      prx.on "connect", (req, socket, head) ->
-        onConnect(req, socket, head, proxy)
+      prx.on("connect", (req, socket, head) => onConnect(req, socket, head, proxy));
 
-      new Promise (resolve) ->
-        prx.listen port, ->
-          prx.proxy = proxy
-          console.log "server listening on port: #{port}"
-          resolve(proxy)
+      return new Promise(resolve => prx.listen(port, function() {
+        prx.proxy = proxy;
+        console.log(`server listening on port: ${port}`);
+        return resolve(proxy);
+      }));
+    });
+  },
 
-  stop: ->
-    new Promise (resolve) ->
-      prx.destroy(resolve)
-    .then ->
-      prx.proxy.close()
-}
+  stop() {
+    return new Promise(resolve => prx.destroy(resolve)).then(() => prx.proxy.close());
+  }
+};

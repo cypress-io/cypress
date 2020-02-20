@@ -1,35 +1,48 @@
-url = require("url")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const url = require("url");
 
 module.exports = {
-  parseHost: (hostString, defaultPort) ->
-    if m = hostString.match(/^http:\/\/(.*)/)
-      parsedUrl = url.parse(hostString)
+  parseHost(hostString, defaultPort) {
+    let m;
+    if (m = hostString.match(/^http:\/\/(.*)/)) {
+      const parsedUrl = url.parse(hostString);
 
       return {
-        host: parsedUrl.hostname
+        host: parsedUrl.hostname,
         port: parsedUrl.port
-      }
-
-    hostPort = hostString.split(':')
-    host     = hostPort[0]
-    port     = if hostPort.length is 2 then +hostPort[1] else defaultPort
-
-    return {
-      host: host
-      port: port
+      };
     }
 
-  hostAndPort: (reqUrl, headers, defaultPort) ->
-    host = headers.host
+    const hostPort = hostString.split(':');
+    const host     = hostPort[0];
+    const port     = hostPort.length === 2 ? +hostPort[1] : defaultPort;
 
-    hostPort = @parseHost(host, defaultPort)
+    return {
+      host,
+      port
+    };
+  },
 
-    ## this handles paths which include the full url. This could happen if it's a proxy
-    if m = reqUrl.match(/^http:\/\/([^\/]*)\/?(.*)$/)
-      parsedUrl = url.parse(reqUrl)
-      hostPort.host = parsedUrl.hostname
-      hostPort.port = parsedUrl.port
-      reqUrl = parsedUrl.path
+  hostAndPort(reqUrl, headers, defaultPort) {
+    let m;
+    const {
+      host
+    } = headers;
 
-    hostPort
-}
+    const hostPort = this.parseHost(host, defaultPort);
+
+    //# this handles paths which include the full url. This could happen if it's a proxy
+    if (m = reqUrl.match(/^http:\/\/([^\/]*)\/?(.*)$/)) {
+      const parsedUrl = url.parse(reqUrl);
+      hostPort.host = parsedUrl.hostname;
+      hostPort.port = parsedUrl.port;
+      reqUrl = parsedUrl.path;
+    }
+
+    return hostPort;
+  }
+};
