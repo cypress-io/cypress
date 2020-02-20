@@ -5387,6 +5387,11 @@ arg@4.1.2:
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.2.tgz#e70c90579e02c63d80e3ad4e31d8bfdb8bd50064"
   integrity sha512-+ytCkGcBtHZ3V2r2Z06AncYO8jz46UEamcspGoU8lHcEbpn6J77QK0vdWvChsclg/tM5XIJC5tnjmPp7Eq6Obg==
 
+arg@4.1.3:
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
+  integrity sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==
+
 arg@^4.1.0:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.1.tgz#485f8e7c390ce4c5f78257dbea80d4be11feda4c"
@@ -23609,12 +23614,13 @@ term-size@^1.2.0:
   dependencies:
     execa "^0.7.0"
 
-term-to-html@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/term-to-html/-/term-to-html-1.0.0.tgz#63f413a743ead18f8acbf74e359cf35b4e250126"
-  integrity sha512-XiGrBBJa0+EFPF17xI3AZfD0fnRAPBjxLhO067LdwU5masQh51oMxhr6CefgVwnYz8iPfXBJRIbs68SNcdeM8w==
+term-to-html@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/term-to-html/-/term-to-html-1.1.0.tgz#1bcb5e1bb573fe88e5c7a2c05f623c7e86bd62d4"
+  integrity sha512-dArb+xhYE6WB0VCwZ03j+mndmyWSIGZ9PQEg1FIin6rZK5BN4mmKB76Fooxj4guMLFpp6/jXD1ph+/3djpvwRQ==
   dependencies:
     ansi-to-html "0.6.14"
+    arg "4.1.3"
     escape-html "1.0.3"
 
 terminal-banner@1.1.0:

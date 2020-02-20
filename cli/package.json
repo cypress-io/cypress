@@ -29,6 +29,7 @@
     "cachedir": "2.3.0",
     "chalk": "3.0.0",
     "check-more-types": "2.24.0",
+    "cli-table3": "0.5.1",
     "commander": "4.1.0",
     "common-tags": "1.8.0",
     "debug": "4.1.1",
