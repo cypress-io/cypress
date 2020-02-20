@@ -268,7 +268,6 @@ jobs:
           at: ~/
       - run: mkdir -p cli/visual-snapshots
       - run:
-          # TODO sanitize "cypress info" output to be consistent
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
           environment:
             FORCE_COLOR: 2
