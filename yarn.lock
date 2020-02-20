@@ -23614,10 +23614,10 @@ term-size@^1.2.0:
   dependencies:
     execa "^0.7.0"
 
-term-to-html@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/term-to-html/-/term-to-html-1.1.0.tgz#1bcb5e1bb573fe88e5c7a2c05f623c7e86bd62d4"
-  integrity sha512-dArb+xhYE6WB0VCwZ03j+mndmyWSIGZ9PQEg1FIin6rZK5BN4mmKB76Fooxj4guMLFpp6/jXD1ph+/3djpvwRQ==
+term-to-html@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/term-to-html/-/term-to-html-1.2.0.tgz#3c4654b50c70399434eb06bdd2fc838b493fe89a"
+  integrity sha512-SgsOxkGFBC3aXqM//Zdbf++62+11EVLPyLcIvC7SxtNybwhziZXBQeCM/Vd5CR+6shtLJjMsO8iAN5d7Zdf0NQ==
   dependencies:
     ansi-to-html "0.6.14"
     arg "4.1.3"
