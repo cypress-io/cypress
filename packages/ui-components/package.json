@@ -16,7 +16,7 @@
   "devDependencies": {
     "@cypress/eslint-plugin-dev": "5.0.0",
     "@cypress/webpack-preprocessor": "4.1.2",
-    "@fortawesome/fontawesome-free": "5.12.2",
+    "@fortawesome/fontawesome-free": "5.12.1",
     "browser-logos": "github:alrra/browser-logos",
     "classnames": "2.2.6",
     "eslint-plugin-cypress": "2.10.1",
