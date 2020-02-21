@@ -3,7 +3,7 @@ Can't run because you've entered an invalid browser name.
 
 Browser: 'browserNotGonnaBeFound' was not found on your system.
 
-Available browsers found are: chrome, chromium, chrome:canary, firefox, firefox:dev, firefox:nightly, edge, edge:canary, edge:beta, edge:dev, electron
+Available browsers found are: chrome, firefox, electron
 `
 
 exports['lib/browsers/index .ensureAndGetByNameOrPath throws a special error when canary is passed 1'] = `
