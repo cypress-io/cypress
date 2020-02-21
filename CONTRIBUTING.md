@@ -5,8 +5,8 @@ Thanks for taking the time to contribute! :smile:
 **Once you learn how to use Cypress, you can contribute in many ways:**
 
 - Join the [Cypress Gitter chat](https://on.cypress.io/chat) and answer questions. Teaching others how to use Cypress is a great way to learn more about how it works.
-- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/.github/CONTRIBUTING.md#adding-examples).
-- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/.github/CONTRIBUTING.md).
+- Blog about Cypress. We display blogs featuring Cypress on our [Examples](https://on.cypress.io/examples) page. If you'd like your blog featured, [open a PR to add it to our docs](https://github.com/cypress-io/cypress-documentation/blob/develop/CONTRIBUTING.md#adding-examples).
+- Write some documentation or improve our existing docs. Know another language? You can help us translate them. See our [guide to contributing to our docs](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 - Give a talk about Cypress. [Contact us](mailto:support@cypress.io) ahead of time and we'll send you some swag. :shirt:
 
 **Want to dive deeper into how Cypress works? There are several ways you can help with the development of Cypress:**
@@ -31,25 +31,25 @@ Thanks for taking the time to contribute! :smile:
   - [Tests](#tests)
   - [Packages](#packages)
 - [Committing Code](#committing-code)
-  - [Branches](#branches)
-  - [Pull Requests](#pull-requests)
-  - [Testing](#testing)
-  - [Dependencies](#dependencies)
+ - [Branches](#branches)
+ - [Pull Requests](#pull-requests)
+ - [Testing](#testing)
+ - [Dependencies](#dependencies)
 - [Deployment](#deployment)
 
 ## CI status
 
-Build status | Description
-:--- | :---
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions) | [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions)
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-ci-environments.svg?style=svg&circle-token=66a4d36c3966cbe476f13e7dfbe3af0693db3fb9)](https://circleci.com/gh/cypress-io/cypress-test-ci-environments) | [cypress-test-ci-environments](https://github.com/cypress-io/cypress-test-ci-environments)
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-module-api.svg?style=svg&circle-token=317f79ae796e0ffd6cc7dd90859c0f67e5a306e7)](https://circleci.com/gh/cypress-io/cypress-test-module-api) | [cypress-test-module-api](https://github.com/cypress-io/cypress-test-module-api)
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-nested-projects.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-test-nested-projects) | [cypress-test-nested-projects](https://github.com/cypress-io/cypress-test-nested-projects)
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-on.svg?style=svg&circle-token=51ba85f5720654ee58212f45f6b9afc56d55d52a)](https://circleci.com/gh/cypress-io/cypress-on) | [cypress-on](https://github.com/cypress-io/cypress-on)
-[![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions) | [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos)
-[![CircleCI](https://circleci.com/gh/cypress-io/docsearch-scraper.svg?style=svg&circle-token=8087137233788ec1eab4f79d4451392ca53183b2)](https://circleci.com/gh/cypress-io/docsearch-scraper) | [docsearch-scraper](https://github.com/cypress-io/docsearch-scraper)
-[![Docker Build Status](https://img.shields.io/docker/build/cypress/base.svg)](https://hub.docker.com/r/cypress/base/) | [cypress-docker-images](https://github.com/cypress-io/cypress-docker-images)
-[![Build status](https://ci.appveyor.com/api/projects/status/ln8tg3dv42nk916c?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress) | Windows CI
+| Build status                                                                                                                                                                                                        | Description                                                                                |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------- |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions)     | [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions)     |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-ci-environments.svg?style=svg&circle-token=66a4d36c3966cbe476f13e7dfbe3af0693db3fb9)](https://circleci.com/gh/cypress-io/cypress-test-ci-environments) | [cypress-test-ci-environments](https://github.com/cypress-io/cypress-test-ci-environments) |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-module-api.svg?style=svg&circle-token=317f79ae796e0ffd6cc7dd90859c0f67e5a306e7)](https://circleci.com/gh/cypress-io/cypress-test-module-api)           | [cypress-test-module-api](https://github.com/cypress-io/cypress-test-module-api)           |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-nested-projects.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-test-nested-projects)                                                       | [cypress-test-nested-projects](https://github.com/cypress-io/cypress-test-nested-projects) |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-on.svg?style=svg&circle-token=51ba85f5720654ee58212f45f6b9afc56d55d52a)](https://circleci.com/gh/cypress-io/cypress-on)                                     | [cypress-on](https://github.com/cypress-io/cypress-on)                                     |
+| [![CircleCI](https://circleci.com/gh/cypress-io/cypress-test-node-versions.svg?style=svg&circle-token=6a7c4e7e7ab427e11bea6c2af3df29c4491d2376)](https://circleci.com/gh/cypress-io/cypress-test-node-versions)     | [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos)     |
+| [![CircleCI](https://circleci.com/gh/cypress-io/docsearch-scraper.svg?style=svg&circle-token=8087137233788ec1eab4f79d4451392ca53183b2)](https://circleci.com/gh/cypress-io/docsearch-scraper)                       | [docsearch-scraper](https://github.com/cypress-io/docsearch-scraper)                       |
+| [![Docker Build Status](https://img.shields.io/docker/build/cypress/base.svg)](https://hub.docker.com/r/cypress/base/)                                                                                              | [cypress-docker-images](https://github.com/cypress-io/cypress-docker-images)               |
+| [![Build status](https://ci.appveyor.com/api/projects/status/ln8tg3dv42nk916c?svg=true)](https://ci.appveyor.com/project/cypress-io/cypress)                                                                        | Windows CI                                                                                 |
 
 ## Code of Conduct
 
@@ -119,7 +119,7 @@ Some opened issue are questions, not bug reports or feature requests. Issues are
 
 #### Other open source repos
 
-Issues may be opened about wanting changes to our [documentation](), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
+Issues may be opened about wanting changes to our [documentation](https://github.com/cypress-io/cypress-documentation), our [example-kitchensink app](https://github.com/cypress-io/cypress-example-kitchensink), or [another repository](https://github.com/cypress-io). In this case you should:
 
 - Thank them for their contribution.
 - Explain that this repo is only for bugs or feature requests of the Cypress product.
@@ -225,7 +225,7 @@ Some issues are resolved by the community, by giving some guidance or a workarou
 ## Writing Documentation
 
 Cypress documentation lives in a separate repository with its own dependencies and build tools.
-See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/.github/CONTRIBUTING.md).
+See [Documentation Contributing Guideline](https://github.com/cypress-io/cypress-documentation/blob/master/CONTRIBUTING.md).
 
 ## Writing code
 
@@ -241,129 +241,153 @@ This repository is made up of various packages. They are discrete modules with d
 
 Here is a list of the core packages in this repository with a short description, located within the [`packages`](./packages) directory:
 
- Folder Name | Purpose
- ----------- | -------
-[cli](./cli) | The command-line tool that is packaged as an `npm` module.
-[coffee](./packages/coffee) | A centralized version of CoffeeScript used for other packages.
-[desktop-gui](./packages/desktop-gui) | The front-end code for the Cypress Desktop GUI.
-[driver](./packages/driver) | The code that is used to drive the behavior of the API commands.
-[electron](./packages/electron) | The Cypress implementation of Electron.
-[example](./packages/example) | Our example kitchen-sink application.
-[extension](./packages/extension) | The Cypress Chrome browser extension
-[https-proxy](./packages/https-proxy) | This does https proxy for handling http certs and traffic.
-[launcher](./packages/launcher) | Finds and launches browsers installed on your system.
-[reporter](./packages/reporter) | The reporter shows the running results of the tests (The Command Log UI).
-[root](./packages/root) | Dummy package pointing at the root of the repository.
-[runner](./packages/runner) | The runner is the minimal "chrome" around the user's application under test.
-[server](./packages/server) | The <3 of Cypress. This orchestrates everything. The backend node process.
-[socket](./packages/socket) | A wrapper around socket.io to provide common libraries.
-[static](./packages/static) | Serves static assets used in the Cypress GUI.
-[ts](./packages/ts) | A centralized version of typescript.
+ | Folder Name                           | Package Name            | Purpose                                                                      |
+ | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
+ | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
+ | [coffee](./packages/coffee)           | `@packages/coffee`      | A centralized version of CoffeeScript used for other packages.               |
+ | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI.                              |
+ | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
+ | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
+ | [example](./packages/example)         | `@packages/example`     | Our example kitchen-sink application.                                        |
+ | [extension](./packages/extension)     | `@packages/extension`   | The Cypress Chrome browser extension                                         |
+ | [https-proxy](./packages/https-proxy) | `@packages/https-proxy` | This does https proxy for handling http certs and traffic.                   |
+ | [launcher](./packages/launcher)       | `@packages/launcher`    | Finds and launches browsers installed on your system.                        |
+ | [reporter](./packages/reporter)       | `@packages/reporter`    | The reporter shows the running results of the tests (The Command Log UI).    |
+ | [root](./packages/root)               | `@packages/root`        | Dummy package pointing at the root of the repository.                        |
+ | [runner](./packages/runner)           | `@packages/runner`      | The runner is the minimal "chrome" around the user's application under test. |
+ | [server](./packages/server)           | `@packages/server`      | The <3 of Cypress. This orchestrates everything. The backend node process.   |
+ | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
+ | [static](./packages/static)           | `@packages/static`      | Serves static assets used in the Cypress GUI.                                |
+ | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
 
 We try to tag all issues with a `pkg/` tag describing the appropriate package the work is required in. For example, the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label is tagged on issues that require work in the `driver` package.
 
 ### Requirements
 
-You must have [`node`](https://nodejs.org/en/) and [`npm`](https://www.npmjs.com/) installed to run the project. We use [avn](https://github.com/wbyoung/avn), a utility to switch to the right npm version, in each folder. Currently, Cypress should be developed using the version specified in root [.node-version](.node-version) file.
+You must have [`node`](https://nodejs.org/en/) and [`yarn`](https://yarnpkg.com/en/docs/install) installed to run the project. Currently, Cypress should be developed using the Node.js version specified in the root [.node-version](.node-version) file. You can use [avn](https://github.com/wbyoung/avn) to automatically use the right version of Node.js for this repo.
 
 ### Getting Started
+
+The project utilizes [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) and leverages [lerna](https://lerna.js.org/) to orchestrate running within the context of one or more packages. While it is not as important to understand lerna or yarn workspaces, it **is important** to note that running scripts or installing new dependencies should always happen from the repo's root directory.
 
 > **⚠ Running on Windows?**
 >
 > Many of the NPM scripts used during development use commands designed for a Linux-like shell.If you are running a Windows operating system, you may encounter many commands that are not working. To fix this behavior, you have to set a Linux-like shell as the default `npm` script shell. If you have Git for Windows installed, you can set Git Bash as the default script shell by using the following command:
 > ```bash
-> npm config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"  
+> yarn config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"
 > ```
 > Git Bash may be installed in `Program Files`, if so, use the following command:
 >```bash
->npm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"
+> yarn config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"
 >```
 
 **Install all dependencies:**
 
 ```bash
-npm install
+yarn
 ```
 
-This will install this repo's direct dependencies as well as the dependencies for every individual package.
+This will install all the dependencies for the repo and perform a preliminary build.
 
-**Then, build all the packages and start the app:**
+**Next, start the app:**
 
 ```bash
-npm run build
-npm start
+yarn start
 ```
 
 If there are errors building the packages, prefix the commands with `DEBUG=cypress:*` to see more details.
 
 This outputs a lot of debugging lines. To focus on an individual module, run with `DEBUG=cypress:launcher` for instance.
 
-When running `npm start` this routes through the CLI and eventually calls `npm run dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
+When running `yarn start` this routes through the CLI and eventually calls `yarn dev` with the proper arguments. This enables Cypress day-to-day development to match the logic of the built binary + CLI integration.
 
-If you want to bypass the CLI entirely, you can use the `npm run dev` task and pass arguments directly. For example to headlessly run a project in a given folder, while trying to record to the Dashboard
+If you want to bypass the CLI entirely, you can use the `yarn dev` task and pass arguments directly. For example, to headlessly run a project in a given folder, while trying to record to the Dashboard
 
 ```text
-npm run dev -- --run-project /project/folder --record --key <key>
+yarn dev --run-project /project/folder --record --key <key>
+```
+
+#### Adding new Dependencies
+
+```shell
+# add a new dep to the root of the repo
+$ yarn add -W my-new-dep1
+
+# add a new dep to a specific package
+$ yarn workspace @packages/server add my-new-dep1
+$ yarn workspace @packages/server add --dev my-new-dep1
 ```
 
 #### Tasks
 
-Each package is responsible for building itself and testing itself and can do so using whatever tools are appropriate, but each conforms to a standard set of npm scripts so that building, watching, testing, etc. can be orchestrated from the root of this repo. Here are the npm scripts supported and what they mean:
+> Scripts are intended to be **run** from the **root of the repo**. **Do not install dependencies or run scripts from within a sub-directory.**
 
-Task | Purpose
----- | -------
-`build` | Build the package
-`build-prod` | Build all assets for production (if makes sense)
-`start` | Run a server for serving files
-`watch` | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file.
-`clean` | Remove any assets created by `build-dev` or `build-prod`
-`clean-deps` | Remove any dependencies installed (usually by `npm`)
-`test` | Runs all tests once
-`test-watch` | Run all tests in watch mode
+##### Common Top Level Tasks
 
-Not every package requires or makes use of every script, so it is simply omitted from that package's `package.json` and not run.
+By default, top level tasks will execute for all packages. However, most scripts can be provided one or more scopes. Providing a scope will execute tasks within the provided packages. Scope values are based on **package names** and not the directory structure.
 
-You can run `npm run all <script name>` from the root directory to run a script in every package that utilizes that script. Many times, you may only be working on one or two packages at a time, so it won't be necessary or desirable to run a script for every package. You can use the `--packages` option to specify in which package(s) to run the script.
+| Task               | Purpose                                                          |
+| :----------------- | :--------------------------------------------------------------- |
+| `build`            | Compile non-node code (coffeescript/typescript)                  |
+| `start`            | Open Cypress in dev and global mode                              |
+| `watch`            | Auto-rebuild on file changes                                     |
+| `clean`            | Remove build artifacts                                           |
+| `clean-deps`       | Remove all installed dependencies (in root and in every package) |
+| `test`             | Run the default set of tests (may be package dependent)          |
+| `test-debug`       | Run unit/integration tests with inspect node CLI flags           |
+| `test-unit`        | Run unit tests                                                   |
+| `test-integration` | Run integration tests                                            |
+| `test-e2e`         | Run end-to-end tests                                             |
+| `test-watch`       | Run unit tests and rebuild/rerun on file changes                 |
 
-You can even run `npm run all install` to install all npm dependencies for each package. Note that this is already done automatically for you when you run `npm install`.
+> Most of the time you will only want to run a task within a specific package; this can be done by providing the package name as a scope to the top level task.
 
-```bash
-npm run all watch-dev -- --packages core-desktop-gui
+```shell
+# Run test-unit only within cypress package (./cli)
+$ yarn test-unit --scope cypress
+
+# Run test-unit only within the cypress and server packages (./cli & ./packages/server)
+$ yarn test-unit --scope cypress --scope @packages/server
+
+# Run test-unit in all packages with the name starting with `@packages/`
+$ yarn test-unit --scope @packages/*
 ```
 
-Separate the package names with commas to specify multiple packages:
+##### Package-Level Scripts
 
-```bash
-npm run all watch-dev -- --packages core-desktop-gui,core-runner
-```
+> Although scripts are meant to be run from the root of the repo; they typically delegate to the scripts within the packages.
 
-By default, all tasks run in parallel. This is faster than running serially, but the output ends up mixed together and, if things go wrong, it can be difficult see where the error occurred. To run tasks serially, use the `--serial` flag:
+Each package is responsible for building itself and testing itself and can do so using whatever tools are appropriate, but each conforms to a standard set of scripts so that building, watching, testing, etc. can be orchestrated from the root of this repo. Here are the scripts supported and what they mean:
 
-
-```bash
-npm run all build-prod -- --serial
-```
-
-*build-prod* will be run sequentially for every package, so the output for each package won't be jumbled with the output of the others.
-
-It is not recommended to use `--serial` with any script that is long-running, like *watch-dev* or *test*, since they need to be parallel.
+| Task               | Purpose                                                                                                                                                  |
+| :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `build`            | Build the package                                                                                                                                        |
+| `build-prod`       | Build all assets for production (if makes sense)                                                                                                         |
+| `start`            | Run a server for serving files                                                                                                                           |
+| `watch`            | Watch source files and build development assets when they are saved. This may also run a server for serving files and run tests related to a saved file. |
+| `clean`            | Remove any assets created by `build-dev` or `build-prod`                                                                                                 |
+| `clean-deps`       | Remove any dependencies installed (usually by `yarn`)                                                                                                    |
+| `test`             | Runs all tests once (this usually means running unit tests; via `yarn test-unit`)                                                                        |
+| `test-unit`        | Run all unit tests within the package; `exit 0` if N/A                                                                                                   |
+| `test-integration` | Run all integration tests within the package; `exit 0` if N/A                                                                                            |
+| `test-e2e`         | Run all e2e tests within the package; `exit 0` if N/A                                                                                                    |
+| `test-watch`       | Run all unit tests in the package in watch mode                                                                                                          |
 
 #### Debugging
 
 Some packages use [debug](https://github.com/visionmedia/debug#readme) to
 log debug messages to the console. The naming scheme should be
-`cypress:<package name>`. For example to see launcher messages during unit
+`cypress:<package name>`; where package name is without the `@packages` scope. For example to see launcher messages during unit
 tests start it using
 
 ```bash
-cd packages/launcher
-DEBUG=cypress:launcher npm test
+$ DEBUG=cypress:launcher yarn test --scope @packages/launcher
 ```
 
 If you want to see log messages from all Cypress projects use wild card
 
 ```bash
-DEBUG=cypress:*
+$ DEBUG=cypress:*
 ```
 
 Or for an individual package:
@@ -377,16 +401,16 @@ DEBUG=cypress:launcher
 ### Coding Style
 
 We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rules specified in
-[@cypress/eslint-plugin-dev](https://github.com/cypress-io/cypress-eslint-plugin-dev) plugin.
+[@cypress/eslint-plugin-dev](https://github.com/cypress-io/eslint-plugin-cypress) plugin.
 
 When you edit files, you can quickly fix all changed files before you commit using
 
 ```bash
-npm run lint-changed-fix
+$ yarn lint-changed-fix
 ```
 
 When committing files, we run a Git pre-commit hook to lint the staged JS files. See the [`lint-staged` project](https://github.com/okonet/lint-staged).
-If this command fails, you may need to run `npm run lint-changed-fix` and commit those changes.
+If this command fails, you may need to run `yarn lint-changed-fix` and commit those changes.
 
 We **DO NOT** use Prettier to format code. You can find [.prettierignore](.prettierignore) file that ignores all files in this repository. To ensure this file is loaded, please always open _the root repository folder_ in your text editor, otherwise your code formatter might execute, reformatting lots of source files.
 
@@ -407,9 +431,9 @@ Sometimes tests pass locally, but fail in CI. Our CI environment is dockerized. 
 1. [Install Docker](https://docs.docker.com/install/) and get it running on your machine.
 2. Run the following command from the root of the project:
 
-  ```shell
-  npm run docker
-  ```
+```shell
+$ yarn docker
+```
 
 There is a script [scripts/run-docker-local.sh](scripts/run-docker-local.sh) that runs the cypress image (see [circle.yml](circle.yml) for the current image name).
 
@@ -417,25 +441,25 @@ The image will start and will map the root of the repository to `/cypress` insid
 
 ##### Troubleshooting
 
-Sometimes building inside the image has problems with `node-sass` library.
+Sometimes building inside the image has problems with `node-sass` library. This generally only happens when installing packages locally (in a non-linux environment), and then trying to use these packages in the docker container (linux). The same can happen if packages are installed via the docker container and then trying to run locally; i.e. installed node_modules were for the docker linux environment, but cypress is running in a non-linux environment.
 
 ```text
 Error: Missing binding /cypress/packages/desktop-gui/node_modules/node-sass/vendor/linux-x64-48/binding.node
 Node Sass could not find a binding for your current environment: Linux 64-bit with Node.js 6.x
 
 Found bindings for the following environments:
-  - OS X 64-bit with Node.js 6.x
+ - OS X 64-bit with Node.js 6.x
 
 This usually happens because your environment has changed since running `npm install`.
 Run `npm rebuild node-sass` to build the binding for your current environment.
 ```
 
-From the running container, go into that project and rebuild `node-sass`.
+In order to resolve this issue, remove all node_modules via `yarn clean-deps` and then reinstall them in the correct environment via `yarn`. If using/running from a docker container, this is done from within the container; however if running locally, then run from your local shell.
 
 ```bash
-$ npm run docker
-cd packages/desktop-gui
-npm rebuild node-sass
+$ yarn docker
+yarn clean-deps
+yarn
 ```
 
 #### Docker for built binary
@@ -446,12 +470,12 @@ You can also use Docker to simulate and debug the built binary. In a temporary f
 $ docker run -it -w /app -v $PWD:/app cypress/base:8 /bin/bash
 ```
 
-Point the installation at a specific binary and npm (if needed) and _set local cache folder_ to unzip the downloaded binary into a subfolder.
+Point the installation at a specific beta binary and NPM package archive (if needed) and _set local cache folder_ to unzip the downloaded binary into a subfolder.
 
 ```shell
 $ export CYPRESS_INSTALL_BINARY=https://cdn.cypress.io/beta/.../cypress.zip
 $ export CYPRESS_CACHE_FOLDER=./cypress-cache
-$ npm i https://cdn.cypress.io/beta/npm/.../cypress.tgz
+$ yarn add https://cdn.cypress.io/beta/npm/.../cypress.tgz
 ```
 
 Note that unzipping the Linux binary inside a Docker container onto a mapped volume drive is *slow*. But once this is done you can modify the application resource folder in the local folder `/tmp/test-folder/node_modules/cypress/cypress-cache/3.3.0/Cypress/resources/app` to debug issues.
@@ -477,7 +501,7 @@ The repository is setup with two main (protected) branches.
 
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./.github/ISSUE_TEMPLATE.md)**.
 - PR's can be opened before all the work is finished. In fact we encourage this! Please write `[WIP]` in the title of your Pull Request if your PR is not ready for review - someone will review your PR as soon as the `[WIP]` is removed.
-- Fill out the [Pull Request Tempalte](./PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleteing those sections. PR's will not be reviewed if this template is not filled in.
+- Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 
@@ -490,7 +514,7 @@ After a PR has been opened, our `cypress-bot` will comment on the PR detailing t
 1. The contributor opening the pull request may not approve their own PR.
 2. The PR will not be merged if some reviewers have voted "Needs changes".
 
-If any of the Pull Request Review guidelines can't be met, a comment will be left by the reviewer with 'Request changes'. Please make any updates as appropriate and we will rereview once those changes are addressed.
+If any of the Pull Request Review guidelines can't be met, a comment will be left by the reviewer with 'Request changes'. Please make any updates as appropriate and we will re-review once those changes are addressed.
 
 **During a Pull Request Review, the following should be done:**
 

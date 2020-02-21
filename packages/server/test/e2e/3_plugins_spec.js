@@ -24,7 +24,6 @@ describe('e2e plugins', function () {
       project: workingPreprocessor,
       sanitizeScreenshotDimensions: true,
       snapshot: true,
-      expectedExitCode: 0,
     })
   })
 
@@ -46,7 +45,6 @@ describe('e2e plugins', function () {
       project: pluginConfig,
       sanitizeScreenshotDimensions: true,
       snapshot: true,
-      expectedExitCode: 0,
     })
   })
 
@@ -87,7 +85,7 @@ describe('e2e plugins', function () {
       snapshot: true,
       // we are interested in the actual filtered available browser name
       // which should be "electron"
-      normalizeAvailableBrowsers: false,
+      normalizeStdoutAvailableBrowsers: false,
     })
   })
 
@@ -98,7 +96,6 @@ describe('e2e plugins', function () {
     project: pluginExtension,
     sanitizeScreenshotDimensions: true,
     snapshot: true,
-    expectedExitCode: 0,
   })
 
   it('handles absolute path to pluginsFile', function () {
@@ -113,7 +110,6 @@ describe('e2e plugins', function () {
       project: pluginsAbsolutePath,
       sanitizeScreenshotDimensions: true,
       snapshot: true,
-      expectedExitCode: 0,
     })
   })
 

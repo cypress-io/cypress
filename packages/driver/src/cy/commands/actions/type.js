@@ -5,6 +5,7 @@ const $dom = require('../../../dom')
 const $elements = require('../../../dom/elements')
 const $selection = require('../../../dom/selection')
 const $utils = require('../../../cypress/utils')
+const $errUtils = require('../../../cypress/error_utils')
 const $actionability = require('../../actionability')
 const $Keyboard = require('../../../cy/keyboard')
 const debug = require('debug')('cypress:driver:command:type')
@@ -107,21 +108,21 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     }
 
     if (options.$el.length > 1) {
-      $utils.throwErrByPath('type.multiple_elements', {
+      $errUtils.throwErrByPath('type.multiple_elements', {
         onFail: options._log,
         args: { num: options.$el.length },
       })
     }
 
     if (!(_.isString(chars) || _.isFinite(chars))) {
-      $utils.throwErrByPath('type.wrong_type', {
+      $errUtils.throwErrByPath('type.wrong_type', {
         onFail: options._log,
         args: { chars },
       })
     }
 
     if (_.isString(chars) && _.isEmpty(chars)) {
-      $utils.throwErrByPath('type.empty_string', {
+      $errUtils.throwErrByPath('type.empty_string', {
         onFail: options._log,
         args: { chars },
       })
@@ -335,10 +336,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
         onNoMatchingSpecialChars (chars, allChars) {
           if (chars === 'tab') {
-            return $utils.throwErrByPath('type.tab', { onFail: options._log })
+            $errUtils.throwErrByPath('type.tab', { onFail: options._log })
           }
 
-          return $utils.throwErrByPath('type.invalid', {
+          $errUtils.throwErrByPath('type.invalid', {
             onFail: options._log,
             args: { chars: `{${chars}}`, allChars },
           })
@@ -409,13 +410,13 @@ module.exports = function (Commands, Cypress, cy, state, config) {
               const onFail = options._log
 
               if ($dom.isTextLike($elToClick[0])) {
-                $utils.throwErrByPath('type.not_actionable_textlike', {
+                $errUtils.throwErrByPath('type.not_actionable_textlike', {
                   onFail,
                   args: { node },
                 })
               }
 
-              $utils.throwErrByPath('type.not_on_typeable_element', {
+              $errUtils.throwErrByPath('type.not_on_typeable_element', {
                 onFail,
                 args: { node },
               })
@@ -485,7 +486,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (!$dom.isTextLike($el.get(0))) {
         const word = $utils.plural(subject, 'contains', 'is')
 
-        $utils.throwErrByPath('clear.invalid_element', {
+        $errUtils.throwErrByPath('clear.invalid_element', {
           onFail: options._log,
           args: { word, node },
         })

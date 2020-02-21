@@ -122,8 +122,17 @@ const init = (config, options) => {
       return options.onError(err)
     }
 
+    const handleWarning = (warningErr) => {
+      debug('plugins process warning:', warningErr.stack)
+
+      if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
+
+      options.onWarning(warningErr)
+    }
+
     pluginsProcess.on('error', handleError)
     ipc.on('error', handleError)
+    ipc.on('warning', handleWarning)
 
     // see timers/parent.js line #93 for why this is necessary
     process.on('exit', killPluginsProcess)

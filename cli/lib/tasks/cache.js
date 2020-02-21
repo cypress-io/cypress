@@ -14,16 +14,21 @@ const clear = () => {
 }
 
 const list = () => {
-  return fs
-  .readdirAsync(state.getCacheDir())
-  .filter(util.isSemver)
+  return getCachedVersions()
   .then((versions) => {
     logger.log(versions.join(', '))
   })
+}
+
+const getCachedVersions = () => {
+  return fs
+  .readdirAsync(state.getCacheDir())
+  .filter(util.isSemver)
 }
 
 module.exports = {
   path,
   clear,
   list,
+  getCachedVersions,
 }

@@ -141,7 +141,6 @@ describe "e2e requests", ->
   e2e.it "passes", {
     spec: "request_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }
 
   it "fails when network immediately fails", ->

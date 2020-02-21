@@ -161,16 +161,16 @@ describe('Specs List', function () {
 
       context('run all specs', function () {
         it('displays run all specs button', () => {
-          cy.contains('.btn', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs')
         })
 
         it('has play icon', () => {
-          cy.contains('.btn', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs')
           .find('i').should('have.class', 'fa-play')
         })
 
         it('triggers browser launch on click of button', () => {
-          cy.contains('.btn', 'Run all specs').click()
+          cy.contains('.all-tests', 'Run all specs').click()
           .then(function () {
             const launchArgs = this.ipc.launchBrowser.lastCall.args
 
@@ -182,7 +182,7 @@ describe('Specs List', function () {
 
         describe('all specs running in browser', function () {
           beforeEach(() => {
-            cy.contains('.btn', 'Run all specs').as('allSpecs').click()
+            cy.contains('.all-tests', 'Run all specs').as('allSpecs').click()
           })
 
           it('updates spec icon', function () {
