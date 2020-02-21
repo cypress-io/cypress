@@ -11,6 +11,7 @@
     "lint-coffee": "coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
     "repl": "node repl.js",
     "start": "node ../../scripts/cypress open --dev --global",
+    "test": "node ./test/scripts/run.js",
     "test-cov": "cross-env NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./test/support/mocha.opts",
     "test-cov-process": "cross-env NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
     "test-debug": "yarn test-unit --inspect-brk=5566",

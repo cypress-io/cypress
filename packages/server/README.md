@@ -48,4 +48,38 @@ yarn lerna run test-unit-watch --scope @packages/server --stream
 
 When running e2e tests, some test projects output verbose logs. To see them run the test with `DEBUG=cypress:e2e` environment variable.
 
-To update snapshots, see `snap-shot-it` instructions: https://github.com/bahmutov/snap-shot-it#advanced-use
+> NOTE: All commands below here assume you are cd'd into `packages/server`
+> ---
+
+### Running individual unit tests
+
+```bash
+yarn test <path/to/test>
+yarn test test/unit/api_spec.coffee
+```
+
+### Running individual integration tests
+
+```bash
+yarn test <path/to/test>
+yarn test test/integration/cli_spec.coffee
+```
+
+### Running individual e2e tests
+
+```bash
+yarn test-e2e --spec <glob_matching_test_name>
+yarn test-e2e --spec 1_async # runs test/e2e/1_async_timeouts_spec.coffee
+```
+
+### Updating snaphots
+
+Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info.
+
+```bash
+SNAPSHOT_UPDATE=1 yarn test test/unit/api_spec.coffee
+
+SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.coffee
+
+SNAPSHOT_UPDATE=1 yarn test-e2e --spec 1_async
+```
