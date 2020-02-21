@@ -129,18 +129,48 @@ export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = Bluebird.method((target: websocketUrl): Bluebird<CRIWrapper> => {
+export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
-  const enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
-  let closed = false
-  let connected = false
+  let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
+
+  let closed = false // has the user called .close on this?
+  let connected = false // is this currently connected to CDP?
+
   let cri
   let client: CRIWrapper
 
+  const reconnect = () => {
+    debug('disconnected, attempting to reconnect... %o', { closed })
+
+    connected = false
+
+    if (closed) {
+      return
+    }
+
+    return connect()
+    .then(() => {
+      debug('restoring subscriptions + running queued commands... %o', { subscriptions, enqueuedCommands })
+      subscriptions.forEach((sub) => {
+        cri.on(sub.eventName, sub.cb)
+      })
+
+      enqueuedCommands.forEach((cmd) => {
+        cri.send(cmd.command, cmd.params)
+        .then(cmd.p.resolve, cmd.p.reject)
+      })
+
+      enqueuedCommands = []
+    })
+    .catch((err) => {
+      const err2 = new Error(`There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.\n\n${err.message}`)
+
+      onAsynchronousError(err2)
+    })
+  }
+
   const connect = () => {
     cri?.close()
-
-    const reconnect = _.once(connect)
 
     debug('connecting %o', { target })
 
@@ -158,26 +188,7 @@ export const create = Bluebird.method((target: websocketUrl): Bluebird<CRIWrappe
       cri.close = Bluebird.promisify(cri.close, { context: cri })
 
       // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
-      cri._notifier.on('disconnect', () => {
-        debug
-        connected = false
-
-        if (closed) {
-          return
-        }
-
-        reconnect()
-        .then(() => {
-          subscriptions.forEach((sub) => {
-            cri.on(sub.eventName, sub.cb)
-          })
-
-          enqueuedCommands.forEach((cmd) => {
-            cri.send(cmd.command, cmd.params)
-            .then(cmd.p.resolve, cmd.p.reject)
-          })
-        })
-      })
+      cri._notifier.on('disconnect', reconnect)
     })
   }
 
@@ -203,21 +214,34 @@ export const create = Bluebird.method((target: websocketUrl): Bluebird<CRIWrappe
       })
     })
 
-    /**
-     * Wrapper around Chrome remote interface client
-     * that logs every command sent.
-     */
     client = {
       ensureMinimumProtocolVersion,
       getProtocolVersion,
       send: Bluebird.method((command: CRI.Command, params?: object) => {
-        if (connected) {
-          return cri.send(command, params)
+        const enqueue = () => {
+          return new Bluebird((resolve, reject) => {
+            enqueuedCommands.push({ command, params, p: { resolve, reject } })
+          })
         }
 
-        return new Bluebird((resolve, reject) => {
-          enqueuedCommands.push({ command, params, p: { resolve, reject } })
-        })
+        if (connected) {
+          return cri.send(command, params)
+          .catch((err) => {
+            if (!/^WebSocket is not open/.test(err.message)) {
+              throw err
+            }
+
+            debug('encountered closed websocket on send %o', { command, params, err })
+
+            const p = enqueue()
+
+            reconnect()
+
+            return p
+          })
+        }
+
+        return enqueue()
       }),
       on (eventName: CRI.EventName, cb: Function) {
         subscriptions.push({ eventName, cb })

@@ -24,4 +24,12 @@ describe('e2e cdp', function () {
     expectedExitCode: 1,
     snapshot: true,
   })
+
+  e2e.it.only('handles disconnections as expected', {
+    project: Fixtures.projectPath('remote-debugging-disconnect'),
+    spec: 'spec.ts',
+    browser: 'chrome',
+    expectedExitCode: 1,
+    snapshot: true,
+  })
 })
