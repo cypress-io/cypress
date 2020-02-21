@@ -101,6 +101,7 @@ const preprocessor = (options = {}) => {
     // the `handle` function below and its promise is what is ultimately
     // returned from this function
     let latestBundle = createDeferred()
+
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
     bundles[filePath] = latestBundle.promise
@@ -125,6 +126,7 @@ const preprocessor = (options = {}) => {
       if (stats.hasErrors()) {
         err = new Error('Webpack Compilation Error')
         err.stack = jsonStats.errors.join('\n\n')
+
         return rejectWithErr(err)
       }
 

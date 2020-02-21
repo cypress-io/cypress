@@ -1,54 +1,46 @@
 {
   "name": "@cypress/webpack-preprocessor",
-  "description": "Cypress preprocessor for bundling JavaScript via webpack",
   "version": "0.0.0-development",
-  "author": "Chris Breiding <chris@cypress.io>",
-  "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
-  "files": [
-    "*.js"
-  ],
+  "description": "Cypress preprocessor for bundling JavaScript via webpack",
   "private": false,
-  "homepage": "https://github.com/cypress-io/cypress-webpack-preprocessor#readme",
-  "keywords": [
-    "cypress",
-    "cypress-plugin",
-    "cypress-preprocessor",
-    "webpack"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cypress-io/cypress-webpack-preprocessor.git"
-  },
   "scripts": {
     "ban": "ban",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "eslint --fix *.js",
-    "pretest": "npm run lint",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
+    "lint-fix": "yarn lint --fix",
     "secure": "nsp check",
+    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "pretest": "npm run lint",
     "test": "npm run test-unit && npm run test-e2e",
-    "test-e2e": "mocha test/e2e/*.js",
-    "test-unit": "mocha test/unit/*.js",
     "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
-    "test-watch": "chokidar '*.js' 'test/unit/*.js' -c 'npm run test-unit'",
-    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
+    "test-e2e": "mocha test/e2e/*.spec.js",
+    "test-unit": "mocha test/unit/*.spec.js",
+    "test-watch": "chokidar '*.js' 'test/unit/*.js' -c 'npm run test-unit'"
+  },
+  "dependencies": {
+    "bluebird": "3.7.1",
+    "debug": "4.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.1",
     "@babel/preset-env": "^7.0.0",
+    "@cypress/eslint-plugin-dev": "5.0.0",
     "babel-loader": "^8.0.2",
     "ban-sensitive-files": "1.9.0",
     "chai": "4.1.2",
+    "chalk": "3.0.0",
     "chokidar-cli": "1.2.0",
     "condition-circle": "1.5.0",
+    "cypress": "4.0.2",
     "dependency-check": "2.9.1",
     "deps-ok": "1.2.1",
     "dont-crack": "1.2.1",
-    "eslint": "4.6.1",
-    "eslint-plugin-cypress-dev": "1.1.1",
+    "eslint": "6.8.0",
+    "eslint-plugin-json-format": "2.0.1",
     "eslint-plugin-mocha": "4.11.0",
+    "fast-glob": "3.1.1",
     "fs-extra": "8.1.0",
     "github-post-release": "1.13.1",
     "license-checker": "13.0.3",
@@ -60,20 +52,33 @@
     "simple-commit-message": "3.3.1",
     "sinon": "3.2.1",
     "sinon-chai": "2.13.0",
-    "snap-shot-it": "7.9.0",
+    "snap-shot-it": "7.9.2",
     "webpack": "^4.18.1"
   },
   "peerDependencies": {
     "webpack": "^4.18.1"
   },
+  "files": [
+    "*.js"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress-webpack-preprocessor.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-webpack-preprocessor#readme",
+  "author": "Chris Breiding <chris@cypress.io>",
+  "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "cypress-preprocessor",
+    "webpack"
+  ],
   "optionalDependencies": {
     "@babel/core": "^7.0.1",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.2"
-  },
-  "dependencies": {
-    "bluebird": "3.7.1",
-    "debug": "4.1.1"
   },
   "release": {
     "verifyConditions": "condition-circle",
