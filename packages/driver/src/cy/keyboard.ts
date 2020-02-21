@@ -2,7 +2,7 @@ import Promise from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
 import moment from 'moment'
-import $utils from '../cypress/utils.coffee'
+import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
 import * as $document from '../dom/document'
@@ -369,7 +369,7 @@ const validateTyping = (
   if (!isFocusable && isTextLike && !force) {
     const node = $dom.stringify($el)
 
-    $utils.throwErrByPath('type.not_actionable_textlike', {
+    $errUtils.throwErrByPath('type.not_actionable_textlike', {
       onFail,
       args: { node },
     })
@@ -379,14 +379,14 @@ const validateTyping = (
   if (!isFocusable && !isTextLike) {
     const node = $dom.stringify($el)
 
-    $utils.throwErrByPath('type.not_on_typeable_element', {
+    $errUtils.throwErrByPath('type.not_on_typeable_element', {
       onFail,
       args: { node },
     })
   }
 
   if (numElements > 1) {
-    $utils.throwErrByPath('type.multiple_elements', {
+    $errUtils.throwErrByPath('type.multiple_elements', {
       onFail,
       args: { num: numElements },
     })
@@ -411,7 +411,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_date', {
+    $errUtils.throwErrByPath('type.invalid_date', {
       onFail,
       // set matched date or entire char string
       args: { chars: allChars },
@@ -427,7 +427,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_month', {
+    $errUtils.throwErrByPath('type.invalid_month', {
       onFail,
       args: { chars: allChars },
     })
@@ -442,7 +442,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_week', {
+    $errUtils.throwErrByPath('type.invalid_week', {
       onFail,
       args: { chars: allChars },
     })
@@ -457,7 +457,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_time', {
+    $errUtils.throwErrByPath('type.invalid_time', {
       onFail,
       args: { chars: allChars },
     })
@@ -472,7 +472,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_dateTime', {
+    $errUtils.throwErrByPath('type.invalid_datetime', {
       onFail,
       args: { chars: allChars },
     })

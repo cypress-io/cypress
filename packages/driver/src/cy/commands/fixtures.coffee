@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 fixturesRe = /^(fx:|fixture:)/
 
@@ -20,7 +20,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     fixture: (fixture, args...) ->
       if config("fixturesFolder") is false
-        $utils.throwErrByPath("fixture.set_to_false")
+        $errUtils.throwErrByPath("fixture.set_to_false")
 
       ## if we already have cached
       ## this fixture then just return it
@@ -55,7 +55,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       .timeout(timeout)
       .then (response) =>
         if err = response.__error
-          $utils.throwErr(err)
+          $errUtils.throwErr(err)
         else
           ## add the fixture to the cache
           ## so it can just be returned next time
@@ -64,7 +64,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           ## return the cloned response
           return clone(response)
       .catch Promise.TimeoutError, (err) ->
-        $utils.throwErrByPath "fixture.timed_out", {
+        $errUtils.throwErrByPath "fixture.timed_out", {
           args: { timeout }
         }
   })

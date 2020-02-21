@@ -1,12 +1,12 @@
 _ = require("lodash")
 
 $Chainer = require("../../cypress/chainer")
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 command = (ctx, name, args...) ->
   if not ctx[name]
     cmds = _.keys($Chainer.prototype).join(", ")
-    $utils.throwErrByPath("miscellaneous.invalid_command", {
+    $errUtils.throwErrByPath("miscellaneous.invalid_command", {
       args: { name, cmds }
     })
 

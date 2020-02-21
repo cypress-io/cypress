@@ -3,7 +3,7 @@ require("../spec_helper")
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 ws          = require("ws")
-httpsAgent  = require("https-proxy-agent")
+httpsProxyAgent  = require("https-proxy-agent")
 evilDns     = require("evil-dns")
 Promise     = require("bluebird")
 socketIo    = require("#{root}../socket")
@@ -62,7 +62,7 @@ describe "Web Sockets", ->
         done()
 
     it "sends back ECONNRESET when error upgrading", (done) ->
-      agent = new httpsAgent("http://localhost:#{cyPort}")
+      agent = new httpsProxyAgent("http://localhost:#{cyPort}")
 
       @server._onDomainSet("http://localhost:#{otherPort}")
 
@@ -94,7 +94,7 @@ describe "Web Sockets", ->
 
     it "proxies http messages through http proxy", (done) ->
       ## force node into legit proxy mode like a browser
-      agent = new httpsAgent("http://localhost:#{cyPort}")
+      agent = new httpsProxyAgent("http://localhost:#{cyPort}")
 
       @server._onDomainSet("http://localhost:#{wsPort}")
 
@@ -115,7 +115,7 @@ describe "Web Sockets", ->
 
     it "proxies https messages through http", (done) ->
       ## force node into legit proxy mode like a browser
-      agent = new httpsAgent({
+      agent = new httpsProxyAgent({
         host: "localhost"
         port: cyPort
         rejectUnauthorized: false
@@ -149,7 +149,7 @@ describe "Web Sockets", ->
       evilDns.add("ws.foobar.com", "127.0.0.1")
 
       ## force node into legit proxy mode like a browser
-      agent = new httpsAgent({
+      agent = new httpsProxyAgent({
         host: "localhost"
         port: cyPort
         rejectUnauthorized: false
@@ -178,67 +178,69 @@ describe "Web Sockets", ->
 
       @server.startWebsockets(@automation, @cfg, {})
 
+    testSocketIo = (wsUrl, beforeFn) ->
+      context 'behind Cy proxy', ->
+        beforeEach (done) ->
+          ## force node into legit proxy mode like a browser
+          agent = new httpsProxyAgent("http://localhost:#{cyPort}")
+
+          beforeFn?.call(@)
+
+          @wsClient = socketIo.client(wsUrl || @cfg.proxyUrl, {
+            agent: agent
+            path: @cfg.socketIoRoute
+            transports: ["websocket"]
+            parser: socketIo.circularParser
+            rejectUnauthorized: false
+          })
+          @wsClient.on "connect", -> done()
+
+        afterEach ->
+          @wsClient.disconnect()
+
+        it "continues to handle socket.io requests just fine", (done) ->
+          @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
+            expect(data.response).to.deep.eq({foo: "bar"})
+            done()
+
+      context 'without Cy proxy', ->
+        beforeEach ->
+          beforeFn?.call(@)
+
+        afterEach ->
+          @wsClient.disconnect()
+
+        it "fails to connect via websocket", (done) ->
+          @wsClient = socketIo.client(wsUrl || @cfg.proxyUrl, {
+            path: @cfg.socketIoRoute
+            transports: ["websocket"]
+            parser: socketIo.circularParser
+            rejectUnauthorized: false
+            reconnection: false
+          })
+
+          @wsClient.on "connect", -> done(new Error('should not have been able to connect'))
+          @wsClient.on "connect_error", -> done()
+
+        it "fails to connect via polling", (done) ->
+          @wsClient = socketIo.client(wsUrl || @cfg.proxyUrl, {
+            path: @cfg.socketIoRoute
+            transports: ["polling"]
+            parser: socketIo.circularParser
+            rejectUnauthorized: false
+            reconnection: false
+          })
+
+          @wsClient.on "connect", -> done(new Error('should not have been able to connect'))
+          @wsClient.on "connect_error", -> done()
+
     context "http", ->
-      beforeEach (done) ->
-        @wsClient = socketIo.client(@cfg.proxyUrl, {
-          path: @cfg.socketIoRoute
-          transports: ["websocket"]
-          parser: socketIo.circularParser
-        })
-        @wsClient.on "connect", -> done()
-
-      afterEach ->
-        @wsClient.disconnect()
-
-      it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
-          expect(data.response).to.deep.eq({foo: "bar"})
-          done()
+      testSocketIo()
 
     context "when http superDomain has been set", ->
-      beforeEach (done) ->
-        ## force node into legit proxy mode like a browser
-        agent = new httpsAgent("http://localhost:#{cyPort}")
-
+      testSocketIo "http://localhost:#{otherPort}", ->
         @server._onDomainSet("http://localhost:#{otherPort}")
 
-        @wsClient = socketIo.client("http://localhost:#{otherPort}", {
-          agent: agent
-          path: @cfg.socketIoRoute
-          transports: ["websocket"]
-          parser: socketIo.circularParser
-        })
-        @wsClient.on "connect", -> done()
-
-      afterEach ->
-        @wsClient.disconnect()
-
-      it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
-          expect(data.response).to.deep.eq({foo: "bar"})
-          done()
-
     context "when https superDomain has been set", ->
-      beforeEach (done) ->
-        ## force node into legit proxy mode like a browser
-        agent = new httpsAgent("http://localhost:#{cyPort}")
-
-        @server._onDomainSet("https://localhost:#{wssPort}")
-
-        ## must not use a direct websocket transport else we'll
-        ## never make it to the /__socket.io route
-        @wsClient = socketIo.client("https://localhost:#{wssPort}", {
-          agent: agent
-          path: @cfg.socketIoRoute
-          parser: socketIo.circularParser
-          rejectUnauthorized: false
-        })
-        @wsClient.on "connect", -> done()
-
-      afterEach ->
-        @wsClient.disconnect()
-
-      it "continues to handle socket.io requests just fine", (done) ->
-        @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
-          expect(data.response).to.deep.eq({foo: "bar"})
-          done()
+      testSocketIo "http://localhost:#{wssPort}", ->
+        @server._onDomainSet("http://localhost:#{wssPort}")

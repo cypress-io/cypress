@@ -262,14 +262,24 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(/Runner.start\(.+\)/)
 
-    it "routes even without a proxy set", ->
+    it "clientRoute routes to 'not launched through Cypress' without a proxy set", ->
       @rp({
         url: @proxy + "/__"
         proxy: null
       })
       .then (res) ->
         expect(res.statusCode).to.eq(200)
-        expect(res.body).to.match(/Runner.start/)
+        expect(res.body).to.match(/This browser was not launched through Cypress\./)
+
+    it "other URLs redirect to clientRoute without a proxy set", ->
+      ## test something that isn't the clientRoute
+      @rp({
+        url: @proxy + "/__cypress/xhrs/foo"
+        proxy: null
+      })
+      .then (res) ->
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers['location']).to.eq('/__/')
 
     it "routes when baseUrl is set", ->
       @setup({baseUrl: "http://localhost:9999/app"})
@@ -1329,6 +1339,20 @@ describe "Routes", ->
           throw new Error("should not reach")
         .catch (err) ->
           expect(err.message).to.eq('Error: socket hang up')
+
+      it "sends back 401 when file server does not receive correct auth", ->
+        @setup("<root>", {
+          config: {
+            fileServerFolder: "/Users/bmann/Dev/projects"
+          }
+        })
+        .then =>
+          rp("http://localhost:#{@server._fileServer.port()}/foo/views/test/index.html", {
+            resolveWithFullResponse: true
+            simple: false
+          })
+        .then (res) =>
+          expect(res.statusCode).to.eq(401)
 
       it "sends back 404 when file does not exist locally", ->
         @setup("<root>", {

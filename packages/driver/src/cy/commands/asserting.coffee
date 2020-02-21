@@ -3,7 +3,7 @@ $ = require("jquery")
 Promise = require("bluebird")
 
 $dom = require("../../dom")
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 bRe            = /(\*\*)(.+)(\*\*)/
 bTagOpen       = /\*\*/g
@@ -64,8 +64,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## since we are throwing our own error
       ## without going through the assertion we need
       ## to ensure our .should command gets logged
-      current = state("current")
-
       log = Cypress.log({
         name: "should"
         type: "child"
@@ -75,7 +73,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         error: err
       })
 
-      $utils.throwErr(err, { onFail: log })
+      $errUtils.throwErr(err, { onFail: log })
 
     chainers = chainers.split(".")
     lastChainer = _.last(chainers)
@@ -86,7 +84,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     options = {}
 
     if reEventually.test(chainers)
-      err = $utils.cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
+      err = $errUtils.cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
       err.retry = false
       throwAndLogErr(err)
 
@@ -125,7 +123,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       newExp = _.reduce chainers, (memo, value) =>
         if value not of memo
-          err = $utils.cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
+          err = $errUtils.cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
           err.retry = false
           throwAndLogErr(err)
 
