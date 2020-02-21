@@ -123,25 +123,24 @@ describe('e2e plugins', function () {
     })
   })
 
-  describe('env', function () {
+  describe('projectRoot and configFile', function () {
     it('passes projectRoot and default configFile to plugins function', function () {
       return e2e.exec(this, {
-        spec: 'plugins_env_spec.js',
-        project: e2eProject,
+        spec: 'plugins_config_extras_spec.js',
+        // project: e2eProject,
         config: {
           env: {
             projectRoot: e2eProject,
             configFile: path.join(e2eProject, 'cypress.json'),
           },
         },
-        expectedExitCode: 0,
       })
     })
 
     it('passes custom configFile to plugins function', function () {
       return e2e.exec(this, {
-        spec: 'plugins_env_spec.js',
-        project: e2eProject,
+        spec: 'plugins_config_extras_spec.js',
+        // project: e2eProject,
         configFile: 'cypress-alt.json',
         config: {
           env: {
@@ -149,14 +148,13 @@ describe('e2e plugins', function () {
             configFile: path.join(e2eProject, 'cypress-alt.json'),
           },
         },
-        expectedExitCode: 0,
       })
     })
 
     it('passes false configFile to plugins function', function () {
       return e2e.exec(this, {
-        spec: 'plugins_env_spec.js',
-        project: e2eProject,
+        spec: 'plugins_config_extras_spec.js',
+        // project: e2eProject,
         configFile: 'false',
         config: {
           env: {
@@ -164,7 +162,6 @@ describe('e2e plugins', function () {
             configFile: false,
           },
         },
-        expectedExitCode: 0,
       })
     })
   })

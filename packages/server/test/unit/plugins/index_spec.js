@@ -10,20 +10,20 @@ const PLUGIN_PID = 77777
 describe('lib/plugins/index', () => {
   let pluginsProcess
   let ipc
-  let env
+  let configExtras
   let getOptions
 
   beforeEach(() => {
     plugins._reset()
 
-    env = {
+    configExtras = {
       projectRoot: '/path/to/project/root',
       configFile: '/path/to/project/root/cypress.json',
     }
 
     getOptions = (overrides = {}) => {
       return {
-        ...env,
+        ...configExtras,
         ...overrides,
       }
     }
@@ -117,12 +117,15 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    it('sends \'load\' event with config and env and via ipc', () => {
+    it('sends \'load\' event with config via ipc', () => {
       ipc.on.withArgs('loaded').yields([])
       const config = { pluginsFile: 'cypress-plugin' }
 
       return plugins.init(config, getOptions()).then(() => {
-        expect(ipc.send).to.be.calledWith('load', config, env)
+        expect(ipc.send).to.be.calledWith('load', {
+          ...config,
+          ...configExtras,
+        })
       })
     })
 

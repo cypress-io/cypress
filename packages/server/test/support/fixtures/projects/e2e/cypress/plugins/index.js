@@ -6,7 +6,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const performance = require('../../../../test/support/helpers/performance')
 
-module.exports = (on, config, env) => {
+module.exports = (on, config) => {
   // save some time by only reading the originals once
   let cache = {}
 
@@ -152,8 +152,8 @@ module.exports = (on, config, env) => {
       return browserArgs
     },
 
-    'get:env:value' (key) {
-      return env[key]
+    'get:config:value' (key) {
+      return config[key]
     },
   })
 }

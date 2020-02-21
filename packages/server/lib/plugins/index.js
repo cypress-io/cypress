@@ -68,14 +68,16 @@ const init = (config, options) => {
       handler(ipc)
     }
 
-    const env = {
+    _.extend(config, {
       projectRoot: options.projectRoot,
       configFile: options.configFile,
-    }
+    })
 
-    ipc.send('load', config, env)
+    ipc.send('load', config)
 
     ipc.on('loaded', (newCfg, registrations) => {
+      _.omit(config, 'projectRoot', 'configFile')
+
       _.each(registrations, (registration) => {
         debug('register plugins process event', registration.event, 'with id', registration.eventId)
 

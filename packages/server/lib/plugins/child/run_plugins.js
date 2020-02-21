@@ -35,7 +35,7 @@ const sendWarning = (ipc, warningErr) => {
 
 let plugins
 
-const load = (ipc, config, env, pluginsFile) => {
+const load = (ipc, config, pluginsFile) => {
   debug('run plugins function')
 
   let eventIdCount = 0
@@ -74,7 +74,7 @@ const load = (ipc, config, env, pluginsFile) => {
 
   Promise
   .try(() => {
-    return plugins(register, config, env)
+    return plugins(register, config)
   })
   .then((modifiedCfg) => {
     ipc.send('loaded', modifiedCfg, registrations)
@@ -191,10 +191,10 @@ module.exports = (ipc, pluginsFile) => {
     return
   }
 
-  ipc.on('load', (config, env) => {
+  ipc.on('load', (config) => {
     debug('plugins load file "%s"', pluginsFile)
     debug('passing config %o', config)
-    load(ipc, config, env, pluginsFile)
+    load(ipc, config, pluginsFile)
   })
 
   ipc.on('execute', (event, ids, args) => {

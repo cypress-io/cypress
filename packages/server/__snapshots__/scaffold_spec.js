@@ -445,10 +445,9 @@ exports['lib/scaffold .plugins creates pluginsFile when pluginsFolder does not e
 /**
  * @type {Cypress.PluginConfig}
  */
-module.exports = (on, config, env) => {
+module.exports = (on, config) => {
   // <backtick>on<backtick> is used to hook into various events Cypress emits
   // <backtick>config<backtick> is the resolved Cypress config
-  // <backtick>env<backtick> are properties of the environment, including <backtick>projectRoot<backtick> and <backtick>configFile<backtick>
 }
 
 `
