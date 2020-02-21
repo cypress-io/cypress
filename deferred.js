@@ -7,6 +7,7 @@ const createDeferred = () => {
     deferred.resolve = resolve
     deferred.reject = reject
   })
+
   return deferred
 }
 

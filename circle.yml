@@ -9,19 +9,27 @@ workflows:
 jobs:
   test:
     docker:
-      - image: circleci/node:8
+      - image: cypress/base:8
 
     steps:
       - checkout
-
+      
+      - restore_cache:
+          keys:
+          - cache-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
       - run:
-          name: Install dependencies
-          command: npm install
-
+          name: Yarn install
+          command: yarn install --frozen-lockfile
+      - save_cache:
+          key: cache-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
+          paths:
+          - ~/.cache
       - run:
           name: Lint code
           command: npm run lint
-
+      - run:
+          name: Cypress Verfiy
+          command: $(npm bin)/cypress verify
       - run:
           name: Run tests
           command: npm test

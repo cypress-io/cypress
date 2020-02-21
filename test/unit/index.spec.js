@@ -5,13 +5,16 @@ const mockery = require('mockery')
 const sinon = require('sinon')
 
 const expect = chai.expect
+
 chai.use(require('sinon-chai'))
 
 const sandbox = sinon.sandbox.create()
 const webpack = sandbox.stub()
+
 mockery.enable({
   warnOnUnregistered: false,
 })
+
 mockery.registerMock('webpack', webpack)
 
 const preprocessor = require('../../index')
@@ -30,11 +33,16 @@ describe('webpack preprocessor', function () {
       watch: sandbox.stub().returns(this.watchApi),
       plugin: sandbox.stub(),
     }
+
     webpack.returns(this.compilerApi)
 
     this.statsApi = {
-      hasErrors () { return false },
-      toJson () { return { warnings: [], errors: [] } },
+      hasErrors () {
+        return false
+      },
+      toJson () {
+        return { warnings: [], errors: [] }
+      },
     }
 
     this.file = {
@@ -44,6 +52,7 @@ describe('webpack preprocessor', function () {
       on: sandbox.stub(),
       emit: sandbox.spy(),
     }
+
     this.util = {
       getOutputPath: sandbox.stub().returns(this.outputPath),
       fileUpdated: sandbox.spy(),
@@ -91,6 +100,7 @@ describe('webpack preprocessor', function () {
         webpack.returns(this.compilerApi)
 
         const run = preprocessor(this.options)
+
         run(this.file)
         run(this.file)
         expect(webpack).to.be.calledOnce
@@ -146,6 +156,7 @@ describe('webpack preprocessor', function () {
       it('watches when shouldWatch is true', function () {
         this.file.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
+
         return this.run().then(() => {
           expect(this.compilerApi.watch).to.be.called
         })
@@ -173,6 +184,7 @@ describe('webpack preprocessor', function () {
         this.file.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
         this.compilerApi.plugin.withArgs('compile').yields()
+
         return this.run().then(() => {
           expect(this.file.emit).to.be.calledWith('rerun')
         })
@@ -181,6 +193,7 @@ describe('webpack preprocessor', function () {
       it('does not emit "rerun" when shouldWatch is false', function () {
         this.file.shouldWatch = false
         this.compilerApi.plugin.withArgs('compile').yields()
+
         return this.run().then(() => {
           expect(this.file.emit).not.to.be.calledWith('rerun')
         })
@@ -189,6 +202,7 @@ describe('webpack preprocessor', function () {
       it('closes bundler when shouldWatch is true and `close` is emitted', function () {
         this.file.shouldWatch = true
         this.compilerApi.watch.yields(null, this.statsApi)
+
         return this.run().then(() => {
           this.file.on.withArgs('close').yield()
           expect(this.watchApi.close).to.be.called
@@ -253,6 +267,7 @@ describe('webpack preprocessor', function () {
 
       it('it rejects with error when an err', function () {
         this.compilerApi.run.yields(this.err)
+
         return this.run().catch((err) => {
           expect(err.stack).to.equal(this.err.stack)
         })
@@ -260,11 +275,18 @@ describe('webpack preprocessor', function () {
 
       it('it rejects with joined errors when a stats err', function () {
         const errs = ['foo', 'bar', 'baz']
+
         this.statsApi = {
-          hasErrors () { return true },
-          toJson () { return { errors: errs } },
+          hasErrors () {
+            return true
+          },
+          toJson () {
+            return { errors: errs }
+          },
         }
+
         this.compilerApi.run.yields(null, this.statsApi)
+
         return this.run().catch((err) => {
           expect(err.stack).to.equal(errs.join('\n\n'))
         })
@@ -272,6 +294,7 @@ describe('webpack preprocessor', function () {
 
       it('backs up stack as originalStack', function () {
         this.compilerApi.run.yields(this.err)
+
         return this.run().catch((err) => {
           expect(err.originalStack).to.equal(this.err.stack)
         })
