@@ -245,13 +245,13 @@ const elIsNotElementFromPoint = function ($el) {
 
 const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent()) {
   // no ancestor, not out of bounds!
-  if (!$ancestor) {
+  if (!$ancestor || !$ancestor[0]) {
     return false
   }
 
-  // if we've reached the top parent, which is document
+  // if we've reached the top parent, which is not a normal DOM el
   // then we're in bounds all the way up, return false
-  if ($ancestor.is('body,html') || $document.isDocument($ancestor) || $ancestor[0].parentNode.nodeType === 11) {
+  if ($ancestor.is('body,html') || $document.isDocument($ancestor)) {
     return false
   }
 
