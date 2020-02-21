@@ -108,8 +108,6 @@ const preprocessor = (options = {}) => {
 
     const rejectWithErr = (err) => {
       err.filePath = filePath
-      // backup the original stack before it's potentially modified by bluebird
-      err.originalStack = err.stack
       debug(`errored bundling ${outputPath}`, err)
       latestBundle.reject(err)
     }
@@ -125,7 +123,14 @@ const preprocessor = (options = {}) => {
 
       if (stats.hasErrors()) {
         err = new Error('Webpack Compilation Error')
-        err.stack = jsonStats.errors.join('\n\n')
+
+        const errorsToAppend = jsonStats.errors
+        // remove stack trace lines since they're useless for debugging
+        .map((err) => err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, ''))
+        // multiple errors separated by newline
+        .join('\n\n')
+
+        err.message += `\n${errorsToAppend}`
 
         return rejectWithErr(err)
       }

@@ -273,8 +273,9 @@ describe('webpack preprocessor', function () {
         })
       })
 
-      it('it rejects with joined errors when a stats err', function () {
-        const errs = ['foo', 'bar', 'baz']
+      it('it rejects with joined errors when a stats err and strips stacktrace', function () {
+        const errs = ['foo\nat Object.foo', 'bar', 'baz']
+        const errsNoStack = ['foo', 'bar', 'baz']
 
         this.statsApi = {
           hasErrors () {
@@ -288,15 +289,7 @@ describe('webpack preprocessor', function () {
         this.compilerApi.run.yields(null, this.statsApi)
 
         return this.run().catch((err) => {
-          expect(err.stack).to.equal(errs.join('\n\n'))
-        })
-      })
-
-      it('backs up stack as originalStack', function () {
-        this.compilerApi.run.yields(this.err)
-
-        return this.run().catch((err) => {
-          expect(err.originalStack).to.equal(this.err.stack)
+          expect(err.message).to.equal(`Webpack Compilation Error\n${errsNoStack.join('\n\n')}`)
         })
       })
     })
