@@ -11,6 +11,8 @@ const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client
 // debug using cypress-verbose:server:browsers:cri-client:recv:*
 const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:recv:[<--]')
 
+const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is not open/
+
 /**
  * Url returned by the Chrome Remote Interface
 */
@@ -227,7 +229,7 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
         if (connected) {
           return cri.send(command, params)
           .catch((err) => {
-            if (!/^WebSocket is not open/.test(err.message)) {
+            if (!WEBSOCKET_NOT_OPEN_RE.test(err.message)) {
               throw err
             }
 

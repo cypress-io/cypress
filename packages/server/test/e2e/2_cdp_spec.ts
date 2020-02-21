@@ -25,7 +25,8 @@ describe('e2e cdp', function () {
     snapshot: true,
   })
 
-  e2e.it.only('handles disconnections as expected', {
+  // https://github.com/cypress-io/cypress/issues/5685
+  e2e.it('handles disconnections as expected', {
     project: Fixtures.projectPath('remote-debugging-disconnect'),
     spec: 'spec.ts',
     browser: 'chrome',
