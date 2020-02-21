@@ -65,12 +65,16 @@ exports.runTest = async (options = {}) => {
     expectedResults: {
       totalFailed: 0,
     },
-    expectedStdout: null,
+    stdoutInclude: null,
     browser: 'electron',
     exit: true,
   })
 
   _.merge(opts, parsedSpecOptions)
+
+  if (_.isString(opts.stdoutInclude)) {
+    opts.stdoutInclude = [opts.stdoutInclude]
+  }
 
   console.log(chalk.cyanBright(`starting test run: ${opts.spec}`))
 
@@ -106,8 +110,8 @@ exports.runTest = async (options = {}) => {
     expect(res).includes(opts.expectedResults)
   })
   .then(() => {
-    if (opts.expectedStdout) {
-      _.forEach(opts.expectedStdout, (v) => {
+    if (opts.stdoutInclude) {
+      _.forEach(opts.stdoutInclude, (v) => {
         expect(stdout).include(v)
         console.log(`${chalk.bold('run matched stdout:')}\n${v}`)
       })
