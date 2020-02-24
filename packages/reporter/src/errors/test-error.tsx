@@ -20,9 +20,6 @@ const TestError = observer((props: Props) => {
   md.enable(['backticks', 'emphasis', 'escape'])
 
   const onPrint = () => {
-    console.log('onPrint', !!props.model) // eslint-disable-line no-console
-    console.log('model id:', props.model.id) // eslint-disable-line no-console
-
     events.emit('show:error', props.model.id)
   }
 
