@@ -40,7 +40,7 @@ const TestError = observer((props: Props) => {
             {err.name}
           </div>
 
-          <Tooltip title='Print error to console' className='cy-tooltip'>
+          <Tooltip title='Print error to console'>
             <button className='runnable-err-print' onClick={onPrint}>
               <i className='fas fa-terminal'></i>
             </button>
