@@ -1,5 +1,3 @@
-require('@packages/coffee/register')
-
 const Promise = require('bluebird')
 const proxy = require('./test/helpers/proxy')
 const httpServer = require('./test/helpers/http_server')
