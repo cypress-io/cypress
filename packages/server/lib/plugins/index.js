@@ -112,10 +112,7 @@ const init = (config, options) => {
 
     const handleError = (err) => {
       debug('plugins process error:', err.stack)
-      if (!pluginsProcess) {
-        // prevent repeating this in case of multiple errors
-        return
-      }
+      if (!pluginsProcess) return // prevent repeating this in case of multiple errors
 
       killPluginsProcess()
       err = errors.get('PLUGINS_ERROR', err.annotated || err.stack || err.message)
@@ -126,7 +123,6 @@ const init = (config, options) => {
 
     const handleWarning = (warningErr) => {
       debug('plugins process warning:', warningErr.stack)
-
       if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
 
       options.onWarning(warningErr)

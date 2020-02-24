@@ -32,14 +32,14 @@ shell.sed(
   '-i',
   '<reference types="chai" />',
   '<reference path="../chai/index.d.ts" />',
-  join('types', 'chai-jquery', 'index.d.ts')
+  join('types', 'chai-jquery', 'index.d.ts'),
 )
 
 shell.sed(
   '-i',
   '<reference types="jquery" />',
   '<reference path="../jquery/index.d.ts" />',
-  join('types', 'chai-jquery', 'index.d.ts')
+  join('types', 'chai-jquery', 'index.d.ts'),
 )
 
 const sinonChaiFilename = join('types', 'sinon-chai', 'index.d.ts')
@@ -48,7 +48,7 @@ shell.sed(
   '-i',
   '<reference types="chai" />',
   '<reference path="../chai/index.d.ts" />',
-  sinonChaiFilename
+  sinonChaiFilename,
 )
 
 // also use relative import via path for sinon-chai
@@ -57,7 +57,7 @@ shell.sed(
   '-i',
   '<reference types="sinon" />',
   '<reference path="../sinon/index.d.ts" />',
-  sinonChaiFilename
+  sinonChaiFilename,
 )
 
 // and an import sinon line to be changed to relative path

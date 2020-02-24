@@ -207,7 +207,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
       // start nudging
       return scrollContainers(
-        getAllScrollables([], $el)
+        getAllScrollables([], $el),
       )
     }
   }
