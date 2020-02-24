@@ -40,6 +40,7 @@ type HttpMiddlewareCtx<T> = {
 
 export type ServerCtx = Readonly<{
   config: CyServer.Config
+  getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
@@ -50,6 +51,7 @@ export type ServerCtx = Readonly<{
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
+  'getFileServerToken',
   'getRemoteState',
   'netStubbingState',
   'next',
@@ -103,7 +105,6 @@ export function _runStage (type: HttpStages, ctx: any) {
         .omit(READONLY_MIDDLEWARE_KEYS)
         .forEach((value, key) => {
           if (ctx[key] !== value) {
-            debug(`copying %o`, { [key]: value })
             ctx[key] = value
           }
         })
@@ -142,7 +143,7 @@ export function _runStage (type: HttpStages, ctx: any) {
           _end()
         },
         onError: (error: Error) => {
-          debug('Error in middleware %o', { stage, middlewareName, error, ctx })
+          debug('Error in middleware %o', { stage, middlewareName, error })
 
           if (type === HttpStages.Error) {
             return
@@ -177,6 +178,7 @@ export function _runStage (type: HttpStages, ctx: any) {
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
+  getFileServerToken: () => string
   getRemoteState: () => any
   middleware: HttpMiddlewareStacks
   netStubbingState: NetStubbingState
@@ -187,6 +189,7 @@ export class Http {
     this.buffers = new HttpBuffers()
 
     this.config = opts.config
+    this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
@@ -209,6 +212,7 @@ export class Http {
 
       buffers: this.buffers,
       config: this.config,
+      getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),

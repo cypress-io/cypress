@@ -89,7 +89,7 @@ export default {
         _.sortBy(consoleProps.table, (val, key) => key),
         (table) => {
           return this._logTable({ table })
-        }
+        },
       )
 
       return

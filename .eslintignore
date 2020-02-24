@@ -25,6 +25,7 @@ packages/extension/test/helpers/background.js
 packages/server/lib/scaffold/plugins/index.js
 packages/server/lib/scaffold/support/index.js
 packages/server/lib/scaffold/support/commands.js
+packages/server/test/support/fixtures/projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
 
 packages/launcher/lib/**/*.js
 

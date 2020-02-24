@@ -31,9 +31,6 @@ function _connectAsync (opts) {
     // can be closed, just needed to test the connection
     sock.end()
   })
-  .catch((err) => {
-    errors.throw('CDP_COULD_NOT_CONNECT', opts.port, err)
-  })
 }
 
 /**
@@ -94,6 +91,9 @@ const getWsTargetFor = (port) => {
   }
 
   return _connectAsync(connectOpts)
+  .catch((err) => {
+    errors.throw('CDP_COULD_NOT_CONNECT', port, err)
+  })
   .then(() => {
     const retry = () => {
       debug('attempting to find CRI target... %o', { retryIndex })

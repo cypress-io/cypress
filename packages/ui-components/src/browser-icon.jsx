@@ -3,6 +3,7 @@ import React from 'react'
 
 const families = {
   chrome: /^chrome/i,
+  chromium: /^chromium/i,
   edge: /^edge/i,
   electron: /^electron/i,
   firefox: /^firefox/i,
@@ -36,6 +37,7 @@ const logoPath = (browserName) => {
   return logoPaths[browserKey] || logoPaths[familyFallback(browserKey)]
 }
 
+// browserName should be the browser's display name
 const BrowserIcon = ({ browserName }) => {
   if (logoPath(browserName)) {
     return <img className='browser-icon' src={logoPath(browserName)} />

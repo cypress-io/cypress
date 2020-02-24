@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import debugModule from 'debug'
 import { HttpMiddleware } from '.'
 import { InterceptError } from '@packages/net-stubbing/server'
@@ -14,7 +13,12 @@ export type ErrorMiddleware = HttpMiddleware<{
 }>
 
 const LogError: ErrorMiddleware = function () {
-  debug('error proxying request %o', _.pick(this, 'error', 'req', 'res', 'incomingRes', 'outgoingReq', 'incomingResStream'))
+  debug('error proxying request %o', {
+    error: this.error,
+    url: this.req.url,
+    headers: this.req.headers,
+  })
+
   this.next()
 }
 

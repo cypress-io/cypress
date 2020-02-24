@@ -3,7 +3,7 @@ import CyServer from '@packages/server'
 import { blacklist, cors } from '@packages/network'
 import { InterceptRequest } from '@packages/net-stubbing/server'
 import debugModule from 'debug'
-import { HttpMiddleware } from '.'
+import { HttpMiddleware } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
   outgoingReq: any
@@ -23,7 +23,7 @@ const MaybeEndRequestWithBufferedResponse: RequestMiddleware = function () {
   const buffer = this.buffers.take(this.req.proxiedUrl)
 
   if (buffer) {
-    debug('got a buffer %o', buffer)
+    debug('got a buffer %o', _.pick(buffer, 'url'))
     this.res.wantsInjection = 'full'
 
     return this.onResponse(buffer.response, buffer.stream)
@@ -125,10 +125,12 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     url: this.req.proxiedUrl,
   }
 
-  const remoteState = this.getRemoteState()
+  const { strategy, origin, fileServer } = this.getRemoteState()
 
-  if (remoteState.strategy === 'file' && requestOptions.url.startsWith(remoteState.origin)) {
-    requestOptions.url = requestOptions.url.replace(remoteState.origin, remoteState.fileServer)
+  if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
+    this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
+
+    requestOptions.url = requestOptions.url.replace(origin, fileServer)
   }
 
   // if the request has been buffered, can't stream body

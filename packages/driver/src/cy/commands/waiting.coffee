@@ -2,7 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 { waitForRoute } = require("@packages/net-stubbing/driver")
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 getNumRequests = (state, alias) =>
   requests = state("aliasRequests") ? {}
@@ -15,11 +15,11 @@ getNumRequests = (state, alias) =>
   [index, _.ordinalize(requests[alias])]
 
 throwErr = (arg) ->
-  $utils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
+  $errUtils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   waitFunction = ->
-    $utils.throwErrByPath("wait.fn_deprecated")
+    $errUtils.throwErrByPath("wait.fn_deprecated")
 
   waitNumber = (subject, ms, options) ->
     ## increase the timeout by the delta
@@ -44,7 +44,29 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         aliasType: "route"
       })
 
-    waitForRouteAlias = (str, options) ->
+    checkForXhr = (alias, type, index, num, options) ->
+      options.type = type
+
+      ## append .type to the alias
+      xhr = cy.getIndexedXhrByAlias(alias + "." + type, index)
+
+      ## return our xhr object
+      return Promise.resolve(xhr) if xhr
+
+      options.error = $errUtils.errMsgByPath("wait.timed_out", {
+        timeout: options.timeout
+        alias
+        num
+        type
+      })
+
+      args = arguments
+
+      cy.retry ->
+        checkForXhr.apply(window, args)
+      , options
+
+    waitForXhr = (str, options) ->
       ## we always want to strip everything after the last '.'
       ## since we support alias property 'request'
       if _.indexOf(str, ".") == -1 ||
@@ -86,14 +108,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         log.set "referencesAlias", aliases
 
       if command.get("name") isnt "route"
-        $utils.throwErrByPath("wait.invalid_alias", {
+        $errUtils.throwErrByPath("wait.invalid_alias", {
           onFail: options._log
           args: { alias }
         })
 
       options.timeout = options["#{type}Timeout"] || options.timeout || cy.timeout()
 
-      options.error = $utils.errMessageByPath "wait.timed_out", {
+      options.error = $errUtils.errMsgByPath "wait.timed_out", {
         timeout: options.timeout
         alias
         num
@@ -107,7 +129,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## we may get back an xhr value instead
       ## of a promise, so we have to wrap this
       ## in another promise :-(
-      waitForRouteAlias(str, _.omit(options, "error", "_runnableTimeout"))
+      waitForXhr(str, _.omit(options, "error", "_runnableTimeout"))
     .then (responses) ->
       ## if we only asked to wait for one alias
       ## then return that, else return the array of xhr responses
@@ -130,7 +152,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## to wait on multiple aliases and forget to make this
       ## an array
       if _.isString(options)
-        $utils.throwErrByPath("wait.invalid_arguments")
+        $errUtils.throwErrByPath("wait.invalid_arguments")
 
       _.defaults options, {log: true}
 

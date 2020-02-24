@@ -2,7 +2,7 @@ import Promise from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
 import moment from 'moment'
-import $utils from '../cypress/utils.coffee'
+import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
 import * as $document from '../dom/document'
@@ -37,7 +37,7 @@ interface KeyDetailsPartial extends Partial<KeyDetails> {
 type SimulatedDefault = (
   el: HTMLElement,
   key: KeyDetails,
-  options: any
+  options: typeOptions
 ) => void
 
 interface KeyDetails {
@@ -231,12 +231,12 @@ const shouldIgnoreEvent = <
   K extends { [key in T]?: boolean }
 >(
     eventName: T,
-    options: K
+    options: K,
   ) => {
   return options[eventName] === false
 }
 
-const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
+const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: typeOptions) => {
   if (!key.text) return false
 
   const bounds = $selection.getSelectionBounds(el)
@@ -250,7 +250,7 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
     const isNumberInputType = $elements.isInput(el) && $elements.isInputType(el, 'number')
 
     if (isNumberInputType) {
-      const needsValue = options.prevVal || ''
+      const needsValue = options.prevValue || ''
       const needsValueLength = (needsValue && needsValue.length) || 0
       const curVal = $elements.getNativeProp(el, 'value')
       const bounds = $selection.getSelectionBounds(el)
@@ -269,13 +269,13 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options) => {
           return
         }
 
-        options.prevVal = needsValue + key.text
+        options.prevValue = needsValue + key.text
 
         return
       }
 
-      key.text = (options.prevVal || '') + key.text
-      options.prevVal = null
+      key.text = (options.prevValue || '') + key.text
+      options.prevValue = undefined
     }
 
     if (noneSelected) {
@@ -312,7 +312,7 @@ const validateTyping = (
   currentIndex: number,
   onFail: Function,
   skipCheckUntilIndex: number | undefined,
-  force: boolean
+  force: boolean,
 ) => {
   const chars = joinKeyArrayToString(keys.slice(currentIndex))
   const allChars = joinKeyArrayToString(keys)
@@ -367,7 +367,7 @@ const validateTyping = (
   if (!isFocusable && isTextLike && !force) {
     const node = $dom.stringify($el)
 
-    $utils.throwErrByPath('type.not_actionable_textlike', {
+    $errUtils.throwErrByPath('type.not_actionable_textlike', {
       onFail,
       args: { node },
     })
@@ -377,14 +377,14 @@ const validateTyping = (
   if (!isFocusable && !isTextLike) {
     const node = $dom.stringify($el)
 
-    $utils.throwErrByPath('type.not_on_typeable_element', {
+    $errUtils.throwErrByPath('type.not_on_typeable_element', {
       onFail,
       args: { node },
     })
   }
 
   if (numElements > 1) {
-    $utils.throwErrByPath('type.multiple_elements', {
+    $errUtils.throwErrByPath('type.multiple_elements', {
       onFail,
       args: { num: numElements },
     })
@@ -409,7 +409,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_date', {
+    $errUtils.throwErrByPath('type.invalid_date', {
       onFail,
       // set matched date or entire char string
       args: { chars: allChars },
@@ -425,7 +425,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_month', {
+    $errUtils.throwErrByPath('type.invalid_month', {
       onFail,
       args: { chars: allChars },
     })
@@ -440,7 +440,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_week', {
+    $errUtils.throwErrByPath('type.invalid_week', {
       onFail,
       args: { chars: allChars },
     })
@@ -455,7 +455,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_time', {
+    $errUtils.throwErrByPath('type.invalid_time', {
       onFail,
       args: { chars: allChars },
     })
@@ -470,7 +470,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_dateTime', {
+    $errUtils.throwErrByPath('type.invalid_datetime', {
       onFail,
       args: { chars: allChars },
     })
@@ -491,7 +491,7 @@ const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
       $selection.replaceSelectionContents(el, '\n')
     }
 
-    options.onEnterPressed()
+    options.onEnterPressed && options.onEnterPressed()
   },
   Delete: (el, key) => {
     key.events.input = $selection.deleteRightOfCursor(el)
@@ -600,6 +600,8 @@ export interface typeOptions {
   onEnterPressed?: Function
   onNoMatchingSpecialChars?: Function
   onBeforeSpecialCharAction?: Function
+  prevValue?: string
+  id?: string
 }
 
 export class Keyboard {
@@ -650,13 +652,13 @@ export class Keyboard {
 
           // ignore empty strings
           return _.filter(_.split(chars, ''))
-        }
+        },
       )
     }
 
     const keyDetailsArr = _.map(
       keys,
-      getKeyDetails(options.onNoMatchingSpecialChars)
+      getKeyDetails(options.onNoMatchingSpecialChars),
     )
 
     const numKeys = countNumIndividualKeyStrokes(keyDetailsArr)
@@ -692,7 +694,7 @@ export class Keyboard {
               currentKeyIndex,
               options.onFail,
               _skipCheckUntilIndex,
-              options.force
+              options.force,
             )
 
             _skipCheckUntilIndex = skipCheckUntilIndex
@@ -723,7 +725,7 @@ export class Keyboard {
                 return $elements.setNativeProp(
                   activeEl as $elements.HTMLTextLikeInputElement,
                   'value',
-                  valToSet
+                  valToSet,
                 )
               }
             }
@@ -742,7 +744,7 @@ export class Keyboard {
 
           return null
         }
-      }
+      },
     )
 
     // we will only press each modifier once, so only find unique modifiers
@@ -776,11 +778,7 @@ export class Keyboard {
     el: HTMLElement,
     eventType: KeyEventType,
     keyDetails: KeyDetails,
-    opts: {
-      id: string
-      onEvent?: (...args) => boolean
-      onBeforeEvent?: (...args) => boolean
-    }
+    opts: typeOptions,
   ) {
     debug('fireSimulatedEvent', eventType, keyDetails)
 
@@ -876,15 +874,14 @@ export class Keyboard {
           detail: 0,
           view: win,
         },
-        _.isUndefined
+        _.isUndefined,
       ),
     }
 
     let event: Event
 
     debug('event options:', eventType, eventOptions)
-
-    if (eventConstructor === 'TextEvent') {
+    if (eventConstructor === 'TextEvent' && win[eventConstructor]) {
       event = document.createEvent('TextEvent')
       // @ts-ignore
       event.initTextEvent(
@@ -893,7 +890,7 @@ export class Keyboard {
         eventOptions.cancelable,
         eventOptions.view,
         eventOptions.data,
-        1
+        1,
         // eventOptions.locale
       )
       /*1: IE11 Input method param*/
@@ -965,7 +962,7 @@ export class Keyboard {
     return true
   }
 
-  simulatedKeydown (el: HTMLElement, _key: KeyDetails, options: any) {
+  simulatedKeydown (el: HTMLElement, _key: KeyDetails, options: typeOptions) {
     if (isModifier(_key)) {
       const didFlag = this.flagModifier(_key)
 
@@ -994,7 +991,7 @@ export class Keyboard {
 
     debug(
       'typeSimulatedKey options:',
-      _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id'])
+      _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id']),
     )
 
     if (
@@ -1050,7 +1047,7 @@ export class Keyboard {
     this.simulatedKeyup(elToKeyup, key, options)
   }
 
-  simulatedKeyup (el: HTMLElement, _key: KeyDetails, options: any) {
+  simulatedKeyup (el: HTMLElement, _key: KeyDetails, options: typeOptions) {
     if (shouldIgnoreEvent('keyup', _key.events)) {
       debug('simulatedKeyup: ignoring event')
       delete _key.events.keyup

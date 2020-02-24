@@ -30,7 +30,7 @@ export function stripStream () {
         'self$2',
         '$1self$3$4',
         '$1 || $2.parent.__Cypress__$3',
-      ]
-    )
+      ],
+    ),
   )
 }

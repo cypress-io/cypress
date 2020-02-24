@@ -7,6 +7,7 @@ import { Reporter, ReporterProps } from './main'
 import Header from './header/header'
 import Runnables from './runnables/runnables'
 import { Events } from './lib/events'
+import ForcedGcWarning from './lib/forced-gc-warning'
 import { AppState } from './lib/app-state'
 
 const runnablesStore = {}
@@ -109,5 +110,14 @@ describe('<Reporter />', () => {
     expect(component.find(Runnables)).to.have.prop('error', error)
     expect(component.find(Runnables)).to.have.prop('runnablesStore', runnablesStore)
     expect(component.find(Runnables)).to.have.prop('specPath', 'the spec path')
+  })
+
+  it('renders the forced gc warning with the appState and events', () => {
+    const events = eventsStub()
+    const props = getProps({ events })
+    const component = shallow(<Reporter {...props} />)
+
+    expect(component.find(ForcedGcWarning)).to.have.prop('events', events)
+    expect(component.find(ForcedGcWarning)).to.have.prop('appState', props.appState)
   })
 })

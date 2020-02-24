@@ -16,7 +16,7 @@ describe "lib/util/validation", ->
         {
           name: "Chrome",
           displayName: "Chrome Browser",
-          family: "chrome",
+          family: "chromium",
           path: "/path/to/chrome",
           version: "1.2.3",
           majorVersion: 1
@@ -34,7 +34,7 @@ describe "lib/util/validation", ->
         {
           name: "Electron",
           displayName: "Electron",
-          family: "electron",
+          family: "chromium",
           path: "",
           version: "99.101.3",
           majorVersion: 99
@@ -42,7 +42,7 @@ describe "lib/util/validation", ->
         # invalid browser, missing displayName
         {
           name: "No display name",
-          family: "electron"
+          family: "chromium"
         },
         {
           name: "bad family",

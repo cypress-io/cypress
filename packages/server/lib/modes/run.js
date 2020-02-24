@@ -403,7 +403,7 @@ const iterateThroughSpecs = function (options = {}) {
         spec,
         claimedInstances - 1,
         totalInstances,
-        estimated
+        estimated,
       )
       .tap((results) => {
         runs.push(results)
@@ -453,27 +453,50 @@ const getProjectId = Promise.method((project, id) => {
 const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
 
-  if (browser.family === 'electron') {
+  if (browser.name === 'electron') {
     return getElectronProps(browser.isHeaded, project, writeVideoFrame)
   }
 
-  if (browser.family === 'chrome') {
-    return getChromeProps(browser.isHeaded, project, writeVideoFrame)
+  if (browser.family === 'chromium') {
+    return getChromeProps(writeVideoFrame)
+  }
+
+  if (browser.family === 'firefox') {
+    return getFirefoxProps(project, writeVideoFrame)
   }
 
   return {}
 }
 
-const getChromeProps = (isHeaded, project, writeVideoFrame) => {
-  const shouldWriteVideo = Boolean(writeVideoFrame)
-
-  debug('setting Chrome properties %o', { isHeaded, shouldWriteVideo })
+const getFirefoxProps = (project, writeVideoFrame) => {
+  debug('setting Firefox properties')
 
   return _
   .chain({})
   .tap((props) => {
     if (writeVideoFrame) {
-      props.screencastFrame = (e) => {
+      const onScreencastFrame = (data) => {
+        writeVideoFrame(data)
+      }
+
+      project.on('capture:video:frames', onScreencastFrame)
+
+      props.onScreencastFrame = true
+    }
+  })
+  .value()
+}
+
+const getChromeProps = (writeVideoFrame) => {
+  const shouldWriteVideo = Boolean(writeVideoFrame)
+
+  debug('setting Chrome properties %o', { shouldWriteVideo })
+
+  return _
+  .chain({})
+  .tap((props) => {
+    if (writeVideoFrame) {
+      props.onScreencastFrame = (e) => {
         // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
         writeVideoFrame(Buffer.from(e.data, 'base64'))
       }
@@ -610,7 +633,7 @@ const trashAssets = Promise.method((config = {}) => {
 
   return Promise.join(
     trash.folder(config.videosFolder),
-    trash.folder(config.screenshotsFolder)
+    trash.folder(config.screenshotsFolder),
   )
   .catch((err) => {
     // dont make trashing assets fail the build
@@ -621,31 +644,35 @@ const trashAssets = Promise.method((config = {}) => {
 // if we've been told to record and we're not spawning a headed browser
 const browserCanBeRecorded = (browser) => {
   // TODO: enable recording Electron in headed mode too
-  if (browser.family === 'electron' && browser.isHeadless) {
+  if (browser.name === 'electron' && browser.isHeadless) {
     return true
   }
 
-  if (browser.family === 'chrome') {
+  if (browser.name !== 'electron' && browser.family === 'chromium') {
+    return true
+  }
+
+  if (browser.family === 'firefox') {
     return true
   }
 
   return false
 }
 
-const createVideoRecording = function (videoName) {
+const createVideoRecording = function (videoName, options = {}) {
   const outputDir = path.dirname(videoName)
 
   return fs
   .ensureDirAsync(outputDir)
   .then(() => {
     return videoCapture
-    .start(videoName, {
+    .start(videoName, _.extend({}, options, {
       onError (err) {
         // catch video recording failures and log them out
         // but don't let this affect the run at all
         return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
       },
-    })
+    }))
   })
 }
 
@@ -673,7 +700,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
     console.log('')
 
     // TODO update error messages and included browser name and headed mode
-    if (browser.family === 'electron' && browser.isHeaded) {
+    if (browser.name === 'electron' && browser.isHeaded) {
       errors.warning('CANNOT_RECORD_VIDEO_HEADED')
     } else {
       errors.warning('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER', browser.name)
@@ -694,7 +721,7 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   const videoName = videoPath('.mp4')
   const compressedVideoName = videoPath('-compressed.mp4')
 
-  return this.createVideoRecording(videoName)
+  return this.createVideoRecording(videoName, { webmInput: browser.family === 'firefox' })
   .then((props = {}) => {
     return {
       videoName,
@@ -915,7 +942,24 @@ module.exports = {
       },
     }
 
+    const warnings = {}
+
     browserOpts.projectRoot = projectRoot
+
+    browserOpts.onWarning = (err) => {
+      const { message } = err
+
+      // if this warning has already been
+      // seen for this browser launch then
+      // suppress it
+      if (warnings[message]) {
+        return
+      }
+
+      warnings[message] = err
+
+      return project.onWarning
+    }
 
     return openProject.launch(browser, spec, browserOpts)
   },
@@ -968,11 +1012,19 @@ module.exports = {
     let attempts = 0
 
     const wait = () => {
+      debug('waiting for socket to connect and browser to launch...')
+
       return Promise.join(
-        this.waitForSocketConnection(project, socketId),
+        this.waitForSocketConnection(project, socketId)
+        .tap(() => {
+          debug('socket connected', { socketId })
+        }),
         this.launchBrowser(options)
+        .tap(() => {
+          debug('browser launched')
+        }),
       )
-      .timeout(timeout || 30000)
+      .timeout(timeout || 60000)
       .catch(Promise.TimeoutError, (err) => {
         attempts += 1
 
@@ -1095,7 +1147,7 @@ module.exports = {
             videoName,
             compressedVideoName,
             videoCompression,
-            suv
+            suv,
           ).then(finish)
           // TODO: add a catch here
         }
@@ -1120,7 +1172,7 @@ module.exports = {
   runSpecs (options = {}) {
     _.defaults(options, {
       // only non-Electron browsers run headed by default
-      headed: options.browser.family !== 'electron',
+      headed: options.browser.name !== 'electron',
     })
 
     const { config, browser, sys, headed, outputPath, specs, specPattern, beforeSpecRun, afterSpecRun, runUrl, parallel, group, tag } = options
@@ -1209,6 +1261,11 @@ module.exports = {
       browser,
     })
 
+    if (browser.family !== 'chromium' && !options.config.chromeWebSecurity) {
+      console.log()
+      errors.warning('CHROME_WEB_SECURITY_NOT_SUPPORTED', browser.family)
+    }
+
     const screenshots = []
 
     // we know we're done running headlessly
@@ -1264,7 +1321,7 @@ module.exports = {
           'found \'%d\' specs using spec pattern \'%s\': %o',
           names.length,
           specPattern,
-          names
+          names,
         )
       }
     })
@@ -1334,7 +1391,7 @@ module.exports = {
             errors.throw('NO_SPECS_FOUND', config.integrationFolder, specPattern)
           }
 
-          if (browser.family === 'chrome') {
+          if (browser.family === 'chromium') {
             chromePolicyCheck.run(onWarning)
           }
 

@@ -28,6 +28,15 @@ defaults: &defaults
     COLUMNS: 100
     LINES: 24
 
+# filters and requires for testing binary with Firefox
+testBinaryFirefox: &testBinaryFirefox
+  filters:
+    branches:
+      only:
+        - develop
+  requires:
+    - build-npm-package
+    - build-binary
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -87,11 +96,9 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - install-latest-chrome:
-          browser: << parameters.browser >>
       - run:
-          command: npm run test-e2e -- --chunk << parameters.chunk >> --browser << parameters.browser >>
-          working_directory: packages/server
+          command: yarn lerna exec --scope @packages/server "yarn test-e2e --chunk << parameters.chunk >> --browser << parameters.browser >>"
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -102,155 +109,96 @@ commands:
       - store_artifacts:
           path: ~/.npm/_logs
 
-  # for caching node modules use project environment variable
-  # like CACHE_VERSION=15
-  save-cache:
-    description: |
-      Shorter command to save node_modules for a package
-      Warning! Only works with "packages/<name>/node_modules"
+  post-install-comment:
+    description: Post GitHub comment with a blurb on how to install pre-release version
+    steps:
+      - run: ls -la
+      # make sure JSON files with uploaded urls are present
+      - run: ls -la binary-url.json npm-package-url.json
+      - run: cat binary-url.json
+      - run: cat npm-package-url.json
+      - run:
+          name: Post pre-release install comment
+          command: |
+            node scripts/add-install-comment.js \
+              --npm npm-package-url.json \
+              --binary binary-url.json
+
+  verify-mocha-results:
+    description: Double-check that Mocha tests ran as expected.
     parameters:
-      packageName:
-        description: Name of the package to save, for example "server" or "desktop-gui"
-        type: string
+      expectedResultCount:
+        description: The number of result files to expect, ie, the number of Mocha test suites that ran.
+        type: integer
+        ## by default, assert that at least 1 test ran
+        default: 0
     steps:
-      - save_cache:
-          name: Saving cache for << parameters.packageName >>
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "packages/<< parameters.packageName >>/package.json" }}
-          paths:
-            - packages/<< parameters.packageName >>/node_modules
+      - run: yarn verify:mocha:results << parameters.expectedResultCount >>
 
-  save-caches:
-    description: save each node_modules folder per package
-    steps:
-      # TODO switch to "save-cache" when it allows custom paths
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-cli-{{ checksum "cli/package.json" }}
-          paths:
-            - cli/node_modules
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "package.json" }}
-          paths:
-            - node_modules
-      - save-cache:
-          packageName: coffee
-      - save-cache:
-          packageName: desktop-gui
-      - save-cache:
-          packageName: driver
-      - save-cache:
-          packageName: example
-      # TODO switch to "save-cache" custom command when it allows passing list of paths
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-electron-{{ checksum "packages/electron/package.json" }}
-          paths:
-            - packages/electron/node_modules
-            - ~/.cache/electron
-            - ~/.electron
-      - save-cache:
-          packageName: extension
-      - save-cache:
-          packageName: https-proxy
-      - save-cache:
-          packageName: launcher
-      - save-cache:
-          packageName: network
-      - save-cache:
-          packageName: reporter
-      - save-cache:
-          packageName: runner
-      - save-cache:
-          packageName: server
-      - save-cache:
-          packageName: socket
-      - save-cache:
-          packageName: static
-      - save-cache:
-          packageName: ts
-      - save-cache:
-          packageName: ui-components
-      - save-cache:
-          packageName: web-config
-
-  restore-cache:
+  test-binary-against-repo:
     description: |
-      Shorter command to restore node_modules for a package.
-      Since it does not list paths to restore, can restore any cache,
-      as long the key is the same as the saved one.
+      Takes the built binary and NPM package, clones given example repo
+      and runs the new version of Cypress against it.
     parameters:
-      packageName:
-        description: Name of the package to restore, for example "server" or "desktop-gui"
+      repo:
+        description: Name of the repo like "cypress-example-kitchensink"
         type: string
-      packagePath:
-        description: Path to package.json file
+      browser:
+        description: Name of the browser to use
+        type: enum
+        enum: ["electron", "chrome", "firefox"]
+        default: "electron"
+      command:
+        description: Test command to run to start Cypress tests
         type: string
+        default: "npm run e2e"
+      wait-on:
+        description: Url to wait-on before starting tests
+        type: string
+        default: ""
     steps:
-      - restore_cache:
-          name: Restoring cache for << parameters.packageName >>
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-<< parameters.packageName >>-{{ checksum "<< parameters.packagePath >>" }}
-
-  restore-caches:
-    description: need to restore a separate cache for each package.json
-    steps:
-      - restore-cache:
-          packageName: cli
-          packagePath: cli/package.json
-      - restore-cache:
-          packageName: root
-          packagePath: package.json
-      - restore-cache:
-          packageName: coffee
-          packagePath: packages/coffee/package.json
-      - restore-cache:
-          packageName: desktop-gui
-          packagePath: packages/desktop-gui/package.json
-      - restore-cache:
-          packageName: driver
-          packagePath: packages/driver/package.json
-      - restore-cache:
-          packageName: example
-          packagePath: packages/example/package.json
-      - restore-cache:
-          packageName: electron
-          packagePath: packages/electron/package.json
-      - restore-cache:
-          packageName: extension
-          packagePath: packages/extension/package.json
-      - restore-cache:
-          packageName: https-proxy
-          packagePath: packages/https-proxy/package.json
-      - restore-cache:
-          packageName: launcher
-          packagePath: packages/launcher/package.json
-      - restore-cache:
-          packageName: network
-          packagePath: packages/network/package.json
-      - restore-cache:
-          packageName: reporter
-          packagePath: packages/reporter/package.json
-      - restore-cache:
-          packageName: runner
-          packagePath: packages/runner/package.json
-      - restore-cache:
-          packageName: server
-          packagePath: packages/server/package.json
-      - restore-cache:
-          packageName: socket
-          packagePath: packages/socket/package.json
-      - restore-cache:
-          packageName: static
-          packagePath: packages/static/package.json
-      - restore-cache:
-          packageName: ts
-          packagePath: packages/ts/package.json
-      - restore-cache:
-          packageName: ui-components
-          packagePath: packages/ui-components/package.json
-      - restore-cache:
-          packageName: web-config
-          packagePath: packages/web-config/package.json
+      - attach_workspace:
+          at: ~/
+      # make sure the binary and NPM package files are present
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run:
+          name: Cloning project <<parameters.repo>>
+          command: git clone --depth 1 https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+      - run:
+          command: npm install
+          working_directory: /tmp/<<parameters.repo>>
+      - run:
+          name: Install Cypress
+          working_directory: /tmp/<<parameters.repo>>
+          # force installing the freshly built binary
+          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm run build --if-present
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm start --if-present
+          background: true
+      - when:
+          condition: <<parameters.wait-on>>
+          steps:
+            - run:
+                name: Wait-on <<parameters.wait-on>>
+                command: npx wait-on <<parameters.wait-on>> --timeout 120000
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: <<parameters.command>> -- --browser <<parameters.browser>>
+      - store-npm-logs
+      - store_artifacts:
+          name: screenshots
+          path: /tmp/<<parameters.repo>>/cypress/screenshots
+      - store_artifacts:
+          name: videos
+          path: /tmp/<<parameters.repo>>/cypress/videos
 
 jobs:
-  ## code checkout and NPM installs
+  ## code checkout and yarn installs
   build:
     <<: *defaults
     steps:
@@ -259,44 +207,39 @@ jobs:
           name: Print working folder
           command: echo $PWD
       - run:
-          name: print global NPM cache path
-          command: echo $(npm -g bin)
+          name: print global yarn cache path
+          command: echo $(yarn global bin)
       - run:
           name: print Node version
           command: node -v
       - run:
-          name: print NPM version
-          command: npm -v
-      - run: npm run check-node-version
+          name: print yarn version
+          command: yarn -v
+      - run: yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run: npm run check-terminal
+      - run: yarn check-terminal
 
-      - run: npm run stop-only-all
+      - run: yarn stop-only-all
 
-      - restore-caches
+      - restore_cache:
+          name: Restore yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "yarn.lock" }}
 
       # show what is already cached globally
-      - run: ls $(npm -g bin)
-      - run: ls $(npm -g bin)/../lib/node_modules
+      - run: ls $(yarn global bin)
+      - run: ls $(yarn global bin)/../lib/node_modules
 
-      # Install the root packages
-      # Link sup packages in ./node_modules/@packages/*
-      # Install sub packages dependencies and build all sub packages via postinstall script
       # try several times, because flaky NPM installs ...
-      - run: npm install || npm install
+      - run: yarn --ignore-engines || yarn --ignore-engines
       - run:
           name: Top level packages
-          command: npm ls --depth=0 || true
+          command: yarn list --depth=0 || true
 
-      # Prune so we do not save removed dependencies to cache
-      - run: npm run all prune
-
-      - save-caches
       - store-npm-logs
 
       ## save entire folder as artifact for other jobs to run without reinstalling
@@ -311,8 +254,35 @@ jobs:
       - attach_workspace:
           at: ~/
       ## this will catch .only's in js/coffee as well
-      - run: npm run lint-all
+      - run: yarn lint-all
+      - run:
+          name: cypress info (dev)
+          command: node cli/bin/cypress info --dev
       - store-npm-logs
+
+  cli-visual-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: mkdir -p cli/visual-snapshots
+      - run:
+          # TODO sanitize "cypress info" output to be consistent
+          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
+          environment:
+            FORCE_COLOR: 2
+      - run:
+          command: node cli/bin/cypress help | yarn --silent term-to-html > cli/visual-snapshots/cypress-help.html
+          environment:
+            FORCE_COLOR: 2
+      - store_artifacts:
+          path: cli/visual-snapshots
+      - run:
+          name: Upload CLI snapshots for diffing
+          command: |
+            PERCY_TOKEN=$PERCY_TOKEN_CLI \
+            yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
     <<: *defaults
@@ -321,27 +291,17 @@ jobs:
       - attach_workspace:
           at: ~/
       # make sure mocha runs
-      - run: npm run test-mocha
+      - run: yarn test-mocha
       # test binary build code
-      - run: npm run test-scripts
+      - run: yarn test-scripts
       # make sure our snapshots are compared correctly
-      - run: npm run test-mocha-snapshot
+      - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
-      - run: npm run all build-js
-      # test codemods
-      - run: npm run test-jscodeshift
-      # run unit tests from individual packages
-      - run: npm run all test -- --package cli
-      - run: npm run all test -- --package electron
-      - run: npm run all test -- --package extension
-      - run: npm run all test -- --package https-proxy
-      - run: npm run all test -- --package launcher
-      - run: npm run all test -- --package network
-      - run: npm run all test -- --package proxy
-      - run: npm run all test -- --package reporter
-      - run: npm run all test -- --package runner
-      - run: npm run all test -- --package socket
-      - run: npm run all test -- --package static
+      - run: yarn lerna run build-js --stream
+      # run unit tests from each individual package
+      - run: yarn test
+      - verify-mocha-results:
+          expectedResultCount: 6
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -359,8 +319,7 @@ jobs:
           command: ls -la chai
           working_directory: cli/types
       - run:
-          command: npm run dtslint
-          working_directory: cli
+          command: yarn lerna exec  --scope cypress "yarn dtslint"
       - store-npm-logs
 
   "server-unit-tests":
@@ -369,7 +328,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: npm run all test-unit -- --package server
+      - run: yarn test-unit --scope @packages/server
+      - verify-mocha-results:
+          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -380,7 +341,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: npm run all test-integration -- --package server
+      - run: yarn test-integration --scope @packages/server
+      - verify-mocha-results:
+          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
@@ -391,7 +354,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm run all test-performance -- --package server
+          command: yarn lerna exec --scope @packages/server "yarn test-performance"
+      - verify-mocha-results:
+          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -510,27 +475,78 @@ jobs:
           browser: electron
           chunk: 8
 
+  "server-e2e-tests-firefox-1":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 1
+
+  "server-e2e-tests-firefox-2":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 2
+
+  "server-e2e-tests-firefox-3":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 3
+
+  "server-e2e-tests-firefox-4":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 4
+
+  "server-e2e-tests-firefox-5":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 5
+
+  "server-e2e-tests-firefox-6":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 6
+
+  "server-e2e-tests-firefox-7":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 7
+
+  "server-e2e-tests-firefox-8":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          browser: firefox
+          chunk: 8
+
   "driver-integration-tests-chrome":
     <<: *defaults
     parallelism: 5
     steps:
       - attach_workspace:
           at: ~/
-      - install-latest-chrome:
-          browser: chrome
       - run:
-          command: npm start
+          command: yarn lerna exec --scope @packages/driver "yarn start"
           background: true
-          working_directory: packages/driver
       - run:
-          command: $(npm bin)/wait-on http://localhost:3500
-          working_directory: packages/driver
+          command: yarn wait-on http://localhost:3500
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 5x-driver-chrome --browser chrome
-          working_directory: packages/driver
+            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-chrome --browser chrome"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -554,13 +570,34 @@ jobs:
   #         command: |
   #           CYPRESS_KONFIG_ENV=production \
   #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-  #           npm run cypress:run -- --record --parallel --group 5x-driver-electron --browser electron
+  #           npm run cypress:run --record --parallel --group 5x-driver-electron --browser electron
   #         working_directory: packages/driver
   #     - store_test_results:
   #         path: /tmp/cypress
   #     - store_artifacts:
   #         path: /tmp/artifacts
   #     - store-npm-logs
+
+  "driver-integration-tests-firefox":
+    <<: *defaults
+    parallelism: 5
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn lerna run start --scope @packages/driver
+          background: true
+      - run:
+          command: $(yarn bin)/wait-on http://localhost:3500
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-firefox --browser firefox"
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
 
   "desktop-gui-integration-tests-2x":
     <<: *defaults
@@ -569,14 +606,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm run build-prod
-          working_directory: packages/desktop-gui
+          command: yarn lerna exec --scope @packages/desktop-gui "yarn build-prod"
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group 2x-desktop-gui
-          working_directory: packages/desktop-gui
+            yarn lerna exec --scope @packages/desktop-gui "yarn cypress:run --record --parallel --group 2x-desktop-gui"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -589,14 +624,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm run build-prod
-          working_directory: packages/reporter
+          command: yarn lerna exec  --scope @packages/reporter "yarn build-prod"
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group reporter
-          working_directory: packages/reporter
+            yarn lerna exec  --scope @packages/reporter "yarn cypress:run --record --parallel --group reporter"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -609,14 +642,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: npm run build
-          working_directory: packages/ui-components
+          command: yarn lerna run build --scope @packages/ui-components
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            npm run cypress:run -- --record --parallel --group ui-components
-          working_directory: packages/ui-components
+            yarn lerna exec --scope @packages/ui-components "yarn cypress:run --record --parallel --group ui-components"
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -665,15 +696,12 @@ jobs:
 
       - attach_workspace:
           at: ~/
-      - run: $(npm bin)/print-arch
+      - run: $(yarn bin)/print-arch
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
-          # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
-          # won't be set and we will use default version, since we are not going to
-          # upload the dev binary build anywhere
-          command: npm run binary-build -- --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
-      - run: npm run binary-zip -- --platform $PLATFORM
+          command: yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+      - run: yarn binary-zip --platform $PLATFORM
       # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
       - store-npm-logs
@@ -711,16 +739,16 @@ jobs:
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
       - run:
           name: Install prod dependencies
-          command: npm install --production
+          command: yarn --production
           working_directory: /tmp/repo
       - run:
           name: Example server
-          command: npm start
+          command: yarn start
           working_directory: /tmp/repo
           background: true
       - run:
           name: Run Kitchensink example project
-          command: npm run cypress:run -- --project /tmp/repo
+          command: yarn cypress:run --project /tmp/repo
       - store_artifacts:
           path: /tmp/repo/cypress/screenshots
       - store_artifacts:
@@ -737,11 +765,11 @@ jobs:
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
       - run:
           name: Install prod dependencies
-          command: npm install --production
+          command: yarn --production
           working_directory: /tmp/repo
       - run:
           name: Example server
-          command: npm start
+          command: yarn start
           working_directory: /tmp/repo
           background: true
       - run:
@@ -751,7 +779,7 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_ENV=staging \
             CYPRESS_video=false \
-            npm run cypress:run -- --project /tmp/repo --record
+            yarn cypress:run --project /tmp/repo --record
       - store-npm-logs
 
   "test-against-staging":
@@ -768,7 +796,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
-            npm run cypress:run -- --project /tmp/repo --record
+            yarn cypress:run --project /tmp/repo --record
       - store-npm-logs
 
   build-npm-package:
@@ -776,33 +804,31 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: npm run check-next-dev-version
+      - run: yarn check-next-dev-version
       - run:
           name: bump NPM version
-          command: npm --no-git-tag-version --allow-same-version version ${NEXT_DEV_VERSION:-0.0.0-development}
+          command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
-          working_directory: cli
-          command: npm run build
+          command: yarn build --scope cypress
       - run:
           command: ls -la types
           working_directory: cli/build
       - run:
           name: list NPM package contents
-          working_directory: cli/build
-          command: npm run size
+          command: yarn lerna run --scope cypress size
       - run:
           name: pack NPM package
           working_directory: cli/build
-          command: npm pack
+          command: yarn pack
       - run:
           name: list created NPM package
           working_directory: cli/build
           command: ls -l
       # created file should have filename cypress-<version>.tgz
       - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
-      - run: cp cli/build/cypress-${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
+      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
+      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
       - run: ls -l /tmp/urls
       - store-npm-logs
       - run: pwd
@@ -860,13 +886,7 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: /tmp/testing
-          command: $(npm bin)/cypress verify
-      - run:
-          name: Post pre-release install comment
-          command: |
-            node scripts/add-install-comment.js \
-              --npm npm-package-url.json \
-              --binary binary-url.json
+          command: $(yarn bin)/cypress verify
       - run:
           name: Running other test projects with new NPM package and binary
           command: |
@@ -875,6 +895,15 @@ jobs:
               --binary binary-url.json \
               --provider circle
       - store-npm-logs
+
+  post-pre-release-install-comment:
+    <<: *defaults
+    steps:
+      # needs uploaded NPM and test binary
+      - attach_workspace:
+          at: ~/
+      - run: ls -la
+      - post-install-comment
 
   "test-npm-module-and-verify-binary":
     <<: *defaults
@@ -898,7 +927,15 @@ jobs:
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: $(npm bin)/cypress verify
+          command: $(yarn bin)/cypress verify
+      - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: $(yarn bin)/cypress help
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(yarn bin)/cypress info
       - store-npm-logs
 
   # install NPM + binary zip and run against staging API
@@ -925,39 +962,79 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_ENV=staging \
-            $(npm bin)/cypress run --record
+            $(yarn bin)/cypress run --record
       - store-npm-logs
+
+  "test-binary-against-recipes-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci:firefox
 
   "test-binary-against-kitchensink":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      # make sure the binary and NPM package files are present
-      - run: ls -l
-      - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning kitchensink project
-          command: git clone --depth 1 https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/kitchensink
-      - run:
-          command: npm install
-          working_directory: /tmp/kitchensink
-      - run:
-          name: Install Cypress
-          working_directory: /tmp/kitchensink
-          # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm run build
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm start
-          background: true
-      - run:
-          working_directory: /tmp/kitchensink
-          command: npm run e2e
-      - store-npm-logs
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+
+  "test-binary-against-kitchensink-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: firefox
+
+  "test-binary-against-kitchensink-chrome":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-kitchensink
+          browser: chrome
+
+  "test-binary-against-todomvc-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-todomvc
+          browser: firefox
+
+  "test-binary-against-documentation-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-documentation
+          browser: firefox
+          command: "npm run cypress:run"
+          wait-on: "http://localhost:2222"
+
+
+  "test-binary-against-realworld-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-realworld
+          browser: firefox
+          command: "npm run cypress:run"
+          wait-on: "http://localhost:4100"
+
+  "test-binary-against-api-testing-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-api-testing
+          browser: firefox
+          command: "npm run cy:run"
+          wait-on: "http://localhost:3000"
+
+  "test-binary-against-piechopper-firefox":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-example-piechopper
+          browser: firefox
+          command: "npm run cypress:run"
+          wait-on: "http://localhost:8080"
 
   test-binary-as-specific-user:
     <<: *defaults
@@ -986,17 +1063,25 @@ jobs:
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: $(yarn bin)/cypress help
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(yarn bin)/cypress info
+      - run:
           name: Add Cypress demo
           working_directory: test-binary
           command: npx @bahmutov/cly init
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(npm bin)/cypress verify
+          command: DEBUG=cypress:cli $(yarn bin)/cypress verify
       - run:
           name: Run Cypress binary
           working_directory: test-binary
-          command: DEBUG=cypress:cli $(npm bin)/cypress run
+          command: DEBUG=cypress:cli $(yarn bin)/cypress run
       - store-npm-logs
 
 linux-workflow: &linux-workflow
@@ -1010,6 +1095,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     # unit, integration and e2e tests
+    - cli-visual-tests:
+        requires:
+          - build
     - unit-tests:
         requires:
           - build
@@ -1020,74 +1108,84 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - server-performance-tests:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-1:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-2:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-3:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-4:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-5:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-6:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-7:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-chrome-8:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-1:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-2:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-3:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-4:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-5:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-6:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-7:
-        context: test-runner:performance-tracking
         requires:
           - build
     - server-e2e-tests-electron-8:
-        context: test-runner:performance-tracking
+        requires:
+          - build
+    - server-e2e-tests-firefox-1:
+        requires:
+          - build
+    - server-e2e-tests-firefox-2:
+        requires:
+          - build
+    - server-e2e-tests-firefox-3:
+        requires:
+          - build
+    - server-e2e-tests-firefox-4:
+        requires:
+          - build
+    - server-e2e-tests-firefox-5:
+        requires:
+          - build
+    - server-e2e-tests-firefox-6:
+        requires:
+          - build
+    - server-e2e-tests-firefox-7:
+        requires:
+          - build
+    - server-e2e-tests-firefox-8:
         requires:
           - build
     - driver-integration-tests-chrome:
+        requires:
+          - build
+    - driver-integration-tests-firefox:
         requires:
           - build
     ## TODO: add these back in when flaky tests are fixed
@@ -1139,7 +1237,6 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
     - build-binary:
-        context: test-runner:performance-tracking
         requires:
           - build
     - upload-binary:
@@ -1150,6 +1247,15 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build-binary
+    - post-pre-release-install-comment:
+        context: test-runner:commit-status-checks
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - upload-npm-package
+          - upload-binary
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         filters:
@@ -1176,14 +1282,26 @@ linux-workflow: &linux-workflow
         requires:
           - build-npm-package
           - build-binary
+
+    - test-binary-against-recipes-firefox:
+        <<: *testBinaryFirefox
     - test-binary-against-kitchensink:
-        filters:
-          branches:
-            only:
-              - develop
-        requires:
-          - build-npm-package
-          - build-binary
+        <<: *testBinaryFirefox
+    - test-binary-against-kitchensink-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-kitchensink-chrome:
+        <<: *testBinaryFirefox
+    - test-binary-against-todomvc-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-documentation-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-api-testing-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-realworld-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-piechopper-firefox:
+        <<: *testBinaryFirefox
+
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
         executor: non-root-docker-user
@@ -1281,6 +1399,17 @@ mac-workflow: &mac-workflow
         requires:
           - Mac NPM package
           - Mac binary
+
+    - post-pre-release-install-comment:
+        context: test-runner:commit-status-checks
+        name: Post Mac pre-release install comment
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+          - Mac NPM package upload
+          - Mac binary upload
 
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs

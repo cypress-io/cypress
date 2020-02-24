@@ -27,7 +27,7 @@ const find = function findSpecs (config, specPattern) {
 
   debug(
     'looking for test specs in the folder:',
-    integrationFolderPath
+    integrationFolderPath,
   )
 
   if (specPattern) {
@@ -45,7 +45,7 @@ const find = function findSpecs (config, specPattern) {
     fixturesFolderPath = path.join(
       config.fixturesFolder,
       '**',
-      '*'
+      '*',
     )
   }
 

@@ -15,7 +15,6 @@ describe "e2e baseUrl", ->
     e2e.it "passes", {
       spec: "base_url_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     }
 
   context "http", ->
@@ -32,5 +31,4 @@ describe "e2e baseUrl", ->
     e2e.it "passes", {
       spec: "base_url_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
     }

@@ -1,6 +1,5 @@
 $ = Cypress.$.bind(Cypress)
-_ = Cypress._
-Promise = Cypress.Promise
+{ _, Promise } = Cypress
 
 Cookie = require("js-cookie")
 
@@ -102,7 +101,7 @@ describe "src/cy/commands/navigation", ->
 
     describe "errors", ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
@@ -1100,40 +1099,43 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("The new URL is considered a different origin because the following parts of the URL are different:")
+          expect(err.message).to.include("> port")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy
-          .visit("http://localhost:3500/fixtures/generic.html")
-          .visit("http://localhost:3501/fixtures/generic.html")
+        cy.visit("http://localhost:3500/fixtures/generic.html")
+        cy.visit("http://localhost:3501/fixtures/generic.html")
 
       it "throws when attempting to visit a 2nd domain on different protocol", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("The new URL is considered a different origin because the following parts of the URL are different:")
+          expect(err.message).to.include("> protocol")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy
-          .visit("http://localhost:3500/fixtures/generic.html")
-          .visit("https://localhost:3500/fixtures/generic.html")
+        cy.visit("http://localhost:3500/fixtures/generic.html")
+        cy.visit("https://localhost:3500/fixtures/generic.html")
 
-      it "throws when attempting to visit a 2nd domain on different host", (done) ->
+      it "throws when attempting to visit a 2nd domain on different superdomain", (done) ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("The new URL is considered a different origin because the following parts of the URL are different:")
+          expect(err.message).to.include("> superdomain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy
-          .visit("http://localhost:3500/fixtures/generic.html")
-          .visit("http://google.com:3500/fixtures/generic.html")
+        cy.visit("http://localhost:3500/fixtures/generic.html")
+        cy.visit("http://google.com:3500/fixtures/generic.html")
 
       it "throws attemping to visit 2 unique ip addresses", (done) ->
         $autIframe = cy.state("$autIframe")
@@ -1161,7 +1163,7 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a second unique domain.")
+          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1555,7 +1557,7 @@ describe "src/cy/commands/navigation", ->
 
           expect(Cookie.get("__cypress.initial")).to.be.undefined
 
-    ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973
+    ## TODO: broken - https://github.com/cypress-io/cypress/issues/4973 (chrome76+ and firefox)
     it.skip "does not reset the timeout", (done) ->
       cy.timeout(1000)
 
@@ -1585,9 +1587,7 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='/timeout?ms=500'>jquery</a>")
             .appendTo(win.document.body)
 
-            ## this causes a synchronous beforeunload event
-            ## unlike win.location.href setter
-            $a.get(0).click()
+            causeSynchronousBeforeUnload($a)
 
           when 2
             ## on 2nd retry add the DOM element
@@ -1647,9 +1647,7 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='/timeout?ms=500'>jquery</a>")
             .appendTo(win.document.body)
 
-            ## this causes a synchronous beforeunload event
-            ## unlike win.location.href setter
-            $a.get(0).click()
+            causeSynchronousBeforeUnload($a)
 
             null
           .wrap(null).then ->
@@ -1692,9 +1690,7 @@ describe "src/cy/commands/navigation", ->
               $a = win.$("<a href='/timeout?ms=400'>jquery</a>")
               .appendTo(win.document.body)
 
-              ## this causes a synchronous beforeunload event
-              ## unlike win.location.href setter
-              $a.get(0).click()
+              causeSynchronousBeforeUnload($a)
 
               ## immediately logs pending state
               expect(logByName("page load").get("state")).to.eq("pending")
@@ -1735,9 +1731,9 @@ describe "src/cy/commands/navigation", ->
             $a = win.$("<a href='#{url}'>jquery</a>")
             .appendTo(win.document.body)
 
-            $a.get(0).click()
+            causeSynchronousBeforeUnload($a)
 
-            null
+      null
 
   ## this tests isLoading spinner
   ## and page load event
@@ -1800,7 +1796,7 @@ describe "src/cy/commands/navigation", ->
             expect(@lastLog).to.exist
             expect(@lastLog.get("state")).to.eq("pending")
             expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
-            expect(@lastLog.get("snapshots")).to.be.empty
+            expect(@lastLog.get("snapshots")).to.not.exist
 
         .get("#dimensions").click()
         .then ->
@@ -1825,7 +1821,7 @@ describe "src/cy/commands/navigation", ->
             expect(@lastLog).to.exist
             expect(@lastLog.get("state")).to.eq("pending")
             expect(@lastLog.get("message")).to.eq("--waiting for new page to load--")
-            expect(@lastLog.get("snapshots")).to.be.empty
+            expect(@lastLog.get("snapshots")).to.not.exist
 
           cy
             .get("form#click-me")
@@ -2181,3 +2177,12 @@ describe "src/cy/commands/navigation", ->
               "Originated From": $form.get(0)
               "Args": event
             })
+
+
+causeSynchronousBeforeUnload = ($a) ->
+  ## this causes a synchronous beforeunload event
+  ## chrome & firefox behave differently
+  win = $a[0].ownerDocument.defaultView
+  if Cypress.isBrowser('firefox')
+    win.location.href = $a[0].href
+  else $a.get(0).click()
