@@ -1123,7 +1123,7 @@ describe "lib/config", ->
       }
       browserTwo = {
         name: "fake electron",
-        family: "electron",
+        family: "chromium",
         displayName: "Electron",
         version: "x.y.z",
         # Electron browser is built-in, no external path

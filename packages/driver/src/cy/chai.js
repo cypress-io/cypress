@@ -54,8 +54,8 @@ chai.use((chai, u) => {
           'chai.invalid_jquery_obj', {
             assertion: method,
             subject: $utils.stringifyActual(obj),
-          }
-        )
+          },
+        ),
       )
 
       throw err
@@ -282,7 +282,7 @@ chai.use((chai, u) => {
           obj.is(selector) || !!obj.find(selector).length,
           'expected #{this} to contain #{exp}',
           'expected #{this} not to contain #{exp}',
-          text
+          text,
         )
       })
     }
@@ -324,7 +324,7 @@ chai.use((chai, u) => {
               `expected '${node}' to have a length of \#{exp} but got \#{act}`,
               `expected '${node}' to not have a length of \#{act}`,
               length,
-              obj.length
+              obj.length,
             )
           } catch (e1) {
             e1.node = node
@@ -384,7 +384,7 @@ chai.use((chai, u) => {
               'expected \#{act} to exist in the DOM',
               'expected \#{act} not to exist in the DOM',
               node,
-              node
+              node,
             )
           } catch (e1) {
             e1.node = node

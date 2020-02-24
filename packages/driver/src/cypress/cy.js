@@ -369,7 +369,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               current: command.get('name'),
               called: enqueuedCmd.name,
             },
-          }
+          },
         )
       }
 
@@ -390,7 +390,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               current: command.get('name'),
               returned: ret,
             },
-          }
+          },
         )
       }
 
@@ -990,7 +990,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
                   current: current.get('name'),
                   called: name,
                 },
-              }
+              },
             )
           }
         }
@@ -1035,7 +1035,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     now (name, ...args) {
       return Promise.resolve(
-        commandFns[name].apply(cy, args)
+        commandFns[name].apply(cy, args),
       )
     },
 
