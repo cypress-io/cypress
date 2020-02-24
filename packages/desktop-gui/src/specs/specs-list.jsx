@@ -117,6 +117,14 @@ class SpecsList extends Component {
     return projectsApi.runSpec(project, spec, project.chosenBrowser)
   }
 
+  _setExpandRootFolder (specFolderPath, isExpanded, e) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    specsStore.setExpandSpecChildren(specFolderPath, isExpanded)
+    specsStore.setExpandSpecFolder(specFolderPath, true)
+  }
+
   _selectSpecFolder (specFolderPath, e) {
     e.preventDefault()
 
@@ -132,7 +140,17 @@ class SpecsList extends Component {
           <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
             <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
             <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`}></i>
-            {nestingLevel === 0 ? `${spec.displayName} tests` : spec.displayName}
+            {
+              nestingLevel === 0 ?
+              <>
+                {spec.displayName} tests
+                <span>
+                  <a onClick={this._setExpandRootFolder.bind(this, spec, false)}>collapse all</a>{' | '}
+                  <a onClick={this._setExpandRootFolder.bind(this, spec, true)}>expand all</a>
+                </span>
+              </> :
+              spec.displayName
+            }
           </div>
           {
             isExpanded ?

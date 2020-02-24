@@ -58,8 +58,16 @@ export class SpecsStore {
     this.chosenSpecPath = relativePath
   }
 
-  @action setExpandSpecFolder (spec) {
-    spec.setExpanded(!spec.isExpanded)
+  @action setExpandSpecFolder (spec, isExpanded) {
+    spec.setExpanded(isExpanded === undefined ? !spec.isExpanded : isExpanded)
+  }
+
+  @action setExpandSpecChildren (spec, isExpanded) {
+    this._depthFirstIterateSpecs(spec, (fileOfFolder) => {
+      if (fileOfFolder instanceof Folder) {
+        fileOfFolder.setExpanded(isExpanded)
+      }
+    })
   }
 
   @action setFilter (project, filter = null) {
@@ -124,6 +132,15 @@ export class SpecsStore {
     }, [])
 
     return tree
+  }
+
+  _depthFirstIterateSpecs (root, func) {
+    for (const child of root.children) {
+      func(child)
+      if (child instanceof Folder) {
+        this._depthFirstIterateSpecs(child, func)
+      }
+    }
   }
 }
 
