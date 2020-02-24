@@ -6,6 +6,7 @@ glob        = require("../util/glob")
 specsUtil   = require("../util/specs")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
+{ escapeFilenameInUrl } = require('../util/escape_filename')
 
 module.exports = {
   handleFiles: (req, res, config) ->
@@ -22,6 +23,10 @@ module.exports = {
 
     @getSpecs(test, config)
     .then (specs) =>
+      specs = specs.map((fileName) => 
+        return escapeFilenameInUrl(fileName)
+      )
+
       @getJavascripts(config)
       .then (js) =>
         res.render iframePath, {
