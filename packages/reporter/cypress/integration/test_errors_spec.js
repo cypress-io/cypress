@@ -86,6 +86,10 @@ describe('test errors', function () {
     })
 
     it('clicking prints to console', function () {
+      cy.window().then((win) => {
+        cy.spy(win.console, 'log')
+      })
+
       cy.spy(this.runner, 'emit')
       cy.get('.runnable-err-print').click().should(() => {
         expect(this.runner.emit).to.be.calledWith('runner:console:error')

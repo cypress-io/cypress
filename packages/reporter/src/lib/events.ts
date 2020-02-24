@@ -161,8 +161,12 @@ const events: Events = {
     })
 
     localBus.on('show:error', (testId: number) => {
+      console.log('show:error', testId) // eslint-disable-line no-console
+
       const test = runnablesStore.testById(testId)
       const command = test.err.isCommandErr && test.commandMatchingErr()
+
+      console.log('emit runner:console:error', test.err, command ? command.id : undefined) // eslint-disable-line no-console
 
       runner.emit('runner:console:error', {
         err: test.err,
