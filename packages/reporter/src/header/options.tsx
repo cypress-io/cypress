@@ -46,9 +46,6 @@ const Options = observer(({ appState, events = defaultEvents }: Props) => {
           <button className={cs({ active: filter === null })} onClick={setFilter(null)}>
             None
           </button>
-          <button className={cs({ active: filter === 'active' })} onClick={setFilter('active')}>
-            Running
-          </button>
           <button className={cs({ active: filter === 'passed' })} onClick={setFilter('passed')}>
             Passed
           </button>

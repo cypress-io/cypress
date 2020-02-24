@@ -158,7 +158,7 @@ export default class Test extends Runnable {
   matchesFilter (filter: TestState | null) {
     if (!filter) return true
 
-    return this.state === filter
+    return this.isActive || this.state === filter
   }
 
   _findOrCreateHook (name: string) {
