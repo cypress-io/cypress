@@ -111,7 +111,7 @@ export const browsers: Browser[] = [
 export function launch (
   browser: FoundBrowser,
   url: string,
-  args: string[] = []
+  args: string[] = [],
 ) {
   log('launching browser %o to open %s', browser, url)
 

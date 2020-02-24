@@ -24,7 +24,7 @@ const onBeforeRetry = (details) => {
       delay: humanTime.long(details.delay, false),
       tries: details.total - details.retryIndex,
       response: details.err,
-    }
+    },
   )
 }
 
@@ -86,7 +86,7 @@ const throwIfIndeterminateCiBuildId = (ciBuildId, parallel, group) => {
         group,
         parallel,
       },
-      ciProvider.detectableCiBuildIdProviders()
+      ciProvider.detectableCiBuildIdProviders(),
     )
   }
 }
@@ -151,7 +151,7 @@ const uploadArtifacts = (options = {}) => {
     return uploads.push(
       upload.send(pathToFile, url)
       .then(success)
-      .catch(fail)
+      .catch(fail),
     )
   }
 

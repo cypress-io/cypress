@@ -403,7 +403,7 @@ const iterateThroughSpecs = function (options = {}) {
         spec,
         claimedInstances - 1,
         totalInstances,
-        estimated
+        estimated,
       )
       .tap((results) => {
         runs.push(results)
@@ -633,7 +633,7 @@ const trashAssets = Promise.method((config = {}) => {
 
   return Promise.join(
     trash.folder(config.videosFolder),
-    trash.folder(config.screenshotsFolder)
+    trash.folder(config.screenshotsFolder),
   )
   .catch((err) => {
     // dont make trashing assets fail the build
@@ -1022,7 +1022,7 @@ module.exports = {
         this.launchBrowser(options)
         .tap(() => {
           debug('browser launched')
-        })
+        }),
       )
       .timeout(timeout || 60000)
       .catch(Promise.TimeoutError, (err) => {
@@ -1147,7 +1147,7 @@ module.exports = {
             videoName,
             compressedVideoName,
             videoCompression,
-            suv
+            suv,
           ).then(finish)
           // TODO: add a catch here
         }
@@ -1321,7 +1321,7 @@ module.exports = {
           'found \'%d\' specs using spec pattern \'%s\': %o',
           names.length,
           specPattern,
-          names
+          names,
         )
       }
     })
