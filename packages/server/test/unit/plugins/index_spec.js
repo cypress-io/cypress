@@ -170,7 +170,7 @@ describe('lib/plugins/index', () => {
             'execute',
             'some:event',
             { eventId: 0, invocationId: '00' },
-            ['foo', 'bar']
+            ['foo', 'bar'],
           )
 
           expect(value).to.equal('value')

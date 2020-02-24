@@ -104,7 +104,7 @@ describe('e2e plugins', function () {
       config: {
         pluginsFile: path.join(
           pluginsAbsolutePath,
-          'cypress/plugins/index.js'
+          'cypress/plugins/index.js',
         ),
       },
       project: pluginsAbsolutePath,
