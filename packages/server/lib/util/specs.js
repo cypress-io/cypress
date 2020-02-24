@@ -39,7 +39,7 @@ const find = function findSpecs (config, specPattern) {
     fixturesFolderPath = path.join(
       config.fixturesFolder,
       '**',
-      '*'
+      '*',
     )
   }
 

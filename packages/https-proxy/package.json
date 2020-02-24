@@ -23,7 +23,6 @@
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "@packages/coffee": "*",
     "@packages/network": "*",
     "@packages/ts": "*",
     "chai": "3.5.0",

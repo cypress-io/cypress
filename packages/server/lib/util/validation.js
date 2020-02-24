@@ -18,7 +18,7 @@ const str = JSON.stringify
 */
 const errMsg = (key, value, type) => {
   return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(
-    value
+    value,
   )}\``
 }
 
@@ -48,7 +48,7 @@ const isValidBrowser = (browser) => {
   }
 
   // TODO: this is duplicated with browsers/index
-  const knownBrowserFamilies = ['electron', 'chromium', 'firefox']
+  const knownBrowserFamilies = ['chromium', 'firefox']
 
   if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
     return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
@@ -153,7 +153,7 @@ module.exports = {
     return errMsg(
       key,
       value,
-      'a fully qualified URL (starting with `http://` or `https://`)'
+      'a fully qualified URL (starting with `http://` or `https://`)',
     )
   },
 

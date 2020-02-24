@@ -122,7 +122,7 @@ const moduleFactory = () => {
             debug(
               'launching browser: %o, spec: %s',
               browser,
-              spec.relative
+              spec.relative,
             )
 
             return browsers.open(browser, options, automation)

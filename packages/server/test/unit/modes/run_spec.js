@@ -764,7 +764,7 @@ describe('lib/modes/run', () => {
           },
           {
             show: true,
-          }
+          },
         )
       })
     })
