@@ -5,7 +5,6 @@
   "main": "src/main.tsx",
   "scripts": {
     "build-js": "webpack",
-    "build-prod": "yarn build-js",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",

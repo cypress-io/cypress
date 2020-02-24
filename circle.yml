@@ -585,7 +585,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna run start --scope @packages/driver
+          command: yarn workspace @packages/driver start
           background: true
       - run:
           command: $(yarn bin)/wait-on http://localhost:3500
@@ -606,7 +606,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/desktop-gui "yarn build-prod"
+          command: yarn workspace @packages/desktop-gui build-prod
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
@@ -624,7 +624,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec  --scope @packages/reporter "yarn build-prod"
+          command:  yarn workspace @packages/reporter build-js
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
@@ -642,7 +642,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna run build --scope @packages/ui-components
+          command: yarn workspace @packages/ui-components build-js
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
