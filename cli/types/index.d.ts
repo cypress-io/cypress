@@ -1955,7 +1955,7 @@ declare namespace Cypress {
      * @example
      *    cy.$$('p')
      */
-    $$: JQueryStatic
+    $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {

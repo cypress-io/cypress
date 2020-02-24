@@ -129,6 +129,7 @@ const knownCommands = [
   '-v',
   '--version',
   'version',
+  'info',
 ]
 
 const text = (description) => {
@@ -296,6 +297,18 @@ module.exports = {
       }
 
       cache[command]()
+    })
+
+    program
+    .command('info')
+    .usage('[command]')
+    .description('Prints Cypress and system information')
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      require('./exec/info')
+      .start(opts)
+      .then(util.exit)
+      .catch(util.logErrorExit1)
     })
 
     debug('cli starts with arguments %j', args)

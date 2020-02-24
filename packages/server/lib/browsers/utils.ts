@@ -19,6 +19,7 @@ const PATH_TO_BROWSERS = appData.path('browsers')
 const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
 
 const getBrowserPath = (browser) => {
+  // TODO need to check if browser.name is an unempty string
   return path.join(
     PATH_TO_BROWSERS,
     `${browser.name}-${browser.channel}`
@@ -177,6 +178,8 @@ export = {
   getPort,
 
   copyExtension,
+
+  getBrowserPath,
 
   getProfileDir,
 
