@@ -32,5 +32,9 @@ describe('e2e cdp', function () {
     browser: 'chrome',
     expectedExitCode: 1,
     snapshot: true,
+    onStdout: (stdout) => {
+      // the location of this warning is non-deterministic
+      return stdout.replace('The automation client disconnected. Cannot continue running tests.\n', '')
+    },
   })
 })
