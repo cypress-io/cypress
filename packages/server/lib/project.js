@@ -32,6 +32,9 @@ const specsUtil = require('./util/specs')
 const localCwd = cwd()
 
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
+const ampersandRe = /&/g
+const percentRe = /%/g
+const questionRe = /\?/g
 
 class Project extends EE {
   constructor (projectRoot) {
@@ -518,11 +521,18 @@ class Project extends EE {
 
   normalizeSpecUrl (browserUrl, specUrl) {
     const replacer = (match) => match.replace('//', '/')
+    let paths = specUrl.split('/')
+
+    // escape valid file name characters that cannot be used in URL
+    paths[paths.length - 1] = _.last(paths)
+    .replace(percentRe, '%25') // %
+    .replace(ampersandRe, '%26') // &
+    .replace(questionRe, '%3F') // ? -> it's only valid in Linux
 
     return [
       browserUrl,
       '#/tests',
-      specUrl,
+      ...paths,
     ].join('/').replace(multipleForwardSlashesRe, replacer)
   }
 

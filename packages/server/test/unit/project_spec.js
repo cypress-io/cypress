@@ -698,6 +698,17 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
+    // ? isn't tested here because it's valid in Unix/Linux, but invalid in Windows
+    // https://gist.github.com/doctaphred/d01d05291546186941e1b7ddc02034d3
+    it('escapses %, &', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a&b%c.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%26b%25c.js')
+      })
+    })
+
     it('returns __all spec url', function () {
       return this.project.getSpecUrl()
       .then((str) => {
