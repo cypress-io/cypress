@@ -185,6 +185,20 @@
         margin-right: 0.6em;
         padding: 0;
       }
+
+      .clear-filter {
+        background: none;
+        color: #476fc9;
+        font-weight: normal;
+        margin-left: 0.6em;
+        outline: none;
+        padding: 0.4em 0.6em;
+
+        &:hover,
+        &:focus {
+          text-decoration: underline;
+        }
+      }
     }
   }
 
