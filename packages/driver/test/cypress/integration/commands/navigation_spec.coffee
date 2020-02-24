@@ -1100,7 +1100,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
-          expect(err.message).to.include("The new URL is considered a different origin because the following parts of the URL are different: port")
+          expect(err.message).to.include("The new URL is considered a different origin because the following parts of the URL are different:")
           expect(err.message).to.include("> port")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
