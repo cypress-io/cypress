@@ -528,6 +528,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     {
       type,
       clear,
-    }
+    },
   )
 }
