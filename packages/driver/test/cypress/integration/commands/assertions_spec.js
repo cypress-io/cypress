@@ -1790,13 +1790,8 @@ describe('src/cy/commands/assertions', () => {
           const l6 = this.logs[5]
 
           // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.eq(
-            `\
-expected \`<div>\` to be 'visible'
-
-This element \`<div>\` is not visible because it has CSS property: \`display: none\`\
-`,
-          )
+          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
+          expect(l6.get('error').message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
         }
       })
 
