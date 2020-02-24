@@ -186,11 +186,23 @@
         padding: 0;
       }
 
+      .filter-passed i {
+        color: #23AE89;
+      }
+
+      .filter-failed i {
+        color: #E94B3B;
+      }
+
+      .filter-pending i {
+        color: #aaa;
+      }
+
       .clear-filter {
         background: none;
         color: #476fc9;
         font-weight: normal;
-        margin-left: 0.6em;
+        margin-left: 0.4em;
         outline: none;
         padding: 0.4em 0.6em;
 

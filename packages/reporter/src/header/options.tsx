@@ -43,14 +43,14 @@ const Options = observer(({ appState, events = defaultEvents }: Props) => {
       <div className='test-filter'>
         <label>Filter:</label>
         <div className='test-filter-group button-group' role='group'>
-          <button className={cs({ active: filter === 'passed' })} onClick={setFilter('passed')}>
-            Passed
+          <button className={cs('filter-passed', { active: filter === 'passed' })} onClick={setFilter('passed')}>
+            <i className='fas fa-check' /> Passed
           </button>
-          <button className={cs({ active: filter === 'failed' })} onClick={setFilter('failed')}>
-            Failed
+          <button className={cs('filter-failed', { active: filter === 'failed' })} onClick={setFilter('failed')}>
+            <i className='fas fa-times' /> Failed
           </button>
-          <button className={cs({ active: filter === 'pending' })} onClick={setFilter('pending')}>
-            Pending
+          <button className={cs('filter-pending', { active: filter === 'pending' })} onClick={setFilter('pending')}>
+            <i className='fas fa-circle-notch' /> Pending
           </button>
         </div>
         {!!filter && (
