@@ -322,7 +322,7 @@ describe('Specs List', function () {
         cy.get(lastCollapsedFolderSelector).click()
         cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 0)
       })
-      
+
       it('expand all expands all sub folders', () => {
         cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
         cy.get('.folder-expanded').should('have.length', 2)

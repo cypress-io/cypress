@@ -149,7 +149,7 @@ class SpecsList extends Component {
                   <a onClick={this._setExpandRootFolder.bind(this, spec, true)}>expand all</a>
                 </span>
               </> :
-              spec.displayName
+                spec.displayName
             }
           </div>
           {
