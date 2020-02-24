@@ -104,68 +104,67 @@ describe('suites', function () {
       cy.get('.toggle-options').click()
     })
 
-    it('displays when the "Running" filter is selected and it contains active tests', () => {
-      cy.get('[value="active"]').click()
-      cy.contains('suite 1').should('be.visible')
-      cy.contains('suite (nested) 1').should('be.visible')
-    })
-
-    it('does not display when the "Running" filter is selected and it does not contain active tests', () => {
-      cy.get('[value="active"]').click()
-      cy.contains('suite 3').should('not.exist')
-      cy.contains('suite 4').should('not.exist')
-    })
-
     it('displays when the "Passed" filter is selected and it contains passed tests', () => {
-      cy.get('[value="passed"]').click()
+      cy.get('.filter-passed').click()
       cy.contains('suite 1').should('be.visible')
       cy.contains('suite 3').should('be.visible')
     })
 
     it('does not display when the "Passed" filter is selected and it does not contain passed tests', () => {
-      cy.get('[value="passed"]').click()
+      cy.get('.filter-passed').click()
       cy.contains('suite 4').should('not.exist')
       cy.contains('suite (nested) 1').should('not.exist')
     })
 
     it('displays when the "Failed" filter is selected and it contains failed tests', () => {
-      cy.get('[value="failed"]').click()
+      cy.get('.filter-failed').click()
       cy.contains('suite 1').should('be.visible')
     })
 
     it('does not display when the "Failed" filter is selected and it does not contain failed tests', () => {
-      cy.get('[value="failed"]').click()
+      cy.get('.filter-failed').click()
       cy.contains('suite 3').should('not.exist')
       cy.contains('suite 4').should('not.exist')
       cy.contains('suite (nested) 1').should('not.exist')
     })
 
     it('displays when the "Pending" filter is selected and it contains pending tests', () => {
-      cy.get('[value="pending"]').click()
+      cy.get('.filter-pending').click()
       cy.contains('suite 1').should('be.visible')
       cy.contains('suite (nested) 1').should('be.visible')
     })
 
+    it('always displays running test', function () {
+      cy.wrap({}).then(() => {
+        this.runner.emit('test:before:run:async', { id: 'r7' })
+      })
+
+      cy.get('.filter-passed').click()
+      cy.contains('suite (nested) 1').should('be.visible')
+      cy.get('.filter-failed').click()
+      cy.contains('suite (nested) 1').should('be.visible')
+      cy.get('.filter-pending').click()
+      cy.contains('suite (nested) 1').should('be.visible')
+    })
+
     it('does not display when the "Pending" filter is selected and it does not contain pending tests', () => {
-      cy.get('[value="pending"]').click()
+      cy.get('.filter-pending').click()
       cy.contains('suite 3').should('not.exist')
       cy.contains('suite 4').should('not.exist')
     })
 
     it('does not display when any filter and no children', () => {
-      cy.get('[value="active"]').click()
+      cy.get('.filter-passed').click()
       cy.contains('suite 5').should('not.exist')
-      cy.get('[value="passed"]').click()
+      cy.get('.filter-failed').click()
       cy.contains('suite 5').should('not.exist')
-      cy.get('[value="failed"]').click()
-      cy.contains('suite 5').should('not.exist')
-      cy.get('[value="pending"]').click()
+      cy.get('.filter-pending').click()
       cy.contains('suite 5').should('not.exist')
     })
 
-    it('displays when the "No filters" filter is selected', () => {
-      cy.get('[value="passed"]').click()
-      cy.get('[value=""]').click()
+    it('displays all when filter is cleared', () => {
+      cy.get('.filter-passed').click()
+      cy.get('.clear-filter').click()
 
       cy.contains('suite 1').should('be.visible')
       cy.contains('suite 3').should('be.visible')

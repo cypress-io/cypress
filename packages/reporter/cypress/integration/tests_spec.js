@@ -104,30 +104,15 @@ describe('tests', function () {
       cy.get('.toggle-options').click()
     })
 
-    it('displays when the "Running" filter is selected and it is active', () => {
-      cy.get('[value="active"]').click()
-      cy.contains('test (nested) 2').should('be.visible')
-    })
-
-    it('does not display when the "Running" filter is selected and it is not active', () => {
-      cy.get('[value="active"]').click()
-      cy.contains('test 1').should('not.exist')
-      cy.contains('test 2').should('not.exist')
-      cy.contains('test 3').should('not.exist')
-      cy.contains('test 4').should('not.exist')
-      cy.contains('test 5').should('not.exist')
-      cy.contains('test (nested) 1').should('not.exist')
-    })
-
     it('displays when the "Passed" filter is selected and it is passed', () => {
-      cy.get('[value="passed"]').click()
+      cy.get('.filter-passed').click()
       cy.contains('test 1').should('be.visible')
       cy.contains('test 3').should('be.visible')
       cy.contains('test 4').should('be.visible')
     })
 
     it('does not display when the "Passed" filter is selected and it is not passed', () => {
-      cy.get('[value="passed"]').click()
+      cy.get('.filter-passed').click()
       cy.contains('test 2').should('not.exist')
       cy.contains('test 5').should('not.exist')
       cy.contains('test (nested) 1').should('not.exist')
@@ -135,12 +120,12 @@ describe('tests', function () {
     })
 
     it('displays when the "Failed" filter is selected and it is failed', () => {
-      cy.get('[value="failed"]').click()
+      cy.get('.filter-failed').click()
       cy.contains('test 2').should('be.visible')
     })
 
     it('does not display when the "Failed" filter is selected and it is not failed', () => {
-      cy.get('[value="failed"]').click()
+      cy.get('.filter-failed').click()
       cy.contains('test 1').should('not.exist')
       cy.contains('test 3').should('not.exist')
       cy.contains('test 4').should('not.exist')
@@ -150,12 +135,12 @@ describe('tests', function () {
     })
 
     it('displays when the "Pending" filter is selected and it is pending', () => {
-      cy.get('[value="pending"]').click()
+      cy.get('.filter-pending').click()
       cy.contains('test (nested) 1').should('be.visible')
     })
 
     it('does not display when the "Pending" filter is selected and it is not pending', () => {
-      cy.get('[value="pending"]').click()
+      cy.get('.filter-pending').click()
       cy.contains('test 1').should('not.exist')
       cy.contains('test 2').should('not.exist')
       cy.contains('test 3').should('not.exist')
@@ -164,9 +149,9 @@ describe('tests', function () {
       cy.contains('test (nested) 2').should('not.exist')
     })
 
-    it('displays when the "No filters" filter is selected', () => {
-      cy.get('[value="passed"]').click()
-      cy.get('[value=""]').click()
+    it('does not display when any filter and no children', () => {
+      cy.get('.filter-passed').click()
+      cy.get('.clear-filter').click()
 
       cy.contains('test 1').should('be.visible')
       cy.contains('test 2').should('be.visible')
@@ -174,6 +159,19 @@ describe('tests', function () {
       cy.contains('test 4').should('be.visible')
       cy.contains('test 5').should('be.visible')
       cy.contains('test (nested) 1').should('be.visible')
+      cy.contains('test (nested) 2').should('be.visible')
+    })
+
+    it('always displays running test', function () {
+      cy.wrap({}).then(() => {
+        this.runner.emit('test:before:run:async', { id: 'r7' })
+      })
+
+      cy.get('.filter-passed').click()
+      cy.contains('test (nested) 2').should('be.visible')
+      cy.get('.filter-failed').click()
+      cy.contains('test (nested) 2').should('be.visible')
+      cy.get('.filter-pending').click()
       cy.contains('test (nested) 2').should('be.visible')
     })
 
@@ -192,7 +190,7 @@ describe('tests', function () {
 
       this.runner.emit('runnables:ready', this.runnables)
 
-      cy.get('[value="passed"]').click()
+      cy.get('.filter-passed').click()
       cy.get('.filter-empty-message')
       .should('be.visible')
       .should('have.length', 1)
