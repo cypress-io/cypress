@@ -1,0 +1,37 @@
+@import './tooltip';
+
+.reporter {
+  .button-group {
+    display: flex;
+
+    button {
+      background: #eee;
+      border-radius: 0;
+      border-color: #d3d3d3;
+      border-style: solid solid solid none;
+      border-width: 1px;
+      box-shadow: none;
+      font-weight: normal;
+      outline: none;
+      padding: 0.4em 0.6em;
+
+      &:hover {
+        background: #e3e3e3;
+      }
+
+      &:first-child {
+        border-radius: 3px 0 0 3px;
+        border-left-style: solid;
+      }
+
+      &:last-child {
+        border-radius: 0 3px 3px 0;
+      }
+
+      &.active {
+        background: #e3e3e3;
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+    }
+  }
+}

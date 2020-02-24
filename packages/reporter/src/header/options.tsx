@@ -40,29 +40,26 @@ const Options = observer(({ appState, events = defaultEvents }: Props) => {
         </Tooltip>
       </button>
 
-      <form className='test-filter'>
-        <legend>Filter:</legend>
-        <label>
-          <input type='radio' value='' checked={filter === null} onChange={setFilter(null)} />
-          None
-        </label>
-        <label>
-          <input type='radio' value='active' checked={filter === 'active'} onChange={setFilter('active')} />
-          Running
-        </label>
-        <label>
-          <input type='radio' value='passed' checked={filter === 'passed'} onChange={setFilter('passed')} />
-          Passed
-        </label>
-        <label>
-          <input type='radio' value='failed' checked={filter === 'failed'} onChange={setFilter('failed')} />
-          Failed
-        </label>
-        <label>
-          <input type='radio' value='pending' checked={filter === 'pending'} onChange={setFilter('pending')} />
-          Pending
-        </label>
-      </form>
+      <div className='test-filter'>
+        <label>Filter:</label>
+        <div className='test-filter-group button-group' role='group'>
+          <button className={cs({ active: filter === null })} onClick={setFilter(null)}>
+            None
+          </button>
+          <button className={cs({ active: filter === 'active' })} onClick={setFilter('active')}>
+            Running
+          </button>
+          <button className={cs({ active: filter === 'passed' })} onClick={setFilter('passed')}>
+            Passed
+          </button>
+          <button className={cs({ active: filter === 'failed' })} onClick={setFilter('failed')}>
+            Failed
+          </button>
+          <button className={cs({ active: filter === 'pending' })} onClick={setFilter('pending')}>
+            Pending
+          </button>
+        </div>
+      </div>
     </div>
   )
 })
