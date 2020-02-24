@@ -22,7 +22,7 @@ describe('Proxy', () => {
       proxy.start(3333)
       .then((proxy1) => {
         this.proxy = proxy1
-      })
+      }),
     )
   })
 
@@ -30,7 +30,7 @@ describe('Proxy', () => {
     return Promise.join(
       httpServer.stop(),
       httpsServer.stop(),
-      proxy.stop()
+      proxy.stop(),
     )
   })
 

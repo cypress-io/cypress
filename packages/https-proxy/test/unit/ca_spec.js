@@ -44,7 +44,7 @@ describe('lib/ca', () => {
     it('creates certs + keys dir', function () {
       return Promise.join(
         fs.statAsync(path.join(this.dir, 'certs')),
-        fs.statAsync(path.join(this.dir, 'keys'))
+        fs.statAsync(path.join(this.dir, 'keys')),
       )
     })
 
