@@ -699,3 +699,25 @@ describe "lib/gui/events", ->
           expect(err.name).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.message).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.apiUrl).to.equal(konfig("api_url"))
+
+    describe "launch:browser", ->
+      it "launches browser via openProject", ->
+        sinon.stub(openProject, 'launch').callsFake (browser, spec, opts) ->
+          expect(browser).to.eq('foo')
+          expect(spec).to.eq('bar')
+
+          opts.onBrowserOpen()
+          opts.onBrowserClose()
+
+          Promise.resolve()
+
+        @handleEvent("launch:browser", { browser: 'foo', spec: 'bar' }).then =>
+          expect(@send.getCall(0).args[1].data).to.include({ browserOpened: true })
+          expect(@send.getCall(1).args[1].data).to.include({ browserClosed: true })
+
+      it "wraps error titles if not set", ->
+        err = new Error('foo')
+        sinon.stub(openProject, 'launch').rejects(err)
+
+        @handleEvent("launch:browser", {}).then =>
+          expect(@send.getCall(0).args[1].__error).to.include({ message: 'foo', title: 'Error launching browser' })

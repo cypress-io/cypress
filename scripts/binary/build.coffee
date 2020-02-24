@@ -24,7 +24,6 @@ meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
 xvfb = require("../../cli/lib/exec/xvfb")
-linkPackages = require('../link-packages')
 { transformRequires } = require('./util/transform-requires')
 { testStaticAssets } = require('./util/testStaticAssets')
 performanceTracking = require('../../packages/server/test/support/helpers/performance.js')
@@ -126,6 +125,20 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#copyPackages")
 
     packages.copyAllToDist(distDir())
+
+  copyPatches = ->
+    log("#copyPatches")
+
+    patchesPath = path.join(__dirname, '..', '..', 'patches')
+    destPatchesPath = path.join(distDir(), 'patches')
+
+    fs.mkdirSync(destPatchesPath)
+    fs.readdirSync(patchesPath)
+    .map((patchFileName) -> [
+      path.join(patchesPath, patchFileName),
+      path.join(destPatchesPath, patchFileName)
+    ])
+    .forEach(([src, dest]) -> fs.copyFileSync(src, dest))
 
   transformSymlinkRequires = ->
     log("#transformSymlinkRequires")
@@ -347,6 +360,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
+  .then(copyPatches)
   .then(npmInstallPackages)
   .then(createRootPackage)
   .then(convertCoffeeToJs)

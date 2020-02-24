@@ -3,7 +3,7 @@ const path = require('path')
 const chalk = require('chalk')
 const finder = require('find-package-json')
 
-const DEFAULT_SCRIPT = 'npm run test -- --inspect-brk=5566'
+const DEFAULT_SCRIPT = 'yarn test --inspect-brk=5566'
 
 const file = process.argv[2]
 

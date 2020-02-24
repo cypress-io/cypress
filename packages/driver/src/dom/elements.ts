@@ -864,9 +864,14 @@ const getFirstParentWithTagName = ($el, tagName) => {
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
-  // return null if we're at body/html/document
+  // don't continue if we're undefined
+  if (!$el || !$el[0]) {
+    return null
+  }
+
+  // return null if we're at not a normal DOM el
   // cuz that means nothing has fixed position
-  if (!$el || $el.is('body,html') || $document.isDocument($el)) {
+  if ($el.is('body,html') || $document.isDocument($el)) {
     return null
   }
 
@@ -945,7 +950,23 @@ const getElements = ($el) => {
   return els
 }
 
-const getContainsSelector = (text, filter = '') => {
+const whitespaces = /\s+/g
+
+// When multiple space characters are considered as a single whitespace in all tags except <pre>.
+const normalizeWhitespaces = (elem) => {
+  let testText = elem.textContent || elem.innerText || $(elem).text()
+
+  if (elem.tagName === 'PRE') {
+    return testText
+  }
+
+  return testText.replace(whitespaces, ' ')
+}
+const getContainsSelector = (text, filter = '', options: {
+  matchCase?: boolean
+} = {}) => {
+  const $expr = $.expr[':']
+
   const escapedText = $utils.escapeQuotes(text)
 
   // they may have written the filter as
@@ -953,8 +974,41 @@ const getContainsSelector = (text, filter = '') => {
   // https://github.com/cypress-io/cypress/issues/2407
   const filters = filter.trim().split(',')
 
+  let cyContainsSelector
+
+  if (_.isRegExp(text)) {
+    if (options.matchCase === false && !text.flags.includes('i')) {
+      text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
+    }
+
+    // taken from jquery's normal contains method
+    cyContainsSelector = function (elem) {
+      let testText = normalizeWhitespaces(elem)
+
+      return text.test(testText)
+    }
+  } else if (_.isString(text)) {
+    cyContainsSelector = function (elem) {
+      let testText = normalizeWhitespaces(elem)
+
+      if (!options.matchCase) {
+        testText = testText.toLowerCase()
+        text = text.toLowerCase()
+      }
+
+      return testText.includes(text)
+    }
+  } else {
+    cyContainsSelector = $expr.contains
+  }
+
+  // we set the `cy-contains` jquery selector which will only be used
+  // in the context of cy.contains(...) command and selector playground.
+  $expr['cy-contains'] = cyContainsSelector
+
   const selectors = _.map(filters, (filter) => {
-    return `${filter}:not(script,style):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+    // use custom cy-contains selector that is registered above
+    return `${filter}:not(script,style):cy-contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
   })
 
   return selectors.join()

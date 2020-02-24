@@ -19,9 +19,10 @@ const PATH_TO_BROWSERS = appData.path('browsers')
 const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
 
 const getBrowserPath = (browser) => {
+  // TODO need to check if browser.name is an unempty string
   return path.join(
     PATH_TO_BROWSERS,
-    `${browser.name}`
+    `${browser.name}-${browser.channel}`
   )
 }
 
@@ -126,7 +127,9 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
     ))
 
     _.extend(pluginConfigResult, {
-      args: _.filter(pluginConfigResult, (_val, key) => _.isNumber(key)),
+      args: _.filter(pluginConfigResult, (_val, key) => {
+        return _.isNumber(key)
+      }),
       extensions: [],
     })
   } else {
@@ -164,6 +167,8 @@ function extendLaunchOptionsFromPlugins (launchOptions, pluginConfigResult, opti
 }
 
 export = {
+  extendLaunchOptionsFromPlugins,
+
   executeBeforeBrowserLaunch,
 
   defaultLaunchOptions,
@@ -173,6 +178,8 @@ export = {
   getPort,
 
   copyExtension,
+
+  getBrowserPath,
 
   getProfileDir,
 

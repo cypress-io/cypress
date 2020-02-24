@@ -97,10 +97,9 @@ describe "lib/browsers/chrome", ->
 
       pathToTheme = extension.getPathToTheme()
 
-      ## this should get obliterated
-      @args.push("--something=else")
-      
-      chrome.open("chrome", "http://", {}, @automation)
+      onWarning = sinon.stub()
+
+      chrome.open("chrome", "http://", { onWarning }, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
@@ -111,7 +110,7 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
-        expect(errors.warning).calledOnce
+        expect(onWarning).calledOnce
 
     it "normalizes --load-extension if provided in plugin", ->
       plugins.register 'before:browser:launch', (browser, config) ->
@@ -134,26 +133,13 @@ describe "lib/browsers/chrome", ->
 
     it "normalizes multiple extensions from plugins", ->
       plugins.register 'before:browser:launch', (browser, config) ->
-        return Promise.resolve {
-          args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]
-        }
-
-        expect(args).to.deep.eq([
-          "--foo=bar"
-          "--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,#{pathToTheme}"
-          "--user-data-dir=/profile/dir"
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ])
-
-        expect(onWarning).calledOnce
-
-    it "normalizes multiple extensions from plugins", ->
-      plugins.register 'before:browser:launch', (browser, config) ->
         return Promise.resolve {args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]}
-      
+
       pathToTheme = extension.getPathToTheme()
 
-      chrome.open("chrome", "http://", {}, @automation)
+      onWarning = sinon.stub()
+
+      chrome.open("chrome", "http://", { onWarning }, @automation)
       .then =>
         args = utils.launch.firstCall.args[2]
 
@@ -164,7 +150,7 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
-        expect(errors.warning).not.calledOnce
+        expect(onWarning).not.calledOnce
 
     it "cleans up an unclean browser profile exit status", ->
       @readJson.withArgs("/profile/dir/Default/Preferences").resolves({

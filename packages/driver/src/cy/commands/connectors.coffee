@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $dom = require("../../dom")
 $utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 returnFalseIfThenable = (key, args...) ->
   if key is "then" and _.isFunction(args[0]) and _.isFunction(args[1])
@@ -113,7 +114,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ret = undefined
 
       if ret? and invokedCyCommand and not ret.then
-        $utils.throwErrByPath("then.callback_mixes_sync_and_async", {
+        $errUtils.throwErrByPath("then.callback_mixes_sync_and_async", {
           onFail: options._log
           args: { value: $utils.stringify(ret) }
         })
@@ -128,7 +129,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## resolve with the existing subject
       return if _.isUndefined(ret) then subject else ret
     .catch Promise.TimeoutError, ->
-      $utils.throwErrByPath "invoke_its.timed_out", {
+      $errUtils.throwErrByPath "invoke_its.timed_out", {
         onFail: options._log
         args: {
           cmd: name
@@ -143,7 +144,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   invokeFn = (subject, optionsOrStr, args...) ->
     optionsPassed = _.isObject(optionsOrStr) and !_.isFunction(optionsOrStr)
-    options = null 
+    options = null
     str = null
 
     if not optionsPassed
@@ -187,34 +188,34 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     ## check for false positive (negative?) with 0 given as index
     if not isProp(str)
-      $utils.throwErrByPath("invoke_its.null_or_undefined_property_name", {
+      $errUtils.throwErrByPath("invoke_its.null_or_undefined_property_name", {
         onFail: options._log
         args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
       })
 
     if not _.isString(str) and not _.isNumber(str)
-      $utils.throwErrByPath("invoke_its.invalid_prop_name_arg", {
+      $errUtils.throwErrByPath("invoke_its.invalid_prop_name_arg", {
         onFail: options._log
         args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
       })
 
     if not _.isObject(options) or _.isFunction(options)
-      $utils.throwErrByPath("invoke_its.invalid_options_arg", {
+      $errUtils.throwErrByPath("invoke_its.invalid_options_arg", {
         onFail: options._log
         args: { cmd: name }
       })
 
-    if isCmdIts and args and args.length > 0	
-      $utils.throwErrByPath("invoke_its.invalid_num_of_args", {	
-        onFail: options._log	
+    if isCmdIts and args and args.length > 0
+      $errUtils.throwErrByPath("invoke_its.invalid_num_of_args", {
+        onFail: options._log
         args: { cmd: name }
       })
 
     ## TODO: use the new error utils that are part of
     ## the error message enhancements PR
     propertyNotOnSubjectErr = (prop) ->
-      $utils.cypressErr(
-        $utils.errMessageByPath("invoke_its.nonexistent_prop", {
+      $errUtils.cypressErr(
+        $errUtils.errMsgByPath("invoke_its.nonexistent_prop", {
           prop,
           cmd: name
         })
@@ -223,8 +224,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     propertyValueNullOrUndefinedErr = (prop, value) ->
       errMessagePath = if isCmdIts then "its" else "invoke"
 
-      $utils.cypressErr(
-        $utils.errMessageByPath("#{errMessagePath}.null_or_undefined_prop_value", {
+      $errUtils.cypressErr(
+        $errUtils.errMsgByPath("#{errMessagePath}.null_or_undefined_prop_value", {
           prop,
           value,
           cmd: name
@@ -234,8 +235,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     subjectNullOrUndefinedErr = (prop, value) ->
       errMessagePath = if isCmdIts then "its" else "invoke"
 
-      $utils.cypressErr(
-        $utils.errMessageByPath("#{errMessagePath}.subject_null_or_undefined", {
+      $errUtils.cypressErr(
+        $errUtils.errMsgByPath("#{errMessagePath}.subject_null_or_undefined", {
           prop,
           value,
           cmd: name
@@ -243,8 +244,8 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       )
 
     propertyNotOnPreviousNullOrUndefinedValueErr = (prop, value, previousProp) ->
-      $utils.cypressErr(
-        $utils.errMessageByPath("invoke_its.previous_prop_null_or_undefined", {
+      $errUtils.cypressErr(
+        $errUtils.errMsgByPath("invoke_its.previous_prop_null_or_undefined", {
           prop,
           value,
           previousProp,
@@ -316,7 +317,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         throw traversalErr
 
       ## else throw that prop isn't a function
-      $utils.throwErrByPath("invoke.prop_not_a_function", {
+      $errUtils.throwErrByPath("invoke.prop_not_a_function", {
         onFail: options._log
         args: {
           prop: propAtLastPath
@@ -396,7 +397,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     spread: (subject, options, fn) ->
       ## if this isnt an array-like blow up right here
       if not _.isArrayLike(subject)
-        $utils.throwErrByPath("spread.invalid_type")
+        $errUtils.throwErrByPath("spread.invalid_type")
 
       subject._spreadArray = true
 
@@ -410,10 +411,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options = {}
 
       if not _.isFunction(fn)
-        $utils.throwErrByPath("each.invalid_argument")
+        $errUtils.throwErrByPath("each.invalid_argument")
 
       nonArray = ->
-        $utils.throwErrByPath("each.non_array", {
+        $errUtils.throwErrByPath("each.non_array", {
           args: {subject: $utils.stringify(subject)}
         })
 
