@@ -39,7 +39,7 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Props
       <Stats stats={statsStore} />
       <div className='spacer' />
       <Controls appState={appState} isShowingOptions={showOptions} onToggleOptions={state.toggleShowingOptions} />
-      {<Options appState={appState} />}
+      {showOptions && <Options appState={appState} />}
     </header>
   )
 })
