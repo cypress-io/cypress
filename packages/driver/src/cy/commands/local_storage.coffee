@@ -31,6 +31,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({
     clearLocalStorage: (keys, options = {}) ->
+      _.isPlainObject(keys)
+        options = keys
+        keys = null
+
       _.defaults options, {log: true}
       
       ## bail if we have keys and we're not a string and we're not a regexp
