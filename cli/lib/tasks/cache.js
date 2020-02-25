@@ -1,3 +1,4 @@
+const { execSync } = require('child_process')
 const state = require('./state')
 const logger = require('../logger')
 const fs = require('../fs')
@@ -14,15 +15,21 @@ const clear = () => {
 }
 
 const list = () => {
-  return getCachedVersions()
+  const cacheDir = state.getCacheDir()
+
+  return getCachedVersions(cacheDir)
   .then((versions) => {
-    logger.log(versions.join(', '))
+    versions.forEach(async (version) => {
+      const size = await execSync(`du -hs ${cacheDir}/${version}`)
+
+      logger.log(`${version}: ${size.toString().split(/\t/)[0]}`)
+    })
   })
 }
 
-const getCachedVersions = () => {
+const getCachedVersions = (cacheDir) => {
   return fs
-  .readdirAsync(state.getCacheDir())
+  .readdirAsync(cacheDir || state.getCacheDir())
   .filter(util.isSemver)
 }
 
