@@ -350,7 +350,7 @@ describe('Proxy Performance', function () {
           cyServer = Server()
 
           return cyServer.open(config)
-        })
+        }),
       )
     })
   })

@@ -270,7 +270,7 @@ const deleteLeftOfCursor = function (el) {
         'modify',
         'extend',
         'backward',
-        'character'
+        'character',
       )
     }
 

@@ -255,7 +255,34 @@ jobs:
           at: ~/
       ## this will catch .only's in js/coffee as well
       - run: yarn lint-all
+      - run:
+          name: cypress info (dev)
+          command: node cli/bin/cypress info --dev
       - store-npm-logs
+
+  cli-visual-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: mkdir -p cli/visual-snapshots
+      - run:
+          # TODO sanitize "cypress info" output to be consistent
+          command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
+          environment:
+            FORCE_COLOR: 2
+      - run:
+          command: node cli/bin/cypress help | yarn --silent term-to-html > cli/visual-snapshots/cypress-help.html
+          environment:
+            FORCE_COLOR: 2
+      - store_artifacts:
+          path: cli/visual-snapshots
+      - run:
+          name: Upload CLI snapshots for diffing
+          command: |
+            PERCY_TOKEN=$PERCY_TOKEN_CLI \
+            yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
     <<: *defaults
@@ -901,6 +928,14 @@ jobs:
           name: Verify Cypress binary
           working_directory: test-binary
           command: $(yarn bin)/cypress verify
+      - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: $(yarn bin)/cypress help
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(yarn bin)/cypress info
       - store-npm-logs
 
   # install NPM + binary zip and run against staging API
@@ -1028,6 +1063,14 @@ jobs:
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
+          name: Cypress help
+          working_directory: test-binary
+          command: $(yarn bin)/cypress help
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(yarn bin)/cypress info
+      - run:
           name: Add Cypress demo
           working_directory: test-binary
           command: npx @bahmutov/cly init
@@ -1052,6 +1095,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     # unit, integration and e2e tests
+    - cli-visual-tests:
+        requires:
+          - build
     - unit-tests:
         requires:
           - build
