@@ -7,6 +7,35 @@ const {
 } = require('../../../support/utils')
 
 describe('src/cy/commands/actions/type - #type special chars', () => {
+  before(function () {
+    cy
+    .visit('/fixtures/dom.html')
+    .then(function (win) {
+      const el = cy.$$('[contenteditable]:first').get(0)
+
+      // by default... the last new line by itself
+      // will only ever count as a single new line...
+      // but new lines above it will count as 2 new lines...
+      // so by adding "3" new lines, the last counts as 1
+      // and the first 2 count as 2...
+      el.innerHTML = '<div><br></div>'.repeat(3)
+
+      // browsers changed their implementation
+      // of the number of newlines that <div><br></div>
+      // create. newer versions of chrome set 2 new lines
+      // per set - whereas older ones create only 1 new line.
+      // so we grab the current sets for the assertion later
+      // so this test is browser version agnostic
+      const newLines = el.innerText
+
+      // disregard the last new line, and divide by 2...
+      // this tells us how many multiples of new lines
+      // the browser inserts for new lines other than
+      // the last new line
+      this.multiplierNumNewLines = (newLines.length - 1) / 2
+    })
+  })
+
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
@@ -1165,7 +1194,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     it('inserts new line into [contenteditable] ', () => {
       cy.get('#input-types [contenteditable]:first').invoke('text', 'foo')
       .type('bar{enter}baz{enter}{enter}{enter}quux').then(function ($div) {
-        const conditionalNewLines = '\n\n'
+        const conditionalNewLines = '\n\n'.repeat(this.multiplierNumNewLines)
 
         if (Cypress.isBrowser('firefox')) {
           expect(trimInnerText($div)).to.eql(`foobar\nbaz\n\n\nquux`)
