@@ -120,7 +120,7 @@ const closeProject = (project) => {
 
   return Promise.join(
     closeBrowser(project),
-    ipc.closeProject()
+    ipc.closeProject(),
   )
 }
 
