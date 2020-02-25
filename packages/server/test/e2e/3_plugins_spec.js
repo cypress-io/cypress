@@ -50,7 +50,7 @@ describe('e2e plugins', function () {
 
   it('catches invalid viewportWidth returned from plugins', function () {
     // the test project returns config object with a bad value
-    e2e.exec(this, {
+    return e2e.exec(this, {
       project: pluginReturnsBadConfig,
       expectedExitCode: 1,
       snapshot: true,
@@ -127,7 +127,6 @@ describe('e2e plugins', function () {
     it('passes projectRoot and default configFile to plugins function', function () {
       return e2e.exec(this, {
         spec: 'plugins_config_extras_spec.js',
-        // project: e2eProject,
         config: {
           env: {
             projectRoot: e2eProject,
@@ -140,7 +139,6 @@ describe('e2e plugins', function () {
     it('passes custom configFile to plugins function', function () {
       return e2e.exec(this, {
         spec: 'plugins_config_extras_spec.js',
-        // project: e2eProject,
         configFile: 'cypress-alt.json',
         config: {
           env: {
@@ -154,7 +152,6 @@ describe('e2e plugins', function () {
     it('passes false configFile to plugins function', function () {
       return e2e.exec(this, {
         spec: 'plugins_config_extras_spec.js',
-        // project: e2eProject,
         configFile: 'false',
         config: {
           env: {

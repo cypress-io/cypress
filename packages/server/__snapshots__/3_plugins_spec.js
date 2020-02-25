@@ -180,13 +180,6 @@ exports['e2e plugins can modify config from plugins 1'] = `
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
 An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
 
-Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
-
-`
-
-exports['e2e plugins catches invalid browsers list returned from plugins 2'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
-
 Expected at least one browser
 
 `
@@ -400,5 +393,12 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        4        3        1        -        -  
 
+
+`
+
+exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+
+Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
 `
