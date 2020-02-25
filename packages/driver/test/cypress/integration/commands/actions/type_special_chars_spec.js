@@ -1165,8 +1165,6 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     it('inserts new line into [contenteditable] ', () => {
       cy.get('#input-types [contenteditable]:first').invoke('text', 'foo')
       .type('bar{enter}baz{enter}{enter}{enter}quux').then(function ($div) {
-        const conditionalNewLines = '\n\n'
-
         if (Cypress.isBrowser('firefox')) {
           expect(trimInnerText($div)).to.eql(`foobar\nbaz\n\n\nquux`)
           expect($div.get(0).textContent).to.eql('foobarbazquux')
@@ -1174,7 +1172,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
           return
         }
 
-        expect(trimInnerText($div)).to.equal(`foobar\nbaz${conditionalNewLines}\nquux`)
+        expect(trimInnerText($div)).to.equal(`foobar\nbaz\nquux`)
         expect($div.get(0).textContent).to.equal('foobarbazquux')
       })
     })
