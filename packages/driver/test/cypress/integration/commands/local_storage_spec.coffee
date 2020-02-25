@@ -76,4 +76,10 @@ describe "src/cy/commands/local_storage", ->
           lastLog = @lastLog
 
           expect(lastLog).to.be.undefined
+      
+      it "log is disabled without key", ->
+        cy.clearLocalStorage({log: false}).then ->
+          lastLog = @lastLog
+
+          expect(lastLog).to.be.undefined
 
