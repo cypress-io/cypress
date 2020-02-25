@@ -125,7 +125,7 @@ const init = (config, options) => {
       debug('plugins process warning:', warningErr.stack)
       if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
 
-      options.onWarning(warningErr)
+      return options.onWarning(warningErr)
     }
 
     pluginsProcess.on('error', handleError)
