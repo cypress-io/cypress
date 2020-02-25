@@ -82,7 +82,7 @@ const getAllFn = (...aliases) => {
   return Cypress.Promise.all(
     aliases[0].split(' ').map((alias) => {
       return cy.now('get', alias)
-    })
+    }),
   )
 }
 

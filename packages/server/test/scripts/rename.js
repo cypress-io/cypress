@@ -25,7 +25,7 @@ const removeChunkPrefixes = () => {
 
   return Promise.join(
     renameFiles('test/e2e/**/*'),
-    renameFiles('__snapshots__/**/*')
+    renameFiles('__snapshots__/**/*'),
   )
 }
 
@@ -37,12 +37,12 @@ const renameSnapshotsToMatchSpecs = () => {
     const specName = path.basename(spec)
 
     const pathToSnapshot = path.resolve(
-      __dirname, '..', '..', '__snapshots__', specName.slice(2)
+      __dirname, '..', '..', '__snapshots__', specName.slice(2),
     )
 
     const pathToRenamedSnapshot = path.join(
       path.dirname(pathToSnapshot),
-      specName
+      specName,
     )
 
     return fs.renameAsync(pathToSnapshot, pathToRenamedSnapshot)
