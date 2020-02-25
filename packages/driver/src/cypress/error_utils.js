@@ -72,10 +72,10 @@ const makeErrFromObj = (obj) => {
 const throwErr = (err, options = {}) => {
   if (_.isString(err)) {
     err = cypressErr(err)
+  }
 
-    if (options.noStackTrace) {
-      err.stack = ''
-    }
+  if (options.noStackTrace) {
+    err.stack = ''
   }
 
   let { onFail, errProps } = options
