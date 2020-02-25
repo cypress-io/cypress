@@ -144,10 +144,13 @@ class SpecsList extends Component {
               nestingLevel === 0 ?
               <>
                 {spec.displayName} tests
-                <span>
-                  <a onClick={this._setExpandRootFolder.bind(this, spec, false)}>collapse all</a>{' | '}
-                  <a onClick={this._setExpandRootFolder.bind(this, spec, true)}>expand all</a>
-                </span>
+                {specsStore.specHasFolders(spec) ?
+                  <span>
+                    <a onClick={this._setExpandRootFolder.bind(this, spec, false)}>collapse all</a>{' | '}
+                    <a onClick={this._setExpandRootFolder.bind(this, spec, true)}>expand all</a>
+                  </span> :
+                  null
+                }
               </> :
                 spec.displayName
             }

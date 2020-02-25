@@ -94,6 +94,14 @@ export class SpecsStore {
     return `specsFilter-${id}-${shortenedPath}`
   }
 
+  specHasFolders (spec) {
+    if (spec instanceof Spec) {
+      return false
+    }
+
+    return spec.children.some((s) => s instanceof Folder)
+  }
+
   _tree (files) {
     if (this.filter) {
       files = _.filter(files, (spec) => {
