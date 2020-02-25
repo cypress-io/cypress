@@ -628,21 +628,18 @@ module.exports = {
         > #{message}
 
       Before the page load, you were bound to the origin policy:
+
         > #{originPolicy}
 
-      A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+      A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
-      This typically happens in one of three ways:
+      A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-      1. You clicked an <a> that routed you outside of your application
-      2. You submitted a form and your server redirected you outside of your application
-      3. You used a javascript redirect to a page outside of your application
-
-      Cypress does not allow you to change superdomains within a single test.
+      Cypress does not allow you to navigate to a different origin URL within a single test.
 
       You may need to restructure some of your test code to avoid this problem.
 
-      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in #{formatConfigFile(configFile)}.
+      Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in #{formatConfigFile(configFile)}.
 
       https://on.cypress.io/cross-origin-violation
 
@@ -1074,20 +1071,26 @@ module.exports = {
       URL from the `options` object: {{optionsUrl}}
       URL from the `url` parameter: {{url}}
     """
-    cannot_visit_2nd_domain: """
-      #{cmd('visit')} failed because you are attempting to visit a second unique domain.
+    cannot_visit_different_origin: """
+      #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-      You may only visit a single unique domain per test.
+      The new URL is considered a different origin because the following parts of the URL are different:
 
-      Different subdomains are okay, but unique domains are not.
+        > {{differences}}
 
-      The previous domain you visited was: '{{previousDomain}}'
+      You may only #{cmd('visit')} same-origin URLs within a single test.
 
-      You're attempting to visit this new domain: '{{attemptedDomain}}'
+      The previous URL you visited was: 
+      
+        > '{{previousUrl}}'
 
-      You may need to restructure some of your code to prevent this from happening.
+      You're attempting to visit this URL: 
+      
+        > '{{attemptedUrl}}'
 
-      https://on.cypress.io/cannot-visit-second-unique-domain
+      You may need to restructure some of your test code to avoid this problem.
+
+      https://on.cypress.io/cannot-visit-different-origin-domain
     """
     loading_network_failed: """
       #{cmd('visit')} failed trying to load:

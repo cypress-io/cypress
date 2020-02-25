@@ -31,7 +31,7 @@
     "css-element-queries": "1.2.3",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.2",
-    "eslint": "6.1.0",
+    "eslint": "6.8.0",
     "jsdom": "14.1.0",
     "lodash": "4.17.15",
     "markdown-it": "6.1.1",
