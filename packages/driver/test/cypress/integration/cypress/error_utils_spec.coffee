@@ -4,11 +4,17 @@ $errorMessages = require("../../../../src/cypress/error_messages")
 describe "driver/src/cypress/error_utils", ->
   context ".throwErr", ->
     it "throws the error as sent", ->
-      try
-        $errUtils.throwErr("Something unexpected")
-      catch e
-        expect(e.message).to.include "Something unexpected"
-        expect(e.name).to.eq "CypressError"
+      fn = -> $errUtils.throwErr("Something unexpected")
+
+      expect(fn).to.throw().and.satisfy (err) ->
+        expect(err.message).to.include "Something unexpected"
+        expect(err.name).to.eq "CypressError"
+
+    it "removes stack if noStackTrace: true", ->
+      fn = -> $errUtils.throwErr("Something unexpected", { noStackTrace: true })
+
+      expect(fn).to.throw().and.satisfy (err) ->
+        expect(err.stack).to.equal("")
 
   context ".throwErrByPath", ->
     beforeEach ->
