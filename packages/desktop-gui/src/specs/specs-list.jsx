@@ -142,16 +142,16 @@ class SpecsList extends Component {
             <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`}></i>
             {
               nestingLevel === 0 ?
-              <>
-                {spec.displayName} tests
-                {specsStore.specHasFolders(spec) ?
-                  <span>
-                    <a onClick={this._setExpandRootFolder.bind(this, spec, false)}>collapse all</a>{' | '}
-                    <a onClick={this._setExpandRootFolder.bind(this, spec, true)}>expand all</a>
-                  </span> :
-                  null
-                }
-              </> :
+                <>
+                  {spec.displayName} tests
+                  {specsStore.specHasFolders(spec) ?
+                    <span>
+                      <a onClick={this._setExpandRootFolder.bind(this, spec, false)}>collapse all</a>{' | '}
+                      <a onClick={this._setExpandRootFolder.bind(this, spec, true)}>expand all</a>
+                    </span> :
+                    null
+                  }
+                </> :
                 spec.displayName
             }
           </div>
