@@ -401,9 +401,9 @@ const isSvg = function (el): el is SVGElement {
 }
 
 // active element is the default if its null
-// or its equal to document.body
+// or it's equal to document.body
 const activeElementIsDefault = (activeElement, body: HTMLElement) => {
-  return !activeElement || (activeElement === body && !body.ownerDocument?.getSelection()?.rangeCount)
+  return !activeElement || (activeElement === body && !isContentEditable(body))
 }
 
 const isFocused = (el) => {
