@@ -7,5 +7,10 @@
   ],
   "rules": {
     "prefer-spread": "off"
+  },
+  "settings": {
+    "react": {
+      "version": "16.8"
+    }
   }
 }
