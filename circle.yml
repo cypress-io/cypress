@@ -1457,9 +1457,8 @@ mac-workflow: &mac-workflow
         name: mac-test-binary-against-staging
         executor: mac
         requires:
-          - Mac NPM package
-          - Mac binary
-
+          - mac-build-npm-package
+          - mac-build-binary
     - post-pre-release-install-comment:
         context: test-runner:commit-status-checks
         name: Post Mac pre-release install comment
@@ -1468,9 +1467,8 @@ mac-workflow: &mac-workflow
             only:
               - develop
         requires:
-          - Mac NPM package upload
-          - Mac binary upload
-
+          - mac-upload-npm-package
+          - mac-upload-binary
     - test-binary-and-npm-against-other-projects:
         context: test-runner:trigger-test-jobs
         name: mac-test-binary-and-npm-against-other-projects
