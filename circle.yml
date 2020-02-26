@@ -261,6 +261,7 @@ jobs:
 
   ## code checkout and yarn installs
   build:
+    <<: *defaults
     steps:
       - checkout
       - print-env
@@ -314,6 +315,7 @@ jobs:
             - cypress
 
   win-prebuild:
+    <<: *defaults
     description: windows-specific prebuild steps
     steps:
       - print-env
@@ -346,6 +348,7 @@ jobs:
             - C:\Program Files\nodejs
 
   ensure-tempdir:
+    <<: *defaults
     description: make sure that /tmp and %TEMP% are the same on windows
     steps:
       - run:
@@ -840,8 +843,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-        name: Cloning test project
-        command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+          name: Cloning test project
+          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
       - run:
           name: Install prod dependencies
           command: yarn --production
