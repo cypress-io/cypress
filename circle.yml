@@ -240,6 +240,47 @@ commands:
           name: videos
           path: /tmp/<<parameters.repo>>/cypress/videos
 
+  win-prebuild:
+    description: windows-specific prebuild steps
+    steps:
+      - print-env
+      - restore_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
+      - run:
+          name: Install Node
+          command: |
+            set -ev
+            version_slug=node-v$nodejs_version-win-$TARGET_ARCH
+            if [[ -e "/c/Program Files/nodejs/__cypress" ]]; then
+              echo "Cached Node install found."
+              exit 0
+            fi
+            echo "Installing Node $nodejs_version $TARGET_ARCH from nodejs.org"
+            # remove default Node install
+            rm -rf "/c/Program Files/nodejs"
+            # replace it with ours :)
+            mkdir "/c/Program Files/nodejs"
+            choco install wget
+            wget https://nodejs.org/dist/v$nodejs_version/$version_slug.zip -O node.zip
+            unzip node.zip -d ./node
+            mv ./node/$version_slug/* "/c/Program Files/nodejs"
+            touch "/c/Program Files/nodejs/__cypress"
+            rm -rf ./node.zip ./node
+      - print-env
+      - save_cache:
+          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.CIRCLE_JOB }}
+          paths:
+            - C:\Program Files\nodejs
+
+  ensure-tempdir:
+    description: make sure that /tmp and %TEMP% are the same on windows
+    steps:
+      - run:
+          name: Ensure /tmp is valid
+          command: |
+            set -e
+            node -e "process.exit(process.platform === 'win32')" || cmd.exe /c mklink /J "C:\Users\circleci\AppData\Local\Temp" "C:\tmp"
+
   common-build:
     description: perform build steps that are common between POSIX and windows
     steps:
@@ -312,49 +353,6 @@ jobs:
     steps:
       - win-prebuild
       - common-build
-
-  win-prebuild:
-    <<: *defaults
-    description: windows-specific prebuild steps
-    steps:
-      - print-env
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
-      - run:
-          name: Install Node
-          command: |
-            set -ev
-            version_slug=node-v$nodejs_version-win-$TARGET_ARCH
-            if [[ -e "/c/Program Files/nodejs/__cypress" ]]; then
-              echo "Cached Node install found."
-              exit 0
-            fi
-            echo "Installing Node $nodejs_version $TARGET_ARCH from nodejs.org"
-            # remove default Node install
-            rm -rf "/c/Program Files/nodejs"
-            # replace it with ours :)
-            mkdir "/c/Program Files/nodejs"
-            choco install wget
-            wget https://nodejs.org/dist/v$nodejs_version/$version_slug.zip -O node.zip
-            unzip node.zip -d ./node
-            mv ./node/$version_slug/* "/c/Program Files/nodejs"
-            touch "/c/Program Files/nodejs/__cypress"
-            rm -rf ./node.zip ./node
-      - print-env
-      - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.CIRCLE_JOB }}
-          paths:
-            - C:\Program Files\nodejs
-
-  ensure-tempdir:
-    <<: *defaults
-    description: make sure that /tmp and %TEMP% are the same on windows
-    steps:
-      - run:
-          name: Ensure /tmp is valid
-          command: |
-            set -e
-            node -e "process.exit(process.platform === 'win32')" || cmd.exe /c mklink /J "C:\Users\circleci\AppData\Local\Temp" "C:\tmp"
 
   lint:
     <<: *defaults
