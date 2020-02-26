@@ -435,13 +435,37 @@ const isFocusedOrInFocused = (el: HTMLElement) => {
 
   let elToCheckCurrentlyFocused
 
+  let isContentEditableEl = false
+
   if (isFocusable($(el))) {
     elToCheckCurrentlyFocused = el
   } else if (isContentEditable(el)) {
+    isContentEditableEl = true
     elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
   }
 
+  debug('elToCheckCurrentlyFocused', elToCheckCurrentlyFocused)
+
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    if (isContentEditableEl) {
+      // we make sure the the current document selection (blinking cursor) is inside the element
+      const sel = doc.getSelection()
+
+      if (sel?.rangeCount) {
+        const range = sel.getRangeAt(0)
+        const curSelectionContainer = range.commonAncestorContainer
+
+        const selectionInsideElement = el.contains(curSelectionContainer)
+
+        debug('isInFocused by document selection?', selectionInsideElement, ':', curSelectionContainer, 'is inside', el)
+
+        return selectionInsideElement
+      }
+
+      // no selection, not in focused
+      return false
+    }
+
     return true
   }
 
