@@ -19,6 +19,9 @@ describe('Warning Message', function () {
       cy.stub(this.ipc, 'onProjectWarning')
       cy.stub(this.ipc, 'externalOpen')
 
+      this.pingBaseUrl = this.util.deferred()
+      cy.stub(this.ipc, 'pingBaseUrl').returns(this.pingBaseUrl.promise)
+
       this.start()
     })
   })
@@ -130,6 +133,49 @@ describe('Warning Message', function () {
     })
 
     cy.get('.specs').invoke('position').its('top').should('gt', 100)
+  })
+
+  it('does not show retry button for non-baseUrl warnings', function () {
+    cy.shouldBeOnProjectSpecs().then(() => {
+      this.ipc.onProjectWarning.yield(null, this.warningObj)
+    })
+
+    cy.contains('Try Again').should('not.exist')
+  })
+
+  context('for baseUrl warnings', function () {
+    beforeEach(function () {
+      this.warningObj.type = 'CANNOT_CONNECT_BASE_URL_WARNING'
+
+      cy.shouldBeOnProjectSpecs().then(() => {
+        this.ipc.onProjectWarning.yield(null, this.warningObj)
+      })
+    })
+
+    it('shows retry button', function () {
+      cy.contains('Try Again')
+    })
+
+    it('pings baseUrl when retry button is clicked', function () {
+      cy.contains('Try Again').click()
+      cy.wrap(this.ipc.pingBaseUrl).should('be.called')
+    })
+
+    it('shows warning if baseUrl is still unreachable', function () {
+      cy.contains('Try Again').click().then(function () {
+        this.pingBaseUrl.reject(this.baseUrlWarning)
+      })
+
+      cy.get('.alert-warning').should('be.visible')
+    })
+
+    it('does not show warning if baseUrl is reachable', function () {
+      cy.contains('Try Again').click().then(function () {
+        this.pingBaseUrl.resolve()
+      })
+
+      cy.get('.alert-warning').should('not.be.visible')
+    })
   })
 
   context('with multiple warnings', function () {

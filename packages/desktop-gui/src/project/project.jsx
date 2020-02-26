@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
-import { toJS } from 'mobx'
 import Loader from 'react-loader'
 import _ from 'lodash'
 
@@ -79,7 +78,17 @@ class Project extends Component {
   _renderWarnings = () => {
     const { warnings } = this.props.project
 
-    return _.map(warnings, (warning, i) => (!warning.dismissed && <WarningMessage key={i} warning={warning} onTryAgain={() => this._pingBaseUrl(warning)} onDismissWarning={() => this._removeWarning(warning)}/>))
+    return _(warnings)
+    .reject((warning) => warning.dismissed)
+    .map((warning, i) => (
+      <WarningMessage
+        key={i}
+        warning={warning}
+        onRetry={() => this._pingBaseUrl(warning)}
+        onDismissWarning={() => this._removeWarning(warning)}
+      />
+    ))
+    .value()
   }
 
   _removeWarning = (warning) => {
@@ -91,10 +100,14 @@ class Project extends Component {
   }
 
   _pingBaseUrl = (warning) => {
-    this.props.project.dismissWarning(warning, true)
-    projectsApi.pingBaseUrl(toJS(this.props.project.resolvedConfig.baseUrl).value)
+    const { project } = this.props
+
+    projectsApi.pingBaseUrl(project.getConfigValue('baseUrl'))
+    .then(() => {
+      project.dismissWarning(warning, true)
+    })
     .catch((err) => {
-      this.props.project.addWarning(err)
+      project.addWarning(err)
     })
   }
 }

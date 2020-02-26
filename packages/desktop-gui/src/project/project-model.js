@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { computed, observable, action } from 'mobx'
+import { action, computed, observable, toJS } from 'mobx'
 import Browser from '../lib/browser-model'
 
 const cacheProps = [
@@ -237,11 +237,6 @@ export default class Project {
       }))
     }
 
-    if (!isProjectReload) {
-      // dismiss warning if not cleared by project reload
-      this.dismissedWarnings[this._serializeWarning(warning)] = true
-    }
-
     warning.dismissed = true
   }
 
@@ -261,6 +256,12 @@ export default class Project {
 
   clientDetails () {
     return _.pick(this, 'id', 'path')
+  }
+
+  getConfigValue (key) {
+    if (!this.resolvedConfig) return
+
+    return toJS(this.resolvedConfig[key]).value
   }
 
   serialize () {
