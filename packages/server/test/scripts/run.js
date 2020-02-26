@@ -34,13 +34,13 @@ if (!run || !run.length) {
 
     It should look something like this:
 
-      $ npm test ./test/unit/api_spec.coffee
+      $ yarn test ./test/unit/api_spec.coffee
 
     If you want to run all a specific group of tests:
 
-      $ npm run test-unit
-      $ npm run test-integration
-      $ npm run test-e2e
+      $ yarn test-unit
+      $ yarn test-integration
+      $ yarn test-e2e
   `)
 }
 

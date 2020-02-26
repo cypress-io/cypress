@@ -97,7 +97,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/server "yarn test-e2e --chunk << parameters.chunk >> --browser << parameters.browser >>"
+          command: yarn lerna exec --scope @packages/server "yarn test ./test/e2e/<< parameters.chunk >>*spec* --browser << parameters.browser >>"
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
