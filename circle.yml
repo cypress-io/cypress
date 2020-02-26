@@ -949,6 +949,8 @@ jobs:
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
       - run: mkdir test-binary
+      # upgrade NPM, otherwise NPM v5 gets so many errors
+      - run: npm i -g npm
       - run:
           name: Create new NPM package
           working_directory: test-binary
