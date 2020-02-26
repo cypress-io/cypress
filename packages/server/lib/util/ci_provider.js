@@ -446,7 +446,7 @@ const _providerCommitParams = () => {
       message: env.CI_COMMIT_MESSAGE,
       authorName: env.GITLAB_USER_NAME,
       authorEmail: env.GITLAB_USER_EMAIL,
-      remoteOrigin: env.CI_PROJECT_URL,
+      remoteOrigin: env.CI_REPOSITORY_URL,
       defaultBranch: env.CI_DEFAULT_BRANCH,
     },
     googleCloud: {

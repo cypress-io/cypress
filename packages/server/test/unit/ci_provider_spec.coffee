@@ -470,7 +470,7 @@ describe "lib/util/ci_provider", ->
       message: "ciCommitMessage"
       authorName: "gitlabUserName"
       authorEmail: "gitlabUserEmail"
-      remoteOrigin: "ciProjectUrl"
+      remoteOrigin: "ciRepositoryUrl"
       defaultBranch: "ciDefaultBranch"
     })
 
