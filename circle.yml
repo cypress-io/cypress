@@ -61,12 +61,12 @@ win-base-executor: &win-base-executor
     name: win/vs2019
     shell: bash.exe # default is powershell, which just won't work with the scripts we use on linux/darwin
 
-win-ia32-executor:
+win-ia32-executor: &win-ia32-executor
   <<: *win-base-executor
   environment:
     TARGET_ARCH: ia32
 
-win-x64-executor:
+win-x64-executor: &win-x64-executor
   <<: *win-base-executor
   environment:
     TARGET_ARCH: x64
