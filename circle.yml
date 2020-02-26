@@ -319,7 +319,7 @@ commands:
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
-      - run: ls $(yarn global bin)/../lib/node_modules
+      - run: ls $(yarn global bin)/../lib/node_modules || true
 
       # try several times, because flaky NPM installs ...
       - run: yarn --ignore-engines || yarn --ignore-engines
