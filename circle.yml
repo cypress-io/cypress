@@ -240,12 +240,16 @@ commands:
           name: videos
           path: /tmp/<<parameters.repo>>/cypress/videos
 
+  restore-win-node-cache:
+    steps:
+      - restore_cache:
+        key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
+
   win-prebuild:
     description: windows-specific prebuild steps
     steps:
       - print-env
-      - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
+      - restore-win-node-cache
       - run:
           name: Install Node
           command: |
@@ -798,10 +802,10 @@ jobs:
             else
               echo "Not Mac platform, skipping code sign setup"
             fi
-
       - attach_workspace:
           at: ~/
       - run: $(yarn bin)/print-arch
+      - restore-win-node-cache
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
@@ -839,6 +843,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - restore-win-node-cache
       - run:
           name: Cloning test project
           command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
@@ -911,6 +916,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - restore-win-node-cache
       - run: yarn check-next-dev-version
       - run:
           name: bump NPM version
