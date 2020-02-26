@@ -59,13 +59,17 @@ export class SpecsStore {
   }
 
   @action setExpandSpecFolder (spec, isExpanded) {
-    spec.setExpanded(isExpanded === undefined ? !spec.isExpanded : isExpanded)
+    spec.setExpanded(isExpanded)
+  }
+
+  @action toggleExpandSpecFolder (spec) {
+    spec.setExpanded(!spec.isExpanded)
   }
 
   @action setExpandSpecChildren (spec, isExpanded) {
-    this._depthFirstIterateSpecs(spec, (fileOfFolder) => {
-      if (fileOfFolder instanceof Folder) {
-        fileOfFolder.setExpanded(isExpanded)
+    this._depthFirstIterateSpecs(spec, (specOrFolder) => {
+      if (specOrFolder.isFolder) {
+        specOrFolder.setExpanded(isExpanded)
       }
     })
   }
@@ -94,12 +98,12 @@ export class SpecsStore {
     return `specsFilter-${id}-${shortenedPath}`
   }
 
-  specHasFolders (spec) {
-    if (spec instanceof Spec) {
+  specHasFolders (specOrFolder) {
+    if (!specOrFolder.isFolder) {
       return false
     }
 
-    return spec.children.some((s) => s instanceof Folder)
+    return specOrFolder.children.some((child) => child.isFolder)
   }
 
   _tree (files) {
@@ -143,12 +147,12 @@ export class SpecsStore {
   }
 
   _depthFirstIterateSpecs (root, func) {
-    for (const child of root.children) {
+    _.each(root.children, (child) => {
       func(child)
-      if (child instanceof Folder) {
+      if (child.isFolder) {
         this._depthFirstIterateSpecs(child, func)
       }
-    }
+    })
   }
 }
 

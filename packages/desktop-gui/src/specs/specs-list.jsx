@@ -128,7 +128,7 @@ class SpecsList extends Component {
   _selectSpecFolder (specFolderPath, e) {
     e.preventDefault()
 
-    specsStore.setExpandSpecFolder(specFolderPath)
+    specsStore.toggleExpandSpecFolder(specFolderPath)
   }
 
   _folderContent (spec, nestingLevel) {
