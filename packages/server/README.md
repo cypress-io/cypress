@@ -17,11 +17,11 @@ The [driver](../driver) and the server are the two most complex packages of Cypr
 
 ## Developing
 
-To run Cypress:
+To run the Cypress server:
 
 ```bash
 ## boots the entire Cypress application
-yarn lerna run start --scope @packages/server --stream
+yarn start
 ```
 
 Since the server controls nearly every aspect of Cypress, after making changes you'll need to manually restart Cypress.
@@ -35,15 +35,15 @@ Since this is slow, it's better to drive your development with tests.
 yarn build
 ```
 
-* `yarn lerna run test-unit --scope @packages/server --stream` executes unit tests in [`test/unit`](./test/unit)
-* `yarn lerna run test-integration --scope @packages/server --stream` executes integration tests in [`test/integration`](./test/integration)
-* `yarn lerna run test-performance --scope @packages/server --stream` executes performance tests in [`test/performance`](./test/performance)
-* `yarn lerna run test-e2e --scope @packages/server --stream` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
+* `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)
+* `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
+* `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
+* `yarn test-e2e` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
 
-Each of these tasks can run in "watch" mode by appending `-watch` to the task:
+You can also use the `test-watch` command to rerun a test file whenever there is a change:
 
 ```bash
-yarn lerna run test-unit-watch --scope @packages/server --stream
+yarn test-watch /test/path/to/spec.js
 ```
 
 When running e2e tests, some test projects output verbose logs. To see them run the test with `DEBUG=cypress:e2e` environment variable.
