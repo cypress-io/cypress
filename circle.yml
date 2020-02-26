@@ -943,6 +943,8 @@ jobs:
     docker:
       - image: cypress/base:8.0.0
     steps:
+      - attach_workspace:
+          at: ~/
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
