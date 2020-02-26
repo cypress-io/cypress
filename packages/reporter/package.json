@@ -4,16 +4,15 @@
   "private": true,
   "main": "src/main.tsx",
   "scripts": {
-    "build-js": "webpack",
+    "build-for-tests": "webpack",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
-    "postinstall": "echo '@packages/reporter needs: yarn build-js'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha 'src/**/*.spec.*'",
     "test-watch": "yarn test-unit --watch",
-    "watch": "yarn build-js --watch --progress"
+    "watch": "yarn build-for-tests --watch --progress"
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
