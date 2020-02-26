@@ -241,10 +241,8 @@ export default class Project {
       // dismiss warning if not cleared by project reload
       this.dismissedWarnings[this._serializeWarning(warning)] = true
     }
-    
-    warning.dismissed = true
 
-    this.warnings = _.without(this.warnings, warning)
+    warning.dismissed = true
   }
 
   _serializeWarning (warning) {
