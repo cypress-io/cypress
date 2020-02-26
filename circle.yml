@@ -240,9 +240,8 @@ commands:
           name: videos
           path: /tmp/<<parameters.repo>>/cypress/videos
 
-  ## code checkout and yarn installs
-  build:
-    <<: *defaults
+  common-build:
+    description: perform build steps that are common between POSIX and windows
     steps:
       - checkout
       - print-env
@@ -299,7 +298,7 @@ jobs:
   posix-build:
     <<: *defaults
     steps:
-      - build
+      - common-build
 
   win-build:
     <<: *defaults
@@ -312,7 +311,7 @@ jobs:
       TARGET_ARCH: << parameters.arch >>
     steps:
       - win-prebuild
-      - build
+      - common-build
 
   win-prebuild:
     <<: *defaults
