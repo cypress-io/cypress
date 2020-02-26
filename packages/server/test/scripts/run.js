@@ -8,10 +8,10 @@ const os = require('os')
 
 const options = minimist(process.argv.slice(2))
 
-let run = options._[0]
+let run = options._
 
-if (run && run.includes('--inspect-brk')) {
-  run = options._[1]
+if (run[0] && run[0].includes('--inspect-brk')) {
+  run = run.slice(1)
 }
 
 function exitErr (msg) {
@@ -28,7 +28,7 @@ const isGteNode12 = () => {
   return Number(process.versions.node.split('.')[0]) >= 12
 }
 
-if (!run) {
+if (!run || !run.length) {
   return exitErr(`
     Error: A path to a spec file must be specified!
 
@@ -51,7 +51,7 @@ const commandAndArguments = {
 
 if (isWindows()) {
   commandAndArguments.command = 'mocha'
-  commandAndArguments.args = [run]
+  commandAndArguments.args = run.slice()
 } else {
   commandAndArguments.command = 'xvfb-maybe'
   commandAndArguments.args = [
@@ -79,8 +79,9 @@ if (isGteNode12()) {
 if (!isWindows()) {
   commandAndArguments.args.push(
     'node_modules/.bin/_mocha',
-    run,
   )
+
+  commandAndArguments.args = commandAndArguments.args.concat(run)
 }
 
 if (options.fgrep) {
@@ -132,6 +133,7 @@ if (options.browser) {
 const cmd = `${commandAndArguments.command} ${
   commandAndArguments.args.join(' ')}`
 
+console.log('specfiles:', run)
 console.log('test command:')
 console.log(cmd)
 
