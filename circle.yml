@@ -297,7 +297,7 @@ jobs:
       # make sure our snapshots are compared correctly
       - run: yarn test-mocha-snapshot
       # make sure packages with TypeScript can be transpiled to JS
-      - run: yarn lerna run build-js --stream
+      - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
       - verify-mocha-results:
@@ -624,7 +624,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command:  yarn workspace @packages/reporter build-js
+          command:  yarn workspace @packages/reporter build-for-tests
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
@@ -642,7 +642,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/ui-components build-js
+          command: yarn workspace @packages/ui-components build-for-tests
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
