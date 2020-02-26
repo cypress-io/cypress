@@ -952,10 +952,6 @@ jobs:
       # upgrade NPM, otherwise NPM v5 gets so many errors
       - run: npm i -g npm@5.1.0
       - run:
-          name: Create new NPM package
-          working_directory: test-binary
-          command: npm init -y
-      - run:
           # install NPM from built NPM package folder
           name: Install Cypress
           working_directory: test-binary
