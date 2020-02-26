@@ -250,7 +250,7 @@ commands:
   restore-win-node-cache:
     steps:
       - restore_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-{{ .Environment.CIRCLE_JOB }}
+          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-{{ .Environment.TARGET_ARCH }}
 
   win-prebuild:
     description: windows-specific prebuild steps
@@ -279,7 +279,7 @@ commands:
             rm -rf ./node.zip ./node
       - print-env
       - save_cache:
-          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-{{ .Environment.CIRCLE_JOB }}
+          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-{{ .Environment.TARGET_ARCH }}
           paths:
             - C:\Program Files\nodejs
 
