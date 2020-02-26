@@ -40,9 +40,6 @@ logger = (msg, platform) ->
 logBuiltAllPackages = () ->
   console.log("built all packages")
 
-logBuiltAllJs = () ->
-  console.log("built all JS")
-
 # can pass options to better control the build
 # for example
 #   skipClean - do not delete "dist" folder before build
@@ -118,8 +115,6 @@ buildCypressApp = (platform, version, options = {}) ->
     packages.runAllBuild()
     # Promise.resolve()
     .then(R.tap(logBuiltAllPackages))
-    .then(packages.runAllBuildJs)
-    .then(R.tap(logBuiltAllJs))
 
   copyPackages = ->
     log("#copyPackages")
