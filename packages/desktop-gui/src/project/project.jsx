@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import { toJS } from 'mobx'
 import Loader from 'react-loader'
+import _ from 'lodash'
 
 import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
@@ -78,8 +79,7 @@ class Project extends Component {
   _renderWarnings = () => {
     const { warnings } = this.props.project
 
-    return warnings.map((warning, i) =>
-      (<WarningMessage key={i} warning={warning} onTryAgain={() => this._pingBaseUrl(warning)} onClearWarning={() => this._removeWarning(warning)}/>))
+    return _.map(warnings, (warning, i) => (!warning.dismissed && <WarningMessage key={i} warning={warning} onTryAgain={() => this._pingBaseUrl(warning)} onClearWarning={() => this._removeWarning(warning)}/>))
   }
 
   _removeWarning = (warning) => {

@@ -13,7 +13,6 @@ Server        = require("#{root}lib/server")
 Socket        = require("#{root}lib/socket")
 fileServer    = require("#{root}lib/file_server")
 ensureUrl     = require("#{root}lib/util/ensure-url")
-buffers       = require("#{root}lib/util/buffers")
 
 morganFn = ->
 mockery.registerMock("morgan", -> morganFn)
@@ -42,12 +41,12 @@ describe "lib/server", ->
       @use = sinon.spy(express.application, "use")
 
     it "instantiates express instance without morgan", ->
-      app = @server.createExpressApp(false)
+      app = @server.createExpressApp({ morgan: false })
       expect(app.get("view engine")).to.eq("html")
       expect(@use).not.to.be.calledWith(morganFn)
 
     it "requires morgan if true", ->
-      @server.createExpressApp(true)
+      @server.createExpressApp({ morgan: true })
       expect(@use).to.be.calledWith(morganFn)
 
   context "#open", ->
@@ -61,7 +60,7 @@ describe "lib/server", ->
 
       @server.open(@config)
       .then =>
-        expect(@server.createExpressApp).to.be.calledWith(false)
+        expect(@server.createExpressApp).to.be.calledWithMatch({ morgan: false })
 
     it "calls #createServer with port", ->
       _.extend @config, {port: 54321}
@@ -105,7 +104,7 @@ describe "lib/server", ->
   context "#createServer", ->
     beforeEach ->
       @port = 54321
-      @app  = @server.createExpressApp(true)
+      @app  = @server.createExpressApp({ morgan: true })
 
     it "isListening=true", ->
       @server.createServer(@app, {port: @port})
@@ -193,11 +192,14 @@ describe "lib/server", ->
 
   context "#reset", ->
     beforeEach ->
-      sinon.stub(buffers, "reset")
+      @server.open(@config)
+      .then =>
+        @buffers = @server._networkProxy.http
+        sinon.stub(@buffers, "reset")
 
     it "resets the buffers", ->
       @server.reset()
-      expect(buffers.reset).to.be.called
+      expect(@buffers.reset).to.be.called
 
     it "sets the domain to the previous base url if set", ->
       @server._baseUrl = "http://localhost:3000"
@@ -248,8 +250,19 @@ describe "lib/server", ->
       @head   = {}
 
     it "is noop if req.url startsWith socketIoRoute", ->
+      socket = {
+        remotePort: 12345
+        remoteAddress: '127.0.0.1'
+      }
+
+      @server._socketWhitelist.add({
+        localPort: socket.remotePort,
+        once: _.noop
+      })
+
       noop = @server.proxyWebsockets(@proxy, "/foo", {
-        url: "/foobarbaz"
+        url: "/foobarbaz",
+        socket
       })
 
       expect(noop).to.be.undefined

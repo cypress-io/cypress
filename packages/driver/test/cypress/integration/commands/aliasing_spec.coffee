@@ -27,7 +27,7 @@ describe "src/cy/commands/aliasing", ->
 
     it "stores the lookup as an alias", ->
       cy.get("body").as("b").then ->
-        expect(cy.state("aliases").b).to.be.defined
+        expect(cy.state("aliases").b).to.exist
 
     it "stores the resulting subject as the alias", ->
       $body = cy.$$("body")
@@ -53,17 +53,19 @@ describe "src/cy/commands/aliasing", ->
 
     it "allows dot in alias names", ->
       cy.get("body").as("body.foo").then ->
-        expect(cy.get('@body.foo')).to.be.defined
-        expect(cy.state("aliases")['body.foo']).to.be.defined
+        expect(cy.state("aliases")['body.foo']).to.exist
+        cy.get('@body.foo').should("exist")
 
     it "recognizes dot and non dot with same alias names", ->
       cy.get("body").as("body").then ->
-        expect(cy.get('@body')).to.be.defined
-        expect(cy.state("aliases")['body']).to.be.defined
+        expect(cy.state("aliases")['body']).to.exist
+        cy.get('@body').should("exist")
+
       cy.contains("foo").as("body.foo").then ->
-        expect(cy.get('@body.foo')).to.be.defined
-        expect(cy.get('@body.foo')).to.not.eq(cy.get('@body'))
-        expect(cy.state("aliases")['body.foo']).to.be.defined
+        expect(cy.state("aliases")['body.foo']).to.exist
+        cy.get('@body.foo').should("exist")
+        cy.get('@body.foo').then (bodyFoo) ->
+          cy.get('@body').should("not.equal", bodyFoo)
 
     context "DOM subjects", ->
       it "assigns the remote jquery instance", ->
@@ -356,7 +358,7 @@ describe "src/cy/commands/aliasing", ->
         .get("input:first").as("firstInput")
         .get("div:last").as("lastDiv")
         .then ->
-          expect(cy.getAlias("@firstInput")).to.be.defined
+          expect(cy.getAlias("@firstInput")).to.exist
 
     describe "errors", ->
       it "throws when an alias cannot be found", (done) ->
@@ -368,7 +370,7 @@ describe "src/cy/commands/aliasing", ->
           .get("body").as("b")
           .get("input:first").as("firstInput")
           .get("@lastDiv")
-      
+
       it "throws when alias is missing '@' but matches an available alias", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.eq "Invalid alias: 'getAny'.\nYou forgot the '@'. It should be written as: '@getAny'."

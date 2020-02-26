@@ -24,9 +24,9 @@ meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
 xvfb = require("../../cli/lib/exec/xvfb")
-linkPackages = require('../link-packages')
 { transformRequires } = require('./util/transform-requires')
 { testStaticAssets } = require('./util/testStaticAssets')
+performanceTracking = require('../../packages/server/test/support/helpers/performance.js')
 
 rootPackage = require("@packages/root")
 
@@ -125,6 +125,20 @@ buildCypressApp = (platform, version, options = {}) ->
     log("#copyPackages")
 
     packages.copyAllToDist(distDir())
+
+  copyPatches = ->
+    log("#copyPatches")
+
+    patchesPath = path.join(__dirname, '..', '..', 'patches')
+    destPatchesPath = path.join(distDir(), 'patches')
+
+    fs.mkdirSync(destPatchesPath)
+    fs.readdirSync(patchesPath)
+    .map((patchFileName) -> [
+      path.join(patchesPath, patchFileName),
+      path.join(destPatchesPath, patchFileName)
+    ])
+    .forEach(([src, dest]) -> fs.copyFileSync(src, dest))
 
   transformSymlinkRequires = ->
     log("#transformSymlinkRequires")
@@ -301,11 +315,52 @@ buildCypressApp = (platform, version, options = {}) ->
         else
           reject new Error("Verifying App via GateKeeper failed")
 
+  printPackageSizes = ->
+    appFolder = meta.buildAppDir(platform, "packages")
+    log("#printPackageSizes #{appFolder}")
+
+    if (platform == "win32") then return Promise.resolve()
+
+    # "du" - disk usage utility
+    # -d -1 depth of 1
+    # -h human readable sizes (K and M)
+    args = ["-d", "1", appFolder]
+
+    parseDiskUsage = (result) ->
+      lines = result.stdout.split(os.EOL)
+      # will store {package name: package size}
+      data = {}
+
+      lines.forEach (line) ->
+        parts = line.split('\t')
+        packageSize = parseFloat(parts[0])
+        folder = parts[1]
+
+        packageName = path.basename(folder)
+        if packageName is "packages"
+          return # root "packages" information
+
+        data[packageName] = packageSize
+
+      return data
+
+    printDiskUsage = (sizes) ->
+      bySize = R.sortBy(R.prop('1'))
+      console.log(bySize(R.toPairs(sizes)))
+
+    execa("du", args)
+    .then(parseDiskUsage)
+    .then(R.tap(printDiskUsage))
+    .then((sizes) ->
+      performanceTracking.track('test runner size', sizes)
+    )
+
   Promise.resolve()
   .then(checkPlatform)
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
+  .then(copyPatches)
   .then(npmInstallPackages)
   .then(createRootPackage)
   .then(convertCoffeeToJs)
@@ -320,6 +375,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(runSmokeTests)
   .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
+  .then(printPackageSizes)
   .return({
     buildDir: buildDir()
   })

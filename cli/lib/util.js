@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const ospath = require('ospath')
 const crypto = require('crypto')
 const la = require('lazy-ass')
 const is = require('check-more-types')
@@ -158,6 +159,8 @@ function printNodeOptions (log = debug) {
  * Removes double quote characters
  * from the start and end of the given string IF they are both present
  *
+ * @param {string} str Input string
+ * @returns {string} Trimmed string or the original string if there are no double quotes around it.
  * @example
   ```
   dequote('"foo"')
@@ -175,8 +178,77 @@ const dequote = (str) => {
   return str
 }
 
+const parseOpts = (opts) => {
+  opts = _.pick(opts,
+    'browser',
+    'cachePath',
+    'cacheList',
+    'cacheClear',
+    'ciBuildId',
+    'config',
+    'configFile',
+    'cypressVersion',
+    'destination',
+    'detached',
+    'dev',
+    'exit',
+    'env',
+    'force',
+    'global',
+    'group',
+    'headed',
+    'headless',
+    'key',
+    'path',
+    'parallel',
+    'port',
+    'project',
+    'reporter',
+    'reporterOptions',
+    'record',
+    'spec',
+    'tag')
+
+  if (opts.exit) {
+    opts = _.omit(opts, 'exit')
+  }
+
+  // some options might be quoted - which leads to unexpected results
+  // remove double quotes from certain options
+  const removeQuotes = {
+    group: dequote,
+    ciBuildId: dequote,
+  }
+  const cleanOpts = R.evolve(removeQuotes, opts)
+
+  debug('parsed cli options %o', cleanOpts)
+
+  return cleanOpts
+}
+
+/**
+ * Copy of packages/server/lib/browsers/utils.ts
+ * because we need same functionality in CLI to show the path :(
+ */
+const getApplicationDataFolder = (...paths) => {
+  const { env } = process
+
+  // allow overriding the app_data folder
+  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_ENV || 'development'
+
+  const PRODUCT_NAME = pkg.productName || pkg.name
+  const OS_DATA_PATH = ospath.data()
+
+  const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
+
+  return p
+}
+
 const util = {
   normalizeModuleOptions,
+  parseOpts,
   isValidCypressEnvValue,
   printNodeOptions,
 
@@ -326,7 +398,15 @@ const util = {
       }
 
       return os.release()
+    })
+  },
 
+  getPlatformInfo () {
+    return util.getOsVersionAsync().then((version) => {
+      return stripIndent`
+        Platform: ${os.platform()} (${version})
+        Cypress Version: ${util.pkgVersion()}
+      `
     })
   },
 
@@ -407,6 +487,8 @@ const util = {
   getFileChecksum,
 
   getFileSize,
+
+  getApplicationDataFolder,
 }
 
 module.exports = util

@@ -22,7 +22,7 @@ const openRecordKeyGuide = (e) => {
 }
 
 const showLogin = () => {
-  authStore.setShowingLogin(true)
+  authStore.openLogin()
 }
 
 @observer
@@ -74,7 +74,7 @@ class RecordKey extends Component {
     return (
       <div>
         <a href='#' className='learn-more' onClick={openRecordKeyGuide}>
-          <i className='fa fa-info-circle'></i>{' '}
+          <i className='fas fa-info-circle'></i>{' '}
           Learn More
         </a>
         <p className='text-muted'>
@@ -97,7 +97,7 @@ class RecordKey extends Component {
             className='btn btn-primary'
             onClick={showLogin}
           >
-            <i className='fa fa-user'></i>{' '}
+            <i className='fas fa-user'></i>{' '}
             Log In
           </button>
         </p>
@@ -107,7 +107,7 @@ class RecordKey extends Component {
     if (this.isLoading) {
       return (
         <p className='loading-record-keys'>
-          <i className='fa fa-spinner fa-spin'></i>{' '}
+          <i className='fas fa-spinner fa-spin'></i>{' '}
           Loading Keys...
         </p>
       )
@@ -131,7 +131,7 @@ class RecordKey extends Component {
         </p>
         <p className='text-muted manage-btn'>
           <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>
-            <i className='fa fa-key'></i> You can change this key in the Dashboard
+            <i className='fas fa-key'></i> You can change this key in the Dashboard
           </a>
         </p>
       </div>

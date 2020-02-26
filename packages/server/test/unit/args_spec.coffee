@@ -3,7 +3,9 @@ require("../spec_helper")
 _        = require("lodash")
 path     = require("path")
 os       = require("os")
-argsUtil = require("#{root}lib/util/args")
+snapshot = require("snap-shot-it")
+stripAnsi = require("strip-ansi")
+argsUtil  = require("#{root}lib/util/args")
 proxyUtil = require("#{root}lib/util/proxy")
 getWindowsProxyUtil = require("#{root}lib/util/get-windows-proxy")
 
@@ -52,6 +54,13 @@ describe "lib/util/args", ->
       options = @setup("--run-project", "foo", "--spec", "'cypress/integration/foo_spec.js'")
       expect(options.spec[0]).to.eq("#{cwd}/cypress/integration/foo_spec.js")
 
+  context "--tag", ->
+    it "converts to array", ->
+      options = @setup("--run-project", "foo", "--tag", "nightly,production,build")
+      expect(options.tag[0]).to.eq("nightly")
+      expect(options.tag[1]).to.eq("production")
+      expect(options.tag[2]).to.eq("build")
+
   context "--port", ->
     it "converts to Number", ->
       options = @setup("--port", "8080")
@@ -66,6 +75,17 @@ describe "lib/util/args", ->
         host: "localhost:8888"
         bar: "qux="
       })
+
+    it "throws if env string cannot be parsed", ->
+      expect () =>
+        @setup("--env", "nonono")
+      .to.throw
+
+      # now look at the error
+      try
+        @setup("--env", "nonono")
+      catch err
+        snapshot("invalid env error", stripAnsi(err.message))
 
   context "--reporterOptions", ->
     it "converts to object literal", ->
@@ -104,6 +124,17 @@ describe "lib/util/args", ->
           toConsole: true
         }
       })
+
+    it "throws if reporter string cannot be parsed", ->
+      expect () =>
+        @setup("--reporterOptions", "abc")
+      .to.throw
+
+      # now look at the error
+      try
+        @setup("--reporterOptions", "abc")
+      catch err
+        snapshot("invalid reporter options error", stripAnsi(err.message))
 
   context "--config", ->
     it "converts to object literal", ->
@@ -165,14 +196,25 @@ describe "lib/util/args", ->
       options = @setup("--port", 2222)
       expect(options.config.port).to.eq(2222)
 
+    it "throws if config string cannot be parsed", ->
+      expect () =>
+        @setup("--config", "xyz")
+      .to.throw
+
+      # now look at the error
+      try
+        @setup("--config", "xyz")
+      catch err
+        snapshot("invalid config error", stripAnsi(err.message))
+
   context ".toArray", ->
     beforeEach ->
       @obj = {config: {foo: "bar"}, project: "foo/bar"}
 
     it "rejects values which have an cooresponding underscore'd key", ->
       expect(argsUtil.toArray(@obj)).to.deep.eq([
-        "--project=foo/bar",
         "--config=#{JSON.stringify({foo: 'bar'})}"
+        "--project=foo/bar",
       ])
 
   context ".toObject", ->
@@ -221,9 +263,9 @@ describe "lib/util/args", ->
       expect(@obj).to.deep.eq({
         cwd
         _: []
+        config: @config
         getKey: true
         invokedFromCli: false
-        config: @config
         spec: @specs
       })
 
@@ -241,10 +283,10 @@ describe "lib/util/args", ->
       args = argsUtil.toArray(@obj)
 
       expect(args).to.deep.eq([
+        "--config=#{mergedConfig}"
         "--cwd=#{cwd}"
         "--getKey=true"
         "--spec=#{JSON.stringify(@specs)}",
-        "--config=#{mergedConfig}"
       ])
 
       expect(argsUtil.toObject(args)).to.deep.eq({

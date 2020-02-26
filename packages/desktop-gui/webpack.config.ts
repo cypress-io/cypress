@@ -4,7 +4,7 @@ import path from 'path'
 const config: typeof commonConfig = {
   ...commonConfig,
   entry: {
-    app: [path.resolve(__dirname, 'src/main')],
+    app: [require.resolve('@babel/polyfill'), path.resolve(__dirname, 'src/main')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -25,6 +25,11 @@ config.plugins = [
 
 config.resolve = {
   ...config.resolve,
+  alias: {
+    'lodash': require.resolve('lodash'),
+    'react': require.resolve('react'),
+    'react-dom': require.resolve('react-dom'),
+  },
 }
 
 export default config

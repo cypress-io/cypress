@@ -34,13 +34,27 @@ setWindowProxy = (win) ->
   if not process.env.HTTP_PROXY
     return
 
-  return new Promise (resolve) ->
-    win.webContents.session.setProxy({
-      proxyRules: process.env.HTTP_PROXY
-      proxyBypassRules: process.env.NO_PROXY
-    }, resolve)
+  win.webContents.session.setProxy({
+    proxyRules: process.env.HTTP_PROXY
+    proxyBypassRules: process.env.NO_PROXY
+  })
 
 module.exports = {
+  installExtension: (path) ->
+    ## extensions can only be installed for all BrowserWindows
+    name = BrowserWindow.addExtension(path)
+
+    debug('electron extension installed %o', { success: !!name, name, path })
+
+    if !name
+      throw new Error('Extension could not be installed.')
+
+  removeAllExtensions: ->
+    extensions = _.keys(BrowserWindow.getExtensions())
+
+    debug('removing all electron extensions %o', extensions)
+    extensions.forEach(BrowserWindow.removeExtension)
+
   reset: ->
     windows = {}
 
@@ -95,7 +109,7 @@ module.exports = {
       onNewWindow: ->
       webPreferences:  {
         partition:            null
-        chromeWebSecurity:    true
+        webSecurity:          true
         nodeIntegration:      false
         backgroundThrottling: false
       }
@@ -108,8 +122,7 @@ module.exports = {
       options.frame = false
       options.webPreferences.offscreen = true
 
-    if options.chromeWebSecurity is false
-      options.webPreferences.webSecurity = false
+    options.webPreferences.webSecurity = !!options.chromeWebSecurity
 
     if options.partition
       options.webPreferences.partition = options.partition
@@ -156,16 +169,12 @@ module.exports = {
       })
 
     if options.onPaint
-      setFrameRate = (num) ->
-        if win.webContents.getFrameRate() isnt num
-          win.webContents.setFrameRate(num)
-
       win.webContents.on "paint", (event, dirty, image) ->
         ## https://github.com/cypress-io/cypress/issues/705
         ## if win is destroyed this will throw
         try
           if fr = options.recordFrameRate
-            setFrameRate(fr)
+            win.webContents.frameRate = fr
 
           options.onPaint.apply(win, arguments)
         catch err

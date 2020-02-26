@@ -10,7 +10,7 @@ class WarningMessage extends Component {
     return (
       <div className='alert alert-warning'>
         <p className='header'>
-          <i className='fa fa-warning'></i>{' '}
+          <i className='fas fa-exclamation-triangle'></i>{' '}
           <strong>Warning</strong>
         </p>
         <div>
@@ -22,7 +22,7 @@ class WarningMessage extends Component {
           }
         </div>
         <button className='btn btn-link close' onClick={this.props.onClearWarning}>
-          <i className='fa fa-remove' />
+          <i className='fas fa-times' />
         </button>
       </div>
     )

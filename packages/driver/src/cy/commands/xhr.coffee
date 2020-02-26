@@ -2,6 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 $Server = require("../../cypress/server")
 $Location = require("../../cypress/location")
 
@@ -36,7 +37,7 @@ getUrl = (options) ->
   options.originalUrl or options.url
 
 unavailableErr = ->
-  $utils.throwErrByPath("server.unavailable")
+  $errUtils.throwErrByPath("server.unavailable")
 
 getDisplayName = (route) ->
   if route and route.response? then "xhr stub" else "xhr"
@@ -86,6 +87,9 @@ startXhrServer = (cy, state, config) ->
   server = $Server.create({
     xhrUrl: config("xhrUrl")
     stripOrigin: stripOrigin
+
+    emitIncoming: (id, route) ->
+      Cypress.backend('incoming:xhr', id, route)
 
     ## shouldnt these stubs be called routes?
     ## rename everything related to stubs => routes
@@ -164,13 +168,13 @@ startXhrServer = (cy, state, config) ->
         log.snapshot("response").end()
 
     onNetworkError: (xhr) ->
-      err = $utils.cypressErr($utils.errMessageByPath("xhr.network_error"))
+      err = $errUtils.cypressErr($errUtils.errMsgByPath("xhr.network_error"))
 
       if log = logs[xhr.id]
         log.snapshot("failed").error(err)
 
     onFixtureError: (xhr, err) ->
-      err = $utils.cypressErr(err)
+      err = $errUtils.cypressErr(err)
 
       @onError(xhr, err)
 
@@ -180,13 +184,15 @@ startXhrServer = (cy, state, config) ->
       if log = logs[xhr.id]
         log.snapshot("error").error(err)
 
-      if r = state("reject")
-        r(err)
+      ## re-throw the error since this came from AUT code, and needs to
+      ## cause an 'uncaught:exception' event. This error will be caught in
+      ## top.onerror with stack as 5th argument.
+      throw err
 
     onXhrAbort: (xhr, stack) =>
       setResponse(state, xhr)
 
-      err = new Error $utils.errMessageByPath("xhr.aborted")
+      err = new Error $errUtils.errMsgByPath("xhr.aborted")
       err.name = "AbortError"
       err.stack = stack
 
@@ -246,6 +252,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## correctly
   Cypress.on("window:unload", cancelPendingXhrs)
 
+  Cypress.on "test:before:run:async", ->
+    ## reset any state on the backend
+    Cypress.backend('reset:server:state')
+
   Cypress.on "test:before:run", ->
     ## reset the existing server
     reset()
@@ -256,7 +266,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     ## window such as if the last test ended
     ## with a cross origin window
     try
-      server = startXhrServer(cy, state, config)
+      server = startXhrServer(cy, state, config, Cypress)
     catch err
       ## in this case, just don't bind to the server
       server = null
@@ -279,7 +289,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         options = {}
 
       if not _.isObject(options)
-        $utils.throwErrByPath("server.invalid_argument")
+        $errUtils.throwErrByPath("server.invalid_argument")
 
       _.defaults options,
         enable: true ## set enable to false to turn off stubbing
@@ -305,7 +315,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       hasResponse = true
 
       if not state("serverIsStubbed")
-        $utils.throwErrByPath("route.failed_prerequisites")
+        $errUtils.throwErrByPath("route.failed_prerequisites")
 
       ## get the default options currently set
       ## on our server
@@ -322,7 +332,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             options = o = _.extend {}, options, args[0]
 
           when args.length is 0
-            $utils.throwErrByPath "route.invalid_arguments"
+            $errUtils.throwErrByPath "route.invalid_arguments"
 
           when args.length is 1
             o.url = args[0]
@@ -365,18 +375,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         _.defaults(options, defaults)
 
         if not options.url
-          $utils.throwErrByPath "route.url_missing"
+          $errUtils.throwErrByPath "route.url_missing"
 
         if not (_.isString(options.url) or _.isRegExp(options.url))
-          $utils.throwErrByPath "route.url_invalid"
+          $errUtils.throwErrByPath "route.url_invalid"
 
         if not $utils.isValidHttpMethod(options.method)
-          $utils.throwErrByPath "route.method_invalid", {
+          $errUtils.throwErrByPath "route.method_invalid", {
             args: { method: o.method }
           }
 
         if hasResponse and not options.response?
-          $utils.throwErrByPath "route.response_invalid"
+          $errUtils.throwErrByPath "route.response_invalid"
 
         ## convert to wildcard regex
         if options.url is "*"
@@ -415,7 +425,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         ## https://github.com/cypress-io/cypress/issues/2372
         if (decodedUrl = tryDecodeUri(urlString)) and urlString != decodedUrl
-          $utils.warnByPath("route.url_percentencoding_warning", { args: { decodedUrl }})
+          $errUtils.warnByPath("route.url_percentencoding_warning", { args: { decodedUrl }})
 
         options.log = Cypress.log({
           name: "route"

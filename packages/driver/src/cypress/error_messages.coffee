@@ -79,6 +79,9 @@ module.exports = {
     timed_out:  "#{cmd('blur')} timed out because your browser did not receive any blur events. This is a known bug in Chrome when it is not the currently focused window."
     wrong_focused_element: "#{cmd('blur')} can only be called on the focused element. Currently the focused element is a: {{node}}"
 
+  browser:
+    invalid_arg: "Cypress.{{method}}() must be passed the name of a browser or an object to filter with. You passed: {{obj}}"
+
   chai:
     length_invalid_argument: "You must provide a valid number to a length assertion. You passed: '{{length}}'"
     match_invalid_argument: "'match' requires its argument be a 'RegExp'. You passed: '{{regExp}}'"
@@ -117,7 +120,16 @@ module.exports = {
 
         > {{node}}
 
-      Cypress considers a 'textarea', any 'element' with a 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid clearable elements.
+      A clearable element matches one of the following selectors:
+        'a[href]'
+        'area[href]'
+        'input'
+        'select'
+        'textarea'
+        'button'
+        'iframe'
+        '[tabindex]'
+        '[contenteditable]'
     """
 
   clearCookie:
@@ -127,8 +139,8 @@ module.exports = {
     invalid_argument: "#{cmd('clearLocalStorage')} must be called with either a string or regular expression."
 
   click:
-    multiple_elements: "#{cmd('click')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
-    on_select_element: "#{cmd('click')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
+    multiple_elements: "#{cmd('{{cmd}}')} can only be called on a single element. Your subject contained {{num}} elements. Pass { multiple: true } if you want to serially click each element."
+    on_select_element: "#{cmd('{{cmd}}')} cannot be called on a <select> element. Use #{cmd('select')} command instead to change the value."
 
   clock:
     already_created: "#{cmd('clock')} can only be called once per test. Use the clock returned from the previous call."
@@ -139,8 +151,15 @@ module.exports = {
     empty_string: "#{cmd('contains')} cannot be passed an empty string."
     invalid_argument: "#{cmd('contains')} can only accept a string, number or regular expression."
     length_option: "#{cmd('contains')} cannot be passed a length option because it will only ever return 1 element."
+    regex_conflict: "You passed a regular expression with the case-insensitive (i) flag and { matchCase: true } to #{cmd('contains')}. Those options conflict with each other, so please choose one or the other."
 
   cookies:
+    backend_error: """
+    #{cmd('{{command}}')} had an unexpected error {{action}} {{browserDisplayName}}.
+
+    {{errMessage}}
+    {{errStack}}
+    """
     removed_method: """
       The Cypress.Cookies.{{method}}() method has been removed.
 
@@ -399,11 +418,12 @@ module.exports = {
 
       cy.wrap({ foo: {{value}} }).its('foo.baz').should('not.exist')
       """
-    invalid_1st_arg: "#{cmd('{{cmd}}')} only accepts a string as the first argument."
+    invalid_prop_name_arg: "#{cmd('{{cmd}}')} only accepts a string or a number as the {{identifier}}Name argument."
+    null_or_undefined_property_name: "#{cmd('{{cmd}}')} expects the {{identifier}}Name argument to have a value."
+    invalid_options_arg: "#{cmd('{{cmd}}')} only accepts an object as the options argument."
     invalid_num_of_args:
       """
-      #{cmd('{{cmd}}')} only accepts a single argument.
-
+      #{cmd('{{cmd}}')} does not accept additional arguments.
       If you want to invoke a function with arguments, use cy.invoke().
       """
     timed_out:
@@ -589,6 +609,17 @@ module.exports = {
     async_timed_out: "Timed out after '{{ms}}ms'. The done() callback was never invoked!"
     invalid_interface: "Invalid mocha interface '{{name}}'"
     timed_out: "Cypress command timeout of '{{ms}}ms' exceeded."
+    overspecified: """
+    Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+
+    Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callback
+
+    #{divider(60, '-')}
+
+    Original mocha error:
+
+    {{error}}
+    """
 
   navigation:
     cross_origin: ({ message, originPolicy, configFile }) -> """
@@ -597,21 +628,18 @@ module.exports = {
         > #{message}
 
       Before the page load, you were bound to the origin policy:
+
         > #{originPolicy}
 
-      A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+      A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
-      This typically happens in one of three ways:
+      A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-      1. You clicked an <a> that routed you outside of your application
-      2. You submitted a form and your server redirected you outside of your application
-      3. You used a javascript redirect to a page outside of your application
-
-      Cypress does not allow you to change superdomains within a single test.
+      Cypress does not allow you to navigate to a different origin URL within a single test.
 
       You may need to restructure some of your test code to avoid this problem.
 
-      Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in #{formatConfigFile(configFile)}.
+      Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in #{formatConfigFile(configFile)}.
 
       https://on.cypress.io/cross-origin-violation
 
@@ -780,7 +808,9 @@ module.exports = {
     invalid_capture: "{{cmd}}() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: {{arg}}"
     invalid_boolean: "{{cmd}}() '{{option}}' option must be a boolean. You passed: {{arg}}"
     invalid_blackout: "{{cmd}}() 'blackout' option must be an array of strings. You passed: {{arg}}"
-    invalid_clip: "{{cmd}}() 'clip' option must be an object of with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_clip: "{{cmd}}() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: {{arg}}"
+    invalid_height: "#{cmd('screenshot')} only works with a screenshot area with a height greater than zero."
+    invalid_padding: "{{cmd}}() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: {{arg}}"
     invalid_callback: "{{cmd}}() '{{callback}}' option must be a function. You passed: {{arg}}"
     multiple_elements: "#{cmd('screenshot')} only works for a single element. You attempted to screenshot {{numElements}} elements."
     timed_out: "#{cmd('screenshot')} timed out waiting '{{timeout}}ms' to complete."
@@ -932,6 +962,7 @@ module.exports = {
     invalid_month: "Typing into a month input with #{cmd('type')} requires a valid month with the format 'yyyy-MM'. You passed: {{chars}}"
     invalid_week: "Typing into a week input with #{cmd('type')} requires a valid week with the format 'yyyy-Www', where W is the literal character 'W' and ww is the week number (00-53). You passed: {{chars}}"
     invalid_time: "Typing into a time input with #{cmd('type')} requires a valid time with the format 'HH:mm', 'HH:mm:ss' or 'HH:mm:ss.SSS', where HH is 00-23, mm is 00-59, ss is 00-59, and SSS is 000-999. You passed: {{chars}}"
+    invalid_datetime: "Typing into a datetime input with #{cmd('type')} requires a valid datetime with the format 'yyyy-MM-ddThh:mm', for example '2017-06-01T08:30'. You passed: {{chars}}"
     multiple_elements: "#{cmd('type')} can only be called on a single element. Your subject contained {{num}} elements."
     not_on_typeable_element: """
       #{cmd('type')} failed because it requires a valid typeable element.
@@ -940,7 +971,25 @@ module.exports = {
 
         > {{node}}
 
-      Cypress considers the 'body', 'textarea', any 'element' with a 'tabindex' or 'contenteditable' attribute, or any 'input' with a 'type' attribute of 'text', 'password', 'email', 'number', 'date', 'week', 'month', 'time', 'datetime', 'datetime-local', 'search', 'url', or 'tel' to be valid typeable elements.
+      A typeable element matches one of the following selectors:
+        'a[href]'
+        'area[href]'
+        'input'
+        'select'
+        'textarea'
+        'button'
+        'iframe'
+        '[tabindex]'
+        '[contenteditable]'
+    """
+    not_actionable_textlike: """
+      #{cmd('type')} failed because it targeted a disabled element.
+
+      The element typed into was:
+
+        > {{node}}
+
+      You should ensure the element does not have an attribute named 'disabled' before typing into it.
     """
     tab: "{tab} isn't a supported character sequence. You'll want to use the command #{cmd('tab')}, which is not ready yet, but when it is done that's what you'll use."
     wrong_type: "#{cmd('type')} can only accept a String or Number. You passed in: '{{chars}}'"
@@ -992,7 +1041,7 @@ module.exports = {
 
   viewport:
     bad_args:  "#{cmd('viewport')} can only accept a string preset or a width and height as numbers."
-    dimensions_out_of_range: "#{cmd('viewport')} width and height must be between 20px and 4000px."
+    dimensions_out_of_range: "#{cmd('viewport')} width and height must be at least 0px."
     empty_string: "#{cmd('viewport')} cannot be passed an empty string."
     invalid_orientation: "#{cmd('viewport')} can only accept '{{all}}' as valid orientations. Your orientation was: '{{orientation}}'"
     missing_preset: "#{cmd('viewport')} could not find a preset for: '{{preset}}'. Available presets are: {{presets}}"
@@ -1022,20 +1071,26 @@ module.exports = {
       URL from the `options` object: {{optionsUrl}}
       URL from the `url` parameter: {{url}}
     """
-    cannot_visit_2nd_domain: """
-      #{cmd('visit')} failed because you are attempting to visit a second unique domain.
+    cannot_visit_different_origin: """
+      #{cmd('visit')} failed because you are attempting to visit a URL that is of a different origin.
 
-      You may only visit a single unique domain per test.
+      The new URL is considered a different origin because the following parts of the URL are different:
 
-      Different subdomains are okay, but unique domains are not.
+        > {{differences}}
 
-      The previous domain you visited was: '{{previousDomain}}'
+      You may only #{cmd('visit')} same-origin URLs within a single test.
 
-      You're attempting to visit this new domain: '{{attemptedDomain}}'
+      The previous URL you visited was: 
+      
+        > '{{previousUrl}}'
 
-      You may need to restructure some of your code to prevent this from happening.
+      You're attempting to visit this URL: 
+      
+        > '{{attemptedUrl}}'
 
-      https://on.cypress.io/cannot-visit-second-unique-domain
+      You may need to restructure some of your test code to avoid this problem.
+
+      https://on.cypress.io/cannot-visit-different-origin-domain
     """
     loading_network_failed: """
       #{cmd('visit')} failed trying to load:

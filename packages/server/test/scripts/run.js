@@ -64,7 +64,7 @@ if (isWindows()) {
 if (options['inspect-brk']) {
   commandAndArguments.args.push(
     '--inspect',
-    `--inspect-brk${options['inspect-brk'] === true ? '' : `=${options['inspect-brk']}`}`
+    `--inspect-brk${options['inspect-brk'] === true ? '' : `=${options['inspect-brk']}`}`,
   )
 }
 
@@ -72,19 +72,21 @@ if (isGteNode12()) {
   // max HTTP header size 8kb -> 1mb
   // https://github.com/cypress-io/cypress/issues/76
   commandAndArguments.args.push(
-    `--max-http-header-size=${1024 * 1024}`
+    `--max-http-header-size=${1024 * 1024}`,
   )
 }
 
-commandAndArguments.args.push(
-  'node_modules/.bin/_mocha',
-  run
-)
+if (!isWindows()) {
+  commandAndArguments.args.push(
+    'node_modules/.bin/_mocha',
+    run,
+  )
+}
 
 if (options.fgrep) {
   commandAndArguments.args.push(
     '--fgrep',
-    options.fgrep
+    options.fgrep,
   )
 }
 
@@ -92,12 +94,11 @@ commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
-  '--compilers',
-  'ts:@packages/ts/register,coffee:@packages/coffee/register',
+  '--compilers ts:@packages/ts/register,coffee:@packages/coffee/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
-  'configFile=../../mocha-reporter-config.json'
+  'configFile=../../mocha-reporter-config.json',
 )
 
 const env = _.clone(process.env)

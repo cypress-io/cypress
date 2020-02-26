@@ -24,9 +24,9 @@ describe "src/cy/commands/connectors", ->
 
       it "spreads a jQuery wrapper into individual arguments", ->
         cy.noop($("div")).spread (first, second) ->
-          expect(first.tagName).to.eq('DIV');
+          expect(first.tagName).to.eq('DIV')
           expect(first.innerText).to.eq("div")
-          expect(second.tagName).to.eq('DIV');
+          expect(second.tagName).to.eq('DIV')
           expect(second.innerText).to.contain("Nested Find")
 
       it "passes timeout option to spread", ->
@@ -337,6 +337,24 @@ describe "src/cy/commands/connectors", ->
           cy.noop(@obj).invoke("foo").then (str) ->
             expect(str).to.eq "foo"
 
+        it "works with numerical indexes", ->
+          i = 0
+          fn = ->
+            i++
+            return i == 5
+
+          cy.noop([_.noop, fn]).invoke(1).should('be.true')
+
+        it "works with 0 as a value if object has property 0", ->
+          i = 0
+          fn = ->
+            if i++ is 0 then "cy.noop is undocumented"
+            else "and I don't understand what it is"
+
+          cy.wrap([fn, "bar"]).invoke(0).should("eq", "cy.noop is undocumented")
+          cy.wrap({"0": fn}).invoke(0).should("eq", "and I don't understand what it is")
+
+
         it "forwards any additional arguments", ->
           cy.noop(@obj).invoke("bar", 1, 2).then (num) ->
             expect(num).to.eq 3
@@ -465,6 +483,120 @@ describe "src/cy/commands/connectors", ->
 
             cy.wrap(obj).invoke("foo.bar")
 
+      describe "accepts a options argument", ->
+
+        it "changes subject to function invocation", ->
+          cy.noop({ foo: -> "foo" }).invoke({ log: false }, "foo").then (str) ->
+            expect(str).to.eq "foo"
+
+        it "forwards any additional arguments", ->
+          cy.noop({ bar: (num1, num2) -> num1 + num2 }).invoke({ log: false }, "bar", 1, 2).then (num) ->
+            expect(num).to.eq 3
+
+          cy.noop({ bar: -> undefined }).invoke({ log: false }, "bar").then (val) ->
+            expect(val).to.be.undefined
+
+        it "works with numerical indexes", ->
+          i = 0
+          fn = ->
+            i++
+            return i == 5
+
+          cy.noop([_.noop, fn]).invoke({}, 1).should('be.true')
+
+        describe "errors", ->
+          beforeEach ->
+            Cypress.config("defaultCommandTimeout", 50)
+
+            cy.on "log:added", (attrs, log) =>
+              @lastLog = log
+
+            return null
+
+          it "throws when function name is missing", (done) ->
+            cy.on "fail", (err) =>
+                lastLog = @lastLog
+                expect(err.message).to.include "cy.invoke() expects the functionName argument to have a value"
+                expect(lastLog.get("error").message).to.include(err.message)
+                done()
+              
+            cy.wrap({ foo: -> "foo"}).invoke({})
+
+          it "throws when function name is not of type string but of type boolean", (done) ->
+            cy.on "fail", (err) =>
+                lastLog = @lastLog
+                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
+                expect(lastLog.get("error").message).to.include(err.message)
+                done()
+              
+            cy.wrap({ foo: -> "foo"}).invoke({}, true)
+
+          it "throws when function name is not of type string but of type function", (done) ->
+            cy.on "fail", (err) =>
+                lastLog = @lastLog
+                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
+                expect(lastLog.get("error").message).to.include(err.message)
+                done()
+              
+            cy.wrap({ foo: -> "foo"}).invoke(() -> {})
+
+          it "throws when first parameter is neither of type object nor of type string nor of type number", (done) ->
+            cy.on "fail", (err) =>
+                lastLog = @lastLog
+                expect(err.message).to.include "cy.invoke() only accepts a string or a number as the functionName argument."
+                expect(lastLog.get("error").message).to.include(err.message)
+                done()
+              
+            cy.wrap({ foo: -> "foo"}).invoke(true, "show")
+
+        describe ".log", ->
+          beforeEach ->
+            @obj = {
+              foo: "foo bar baz"
+              num: 123
+              bar: -> "bar"
+              attr: (key, value) ->
+                obj = {}
+                obj[key] = value
+                obj
+              sum: (a, b) -> a + b
+            }
+
+            cy.on "log:added", (attrs, log) =>
+              @lastLog = log
+
+            return null
+
+          it "logs obj as a function", ->
+            cy.noop(@obj).invoke({ log: true }, "bar").then ->
+              obj = {
+                name: "invoke"
+                message: ".bar()"
+              }
+
+              lastLog = @lastLog
+
+              _.each obj, (value, key) =>
+                expect(lastLog.get(key)).to.deep.eq value
+
+          it "logs obj with arguments", ->
+            cy.noop(@obj).invoke({ log: true }, "attr", "numbers", [1,2,3]).then ->
+              expect(@lastLog.invoke("consoleProps")).to.deep.eq {
+                Command:  "invoke"
+                Function: ".attr(numbers, [1, 2, 3])"
+                "With Arguments": ["numbers", [1,2,3]]
+                Subject: @obj
+                Yielded: {numbers: [1,2,3]}
+              }
+
+          it "can be disabled", ->
+            cy.noop(@obj).invoke({ log: true }, "sum", 1, 2).then ->
+              expect(@lastLog.invoke("consoleProps")).to.have.property("Function", ".sum(1, 2)")
+              @lastLog = undefined
+
+            cy.noop(@obj).invoke({ log: false }, "sum", 1, 2).then ->
+              expect(@lastLog).to.be.undefined
+        
       describe ".log", ->
         beforeEach ->
           @obj = {
@@ -480,8 +612,8 @@ describe "src/cy/commands/connectors", ->
                 memo + num
               , 0
             math: {
-              sum: =>
-                @obj.sum.apply(@obj, arguments)
+              sum: (args...) =>
+                @obj.sum.apply(@obj, args)
             }
           }
 
@@ -604,16 +736,6 @@ describe "src/cy/commands/connectors", ->
 
           cy.invoke("queue")
 
-        it "throws when first argument isnt a string", (done) ->
-          cy.on "fail", (err) =>
-            lastLog = @lastLog
-
-            expect(err.message).to.eq "cy.invoke() only accepts a string as the first argument."
-            expect(lastLog.get("error")).to.eq err
-            done()
-
-          cy.wrap({}).invoke({})
-
         it "logs once when not dom subject", (done) ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
@@ -698,6 +820,14 @@ describe "src/cy/commands/connectors", ->
         fn = -> "bar"
         cy.wrap({foo: fn}).its("foo").should("eq", fn)
 
+      it "works with numerical indexes", ->
+        cy.wrap(['foo', 'bar']).its(1).should('eq', 'bar')
+
+      it "works with 0 as a value if object has property 0", ->
+        cy.wrap(["foo", "bar"]).its(0).should("eq", "foo")
+        cy.wrap({"0": "whoa"}).its(0).should("eq", "whoa")
+        cy.wrap([###empty###, "spooky"]).its(0).should("not.exist")
+
       it "reduces into dot separated values", ->
         obj = {
           foo: {
@@ -740,7 +870,7 @@ describe "src/cy/commands/connectors", ->
           foo:  -> throw err
         }
 
-        cy.wrap(obj).its("foo").should("throw", err)
+        cy.wrap(obj).its("foo").should("throw", "nope cant access me")
 
       it "returns property", ->
         cy.noop({baz: "baz"}).its("baz").then (num) ->
@@ -859,6 +989,54 @@ describe "src/cy/commands/connectors", ->
         cy.wrap(obj).its("foo").should("be.undefined")
         cy.wrap(obj).its("foo").should("eq", undefined)
 
+      describe "accepts a options argument and works as without options argument", ->
+
+        it "proxies to #invokeFn", ->
+          fn = -> "bar"
+          cy.wrap({foo: fn}).its("foo", { log: false }).should("eq", fn)
+
+        it "does not invoke a function and uses as a property", ->
+          fn = -> "fn"
+          fn.bar = "bar"
+
+          cy.wrap(fn).its("bar", { log: false }).should("eq", "bar")
+
+        it "works with numerical indexes", ->
+          cy.wrap(['foo', 'bar']).its(1, {}).should('eq', 'bar')
+
+        describe ".log", -> 
+          beforeEach ->
+            @obj = {
+              foo: "foo bar baz"
+              num: 123
+            }
+
+            cy.on "log:added", (attrs, log) =>
+              @lastLog = log
+
+            return null
+
+          it "logs obj as a property", ->
+            cy.noop(@obj).its("foo", { log: true }).then ->
+              obj = {
+                name: "its"
+                message: ".foo"
+              }
+
+              lastLog = @lastLog
+
+              _.each obj, (value, key) =>
+                expect(lastLog.get(key)).to.deep.eq value
+
+          it "#consoleProps as a regular property", ->
+            cy.noop(@obj).its("num", { log: true }).then ->
+              expect(@lastLog.invoke("consoleProps")).to.deep.eq {
+                Command:  "its"
+                Property: ".num"
+                Subject:       @obj
+                Yielded: 123
+              }
+
       describe ".log", ->
         beforeEach ->
           @obj = {
@@ -930,6 +1108,14 @@ describe "src/cy/commands/connectors", ->
               Subject:       @obj
               Yielded: 123
             }
+
+        it "can be disabled", ->
+          cy.noop(@obj).its("num", { log: true }).then ->
+            expect(@lastLog.invoke("consoleProps")).to.have.property("Property", ".num")
+            @lastLog = undefined
+          
+          cy.noop(@obj).its("num", { log: false }).then ->
+            expect(@lastLog).to.be.undefined
 
       describe "errors", ->
         beforeEach ->
@@ -1121,11 +1307,11 @@ describe "src/cy/commands/connectors", ->
 
             cy.wrap(val).its("foo")
 
-        it "throws two args were passed as subject", (done) ->
+        it "throws does not accept additional arguments", (done) ->
           cy.on "fail", (err) =>
             lastLog = @lastLog
 
-            expect(err.message).to.include "cy.its() only accepts a single argument."
+            expect(err.message).to.include "cy.its() does not accept additional arguments."
             expect(lastLog.get("error").message).to.include(err.message)
             done()
 
@@ -1133,7 +1319,34 @@ describe "src/cy/commands/connectors", ->
           fn.bar = -> "bar"
           fn.bar.baz = "baz"
 
-          cy.wrap(fn).its("bar", "baz").should("eq", "baz")
+          cy.wrap(fn).its("bar", { log: false }, "baz").should("eq", "baz")
+
+        it "throws when options argument is not an object", (done) ->
+          cy.on "fail", (err) =>
+              lastLog = @lastLog
+              expect(err.message).to.include "cy.its() only accepts an object as the options argument."
+              expect(lastLog.get("error").message).to.include(err.message)
+              done()
+            
+          cy.wrap({ foo: "string" }).its("foo", "bar")
+
+        it "throws when property name is missing", (done) ->
+          cy.on "fail", (err) =>
+              lastLog = @lastLog
+              expect(err.message).to.include "cy.its() expects the propertyName argument to have a value"
+              expect(lastLog.get("error").message).to.include(err.message)
+              done()
+
+          cy.wrap({ foo: "foo"}).its()
+
+        it "throws when property name is not of type string", (done) ->
+          cy.on "fail", (err) =>
+              lastLog = @lastLog
+              expect(err.message).to.include "cy.its() only accepts a string or a number as the propertyName argument."
+              expect(lastLog.get("error").message).to.include(err.message)
+              done()
+            
+          cy.wrap({ foo: "foo"}).its(true)
 
         it "resets traversalErr and throws the right assertion", (done) ->
           cy.timeout(200)
@@ -1222,7 +1435,7 @@ describe "src/cy/commands/connectors", ->
       it "awaits promises returned", ->
         count = 0
 
-        start = new Date
+        start = new Date()
 
         cy.get("#list li").each ($li, i, arr) ->
           new Promise (resolve, reject) ->
@@ -1232,7 +1445,7 @@ describe "src/cy/commands/connectors", ->
             , 20
         .then ($lis) ->
           expect(count).to.eq(3)
-          expect(new Date - start).to.be.gt(60)
+          expect(new Date() - start).to.be.gt(60)
 
       it "supports array like structures", ->
         count = 0

@@ -25,9 +25,6 @@ packages/https-proxy/ca/
 packages/desktop-gui/cypress/videos
 packages/desktop-gui/src/jsconfig.json
 
-# from driver
-packages/driver/test/cypress/videos
-
 # from example
 packages/example/app
 packages/example/build
@@ -57,8 +54,8 @@ cli/build
 # Building app binary
 scripts/support
 package-lock.json
-yarn.lock
 binary-url.json
 
 # Allows us to dynamically create eslint rules that override the default for Decaffeinate scripts
 .eslintrc.js
+cli/visual-snapshots
