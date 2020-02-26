@@ -56,11 +56,20 @@ orbs:
   win: circleci/windows@1.0.0
 
 ## due to a bug in Circle CI, this cannot be defined as a real "executor"
-win-executor: &win-executor
+win-base-executor: &win-base-executor
   executor:
     name: win/vs2019
     shell: bash.exe # default is powershell, which just won't work with the scripts we use on linux/darwin
 
+win-ia32-executor:
+  <<: *win-base-executor
+  environment:
+    TARGET_ARCH: ia32
+
+win-x64-executor:
+  <<: *win-base-executor
+  environment:
+    TARGET_ARCH: x64
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
@@ -350,10 +359,6 @@ jobs:
     parameters:
       executor:
         type: executor
-      arch:
-        type: string
-    environment:
-      TARGET_ARCH: << parameters.arch >>
     steps:
       - win-prebuild
       - common-build
@@ -1483,53 +1488,52 @@ mac-workflow: &mac-workflow
 win-ia32-workflow: &win-ia32-workflow
   jobs:
   - win-build:
-      <<: *win-executor
+      <<: *win-ia32-executor
       <<: *win-build-filters
       name: 'win-ia32-build'
-      arch: x86
   - build-npm-package:
-      <<: *win-executor
+      <<: *win-ia32-executor
       name: 'win-ia32-build-npm-package'
       requires:
         - win-ia32-build
   - upload-npm-package:
-      <<: *win-executor
+      <<: *win-ia32-executor
       name: 'win-ia32-upload-npm-package'
       context: test-runner:upload
       requires:
         - win-ia32-build-npm-package
   - build-binary:
-      <<: *win-executor
+      <<: *win-ia32-executor
       name: 'win-ia32-build-binary'
       context: org-global
       requires:
         - win-ia32-build
   - upload-binary:
-      <<: *win-executor
+      <<: *win-ia32-executor
       name: 'win-ia32-upload-binary'
       context: test-runner:upload
       requires:
         - win-ia32-build-binary
   - test-kitchensink:
-      <<: *win-executor
+      <<: *win-ia32-executor
       name: 'win-ia32-test-kitchensink'
       requires:
         - win-ia32-build
   - test-binary-against-kitchensink:
-      <<: *win-executor
+      <<: *win-ia32-executor
       name: 'win-ia32-test-binary-against-kitchensink'
       requires:
         - win-ia32-build-npm-package
         - win-ia32-build-binary
   - test-binary-against-staging:
-      <<: *win-executor
+      <<: *win-ia32-executor
       name: 'win-ia32-test-binary-against-staging'
       context: test-runner:record-tests
       requires:
         - win-ia32-build-npm-package
         - win-ia32-build-binary
   - test-binary-and-npm-against-other-projects:
-      <<: *win-executor
+      <<: *win-ia32-executor
       context: test-runner:trigger-test-jobs
       name: 'win-ia32-test-binary-and-npm-against-other-projects'
       requires:
@@ -1539,53 +1543,52 @@ win-ia32-workflow: &win-ia32-workflow
 win-x64-workflow: &win-x64-workflow
   jobs:
   - win-build:
-      <<: *win-executor
+      <<: *win-x64-executor
       <<: *win-build-filters
       name: 'win-x64-build'
-      arch: x64
   - build-npm-package:
-      <<: *win-executor
+      <<: *win-x64-executor
       name: 'win-x64-build-npm-package'
       requires:
         - win-x64-build
   - upload-npm-package:
-      <<: *win-executor
+      <<: *win-x64-executor
       name: 'win-x64-upload-npm-package'
       context: test-runner:upload
       requires:
         - win-x64-build-npm-package
   - build-binary:
-      <<: *win-executor
+      <<: *win-x64-executor
       name: 'win-x64-build-binary'
       context: org-global
       requires:
         - win-x64-build
   - upload-binary:
-      <<: *win-executor
+      <<: *win-x64-executor
       name: 'win-x64-upload-binary'
       context: test-runner:upload
       requires:
         - win-x64-build-binary
   - test-kitchensink:
-      <<: *win-executor
+      <<: *win-x64-executor
       name: 'win-x64-test-kitchensink'
       requires:
         - win-x64-build
   - test-binary-against-kitchensink:
-      <<: *win-executor
+      <<: *win-x64-executor
       name: 'win-x64-test-binary-against-kitchensink'
       requires:
         - win-x64-build-npm-package
         - win-x64-build-binary
   - test-binary-against-staging:
-      <<: *win-executor
+      <<: *win-x64-executor
       name: 'win-x64-test-binary-against-staging'
       context: test-runner:record-tests
       requires:
         - win-x64-build-npm-package
         - win-x64-build-binary
   - test-binary-and-npm-against-other-projects:
-      <<: *win-executor
+      <<: *win-x64-executor
       context: test-runner:trigger-test-jobs
       name: 'win-x64-test-binary-and-npm-against-other-projects'
       requires:
