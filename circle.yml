@@ -51,6 +51,7 @@ testBinaryFirefox: &testBinaryFirefox
     - build-npm-package
     - build-binary
 
+
 orbs:
   win: circleci/windows@1.0.0
 
@@ -62,13 +63,11 @@ win-base-executor: &win-base-executor
 
 win-ia32-executor: &win-ia32-executor
   <<: *win-base-executor
-  environment:
-    TARGET_ARCH: x86
+  context: test-runner:win-ia32
 
 win-x64-executor: &win-x64-executor
   <<: *win-base-executor
-  environment:
-    TARGET_ARCH: x64
+  context: test-runner:win-x64
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
