@@ -95,10 +95,6 @@ executors:
     environment:
       PLATFORM: mac
 
-  win:
-    windows:
-      shell: bash.exe
-
 commands:
   print-env:
     steps:
