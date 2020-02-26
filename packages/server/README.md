@@ -28,12 +28,15 @@ Since the server controls nearly every aspect of Cypress, after making changes y
 
 Since this is slow, it's better to drive your development with tests.
 
-## Testing
+## Building
+
+Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
 
 ```shell
-# be sure to build (also happens on `yarn` when installing dependencies)
-yarn build
+yarn lerna run build-prod --scope @packages/server --stream
 ```
+
+## Testing
 
 * `yarn lerna run test-unit --scope @packages/server --stream` executes unit tests in [`test/unit`](./test/unit)
 * `yarn lerna run test-integration --scope @packages/server --stream` executes integration tests in [`test/integration`](./test/integration)
