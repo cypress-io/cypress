@@ -181,7 +181,7 @@ describe('lib/plugins/index', () => {
     describe('load:error message', () => {
       context('PLUGINS_FILE_ERROR', () => {
         beforeEach(() => {
-          return ipc.on.withArgs('load:error').yields('PLUGINS_FILE_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+          ipc.on.withArgs('load:error').yields('PLUGINS_FILE_ERROR', 'path/to/pluginsFile.js', 'error message stack')
         })
 
         it('rejects plugins.init', () => {
@@ -197,7 +197,7 @@ describe('lib/plugins/index', () => {
 
       context('PLUGINS_FUNCTION_ERROR', () => {
         beforeEach(() => {
-          return ipc.on.withArgs('load:error').yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
+          ipc.on.withArgs('load:error').yields('PLUGINS_FUNCTION_ERROR', 'path/to/pluginsFile.js', 'error message stack')
         })
 
         it('rejects plugins.init', () => {
@@ -308,7 +308,7 @@ describe('lib/plugins/index', () => {
 
   context('#getPluginPid', () => {
     beforeEach(() => {
-      return plugins._setPluginsProcess(null)
+      plugins._setPluginsProcess(null)
     })
 
     it('returns the pid if there is a plugins process', () => {
