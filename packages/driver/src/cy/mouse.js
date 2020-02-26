@@ -408,7 +408,7 @@ const create = (state, keyboard, focused, Cypress) => {
       // TODO: pointer events should have fractional coordinates, not rounded
       let pointerdown = sendPointerdown(
         el,
-        pointerEvtOptions
+        pointerEvtOptions,
       )
 
       const pointerdownPrevented = pointerdown.preventedDefault

@@ -496,8 +496,7 @@ create = (options = {}) ->
               bak = fns[prop]
 
               if _.isFunction(bak)
-                fns[prop] = ->
-                  bak.apply(xhr, arguments)
+                -> bak.apply(xhr, arguments)
               else
                 overrides[prop]
             set: (fn) ->

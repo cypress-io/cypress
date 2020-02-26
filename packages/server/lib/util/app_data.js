@@ -37,7 +37,7 @@ module.exports = {
       .then(() => {
         return Promise.join(
           fs.ensureDirAsync(this.path()),
-          !isProduction() ? this.symlink() : undefined
+          !isProduction() ? this.symlink() : undefined,
         )
       })
     }
@@ -88,7 +88,7 @@ module.exports = {
   remove () {
     return Promise.join(
       fs.removeAsync(this.path()),
-      this.removeSymlink()
+      this.removeSymlink(),
     )
   },
 
