@@ -29,7 +29,7 @@
       "onlySingle": true,
       "execute": false,
       "cwd": "[cwd]/packages/server",
-      "command": "yarn test [fileBasename]"
+      "command": "yarn test [file]"
     },
     {
       "name": "packages/runner watch",

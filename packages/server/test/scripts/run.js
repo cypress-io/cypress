@@ -4,14 +4,28 @@ const _ = require('lodash')
 const chalk = require('chalk')
 const minimist = require('minimist')
 const execa = require('execa')
+const path = require('path')
 const os = require('os')
 
 const options = minimist(process.argv.slice(2))
 
 let run = options._
 
+if (options['spec']) {
+  console.error('NOTE: It is no longer necessary to pass `--spec` to server test commands. Try passing the path directly instead.')
+  run = [options.spec]
+}
+
 if (run[0] && run[0].includes('--inspect-brk')) {
   run = run.slice(1)
+}
+
+if (options['glob-in-dir']) {
+  if (run[0]) {
+    run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
+  } else {
+    run = [options['glob-in-dir']]
+  }
 }
 
 function exitErr (msg) {
