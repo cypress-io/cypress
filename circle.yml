@@ -57,20 +57,17 @@ orbs:
 
 ## due to a bug in Circle CI, this cannot be defined as a real "executor"
 win-base-executor: &win-base-executor
-  name: win/vs2019
-  shell: bash.exe # default is powershell, which just won't work with the scripts we use on linux/darwin
+  executor:
+    name: win/vs2019
+    shell: bash.exe # default is powershell, which just won't work with the scripts we use on linux/darwin
 
 win-ia32-executor: &win-ia32-executor
-  executor:
-    <<: *win-base-executor
-    environment:
-      TARGET_ARCH: ia32
+  <<: *win-base-executor
+  context: test-runner:win-ia32
 
 win-x64-executor: &win-x64-executor
-  executor:
-    <<: *win-base-executor
-    environment:
-      TARGET_ARCH: x64
+  <<: *win-base-executor
+  context: test-runner:win-x64
 
 executors:
   # the Docker image with Cypress dependencies and Chrome browser
