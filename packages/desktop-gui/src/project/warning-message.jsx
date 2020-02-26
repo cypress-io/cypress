@@ -21,7 +21,7 @@ class WarningMessage extends Component {
             </button>
           }
         </div>
-        <button className='btn btn-link close' onClick={this.props.onClearWarning}>
+        <button className='btn btn-link close' onClick={this.props.onDismissWarning}>
           <i className='fas fa-times' />
         </button>
       </div>

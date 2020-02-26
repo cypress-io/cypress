@@ -79,11 +79,11 @@ class Project extends Component {
   _renderWarnings = () => {
     const { warnings } = this.props.project
 
-    return _.map(warnings, (warning, i) => (!warning.dismissed && <WarningMessage key={i} warning={warning} onTryAgain={() => this._pingBaseUrl(warning)} onClearWarning={() => this._removeWarning(warning)}/>))
+    return _.map(warnings, (warning, i) => (!warning.dismissed && <WarningMessage key={i} warning={warning} onTryAgain={() => this._pingBaseUrl(warning)} onDismissWarning={() => this._removeWarning(warning)}/>))
   }
 
   _removeWarning = (warning) => {
-    this.props.project.clearWarning(warning)
+    this.props.project.dismissWarning(warning)
   }
 
   _reopenProject = () => {
@@ -91,7 +91,7 @@ class Project extends Component {
   }
 
   _pingBaseUrl = (warning) => {
-    this.props.project.clearWarning(warning, true)
+    this.props.project.dismissWarning(warning, true)
     projectsApi.pingBaseUrl(toJS(this.props.project.resolvedConfig.baseUrl).value)
     .catch((err) => {
       this.props.project.addWarning(err)

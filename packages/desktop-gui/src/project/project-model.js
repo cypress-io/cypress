@@ -229,11 +229,11 @@ export default class Project {
     this.warnings[id] = { ...warning }
   }
 
-  @action clearWarning (warning, isProjectReload) {
+  @action dismissWarning (warning, isProjectReload) {
     if (!warning) {
       // calling with no warning clears all warnings
       return _.each(this.warnings, ((warning) => {
-        return this.clearWarning(warning, isProjectReload)
+        return this.dismissWarning(warning, isProjectReload)
       }))
     }
 
