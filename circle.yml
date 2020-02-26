@@ -240,25 +240,6 @@ commands:
           name: videos
           path: /tmp/<<parameters.repo>>/cypress/videos
 
-jobs:
-  posix-build:
-    <<: *defaults
-    steps:
-      - build
-
-  win-build:
-    <<: *defaults
-    parameters:
-      executor:
-        type: executor
-      arch:
-        type: string
-    environment:
-      TARGET_ARCH: << parameters.arch >>
-    steps:
-      - win-prebuild
-      - build
-
   ## code checkout and yarn installs
   build:
     <<: *defaults
@@ -313,6 +294,25 @@ jobs:
           root: ~/
           paths:
             - cypress
+
+jobs:
+  posix-build:
+    <<: *defaults
+    steps:
+      - build
+
+  win-build:
+    <<: *defaults
+    parameters:
+      executor:
+        type: executor
+      arch:
+        type: string
+    environment:
+      TARGET_ARCH: << parameters.arch >>
+    steps:
+      - win-prebuild
+      - build
 
   win-prebuild:
     <<: *defaults
