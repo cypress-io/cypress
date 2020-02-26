@@ -19,83 +19,23 @@ const keyEvents = [
 ]
 const attachKeyListeners = attachListeners(keyEvents)
 
-const _it = it
-
-function overrideIt (fn) {
-  it = fn()
-  it['only'] = fn('only')
-  it['skip'] = fn('skip')
-}
-
-overrideIt(function (subFn) {
-  return function (...args) {
-    const origIt = subFn ? _it[subFn] : _it
-
-    if (args.length > 2 && _.isObject(args[1])) {
-      const opts = _.defaults({}, args[1], {
-        browsers: '*',
-      })
-
-      const mochaArgs = [args[0], args[2]]
-
-      // return origIt.apply(this, mochaArgs)
-
-      if (!shouldRunBrowser(opts.browsers, Cypress.browser.family)) {
-        mochaArgs[0] = `[browser skip (${opts.browsers})]${mochaArgs[0]}`
-
-        if (subFn === 'only') {
-          mochaArgs[1] = function () {
-            this.skip()
-          }
-
-          return origIt.apply(this, mochaArgs)
-        }
-
-        return _it['skip'].apply(this, mochaArgs)
-      }
-
-      return origIt.apply(this, mochaArgs)
-    }
-
-    return origIt.apply(this, args)
-  }
-})
-
-const shouldRunBrowser = (browserlist, browser) => {
-  // return true
-  let allEnabled = false
-  const exclude = []
-  const include = []
-
-  browserlist.split(/\s+,\s+/).forEach((v) => {
-    if (v === '*') {
-      allEnabled = true
-
-      return
-    }
-
-    if (v.includes('!')) {
-      allEnabled = true
-      exclude.push(v.slice(1))
-
-      return
-    }
-
-    include.push(v)
-  })
-
-  if (!allEnabled) {
-    return include.includes(browser)
-  }
-
-  return !exclude.includes(browser)
-}
-
 // trim new lines at the end of innerText
 // due to changing browser versions implementing
 // this differently
 const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
+}
+
+const expectTextEndsWith = (expected) => {
+  return ($el) => {
+    const text = $el.text().trim()
+
+    const passed = text.endsWith(expected)
+
+    const displayText = text.length > 300 ? (`${text.slice(0, 100)}...${text.slice(-100)}`) : text
+
+    assert(passed, `expected ${displayText} to end with ${expected}`)
+  }
 }
 
 describe('src/cy/commands/actions/type', () => {
@@ -1814,8 +1754,7 @@ describe('src/cy/commands/actions/type', () => {
           })
         })
 
-        it(`can type into an iframe with designmode = 'on'`, () => {
-          // append a new iframe to the body
+        function insertIframe () {
           cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
           .appendTo(cy.$$('body'))
 
@@ -1831,7 +1770,45 @@ describe('src/cy/commands/actions/type', () => {
           .should(() => {
             expect(loaded).to.eq(true)
           })
+        }
 
+        it('can type in designmode="on"', () => {
+          cy.timeout(100)
+          cy.state('document').designMode = 'on'
+          cy.state('document').documentElement.focus()
+          cy.get('div.item:first')
+          .type('111')
+
+          cy.get('body').then(expectTextEndsWith('111'))
+          // .should('contain', 'New Yorkfoo')
+        })
+
+        it('can type in body[contenteditable]', () => {
+          cy.state('document').body.setAttribute('contenteditable', true)
+          cy.state('document').documentElement.focus()
+          cy.get('div.item:first')
+          .type('111')
+
+          cy.get('body')
+          .then(expectTextEndsWith('111'))
+        })
+
+        // https://github.com/cypress-io/cypress/issues/5930
+        it('can type into an iframe with body[contenteditable]', () => {
+          insertIframe()
+          cy.get('#generic-iframe').then(($iframe) => {
+            cy.wrap($iframe.contents().find('html').first().find('body'))
+            .then(($body) => {
+              $body.attr('contenteditable', true)
+            })
+            .type('111')
+            .then(expectTextEndsWith('111'))
+          })
+        })
+
+        it(`can type into an iframe with designmode = 'on'`, () => {
+          // append a new iframe to the body
+          insertIframe()
           // type text into iframe
           cy.get('#generic-iframe')
           .then(($iframe) => {
@@ -3948,11 +3925,11 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('accurately returns document body el with no falsey contenteditable="false" attr', () => {
+      it('accurately returns documentElement el when contenteditable="false" attr', () => {
         cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
         cy.get('#ce-inner1').then(($el) => {
-          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0].ownerDocument.body)
+          expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0].ownerDocument.documentElement)
         })
       })
 
@@ -4942,8 +4919,8 @@ describe('src/cy/commands/actions/type', () => {
         })
       })
 
-      it('throws when not textarea or text-like', (done) => {
-        cy.timeout(300)
+      it('throws when not textarea or text-like', () => {
+        cy.timeout(1000)
         cy.get('div#nested-find').type('foo')
 
         cy.on('fail', (err) => {
@@ -4951,7 +4928,7 @@ describe('src/cy/commands/actions/type', () => {
           expect(err.message).to.include('The element typed into was:')
           expect(err.message).to.include('<div id="nested-find">Nested ...</div>')
           expect(err.message).to.include(`A typeable element matches one of the following selectors:`)
-          done()
+          // done()
         })
       })
 

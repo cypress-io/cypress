@@ -352,7 +352,7 @@ const getTagName = (el) => {
 // should be true for elements:
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
-const isContentEditable = (el: any): el is HTMLContentEditableElement => {
+const isContentEditable = (el: HTMLElement): el is HTMLContentEditableElement => {
   return getNativeProp(el, 'isContentEditable') || $document.getDocumentFromElement(el).designMode === 'on'
 }
 
@@ -402,8 +402,8 @@ const isSvg = function (el): el is SVGElement {
 
 // active element is the default if its null
 // or its equal to document.body
-const activeElementIsDefault = (activeElement, body) => {
-  return !activeElement || activeElement === body
+const activeElementIsDefault = (activeElement, body: HTMLElement) => {
+  return !activeElement || (activeElement === body && !body.ownerDocument?.getSelection()?.rangeCount)
 }
 
 const isFocused = (el) => {
@@ -423,19 +423,48 @@ const isFocused = (el) => {
 }
 
 const isFocusedOrInFocused = (el: HTMLElement) => {
+  debug('isFocusedOrInFocus', el)
+
   const doc = $document.getDocumentFromElement(el)
+
+  if (!doc.hasFocus()) {
+    return false
+  }
 
   const { activeElement } = doc
 
   let elToCheckCurrentlyFocused
 
+  let isContentEditableEl = false
+
   if (isFocusable($(el))) {
     elToCheckCurrentlyFocused = el
   } else if (isContentEditable(el)) {
+    isContentEditableEl = true
     elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
   }
 
+  debug('elToCheckCurrentlyFocused', elToCheckCurrentlyFocused)
+
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    if (isContentEditableEl) {
+      const sel = doc.getSelection()
+
+      if (sel?.rangeCount) {
+        const range = sel.getRangeAt(0)
+        const curSelectionContainer = range.commonAncestorContainer
+
+        const selectionInsideElement = el.contains(curSelectionContainer)
+
+        debug('isInFocused by document selection?', selectionInsideElement, ':', curSelectionContainer, 'is inside', el)
+
+        return selectionInsideElement
+      }
+
+      // no selection, not in focused
+      return false
+    }
+
     return true
   }
 

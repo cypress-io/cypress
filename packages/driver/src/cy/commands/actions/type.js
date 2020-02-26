@@ -349,9 +349,11 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
     const handleFocused = function () {
       // if it's the body, don't need to worry about focus
-      const isBody = options.$el.is('body')
+      const isBody = options.$el.is('body') && !$elements.isContentEditable(options.$el[0])
 
       if (isBody) {
+        debug('typing into body')
+
         return type()
       }
 
