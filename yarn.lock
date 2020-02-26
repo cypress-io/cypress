@@ -11436,20 +11436,6 @@ execa@1.0.0, execa@^1.0.0:
     signal-exit "^3.0.0"
     strip-eof "^1.0.0"
 
-execa@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/execa/-/execa-2.0.0.tgz#5524c9739710e603e97c6dfc3f6ff6bff2819885"
-  integrity sha512-+ym7S09yUVPHEhYBsdLm53ZjCmCSeAQVtM/iN9dDj9tbvcBnCeBXTXHPWR9HXzht+vslGROteM8bSUdr4YszUg==
-  dependencies:
-    cross-spawn "^6.0.5"
-    get-stream "^5.0.0"
-    is-stream "^2.0.0"
-    merge-stream "^2.0.0"
-    npm-run-path "^3.0.0"
-    p-finally "^2.0.0"
-    signal-exit "^3.0.2"
-    strip-final-newline "^2.0.0"
-
 execa@3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/execa/-/execa-3.4.0.tgz#c08ed4550ef65d858fac269ffc8572446f37eb89"
