@@ -49,7 +49,7 @@ const join = require('path').join
 
 const nodeVersionNeededString = read(
   join(__dirname, '..', '.node-version'),
-  'utf8'
+  'utf8',
 )
 const nodeVersionNeeded = nodeVersionNeededString.split('.')
 

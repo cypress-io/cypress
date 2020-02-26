@@ -21,7 +21,6 @@ describe "e2e video compression", ->
         MS_PER_TEST
       }
     }
-    expectedExitCode: 0
     onRun: (exec) ->
       process.env.VIDEO_COMPRESSION_THROTTLE = 10
 
@@ -37,7 +36,7 @@ describe "e2e video compression", ->
           .then ({ duration }) ->
             durationMs = videoCapture.getMsFromDuration(duration)
             expect(durationMs).to.be.ok
-            expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, humanInterval('10 seconds'))
+            expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, humanInterval('15 seconds'))
 
       .get("stdout")
       .then (stdout) ->

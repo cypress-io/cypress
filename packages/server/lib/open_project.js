@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const la = require('lazy-ass')
-const debug = require('debug')('cypress:server:openproject')
+const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const Project = require('./project')
@@ -122,7 +122,7 @@ const moduleFactory = () => {
             debug(
               'launching browser: %o, spec: %s',
               browser,
-              spec.relative
+              spec.relative,
             )
 
             return browsers.open(browser, options, automation)

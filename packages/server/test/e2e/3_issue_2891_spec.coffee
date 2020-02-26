@@ -12,5 +12,4 @@ describe "e2e issue 2891", ->
       spec: "default_layout_spec.js"
       sanitizeScreenshotDimensions: true
       snapshot: true
-      expectedExitCode: 0
     })

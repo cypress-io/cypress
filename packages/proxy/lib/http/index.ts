@@ -47,6 +47,7 @@ type HttpMiddlewareCtx<T> = {
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
+  'getFileServerToken',
   'getRemoteState',
   'request',
   'next',
@@ -59,6 +60,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
 type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & Readonly<{
   buffers: HttpBuffers
   config: any
+  getFileServerToken: () => string
   getRemoteState: () => any
   request: any
 
@@ -99,7 +101,6 @@ export function _runStage (type: HttpStages, ctx: any) {
         .omit(READONLY_MIDDLEWARE_KEYS)
         .forEach((value, key) => {
           if (ctx[key] !== value) {
-            debug(`copying %o`, { [key]: value })
             ctx[key] = value
           }
         })
@@ -138,7 +139,7 @@ export function _runStage (type: HttpStages, ctx: any) {
           _end()
         },
         onError: (error: Error) => {
-          debug('Error in middleware %o', { stage, middlewareName, error, ctx })
+          debug('Error in middleware %o', { stage, middlewareName, error })
 
           if (type === HttpStages.Error) {
             return
@@ -173,12 +174,14 @@ export function _runStage (type: HttpStages, ctx: any) {
 export class Http {
   buffers: HttpBuffers
   config: any
+  getFileServerToken: () => string
   getRemoteState: () => any
   middleware: MiddlewareStacks
   request: any
 
   constructor (opts: {
     config: any
+    getFileServerToken: () => string
     getRemoteState: () => any
     middleware?: MiddlewareStacks
     request: any
@@ -186,6 +189,7 @@ export class Http {
     this.buffers = new HttpBuffers()
 
     this.config = opts.config
+    this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
     this.request = opts.request
 
@@ -207,6 +211,7 @@ export class Http {
 
       buffers: this.buffers,
       config: this.config,
+      getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),

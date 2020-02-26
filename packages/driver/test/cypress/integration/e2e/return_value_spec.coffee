@@ -16,6 +16,10 @@ describe "return values", ->
 
     return undefined
 
+  it "can return cy and have done callback", (done) ->
+    cy.wrap({}).then ->
+      done()
+
   it "throws when returning a non promise and invoking cy commands", (done) ->
     cy.on "fail", (err) ->
       expect(err.message).to.include("> foo")
@@ -91,3 +95,23 @@ describe "return values", ->
         return "bar"
 
     cy.foo()
+
+  describe "without invoking cy", ->
+    it "handles returning undefined", ->
+      return undefined
+
+    it "handles synchronously invoking and returning done callback", (done) ->
+      return done()
+
+    it "handles synchronously invoking done callback and returning undefined", (done) ->
+      done()
+      return undefined
+
+    it "handles synchronously invoking done callback and returning a value", (done) ->
+      done()
+      return "foo"
+
+    it "handles asynchronously invoking done callback", (done) ->
+      setTimeout ->
+        done()
+      return "foo"

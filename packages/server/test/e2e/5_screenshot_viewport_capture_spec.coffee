@@ -18,6 +18,5 @@ describe "e2e screenshot viewport capture", ->
   ## captures (namely that the runner UI is hidden)
   e2e.it "passes", {
     spec: "screenshot_viewport_capture_spec.coffee"
-    expectedExitCode: 0
     snapshot: true
   }

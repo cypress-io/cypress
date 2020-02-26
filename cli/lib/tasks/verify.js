@@ -55,7 +55,7 @@ const runSmokeTest = (binaryDir, options) => {
         debug('error timedOut is true')
 
         return throwFormErrorText(
-          errors.smokeTestFailure(smokeTestCommand, true)
+          errors.smokeTestFailure(smokeTestCommand, true),
         )(errMessage)
       }
 
@@ -90,7 +90,7 @@ const runSmokeTest = (binaryDir, options) => {
     if (options.dev) {
       executable = 'node'
       args.unshift(
-        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
       )
     }
 
@@ -208,9 +208,9 @@ function testBinary (version, binaryDir, options) {
             task,
             util.titleize(
               chalk.green('Verified Cypress!'),
-              chalk.gray(binaryDir)
+              chalk.gray(binaryDir),
             ),
-            rendererOptions.renderer
+            rendererOptions.renderer,
           )
         })
       },

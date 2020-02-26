@@ -21,6 +21,7 @@ exports['e2e visit / low response timeout / passes'] = `
     ✓ scrolls automatically to div with id=foo
     ✓ can load an http page with a huge amount of elements without timing out
     ✓ can load a local file with a huge amount of elements without timing out
+    ✓ can load a site via TLSv1
     issue #225: hash urls
       ✓ can visit a hash url and loads
       ✓ can visit the same hash url and loads
@@ -35,14 +36,14 @@ exports['e2e visit / low response timeout / passes'] = `
       ✓ sets accept header to text/html,*/*
 
 
-  11 passing
+  12 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        11                                                                               │
-  │ Passing:      11                                                                               │
+  │ Tests:        12                                                                               │
+  │ Passing:      12                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -66,9 +67,9 @@ exports['e2e visit / low response timeout / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  visit_spec.coffee                        XX:XX       11       11        -        -        - │
+  │ ✔  visit_spec.coffee                        XX:XX       12       12        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       11       11        -        -        -  
+    ✔  All specs passed!                        XX:XX       12       12        -        -        -  
 
 
 `
@@ -121,7 +122,7 @@ The stack trace for this error is:
 Error: connect ECONNREFUSED 127.0.0.1:16795
     [stack trace lines]
 
-      [stack trace lines]
+  
 
 
 
@@ -578,7 +579,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-      [stack trace lines]
+  
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
      CypressError: cy.visit() failed trying to load:
@@ -602,7 +603,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-      [stack trace lines]
+  
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
      CypressError: cy.visit() failed trying to load:
@@ -626,7 +627,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-      [stack trace lines]
+  
 
 
 
@@ -677,6 +678,67 @@ Error: ESOCKETTIMEDOUT
   │    pec.js                                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
+
+
+`
+
+exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting cy.visit'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (issue_2196_spec.coffee)                                                   │
+  │ Searched:   cypress/integration/issue_2196_spec.coffee                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  issue_2196_spec.coffee                                                          (1 of 1)
+
+
+  issue #2196: overwriting visit
+    ✓ fires onBeforeLoad
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     issue_2196_spec.coffee                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_2196_spec.coffee.mp4          (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  issue_2196_spec.coffee                   XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

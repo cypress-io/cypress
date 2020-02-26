@@ -7,14 +7,14 @@ import NoAutomation from './no-automation'
 
 const noBrowsers = []
 const browsersWithChosen = [
-  { name: 'canary', version: '52.7', majorVersion: 52 },
-  { name: 'chrome', version: '52.2', majorVersion: 52, default: true },
-  { name: 'chromium', version: '53.2', majorVersion: 53 },
+  { name: 'canary', displayName: 'Canary', version: '52.7', majorVersion: 52 },
+  { name: 'chrome', displayName: 'Chrome', version: '52.2', majorVersion: 52, default: true },
+  { name: 'chromium', displayName: 'Chromium', version: '53.2', majorVersion: 53 },
 ]
 const browsersWithoutChosen = [
-  { name: 'canary', version: '52.7', majorVersion: 52 },
-  { name: 'chrome', version: '52.2', majorVersion: 52 },
-  { name: 'chromium', version: '53.2', majorVersion: 53 },
+  { name: 'canary', displayName: 'Canary', version: '52.7', majorVersion: 52 },
+  { name: 'chrome', displayName: 'Chrome', version: '52.2', majorVersion: 52 },
+  { name: 'chromium', displayName: 'Chromium', version: '53.2', majorVersion: 53 },
 ]
 
 describe('<NoAutomation />', () => {
@@ -44,11 +44,11 @@ describe('<NoAutomation />', () => {
       expect(component.find('Dropdown').prop('others')[1]).to.eql(_.extend({}, browsersWithChosen[2], { key: 'chromium53.2' }))
     })
 
-    it('renders browser in <Dropdown /> with icon based on browser name', () => {
+    it('renders browser in <Dropdown /> with icon based on browser displayName', () => {
       const component = shallow(<NoAutomation browsers={browsersWithChosen} />)
       const browser = shallow(component.find('Dropdown').prop('renderItem')(browsersWithChosen[0]))
 
-      expect(browser.find('i')).to.have.className('fa-chrome')
+      expect(browser.find('BrowserIcon').prop('browserName')).to.equal('Canary')
     })
 
     it('renders browser in <Dropdown /> with browser name and version', () => {

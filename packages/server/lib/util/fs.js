@@ -3,8 +3,8 @@
 const fs = require('fs-extra')
 const Promise = require('bluebird')
 
-//# warn users if somehow synchronous file methods are invoked
-//# these methods due to "too many files" errors are a huge pain
+// warn users if somehow synchronous file methods are invoked
+// these methods due to "too many files" errors are a huge pain
 const warnOnSyncFileSystem = () => {
   console.error('WARNING: fs sync methods can fail due to EMFILE errors')
   console.error('Cypress only works reliably when ALL fs calls are async')

@@ -20,7 +20,7 @@ const binaryPkgPath = path.join(
   'Contents',
   'Resources',
   'app',
-  'package.json'
+  'package.json',
 )
 
 describe('lib/tasks/state', function () {
@@ -88,7 +88,7 @@ describe('lib/tasks/state', function () {
         '.cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
 
       expect(state.getPathToExecutable(state.getBinaryDir())).to.equal(
-        macExecutable
+        macExecutable,
       )
     })
 
@@ -97,7 +97,7 @@ describe('lib/tasks/state', function () {
       const linuxExecutable = '.cache/Cypress/1.2.3/Cypress/Cypress'
 
       expect(state.getPathToExecutable(state.getBinaryDir())).to.equal(
-        linuxExecutable
+        linuxExecutable,
       )
     })
 
@@ -110,7 +110,7 @@ describe('lib/tasks/state', function () {
       const customBinaryDir = 'home/downloads/cypress.app'
 
       expect(state.getPathToExecutable(customBinaryDir)).to.equal(
-        'home/downloads/cypress.app/Contents/MacOS/Cypress'
+        'home/downloads/cypress.app/Contents/MacOS/Cypress',
       )
     })
   })
@@ -118,7 +118,7 @@ describe('lib/tasks/state', function () {
   context('.getBinaryDir', function () {
     it('resolves path on macOS', function () {
       expect(state.getBinaryDir()).to.equal(
-        path.join(versionDir, 'Cypress.app')
+        path.join(versionDir, 'Cypress.app'),
       )
     })
 
@@ -142,7 +142,7 @@ describe('lib/tasks/state', function () {
 
     it('resolves path to binary/installation from version', function () {
       expect(state.getBinaryDir('4.5.6')).to.be.equal(
-        path.join(cacheDir, '4.5.6', 'Cypress.app')
+        path.join(cacheDir, '4.5.6', 'Cypress.app'),
       )
     })
 
@@ -179,16 +179,18 @@ describe('lib/tasks/state', function () {
     })
 
     it('can accept custom binaryDir', function () {
-      const customBinaryDir = '/custom/binary/dir'
+      // note how the binary state file is in the runner's parent folder
+      const customBinaryDir = '/custom/binary/1.2.3/runner'
+      const binaryStatePath = '/custom/binary/1.2.3/binary_state.json'
 
       sinon
       .stub(fs, 'pathExistsAsync')
-      .withArgs('/custom/binary/dir/binary_state.json')
-      .resolves({ verified: true })
+      .withArgs(binaryStatePath)
+      .resolves(true)
 
       sinon
       .stub(fs, 'readJsonAsync')
-      .withArgs('/custom/binary/dir/binary_state.json')
+      .withArgs(binaryStatePath)
       .resolves({ verified: true })
 
       return state
@@ -200,6 +202,8 @@ describe('lib/tasks/state', function () {
   })
 
   context('.writeBinaryVerified', function () {
+    const binaryStateFilename = path.join(versionDir, 'binary_state.json')
+
     beforeEach(() => {
       mockfs({})
     })
@@ -216,11 +220,11 @@ describe('lib/tasks/state', function () {
       .then(
         () => {
           return expect(fs.outputJsonAsync).to.be.calledWith(
-            path.join(binaryDir, 'binary_state.json'),
-            { verified: true }
+            binaryStateFilename,
+            { verified: true },
           )
         },
-        { spaces: 2 }
+        { spaces: 2 },
       )
     })
 
@@ -231,9 +235,9 @@ describe('lib/tasks/state', function () {
       .writeBinaryVerifiedAsync(false, binaryDir)
       .then(() => {
         return expect(fs.outputJsonAsync).to.be.calledWith(
-          path.join(binaryDir, 'binary_state.json'),
+          binaryStateFilename,
           { verified: false },
-          { spaces: 2 }
+          { spaces: 2 },
         )
       })
     })
@@ -306,7 +310,7 @@ describe('lib/tasks/state', function () {
 
       return state
       .parseRealPlatformBinaryFolderAsync(
-        '/Documents/Cypress.app/Contents/MacOS/Cypress'
+        '/Documents/Cypress.app/Contents/MacOS/Cypress',
       )
       .then((path) => {
         return expect(path).to.eql('/Documents/Cypress.app')

@@ -33,5 +33,4 @@ describe "e2e websockets", ->
   e2e.it "passes", {
     spec: "websockets_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }
