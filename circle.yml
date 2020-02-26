@@ -243,7 +243,7 @@ commands:
   restore-win-node-cache:
     steps:
       - restore_cache:
-        key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
+          key: v{{ .Environment.CACHE_VERSION }}-node-v{{ .Environment.nodejs_version }}-win-{{ .Environment.TARGET_ARCH }}
 
   win-prebuild:
     description: windows-specific prebuild steps
