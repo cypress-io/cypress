@@ -11,17 +11,14 @@
     "lint-coffee": "coffeelint test/*.coffee test/unit/*.coffee test/integration/*.coffee",
     "repl": "node repl.js",
     "start": "node ../../scripts/cypress open --dev --global",
+    "test": "node ./test/scripts/run.js",
     "test-cov": "cross-env NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 xvfb-maybe istanbul cover node_modules/.bin/_mocha -- --opts ./test/support/mocha.opts",
     "test-cov-process": "cross-env NODE_COVERAGE=true NODE_ENV=test CYPRESS_ENV=test BLUEBIRD_DEBUG=1 istanbul cover --include-pid",
-    "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-e2e": "node ./test/scripts/e2e.js",
-    "test-e2e-chrome": "node ./test/scripts/run.js test/e2e chrome",
-    "test-integration": "node ./test/scripts/run.js test/integration",
-    "test-integration-watch": "./test/support/watch test-integration",
-    "test-performance": "node ./test/scripts/run.js test/performance",
-    "test-unit": "node ./test/scripts/run.js test/unit",
-    "test-unit-watch": "./test/support/watch test/unit",
-    "test-watch": "./test/support/watch test-unit"
+    "test-e2e": "node ./test/scripts/run.js --glob-in-dir=test/e2e",
+    "test-integration": "node ./test/scripts/run.js --glob-in-dir=test/integration",
+    "test-performance": "node ./test/scripts/run.js --glob-in-dir=test/performance",
+    "test-unit": "node ./test/scripts/run.js --glob-in-dir=test/unit",
+    "test-watch": "./test/support/watch test"
   },
   "dependencies": {
     "@benmalka/foxdriver": "0.2.3",
