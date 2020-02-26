@@ -241,6 +241,24 @@ commands:
           path: /tmp/<<parameters.repo>>/cypress/videos
 
 jobs:
+  posix-build:
+    <<: *defaults
+    steps:
+      - build
+
+  win-build:
+    <<: *defaults
+    parameters:
+      executor:
+        type: executor
+      arch:
+        type: string
+    environment:
+      TARGET_ARCH: << parameters.arch >>
+    steps:
+      - win-prebuild
+      - build
+
   ## code checkout and yarn installs
   build:
     steps:
@@ -335,26 +353,6 @@ jobs:
           command: |
             set -e
             node -e "process.exit(process.platform === 'win32')" || cmd.exe /c mklink /J "C:\Users\circleci\AppData\Local\Temp" "C:\tmp"
-
-jobs:
-  ## code checkout and NPM installs
-  posix-build:
-    <<: *defaults
-    steps:
-      - build
-
-  win-build:
-    <<: *defaults
-    parameters:
-      executor:
-        type: executor
-      arch:
-        type: string
-    environment:
-      TARGET_ARCH: << parameters.arch >>
-    steps:
-      - win-prebuild
-      - build
 
   lint:
     <<: *defaults
