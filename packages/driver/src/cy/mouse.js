@@ -167,12 +167,6 @@ const create = (state, keyboard, focused, Cypress) => {
       return false
     }
 
-    // if (!$elements.isFocusedOrInFocused(el)) {
-    //   _debug('false: not focusedOrInFocus')
-
-    //   return false
-    // }
-
     if ($elements.isNeedSingleValueChangeInputElement(el)) {
       _debug('false: is single value change input')
 

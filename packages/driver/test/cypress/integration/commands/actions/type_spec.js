@@ -1739,6 +1739,9 @@ describe('src/cy/commands/actions/type - #type', () => {
         // .should('contain', 'New Yorkfoo')
       })
 
+      // TODO[breaking]: we should edit div.item:first text content instead of
+      // moving to the end of the host contenteditable. This will allow targeting
+      // specific elements to simplify testing rich editors
       it('can type in body[contenteditable]', () => {
         cy.state('document').body.setAttribute('contenteditable', true)
         cy.state('document').documentElement.focus()
