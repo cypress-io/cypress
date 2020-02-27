@@ -960,6 +960,18 @@ jobs:
           # force installing the freshly built binary
           # use Yarn because npm v5.0.0 is hopelessly broken
           command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip yarn add /root/cypress/cypress.tgz
+      - run:
+          name: Install Cypress binary
+          working_directory: test-binary
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip yarn cypress install
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: yarn cypress verify
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: yarn cypress info
 
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
