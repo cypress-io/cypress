@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
+    "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
@@ -22,6 +23,12 @@
     "mocha": "3.5.3"
   },
   "files": [
-    "lib"
-  ]
+    "lib",
+    "patches"
+  ],
+  "workspaces": {
+    "nohoist": [
+      "**"
+    ]
+  }
 }
