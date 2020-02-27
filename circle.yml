@@ -969,6 +969,10 @@ jobs:
           working_directory: test-binary
           command: yarn cypress verify
       - run:
+          name: Print Cypress version
+          working_directory: test-binary
+          command: yarn cypress version
+      - run:
           name: Cypress info
           working_directory: test-binary
           command: yarn cypress info
