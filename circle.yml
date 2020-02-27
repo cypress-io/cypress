@@ -7,7 +7,7 @@ macBuildFilters: &macBuildFilters
   filters:
     branches:
       only:
-        - issue-6582-fix-patch-package
+        - develop
 
 defaults: &defaults
   parallelism: 1
@@ -33,7 +33,7 @@ testBinaryFirefox: &testBinaryFirefox
   filters:
     branches:
       only:
-        - issue-6582-fix-patch-package
+        - develop
   requires:
     - build-npm-package
     - build-binary
@@ -1212,7 +1212,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - build
     - test-kitchensink:
@@ -1223,7 +1223,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - build
     - build-npm-package:
@@ -1234,7 +1234,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - build-npm-package
     - build-binary:
@@ -1245,7 +1245,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - build-binary
     - post-pre-release-install-comment:
@@ -1253,7 +1253,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - upload-npm-package
           - upload-binary
@@ -1262,7 +1262,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - upload-npm-package
           - upload-binary
@@ -1270,7 +1270,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - build-npm-package
           - build-binary
@@ -1279,7 +1279,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - build-npm-package
           - build-binary
@@ -1339,7 +1339,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
 
     - upload-npm-package:
         name: Mac NPM package upload
@@ -1348,7 +1348,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - Mac NPM package
 
@@ -1367,7 +1367,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - Mac binary
 
@@ -1384,7 +1384,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - Mac NPM package
           - Mac binary
@@ -1396,7 +1396,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - Mac NPM package
           - Mac binary
@@ -1407,7 +1407,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -1419,7 +1419,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - issue-6582-fix-patch-package
+              - develop
         requires:
           - Mac NPM package upload
           - Mac binary upload
