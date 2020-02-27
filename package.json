@@ -218,10 +218,6 @@
     "packages": [
       "cli",
       "packages/*"
-    ],
-    "nohoist": [
-      "@packages/driver/*",
-      "@packages/socket/**"
     ]
   },
   "lint-staged": {

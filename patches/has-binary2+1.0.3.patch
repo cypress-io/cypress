@@ -1,7 +1,7 @@
-diff --git a/node_modules/@packages/socket/node_modules/has-binary2/index.js b/node_modules/@packages/socket/node_modules/has-binary2/index.js
+diff --git a/node_modules/has-binary2/index.js b/node_modules/has-binary2/index.js
 index cf756a3..277ed03 100644
---- a/node_modules/@packages/socket/node_modules/has-binary2/index.js
-+++ b/node_modules/@packages/socket/node_modules/has-binary2/index.js
+--- a/node_modules/has-binary2/index.js
++++ b/node_modules/has-binary2/index.js
 @@ -4,19 +4,19 @@
   * Module requirements.
   */
