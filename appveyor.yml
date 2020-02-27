@@ -2,7 +2,6 @@ branches:
   only:
     - master
     - develop
-    - issue-6582-fix-patch-package
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/
