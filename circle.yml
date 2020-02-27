@@ -942,7 +942,6 @@ jobs:
     <<: *defaults
     docker:
       - image: cypress/base:8.0.0
-        user: node
     steps:
       - attach_workspace:
           at: ~/
@@ -955,16 +954,9 @@ jobs:
           working_directory: test-binary
           command: npm init -y
       - run:
-          # install NPM from built NPM package folder
           name: Install Cypress
           working_directory: test-binary
-          # force installing the freshly built binary
-          # use Yarn because npm v5.0.0 is hopelessly broken
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip yarn add /root/cypress/cypress.tgz
-      - run:
-          name: Install Cypress binary
-          working_directory: test-binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip $(npm bin)/cypress install
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm install /root/cypress/cypress.tgz
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
