@@ -963,19 +963,19 @@ jobs:
       - run:
           name: Install Cypress binary
           working_directory: test-binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip yarn cypress install
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip $(npm bin)/cypress install
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
-          command: yarn cypress verify
+          command: $(npm bin)/cypress verify
       - run:
           name: Print Cypress version
           working_directory: test-binary
-          command: yarn cypress version
+          command: $(npm bin)/cypress version
       - run:
           name: Cypress info
           working_directory: test-binary
-          command: yarn cypress info
+          command: $(npm bin)/cypress info
 
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
