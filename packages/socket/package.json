@@ -12,7 +12,6 @@
     "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },
   "dependencies": {
-    "resolve-pkg": "2.0.0",
     "socket.io": "2.3.0",
     "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#unpatched-has-binary-2",
     "socket.io-client": "2.3.0"
@@ -20,7 +19,8 @@
   "devDependencies": {
     "chai": "3.5.0",
     "cross-env": "6.0.3",
-    "mocha": "3.5.3"
+    "mocha": "3.5.3",
+    "resolve-pkg": "2.0.0"
   },
   "files": [
     "lib",
