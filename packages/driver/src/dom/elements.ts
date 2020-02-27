@@ -401,7 +401,7 @@ const isSvg = function (el): el is SVGElement {
 }
 
 // active element is the default if its null
-// or it's equal to document.body
+// or it's equal to document.body that is not contenteditable
 const activeElementIsDefault = (activeElement, body: HTMLElement) => {
   return !activeElement || (activeElement === body && !isContentEditable(body))
 }
