@@ -8,6 +8,7 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const scaffoldDebug = require('debug')('cypress:server:scaffold')
 const debug = require('debug')('cypress:server:project')
+const debugVerbose = require('debug')('cypress-verbose:server:project')
 const cwd = require('./cwd')
 const api = require('./api')
 const user = require('./user')
@@ -672,7 +673,7 @@ class Project extends EE {
   }
 
   static getProjectStatuses (clientProjects = []) {
-    debug(`get project statuses for ${clientProjects.length} projects`)
+    debugVerbose(`get project statuses for ${clientProjects.length} projects`)
 
     return user.ensureAuthToken()
     .then((authToken) => {
@@ -711,7 +712,7 @@ class Project extends EE {
   }
 
   static getProjectStatus (clientProject) {
-    debug('get project status for client id %s at path %s', clientProject.id, clientProject.path)
+    debugVerbose('get project status for client id %s at path %s', clientProject.id, clientProject.path)
 
     if (!clientProject.id) {
       debug('no project id')

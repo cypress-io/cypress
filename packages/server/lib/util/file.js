@@ -2,7 +2,7 @@ const _ = require('lodash')
 const os = require('os')
 const md5 = require('md5')
 const path = require('path')
-const debug = require('debug')('cypress:server:file')
+const debug = require('debug')('cypress-verbose:server:file')
 const Promise = require('bluebird')
 const lockFile = Promise.promisifyAll(require('lockfile'))
 const fs = require('./fs')
@@ -205,7 +205,7 @@ class File {
       return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
     })
     .finally(() => {
-      return debug('gettin lock succeeded or failed for %s', this.path)
+      return debug('getting lock succeeded or failed for %s', this.path)
     })
   }
 

@@ -2,6 +2,7 @@ _           = require("lodash")
 ipc         = require("electron").ipcMain
 { shell, clipboard } = require('electron')
 debug       = require('debug')('cypress:server:events')
+debugVerbose= require('debug')('cypress-verbose:server:events')
 pluralize   = require("pluralize")
 stripAnsi   = require("strip-ansi")
 dialog      = require("./dialog")
@@ -22,15 +23,29 @@ browsers    = require("../browsers")
 konfig      = require("../konfig")
 
 handleEvent = (options, bus, event, id, type, arg) ->
-  debug("got request for event: %s, %o", type, arg)
+  if debug.enabled
+    if type is 'get:project:status'
+      debugVerbose("got request for event: %s, %o", type, arg)
+    else
+      debug("got request for event: %s, %o", type, arg)
 
   sendResponse = (data = {}) ->
     try
-      debug("sending ipc data %o", {type: type, data: data})
+      if debug.enabled
+        if type is 'get:project:status'
+          debugVerbose("sending ipc data %o", {type: type, data: data})
+        else
+          debug("sending ipc data %o", {type: type, data: data})
+
       event.sender.send("response", data)
 
   sendErr = (err) ->
-    debug("send error: %o", err)
+    if debug.enabled
+      if err.type is 'get:project:status' or err.type is 'NOT_LOGGED_IN'
+        debugVerbose("send error: %o", err)
+      else
+        debug("send error: %o", err)
+
     sendResponse({id: id, __error: errors.clone(err, {html: true})})
 
   send = (data) ->

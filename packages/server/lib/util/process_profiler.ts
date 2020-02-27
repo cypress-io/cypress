@@ -208,7 +208,7 @@ export const _aggregateGroups = (processes: Process[]) => {
 export const _printGroupedProcesses = (groupTotals) => {
   const consoleBuffer = concatStream((buf) => {
     // get rid of trailing newline
-    debug(String(buf).trim())
+    debugVerbose(String(buf).trim())
   })
 
   // eslint-disable-next-line no-console
