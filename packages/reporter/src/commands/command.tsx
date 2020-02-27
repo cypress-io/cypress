@@ -151,7 +151,7 @@ class Command extends Component<Props> {
             'command-has-duplicates': model.hasDuplicates,
             'command-is-duplicate': model.isDuplicate,
             'command-is-open': this.isOpen,
-          }
+          },
         )}
         onMouseOver={() => this._snapshot(true)}
         onMouseOut={() => this._snapshot(false)}

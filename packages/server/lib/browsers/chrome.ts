@@ -288,7 +288,7 @@ const _navigateUsingCRI = async function (client, url) {
 
 const _setAutomation = (client, automation) => {
   return automation.use(
-    CdpAutomation(client.send)
+    CdpAutomation(client.send),
   )
 }
 
@@ -424,7 +424,7 @@ export = {
     const [extDest] = await Bluebird.all([
       this._writeExtension(
         browser,
-        options
+        options,
       ),
       _removeRootExtension(),
       _disableRestorePagesPrompt(userDir),

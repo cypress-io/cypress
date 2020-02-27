@@ -36,7 +36,7 @@ module.exports = (on, config) => {
       // this is needed to ensure correct error screenshot / video recording
       // resolution of exactly 1280x720 (height must account for firefox url bar)
       options.args = options.args.concat(
-        ['-width', '1280', '-height', '794']
+        ['-width', '1280', '-height', '794'],
       )
     }
 

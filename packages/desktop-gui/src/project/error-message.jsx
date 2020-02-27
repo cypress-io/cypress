@@ -7,6 +7,26 @@ import { configFileFormatted } from '../lib/config-file-formatted'
 
 import Markdown from 'markdown-it'
 
+const _copyErrorDetails = (err) => {
+  let details = [
+    `**Message:** ${err.message}`,
+  ]
+
+  if (err.details) {
+    details.push(`**Details:** ${err.details}`)
+  }
+
+  if (err.title) {
+    details.unshift(`**Title:** ${err.title}`)
+  }
+
+  if (err.stack2) {
+    details.push(`**Stack trace:**\n\`\`\`\n${err.stack2}\n\`\`\``)
+  }
+
+  ipc.setClipboardText(details.join('\n\n'))
+}
+
 const md = new Markdown({
   html: true,
   linkify: true,
@@ -20,7 +40,7 @@ const ErrorDetails = observer(({ err }) => {
   if (detailsBody) {
     return (
       <pre>
-        <details>
+        <details className='details-body'>
           <summary>{detailsTitle}</summary>
           {detailsBody}
         </details>
@@ -61,7 +81,7 @@ class ErrorMessage extends Component {
         <div className='full-alert alert alert-danger error'>
           <p className='header'>
             <i className='fas fa-exclamation-triangle'></i>{' '}
-            <strong>{err.title || 'Can\'t start server'}</strong>
+            <strong>{err.title || 'An unexpected error occurred'}</strong>
           </p>
           <span className='alert-content'>
             <div ref={(node) => this.errorMessageNode = node} dangerouslySetInnerHTML={{
@@ -76,7 +96,22 @@ class ErrorMessage extends Component {
                 <p>To fix, stop the other running process or change the port in {configFileFormatted(this.props.project.configFile)}</p>
               </div>
             )}
+            {err.stack2 && (
+              <details className='stacktrace'>
+                <summary>Stack trace</summary>
+                <pre>{err.stack2}</pre>
+              </details>
+            )}
           </span>
+          <button
+            className='btn btn-default btn-sm'
+            onClick={() => {
+              _copyErrorDetails(err)
+            }}
+          >
+            <i className='fas fa-copy'></i>{' '}
+            Copy to Clipboard
+          </button>
           <button
             className='btn btn-default btn-sm'
             onClick={this.props.onTryAgain}

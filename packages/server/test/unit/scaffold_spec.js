@@ -122,14 +122,14 @@ describe('lib/scaffold', () => {
     it('creates both integrationFolder and example specs when integrationFolder does not exist', function () {
       return Promise.join(
         cypressEx.getPathToExamples(),
-        scaffold.integration(this.integrationFolder, this.cfg)
+        scaffold.integration(this.integrationFolder, this.cfg),
       )
       .spread((exampleSpecs) => {
         return Promise.join(
           fs.statAsync(`${this.integrationFolder}/examples/actions.spec.js`).get('size'),
           fs.statAsync(exampleSpecs[0]).get('size'),
           fs.statAsync(`${this.integrationFolder}/examples/location.spec.js`).get('size'),
-          fs.statAsync(exampleSpecs[8]).get('size')
+          fs.statAsync(exampleSpecs[8]).get('size'),
         ).spread((size1, size2, size3, size4) => {
           expect(size1).to.eq(size2)
 
@@ -244,7 +244,7 @@ describe('lib/scaffold', () => {
       .then(() => {
         return Promise.join(
           fs.readFileAsync(`${this.supportFolder}/commands.js`, 'utf8'),
-          fs.readFileAsync(`${this.supportFolder}/index.js`, 'utf8')
+          fs.readFileAsync(`${this.supportFolder}/index.js`, 'utf8'),
         ).spread((commandsContents, indexContents) => {
           snapshot(commandsContents)
 

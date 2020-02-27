@@ -78,15 +78,41 @@ class Project extends Component {
   _renderWarnings = () => {
     const { warnings } = this.props.project
 
-    return _.map(warnings, (warning, i) => (!warning.dismissed && <WarningMessage key={i} warning={warning} onClearWarning={() => this._removeWarning(warning)}/>))
+    return _.map(warnings, (warning, i) => (
+      <WarningMessage
+        key={i}
+        warning={warning}
+        onRetry={() => this._retryPingingBaseUrl(warning)}
+        onDismissWarning={() => this._removeWarning(warning)}
+      />
+    ))
   }
 
   _removeWarning = (warning) => {
-    this.props.project.clearWarning(warning)
+    this.props.project.dismissWarning(warning)
   }
 
   _reopenProject = () => {
     projectsApi.reopenProject(this.props.project)
+  }
+
+  _retryPingingBaseUrl = (warning) => {
+    const { project } = this.props
+
+    warning.setRetrying(true)
+
+    projectsApi.pingBaseUrl(project.getConfigValue('baseUrl'))
+    .then(() => {
+      project.dismissWarning(warning)
+    })
+    .catch((err) => {
+      if (err && err.type === warning.type) return
+
+      project.setError(err)
+    })
+    .finally(() => {
+      warning.setRetrying(false)
+    })
   }
 }
 

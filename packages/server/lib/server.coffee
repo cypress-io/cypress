@@ -26,6 +26,7 @@ appData      = require("./util/app_data")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
+{ SocketWhitelist } = require("./util/socket_whitelist")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
@@ -38,6 +39,30 @@ templateEngine = require("./template_engine")
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
 
+ALLOWED_PROXY_BYPASS_URLS = [
+  '/',
+  '/__cypress/runner/cypress_runner.css',
+  '/__cypress/static/favicon.ico'
+]
+
+_isNonProxiedRequest = (req) ->
+  ## proxied HTTP requests have a URL like: "http://example.com/foo"
+  ## non-proxied HTTP requests have a URL like: "/foo"
+  req.proxiedUrl.startsWith('/')
+
+_forceProxyMiddleware = (clientRoute) ->
+  ## normalize clientRoute to help with comparison
+  trimmedClientRoute = _.trimEnd(clientRoute, '/')
+
+  (req, res, next) ->
+    trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+    if _isNonProxiedRequest(req) and !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) and trimmedUrl isnt trimmedClientRoute
+      ## this request is non-proxied and non-whitelisted, redirect to the runner error page
+      return res.redirect(clientRoute)
+
+    next()
+
 isResponseHtml = (contentType, responseBuffer) ->
   if contentType
     return contentType is "text/html"
@@ -48,6 +73,12 @@ isResponseHtml = (contentType, responseBuffer) ->
   return false
 
 setProxiedUrl = (req) ->
+  ## proxiedUrl is the full URL with scheme, host, and port
+  ## it will only be fully-qualified if the request was proxied.
+
+  ## this function will set the URL of the request to be the path
+  ## only, which can then be used to proxy the request.
+
   ## bail if we've already proxied the url
   return if req.proxiedUrl
 
@@ -70,6 +101,7 @@ class Server
     if not (@ instanceof Server)
       return new Server()
 
+    @_socketWhitelist = new SocketWhitelist()
     @_request    = null
     @_middleware = null
     @_server     = null
@@ -80,7 +112,8 @@ class Server
     @_httpsProxy = null
     @_urlResolver = null
 
-  createExpressApp: (morgan) ->
+  createExpressApp: (config) ->
+    { morgan, clientRoute } = config
     app = express()
 
     ## set the cypress config from the cypress.json file
@@ -103,6 +136,8 @@ class Server
       ## always continue on
 
       next()
+
+    app.use _forceProxyMiddleware(clientRoute)
 
     app.use require("cookie-parser")()
     app.use compression({filter: notSSE})
@@ -132,7 +167,7 @@ class Server
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
-      app = @createExpressApp(config.morgan)
+      app = @createExpressApp(config)
 
       logger.setSettings(config)
 
@@ -145,7 +180,9 @@ class Server
 
       getRemoteState = => @_getRemoteState()
 
-      @_networkProxy = new NetworkProxy({ config, getRemoteState, request: @_request })
+      getFileServerToken = => @_fileServer.token
+
+      @_networkProxy = new NetworkProxy({ config, getRemoteState, getFileServerToken, request: @_request })
 
       @createHosts(config.hosts)
 
@@ -189,6 +226,8 @@ class Server
 
       @_server.on "connect", (req, socket, head) =>
         debug("Got CONNECT request from %s", req.url)
+
+        socket.once 'upstream-connected', @_socketWhitelist.add
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
@@ -319,7 +358,7 @@ class Server
   _onRequest: (headers, automationRequest, options) ->
     @_request.sendPromise(headers, automationRequest, options)
 
-  _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
+  _onResolveUrl: (urlStr, headers, automationRequest, options = { headers: {} }) ->
     debug("resolving visit %o", {
       url: urlStr
       headers
@@ -370,6 +409,8 @@ class Server
 
       if not fullyQualifiedRe.test(urlStr)
         handlingLocalFile = true
+
+        options.headers['x-cypress-authorization'] = @_fileServer.token
 
         @_remoteVisitingUrl = true
 
@@ -607,7 +648,13 @@ class Server
 
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
-    return if req.url.startsWith(socketIoRoute)
+    if req.url.startsWith(socketIoRoute)
+      if not @_socketWhitelist.isRequestWhitelisted(req)
+        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
+        socket.end()
+
+      ## we can return here either way, if the socket is still valid socket.io will hook it up
+      return
 
     if (host = req.headers.host) and @_remoteProps and (remoteOrigin = @_remoteOrigin)
       ## get the port from @_remoteProps

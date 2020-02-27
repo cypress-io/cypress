@@ -253,7 +253,7 @@ function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&f
             if (lib === 'hugeApp') {
               stripped = stripped.replace(
                 'window.self !== window.self',
-                'window.self !== window.top'
+                'window.self !== window.top',
               )
             }
 

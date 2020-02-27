@@ -2,7 +2,7 @@ _ = require("lodash")
 Promise = require("bluebird")
 debug = require('debug')('cypress:driver:retries')
 $utils = require("../cypress/utils")
-{ CypressErrorRe } = require("../cypress/log")
+$errUtils = require("../cypress/error_utils")
 
 create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
   return {
@@ -30,11 +30,11 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
       })
 
       { error } = options
-      
+
       ## TODO: remove this once the codeframe PR is in since that
       ## correctly handles not rewrapping errors so that stack
       ## traces are correctly displayed
-      if debug.enabled and error and not CypressErrorRe.test(error.name)
+      if debug.enabled and error and not $errUtils.CypressErrorRe.test(error.name)
         debug('retrying due to caught error...')
         console.error(error)
 
@@ -63,7 +63,7 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
             _.get(err, 'message') or
               err
 
-        $utils.throwErrByPath "miscellaneous.retry_timed_out", {
+        $errUtils.throwErrByPath "miscellaneous.retry_timed_out", {
           onFail: (options.onFail or log)
           args: { error: getErrMessage(options.error) }
         }

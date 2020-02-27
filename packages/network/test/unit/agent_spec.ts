@@ -297,8 +297,8 @@ describe('lib/agent', function () {
           allowDestroy(
             net.createServer((socket) => {
               socket.end()
-            })
-          )
+            }),
+          ),
         ) as net.Server & AsyncServer
 
         const proxyPort = PROXY_PORT + 2

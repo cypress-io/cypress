@@ -47,8 +47,26 @@
       top: -1px;
 
       &.fa-globe {
-        top: 0; 
+        top: 0;
       }
+    }
+  }
+
+  &.automation-failure {
+    .browser-icon {
+      margin-right: 5px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+
+    .dropdown-toggle {
+      margin-left: 5px;
+    }
+
+    .dropdown-menu li {
+      padding: 8px 12px;
+      white-space: nowrap;
     }
   }
 
