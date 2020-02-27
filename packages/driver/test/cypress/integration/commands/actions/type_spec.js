@@ -12,6 +12,18 @@ const {
   shouldBeCalledOnce,
 } = require('../../../support/utils')
 
+const expectTextEndsWith = (expected) => {
+  return ($el) => {
+    const text = $el.text().trim()
+
+    const passed = text.endsWith(expected)
+
+    const displayText = text.length > 300 ? (`${text.slice(0, 100)}...${text.slice(-100)}`) : text
+
+    assert(passed, `expected ${displayText} to end with ${expected}`)
+  }
+}
+
 describe('src/cy/commands/actions/type - #type', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -1436,13 +1448,13 @@ describe('src/cy/commands/actions/type - #type', () => {
 
       it('<area> element', () => {
         cy.$$(`
-        <map name="map">
-        <area shape="circle" coords="0,0,100"
-        href="#"
-        target="_blank" alt="area" />
-        </map>
-        <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
-        `).prependTo(cy.$$('body'))
+          <map name="map">
+          <area shape="circle" coords="0,0,100"
+          href="#"
+          target="_blank" alt="area" />
+          </map>
+          <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
+          `).prependTo(cy.$$('body'))
 
         let keydown = cy.stub()
 
@@ -1698,8 +1710,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it(`can type into an iframe with designmode = 'on'`, () => {
-        // append a new iframe to the body
+      function insertIframe () {
         cy.$$('<iframe id="generic-iframe" src="/fixtures/generic.html" style="height: 500px"></iframe>')
         .appendTo(cy.$$('body'))
 
@@ -1715,7 +1726,47 @@ describe('src/cy/commands/actions/type - #type', () => {
         .should(() => {
           expect(loaded).to.eq(true)
         })
+      }
 
+      it('can type in designmode="on"', () => {
+        cy.timeout(100)
+        cy.state('document').designMode = 'on'
+        cy.state('document').documentElement.focus()
+        cy.get('div.item:first')
+        .type('111')
+
+        cy.get('body').then(expectTextEndsWith('111'))
+      })
+
+      // TODO[breaking]: we should edit div.item:first text content instead of
+      // moving to the end of the host contenteditable. This will allow targeting
+      // specific elements to simplify testing rich editors
+      it('can type in body[contenteditable]', () => {
+        cy.state('document').body.setAttribute('contenteditable', true)
+        cy.state('document').documentElement.focus()
+        cy.get('div.item:first')
+        .type('111')
+
+        cy.get('body')
+        .then(expectTextEndsWith('111'))
+      })
+
+      // https://github.com/cypress-io/cypress/issues/5930
+      it('can type into an iframe with body[contenteditable]', () => {
+        insertIframe()
+        cy.get('#generic-iframe').then(($iframe) => {
+          cy.wrap($iframe.contents().find('html').first().find('body'))
+          .then(($body) => {
+            $body.attr('contenteditable', true)
+          })
+          .type('111')
+          .then(expectTextEndsWith('111'))
+        })
+      })
+
+      it(`can type into an iframe with designmode = 'on'`, () => {
+        // append a new iframe to the body
+        insertIframe()
         // type text into iframe
         cy.get('#generic-iframe')
         .then(($iframe) => {
@@ -2501,11 +2552,11 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('accurately returns document body el with no falsey contenteditable="false" attr', () => {
+    it('accurately returns documentElement el when contenteditable="false" attr', () => {
       cy.$$('<div contenteditable="false"><div id="ce-inner1">foo</div></div>').appendTo(cy.$$('body'))
 
       cy.get('#ce-inner1').then(($el) => {
-        expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0].ownerDocument.body)
+        expect(Cypress.dom.getHostContenteditable($el[0])).to.eq($el[0].ownerDocument.documentElement)
       })
     })
 
@@ -2650,8 +2701,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       const el = $el.get(0)
 
       el.innerHTML = 'start' +
-      '<div>middle</div>' +
-      '<div>end</div>'
+        '<div>middle</div>' +
+        '<div>end</div>'
 
       cy.get('[contenteditable]:first')
       // move cursor to beginning of div
@@ -2666,8 +2717,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       const el = $el.get(0)
 
       el.innerHTML = 'start' +
-      '<div>middle</div>' +
-      '<div>end</div>'
+        '<div>middle</div>' +
+        '<div>end</div>'
 
       cy.get('[contenteditable]:first').type(`${'{leftarrow}'.repeat(12)}[_I_]`).then(($el) => {
         expect(trimInnerText($el)).to.eql('star[_I_]t\nmiddle\nend')
@@ -2937,7 +2988,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
           // eslint-disable-next-line
-          console.table(table.data, table.columns)
+            console.table(table.data, table.columns)
 
           expect(table.name).to.eq('Keyboard Events')
           const expectedTable = {
@@ -2981,7 +3032,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
           // eslint-disable-next-line
-          console.table(table.data, table.columns)
+            console.table(table.data, table.columns)
 
           expect(table.data).to.deep.eq({
             1: { Typed: 'f', 'Events Fired': 'keydown, keyup', 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': true, 'Target Element': $el[0] },
