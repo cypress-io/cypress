@@ -4,34 +4,32 @@
   "private": true,
   "main": "src/index.jsx",
   "scripts": {
-    "build": "webpack",
+    "build-for-tests": "webpack",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
     "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
     "pretest": "npm run check-deps-pre",
-    "watch": "npm run build -- --watch --progress"
+    "watch": "npm run build-for-tests -- --watch --progress"
   },
   "devDependencies": {
+    "@babel/core": "7.8.4",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-proposal-decorators": "7.8.3",
-    "@babel/preset-env": "7.8.3",
+    "@babel/preset-env": "7.8.4",
     "@babel/preset-react": "7.8.3",
-    "@cypress/eslint-plugin-dev": "5.0.0",
-    "@cypress/webpack-preprocessor": "4.1.1",
+    "@cypress/webpack-preprocessor": "4.1.2",
     "@fortawesome/fontawesome-free": "5.12.1",
+    "babel-loader": "8.0.6",
     "browser-logos": "github:alrra/browser-logos",
     "classnames": "2.2.6",
-    "eslint-plugin-cypress": "2.10.1",
-    "eslint-plugin-react": "7.18.3",
-    "file-loader": "5.0.2",
+    "file-loader": "4.3.0",
     "lodash": "4.17.15",
-    "node-sass": "4.13.0",
     "prop-types": "15.7.2",
     "react": "16.12.0",
     "react-dom": "16.12.0",
-    "webpack": "4.41.2",
-    "webpack-cli": "3.3.10"
+    "webpack": "4.41.6",
+    "webpack-cli": "3.3.11"
   }
 }
