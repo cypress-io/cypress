@@ -949,6 +949,8 @@ jobs:
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
       - run: mkdir test-binary
+      - run: node --version
+      - run: npm --version
       - run:
           name: Create new NPM package
           working_directory: test-binary
