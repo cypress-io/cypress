@@ -1736,7 +1736,6 @@ describe('src/cy/commands/actions/type - #type', () => {
         .type('111')
 
         cy.get('body').then(expectTextEndsWith('111'))
-        // .should('contain', 'New Yorkfoo')
       })
 
       // TODO[breaking]: we should edit div.item:first text content instead of
