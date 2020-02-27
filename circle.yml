@@ -949,14 +949,17 @@ jobs:
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
       - run: mkdir test-binary
-      # upgrade NPM, otherwise NPM v5 gets so many errors
-      - run: npm i -g npm@5.1.0
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
       - run:
           # install NPM from built NPM package folder
           name: Install Cypress
           working_directory: test-binary
           # force installing the freshly built binary
-          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+          # use Yarn because npm v5.0.0 is hopelessly broken
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip yarn add /root/cypress/cypress.tgz
 
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
