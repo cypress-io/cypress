@@ -221,7 +221,7 @@
     ],
     "nohoist": [
       "@packages/driver/*",
-      "@packages/socket/has-binary2"
+      "@packages/socket/**"
     ]
   },
   "lint-staged": {
