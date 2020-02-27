@@ -59,7 +59,8 @@ executors:
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
-      xcode: "10.1.0"
+      ## Node 12.10.0 (yarn 1.17.3)
+      xcode: "11.0.0"
     environment:
       PLATFORM: mac
 
