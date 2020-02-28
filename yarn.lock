@@ -18091,10 +18091,10 @@ node-loggly-bulk@^2.2.4:
     moment "^2.18.1"
     request ">=2.76.0 <3.0.0"
 
-node-machine-id@1.1.10:
-  version "1.1.10"
-  resolved "https://registry.yarnpkg.com/node-machine-id/-/node-machine-id-1.1.10.tgz#b4cb8f01b25b90d4e0675be00df30e61ee75179b"
-  integrity sha512-6SVxo3Ic2Qc09z1rCJh3No7ubizPLszImsMQnZZWfzeOC6SYU4orN214++c3ikB8uaP/A6dwSlO88A3ohI5oNA==
+node-machine-id@1.1.12:
+  version "1.1.12"
+  resolved "https://registry.yarnpkg.com/node-machine-id/-/node-machine-id-1.1.12.tgz#37904eee1e59b320bb9c5d6c0a59f3b469cb6267"
+  integrity sha512-QNABxbrPa3qEIfrE6GOJ7BYIuignnJw7iQ2YPbc3Nla1HzRJjXzZOiikfF8m7eAMfichLt3M4VgLOetqgDmgGQ==
 
 node-modules-regexp@^1.0.0:
   version "1.0.0"
