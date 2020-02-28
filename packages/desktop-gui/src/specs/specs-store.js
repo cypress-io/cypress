@@ -58,8 +58,20 @@ export class SpecsStore {
     this.chosenSpecPath = relativePath
   }
 
-  @action setExpandSpecFolder (spec) {
+  @action setExpandSpecFolder (spec, isExpanded) {
+    spec.setExpanded(isExpanded)
+  }
+
+  @action toggleExpandSpecFolder (spec) {
     spec.setExpanded(!spec.isExpanded)
+  }
+
+  @action setExpandSpecChildren (spec, isExpanded) {
+    this._depthFirstIterateSpecs(spec, (specOrFolder) => {
+      if (specOrFolder.isFolder) {
+        specOrFolder.setExpanded(isExpanded)
+      }
+    })
   }
 
   @action setFilter (project, filter = null) {
@@ -84,6 +96,14 @@ export class SpecsStore {
     const shortenedPath = path.replace(/.*cypress/, 'cypress')
 
     return `specsFilter-${id}-${shortenedPath}`
+  }
+
+  specHasFolders (specOrFolder) {
+    if (!specOrFolder.isFolder) {
+      return false
+    }
+
+    return specOrFolder.children.some((child) => child.isFolder)
   }
 
   _tree (files) {
@@ -124,6 +144,15 @@ export class SpecsStore {
     }, [])
 
     return tree
+  }
+
+  _depthFirstIterateSpecs (root, func) {
+    _.each(root.children, (child) => {
+      func(child)
+      if (child.isFolder) {
+        this._depthFirstIterateSpecs(child, func)
+      }
+    })
   }
 }
 

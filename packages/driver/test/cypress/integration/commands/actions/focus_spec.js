@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $ = Cypress.$.bind(Cypress)
 const {
   _,
@@ -20,7 +9,7 @@ const getActiveElement = () => {
 
 describe('src/cy/commands/actions/focus', () => {
   before(() => {
-    return cy
+    cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
       this.body = win.document.body.outerHTML
@@ -30,7 +19,7 @@ describe('src/cy/commands/actions/focus', () => {
   beforeEach(function () {
     const doc = cy.state('document')
 
-    return $(doc.body).empty().html(this.body)
+    $(doc.body).empty().html(this.body)
   })
 
   context('#focus', () => {
@@ -38,10 +27,10 @@ describe('src/cy/commands/actions/focus', () => {
       let focus = false
 
       cy.$$('#focus input').focus(() => {
-        return focus = true
+        focus = true
       })
 
-      return cy.get('#focus input').focus().then(($input) => {
+      cy.get('#focus input').focus().then(($input) => {
         expect(focus).to.be.true
 
         expect(getActiveElement()).to.eq($input.get(0))
@@ -52,10 +41,10 @@ describe('src/cy/commands/actions/focus', () => {
       let focusin = false
 
       cy.$$('#focus').focusin(() => {
-        return focusin = true
+        focusin = true
       })
 
-      return cy.get('#focus input').focus().then(() => {
+      cy.get('#focus input').focus().then(() => {
         expect(focusin).to.be.true
       })
     })
@@ -64,10 +53,10 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       cy.$$('input:first').blur(() => {
-        return blurred = true
+        blurred = true
       })
 
-      return cy
+      cy
       .get('input:first').focus()
       .get('#focus input').focus()
       .then(() => {
@@ -78,7 +67,7 @@ describe('src/cy/commands/actions/focus', () => {
     it('matches cy.focused()', () => {
       const button = cy.$$('#button')
 
-      return cy
+      cy
       .get('#button').focus().focused()
       .then(($focused) => {
         expect($focused.get(0)).to.eq(button.get(0))
@@ -88,7 +77,7 @@ describe('src/cy/commands/actions/focus', () => {
     it('returns the original subject', () => {
       const button = cy.$$('#button')
 
-      return cy.get('#button').focus().then(($button) => {
+      cy.get('#button').focus().then(($button) => {
         expect($button).to.match(button)
       })
     })
@@ -97,10 +86,10 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       cy.$$('input:first').blur(() => {
-        return blurred = true
+        blurred = true
       })
 
-      return cy
+      cy
       .get('input:first').focus()
       .get('input:last').focus()
       .then(() => {
@@ -120,21 +109,21 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       const onFocus = () => {
-        return focused = true
+        focused = true
       }
 
       const onBlur = () => {
-        return blurred = true
+        blurred = true
       }
 
-      return cy
+      cy
       .get('input:first').focus().then(($input) => {
         expect(doc.activeElement).to.eq($input.get(0))
 
         $input.get(0).addEventListener('blur', onBlur)
         body.addEventListener('focus', onFocus)
 
-        return cy.get('body').focus().then(() => {
+        cy.get('body').focus().then(() => {
           // should not have changed actual activeElement
           expect(doc.activeElement).to.eq($input.get(0))
 
@@ -156,21 +145,21 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       const onFocus = () => {
-        return focused = true
+        focused = true
       }
 
       const onBlur = () => {
-        return blurred = true
+        blurred = true
       }
 
-      return cy
+      cy
       .get('input:first').focus().then(($input) => {
         expect(doc.activeElement).to.eq($input.get(0))
 
         $input.get(0).addEventListener('blur', onBlur)
         win.addEventListener('focus', onFocus)
 
-        return cy.window().focus().then(() => {
+        cy.window().focus().then(() => {
           // should not have changed actual activeElement
           expect(doc.activeElement).to.eq($input.get(0))
 
@@ -187,7 +176,7 @@ describe('src/cy/commands/actions/focus', () => {
     it('can focus [contenteditable]', () => {
       const ce = cy.$$('[contenteditable]:first')
 
-      return cy
+      cy
       .get('[contenteditable]:first').focus()
       .focused().then(($ce) => {
         expect($ce.get(0)).to.eq(ce.get(0))
@@ -199,7 +188,7 @@ describe('src/cy/commands/actions/focus', () => {
 
       cy.$$('[data-cy=rect]').focus(onFocus)
 
-      return cy.get('[data-cy=rect]').focus().then(() => {
+      cy.get('[data-cy=rect]').focus().then(() => {
         expect(onFocus).to.be.calledOnce
       })
     })
@@ -209,31 +198,29 @@ describe('src/cy/commands/actions/focus', () => {
 
       cy.$$('#readonly-attr').focus(onFocus)
 
-      return cy.get('#readonly-attr').focus().then(() => {
+      cy.get('#readonly-attr').focus().then(() => {
         expect(onFocus).to.be.calledOnce
       })
     })
 
     describe('assertion verification', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
             this.lastLog = log
           }
         })
-
-        return null
       })
 
       it('eventually passes the assertion', () => {
         cy.$$(':text:first').focus(function () {
-          return _.delay(() => {
-            return $(this).addClass('focused')
+          _.delay(() => {
+            $(this).addClass('focused')
           }
           , 100)
         })
 
-        return cy.get(':text:first').focus().should('have.class', 'focused').then(function () {
+        cy.get(':text:first').focus().should('have.class', 'focused').then(() => {
           const {
             lastLog,
           } = this
@@ -247,18 +234,16 @@ describe('src/cy/commands/actions/focus', () => {
     })
 
     describe('.log', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'focus') {
             this.lastLog = log
 
-            return this.logs.push(log)
+            this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs immediately before resolving', () => {
@@ -279,13 +264,13 @@ describe('src/cy/commands/actions/focus', () => {
           }
         })
 
-        return cy.get(':text:first').focus().then(() => {
+        cy.get(':text:first').focus().then(() => {
           expect(expected).to.be.true
         })
       })
 
       it('snapshots after clicking', () => {
-        return cy.get(':text:first').focus().then(function () {
+        cy.get(':text:first').focus().then(() => {
           const {
             lastLog,
           } = this
@@ -297,7 +282,7 @@ describe('src/cy/commands/actions/focus', () => {
       })
 
       it('passes in $el', () => {
-        return cy.get('input:first').focus().then(function ($input) {
+        cy.get('input:first').focus().then(($input) => {
           const {
             lastLog,
           } = this
@@ -307,15 +292,15 @@ describe('src/cy/commands/actions/focus', () => {
       })
 
       it('logs 2 focus event', () => {
-        return cy
+        cy
         .get('input:first').focus()
-        .get('button:first').focus().then(function () {
+        .get('button:first').focus().then(() => {
           expect(this.logs.length).to.eq(2)
         })
       })
 
       it('#consoleProps', () => {
-        return cy.get('input:first').focus().then(function ($input) {
+        cy.get('input:first').focus().then(($input) => {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'focus',
             'Applied To': $input.get(0),
@@ -324,7 +309,7 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', function () {
       beforeEach(function () {
         Cypress.config('defaultCommandTimeout', 100)
 
@@ -333,18 +318,16 @@ describe('src/cy/commands/actions/focus', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
-          return this.logs.push(log)
+          this.logs.push(log)
         })
-
-        return null
       })
 
       it('throws when not a dom subject', (done) => {
         cy.on('fail', () => {
-          return done()
+          done()
         })
 
-        return cy.noop({}).focus()
+        cy.noop({}).focus()
       })
 
       it('throws when subject is not in the document', (done) => {
@@ -353,42 +336,38 @@ describe('src/cy/commands/actions/focus', () => {
         const $input = cy.$$('input:first').focus((e) => {
           focused += 1
           $input.remove()
-
-          return false
         })
 
         cy.on('fail', (err) => {
           expect(focused).to.eq(1)
           expect(err.message).to.include('cy.focus() failed because this element')
 
-          return done()
+          done()
         })
 
-        return cy.get('input:first').focus().focus()
+        cy.get('input:first').focus().focus()
       })
 
       it('throws when not a[href],link[href],button,input,select,textarea,[tabindex]', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.focus() can only be called on a valid focusable element. Your subject is a: <form id="by-id">...</form>')
 
-          return done()
+          done()
         })
 
-        return cy.get('form').focus()
+        cy.get('form').focus()
       })
 
       it('throws when subject is a collection of elements', function (done) {
         cy
         .get('textarea,:text').then(function ($inputs) {
           this.num = $inputs.length
-
-          return $inputs
         }).focus()
 
-        return cy.on('fail', (err) => {
+        cy.on('fail', (err) => {
           expect(err.message).to.include(`cy.focus() can only be called on a single element. Your subject contained ${this.num} elements.`)
 
-          return done()
+          done()
         })
       })
 
@@ -401,10 +380,10 @@ describe('src/cy/commands/actions/focus', () => {
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.focus()
+        cy.focus()
       })
 
       // TODO: dont skip this
@@ -414,7 +393,7 @@ describe('src/cy/commands/actions/focus', () => {
         // we only want to test when the document
         // isnt in focus
         if (cy.state('document').hasFocus()) {
-          return done()
+          done()
         }
 
         // now = cy.now
@@ -431,32 +410,33 @@ describe('src/cy/commands/actions/focus', () => {
         // cy.stub(cy, "now", nowFn)
 
         const $first = cy.$$('input:first')
-        const $last = cy.$$('input:last')
+        //const $last = cy.$$('input:last')
 
         $first.on('focus', function () {
-          return $(this).remove()
+          $(this).remove()
         })
 
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.blur() failed because this element')
 
-          return done()
+          done()
         })
 
         // we remove the first element and then
         // focus on the 2nd.  the 2nd focus causes
         // a blur on the 1st element, which should
         // cause an error because its no longer in the DOM
-        return cy
+        cy
         .get('input:first').focus()
         .get('input:last').focus()
-        .then(() => // sometimes hasFocus() returns false
-        // even though its really in focus
-        // in those cases, just pass
-        // i cant come up with another way
-        // to test this accurately
-        {
-          return done()
+        .then(() => {
+          // sometimes hasFocus() returns false
+          // even though its really in focus
+          // in those cases, just pass
+          // i cant come up with another way
+          // to test this accurately
+
+          done()
         })
       })
 
@@ -472,20 +452,20 @@ describe('src/cy/commands/actions/focus', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          return done()
+          done()
         })
 
-        return cy.get(':text:first').focus().should('have.class', 'focused')
+        cy.get(':text:first').focus().should('have.class', 'focused')
       })
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
           expect(this.logs.length).to.eq(3)
 
-          return done()
+          done()
         })
 
-        return cy.get(':text:first').focus().should('have.class', 'focused')
+        cy.get(':text:first').focus().should('have.class', 'focused')
       })
     })
   })
@@ -495,11 +475,11 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       cy.$$('#focus input').blur(() => {
-        return blurred = true
+        blurred = true
       })
 
-      return cy.get('#focus').within(() => {
-        return cy
+      cy.get('#focus').within(() => {
+        cy
         .get('input').focus()
         .then(($input) => {
           expect(getActiveElement()).to.eq($input.get(0))
@@ -516,10 +496,10 @@ describe('src/cy/commands/actions/focus', () => {
       let focusout = false
 
       cy.$$('#focus').focusout(() => {
-        return focusout = true
+        focusout = true
       })
 
-      return cy.get('#focus input').focus().blur().then(() => {
+      cy.get('#focus input').focus().blur().then(() => {
         expect(focusout).to.be.true
       })
     })
@@ -529,10 +509,10 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       cy.$$('input:first').blur(() => {
-        return blurred = true
+        blurred = true
       })
 
-      return cy.get('input:first').focus().blur().then(() => {
+      cy.get('input:first').focus().blur().then(() => {
         expect(blurred).to.be.true
       })
     })
@@ -540,7 +520,7 @@ describe('src/cy/commands/actions/focus', () => {
     it('returns the original subject', () => {
       const input = cy.$$('input:first')
 
-      return cy.get('input:first').focus().blur().then(($input) => {
+      cy.get('input:first').focus().blur().then(($input) => {
         expect($input).to.match(input)
       })
     })
@@ -552,16 +532,16 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       const onBlur = () => {
-        return blurred = true
+        blurred = true
       }
 
       body.addEventListener('blur', onBlur)
 
-      return cy
+      cy
       .get('body').blur().then(() => {
         expect(blurred).to.be.false
       }).get('input:first').focus().then(($input) => {
-        return cy
+        cy
         .get('body').blur({ force: true })
         .then(() => {
           expect(doc.activeElement).to.eq($input.get(0))
@@ -579,21 +559,21 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       const onBlur = () => {
-        return blurred = true
+        blurred = true
       }
 
       win.addEventListener('blur', onBlur)
 
-      return cy
+      cy
       .window().blur().then(() => {
         expect(blurred).to.be.true
       }).get('input:first').focus().then(($input) => {
-        return cy
+        cy
         .window().blur({ force: true })
         .then(() => {
           expect(doc.activeElement).to.eq($input.get(0))
 
-          return win.removeEventListener('blur', onBlur)
+          win.removeEventListener('blur', onBlur)
         })
       })
     })
@@ -601,7 +581,7 @@ describe('src/cy/commands/actions/focus', () => {
     it('can blur [contenteditable]', () => {
       const ce = cy.$$('[contenteditable]:first')
 
-      return cy
+      cy
       .get('[contenteditable]:first').focus().blur().then(($ce) => {
         expect($ce.get(0)).to.eq(ce.get(0))
       })
@@ -611,10 +591,10 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       cy.$$('#time-without-value').blur(() => {
-        return blurred = true
+        blurred = true
       })
 
-      return cy
+      cy
       .get('#time-without-value').focus().invoke('val', '03:15:00').blur()
       .then(() => {
         expect(blurred).to.be.true
@@ -626,10 +606,10 @@ describe('src/cy/commands/actions/focus', () => {
 
       cy
       .$$('#comments').blur(() => {
-        return blurred = true
+        blurred = true
       }).get(0).focus()
 
-      return cy.get('#comments').blur().then(() => {
+      cy.get('#comments').blur().then(() => {
         expect(blurred).to.be.true
       })
     })
@@ -638,10 +618,10 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       cy.$$('input:first').blur(() => {
-        return blurred = true
+        blurred = true
       })
 
-      return cy
+      cy
       .get('input:last').focus()
       .get('input:first').blur({ force: true })
       .then(() => {
@@ -653,10 +633,10 @@ describe('src/cy/commands/actions/focus', () => {
       let blurred = false
 
       cy.$$('input:first').blur(() => {
-        return blurred = true
+        blurred = true
       })
 
-      return cy
+      cy
       .focused().should('not.exist')
       .get('input:first').blur({ force: true })
       .then(() => {
@@ -669,31 +649,29 @@ describe('src/cy/commands/actions/focus', () => {
 
       cy.$$('[data-cy=rect]').blur(onBlur)
 
-      return cy.get('[data-cy=rect]').focus().blur().then(() => {
+      cy.get('[data-cy=rect]').focus().blur().then(() => {
         expect(onBlur).to.be.calledOnce
       })
     })
 
     describe('assertion verification', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
             this.lastLog = log
           }
         })
-
-        return null
       })
 
       it('eventually passes the assertion', () => {
         cy.$$(':text:first').blur(function () {
-          return _.delay(() => {
-            return $(this).addClass('blured')
+          _.delay(() => {
+            $(this).addClass('blured')
           }
           , 100)
         })
 
-        return cy.get(':text:first').focus().blur().should('have.class', 'blured').then(function () {
+        cy.get(':text:first').focus().blur().should('have.class', 'blured').then(() => {
           const {
             lastLog,
           } = this
@@ -706,7 +684,7 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
-    describe('.log', () => {
+    describe('.log', function () {
       beforeEach(function () {
         this.logs = []
 
@@ -714,11 +692,9 @@ describe('src/cy/commands/actions/focus', () => {
           if (attrs.name === 'blur') {
             this.lastLog = log
 
-            return this.logs.push(log)
+            this.logs.push(log)
           }
         })
-
-        return null
       })
 
       it('logs immediately before resolving', () => {
@@ -734,13 +710,13 @@ describe('src/cy/commands/actions/focus', () => {
           }
         })
 
-        return cy.get(':text:first').focus().blur().then(() => {
+        cy.get(':text:first').focus().blur().then(() => {
           expect(expected).to.be.true
         })
       })
 
-      it('snapshots after clicking', () => {
-        return cy.get(':text:first').focus().blur().then(function () {
+      it('snapshots after clicking', function () {
+        cy.get(':text:first').focus().blur().then(() => {
           const {
             lastLog,
           } = this
@@ -751,8 +727,8 @@ describe('src/cy/commands/actions/focus', () => {
         })
       })
 
-      it('passes in $el', () => {
-        return cy.get('input:first').focus().blur().then(function ($input) {
+      it('passes in $el', function () {
+        cy.get('input:first').focus().blur().then(($input) => {
           const {
             lastLog,
           } = this
@@ -761,16 +737,16 @@ describe('src/cy/commands/actions/focus', () => {
         })
       })
 
-      it('logs 1 blur event', () => {
-        return cy
-        .get('input:first').focus().blur().then(function () {
+      it('logs 1 blur event', function () {
+        cy
+        .get('input:first').focus().blur().then(() => {
           expect(this.logs.length).to.eq(1)
         })
       })
 
-      it('logs delta options for {force: true}', () => {
-        return cy
-        .get('input:first').blur({ force: true }).then(function () {
+      it('logs delta options for {force: true}', function () {
+        cy
+        .get('input:first').blur({ force: true }).then(() => {
           const {
             lastLog,
           } = this
@@ -779,8 +755,8 @@ describe('src/cy/commands/actions/focus', () => {
         })
       })
 
-      it('#consoleProps', () => {
-        return cy.get('input:first').focus().blur().then(function ($input) {
+      it('#consoleProps', function () {
+        cy.get('input:first').focus().blur().then(($input) => {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'blur',
             'Applied To': $input.get(0),
@@ -789,7 +765,7 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', function () {
       beforeEach(function () {
         Cypress.config('defaultCommandTimeout', 100)
 
@@ -798,18 +774,16 @@ describe('src/cy/commands/actions/focus', () => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
 
-          return this.logs.push(log)
+          this.logs.push(log)
         })
-
-        return null
       })
 
       it('throws when not a dom subject', (done) => {
         cy.on('fail', () => {
-          return done()
+          done()
         })
 
-        return cy.noop({}).blur()
+        cy.noop({}).blur()
       })
 
       it('throws when subject is not in the document', (done) => {
@@ -819,21 +793,17 @@ describe('src/cy/commands/actions/focus', () => {
           blurred += 1
           $input.focus(() => {
             $input.remove()
-
-            return false
           })
-
-          return false
         })
 
         cy.on('fail', (err) => {
           expect(blurred).to.eq(1)
           expect(err.message).to.include('cy.blur() failed because this element')
 
-          return done()
+          done()
         })
 
-        return cy.get('input:first').focus().blur().focus().blur()
+        cy.get('input:first').focus().blur().focus().blur()
       })
 
       it('throws when subject is a collection of elements', (done) => {
@@ -842,10 +812,10 @@ describe('src/cy/commands/actions/focus', () => {
         cy.on('fail', (err) => {
           expect(err.message).to.include(`cy.blur() can only be called on a single element. Your subject contained ${num} elements.`)
 
-          return done()
+          done()
         })
 
-        return cy
+        cy
         .get('textarea,:text').blur()
       })
 
@@ -853,27 +823,27 @@ describe('src/cy/commands/actions/focus', () => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.blur() can only be called when there is a currently focused element.')
 
-          return done()
+          done()
         })
 
-        return cy.get('form:first').blur()
+        cy.get('form:first').blur()
       })
 
       it('throws when blur is called on a non-active element', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('cy.blur() can only be called on the focused element. Currently the focused element is a: <input id="input">')
 
-          return done()
+          done()
         })
 
-        return cy
+        cy
         .get('input:first').focus()
         .get('#button').blur()
       })
 
       it('logs delta options on error', function (done) {
         cy.$$('button:first').click(function () {
-          return $(this).remove()
+          $(this).remove()
         })
 
         cy.on('fail', (err) => {
@@ -883,10 +853,10 @@ describe('src/cy/commands/actions/focus', () => {
 
           expect(lastLog.get('message')).to.eq('{force: true}')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').click().blur({ force: true })
+        cy.get('button:first').click().blur({ force: true })
       })
 
       it('logs once when not dom subject', function (done) {
@@ -898,10 +868,10 @@ describe('src/cy/commands/actions/focus', () => {
           expect(this.logs.length).to.eq(1)
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.blur()
+        cy.blur()
       })
 
       it('eventually fails the assertion', function (done) {
@@ -916,24 +886,24 @@ describe('src/cy/commands/actions/focus', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          return done()
+          done()
         })
 
-        return cy.get(':text:first').focus().blur().should('have.class', 'blured')
+        cy.get(':text:first').focus().blur().should('have.class', 'blured')
       })
 
       it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
           expect(this.logs.length).to.eq(4)
 
-          return done()
+          done()
         })
 
-        return cy.get(':text:first').focus().blur().should('have.class', 'blured')
+        cy.get(':text:first').focus().blur().should('have.class', 'blured')
       })
 
       it('can handle window w/length > 1 as a subject', () => {
-        return cy.window().should('have.length', 2)
+        cy.window().should('have.length', 2)
         .focus()
       })
     })

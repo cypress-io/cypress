@@ -169,7 +169,7 @@ const wrapAll = (runnable) => {
   return _.extend(
     {},
     $utils.reduceProps(runnable, RUNNABLE_PROPS),
-    $utils.reduceProps(runnable, RUNNABLE_LOGS)
+    $utils.reduceProps(runnable, RUNNABLE_LOGS),
   )
 }
 
@@ -743,7 +743,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
         $errUtils.errMsgByPath('uncaught.error_in_hook', {
           parentTitle,
           hookName,
-        })
+        }),
       )
     }
 
@@ -914,7 +914,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
         setTests,
         onRunnable,
         onLogsById,
-        getTestId
+        getTestId,
       )
     },
 

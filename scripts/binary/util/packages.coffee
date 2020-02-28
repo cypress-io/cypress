@@ -40,24 +40,10 @@ createCLIExecutable = (command) ->
 yarn = createCLIExecutable('yarn')
 npx = createCLIExecutable('npx')
 
-runAllBuildJs = _.partial(npx, ["lerna", "run", "build-js", "--ignore", "cli"])
+runAllBuild = _.partial(npx, ["lerna", "run", "build-prod", "--ignore", "cli"])
 
 # removes transpiled JS files in the original package folders
 runAllCleanJs = _.partial(npx, ["lerna", "run", "clean-js", "--ignore", "cli"])
-
-# builds all the packages except for cli
-runAllBuild = (args...) ->
-  getPackagesWithScript('build')
-  .then (pkgNameArr) ->
-    pkgs = pkgNameArr
-      .map((pkgName) ->
-        "@packages/#{pkgName}"
-      )
-      .join(',')
-    npx(
-      ["lerna", "run", "build-prod", "--scope", "\"{#{pkgs}}\"", "--ignore", "cli"]
-      args...
-    )
 
 ## @returns string[] with names of packages, e.g. ['runner', 'driver', 'server']
 getPackagesWithScript = (scriptName) ->
@@ -226,8 +212,6 @@ symlinkAll = (pathToDistPackages, pathTo) ->
 
 module.exports = {
   runAllBuild
-
-  runAllBuildJs
 
   copyAllToDist
 
