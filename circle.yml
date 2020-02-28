@@ -59,7 +59,8 @@ executors:
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
-      xcode: "10.1.0"
+      ## Node 12.10.0 (yarn 1.17.3)
+      xcode: "11.0.0"
     environment:
       PLATFORM: mac
 
@@ -235,7 +236,7 @@ jobs:
       - run: ls $(yarn global bin)/../lib/node_modules
 
       # try several times, because flaky NPM installs ...
-      - run: yarn --ignore-engines || yarn --ignore-engines
+      - run: yarn || yarn
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
