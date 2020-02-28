@@ -480,7 +480,7 @@ describe "src/cy/commands/screenshot", ->
             expect(Screenshot.onBeforeScreenshot).to.be.calledOnce
             expect(Screenshot.onBeforeScreenshot.firstCall.args[0]).to.match(".tall-element")
 
-            expect(Screenshot.onAfterScreenshot).not.to.be.calleed
+            expect(Screenshot.onAfterScreenshot).not.to.be.called
         })
         .then ->
           expect(Screenshot.onAfterScreenshot).to.be.calledOnce

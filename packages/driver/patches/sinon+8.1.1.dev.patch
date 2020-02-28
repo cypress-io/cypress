@@ -1,0 +1,19 @@
+diff --git a/node_modules/sinon/lib/sinon/util/core/function-to-string.js b/node_modules/sinon/lib/sinon/util/core/function-to-string.js
+index fa0265b..a50bdf6 100644
+--- a/node_modules/sinon/lib/sinon/util/core/function-to-string.js
++++ b/node_modules/sinon/lib/sinon/util/core/function-to-string.js
+@@ -9,8 +9,12 @@ module.exports = function toString() {
+             thisValue = this.getCall(i).thisValue;
+ 
+             for (prop in thisValue) {
+-                if (thisValue[prop] === this) {
+-                    return prop;
++                try {
++                    if (thisValue[prop] === this) {
++                        return prop;
++                    }
++                } catch (e) {
++                    // no-op - accessing props can throw an error, nothing to do here
+                 }
+             }
+         }

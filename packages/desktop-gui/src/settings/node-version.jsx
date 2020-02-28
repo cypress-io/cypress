@@ -6,7 +6,7 @@ import ipc from '../lib/ipc'
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/configuration#Node-Version')
+  ipc.externalOpen('https://on.cypress.io/node-version')
 }
 
 const renderLearnMore = () => {

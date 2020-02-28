@@ -10,6 +10,7 @@ import EQ from 'css-element-queries/src/ElementQueries'
 import { Error } from './errors/an-error'
 import appState, { AppState } from './lib/app-state'
 import events, { Runner, Events } from './lib/events'
+import ForcedGcWarning from './lib/forced-gc-warning'
 import runnablesStore, { RunnablesStore } from './runnables/runnables-store'
 import scroller, { Scroller } from './lib/scroller'
 import statsStore, { StatsStore } from './header/stats-store'
@@ -55,7 +56,27 @@ class Reporter extends Component<ReporterProps> {
     statsStore,
   }
 
-  componentWillMount () {
+  render () {
+    const { appState } = this.props
+
+    return (
+      <div className={cs('reporter', { 'is-running': appState.isRunning })}>
+        <Header appState={appState} statsStore={this.props.statsStore} />
+        <Runnables
+          appState={appState}
+          error={this.props.error}
+          runnablesStore={this.props.runnablesStore}
+          scroller={this.props.scroller}
+          specPath={this.props.specPath}
+        />
+        <ForcedGcWarning
+          appState={appState}
+          events={this.props.events}/>
+      </div>
+    )
+  }
+
+  componentDidMount () {
     const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
 
     action('set:scrolling', () => {
@@ -70,29 +91,11 @@ class Reporter extends Component<ReporterProps> {
     })
 
     this.props.events.listen(runner)
-  }
 
-  render () {
-    const { appState } = this.props
-
-    return (
-      <div className={cs('reporter', { 'is-running': appState.isRunning })}>
-        <Header appState={appState} statsStore={this.props.statsStore} />
-        <Runnables
-          appState={appState}
-          error={this.props.error}
-          runnablesStore={this.props.runnablesStore}
-          scroller={this.props.scroller}
-          specPath={this.props.specPath}
-        />
-      </div>
-    )
-  }
-
-  componentDidMount () {
     shortcuts.start()
     EQ.init()
   }
+
   componentWillUnmount () {
     shortcuts.stop()
   }

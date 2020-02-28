@@ -161,16 +161,16 @@ describe('Specs List', function () {
 
       context('run all specs', function () {
         it('displays run all specs button', () => {
-          cy.contains('.btn', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs')
         })
 
         it('has play icon', () => {
-          cy.contains('.btn', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs')
           .find('i').should('have.class', 'fa-play')
         })
 
         it('triggers browser launch on click of button', () => {
-          cy.contains('.btn', 'Run all specs').click()
+          cy.contains('.all-tests', 'Run all specs').click()
           .then(function () {
             const launchArgs = this.ipc.launchBrowser.lastCall.args
 
@@ -182,7 +182,7 @@ describe('Specs List', function () {
 
         describe('all specs running in browser', function () {
           beforeEach(() => {
-            cy.contains('.btn', 'Run all specs').as('allSpecs').click()
+            cy.contains('.all-tests', 'Run all specs').as('allSpecs').click()
           })
 
           it('updates spec icon', function () {
@@ -275,6 +275,87 @@ describe('Specs List', function () {
           cy.get(lastExpandedFolderSelector).click()
 
           cy.get('.file').should('have.length', 0)
+        })
+      })
+    })
+
+    context('expand/collapse root specs', function () {
+      describe('with folders', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, this.specs)
+
+          this.openProject.resolve(this.config)
+        })
+
+        it('collapsing root spec will keep root itself expanded', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+          cy.get('.folder.folder-collapsed').should('have.length', 3)
+          cy.get('.folder.folder-expanded').should('have.length', 2)
+        })
+
+        it('collapses all children folders', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+
+          const lastCollapsedFolderSelector = '.folder-collapsed:last .folder-name'
+          const rootSpecCollapsedFoldersSelector = '.folder-collapsed'
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 2)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 2)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 1)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 0)
+        })
+
+        it('expand all expands all sub folders', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+          cy.get('.folder-expanded').should('have.length', 2)
+          cy.get('.folder-collapsed').should('have.length', 3)
+
+          cy.get('.level-0 .folder-name').find('a:last').click({ multiple: true })
+          cy.get('.folder-expanded').should('have.length', 10)
+          cy.get('.folder-collapsed').should('have.length', 0)
+        })
+      })
+
+      describe('without folders', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, {
+            integration: [
+              {
+                name: 'app_spec.coffee',
+                relative: 'app_spec.coffee',
+              },
+              {
+                name: 'account_new_spec.coffee',
+                relative: 'account_new_spec.coffee',
+              },
+            ],
+            unit: [],
+          })
+
+          this.openProject.resolve(this.config)
+        })
+
+        it('hides expand/collapse buttons when there are no folders', function () {
+          cy.get('.level-0 .folder-name a').should('not.exist')
         })
       })
     })

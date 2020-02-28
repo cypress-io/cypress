@@ -1,6 +1,6 @@
 const path = require('path')
 const Promise = require('bluebird')
-const background = require('../app/background')
+const { getCookieUrl } = require('./util')
 const fs = Promise.promisifyAll(require('fs'))
 
 module.exports = {
@@ -29,9 +29,6 @@ module.exports = {
     })
   },
 
-  getCookieUrl: background.getUrl,
+  getCookieUrl,
 
-  connect: background.connect,
-
-  app: background,
 }

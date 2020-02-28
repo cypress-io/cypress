@@ -20,9 +20,9 @@ ws.on('connect', () => {
   ws.emit('runner:connected')
 })
 
-const driverToReporterEvents = 'paused'.split(' ')
+const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'backend:request automation:request mocha'.split(' ')
+const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
@@ -177,7 +177,7 @@ const eventManager = {
   },
 
   setup (config, specPath) {
-    Cypress = $Cypress.create(config)
+    Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
     window.Cypress = Cypress
@@ -187,7 +187,15 @@ const eventManager = {
     ws.emit('watch:test:file', specPath)
   },
 
+  isBrowser (browserName) {
+    if (!this.Cypress) return false
+
+    return this.Cypress.isBrowser(browserName)
+  },
+
   initialize ($autIframe, config) {
+    performance.mark('initialize-start')
+
     Cypress.initialize($autIframe)
 
     // get the current runnable in case we reran mid-test due to a visit
@@ -195,6 +203,8 @@ const eventManager = {
     ws.emit('get:existing:run:state', (state = {}) => {
       const runnables = Cypress.normalizeAll(state.tests)
       const run = () => {
+        performance.mark('initialize-end')
+        performance.measure('initialize', 'initialize-start', 'initialize-end')
         this._runDriver(state)
       }
 
@@ -303,9 +313,14 @@ const eventManager = {
   },
 
   _runDriver (state) {
-    Cypress.run(() => {})
+    performance.mark('run-s')
+    Cypress.run(() => {
+      performance.mark('run-e')
+      performance.measure('run', 'run-s', 'run-e')
+    })
 
     reporterBus.emit('reporter:start', {
+      firefoxGcInterval: Cypress.getFirefoxGcInterval(),
       startTime: Cypress.getStartTime(),
       numPassed: state.passed,
       numFailed: state.failed,

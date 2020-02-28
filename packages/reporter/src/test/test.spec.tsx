@@ -144,7 +144,7 @@ describe('<Test />', () => {
             appState={appStateStub()}
             model={model()}
             scroller={scroller}
-          />
+          />,
         )
 
         expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container'))
@@ -156,7 +156,7 @@ describe('<Test />', () => {
             appState={appStateStub({ autoScrollingEnabled: false })}
             model={model()}
             scroller={scroller}
-          />
+          />,
         )
 
         expect(scroller.scrollIntoView).not.to.have.been.called
@@ -168,7 +168,7 @@ describe('<Test />', () => {
             appState={appStateStub({ isRunning: false })}
             model={model()}
             scroller={scroller}
-          />
+          />,
         )
 
         expect(scroller.scrollIntoView).not.to.have.been.called
@@ -180,7 +180,7 @@ describe('<Test />', () => {
             appState={appStateStub()}
             model={model({ shouldRender: false })}
             scroller={scroller}
-          />
+          />,
         )
 
         expect(scroller.scrollIntoView).not.to.have.been.called
@@ -192,7 +192,7 @@ describe('<Test />', () => {
             appState={appStateStub()}
             model={model({ isActive: null })}
             scroller={scroller}
-          />
+          />,
         )
 
         expect(scroller.scrollIntoView).not.to.have.been.called

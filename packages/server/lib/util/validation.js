@@ -18,7 +18,7 @@ const str = JSON.stringify
 */
 const errMsg = (key, value, type) => {
   return `Expected \`${key}\` to be ${type}. Instead the value was: \`${str(
-    value
+    value,
   )}\``
 }
 
@@ -47,7 +47,8 @@ const isValidBrowser = (browser) => {
     return errMsg('name', browser, 'a non-empty string')
   }
 
-  const knownBrowserFamilies = ['electron', 'chrome', 'firefox']
+  // TODO: this is duplicated with browsers/index
+  const knownBrowserFamilies = ['chromium', 'firefox']
 
   if (!is.oneOf(knownBrowserFamilies)(browser.family)) {
     return errMsg('family', browser, commaListsOr`either ${knownBrowserFamilies}`)
@@ -88,7 +89,7 @@ const isValidBrowserList = (key, browsers) => {
   }
 
   if (!browsers.length) {
-    return 'Expected at list one browser'
+    return 'Expected at least one browser'
   }
 
   for (let k = 0; k < browsers.length; k += 1) {
@@ -102,10 +103,31 @@ const isValidBrowserList = (key, browsers) => {
   return true
 }
 
+const isValidFirefoxGcInterval = (key, value) => {
+  const isIntervalValue = (val) => {
+    if (isNumber(val)) {
+      return val >= 0
+    }
+
+    return val == null
+  }
+
+  if (isIntervalValue(value)
+      || (_.isEqual(_.keys(value), ['runMode', 'openMode'])
+          && isIntervalValue(value.runMode)
+          && isIntervalValue(value.openMode))) {
+    return true
+  }
+
+  return errMsg(key, value, 'a positive number or null or an object with "openMode" and "runMode" as keys and positive numbers or nulls as values')
+}
+
 module.exports = {
   isValidBrowser,
 
   isValidBrowserList,
+
+  isValidFirefoxGcInterval,
 
   isNumber (key, value) {
     if (value == null || isNumber(value)) {
@@ -131,7 +153,7 @@ module.exports = {
     return errMsg(
       key,
       value,
-      'a fully qualified URL (starting with `http://` or `https://`)'
+      'a fully qualified URL (starting with `http://` or `https://`)',
     )
   },
 

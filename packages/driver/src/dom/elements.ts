@@ -7,6 +7,9 @@ import * as $jquery from './jquery'
 import * as $selection from './selection'
 import { parentHasDisplayNone } from './visibility'
 import * as $window from './window'
+import Debug from 'debug'
+
+const debug = Debug('cypress:driver:elements')
 
 const { wrap } = $jquery
 
@@ -331,7 +334,7 @@ const isNeedSingleValueChangeInputElement = (el: HTMLElement): el is HTMLSingleV
     return false
   }
 
-  return inputTypeNeedSingleValueChangeRe.test(el.type)
+  return inputTypeNeedSingleValueChangeRe.test((el.getAttribute('type') || '').toLocaleLowerCase())
 }
 
 const canSetSelectionRangeElement = (el): el is HTMLElementCanSetSelectionRange => {
@@ -349,8 +352,8 @@ const getTagName = (el) => {
 // should be true for elements:
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
-const isContentEditable = (el: any): el is HTMLContentEditableElement => {
-  return getNativeProp(el, 'isContentEditable')
+const isContentEditable = (el: HTMLElement): el is HTMLContentEditableElement => {
+  return getNativeProp(el, 'isContentEditable') || $document.getDocumentFromElement(el).designMode === 'on'
 }
 
 const isTextarea = (el): el is HTMLTextAreaElement => {
@@ -398,9 +401,9 @@ const isSvg = function (el): el is SVGElement {
 }
 
 // active element is the default if its null
-// or its equal to document.body
-const activeElementIsDefault = (activeElement, body) => {
-  return !activeElement || activeElement === body
+// or it's equal to document.body that is not contenteditable
+const activeElementIsDefault = (activeElement, body: HTMLElement) => {
+  return !activeElement || (activeElement === body && !isContentEditable(body))
 }
 
 const isFocused = (el) => {
@@ -420,19 +423,49 @@ const isFocused = (el) => {
 }
 
 const isFocusedOrInFocused = (el: HTMLElement) => {
+  debug('isFocusedOrInFocus', el)
+
   const doc = $document.getDocumentFromElement(el)
+
+  if (!doc.hasFocus()) {
+    return false
+  }
 
   const { activeElement } = doc
 
   let elToCheckCurrentlyFocused
 
+  let isContentEditableEl = false
+
   if (isFocusable($(el))) {
     elToCheckCurrentlyFocused = el
   } else if (isContentEditable(el)) {
+    isContentEditableEl = true
     elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
   }
 
+  debug('elToCheckCurrentlyFocused', elToCheckCurrentlyFocused)
+
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    if (isContentEditableEl) {
+      // we make sure the the current document selection (blinking cursor) is inside the element
+      const sel = doc.getSelection()
+
+      if (sel?.rangeCount) {
+        const range = sel.getRangeAt(0)
+        const curSelectionContainer = range.commonAncestorContainer
+
+        const selectionInsideElement = el.contains(curSelectionContainer)
+
+        debug('isInFocused by document selection?', selectionInsideElement, ':', curSelectionContainer, 'is inside', el)
+
+        return selectionInsideElement
+      }
+
+      // no selection, not in focused
+      return false
+    }
+
     return true
   }
 
@@ -559,7 +592,7 @@ const isDisabled = ($el: JQuery) => {
 }
 
 const isReadOnlyInputOrTextarea = (
-  el: HTMLInputElement | HTMLTextAreaElement
+  el: HTMLInputElement | HTMLTextAreaElement,
 ) => {
   return el.readOnly
 }
@@ -602,10 +635,10 @@ const isAttached = function ($el) {
   const doc = $document.getDocumentFromElement(els[0])
 
   // TODO: i guess its possible each element
-  // is technically bound to a differnet document
+  // is technically bound to a different document
   // but c'mon
   const isIn = (el) => {
-    return $.contains((doc as unknown) as Element, el)
+    return $.contains(doc, el)
   }
 
   // make sure the document is currently
@@ -730,11 +763,15 @@ const isScrollable = ($el) => {
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
     if (win.innerHeight < documentElement.scrollHeight) {
+      debug('isScrollable: window scrollable on Y')
+
       return true
     }
 
     // Check if body width is higher than window width
     if (win.innerWidth < documentElement.scrollWidth) {
+      debug('isScrollable: window scrollable on X')
+
       return true
     }
 
@@ -762,6 +799,8 @@ const isScrollable = ($el) => {
   if (el.clientHeight < el.scrollHeight) {
     // and our element has scroll or auto overflow or overflowX
     if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowY)) {
+      debug('isScrollable: clientHeight < scrollHeight and scroll/auto overflow')
+
       return true
     }
   }
@@ -769,6 +808,8 @@ const isScrollable = ($el) => {
   // x axis
   if (el.clientWidth < el.scrollWidth) {
     if (isScrollOrAuto(overflow) || isScrollOrAuto(overflowX)) {
+      debug('isScrollable: clientWidth < scrollWidth and scroll/auto overflow')
+
       return true
     }
   }
@@ -853,9 +894,14 @@ const getFirstParentWithTagName = ($el, tagName) => {
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
-  // return null if we're at body/html/document
+  // don't continue if we're undefined
+  if (!$el || !$el[0]) {
+    return null
+  }
+
+  // return null if we're at not a normal DOM el
   // cuz that means nothing has fixed position
-  if (!$el || $el.is('body,html') || $document.isDocument($el)) {
+  if ($el.is('body,html') || $document.isDocument($el)) {
     return null
   }
 
@@ -934,7 +980,23 @@ const getElements = ($el) => {
   return els
 }
 
-const getContainsSelector = (text, filter = '') => {
+const whitespaces = /\s+/g
+
+// When multiple space characters are considered as a single whitespace in all tags except <pre>.
+const normalizeWhitespaces = (elem) => {
+  let testText = elem.textContent || elem.innerText || $(elem).text()
+
+  if (elem.tagName === 'PRE') {
+    return testText
+  }
+
+  return testText.replace(whitespaces, ' ')
+}
+const getContainsSelector = (text, filter = '', options: {
+  matchCase?: boolean
+} = {}) => {
+  const $expr = $.expr[':']
+
   const escapedText = $utils.escapeQuotes(text)
 
   // they may have written the filter as
@@ -942,8 +1004,41 @@ const getContainsSelector = (text, filter = '') => {
   // https://github.com/cypress-io/cypress/issues/2407
   const filters = filter.trim().split(',')
 
+  let cyContainsSelector
+
+  if (_.isRegExp(text)) {
+    if (options.matchCase === false && !text.flags.includes('i')) {
+      text = new RegExp(text.source, text.flags + 'i') // eslint-disable-line prefer-template
+    }
+
+    // taken from jquery's normal contains method
+    cyContainsSelector = function (elem) {
+      let testText = normalizeWhitespaces(elem)
+
+      return text.test(testText)
+    }
+  } else if (_.isString(text)) {
+    cyContainsSelector = function (elem) {
+      let testText = normalizeWhitespaces(elem)
+
+      if (!options.matchCase) {
+        testText = testText.toLowerCase()
+        text = text.toLowerCase()
+      }
+
+      return testText.includes(text)
+    }
+  } else {
+    cyContainsSelector = $expr.contains
+  }
+
+  // we set the `cy-contains` jquery selector which will only be used
+  // in the context of cy.contains(...) command and selector playground.
+  $expr['cy-contains'] = cyContainsSelector
+
   const selectors = _.map(filters, (filter) => {
-    return `${filter}:not(script,style):contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
+    // use custom cy-contains selector that is registered above
+    return `${filter}:not(script,style):cy-contains('${escapedText}'), ${filter}[type='submit'][value~='${escapedText}']`
   })
 
   return selectors.join()

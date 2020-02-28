@@ -5,9 +5,8 @@ describe "e2e issue 674", ->
 
   ## https://github.com/cypress-io/cypress/issues/674
 
-  it "fails", ->
-    e2e.exec(@, {
-      spec: "issue_674_spec.coffee"
-      snapshot: true
-      expectedExitCode: 1
-    })
+  e2e.it "fails", {
+    spec: "issue_674_spec.coffee"
+    snapshot: true
+    expectedExitCode: 1
+  }
