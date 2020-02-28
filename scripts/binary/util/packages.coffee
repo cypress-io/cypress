@@ -106,7 +106,7 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)
   console.log("in %s", packagePath)
   la(check.unemptyString(packageToInstall), "missing package to install")
-  yarn(["install", "--force", "--ignore-engines", packageToInstall], packagePath)
+  yarn(["install", "--force", packageToInstall], packagePath)
 
 removeDevDependencies = (packageFolder) ->
   packagePath = pathToPackageJson(packageFolder)
@@ -141,7 +141,7 @@ npmInstallAll = (pathToPackages) ->
 
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
-    npmInstall = _.partial(yarn, ["install", "--production", "--silent", "--ignore-engines"])
+    npmInstall = _.partial(yarn, ["install", "--production"])
 
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
