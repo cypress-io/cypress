@@ -159,6 +159,8 @@ class Project extends EE {
     cfg = config.whitelist(cfg)
 
     return plugins.init(cfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
       onError (err) {
         debug('got plugins error', err.stack)
 
