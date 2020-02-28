@@ -1,21 +1,8 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $ = Cypress.$.bind(Cypress)
-const {
-  _,
-} = Cypress
 
 describe('src/cy/commands/actions/hover', () => {
   before(() => {
-    return cy
+    cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
       this.body = win.document.body.outerHTML
@@ -25,7 +12,7 @@ describe('src/cy/commands/actions/hover', () => {
   beforeEach(function () {
     const doc = cy.state('document')
 
-    return $(doc.body).empty().html(this.body)
+    $(doc.body).empty().html(this.body)
   })
 
   context('#hover', () => {
@@ -34,10 +21,10 @@ describe('src/cy/commands/actions/hover', () => {
         expect(err.message).to.include('cy.hover() is not currently implemented.')
         expect(err.message).to.include('https://on.cypress.io/hover')
 
-        return done()
+        done()
       })
 
-      return cy.get('button').hover()
+      cy.get('button').hover()
     })
   })
 })
