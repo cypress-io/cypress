@@ -26,7 +26,7 @@
     "arch": "2.1.1",
     "bluebird": "3.7.2",
     "cachedir": "2.3.0",
-    "chalk": "3.0.0",
+    "chalk": "2.4.2",
     "check-more-types": "2.24.0",
     "commander": "4.1.0",
     "common-tags": "1.8.0",

@@ -938,6 +938,40 @@ jobs:
           command: $(yarn bin)/cypress info
       - store-npm-logs
 
+  test-npm-module-on-minimum-node-version:
+    <<: *defaults
+    docker:
+      - image: cypress/base:8.0.0
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure we have cypress.zip received
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir test-binary
+      - run: node --version
+      - run: npm --version
+      - run:
+          name: Create new NPM package
+          working_directory: test-binary
+          command: npm init -y
+      - run:
+          name: Install Cypress
+          working_directory: test-binary
+          command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm install /root/cypress/cypress.tgz
+      - run:
+          name: Verify Cypress binary
+          working_directory: test-binary
+          command: $(npm bin)/cypress verify
+      - run:
+          name: Print Cypress version
+          working_directory: test-binary
+          command: $(npm bin)/cypress version
+      - run:
+          name: Cypress info
+          working_directory: test-binary
+          command: $(npm bin)/cypress info
+
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
     <<: *defaults
@@ -1247,6 +1281,10 @@ linux-workflow: &linux-workflow
               - develop
         requires:
           - build-binary
+    - test-npm-module-on-minimum-node-version:
+        requires:
+          - build-binary
+          - build-npm-package
     - post-pre-release-install-comment:
         context: test-runner:commit-status-checks
         filters:
