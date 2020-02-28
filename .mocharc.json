@@ -1,0 +1,3 @@
+{
+  "watch-ignore": ["./test/_test-output", "node_modules"]
+}

@@ -108,7 +108,8 @@ const preprocessor = (options = {}) => {
 
     const rejectWithErr = (err) => {
       err.filePath = filePath
-      debug(`errored bundling ${outputPath}`, err)
+      debug(`errored bundling ${outputPath}`, err.message)
+
       latestBundle.reject(err)
     }
 
@@ -116,6 +117,8 @@ const preprocessor = (options = {}) => {
     // and, if watching, each time watching triggers a re-bundle
     const handle = (err, stats) => {
       if (err) {
+        debug('handle - had error', err.message)
+
         return rejectWithErr(err)
       }
 
@@ -126,11 +129,13 @@ const preprocessor = (options = {}) => {
 
         const errorsToAppend = jsonStats.errors
         // remove stack trace lines since they're useless for debugging
-        .map((err) => err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, ''))
+        .map(cleanseError)
         // multiple errors separated by newline
         .join('\n\n')
 
         err.message += `\n${errorsToAppend}`
+
+        debug('stats had error(s)')
 
         return rejectWithErr(err)
       }
@@ -157,7 +162,7 @@ const preprocessor = (options = {}) => {
       latestBundle = createDeferred()
       bundles[filePath] = latestBundle.promise
 
-      bundles[filePath].tap(() => {
+      bundles[filePath].finally(() => {
         debug('- compile finished for', filePath)
         // when the bundling is finished, emit 'rerun' to let Cypress
         // know to rerun the spec
@@ -187,12 +192,12 @@ const preprocessor = (options = {}) => {
 
     // when the spec or project is closed, we need to clean up the cached
     // bundle promise and stop the watcher via `bundler.close()`
-    file.on('close', () => {
+    file.on('close', (cb = function () {}) => {
       debug('close', filePath)
       delete bundles[filePath]
 
       if (file.shouldWatch) {
-        bundler.close()
+        bundler.close(cb)
       }
     })
 
@@ -218,6 +223,10 @@ Object.defineProperty(preprocessor, 'defaultOptions', {
 // for testing purposes
 preprocessor.__reset = () => {
   bundles = {}
+}
+
+function cleanseError (err) {
+  return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
 module.exports = preprocessor
