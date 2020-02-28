@@ -163,7 +163,7 @@
     "express-useragent": "1.0.12",
     "http-mitm-proxy": "0.7.0",
     "https-pem": "2.0.0",
-    "https-proxy-agent": "3.0.0",
+    "https-proxy-agent": "3.0.1",
     "istanbul": "0.4.5",
     "mock-fs": "4.10.4",
     "mocked-env": "1.2.4",
