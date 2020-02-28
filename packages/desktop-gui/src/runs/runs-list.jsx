@@ -29,7 +29,9 @@ class RunsList extends Component {
     apiError: null,
   }
 
-  componentWillMount () {
+  constructor (...args) {
+    super(...args)
+
     this.runsStore = new RunsStore()
   }
 

@@ -24,12 +24,12 @@
       "command": "yarn test-watch [file]"
     },
     {
-      "name": "packages/server test-e2e",
+      "name": "packages/server test",
       "focus": true,
       "onlySingle": true,
       "execute": false,
       "cwd": "[cwd]/packages/server",
-      "command": "yarn test-e2e --spec [fileBasename]"
+      "command": "yarn test [file]"
     },
     {
       "name": "packages/runner watch",
