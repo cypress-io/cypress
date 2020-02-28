@@ -227,6 +227,7 @@ const _providerCiParams = () => {
       'CI_PROJECT_URL',
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
+      'CI_DEFAULT_BRANCH',
     // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
@@ -445,8 +446,8 @@ const _providerCommitParams = () => {
       message: env.CI_COMMIT_MESSAGE,
       authorName: env.GITLAB_USER_NAME,
       authorEmail: env.GITLAB_USER_EMAIL,
-      // remoteOrigin: ???
-      // defaultBranch: ???
+      remoteOrigin: env.CI_REPOSITORY_URL,
+      defaultBranch: env.CI_DEFAULT_BRANCH,
     },
     googleCloud: {
       sha: env.COMMIT_SHA,

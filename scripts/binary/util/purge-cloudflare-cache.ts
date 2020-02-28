@@ -13,7 +13,7 @@ function hasCloudflareEnvironmentVars () {
 export function purgeCloudflareCache (url) {
   la(
     hasCloudflareEnvironmentVars(),
-    'Cannot purge Cloudflare cache without credentials. Ensure that the CF_TOKEN and CF_ZONEID environment variables are set.'
+    'Cannot purge Cloudflare cache without credentials. Ensure that the CF_TOKEN and CF_ZONEID environment variables are set.',
   )
 
   la(check.webUrl(url), 'Missing url to purge from Cloudflare.')

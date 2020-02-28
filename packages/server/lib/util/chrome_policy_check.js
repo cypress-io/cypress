@@ -66,7 +66,7 @@ function getRunner ({ enumerateValues }) {
             return value
           })
         })
-      })
+      }),
     )
   }
 
