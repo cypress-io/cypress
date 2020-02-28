@@ -218,6 +218,15 @@ describe('Specs List', function () {
       })
 
       context('collapsing specs', function () {
+        it('sets folder collapsed when clicked on icon', function () {
+          cy.get('.folder:first').should('have.class', 'folder-expanded')
+          cy.get('.folder-collapse-icon:first').should('have.class', 'fa-caret-down')
+          cy.get('.folder .folder-name:first').click()
+
+          cy.get('.folder-collapse-icon:first').should('have.class', 'fa-caret-right')
+          cy.get('.folder:first').should('have.class', 'folder-collapsed')
+        })
+
         it('sets folder collapsed when clicked', function () {
           cy.get('.folder:first').should('have.class', 'folder-expanded')
           cy.get('.folder .folder-name:first').click()
