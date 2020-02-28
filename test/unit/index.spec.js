@@ -8,8 +8,7 @@ const expect = chai.expect
 
 chai.use(require('sinon-chai'))
 
-const sandbox = sinon.sandbox.create()
-const webpack = sandbox.stub()
+const webpack = sinon.stub()
 
 mockery.enable({
   warnOnUnregistered: false,
@@ -22,16 +21,16 @@ const stubbableRequire = require('../../stubbable-require')
 
 describe('webpack preprocessor', function () {
   beforeEach(function () {
-    sandbox.restore()
+    sinon.restore()
 
     this.watchApi = {
-      close: sandbox.spy(),
+      close: sinon.spy(),
     }
 
     this.compilerApi = {
-      run: sandbox.stub(),
-      watch: sandbox.stub().returns(this.watchApi),
-      plugin: sandbox.stub(),
+      run: sinon.stub(),
+      watch: sinon.stub().returns(this.watchApi),
+      plugin: sinon.stub(),
     }
 
     webpack.returns(this.compilerApi)
@@ -49,14 +48,14 @@ describe('webpack preprocessor', function () {
       filePath: 'path/to/file.js',
       outputPath: 'output/output.js',
       shouldWatch: false,
-      on: sandbox.stub(),
-      emit: sandbox.spy(),
+      on: sinon.stub(),
+      emit: sinon.spy(),
     }
 
     this.util = {
-      getOutputPath: sandbox.stub().returns(this.outputPath),
-      fileUpdated: sandbox.spy(),
-      onClose: sandbox.stub(),
+      getOutputPath: sinon.stub().returns(this.outputPath),
+      fileUpdated: sinon.spy(),
+      onClose: sinon.stub(),
     }
 
     this.run = (options, file = this.file) => {
@@ -239,7 +238,7 @@ describe('webpack preprocessor', function () {
       })
 
       it('requires babel dependencies when default options are used', function () {
-        sandbox.spy(stubbableRequire, 'resolve')
+        sinon.spy(stubbableRequire, 'resolve')
 
         return this.run().then(() => {
           expect(stubbableRequire.resolve).to.be.calledWith('babel-loader')
@@ -248,7 +247,7 @@ describe('webpack preprocessor', function () {
       })
 
       it('does not requires babel dependencies when user options are non-default', function () {
-        sandbox.spy(stubbableRequire, 'resolve')
+        sinon.spy(stubbableRequire, 'resolve')
         const options = { webpackOptions: { module: { rules: [] } } }
 
         return this.run(options).then(() => {

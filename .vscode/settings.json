@@ -1,4 +1,6 @@
 {
   "standard.enable": false,
+  "eslint.enable": true,
+  "eslint.validate": ["json"],
   "git.ignoreLimitWarning": true
 }

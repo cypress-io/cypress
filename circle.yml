@@ -13,17 +13,17 @@ jobs:
 
     steps:
       - checkout
-      
+
       - restore_cache:
           keys:
-          - cache-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
+            - cache-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
       - run:
           name: Yarn install
           command: yarn install --frozen-lockfile
       - save_cache:
           key: cache-{{ arch }}-{{ .Branch }}-{{ checksum "package.json" }}
           paths:
-          - ~/.cache
+            - ~/.cache
       - run:
           name: Lint code
           command: npm run lint
@@ -33,7 +33,10 @@ jobs:
       - run:
           name: Run tests
           command: npm test
-
+      - run: yarn add -D webpack@latest webpack-cli@latest
+      - run:
+          name: Run tests w/ webpack@latest
+          command: npm test
       - run:
           name: Semantic release
           command: npm run semantic-release || true
