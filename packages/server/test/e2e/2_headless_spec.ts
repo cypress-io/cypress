@@ -1,4 +1,5 @@
 const e2e = require('../support/helpers/e2e')
+const Fixtures = require('../support/helpers/fixtures')
 
 describe('e2e headless', function () {
   e2e.setup()
@@ -37,5 +38,12 @@ describe('e2e headless', function () {
       snapshot: true,
       browser: b,
     })
+  })
+
+  e2e.it('launches maximized by default in headless mode (1280x720)', {
+    browser: 'chrome',
+    headed: false,
+    project: Fixtures.projectPath('screen-size'),
+    spec: '720p.spec.js',
   })
 })
