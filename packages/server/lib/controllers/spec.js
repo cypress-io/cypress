@@ -54,7 +54,7 @@ module.exports = {
       console.log('') // eslint-disable-line no-console
       errors.log(err)
 
-      return project.emit('exitEarlyWithErr', err.message)
+      project.emit('exitEarlyWithErr', err.message)
     })
   },
 }

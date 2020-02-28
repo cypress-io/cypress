@@ -19,43 +19,43 @@ module.exports = function (app, config, request, getRemoteState, getDeferredResp
     // slice out the cache buster
     const test = CacheBuster.strip(req.query.p)
 
-    return spec.handle(test, req, res, config, next, project)
+    spec.handle(test, req, res, config, next, project)
   })
 
   app.get('/__cypress/socket.io.js', (req, res) => {
-    return client.handle(req, res)
+    client.handle(req, res)
   })
 
   app.get('/__cypress/reporter/*', (req, res) => {
-    return reporter.handle(req, res)
+    reporter.handle(req, res)
   })
 
   app.get('/__cypress/runner/*', (req, res) => {
-    return runner.handle(req, res)
+    runner.handle(req, res)
   })
 
   app.get('/__cypress/static/*', (req, res) => {
-    return staticCtrl.handle(req, res)
+    staticCtrl.handle(req, res)
   })
 
   // routing for /files JSON endpoint
   app.get('/__cypress/files', (req, res) => {
-    return files.handleFiles(req, res, config)
+    files.handleFiles(req, res, config)
   })
 
   // routing for the dynamic iframe html
   app.get('/__cypress/iframes/*', (req, res) => {
-    return files.handleIframe(req, res, config, getRemoteState)
+    files.handleIframe(req, res, config, getRemoteState)
   })
 
   app.all('/__cypress/xhrs/*', (req, res, next) => {
-    return xhrs.handle(req, res, getDeferredResponse, config, next)
+    xhrs.handle(req, res, getDeferredResponse, config, next)
   })
 
   app.get('/__root/*', (req, res) => {
     const file = path.join(config.projectRoot, req.params[0])
 
-    return res.sendFile(file, { etag: false })
+    res.sendFile(file, { etag: false })
   })
 
   // we've namespaced the initial sending down of our cypress
@@ -70,7 +70,7 @@ module.exports = function (app, config, request, getRemoteState, getDeferredResp
   app.get(config.clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    return runner.serve(req, res, {
+    runner.serve(req, res, {
       config,
       project,
       getRemoteState,
@@ -78,19 +78,19 @@ module.exports = function (app, config, request, getRemoteState, getDeferredResp
   })
 
   app.all('*', (req, res) => {
-    return networkProxy.handleHttpRequest(req, res)
+    networkProxy.handleHttpRequest(req, res)
   })
 
   // when we experience uncaught errors
   // during routing just log them out to
   // the console and send 500 status
   // and report to raygun (in production)
-  return app.use((err, req, res) => {
+  app.use((err, req, res) => {
     console.log(err.stack) // eslint-disable-line no-console
 
     res.set('x-cypress-error', err.message)
     res.set('x-cypress-stack', JSON.stringify(err.stack))
 
-    return res.sendStatus(500)
+    res.sendStatus(500)
   })
 }
