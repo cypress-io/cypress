@@ -105,7 +105,7 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
 const getFirstWorkingFamily = (
   { port, host }: http.RequestOptions,
   familyCache: FamilyCache,
-  cb: Function
+  cb: Function,
 ) => {
   // this is a workaround for localhost (and potentially others) having invalid
   // A records but valid AAAA records. here, we just cache the family of the first

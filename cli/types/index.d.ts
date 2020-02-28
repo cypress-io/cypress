@@ -52,7 +52,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
+  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -1955,7 +1955,7 @@ declare namespace Cypress {
      * @example
      *    cy.$$('p')
      */
-    $$: JQueryStatic
+    $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -2280,6 +2280,17 @@ declare namespace Cypress {
      * @default { runMode: 1, openMode: null }
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
+  }
+
+  interface PluginConfigOptions extends ConfigOptions {
+    /**
+    * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
+    */
+    configFile: string | false
+    /**
+    * Absolute path to the root of the project
+    */
+    projectRoot: string
   }
 
   interface DebugOptions {

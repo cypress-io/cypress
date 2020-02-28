@@ -942,7 +942,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       #{arg2}
 
-      To avoid this error, ensure sure that there are no other instances of Firefox launched by Cypress running.
+      To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
       """
 
 get = (type, arg1, arg2, arg3) ->

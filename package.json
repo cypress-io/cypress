@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "4.0.2",
+  "version": "4.1.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -38,7 +38,7 @@
     "ensure-deps": "./scripts/ensure-dependencies.sh",
     "postinstall": "patch-package && yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json,.eslintrc .",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-all": "yarn lint-coffee && yarn lint",
     "lint-changed": "lint-changed",
     "lint-changed-fix": "yarn lint-changed --fix",
@@ -51,7 +51,7 @@
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src --exclude e2e.coffee,e2e.js",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,network,reporter,runner,socket,static}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,network,reporter,runner,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-e2e": "lerna exec yarn test-e2e --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
@@ -66,6 +66,7 @@
     "test-unit": "lerna exec yarn test-unit --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
     "pretest-watch": "yarn ensure-deps",
     "test-watch": "lerna exec yarn test-watch --ignore \"'@packages/{coffee,desktop-gui,driver,root,static,web-config}'\"",
+    "verify:mocha:results": "node ./scripts/verify_mocha_results",
     "prewatch": "yarn ensure-deps",
     "watch": "lerna exec yarn watch --parallel --stream"
   },
@@ -76,7 +77,7 @@
   },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.12",
-    "@cypress/commit-message-install": "3.1.0",
+    "@cypress/commit-message-install": "3.1.1",
     "@cypress/env-or-json-file": "2.0.0",
     "@cypress/eslint-plugin-dev": "5.0.0",
     "@cypress/github-commit-status-check": "1.5.0",
@@ -120,11 +121,11 @@
     "decaffeinate": "6.0.9",
     "del": "3.0.0",
     "electron-builder": "20.39.0",
-    "eslint": "6.1.0",
-    "eslint-plugin-cypress": "2.8.1",
+    "eslint": "6.8.0",
+    "eslint-plugin-cypress": "2.10.3",
     "eslint-plugin-json-format": "2.0.0",
     "eslint-plugin-mocha": "6.1.0",
-    "eslint-plugin-react": "7.14.2",
+    "eslint-plugin-react": "7.18.3",
     "execa": "1.0.0",
     "execa-wrap": "1.4.0",
     "filesize": "4.1.2",
@@ -158,6 +159,7 @@
     "mock-fs": "4.9.0",
     "parse-github-repo-url": "1.4.1",
     "patch-package": "6.2.0",
+    "percy": "0.21.0",
     "plist": "2.1.0",
     "pluralize": "8.0.0",
     "postinstall-postinstall": "2.0.0",
@@ -174,6 +176,7 @@
     "snap-shot-it": "7.9.1",
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
+    "term-to-html": "1.0.0",
     "terminal-banner": "1.1.0",
     "through": "2.3.8",
     "ts-node": "8.3.0",
@@ -215,9 +218,6 @@
     "packages": [
       "cli",
       "packages/*"
-    ],
-    "nohoist": [
-      "@packages/driver/*"
     ]
   },
   "lint-staged": {

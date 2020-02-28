@@ -225,12 +225,12 @@ const copy = function () {
     return Promise.join(
       screenshots.copy(
         screenshotsFolder,
-        path.join(ca, path.basename(screenshotsFolder))
+        path.join(ca, path.basename(screenshotsFolder)),
       ),
       videoCapture.copy(
         videosFolder,
-        path.join(ca, path.basename(videosFolder))
-      )
+        path.join(ca, path.basename(videosFolder)),
+      ),
     )
   }
 }
@@ -393,7 +393,7 @@ const e2e = {
           if (_.isArray(npmI)) {
             const copyToE2ENodeModules = (module) => {
               return fs.copyAsync(
-                path.resolve('node_modules', module), Fixtures.path(`projects/e2e/node_modules/${module}`)
+                path.resolve('node_modules', module), Fixtures.path(`projects/e2e/node_modules/${module}`),
               )
             }
 
@@ -571,6 +571,10 @@ const e2e = {
 
     if (options.tag) {
       args.push(`--tag=${options.tag}`)
+    }
+
+    if (options.configFile) {
+      args.push(`--config-file=${options.configFile}`)
     }
 
     return args
