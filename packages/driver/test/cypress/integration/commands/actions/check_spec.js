@@ -631,9 +631,7 @@ describe('src/cy/commands/actions/check', () => {
           expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
           expect(console.Elements).to.eq(1)
 
-          expect(console.Coords).to.deep.eq(
-            _.pick(fromElWindow, 'x', 'y',)
-          )
+          expect(console.Coords).to.deep.eq(_.pick(fromElWindow, 'x', 'y'))
         })
       })
 
@@ -1177,9 +1175,7 @@ describe('src/cy/commands/actions/check', () => {
           expect(console['Applied To']).to.eq(lastLog.get('$el').get(0))
           expect(console.Elements).to.eq(1)
 
-          expect(console.Coords).to.deep.eq(
-            _.pick(fromElWindow, 'x', 'y',)
-          )
+          expect(console.Coords).to.deep.eq(_.pick(fromElWindow, 'x', 'y'))
         })
       })
 
