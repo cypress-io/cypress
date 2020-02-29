@@ -13,6 +13,7 @@ import specsStore, { allSpecsSpec } from './specs-store'
 class SpecsList extends Component {
   constructor (props) {
     super(props)
+    this.state = { hiddenSearchKeyTips: true }
     this.filterRef = React.createRef()
   }
 
@@ -51,7 +52,7 @@ class SpecsList extends Component {
           </div>
 
           <label className='search-info'>
-            <i className='fas fa-info' onClick={this._showAccessKeys}></i>
+            <i className='fas fa-info' onClick={this._showSearchKeyTips}></i>
           </label>
 
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
@@ -99,7 +100,8 @@ class SpecsList extends Component {
     return isChosen ? 'far fa-dot-circle green' : 'far fa-file'
   }
 
-  _showAccessKeys () {
+  _showSearchKeyTips () {
+
   }
 
   _clearFilter = () => {
