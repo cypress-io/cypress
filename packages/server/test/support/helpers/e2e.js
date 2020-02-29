@@ -573,6 +573,10 @@ const e2e = {
       args.push(`--tag=${options.tag}`)
     }
 
+    if (options.configFile) {
+      args.push(`--config-file=${options.configFile}`)
+    }
+
     return args
   },
 
