@@ -51,7 +51,7 @@ class SpecsList extends Component {
           </div>
 
           <label className='search-info'>
-            <i className='fas fa-info'></i>
+            <i className='fas fa-info' onClick={this._showAccessKeys}></i>
           </label>
 
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
@@ -97,6 +97,9 @@ class SpecsList extends Component {
 
   _specIcon (isChosen) {
     return isChosen ? 'far fa-dot-circle green' : 'far fa-file'
+  }
+
+  _showAccessKeys () {
   }
 
   _clearFilter = () => {
