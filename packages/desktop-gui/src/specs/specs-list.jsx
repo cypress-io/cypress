@@ -107,7 +107,7 @@ class SpecsList extends Component {
   }
 
   _toggleSearchTips () {
-    return (this.state.hiddenSearchTips) ? 'Search...' : 'Press CTRL + F (or CMD + F on Mac) to make quick search...'
+    return (this.state.hiddenSearchTips) ? 'Search...' : 'Press CTRL + F (or CMD + F on Mac) to make a quick search...'
   }
 
   _clearFilter = () => {
