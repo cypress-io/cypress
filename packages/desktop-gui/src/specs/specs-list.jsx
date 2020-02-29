@@ -13,7 +13,7 @@ import specsStore, { allSpecsSpec } from './specs-store'
 class SpecsList extends Component {
   constructor (props) {
     super(props)
-    this.state = { hiddenSearchKeyTips: true }
+    this.state = { hiddenSearchTips: true }
     this.filterRef = React.createRef()
   }
 
@@ -34,7 +34,7 @@ class SpecsList extends Component {
             <input
               id='filter'
               className='filter'
-              placeholder='Search...'
+              placeholder={this._toggleSearchTips()}
               value={specsStore.filter || ''}
               ref={this.filterRef}
               onChange={this._updateFilter}
@@ -52,7 +52,7 @@ class SpecsList extends Component {
           </div>
 
           <label className='search-info'>
-            <i className='fas fa-info' onClick={this._showSearchKeyTips}></i>
+            <i className='fas fa-info' onClick={this._setSearchKeyTips}></i>
           </label>
 
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
@@ -100,10 +100,14 @@ class SpecsList extends Component {
     return isChosen ? 'far fa-dot-circle green' : 'far fa-file'
   }
 
-  _showSearchKeyTips = () => {
+  _setSearchKeyTips = () => {
     this.setState({
-      hiddenSearchKeyTips: !this.state.hiddenSearchKeyTips,
+      hiddenSearchTips: !this.state.hiddenSearchTips,
     })
+  }
+
+  _toggleSearchTips () {
+    return (this.state.hiddenSearchTips) ? 'Search...' : 'Press CTRL + F (or CMD + F on Mac) to make quick search...'
   }
 
   _clearFilter = () => {
