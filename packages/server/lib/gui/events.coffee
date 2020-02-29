@@ -302,6 +302,14 @@ handleEvent = (options, bus, event, id, type, arg) ->
         err.apiUrl = apiUrl
         sendErr(err)
 
+    when "ping:baseUrl"
+      baseUrl = arg
+      ensureUrl.isListening(baseUrl)
+      .then(send)
+      .catch (err) ->
+        warning = errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+        sendErr(warning)
+
     when "set:clipboard:text"
       clipboard.writeText(arg)
       sendNull()

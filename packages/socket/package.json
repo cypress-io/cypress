@@ -5,23 +5,30 @@
   "main": "index.js",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
+    "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },
   "dependencies": {
-    "resolve-pkg": "2.0.0",
     "socket.io": "2.3.0",
-    "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#4d3076af68ea8192c2e53f9d185eaa166359b4c5",
+    "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#unpatched-has-binary-2",
     "socket.io-client": "2.3.0"
   },
   "devDependencies": {
     "chai": "3.5.0",
     "cross-env": "6.0.3",
-    "mocha": "3.5.3"
+    "mocha": "3.5.3",
+    "resolve-pkg": "2.0.0"
   },
   "files": [
-    "lib"
-  ]
+    "lib",
+    "patches"
+  ],
+  "workspaces": {
+    "nohoist": [
+      "**"
+    ]
+  }
 }
