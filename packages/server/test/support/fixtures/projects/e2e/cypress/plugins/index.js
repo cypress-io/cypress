@@ -151,5 +151,9 @@ module.exports = (on, config) => {
     'get:browser:args' () {
       return browserArgs
     },
+
+    'get:config:value' (key) {
+      return config[key]
+    },
   })
 }
