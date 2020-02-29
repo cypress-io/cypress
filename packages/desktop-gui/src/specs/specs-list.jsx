@@ -100,8 +100,10 @@ class SpecsList extends Component {
     return isChosen ? 'far fa-dot-circle green' : 'far fa-file'
   }
 
-  _showSearchKeyTips () {
-
+  _showSearchKeyTips = () => {
+    this.setState({
+      hiddenSearchKeyTips: !this.state.hiddenSearchKeyTips,
+    })
   }
 
   _clearFilter = () => {
