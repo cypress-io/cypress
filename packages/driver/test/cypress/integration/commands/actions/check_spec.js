@@ -632,7 +632,7 @@ describe('src/cy/commands/actions/check', () => {
           expect(console.Elements).to.eq(1)
 
           expect(console.Coords).to.deep.eq(
-            _.pick(fromElWindow, 'x', 'y')
+            _.pick(fromElWindow, 'x', 'y',)
           )
         })
       })
@@ -1178,7 +1178,7 @@ describe('src/cy/commands/actions/check', () => {
           expect(console.Elements).to.eq(1)
 
           expect(console.Coords).to.deep.eq(
-            _.pick(fromElWindow, 'x', 'y')
+            _.pick(fromElWindow, 'x', 'y',)
           )
         })
       })
