@@ -40,9 +40,6 @@ logger = (msg, platform) ->
 logBuiltAllPackages = () ->
   console.log("built all packages")
 
-logBuiltAllJs = () ->
-  console.log("built all JS")
-
 # can pass options to better control the build
 # for example
 #   skipClean - do not delete "dist" folder before build
@@ -118,27 +115,11 @@ buildCypressApp = (platform, version, options = {}) ->
     packages.runAllBuild()
     # Promise.resolve()
     .then(R.tap(logBuiltAllPackages))
-    .then(packages.runAllBuildJs)
-    .then(R.tap(logBuiltAllJs))
 
   copyPackages = ->
     log("#copyPackages")
 
     packages.copyAllToDist(distDir())
-
-  copyPatches = ->
-    log("#copyPatches")
-
-    patchesPath = path.join(__dirname, '..', '..', 'patches')
-    destPatchesPath = path.join(distDir(), 'patches')
-
-    fs.mkdirSync(destPatchesPath)
-    fs.readdirSync(patchesPath)
-    .map((patchFileName) -> [
-      path.join(patchesPath, patchFileName),
-      path.join(destPatchesPath, patchFileName)
-    ])
-    .forEach(([src, dest]) -> fs.copyFileSync(src, dest))
 
   transformSymlinkRequires = ->
     log("#transformSymlinkRequires")
@@ -360,7 +341,6 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
-  .then(copyPatches)
   .then(npmInstallPackages)
   .then(createRootPackage)
   .then(convertCoffeeToJs)

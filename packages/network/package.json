@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-js": "tsc --project .",
+    "build-prod": "tsc --project .",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",

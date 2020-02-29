@@ -315,6 +315,8 @@ const verify = function (cy, $el, options, callbacks) {
         // scroll the element into view
         $el.get(0).scrollIntoView()
 
+        debug('scrollIntoView:', $el[0])
+
         if (onScroll) {
           onScroll($el, 'element')
         }

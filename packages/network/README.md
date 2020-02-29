@@ -21,7 +21,7 @@ See the individual class files in [`./lib`](./lib) for more information.
 Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
 
 ```shell
-yarn lerna run build-js --scope @packages/network --stream
+yarn lerna run build-prod --scope @packages/network --stream
 ```
 
 ## Testing
