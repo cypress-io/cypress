@@ -233,7 +233,7 @@ const shouldIgnoreEvent = <
   K extends { [key in T]?: boolean }
 >(
     eventName: T,
-    options: K
+    options: K,
   ) => {
   return options[eventName] === false
 }
@@ -314,7 +314,7 @@ const validateTyping = (
   currentIndex: number,
   onFail: Function,
   skipCheckUntilIndex: number | undefined,
-  force: boolean
+  force: boolean,
 ) => {
   const chars = joinKeyArrayToString(keys.slice(currentIndex))
   const allChars = joinKeyArrayToString(keys)
@@ -654,13 +654,13 @@ export class Keyboard {
 
           // ignore empty strings
           return _.filter(_.split(chars, ''))
-        }
+        },
       )
     }
 
     const keyDetailsArr = _.map(
       keys,
-      getKeyDetails(options.onNoMatchingSpecialChars)
+      getKeyDetails(options.onNoMatchingSpecialChars),
     )
 
     const numKeys = countNumIndividualKeyStrokes(keyDetailsArr)
@@ -696,7 +696,7 @@ export class Keyboard {
               currentKeyIndex,
               options.onFail,
               _skipCheckUntilIndex,
-              options.force
+              options.force,
             )
 
             _skipCheckUntilIndex = skipCheckUntilIndex
@@ -727,7 +727,7 @@ export class Keyboard {
                 return $elements.setNativeProp(
                   activeEl as $elements.HTMLTextLikeInputElement,
                   'value',
-                  valToSet
+                  valToSet,
                 )
               }
             }
@@ -746,7 +746,7 @@ export class Keyboard {
 
           return null
         }
-      }
+      },
     )
 
     // we will only press each modifier once, so only find unique modifiers
@@ -780,7 +780,7 @@ export class Keyboard {
     el: HTMLElement,
     eventType: KeyEventType,
     keyDetails: KeyDetails,
-    opts: typeOptions
+    opts: typeOptions,
   ) {
     debug('fireSimulatedEvent', eventType, keyDetails)
 
@@ -876,7 +876,7 @@ export class Keyboard {
           detail: 0,
           view: win,
         },
-        _.isUndefined
+        _.isUndefined,
       ),
     }
 
@@ -892,7 +892,7 @@ export class Keyboard {
         eventOptions.cancelable,
         eventOptions.view,
         eventOptions.data,
-        1
+        1,
         // eventOptions.locale
       )
       /*1: IE11 Input method param*/
@@ -993,7 +993,7 @@ export class Keyboard {
 
     debug(
       'typeSimulatedKey options:',
-      _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id'])
+      _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id']),
     )
 
     if (

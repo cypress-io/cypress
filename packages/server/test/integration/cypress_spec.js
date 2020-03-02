@@ -559,7 +559,7 @@ describe('lib/cypress', () => {
           return Promise.join(
             fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'actions.spec.js')),
             fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'files.spec.js')),
-            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'viewport.spec.js'))
+            fs.statAsync(path.join(cfg.integrationFolder, 'examples', 'viewport.spec.js')),
           )
         })
       })
@@ -792,7 +792,7 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Browser: \'foo\' was not found on your system.'
+              'Browser: \'foo\' was not found on your system.',
             )
           })
         })
@@ -802,7 +802,7 @@ describe('lib/cypress', () => {
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Available browsers found are: chrome, chromium, chrome:canary, electron'
+              'Available browsers found are: chrome, chromium, chrome:canary, electron',
             )
           })
         })

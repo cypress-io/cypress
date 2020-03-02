@@ -4,14 +4,28 @@ const _ = require('lodash')
 const chalk = require('chalk')
 const minimist = require('minimist')
 const execa = require('execa')
+const path = require('path')
 const os = require('os')
 
 const options = minimist(process.argv.slice(2))
 
-let run = options._[0]
+let run = options._
 
-if (run && run.includes('--inspect-brk')) {
-  run = options._[1]
+if (options['spec']) {
+  console.error('NOTE: It is no longer necessary to pass `--spec` to server test commands. Try passing the path directly instead.')
+  run = [options.spec]
+}
+
+if (run[0] && run[0].includes('--inspect-brk')) {
+  run = run.slice(1)
+}
+
+if (options['glob-in-dir']) {
+  if (run[0]) {
+    run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
+  } else {
+    run = [options['glob-in-dir']]
+  }
 }
 
 function exitErr (msg) {
@@ -28,19 +42,19 @@ const isGteNode12 = () => {
   return Number(process.versions.node.split('.')[0]) >= 12
 }
 
-if (!run) {
+if (!run || !run.length) {
   return exitErr(`
     Error: A path to a spec file must be specified!
 
     It should look something like this:
 
-      $ npm test ./test/unit/api_spec.coffee
+      $ yarn test ./test/unit/api_spec.coffee
 
     If you want to run all a specific group of tests:
 
-      $ npm run test-unit
-      $ npm run test-integration
-      $ npm run test-e2e
+      $ yarn test-unit
+      $ yarn test-integration
+      $ yarn test-e2e
   `)
 }
 
@@ -51,7 +65,7 @@ const commandAndArguments = {
 
 if (isWindows()) {
   commandAndArguments.command = 'mocha'
-  commandAndArguments.args = [run]
+  commandAndArguments.args = run.slice()
 } else {
   commandAndArguments.command = 'xvfb-maybe'
   commandAndArguments.args = [
@@ -64,7 +78,7 @@ if (isWindows()) {
 if (options['inspect-brk']) {
   commandAndArguments.args.push(
     '--inspect',
-    `--inspect-brk${options['inspect-brk'] === true ? '' : `=${options['inspect-brk']}`}`
+    `--inspect-brk${options['inspect-brk'] === true ? '' : `=${options['inspect-brk']}`}`,
   )
 }
 
@@ -72,21 +86,22 @@ if (isGteNode12()) {
   // max HTTP header size 8kb -> 1mb
   // https://github.com/cypress-io/cypress/issues/76
   commandAndArguments.args.push(
-    `--max-http-header-size=${1024 * 1024}`
+    `--max-http-header-size=${1024 * 1024}`,
   )
 }
 
 if (!isWindows()) {
   commandAndArguments.args.push(
     'node_modules/.bin/_mocha',
-    run
   )
+
+  commandAndArguments.args = commandAndArguments.args.concat(run)
 }
 
 if (options.fgrep) {
   commandAndArguments.args.push(
     '--fgrep',
-    options.fgrep
+    options.fgrep,
   )
 }
 
@@ -98,7 +113,7 @@ commandAndArguments.args.push(
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
-  'configFile=../../mocha-reporter-config.json'
+  'configFile=../../mocha-reporter-config.json',
 )
 
 const env = _.clone(process.env)
@@ -132,6 +147,7 @@ if (options.browser) {
 const cmd = `${commandAndArguments.command} ${
   commandAndArguments.args.join(' ')}`
 
+console.log('specfiles:', run)
 console.log('test command:')
 console.log(cmd)
 

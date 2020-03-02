@@ -24,4 +24,17 @@ describe('e2e cdp', function () {
     expectedExitCode: 1,
     snapshot: true,
   })
+
+  // https://github.com/cypress-io/cypress/issues/5685
+  e2e.it('handles disconnections as expected', {
+    project: Fixtures.projectPath('remote-debugging-disconnect'),
+    spec: 'spec.ts',
+    browser: 'chrome',
+    expectedExitCode: 1,
+    snapshot: true,
+    onStdout: (stdout) => {
+      // the location of this warning is non-deterministic
+      return stdout.replace('The automation client disconnected. Cannot continue running tests.\n', '')
+    },
+  })
 })

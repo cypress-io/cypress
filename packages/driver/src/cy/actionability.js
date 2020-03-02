@@ -207,7 +207,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
       // start nudging
       return scrollContainers(
-        getAllScrollables([], $el)
+        getAllScrollables([], $el),
       )
     }
   }
@@ -314,6 +314,8 @@ const verify = function (cy, $el, options, callbacks) {
 
         // scroll the element into view
         $el.get(0).scrollIntoView()
+
+        debug('scrollIntoView:', $el[0])
 
         if (onScroll) {
           onScroll($el, 'element')
