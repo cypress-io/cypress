@@ -122,13 +122,9 @@ declare namespace Cypress {
     clear: (keys?: string[]) => void
   }
 
-  interface ViewportPosition {
-    top: number
-    left: number
+  interface ViewportPosition extends WindowPosition {
     right: number
     bottom: number
-    topCenter: number
-    leftCenter: number
   }
 
   interface WindowPosition {
@@ -143,15 +139,17 @@ declare namespace Cypress {
     scrollLeft: number
     width: number
     height: number
-    fromViewport: ViewportPosition
-    fromWindow: WindowPosition
+    fromElViewport: ViewportPosition
+    fromElWindow: WindowPosition
+    fromAutWindow: WindowPosition
   }
 
   interface ElementCoordinates {
     width: number
     height: number
-    fromViewport: ViewportPosition
-    fromWindow: WindowPosition
+    fromElViewport: ViewportPosition & { x: number, y: number }
+    fromElWindow: WindowPosition & { x: number, y: number }
+    fromAutWindow: WindowPosition & { x: number, y: number }
   }
 
   /**
@@ -433,7 +431,7 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an element is scrollable.
        */
-      isScrollable(element: JQuery | HTMLElement): boolean
+      isScrollable(element: Window | JQuery | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element currently has focus.
        */
@@ -445,7 +443,7 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an element is attached to the DOM.
        */
-      isAttached(element: JQuery | HTMLElement): boolean
+      isAttached(element: JQuery | HTMLElement | Window | Document): boolean
       isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
       /**
        * Returns a boolean indicating whether an element is a descendent of another element.
@@ -467,6 +465,7 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a jQuery object.
        */
       isJquery(obj: any): boolean
+      isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
       stringify(element: JQuery | HTMLElement, form: string): string
       getElements(element: JQuery): JQuery | HTMLElement[]
       getContainsSelector(text: string, filter?: string): JQuery.Selector
