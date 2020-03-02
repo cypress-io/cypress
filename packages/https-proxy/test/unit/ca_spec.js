@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const { expect } = require('../spec_helper')
 
 let fs = require('fs-extra')
@@ -15,7 +16,12 @@ describe('lib/ca', () => {
 
     return fs.ensureDirAsync(this.dir)
     .then(() => {
+      console.time('creating CA')
+
       return CA.create(this.dir)
+      .tap(() => {
+        console.timeEnd('creating CA')
+      })
     }).then((ca) => {
       this.ca = ca
     })
@@ -27,8 +33,11 @@ describe('lib/ca', () => {
 
   context('#generateServerCertificateKeys', () => {
     it('generates certs for each host', function () {
+      console.time('generating cert')
+
       return this.ca.generateServerCertificateKeys('www.cypress.io')
       .spread((certPem, keyPrivatePem) => {
+        console.timeEnd('generating cert')
         expect(certPem).to.include('-----BEGIN CERTIFICATE-----')
 
         expect(keyPrivatePem).to.include('-----BEGIN RSA PRIVATE KEY-----')
