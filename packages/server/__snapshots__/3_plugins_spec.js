@@ -1,4 +1,4 @@
-exports['e2e plugins passes 1'] = `
+exports['e2e plugins passes with working preprocessor 1'] = `
 
 ====================================================================================================
 
@@ -58,7 +58,7 @@ exports['e2e plugins passes 1'] = `
 
 `
 
-exports['e2e plugins fails 1'] = `
+exports['e2e plugins fails with async error 1'] = `
 
 ====================================================================================================
 
@@ -174,13 +174,6 @@ exports['e2e plugins can modify config from plugins 1'] = `
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
-
-`
-
-exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
-
-Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
 `
 
@@ -400,5 +393,12 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        4        3        1        -        -  
 
+
+`
+
+exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+
+Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
 `
