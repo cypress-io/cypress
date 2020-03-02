@@ -37,7 +37,7 @@ const registerHandler = (handler) => {
 const init = (config, options) => {
   debug('plugins.init', config.pluginsFile)
 
-  new Promise((_resolve, _reject) => {
+  return new Promise((_resolve, _reject) => {
     // provide a safety net for fulfilling the promise because the
     // 'handleError' function below can potentially be triggered
     // before or after the promise is already fulfilled
