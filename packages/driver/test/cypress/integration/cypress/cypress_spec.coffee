@@ -29,7 +29,7 @@ describe "driver/src/cypress/index", ->
         expect($el.get(0)).to.eq($foo.get(0))
 
   context "#backend", ->
-    it "sets __stackCleaned__ on errors", (done) ->
+    it "sets __stackCleaned__ on errors", ->
       cy.stub(@Cypress, "emit")
       .withArgs("backend:request")
       .yieldsAsync({
@@ -44,8 +44,6 @@ describe "driver/src/cypress/index", ->
       .catch (err) ->
         expect(err.backend).to.be.true
         expect(err.stack).not.to.include("From previous event")
-
-        done()
 
     ## https://github.com/cypress-io/cypress/issues/4346
     it "can complete if a circular reference is sent", ->
@@ -76,14 +74,14 @@ describe "driver/src/cypress/index", ->
       fn = ->
         Cypress.Log.command({})
 
-      expect(fn).to.throw(/has been renamed to Cypress.log/)
+      expect(fn).to.throw('has been renamed to Cypress.log')
 
     it "throws when passing non-object to Cypress.log()", ->
       fn = ->
         Cypress.log('My Log')
 
-      expect(fn).to.throw(/Cypress.log() can only be called with an options object. Your argument was/)
-      expect(fn).to.throw(/My Log/)
+      expect(fn).to.throw('Cypress.log() can only be called with an options object. Your argument was')
+      expect(fn).to.throw('My Log')
 
     it "does not throw when Cypress.log() called outside of command", ->
       fn = ->

@@ -63,13 +63,20 @@ stub()
 expect(stub).to.have.been.calledOnce
 cy.wrap(stub).should('have.been.calledOnce')
 
-// window:confirm stubbing
-Cypress.on('window:confirm', () => { })
-Cypress.on('window:confirm', cy.spy())
-Cypress.on('window:confirm', cy.stub())
-cy.on('window:confirm', () => { })
-cy.on('window:confirm', cy.spy())
-cy.on('window:confirm', cy.stub())
+namespace EventInterfaceTests {
+  // window:confirm stubbing
+  Cypress.on('window:confirm', () => { })
+  Cypress.on('window:confirm', cy.spy())
+  Cypress.on('window:confirm', cy.stub())
+  cy.on('window:confirm', () => { })
+  cy.on('window:confirm', cy.spy())
+  cy.on('window:confirm', cy.stub())
+
+  Cypress.removeListener('fail', () => {})
+  Cypress.removeAllListeners('fail')
+  cy.removeListener('fail', () => {})
+  cy.removeAllListeners('fail')
+}
 
 // specifying HTTP method directly in the options object
 cy.request({

@@ -20,6 +20,5 @@ describe "e2e screenshot element capture", ->
   ## that the runner UI is hidden and that the page is scrolled properly
   e2e.it "passes", {
     spec: "screenshot_element_capture_spec.coffee"
-    expectedExitCode: 0
     snapshot: true
   }

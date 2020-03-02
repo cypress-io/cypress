@@ -109,16 +109,16 @@ describe('Settings', () => {
       it('applies the same color treatment to expanded key values as the root key', () => {
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
         cy.get('.config-vars').as('config-vars')
-        .contains('span', 'Chrome').parent('span').should('have.class', 'plugins')
+        .contains('span', 'Chrome').parent('span').should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Chromium').parent('span').should('have.class', 'plugins')
+        .contains('span', 'Chromium').parent('span').should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Canary').parent('span').should('have.class', 'plugins')
+        .contains('span', 'Canary').parent('span').should('have.class', 'plugin')
 
         cy.get('@config-vars')
-        .contains('span', 'Electron').parent('span').should('have.class', 'plugins')
+        .contains('span', 'Electron').parent('span').should('have.class', 'plugin')
 
         cy.contains('span', 'blacklistHosts').parents('div').first().find('span').first().click()
         cy.get('@config-vars')
@@ -137,7 +137,7 @@ describe('Settings', () => {
         cy.get('@config-vars')
         .contains('span', 'Electron').parents('div').first().find('span').first().click()
 
-        cy.get('@config-vars').contains('span', 'electron').parents('li').eq(1).find('.line .plugins').should('have.length', 6)
+        cy.get('@config-vars').contains('span', 'electron').parents('li').eq(1).find('.line .plugin').should('have.length', 6)
       })
 
       it('displays string values as quoted strings', () => {
@@ -490,6 +490,7 @@ describe('Settings', () => {
   describe('errors', () => {
     beforeEach(function () {
       this.err = {
+        title: 'Foo Title',
         message: 'Port \'2020\' is already in use.',
         name: 'Error',
         port: 2020,
@@ -514,11 +515,11 @@ describe('Settings', () => {
     })
 
     it('displays errors', () => {
-      cy.contains('Can\'t start server')
+      cy.contains('Foo Title')
     })
 
     it('displays config after error is fixed', function () {
-      cy.contains('Can\'t start server').then(() => {
+      cy.contains('Foo Title').then(() => {
         this.ipc.openProject.onCall(1).resolves(this.config)
 
         this.ipc.onConfigChanged.yield()

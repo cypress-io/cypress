@@ -29,7 +29,7 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
       "given": {
         "name": "Chrome",
         "displayName": "Chrome Browser",
-        "family": "chrome",
+        "family": "chromium",
         "path": "/path/to/chrome",
         "version": "1.2.3",
         "majorVersion": 1
@@ -51,7 +51,7 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
       "given": {
         "name": "Electron",
         "displayName": "Electron",
-        "family": "electron",
+        "family": "chromium",
         "path": "",
         "version": "99.101.3",
         "majorVersion": 99
@@ -61,9 +61,9 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
     {
       "given": {
         "name": "No display name",
-        "family": "electron"
+        "family": "chromium"
       },
-      "expect": "Expected `displayName` to be a non-empty string. Instead the value was: `{\"name\":\"No display name\",\"family\":\"electron\"}`"
+      "expect": "Expected `displayName` to be a non-empty string. Instead the value was: `{\"name\":\"No display name\",\"family\":\"chromium\"}`"
     },
     {
       "given": {
@@ -71,7 +71,7 @@ exports['lib/util/validation #isValidBrowser passes valid browsers and forms err
         "displayName": "Bad family browser",
         "family": "unknown family"
       },
-      "expect": "Expected `family` to be either electron, chrome or firefox. Instead the value was: `{\"name\":\"bad family\",\"displayName\":\"Bad family browser\",\"family\":\"unknown family\"}`"
+      "expect": "Expected `family` to be either chromium or firefox. Instead the value was: `{\"name\":\"bad family\",\"displayName\":\"Bad family browser\",\"family\":\"unknown family\"}`"
     }
   ]
 }
@@ -81,7 +81,7 @@ Missing browsers list
 `
 
 exports['empty list of browsers'] = `
-Expected at list one browser
+Expected at least one browser
 `
 
 exports['browsers list with a string'] = `

@@ -36,7 +36,6 @@ onServer = (app) ->
     """)
 
 describe "e2e web security", ->
-  require("mocha-banner").register()
 
   context "when enabled", ->
     e2e.setup({
@@ -82,5 +81,19 @@ describe "e2e web security", ->
     e2e.it "passes", {
       spec: "web_security_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
+      browser: ['chrome', 'electron']
     }
+
+context 'firefox', ->
+  e2e.setup({
+    settings: {
+      chromeWebSecurity: false
+    }
+  })
+  e2e.it "displays warning when firefox and chromeWebSecurity:false", {
+    spec: "simple_passing_spec.coffee"
+    snapshot: true
+    browser: 'firefox'
+    onStdout: (stdout) ->
+      expect(stdout).include('Your project has set the configuration option: `chromeWebSecurity: false`\n\nThis option will not have an effect in Firefox.')
+  }

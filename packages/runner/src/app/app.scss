@@ -9,6 +9,7 @@
   position: absolute;
   top: 0;
   width: 33%;
+  z-index: 1;
 
   .is-reporter-sized & {
     min-width: 0;

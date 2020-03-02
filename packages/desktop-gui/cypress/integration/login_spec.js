@@ -96,9 +96,7 @@ describe('Login', function () {
           })
 
           it('displays username in UI', function () {
-            cy.get('nav a').should(function ($a) {
-              expect($a).to.contain(this.user.name)
-            })
+            cy.get('.user-dropdown .dropdown-chosen').should('contain', this.user.name)
           })
 
           it('displays username in success dialog', () => {
@@ -117,14 +115,14 @@ describe('Login', function () {
 
             context('log out', function () {
               it('displays login button on logout', () => {
-                cy.get('nav a').contains('Jane').click()
+                cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
 
                 cy.contains('Log Out').click()
                 cy.get('.nav').contains('Log In')
               })
 
               it('calls log:out', function () {
-                cy.get('nav a').contains('Jane').click()
+                cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
 
                 cy.contains('Log Out').click().then(function () {
                   expect(this.ipc.logOut).to.be.called
@@ -132,7 +130,7 @@ describe('Login', function () {
               })
 
               it('has login button enabled when returning to login after logout', function () {
-                cy.get('nav a').contains('Jane').click()
+                cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
                 cy.contains('Log Out').click()
                 cy.contains('Log In').click()
 
