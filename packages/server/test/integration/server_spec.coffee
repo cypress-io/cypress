@@ -73,7 +73,7 @@ describe "Server", ->
             ## and open our cypress server
             @server = Server()
 
-            @server.open(cfg, {})
+            @server.open(cfg)
             .spread (port) =>
               if initialUrl
                 @server._onDomainSet(initialUrl)

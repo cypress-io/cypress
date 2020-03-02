@@ -32,7 +32,7 @@ describe "Web Sockets", ->
 
       @server = Server()
 
-      @server.open(@cfg, {})
+      @server.open(@cfg)
       .then =>
         httpsServer.start(wssPort)
       .then (httpsSrv) =>

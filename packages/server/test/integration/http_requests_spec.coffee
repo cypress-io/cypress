@@ -133,7 +133,7 @@ describe "Routes", ->
             ## and open our cypress server
             @server = Server(Watchers())
 
-            @server.open(cfg, { project })
+            @server.open(cfg, project)
             .spread (port) =>
               if initialUrl
                 @server._onDomainSet(initialUrl)
