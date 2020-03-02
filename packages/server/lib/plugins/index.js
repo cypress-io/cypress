@@ -68,9 +68,16 @@ const init = (config, options) => {
       handler(ipc)
     }
 
+    _.extend(config, {
+      projectRoot: options.projectRoot,
+      configFile: options.configFile,
+    })
+
     ipc.send('load', config)
 
     ipc.on('loaded', (newCfg, registrations) => {
+      _.omit(config, 'projectRoot', 'configFile')
+
       _.each(registrations, (registration) => {
         debug('register plugins process event', registration.event, 'with id', registration.eventId)
 
@@ -105,9 +112,7 @@ const init = (config, options) => {
 
     const handleError = (err) => {
       debug('plugins process error:', err.stack)
-      if (!pluginsProcess) {
-        return // prevent repeating this in case of multiple errors
-      }
+      if (!pluginsProcess) return // prevent repeating this in case of multiple errors
 
       killPluginsProcess()
       err = errors.get('PLUGINS_ERROR', err.annotated || err.stack || err.message)
@@ -116,11 +121,9 @@ const init = (config, options) => {
       return options.onError(err)
     }
 
-    const handleWarning = function (warningErr) {
+    const handleWarning = (warningErr) => {
       debug('plugins process warning:', warningErr.stack)
-      if (!pluginsProcess) {
-        return // prevent repeating this in case of multiple warnings
-      }
+      if (!pluginsProcess) return // prevent repeating this in case of multiple warnings
 
       return options.onWarning(warningErr)
     }

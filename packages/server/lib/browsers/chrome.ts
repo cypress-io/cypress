@@ -240,7 +240,7 @@ const _disableRestorePagesPrompt = function (userDir) {
 
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port) {
+const _connectToChromeRemoteInterface = function (port, onError) {
   // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
 
@@ -250,7 +250,7 @@ const _connectToChromeRemoteInterface = function (port) {
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
-    return CriClient.create(wsUrl)
+    return CriClient.create(wsUrl, onError)
   })
 }
 
@@ -452,7 +452,7 @@ export = {
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port)
+    const criClient = await this._connectToChromeRemoteInterface(port, options.onError)
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 
