@@ -604,11 +604,11 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """.trim()
 
       return {msg: msg, details: arg2}
-    when "PLUGINS_ERROR"
+    when "PLUGINS_UNEXPECTED_ERROR"
       msg = """
-      The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+      The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (`#{arg1}`)
       """.trim()
-      return {msg: msg, details: arg1}
+      return {msg: msg, details: arg2}
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO

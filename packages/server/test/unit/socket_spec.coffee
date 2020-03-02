@@ -38,7 +38,7 @@ describe "lib/socket", ->
     beforeEach (done) ->
       ## create a for realz socket.io connection
       ## so we can test server emit / client emit events
-      @server.open(@cfg)
+      @server.open(@cfg, {})
       .then =>
         @options = {
           onSavedStateChanged: sinon.spy()
@@ -437,7 +437,7 @@ describe "lib/socket", ->
       sinon.stub(Socket.prototype, "createIo").returns(@io)
       sinon.stub(preprocessor.emitter, "on")
 
-      @server.open(@cfg)
+      @server.open(@cfg, {})
       .then =>
         @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
 
