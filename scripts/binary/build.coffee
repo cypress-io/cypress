@@ -253,17 +253,12 @@ buildCypressApp = (platform, version, options = {}) ->
     electronVersion = electron.getElectronVersion()
     la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion)
     iconFilename = getIconFilename(platform)
-    electronDistFolder = path.join(__dirname, "..", "..", "packages", "electron", "node_modules", "electron", "dist")
-    if platform is "linux"
-      # for some reason need to use copy of Electron
-      electronDistFolder = path.join("packages", "electron", "dist", "Cypress")
 
     args = [
       "--publish=never",
       "--c.electronVersion=#{electronVersion}",
       "--c.directories.app=#{appFolder}",
       "--c.directories.output=#{outputFolder}",
-      "--c.electronDist=#{electronDistFolder}",
       "--c.icon=#{iconFilename}",
       # for now we cannot pack source files in asar file
       # because electron-builder does not copy nested folders
@@ -317,7 +312,6 @@ buildCypressApp = (platform, version, options = {}) ->
 
       if not cypressExists
         return
-
 
       console.log("cypress file found", cypressFilename)
 
@@ -447,7 +441,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(removeBinFolders)
   .then(removeCyFolders)
   .then(removeDevElectronApp)
-  .then(copyRenameElectronDist)
+  # .then(copyRenameElectronDist)
   .then(electronPackAndSign)
   .then(removeDuplicateElectron)
   .then(testVersion(buildAppDir))
