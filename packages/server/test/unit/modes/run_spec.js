@@ -116,7 +116,7 @@ describe('lib/modes/run', () => {
         toJPEG: sinon.stub().returns('imgdata'),
       }
 
-      const props = runMode.getElectronProps(true, {}, write)
+      const props = runMode.getElectronProps(true, write)
 
       expect(props.recordFrameRate).to.eq(20)
 
@@ -126,7 +126,7 @@ describe('lib/modes/run', () => {
     })
 
     it('does not set recordFrameRate or onPaint when write is falsy', () => {
-      const props = runMode.getElectronProps(true, {}, false)
+      const props = runMode.getElectronProps(true, false)
 
       expect(props).not.to.have.property('recordFrameRate')
 
