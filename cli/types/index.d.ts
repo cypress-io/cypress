@@ -403,24 +403,69 @@ declare namespace Cypress {
      * @see https://on.cypress.io/dom
      */
     dom: {
+      /**
+       * Returns a jQuery object obtained by wrapping an object in jQuery.
+       */
       wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
       query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
+      /**
+       * Returns an array of raw elements pulled out from a jQuery object.
+       */
       unwrap(obj: any): any
+      /**
+       * Returns a boolean indicating whether an object is a DOM object.
+       */
       isDom(obj: any): boolean
       isType(element: JQuery | HTMLElement , type: string): boolean
+      /**
+       * Returns a boolean indicating whether an element is visible.
+       */
       isVisible(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is hidden.
+       */
       isHidden(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element can receive focus.
+       */
       isFocusable(element: JQuery | HTMLElement): boolean
       isTextLike(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is scrollable.
+       */
       isScrollable(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element currently has focus.
+       */
       isFocused(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is detached from the DOM.
+       */
       isDetached(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is attached to the DOM.
+       */
       isAttached(element: JQuery | HTMLElement): boolean
       isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
+      /**
+       * Returns a boolean indicating whether an element is a descendent of another element.
+       */
       isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an object is a DOM element.
+       */
       isElement(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether a node is of document type.
+       */
       isDocument(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a window object.
+       */
       isWindow(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a jQuery object.
+       */
       isJquery(obj: any): boolean
       stringify(element: JQuery | HTMLElement, form: string): string
       getElements(element: JQuery): JQuery | HTMLElement[]
