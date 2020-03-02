@@ -187,12 +187,13 @@ class Server
       @createHosts(config.hosts)
 
       @createRoutes({
-        project
-        onError,
-        getRemoteState
+        app
+        config
         getDeferredResponse: @_xhrServer.getDeferredResponse
-        nodeProxy: @_nodeProxy
+        getRemoteState
         networkProxy: @_networkProxy
+        onError
+        project
       })
 
       @createServer(app, config, project, @_request, onWarning)

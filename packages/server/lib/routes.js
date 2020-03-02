@@ -12,7 +12,7 @@ const client = require('./controllers/client')
 const files = require('./controllers/files')
 const staticCtrl = require('./controllers/static')
 
-module.exports = ({ app, config, getRemoteState, getDeferredResponse, project, networkProxy, onError }) => {
+module.exports = ({ app, config, getDeferredResponse, getRemoteState, networkProxy, project, onError }) => {
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {
