@@ -1,6 +1,13 @@
-const $ = Cypress.$.bind(Cypress)
+declare namespace Cypress {
+  interface cy {
+    state(key: 'document'): Document
+  }
+}
 
 describe('src/dom/coordinates', () => {
+  const $ = Cypress.$.bind(Cypress)
+  let doc: Document
+
   before(() => {
     return cy
     .visit('/fixtures/generic.html')
@@ -10,9 +17,9 @@ describe('src/dom/coordinates', () => {
   })
 
   beforeEach(function () {
-    this.doc = cy.state('document')
+    doc = cy.state('document')
 
-    $(this.doc.body).empty().html(this.body)
+    $(doc.body).empty().html(this.body)
 
     this.$button = $('<button style=\'position: absolute; top: 25px; left: 50px; width: 100px; line-height: 50px; padding: 10px; margin: 10px; border: 10px solid black\'>foo</button>')
     .appendTo(cy.$$('body'))
@@ -24,8 +31,8 @@ describe('src/dom/coordinates', () => {
     it('returns the leftCenter and topCenter normalized', function () {
       const win = Cypress.dom.getWindowByElement(this.$button.get(0))
 
-      const scrollY = Object.getOwnPropertyDescriptor(win, 'scrollY')
-      const scrollX = Object.getOwnPropertyDescriptor(win, 'scrollX')
+      const scrollY = Object.getOwnPropertyDescriptor(win, 'scrollY')!
+      const scrollX = Object.getOwnPropertyDescriptor(win, 'scrollX')!
 
       Object.defineProperty(win, 'scrollY', {
         value: 10,
@@ -63,17 +70,17 @@ describe('src/dom/coordinates', () => {
 
   context('.getElementAtPointFromViewport', () => {
     it('returns same element based on x/y coords', function () {
-      expect(Cypress.dom.getElementAtPointFromViewport(this.doc, 100, 60)).to.eq(this.$button.get(0))
+      expect(Cypress.dom.getElementAtPointFromViewport(doc, 100, 60)).to.eq(this.$button.get(0))
     })
 
     it('does not return if element is hidden', function () {
       this.$button.hide()
 
-      expect(Cypress.dom.getElementAtPointFromViewport(this.doc, 100, 60)).not.to.eq(this.$button.get(0))
+      expect(Cypress.dom.getElementAtPointFromViewport(doc, 100, 60)).not.to.eq(this.$button.get(0))
     })
 
     it('returns null if no element was found', function () {
-      expect(Cypress.dom.getElementAtPointFromViewport(this.doc, 1e9, 1e9)).to.be.null
+      expect(Cypress.dom.getElementAtPointFromViewport(doc, 1e9, 1e9)).to.be.null
     })
   })
 
