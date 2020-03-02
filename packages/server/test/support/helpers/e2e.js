@@ -286,6 +286,7 @@ const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
+    exit: process.env.EXIT != null ? process.env.EXIT : null,
     only: false,
     skip: false,
     browser: [],

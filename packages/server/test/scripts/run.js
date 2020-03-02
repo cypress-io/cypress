@@ -144,6 +144,10 @@ if (options.browser) {
   env.BROWSER = options.browser
 }
 
+if (options.exit != null) {
+  env.EXIT = options.exit
+}
+
 const cmd = `${commandAndArguments.command} ${
   commandAndArguments.args.join(' ')}`
 
