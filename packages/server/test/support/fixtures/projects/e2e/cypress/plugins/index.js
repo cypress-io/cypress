@@ -4,9 +4,21 @@ const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
-const performance = require('../../../../test/support/helpers/performance')
 
 module.exports = (on, config) => {
+  let performance = {
+    track: () => Promise.resolve(),
+  }
+
+  // TODO: fix this - in open mode, this will throw an error
+  // since the relative path is different in open vs run mode
+  try {
+    performance = require('../../../../test/support/helpers/performance')
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err)
+  }
+
   // save some time by only reading the originals once
   let cache = {}
 

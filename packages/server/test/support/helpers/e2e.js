@@ -286,6 +286,7 @@ const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
+    exit: process.env.EXIT,
     only: false,
     skip: false,
     browser: [],
@@ -467,7 +468,7 @@ const e2e = {
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
-      timeout: options.exit === false ? 3000000 : 120000,
+      timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
@@ -561,7 +562,9 @@ const e2e = {
       args.push('--output-path', options.outputPath)
     }
 
-    if (options.exit != null) {
+    if (options.exit === false) {
+      // prevent timeout in --no-exit mode (for debugging)
+      options.timeout = 3000000
       args.push('--exit', options.exit)
     }
 
