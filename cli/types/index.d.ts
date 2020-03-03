@@ -1964,7 +1964,7 @@ declare namespace Cypress {
     })
     ```
      */
-    window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    window(options?: Partial<Loggable & Timeoutable>): Chainable<Window & typeof globalThis>
 
     /**
      * Scopes all subsequent cy commands to within this element.
