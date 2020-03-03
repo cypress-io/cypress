@@ -707,25 +707,25 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
-    if (process.platform !== 'win32') {
-      // ? is tested here because it's valid in Unix/Linux, but invalid in Windows
-      // https://gist.github.com/doctaphred/d01d05291546186941e1b7ddc02034d3
-      it('escapes ?', function () {
-        const filePath = path.join(__dirname, '../support/fixtures/projects/todos/tests/sub/a?.spec.js')
+    // ? is invalid in Windows, but it can be tested here
+    // because it's a unit test and doesn't check the existence of files
+    it('escapes ?', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a?.spec.js')
 
-        fs.writeFileSync(filePath, '')
-
-        const todosSpec = path.join(this.todosPath, 'tests/sub/a?.spec.js')
-
-        return this.project.getSpecUrl(todosSpec)
-        .then((str) => {
-          expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%3F.spec.js')
-        })
-        .then(() => {
-          fs.unlinkSync(filePath)
-        })
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%3F.spec.js')
       })
-    }
+    })
+
+    it('escapes %, &, ? in the url dir', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/s%&?ub/a.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/s%25%26%3Fub/a.spec.js')
+      })
+    })
 
     it('returns __all spec url', function () {
       return this.project.getSpecUrl()
