@@ -23,8 +23,11 @@ module.exports = {
 
     @getSpecs(test, config)
     .then (specs) =>
-      specs = specs.map((fileName) => 
-        return escapeFilenameInUrl(fileName)
+      specs = specs.map((fileName) =>
+        PREFIX = '/__cypress/tests?p'
+        fileName = fileName.replace(PREFIX, '__CYPRESS_SPEC_FILE_PREFIX__')
+        
+        return escapeFilenameInUrl(fileName).replace('__CYPRESS_SPEC_FILE_PREFIX__', PREFIX)
       )
 
       @getJavascripts(config)
