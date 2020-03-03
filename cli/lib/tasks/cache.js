@@ -11,6 +11,8 @@ const chalk = require('chalk')
 const g = chalk.green
 // last used color
 const u = chalk.cyan
+// accepts and table headings
+const a = chalk.red
 
 // TODO: rename this function
 const path = () => {
@@ -27,7 +29,7 @@ const list = () => {
   return getCachedVersions()
   .then((binaries) => {
     const table = new Table({
-      head: ['version', 'last used'],
+      head: [a('version'), a('last used')],
     })
 
     binaries.forEach((x) => {
