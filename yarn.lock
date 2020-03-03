@@ -13887,13 +13887,6 @@ https-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/https-browserify/-/https-browserify-1.0.0.tgz#ec06c10e0a34c0f2faf199f7fd7fc78fffd03c73"
   integrity sha1-7AbBDgo0wPL68Zn3/X/Hj//QPHM=
 
-https-pem@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/https-pem/-/https-pem-2.0.0.tgz#c50d6c1737b28a6c9308760bb0245124d3cbd269"
-  integrity sha512-EeJkZ9hIi1l5aQBDSBzxgES7Z748mNOf3cbN48j/lzq4vZhinqNtM1kyaw0orPaxHfJTBvy/oZbJkhsxg1UHCg==
-  dependencies:
-    selfsigned "^1.10.1"
-
 https-proxy-agent@3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-3.0.1.tgz#b8c286433e87602311b01c8ea34413d856a4af81"
@@ -21940,13 +21933,6 @@ self-signed-cert@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/self-signed-cert/-/self-signed-cert-1.0.1.tgz#9e2fae07503f84fb910f4a87c5c5c6becc207bf6"
   integrity sha512-86d1jYydqaRdUEyR9tj5nQ0d059RUWB9gdZrzDy2MJaUHii1h9EyzbAepkV1rOLO2AkSkQbXtUrqWRH4FDYWHA==
-
-selfsigned@^1.10.1:
-  version "1.10.7"
-  resolved "https://registry.yarnpkg.com/selfsigned/-/selfsigned-1.10.7.tgz#da5819fd049d5574f28e88a9bcc6dbc6e6f3906b"
-  integrity sha512-8M3wBCzeWIJnQfl43IKwOmC4H/RAp50S8DF60znzjW5GVqTcSe2vWclt7hmYVPkKPlHWOu5EaWOMZ2Y6W8ZXTA==
-  dependencies:
-    node-forge "0.9.0"
 
 semaphore@1.1.0, semaphore@^1.1.0:
   version "1.1.0"
