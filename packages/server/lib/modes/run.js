@@ -487,6 +487,19 @@ const getFirefoxProps = (project, writeVideoFrame) => {
   .value()
 }
 
+const getCdpVideoPropSetter = (writeVideoFrame) => {
+  if (!writeVideoFrame) {
+    return _.noop
+  }
+
+  return (props) => {
+    props.onScreencastFrame = (e) => {
+      // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
+      writeVideoFrame(Buffer.from(e.data, 'base64'))
+    }
+  }
+}
+
 const getChromeProps = (writeVideoFrame) => {
   const shouldWriteVideo = Boolean(writeVideoFrame)
 
@@ -494,14 +507,7 @@ const getChromeProps = (writeVideoFrame) => {
 
   return _
   .chain({})
-  .tap((props) => {
-    if (writeVideoFrame) {
-      props.onScreencastFrame = (e) => {
-        // https://chromedevtools.github.io/devtools-protocol/tot/Page#event-screencastFrame
-        writeVideoFrame(Buffer.from(e.data, 'base64'))
-      }
-    }
-  })
+  .tap(getCdpVideoPropSetter(writeVideoFrame))
   .value()
 }
 
@@ -526,14 +532,7 @@ const getElectronProps = (isHeaded, project, writeVideoFrame) => {
       options.show = false
     },
   })
-  .tap((props) => {
-    if (writeVideoFrame) {
-      props.recordFrameRate = 20
-      props.onPaint = (event, dirty, image) => {
-        return writeVideoFrame(image.toJPEG(100))
-      }
-    }
-  })
+  .tap(getCdpVideoPropSetter(writeVideoFrame))
   .value()
 }
 
