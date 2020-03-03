@@ -948,6 +948,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
         if (!_stopped) {
           throw new Error('runnable must have an id', runnable.id)
         }
+
+        return
       }
 
       switch (runnable.type) {
