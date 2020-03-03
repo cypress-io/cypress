@@ -12,7 +12,10 @@ EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
 describe "e2e video compression", ->
   e2e.setup()
 
-  [true, false].forEach (headed) =>
+  [
+    true,
+    false
+  ].forEach (headed) =>
     e2e.it "passes (head#{if headed then 'ed' else 'less'})", {
       spec: "video_compression_spec.coffee"
       snapshot: false
