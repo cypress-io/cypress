@@ -57,6 +57,30 @@ const _installExtensions = function (extensionPaths = [], options) {
   })
 }
 
+const _maybeRecordVideo = function (webContents, options) {
+  return async () => {
+    const { onScreencastFrame } = options
+
+    if (!onScreencastFrame) {
+      debug('options.onScreencastFrame is falsy')
+
+      return
+    }
+
+    debug('starting screencast')
+
+    webContents.debugger.on('message', (event, method, params) => {
+      if (method === 'Page.screencastFrame') {
+        onScreencastFrame(params)
+      }
+    })
+
+    await webContents.debugger.sendCommand('Page.startScreencast', {
+      format: 'jpeg',
+    })
+  }
+}
+
 module.exports = {
   _defaultOptions (projectRoot, state, options) {
     const _this = this
@@ -116,6 +140,7 @@ module.exports = {
     automation.use(getAutomation(win))
 
     return this._launch(win, url, options)
+    .tap(_maybeRecordVideo(win.webContents, options))
   },
 
   _launchChild (e, url, parent, projectRoot, state, options) {
@@ -129,7 +154,6 @@ module.exports = {
       x: parentX + 100,
       y: parentY + 100,
       trackState: false,
-      onPaint: null, // dont capture paint events
     })
 
     const win = Windows.create(projectRoot, options)
@@ -154,7 +178,8 @@ module.exports = {
 
     return Bluebird.try(() => {
       return this._attachDebugger(win.webContents)
-    }).then(() => {
+    })
+    .then(() => {
       let ua
 
       ua = options.userAgent
@@ -177,12 +202,15 @@ module.exports = {
         setProxy(),
         this._clearCache(win.webContents),
       )
-    }).then(() => {
+    })
+    .then(() => {
       return win.loadURL(url)
-    }).then(() => {
+    })
+    .then(() => {
       // enabling can only happen once the window has loaded
       return this._enableDebugger(win.webContents)
-    }).return(win)
+    })
+    .return(win)
   },
 
   _attachDebugger (webContents) {
