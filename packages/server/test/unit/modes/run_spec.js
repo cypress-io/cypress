@@ -105,28 +105,26 @@ describe('lib/modes/run', () => {
       expect(props.show).to.be.true
     })
 
-    it('sets recordFrameRate and onPaint when write is true', () => {
+    it('sets onScreencastFrame when write is true', () => {
       const write = sinon.stub()
 
       const image = {
-        toJPEG: sinon.stub().returns('imgdata'),
+        data: '',
       }
 
       const props = runMode.getElectronProps(true, {}, write)
 
-      expect(props.recordFrameRate).to.eq(20)
+      props.onScreencastFrame(image)
 
-      props.onPaint({}, false, image)
-
-      expect(write).to.be.calledWith('imgdata')
+      expect(write).to.be.calledOnce
     })
 
-    it('does not set recordFrameRate or onPaint when write is falsy', () => {
+    it('does not set onScreencastFrame when write is falsy', () => {
       const props = runMode.getElectronProps(true, {}, false)
 
       expect(props).not.to.have.property('recordFrameRate')
 
-      expect(props).not.to.have.property('onPaint')
+      expect(props).not.to.have.property('onScreencastFrame')
     })
 
     it('sets options.show = false onNewWindow callback', () => {
@@ -623,20 +621,6 @@ describe('lib/modes/run', () => {
       return runMode.run()
       .then(() => {
         expect(errors.warning).to.not.be.called
-      })
-    })
-
-    it('shows no warnings for electron browser', () => {
-      return runMode.run({ browser: 'electron' })
-      .then(() => {
-        expect(errors.warning).to.not.be.calledWith('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER')
-      })
-    })
-
-    it('disables video recording on headed runs', () => {
-      return runMode.run({ headed: true })
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CANNOT_RECORD_VIDEO_HEADED')
       })
     })
 
