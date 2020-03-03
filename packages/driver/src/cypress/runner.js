@@ -67,7 +67,7 @@ const debug = require('debug')('cypress:driver:runner')
 // }
 
 const fire = function (event, runnable, Cypress) {
-  debug('fire:', event)
+  debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
   }
