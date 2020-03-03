@@ -116,3 +116,5 @@ const obj = {
   foo: () => { }
 }
 cy.spy(obj, 'foo').as('my-spy')
+
+cy.window().then(window => window.eval('1'))
