@@ -624,20 +624,6 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('shows no warnings for electron browser', () => {
-      return runMode.run({ browser: 'electron' })
-      .then(() => {
-        expect(errors.warning).to.not.be.calledWith('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER')
-      })
-    })
-
-    it('disables video recording on headed runs', () => {
-      return runMode.run({ headed: true })
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CANNOT_RECORD_VIDEO_HEADED')
-      })
-    })
-
     it('throws an error if invalid browser family supplied', () => {
       const browser = { name: 'opera', family: 'opera - btw when is Opera support coming?' }
 

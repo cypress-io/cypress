@@ -640,24 +640,6 @@ const trashAssets = Promise.method((config = {}) => {
   })
 })
 
-// if we've been told to record and we're not spawning a headed browser
-const browserCanBeRecorded = (browser) => {
-  // TODO: enable recording Electron in headed mode too
-  if (browser.name === 'electron' && browser.isHeadless) {
-    return true
-  }
-
-  if (browser.name !== 'electron' && browser.family === 'chromium') {
-    return true
-  }
-
-  if (browser.family === 'firefox') {
-    return true
-  }
-
-  return false
-}
-
 const createVideoRecording = function (videoName, options = {}) {
   const outputDir = path.dirname(videoName)
 
@@ -690,21 +672,6 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   // bail if we've been told not to capture
   // a video recording
   if (!video) {
-    return
-  }
-
-  // handle if this browser cannot actually
-  // be recorded
-  if (!browserCanBeRecorded(browser)) {
-    console.log('')
-
-    // TODO update error messages and included browser name and headed mode
-    if (browser.name === 'electron' && browser.isHeaded) {
-      errors.warning('CANNOT_RECORD_VIDEO_HEADED')
-    } else {
-      errors.warning('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER', browser.name)
-    }
-
     return
   }
 
