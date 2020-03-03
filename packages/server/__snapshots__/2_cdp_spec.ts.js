@@ -66,9 +66,9 @@ exports['e2e cdp / handles disconnections as expected'] = `
   e2e remote debugging disconnect
     ✓ reconnects as expected
 
-Error: There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
+There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
-connect ECONNREFUSED 127.0.0.1:7777
+Error: connect ECONNREFUSED 127.0.0.1:7777
     [stack trace lines]
 
 

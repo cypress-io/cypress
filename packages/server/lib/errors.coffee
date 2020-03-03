@@ -900,6 +900,12 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       #{arg2.stack}
       """
+    when "CDP_COULD_NOT_RECONNECT"
+      """
+      There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
+
+      #{arg1.stack}
+      """
     when "CDP_RETRYING_CONNECTION"
       """
       Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
