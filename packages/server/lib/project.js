@@ -522,11 +522,11 @@ class Project extends EE {
   normalizeSpecUrl (browserUrl, specUrl) {
     const replacer = (match) => match.replace('//', '/')
 
-    return escapeFilenameInUrl([
+    return [
       browserUrl,
       '#/tests',
-      specUrl,
-    ].join('/').replace(multipleForwardSlashesRe, replacer))
+      escapeFilenameInUrl(specUrl),
+    ].join('/').replace(multipleForwardSlashesRe, replacer)
   }
 
   scaffold (cfg) {
