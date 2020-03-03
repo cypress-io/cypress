@@ -15,7 +15,7 @@ This package contains the code for Cypress's HTTP interception proxy.
 Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
 
 ```shell
-yarn lerna run build-js --scope @packages/proxy --stream
+yarn lerna run build-prod --scope @packages/proxy --stream
 ```
 
 ## Testing

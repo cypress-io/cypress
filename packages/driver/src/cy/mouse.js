@@ -152,21 +152,28 @@ const create = (state, keyboard, focused, Cypress) => {
   }
 
   const shouldMoveCursorToEndAfterMousedown = (el) => {
+    const _debug = debug.extend(':shouldMoveCursorToEnd')
+
+    _debug('shouldMoveToEnd?', el)
     if (!$elements.isElement(el)) {
+      _debug('false: not element')
+
       return false
     }
 
     if (!($elements.isInput(el) || $elements.isTextarea(el) || $elements.isContentEditable(el))) {
-      return false
-    }
+      _debug('false: not input/textarea/contentedtable')
 
-    if (!$elements.isFocused(el)) {
       return false
     }
 
     if ($elements.isNeedSingleValueChangeInputElement(el)) {
+      _debug('false: is single value change input')
+
       return false
     }
+
+    _debug('true: should move to end')
 
     return true
   }
@@ -458,7 +465,9 @@ const create = (state, keyboard, focused, Cypress) => {
       //# retrieve the first focusable $el in our parent chain
       const $elToFocus = $elements.getFirstFocusableEl($(el))
 
+      debug('elToFocus:', $elToFocus[0])
       if (focused.needsFocus($elToFocus, $previouslyFocused)) {
+        debug('el needs focus')
         if ($dom.isWindow($elToFocus)) {
           // if the first focusable element from the click
           // is the window, then we can skip the focus event
@@ -474,9 +483,9 @@ const create = (state, keyboard, focused, Cypress) => {
         }
       }
 
-      if (shouldMoveCursorToEndAfterMousedown($elToFocus[0])) {
-        debug('moveSelectionToEnd due to click')
-        $selection.moveSelectionToEnd($elToFocus[0], { onlyIfEmptySelection: true })
+      if (shouldMoveCursorToEndAfterMousedown(el)) {
+        debug('moveSelectionToEnd due to click', el)
+        $selection.moveSelectionToEnd(el, { onlyIfEmptySelection: true })
       }
 
       return mouseDownPhase

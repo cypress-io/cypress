@@ -4,9 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "tsc --project .",
-    "build-js": "tsc --project .",
-    "build-prod": "yarn build",
+    "build-prod": "tsc --project .",
     "clean": "node scripts/clean.js || true",
     "clean-deps": "rm -rf node_modules",
     "clean-js": "yarn clean",
