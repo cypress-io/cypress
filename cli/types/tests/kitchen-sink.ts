@@ -142,3 +142,5 @@ namespace BlobTests {
       dateUrl // $ExpectType string
   })
 }
+
+cy.window().then(window => window.eval('1'))
