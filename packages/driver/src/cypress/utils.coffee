@@ -109,7 +109,7 @@ module.exports = {
     if _.isEmpty(obj) then undefined else obj
 
   stringifyActualObj: (obj) ->
-    obj = @normalizeObjWithLength(obj)
+     obj = @normalizeObjWithLength(obj)
 
     str = _.reduce obj, (memo, value, key) =>
       memo.push "#{key}".toLowerCase() + ": " + @stringifyActual(value)

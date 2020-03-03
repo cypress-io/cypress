@@ -102,6 +102,7 @@ namespace CypressItsTests {
   cy.wrap({foo: 'bar'}).its('foo') // $ExpectType Chainable<string>
   cy.wrap([1, 2]).its(1) // $ExpectType Chainable<number>
   cy.wrap(['foo', 'bar']).its(1) // $ExpectType Chainable<string>
+  
   .then((s: string) => {
     s
   })
