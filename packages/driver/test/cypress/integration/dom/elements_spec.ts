@@ -1,13 +1,19 @@
-const $ = Cypress.$.bind(Cypress)
+declare namespace Cypress {
+  interface cy {
+    state(key: 'window'): Window
+  }
+}
 
 describe('src/dom/elements', () => {
+  const $ = Cypress.$.bind(Cypress)
+
   context('.isAttached', () => {
     beforeEach(() => {
       cy.visit('/fixtures/iframe-outer.html')
     })
 
     it('no elements', () => {
-      const $el = $(null)
+      const $el = $(null!)
 
       expect(Cypress.dom.isAttached($el)).to.be.false
     })
@@ -68,9 +74,9 @@ describe('src/dom/elements', () => {
 
     it('element in iframe', (done) => {
       cy.get('iframe').then(($iframe) => {
-        const $doc = $iframe.contents()
+        const $doc = $iframe.contents() as JQuery<Document>
 
-        const $btn = $doc.find('button')
+        const $btn = $doc.find('button') as unknown as JQuery<HTMLButtonElement>
 
         expect($btn.length).to.eq(1)
 
@@ -84,7 +90,7 @@ describe('src/dom/elements', () => {
           done()
         })
 
-        const win = $doc.get(0).defaultView
+        const win = $doc.get(0).defaultView!
 
         win.location.reload()
       })
@@ -93,7 +99,7 @@ describe('src/dom/elements', () => {
 
   context('.isDetached', () => {
     it('opposite of attached', () => {
-      const $el = $(null)
+      const $el = $(null!)
 
       expect(Cypress.dom.isDetached($el)).to.be.true
     })
