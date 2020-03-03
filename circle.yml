@@ -303,6 +303,9 @@ jobs:
           expectedResultCount: 6
       - store_test_results:
           path: /tmp/cypress
+      # CLI tests generate HTML files with sample CLI command output
+      - store_artifacts:
+          path: cli/test/html
       - store-npm-logs
 
   lint-types:
