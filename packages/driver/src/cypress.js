@@ -31,7 +31,7 @@ const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
 const browserInfo = require('./cypress/browser')
-const debug = require('debug')('cypress-events:driver')
+const debug = require('debug')('cypress:driver:cypress')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
