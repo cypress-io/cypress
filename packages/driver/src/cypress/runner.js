@@ -17,8 +17,9 @@ const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
-const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file testConfiguration'.split(' ')
+const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file cfg suiteCfg isLastInSuite'.split(' ')
 
+const debug = require('debug')('cypress:driver:runner')
 // ## initial payload
 // {
 //   suites: [
@@ -66,6 +67,7 @@ const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFrom
 // }
 
 const fire = function (event, runnable, Cypress) {
+  debug('fire:', event)
   if (runnable._fired == null) {
     runnable._fired = {}
   }
@@ -102,9 +104,16 @@ const runnableAfterRunAsync = function (runnable, Cypress) {
   })
 }
 
-const testAfterRun = function (test, Cypress) {
+const testAfterRun = function (test, Cypress, getTestById) {
   test.clearTimeout()
   if (!fired(TEST_AFTER_RUN_EVENT, test)) {
+    const t = test
+    const siblings = getAllSiblingTests(t.parent, getTestById)
+
+    if (lastTestThatWillRunInSuite(t, siblings)) {
+      t.isLastInSuite = true
+    }
+
     setWallClockDuration(test)
     fire(TEST_AFTER_RUN_EVENT, test, Cypress)
 
@@ -180,7 +189,7 @@ const wrapAll = (runnable) => {
   return _.extend(
     {},
     reduceProps(runnable, RUNNABLE_PROPS),
-    reduceProps(runnable, RUNNABLE_LOGS)
+    reduceProps(runnable, RUNNABLE_LOGS),
   )
 }
 
@@ -366,7 +375,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
       fn = function () {
         setTest(null)
 
-        testAfterRun(test, Cypress)
+        testAfterRun(test, Cypress, getTestById)
 
         // and now invoke next(err)
         return originalFn.apply(window, arguments)
@@ -758,7 +767,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
         $utils.errMessageByPath('uncaught.error_in_hook', {
           parentTitle,
           hookName,
-        })
+        }),
       )
     }
 
@@ -928,7 +937,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
         setTests,
         onRunnable,
         onLogsById,
-        getTestId
+        getTestId,
       )
     },
 
@@ -957,7 +966,9 @@ const create = function (specWindow, mocha, Cypress, cy) {
       let lifecycleStart; let test
 
       if (!runnable.id) {
-        throw new Error('runnable must have an id', runnable.id)
+        if (!_stopped) {
+          throw new Error('runnable must have an id', runnable.id)
+        }
       }
 
       switch (runnable.type) {
@@ -1005,6 +1016,12 @@ const create = function (specWindow, mocha, Cypress, cy) {
       // of cy - since we now have a new 'test' and all of the
       // associated _runnables will share this state
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+        if (test.parent && test.parent.cfg) {
+          console.log('added suiteCfg', test.parent.cfg)
+          test.suiteCfg = test.parent.cfg
+          delete test.parent.cfg
+        }
+
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
 

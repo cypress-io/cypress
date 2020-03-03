@@ -355,7 +355,10 @@ namespace CypressBrowserTests {
   Cypress.isBrowser({family: 'foo'}) // $ExpectError
   Cypress.isBrowser() // $ExpectError
 }
+
 namespace CypressTestConfigTests {
+
+  // set config on a per-test basis
   it('test', {
     browser: {name: 'firefox'}
   }, () => {})
@@ -369,4 +372,19 @@ namespace CypressTestConfigTests {
   it('test', {
     browser: {foo: 'bar'} // $ExpectError
   }, () => {})
+
+  // set config on a per-suite basis
+  describe('suite', {
+    browser: {family: 'firefox'},
+    baseUrl: 'www.example.com'
+  }, () => {
+
+  })
+  describe('suite', {
+    browser: {family: 'firefox'},
+    baseUrl: 'www.example.com'
+    foo: 'foo' // $ExpectError
+  }, () => {
+
+  })
 }

@@ -9,6 +9,7 @@ import automation from './automation'
 import logger from './logger'
 
 import $Cypress, { $ } from '@packages/driver'
+const debug = require('debug')('cypress:runner:events')
 
 const ws = client.connect({
   path: '/__socket.io',
@@ -241,46 +242,82 @@ const eventManager = {
       ws.emit('client:request', msg, data, cb)
     })
 
-    let restoreConfigurationFn = null
+    let restoreTestConfigFn = null
+    let restoreSuiteConfigFn = null
 
     Cypress.on('test:before:run', (test) => {
       /**
        * @type {Cypress.TestConfigOptions}
        */
-      const testConfig = test.testConfiguration
+      const testConfig = test.cfg
+      const suiteConfig = test.suiteCfg
 
-      restoreConfigurationFn = null
-      if (!testConfig) return
+      debug('test:before:run')
 
-      const config = Cypress.config()
+      if (!(suiteConfig || testConfig)) return
 
-      const backupConfig = _.clone(config)
+      debug('got per-test config')
 
-      _.extend(config, _.omit(testConfig, 'browser'))
+      const config = Cypress.config
 
-      let backupEnv
-      let env
+      const backupConfig = _.clone(config())
 
-      if (testConfig.env) {
-        env = Cypress.env()
-        backupEnv = _.clone(env)
-        _.extend(env, testConfig.env)
+      const env = Cypress.env
+      const backupEnv = _.clone(env())
+
+      const restoreConfigFn = function () {
+        Cypress.config.reset()
+        Cypress.config(backupConfig)
+        Cypress.env.reset()
+        Cypress.env(backupEnv)
       }
 
-      restoreConfigurationFn = function () {
-        _.extend(config, backupConfig)
-        if (env) {
-          Object.keys(env).forEach((key) => {
-            delete env[key]
-          })
+      if (suiteConfig) {
+        debug('load suite config')
 
-          _.extend(env, backupEnv)
+        if (suiteConfig.env) {
+          env(suiteConfig.env)
         }
+
+        restoreSuiteConfigFn = restoreConfigFn
+        config(_.omit(suiteConfig, 'browser'))
+      }
+
+      if (testConfig) {
+        debug('load test config')
+        if (testConfig.env) {
+          env(testConfig.env)
+        }
+
+        restoreTestConfigFn = restoreConfigFn
+        config(_.omit(testConfig, 'browser'))
       }
     })
 
     Cypress.on('test:after:run', (test) => {
-      restoreConfigurationFn && restoreConfigurationFn()
+      if (restoreTestConfigFn || restoreSuiteConfigFn) {
+        restoreTestConfigFn && debug('restoring from test')
+        restoreSuiteConfigFn && debug('restoring from suite')
+        if (restoreSuiteConfigFn !== restoreTestConfigFn) {
+          if (restoreTestConfigFn) {
+            restoreTestConfigFn()
+            restoreTestConfigFn = null
+          }
+
+          if (restoreSuiteConfigFn) {
+            restoreSuiteConfigFn()
+            restoreSuiteConfigFn = null
+          }
+
+          return
+        }
+
+        restoreTestConfigFn()
+        restoreSuiteConfigFn = null
+        restoreTestConfigFn = null
+
+        return
+      }
     })
 
     _.each(driverToSocketEvents, (event) => {

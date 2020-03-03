@@ -8,7 +8,9 @@ const testState = {
 }
 
 describe('per-test config', () => {
-  after(() => {
+  after(function () {
+    if (hasOnly(this.currentTest)) return
+
     if (Cypress.browser.name === 'firefox') {
       return expect(testState).deep.eq({
         ranChrome: false,
@@ -103,4 +105,29 @@ describe('per-test config', () => {
       expect(Cypress.env('FOO_VALUE')).eq('foo')
     })
   })
+
+  describe('in suite', () => {
+    describe('config in suite', {
+      defaultCommandTimeout: 200,
+    }, () => {
+      it('test', () => {
+        expect(Cypress.config().defaultCommandTimeout).eq(200)
+      })
+    })
+  })
 })
+
+function hasOnly (test) {
+  let curSuite = test.parent
+  let hasOnly = false
+
+  while (curSuite) {
+    if (curSuite._onlySuites.length || curSuite._onlyTests.length) {
+      hasOnly = true
+    }
+
+    curSuite = curSuite.parent
+  }
+
+  return hasOnly
+}

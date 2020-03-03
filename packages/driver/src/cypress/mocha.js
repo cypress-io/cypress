@@ -18,16 +18,16 @@ const runnableResetTimeout = Runnable.prototype.resetTimeout
 delete window.mocha
 delete window.Mocha
 
-function overrideMochaIt (specWindow) {
-  const _it = specWindow.it
+function overrideMochaFn (fnName, specWindow) {
+  const _fn = specWindow[fnName]
 
-  function overrideIt (fn) {
-    specWindow.it = fn()
-    specWindow.it['only'] = fn('only')
-    specWindow.it['skip'] = fn('skip')
+  function overrideFn (fn) {
+    specWindow[fnName] = fn()
+    specWindow[fnName]['only'] = fn('only')
+    specWindow[fnName]['skip'] = fn('skip')
   }
 
-  overrideIt(function (subFn) {
+  overrideFn(function (subFn) {
     return function (...args) {
       /**
        * @type {Cypress.Cypress}
@@ -46,7 +46,7 @@ function overrideMochaIt (specWindow) {
         return _.some(browserlist, Cypress.isBrowser)
       }
 
-      const origIt = subFn ? _it[subFn] : _it
+      const origFn = subFn ? _fn[subFn] : _fn
 
       if (args.length > 2 && _.isObject(args[1])) {
         const opts = _.defaults({}, args[1], {
@@ -63,20 +63,20 @@ function overrideMochaIt (specWindow) {
               this.skip()
             }
 
-            return origIt.apply(this, mochaArgs)
+            return origFn.apply(this, mochaArgs)
           }
 
-          return _it['skip'].apply(this, mochaArgs)
+          return _fn['skip'].apply(this, mochaArgs)
         }
 
-        const ret = origIt.apply(this, mochaArgs)
+        const ret = origFn.apply(this, mochaArgs)
 
-        ret.testConfiguration = opts
+        ret.cfg = opts
 
         return ret
       }
 
-      return origIt.apply(this, args)
+      return origFn.apply(this, args)
     }
   })
 }
@@ -97,7 +97,9 @@ const ui = (specWindow, _mocha) => {
     // such as describe, it, before, beforeEach, etc
     this.suite.emit('pre-require', specWindow, null, this)
 
-    overrideMochaIt(specWindow)
+    overrideMochaFn('it', specWindow)
+    overrideMochaFn('describe', specWindow)
+    overrideMochaFn('context', specWindow)
 
     return this
   }
