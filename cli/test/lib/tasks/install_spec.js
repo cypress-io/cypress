@@ -68,7 +68,7 @@ describe('/lib/tasks/install', function () {
 
           snapshot(
             'skip installation 1',
-            normalize(this.stdout.toString())
+            normalize(this.stdout.toString()),
           )
         })
       })
@@ -92,7 +92,7 @@ describe('/lib/tasks/install', function () {
 
           snapshot(
             'specify version in env vars 1',
-            normalize(this.stdout.toString())
+            normalize(this.stdout.toString()),
           )
         })
       })
@@ -195,7 +195,7 @@ describe('/lib/tasks/install', function () {
           .then(() => {
             return snapshot(
               'version already installed - cypress install 1',
-              normalize(this.stdout.toString())
+              normalize(this.stdout.toString()),
             )
           })
         })
@@ -207,7 +207,7 @@ describe('/lib/tasks/install', function () {
           .then(() => {
             snapshot(
               'version already installed - postInstall 1',
-              normalize(this.stdout.toString())
+              normalize(this.stdout.toString()),
             )
           })
         })
@@ -231,7 +231,7 @@ describe('/lib/tasks/install', function () {
 
           snapshot(
             'continues installing on failure 1',
-            normalize(this.stdout.toString())
+            normalize(this.stdout.toString()),
           )
         })
       })
@@ -254,12 +254,12 @@ describe('/lib/tasks/install', function () {
 
           // cleans up the zip file
           expect(fs.removeAsync).to.be.calledWith(
-            downloadDestination
+            downloadDestination,
           )
 
           snapshot(
             'installs without existing installation 1',
-            normalize(this.stdout.toString())
+            normalize(this.stdout.toString()),
           )
         })
       })
@@ -282,7 +282,7 @@ describe('/lib/tasks/install', function () {
 
           snapshot(
             'installed version does not match needed version 1',
-            normalize(this.stdout.toString())
+            normalize(this.stdout.toString()),
           )
         })
       })
@@ -305,7 +305,7 @@ describe('/lib/tasks/install', function () {
 
           snapshot(
             'forcing true always installs 1',
-            normalize(this.stdout.toString())
+            normalize(this.stdout.toString()),
           )
         })
       })
@@ -330,7 +330,7 @@ describe('/lib/tasks/install', function () {
 
           snapshot(
             'warning installing as global 1',
-            normalize(this.stdout.toString())
+            normalize(this.stdout.toString()),
           )
         })
       })
@@ -347,7 +347,7 @@ describe('/lib/tasks/install', function () {
         it('uses verbose renderer', function () {
           snapshot(
             'installing in ci 1',
-            normalize(this.stdout.toString())
+            normalize(this.stdout.toString()),
           )
         })
       })
@@ -371,7 +371,7 @@ describe('/lib/tasks/install', function () {
 
             snapshot(
               'invalid cache directory 1',
-              normalize(this.stdout.toString())
+              normalize(this.stdout.toString()),
             )
           })
         })
@@ -441,7 +441,7 @@ describe('/lib/tasks/install', function () {
 
             snapshot(
               'error for removed CYPRESS_BINARY_VERSION 1',
-              normalize(this.stdout.toString())
+              normalize(this.stdout.toString()),
             )
           })
         })
@@ -455,7 +455,7 @@ describe('/lib/tasks/install', function () {
       .then(() => {
         return snapshot(
           'silent install 1',
-          normalize(`[no output]${this.stdout.toString()}`)
+          normalize(`[no output]${this.stdout.toString()}`),
         )
       })
     })

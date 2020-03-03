@@ -138,12 +138,12 @@ class Project extends EE {
 
         return Promise.join(
           this.watchSettingsAndStartWebsockets(options, cfg),
-          this.scaffold(cfg)
+          this.scaffold(cfg),
         )
         .then(() => {
           return Promise.join(
             this.checkSupportFile(cfg),
-            this.watchPluginsFile(cfg, options)
+            this.watchPluginsFile(cfg, options),
           )
         })
       })
@@ -159,6 +159,8 @@ class Project extends EE {
     cfg = config.whitelist(cfg)
 
     return plugins.init(cfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
       onError (err) {
         debug('got plugins error', err.stack)
 
@@ -211,7 +213,7 @@ class Project extends EE {
     return Promise.join(
       this.server ? this.server.close() : undefined,
       this.watchers ? this.watchers.close() : undefined,
-      preprocessor.close()
+      preprocessor.close(),
     )
     .then(() => {
       return process.chdir(localCwd)
@@ -512,7 +514,7 @@ class Project extends EE {
     // becomes /integration/foo.coffee
     return `/${path.join(type, path.relative(
       integrationFolder,
-      path.resolve(projectRoot, pathToSpec)
+      path.resolve(projectRoot, pathToSpec),
     ))}`
   }
 

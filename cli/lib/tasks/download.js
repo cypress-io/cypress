@@ -121,7 +121,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
         debug(text)
 
         throw new Error(text)
-      }
+      },
     )
   }
 
@@ -253,7 +253,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
           Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
           Response message: ${response.statusMessage}
-        `
+        `,
         )
 
         reject(err)
