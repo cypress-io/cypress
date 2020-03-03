@@ -120,7 +120,7 @@
     "debug": "4.1.1",
     "decaffeinate": "6.0.9",
     "del": "3.0.0",
-    "electron-builder": "21.2.0",
+    "electron-builder": "22.3.6",
     "electron-notarize": "0.2.1",
     "eslint": "6.8.0",
     "eslint-plugin-cypress": "2.10.3",

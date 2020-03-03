@@ -24,7 +24,7 @@ module.exports = {
 
   // returns icons package so that the caller code can find
   // paths to the icons without hard-coding them
-  icon () {
+  icons () {
     return require('@cypress/icons')
   },
 
