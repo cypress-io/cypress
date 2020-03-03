@@ -128,17 +128,41 @@ describe('Error Message', function () {
     this.start()
 
     cy.get('.error').contains('ReferenceError: alsdkjf is not defined')
-    cy.get('details').should('not.have.attr', 'open')
-    cy.get('details').click().should('have.attr', 'open')
-    cy.get('summary').should('contain', 'ReferenceError')
+    cy.get('details.details-body').should('not.have.attr', 'open')
+    cy.get('details.details-body').click().should('have.attr', 'open')
+    cy.get('details.details-body > summary').should('contain', 'ReferenceError')
   })
 
   it('doesn\'t show error details if not provided', function () {
     cy.stub(this.ipc, 'onProjectError').yields(null, this.err)
     this.start()
 
+    cy.get('details.details-body > summary').should('not.exist')
+  })
+
+  it('shows error stack trace if provided', function () {
+    const err = new Error('foo')
+
+    err.stack = 'bar'
+
+    cy.stub(this.ipc, 'onProjectError').yields(null, err)
+    this.start()
+
+    cy.get('.error').contains('foo')
+    cy.get('details.stacktrace').should('not.have.attr', 'open')
+    cy.get('details.stacktrace').click().should('have.attr', 'open')
+    cy.get('details.stacktrace').should('contain', 'bar')
+  })
+
+  it('doesn\'t show error stack trace if not provided', function () {
+    const err = new Error()
+
+    delete err.stack
+    cy.stub(this.ipc, 'onProjectError').yields(null, err)
+    this.start()
+
     cy.get('.error')
-    cy.get('summary').should('not.exist')
+    cy.get('details.stacktrace > summary').should('not.be.visible')
   })
 
   it('shows abbreviated error details if only one line', function () {
@@ -155,7 +179,7 @@ describe('Error Message', function () {
     this.start()
 
     cy.get('.error').contains('ReferenceError: alsdkjf is not defined')
-    cy.get('summary').should('not.exist')
+    cy.get('details.details-body > summary').should('not.exist')
   })
 
   it('opens links outside of electron', function () {
@@ -197,7 +221,7 @@ describe('Error Message', function () {
     this.ipc.openProject.rejects(this.detailsErr)
     this.start()
 
-    cy.get('details').click()
+    cy.get('details.details-body').click()
     cy.get('nav').should('be.visible')
     cy.get('footer').should('be.visible')
   })
@@ -207,7 +231,7 @@ describe('Error Message', function () {
     this.ipc.openProject.rejects(this.detailsErr)
     this.start()
 
-    cy.get('details').click()
+    cy.get('details.details-body').click()
     cy.contains('Try Again').should('be.visible')
     cy.get('.full-alert pre').should('have.css', 'overflow', 'auto')
   })

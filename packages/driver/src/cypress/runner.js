@@ -7,6 +7,7 @@ const Pending = require('mocha/lib/pending')
 
 const $Log = require('./log')
 const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -15,7 +16,6 @@ const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
-const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
 const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file cfg suiteCfg isLastInSuite'.split(' ')
 
@@ -166,35 +166,20 @@ const setWallClockDuration = (test) => {
   return test.wallClockDuration = new Date() - test.wallClockStartedAt
 }
 
-const reduceProps = (obj, props) => {
-  return _.reduce(props, (memo, prop) => {
-    if (_.has(obj, prop) || (obj[prop] !== undefined)) {
-      memo[prop] = obj[prop]
-    }
-
-    return memo
-  }
-  , {})
-}
-
 // we need to optimize wrap by converting
 // tests to an id-based object which prevents
 // us from recursively iterating through every
 // parent since we could just return the found test
 const wrap = (runnable) => {
-  return reduceProps(runnable, RUNNABLE_PROPS)
+  return $utils.reduceProps(runnable, RUNNABLE_PROPS)
 }
 
 const wrapAll = (runnable) => {
   return _.extend(
     {},
-    reduceProps(runnable, RUNNABLE_PROPS),
-    reduceProps(runnable, RUNNABLE_LOGS),
+    $utils.reduceProps(runnable, RUNNABLE_PROPS),
+    $utils.reduceProps(runnable, RUNNABLE_LOGS),
   )
-}
-
-const wrapErr = (err) => {
-  return reduceProps(err, ERROR_PROPS)
 }
 
 const getHookName = function (hook) {
@@ -753,7 +738,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     let hookName
     const isHook = runnable.type === 'hook'
 
-    $utils.normalizeErrorStack(err)
+    $errUtils.normalizeErrorStack(err)
 
     if (isHook) {
       const parentTitle = runnable.parent.title
@@ -762,9 +747,9 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
 
       // append a friendly message to the error indicating
       // we're skipping the remaining tests in this suite
-      err = $utils.appendErrMsg(
+      err = $errUtils.appendErrMsg(
         err,
-        $utils.errMessageByPath('uncaught.error_in_hook', {
+        $errUtils.errMsgByPath('uncaught.error_in_hook', {
           parentTitle,
           hookName,
         }),
@@ -773,7 +758,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
 
     // always set runnable err so we can tap into
     // taking a screenshot on error
-    runnable.err = wrapErr(err)
+    runnable.err = $errUtils.wrapErr(err)
 
     if (!runnable.alreadyEmittedMocha) {
       // do not double emit this event
@@ -831,10 +816,11 @@ const create = function (specWindow, mocha, Cypress, cy) {
       ])
       .compact()
       .join('\n\n')
+      .value()
     }
 
     // else  do the same thing as mocha here
-    err = $utils.appendErrMsg(err, append())
+    err = $errUtils.appendErrMsg(err, append())
 
     // remove this error's stack since it gives no valuable context
     err.stack = ''
@@ -1017,7 +1003,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
       // associated _runnables will share this state
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
         if (test.parent && test.parent.cfg) {
-          console.log('added suiteCfg', test.parent.cfg)
           test.suiteCfg = test.parent.cfg
           delete test.parent.cfg
         }
@@ -1084,7 +1069,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
             err.isPending = true
           }
 
-          runnable.err = wrapErr(err)
+          runnable.err = $errUtils.wrapErr(err)
         }
 
         return runnableAfterRunAsync(runnable, Cypress)
@@ -1264,7 +1249,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
       test = getTestById(testId)
 
       if (test) {
-        return wrapErr(test.err)
+        return $errUtils.wrapErr(test.err)
       }
     },
 

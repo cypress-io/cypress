@@ -490,6 +490,7 @@ describe('Settings', () => {
   describe('errors', () => {
     beforeEach(function () {
       this.err = {
+        title: 'Foo Title',
         message: 'Port \'2020\' is already in use.',
         name: 'Error',
         port: 2020,
@@ -514,11 +515,11 @@ describe('Settings', () => {
     })
 
     it('displays errors', () => {
-      cy.contains('Can\'t start server')
+      cy.contains('Foo Title')
     })
 
     it('displays config after error is fixed', function () {
-      cy.contains('Can\'t start server').then(() => {
+      cy.contains('Foo Title').then(() => {
         this.ipc.openProject.onCall(1).resolves(this.config)
 
         this.ipc.onConfigChanged.yield()

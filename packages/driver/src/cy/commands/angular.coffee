@@ -2,7 +2,7 @@ _ = require("lodash")
 $ = require("jquery")
 Promise = require("bluebird")
 
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
@@ -66,7 +66,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cancelAll()
       return subject
     .catch Promise.AggregateError, (err) ->
-      $utils.throwErr error
+      $errUtils.throwErr error
 
   Commands.addAll({
     ng: (type, selector, options = {}) ->
@@ -75,7 +75,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## and if angular is available through them.  throw a very specific
       ## error message here that's different depending on what module
       ## system you're using
-      $utils.throwErrByPath "ng.no_global" if not state("window").angular
+      $errUtils.throwErrByPath "ng.no_global" if not state("window").angular
 
       _.defaults options, {log: true}
 

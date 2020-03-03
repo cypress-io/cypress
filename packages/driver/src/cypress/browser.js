@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 
 const isBrowser = function (config, obj = '') {
   if (_.isString(obj)) {
@@ -13,7 +14,7 @@ const isBrowser = function (config, obj = '') {
     return _.isMatch(config.browser, obj)
   }
 
-  $utils.throwErrByPath('browser.invalid_arg', {
+  $errUtils.throwErrByPath('browser.invalid_arg', {
     args: { method: 'isBrowser', obj: $utils.stringify(obj) },
   })
 }
