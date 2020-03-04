@@ -346,12 +346,6 @@ Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
 exports['e2e plugins fails when there is an async error at the root 1'] = `
 
-The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-root-async-error/cypress/plugins/index.js\`)
-
- Error: Root async error from plugins file
-    [stack trace lines]
-
-
 ====================================================================================================
 
   (Run Starting)
@@ -367,6 +361,12 @@ The following error was thrown by a plugin. We stopped running your tests becaus
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  app_spec.js                                                                     (1 of 1)
+
+The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-root-async-error/cypress/plugins/index.js\`)
+
+ Error: Root async error from plugins file
+    [stack trace lines]
+
 
   (Results)
 

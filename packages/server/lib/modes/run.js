@@ -574,11 +574,7 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     // to give user's plugins file a chance to change it
     browsers: args.browsers,
     onWarning,
-    onError (err) {
-      console.log('')
-      errors.log(err)
-      args.onError(err)
-    },
+    onError: args.onError,
   }
 
   return openProject
@@ -712,9 +708,9 @@ module.exports = {
   getElectronProps,
 
   exitEarly (err) {
-    debug('set early exit message: %s', err.message)
+    debug('set early exit error: %s', err.stack)
 
-    this.earlyExitMessage = err.message
+    this.earlyExitErr = err
   },
 
   displayResults (obj = {}, estimated) {
@@ -937,12 +933,15 @@ module.exports = {
         }
       }
 
-      const onEarlyExit = function (errMsg) {
+      const onEarlyExit = function (err) {
+        console.log('')
+        errors.log(err)
+
         // probably should say we ended
         // early too: (Ended Early: true)
         // in the stats
         const obj = {
-          error: errors.stripAnsi(errMsg),
+          error: errors.stripAnsi(err.message),
           stats: {
             failures: 1,
             tests: 0,
@@ -968,13 +967,13 @@ module.exports = {
       project.once('end', onEnd)
 
       // if we already received a reason to exit early, go ahead and do it
-      if (this.earlyExitMessage) {
-        return onEarlyExit(this.earlyExitMessage)
+      if (this.earlyExitErr) {
+        return onEarlyExit(this.earlyExitErr)
       }
 
       // otherwise override exitEarly so we exit as soon as there is a reason
       this.exitEarly = (err) => {
-        onEarlyExit(err.message)
+        onEarlyExit(err)
       }
     })
   },
