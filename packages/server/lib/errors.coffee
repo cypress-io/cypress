@@ -528,7 +528,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       {
         msg: "We detected that the #{arg1} process running your tests just exited unexpectedly."
         details: """
-        This error can occur whenever Cypress detects that the browser that was launched for running tests has exited or crashed before the tests could finish running, or without the user manually stopping the tests in Cypress.
+        This error occurs whenever Cypress detects the browser exited before tests could finish running.
 
         Learn more at https://on.cypress.io/browser-process-crashed
         """
