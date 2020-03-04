@@ -294,6 +294,14 @@ buildCypressApp = (platform, version, options = {}) ->
     console.log("Removing unnecessary folder '#{electronDistFolder}'")
     fs.removeAsync(electronDistFolder) # .catch(_.noop) why are we ignoring an error here?!
 
+  lsDistFolder = ->
+    log('#lsDistFolder')
+    buildFolder = buildDir()
+    console.log("in build folder %s", buildFolder)
+    execa('ls', ['-la', buildFolder])
+    .then R.prop("stdout")
+    .then console.log
+
   removeDuplicateElectron = ->
     log('#removeDuplicateElectron')
     if platform != "linux"
@@ -454,6 +462,7 @@ buildCypressApp = (platform, version, options = {}) ->
   ## .then(copyRenameElectronDist)
   .then(electronPackAndSign)
   # .then(removeDuplicateElectron)
+  .then(lsDistFolder)
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
   .then(verifyAppCanOpen)
