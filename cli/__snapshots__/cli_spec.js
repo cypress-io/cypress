@@ -420,6 +420,7 @@ exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] 
     verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    info [options]     Prints Cypress and system information
   -------
   stderr:
   -------
