@@ -117,7 +117,7 @@ const formatPath = (name, n, colour = 'reset') => {
 
   const fakeCwdPath = env.get('FAKE_CWD_PATH')
 
-  if (fakeCwdPath && env.get('CYPRESS_ENV') === 'test') {
+  if (fakeCwdPath && env.get('CYPRESS_INTERNAL_ENV') === 'test') {
     // if we're testing within Cypress, we want to strip out
     // the current working directory before calculating the stdout tables
     // this will keep our snapshots consistent everytime we run

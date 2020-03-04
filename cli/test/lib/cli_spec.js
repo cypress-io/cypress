@@ -79,7 +79,7 @@ describe('cli', () => {
     })
   })
 
-  context('CYPRESS_ENV', () => {
+  context('CYPRESS_INTERNAL_ENV', () => {
     /**
      * Replaces line "Platform: ..." with "Platform: xxx"
      * @param {string} s
@@ -107,7 +107,7 @@ describe('cli', () => {
     it('allows and warns when staging environment', () => {
       const options = {
         env: {
-          CYPRESS_ENV: 'staging',
+          CYPRESS_INTERNAL_ENV: 'staging',
         },
         filter: ['code', 'stderr', 'stdout'],
       }
@@ -118,7 +118,7 @@ describe('cli', () => {
     it('catches environment "foo"', () => {
       const options = {
         env: {
-          CYPRESS_ENV: 'foo',
+          CYPRESS_INTERNAL_ENV: 'foo',
         },
         // we are only interested in the exit code
         filter: ['code', 'stderr'],

@@ -20,9 +20,9 @@ describe "lib/config", ->
     process.env = @env
 
   context "environment name check", ->
-    it "throws an error for unknown CYPRESS_ENV", ->
-      sinon.stub(errors, "throw").withArgs("INVALID_CYPRESS_ENV", "foo-bar")
-      process.env.CYPRESS_ENV = "foo-bar"
+    it "throws an error for unknown CYPRESS_INTERNAL_ENV", ->
+      sinon.stub(errors, "throw").withArgs("INVALID_CYPRESS_INTERNAL_ENV", "foo-bar")
+      process.env.CYPRESS_INTERNAL_ENV = "foo-bar"
       cfg = {
         projectRoot: "/foo/bar/"
       }
@@ -30,9 +30,9 @@ describe "lib/config", ->
       config.mergeDefaults(cfg, options)
       expect(errors.throw).have.been.calledOnce
 
-    it "warns for non-production CYPRESS_ENV", ->
-      sinon.stub(errors, "warning").withArgs("NON_PRODUCTION_CYPRESS_ENV", "staging")
-      process.env.CYPRESS_ENV = "staging"
+    it "warns for non-production CYPRESS_INTERNAL_ENV", ->
+      sinon.stub(errors, "warning").withArgs("NON_PRODUCTION_CYPRESS_INTERNAL_ENV", "staging")
+      process.env.CYPRESS_INTERNAL_ENV = "staging"
       cfg = {
         projectRoot: "/foo/bar/"
       }
@@ -40,9 +40,9 @@ describe "lib/config", ->
       config.mergeDefaults(cfg, options)
       expect(errors.warning).have.been.calledOnce
 
-    it "allows production CYPRESS_ENV", ->
+    it "allows production CYPRESS_INTERNAL_ENV", ->
       sinon.stub(errors, "throw")
-      process.env.CYPRESS_ENV = "production"
+      process.env.CYPRESS_INTERNAL_ENV = "production"
       cfg = {
         projectRoot: "/foo/bar/"
       }
@@ -749,7 +749,7 @@ describe "lib/config", ->
           bar: "baz"
           version: "1.0.1"
         })
-        expect(cfg.cypressEnv).to.eq(process.env["CYPRESS_ENV"])
+        expect(cfg.cypressEnv).to.eq(process.env["CYPRESS_INTERNAL_ENV"])
         expect(cfg).not.to.have.property("envFile")
 
     it "merges env into @config.env", ->
@@ -1227,7 +1227,7 @@ describe "lib/config", ->
 
     it "does not merge reserved environment variables", ->
       obj = {
-        CYPRESS_ENV: "production"
+        CYPRESS_INTERNAL_ENV: "production"
         CYPRESS_FOO: "bar"
         CYPRESS_CRASH_REPORTS: "0"
         CYPRESS_PROJECT_ID: "abc123"

@@ -167,25 +167,25 @@ module.exports = {
       args = process.argv
     }
 
-    const CYPRESS_ENV = process.env.CYPRESS_ENV
+    const CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV
 
-    if (!util.isValidCypressEnvValue(CYPRESS_ENV)) {
-      debug('invalid CYPRESS_ENV value', CYPRESS_ENV)
+    if (!util.isValidCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
+      debug('invalid CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)
 
       return errors.exitWithError(errors.errors.invalidCypressEnv)(
-        `CYPRESS_ENV=${CYPRESS_ENV}`,
+        `CYPRESS_INTERNAL_ENV=${CYPRESS_INTERNAL_ENV}`,
       )
     }
 
-    if (util.isNonProductionCypressEnvValue(CYPRESS_ENV)) {
-      debug('non-production CYPRESS_ENV value', CYPRESS_ENV)
+    if (util.isNonProductionCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
+      debug('non-production CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)
 
       let msg = `
-        ${logSymbols.warning} Warning: It looks like you're passing CYPRESS_ENV=${CYPRESS_ENV}
+        ${logSymbols.warning} Warning: It looks like you're passing CYPRESS_INTERNAL_ENV=${CYPRESS_INTERNAL_ENV}
 
-        The environment variable "CYPRESS_ENV" is reserved and should only be used internally.
+        The environment variable "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
 
-        Unset the "CYPRESS_ENV" environment variable and run Cypress again.
+        Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.
       `
 
       logger.log()
