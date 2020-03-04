@@ -1,4 +1,6 @@
-const { $ } = Cypress
+declare interface Window {
+  jquery: Function
+}
 
 describe('src/dom/jquery', () => {
   context('.isJquery', () => {
@@ -9,7 +11,7 @@ describe('src/dom/jquery', () => {
     })
 
     it('is true for actual jquery instances', () => {
-      expect(Cypress.dom.isJquery($(':first'))).to.be.true
+      expect(Cypress.dom.isJquery(Cypress.$(':first'))).to.be.true
     })
   })
 })

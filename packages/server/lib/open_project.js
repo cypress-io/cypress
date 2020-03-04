@@ -118,6 +118,8 @@ const moduleFactory = () => {
             }
           }
 
+          options.onError = openProject.options.onError
+
           relaunchBrowser = () => {
             debug(
               'launching browser: %o, spec: %s',
