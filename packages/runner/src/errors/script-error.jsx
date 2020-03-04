@@ -3,7 +3,6 @@ import React from 'react'
 const ansiToHtml = require('ansi-to-html')
 
 const convert = new ansiToHtml({
-
   fg: '#000',
   bg: '#fff',
   newline: false,
