@@ -547,7 +547,7 @@ describe('lib/modes/run', () => {
     })
 
     it('does not delay when not capturing a video', () => {
-      sinon.stub(runMode, 'listenForProjectEnd').resolves({})
+      sinon.stub(runMode, 'listenForMochaEndEvent').resolves({})
 
       return runMode.waitForTestsToFinishRunning({
         startedVideoCapture: null,
@@ -558,13 +558,13 @@ describe('lib/modes/run', () => {
     })
   })
 
-  context('.listenForProjectEnd', () => {
+  context('.listenForMochaEndEvent', () => {
     it('resolves with end event + argument', function () {
       process.nextTick(() => {
         return this.projectInstance.emit('end', { foo: 'bar' })
       })
 
-      return runMode.listenForProjectEnd(this.projectInstance)
+      return runMode.listenForMochaEndEvent(this.projectInstance)
       .then((obj) => {
         expect(obj).to.deep.eq({
           foo: 'bar',
@@ -580,7 +580,7 @@ describe('lib/modes/run', () => {
         expect(this.projectInstance.listeners('end')).to.have.length(0)
       })
 
-      return runMode.listenForProjectEnd(this.projectInstance)
+      return runMode.listenForMochaEndEvent(this.projectInstance)
     })
   })
 

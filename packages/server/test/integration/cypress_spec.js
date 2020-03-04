@@ -376,7 +376,7 @@ describe('lib/cypress', () => {
     beforeEach(() => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
-      sinon.stub(runMode, 'listenForProjectEnd').resolves({ stats: { failures: 0 } })
+      sinon.stub(runMode, 'listenForMochaEndEvent').resolves({ stats: { failures: 0 } })
       sinon.stub(browsers, 'open')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
     })
@@ -1176,7 +1176,7 @@ describe('lib/cypress', () => {
 
     describe('--port', () => {
       beforeEach(() => {
-        return runMode.listenForProjectEnd.resolves({ stats: { failures: 0 } })
+        return runMode.listenForMochaEndEvent.resolves({ stats: { failures: 0 } })
       })
 
       it('can change the default port to 5544', function () {
@@ -1211,7 +1211,7 @@ describe('lib/cypress', () => {
       beforeEach(() => {
         process.env = _.omit(process.env, 'CYPRESS_DEBUG')
 
-        return runMode.listenForProjectEnd.resolves({ stats: { failures: 0 } })
+        return runMode.listenForMochaEndEvent.resolves({ stats: { failures: 0 } })
       })
 
       it('can set specific environment variables', function () {

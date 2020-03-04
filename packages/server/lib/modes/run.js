@@ -925,7 +925,7 @@ module.exports = {
     return openProject.launch(browser, spec, browserOpts)
   },
 
-  listenForProjectEnd (project, exit) {
+  listenForMochaEndEvent (project, exit) {
     return new Promise((resolve) => {
       if (exit === false) {
         resolve = () => {
@@ -955,7 +955,7 @@ module.exports = {
           },
         }
 
-        debug('project received exitEarlyWithErr %o', { err })
+        debug('project received exitEarly %o', { err })
 
         return resolve(obj)
       }
@@ -1061,7 +1061,7 @@ module.exports = {
     // to avoid chopping off the end of the video
     const delay = this.getVideoRecordingDelay(startedVideoCapture)
 
-    return this.listenForProjectEnd(project, exit)
+    return this.listenForMochaEndEvent(project, exit)
     .delay(delay)
     .then((obj) => {
       _.defaults(obj, {
@@ -1317,7 +1317,7 @@ module.exports = {
     const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag } = options
 
     // this needs to be a closure over `this.exitEarly` and not a reference
-    // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
+    // because `this.exitEarly` gets overwritten in `this.listenForMochaEndEvent`
     options.onError = (err) => {
       this.exitEarly(err)
     }
