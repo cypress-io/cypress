@@ -299,28 +299,36 @@ buildCypressApp = (platform, version, options = {}) ->
     if platform != "linux"
       console.log("no duplicate file on platform #{platform}")
       return Promise.resolve()
-    # for some reason I see duplicate "electron" binary left in the build folder
-    # build/linux-unpacked/Cypress <-- good built app
-    # build/linux-unpacked/electron <-- same file as "Cypress" app
-    CypressFilename = buildDir("Cypress")
-    cypressFilename = buildDir("cypress")
-    console.log(CypressFilename)
-    console.log(cypressFilename)
-    Promise.all([
-      fs.pathExists(CypressFilename),
-      fs.pathExists(cypressFilename),
-    ]).then ([CypressExists, cypressExists]) ->
-      la(CypressExists, "could not find expected file", CypressFilename)
 
-      if not cypressExists
-        return
-
-      console.log("cypress file found", cypressFilename)
+    buildFolder = buildDir()
+    console.log("in build folder %s", buildFolder)
+    execa('ls', ['-la', buildFolder])
+    .then R.prop("stdout")
+    .then console.log
+    .then ->
+      # for some reason I see duplicate "electron" binary left in the build folder
+      # build/linux-unpacked/Cypress <-- good built app
+      # build/linux-unpacked/electron <-- same file as "Cypress" app
+      CypressFilename = buildDir("Cypress")
+      cypressFilename = buildDir("cypress")
+      console.log(CypressFilename)
+      console.log(cypressFilename)
 
       Promise.all([
-        fs.promises.stat(CypressFilename),
-        fs.promises.stat(cypressFilename),
-      ])
+        fs.pathExists(CypressFilename),
+        fs.pathExists(cypressFilename),
+      ]).then ([CypressExists, cypressExists]) ->
+        la(CypressExists, "could not find expected file", CypressFilename)
+
+        if not cypressExists
+          return
+
+        console.log("cypress file found", cypressFilename)
+
+        Promise.all([
+          fs.promises.stat(CypressFilename),
+          fs.promises.stat(cypressFilename),
+        ])
     .then ([CypressStats, cypressStats]) ->
       console.log('Cypress stats for', CypressFilename)
       console.log("%o", CypressStats)
@@ -443,9 +451,9 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(removeBinFolders)
   .then(removeCyFolders)
   .then(removeDevElectronApp)
-  .then(copyRenameElectronDist)
+  ## .then(copyRenameElectronDist)
   .then(electronPackAndSign)
-  .then(removeDuplicateElectron)
+  # .then(removeDuplicateElectron)
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
   .then(verifyAppCanOpen)

@@ -22,6 +22,9 @@
       "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/fsevents/fsevents.node"
     ]
   },
+  "linux": {
+    "target": "dir"
+  },
   "afterPack": "./scripts/after-pack-hook.js",
   "afterSign": "./scripts/after-sign-hook.js"
 }
