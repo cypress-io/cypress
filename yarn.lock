@@ -22099,11 +22099,10 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#4d3076af68ea8192c
   version "3.1.2-patch1"
   resolved "https://codeload.github.com/cypress-io/socket.io-circular-parser/tar.gz/4d3076af68ea8192c2e53f9d185eaa166359b4c5"
   dependencies:
-    circular-json "^0.4.0"
+    circular-json "0.5.9"
     component-emitter "1.2.1"
-    debug "~2.6.4"
+    debug "~4.1.0"
     has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
-    isarray "2.0.1"
 
 socket.io-client@2.3.0:
   version "2.3.0"

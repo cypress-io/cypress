@@ -38,7 +38,7 @@ describe "lib/config", ->
       }
       options = {}
       config.mergeDefaults(cfg, options)
-      expect(errors.throw).have.been.calledOnce
+      expect(errors.warning).have.been.calledOnce
 
     it "allows production CYPRESS_ENV", ->
       sinon.stub(errors, "throw")

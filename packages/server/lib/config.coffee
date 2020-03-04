@@ -307,7 +307,7 @@ module.exports = {
     if not @isValidCypressEnvValue(config.cypressEnv)
       errors.throw("INVALID_CYPRESS_ENV", config.cypressEnv)
     if not @isNonProductionCypressEnvValue(config.cypressEnv)
-      errors.throw("NON_PRODUCTION_CYPRESS_ENV", config.cypressEnv)
+      errors.warning("NON_PRODUCTION_CYPRESS_ENV", config.cypressEnv)
 
     delete config.envFile
 
