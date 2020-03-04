@@ -126,23 +126,6 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       The output from the command we ran was:
       """
       return {msg: msg, details: arg2}
-    when "CANNOT_RECORD_VIDEO_HEADED"
-      """
-      Warning: Cypress can only record videos of Electron when running headlessly.
-
-      You have set the Electron browser to run headed.
-
-      A video will not be recorded when using this mode.
-      """
-    when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
-      ## TODO: can this error be removed? what other family of browsers would we support....?
-      """
-      Warning: Cypress can only record videos when using Firefox, Electron, or a Chromium-family browser.
-
-      You have set the browser to: '#{arg1}'
-
-      A video will not be recorded when using this browser.
-      """
     when "NOT_LOGGED_IN"
       """
       You're not logged in.
