@@ -30,16 +30,6 @@ describe "lib/config", ->
       config.mergeDefaults(cfg, options)
       expect(errors.throw).have.been.calledOnce
 
-    it "warns for non-production CYPRESS_INTERNAL_ENV", ->
-      sinon.stub(errors, "warning").withArgs("NON_PRODUCTION_CYPRESS_INTERNAL_ENV", "staging")
-      process.env.CYPRESS_INTERNAL_ENV = "staging"
-      cfg = {
-        projectRoot: "/foo/bar/"
-      }
-      options = {}
-      config.mergeDefaults(cfg, options)
-      expect(errors.warning).have.been.calledOnce
-
     it "allows production CYPRESS_INTERNAL_ENV", ->
       sinon.stub(errors, "throw")
       process.env.CYPRESS_INTERNAL_ENV = "production"

@@ -886,16 +886,6 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       Do not modify the "CYPRESS_INTERNAL_ENV" value.
       """
-    when "NON_PRODUCTION_CYPRESS_INTERNAL_ENV"
-      """
-      We have detected a set "CYPRESS_INTERNAL_ENV" value
-
-        #{chalk.yellow(arg1)}
-
-      "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
-
-      Do not modify the "CYPRESS_INTERNAL_ENV" value.
-      """
     when "CDP_VERSION_TOO_OLD"
       """
       A minimum CDP version of v#{arg1} is required, but the current browser has #{if arg2.major != 0 then "v#{arg2.major}.#{arg2.minor}" else 'an older version'}.
