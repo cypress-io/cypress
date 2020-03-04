@@ -31,6 +31,7 @@ const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
 const browserInfo = require('./cypress/browser')
+const debug = require('debug')('cypress:driver:cypress')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
@@ -212,6 +213,7 @@ class $Cypress {
     // normalizes all the various ways
     // other objects communicate intent
     // and 'action' to Cypress
+    debug(eventName)
     switch (eventName) {
       case 'recorder:frame':
         return this.emit('recorder:frame', args[0])
