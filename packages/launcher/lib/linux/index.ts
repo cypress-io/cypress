@@ -1,5 +1,5 @@
 import { log } from '../log'
-import { partial, trim, tap } from 'ramda'
+import { partial, trim, tap, prop } from 'ramda'
 import { FoundBrowser, Browser } from '../types'
 import { notInstalledErr } from '../errors'
 import execa from 'execa'
@@ -50,8 +50,8 @@ function getLinuxBrowser (
 export function getVersionString (path: string) {
   log('finding version string using command "%s --version"', path)
 
-  return execa
-  .stdout(path, ['--version'])
+  return execa(path, ['--version'])
+  .then(prop('stdout'))
   .then(trim)
   .then(tap(partial(log, ['stdout: %s'])))
 }

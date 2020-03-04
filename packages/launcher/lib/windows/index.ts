@@ -2,7 +2,7 @@ import execa from 'execa'
 import fse from 'fs-extra'
 import os from 'os'
 import { join, normalize } from 'path'
-import { tap, trim } from 'ramda'
+import { tap, trim, prop } from 'ramda'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import { log } from '../log'
@@ -172,7 +172,8 @@ export function getVersionString (path: string) {
     '/value',
   ]
 
-  return execa.stdout('wmic', args)
+  return execa('wmic', args)
+  .then(prop('stdout'))
   .then(trim)
 }
 
