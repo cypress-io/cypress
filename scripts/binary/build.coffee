@@ -121,20 +121,6 @@ buildCypressApp = (platform, version, options = {}) ->
 
     packages.copyAllToDist(distDir())
 
-  copyPatches = ->
-    log("#copyPatches")
-
-    patchesPath = path.join(__dirname, '..', '..', 'patches')
-    destPatchesPath = path.join(distDir(), 'patches')
-
-    fs.mkdirSync(destPatchesPath)
-    fs.readdirSync(patchesPath)
-    .map((patchFileName) -> [
-      path.join(patchesPath, patchFileName),
-      path.join(destPatchesPath, patchFileName)
-    ])
-    .forEach(([src, dest]) -> fs.copyFileSync(src, dest))
-
   transformSymlinkRequires = ->
     log("#transformSymlinkRequires")
 
@@ -355,7 +341,6 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
-  .then(copyPatches)
   .then(npmInstallPackages)
   .then(createRootPackage)
   .then(convertCoffeeToJs)

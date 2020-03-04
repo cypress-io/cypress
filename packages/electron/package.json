@@ -11,7 +11,7 @@
     "start": "./bin/cypress-electron",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --compilers coffee:@packages/coffee/register",
+    "test-unit": "mocha",
     "test-watch": "yarn test-unit --watch"
   },
   "dependencies": {
@@ -24,7 +24,6 @@
     "minimist": "1.2.0"
   },
   "devDependencies": {
-    "@packages/coffee": "*",
     "electron": "7.1.13",
     "mocha": "3.5.3"
   },
