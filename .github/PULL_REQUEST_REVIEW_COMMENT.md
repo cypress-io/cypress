@@ -15,6 +15,7 @@ If any of the following requirements can't be met, leave a comment in the review
 
 - The feature/bugfix is self-documenting from within the product.
 - The change provides the end user with a way to fix their problem (no dead ends).
+- If a breaking change or a change to a commonly used API, the proposed changes have been discussed and agreed upon in the weekly team meeting (or a separate meeting if a larger change).
 
 ### Functionality
 

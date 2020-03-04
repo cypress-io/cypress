@@ -1,5 +1,5 @@
 $dom = require("../dom")
-$utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 
 crossOriginScriptRe = /^script error/i
 
@@ -34,10 +34,10 @@ create = (state, config, log) ->
     ## reset the msg on a cross origin script error
     ## since no details are accessible
     if crossOriginScriptRe.test(msg)
-      msg = $utils.errMessageByPath("uncaught.cross_origin_script")
+      msg = $errUtils.errMsgByPath("uncaught.cross_origin_script")
 
     createErrFromMsg = ->
-      new Error $utils.errMessageByPath("uncaught.error", { msg, source, lineno })
+      new Error $errUtils.errMsgByPath("uncaught.error", { msg, source, lineno })
 
     ## if we have the 5th argument it means we're in a super
     ## modern browser making this super simple to work with.
@@ -49,14 +49,14 @@ create = (state, config, log) ->
       when "app" then "uncaught.fromApp"
       when "spec" then "uncaught.fromSpec"
 
-    err = $utils.appendErrMsg(err, $utils.errMessageByPath(suffixMsg))
+    err = $errUtils.appendErrMsg(err, $errUtils.errMsgByPath(suffixMsg))
 
     err.onFail = ->
       if l = current and current.getLastLog()
         l.error(err)
 
     ## normalize error message for firefox
-    $utils.normalizeErrorStack(err)
+    $errUtils.normalizeErrorStack(err)
 
     return err
 

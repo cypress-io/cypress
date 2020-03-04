@@ -129,6 +129,7 @@ const knownCommands = [
   '-v',
   '--version',
   'version',
+  'info',
 ]
 
 const text = (description) => {
@@ -172,7 +173,7 @@ module.exports = {
       debug('invalid CYPRESS_ENV value', CYPRESS_ENV)
 
       return errors.exitWithError(errors.errors.invalidCypressEnv)(
-        `CYPRESS_ENV=${CYPRESS_ENV}`
+        `CYPRESS_ENV=${CYPRESS_ENV}`,
       )
     }
 
@@ -268,7 +269,7 @@ module.exports = {
     .command('install')
     .usage('[options]')
     .description(
-      'Installs the Cypress executable matching this package\'s version'
+      'Installs the Cypress executable matching this package\'s version',
     )
     .option('-f, --force', text('forceInstall'))
     .action((opts) => {
@@ -281,7 +282,7 @@ module.exports = {
     .command('verify')
     .usage('[options]')
     .description(
-      'Verifies that Cypress is installed correctly and executable'
+      'Verifies that Cypress is installed correctly and executable',
     )
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
@@ -314,6 +315,18 @@ module.exports = {
       }
 
       cache[command]()
+    })
+
+    program
+    .command('info')
+    .usage('[command]')
+    .description('Prints Cypress and system information')
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      require('./exec/info')
+      .start(opts)
+      .then(util.exit)
+      .catch(util.logErrorExit1)
     })
 
     debug('cli starts with arguments %j', args)

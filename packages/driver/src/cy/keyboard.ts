@@ -2,7 +2,7 @@ import Promise from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
 import moment from 'moment'
-import $utils from '../cypress/utils.coffee'
+import $errUtils from '../cypress/error_utils'
 import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
 import * as $document from '../dom/document'
@@ -231,7 +231,7 @@ const shouldIgnoreEvent = <
   K extends { [key in T]?: boolean }
 >(
     eventName: T,
-    options: K
+    options: K,
   ) => {
   return options[eventName] === false
 }
@@ -312,7 +312,7 @@ const validateTyping = (
   currentIndex: number,
   onFail: Function,
   skipCheckUntilIndex: number | undefined,
-  force: boolean
+  force: boolean,
 ) => {
   const chars = joinKeyArrayToString(keys.slice(currentIndex))
   const allChars = joinKeyArrayToString(keys)
@@ -367,7 +367,7 @@ const validateTyping = (
   if (!isFocusable && isTextLike && !force) {
     const node = $dom.stringify($el)
 
-    $utils.throwErrByPath('type.not_actionable_textlike', {
+    $errUtils.throwErrByPath('type.not_actionable_textlike', {
       onFail,
       args: { node },
     })
@@ -377,14 +377,14 @@ const validateTyping = (
   if (!isFocusable && !isTextLike) {
     const node = $dom.stringify($el)
 
-    $utils.throwErrByPath('type.not_on_typeable_element', {
+    $errUtils.throwErrByPath('type.not_on_typeable_element', {
       onFail,
       args: { node },
     })
   }
 
   if (numElements > 1) {
-    $utils.throwErrByPath('type.multiple_elements', {
+    $errUtils.throwErrByPath('type.multiple_elements', {
       onFail,
       args: { num: numElements },
     })
@@ -409,7 +409,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_date', {
+    $errUtils.throwErrByPath('type.invalid_date', {
       onFail,
       // set matched date or entire char string
       args: { chars: allChars },
@@ -425,7 +425,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_month', {
+    $errUtils.throwErrByPath('type.invalid_month', {
       onFail,
       args: { chars: allChars },
     })
@@ -440,7 +440,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_week', {
+    $errUtils.throwErrByPath('type.invalid_week', {
       onFail,
       args: { chars: allChars },
     })
@@ -455,7 +455,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_time', {
+    $errUtils.throwErrByPath('type.invalid_time', {
       onFail,
       args: { chars: allChars },
     })
@@ -470,7 +470,7 @@ const validateTyping = (
       return { skipCheckUntilIndex }
     }
 
-    $utils.throwErrByPath('type.invalid_dateTime', {
+    $errUtils.throwErrByPath('type.invalid_datetime', {
       onFail,
       args: { chars: allChars },
     })
@@ -652,13 +652,13 @@ export class Keyboard {
 
           // ignore empty strings
           return _.filter(_.split(chars, ''))
-        }
+        },
       )
     }
 
     const keyDetailsArr = _.map(
       keys,
-      getKeyDetails(options.onNoMatchingSpecialChars)
+      getKeyDetails(options.onNoMatchingSpecialChars),
     )
 
     const numKeys = countNumIndividualKeyStrokes(keyDetailsArr)
@@ -694,7 +694,7 @@ export class Keyboard {
               currentKeyIndex,
               options.onFail,
               _skipCheckUntilIndex,
-              options.force
+              options.force,
             )
 
             _skipCheckUntilIndex = skipCheckUntilIndex
@@ -725,7 +725,7 @@ export class Keyboard {
                 return $elements.setNativeProp(
                   activeEl as $elements.HTMLTextLikeInputElement,
                   'value',
-                  valToSet
+                  valToSet,
                 )
               }
             }
@@ -744,7 +744,7 @@ export class Keyboard {
 
           return null
         }
-      }
+      },
     )
 
     // we will only press each modifier once, so only find unique modifiers
@@ -778,7 +778,7 @@ export class Keyboard {
     el: HTMLElement,
     eventType: KeyEventType,
     keyDetails: KeyDetails,
-    opts: typeOptions
+    opts: typeOptions,
   ) {
     debug('fireSimulatedEvent', eventType, keyDetails)
 
@@ -874,7 +874,7 @@ export class Keyboard {
           detail: 0,
           view: win,
         },
-        _.isUndefined
+        _.isUndefined,
       ),
     }
 
@@ -890,7 +890,7 @@ export class Keyboard {
         eventOptions.cancelable,
         eventOptions.view,
         eventOptions.data,
-        1
+        1,
         // eventOptions.locale
       )
       /*1: IE11 Input method param*/
@@ -991,7 +991,7 @@ export class Keyboard {
 
     debug(
       'typeSimulatedKey options:',
-      _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id'])
+      _.pick(options, ['keydown', 'keypress', 'textInput', 'input', 'id']),
     )
 
     if (

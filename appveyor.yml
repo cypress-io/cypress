@@ -73,8 +73,8 @@ test_script:
   - node --version
   - yarn --version
   - 7z
-  - echo *** Browsers installed on this system ***
-  - cd packages/launcher && node index.js && cd ../..
+  - echo *** System info ***
+  - node cli/bin/cypress info --dev
 
   - echo *** Kitchensink tests run on Chrome browser ***
   - npm run dev -- --run-project %CD%/packages/example --browser chrome

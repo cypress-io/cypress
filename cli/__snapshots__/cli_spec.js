@@ -205,6 +205,7 @@ exports['cli help command shows help 1'] = `
     verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    info [options]     Prints Cypress and system information
   -------
   stderr:
   -------
@@ -240,6 +241,7 @@ exports['cli help command shows help for -h 1'] = `
     verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    info [options]     Prints Cypress and system information
   -------
   stderr:
   -------
@@ -275,6 +277,7 @@ exports['cli help command shows help for --help 1'] = `
     verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    info [options]     Prints Cypress and system information
   -------
   stderr:
   -------
@@ -311,6 +314,7 @@ exports['cli unknown command shows usage and exits 1'] = `
     verify [options]   Verifies that Cypress is installed correctly and
                        executable
     cache [options]    Manages the Cypress binary cache
+    info [options]     Prints Cypress and system information
   -------
   stderr:
   -------

@@ -52,7 +52,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
+  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -75,7 +75,7 @@ declare namespace Cypress {
     (task: 'firefox:force:gc'): Promise<void>
   }
 
-  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | string
+  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
 
   type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
 
@@ -335,11 +335,12 @@ declare namespace Cypress {
     isCy(obj: any): obj is Chainable
 
     /**
-     * Checks if you're running in the supplied browser family.
-     * e.g. isBrowser('Chrome') will be true for the browser 'Canary'
-     * @param name browser family name to check
+     * Returns true if currently running the supplied browser name or matcher object.
+     * @example isBrowser('chrome') will be true for the browser 'chrome:canary' and 'chrome:stable'
+     * @example isBrowser({ name: 'firefox', channel: 'dev' }) will be true only for the browser 'firefox:dev' (Firefox Developer Edition)
+     * @param matcher browser name or matcher object to check.
      */
-    isBrowser(name: string): boolean
+    isBrowser(name: BrowserName | Partial<Browser>): boolean
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -1954,7 +1955,7 @@ declare namespace Cypress {
      * @example
      *    cy.$$('p')
      */
-    $$: JQueryStatic
+    $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -2279,6 +2280,17 @@ declare namespace Cypress {
      * @default { runMode: 1, openMode: null }
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
+  }
+
+  interface PluginConfigOptions extends ConfigOptions {
+    /**
+    * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
+    */
+    configFile: string | false
+    /**
+    * Absolute path to the root of the project
+    */
+    projectRoot: string
   }
 
   interface DebugOptions {

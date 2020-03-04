@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 
 // in the browser mocha is coming back
 // as window
@@ -25,7 +25,7 @@ const ui = (specWindow, _mocha) => {
     this._ui = Mocha.interfaces[name]
 
     if (!this._ui) {
-      $utils.throwErrByPath('mocha.invalid_interface', { args: { name } })
+      $errUtils.throwErrByPath('mocha.invalid_interface', { args: { name } })
     }
 
     this._ui = this._ui(this.suite)
@@ -114,7 +114,7 @@ const patchRunnerFail = () => {
     const errMessage = _.get(err, 'message')
 
     if (errMessage && errMessage.indexOf('Resolution method is overspecified') > -1) {
-      err.message = $utils.errMessageByPath('mocha.overspecified', { error: err.stack })
+      err.message = $errUtils.errMsgByPath('mocha.overspecified', { error: err.stack })
     }
 
     // if this isnt a correct error object then just bail
@@ -171,7 +171,7 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
-      const errMessage = $utils.errMessageByPath(getErrPath(), { ms })
+      const errMessage = $errUtils.errMsgByPath(getErrPath(), { ms })
 
       runnable.callback(new Error(errMessage))
       runnable.timedOut = true
