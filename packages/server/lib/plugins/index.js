@@ -37,7 +37,23 @@ const registerHandler = (handler) => {
 const init = (config, options) => {
   debug('plugins.init', config.pluginsFile)
 
-  return new Promise((resolve, reject) => {
+  return new Promise((_resolve, _reject) => {
+    // provide a safety net for fulfilling the promise because the
+    // 'handleError' function below can potentially be triggered
+    // before or after the promise is already fulfilled
+    let fulfilled = false
+
+    // eslint-disable-next-line @cypress/dev/arrow-body-multiline-braces
+    const fulfill = (_fulfill) => (value) => {
+      if (fulfilled) return
+
+      fulfilled = true
+      _fulfill(value)
+    }
+
+    const resolve = fulfill(_resolve)
+    const reject = fulfill(_reject)
+
     if (!config.pluginsFile) {
       return resolve()
     }
@@ -112,13 +128,21 @@ const init = (config, options) => {
 
     const handleError = (err) => {
       debug('plugins process error:', err.stack)
+
       if (!pluginsProcess) return // prevent repeating this in case of multiple errors
 
       killPluginsProcess()
-      err = errors.get('PLUGINS_ERROR', err.annotated || err.stack || err.message)
+
+      err = errors.get('PLUGINS_UNEXPECTED_ERROR', config.pluginsFile, err.annotated || err.stack || err.message)
       err.title = 'Error running plugin'
 
-      return options.onError(err)
+      // this can sometimes trigger before the promise is fulfilled and
+      // sometimes after, so we need to handle each case differently
+      if (fulfilled) {
+        options.onError(err)
+      } else {
+        reject(err)
+      }
     }
 
     const handleWarning = (warningErr) => {
