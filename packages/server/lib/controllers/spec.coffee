@@ -33,7 +33,6 @@ module.exports = {
       ## and display two different errors.
       return
     .catch (err) ->
-      debug('got bundle error')
       if config.isTextTerminal
         ## bluebird made a change in 3.4.7 where they handle
         ## SyntaxErrors differently here
