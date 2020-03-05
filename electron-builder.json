@@ -23,7 +23,8 @@
     ]
   },
   "linux": {
-    "target": "dir"
+    "target": "dir",
+    "executableName": "Cypress"
   },
   "afterPack": "./scripts/after-pack-hook.js",
   "afterSign": "./scripts/after-sign-hook.js"

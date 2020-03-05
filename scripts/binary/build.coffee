@@ -70,6 +70,7 @@ buildCypressApp = (platform, version, options = {}) ->
       console.log('built app version', result.stdout)
       la(result.stdout == version, "different version reported",
         result.stdout, "from input version to build", version)
+      console.log('✅ using node --version works')
 
   testBuiltStaticAssets = ->
     log('#testBuiltStaticAssets')
