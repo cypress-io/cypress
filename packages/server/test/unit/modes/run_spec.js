@@ -55,7 +55,6 @@ describe('lib/modes/run', () => {
 
     beforeEach(() => {
       sinon.stub(openProject, 'create').resolves()
-      this.onError = sinon.spy()
 
       onError = sinon.spy()
       const options = {

@@ -58,124 +58,6 @@ exports['e2e plugins passes with working preprocessor 1'] = `
 
 `
 
-exports['e2e plugins fails when there is an async error at the root 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/integration/app_spec.js                                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  app_spec.js                                                                     (1 of 1)
-
-The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-root-async-error/cypress/plugins/index.js\`)
-
- Error: Root async error from plugins file
-    [stack trace lines]
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.js                                                                      │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  app_spec.js                              XX:XX        -        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
-
-
-`
-
-exports['e2e plugins fails when there is an async error inside an event handler 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  app_spec.coffee                                                                 (1 of 1)
-
-The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-async-error/cypress/plugins/index.js\`)
-
- Error: Async error from plugins file
-    [stack trace lines]
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  app_spec.coffee                          XX:XX        -        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
-
-
-`
-
 exports['e2e plugins can modify config from plugins 1'] = `
 
 ====================================================================================================
@@ -236,13 +118,6 @@ exports['e2e plugins can modify config from plugins 1'] = `
 
 `
 
-exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
-
-Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
-
-`
-
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
 An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
 
@@ -263,65 +138,6 @@ Can't run because you've entered an invalid browser name.
 Browser: 'chrome' was not found on your system.
 
 Available browsers found are: electron
-
-`
-
-exports['e2e plugins / works with user extensions'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
-  │ Searched:   cypress/integration/app_spec.coffee                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  app_spec.coffee                                                                 (1 of 1)
-
-
-  ✓ can inject text from an extension
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.coffee                          XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
 
 `
 
@@ -458,6 +274,131 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   │ ✖  after_screenshot_spec.coffee             XX:XX        4        3        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        4        3        1        -        -  
+
+
+`
+
+exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+
+Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
+
+`
+
+exports['e2e plugins fails when there is an async error at the root 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.js)                                                              │
+  │ Searched:   cypress/integration/app_spec.js                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app_spec.js                                                                     (1 of 1)
+
+The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-root-async-error/cypress/plugins/index.js\`)
+
+ Error: Root async error from plugins file
+    [stack trace lines]
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.js                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  app_spec.js                              XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
+
+
+`
+
+exports['e2e plugins fails when there is an async error inside an event handler 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Searched:   cypress/integration/app_spec.coffee                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app_spec.coffee                                                                 (1 of 1)
+
+The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-async-error/cypress/plugins/index.js\`)
+
+ Error: Async error from plugins file
+    [stack trace lines]
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.coffee                                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  app_spec.coffee                          XX:XX        -        -        1        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `
