@@ -1,4 +1,3 @@
-cp      = require("child_process")
 Promise = require("bluebird")
 os      = require("os")
 execa   = require("execa")
@@ -23,27 +22,39 @@ printFileSizes = (folder) ->
 macZip = (src, dest) ->
   printFileSizes(src)
   .then () ->
-    new Promise (resolve, reject) ->
-      if os.platform() != "darwin"
-        throw new Error("Can only zip on Mac platform")
-      # Ditto (Mac) options
-      # http://www.unix.com/man-page/OSX/1/ditto/
-      # -c create archive
-      # -k set archive format to PKZip
-      # --sequesterRsrc When creating a PKZip archive, preserve resource
-      #   forks and HFS meta-data in the subdirectory __MACOSX
-      # --keepParent when zipping folder "foo", makes the folder
-      #   the top level in the archive
-      #   foo.zip
-      #     foo/
-      #        ...
-      zip = "ditto -c -k --sequesterRsrc --keepParent #{src} #{dest}"
-      console.log(zip)
-      cp.exec zip, {}, (err, stdout, stderr) ->
-        return reject(err) if err
+    if os.platform() != "darwin"
+      throw new Error("Can only zip on Mac platform")
 
-        console.log("✅ ditto zip finished")
-        resolve(dest)
+    # Ditto (Mac) options
+    # http://www.unix.com/man-page/OSX/1/ditto/
+    # -c create archive
+    # -k set archive format to PKZip
+    # --sequesterRsrc When creating a PKZip archive, preserve resource
+    #   forks and HFS meta-data in the subdirectory __MACOSX
+    # --keepParent when zipping folder "foo", makes the folder
+    #   the top level in the archive
+    #   foo.zip
+    #     foo/
+    #        ...
+    zip = "ditto -c -k --sequesterRsrc --keepParent #{src} #{dest}"
+    options = {
+      stdio: "inherit",
+      shell: true
+    }
+    console.log(zip)
+
+    onZipFinished = () ->
+      console.log("✅ ditto finished")
+
+    onError = (err) ->
+      console.error("⛔️ could not zip #{src} into #{dest}")
+      console.error(err.message)
+      throw err
+
+    execa(zip, options)
+    .then onZipFinished
+    .then R.always(dest)
+    .catch onError
 
 megaBytes = (bytes) ->
   1024 * 1024 * bytes
@@ -124,7 +135,7 @@ windowsZip = (src, dest) ->
   console.log("windows zip: #{cmd}")
 
   onZipFinished = () ->
-    console.log("✅ zip finished")
+    console.log("✅ 7z finished")
 
   onError = (err) ->
     console.error("⛔️ could not zip #{src} into #{dest}")
