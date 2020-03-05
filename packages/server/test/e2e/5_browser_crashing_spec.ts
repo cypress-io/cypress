@@ -17,7 +17,7 @@ describe('e2e browser crashing', function () {
 
           expect(stdout).to.contain(needle)
 
-          return stdout.replace(needle, 'the FooBrowser process')
+          return stdout.replace(new RegExp(needle, 'g'), 'the FooBrowser process')
         },
       })
     },

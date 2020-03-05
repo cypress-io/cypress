@@ -368,16 +368,16 @@ class Project extends EE {
         }
       },
 
-      onUnexpectedDisconnect: () => {
+      onUnexpectedDisconnect: (errName) => {
         if (cfg.isTextTerminal) {
           // in run mode, unexpected disconnects are an error that should be raised normally
-          const err = errors.get('BROWSER_CRASHED', this.browser.displayName)
+          const err = errors.get(errName, this.browser.displayName)
 
           return options.onError(err)
         }
 
         // in open mode, they are just printed out
-        errors.warning('BROWSER_CRASHED', this.browser.displayName)
+        errors.warning(errName, this.browser.displayName)
       },
     })
   }

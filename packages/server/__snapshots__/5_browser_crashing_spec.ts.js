@@ -89,7 +89,7 @@ Learn more at https://on.cypress.io/browser-process-crashed
 
   e2e browser sadface3 spec
 
-We detected that the Chrome process running your tests just exited unexpectedly.
+We detected that the FooBrowser process running your tests just exited unexpectedly.
 
 This error occurs whenever Cypress detects the browser exited before tests could finish running.
 
@@ -121,26 +121,11 @@ Learn more at https://on.cypress.io/browser-process-crashed
                                                                                                     
   Running:  browser_crashing_sadface4_spec.js                                               (4 of 4)
 
-We detected that the Chrome process running your tests just exited unexpectedly.
+We detected that the FooBrowser process running your tests just exited unexpectedly.
 
 This error occurs whenever Cypress detects the browser exited before tests could finish running.
 
 Learn more at https://on.cypress.io/browser-process-crashed
-
-
-  e2e browser sadface4 spec
-    1) fails
-
-
-  0 passing
-  1 failing
-
-  1) e2e browser sadface4 spec fails:
-     Error: foo
-      [stack trace lines]
-
-
-
 
   (Results)
 
@@ -150,17 +135,11 @@ Learn more at https://on.cypress.io/browser-process-crashed
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     browser_crashing_sadface4_spec.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/browser_crashing_sadface4_spec.js/e2e browser s     (1280x720)
-     adface4 spec -- fails (failed).png                                                             
 
 
   (Video)

@@ -190,6 +190,16 @@ class Socket {
     }
 
     return this.io.on('connection', (socket: SocketIO.Client) => {
+      let hadUnexpectedDisconnect = false
+      const _onUnexpectedDisconnect = (errName) => {
+        if (hadUnexpectedDisconnect) {
+          return
+        }
+
+        hadUnexpectedDisconnect = true
+        options.onUnexpectedDisconnect(errName)
+      }
+
       debug('socket connected')
 
       _attachDebugLogger(socket)
@@ -226,7 +236,7 @@ class Socket {
               return
             }
 
-            options.onUnexpectedDisconnect('AUTOMATION_SERVER_DISCONNECTED')
+            _onUnexpectedDisconnect('AUTOMATION_SERVER_DISCONNECTED')
 
             // TODO: no longer emit this, just close the browser and display message in reporter
             return this.io.emit('automation:disconnected')
@@ -284,7 +294,7 @@ class Socket {
             debug('checking to see if a new runner socket is available... %o', { hasNewRunnerConnected, sockets })
 
             if (!hasNewRunnerConnected) {
-              options.onUnexpectedDisconnect('BROWSER_CRASHED')
+              _onUnexpectedDisconnect('BROWSER_CRASHED')
             }
           }
 
