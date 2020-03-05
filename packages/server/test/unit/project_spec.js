@@ -698,6 +698,35 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       })
     })
 
+    it('escapses %, &', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a&b%c.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%26b%25c.js')
+      })
+    })
+
+    // ? is invalid in Windows, but it can be tested here
+    // because it's a unit test and doesn't check the existence of files
+    it('escapes ?', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a?.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%3F.spec.js')
+      })
+    })
+
+    it('escapes %, &, ? in the url dir', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/s%&?ub/a.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/s%25%26%3Fub/a.spec.js')
+      })
+    })
+
     it('returns __all spec url', function () {
       return this.project.getSpecUrl()
       .then((str) => {
