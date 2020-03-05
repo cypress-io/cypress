@@ -36,7 +36,7 @@
     "docker": "./scripts/run-docker-local.sh",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
-    "postinstall": "patch-package && yarn build",
+    "postinstall": "yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-all": "yarn lint-coffee && yarn lint",

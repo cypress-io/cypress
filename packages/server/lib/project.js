@@ -77,8 +77,6 @@ class Project extends EE {
     debug('project options %o', options)
     this.options = options
 
-    this.onWarning = options.onWarning
-
     return this.getConfig(options)
     .tap((cfg) => {
       process.chdir(this.projectRoot)
@@ -112,7 +110,7 @@ class Project extends EE {
         return updatedConfig
       })
     }).then((cfg) => {
-      return this.server.open(cfg, this, options.onWarning)
+      return this.server.open(cfg, this, options.onError, options.onWarning)
       .spread((port, warning) => {
         // if we didnt have a cfg.port
         // then get the port once we
