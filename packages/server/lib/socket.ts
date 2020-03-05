@@ -480,8 +480,6 @@ class Socket {
   }
 
   end () {
-    this.ended = true
-
     // TODO: we need an 'ack' from this end
     // event from the other side
     return this.io && this.io.emit('tests:finished')
