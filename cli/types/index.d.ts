@@ -632,7 +632,6 @@ declare namespace Cypress {
       ```
      */
     clearLocalStorage(key?: string): Chainable<Storage>
-
     /**
      * Clear keys in local storage that match given regular expression.
      *
@@ -645,7 +644,6 @@ declare namespace Cypress {
     ```
      */
     clearLocalStorage(re: RegExp): Chainable<Storage>
-
    /**
      * Clear data in local storage.
      * Cypress automatically runs this command before each test to prevent state from being
@@ -661,7 +659,6 @@ declare namespace Cypress {
       ```
      */
     clearLocalStorage(options: Partial<Loggable>): Chainable<Storage>
-
    /**
      * Clear data in local storage.
      * Cypress automatically runs this command before each test to prevent state from being
