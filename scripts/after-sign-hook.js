@@ -44,7 +44,9 @@ module.exports = async function (params) {
       appleIdPassword: process.env.NOTARIZE_APP_PASSWORD,
     })
   } catch (error) {
+    console.error('could not notarize application')
     console.error(error)
+    throw error
   }
 
   console.log(`Done notarizing ${appId}`)
