@@ -124,7 +124,7 @@
       }
 
       &.route {
-        background-color: lighten(#FFB61C, 25%);
+        background-color: $yellow-medium;
       }
 
       &.dom {
@@ -377,7 +377,7 @@
     }
   }
 
-  .command-name-log {
+  .command-name-log, .command-name-get {
     .command-message-text {
       white-space: initial;
       word-wrap: break-word;

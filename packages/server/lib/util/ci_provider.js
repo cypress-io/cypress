@@ -30,6 +30,10 @@ const isAzureCi = () => {
   return process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
 }
 
+const isBamboo = () => {
+  return process.env.bamboo_buildNumber
+}
+
 const isCodeshipBasic = () => {
   return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
 }
@@ -78,7 +82,7 @@ const isWercker = () => {
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
   'azure': isAzureCi,
-  'bamboo': 'bamboo.buildNumber',
+  'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
   'circle': 'CIRCLECI',
@@ -101,9 +105,9 @@ const CI_PROVIDERS = {
 
 const _detectProviderName = () => {
   const { env } = process
-
   // return the key of the first provider
   // which is truthy
+
   return _.findKey(CI_PROVIDERS, (value) => {
     if (_.isString(value)) {
       return env[value]
@@ -135,10 +139,10 @@ const _providerCiParams = () => {
       'BUILD_REPOSITORY_URI',
     ]),
     bamboo: extract([
-      'bamboo.resultsUrl',
-      'bamboo.buildNumber',
-      'bamboo.buildResultsUrl',
-      'bamboo.planRepository.repositoryUrl',
+      'bamboo_buildNumber',
+      'bamboo_buildResultsUrl',
+      'bamboo_planRepository_repositoryUrl',
+      'bamboo_buildKey',
     ]),
     bitbucket: extract([
       'BITBUCKET_REPO_SLUG',
@@ -204,6 +208,8 @@ const _providerCiParams = () => {
       'GITHUB_WORKFLOW',
       'GITHUB_ACTION',
       'GITHUB_EVENT_NAME',
+      'GITHUB_RUN_ID',
+      'GITHUB_REPOSITORY',
     ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
@@ -221,6 +227,7 @@ const _providerCiParams = () => {
       'CI_PROJECT_URL',
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
+      'CI_DEFAULT_BRANCH',
     // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
@@ -365,12 +372,12 @@ const _providerCommitParams = () => {
       authorEmail: env.BUILD_REQUESTEDFOREMAIL,
     },
     bamboo: {
-      // sha: ???
-      branch: env['bamboo.planRepository.branch'],
+      sha: env.bamboo_planRepository_revision,
+      branch: env.bamboo_planRepository_branch,
       // message: ???
-      // authorName: ???
+      authorName: env.bamboo_planRepository_username,
       // authorEmail: ???
-      // remoteOrigin: ???
+      remoteOrigin: env.bamboo_planRepository_repositoryURL,
       // defaultBranch: ???
     },
     bitbucket: {
@@ -429,7 +436,7 @@ const _providerCommitParams = () => {
     },
     githubActions: {
       sha: env.GITHUB_SHA,
-      branch: env.GITHUB_REF,
+      branch: env.GH_BRANCH || env.GITHUB_REF,
       defaultBranch: env.GITHUB_BASE_REF,
       remoteBranch: env.GITHUB_HEAD_REF,
     },
@@ -439,8 +446,8 @@ const _providerCommitParams = () => {
       message: env.CI_COMMIT_MESSAGE,
       authorName: env.GITLAB_USER_NAME,
       authorEmail: env.GITLAB_USER_EMAIL,
-      // remoteOrigin: ???
-      // defaultBranch: ???
+      remoteOrigin: env.CI_REPOSITORY_URL,
+      defaultBranch: env.CI_DEFAULT_BRANCH,
     },
     googleCloud: {
       sha: env.COMMIT_SHA,

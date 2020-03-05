@@ -72,7 +72,7 @@ class RunnablesStore {
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {
     return this._createRunnables<TestProps>('test', runnableProps.tests || [], level).concat(
-      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], level)
+      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], level),
     )
   }
 

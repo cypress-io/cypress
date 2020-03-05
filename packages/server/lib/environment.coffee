@@ -8,6 +8,7 @@ os      = require("os")
 ## to the "packages/server" folder
 cwd     = require("./cwd")
 Promise = require("bluebird")
+debug = require("debug")("cypress:server")
 
 ## never cut off stack traces
 Error.stackTraceLimit = Infinity
@@ -64,7 +65,6 @@ try
     electronLaunchArguments.forEach app.commandLine.appendArgument
 
 catch e
-  if env is "development"
-    console.error(e.message)
+  debug("environment error %s", e.message)
 
 module.exports = env

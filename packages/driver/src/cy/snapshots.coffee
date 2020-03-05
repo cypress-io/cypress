@@ -120,56 +120,62 @@ create = ($$, state) ->
     ## which arrives here as number 1
     ## jQuery v2 allowed to silently try setting 1[HIGHLIGHT_ATTR] doing nothing
     ## jQuery v3 runs in strict mode and throws an error if you attempt to set a property
-    isJqueryElement = $dom.isElement($elToHighlight) and $dom.isJquery($elToHighlight)
 
-    if isJqueryElement
-      $elToHighlight.attr(HIGHLIGHT_ATTR, true) 
+    ## TODO: in firefox sometimes this throws a cross-origin access error
+    try
+      isJqueryElement = $dom.isElement($elToHighlight) and $dom.isJquery($elToHighlight)
 
-    ## TODO: throw error here if cy is undefined!
+      if isJqueryElement
+        $elToHighlight.attr(HIGHLIGHT_ATTR, true)
 
-    $body = $$("body").clone()
+      ## TODO: throw error here if cy is undefined!
+    
+      $body = $$("body").clone()
 
-    ## for the head and body, get an array of all CSS,
-    ## whether it's links or style tags
-    ## if it's same-origin, it will get the actual styles as a string
-    ## it it's cross-domain, it will get a reference to the link's href
-    { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
+      ## for the head and body, get an array of all CSS,
+      ## whether it's links or style tags
+      ## if it's same-origin, it will get the actual styles as a string
+      ## it it's cross-domain, it will get a reference to the link's href
+      { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
 
-    ## replaces iframes with placeholders
-    replaceIframes($body)
+      ## replaces iframes with placeholders
+      replaceIframes($body)
 
-    ## remove tags we don't want in body
-    $body.find("script,link[rel='stylesheet'],style").remove()
+      ## remove tags we don't want in body
+      $body.find("script,link[rel='stylesheet'],style").remove()
 
-    ## here we need to figure out if we're in a remote manual environment
-    ## if so we need to stringify the DOM:
-    ## 1. grab all inputs / textareas / options and set their value on the element
-    ## 2. convert DOM to string: body.prop("outerHTML")
-    ## 3. send this string via websocket to our server
-    ## 4. server rebroadcasts this to our client and its stored as a property
+      ## here we need to figure out if we're in a remote manual environment
+      ## if so we need to stringify the DOM:
+      ## 1. grab all inputs / textareas / options and set their value on the element
+      ## 2. convert DOM to string: body.prop("outerHTML")
+      ## 3. send this string via websocket to our server
+      ## 4. server rebroadcasts this to our client and its stored as a property
 
-    ## its also possible for us to store the DOM string completely on the server
-    ## without ever sending it back to the browser (until its requests).
-    ## we could just store it in memory and wipe it out intelligently.
-    ## this would also prevent having to store the DOM structure on the client,
-    ## which would reduce memory, and some CPU operations
+      ## its also possible for us to store the DOM string completely on the server
+      ## without ever sending it back to the browser (until its requests).
+      ## we could just store it in memory and wipe it out intelligently.
+      ## this would also prevent having to store the DOM structure on the client,
+      ## which would reduce memory, and some CPU operations
 
-    ## now remove it after we clone
-    if isJqueryElement
-      $elToHighlight.removeAttr(HIGHLIGHT_ATTR)
+      ## now remove it after we clone
+      if isJqueryElement
+        $elToHighlight.removeAttr(HIGHLIGHT_ATTR)
 
-    ## preserve attributes on the <html> tag
-    htmlAttrs = getHtmlAttrs($$("html")[0])
+      ## preserve attributes on the <html> tag
+      htmlAttrs = getHtmlAttrs($$("html")[0])
 
-    snapshot = {
-      name
-      htmlAttrs
-      body: $body
-    }
+      snapshot = {
+        name
+        htmlAttrs
+        body: $body
+      }
 
-    snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
+      snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
 
-    return snapshot
+      return snapshot
+
+    catch e
+      null
 
   return {
     createSnapshot

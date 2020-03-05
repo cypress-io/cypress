@@ -264,3 +264,27 @@ These flags can only be used when recording to the Cypress Dashboard service.
 
 https://on.cypress.io/record-params-without-recording
 `
+
+exports['could not parse config error'] = `
+Cypress encountered an error while parsing the argument config
+
+You passed: xyz
+
+The error was: Cannot read property 'split' of undefined
+`
+
+exports['could not parse env error'] = `
+Cypress encountered an error while parsing the argument env
+
+You passed: a123
+
+The error was: Cannot read property 'split' of undefined
+`
+
+exports['could not parse reporter options error'] = `
+Cypress encountered an error while parsing the argument reporterOptions
+
+You passed: nonono
+
+The error was: Cannot read property 'split' of undefined
+`

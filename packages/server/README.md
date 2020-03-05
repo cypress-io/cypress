@@ -15,66 +15,73 @@ The server is the heart of the Cypress application. All of this code represents 
 
 The [driver](../driver) and the server are the two most complex packages of Cypress.
 
-## Installing
-
-The server's dependencies can be installed with:
-
-```bash
-cd packages/server
-npm install
-```
-
 ## Developing
 
-To run Cypress:
+To run the Cypress server:
 
 ```bash
-npm start ## boots the entire Cypress application
+## boots the entire Cypress application
+yarn start
 ```
 
 Since the server controls nearly every aspect of Cypress, after making changes you'll need to manually restart Cypress.
 
 Since this is slow, it's better to drive your development with tests.
 
-## Testing
+## Building
 
-* `npm run test-unit` executes unit tests in [`test/unit`](./test/unit)
-* `npm run test-integration` executes integration tests in [`test/integration`](./test/integration)
-* `npm run test-performance` executes performance tests in [`test/performance`](./test/performance)
-* `npm run test-e2e` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
+Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
 
-Each of these tasks can run in "watch" mode by appending `-watch` to the task:
-
-```bash
-npm run test-unit-watch
+```shell
+yarn lerna run build-prod --scope @packages/server --stream
 ```
 
-Because of the large number of dependencies of the server, it's much more performant to run a single individual test.
+* `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)
+* `yarn test-integration` executes integration tests in [`test/integration`](./test/integration)
+* `yarn test-performance` executes performance tests in [`test/performance`](./test/performance)
+* `yarn test-e2e` executes the large (slow) end to end tests in [`test/e2e`](./test/e2e)
+
+You can also use the `test-watch` command to rerun a test file whenever there is a change:
 
 ```bash
-## runs only this one test file
-npm run test ./test/unit/api_spec.coffee
-
-## works for integration tests
-npm run test ./test/integration/server_spec.coffee
-```
-
-You can also run a single test in `watch` mode.
-
-```bash
-## runs and watches only this one test file
-npm run test-watch ./test/unit/api_spec.coffee
-```
-
-To run an individual e2e test:
-
-You must build all packages before running the E2E tests. Run `npm run build` or `npm run watch` in the project root to accomplish this.
-
-```bash
-## runs tests that match "base_url"
-npm run test-e2e -- --spec base_url
+yarn test-watch /test/path/to/spec.js
 ```
 
 When running e2e tests, some test projects output verbose logs. To see them run the test with `DEBUG=cypress:e2e` environment variable.
 
-To update snapshots, see `snap-shot-it` instructions: https://github.com/bahmutov/snap-shot-it#advanced-use
+### Running individual unit tests
+
+```bashtest-kitchensink
+yarn test <path/to/test>
+yarn test test/unit/api_spec.coffee
+## or
+yarn test-unit api_spec ## shorthand, uses globbing to find spec
+```
+
+### Running individual integration tests
+
+```bash
+yarn test <path/to/test>
+yarn test test/integration/cli_spec.coffee
+## or
+yarn test-integration cli_spec ## shorthand, uses globbing to find spec
+```
+
+### Running individual e2e tests
+
+```bash
+yarn test <path/to/test>
+yarn test test/e2e/1_async_timeouts_spec.coffee
+## or
+yarn test-e2e 1_async ## shorthand, uses globbing to find spec
+```
+
+### Updating snaphots
+
+Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info.
+
+```bash
+SNAPSHOT_UPDATE=1 yarn test test/unit/api_spec.coffee
+SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.coffee
+SNAPSHOT_UPDATE=1 yarn test-e2e 1_async
+```

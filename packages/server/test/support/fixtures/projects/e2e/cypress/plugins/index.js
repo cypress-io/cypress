@@ -4,9 +4,21 @@ const _ = require('lodash')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
-const performance = require('../../../../test/support/helpers/performance')
 
-module.exports = (on) => {
+module.exports = (on, config) => {
+  let performance = {
+    track: () => Promise.resolve(),
+  }
+
+  // TODO: fix this - in open mode, this will throw an error
+  // since the relative path is different in open vs run mode
+  try {
+    performance = require('../../../../test/support/helpers/performance')
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err)
+  }
+
   // save some time by only reading the originals once
   let cache = {}
 
@@ -31,10 +43,18 @@ module.exports = (on) => {
     screenshotsTaken.push(details)
   })
 
-  on('before:browser:launch', (browser, args) => {
-    browserArgs = args
+  on('before:browser:launch', (browser, options) => {
+    if (browser.family === 'firefox' && !config.env['NO_RESIZE']) {
+      // this is needed to ensure correct error screenshot / video recording
+      // resolution of exactly 1280x720 (height must account for firefox url bar)
+      options.args = options.args.concat(
+        ['-width', '1280', '-height', '794'],
+      )
+    }
 
-    return args
+    browserArgs = options.args
+
+    return options
   })
 
   on('task', {
@@ -142,6 +162,10 @@ module.exports = (on) => {
 
     'get:browser:args' () {
       return browserArgs
+    },
+
+    'get:config:value' (key) {
+      return config[key]
     },
   })
 }

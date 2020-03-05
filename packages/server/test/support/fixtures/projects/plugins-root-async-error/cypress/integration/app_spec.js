@@ -1,3 +1,6 @@
-it('passes', () => {
-  expect(true).to.be.true
+it('passes', (done) => {
+  setTimeout(() => {
+    expect(true).to.be.true
+    done()
+  }, 5000)
 })

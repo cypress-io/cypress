@@ -11,11 +11,11 @@ import path from 'path'
 import chalk from 'chalk'
 
 // Ensures node-sass/vendor has built node-sass binary.
-execa.sync('rebuild-node-sass', { cwd: path.join(__dirname, './node_modules/.bin'), stdio: 'inherit' })
+execa.sync('rebuild-node-sass', { cwd: path.join(require.resolve('node-sass'), '../../../', '.bin'), stdio: 'inherit' })
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
-const liveReloadEnabled = !args.includes('--no-livereload')
+const liveReloadEnabled = !(args.includes('--no-livereload') || process.env.NO_LIVERELOAD)
 const watchModeEnabled = args.includes('--watch') || args.includes('-w')
 
 // opt out of livereload with arg --no-livereload
@@ -46,7 +46,7 @@ const commonConfig: webpack.Configuration = {
     colors: true,
     modules: true,
     maxModules: 20,
-    excludeModules: /main.scss/,
+    excludeModules: /(main|test-entry).scss/,
     timings: true,
   },
 

@@ -51,12 +51,15 @@ describe('lib/modes/run', () => {
   })
 
   context('.openProjectCreate', () => {
-    beforeEach(function () {
+    let onError
+
+    beforeEach(() => {
       sinon.stub(openProject, 'create').resolves()
       this.onError = sinon.spy()
 
+      onError = sinon.spy()
       const options = {
-        onError: this.onError,
+        onError,
         port: 8080,
         env: { foo: 'bar' },
         isTextTerminal: true,
@@ -84,7 +87,7 @@ describe('lib/modes/run', () => {
 
       expect(openProject.create.lastCall.args[2].onError).to.be.a('function')
       openProject.create.lastCall.args[2].onError(error)
-      expect(this.onError).to.be.calledWith(error)
+      expect(onError).to.be.calledWith(error)
     })
   })
 
@@ -107,28 +110,25 @@ describe('lib/modes/run', () => {
       expect(props.show).to.be.true
     })
 
-    it('sets recordFrameRate and onPaint when write is true', () => {
+    it('sets onScreencastFrame when write is true', () => {
       const write = sinon.stub()
 
       const image = {
-        toJPEG: sinon.stub().returns('imgdata'),
+        data: '',
       }
 
       const props = runMode.getElectronProps(true, write)
 
-      expect(props.recordFrameRate).to.eq(20)
+      props.onScreencastFrame(image)
 
-      props.onPaint({}, false, image)
-
-      expect(write).to.be.calledWith('imgdata')
+      expect(write).to.be.calledOnce
     })
 
-    it('does not set recordFrameRate or onPaint when write is falsy', () => {
-      const props = runMode.getElectronProps(true, {}, false)
+    it('does not set onScreencastFrame when write is falsy', () => {
+      const props = runMode.getElectronProps(true, false)
 
       expect(props).not.to.have.property('recordFrameRate')
-
-      expect(props).not.to.have.property('onPaint')
+      expect(props).not.to.have.property('onScreencastFrame')
     })
 
     it('sets options.show = false onNewWindow callback', () => {
@@ -141,12 +141,12 @@ describe('lib/modes/run', () => {
       expect(options.show).to.eq(false)
     })
 
-    it('calls onError when webContents crashes', function () {
+    it('calls options.onError when webContents crashes', function () {
       sinon.spy(errors, 'get')
       sinon.spy(errors, 'log')
-      const onError = sinon.spy()
 
-      const props = runMode.getElectronProps(true, true, onError)
+      const onError = sinon.spy()
+      const props = runMode.getElectronProps(true, this.projectInstance, onError)
 
       props.onCrashed()
 
@@ -173,7 +173,7 @@ describe('lib/modes/run', () => {
 
       const browser = {
         name: 'electron',
-        family: 'electron',
+        family: 'chromium',
         isHeaded: false,
       }
 
@@ -206,13 +206,14 @@ describe('lib/modes/run', () => {
 
       const browser = {
         name: 'chrome',
-        family: 'chrome',
+        family: 'chromium',
         isHeaded: true,
       }
 
       runMode.launchBrowser({
         spec,
         browser,
+        project: {},
       })
 
       expect(this.launch).to.be.calledWithMatch(browser, spec, {})
@@ -293,7 +294,7 @@ describe('lib/modes/run', () => {
 
       const onError = sinon.spy()
 
-      return runMode.waitForBrowserToConnect({ timeout: 10, onError })
+      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10, onError })
       .then(() => {
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
@@ -625,20 +626,6 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('shows no warnings for electron browser', () => {
-      return runMode.run({ browser: 'electron' })
-      .then(() => {
-        expect(errors.warning).to.not.be.calledWith('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER')
-      })
-    })
-
-    it('disables video recording on interactive mode runs', () => {
-      return runMode.run({ headed: true })
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CANNOT_RECORD_VIDEO_HEADED')
-      })
-    })
-
     it('throws an error if invalid browser family supplied', () => {
       const browser = { name: 'opera', family: 'opera - btw when is Opera support coming?' }
 
@@ -683,7 +670,7 @@ describe('lib/modes/run', () => {
         name: 'fooBrowser',
         path: 'path/to/browser',
         version: '777',
-        family: 'electron',
+        family: 'chromium',
       })
 
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
@@ -748,7 +735,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes headed to openProject.launch', () => {
-      const browser = { name: 'electron', family: 'electron' }
+      const browser = { name: 'electron', family: 'chromium' }
 
       browsers.ensureAndGetByNameOrPath.resolves(browser)
 
@@ -763,7 +750,7 @@ describe('lib/modes/run', () => {
           },
           {
             show: true,
-          }
+          },
         )
       })
     })

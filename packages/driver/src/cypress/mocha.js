@@ -1,4 +1,5 @@
-const $utils = require('./utils')
+const _ = require('lodash')
+const $errUtils = require('./error_utils')
 
 // in the browser mocha is coming back
 // as window
@@ -24,7 +25,7 @@ const ui = (specWindow, _mocha) => {
     this._ui = Mocha.interfaces[name]
 
     if (!this._ui) {
-      $utils.throwErrByPath('mocha.invalid_interface', { args: { name } })
+      $errUtils.throwErrByPath('mocha.invalid_interface', { args: { name } })
     }
 
     this._ui = this._ui(this.suite)
@@ -62,7 +63,7 @@ const globals = (specWindow, reporter) => {
 
   const _mocha = new Mocha({
     reporter,
-    enableTimeouts: false,
+    timeout: false,
   })
 
   // set mocha props on the specWindow
@@ -110,6 +111,12 @@ const restoreRunnableRun = () => {
 // changing the logic for determing whether this is a valid err
 const patchRunnerFail = () => {
   Runner.prototype.fail = function (runnable, err) {
+    const errMessage = _.get(err, 'message')
+
+    if (errMessage && errMessage.indexOf('Resolution method is overspecified') > -1) {
+      err.message = $errUtils.errMsgByPath('mocha.overspecified', { error: err.stack })
+    }
+
     // if this isnt a correct error object then just bail
     // and call the original function
     if (Object.prototype.toString.call(err) !== '[object Error]') {
@@ -164,7 +171,7 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
-      const errMessage = $utils.errMessageByPath(getErrPath(), { ms })
+      const errMessage = $errUtils.errMsgByPath(getErrPath(), { ms })
 
       runnable.callback(new Error(errMessage))
       runnable.timedOut = true
@@ -199,6 +206,8 @@ const create = (specWindow, Cypress, reporter) => {
 
   const _runner = getRunner(_mocha)
 
+  _mocha.suite.file = Cypress.spec.relative
+
   return {
     _mocha,
 
@@ -216,10 +225,6 @@ const create = (specWindow, Cypress, reporter) => {
 
     getRootSuite () {
       return _mocha.suite
-    },
-
-    options (runner) {
-      return runner.options(_mocha.options)
     },
   }
 }

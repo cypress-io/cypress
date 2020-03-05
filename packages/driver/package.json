@@ -3,23 +3,22 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "cd node_modules/parse-domain && npm run postinstall",
-    "build-prod": "npm run build",
-    "check-deps": "node ../../scripts/check-deps.js --verbose",
-    "check-deps-pre": "npm run check-deps -- --prescript",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project ./test",
     "cypress:run": "node ../../scripts/cypress run --project ./test",
-    "prestart": "npm run check-deps-pre",
-    "start": "../coffee/node_modules/.bin/coffee test/support/server.coffee"
+    "postinstall": "patch-package",
+    "start": "$(yarn bin coffee) test/support/server.coffee"
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/sinon-chai": "1.1.0",
     "@cypress/underscore.inflection": "1.0.1",
     "@cypress/unique-selector": "0.4.2",
-    "@cypress/webpack-preprocessor": "4.1.1",
+    "@cypress/webpack-preprocessor": "4.1.2",
     "@cypress/what-is-circular": "1.0.1",
+    "@packages/coffee": "*",
+    "@packages/runner": "*",
+    "@packages/ts": "*",
     "angular": "1.7.9",
     "backbone": "1.4.0",
     "basic-auth": "2.0.1",
@@ -28,8 +27,8 @@
     "body-parser": "1.19.0",
     "bootstrap": "4.4.1",
     "bytes": "3.1.0",
-    "chai": "3.5.0",
-    "chai-as-promised": "6.0.0",
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
     "chai-subset": "1.6.0",
     "chokidar-cli": "1.2.2",
     "clone": "2.1.2",
@@ -50,23 +49,29 @@
     "methods": "1.1.2",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
-    "mocha": "cypress-io/mocha#58f6eac05e664fc6b69aa9fba70f1f6b5531a900",
+    "mocha": "7.0.1",
     "moment": "2.24.0",
     "morgan": "1.9.1",
     "npm-install-version": "6.0.2",
     "parse-domain": "bahmutov/parse-domain#fb60bd4",
     "setimmediate": "1.0.5",
-    "sinon": "3.3.0",
+    "sinon": "8.1.1",
     "text-mask-addons": "3.8.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
     "url-parse": "1.4.7",
     "vanilla-text-mask": "5.1.1",
     "wait-on": "3.3.0",
-    "webpack": "4.41.0",
+    "webpack": "4.41.2",
     "zone.js": "0.9.0"
   },
   "files": [
-    "lib"
-  ]
+    "lib",
+    "patches"
+  ],
+  "workspaces": {
+    "nohoist": [
+      "*"
+    ]
+  }
 }

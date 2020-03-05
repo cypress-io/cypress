@@ -7,8 +7,12 @@ const fs = require('fs-extra')
 const Promise = require('bluebird')
 const webpack = require('@cypress/webpack-preprocessor')
 
+process.env.NO_LIVERELOAD = '1'
 const webpackOptions = require('@packages/runner/webpack.config.ts').default
 
+/**
+ * @type {Cypress.PluginConfig}
+ */
 module.exports = (on) => {
   on('file:preprocessor', webpack({ webpackOptions }))
 

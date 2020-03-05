@@ -3,7 +3,7 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 
 const $dom = require('../dom')
-const $utils = require('../cypress/utils')
+const $errUtils = require('../cypress/error_utils')
 
 // TODO
 // bTagOpen + bTagClosed
@@ -113,7 +113,7 @@ const create = function (state, queue, retryFn) {
 
       return cmd.get('fn').originalFn.apply(
         state('ctx'),
-        [subject].concat(cmd.get('args'))
+        [subject].concat(cmd.get('args')),
       )
     })
   }
@@ -284,7 +284,18 @@ const create = function (state, queue, retryFn) {
         // assertions
         if (cmdHasFunctionArg(cmd)) {
           let index = cmd.get('assertionIndex')
-          const assertions = cmd.get('assertions')
+          let assertions = cmd.get('assertions')
+
+          // https://github.com/cypress-io/cypress/issues/4981
+          // `assertions` is undefined because assertions added by
+          // `should` command are not handled yet.
+          // So, don't increase i and go back to the last command.
+          if (!assertions) {
+            i -= 1
+            cmd = cmds[i - 1]
+            index = cmd.get('assertionIndex')
+            assertions = cmd.get('assertions')
+          }
 
           // always increase the assertionIndex
           // so our next assertion matches up
@@ -402,7 +413,7 @@ const create = function (state, queue, retryFn) {
 
         // and then push our command into this err
         try {
-          $utils.throwErr(err, { onFail: options._log })
+          $errUtils.throwErr(err, { onFail: options._log })
         } catch (e) {
           err = e
         }

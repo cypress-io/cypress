@@ -69,5 +69,4 @@ describe "e2e page_loading", ->
   e2e.it "passes", {
     spec: "page_loading_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }

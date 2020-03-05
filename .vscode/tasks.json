@@ -6,19 +6,19 @@
     {
       "label": "decaffeinate-bulk file",
       "type": "shell",
-      "command": "npm run decaffeinate-bulk -- convert --file ${file}",
+      "command": "yarn decaffeinate-bulk convert --file ${file}",
       "problemMatcher": []
     },
     {
       "label": "decaffeinate-bulk multiple files",
       "type": "shell",
-      "command": "npm run decaffeinate-bulk -- convert --file ${file} ${file}",
+      "command": "yarn decaffeinate-bulk convert --file ${file} ${file}",
       "problemMatcher": []
     },
     {
       "label": "decaffeinate-bulk dir",
       "type": "shell",
-      "command": "npm run decaffeinate-bulk -- --dir ${fileDirname} convert",
+      "command": "yarn decaffeinate-bulk --dir ${fileDirname} convert",
       "problemMatcher": []
     }
   ]
