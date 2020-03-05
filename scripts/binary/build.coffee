@@ -303,75 +303,6 @@ buildCypressApp = (platform, version, options = {}) ->
     .then R.prop("stdout")
     .then console.log
 
-  removeDuplicateElectron = ->
-    log('#removeDuplicateElectron')
-    if platform != "linux"
-      console.log("no duplicate file on platform #{platform}")
-      return Promise.resolve()
-
-    buildFolder = buildDir()
-    console.log("in build folder %s", buildFolder)
-    execa('ls', ['-la', buildFolder])
-    .then R.prop("stdout")
-    .then console.log
-    .then ->
-      # for some reason I see duplicate "electron" binary left in the build folder
-      # build/linux-unpacked/Cypress <-- good built app
-      # build/linux-unpacked/electron <-- same file as "Cypress" app
-      CypressFilename = buildDir("Cypress")
-      cypressFilename = buildDir("cypress")
-      console.log(CypressFilename)
-      console.log(cypressFilename)
-
-      Promise.all([
-        fs.pathExists(CypressFilename),
-        fs.pathExists(cypressFilename),
-      ]).then ([CypressExists, cypressExists]) ->
-        la(CypressExists, "could not find expected file", CypressFilename)
-
-        if not cypressExists
-          return
-
-        console.log("cypress file found", cypressFilename)
-
-        Promise.all([
-          fs.promises.stat(CypressFilename),
-          fs.promises.stat(cypressFilename),
-        ])
-    .then ([CypressStats, cypressStats]) ->
-      console.log('Cypress stats for', CypressFilename)
-      console.log("%o", CypressStats)
-
-      console.log('cypress stats for', cypressFilename)
-      console.log("%o", CypressStats)
-
-      if CypressStats.ino == cypressStats.ino
-        console.log("Uppercase and lowercase Cypress files are same file")
-        return
-
-      console.log("deleting separate file", cypressFilename)
-      fs.removeAsync(cypressFilename)
-
-  copyRenameElectronDist = ->
-    log("#copyRenameElectronDist")
-    # for some reason on Linux, during the build, electron-builder
-    # cannot find Electron (on Mac it just works)
-    # ⨯ ENOENT: no such file or directory, rename
-    # '/home/person/cypress/build/linux-unpacked/electron'
-    # -> '/home/person/cypress/build/linux-unpacked/cypress'
-    # so we can copy our Electron app ughh
-    if platform != "linux"
-      return Promise.resolve()
-
-    # cp from packages/electron/dist/Cypress/Cypress to
-    # packages/electron/dist/Cypress/electron
-
-    from = path.join("packages", "electron", "dist", "Cypress", "Cypress")
-    to = path.join("packages", "electron", "dist", "Cypress", "electron")
-    console.log(from, "copy ->", to)
-
-    fs.copyAsync(from, to)
-
   runSmokeTests = ->
     log("#runSmokeTests")
 
@@ -460,9 +391,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(removeBinFolders)
   .then(removeCyFolders)
   .then(removeDevElectronApp)
-  ## .then(copyRenameElectronDist)
   .then(electronPackAndSign)
-  # .then(removeDuplicateElectron)
   .then(lsDistFolder)
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
