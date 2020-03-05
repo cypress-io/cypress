@@ -4,10 +4,12 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
+
+const errors = require('../../errors')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
-const errors = require('../../errors')
+const validateEvent = require('./validate_event')
 
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
@@ -16,21 +18,7 @@ const registeredEvents = {}
 const invoke = (eventId, args = []) => {
   const event = registeredEvents[eventId]
 
-  if (!event) {
-    sendError(new Error(`No handler registered for event id ${eventId}`))
-
-    return
-  }
-
   return event.handler(...args)
-}
-
-const sendError = (ipc, err) => {
-  ipc.send('error', util.serializeError(err))
-}
-
-const sendWarning = (ipc, warningErr) => {
-  ipc.send('warning', util.serializeError(warningErr))
 }
 
 let plugins
@@ -44,6 +32,14 @@ const load = (ipc, config, pluginsFile) => {
   // we track the register calls and then send them all at once
   // to the parent process
   const register = (event, handler) => {
+    const { isValid, error } = validateEvent(event, handler)
+
+    if (!isValid) {
+      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, error.stack)
+
+      return
+    }
+
     if (event === 'task') {
       const existingEventId = _.findKey(registeredEvents, { event: 'task' })
 
@@ -74,12 +70,16 @@ const load = (ipc, config, pluginsFile) => {
 
   Promise
   .try(() => {
+    debug('run plugins function')
+
     return plugins(register, config)
   })
   .then((modifiedCfg) => {
+    debug('plugins file successfully loaded')
     ipc.send('loaded', modifiedCfg, registrations)
   })
   .catch((err) => {
+    debug('plugins file errored:', err && err.stack)
     ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
   })
 }
@@ -113,10 +113,9 @@ const execute = (ipc, event, ids, args = []) => {
 
           hasEmittedWarning = true
 
-          sendWarning(ipc,
-            errors.get(
-              'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
-            ))
+          const warning = errors.get('DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS')
+
+          ipc.send('warning', util.serializeError(warning))
 
           // eslint-disable-next-line prefer-rest-params
           return boundFn.apply(this, arguments)
