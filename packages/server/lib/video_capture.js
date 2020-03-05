@@ -94,6 +94,12 @@ module.exports = {
     const lengths = {}
 
     const writeVideoFrame = function (data) {
+      if (_.isEmpty(data)) {
+        debug('empty frame received')
+
+        return
+      }
+
       // make sure we haven't ended
       // our stream yet because paint
       // events can linger beyond
