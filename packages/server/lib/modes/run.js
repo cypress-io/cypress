@@ -1392,6 +1392,7 @@ module.exports = {
               specs,
               sys,
               tag,
+              onError: options.onError,
               videosFolder: config.videosFolder,
               video: config.video,
               videoCompression: config.videoCompression,
