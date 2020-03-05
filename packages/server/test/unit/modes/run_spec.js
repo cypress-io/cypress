@@ -150,7 +150,6 @@ describe('lib/modes/run', () => {
       props.onCrashed()
 
       expect(errors.get).to.be.calledWith('BROWSER_CRASHED')
-      expect(errors.log).to.be.calledOnce
 
       expect(onError).to.be.called
       expect(onError.lastCall.args[0].message).to.include('We detected that the Electron process running your tests just exited unexpectedly')

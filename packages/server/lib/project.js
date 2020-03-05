@@ -69,7 +69,6 @@ class Project extends EE {
     _.defaults(options, {
       report: false,
       onFocusTests () {},
-      onError () {},
       onWarning () {},
       onSettingsChanged: false,
     })
@@ -297,7 +296,6 @@ class Project extends EE {
     this.watchSettings(options.onSettingsChanged, options)
 
     let { reporter, projectRoot } = cfg
-    let hasUnexpectedlyDisconnectedInRunMode = false
 
     // if we've passed down reporter
     // then record these via mocha reporter
@@ -370,22 +368,16 @@ class Project extends EE {
         }
       },
 
-      // TODO: onceing this isn't quite right, since this is reused across runs in
-      onUnexpectedDisconnect: (errorName) => {
+      onUnexpectedDisconnect: () => {
         if (cfg.isTextTerminal) {
-          if (hasUnexpectedlyDisconnectedInRunMode) {
-            // don't want to error twice
-            return
-          }
-
-          hasUnexpectedlyDisconnectedInRunMode = true
-
-          const err = errors.get(errorName, this.browser.displayName)
+          // in run mode, unexpected disconnects are an error that should be raised normally
+          const err = errors.get('BROWSER_CRASHED', this.browser.displayName)
 
           return options.onError(err)
         }
 
-        errors.warning(errorName, this.browser.displayName)
+        // in open mode, they are just printed out
+        errors.warning('BROWSER_CRASHED', this.browser.displayName)
       },
     })
   }

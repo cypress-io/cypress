@@ -520,8 +520,6 @@ const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
     onCrashed () {
       const err = errors.get('BROWSER_CRASHED', 'Electron')
 
-      errors.log(err)
-
       onError(err)
     },
     onNewWindow (e, url, frameName, disposition, options) {

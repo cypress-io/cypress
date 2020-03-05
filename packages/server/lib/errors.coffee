@@ -525,14 +525,13 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
         #{chalk.blue(arg2)}
         """
     when "BROWSER_CRASHED"
-      {
-        msg: "We detected that the #{arg1} process running your tests just exited unexpectedly."
-        details: """
-        This error occurs whenever Cypress detects the browser exited before tests could finish running.
+      """
+      We detected that the #{arg1} process running your tests just exited unexpectedly.
 
-        Learn more at https://on.cypress.io/browser-process-crashed
-        """
-      }
+      This error occurs whenever Cypress detects the browser exited before tests could finish running.
+
+      Learn more at https://on.cypress.io/browser-process-crashed
+      """
     when "AUTOMATION_SERVER_DISCONNECTED"
       {
         msg: "The automation client disconnected. Cannot continue running tests."

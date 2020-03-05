@@ -50,7 +50,6 @@ const _attachDebugLogger = (socket: SocketIO.Socket) => {
 
 class Socket {
   io: SocketIO.Server
-  ended: boolean = false
   testFilePath?: string
   testsDir?: string
 
@@ -213,11 +212,6 @@ class Socket {
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
         automationClient.on('disconnect', () => {
-          // if we've stopped then don't do anything
-          if (this.ended) {
-            return
-          }
-
           // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
           return Promise.delay(2000)
           .then(() => {
@@ -275,18 +269,9 @@ class Socket {
         }
 
         socket.on('disconnect', () => {
-          debug('runner socket disconnected %o', { now: Date.now(), runStatePreservedAt: socket.runStatePreservedAt, ended: this.ended })
-
-          if (this.ended) {
-            return
-          }
+          debug('runner socket disconnected %o', { now: Date.now(), runStatePreservedAt: socket.runStatePreservedAt })
 
           const assertNewRunnerConnected = () => {
-            // if we've stopped then don't do anything
-            if (this.ended) {
-              return
-            }
-
             pendingDcPromise = undefined
 
             const sockets = this.io.sockets.connected
