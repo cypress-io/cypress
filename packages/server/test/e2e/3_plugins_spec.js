@@ -8,6 +8,7 @@ const pluginExtension = Fixtures.projectPath('plugin-extension')
 const pluginConfig = Fixtures.projectPath('plugin-config')
 const pluginFilterBrowsers = Fixtures.projectPath('plugin-filter-browsers')
 const workingPreprocessor = Fixtures.projectPath('working-preprocessor')
+const pluginsRootAsyncError = Fixtures.projectPath('plugins-root-async-error')
 const pluginsAsyncError = Fixtures.projectPath('plugins-async-error')
 const pluginsAbsolutePath = Fixtures.projectPath('plugins-absolute-path')
 const pluginAfterScreenshot = Fixtures.projectPath('plugin-after-screenshot')
@@ -27,7 +28,17 @@ describe('e2e plugins', function () {
     })
   })
 
-  it('fails with async error', function () {
+  it('fails when there is an async error at the root', function () {
+    return e2e.exec(this, {
+      spec: 'app_spec.js',
+      project: pluginsRootAsyncError,
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
+  it('fails when there is an async error inside an event handler', function () {
     return e2e.exec(this, {
       spec: 'app_spec.coffee',
       project: pluginsAsyncError,

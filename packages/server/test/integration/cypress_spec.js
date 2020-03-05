@@ -1165,7 +1165,7 @@ describe('lib/cypress', () => {
               browser: 'electron',
               foo: 'bar',
               onNewWindow: sinon.match.func,
-              onPaint: sinon.match.func,
+              onScreencastFrame: sinon.match.func,
             })
 
             this.expectExitWith(0)
