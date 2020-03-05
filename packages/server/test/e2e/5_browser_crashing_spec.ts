@@ -5,9 +5,10 @@ const e2e = require('../support/helpers/e2e')
 describe('e2e browser crashing', function () {
   e2e.setup()
 
-  e2e.it('is gracefully handled', {
-    spec: 'browser_crashing_spec.js',
-    expectedExitCode: 1,
+  e2e.it('gracefully handles CDP-simulated crashes', {
+    spec: 'browser_crashing_sadface*_spec.js',
+    expectedExitCode: 3,
+    browser: ['chrome', 'electron'],
     snapshot: true,
     onRun (exec, browser) {
       return exec({
@@ -20,5 +21,13 @@ describe('e2e browser crashing', function () {
         },
       })
     },
+  })
+
+  // NOTE: this takes a while, so don't run it in CI
+  e2e.it.skip('gracefully handles real crashes', {
+    timeout: 10 * 60 * 1000,
+    spec: 'browser_freeze_*_spec.js',
+    expectedExitCode: 2,
+    snapshot: false,
   })
 })
