@@ -116,3 +116,10 @@ const obj = {
   foo: () => { }
 }
 cy.spy(obj, 'foo').as('my-spy')
+
+// use path-based access for nested structures
+cy.wrap({
+  foo: {
+    bar: 1
+  }
+}).its('foo.bar')
