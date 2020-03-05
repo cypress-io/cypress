@@ -13,7 +13,11 @@ filesize = require("filesize")
 printFileSizes = (folder) ->
   console.log("File sizes in #{folder}")
   paths = path.join(folder, "*")
-  execa.shell("du -hs #{paths}", {stdio: "inherit"})
+  options = {
+    stdio: "inherit",
+    shell: true
+  }
+  execa("du -hs #{paths}", options)
 
 # resolves with zipped filename
 macZip = (src, dest) ->
@@ -67,7 +71,7 @@ linuxZipAction = (parentFolder, dest, relativeSource) ->
     console.error(err.message)
     throw err
 
-  execa.shell(cmd)
+  execa(cmd, {shell: true})
   .then onZipFinished
   .then R.always(dest)
   .then R.tap(checkZipSize)
@@ -127,7 +131,7 @@ windowsZip = (src, dest) ->
     console.error(err.message)
     throw err
 
-  execa.shell(cmd)
+  execa(cmd, {shell: true})
   .then onZipFinished
   .then R.always(dest)
   .then R.tap(checkZipSize)
