@@ -2,9 +2,6 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Promise = Cypress.Promise
 
-const { beforeEachRestoreRunner } = require('../../../support/helpers.coffee')
-
-beforeEachRestoreRunner()
 describe "src/cy/commands/actions/check", ->
   before ->
     cy
@@ -210,10 +207,10 @@ describe "src/cy/commands/actions/check", ->
         .check("blue")
         .then -> expect(focus).to.eq true
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
@@ -639,10 +636,10 @@ describe "src/cy/commands/actions/check", ->
         $("[name=colors][value=blue]").prop("checked", true).change -> done()
         cy.get("[name=colors]").uncheck("blue")
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>

@@ -1002,6 +1002,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
       // of cy - since we now have a new 'test' and all of the
       // associated _runnables will share this state
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+        // if this is the first test in a suite, attach parent configuration to it
         if (test.parent && test.parent.cfg) {
           test.suiteCfg = test.parent.cfg
           delete test.parent.cfg

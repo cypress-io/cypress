@@ -194,10 +194,10 @@ describe "src/cy/commands/actions/select", ->
         cy.get("select[name=maps]").select("train").then ->
           expect(fired).to.deep.eq events
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>

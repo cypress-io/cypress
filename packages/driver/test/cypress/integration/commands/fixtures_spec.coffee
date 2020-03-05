@@ -1,6 +1,8 @@
 _ = Cypress._
 Promise = Cypress.Promise
+helpers = require('../../support/helpers.coffee')
 
+helpers.beforeEachRestoreRunner()
 describe "src/cy/commands/fixtures", ->
   beforeEach ->
     Cypress.emit("clear:fixtures:cache")
@@ -63,10 +65,10 @@ describe "src/cy/commands/fixtures", ->
 
       """
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 50
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
@@ -76,9 +78,9 @@ describe "src/cy/commands/fixtures", ->
 
         return null
 
-      it "throws if fixturesFolder is set to false", (done) ->
-        Cypress.config("fixturesFolder", false)
-
+      it "throws if fixturesFolder is set to false", {
+        fixturesFolder: false
+      }, {
         cy.on "fail", =>
           lastLog = @lastLog
 
@@ -139,9 +141,9 @@ describe "src/cy/commands/fixtures", ->
         cy.fixture("foo", {timeout: 50})
 
     describe "timeout", ->
-      it "sets timeout to Cypress.config(responseTimeout)", ->
-        Cypress.config("responseTimeout", 2500)
-
+      it "sets timeout to Cypress.config(responseTimeout)", {
+        responseTimeout: 2500
+      }, ->
         Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"})
 
         timeout = cy.spy(Promise.prototype, "timeout")

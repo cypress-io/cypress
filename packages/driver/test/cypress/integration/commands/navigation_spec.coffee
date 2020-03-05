@@ -99,9 +99,10 @@ describe "src/cy/commands/navigation", ->
         expect(rel).to.be.calledWith("beforeunload")
         expect(rel).to.be.calledWith("unload")
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
@@ -290,9 +291,11 @@ describe "src/cy/commands/navigation", ->
             expect(rel).to.be.calledWith("beforeunload")
             expect(rel).to.be.calledWith("unload")
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 50
+    }, ->
+      
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
 
         @logs = []
 
@@ -539,9 +542,9 @@ describe "src/cy/commands/navigation", ->
         .then ->
           expect(backend).to.be.calledWithMatch("resolve:url", "http://localhost:3500/timeout", { auth })
 
-    it "does not support file:// protocol", (done) ->
-      Cypress.config("baseUrl", "")
-
+    it "does not support file:// protocol", {
+      baseUrl: ""
+    }, (done) ->
       cy.on "fail", (err) ->
         expect(err.message).to.contain("cy.visit() failed because the 'file://...' protocol is not supported by Cypress.")
         done()
@@ -964,10 +967,10 @@ describe "src/cy/commands/navigation", ->
         .then ->
           expect(@lastLog.invoke("consoleProps")["Options"]).to.be.undefined
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 50
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
@@ -1618,7 +1621,7 @@ describe "src/cy/commands/navigation", ->
 
         return null
 
-      it "can time out", (done) ->
+      it "can time out", {}, (done) ->
         thenCalled = false
 
         cy.on "fail", (err) =>

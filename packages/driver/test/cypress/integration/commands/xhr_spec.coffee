@@ -789,10 +789,10 @@ describe "src/cy/commands/xhr", ->
           expect(lastLog.get("snapshots")[1].name).to.eq("response")
           expect(lastLog.get("snapshots")[1].body).to.be.an("object")
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 200
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 200)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
@@ -1481,10 +1481,10 @@ describe "src/cy/commands/xhr", ->
         cy
           .contains('#result', '""').should('be.visible')
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 50
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>

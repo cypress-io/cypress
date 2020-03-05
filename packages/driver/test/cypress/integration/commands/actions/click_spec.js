@@ -9,7 +9,6 @@ const { getCommandLogWithText,
   shouldBeCalledOnce,
   shouldNotBeCalled,
 } = require('../../../support/utils')
-const { beforeEachRestoreRunner } = require('../../../support/helpers.coffee')
 
 const fail = function (str) {
   throw new Error(str)
@@ -46,8 +45,6 @@ const getMidPoint = (el) => {
 }
 
 const isFirefox = Cypress.isBrowser('firefox')
-
-beforeEachRestoreRunner()
 
 describe('src/cy/commands/actions/click', () => {
   beforeEach(() => {
@@ -1432,9 +1429,10 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('does not throw when waiting for animations is disabled', () => {
+      it('does not throw when waiting for animations is disabled', {
+        waitForAnimations: false,
+      }, () => {
         cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-        Cypress.config('waitForAnimations', false)
 
         cy.get('button:first').click().then(() => {
           expect(cy.ensureElementIsNotAnimating).not.to.be.called
@@ -1862,10 +1860,10 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -2995,10 +2993,10 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -3433,10 +3431,10 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('el2', 'focus pointerdown pointerup contextmenu').each(shouldBeCalled)
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

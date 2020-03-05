@@ -35,9 +35,9 @@ describe "src/cy/commands/connectors", ->
         cy.noop([1,2,3]).spread {timeout: 150}, (one, two, three) ->
           Promise.delay(100)
 
-      describe "errors", ->
-        beforeEach ->
-          Cypress.config("defaultCommandTimeout", 50)
+      describe "errors", {
+        defaultCommandTimeout: 50
+      }, ->
 
         it "throws when subject isn't array-like", (done) ->
           cy.on "fail", (err) =>
@@ -166,10 +166,10 @@ describe "src/cy/commands/connectors", ->
         .then (obj) ->
           expect(obj).to.be.null
 
-      describe "errors", ->
+      describe "errors", {
+        defaultCommandTimeout: 50
+      }, ->
         beforeEach ->
-          Cypress.config("defaultCommandTimeout", 50)
-
           @logs = []
 
           cy.on "log:added", (attrs, log) =>
@@ -245,11 +245,11 @@ describe "src/cy/commands/connectors", ->
       beforeEach ->
         @remoteWindow = cy.state("window")
 
-      describe "assertion verification", ->
+      describe "assertion verification", {
+        defaultCommandTimeout: 100
+      }, ->
         beforeEach ->
           delete @remoteWindow.$.fn.foo
-
-          Cypress.config("defaultCommandTimeout", 100)
 
           @logs = []
 
@@ -434,9 +434,9 @@ describe "src/cy/commands/connectors", ->
             cy.wrap(obj).invoke("foo").then (val2) ->
               expect(val2).to.eq(val)
 
-        describe "errors", ->
-          beforeEach ->
-            Cypress.config("defaultCommandTimeout", 50)
+        describe "errors", {
+          defaultCommandTimeout: 50
+        }, ->
 
           it "bubbles up automatically", (done) ->
             cy.on "fail", (err) ->
@@ -504,10 +504,10 @@ describe "src/cy/commands/connectors", ->
 
           cy.noop([_.noop, fn]).invoke({}, 1).should('be.true')
 
-        describe "errors", ->
+        describe "errors", {
+          defaultCommandTimeout: 50
+        }, ->
           beforeEach ->
-            Cypress.config("defaultCommandTimeout", 50)
-
             cy.on "log:added", (attrs, log) =>
               @lastLog = log
 
@@ -698,10 +698,10 @@ describe "src/cy/commands/connectors", ->
               Yielded: $btn.get(0)
             }
 
-      describe "errors", ->
+      describe "errors", {
+        defaultCommandTimeout: 50
+      }, ->
         beforeEach ->
-          Cypress.config("defaultCommandTimeout", 50)
-
           @logs = []
 
           cy.on "log:added", (attrs, log) =>
@@ -1117,10 +1117,10 @@ describe "src/cy/commands/connectors", ->
           cy.noop(@obj).its("num", { log: false }).then ->
             expect(@lastLog).to.be.undefined
 
-      describe "errors", ->
+      describe "errors", {
+        defaultCommandTimeout: 50
+      }, ->
         beforeEach ->
-          Cypress.config("defaultCommandTimeout", 50)
-
           @logs = []
 
           cy.on "log:added", (attrs, log) =>
@@ -1495,10 +1495,10 @@ describe "src/cy/commands/connectors", ->
         .then ->
           expect(count).to.eq(1)
 
-      describe "errors", ->
+      describe "errors", {
+        defaultCommandTimeout: 50
+      }, ->
         beforeEach ->
-          Cypress.config("defaultCommandTimeout", 50)
-
           @logs = []
 
           cy.on "log:added", (attrs, log) =>

@@ -441,9 +441,10 @@ describe "src/cy/commands/actions/trigger", ->
           expect(retries).to.eq(3)
           expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
 
-      it "does not throw when waiting for animations is disabled", ->
+      it "does not throw when waiting for animations is disabled", {
+        waitForAnimations: false
+      }, ->
         cy.stub(cy, "ensureElementIsNotAnimating").throws(new Error("animating!"))
-        Cypress.config("waitForAnimations", false)
 
         cy.get("button:first").trigger("mouseover").then ->
           expect(cy.ensureElementIsNotAnimating).not.to.be.called

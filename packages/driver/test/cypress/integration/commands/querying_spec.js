@@ -109,7 +109,9 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('snapshots immediately', () => {
+      it('snapshots immediately', {
+
+      }, () => {
         cy.focused().then(function () {
           const { lastLog } = this
 
@@ -153,10 +155,10 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -405,10 +407,10 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -578,11 +580,9 @@ describe('src/cy/commands/querying', () => {
     })
   })
 
-  context('#get', () => {
-    beforeEach(() => {
-      Cypress.config('defaultCommandTimeout', 200)
-    })
-
+  context('#get', {
+    defaultCommandTimeout: 200,
+  }, () => {
     it('finds by selector', () => {
       const list = cy.$$('#list')
 
@@ -699,11 +699,9 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    describe('should(\'exist\')', () => {
-      beforeEach(() => {
-        Cypress.config('defaultCommandTimeout', 1000)
-      })
-
+    describe('should(\'exist\')', {
+      defaultCommandTimeout: 1000,
+    }, () => {
       it('waits until button exists', () => {
         cy.on('command:retry', _.after(3, () => {
           cy.$$('body').append($('<div id=\'missing-el\'>missing el</div>'))
@@ -1085,11 +1083,9 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    describe('alias references', () => {
-      beforeEach(() => {
-        Cypress.config('defaultCommandTimeout', 100)
-      })
-
+    describe('alias references', {
+      defaultCommandTimeout: 100,
+    }, () => {
       it('can get alias primitives', () => {
         cy
         .noop('foo').as('f')
@@ -1309,10 +1305,8 @@ describe('src/cy/commands/querying', () => {
     //   cy.noop().then ->
     //     expect(cy.get("something")).to.be.a("function")
 
-    describe('errors', () => {
+    describe('errors', { defaultCommandTimeout: 50 }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -2150,10 +2144,10 @@ space
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
