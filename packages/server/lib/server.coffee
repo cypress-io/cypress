@@ -164,6 +164,7 @@ class Server
 
   open: (config = {}, project, onError, onWarning) ->
     debug("server open")
+
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>

@@ -461,3 +461,21 @@ The following error was thrown by a plugin. We stopped running your tests becaus
 
 
 `
+
+exports['e2e plugins projectRoot and configFile passes projectRoot and default configFile to plugins function 1'] = `
+The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js\`).
+
+ Error: You must pass a valid event name when registering a plugin.
+
+You passed: \`invalid:event\`
+
+The following are valid events:
+- file:preprocessor
+- before:browser:launch
+- task
+- after:screenshot
+
+    [stack trace lines]
+
+
+`
