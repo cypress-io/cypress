@@ -69,6 +69,9 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
 
         retryErr = $errUtils.mergeErrProps(error, retryErrProps)
 
+        if retryErr.type is "existence"
+          retryErr.showDiff = false
+
         $errUtils.throwErr(retryErr, {
           onFail: onFail or log
         })

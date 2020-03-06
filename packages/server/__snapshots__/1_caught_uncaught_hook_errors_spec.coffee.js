@@ -40,13 +40,9 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
   3 failing
 
   1) s1a "before each" hook for "t2a":
-
-      AssertionError: Timed out retrying: Expected to find element: \`.does-not-exist\`, but never found it.
+     AssertionError: Timed out retrying: Expected to find element: \`.does-not-exist\`, but never found it.
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1a'
-      + expected - actual
-
-      
       [stack trace lines]
 
   2) s3a "before all" hook for "t8a":
