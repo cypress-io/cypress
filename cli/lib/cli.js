@@ -167,7 +167,7 @@ module.exports = {
       args = process.argv
     }
 
-    const CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV
+    const { CYPRESS_INTERNAL_ENV } = process.env
 
     if (!util.isValidCypressInternalEnvValue(CYPRESS_INTERNAL_ENV)) {
       debug('invalid CYPRESS_INTERNAL_ENV value', CYPRESS_INTERNAL_ENV)
