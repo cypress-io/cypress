@@ -123,3 +123,10 @@ cy.wrap({
     bar: 1
   }
 }).its('foo.bar')
+
+cy.wrap({
+  foo: {
+    quux: ()=>2
+  }
+}).invoke('foo.quux')
+

@@ -1055,6 +1055,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
+    invoke(propertyPath: string, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
     invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
 
     /**
@@ -1068,17 +1069,6 @@ declare namespace Cypress {
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
     its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
-
-    /**
-     * Get a property’s value on the previously yielded subject.
-     *
-     * @see https://on.cypress.io/its
-     * @example
-     *    // Get the 'width' property
-     *    cy.wrap({width: '50'}).its('width')
-     *    // Drill into nested properties by using dot notation
-     *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
-     */
     its(propertyPath: string, options?: Loggable): Chainable<Subject>
 
     /**
