@@ -1,4 +1,7 @@
-describe "src/cy/commands/popups", ->
+describe "src/cy/commands/popups", {
+  isInteractive: true
+  numTestsKeptInMemory: 1,
+}, ->
   context "alert", ->
     beforeEach ->
       cy.visit("/fixtures/generic.html")

@@ -5,23 +5,33 @@
 const testState = {
   ranFirefox: false,
   ranChrome: false,
+  ranChromium: false,
 }
 
 describe('per-test config', () => {
   after(function () {
     if (hasOnly(this.currentTest)) return
 
-    if (Cypress.browser.name === 'firefox') {
+    if (Cypress.browser.family === 'firefox') {
       return expect(testState).deep.eq({
-        ranChrome: false,
+        ranChromium: false,
         ranFirefox: true,
       })
     }
 
     if (Cypress.browser.name === 'chrome') {
       return expect(testState).deep.eq({
+        ranChromium: true,
         ranChrome: true,
         ranFirefox: false,
+      })
+    }
+
+    if (Cypress.browser.name === 'chromium') {
+      return expect(testState).deep.eq({
+        ranChromium: true,
+        ranFirefox: false,
+        ranChrome: false,
       })
     }
 
@@ -59,6 +69,13 @@ describe('per-test config', () => {
   }, () => {
     testState.ranChrome = true
     expect(Cypress.browser.name).eq('chrome')
+  })
+
+  it('can specify only run in chromium', {
+    browser: 'chromium',
+  }, () => {
+    testState.ranChromium = true
+    expect(Cypress.browser.family).eq('chromium')
   })
 
   it('can specify only run in firefox', {
@@ -110,6 +127,14 @@ describe('per-test config', () => {
     describe('config in suite', {
       defaultCommandTimeout: 200,
     }, () => {
+      it('test', () => {
+        expect(Cypress.config().defaultCommandTimeout).eq(200)
+      })
+
+      it('test', () => {
+        expect(Cypress.config().defaultCommandTimeout).eq(200)
+      })
+
       it('test', () => {
         expect(Cypress.config().defaultCommandTimeout).eq(200)
       })

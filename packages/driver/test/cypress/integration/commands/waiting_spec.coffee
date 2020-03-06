@@ -6,7 +6,10 @@ xhrGet = (win, url) ->
   xhr.open("GET", url)
   xhr.send()
 
-describe "src/cy/commands/waiting", ->
+describe "src/cy/commands/waiting", {
+  isInteractive: true
+  numTestsKeptInMemory: 1
+}, ->
   context "#wait", ->
     describe "number argument", ->
       it "passes delay onto Promise", ->

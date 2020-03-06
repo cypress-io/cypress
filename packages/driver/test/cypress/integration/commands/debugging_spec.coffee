@@ -40,7 +40,10 @@ describe "src/cy/commands/debugging", ->
           .debug({log: false}).then ->
             expect(@lastLog).to.be.undefined
 
-  context "#pause", ->
+  context "#pause", {
+    isInteractive: true
+    numTestsKeptInMemory: 1,
+  }, ->
     beforeEach ->
       cy.on "log:added", (attrs, log) =>
         if attrs.name is "pause"

@@ -3,7 +3,10 @@ $ = Cypress.$.bind(Cypress)
 
 Cookie = require("js-cookie")
 
-describe "src/cy/commands/navigation", ->
+describe "src/cy/commands/navigation", {
+  isInteractive: true
+  numTestsKeptInMemory: 1
+}, ->
   context "#reload", ->
     before ->
       cy

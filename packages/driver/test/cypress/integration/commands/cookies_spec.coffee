@@ -144,7 +144,10 @@ describe "src/cy/commands/cookies", ->
 
         cy.getCookies({timeout: 50})
 
-    describe ".log", ->
+    describe ".log", {
+      isInteractive: true
+      numTestsKeptInMemory: 1,
+    }, ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>
           if attrs.name is "getCookies"

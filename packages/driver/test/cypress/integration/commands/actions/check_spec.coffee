@@ -2,7 +2,10 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Promise = Cypress.Promise
 
-describe "src/cy/commands/actions/check", ->
+describe "src/cy/commands/actions/check", {
+  isInteractive: true
+  numTestsKeptInMemory: 1
+}, ->
   before ->
     cy
       .visit("/fixtures/dom.html")

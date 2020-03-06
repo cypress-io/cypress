@@ -2823,7 +2823,10 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
   })
 
-  describe('.log', () => {
+  describe('.log', {
+    isInteractive: true,
+    numTestsKeptInMemory: 1,
+  }, () => {
     beforeEach(function () {
       cy.on('log:added', (attrs, log) => {
         this.lastLog = log
@@ -2849,6 +2852,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('logs delay arguments', () => {
+      Cypress.config('isInteractive', true)
       cy.get(':text:first').type('foo', { delay: 20 }).then(function () {
         const { lastLog } = this
 
@@ -3043,7 +3047,9 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
   })
 
-  describe('user experience', () => {
+  describe('user experience', {
+    isInteractive: true,
+  }, () => {
     it('can print table of keys on click', () => {
       cy.get('input:first').type('foo')
 

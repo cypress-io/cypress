@@ -46,7 +46,10 @@ const getMidPoint = (el) => {
 
 const isFirefox = Cypress.isBrowser('firefox')
 
-describe('src/cy/commands/actions/click', () => {
+describe('src/cy/commands/actions/click', {
+  isInteractive: true,
+  numTestsKeptInMemory: 1,
+}, () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })

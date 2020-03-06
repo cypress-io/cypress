@@ -24,7 +24,10 @@ function stubBrowser (path: string, version: string) {
 
 const HOMEDIR = 'C:/Users/flotwig'
 
-describe('windows browser detection', () => {
+describe('windows browser detection', {
+  isInteractive: true,
+  numTestsKeptInMemory: 1,
+}, () => {
   beforeEach(() => {
     sinon.stub(fse, 'pathExists').resolves(false)
     sinon.stub(os, 'homedir').returns(HOMEDIR)

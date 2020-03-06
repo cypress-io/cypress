@@ -2,7 +2,10 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 Promise = Cypress.Promise
 
-describe "src/cy/commands/connectors", ->
+describe "src/cy/commands/connectors", {
+  isInteractive: true
+  numTestsKeptInMemory: 1
+}, ->
   describe "with jquery", ->
     before ->
       cy

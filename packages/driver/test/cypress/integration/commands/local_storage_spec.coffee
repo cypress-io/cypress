@@ -43,7 +43,10 @@ describe "src/cy/commands/local_storage", ->
         # A number is used as an object will be considered as `options`
         cy.clearLocalStorage(1)
 
-    describe ".log", ->
+    describe ".log", {
+      isInteractive: true
+      numTestsKeptInMemory: 1,
+    }, ->
       beforeEach ->
         cy.on "log:added", (attrs, log) =>
           @lastLog = log

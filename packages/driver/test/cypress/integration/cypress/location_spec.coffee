@@ -20,7 +20,10 @@ urls = {
   auth:     "http://cypress:password123@localhost:8080/foo"
 }
 
-describe "src/cypress/location", ->
+describe "src/cypress/location", {
+  isInteractive: true
+  numTestsKeptInMemory: 1,
+}, ->
   beforeEach ->
     @setup = (remote) =>
       new Location(urls[remote])

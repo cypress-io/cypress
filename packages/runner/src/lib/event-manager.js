@@ -295,26 +295,27 @@ const eventManager = {
     })
 
     Cypress.on('test:after:run', (test) => {
-      if (restoreTestConfigFn || restoreSuiteConfigFn) {
-        restoreTestConfigFn && debug('restoring from test')
-        restoreSuiteConfigFn && debug('restoring from suite')
-        if (restoreSuiteConfigFn !== restoreTestConfigFn) {
-          if (restoreTestConfigFn) {
-            restoreTestConfigFn()
-            restoreTestConfigFn = null
-          }
+      const shouldRunRestoreTestConfig = !!restoreTestConfigFn
+      const shouldRunRestoreSuiteConfig = !!restoreSuiteConfigFn && test.isLastInSuite
 
-          if (restoreSuiteConfigFn) {
-            restoreSuiteConfigFn()
-            restoreSuiteConfigFn = null
-          }
-
-          return
-        }
-
-        restoreTestConfigFn()
-        restoreSuiteConfigFn = null
+      if (shouldRunRestoreTestConfig && shouldRunRestoreSuiteConfig) {
+        restoreSuiteConfigFn()
         restoreTestConfigFn = null
+        restoreSuiteConfigFn = null
+
+        return
+      }
+
+      if (shouldRunRestoreTestConfig) {
+        restoreTestConfigFn()
+        restoreTestConfigFn = null
+
+        return
+      }
+
+      if (shouldRunRestoreSuiteConfig) {
+        restoreSuiteConfigFn()
+        restoreSuiteConfigFn = null
 
         return
       }
