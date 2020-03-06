@@ -7,12 +7,12 @@ const Table = require('cli-table3')
 const moment = require('moment')
 const chalk = require('chalk')
 
-// color for numbers and show values
-const g = chalk.green
-// last used color
-const u = chalk.cyan
-// accepts and table headings
-const a = chalk.red
+// output colors for the table
+const colors = {
+  titles: chalk.white,
+  dates: chalk.cyan,
+  values: chalk.green,
+}
 
 // TODO: rename this function
 const path = () => {
@@ -29,12 +29,12 @@ const list = () => {
   return getCachedVersions()
   .then((binaries) => {
     const table = new Table({
-      head: [a('version'), a('last used')],
+      head: [colors.titles('version'), colors.titles('last used')],
     })
 
-    binaries.forEach((x) => {
-      const versionString = g(x.version)
-      const lastUsed = x.accessed ? u(x.accessed) : 'unknown'
+    binaries.forEach((binary) => {
+      const versionString = colors.values(binary.version)
+      const lastUsed = binary.accessed ? colors.dates(binary.accessed) : 'unknown'
 
       return table.push([versionString, lastUsed])
     })
