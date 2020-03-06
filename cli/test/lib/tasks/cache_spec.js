@@ -60,6 +60,17 @@ describe('lib/tasks/cache', () => {
     snapshot(stripAnsi(stdoutAsString))
   }
 
+  const snapshotWithHtml = async (htmlFilename) => {
+    const stdoutAsString = getSnapshotText()
+
+    snapshot(stripAnsi(stdoutAsString))
+
+    // if the sanitized snapshot matches, let's save the ANSI colors converted into HTML
+    const html = termToHtml.strings(stdoutAsString, termToHtml.themes.dark.name)
+
+    await saveHtml(htmlFilename, html)
+  }
+
   describe('.path', () => {
     it('lists path to cache', () => {
       cache.path()
@@ -105,15 +116,7 @@ describe('lib/tasks/cache', () => {
       })
 
       await cache.list()
-
-      const stdoutAsString = getSnapshotText()
-
-      snapshot(stripAnsi(stdoutAsString))
-
-      // if the sanitized snapshot matches, let's save the ANSI colors converted into HTML
-      const html = termToHtml.strings(stdoutAsString, termToHtml.themes.dark.name)
-
-      await saveHtml('list-of-versions.html', html)
+      await snapshotWithHtml('list-of-versions.html')
     })
   })
 })
