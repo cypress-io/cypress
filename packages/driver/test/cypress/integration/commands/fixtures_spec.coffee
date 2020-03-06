@@ -1,8 +1,6 @@
 _ = Cypress._
 Promise = Cypress.Promise
-helpers = require('../../support/helpers.coffee')
 
-helpers.beforeEachRestoreRunner()
 describe "src/cy/commands/fixtures", ->
   beforeEach ->
     Cypress.emit("clear:fixtures:cache")
@@ -80,7 +78,7 @@ describe "src/cy/commands/fixtures", ->
 
       it "throws if fixturesFolder is set to false", {
         fixturesFolder: false
-      }, {
+      }, (done) ->
         cy.on "fail", =>
           lastLog = @lastLog
 
