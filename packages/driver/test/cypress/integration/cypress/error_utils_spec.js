@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $errUtils = require('../../../../src/cypress/error_utils')
 const $errorMessages = require('../../../../src/cypress/error_messages')
 
@@ -12,7 +5,7 @@ describe('driver/src/cypress/error_utils', () => {
   context('.throwErr', () => {
     it('throws the error as sent', () => {
       try {
-        return $errUtils.throwErr('Something unexpected')
+        $errUtils.throwErr('Something unexpected')
       } catch (e) {
         expect(e.message).to.include('Something unexpected')
 
@@ -23,7 +16,7 @@ describe('driver/src/cypress/error_utils', () => {
 
   context('.throwErrByPath', () => {
     beforeEach(() => {
-      return $errorMessages.__test_errors = {
+      $errorMessages.__test_errors = {
         obj: {
           message: 'This is a simple error message',
           docsUrl: 'https://on.link.io',
@@ -102,7 +95,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
     describe('when error message path does not exist', () => {
       it('has an err.name of InternalError', () => {
         try {
-          return $errUtils.throwErrByPath('not.there')
+          $errUtils.throwErrByPath('not.there')
         } catch (e) {
           expect(e.name).to.eq('InternalError')
         }
@@ -110,7 +103,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
 
       it('has the right message', () => {
         try {
-          return $errUtils.throwErrByPath('not.there')
+          $errUtils.throwErrByPath('not.there')
         } catch (e) {
           expect(e.message).to.include('Error message path \'not.there\' does not exist')
         }
@@ -122,7 +115,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         describe('when no args are provided for the error', () => {
           it('has an err.name of CypressError', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.str')
+              $errUtils.throwErrByPath('__test_errors.str')
             } catch (e) {
               expect(e.name).to.eq('CypressError')
             }
@@ -130,7 +123,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
 
           it('has the right message and docs url', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.str')
+              $errUtils.throwErrByPath('__test_errors.str')
             } catch (e) {
               expect(e.message).to.include('This is a simple error message')
             }
@@ -140,7 +133,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         describe('when args are provided for the error', () => {
           it('uses them in the error message', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.str_with_args', {
+              $errUtils.throwErrByPath('__test_errors.str_with_args', {
                 args: {
                   foo: 'foo', bar: ['bar', 'qux'],
                 },
@@ -154,7 +147,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         describe('when args are provided for the error and some are used multiple times in message', () => {
           it('uses them in the error message', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.str_with_multi_args', {
+              $errUtils.throwErrByPath('__test_errors.str_with_multi_args', {
                 args: {
                   foo: 'foo', bar: ['bar', 'qux'],
                 },
@@ -168,7 +161,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         describe('when markdown and args', () => {
           it('formats markdown in the error message', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.str_with_markdown', {
+              $errUtils.throwErrByPath('__test_errors.str_with_markdown', {
                 args: {
                   foo: 'foo', bar: ['bar', 'qux'],
                 },
@@ -184,7 +177,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         describe('when no args are provided for the error', () => {
           it('has an err.name of CypressError', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.fn')
+              $errUtils.throwErrByPath('__test_errors.fn')
             } catch (e) {
               expect(e.name).to.eq('CypressError')
             }
@@ -192,7 +185,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
 
           it('has the right message and docs url', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.fn')
+              $errUtils.throwErrByPath('__test_errors.fn')
             } catch (e) {
               expect(e.message).to.include('This is a simple error message')
             }
@@ -202,7 +195,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         describe('when args are provided for the error', () => {
           it('uses them in the error message', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.fn_with_args', {
+              $errUtils.throwErrByPath('__test_errors.fn_with_args', {
                 args: {
                   foo: 'foo', bar: ['bar', 'qux'],
                 },
@@ -216,7 +209,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         describe('when args are provided for the error and some are used multiple times in message', () => {
           it('uses them in the error message', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.fn_with_multi_args', {
+              $errUtils.throwErrByPath('__test_errors.fn_with_multi_args', {
                 args: {
                   foo: 'foo', bar: ['bar', 'qux'],
                 },
@@ -230,7 +223,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         describe('when markdown and args', () => {
           it('formats markdown in the error message', () => {
             try {
-              return $errUtils.throwErrByPath('__test_errors.fn_with_markdown', {
+              $errUtils.throwErrByPath('__test_errors.fn_with_markdown', {
                 args: {
                   foo: 'foo', bar: ['bar', 'qux'],
                 },
@@ -245,10 +238,10 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
 
     describe('when onFail is provided as a function', () => {
       it('attaches the function to the error', () => {
-        const onFail = function () {}
+        const onFail = () => {}
 
         try {
-          return $errUtils.throwErrByPath('__test_errors.obj', { onFail })
+          $errUtils.throwErrByPath('__test_errors.obj', { onFail })
         } catch (e) {
           expect(e.onFail).to.equal(onFail)
         }
@@ -260,7 +253,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
         const command = { error: cy.spy() }
 
         try {
-          return $errUtils.throwErrByPath('__test_errors.obj', { onFail: command })
+          $errUtils.throwErrByPath('__test_errors.obj', { onFail: command })
         } catch (e) {
           e.onFail('the error')
 
@@ -284,7 +277,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
 
     it('throws if object not provided as first argument', () => {
       const fn = () => {
-        return $errUtils.getObjValueByPath('foo')
+        $errUtils.getObjValueByPath('foo')
       }
 
       expect(fn).to.throw('The first parameter to utils.getObjValueByPath() must be an object')
@@ -292,7 +285,7 @@ This has markdown like \`${obj.foo}\`, *${obj.bar}*, **${obj.foo}**, and _${obj.
 
     it('throws if path not provided as second argument', function () {
       const fn = () => {
-        return $errUtils.getObjValueByPath(this.obj)
+        $errUtils.getObjValueByPath(this.obj)
       }
 
       expect(fn).to.throw('The second parameter to utils.getObjValueByPath() must be a string')
