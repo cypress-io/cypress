@@ -368,16 +368,33 @@ class Project extends EE {
         }
       },
 
-      onUnexpectedDisconnect: (errName) => {
-        if (cfg.isTextTerminal) {
+      getOnUnexpectedDisconnect: () => {
+        // this is called once per socket, to ensure that only one error is emitted per socket
+
+        let testsEndedSinceCalled = false
+        let disconnected = false
+
+        this.on('end', () => {
+          testsEndedSinceCalled = true
+        })
+
+        return (errName) => {
+          if (disconnected || testsEndedSinceCalled) {
+            return
+          }
+
+          disconnected = true
+
+          if (cfg.isTextTerminal) {
           // in run mode, unexpected disconnects are an error that should be raised normally
-          const err = errors.get(errName, this.browser.displayName)
+            const err = errors.get(errName, this.browser.displayName)
 
-          return options.onError(err)
+            return options.onError(err)
+          }
+
+          // in open mode, they are just printed out
+          errors.warning(errName, this.browser.displayName)
         }
-
-        // in open mode, they are just printed out
-        errors.warning(errName, this.browser.displayName)
       },
     })
   }

@@ -164,7 +164,7 @@ class Socket {
       checkForAppErrors () {},
       onSavedStateChanged () {},
       onTestFileChange () {},
-      onUnexpectedDisconnect () {},
+      getOnUnexpectedDisconnect: _.constant(_.noop),
       onCaptureVideoFrames () {},
     })
 
@@ -193,16 +193,6 @@ class Socket {
     }
 
     return this.io.on('connection', (socket: SocketIO.Client) => {
-      let hadUnexpectedDisconnect = false
-      const _onUnexpectedDisconnect = (errName) => {
-        if (hadUnexpectedDisconnect) {
-          return
-        }
-
-        hadUnexpectedDisconnect = true
-        options.onUnexpectedDisconnect(errName)
-      }
-
       debug('socket connected')
 
       _attachDebugLogger(socket)
@@ -211,6 +201,7 @@ class Socket {
       // them at any time
       const headers = (socket.request != null ? socket.request.headers : undefined) != null ? (socket.request != null ? socket.request.headers : undefined) : {}
 
+      const onUnexpectedDisconnect = options.getOnUnexpectedDisconnect()
       let pendingDcPromise: Promise<void> | undefined
 
       socket.on('automation:client:connected', () => {
@@ -222,21 +213,9 @@ class Socket {
 
         debug('automation:client connected')
 
-        // if our automation disconnects then we're
-        // in trouble and should probably bomb everything
         automationClient.on('disconnect', () => {
-          let endedSinceDisconnect = false
-
-          tests.once('ended', () => {
-            endedSinceDisconnect = true
-          })
-
           return Promise.delay(2000)
           .then(() => {
-            if (endedSinceDisconnect) {
-              return
-            }
-
             // bail if we've swapped to a new automationClient
             if (automationClient !== socket) {
               return
@@ -248,7 +227,7 @@ class Socket {
               return
             }
 
-            _onUnexpectedDisconnect('AUTOMATION_SERVER_DISCONNECTED')
+            onUnexpectedDisconnect('AUTOMATION_SERVER_DISCONNECTED')
 
             // TODO: no longer emit this, just close the browser and display message in reporter
             return this.io.emit('automation:disconnected')
@@ -290,20 +269,10 @@ class Socket {
           pendingDcPromise = undefined
         }
 
-        let endedSinceDisconnect = false
-
-        tests.once('ended', () => {
-          endedSinceDisconnect = true
-        })
-
         socket.on('disconnect', () => {
           debug('runner socket disconnected %o', { now: Date.now(), runStatePreservedAt: socket.runStatePreservedAt })
 
           const assertNewRunnerConnected = () => {
-            if (endedSinceDisconnect) {
-              return
-            }
-
             pendingDcPromise = undefined
 
             const sockets = this.io.sockets.connected
@@ -316,7 +285,7 @@ class Socket {
             debug('checking to see if a new runner socket is available... %o', { hasNewRunnerConnected, sockets })
 
             if (!hasNewRunnerConnected) {
-              _onUnexpectedDisconnect('BROWSER_CRASHED')
+              onUnexpectedDisconnect('BROWSER_CRASHED')
             }
           }
 
