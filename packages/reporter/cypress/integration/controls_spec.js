@@ -54,7 +54,7 @@ describe('controls', () => {
     })
 
     it('shows tooltip with info icon', () => {
-      cy.get('.toggle-auto-scrolling .fa-info-circle').trigger('mouseover')
+      cy.get('.auto-scroll-info').trigger('mouseover')
       cy.get('.tooltip').invoke('text').should('include', 'automatically scroll')
     })
 
