@@ -120,7 +120,7 @@ commandAndArguments.args.push(
 const env = _.clone(process.env)
 
 env.NODE_ENV = 'test'
-env.CYPRESS_ENV = 'test'
+env.CYPRESS_INTERNAL_ENV = 'test'
 
 if (env.VERBOSE === '1') {
   _.extend(env, {

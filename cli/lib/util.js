@@ -121,13 +121,13 @@ function stdoutLineMatches (expectedLine, stdout) {
 }
 
 /**
- * Confirms if given value is a valid CYPRESS_ENV value. Undefined values
+ * Confirms if given value is a valid CYPRESS_INTERNAL_ENV value. Undefined values
  * are valid, because the system can set the default one.
  *
  * @param {string} value
- * @example util.isValidCypressEnvValue(process.env.CYPRESS_ENV)
+ * @example util.isValidCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
-function isValidCypressEnvValue (value) {
+function isValidCypressInternalEnvValue (value) {
   if (_.isUndefined(value)) {
     // will get default value
     return true
@@ -137,6 +137,17 @@ function isValidCypressEnvValue (value) {
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
+}
+
+/**
+ * Confirms if given value is a non-production CYPRESS_INTERNAL_ENV value.
+ * Undefined values are valid, because the system can set the default one.
+ *
+ * @param {string} value
+ * @example util.isNonProductionCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
+ */
+function isNonProductionCypressInternalEnvValue (value) {
+  return !_.isUndefined(value) && value !== 'production'
 }
 
 /**
@@ -234,7 +245,7 @@ const getApplicationDataFolder = (...paths) => {
   const { env } = process
 
   // allow overriding the app_data folder
-  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_ENV || 'development'
+  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
 
   const PRODUCT_NAME = pkg.productName || pkg.name
   const OS_DATA_PATH = ospath.data()
@@ -249,7 +260,8 @@ const getApplicationDataFolder = (...paths) => {
 const util = {
   normalizeModuleOptions,
   parseOpts,
-  isValidCypressEnvValue,
+  isValidCypressInternalEnvValue,
+  isNonProductionCypressInternalEnvValue,
   printNodeOptions,
 
   isCi () {

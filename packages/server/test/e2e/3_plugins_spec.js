@@ -15,6 +15,7 @@ const pluginAfterScreenshot = Fixtures.projectPath('plugin-after-screenshot')
 const pluginReturnsBadConfig = Fixtures.projectPath('plugin-returns-bad-config')
 const pluginReturnsEmptyBrowsersList = Fixtures.projectPath('plugin-returns-empty-browsers-list')
 const pluginReturnsInvalidBrowser = Fixtures.projectPath('plugin-returns-invalid-browser')
+const pluginValidationError = Fixtures.projectPath('plugin-validation-error')
 
 describe('e2e plugins', function () {
   e2e.setup()
@@ -128,6 +129,16 @@ describe('e2e plugins', function () {
     return e2e.exec(this, {
       spec: 'after_screenshot_spec.coffee',
       project: pluginAfterScreenshot,
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
+  it('fails when invalid event is registered', function () {
+    e2e.exec(this, {
+      spec: 'app_spec.js',
+      project: pluginValidationError,
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
