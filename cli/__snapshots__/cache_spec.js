@@ -25,3 +25,13 @@ exports['lib/tasks/cache .list lists all versions of cached binary with last acc
 │ 2.3.4   │ 5 days ago   │
 └─────────┴──────────────┘
 `
+
+exports['lib/tasks/cache .list some versions have never been opened 1'] = `
+┌─────────┬──────────────┐
+│ version │ last used    │
+├─────────┼──────────────┤
+│ 1.2.3   │ 3 months ago │
+├─────────┼──────────────┤
+│ 2.3.4   │ unknown      │
+└─────────┴──────────────┘
+`

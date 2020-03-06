@@ -6,6 +6,7 @@ const { join } = require('path')
 const Table = require('cli-table3')
 const moment = require('moment')
 const chalk = require('chalk')
+const _ = require('lodash')
 
 // output colors for the table
 const colors = {
@@ -62,7 +63,15 @@ const getCachedVersions = () => {
     const executable = state.getPathToExecutable(binaryDir)
 
     return fs.statAsync(executable).then((stat) => {
-      const accessed = moment(stat.atime).fromNow()
+      const lastAccessedTime = _.get(stat, 'atime')
+
+      if (!lastAccessedTime) {
+        // the test runner has never been opened
+        // or could be a test simulating missing timestamp
+        return binary
+      }
+
+      const accessed = moment(lastAccessedTime).fromNow()
 
       binary.accessed = accessed
 
