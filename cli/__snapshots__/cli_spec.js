@@ -323,26 +323,17 @@ exports['cli unknown command shows usage and exits 1'] = `
   
 `
 
-exports['cli CYPRESS_ENV allows staging environment 1'] = `
-  code: 0
-  stderr:
-  -------
-  
-  -------
-
-`
-
-exports['cli CYPRESS_ENV catches environment "foo" 1'] = `
+exports['cli CYPRESS_INTERNAL_ENV catches environment "foo" 1'] = `
   code: 11
   stderr:
   -------
-  The environment variable with the reserved name "CYPRESS_ENV" is set.
+  The environment variable with the reserved name "CYPRESS_INTERNAL_ENV" is set.
 
-  Unset the "CYPRESS_ENV" environment variable and run Cypress again.
+  Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.
 
   ----------
 
-  CYPRESS_ENV=foo
+  CYPRESS_INTERNAL_ENV=foo
 
   ----------
 
@@ -401,4 +392,39 @@ This will work, but it's not recommended.
 
 If you are trying to pass multiple arguments, separate them with commas instead:
   cypress run --tag arg1,arg2,arg3
+`
+
+exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] = `
+  code: 0
+  stdout:
+  -------
+  ⚠ Warning: It looks like you're passing CYPRESS_INTERNAL_ENV=staging
+
+  The environment variable "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
+
+  Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.
+
+  Usage: cypress <command> [options]
+
+  Options:
+    -v, --version      prints Cypress version
+    -h, --help         output usage information
+
+  Commands:
+    help               Shows CLI help and exits
+    version            prints Cypress version
+    run [options]      Runs Cypress tests from the CLI without the GUI
+    open [options]     Opens Cypress in the interactive GUI.
+    install [options]  Installs the Cypress executable matching this package's
+                       version
+    verify [options]   Verifies that Cypress is installed correctly and
+                       executable
+    cache [options]    Manages the Cypress binary cache
+    info [options]     Prints Cypress and system information
+  -------
+  stderr:
+  -------
+  
+  -------
+
 `
