@@ -36,7 +36,7 @@ const failedUnzip = {
 const missingApp = (binaryDir) => {
   return {
     description: `No version of Cypress is installed in: ${chalk.cyan(
-      binaryDir
+      binaryDir,
     )}`,
     solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
@@ -191,8 +191,8 @@ const unexpected = {
 
 const invalidCypressEnv = {
   description:
-    chalk.red('The environment variable with the reserved name "CYPRESS_ENV" is set.'),
-  solution: chalk.red('Unset the "CYPRESS_ENV" environment variable and run Cypress again.'),
+    chalk.red('The environment variable with the reserved name "CYPRESS_INTERNAL_ENV" is set.'),
+  solution: chalk.red('Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.'),
   exitCode: 11,
 }
 
@@ -214,7 +214,7 @@ const removed = {
   CYPRESS_BINARY_VERSION: {
     description: stripIndent`
     The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green(
-    '3.0.0'
+    '3.0.0',
   )}
     `,
     solution: stripIndent`
@@ -224,7 +224,7 @@ const removed = {
   CYPRESS_SKIP_BINARY_INSTALL: {
     description: stripIndent`
     The environment variable CYPRESS_SKIP_BINARY_INSTALL has been removed as of version ${chalk.green(
-    '3.0.0'
+    '3.0.0',
   )}
     `,
     solution: stripIndent`
@@ -287,7 +287,7 @@ function formErrorText (info, msg, prevMessage) {
     la(
       is.unemptyString(obj.description),
       'expected error description to be text',
-      obj.description
+      obj.description,
     )
 
     // assuming that if there the solution is a function it will handle
@@ -307,7 +307,7 @@ function formErrorText (info, msg, prevMessage) {
       la(
         is.unemptyString(obj.solution),
         'expected error solution to be text',
-        obj.solution
+        obj.solution,
       )
 
       add(`

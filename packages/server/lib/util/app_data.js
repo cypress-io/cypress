@@ -27,7 +27,7 @@ const getSymlinkType = () => {
 }
 
 const isProduction = () => {
-  return process.env.CYPRESS_ENV === 'production'
+  return process.env.CYPRESS_INTERNAL_ENV === 'production'
 }
 
 module.exports = {
@@ -37,7 +37,7 @@ module.exports = {
       .then(() => {
         return Promise.join(
           fs.ensureDirAsync(this.path()),
-          !isProduction() ? this.symlink() : undefined
+          !isProduction() ? this.symlink() : undefined,
         )
       })
     }
@@ -64,11 +64,11 @@ module.exports = {
   path (...paths) {
     const { env } = process
 
-    la(check.unemptyString(env.CYPRESS_ENV),
-      'expected CYPRESS_ENV, found', env.CYPRESS_ENV)
+    la(check.unemptyString(env.CYPRESS_INTERNAL_ENV),
+      'expected CYPRESS_INTERNAL_ENV, found', env.CYPRESS_INTERNAL_ENV)
 
     // allow overriding the app_data folder
-    const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_ENV
+    const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV
 
     const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
 
@@ -88,7 +88,7 @@ module.exports = {
   remove () {
     return Promise.join(
       fs.removeAsync(this.path()),
-      this.removeSymlink()
+      this.removeSymlink(),
     )
   },
 

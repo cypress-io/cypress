@@ -150,7 +150,7 @@ describe('Set Up Project', function () {
 
         it('selects personal org by default', function () {
           cy.get('.organizations-select').contains(
-            'Your personal organization'
+            'Your personal organization',
           )
 
           cy.get('.privacy-radio').should('be.visible')

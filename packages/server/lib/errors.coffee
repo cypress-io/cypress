@@ -10,7 +10,7 @@ ansi_up.use_classes = true
 twoOrMoreNewLinesRe = /\n{2,}/
 
 isProduction = ->
-  process.env["CYPRESS_ENV"] is "production"
+  process.env["CYPRESS_INTERNAL_ENV"] is "production"
 
 listItems = (paths) ->
   _
@@ -126,23 +126,6 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       The output from the command we ran was:
       """
       return {msg: msg, details: arg2}
-    when "CANNOT_RECORD_VIDEO_HEADED"
-      """
-      Warning: Cypress can only record videos of Electron when running headlessly.
-
-      You have set the Electron browser to run headed.
-
-      A video will not be recorded when using this mode.
-      """
-    when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
-      ## TODO: can this error be removed? what other family of browsers would we support....?
-      """
-      Warning: Cypress can only record videos when using Firefox, Electron, or a Chromium-family browser.
-
-      You have set the browser to: '#{arg1}'
-
-      A video will not be recorded when using this browser.
-      """
     when "NOT_LOGGED_IN"
       """
       You're not logged in.
@@ -604,11 +587,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """.trim()
 
       return {msg: msg, details: arg2}
-    when "PLUGINS_ERROR"
+    when "PLUGINS_UNEXPECTED_ERROR"
       msg = """
-      The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+      The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (`#{arg1}`)
       """.trim()
-      return {msg: msg, details: arg1}
+      return {msg: msg, details: arg2}
+    when "PLUGINS_VALIDATION_ERROR"
+      msg = """
+      The following validation error was thrown by your plugins file (`#{arg1}`).
+      """.trim()
+      return {msg: msg, details: arg2}
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO
@@ -876,13 +864,15 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       Cypress will use the built-in Node version (v#{arg1}) instead.
       """
-    when "INVALID_CYPRESS_ENV"
+    when "INVALID_CYPRESS_INTERNAL_ENV"
       """
-      We have detected unknown or unsupported CYPRESS_ENV value
+      We have detected an unknown or unsupported "CYPRESS_INTERNAL_ENV" value
 
         #{chalk.yellow(arg1)}
 
-      Please do not modify CYPRESS_ENV value.
+      "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
+
+      Do not modify the "CYPRESS_INTERNAL_ENV" value.
       """
     when "CDP_VERSION_TOO_OLD"
       """
@@ -899,6 +889,12 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       Error details:
 
       #{arg2.stack}
+      """
+    when "CDP_COULD_NOT_RECONNECT"
+      """
+      There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
+
+      #{arg1.stack}
       """
     when "CDP_RETRYING_CONNECTION"
       """

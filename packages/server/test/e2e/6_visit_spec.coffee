@@ -1,6 +1,6 @@
 _         = require("lodash")
 Bluebird  = require("bluebird")
-cert      = require("https-pem")
+cert      = require("@packages/https-proxy/test/helpers/certs")
 https     = require("https")
 useragent = require("express-useragent")
 { allowDestroy } = require("@packages/network")

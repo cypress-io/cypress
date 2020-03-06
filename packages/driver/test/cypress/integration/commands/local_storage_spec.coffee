@@ -40,8 +40,8 @@ describe "src/cy/commands/local_storage", ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "cy.clearLocalStorage() must be called with either a string or regular expression."
           done()
-
-        cy.clearLocalStorage({})
+        # A number is used as an object will be considered as `options`
+        cy.clearLocalStorage(1)
 
     describe ".log", ->
       beforeEach ->
@@ -63,3 +63,23 @@ describe "src/cy/commands/local_storage", ->
 
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
+
+    describe "without log", ->
+      beforeEach ->
+        cy.on "log:added", (attrs, log) =>
+          @lastLog = log
+
+        return null
+        
+      it "log is disabled", ->
+        cy.clearLocalStorage('foo', {log: false}).then ->
+          lastLog = @lastLog
+
+          expect(lastLog).to.be.undefined
+      
+      it "log is disabled without key", ->
+        cy.clearLocalStorage({log: false}).then ->
+          lastLog = @lastLog
+
+          expect(lastLog).to.be.undefined
+
