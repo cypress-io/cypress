@@ -20,7 +20,7 @@ findSystemNode = require("./util/find_system_node")
 CYPRESS_ENV_PREFIX = "CYPRESS_"
 CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
 CYPRESS_RESERVED_ENV_VARS = [
-  "CYPRESS_ENV"
+  "CYPRESS_INTERNAL_ENV"
 ]
 CYPRESS_SPECIAL_ENV_VARS = [
   "CI_KEY"
@@ -229,7 +229,7 @@ hideSpecialVals = (val, key) ->
 module.exports = {
   getConfigKeys: -> configKeys
 
-  isValidCypressEnvValue: (value) ->
+  isValidCypressInternalEnvValue: (value) ->
     # names of config environments, see "config/app.yml"
     names = ["development", "test", "staging", "production"]
     _.includes(names, value)
@@ -298,10 +298,10 @@ module.exports = {
     ## and delete envFile
     config.env = @parseEnv(config, options.env, resolved)
 
-    config.cypressEnv = process.env["CYPRESS_ENV"]
-    debug("using CYPRESS_ENV %s", config.cypressEnv)
-    if not @isValidCypressEnvValue(config.cypressEnv)
-      errors.throw("INVALID_CYPRESS_ENV", config.cypressEnv)
+    config.cypressEnv = process.env["CYPRESS_INTERNAL_ENV"]
+    debug("using CYPRESS_INTERNAL_ENV %s", config.cypressEnv)
+    if not @isValidCypressInternalEnvValue(config.cypressEnv)
+      errors.throw("INVALID_CYPRESS_INTERNAL_ENV", config.cypressEnv)
 
     delete config.envFile
 

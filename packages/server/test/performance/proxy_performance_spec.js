@@ -14,7 +14,7 @@ const performance = require('../support/helpers/performance')
 const Promise = require('bluebird')
 const sanitizeFilename = require('sanitize-filename')
 
-process.env.CYPRESS_ENV = 'development'
+process.env.CYPRESS_INTERNAL_ENV = 'development'
 
 const CA = require('@packages/https-proxy').CA
 const Config = require('../../lib/config')
