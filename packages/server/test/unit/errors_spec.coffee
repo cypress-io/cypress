@@ -55,7 +55,7 @@ describe "lib/errors", ->
       expect(console.log).to.be.calledWithMatch("\n", "details huh")
 
     it "logs err.stack in development", ->
-      process.env.CYPRESS_ENV = "development"
+      process.env.CYPRESS_INTERNAL_ENV = "development"
 
       err = new Error("foo")
 
@@ -68,7 +68,7 @@ describe "lib/errors", ->
   context ".logException", ->
     it "calls logger.createException with unknown error", ->
       sinon.stub(logger, "createException").resolves()
-      sinon.stub(process.env, "CYPRESS_ENV").value("production")
+      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production")
 
       err = new Error("foo")
 
@@ -79,7 +79,7 @@ describe "lib/errors", ->
 
     it "does not call logger.createException when known error", ->
       sinon.stub(logger, "createException").resolves()
-      sinon.stub(process.env, "CYPRESS_ENV").value("production")
+      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production")
 
       err = errors.get("NOT_LOGGED_IN")
 
@@ -90,7 +90,7 @@ describe "lib/errors", ->
 
     it "does not call logger.createException when not in production env", ->
       sinon.stub(logger, "createException").resolves()
-      sinon.stub(process.env, "CYPRESS_ENV").value("development")
+      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("development")
 
       err = new Error("foo")
 
@@ -101,7 +101,7 @@ describe "lib/errors", ->
 
     it "swallows creating exception errors", ->
       sinon.stub(logger, "createException").rejects(new Error("foo"))
-      sinon.stub(process.env, "CYPRESS_ENV").value("production")
+      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production")
 
       err = errors.get("NOT_LOGGED_IN")
 
