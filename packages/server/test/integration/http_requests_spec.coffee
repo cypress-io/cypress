@@ -356,7 +356,7 @@ describe "Routes", ->
 
               body = res.body
 
-              expect(body.integration).to.have.length(3)
+              expect(body.integration).to.have.length(4)
 
               ## remove the absolute path key
               body.integration = _.map body.integration, (obj) ->
@@ -364,6 +364,10 @@ describe "Routes", ->
 
               expect(res.body).to.deep.eq({
                 integration: [
+                  {
+                    "name": "sub/a&b%c.js"
+                    "relative": "tests/sub/a&b%c.js"
+                  }
                   {
                     name: "sub/sub_test.coffee"
                     relative: "tests/sub/sub_test.coffee"
