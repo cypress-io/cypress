@@ -105,7 +105,7 @@ exports['e2e visit / low response timeout / fails when network connection immedi
 
 http://localhost:16795/
 
-We attempted to make an http request to this url but the request failed without a response.
+We attempted to make an http request to this URL but the request failed without a response.
 
 We received this error at the network level:
 
@@ -562,7 +562,7 @@ exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when re
 
 http://localhost:3434/response_never_finishes
 
-We attempted to make an http request to this url but the request failed without a response.
+We attempted to make an http request to this URL but the request failed without a response.
 
 We received this error at the network level:
 
@@ -586,7 +586,7 @@ Error: ESOCKETTIMEDOUT
 
 http://localhost:3434/response_never_finishes
 
-We attempted to make an http request to this url but the request failed without a response.
+We attempted to make an http request to this URL but the request failed without a response.
 
 We received this error at the network level:
 
@@ -610,7 +610,7 @@ Error: ESOCKETTIMEDOUT
 
 http://localhost:3434/timeout?ms=1000
 
-We attempted to make an http request to this url but the request failed without a response.
+We attempted to make an http request to this URL but the request failed without a response.
 
 We received this error at the network level:
 

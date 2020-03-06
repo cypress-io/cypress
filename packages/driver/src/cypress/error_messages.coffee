@@ -1541,7 +1541,7 @@ module.exports = {
 
       {{url}}
 
-      We attempted to make an http request to this url but the request failed without a response.
+      We attempted to make an http request to this URL but the request failed without a response.
 
       We received this error at the network level:
 

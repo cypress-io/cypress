@@ -1218,7 +1218,7 @@ describe "src/cy/commands/navigation", ->
 
             http://localhost:3500/foo.html
 
-            We attempted to make an http request to this url but the request failed without a response.
+            We attempted to make an http request to this URL but the request failed without a response.
 
             We received this error at the network level:
 
