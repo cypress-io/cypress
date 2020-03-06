@@ -6,7 +6,6 @@ import socketIo from '@packages/socket'
 import { SocketIO } from '@packages/socket/types'
 import fs from './util/fs'
 import open from './util/open'
-import { EventEmitter } from 'events'
 
 const exec = require('./exec')
 const task = require('./task')
@@ -17,7 +16,6 @@ const preprocessor = require('./plugins/preprocessor')
 const firefoxUtil = require('./browsers/firefox-util').default
 
 const debug = Debug('cypress:server:socket')
-const debugVerbose = Debug('cypress-verbose:server:socket')
 
 const reporterEvents = [
   // "go:to:file"
@@ -36,17 +34,6 @@ const retry = (fn) => {
 
 const isSpecialSpec = (name) => {
   return name.endsWith('__all')
-}
-
-const _attachDebugLogger = (socket: SocketIO.Socket) => {
-  if (!debugVerbose.enabled) {
-    return
-  }
-
-  socket.use((packet, next) => {
-    debugVerbose('packet received %o', { socketRooms: _.values(socket.rooms), packet })
-    next()
-  })
 }
 
 class Socket {
@@ -170,8 +157,6 @@ class Socket {
 
     let automationClient: any = null
 
-    let tests = new EventEmitter
-
     const { integrationFolder, socketIoRoute, socketIoCookie } = config
 
     this.testsDir = integrationFolder
@@ -194,8 +179,6 @@ class Socket {
 
     return this.io.on('connection', (socket: SocketIO.Client) => {
       debug('socket connected')
-
-      _attachDebugLogger(socket)
 
       // cache the headers so we can access
       // them at any time
@@ -329,14 +312,6 @@ class Socket {
       })
 
       socket.on('mocha', (event, runnable) => {
-        if (event === 'end') {
-          tests.emit('ended')
-        }
-
-        if (event === 'start') {
-          tests.emit('started')
-        }
-
         return options.onMocha(event, runnable)
       })
 
