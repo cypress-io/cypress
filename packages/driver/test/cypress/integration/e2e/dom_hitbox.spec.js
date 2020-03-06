@@ -1,4 +1,4 @@
-import { clickCommandLog } from '../../support/utils'
+const { clickCommandLog } = require('../../support/utils')
 
 // https://github.com/cypress-io/cypress/pull/5299/files
 describe('rect highlight', () => {
