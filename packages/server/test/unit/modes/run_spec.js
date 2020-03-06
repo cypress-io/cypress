@@ -51,10 +51,14 @@ describe('lib/modes/run', () => {
   })
 
   context('.openProjectCreate', () => {
+    let onError
+
     beforeEach(() => {
       sinon.stub(openProject, 'create').resolves()
 
+      onError = sinon.spy()
       const options = {
+        onError,
         port: 8080,
         env: { foo: 'bar' },
         isTextTerminal: true,
@@ -77,12 +81,12 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('emits \'exitEarlyWithErr\' with error message onError', () => {
-      sinon.stub(openProject, 'emit')
-      expect(openProject.create.lastCall.args[2].onError).to.be.a('function')
-      openProject.create.lastCall.args[2].onError({ message: 'the message' })
+    it('calls options.onError with error message onError', () => {
+      const error = { message: 'the message' }
 
-      expect(openProject.emit).to.be.calledWith('exitEarlyWithErr', 'the message')
+      expect(openProject.create.lastCall.args[2].onError).to.be.a('function')
+      openProject.create.lastCall.args[2].onError(error)
+      expect(onError).to.be.calledWith(error)
     })
   })
 
@@ -105,28 +109,25 @@ describe('lib/modes/run', () => {
       expect(props.show).to.be.true
     })
 
-    it('sets recordFrameRate and onPaint when write is true', () => {
+    it('sets onScreencastFrame when write is true', () => {
       const write = sinon.stub()
 
       const image = {
-        toJPEG: sinon.stub().returns('imgdata'),
+        data: '',
       }
 
-      const props = runMode.getElectronProps(true, {}, write)
+      const props = runMode.getElectronProps(true, write)
 
-      expect(props.recordFrameRate).to.eq(20)
+      props.onScreencastFrame(image)
 
-      props.onPaint({}, false, image)
-
-      expect(write).to.be.calledWith('imgdata')
+      expect(write).to.be.calledOnce
     })
 
-    it('does not set recordFrameRate or onPaint when write is falsy', () => {
-      const props = runMode.getElectronProps(true, {}, false)
+    it('does not set onScreencastFrame when write is falsy', () => {
+      const props = runMode.getElectronProps(true, false)
 
       expect(props).not.to.have.property('recordFrameRate')
-
-      expect(props).not.to.have.property('onPaint')
+      expect(props).not.to.have.property('onScreencastFrame')
     })
 
     it('sets options.show = false onNewWindow callback', () => {
@@ -139,20 +140,20 @@ describe('lib/modes/run', () => {
       expect(options.show).to.eq(false)
     })
 
-    it('emits exitEarlyWithErr when webContents crashed', function () {
+    it('calls options.onError when webContents crashes', function () {
       sinon.spy(errors, 'get')
       sinon.spy(errors, 'log')
 
-      const emit = sinon.stub(this.projectInstance, 'emit')
-
-      const props = runMode.getElectronProps(true, this.projectInstance)
+      const onError = sinon.spy()
+      const props = runMode.getElectronProps(true, this.projectInstance, onError)
 
       props.onCrashed()
 
       expect(errors.get).to.be.calledWith('RENDERER_CRASHED')
       expect(errors.log).to.be.calledOnce
 
-      expect(emit).to.be.calledWithMatch('exitEarlyWithErr', 'We detected that the Chromium Renderer process just crashed.')
+      expect(onError).to.be.called
+      expect(onError.lastCall.args[0].message).to.include('We detected that the Chromium Renderer process just crashed.')
     })
   })
 
@@ -290,9 +291,9 @@ describe('lib/modes/run', () => {
         return Promise.delay(1000)
       })
 
-      const emit = sinon.stub(this.projectInstance, 'emit')
+      const onError = sinon.spy()
 
-      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10 })
+      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10, onError })
       .then(() => {
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
@@ -300,7 +301,8 @@ describe('lib/modes/run', () => {
         expect(errors.warning).to.be.calledWith('TESTS_DID_NOT_START_RETRYING', 'Retrying again...')
         expect(errors.get).to.be.calledWith('TESTS_DID_NOT_START_FAILED')
 
-        expect(emit).to.be.calledWith('exitEarlyWithErr', 'The browser never connected. Something is wrong. The tests cannot run. Aborting...')
+        expect(onError).to.be.called
+        expect(onError.lastCall.args[0].message).to.include('The browser never connected. Something is wrong. The tests cannot run. Aborting...')
       })
     })
   })
@@ -448,7 +450,7 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('exitEarlyWithErr event resolves with no tests, and error', function () {
+    it('exiting early resolves with no tests, and error', function () {
       sinon.useFakeTimers({ shouldAdvanceTime: true })
 
       const err = new Error('foo')
@@ -463,10 +465,7 @@ describe('lib/modes/run', () => {
       sinon.spy(Promise.prototype, 'delay')
 
       process.nextTick(() => {
-        expect(this.projectInstance.listeners('exitEarlyWithErr')).to.have.length(1)
-        this.projectInstance.emit('exitEarlyWithErr', err.message)
-
-        expect(this.projectInstance.listeners('exitEarlyWithErr')).to.have.length(0)
+        runMode.exitEarly(err)
       })
 
       return runMode.waitForTestsToFinishRunning({
@@ -623,20 +622,6 @@ describe('lib/modes/run', () => {
       return runMode.run()
       .then(() => {
         expect(errors.warning).to.not.be.called
-      })
-    })
-
-    it('shows no warnings for electron browser', () => {
-      return runMode.run({ browser: 'electron' })
-      .then(() => {
-        expect(errors.warning).to.not.be.calledWith('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER')
-      })
-    })
-
-    it('disables video recording on headed runs', () => {
-      return runMode.run({ headed: true })
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CANNOT_RECORD_VIDEO_HEADED')
       })
     })
 

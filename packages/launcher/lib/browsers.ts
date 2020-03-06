@@ -113,7 +113,7 @@ export function launch (
   url: string,
   args: string[] = [],
 ) {
-  log('launching browser %o to open %s', browser, url)
+  log('launching browser %o', { browser, url })
 
   if (!browser.path) {
     throw new Error(`Browser ${browser.name} is missing path`)
@@ -123,7 +123,21 @@ export function launch (
     args = [url].concat(args)
   }
 
-  log('spawning browser %o with args %s', browser, args.join(' '))
+  log('spawning browser with args %o', { args })
 
-  return cp.spawn(browser.path, args, { stdio: 'ignore' })
+  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+
+  proc.stdout.on('data', (buf) => {
+    log('%s stdout: %s', browser.name, String(buf).trim())
+  })
+
+  proc.stderr.on('data', (buf) => {
+    log('%s stderr: %s', browser.name, String(buf).trim())
+  })
+
+  proc.on('exit', (code, signal) => {
+    log('%s exited: %o', browser.name, { code, signal })
+  })
+
+  return proc
 }
