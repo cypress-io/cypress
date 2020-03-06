@@ -1,16 +1,4 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const {
-  $,
-} = Cypress
-const {
-  Promise,
-} = Cypress
+const { $, Promise } = Cypress
 
 describe('driver/src/cypress/index', () => {
   beforeEach(function () {
@@ -42,7 +30,7 @@ describe('driver/src/cypress/index', () => {
 
       const $foo = $('<div foo=\'bar\'>foo element</div>').appendTo(cy.$$('body'))
 
-      return cy.get(':foo').then(($el) => {
+      cy.get(':foo').then(($el) => {
         expect($el.get(0)).to.eq($foo.get(0))
       })
     })
@@ -98,16 +86,14 @@ describe('driver/src/cypress/index', () => {
     it('returns false on non-cy objects', () => {
       expect(Cypress.isCy(undefined)).to.be.false
 
-      expect(Cypress.isCy(() => {
-        return {}
-      })).to.be.false
+      expect(Cypress.isCy(() => {})).to.be.false
     })
   })
 
   context('.Log', () => {
     it('throws when using Cypress.Log.command()', () => {
       const fn = () => {
-        return Cypress.Log.command({})
+        Cypress.Log.command({})
       }
 
       expect(fn).to.throw('has been renamed to Cypress.log')
@@ -115,7 +101,7 @@ describe('driver/src/cypress/index', () => {
 
     it('throws when passing non-object to Cypress.log()', () => {
       const fn = () => {
-        return Cypress.log('My Log')
+        Cypress.log('My Log')
       }
 
       expect(fn).to.throw('Cypress.log() can only be called with an options object. Your argument was')
@@ -125,7 +111,7 @@ describe('driver/src/cypress/index', () => {
 
     it('does not throw when Cypress.log() called outside of command', () => {
       const fn = () => {
-        return Cypress.log({ message: 'My Log' })
+        Cypress.log({ message: 'My Log' })
       }
 
       expect(fn).to.not.throw()

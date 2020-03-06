@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { SelectorPlayground, $ } = Cypress
 
 const SELECTOR_DEFAULTS = [
@@ -15,9 +5,8 @@ const SELECTOR_DEFAULTS = [
 ]
 
 describe('src/cypress/selector_playground', () => {
-  beforeEach(() => // reset state since this is a singleton
-  {
-    return SelectorPlayground.reset()
+  beforeEach(() => { // reset state since this is a singleton
+    SelectorPlayground.reset()
   })
 
   it('has defaults', () => {
@@ -52,19 +41,19 @@ describe('src/cypress/selector_playground', () => {
 
     it('throws if not passed an object', () => {
       expect(() => {
-        return SelectorPlayground.defaults()
+        SelectorPlayground.defaults()
       }).to.throw('Cypress.SelectorPlayground.defaults() must be called with an object. You passed: ')
     })
 
     it('throws if selectorPriority is not an array', () => {
       expect(() => {
-        return SelectorPlayground.defaults({ selectorPriority: 'foo' })
+        SelectorPlayground.defaults({ selectorPriority: 'foo' })
       }).to.throw('Cypress.SelectorPlayground.defaults() called with invalid \'selectorPriority\' property. It must be an array. You passed: foo')
     })
 
     it('throws if onElement is not a function', () => {
       expect(() => {
-        return SelectorPlayground.defaults({ onElement: 'foo' })
+        SelectorPlayground.defaults({ onElement: 'foo' })
       }).to.throw('Cypress.SelectorPlayground.defaults() called with invalid \'onElement\' property. It must be a function. You passed: foo')
     })
   })

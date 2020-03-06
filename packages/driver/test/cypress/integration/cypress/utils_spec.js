@@ -1,23 +1,5 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const LimitedMap = require('../../../../src/util/limited_map')
-
-const {
-  _,
-} = Cypress
 const $utils = Cypress.utils
-
-const stackWithoutMessage = (err) => {
-  return err.stack.replace(`${err.toString()}\n`, '')
-}
 
 describe('driver/src/cypress/utils', () => {
   context('.reduceProps', () => {

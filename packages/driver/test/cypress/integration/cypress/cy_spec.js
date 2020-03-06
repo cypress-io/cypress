@@ -1,21 +1,8 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $ = Cypress.$.bind(Cypress)
-const {
-  _,
-} = Cypress
 
 describe('driver/src/cypress/cy', () => {
   before(() => {
-    return cy
+    cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
       this.body = win.document.body.outerHTML
@@ -25,13 +12,13 @@ describe('driver/src/cypress/cy', () => {
   beforeEach(function () {
     const doc = cy.state('document')
 
-    return $(doc.body).empty().html(this.body)
+    $(doc.body).empty().html(this.body)
   })
 
   context('hard deprecated private props', () => {
     it('throws on accessing props', () => {
       const fn = () => {
-        return cy.props.foo
+        cy.props.foo
       }
 
       expect(fn).to.throw('You are accessing a private property')
@@ -41,7 +28,7 @@ describe('driver/src/cypress/cy', () => {
 
     it('throws on accessing privates', () => {
       const fn = () => {
-        return cy.privates.foo
+        cy.privates.foo
       }
 
       expect(fn).to.throw('You are accessing a private property')
@@ -54,26 +41,26 @@ describe('driver/src/cypress/cy', () => {
     beforeEach(function () {
       this.setup = function (fn = function () {}) {
         Cypress.Commands.add('nested', () => {
-          return cy.url()
+          cy.url()
         })
 
-        return cy
+        cy
         .nested()
         .noop()
         .then(() => {
-          return fn()
+          fn()
         })
       }
     })
 
     it('ensures to splice queue correctly on first custom command', () => {
       Cypress.Commands.add('login', (email) => {
-        return cy.get('input:first').type('foo')
+        cy.get('input:first').type('foo')
       })
 
       const existing = cy.queue.names()
 
-      return cy.login().noop().then(() => {
+      cy.login().noop().then(() => {
         expect(cy.queue.names()).to.deep.eq(
           existing.concat(['login', 'get', 'type', 'noop', 'then']),
         )
@@ -83,7 +70,7 @@ describe('driver/src/cypress/cy', () => {
     it('queues in the correct order', function () {
       const existing = cy.queue.names()
 
-      return this.setup(() => {
+      this.setup(() => {
         expect(cy.queue.names()).to.deep.eq(
           existing.concat(['nested', 'url', 'noop', 'then']),
         )
@@ -91,7 +78,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('nested command should reference url as next property', function () {
-      return this.setup(() => {
+      this.setup(() => {
         const nested = cy.queue.find({ name: 'nested' })
 
         expect(nested.get('next').get('name')).to.eq('url')
@@ -102,24 +89,24 @@ describe('driver/src/cypress/cy', () => {
       cy.on('command:queue:end', () => {
         expect(cy.state('nestedIndex')).to.be.null
 
-        return done()
+        done()
       })
 
-      return this.setup()
+      this.setup()
     })
 
     it('can recursively nest', () => {
       Cypress.Commands.add('nest1', () => {
-        return cy.nest2()
+        cy.nest2()
       })
 
       Cypress.Commands.add('nest2', () => {
-        return cy.noop()
+        cy.noop()
       })
 
       const existing = cy.queue.names()
 
-      return cy
+      cy
       .nest1()
       .then(() => {
         expect(cy.queue.names()).to.deep.eq(
@@ -130,7 +117,7 @@ describe('driver/src/cypress/cy', () => {
 
     it('works with multiple nested commands', () => {
       Cypress.Commands.add('multiple', () => {
-        return cy
+        cy
         .url()
         .location()
         .noop()
@@ -138,7 +125,7 @@ describe('driver/src/cypress/cy', () => {
 
       const existing = cy.queue.names()
 
-      return cy
+      cy
       .multiple()
       .then(() => {
         expect(cy.queue.names()).to.deep.eq(
@@ -151,13 +138,13 @@ describe('driver/src/cypress/cy', () => {
   context('custom commands', () => {
     beforeEach(() => {
       Cypress.Commands.add('dashboard.selectRenderer', () => {
-        return cy
+        cy
         .get('[contenteditable]')
         .first()
       })
 
-      return Cypress.Commands.add('login', { prevSubject: true }, (subject, email) => {
-        return cy
+      Cypress.Commands.add('login', { prevSubject: true }, (subject, email) => {
+        cy
         .wrap(subject.find('input:first'))
         .type(email)
       })
@@ -166,7 +153,7 @@ describe('driver/src/cypress/cy', () => {
     it('works with custom commands', () => {
       const input = cy.$$('input:first')
 
-      return cy
+      cy
       .get('input:first')
       .parent()
       .command('login', 'brian@foo.com').then(($input) => {
@@ -177,7 +164,7 @@ describe('driver/src/cypress/cy', () => {
     it('works with namespaced commands', () => {
       const ce = cy.$$('[contenteditable]').first()
 
-      return cy
+      cy
       .command('dashboard.selectRenderer').then(($ce) => {
         expect($ce.get(0)).to.eq(ce.get(0))
       })
@@ -189,7 +176,7 @@ describe('driver/src/cypress/cy', () => {
           return [arg1, arg2]
         })
 
-        return cy.wrap('foo').bar(1, 2).then((arr) => {
+        cy.wrap('foo').bar(1, 2).then((arr) => {
           expect(arr).to.deep.eq([1, 2])
         })
       })
@@ -198,7 +185,7 @@ describe('driver/src/cypress/cy', () => {
     describe('child commands', () => {
       beforeEach(() => {
         Cypress.Commands.add('c', { prevSubject: true }, (subject, arg) => {
-          return cy.wrap([subject, arg])
+          cy.wrap([subject, arg])
         })
 
         Cypress.Commands.add('c2', { prevSubject: true }, (subject, arg) => {
@@ -211,7 +198,7 @@ describe('driver/src/cypress/cy', () => {
 
         Cypress.Commands.add('elOnly', { prevSubject: 'element' }, () => {})
 
-        return Cypress.Commands.add('elWinOnly', { prevSubject: ['element', 'window'] }, () => {})
+        Cypress.Commands.add('elWinOnly', { prevSubject: ['element', 'window'] }, () => {})
       })
 
       it('is called with the correct ctx', function () {
@@ -223,13 +210,13 @@ describe('driver/src/cypress/cy', () => {
           expected = true
         })
 
-        return cy.wrap(null).childCtx().then(() => {
+        cy.wrap(null).childCtx().then(() => {
           expect(expected).to.be.true
         })
       })
 
       it('inherits subjects', () => {
-        return cy
+        cy
         .wrap('foo')
         .c('bar')
         .then((arr) => {
@@ -256,12 +243,12 @@ describe('driver/src/cypress/cy', () => {
           expect(err.message).to.include('Oops, it looks like you are trying to call a child command before running a parent command')
           expect(err.message).to.include('cy.c()')
 
-          return done()
+          done()
         })
 
         cy.wrap('foo')
 
-        return cy.c()
+        cy.c()
       })
 
       it('fails when calling child command before parent with arguments', (done) => {
@@ -269,17 +256,17 @@ describe('driver/src/cypress/cy', () => {
           expect(err.message).to.include('Oops, it looks like you are trying to call a child command before running a parent command')
           expect(err.message).to.include('cy.c("bar")')
 
-          return done()
+          done()
         })
 
         cy.wrap('foo')
 
-        return cy.c('bar')
+        cy.c('bar')
       })
 
       it('fails when previous subject becomes detached', (done) => {
         cy.$$('#button').click(function () {
-          return $(this).remove()
+          $(this).remove()
         })
 
         cy.on('fail', (err) => {
@@ -287,10 +274,10 @@ describe('driver/src/cypress/cy', () => {
           expect(err.message).to.include('<button id="button">button</button>')
           expect(err.message).to.include('> cy.click()')
 
-          return done()
+          done()
         })
 
-        return cy.get('#button').click().parent()
+        cy.get('#button').click().parent()
       })
 
       it('fails when previous subject isnt window', (done) => {
@@ -299,10 +286,10 @@ describe('driver/src/cypress/cy', () => {
           expect(err.message).to.include('{foo: bar}')
           expect(err.message).to.include('> cy.wrap()')
 
-          return done()
+          done()
         })
 
-        return cy.wrap({ foo: 'bar' }).winOnly()
+        cy.wrap({ foo: 'bar' }).winOnly()
       })
 
       it('fails when previous subject isnt document', (done) => {
@@ -311,10 +298,10 @@ describe('driver/src/cypress/cy', () => {
           expect(err.message).to.include('[1, 2, 3]')
           expect(err.message).to.include('> cy.wrap()')
 
-          return done()
+          done()
         })
 
-        return cy.wrap([1, 2, 3]).docOnly()
+        cy.wrap([1, 2, 3]).docOnly()
       })
 
       it('fails when previous subject isnt an element or window', (done) => {
@@ -327,14 +314,14 @@ describe('driver/src/cypress/cy', () => {
           expect(err.message).to.include('> cy.wrap()')
           expect(err.message).to.include('All 2 subject validations failed')
 
-          return done()
+          done()
         })
 
-        return cy.window().elWinOnly()
+        cy.window().elWinOnly()
         .then(() => {
           firstPassed = true
 
-          return cy.wrap('string').elWinOnly()
+          cy.wrap('string').elWinOnly()
         })
       })
     })
@@ -342,12 +329,12 @@ describe('driver/src/cypress/cy', () => {
     describe('dual commands', () => {
       beforeEach(() => {
         return Cypress.Commands.add('d', { prevSubject: 'optional' }, (subject, arg) => {
-          return cy.wrap([subject, arg])
+          cy.wrap([subject, arg])
         })
       })
 
       it('passes on subject when used as a child', () => {
-        return cy
+        cy
         .wrap('foo')
         .d('bar')
         .then((arr) => {
@@ -356,7 +343,7 @@ describe('driver/src/cypress/cy', () => {
       })
 
       it('has an undefined subject when used as a parent', () => {
-        return cy
+        cy
         .d('bar')
         .then((arr) => {
           expect(arr).to.deep.eq([undefined, 'bar'])
@@ -366,7 +353,7 @@ describe('driver/src/cypress/cy', () => {
       it('has an undefined subject as a parent with a previous parent', () => {
         cy.wrap('foo')
 
-        return cy
+        cy
         .d('bar')
         .then((arr) => {
           expect(arr).to.deep.eq([undefined, 'bar'])
@@ -398,7 +385,7 @@ describe('driver/src/cypress/cy', () => {
 
       Cypress.Commands.overwrite('noop', function (orig, fn) {
         // yield the context
-        return fn(this)
+        fn(this)
       })
 
       return Cypress.Commands.overwrite('submit', (orig, subject) => {
@@ -407,13 +394,13 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('can modify parent commands', () => {
-      return cy.wrap('bar').then((str) => {
+      cy.wrap('bar').then((str) => {
         expect(str).to.eq('foobar')
       })
     })
 
     it('can modify child commands', () => {
-      return cy.get('li').first().then((el) => {
+      cy.get('li').first().then((el) => {
         expect(el[0]).to.eq(1)
       })
     })
@@ -421,7 +408,7 @@ describe('driver/src/cypress/cy', () => {
     it('has the current runnable ctx', function () {
       const _this = this
 
-      return cy.noop((ctx) => {
+      cy.noop((ctx) => {
         expect(_this === ctx).to.be.true
       })
     })
@@ -431,7 +418,7 @@ describe('driver/src/cypress/cy', () => {
         return orig(`${arg1}baz`)
       })
 
-      return cy.wrap('bar').should('eq', 'barbaz')
+      cy.wrap('bar').should('eq', 'barbaz')
     })
 
     it('errors when command does not exist', () => {
@@ -443,7 +430,7 @@ describe('driver/src/cypress/cy', () => {
     })
 
     it('updates state(\'current\') with modified args', () => {
-      return cy.get('form').eq(0).submit().then(() => {
+      cy.get('form').eq(0).submit().then(() => {
         expect(cy.state('current').get('prev').get('args')[0].foo).to.equal('foo')
       })
     })
