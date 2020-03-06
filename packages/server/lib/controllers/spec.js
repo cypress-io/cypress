@@ -4,7 +4,7 @@ const errors = require('../errors')
 const preprocessor = require('../plugins/preprocessor')
 
 module.exports = {
-  handle (spec, req, res, config, next, project) {
+  handle (spec, req, res, config, next, onError) {
     debug('request for %o', { spec })
 
     res.set({
@@ -51,10 +51,7 @@ module.exports = {
 
       err = errors.get('BUNDLE_ERROR', filePath, preprocessor.errorMessage(err))
 
-      console.log('') // eslint-disable-line no-console
-      errors.log(err)
-
-      project.emit('exitEarlyWithErr', err.message)
+      onError(err)
     })
   },
 }
