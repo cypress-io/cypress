@@ -1,10 +1,12 @@
 import { action, computed, observable } from 'mobx'
 
-export default class Directory {
+export default class Folder {
   @observable path
   @observable displayName
   @observable isExpanded = true
   @observable children = []
+
+  isFolder = true
 
   constructor ({ path, displayName }) {
     this.path = path

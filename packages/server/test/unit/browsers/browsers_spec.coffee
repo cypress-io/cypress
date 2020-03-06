@@ -6,6 +6,9 @@ browsers = require("#{root}../lib/browsers")
 utils = require("#{root}../lib/browsers/utils")
 snapshot = require('snap-shot-it')
 
+normalizeBrowsers = (message) ->
+  message.replace(/(found are: ).*/, "$1chrome, firefox, electron")
+
 describe "lib/browsers/index", ->
   context ".getBrowserInstance", ->
     it "returns instance", ->
@@ -40,7 +43,7 @@ describe "lib/browsers/index", ->
       expect(browsers.ensureAndGetByNameOrPath("browserNotGonnaBeFound"))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then (err) ->
-        snapshot(err.message)
+        snapshot(normalizeBrowsers(err.message))
 
     it "throws a special error when canary is passed", ->
       sinon.stub(utils, "getBrowsers").resolves([

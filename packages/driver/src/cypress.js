@@ -29,7 +29,9 @@ const $Server = require('./cypress/server')
 const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
+const $errUtils = require('./cypress/error_utils')
 const browserInfo = require('./cypress/browser')
+const debug = require('debug')('cypress:driver:cypress')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
@@ -38,7 +40,7 @@ const proxies = {
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
-    $utils.throwErrByPath('miscellaneous.no_cy')
+    $errUtils.throwErrByPath('miscellaneous.no_cy')
   }
 
   return this.cy.$$.apply(this.cy, args)
@@ -49,7 +51,7 @@ _.extend(jqueryProxyFn, $)
 // provide the old interface and
 // throw a deprecation message
 $Log.command = () => {
-  return $utils.throwErrByPath('miscellaneous.command_log_renamed')
+  return $errUtils.throwErrByPath('miscellaneous.command_log_renamed')
 }
 
 const throwDeprecatedCommandInterface = (key, method) => {
@@ -69,13 +71,13 @@ const throwDeprecatedCommandInterface = (key, method) => {
       break
   }
 
-  $utils.throwErrByPath('miscellaneous.custom_command_interface_changed', {
+  $errUtils.throwErrByPath('miscellaneous.custom_command_interface_changed', {
     args: { method, signature },
   })
 }
 
 const throwPrivateCommandInterface = (method) => {
-  $utils.throwErrByPath('miscellaneous.private_custom_command_interface', {
+  $errUtils.throwErrByPath('miscellaneous.private_custom_command_interface', {
     args: { method },
   })
 }
@@ -173,7 +175,7 @@ class $Cypress {
 
   run (fn) {
     if (!this.runner) {
-      $utils.throwErrByPath('miscellaneous.no_runner')
+      $errUtils.throwErrByPath('miscellaneous.no_runner')
     }
 
     return this.runner.run(fn)
@@ -211,6 +213,7 @@ class $Cypress {
     // normalizes all the various ways
     // other objects communicate intent
     // and 'action' to Cypress
+    debug(eventName)
     switch (eventName) {
       case 'recorder:frame':
         return this.emit('recorder:frame', args[0])
@@ -501,7 +504,7 @@ class $Cypress {
           // attaching long stace traces
           // which otherwise make this err
           // unusably long
-          const err = $utils.cloneErr(e)
+          const err = $errUtils.cloneErr(e)
 
           err.__stackCleaned__ = true
           err.backend = true
@@ -523,7 +526,7 @@ class $Cypress {
         const e = reply.error
 
         if (e) {
-          const err = $utils.cloneErr(e)
+          const err = $errUtils.cloneErr(e)
 
           err.automation = true
 

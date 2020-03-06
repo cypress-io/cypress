@@ -8,6 +8,7 @@ const sinonChai = require('@cypress/sinon-chai')
 
 const $dom = require('../dom')
 const $utils = require('../cypress/utils')
+const $errUtils = require('../cypress/error_utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 const chaiInspect = require('./chai/inspect')
 
@@ -48,13 +49,13 @@ chai.use((chai, u) => {
 
   $chaiJquery(chai, chaiUtils, {
     onInvalid (method, obj) {
-      const err = $utils.cypressErr(
-        $utils.errMessageByPath(
+      const err = $errUtils.cypressErr(
+        $errUtils.errMsgByPath(
           'chai.invalid_jquery_obj', {
             assertion: method,
             subject: $utils.stringifyActual(obj),
-          }
-        )
+          },
+        ),
       )
 
       throw err
@@ -252,7 +253,7 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const err = $utils.cypressErr($utils.errMessageByPath('chai.match_invalid_argument', { regExp }))
+        const err = $errUtils.cypressErr($errUtils.errMsgByPath('chai.match_invalid_argument', { regExp }))
 
         err.retry = false
         throw err
@@ -281,7 +282,7 @@ chai.use((chai, u) => {
           obj.is(selector) || !!obj.find(selector).length,
           'expected #{this} to contain #{exp}',
           'expected #{this} not to contain #{exp}',
-          text
+          text,
         )
       })
     }
@@ -323,7 +324,7 @@ chai.use((chai, u) => {
               `expected '${node}' to have a length of \#{exp} but got \#{act}`,
               `expected '${node}' to not have a length of \#{act}`,
               length,
-              obj.length
+              obj.length,
             )
           } catch (e1) {
             e1.node = node
@@ -343,7 +344,7 @@ chai.use((chai, u) => {
               throw e1
             }
 
-            const e2 = $utils.cypressErr($utils.errMessageByPath('chai.length_invalid_argument', { length }))
+            const e2 = $errUtils.cypressErr($errUtils.errMsgByPath('chai.length_invalid_argument', { length }))
 
             e2.retry = false
             throw e2
@@ -383,7 +384,7 @@ chai.use((chai, u) => {
               'expected \#{act} to exist in the DOM',
               'expected \#{act} not to exist in the DOM',
               node,
-              node
+              node,
             )
           } catch (e1) {
             e1.node = node

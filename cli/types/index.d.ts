@@ -52,7 +52,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: ConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
+  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -120,6 +120,36 @@ declare namespace Cypress {
      * @see https://on.cypress.io/clearlocalstorage
      */
     clear: (keys?: string[]) => void
+  }
+
+  interface ViewportPosition extends WindowPosition {
+    right: number
+    bottom: number
+  }
+
+  interface WindowPosition {
+    top: number
+    left: number
+    topCenter: number
+    leftCenter: number
+  }
+
+  interface ElementPositioning {
+    scrollTop: number
+    scrollLeft: number
+    width: number
+    height: number
+    fromElViewport: ViewportPosition
+    fromElWindow: WindowPosition
+    fromAutWindow: WindowPosition
+  }
+
+  interface ElementCoordinates {
+    width: number
+    height: number
+    fromElViewport: ViewportPosition & { x: number, y: number }
+    fromElWindow: WindowPosition & { x: number, y: number }
+    fromAutWindow: WindowPosition & { x: number, y: number }
   }
 
   /**
@@ -371,7 +401,85 @@ declare namespace Cypress {
      * @see https://on.cypress.io/dom
      */
     dom: {
+      /**
+       * Returns a jQuery object obtained by wrapping an object in jQuery.
+       */
+      wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
+      query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
+      /**
+       * Returns an array of raw elements pulled out from a jQuery object.
+       */
+      unwrap(obj: any): any
+      /**
+       * Returns a boolean indicating whether an object is a DOM object.
+       */
+      isDom(obj: any): boolean
+      isType(element: JQuery | HTMLElement , type: string): boolean
+      /**
+       * Returns a boolean indicating whether an element is visible.
+       */
+      isVisible(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is hidden.
+       */
       isHidden(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element can receive focus.
+       */
+      isFocusable(element: JQuery | HTMLElement): boolean
+      isTextLike(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is scrollable.
+       */
+      isScrollable(element: Window | JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element currently has focus.
+       */
+      isFocused(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is detached from the DOM.
+       */
+      isDetached(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is attached to the DOM.
+       */
+      isAttached(element: JQuery | HTMLElement | Window | Document): boolean
+      isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
+      /**
+       * Returns a boolean indicating whether an element is a descendent of another element.
+       */
+      isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an object is a DOM element.
+       */
+      isElement(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether a node is of document type.
+       */
+      isDocument(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a window object.
+       */
+      isWindow(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a jQuery object.
+       */
+      isJquery(obj: any): boolean
+      isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
+      stringify(element: JQuery | HTMLElement, form: string): string
+      getElements(element: JQuery): JQuery | HTMLElement[]
+      getContainsSelector(text: string, filter?: string): JQuery.Selector
+      getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
+      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getReasonIsHidden(element: JQuery | HTMLElement): string
+      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
+      getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
+      getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
+      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position: string): ElementCoordinates
+      getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
     }
 
     /**
@@ -550,13 +658,13 @@ declare namespace Cypress {
     /**
      * Click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').click('topRight')
      */
-    click(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    click(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Click a DOM element at specific coordinates
      *
@@ -687,13 +795,13 @@ declare namespace Cypress {
     /**
      * Double-click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/dblclick
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -717,13 +825,13 @@ declare namespace Cypress {
     /**
      * Right-click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').rightclick('topRight')
      */
-    rightclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    rightclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element at specific coordinates
      *
@@ -1955,7 +2063,7 @@ declare namespace Cypress {
      * @example
      *    cy.$$('p')
      */
-    $$: JQueryStatic
+    $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -2280,6 +2388,17 @@ declare namespace Cypress {
      * @default { runMode: 1, openMode: null }
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
+  }
+
+  interface PluginConfigOptions extends ConfigOptions {
+    /**
+    * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
+    */
+    configFile: string | false
+    /**
+    * Absolute path to the root of the project
+    */
+    projectRoot: string
   }
 
   interface DebugOptions {

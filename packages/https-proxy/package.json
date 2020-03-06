@@ -6,6 +6,7 @@
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "https": "node https.js",
+    "regenerate:certs": "cd ./test/helpers/certs && ./regenerate-certs.sh",
     "start": "node index.js",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -23,7 +24,6 @@
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
-    "@packages/coffee": "*",
     "@packages/network": "*",
     "@packages/ts": "*",
     "chai": "3.5.0",

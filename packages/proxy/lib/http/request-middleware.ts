@@ -123,10 +123,12 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     url: this.req.proxiedUrl,
   }
 
-  const remoteState = this.getRemoteState()
+  const { strategy, origin, fileServer } = this.getRemoteState()
 
-  if (remoteState.strategy === 'file' && requestOptions.url.startsWith(remoteState.origin)) {
-    requestOptions.url = requestOptions.url.replace(remoteState.origin, remoteState.fileServer)
+  if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
+    this.req.headers['x-cypress-authorization'] = this.getFileServerToken()
+
+    requestOptions.url = requestOptions.url.replace(origin, fileServer)
   }
 
   const req = this.request.create(requestOptions)

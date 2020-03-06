@@ -1,8 +1,8 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { forwardRef } from 'react'
 
-export default observer(({ state }) => {
+export default observer(forwardRef(({ state }, ref) => {
   if (!state.messageTitle) return null
 
   function controls () {
@@ -17,6 +17,7 @@ export default observer(({ state }) => {
 
   return (
     <div
+      ref={ref}
       className={cs(
         'message-container',
         `message-${state.messageStyles.state}`,
@@ -32,4 +33,4 @@ export default observer(({ state }) => {
       {controls()}
     </div>
   )
-})
+}))
