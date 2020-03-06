@@ -45,7 +45,6 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-
       [stack trace lines]
 
   2) s1 without an afterEach hook t2:
@@ -58,7 +57,6 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-
       [stack trace lines]
 
   3) s1 with an afterEach hook t4:
@@ -71,7 +69,6 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-
       [stack trace lines]
 
   4) s1 with an afterEach hook t5:
@@ -98,7 +95,6 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-
       [stack trace lines]
 
 

@@ -276,7 +276,7 @@ const processErr = (errObj = {}, config) => {
   }
 
   // append the docs url when not interactive so it appears in the stdout
-  return appendErrMsg(errObj, `${errObj.docsUrl}\n`)
+  return appendErrMsg(errObj, errObj.docsUrl)
 }
 
 module.exports = {

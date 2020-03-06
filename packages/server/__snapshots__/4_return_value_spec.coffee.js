@@ -38,7 +38,6 @@ For convenience, you can also simply omit any return value or return \`undefined
 In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
 
 https://on.cypress.io/returning-value-and-commands-in-test
-
       [stack trace lines]
 
   2)  errors when invoking commands in custom command and returning different value:
@@ -59,7 +58,6 @@ For convenience, you can also simply omit any return value or return \`undefined
 In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
 
 https://on.cypress.io/returning-value-and-commands-in-custom-command
-
       [stack trace lines]
 
   3)  errors when not invoking commands, invoking done callback, and returning a promise:
