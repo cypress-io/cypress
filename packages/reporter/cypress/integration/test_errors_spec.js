@@ -99,17 +99,22 @@ describe('test errors', function () {
   })
 
   describe('stack trace', function () {
-    it('hides stack trace by default', function () {
+    beforeEach(function () {
       this.setError(this.commandErr)
+    })
 
+    it('hides stack trace by default', function () {
       cy.get('.runnable-err-stack-trace').should('not.be.visible')
     })
 
     it('opens stack trace on click', function () {
-      this.setError(this.commandErr)
-
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace').should('be.visible')
+    })
+
+    it('does not collapse test when clicking', () => {
+      cy.contains('View stack trace').click()
+      cy.get('.command-wrapper').should('be.visible')
     })
   })
 
