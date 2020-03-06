@@ -6,6 +6,7 @@ import socketIo from '@packages/socket'
 import { SocketIO } from '@packages/socket/types'
 import fs from './util/fs'
 import open from './util/open'
+import { EventEmitter } from 'events'
 
 const exec = require('./exec')
 const task = require('./task')
@@ -169,6 +170,8 @@ class Socket {
 
     let automationClient: any = null
 
+    let tests = new EventEmitter
+
     const { integrationFolder, socketIoRoute, socketIoCookie } = config
 
     this.testsDir = integrationFolder
@@ -222,9 +225,18 @@ class Socket {
         // if our automation disconnects then we're
         // in trouble and should probably bomb everything
         automationClient.on('disconnect', () => {
-          // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
+          let endedSinceDisconnect = false
+
+          tests.once('ended', () => {
+            endedSinceDisconnect = true
+          })
+
           return Promise.delay(2000)
           .then(() => {
+            if (endedSinceDisconnect) {
+              return
+            }
+
             // bail if we've swapped to a new automationClient
             if (automationClient !== socket) {
               return
@@ -278,10 +290,20 @@ class Socket {
           pendingDcPromise = undefined
         }
 
+        let endedSinceDisconnect = false
+
+        tests.once('ended', () => {
+          endedSinceDisconnect = true
+        })
+
         socket.on('disconnect', () => {
           debug('runner socket disconnected %o', { now: Date.now(), runStatePreservedAt: socket.runStatePreservedAt })
 
           const assertNewRunnerConnected = () => {
+            if (endedSinceDisconnect) {
+              return
+            }
+
             pendingDcPromise = undefined
 
             const sockets = this.io.sockets.connected
@@ -337,8 +359,16 @@ class Socket {
         return cb()
       })
 
-      socket.on('mocha', (...args) => {
-        return options.onMocha.apply(options, args)
+      socket.on('mocha', (event, runnable) => {
+        if (event === 'end') {
+          tests.emit('ended')
+        }
+
+        if (event === 'start') {
+          tests.emit('started')
+        }
+
+        return options.onMocha(event, runnable)
       })
 
       socket.on('open:finder', (p, cb = function () {}) => {
