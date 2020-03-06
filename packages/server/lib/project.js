@@ -371,20 +371,22 @@ class Project extends EE {
 
       getOnUnexpectedDisconnect: () => {
         // this is called once per socket, to ensure that only one error is emitted per socket
+        let disconnectedSinceCalled = false
 
-        let testsEndedSinceCalled = false
-        let disconnected = false
+        this.on('unexpected-disconnect', () => {
+          disconnectedSinceCalled = true
+        })
 
         this.on('end', () => {
-          testsEndedSinceCalled = true
+          disconnectedSinceCalled = true
         })
 
         return (errName) => {
-          if (disconnected || testsEndedSinceCalled) {
+          if (disconnectedSinceCalled) {
             return
           }
 
-          disconnected = true
+          this.emit('unexpected-disconnect')
 
           if (cfg.isTextTerminal) {
           // in run mode, unexpected disconnects are an error that should be raised normally
