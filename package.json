@@ -78,7 +78,7 @@
   "devDependencies": {
     "axios": "0.19.2",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
-    "ban-sensitive-files": "1.9.2",
+    "ban-sensitive-files": "1.9.3",
     "css-loader": "3.4.2",
     "cypress": "4.1.0",
     "dependency-check": "3.4.1",
