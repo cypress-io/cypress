@@ -4,7 +4,7 @@ import prompts from 'prompts'
 import { optionInfo } from './option_info'
 import fs from '../../../util/fs'
 import { Config } from '../config'
-import scaffold from '../../../scaffold2'
+import scaffold from './fs'
 
 export const prompt = async (options: any) => {
   const { customize } = await prompts({
@@ -85,6 +85,7 @@ const configPrompts = async (optionInfo) => {
       message: ``, // required
       // @ts-ignore
       onRender ({ yellow }) {
+        // @ts-ignore
         this.msg = `  Customize ${yellow(`${option.name}`)}?`
       },
     })
@@ -133,6 +134,7 @@ const objectPrompt = async (option) => {
     message: '', // required
     // @ts-ignore
     onRender ({ underline, reset }) {
+      // @ts-ignore
       this.msg = `  - ${underline().yellow(`${name}`)} object: ${reset().dim(`${description}`)}\n      Add this object?:`
     },
   })
