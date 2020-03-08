@@ -49,7 +49,7 @@ runProjectTest = (buildAppExecutable, e2e) ->
   console.log("running project test")
 
   new Promise (resolve, reject) ->
-    env = _.omit(process.env, "CYPRESS_ENV")
+    env = _.omit(process.env, "CYPRESS_INTERNAL_ENV")
 
     if !canRecordVideo()
       console.log("cannot record video on this platform yet, disabling")
@@ -92,7 +92,7 @@ runFailingProjectTest = (buildAppExecutable, e2e) ->
 
   spawn = ->
     new Promise (resolve, reject) ->
-      env = _.omit(process.env, "CYPRESS_ENV")
+      env = _.omit(process.env, "CYPRESS_INTERNAL_ENV")
 
       args = [
         "--run-project=#{e2e}",
