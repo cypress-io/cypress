@@ -1,1 +1,1 @@
-export { prompt } from './prompt'
+export { prompt } from './scaffold/prompt'

@@ -213,7 +213,7 @@ export const optionInfo = [
         "name": "chromeWebSecurity",
         "default": "true",
         "type": "text",
-        "description": "Whether Chrome Web Security for `same-origin policy` and `insecure mixed content` is enabled. 'Read more about this here'"
+        "description": "Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. 'Read more about this here'"
       },
       {
         "name": "userAgent",

@@ -1,10 +1,10 @@
 import _ from 'lodash'
 import prompts from 'prompts'
 
-import { optionInfo } from './options'
-import fs from '../../util/fs'
-import { Config } from './config'
-import scaffold from '../../scaffold2'
+import { optionInfo } from './option_info'
+import fs from '../../../util/fs'
+import { Config } from '../config'
+import scaffold from '../../../scaffold2'
 
 export const prompt = async (options: any) => {
   const { customize } = await prompts({
