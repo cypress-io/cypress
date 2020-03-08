@@ -56,7 +56,7 @@ const filesSizesAreSame = (files, index) => {
     Promise.all(_.map(files, getFileSize)),
     Promise.all(_.map(files, (file) => {
       return getFileSize(getIndexedExample(file, index))
-    }))
+    })),
   )
   .spread((fileSizes, originalFileSizes) => {
     return _.every(fileSizes, (size, i) => {
@@ -133,7 +133,7 @@ module.exports = {
     const folder = path.join(
       projRoot,
       config.integrationFolder ||
-        _.find(optionInfo[2].options, { name: 'integrationFolder' }).default
+        _.find(optionInfo[2].options, { name: 'integrationFolder' }).default,
     )
 
     config.integrationFolder = folder
@@ -161,7 +161,7 @@ module.exports = {
     const folder = path.join(
       projRoot,
       config.fixturesFolder ||
-        _.find(optionInfo[2].options, { name: 'fixturesFolder' }).default
+        _.find(optionInfo[2].options, { name: 'fixturesFolder' }).default,
     )
 
     config.fixturesFolder = folder
@@ -184,7 +184,7 @@ module.exports = {
     const supportFile = path.join(
       projRoot,
       config.supportFile ||
-        _.find(optionInfo[2].options, { name: 'supportFile' }).default
+        _.find(optionInfo[2].options, { name: 'supportFile' }).default,
     )
 
     config.supportFile = supportFile
@@ -200,7 +200,7 @@ module.exports = {
 
       return Promise.join(
         this._copy('support/commands.js', folder, config),
-        this._copy('support/index.js', folder, config)
+        this._copy('support/index.js', folder, config),
       )
     })
   },
