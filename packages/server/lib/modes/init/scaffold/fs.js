@@ -4,7 +4,7 @@ const path = require('path')
 const cypressEx = require('@packages/example')
 const fs = require('../../../util/fs')
 const glob = require('../../../util/glob')
-const cwd = require('./cwd')
+const cwd = require('../../../cwd')
 const debug = require('debug')('cypress:server:scaffold')
 const { isEmpty } = require('ramda')
 const { isDefault } = require('../../../util/config')
@@ -111,13 +111,17 @@ const isNewProject = (integrationFolder) => {
   })
 }
 
-const { optionInfo } = require('./modes/init/options')
+const { optionInfo } = require('./option_info')
 
 const isDefault2 = (config, option) => {
   return config[option] === undefined || config[option] === optionInfo[2][option]
 }
 
 module.exports = {
+  create (options) {
+
+  },
+
   isNewProject,
 
   integrationExampleName () {
