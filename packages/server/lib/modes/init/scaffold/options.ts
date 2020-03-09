@@ -1,5 +1,7 @@
 export const fromCommandArgs = (args) => {
-  console.log('from command args')
+  return {
+    config: {},
+  }
 }
 
 export const fromPrompts = (args) => {

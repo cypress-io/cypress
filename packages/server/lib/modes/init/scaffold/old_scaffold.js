@@ -38,10 +38,6 @@ const isDefault2 = (config, option) => {
 }
 
 module.exports = {
-  create (options) {
-
-  },
-
   integrationExampleName () {
     return exampleFolderName
   },
