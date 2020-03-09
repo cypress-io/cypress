@@ -663,13 +663,13 @@ declare namespace Cypress {
     /**
      * Click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').click('topRight')
      */
-    click(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    click(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Click a DOM element at specific coordinates
      *
@@ -800,13 +800,13 @@ declare namespace Cypress {
     /**
      * Double-click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/dblclick
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -830,13 +830,13 @@ declare namespace Cypress {
     /**
      * Right-click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').rightclick('topRight')
      */
-    rightclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    rightclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element at specific coordinates
      *

@@ -10,7 +10,7 @@ ansi_up.use_classes = true
 twoOrMoreNewLinesRe = /\n{2,}/
 
 isProduction = ->
-  process.env["CYPRESS_ENV"] is "production"
+  process.env["CYPRESS_INTERNAL_ENV"] is "production"
 
 listItems = (paths) ->
   _
@@ -592,6 +592,11 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (`#{arg1}`)
       """.trim()
       return {msg: msg, details: arg2}
+    when "PLUGINS_VALIDATION_ERROR"
+      msg = """
+      The following validation error was thrown by your plugins file (`#{arg1}`).
+      """.trim()
+      return {msg: msg, details: arg2}
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO
@@ -859,13 +864,15 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       Cypress will use the built-in Node version (v#{arg1}) instead.
       """
-    when "INVALID_CYPRESS_ENV"
+    when "INVALID_CYPRESS_INTERNAL_ENV"
       """
-      We have detected unknown or unsupported CYPRESS_ENV value
+      We have detected an unknown or unsupported "CYPRESS_INTERNAL_ENV" value
 
         #{chalk.yellow(arg1)}
 
-      Please do not modify CYPRESS_ENV value.
+      "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
+
+      Do not modify the "CYPRESS_INTERNAL_ENV" value.
       """
     when "CDP_VERSION_TOO_OLD"
       """
