@@ -4482,7 +4482,6 @@ declare namespace Cypress {
    * Individual task callback. Receives a single argument and _should_ return
    * anything but `undefined` or a promise that resolves anything but `undefined`
    * TODO: find a way to express "anything but undefined" in TypeScript
-   * IDEA: is this not just `{}`?
    */
   type Task = (value: any) => any
 
