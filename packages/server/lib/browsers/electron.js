@@ -82,13 +82,11 @@ const _maybeRecordVideo = function (webContents, options) {
   return async () => {
     const { onScreencastFrame } = options
 
-    if (!onScreencastFrame) {
-      debug('options.onScreencastFrame is falsy')
+    debug('maybe recording video %o', { onScreencastFrame })
 
+    if (!onScreencastFrame) {
       return
     }
-
-    debug('starting screencast')
 
     webContents.debugger.on('message', (event, method, params) => {
       if (method === 'Page.screencastFrame') {
