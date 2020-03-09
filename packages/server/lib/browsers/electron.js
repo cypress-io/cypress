@@ -263,10 +263,7 @@ module.exports = {
   _enableDebugger (webContents) {
     debug('debugger: enable Console and Network')
 
-    return Bluebird.join(
-      webContents.debugger.sendCommand('Console.enable'),
-      webContents.debugger.sendCommand('Network.enable'),
-    )
+    return webContents.debugger.sendCommand('Console.enable')
   },
 
   _getPartition (options) {
