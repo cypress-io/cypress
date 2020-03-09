@@ -63,7 +63,7 @@ install:
   - has-env GH
   # clean cache to prevent install permission issues
   - yarn cache clean
-  - yarn || yarn || yarn
+  - yarn --frozen-lockfile || yarn --frozen-lockfile || yarn --frozen-lockfile
   - .\node_modules\.bin\print-arch
 
 # Post-install test scripts.
