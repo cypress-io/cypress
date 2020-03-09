@@ -4,7 +4,7 @@ import prompts from 'prompts'
 import { optionInfo } from './option_info'
 import fs from '../../../util/fs'
 import { Config } from '../config'
-import scaffold from './fs'
+import scaffold from './old_scaffold'
 
 export const prompt = async (options: any) => {
   const { customize } = await prompts({

@@ -5,4 +5,4 @@ export const option = {
   fromPrompts,
 }
 
-export { create } from './fs'
+export { create } from './old_scaffold'
