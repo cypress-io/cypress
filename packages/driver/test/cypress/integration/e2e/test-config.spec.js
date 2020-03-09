@@ -140,6 +140,66 @@ describe('per-test config', () => {
       })
     })
   })
+
+  describe('in nested suite', () => {
+    describe('config in suite', {
+      foo: true,
+      defaultCommandTimeout: 200,
+    }, () => {
+      it('has config.foo', () => {
+        expect(Cypress.config().foo).ok
+        expect(Cypress.config().defaultCommandTimeout).eq(200)
+      })
+
+      describe('inner suite', {
+        bar: true,
+      }, () => {
+        it('has config.bar', () => {
+          expect(Cypress.config().bar).ok
+        })
+
+        it('has config.bar and config.foo', () => {
+          expect(Cypress.config().bar).ok
+          expect(Cypress.config().foo).ok
+          expect(Cypress.config().defaultCommandTimeout).eq(200)
+        })
+      })
+    })
+  })
+
+  describe('in double nested suite', () => {
+    describe('config in suite', {
+      foo: true,
+    }, () => {
+      describe('inner suite', { bar: true }, () => {
+        it('has config.bar', () => {
+          expect(Cypress.config().bar).ok
+          expect(Cypress.config().foo).ok
+        })
+      })
+    })
+  })
+
+  describe('in mulitple nested suites', () => {
+    describe('config in suite', {
+      foo: true,
+    }, () => {
+      describe('inner suite 1', { bar: true }, () => {
+        it('has config.bar', () => {
+          expect(Cypress.config().bar).ok
+          expect(Cypress.config().foo).ok
+        })
+      })
+
+      describe('inner suite 2', { baz: true }, () => {
+        it('has config.bar', () => {
+          expect(Cypress.config().bar).not.ok
+          expect(Cypress.config().baz).ok
+          expect(Cypress.config().foo).ok
+        })
+      })
+    })
+  })
 })
 
 function hasOnly (test) {
