@@ -42,7 +42,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.8.1-chrome80-ff72
+      - image: cypress/browsers:node12.13.0-chrome80-ff73
     environment:
       PLATFORM: linux
 

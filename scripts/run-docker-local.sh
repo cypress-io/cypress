@@ -2,7 +2,7 @@ set e+x
 
 echo "This script should be run from cypress's root"
 
-name=cypress/browsers:node12.8.1-chrome80-ff72
+name=cypress/browsers:node12.13.0-chrome80-ff73
 echo "Pulling CI container $name"
 
 docker pull $name
