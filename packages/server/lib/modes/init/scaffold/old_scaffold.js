@@ -3,10 +3,8 @@ const Promise = require('bluebird')
 const path = require('path')
 const cypressEx = require('@packages/example')
 const fs = require('../../../util/fs')
-const glob = require('../../../util/glob')
 const cwd = require('../../../cwd')
 const debug = require('debug')('cypress:server:scaffold')
-const { isEmpty } = require('ramda')
 const { isDefault } = require('../../../util/config')
 
 const exampleFolderName = cypressEx.getFolderName()
@@ -14,10 +12,6 @@ const getExampleSpecsFullPaths = cypressEx.getPathToExamples()
 
 const getPathFromIntegrationFolder = (file) => {
   return file.substring(file.indexOf('integration/') + 'integration/'.length)
-}
-
-const isDifferentNumberOfFiles = (files, exampleSpecs) => {
-  return files.length !== exampleSpecs.length
 }
 
 const getExampleSpecs = () => {
@@ -37,80 +31,6 @@ const getExampleSpecs = () => {
   })
 }
 
-const getIndexedExample = (file, index) => {
-  return index[getPathFromIntegrationFolder(file)]
-}
-
-const filesNamesAreDifferent = (files, index) => {
-  return _.some(files, (file) => {
-    return !getIndexedExample(file, index)
-  })
-}
-
-const getFileSize = (file) => {
-  return fs.statAsync(file).get('size')
-}
-
-const filesSizesAreSame = (files, index) => {
-  return Promise.join(
-    Promise.all(_.map(files, getFileSize)),
-    Promise.all(_.map(files, (file) => {
-      return getFileSize(getIndexedExample(file, index))
-    })),
-  )
-  .spread((fileSizes, originalFileSizes) => {
-    return _.every(fileSizes, (size, i) => {
-      return size === originalFileSizes[i]
-    })
-  })
-}
-
-const isNewProject = (integrationFolder) => {
-  // logic to determine if new project
-  // 1. there are no files in 'integrationFolder'
-  // 2. there is a different number of files in 'integrationFolder'
-  // 3. the files are named the same as the example files
-  // 4. the bytes of the files match the example files
-
-  debug('determine if new project by globbing files in %o', { integrationFolder })
-
-  // checks for file up to 3 levels deep
-  return glob('{*,*/*,*/*/*}', { cwd: integrationFolder, realpath: true, nodir: true })
-  .then((files) => {
-    debug(`found ${files.length} files in folder ${integrationFolder}`)
-    debug('determine if we should scaffold:')
-
-    // TODO: add tests for this
-    debug('- empty?', isEmpty(files))
-    if (isEmpty(files)) {
-      return true
-    } // 1
-
-    return getExampleSpecs()
-    .then((exampleSpecs) => {
-      const numFilesDifferent = isDifferentNumberOfFiles(files, exampleSpecs.shortPaths)
-
-      debug('- different number of files?', numFilesDifferent)
-      if (numFilesDifferent) {
-        return false
-      } // 2
-
-      const filesNamesDifferent = filesNamesAreDifferent(files, exampleSpecs.index)
-
-      debug('- different file names?', filesNamesDifferent)
-      if (filesNamesDifferent) {
-        return false
-      } // 3
-
-      return filesSizesAreSame(files, exampleSpecs.index)
-    })
-  }).then((sameSizes) => {
-    debug('- same sizes?', sameSizes)
-
-    return sameSizes
-  })
-}
-
 const { optionInfo } = require('./option_info')
 
 const isDefault2 = (config, option) => {
@@ -121,8 +41,6 @@ module.exports = {
   create (options) {
 
   },
-
-  isNewProject,
 
   integrationExampleName () {
     return exampleFolderName
