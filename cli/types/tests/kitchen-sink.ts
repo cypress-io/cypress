@@ -122,3 +122,9 @@ cy.window().then(window => {
 
   window.eval('1')'
 })
+
+// clearLocalStorage signatures
+cy.clearLocalStorage()
+cy.clearLocalStorage('todos')
+cy.clearLocalStorage('todos', { log: false })
+cy.clearLocalStorage({ log: false })

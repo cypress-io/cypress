@@ -622,12 +622,12 @@ declare namespace Cypress {
      * @param {string} [key] - name of a particular item to remove (optional).
      * @example
       ```
-      // removes all local storage keys
+      // Removes all local storage keys
       cy.clearLocalStorage()
         .should(ls => {
           expect(ls.getItem('prop1')).to.be.null
         })
-      // removes item "todos"
+      // Removes item "todos"
       cy.clearLocalStorage("todos")
       ```
      */
@@ -639,11 +639,42 @@ declare namespace Cypress {
      * @param {RegExp} re - regular expression to match.
      * @example
     ```
-    // Clear all local storage matching /app-/
+    // Clears all local storage matching /app-/
     cy.clearLocalStorage(/app-/)
     ```
      */
     clearLocalStorage(re: RegExp): Chainable<Storage>
+   /**
+     * Clear data in local storage.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     * @param {options} [object] - options object
+     * @example
+      ```
+      // Removes all local storage items, without logging
+      cy.clearLocalStorage({ log: false })
+      ```
+     */
+    clearLocalStorage(options: Partial<Loggable>): Chainable<Storage>
+   /**
+     * Clear data in local storage.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     * @param {string} [key] - name of a particular item to remove (optional).
+     * @param {options} [object] - options object
+     * @example
+      ```
+      // Removes item "todos" without logging
+      cy.clearLocalStorage("todos", { log: false })
+      ```
+     */
+    clearLocalStorage(key: string, options: Partial<Loggable>): Chainable<Storage>
 
     /**
      * Click a DOM element.
@@ -658,13 +689,13 @@ declare namespace Cypress {
     /**
      * Click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').click('topRight')
      */
-    click(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    click(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Click a DOM element at specific coordinates
      *
@@ -795,13 +826,13 @@ declare namespace Cypress {
     /**
      * Double-click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/dblclick
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -825,13 +856,13 @@ declare namespace Cypress {
     /**
      * Right-click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').rightclick('topRight')
      */
-    rightclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    rightclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element at specific coordinates
      *

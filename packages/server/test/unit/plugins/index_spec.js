@@ -212,7 +212,7 @@ describe('lib/plugins/index', () => {
       })
     })
 
-    describe('error message', () => {
+    describe('error after loaded', () => {
       let err
       let onError
 
@@ -256,6 +256,43 @@ describe('lib/plugins/index', () => {
         expect(onError.lastCall.args[0].stack).to.include('The following error was thrown by a plugin')
 
         expect(onError.lastCall.args[0].details).to.include(err.message)
+      })
+    })
+
+    describe('error before loaded', () => {
+      let err
+
+      beforeEach(() => {
+        err = {
+          name: 'error name',
+          message: 'error message',
+        }
+
+        pluginsProcess.on.withArgs('error').yields(err)
+      })
+
+      it('rejects when plugins process errors', () => {
+        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
+        .then(() => {
+          throw new Error('Should not resolve')
+        })
+        .catch((_err) => {
+          expect(_err.title).to.equal('Error running plugin')
+          expect(_err.stack).to.include('The following error was thrown by a plugin')
+          expect(_err.details).to.include(err.message)
+        })
+      })
+
+      it('rejects when plugins ipc sends error', () => {
+        return plugins.init({ pluginsFile: 'cypress-plugin' }, getOptions())
+        .then(() => {
+          throw new Error('Should not resolve')
+        })
+        .catch((_err) => {
+          expect(_err.title).to.equal('Error running plugin')
+          expect(_err.stack).to.include('The following error was thrown by a plugin')
+          expect(_err.details).to.include(err.message)
+        })
       })
     })
   })
