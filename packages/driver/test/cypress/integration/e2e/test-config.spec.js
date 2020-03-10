@@ -180,6 +180,37 @@ describe('per-test config', () => {
     })
   })
 
+  describe('in mulitple nested suites', {
+    foo: false,
+  }, () => {
+    describe('config in suite', {
+      foo: true,
+    }, () => {
+      describe('inner suite 1', { bar: true }, () => {
+        it('has config.bar', () => {
+          expect(Cypress.config().bar).ok
+          expect(Cypress.config().foo).ok
+        })
+      })
+
+      describe('inner suite 2', { baz: true }, () => {
+        it('has config.baz', () => {
+          expect(Cypress.config().bar).not.ok
+          expect(Cypress.config().baz).ok
+          expect(Cypress.config().foo).ok
+        })
+      })
+
+      describe('inner suite 3', () => {
+        it('has only config.foo', () => {
+          expect(Cypress.config().bar).not.ok
+          expect(Cypress.config().baz).not.ok
+          expect(Cypress.config().foo).ok
+        })
+      })
+    })
+  })
+
   describe('in mulitple nested suites', () => {
     describe('config in suite', {
       foo: true,

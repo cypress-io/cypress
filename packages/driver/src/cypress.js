@@ -264,16 +264,20 @@ class $Cypress {
       case 'runner:suite:start':
         // mocha runner started processing a suite
         if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'suite', ...args)
+          this.emit('mocha', 'suite', ...args)
         }
+
+        this.emit('suite:start', ...args)
 
         break
 
       case 'runner:suite:end':
         // mocha runner finished processing a suite
         if (this.config('isTextTerminal')) {
-          return this.emit('mocha', 'suite end', ...args)
+          this.emit('mocha', 'suite end', ...args)
         }
+
+        this.emit('suite:end', ...args)
 
         break
 

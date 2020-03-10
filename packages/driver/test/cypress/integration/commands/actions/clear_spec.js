@@ -6,7 +6,10 @@ const {
   shouldNotBeCalled,
 } = require('../../../support/utils')
 
-describe('src/cy/commands/actions/type - #clear', () => {
+describe('src/cy/commands/actions/type - #clear', {
+  isInteractive: true,
+  numTestsKeptInMemory: 1,
+}, () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })

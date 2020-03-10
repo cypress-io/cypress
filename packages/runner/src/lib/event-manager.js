@@ -243,20 +243,42 @@ const eventManager = {
     })
 
     let restoreTestConfigFn = null
-    let restoreSuiteConfigFn = null
+    const backupSuiteCfgs = {
+
+    }
+
+    Cypress.on('suite:start', (suite) => {
+      if (suite.cfg) {
+        const config = Cypress.config
+
+        const backupConfig = _.clone(config())
+
+        // const env = Cypress.env
+        // const backupEnv = _.clone(env())
+
+        backupSuiteCfgs[suite.id] = backupConfig
+        config(_.omit(suite.cfg, 'browser'))
+      }
+    })
+
+    Cypress.on('suite:end', (suite) => {
+      const backupConfig = backupSuiteCfgs[suite.id]
+
+      if (backupConfig) {
+        Cypress.config.reset()
+        Cypress.config(backupConfig)
+      }
+    })
 
     Cypress.on('test:before:run', (test) => {
       /**
        * @type {Cypress.TestConfigOptions}
        */
       const testConfig = test.cfg
-      const suiteConfig = test.suiteCfg
 
       debug('test:before:run')
 
-      if (!(suiteConfig || testConfig)) return
-
-      debug('got per-test config')
+      if (!testConfig) return
 
       const config = Cypress.config
 
@@ -272,50 +294,21 @@ const eventManager = {
         Cypress.env(backupEnv)
       }
 
-      if (suiteConfig) {
-        debug('load suite config')
-
-        if (suiteConfig.env) {
-          env(suiteConfig.env)
-        }
-
-        restoreSuiteConfigFn = restoreConfigFn
-        config(_.omit(suiteConfig, 'browser'))
+      debug('load test config')
+      if (testConfig.env) {
+        env(testConfig.env)
       }
 
-      if (testConfig) {
-        debug('load test config')
-        if (testConfig.env) {
-          env(testConfig.env)
-        }
-
-        restoreTestConfigFn = restoreConfigFn
-        config(_.omit(testConfig, 'browser'))
-      }
+      restoreTestConfigFn = restoreConfigFn
+      config(_.omit(testConfig, 'browser'))
     })
 
     Cypress.on('test:after:run', (test) => {
       const shouldRunRestoreTestConfig = !!restoreTestConfigFn
-      const shouldRunRestoreSuiteConfig = !!restoreSuiteConfigFn && test.isLastInSuite
-
-      if (shouldRunRestoreTestConfig && shouldRunRestoreSuiteConfig) {
-        restoreSuiteConfigFn()
-        restoreTestConfigFn = null
-        restoreSuiteConfigFn = null
-
-        return
-      }
 
       if (shouldRunRestoreTestConfig) {
         restoreTestConfigFn()
         restoreTestConfigFn = null
-
-        return
-      }
-
-      if (shouldRunRestoreSuiteConfig) {
-        restoreSuiteConfigFn()
-        restoreSuiteConfigFn = null
 
         return
       }

@@ -1005,29 +1005,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
       // associated _runnables will share this state
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
         // if this is the first test in a suite, attach parent configuration to it
-        let curTest = test
-        let suiteCfg = null
-
-        while (curTest.parent) {
-          const cfg = curTest.parent.cfg
-
-          if (cfg) {
-            suiteCfg = (suiteCfg && { ...suiteCfg, ...cfg }) || cfg
-          }
-
-          curTest = curTest.parent
-        }
-
-        if (suiteCfg) {
-          delete test.parent.cfg
-          test.suiteCfg = suiteCfg
-        }
-
-        // if (test.parent && test.parent.cfg) {
-        //   test.suiteCfg = test.parent.cfg
-        //   delete test.parent.cfg
-        // }
-
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
 
