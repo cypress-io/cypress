@@ -12,6 +12,7 @@ const xvfbOptions = {
   // need to explicitly define screen otherwise electron will crash
   // https://github.com/cypress-io/cypress/issues/6184
   xvfb_args: ['-screen', '0', '1280x1024x24'],
+  reuse: true,
   onStderrData (data) {
     if (debugXvfb.enabled) {
       debugXvfb(data.toString())

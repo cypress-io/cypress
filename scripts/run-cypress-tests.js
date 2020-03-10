@@ -142,9 +142,6 @@ const runSpec = (spec) => {
   console.log('\nRunning spec', spec)
   la(is.unemptyString(spec), 'missing spec filename', spec)
 
-  // get the path to xvfb-maybe binary
-  // const cmd = path.join(__dirname, '..', 'node_modules', '.bin', 'xvfb-maybe')
-
   const configFile = path.join(__dirname, '..', 'mocha-reporter-config.json')
 
   const args = [
