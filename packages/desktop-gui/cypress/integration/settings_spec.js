@@ -523,7 +523,7 @@ describe('Settings', () => {
   })
 
   describe('errors', () => {
-    beforeEach(function () {      
+    beforeEach(function () {
       this.err = {
         title: 'Foo Title',
         message: 'Port \'2020\' is already in use.',
@@ -538,27 +538,34 @@ describe('Settings', () => {
 
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
-
+      this.openProject.resolve(this.config)
       this.goToSettings()
+      cy.contains('Configuration').click()
+
+      cy.contains('http://localhost:7777').then(() => {
+        this.ipc.openProject.onCall(1).rejects(this.err)
+
+        this.ipc.onConfigChanged.yield()
+      })
     })
-    
+
     it('displays errors', () => {
       cy.contains('Foo Title')
     })
-    
+
     it('displays config after error is fixed', function () {
       cy.contains('Foo Title').then(() => {
         this.ipc.openProject.onCall(1).resolves(this.config)
 
-      cy.get('.settings-proxy').should('contain', 'from environment variables')
-      cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
+        this.ipc.onConfigChanged.yield()
+      })
 
-      cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
+      cy.contains('Configuration')
     })
   })
-  
+
   describe('proxy settings panel', () => {
-    beforeEach(function () {      
+    beforeEach(function () {
       this.openProject.resolve(this.config)
       this.config.resolved.baseUrl.value = 'http://localhost:7777'
 
@@ -708,6 +715,8 @@ describe('Settings', () => {
   })
 
   describe('errors', () => {
+    const errorText = 'An unexpected error occurred'
+
     beforeEach(function () {
       this.err = {
         message: 'Port \'2020\' is already in use.',
@@ -734,11 +743,11 @@ describe('Settings', () => {
     })
 
     it('displays errors', () => {
-      cy.contains('Can\'t start server')
+      cy.contains(errorText)
     })
 
     it('displays config after error is fixed', function () {
-      cy.contains('Can\'t start server').then(() => {
+      cy.contains(errorText).then(() => {
         this.ipc.openProject.onCall(1).resolves(this.config)
 
         this.ipc.onConfigChanged.yield()
