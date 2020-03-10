@@ -14,6 +14,7 @@ describe('per-test config', () => {
 
     if (Cypress.browser.family === 'firefox') {
       return expect(testState).deep.eq({
+        ranChrome: false,
         ranChromium: false,
         ranFirefox: true,
       })
@@ -21,17 +22,17 @@ describe('per-test config', () => {
 
     if (Cypress.browser.name === 'chrome') {
       return expect(testState).deep.eq({
-        ranChromium: true,
         ranChrome: true,
+        ranChromium: false,
         ranFirefox: false,
       })
     }
 
     if (Cypress.browser.name === 'chromium') {
       return expect(testState).deep.eq({
+        ranChrome: false,
         ranChromium: true,
         ranFirefox: false,
-        ranChrome: false,
       })
     }
 

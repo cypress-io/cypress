@@ -7,13 +7,13 @@ describe "src/cy/commands/window", ->
       cy.window().then (win) ->
         expect(win).to.eq cy.state("$autIframe").prop("contentWindow")
 
-    describe "assertion verification", ->
+    describe "assertion verification", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
         @remoteWindow = cy.state("window")
 
         delete @remoteWindow.foo
-
-        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 

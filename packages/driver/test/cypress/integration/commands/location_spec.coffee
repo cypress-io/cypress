@@ -45,10 +45,10 @@ describe "src/cy/commands/location", ->
           expect(lastLog.get("state")).to.eq("passed")
           expect(lastLog.get("ended")).to.be.true
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
@@ -160,10 +160,10 @@ describe "src/cy/commands/location", ->
           expect(lastLog.get("state")).to.eq("passed")
           expect(lastLog.get("ended")).to.be.true
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
@@ -279,10 +279,10 @@ describe "src/cy/commands/location", ->
           expect(lastLog.get("state")).to.eq("passed")
           expect(lastLog.get("ended")).to.be.true
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 100)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
