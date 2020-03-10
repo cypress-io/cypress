@@ -326,8 +326,11 @@ class $Cypress {
 
       case 'runner:fail': {
         // mocha runner calculated a failure
-
         const err = args[0].err
+
+        if ($dom.isDom(err.actual) || $dom.isDom(err.expected)) {
+          err.showDiff = false
+        }
 
         if (err.actual) {
           err.actual = chai.util.inspect(err.actual)
