@@ -116,3 +116,9 @@ const obj = {
   foo: () => { }
 }
 cy.spy(obj, 'foo').as('my-spy')
+
+// clearLocalStorage signatures
+cy.clearLocalStorage()
+cy.clearLocalStorage('todos')
+cy.clearLocalStorage('todos', { log: false })
+cy.clearLocalStorage({ log: false })

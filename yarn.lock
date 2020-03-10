@@ -1742,23 +1742,23 @@
   resolved "https://registry.yarnpkg.com/@ffmpeg-installer/darwin-x64/-/darwin-x64-4.1.0.tgz#48e1706c690e628148482bfb64acb67472089aaa"
   integrity sha512-Z4EyG3cIFjdhlY8wI9aLUXuH8nVt7E9SlMVZtWvSPnm2sm37/yC2CwjUzyCQbJbySnef1tQwGG2Sx+uWhd9IAw==
 
-"@ffmpeg-installer/ffmpeg@1.0.19":
-  version "1.0.19"
-  resolved "https://registry.yarnpkg.com/@ffmpeg-installer/ffmpeg/-/ffmpeg-1.0.19.tgz#2718bf06a7d215acd12fdfd05097f4e55d2d2c7e"
-  integrity sha512-cIhboAWGJSiQut6kE5DzljN2CO1RzYDaEJIje/RUl43yK1EQUHnpoeS9BLIulqM93o0ga9SRPKTqOgg76KYyfw==
+"@ffmpeg-installer/ffmpeg@1.0.20":
+  version "1.0.20"
+  resolved "https://registry.yarnpkg.com/@ffmpeg-installer/ffmpeg/-/ffmpeg-1.0.20.tgz#d3c9c2bbcd76149468fb0886c2b3fe9e4795490b"
+  integrity sha512-wbgd//6OdwbFXYgV68ZyKrIcozEQpUKlvV66XHaqO2h3sFbX0jYLzx62Q0v8UcFWN21LoxT98NU2P+K0OWsKNA==
   optionalDependencies:
     "@ffmpeg-installer/darwin-x64" "4.1.0"
     "@ffmpeg-installer/linux-arm" "4.1.3"
-    "@ffmpeg-installer/linux-arm64" "4.1.3"
+    "@ffmpeg-installer/linux-arm64" "4.1.4"
     "@ffmpeg-installer/linux-ia32" "4.1.0"
     "@ffmpeg-installer/linux-x64" "4.1.0"
     "@ffmpeg-installer/win32-ia32" "4.1.0"
     "@ffmpeg-installer/win32-x64" "4.1.0"
 
-"@ffmpeg-installer/linux-arm64@4.1.3":
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/@ffmpeg-installer/linux-arm64/-/linux-arm64-4.1.3.tgz#300c19a89de1fdeafb2d0983758419da7dcfa848"
-  integrity sha512-QBlK7H8H/ypnh619OJBASrikToEUUejGwLbl5H1UPNpZyLtlhhvvafDktISWAtR2qNHTfbi1ckLIgC6FMrE+lQ==
+"@ffmpeg-installer/linux-arm64@4.1.4":
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/@ffmpeg-installer/linux-arm64/-/linux-arm64-4.1.4.tgz#7219f3f901bb67f7926cb060b56b6974a6cad29f"
+  integrity sha512-dljEqAOD0oIM6O6DxBW9US/FkvqvQwgJ2lGHOwHDDwu/pX8+V0YsDL1xqHbj1DMX/+nP9rxw7G7gcUvGspSoKg==
 
 "@ffmpeg-installer/linux-arm@4.1.3":
   version "4.1.3"
@@ -4647,7 +4647,7 @@ arg@4.1.2:
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.2.tgz#e70c90579e02c63d80e3ad4e31d8bfdb8bd50064"
   integrity sha512-+ytCkGcBtHZ3V2r2Z06AncYO8jz46UEamcspGoU8lHcEbpn6J77QK0vdWvChsclg/tM5XIJC5tnjmPp7Eq6Obg==
 
-arg@^4.1.0:
+arg@4.1.3, arg@^4.1.0:
   version "4.1.3"
   resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
   integrity sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==
@@ -22831,12 +22831,13 @@ term-size@^1.2.0:
   dependencies:
     execa "^0.7.0"
 
-term-to-html@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/term-to-html/-/term-to-html-1.0.0.tgz#63f413a743ead18f8acbf74e359cf35b4e250126"
-  integrity sha512-XiGrBBJa0+EFPF17xI3AZfD0fnRAPBjxLhO067LdwU5masQh51oMxhr6CefgVwnYz8iPfXBJRIbs68SNcdeM8w==
+term-to-html@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/term-to-html/-/term-to-html-1.2.0.tgz#3c4654b50c70399434eb06bdd2fc838b493fe89a"
+  integrity sha512-SgsOxkGFBC3aXqM//Zdbf++62+11EVLPyLcIvC7SxtNybwhziZXBQeCM/Vd5CR+6shtLJjMsO8iAN5d7Zdf0NQ==
   dependencies:
     ansi-to-html "0.6.14"
+    arg "4.1.3"
     escape-html "1.0.3"
 
 terminal-banner@1.1.0:
