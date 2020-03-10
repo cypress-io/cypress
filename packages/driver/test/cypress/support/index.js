@@ -15,3 +15,14 @@
 
 // Alternatively you can use CommonJS syntax:
 // require("./commands")
+
+Cypress.config().numTestsKeptInMemory = 1
+const _isInteractive = Cypress.config().isInteractive
+
+beforeEach(() => {
+  Cypress.config().isInteractive = true
+})
+
+afterEach(() => {
+  Cypress.config().isInteractive = _isInteractive
+})
