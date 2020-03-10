@@ -1423,7 +1423,7 @@ module.exports = {
       msg = "Because this error occurred during a `#{obj.hookName}` hook we are skipping "
 
       if t = obj.parentTitle
-        msg += "the remaining tests in the current suite: '#{_.truncate(t, 20)}'"
+        msg += "the remaining tests in the current suite: `#{_.truncate(t, 20)}`"
       else
         msg += "all of the remaining tests."
 
