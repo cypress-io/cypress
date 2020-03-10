@@ -149,13 +149,13 @@ describe "src/cy/commands/window", ->
       cy.document().then ($doc) ->
         expect($doc).to.eq cy.state("$autIframe").prop("contentDocument")
 
-    describe "assertion verification", ->
+    describe "assertion verification", {
+      defaultCommandTimeout: 100
+    }, ->
       beforeEach ->
         @remoteDocument = cy.state("window").document
 
         delete @remoteDocument.foo
-
-        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 
@@ -357,10 +357,10 @@ describe "src/cy/commands/window", ->
       cy.title().then ($title) ->
         expect($title).to.eq("")
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 50
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
@@ -609,10 +609,10 @@ describe "src/cy/commands/window", ->
 
         cy.viewport("samsung-note9")
 
-    context "errors", ->
+    context "errors", {
+      defaultCommandTimeout: 50
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>

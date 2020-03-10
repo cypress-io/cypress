@@ -316,10 +316,10 @@ describe "src/cy/commands/actions/scroll", ->
           .scrollTo("right").then ->
             expect(cy.ensureScrollability).to.be.calledTwice
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 50
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
@@ -615,10 +615,10 @@ describe "src/cy/commands/actions/scroll", ->
             expect(lastLog.get("state")).to.eq("passed")
             expect(lastLog.get("ended")).to.be.true
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 50
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>

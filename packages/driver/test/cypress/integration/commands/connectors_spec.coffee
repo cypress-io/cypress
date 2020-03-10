@@ -1499,7 +1499,7 @@ describe "src/cy/commands/connectors", {
           expect(count).to.eq(1)
 
       describe "errors", {
-        defaultCommandTimeout: 50
+        defaultCommandTimeout: 100
       }, ->
         beforeEach ->
           @logs = []

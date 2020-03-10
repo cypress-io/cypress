@@ -638,9 +638,9 @@ describe "src/cy/commands/screenshot", ->
       beforeEach ->
         Cypress.automation.withArgs("take:screenshot").resolves(@serverResult)
 
-      it "sets timeout to Cypress.config(responseTimeout)", ->
-        Cypress.config("responseTimeout", 2500)
-
+      it "sets timeout to Cypress.config(responseTimeout)", {
+        responseTimeout: 2500
+      }, ->
         timeout = cy.spy(Promise.prototype, "timeout")
 
         cy.screenshot().then ->
@@ -669,10 +669,10 @@ describe "src/cy/commands/screenshot", ->
           ## restores the timeout afterwards
           expect(cy.timeout()).to.eq(100)
 
-    describe "errors", ->
+    describe "errors", {
+      defaultCommandTimeout: 50
+    }, ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
-
         @logs = []
 
         cy.on "log:added", (attrs, log) =>
