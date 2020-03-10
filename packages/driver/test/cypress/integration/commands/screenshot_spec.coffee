@@ -4,10 +4,6 @@ _ = Cypress._
 Promise = Cypress.Promise
 Screenshot = Cypress.Screenshot
 
-helpers = require('../../support/helpers.coffee')
-
-helpers.beforeEachRestoreRunner()
-
 getViewportHeight = () ->
   Math.min(cy.state("viewportHeight"), $(cy.state("window")).height())
 

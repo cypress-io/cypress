@@ -2,10 +2,6 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 dom = Cypress.dom
 
-helpers = require("../../support/helpers")
-
-helpers.beforeEachRestoreRunner()
-
 describe "src/cy/commands/traversals", ->
   beforeEach ->
     cy.visit("/fixtures/dom.html")
@@ -34,10 +30,9 @@ describe "src/cy/commands/traversals", ->
         cy.get("#list")[name](arg).then ($el) ->
           expect($el).to.match el
 
-      describe "errors", ->
-        beforeEach ->
-          Cypress.config("defaultCommandTimeout", 100)
-
+      describe "errors", {
+        defaultCommandTimeout: 100
+      }, ->
         it "throws when options.length isnt a number", (done) ->
           cy.on "fail", (err) ->
             expect(err.message).to.include "You must provide a valid number to a length assertion. You passed: 'asdf'"
@@ -228,10 +223,10 @@ describe "src/cy/commands/traversals", ->
       expect($button.length).to.eq(1)
       expect(logs.length).to.eq(1)
 
-  describe "errors", ->
+  describe "errors", {
+    defaultCommandTimeout: 100
+  }, ->
     beforeEach ->
-      Cypress.config("defaultCommandTimeout", 100)
-
       @logs = []
 
       cy.on "log:added", (attrs, log) =>

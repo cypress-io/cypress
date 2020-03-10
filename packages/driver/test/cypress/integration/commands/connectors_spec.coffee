@@ -1514,7 +1514,7 @@ describe "src/cy/commands/connectors", {
           cy.on "fail", (err) =>
             ## get + each
             expect(@logs.length).to.eq(2)
-            expect(err.message).to.include("cy.each() timed out after waiting '50ms'.\n\nYour callback function returned a promise which never resolved.")
+            expect(err.message).to.include("cy.each() timed out after waiting '100ms'.\n\nYour callback function returned a promise which never resolved.")
             done()
 
           cy.get("ul").each ($ul) ->
