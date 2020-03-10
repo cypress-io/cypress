@@ -23,7 +23,7 @@
     "@packages/web-config": "*",
     "@types/enzyme": "3.10.4",
     "@types/react": "16.9.21",
-    "bluebird": "3.5.0",
+    "bluebird": "3.7.2",
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
