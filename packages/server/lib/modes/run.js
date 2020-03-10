@@ -721,7 +721,7 @@ module.exports = {
   getElectronProps,
 
   displayRunStarting,
-  
+
   exitEarly (err) {
     debug('set early exit error: %s', err.stack)
 
