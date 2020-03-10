@@ -117,4 +117,8 @@ const obj = {
 }
 cy.spy(obj, 'foo').as('my-spy')
 
-cy.window().then(window => window.eval('1'))
+cy.window().then(window => {
+  const windowTest: Window & typeof globalThis = window
+
+  window.eval('1')'
+})
