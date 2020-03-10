@@ -237,3 +237,19 @@ describe "driver/src/cypress/error_utils", ->
     it "returns undefined for non-existent deeper path", ->
       objVal = $errUtils.getObjValueByPath @obj, "bar.baz.nope"
       expect(objVal).to.be.undefined
+
+  context ".appendErrMsg", ->
+    it "replaces old stack message with new one", ->
+      err = new Error("old message")
+      newErr = $errUtils.appendErrMsg(err, "new message")
+
+      expect(newErr.message).to.equal("old message\n\nnew message")
+      expect(newErr.stack).to.include("Error: old message\n\nnew message\n")
+
+    it "properly replaces stack message when error has no message", ->
+      err = new Error()
+      newErr = $errUtils.appendErrMsg(err, "new message")
+
+      expect(newErr.message).to.equal("new message")
+      expect(newErr.stack).to.include("Error: new message\n")
+      expect(newErr.stack).not.to.include("\nError")

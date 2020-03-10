@@ -18,25 +18,30 @@ const mergeErrProps = (origErr, newProps) => {
   return _.extend(origErr, newProps)
 }
 
-const modifyErrMsg = (err, newErrMsg, cb) => {
-  let { stack, message } = err
+const replaceMsgInStack = (err, newMsg) => {
+  const { message, name, stack } = err
 
-  err = normalizeErrorStack(err)
+  if (!stack) return stack
 
-  // preserve message
-  const originalErrMsg = message
-
-  // modify message
-  message = cb(originalErrMsg, newErrMsg)
-
-  if (stack) {
-    // reset stack by replacing the original
-    // first line with the new one
-    stack = stack.replace(originalErrMsg, message)
+  if (message) {
+    // reset stack by replacing the original message with the new one
+    return stack.replace(message, newMsg)
   }
 
-  err.message = message
-  err.stack = stack
+  // if message is undefined or an empty string, the error (in Chrome at least)
+  // is 'Error\n\n<stack>' and it results in wrongly prepending the
+  // new message, looking like '<newMsg>Error\n\n<stack>'
+  return stack.replace(name, `${name}: ${newMsg}`)
+}
+
+const modifyErrMsg = (err, newErrMsg, cb) => {
+  err = normalizeErrorStack(err)
+
+  const newMsg = cb(err.message, newErrMsg)
+  const newStack = replaceMsgInStack(err, newMsg)
+
+  err.message = newMsg
+  err.stack = newStack
 
   return err
 }
