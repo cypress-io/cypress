@@ -167,6 +167,8 @@ const getResultsFromHar = (har) => {
 
   results['Min'] = mins.total
 
+  expect(timings.total.length).to.be.at.least(1000)
+
   ;[1, 5, 25, 50, 75, 95, 99, 99.7].forEach((p) => {
     results[`${p}% <=`] = percentile(timings.total, p)
   })
