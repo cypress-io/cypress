@@ -17,7 +17,7 @@ function getLinuxBrowser (
     }
 
     log(
-      'Could not extract version from %s using regex %s',
+      'Could not extract version from "%s" using regex %s',
       stdout,
       versionRegex,
     )
@@ -53,7 +53,7 @@ export function getVersionString (path: string) {
   return execa
   .stdout(path, ['--version'])
   .then(trim)
-  .then(tap(partial(log, ['stdout: %s'])))
+  .then(tap(partial(log, ['stdout: "%s"'])))
 }
 
 export function detect (browser: Browser) {
