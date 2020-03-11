@@ -18,7 +18,7 @@ const runnableResetTimeout = Runnable.prototype.resetTimeout
 delete window.mocha
 delete window.Mocha
 
-function overrideMochaFn (fnName, specWindow) {
+function overloadMochaFnForConfig (fnName, specWindow) {
   const _fn = specWindow[fnName]
 
   function overrideFn (fn) {
@@ -97,9 +97,11 @@ const ui = (specWindow, _mocha) => {
     // such as describe, it, before, beforeEach, etc
     this.suite.emit('pre-require', specWindow, null, this)
 
-    overrideMochaFn('it', specWindow)
-    overrideMochaFn('describe', specWindow)
-    overrideMochaFn('context', specWindow)
+    // allow per-test-config/per-suite-config
+    // by accepting 3 arguments to it/describe/context
+    overloadMochaFnForConfig('it', specWindow)
+    overloadMochaFnForConfig('describe', specWindow)
+    overloadMochaFnForConfig('context', specWindow)
 
     return this
   }

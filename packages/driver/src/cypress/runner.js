@@ -17,7 +17,7 @@ const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
-const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file cfg suiteCfg isLastInSuite'.split(' ')
+const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file cfg'.split(' ')
 
 const debug = require('debug')('cypress:driver:runner')
 // ## initial payload
@@ -104,16 +104,9 @@ const runnableAfterRunAsync = function (runnable, Cypress) {
   })
 }
 
-const testAfterRun = function (test, Cypress, getTestById) {
+const testAfterRun = function (test, Cypress) {
   test.clearTimeout()
   if (!fired(TEST_AFTER_RUN_EVENT, test)) {
-    const t = test
-    const siblings = getAllSiblingTests(t.parent, getTestById)
-
-    if (lastTestThatWillRunInSuite(t, siblings)) {
-      t.isLastInSuite = true
-    }
-
     setWallClockDuration(test)
     fire(TEST_AFTER_RUN_EVENT, test, Cypress)
 
@@ -360,7 +353,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
       fn = function () {
         setTest(null)
 
-        testAfterRun(test, Cypress, getTestById)
+        testAfterRun(test, Cypress)
 
         // and now invoke next(err)
         return originalFn.apply(window, arguments)
@@ -1004,7 +997,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
       // of cy - since we now have a new 'test' and all of the
       // associated _runnables will share this state
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
-        // if this is the first test in a suite, attach parent configuration to it
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
 

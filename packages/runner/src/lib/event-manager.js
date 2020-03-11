@@ -36,6 +36,74 @@ const reporterBus = new EventEmitter()
  */
 let Cypress
 
+function mutateConfiguration (newConfig, Cypress) {
+  const { config, env } = Cypress
+
+  const backupConfig = _.clone(config())
+
+  const backupEnv = _.clone(env())
+
+  const restoreConfigFn = function () {
+    Cypress.config.reset()
+    Cypress.config(backupConfig)
+    Cypress.env.reset()
+    Cypress.env(backupEnv)
+  }
+
+  debug('load test config')
+  if (newConfig.env) {
+    env(newConfig.env)
+  }
+
+  config(_.omit(newConfig, 'browser'))
+
+  return restoreConfigFn
+}
+
+function addSuiteConfigListeners () {
+  const backupSuiteCfgs = {}
+
+  Cypress.on('suite:start', (suite) => {
+    const suiteCfg = suite.cfg
+
+    if (!suiteCfg) return
+
+    backupSuiteCfgs[suite.id] = mutateConfiguration(suiteCfg, Cypress)
+  })
+
+  Cypress.on('suite:end', (suite) => {
+    const backupConfigFn = backupSuiteCfgs[suite.id]
+
+    if (backupConfigFn) {
+      backupConfigFn()
+    }
+  })
+}
+
+function addTestConfigListeners () {
+  let restoreTestConfigFn = null
+
+  Cypress.on('test:before:run', (test) => {
+    const testConfig = test.cfg
+
+    debug('test:before:run')
+
+    if (!testConfig) return
+
+    restoreTestConfigFn = mutateConfiguration(testConfig, Cypress)
+  })
+
+  Cypress.on('test:after:run', (test) => {
+    const shouldRunRestoreTestConfig = !!restoreTestConfigFn
+
+    if (shouldRunRestoreTestConfig) {
+      restoreTestConfigFn()
+      restoreTestConfigFn = null
+
+      return
+    }
+  })
+}
 const eventManager = {
   reporterBus,
 
@@ -242,78 +310,6 @@ const eventManager = {
       ws.emit('client:request', msg, data, cb)
     })
 
-    let restoreTestConfigFn = null
-    const backupSuiteCfgs = {
-
-    }
-
-    Cypress.on('suite:start', (suite) => {
-      if (suite.cfg) {
-        const config = Cypress.config
-
-        const backupConfig = _.clone(config())
-
-        // const env = Cypress.env
-        // const backupEnv = _.clone(env())
-
-        backupSuiteCfgs[suite.id] = backupConfig
-        config(_.omit(suite.cfg, 'browser'))
-      }
-    })
-
-    Cypress.on('suite:end', (suite) => {
-      const backupConfig = backupSuiteCfgs[suite.id]
-
-      if (backupConfig) {
-        Cypress.config.reset()
-        Cypress.config(backupConfig)
-      }
-    })
-
-    Cypress.on('test:before:run', (test) => {
-      /**
-       * @type {Cypress.TestConfigOptions}
-       */
-      const testConfig = test.cfg
-
-      debug('test:before:run')
-
-      if (!testConfig) return
-
-      const config = Cypress.config
-
-      const backupConfig = _.clone(config())
-
-      const env = Cypress.env
-      const backupEnv = _.clone(env())
-
-      const restoreConfigFn = function () {
-        Cypress.config.reset()
-        Cypress.config(backupConfig)
-        Cypress.env.reset()
-        Cypress.env(backupEnv)
-      }
-
-      debug('load test config')
-      if (testConfig.env) {
-        env(testConfig.env)
-      }
-
-      restoreTestConfigFn = restoreConfigFn
-      config(_.omit(testConfig, 'browser'))
-    })
-
-    Cypress.on('test:after:run', (test) => {
-      const shouldRunRestoreTestConfig = !!restoreTestConfigFn
-
-      if (shouldRunRestoreTestConfig) {
-        restoreTestConfigFn()
-        restoreTestConfigFn = null
-
-        return
-      }
-    })
-
     _.each(driverToSocketEvents, (event) => {
       Cypress.on(event, (...args) => {
         return ws.emit(event, ...args)
@@ -386,6 +382,9 @@ const eventManager = {
       Cypress.stop()
       localBus.emit('script:error', err)
     })
+
+    addSuiteConfigListeners()
+    addTestConfigListeners()
   },
 
   _runDriver (state) {

@@ -1,5 +1,5 @@
-/* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
 /// <reference path="../../../../../../cli/types/index.d.ts" />
+/* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
 // @ts-check
 
 const testState = {
@@ -126,6 +126,24 @@ describe('per-test config', () => {
 
   describe('in suite', () => {
     describe('config in suite', {
+      defaultCommandTimeout: 200,
+    }, () => {
+      it('test', () => {
+        expect(Cypress.config().defaultCommandTimeout).eq(200)
+      })
+
+      it('test', () => {
+        expect(Cypress.config().defaultCommandTimeout).eq(200)
+      })
+
+      it('test', () => {
+        expect(Cypress.config().defaultCommandTimeout).eq(200)
+      })
+    })
+  })
+
+  describe('in suite (context)', () => {
+    context('config in suite', {
       defaultCommandTimeout: 200,
     }, () => {
       it('test', () => {
