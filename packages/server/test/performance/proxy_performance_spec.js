@@ -373,12 +373,12 @@ describe('Proxy Performance', function () {
 
       // slice(1) since first test is used as baseline above
       testCases.slice(1).map((testCase) => {
-        it(`${testCase.name} loads 1000 images, with 75% loading no more than 2x as slow as the slowest baseline request`, function () {
+        it(`${testCase.name} loads 1000 images less than 2x as slowly as Chrome`, function () {
           debug('Current test: ', testCase.name)
 
           return runBrowserTest(urlUnderTest, testCase)
           .then((results) => {
-            expect(results['75% <=']).to.be.lessThan(baseline['Max'] * 2)
+            expect(results['Total']).to.be.lessThan(2 * baseline['Total'])
           })
         })
       })
