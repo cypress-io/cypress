@@ -677,7 +677,6 @@ const e2e = {
           // because we are piping the child process
           COLUMNS: 100,
           LINES: 24,
-          DEBUG: 'cypress:*',
         })
         .defaults({
           FAKE_CWD_PATH: '/XXX/XXX/XXX',
