@@ -2133,21 +2133,21 @@ declare namespace Cypress {
      *
      * @default {true}
      */
-    failOnStatusCode: boolean
+    failOnStatusCode?: boolean
 
     /**
      * Whether Cypress should automatically retry status code errors under the hood
      *
      * @default {false}
      */
-    retryOnStatusCodeFailure: boolean
+    retryOnStatusCodeFailure?: boolean
 
     /**
      * Whether Cypress should automatically retry transient network errors under the hood
      *
      * @default {true}
      */
-    retryOnNetworkFailure: boolean
+    retryOnNetworkFailure?: boolean
   }
 
   /**
@@ -2161,7 +2161,7 @@ declare namespace Cypress {
      *
      * @default depends on context, null if outside of within wrapper
      */
-    withinSubject: JQuery | HTMLElement | null
+    withinSubject?: JQuery | HTMLElement | null
   }
 
   /**
@@ -2173,7 +2173,7 @@ declare namespace Cypress {
      *
      * @default true
      */
-    log: boolean
+    log?: boolean
   }
 
   /**
@@ -2186,7 +2186,7 @@ declare namespace Cypress {
      * @default defaultCommandTimeout
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
-    timeout: number
+    timeout?: number
   }
 
   /**
@@ -2198,7 +2198,7 @@ declare namespace Cypress {
      *
      * @default true
      */
-    matchCase: boolean
+    matchCase?: boolean
   }
 
   /**
@@ -2211,14 +2211,14 @@ declare namespace Cypress {
      * @default {@link Timeoutable#timeout}
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
-    requestTimeout: number,
+    requestTimeout?: number,
     /**
      * Time to wait for the response (ms)
      *
      * @default {@link Timeoutable#timeout}
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
-    responseTimeout: number
+    responseTimeout?: number
   }
 
   /**
@@ -2231,7 +2231,7 @@ declare namespace Cypress {
      *
      * @default false
      */
-    force: boolean
+    force?: boolean
   }
 
   interface BlurOptions extends Loggable, Forceable { }
@@ -2253,7 +2253,7 @@ declare namespace Cypress {
      *
      * @default false
      */
-    multiple: boolean
+    multiple?: boolean
   }
 
   interface ConfigOptions {
@@ -2261,164 +2261,164 @@ declare namespace Cypress {
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
      * @default null
      */
-    baseUrl: string | null
+    baseUrl?: string | null
     /**
      * Any values to be set as [environment variables](https://docs.cypress.io/guides/guides/environment-variables.html)
      * @default {}
      */
-    env: { [key: string]: any }
+    env?: { [key: string]: any }
     /**
      * A String or Array of glob patterns used to ignore test files that would otherwise be shown in your list of tests. Cypress uses minimatch with the options: {dot: true, matchBase: true}. We suggest using http://globtester.com to test what files would match.
      * @default "*.hot-update.js"
      */
-    ignoreTestFiles: string | string[]
+    ignoreTestFiles?: string | string[]
     /**
      * The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run.
      * @default 50
      */
-    numTestsKeptInMemory: number
+    numTestsKeptInMemory?: number
     /**
      * Port used to host Cypress. Normally this is a randomly generated port
      * @default null
      */
-    port: number | null
+    port?: number | null
     /**
      * The [reporter](https://docs.cypress.io/guides/guides/reporters.html) used when running headlessly or in CI
      * @default "spec"
      */
-    reporter: string
+    reporter?: string
     /**
      * Whether to take a screenshot on test failure when running headlessly or in CI
      * @default true
      */
-    watchForFileChanges: boolean
+    watchForFileChanges?: boolean
     /**
      * Time, in milliseconds, to wait until most DOM based commands are considered timed out
      * @default 4000
      */
-    defaultCommandTimeout: number
+    defaultCommandTimeout?: number
     /**
      * Time, in milliseconds, to wait for a system command to finish executing during a [cy.exec()](https://on.cypress.io/exec) command
      * @default 60000
      */
-    execTimeout: number
+    execTimeout?: number
     /**
      * Time, in milliseconds, to wait for page transition events or [cy.visit()](https://on.cypress.io/visit), [cy.go()](https://on.cypress.io/go), [cy.reload()](https://on.cypress.io/reload) commands to fire their page load events
      * @default 60000
      */
-    pageLoadTimeout: number
+    pageLoadTimeout?: number
     /**
      * Time, in milliseconds, to wait for an XHR request to go out in a [cy.wait()](https://on.cypress.io/wait) command
      * @default 5000
      */
-    requestTimeout: number
+    requestTimeout?: number
     /**
      * Time, in milliseconds, to wait until a response in a [cy.request()](https://on.cypress.io/request), [cy.wait()](https://on.cypress.io/wait), [cy.fixture()](https://on.cypress.io/fixture), [cy.getCookie()](https://on.cypress.io/getcookie), [cy.getCookies()](https://on.cypress.io/getcookies), [cy.setCookie()](https://on.cypress.io/setcookie), [cy.clearCookie()](https://on.cypress.io/clearcookie), [cy.clearCookies()](https://on.cypress.io/clearcookies), and [cy.screenshot()](https://on.cypress.io/screenshot) commands
      * @default 30000
      */
-    responseTimeout: number
+    responseTimeout?: number
     /**
      * Path to folder where application files will attempt to be served from
      * @default root project folder
      */
-    fileServerFolder: string
+    fileServerFolder?: string
     /**
      * Path to folder containing fixture files (Pass false to disable)
      * @default "cypress/fixtures"
      */
-    fixturesFolder: string
+    fixturesFolder?: string
     /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
      */
-    integrationFolder: string
+    integrationFolder?: string
     /**
      * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
      * @default "bundled"
      */
-    nodeVersion: "system" | "bundled"
+    nodeVersion?: "system" | "bundled"
     /**
      * Path to plugins file. (Pass false to disable)
      * @default "cypress/plugins/index.js"
      */
-    pluginsFile: string
+    pluginsFile?: string
     /**
      * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
      * @default null
      */
-    resolvedNodePath: string
+    resolvedNodePath?: string
     /**
      * The version of `node` that is being used to execute plugins.
      * @example 1.2.3
      */
-    resolvedNodeVersion: string
+    resolvedNodeVersion?: string
     /**
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
      */
-    screenshotsFolder: string
+    screenshotsFolder?: string
     /**
      * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
      * @default "cypress/support/index.js"
      */
-    supportFile: string
+    supportFile?: string
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
      */
-    videosFolder: string
+    videosFolder?: string
     /**
      * Whether Cypress will trash assets within the screenshotsFolder and videosFolder before headless test runs.
      * @default true
      */
-    trashAssetsBeforeRuns: boolean
+    trashAssetsBeforeRuns?: boolean
     /**
      * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * @default 32
      */
-    videoCompression: number
+    videoCompression?: number
     /**
      * Whether Cypress will record a video of the test run when running headlessly.
      * @default true
      */
-    video: boolean
+    video?: boolean
     /**
      * Whether Cypress will upload the video to the Dashboard even if all tests are passing. This applies only when recording your runs to the Dashboard. Turn this off if you’d like the video uploaded only when there are failing tests.
      * @default true
      */
-    videoUploadOnPasses: boolean
+    videoUploadOnPasses?: boolean
     /**
      * Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. Read more about this here
      * @default true
      */
-    chromeWebSecurity: boolean
+    chromeWebSecurity?: boolean
     /**
      * Default height in pixels for the application under tests’ viewport (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
      * @default 660
      */
-    viewportHeight: number
+    viewportHeight?: number
     /**
      * Default width in pixels for the application under tests’ viewport. (Override with [cy.viewport()](https://on.cypress.io/viewport) command)
      * @default 1000
      */
-    viewportWidth: number
+    viewportWidth?: number
     /**
      * The distance in pixels an element must exceed over time to be considered animating
      * @default 5
      */
-    animationDistanceThreshold: number
+    animationDistanceThreshold?: number
     /**
      * Whether to wait for elements to finish animating before executing commands
      * @default true
      */
-    waitForAnimations: boolean
+    waitForAnimations?: boolean
     /**
      * Firefox-only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.
      * Set the interval to `null` or 0 to disable forced garbage collections.
      * @default { runMode: 1, openMode: null }
      */
-    firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
+    firefoxGcInterval?: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
   }
 
   interface PluginConfigOptions extends ConfigOptions {
@@ -2445,7 +2445,7 @@ declare namespace Cypress {
      *
      * @default true
      */
-    failOnNonZeroExit: boolean
+    failOnNonZeroExit?: boolean
     /**
      * Object of environment variables to set before the command executes
      * (e.g. {USERNAME: 'johndoe'}). Will be merged with existing
@@ -2453,7 +2453,7 @@ declare namespace Cypress {
      *
      * @default {}
      */
-    env: object
+    env?: object
   }
 
   /**
@@ -2519,13 +2519,13 @@ declare namespace Cypress {
      *
      * @default 0
      */
-    duration: number
+    duration?: number
     /**
      * Will scroll with the easing animation
      *
      * @default 'swing'
      */
-    easing: 'swing' | 'linear',
+    easing?: 'swing' | 'linear',
   }
 
   interface ScrollIntoViewOptions extends ScrollToOptions {
@@ -2534,7 +2534,7 @@ declare namespace Cypress {
      *
      * @default {top: 0, left: 0}
      */
-    offset: Offset
+    offset?: Offset
   }
 
   interface SelectOptions extends Loggable, Timeoutable, Forceable {
@@ -2582,26 +2582,26 @@ declare namespace Cypress {
      *
      * @default 10
      */
-    delay: number
+    delay?: number
     /**
      * Parse special characters for strings surrounded by `{}`,
      * such as `{esc}`. Set to `false` to type the literal characters instead
      *
      * @default true
      */
-    parseSpecialCharSequences: boolean
+    parseSpecialCharSequences?: boolean
     /**
      * Forces the action, disables waiting for actionability
      *
      * @default false
      */
-    force: boolean
+    force?: boolean
     /**
      * Keep a modifier activated between commands
      *
      * @default true
      */
-    release: boolean
+    release?: boolean
   }
 
   /**
@@ -2620,7 +2620,7 @@ declare namespace Cypress {
      *
      * @default "GET"
      */
-    method: 'GET' | 'POST'
+    method?: 'GET' | 'POST'
 
     /**
      * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-urlencoded` header.
@@ -2694,13 +2694,13 @@ declare namespace Cypress {
      *
      * @default true
      */
-    bubbles: boolean
+    bubbles?: boolean
     /**
      * Whether the event is cancelable
      *
      * @default true
      */
-    cancelable: boolean
+    cancelable?: boolean
   }
 
   /** Options to change the default behavior of .writeFile */
