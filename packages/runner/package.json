@@ -10,7 +10,7 @@
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha src/**/*.spec.*",
+    "test-unit": "mocha --config test/.mocharc.json src/**/*.spec.*",
     "test-watch": "yarn test-unit --watch",
     "watch": "webpack --watch --progress"
   },
@@ -23,6 +23,7 @@
     "@packages/web-config": "*",
     "@types/enzyme": "3.10.4",
     "@types/react": "16.9.21",
+    "ansi-to-html": "0.6.14",
     "bluebird": "3.5.0",
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
