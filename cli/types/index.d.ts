@@ -1070,23 +1070,35 @@ declare namespace Cypress {
     hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
+     * Invoke a function on the previously yielded subject.
+     *
+     * @see https://on.cypress.io/invoke
+     */
+    invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
+      functionName: K,
+      ...args: any[]
+    ): Chainable<R>
+    invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
+      options: Loggable,
+      functionName: K,
+      ...args: any[]
+    ): Chainable<R>
+
+    /**
      * Invoke a function in an array of functions.
      * @see https://on.cypress.io/invoke
      */
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
 
-    /**
-     * Invoke a function on the previously yielded subject.
-     * This isn't possible to strongly type without generic override yet.
-     * If called on an object you can do this instead: `.then(s => s.show())`.
-     * If called on an array you can do this instead: `.each(s => s.show())`.
-     * From there the subject will be properly typed.
+     /**
+     * Invoke a function on the previously yielded subject by a property path.
+     * Property path invocation cannot be strongly-typed.
+     * Invoking by a property path will always result in any.
      *
      * @see https://on.cypress.io/invoke
      */
-    invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
-    invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
+    invoke(propertyPath: string, ...args: any[]): Chainable
 
     /**
      * Get a property’s value on the previously yielded subject.
@@ -1099,6 +1111,7 @@ declare namespace Cypress {
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
     its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
+    its(propertyPath: string, options?: Loggable): Chainable
 
     /**
      * Get a value by index from an array yielded from the previous command.
