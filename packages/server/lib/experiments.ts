@@ -111,6 +111,7 @@ export const getExperiments = (project: CypressProject): CypressExperiments => {
  * Whilelist known experiments here to avoid accidentally showing
  * any config key that starts with "experimental" prefix
 */
+// @ts-ignore
 export const isKnownExperiment = (experiment, key) => {
   return Object.keys(names).includes(key)
 }
