@@ -61,7 +61,7 @@ export const experimental = {
   summaries,
 }
 
-export const getExperimentsFromResolved = (resolvedConfig): CypressExperiments => {
+export const getExperimentsFromResolved = (resolvedConfig, names = experimental.names, summaries = experimental.summaries): CypressExperiments => {
   const experiments: CypressExperiments = {}
 
   if (!resolvedConfig) {
@@ -101,10 +101,10 @@ export const getExperimentsFromResolved = (resolvedConfig): CypressExperiments =
  * and have non-default values and returns a simple object with {key: {value, enabled}}
  * where "on" is set to true if the value is different from default..
  */
-export const getExperiments = (project: CypressProject): CypressExperiments => {
+export const getExperiments = (project: CypressProject, names = experimental.names, summaries = experimental.summaries): CypressExperiments => {
   const resolvedEnv = get(project, 'resolvedConfig', {})
 
-  return getExperimentsFromResolved(resolvedEnv)
+  return getExperimentsFromResolved(resolvedEnv, names, summaries)
 }
 
 /**

@@ -18,6 +18,17 @@ describe('experiments', () => {
 
   context('#getExperiments', () => {
     it('returns enabled experiments', () => {
+      const names = {
+        experimentalFoo: 'experiment foo',
+        experimentalBar: 'experiment bar',
+        experimentalBaz: 'experiment baz',
+      }
+      const summaries = {
+        experimentalFoo: 'feature foo summary',
+        experimentalBar: 'feature bar summary',
+        // let the system use the default summary for other features
+      }
+
       const project = {
         resolvedConfig: {
           // nope, experiment is not enabled
@@ -37,19 +48,28 @@ describe('experiments', () => {
           },
         },
       }
-      const result = getExperiments(project)
+      const result = getExperiments(project, names, summaries)
       const expected = {
         experimentalFoo: {
           value: true,
           enabled: false,
+          key: 'experimentalFoo',
+          name: 'experiment foo',
+          summary: 'feature foo summary',
         },
         experimentalBar: {
           value: true,
           enabled: true,
+          key: 'experimentalBar',
+          name: 'experiment bar',
+          summary: 'feature bar summary',
         },
         experimentalBaz: {
           value: 5,
           enabled: true,
+          key: 'experimentalBaz',
+          name: 'experiment baz',
+          summary: 'top secret',
         },
       }
 
