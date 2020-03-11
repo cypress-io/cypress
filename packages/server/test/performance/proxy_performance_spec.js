@@ -109,7 +109,7 @@ const average = (arr) => {
 }
 
 const percentile = (sortedArr, p) => {
-  const i = Math.floor(p / 100 * sortedArr.length - 1)
+  const i = Math.floor(p / 100 * (sortedArr.length - 1))
 
   return Math.round(sortedArr[i])
 }
