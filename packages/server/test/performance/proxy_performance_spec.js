@@ -374,7 +374,7 @@ describe('Proxy Performance', function () {
 
       // slice(1) since first test is used as baseline above
       testCases.slice(1).map((testCase) => {
-        let multiplier = 2
+        let multiplier = 3
 
         if (testCase.httpsUpstreamProxy) {
           multiplier *= 1.5
