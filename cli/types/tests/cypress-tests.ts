@@ -105,15 +105,31 @@ namespace CypressItsTests {
   .then((s: string) => {
     s
   })
+  cy.wrap({baz: { quux: '2' }}).its('baz.quux') // $ExpectType Chainable<any>
 }
 
 namespace CypressInvokeTests {
   const returnsString = () => 'foo'
   const returnsNumber = () => 42
 
-  // unfortunately could not define more precise type
-  // in this case it should have been "number", but so far no luck
-  cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<any>
+  cy.wrap({ a: returnsString }).invoke('a') // $ExpectType Chainable<string>
+  cy.wrap({ b: returnsNumber }).invoke('b') // $ExpectType Chainable<number>
+  cy.wrap({ b: returnsNumber }).invoke({ log: true }, 'b') // $ExpectType Chainable<number>
+
+  // challenging to define a more precise return type than string | number here
+  cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<string | number>
+
+  // invoke through property path results in any
+  cy.wrap({ a: { fn: (x: number) => x * x }}).invoke('a.fn', 4) // $ExpectType Chainable<any>
+
+  // examples below are from previous attempt at typing `invoke`
+  // (see https://github.com/cypress-io/cypress/issues/4022)
+
+  // call methods on arbitrary objects with reasonable return types
+  cy.wrap({ fn: () => ({a: 1})}).invoke("fn") // $ExpectType Chainable<{ a: number; }>
+
+  // call methods on dom elements with reasonable return types
+  cy.get('.trigger-input-range').invoke('val', 25) // $ExpectType Chainable<string | number | string[] | undefined>
 }
 
 cy.wrap({ foo: ['bar', 'baz'] })
