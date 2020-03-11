@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const ospath = require('ospath')
 const crypto = require('crypto')
 const la = require('lazy-ass')
 const is = require('check-more-types')
@@ -120,13 +121,13 @@ function stdoutLineMatches (expectedLine, stdout) {
 }
 
 /**
- * Confirms if given value is a valid CYPRESS_ENV value. Undefined values
+ * Confirms if given value is a valid CYPRESS_INTERNAL_ENV value. Undefined values
  * are valid, because the system can set the default one.
  *
  * @param {string} value
- * @example util.isValidCypressEnvValue(process.env.CYPRESS_ENV)
+ * @example util.isValidCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
-function isValidCypressEnvValue (value) {
+function isValidCypressInternalEnvValue (value) {
   if (_.isUndefined(value)) {
     // will get default value
     return true
@@ -136,6 +137,17 @@ function isValidCypressEnvValue (value) {
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
+}
+
+/**
+ * Confirms if given value is a non-production CYPRESS_INTERNAL_ENV value.
+ * Undefined values are valid, because the system can set the default one.
+ *
+ * @param {string} value
+ * @example util.isNonProductionCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
+ */
+function isNonProductionCypressInternalEnvValue (value) {
+  return !_.isUndefined(value) && value !== 'production'
 }
 
 /**
@@ -225,10 +237,31 @@ const parseOpts = (opts) => {
   return cleanOpts
 }
 
+/**
+ * Copy of packages/server/lib/browsers/utils.ts
+ * because we need same functionality in CLI to show the path :(
+ */
+const getApplicationDataFolder = (...paths) => {
+  const { env } = process
+
+  // allow overriding the app_data folder
+  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+
+  const PRODUCT_NAME = pkg.productName || pkg.name
+  const OS_DATA_PATH = ospath.data()
+
+  const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
+
+  return p
+}
+
 const util = {
   normalizeModuleOptions,
   parseOpts,
-  isValidCypressEnvValue,
+  isValidCypressInternalEnvValue,
+  isNonProductionCypressInternalEnvValue,
   printNodeOptions,
 
   isCi () {
@@ -406,6 +439,15 @@ const util = {
     })
   },
 
+  getPlatformInfo () {
+    return util.getOsVersionAsync().then((version) => {
+      return stripIndent`
+        Platform: ${os.platform()} (${version})
+        Cypress Version: ${util.pkgVersion()}
+      `
+    })
+  },
+
   // attention:
   // when passing relative path to NPM post install hook, the current working
   // directory is set to the `node_modules/cypress` folder
@@ -483,6 +525,8 @@ const util = {
   getFileChecksum,
 
   getFileSize,
+
+  getApplicationDataFolder,
 }
 
 module.exports = util

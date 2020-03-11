@@ -2,7 +2,7 @@
 
 // compile TypeScript files on the fly using
 // Node require hook project
-if (process.env.CYPRESS_ENV !== 'production') {
+if (process.env.CYPRESS_INTERNAL_ENV !== 'production') {
   require('@packages/ts/register')
 }
 
@@ -28,7 +28,7 @@ if (!module.parent) {
         console.log(` 👍 Found "${filename}":`, foundBrowser)
       })
       .catch((err) => {
-        console.log(` 👎 Couldn't find "${filename}:`, err.message)
+        console.log(` 👎 Couldn't find "${filename}:"`, err.message)
       })
     })
   } else {

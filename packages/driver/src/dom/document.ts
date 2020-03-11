@@ -17,6 +17,12 @@ const isDocument = (obj: HTMLElement | Document): obj is Document => {
 
 // does this document have a currently active window (defaultView)
 const hasActiveWindow = (doc) => {
+  // in firefox, detached documents still have a reference to their window
+  // but document.location is null
+  if (Cypress.isBrowser('firefox') && !doc.location) {
+    return false
+  }
+
   return !!doc.defaultView
 }
 

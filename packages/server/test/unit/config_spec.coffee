@@ -20,9 +20,9 @@ describe "lib/config", ->
     process.env = @env
 
   context "environment name check", ->
-    it "throws an error for unknown CYPRESS_ENV", ->
-      sinon.stub(errors, "throw").withArgs("INVALID_CYPRESS_ENV", "foo-bar")
-      process.env.CYPRESS_ENV = "foo-bar"
+    it "throws an error for unknown CYPRESS_INTERNAL_ENV", ->
+      sinon.stub(errors, "throw").withArgs("INVALID_CYPRESS_INTERNAL_ENV", "foo-bar")
+      process.env.CYPRESS_INTERNAL_ENV = "foo-bar"
       cfg = {
         projectRoot: "/foo/bar/"
       }
@@ -30,9 +30,9 @@ describe "lib/config", ->
       config.mergeDefaults(cfg, options)
       expect(errors.throw).have.been.calledOnce
 
-    it "allows known CYPRESS_ENV", ->
+    it "allows production CYPRESS_INTERNAL_ENV", ->
       sinon.stub(errors, "throw")
-      process.env.CYPRESS_ENV = "test"
+      process.env.CYPRESS_INTERNAL_ENV = "production"
       cfg = {
         projectRoot: "/foo/bar/"
       }
@@ -451,6 +451,27 @@ describe "lib/config", ->
           @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
 
+      context "firefoxGcInterval", ->
+        it "passes if a number", ->
+          @setup({ firefoxGcInterval: 1 })
+          @expectValidationPasses()
+
+        it "passes if null", ->
+          @setup({ firefoxGcInterval: null })
+          @expectValidationPasses()
+
+        it "passes if correctly shaped object", ->
+          @setup({ firefoxGcInterval: { runMode: 1, openMode: null } })
+          @expectValidationPasses()
+
+        it "fails if string", ->
+          @setup({ firefoxGcInterval: 'foo' })
+          @expectValidationFails("a positive number or null or an object")
+
+        it "fails if invalid object", ->
+          @setup({ firefoxGcInterval: { foo: 'bar' } })
+          @expectValidationFails("a positive number or null or an object")
+
   context ".getConfigKeys", ->
     beforeEach ->
       @includes = (key) ->
@@ -718,7 +739,7 @@ describe "lib/config", ->
           bar: "baz"
           version: "1.0.1"
         })
-        expect(cfg.cypressEnv).to.eq(process.env["CYPRESS_ENV"])
+        expect(cfg.cypressEnv).to.eq(process.env["CYPRESS_INTERNAL_ENV"])
         expect(cfg).not.to.have.property("envFile")
 
     it "merges env into @config.env", ->
@@ -787,6 +808,7 @@ describe "lib/config", ->
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },
             fileServerFolder:           { value: "", from: "default" },
+            firefoxGcInterval:          { value: { openMode: null, runMode: 1 }, from: "default" },
             video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
             videoUploadOnPasses:        { value: true, from: "default" }
@@ -861,6 +883,7 @@ describe "lib/config", ->
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
+            firefoxGcInterval:          { value: { openMode: null, runMode: 1 }, from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
@@ -1032,7 +1055,7 @@ describe "lib/config", ->
     it "keeps the list of browsers if the plugins returns empty object", ->
       browser = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",
@@ -1064,7 +1087,7 @@ describe "lib/config", ->
     it "catches browsers=null returned from plugins", ->
       browser = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",
@@ -1092,7 +1115,7 @@ describe "lib/config", ->
     it "allows user to filter browsers", ->
       browserOne = {
         name: "fake browser name",
-        family: "chrome",
+        family: "chromium",
         displayName: "My browser",
         version: "x.y.z",
         path: "/path/to/browser",
@@ -1100,7 +1123,7 @@ describe "lib/config", ->
       }
       browserTwo = {
         name: "fake electron",
-        family: "electron",
+        family: "chromium",
         displayName: "Electron",
         version: "x.y.z",
         # Electron browser is built-in, no external path
@@ -1194,7 +1217,7 @@ describe "lib/config", ->
 
     it "does not merge reserved environment variables", ->
       obj = {
-        CYPRESS_ENV: "production"
+        CYPRESS_INTERNAL_ENV: "production"
         CYPRESS_FOO: "bar"
         CYPRESS_CRASH_REPORTS: "0"
         CYPRESS_PROJECT_ID: "abc123"

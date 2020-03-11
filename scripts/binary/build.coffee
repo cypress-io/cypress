@@ -24,7 +24,6 @@ meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
 xvfb = require("../../cli/lib/exec/xvfb")
-linkPackages = require('../link-packages')
 { transformRequires } = require('./util/transform-requires')
 { testStaticAssets } = require('./util/testStaticAssets')
 performanceTracking = require('../../packages/server/test/support/helpers/performance.js')
@@ -40,9 +39,6 @@ logger = (msg, platform) ->
 
 logBuiltAllPackages = () ->
   console.log("built all packages")
-
-logBuiltAllJs = () ->
-  console.log("built all JS")
 
 # can pass options to better control the build
 # for example
@@ -119,8 +115,6 @@ buildCypressApp = (platform, version, options = {}) ->
     packages.runAllBuild()
     # Promise.resolve()
     .then(R.tap(logBuiltAllPackages))
-    .then(packages.runAllBuildJs)
-    .then(R.tap(logBuiltAllJs))
 
   copyPackages = ->
     log("#copyPackages")
@@ -154,7 +148,7 @@ buildCypressApp = (platform, version, options = {}) ->
     })
     .then =>
       str = """
-      process.env.CYPRESS_ENV = process.env.CYPRESS_ENV || 'production'
+      process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
       require('./packages/server')
       """
 

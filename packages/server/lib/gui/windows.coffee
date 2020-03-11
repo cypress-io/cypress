@@ -40,6 +40,21 @@ setWindowProxy = (win) ->
   })
 
 module.exports = {
+  installExtension: (path) ->
+    ## extensions can only be installed for all BrowserWindows
+    name = BrowserWindow.addExtension(path)
+
+    debug('electron extension installed %o', { success: !!name, name, path })
+
+    if !name
+      throw new Error('Extension could not be installed.')
+
+  removeAllExtensions: ->
+    extensions = _.keys(BrowserWindow.getExtensions())
+
+    debug('removing all electron extensions %o', extensions)
+    extensions.forEach(BrowserWindow.removeExtension)
+
   reset: ->
     windows = {}
 
@@ -86,7 +101,6 @@ module.exports = {
       recordFrameRate: null
       # extension:       null ## TODO add these once we update electron
       # devToolsExtension: null ## since these API's were added in 1.7.6
-      onPaint:         null
       onFocus: ->
       onBlur: ->
       onClose: ->
@@ -152,18 +166,6 @@ module.exports = {
         showInspectElement: true
         window: win
       })
-
-    if options.onPaint
-      win.webContents.on "paint", (event, dirty, image) ->
-        ## https://github.com/cypress-io/cypress/issues/705
-        ## if win is destroyed this will throw
-        try
-          if fr = options.recordFrameRate
-            win.webContents.frameRate = fr
-
-          options.onPaint.apply(win, arguments)
-        catch err
-          ## do nothing
 
     win
 

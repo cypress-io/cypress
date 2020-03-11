@@ -284,6 +284,36 @@ describe('lib/project', () => {
         expect(startListening.getCall(0).args[1]).to.eq(options)
       })
     })
+
+    it('attaches warning to non-chrome browsers when chromeWebSecurity:false', function () {
+      Object.assign(this.config, {
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        chromeWebSecurity: false,
+      })
+
+      return this.project.open()
+      .then(() => this.project.getConfig())
+      .then((config) => {
+        expect(config.chromeWebSecurity).eq(false)
+        expect(config.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+            warning: `\
+Your project has set the configuration option: \`chromeWebSecurity: false\`
+
+This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
+`,
+          },
+        ])
+
+        expect(config).ok
+      })
+    })
   })
 
   context('#close', () => {
@@ -665,6 +695,35 @@ describe('lib/project', () => {
       return this.project.getSpecUrl(todosSpec)
       .then((str) => {
         expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee')
+      })
+    })
+
+    it('escapses %, &', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a&b%c.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%26b%25c.js')
+      })
+    })
+
+    // ? is invalid in Windows, but it can be tested here
+    // because it's a unit test and doesn't check the existence of files
+    it('escapes ?', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a?.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%3F.spec.js')
+      })
+    })
+
+    it('escapes %, &, ? in the url dir', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/s%&?ub/a.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/s%25%26%3Fub/a.spec.js')
       })
     })
 

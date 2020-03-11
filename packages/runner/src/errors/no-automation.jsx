@@ -1,21 +1,8 @@
 import _ from 'lodash'
 import React from 'react'
-
-import Dropdown from '../dropdown/dropdown'
+import { BrowserIcon, Dropdown } from '@packages/ui-components'
 
 const displayName = (name) => _.capitalize(name)
-
-const icon = (browser) => {
-  switch (browser) {
-    case 'chrome':
-    case 'chromium':
-    case 'canary':
-    case 'electron':
-      return 'fab fa-chrome'
-    default:
-      return 'fas fa-globe'
-  }
-}
 
 const noBrowsers = () => (
   <div>
@@ -33,8 +20,8 @@ const noBrowsers = () => (
 
 const browser = (browser) => (
   <span>
-    <i className={icon(browser.name)}></i>
-    <span>Run {displayName(browser.name)} {browser.majorVersion}</span>
+    <BrowserIcon browserName={browser.displayName} />
+    <span>Run {displayName(browser.displayName)} {browser.majorVersion}</span>
   </span>
 )
 
@@ -53,6 +40,7 @@ const browserPicker = (browsers, onLaunchBrowser) => {
         others={otherBrowsers}
         onSelect={onLaunchBrowser}
         renderItem={browser}
+        keyProperty='key'
       />
     </div>
   )

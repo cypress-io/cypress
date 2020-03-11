@@ -144,7 +144,7 @@ $max-nesting-level: 14;
 
     &.level-0 {
       >div>.folder-name {
-        padding: 5px 20px;
+        padding: 5px 10px 5px 20px;
         background-color: #F9F9F9;
         font-weight: normal;
         text-transform: uppercase;
@@ -153,10 +153,18 @@ $max-nesting-level: 14;
         color: #777;
         line-height: 18px;
         font-family: $font-sans;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
 
         i {
           display: none;
           margin-right: 5px;
+        }
+
+        span {
+          font-size: 10px;
+          margin-left: 10px;
         }
       }
     }

@@ -11,9 +11,13 @@ describe "visits", ->
     cy.visit("/elements.html", {timeout: 5000})
 
   ## https://github.com/cypress-io/cypress/issues/5602
-  it.only "can load a website which uses invalid HTTP header chars", ->
+  it "can load a website which uses invalid HTTP header chars", ->
     cy.visit("http://localhost:3434/invalid-header-char")
     .contains('foo')
+
+  ## https://github.com/cypress-io/cypress/issues/5446
+  it "can load a site via TLSv1", ->
+    cy.visit("https://localhost:6776")
 
   context "issue #225: hash urls", ->
     rand = Math.random()
