@@ -769,7 +769,9 @@ describe "src/cy/commands/screenshot", ->
 
         cy.screenshot()
 
-      it "throws after timing out", (done) ->
+      it "throws after timing out", {
+        defaultCommandTimeout: 100
+      }, (done) ->
         Cypress.automation.withArgs("take:screenshot").resolves(Promise.delay(1000))
 
         cy.on "fail", (err) =>
