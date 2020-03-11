@@ -4,6 +4,7 @@ const Promise = require('bluebird')
 const electron = require('electron')
 const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
+const R = require('ramda')
 const pkg = require('@packages/root')
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
@@ -18,6 +19,7 @@ const env = require(`${root}../lib/util/env`)
 const random = require(`${root}../lib/util/random`)
 const system = require(`${root}../lib/util/system`)
 const specsUtil = require(`${root}../lib/util/specs`)
+const { experimental } = require(`${root}../lib/experiments`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
@@ -787,17 +789,27 @@ describe('lib/modes/run', () => {
     // restore pkg.version property
     // for some reason I cannot stub property value using Sinon
     let version
+    // save a copy of "true" experiments right away
+    const names = R.clone(experimental.names)
 
     before(() => {
+      // reset experiments names before each test
+      experimental.names = {}
       version = pkg.version
     })
 
     afterEach(() => {
       pkg.version = version
+      experimental.names = names
     })
 
     it('returns heading with experiments', () => {
       pkg.version = '1.2.3'
+
+      experimental.names = {
+        experimentalFeatureA: 'experimentalFeatureA',
+        experimentalFeatureB: 'experimentalFeatureB',
+      }
 
       const options = {
         browser: {
@@ -823,8 +835,17 @@ describe('lib/modes/run', () => {
       snapshot('enabled experiments', stripAnsi(heading))
     })
 
+    it('resets the experiments names', () => {
+      expect(experimental.names, 'experiments were reset').to.deep.equal(names)
+    })
+
     it('returns heading with some enabled experiments', () => {
       pkg.version = '1.2.3'
+
+      experimental.names = {
+        experimentalFeatureA: 'experimentalFeatureA',
+        experimentalFeatureB: 'experimentalFeatureB',
+      }
 
       const options = {
         browser: {

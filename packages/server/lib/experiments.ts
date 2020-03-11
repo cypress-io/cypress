@@ -44,21 +44,24 @@ interface StringValues {
  * When adding an experiment, add its summary text here.
  * "experimentalComponentTesting": "Allows mounting and testing framework-specific components"
 */
-const summaries: StringValues = {}
+const _summaries: StringValues = {}
 
 /**
  * Keeps short names for experiments.
  * When adding new experiments, add a short name
  * like "experimentalComponentTesting": "Component Testing"
 */
-const names: StringValues = {}
+const _names: StringValues = {}
 
 /**
  * Export this object for easy stubbing from end-to-end tests.
+ * If you cannot easily pass "names" and "summaries" arguments
+ * to "getExperimentsFromResolved" function, then use this
+ * object to change "experiments.names" and "experimental.summaries" objects.
 */
 export const experimental = {
-  names,
-  summaries,
+  names: _names,
+  summaries: _summaries,
 }
 
 export const getExperimentsFromResolved = (resolvedConfig, names = experimental.names, summaries = experimental.summaries): CypressExperiments => {
@@ -113,5 +116,5 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
 */
 // @ts-ignore
 export const isKnownExperiment = (experiment, key) => {
-  return Object.keys(names).includes(key)
+  return Object.keys(experimental.names).includes(key)
 }
