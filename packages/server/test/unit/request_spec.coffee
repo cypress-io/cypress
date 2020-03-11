@@ -42,10 +42,7 @@ testAttachingCookiesWith = (fn) ->
         }
     })
 
-describe "lib/request", {
-  isInteractive: true
-  numTestsKeptInMemory: 1
-}, ->
+describe "lib/request", ->
   beforeEach ->
     @fn = sinon.stub()
     @fn.withArgs('set:cookie').resolves({})

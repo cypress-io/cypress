@@ -469,14 +469,11 @@ namespace CypressTestConfigTests {
   describe('suite', {
     browser: {family: 'firefox'},
     baseUrl: 'www.example.com'
-  }, () => {
+  }, () => {})
 
-  })
   describe('suite', {
     browser: {family: 'firefox'},
     baseUrl: 'www.example.com'
     foo: 'foo' // $ExpectError
-  }, () => {
-
-  })
+  }, () => {})
 }
