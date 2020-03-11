@@ -125,11 +125,12 @@ describe "lib/plugins/preprocessor", ->
       }())
       """)
 
-    it "replaces new lines with {newline} placeholder", ->
-      expect(preprocessor.clientSideError("with\nnew\nlines")).to.include('error: "with{newline}new{newline}lines"')
 
-    it "removes command line syntax highlighting characters", ->
-      expect(preprocessor.clientSideError("[30mfoo[100mbar[7mbaz")).to.include('error: "foobarbaz"')
+    it "does not replace new lines with {newline} placeholder", ->
+      expect(preprocessor.clientSideError("with\nnew\nlines")).to.include('error: "with\\nnew\\nlines"')
+
+    it "does not remove command line syntax highlighting characters", ->
+      expect(preprocessor.clientSideError("[30mfoo[100mbar[7mbaz")).to.include('error: "[30mfoo[100mbar[7mbaz"')
 
   context "#errorMessage", ->
     it "handles error strings", ->

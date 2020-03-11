@@ -24,7 +24,7 @@
   "devDependencies": {
     "@cypress/sinon-chai": "2.9.0",
     "@types/express": "4.17.2",
-    "request": "2.88.0",
+    "request": "cypress-io/request#b5af0d1fa47eec97ba980cde90a13e69a2afcd16",
     "request-promise": "4.2.5",
     "typescript": "3.5.3"
   },
