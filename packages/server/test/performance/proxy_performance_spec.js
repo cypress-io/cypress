@@ -358,10 +358,9 @@ describe('Proxy Performance', function () {
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
-    const testCases = _.cloneDeep(TEST_CASES)
-
     describe(urlUnderTest, function () {
       let baseline
+      const testCases = _.cloneDeep(TEST_CASES)
 
       before(function () {
         // run baseline test
@@ -375,12 +374,18 @@ describe('Proxy Performance', function () {
 
       // slice(1) since first test is used as baseline above
       testCases.slice(1).map((testCase) => {
-        it(`${testCase.name} loads 1000 images less than 2x as slowly as Chrome`, function () {
+        let multiplier = 2
+
+        if (testCase.httpsUpstreamProxy) {
+          multiplier *= 1.5
+        }
+
+        it(`${testCase.name} loads 1000 images less than ${multiplier}x as slowly as Chrome`, function () {
           debug('Current test: ', testCase.name)
 
           return runBrowserTest(urlUnderTest, testCase)
           .then((results) => {
-            expect(results['Total']).to.be.lessThan(2 * baseline['Total'])
+            expect(results['Total']).to.be.lessThan(multiplier * baseline['Total'])
           })
         })
       })
