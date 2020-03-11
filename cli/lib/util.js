@@ -287,8 +287,8 @@ const util = {
     }
 
     if (options.dev && nodeVersion < 12) {
-      // `node` is used when --dev is passed, so this won't work if Node is too old
-      logger.warn('(dev-mode warning only) NODE_OPTIONS=--max-http-header-size could not be set. See https://github.com/cypress-io/cypress/pull/5452')
+      // `node` is used instead of Electron when --dev is passed, so this won't work if Node is too old
+      debug('NODE_OPTIONS=--max-http-header-size could not be set because we\'re in dev mode and Node is < 12.0.0')
 
       return
     }
