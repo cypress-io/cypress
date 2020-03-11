@@ -349,6 +349,7 @@ class HttpsAgent extends https.Agent {
 
       const connectReq = buildConnectReqHead(hostname, port, proxy)
 
+      proxySocket.setNoDelay(true)
       proxySocket.write(connectReq)
     })
   }
