@@ -377,6 +377,8 @@ describe('Proxy Performance', function () {
         let multiplier = 3
 
         if (testCase.httpsUpstreamProxy) {
+          // there is extra slowdown when the HTTPS upstream is used, so slightly increase the multiplier
+          // maybe from higher CPU utilization with debugging-proxy and HTTPS
           multiplier *= 1.5
         }
 
