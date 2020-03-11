@@ -17,9 +17,10 @@ function getLinuxBrowser (
     }
 
     log(
-      'Could not extract version from "%s" using regex %s',
-      stdout,
-      versionRegex,
+      'Could not extract version from stdout using regex: %o', {
+        stdout,
+        versionRegex,
+      },
     )
 
     throw notInstalledErr(binary)
