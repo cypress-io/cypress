@@ -2,6 +2,8 @@ $ = Cypress.$.bind(Cypress)
 _ = Cypress._
 dom = Cypress.dom
 
+helpers = require("../../support/helpers")
+
 describe "src/cy/commands/traversals", ->
   beforeEach ->
     cy.visit("/fixtures/dom.html")
