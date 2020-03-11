@@ -1,3 +1,14 @@
+/* eslint-disable
+    default-case,
+    no-cond-assign,
+    no-empty,
+    no-ex-assign,
+    no-unused-vars,
+    prefer-rest-params,
+    prefer-spread,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -6,209 +17,232 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash");
-const $ = require("jquery");
-const Promise = require("bluebird");
+const _ = require('lodash')
+const $ = require('jquery')
+const Promise = require('bluebird')
 
-const $dom = require("../dom");
-const $selection = require("../dom/selection");
-const $utils = require("./utils");
-const $Chai = require("../cy/chai");
-const $Xhrs = require("../cy/xhrs");
-const $jQuery = require("../cy/jquery");
-const $Aliases = require("../cy/aliases");
-const $Events = require("./events");
-const $Errors = require("../cy/errors");
-const $Ensures = require("../cy/ensures");
-const $Focused = require("../cy/focused");
-const $Location = require("../cy/location");
-const $Assertions = require("../cy/assertions");
-const $Listeners = require("../cy/listeners");
-const $Chainer = require("./chainer");
-const $Timers = require("../cy/timers");
-const $Timeouts = require("../cy/timeouts");
-const $Retries = require("../cy/retries");
-const $Stability = require("../cy/stability");
-const $Snapshots = require("../cy/snapshots");
-const $CommandQueue = require("./command_queue");
+const $dom = require('../dom')
+const $selection = require('../dom/selection')
+const $utils = require('./utils')
+const $Chai = require('../cy/chai')
+const $Xhrs = require('../cy/xhrs')
+const $jQuery = require('../cy/jquery')
+const $Aliases = require('../cy/aliases')
+const $Events = require('./events')
+const $Errors = require('../cy/errors')
+const $Ensures = require('../cy/ensures')
+const $Focused = require('../cy/focused')
+const $Location = require('../cy/location')
+const $Assertions = require('../cy/assertions')
+const $Listeners = require('../cy/listeners')
+const $Chainer = require('./chainer')
+const $Timers = require('../cy/timers')
+const $Timeouts = require('../cy/timeouts')
+const $Retries = require('../cy/retries')
+const $Stability = require('../cy/stability')
+const $Snapshots = require('../cy/snapshots')
+const $CommandQueue = require('./command_queue')
 
-const crossOriginScriptRe = /^script error/i;
+const crossOriginScriptRe = /^script error/i
 
 const privateProps = {
-  props:    { name: "state", url: true },
-  privates: { name: "state", url: false }
-};
+  props: { name: 'state', url: true },
+  privates: { name: 'state', url: false },
+}
 
-const noArgsAreAFunction = args => !_.some(args, _.isFunction);
+const noArgsAreAFunction = (args) => {
+  return !_.some(args, _.isFunction)
+}
 
-const isPromiseLike = ret => ret && _.isFunction(ret.then);
+const isPromiseLike = (ret) => {
+  return ret && _.isFunction(ret.then)
+}
 
-const returnedFalse = result => result === false;
+const returnedFalse = (result) => {
+  return result === false
+}
 
-const getContentWindow = $autIframe => $autIframe.prop("contentWindow");
+const getContentWindow = ($autIframe) => {
+  return $autIframe.prop('contentWindow')
+}
 
-const setWindowDocumentProps = function(contentWindow, state) {
-  state("window",   contentWindow);
-  return state("document", contentWindow.document);
-};
+const setWindowDocumentProps = function (contentWindow, state) {
+  state('window', contentWindow)
 
-const setRemoteIframeProps = ($autIframe, state) => state("$autIframe", $autIframe);
+  return state('document', contentWindow.document)
+}
 
-const create = function(specWindow, Cypress, Cookies, state, config, log) {
-  let stopped = false;
-  const commandFns = {};
+const setRemoteIframeProps = ($autIframe, state) => {
+  return state('$autIframe', $autIframe)
+}
 
-  const isStopped = () => stopped;
+const create = function (specWindow, Cypress, Cookies, state, config, log) {
+  let stopped = false
+  const commandFns = {}
 
-  const onFinishAssertions = function() {
-    return assertions.finishAssertions.apply(window, arguments);
-  };
+  const isStopped = () => {
+    return stopped
+  }
 
-  const warnMixingPromisesAndCommands = function() {
-    const title = state("runnable").fullTitle();
+  const onFinishAssertions = function () {
+    return assertions.finishAssertions.apply(window, arguments)
+  }
 
-    const msg = $utils.errMessageByPath("miscellaneous.mixing_promises_and_commands", title);
+  const warnMixingPromisesAndCommands = function () {
+    const title = state('runnable').fullTitle()
 
-    return $utils.warning(msg);
-  };
+    const msg = $utils.errMessageByPath('miscellaneous.mixing_promises_and_commands', title)
 
-  const $$ = function(selector, context) {
-    if (context == null) { context = state("document"); }
-    return $dom.query(selector, context);
-  };
+    return $utils.warning(msg)
+  }
 
-  const queue = $CommandQueue.create();
+  const $$ = function (selector, context) {
+    if (context == null) {
+      context = state('document')
+    }
 
-  const Chainer = $Chainer.create();
-  const timeouts = $Timeouts.create(state);
-  const stability = $Stability.create(Cypress, state);
-  const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions);
-  var assertions = $Assertions.create(Cypress, state, queue, retries.retry);
+    return $dom.query(selector, context)
+  }
 
-  const jquery = $jQuery.create(state);
-  const location = $Location.create(state);
-  const focused = $Focused.create(state);
-  const timers = $Timers.create();
+  const queue = $CommandQueue.create()
 
-  const { expect } = $Chai.create(specWindow, assertions.assert);
+  const Chainer = $Chainer.create()
+  const timeouts = $Timeouts.create(state)
+  const stability = $Stability.create(Cypress, state)
+  const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
+  const assertions = $Assertions.create(Cypress, state, queue, retries.retry)
 
-  const xhrs = $Xhrs.create(state);
-  const aliases = $Aliases.create(jquery.getRemotejQueryInstance, state);
+  const jquery = $jQuery.create(state)
+  const location = $Location.create(state)
+  const focused = $Focused.create(state)
+  const timers = $Timers.create()
 
-  const errors = $Errors.create(state, config, log);
-  const ensures = $Ensures.create(state, expect);
+  const { expect } = $Chai.create(specWindow, assertions.assert)
 
-  const snapshots = $Snapshots.create($$, state);
+  const xhrs = $Xhrs.create(state)
+  const aliases = $Aliases.create(jquery.getRemotejQueryInstance, state)
 
-  const isCy = val => (val === cy) || $utils.isInstanceOf(val, Chainer);
+  const errors = $Errors.create(state, config, log)
+  const ensures = $Ensures.create(state, expect)
 
-  const runnableCtx = function(name) {
-    ensures.ensureRunnable(name);
+  const snapshots = $Snapshots.create($$, state)
 
-    return state("runnable").ctx;
-  };
+  const isCy = (val) => {
+    return (val === cy) || $utils.isInstanceOf(val, Chainer)
+  }
 
-  const urlNavigationEvent = event => Cypress.action("app:navigation:changed", `page navigation event (${event})`);
+  const runnableCtx = function (name) {
+    ensures.ensureRunnable(name)
 
-  const contentWindowListeners = function(contentWindow) {
+    return state('runnable').ctx
+  }
+
+  const urlNavigationEvent = (event) => {
+    return Cypress.action('app:navigation:changed', `page navigation event (${event})`)
+  }
+
+  const contentWindowListeners = function (contentWindow) {
     return $Listeners.bindTo(contentWindow, {
-      onError() {
+      onError () {
         //# use a function callback here instead of direct
         //# reference so our users can override this function
         //# if need be
-        return cy.onUncaughtException.apply(cy, arguments);
+        return cy.onUncaughtException.apply(cy, arguments)
       },
-      onSubmit(e) {
-        return Cypress.action("app:form:submitted", e);
+      onSubmit (e) {
+        return Cypress.action('app:form:submitted', e)
       },
-      onBeforeUnload(e) {
-        stability.isStable(false, "beforeunload");
+      onBeforeUnload (e) {
+        stability.isStable(false, 'beforeunload')
 
-        Cookies.setInitial();
+        Cookies.setInitial()
 
-        timers.reset();
+        timers.reset()
 
-        Cypress.action("app:window:before:unload", e);
+        Cypress.action('app:window:before:unload', e)
 
         //# return undefined so our beforeunload handler
         //# doesnt trigger a confirmation dialog
-        return undefined;
+        return undefined
       },
-      onUnload(e) {
-        return Cypress.action("app:window:unload", e);
+      onUnload (e) {
+        return Cypress.action('app:window:unload', e)
       },
-      onNavigation(...args) {
-        return Cypress.action("app:navigation:changed", ...args);
+      onNavigation (...args) {
+        return Cypress.action('app:navigation:changed', ...args)
       },
-      onAlert(str) {
-        return Cypress.action("app:window:alert", str);
+      onAlert (str) {
+        return Cypress.action('app:window:alert', str)
       },
-      onConfirm(str) {
-        const results = Cypress.action("app:window:confirm", str);
+      onConfirm (str) {
+        const results = Cypress.action('app:window:confirm', str)
 
         //# return false if ANY results are false
         //# else true
-        const ret = !_.some(results, returnedFalse);
+        const ret = !_.some(results, returnedFalse)
 
-        Cypress.action("app:window:confirmed", str, ret);
+        Cypress.action('app:window:confirmed', str, ret)
 
-        return ret;
-      }
-    });
-  };
+        return ret
+      },
+    })
+  }
 
-  const wrapNativeMethods = function(contentWindow) {
+  const wrapNativeMethods = function (contentWindow) {
     try {
       //# return null to trick contentWindow into thinking
       //# its not been iframed if modifyObstructiveCode is true
-      if (config("modifyObstructiveCode")) {
-        Object.defineProperty(contentWindow, "frameElement", {
-          get() { return null; }
-        });
+      if (config('modifyObstructiveCode')) {
+        Object.defineProperty(contentWindow, 'frameElement', {
+          get () {
+            return null
+          },
+        })
       }
 
-      contentWindow.HTMLElement.prototype.focus = function(focusOption) {
-        return focused.interceptFocus(this, contentWindow, focusOption);
-      };
+      contentWindow.HTMLElement.prototype.focus = function (focusOption) {
+        return focused.interceptFocus(this, contentWindow, focusOption)
+      }
 
-      contentWindow.HTMLElement.prototype.blur = function() {
-        return focused.interceptBlur(this);
-      };
+      contentWindow.HTMLElement.prototype.blur = function () {
+        return focused.interceptBlur(this)
+      }
 
-      contentWindow.SVGElement.prototype.focus = function(focusOption) {
-        return focused.interceptFocus(this, contentWindow, focusOption);
-      };
+      contentWindow.SVGElement.prototype.focus = function (focusOption) {
+        return focused.interceptFocus(this, contentWindow, focusOption)
+      }
 
-      contentWindow.SVGElement.prototype.blur = function() {
-        return focused.interceptBlur(this);
-      };
+      contentWindow.SVGElement.prototype.blur = function () {
+        return focused.interceptBlur(this)
+      }
 
-      contentWindow.HTMLInputElement.prototype.select = function() {
-        return $selection.interceptSelect.call(this);
-      };
+      contentWindow.HTMLInputElement.prototype.select = function () {
+        return $selection.interceptSelect.call(this)
+      }
 
-      contentWindow.document.hasFocus = function() {
-        return focused.documentHasFocus.call(this);
-      };
+      contentWindow.document.hasFocus = function () {
+        return focused.documentHasFocus.call(this)
+      }
 
-      const cssModificationSpy = function(original, ...args) {
-        snapshots.onCssModified(this.href);
-        return original.apply(this, args);
-      };
+      const cssModificationSpy = function (original, ...args) {
+        snapshots.onCssModified(this.href)
+
+        return original.apply(this, args)
+      }
 
       const {
-        insertRule
-      } = contentWindow.CSSStyleSheet.prototype;
+        insertRule,
+      } = contentWindow.CSSStyleSheet.prototype
       const {
-        deleteRule
-      } = contentWindow.CSSStyleSheet.prototype;
+        deleteRule,
+      } = contentWindow.CSSStyleSheet.prototype
 
-      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy);
-      return contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy);
+      contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
+      contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
     } catch (error) {}
-  };
+  }
 
-  const enqueue = function(obj) {
+  const enqueue = function (obj) {
     //# if we have a nestedIndex it means we're processing
     //# nested commands and need to splice them into the
     //# index past the current index as opposed to
@@ -222,64 +256,71 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
     //# first command. this was due to nestedIndex being undefined at that
     //# time. so we have to ensure to check that its any kind of number (even 0)
     //# in order to know to splice into the existing array.
-    let nestedIndex = state("nestedIndex");
+    let nestedIndex = state('nestedIndex')
 
     //# if this is a number then we know
     //# we're about to splice this into our commands
     //# and need to reset next + increment the index
     if (_.isNumber(nestedIndex)) {
-      state("nestedIndex", (nestedIndex += 1));
+      state('nestedIndex', (nestedIndex += 1))
     }
 
     //# we look at whether or not nestedIndex is a number, because if it
     //# is then we need to splice inside of our commands, else just push
     //# it onto the end of the queu
-    const index = _.isNumber(nestedIndex) ? nestedIndex : queue.length;
+    const index = _.isNumber(nestedIndex) ? nestedIndex : queue.length
 
-    queue.splice(index, 0, obj);
+    queue.splice(index, 0, obj)
 
-    return Cypress.action("cy:command:enqueued", obj);
-  };
+    return Cypress.action('cy:command:enqueued', obj)
+  }
 
-  var getCommandsUntilFirstParentOrValidSubject = function(command, memo = []) {
-    if (!command) { return null; }
-
-    //# push these onto the beginning of the commands array
-    memo.unshift(command);
-
-    //# break and return the memo
-    if ((command.get("type") === "parent") || $dom.isAttached(command.get("subject"))) {
-      return memo;
+  const getCommandsUntilFirstParentOrValidSubject = function (command, memo = []) {
+    if (!command) {
+      return null
     }
 
-    return getCommandsUntilFirstParentOrValidSubject(command.get("prev"), memo);
-  };
+    //# push these onto the beginning of the commands array
+    memo.unshift(command)
 
-  const runCommand = function(command) {
+    //# break and return the memo
+    if ((command.get('type') === 'parent') || $dom.isAttached(command.get('subject'))) {
+      return memo
+    }
+
+    return getCommandsUntilFirstParentOrValidSubject(command.get('prev'), memo)
+  }
+
+  const runCommand = function (command) {
     //# bail here prior to creating a new promise
     //# because we could have stopped / canceled
     //# prior to ever making it through our first
     //# command
-    if (stopped) { return; }
+    if (stopped) {
+      return
+    }
 
-    state("current", command);
-    state("chainerId", command.get("chainerId"));
+    state('current', command)
+    state('chainerId', command.get('chainerId'))
 
-    return stability.whenStable(function() {
+    return stability.whenStable(() => {
       //# TODO: handle this event
       // @trigger "invoke:start", command
 
-      state("nestedIndex", state("index"));
+      state('nestedIndex', state('index'))
 
-      return command.get("args");}).all()
+      return command.get('args')
+    }).all()
 
-    .then(function(args) {
+    .then((args) => {
       //# store this if we enqueue new commands
       //# to check for promise violations
-      let ret;
-      let enqueuedCmd = null;
+      let ret
+      let enqueuedCmd = null
 
-      const commandEnqueued = obj => enqueuedCmd = obj;
+      const commandEnqueued = (obj) => {
+        return enqueuedCmd = obj
+      }
 
       //# only check for command enqueing when none
       //# of our args are functions else commands
@@ -287,60 +328,60 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
       //# since they return promises and queue more
       //# new commands
       if (noArgsAreAFunction(args)) {
-        Cypress.once("command:enqueued", commandEnqueued);
+        Cypress.once('command:enqueued', commandEnqueued)
       }
 
       //# run the command's fn with runnable's context
       try {
-        ret = command.get("fn").apply(state("ctx"), args);
+        ret = command.get('fn').apply(state('ctx'), args)
       } catch (err) {
-        throw err;
-      }
-      finally {
+        throw err
+      } finally {
         //# always remove this listener
-        Cypress.removeListener("command:enqueued", commandEnqueued);
+        Cypress.removeListener('command:enqueued', commandEnqueued)
       }
 
-      state("commandIntermediateValue", ret);
+      state('commandIntermediateValue', ret)
 
       //# we cannot pass our cypress instance or our chainer
       //# back into bluebird else it will create a thenable
       //# which is never resolved
       switch (false) {
         case !isCy(ret):
-          return null;
+          return null
         case !enqueuedCmd || !isPromiseLike(ret):
           return $utils.throwErrByPath(
-            "miscellaneous.command_returned_promise_and_commands", {
+            'miscellaneous.command_returned_promise_and_commands', {
               args: {
-                current: command.get("name"),
-                called: enqueuedCmd.name
-              }
+                current: command.get('name'),
+                called: enqueuedCmd.name,
+              },
             }
-          );
+          )
         case !enqueuedCmd || !!_.isUndefined(ret):
           //# TODO: clean this up in the utility function
           //# to conditionally stringify functions
           ret = _.isFunction(ret) ?
             ret.toString()
-          :
-            $utils.stringify(ret);
+            :
+            $utils.stringify(ret)
 
           //# if we got a return value and we enqueued
           //# a new command and we didn't return cy
           //# or an undefined value then throw
           return $utils.throwErrByPath(
-            "miscellaneous.returned_value_and_commands_from_custom_command", {
+            'miscellaneous.returned_value_and_commands_from_custom_command', {
               args: {
-                current: command.get("name"),
-                returned: ret
-              }
+                current: command.get('name'),
+                returned: ret,
+              },
             }
-          );
+          )
         default:
-          return ret;
-      }}).then(function(subject) {
-      state("commandIntermediateValue", undefined);
+          return ret
+      }
+    }).then((subject) => {
+      state('commandIntermediateValue', undefined)
 
       //# we may be given a regular array here so
       //# we need to re-wrap the array in jquery
@@ -348,7 +389,7 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
       //# in this subject is a jquery element.
       //# we want to do this because in 3.1.2 there
       //# was a regression when wrapping an array of elements
-      const firstSubject = $utils.unwrapFirst(subject);
+      const firstSubject = $utils.unwrapFirst(subject)
 
       //# if ret is a DOM element and its not an instance of our own jQuery
       if (subject && $dom.isElement(firstSubject) && !$utils.isInstanceOf(subject, $)) {
@@ -358,112 +399,115 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
         //# wrapSubjectsInJquery: false
         //# which will just pass subjects downstream
         //# without modifying them
-        subject = $dom.wrap(subject);
+        subject = $dom.wrap(subject)
       }
 
-      command.set({ subject });
+      command.set({ subject })
 
       //# end / snapshot our logs
       //# if they need it
-      command.finishLogs();
+      command.finishLogs()
 
       //# reset the nestedIndex back to null
-      state("nestedIndex", null);
+      state('nestedIndex', null)
 
       //# also reset recentlyReady back to null
-      state("recentlyReady", null);
+      state('recentlyReady', null)
 
-      state("subject", subject);
+      state('subject', subject)
 
-      return subject;
-    });
-  };
+      return subject
+    })
+  }
 
-  const run = function() {
-    var next = function() {
+  const run = function () {
+    const next = function () {
       //# bail if we've been told to abort in case
       //# an old command continues to run after
-      let left;
       if (stopped) {
-        return;
+        return
       }
 
       //# start at 0 index if we dont have one
-      let index = (left = state("index")) != null ? left : state("index", 0);
+      let index = state('index') || state('index', 0)
 
-      const command = queue.at(index);
+      const command = queue.at(index)
 
       //# if the command should be skipped
       //# just bail and increment index
       //# and set the subject
       //# TODO DRY THIS LOGIC UP
-      if (command && command.get("skip")) {
+      if (command && command.get('skip')) {
         //# must set prev + next since other
         //# operations depend on this state being correct
-        command.set({prev: queue.at(index - 1), next: queue.at(index + 1)});
-        state("index", index + 1);
-        state("subject", command.get("subject"));
+        command.set({ prev: queue.at(index - 1), next: queue.at(index + 1) })
+        state('index', index + 1)
+        state('subject', command.get('subject'))
 
-        return next();
+        return next()
       }
 
       //# if we're at the very end
       if (!command) {
-
         //# trigger queue is almost finished
-        Cypress.action("cy:command:queue:before:end");
+        Cypress.action('cy:command:queue:before:end')
 
         //# we need to wait after all commands have
         //# finished running if the application under
         //# test is no longer stable because we cannot
         //# move onto the next test until its finished
-        return stability.whenStable(function() {
-          Cypress.action("cy:command:queue:end");
+        return stability.whenStable(() => {
+          Cypress.action('cy:command:queue:end')
 
-          return null;
-        });
+          return null
+        })
       }
 
       //# store the previous timeout
-      const prevTimeout = timeouts.timeout();
+      const prevTimeout = timeouts.timeout()
 
       //# store the current runnable
-      const runnable = state("runnable");
+      const runnable = state('runnable')
 
-      Cypress.action("cy:command:start", command);
+      Cypress.action('cy:command:start', command)
 
       return runCommand(command)
-      .then(function() {
+      .then(() => {
         //# each successful command invocation should
         //# always reset the timeout for the current runnable
         //# unless it already has a state.  if it has a state
         //# and we reset the timeout again, it will always
         //# cause a timeout later no matter what.  by this time
         //# mocha expects the test to be done
-        let fn;
-        if (!runnable.state) { timeouts.timeout(prevTimeout); }
+        let fn
+
+        if (!runnable.state) {
+          timeouts.timeout(prevTimeout)
+        }
 
         //# mutate index by incrementing it
         //# this allows us to keep the proper index
         //# in between different hooks like before + beforeEach
         //# else run will be called again and index would start
         //# over at 0
-        state("index", (index += 1));
+        state('index', (index += 1))
 
-        Cypress.action("cy:command:end", command);
+        Cypress.action('cy:command:end', command)
 
-        if ((fn = state("onPaused"))) {
-          return new Promise(resolve => fn(resolve)).then(next);
-        } else {
-          return next();
+        if ((fn = state('onPaused'))) {
+          return new Promise((resolve) => {
+            return fn(resolve)
+          }).then(next)
         }
-      });
-    };
 
-    let inner = null;
+        return next()
+      })
+    }
+
+    let inner = null
 
     //# this ends up being the parent promise wrapper
-    const promise = new Promise(function(resolve, reject) {
+    const promise = new Promise((resolve, reject) => {
       //# bubble out the inner promise
       //# we must use a resolve(null) here
       //# so the outer promise is first defined
@@ -474,7 +518,7 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
       .resolve(null)
       .then(next)
       .then(resolve)
-      .catch(reject);
+      .catch(reject)
 
       //# can't use onCancel argument here because
       //# its called asynchronously
@@ -488,145 +532,153 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
       //#
       //# but when we manually reject the outer promise we
       //# have to go in the opposite direction from outer -> inner
-      const rejectOuterAndCancelInner = function(err) {
-        inner.cancel();
-        return reject(err);
-      };
+      const rejectOuterAndCancelInner = function (err) {
+        inner.cancel()
 
-      state("resolve", resolve);
-      return state("reject", rejectOuterAndCancelInner);
+        return reject(err)
+      }
+
+      state('resolve', resolve)
+
+      return state('reject', rejectOuterAndCancelInner)
     })
-    .catch(function(err) {
+    .catch((err) => {
       //# since this failed this means that a
       //# specific command failed and we should
       //# highlight it in red or insert a new command
-      errors.commandRunningFailed(err);
+      errors.commandRunningFailed(err)
 
-      return fail(err, state("runnable"));
+      return fail(err, state('runnable'))
     })
-    .finally(cleanup);
+    .finally(cleanup)
 
     //# cancel both promises
-    const cancel = function() {
-      promise.cancel();
-      inner.cancel();
+    const cancel = function () {
+      promise.cancel()
+      inner.cancel()
 
       //# notify the world
-      return Cypress.action("cy:canceled");
-    };
+      return Cypress.action('cy:canceled')
+    }
 
-    state("cancel", cancel);
-    state("promise", promise);
+    state('cancel', cancel)
+    state('promise', promise)
 
     //# return this outer bluebird promise
-    return promise;
-  };
+    return promise
+  }
 
-  const removeSubject = () => state("subject", undefined);
+  const removeSubject = () => {
+    return state('subject', undefined)
+  }
 
-  const pushSubjectAndValidate = function(name, args, firstCall, prevSubject) {
+  const pushSubjectAndValidate = function (name, args, firstCall, prevSubject) {
     if (firstCall) {
       //# if we have a prevSubject then error
       //# since we're invoking this improperly
-      let needle;
-      if (prevSubject && ((needle = "optional", ![].concat(prevSubject).includes(needle)))) {
-        const stringifiedArg = $utils.stringifyActual(args[0]);
-        $utils.throwErrByPath("miscellaneous.invoking_child_without_parent", {
+      let needle
+
+      if (prevSubject && ((needle = 'optional', ![].concat(prevSubject).includes(needle)))) {
+        const stringifiedArg = $utils.stringifyActual(args[0])
+
+        $utils.throwErrByPath('miscellaneous.invoking_child_without_parent', {
           args: {
-            cmd:  name,
-            args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg
-          }
-        });
+            cmd: name,
+            args: _.isString(args[0]) ? `\"${stringifiedArg}\"` : stringifiedArg,
+          },
+        })
       }
 
       //# else if this is the very first call
       //# on the chainer then make the first
       //# argument undefined (we have no subject)
-      removeSubject();
+      removeSubject()
     }
 
-    const subject = state("subject");
+    const subject = state('subject')
 
     if (prevSubject) {
       //# make sure our current subject is valid for
       //# what we expect in this command
-      ensures.ensureSubjectByType(subject, prevSubject, name);
+      ensures.ensureSubjectByType(subject, prevSubject, name)
     }
 
-    args.unshift(subject);
+    args.unshift(subject)
 
-    Cypress.action("cy:next:subject:prepared", subject, args);
+    Cypress.action('cy:next:subject:prepared', subject, args)
 
-    return args;
-  };
+    return args
+  }
 
-  const doneEarly = function() {
-    stopped = true;
+  const doneEarly = function () {
+    stopped = true
 
     //# we only need to worry about doneEarly when
     //# it comes from a manual event such as stopping
     //# Cypress or when we yield a (done) callback
     //# and could arbitrarily call it whenever we want
-    const p = state("promise");
+    const p = state('promise')
 
     //# if our outer promise is pending
     //# then cancel outer and inner
     //# and set canceled to be true
     if (p && p.isPending()) {
-      state("canceled", true);
-      state("cancel")();
+      state('canceled', true)
+      state('cancel')()
     }
 
-    return cleanup();
-  };
+    return cleanup()
+  }
 
-  var cleanup = function() {
+  const cleanup = function () {
     //# cleanup could be called during a 'stop' event which
     //# could happen in between a runnable because they are async
-    if (state("runnable")) {
+    if (state('runnable')) {
       //# make sure we don't ever time out this runnable now
-      timeouts.clearTimeout();
+      timeouts.clearTimeout()
     }
 
     //# if a command fails then after each commands
     //# could also fail unless we clear this out
-    state("commandIntermediateValue", undefined);
+    state('commandIntermediateValue', undefined)
 
     //# reset the nestedIndex back to null
-    state("nestedIndex", null);
+    state('nestedIndex', null)
 
     //# also reset recentlyReady back to null
-    state("recentlyReady", null);
+    state('recentlyReady', null)
 
     //# and forcibly move the index needle to the
     //# end in case we have after / afterEach hooks
     //# which need to run
-    return state("index", queue.length);
-  };
+    return state('index', queue.length)
+  }
 
-  var fail = function(err, runnable) {
-    let rets;
-    stopped = true;
+  const fail = function (err, runnable) {
+    let rets
+
+    stopped = true
 
     //# store the error on state now
-    state("error", err);
+    state('error', err)
 
-    const finish = function(err) {
+    const finish = function (err) {
       //# if we have an async done callback
       //# we have an explicit (done) callback and
       //# we aren't attached to the cypress command queue
       //# promise chain and throwing the error would only
       //# result in an unhandled rejection
-      let d;
-      if (d = state("done")) {
+      let d
+
+      if (d = state('done')) {
         //# invoke it with err
-        return d(err);
+        return d(err)
       }
 
       //# else we're connected to the promise chain
       //# and need to throw so this bubbles up
-      throw err;
-    };
+      throw err
+    }
 
     //# if we have a "fail" handler
     //# 1. catch any errors it throws and fail the test
@@ -640,21 +692,23 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
     //# 2. throw the error for the promise chain
     try {
       //# collect all of the callbacks for 'fail'
-      rets = Cypress.action("cy:fail", err, state("runnable"));
+      rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
       //# and if any of these throw synchronously immediately error
-      finish(err2);
+      finish(err2)
     }
 
     //# bail if we had callbacks attached
-    if (rets.length) { return; }
+    if (rets.length) {
+      return
+    }
 
     //# else figure out how to finisht this failure
-    return finish(err);
-  };
+    return finish(err)
+  }
 
-  var cy = {
-    id: _.uniqueId("cy"),
+  const cy = {
+    id: _.uniqueId('cy'),
 
     //# synchrounous querying
     $$,
@@ -735,18 +789,18 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
     ensureScrollability: ensures.ensureScrollability,
     ensureElementIsNotAnimating: ensures.ensureElementIsNotAnimating,
 
-    initialize($autIframe) {
-      setRemoteIframeProps($autIframe, state);
+    initialize ($autIframe) {
+      setRemoteIframeProps($autIframe, state)
 
       //# dont need to worry about a try/catch here
       //# because this is during initialize and its
       //# impossible something is wrong here
-      setWindowDocumentProps(getContentWindow($autIframe), state);
+      setWindowDocumentProps(getContentWindow($autIframe), state)
 
       //# initially set the content window listeners too
       //# so we can tap into all the normal flow of events
       //# like before:unload, navigation events, etc
-      contentWindowListeners(getContentWindow($autIframe));
+      contentWindowListeners(getContentWindow($autIframe))
 
       //# the load event comes from the autIframe anytime any window
       //# inside of it loads.
@@ -756,173 +810,179 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
       //# when we find ourselves in a cross origin situation, then our
       //# proxy has not injected Cypress.action('window:before:load')
       //# so Cypress.onBeforeAppWindowLoad() was never called
-      return $autIframe.on("load", function() {
+      return $autIframe.on('load', () => {
         //# if setting these props failed
         //# then we know we're in a cross origin failure
-        let onpl, r;
+        let onpl; let r
+
         try {
-          setWindowDocumentProps(getContentWindow($autIframe), state);
+          setWindowDocumentProps(getContentWindow($autIframe), state)
 
           //# we may need to update the url now
-          urlNavigationEvent("load");
+          urlNavigationEvent('load')
 
           //# we normally DONT need to reapply contentWindow listeners
           //# because they would have been automatically applied during
           //# onBeforeAppWindowLoad, but in the case where we visited
           //# about:blank in a visit, we do need these
-          contentWindowListeners(getContentWindow($autIframe));
+          contentWindowListeners(getContentWindow($autIframe))
 
-          Cypress.action("app:window:load", state("window"));
+          Cypress.action('app:window:load', state('window'))
 
           //# we are now stable again which is purposefully
           //# the last event we call here, to give our event
           //# listeners time to be invoked prior to moving on
-          return stability.isStable(true, "load");
+          return stability.isStable(true, 'load')
         } catch (err) {
           //# we failed setting the remote window props
           //# which means we're in a cross domain failure
           //# check first to see if you have a callback function
           //# defined and let the page load change the error
-          if (onpl = state("onPageLoadErr")) {
-            err = onpl(err);
+          if (onpl = state('onPageLoadErr')) {
+            err = onpl(err)
           }
 
           //# and now reject with it
-          if (r = state("reject")) {
-            return r(err);
+          if (r = state('reject')) {
+            return r(err)
           }
         }
-      });
+      })
     },
 
-    stop() {
+    stop () {
       //# don't do anything if we've already stopped
       if (stopped) {
-        return;
+        return
       }
 
-      return doneEarly();
+      return doneEarly()
     },
 
-    reset() {
-      stopped = false;
+    reset () {
+      stopped = false
 
-      const s = state();
+      const s = state()
 
       const backup = {
         window: s.window,
         document: s.document,
-        $autIframe: s.$autIframe
-      };
+        $autIframe: s.$autIframe,
+      }
 
       //# reset state back to empty object
-      state.reset();
+      state.reset()
 
       //# and then restore these backed up props
-      state(backup);
+      state(backup)
 
-      queue.reset();
-      timers.reset();
+      queue.reset()
+      timers.reset()
 
-      return cy.removeAllListeners();
+      return cy.removeAllListeners()
     },
 
-    addCommandSync(name, fn) {
-      return cy[name] = function() {
-        return fn.apply(runnableCtx(name), arguments);
-      };
+    addCommandSync (name, fn) {
+      cy[name] = function () {
+        return fn.apply(runnableCtx(name), arguments)
+      }
     },
 
-    getChainer() {
-      return Chainer;
+    getChainer () {
+      return Chainer
     },
 
-    addChainer(name, fn) {
+    addChainer (name, fn) {
       //# add this function to our chainer class
-      return Chainer.add(name, fn);
+      return Chainer.add(name, fn)
     },
 
-    addCommand({name, fn, type, prevSubject}) {
+    addCommand ({ name, fn, type, prevSubject }) {
       //# TODO: prob don't need this anymore
-      commandFns[name] = fn;
+      commandFns[name] = fn
 
-      const wrap = function(firstCall) {
-        fn = commandFns[name];
-        const wrapped = wrapByType(fn, firstCall);
-        wrapped.originalFn = fn;
-        return wrapped;
-      };
+      const wrap = function (firstCall) {
+        fn = commandFns[name]
+        const wrapped = wrapByType(fn, firstCall)
 
-      var wrapByType = function(fn, firstCall) {
-        if (type === "parent") {
-          return fn;
+        wrapped.originalFn = fn
+
+        return wrapped
+      }
+
+      const wrapByType = function (fn, firstCall) {
+        if (type === 'parent') {
+          return fn
         }
 
         //# child, dual, assertion, utility command
         //# pushes the previous subject into them
         //# after verifying its of the correct type
-        return function(...args) {
+        return function (...args) {
           //# push the subject into the args
-          args = pushSubjectAndValidate(name, args, firstCall, prevSubject);
+          args = pushSubjectAndValidate(name, args, firstCall, prevSubject)
 
-          return fn.apply(runnableCtx(name), args);
-        };
-      };
+          return fn.apply(runnableCtx(name), args)
+        }
+      }
 
-      cy[name] = function(...args) {
-        let ret;
-        ensures.ensureRunnable(name);
+      cy[name] = function (...args) {
+        let ret
+
+        ensures.ensureRunnable(name)
 
         //# this is the first call on cypress
         //# so create a new chainer instance
-        const chain = Chainer.create(name, args);
+        const chain = Chainer.create(name, args)
 
         //# store the chain so we can access it later
-        state("chain", chain);
+        state('chain', chain)
 
         //# if we are in the middle of a command
         //# and its return value is a promise
         //# that means we are attempting to invoke
         //# a cypress command within another cypress
         //# command and we should error
-        if (ret = state("commandIntermediateValue")) {
-          const current = state("current");
+        if (ret = state('commandIntermediateValue')) {
+          const current = state('current')
 
           //# if this is a custom promise
-          if (isPromiseLike(ret) && noArgsAreAFunction(current.get("args"))) {
+          if (isPromiseLike(ret) && noArgsAreAFunction(current.get('args'))) {
             $utils.throwErrByPath(
-              "miscellaneous.command_returned_promise_and_commands", {
+              'miscellaneous.command_returned_promise_and_commands', {
                 args: {
-                  current: current.get("name"),
-                  called: name
-                }
+                  current: current.get('name'),
+                  called: name,
+                },
               }
-            );
+            )
           }
         }
 
         //# if we're the first call onto a cy
         //# command, then kick off the run
-        if (!state("promise")) {
-          if (state("returnedCustomPromise")) {
-            warnMixingPromisesAndCommands();
+        if (!state('promise')) {
+          if (state('returnedCustomPromise')) {
+            warnMixingPromisesAndCommands()
           }
 
-          run();
+          run()
         }
 
-        return chain;
-      };
+        return chain
+      }
 
-      return cy.addChainer(name, function(chainer, args) {
-        const { firstCall, chainerId } = chainer;
+      return cy.addChainer(name, (chainer, args) => {
+        const { firstCall, chainerId } = chainer
 
         //# dont enqueue / inject any new commands if
         //# onInjectCommand returns false
-        const onInjectCommand = state("onInjectCommand");
+        const onInjectCommand = state('onInjectCommand')
 
         if (_.isFunction(onInjectCommand)) {
-          if (onInjectCommand.call(cy, name, ...args) === false) { return; }
+          if (onInjectCommand.call(cy, name, ...args) === false) {
+            return
+          }
         }
 
         enqueue({
@@ -930,31 +990,31 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
           args,
           type,
           chainerId,
-          fn: wrap(firstCall)
-        });
+          fn: wrap(firstCall),
+        })
 
-        return true;
-      });
+        return true
+      })
     },
 
-    now(name, ...args) {
+    now (name, ...args) {
       return Promise.resolve(
         commandFns[name].apply(cy, args)
-      );
+      )
     },
 
-    replayCommandsFrom(current) {
+    replayCommandsFrom (current) {
       //# reset each chainerId to the
       //# current value
-      const chainerId = state("chainerId");
+      const chainerId = state('chainerId')
 
-      const insert = function(command) {
-        command.set("chainerId", chainerId);
+      const insert = function (command) {
+        command.set('chainerId', chainerId)
 
         //# clone the command to prevent
         //# mutating its properties
-        return enqueue(command.clone());
-      };
+        return enqueue(command.clone())
+      }
 
       //# - starting with the aliased command
       //# - walk up to each prev command
@@ -966,186 +1026,197 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
       //#   inserted if the previous command should
       //#   be replayed
 
-      const commands = getCommandsUntilFirstParentOrValidSubject(current);
+      const commands = getCommandsUntilFirstParentOrValidSubject(current)
 
       if (commands) {
-        let initialCommand = commands.shift();
+        let initialCommand = commands.shift()
 
-        const commandsToInsert = _.reduce(commands, function(memo, command, index) {
-          let needle;
-          const push = () => memo.push(command);
+        const commandsToInsert = _.reduce(commands, (memo, command, index) => {
+          let needle
+          const push = () => {
+            return memo.push(command)
+          }
 
           switch (false) {
-            case command.get("type") !== "assertion":
+            case command.get('type') !== 'assertion':
               //# if we're an assertion and the prev command
               //# is in the memo, then push this one
-              if ((needle = command.get("prev"), memo.includes(needle))) {
-                push();
+              if ((needle = command.get('prev'), memo.includes(needle))) {
+                push()
               }
-              break;
 
-            case command.get("subject") === initialCommand.get("subject"):
+              break
+
+            case command.get('subject') === initialCommand.get('subject'):
               //# when our subjects dont match then
               //# reset the initialCommand to this command
               //# so the next commands can compare against
               //# this one to figure out the changing subjects
-              initialCommand = command;
+              initialCommand = command
 
-              push();
-              break;
+              push()
+              break
           }
 
-          return memo;
+          return memo
         }
 
-        , [initialCommand]);
+        , [initialCommand])
 
         for (let c of commandsToInsert) {
-          insert(c);
+          insert(c)
         }
       }
 
       //# prevent loop comprehension
-      return null;
+      return null
     },
 
-    onBeforeAppWindowLoad(contentWindow) {
+    onBeforeAppWindowLoad (contentWindow) {
       //# we set window / document props before the window load event
       //# so that we properly handle events coming from the application
       //# from the time that happens BEFORE the load event occurs
-      setWindowDocumentProps(contentWindow, state);
+      setWindowDocumentProps(contentWindow, state)
 
-      urlNavigationEvent("before:load");
+      urlNavigationEvent('before:load')
 
-      contentWindowListeners(contentWindow);
+      contentWindowListeners(contentWindow)
 
-      wrapNativeMethods(contentWindow);
+      wrapNativeMethods(contentWindow)
 
-      snapshots.onBeforeWindowLoad();
+      snapshots.onBeforeWindowLoad()
 
-      return timers.wrap(contentWindow);
+      return timers.wrap(contentWindow)
     },
 
-    onSpecWindowUncaughtException() {
+    onSpecWindowUncaughtException () {
       //# create the special uncaught exception err
-      let runnable;
-      const err = errors.createUncaughtException("spec", arguments);
+      let runnable
+      const err = errors.createUncaughtException('spec', arguments)
 
-      if (runnable = state("runnable")) {
+      if (runnable = state('runnable')) {
         //# we're using an explicit done callback here
-        let d, r;
-        if (d = state("done")) {
-          d(err);
+        let d; let r
+
+        if (d = state('done')) {
+          d(err)
         }
 
-        if (r = state("reject")) {
-          return r(err);
+        if (r = state('reject')) {
+          return r(err)
         }
       }
 
       //# else pass the error along
-      return err;
+      return err
     },
 
-    onUncaughtException() {
-      let r;
-      const runnable = state("runnable");
+    onUncaughtException () {
+      let r
+      const runnable = state('runnable')
 
       //# don't do anything if we don't have a current runnable
-      if (!runnable) { return; }
+      if (!runnable) {
+        return
+      }
 
       //# create the special uncaught exception err
-      const err = errors.createUncaughtException("app", arguments);
+      const err = errors.createUncaughtException('app', arguments)
 
-      const results = Cypress.action("app:uncaught:exception", err, runnable);
+      const results = Cypress.action('app:uncaught:exception', err, runnable)
 
       //# dont do anything if any of our uncaught:exception
       //# listeners returned false
-      if (_.some(results, returnedFalse)) { return; }
+      if (_.some(results, returnedFalse)) {
+        return
+      }
 
       //# do all the normal fail stuff and promise cancelation
       //# but dont re-throw the error
-      if (r = state("reject")) {
-        r(err);
+      if (r = state('reject')) {
+        r(err)
       }
 
       //# per the onerror docs we need to return true here
       //# https://developer.mozilla.org/en-US/docs/Web/API/GlobalEventHandlers/onerror
       //# When the function returns true, this prevents the firing of the default event handler.
-      return true;
+      return true
     },
 
-    detachDom(...args) {
-      return snapshots.detachDom(...args);
+    detachDom (...args) {
+      return snapshots.detachDom(...args)
     },
 
-    getStyles(...args) {
-      return snapshots.getStyles(...args);
+    getStyles (...args) {
+      return snapshots.getStyles(...args)
     },
 
-    setRunnable(runnable, hookName) {
+    setRunnable (runnable, hookName) {
       //# when we're setting a new runnable
       //# prepare to run again!
-      stopped = false;
+      stopped = false
 
       //# reset the promise again
-      state("promise", undefined);
+      state('promise', undefined)
 
-      state("hookName", hookName);
+      state('hookName', hookName)
 
-      state("runnable", runnable);
+      state('runnable', runnable)
 
-      state("ctx", runnable.ctx);
+      state('ctx', runnable.ctx)
 
       const {
-        fn
-      } = runnable;
+        fn,
+      } = runnable
 
-      const restore = () => runnable.fn = fn;
+      const restore = () => {
+        return runnable.fn = fn
+      }
 
-      return runnable.fn = function() {
-        restore();
+      runnable.fn = function () {
+        restore()
 
-        const timeout = config("defaultCommandTimeout");
+        const timeout = config('defaultCommandTimeout')
 
         //# control timeouts on runnables ourselves
         if (_.isFinite(timeout)) {
-          timeouts.timeout(timeout);
+          timeouts.timeout(timeout)
         }
 
         //# store the current length of our queue
         //# before we invoke the runnable.fn
-        const currentLength = queue.length;
+        const currentLength = queue.length
 
         try {
           //# if we have a fn.length that means we
           //# are accepting a done callback and need
           //# to change the semantics around how we
           //# attach the run queue
-          let done;
-          if (fn.length) {
-            const originalDone = arguments[0];
+          let done
 
-            arguments[0] = (done = function(err) {
+          if (fn.length) {
+            const originalDone = arguments[0]
+
+            arguments[0] = (done = function (err) {
               //# TODO: handle no longer error
               //# when ended early
-              doneEarly();
+              doneEarly()
 
-              originalDone(err);
+              originalDone(err)
 
               //# return null else we there are situations
               //# where returning a regular bluebird promise
               //# results in a warning about promise being created
               //# in a handler but not returned
-              return null;
-            });
+              return null
+            })
 
             //# store this done property
             //# for async tests
-            state("done", done);
+            state('done', done)
           }
 
-          let ret = fn.apply(this, arguments);
+          let ret = fn.apply(this, arguments)
 
           //# if we returned a value from fn
           //# and enqueued some new commands
@@ -1155,17 +1226,16 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
             (queue.length > currentLength) &&
               (!isCy(ret)) &&
                 (!isPromiseLike(ret))) {
-
             //# TODO: clean this up in the utility function
             //# to conditionally stringify functions
             ret = _.isFunction(ret) ?
               ret.toString()
-            :
-              $utils.stringify(ret);
+              :
+              $utils.stringify(ret)
 
-            $utils.throwErrByPath("miscellaneous.returned_value_and_commands", {
-              args: ret
-            });
+            $utils.throwErrByPath('miscellaneous.returned_value_and_commands', {
+              args: ret,
+            })
           }
 
           //# if we attached a done callback
@@ -1177,64 +1247,64 @@ const create = function(specWindow, Cypress, Cookies, state, config, log) {
           //# in those cases we need to remove
           //# returning a promise
           if (fn.length && ret && ret.catch) {
-            ret = ret.catch(done);
+            ret = ret.catch(done)
           }
 
           //# if we returned a promise like object
           if ((!isCy(ret)) && isPromiseLike(ret)) {
             //# indicate we've returned a custom promise
-            state("returnedCustomPromise", true);
+            state('returnedCustomPromise', true)
 
             //# this means we instantiated a promise
             //# and we've already invoked multiple
             //# commands and should warn
             if (queue.length > currentLength) {
-              warnMixingPromisesAndCommands();
+              warnMixingPromisesAndCommands()
             }
 
-            return ret;
+            return ret
           }
 
           //# if we're cy or we've enqueued commands
           if (isCy(ret) || (queue.length > currentLength)) {
             //# the run should already be kicked off
             //# by now and return this promise
-            return state("promise");
+            return state('promise')
           }
 
           //# else just return ret
-          return ret;
-
+          return ret
         } catch (error) {
           //# if our runnable.fn throw synchronously
           //# then it didnt fail from a cypress command
           //# but we should still teardown and handle
           //# the error
-          const err = error;
-          return fail(err, runnable);
+          const err = error
+
+          return fail(err, runnable)
         }
-      };
-    }
-  };
+      }
+    },
+  }
 
   _.each(privateProps, (obj, key) => {
     return Object.defineProperty(cy, key, {
-      get() {
-        return $utils.throwErrByPath("miscellaneous.private_property", {
-          args: obj
-        });
-      }
-    });
-  });
+      get () {
+        return $utils.throwErrByPath('miscellaneous.private_property', {
+          args: obj,
+        })
+      },
+    })
+  })
 
   //# make cy global in the specWindow
-  specWindow.cy = cy;
+  specWindow.cy = cy
 
-  $Events.extend(cy);
+  $Events.extend(cy)
 
-  return cy;
-};
+  return cy
+}
 
 module.exports = {
-  create
-};
+  create,
+}
