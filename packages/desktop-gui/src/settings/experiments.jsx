@@ -2,17 +2,17 @@ import _ from 'lodash'
 import React from 'react'
 import { observer } from 'mobx-react'
 import ipc from '../lib/ipc'
-import { getExperiments } from '@packages/server/lib/experiments'
+import { getExperiments, isKnownExperiment, experimental } from '@packages/server/lib/experiments'
+
+if (window.Cypress) {
+  // expose object to allow stubbing experimental data during tests
+  window.experimental = experimental
+}
 
 const openHelp = (e) => {
   e.preventDefault()
   ipc.externalOpen('https://on.cypress.io/experiments')
 }
-
-// whilelist known experiments here. Note that "experimental*" keys are also
-// whitelisted in the config code
-const isKnownExperiment = (experiment, key) =>
-  ['experimentalComponentTesting'].includes(key)
 
 const Experiments = observer(({ project }) => {
   const experiments = _.pickBy(getExperiments(project), isKnownExperiment)
@@ -48,11 +48,11 @@ const Experiments = observer(({ project }) => {
             _.map(experiments, (experiment, i) => (
               <li className='experiment' key={i}>
                 <div className='experiment-desc'>
-                  <h5>Component Testing</h5>
+                  <h5>{experiment.name}</h5>
                   <p className="text-muted">
-                    Enables the use of component testing using framework-specific libraries to mount your component directly from the spec file.
+                    {experiment.summary}
                   </p>
-                  <code>experimentalComponentTesting</code>
+                  <code>{experiment.key}</code>
                 </div>
                 <div className='experiment-status'>
                   <span className={`experiment-status-sign ${experiment.enabled ? 'enabled' : ''}`}>

@@ -667,6 +667,15 @@ describe('Settings', () => {
     })
 
     describe('componentTesting', () => {
+      beforeEach(function () {
+        // do not overwrite the shared object reference -
+        // because it is used by the app's code.
+        this.win.experimental.names.experimentalComponentTesting = 'Component Testing'
+        this.win.experimental.summaries.experimentalComponentTesting = `
+          Enables component testing
+        `
+      })
+
       context('enabled', () => {
         beforeEach(function () {
           this.config.experimentalComponentTesting = true
