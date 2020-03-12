@@ -152,6 +152,8 @@ CONFIG_DEFAULTS = {
   javascripts:                   []
 
   ## experimental keys (should all start with "experimental" prefix)
+  # example for component testing with subkeys
+  # experimentalComponentTesting: { componentFolder: 'cypress/component' }
 }
 
 validationRules = {

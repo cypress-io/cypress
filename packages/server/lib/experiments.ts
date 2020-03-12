@@ -42,14 +42,25 @@ interface StringValues {
  * Keeps summaries of experiments. Each summary is 1 - 2 sentences
  * describing the purpose of the experiment.
  * When adding an experiment, add its summary text here.
- * "experimentalComponentTesting": "Allows mounting and testing framework-specific components"
+ *
+ * @example
+  ```
+  {
+    experimentalComponentTesting: 'Allows mounting and testing framework-specific components'
+  }
+  ```
 */
 const _summaries: StringValues = {}
 
 /**
- * Keeps short names for experiments.
- * When adding new experiments, add a short name
- * like "experimentalComponentTesting": "Component Testing"
+ * Keeps short names for experiments. When adding new experiments, add a short name.
+ * The name and summary will be shown in the Settings tab of the Desktop GUI.
+ * @example
+  ```
+  {
+    experimentalComponentTesting: 'Component Testing'
+  }
+  ```
 */
 const _names: StringValues = {}
 
