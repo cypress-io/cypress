@@ -619,9 +619,12 @@ describe('Settings', () => {
   })
 
   describe('experiments panel', () => {
-    const noExperimentsShown = () => {
-      cy.get('.settings-experiments').find('.experiment-intro-empty').should('be.visible')
-      cy.get('.experiment').should('have.length', 0)
+    const hasNoExperimentsPanel = () => {
+      // there are several settings panels,
+      // let's make sure they are loaded
+      cy.get('[class*=settings-]').should('have.length.gt', 1)
+      // but the experiments panel should not be there at all
+      cy.get('.settings-experiments').should('not.exist')
     }
 
     describe('no experimental features turned on', () => {
@@ -631,18 +634,10 @@ describe('Settings', () => {
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
         this.goToSettings()
-        cy.contains('Experiments').click()
-      })
-
-      it('has learn more link', () => {
-        cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
-        .then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
-        })
       })
 
       it('displays panel with no experiments', () => {
-        noExperimentsShown()
+        hasNoExperimentsPanel()
       })
     })
 
@@ -658,11 +653,10 @@ describe('Settings', () => {
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
         this.goToSettings()
-        cy.contains('Experiments').click()
       })
 
       it('are not shown', () => {
-        noExperimentsShown()
+        hasNoExperimentsPanel()
       })
     })
 
@@ -675,6 +669,13 @@ describe('Settings', () => {
           Enables component testing
         `
       })
+
+      const hasLearnMoreLink = () => {
+        cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
+        })
+      }
 
       context('enabled', () => {
         beforeEach(function () {
@@ -690,6 +691,8 @@ describe('Settings', () => {
           this.goToSettings()
           cy.contains('Experiments').click()
         })
+
+        it('has learn more link', hasLearnMoreLink)
 
         it('displays experiment', () => {
           cy.get('.settings-experiments').contains('Component Testing')

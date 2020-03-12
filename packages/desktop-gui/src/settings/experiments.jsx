@@ -2,12 +2,7 @@ import _ from 'lodash'
 import React from 'react'
 import { observer } from 'mobx-react'
 import ipc from '../lib/ipc'
-import { getExperiments, isKnownExperiment, experimental } from '@packages/server/lib/experiments'
-
-if (window.Cypress) {
-  // expose object to allow stubbing experimental data during tests
-  window.experimental = experimental
-}
+import { getExperiments } from '@packages/server/lib/experiments'
 
 const openHelp = (e) => {
   e.preventDefault()
@@ -15,7 +10,7 @@ const openHelp = (e) => {
 }
 
 const Experiments = observer(({ project }) => {
-  const experiments = _.pickBy(getExperiments(project), isKnownExperiment)
+  const experiments = getExperiments(project)
 
   let message
 
