@@ -472,6 +472,12 @@ const isFocusedOrInFocused = (el: HTMLElement) => {
   return false
 }
 
+// mostly useful when traversing up parent nodes and wanting to
+// stop traversal if el is undefined or is html, body, or document
+const isUndefinedOrHTMLBodyDoc = ($el: JQuery<HTMLElement>) => {
+  return !$el || !$el[0] || $el.is('body,html') || $document.isDocument($el[0])
+}
+
 const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
   try {
     if ($jquery.isJquery(obj)) {
@@ -878,9 +884,9 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {
-  // return null if we're at body/html/document
+  // return null if undefined or we're at body/html/document
   // cuz that means nothing has fixed position
-  if (!$el[0] || !tagName || $el.is('body,html') || $document.isDocument($el)) {
+  if (isUndefinedOrHTMLBodyDoc($el) || !tagName) {
     return null
   }
 
@@ -894,14 +900,9 @@ const getFirstParentWithTagName = ($el, tagName) => {
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
-  // don't continue if we're undefined
-  if (!$el || !$el[0]) {
-    return null
-  }
-
-  // return null if we're at not a normal DOM el
+  // return null if we're undefined or at not a normal DOM el
   // cuz that means nothing has fixed position
-  if ($el.is('body,html') || $document.isDocument($el)) {
+  if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
 
@@ -915,9 +916,9 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
 }
 
 const getFirstStickyPositionParent = ($el) => {
-  // return null if we're at body/html
+  // return null if we're undefined or at body/html/document
   // cuz that means nothing has sticky position
-  if (!$el || $el.is('body,html')) {
+  if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
 
@@ -1153,6 +1154,7 @@ const stringify = (el, form = 'long') => {
 
 export {
   isElement,
+  isUndefinedOrHTMLBodyDoc,
   isSelector,
   isScrollOrAuto,
   isFocusable,
