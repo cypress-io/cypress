@@ -766,6 +766,12 @@ const isInputAllowingImplicitFormSubmission = function ($el) {
 }
 
 const isScrollable = ($el) => {
+  const el = $el[0]
+
+  if (!el) {
+    return false
+  }
+
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
     if (win.innerHeight < documentElement.scrollHeight) {
@@ -796,8 +802,6 @@ const isScrollable = ($el) => {
   // if we're any other element, we do some css calculations
   // to see that the overflow is correct and the scroll
   // area is larger than the actual height or width
-  const el = $el[0]
-
   const { overflow, overflowY, overflowX } = window.getComputedStyle(el)
 
   // y axis
@@ -938,20 +942,12 @@ const getFirstScrollableParent = ($el) => {
   const search = ($el) => {
     const $parent = $el.parent()
 
-    // we have no more parents
-    if (!($parent || $parent.length)) {
-      return null
-    }
-
-    // we match the scrollingElement
-    // if $parent[0] is scrollingElement
-    //   return $parent
-
+    // parent is undefined or
     // instead of fussing with scrollingElement
     // we'll simply return null here and let our
     // caller deal with situations where they're
     // needing to scroll the window or scrollableElement
-    if ($parent.is('html,body') || $document.isDocument($parent)) {
+    if (isUndefinedOrHTMLBodyDoc($parent)) {
       return null
     }
 
