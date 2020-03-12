@@ -42,19 +42,19 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
   1) s1a "before each" hook for "t2a":
      AssertionError: Timed out retrying: Expected to find element: \`.does-not-exist\`, but never found it.
 
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1a'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`s1a\`
       [stack trace lines]
 
   2) s3a "before all" hook for "t8a":
      Error: s3a before hook failed
 
-Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 's3a'
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`s3a\`
       [stack trace lines]
 
   3) s4a "before all" hook for "t10a":
      Error: s4a before hook failed
 
-Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 's4a'
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`s4a\`
       [stack trace lines]
 
 
@@ -150,7 +150,7 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1b'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`s1b\`
       [stack trace lines]
 
 
@@ -324,7 +324,7 @@ This behavior is configurable, and you can choose to turn this off by listening 
 
 https://on.cypress.io/uncaught-exception-from-application
 
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 's1'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`s1\`
       [stack trace lines]
 
 
