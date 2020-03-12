@@ -262,10 +262,6 @@ class HttpsAgent extends https.Agent {
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
-    // allow requests to use older TLS versions
-    // https://github.com/cypress-io/cypress/issues/5446
-    options.minVersion = 'TLSv1'
-
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
@@ -353,6 +349,7 @@ class HttpsAgent extends https.Agent {
 
       const connectReq = buildConnectReqHead(hostname, port, proxy)
 
+      proxySocket.setNoDelay(true)
       proxySocket.write(connectReq)
     })
   }
