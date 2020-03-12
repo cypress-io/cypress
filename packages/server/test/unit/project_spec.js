@@ -1,25 +1,11 @@
-/* eslint-disable
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const path = require('path')
-const Promise = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
 const Fixtures = require('../support/helpers/fixtures')
 const api = require(`${root}lib/api`)
 const user = require(`${root}lib/user`)
 const cache = require(`${root}lib/cache`)
-const errors = require(`${root}lib/errors`)
 const config = require(`${root}lib/config`)
 const scaffold = require(`${root}lib/scaffold`)
 const Server = require(`${root}lib/server`)
@@ -30,6 +16,8 @@ const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const plugins = require(`${root}lib/plugins`)
 const fs = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
+const Watchers = require(`${root}lib/watchers`)
+const Socket = require(`${root}lib/socket`)
 
 describe('lib/project', () => {
   beforeEach(function () {
@@ -45,7 +33,7 @@ describe('lib/project', () => {
       return config.set({ projectName: 'project', projectRoot: '/foo/bar' })
       .then((config1) => {
         this.config = config1
-        this.project = Project(this.todosPath)
+        this.project = new Project(this.todosPath)
       })
     })
   })
@@ -53,17 +41,19 @@ describe('lib/project', () => {
   afterEach(function () {
     Fixtures.remove()
 
-    return (this.project != null ? this.project.close() : undefined)
+    if (this.project) {
+      this.project.close()
+    }
   })
 
   it('requires a projectRoot', () => {
-    const fn = () => Project()
+    const fn = () => new Project()
 
     expect(fn).to.throw('Instantiating lib/project requires a projectRoot!')
   })
 
   it('always resolves the projectRoot to be absolute', () => {
-    const p = Project('../foo/bar')
+    const p = new Project('../foo/bar')
 
     expect(p.projectRoot).not.to.eq('../foo/bar')
 
@@ -118,8 +108,7 @@ describe('lib/project', () => {
 
     beforeEach(function () {
       sinon.stub(config, 'get').withArgs(this.todosPath, { foo: 'bar' }).resolves({ baz: 'quux', integrationFolder })
-
-      return sinon.stub(this.project, 'determineIsNewProject').withArgs(integrationFolder).resolves(false)
+      sinon.stub(this.project, 'determineIsNewProject').withArgs(integrationFolder).resolves(false)
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
@@ -127,7 +116,7 @@ describe('lib/project', () => {
       .then((state) => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
-        return this.project.getConfig({ foo: 'bar' })
+        this.project.getConfig({ foo: 'bar' })
         .then((cfg) => {
           expect(cfg).to.deep.eq({
             integrationFolder,
@@ -161,7 +150,7 @@ describe('lib/project', () => {
       .then((state) => {
         sinon.stub(state, 'get').resolves({ showedOnBoardingModal: true })
 
-        return this.project.getConfig({ foo: 'bar' })
+        this.project.getConfig({ foo: 'bar' })
         .then((cfg) => {
           expect(cfg).to.deep.eq({
             integrationFolder,
@@ -183,7 +172,9 @@ describe('lib/project', () => {
       sinon.stub(this.project, '_setSavedState').resolves(cfg)
 
       return this.project.getConfig({ foo: 'bar' })
-      .then((cfg) => expect(cfg).not.to.have.property('isNewProject'))
+      .then((cfg) => {
+        expect(cfg).not.to.have.property('isNewProject')
+      })
     })
   })
 
@@ -197,8 +188,7 @@ describe('lib/project', () => {
       sinon.stub(Server.prototype, 'reset')
       sinon.stub(config, 'updateWithPluginValues').returns(this.config)
       sinon.stub(scaffold, 'plugins').resolves()
-
-      return sinon.stub(plugins, 'init').resolves()
+      sinon.stub(plugins, 'init').resolves()
     })
 
     it('calls #watchSettingsAndStartWebsockets with options + config', function () {
@@ -260,19 +250,34 @@ describe('lib/project', () => {
       })
     })
 
-    //# TODO: watch cypress.json
-    it.skip('watches cypress.json', function () {
-      return this.server.open().bind(this).then(() => expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.json'))
+    it('updates config.state when saved state changes', function () {
+      sinon.spy(this.project, 'saveState')
+
+      const options = {}
+
+      return this.project.open(options)
+      .then(() => options.onSavedStateChanged({ autoScrollingEnabled: false }))
+      .then(() => this.project.getConfig())
+      .then((config) => {
+        expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
+
+        expect(config.state).to.eql({ autoScrollingEnabled: false })
+      })
     })
 
-    //# TODO: pass watchers to Socket.startListening
+    // TODO: skip this for now
+    it.skip('watches cypress.json', function () {
+      return this.server.open().bind(this).then(() => {
+        expect(Watchers.prototype.watch).to.be.calledWith('/Users/brian/app/cypress.json')
+      })
+    })
+
+    // TODO: skip this for now
     it.skip('passes watchers to Socket.startListening', function () {
       const options = {}
 
       return this.server.open(options).then(() => {
-        const {
-          startListening,
-        } = Socket.prototype
+        const { startListening } = Socket.prototype
 
         expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
 
@@ -280,31 +285,43 @@ describe('lib/project', () => {
       })
     })
 
-    it('updates config.state when saved state changes', function () {
-      sinon.spy(this.project, 'saveState')
+    it('attaches warning to non-chrome browsers when chromeWebSecurity:false', function () {
+      Object.assign(this.config, {
+        browsers: [{ family: 'chromium', name: 'Canary' }, { family: 'some-other-family', name: 'some-other-name' }],
+        chromeWebSecurity: false,
+      })
 
-      const options = {}
+      return this.project.open()
+      .then(() => this.project.getConfig())
+      .then((config) => {
+        expect(config.chromeWebSecurity).eq(false)
+        expect(config.browsers).deep.eq([
+          {
+            family: 'chromium',
+            name: 'Canary',
+          },
+          {
+            family: 'some-other-family',
+            name: 'some-other-name',
+            warning: `\
+Your project has set the configuration option: \`chromeWebSecurity: false\`
 
-      return this.project.open(options)
-      .then(() => {
-        return options.onSavedStateChanged({ autoScrollingEnabled: false })
-      }).then(() => {
-        return this.project.getConfig()
-      }).then((config) => {
-        expect(this.project.saveState).to.be.calledWith({ autoScrollingEnabled: false })
+This option will not have an effect in Some-other-name. Tests that rely on web security being disabled will not run as expected.\
+`,
+          },
+        ])
 
-        expect(config.state).to.eql({ autoScrollingEnabled: false })
+        expect(config).ok
       })
     })
   })
 
   context('#close', () => {
     beforeEach(function () {
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
 
       sinon.stub(this.project, 'getConfig').resolves(this.config)
-
-      return sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
+      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 
     it('closes server', function () {
@@ -330,7 +347,7 @@ describe('lib/project', () => {
 
   context('#reset', () => {
     beforeEach(function () {
-      this.project = Project(this.pristinePath)
+      this.project = new Project(this.pristinePath)
       this.project.automation = { reset: sinon.stub() }
       this.project.server = { reset: sinon.stub() }
     })
@@ -347,11 +364,10 @@ describe('lib/project', () => {
 
   context('#getRuns', () => {
     beforeEach(function () {
-      this.project = Project(this.todosPath)
+      this.project = new Project(this.todosPath)
       sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
       sinon.stub(api, 'getProjectRuns').resolves('runs')
-
-      return sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
+      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 
     it('calls api.getProjectRuns with project id + session', function () {
@@ -365,7 +381,7 @@ describe('lib/project', () => {
 
   context('#scaffold', () => {
     beforeEach(function () {
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
       sinon.stub(scaffold, 'integration').resolves()
       sinon.stub(scaffold, 'fixture').resolves()
       sinon.stub(scaffold, 'support').resolves()
@@ -403,9 +419,9 @@ describe('lib/project', () => {
 
   context('#watchSettings', () => {
     beforeEach(function () {
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
       this.project.server = { startWebsockets () {} }
-      sinon.stub(settings, 'pathToCypressJson').returns('/path/to/cypress.json')
+      sinon.stub(settings, 'pathToConfigFile').returns('/path/to/cypress.json')
       sinon.stub(settings, 'pathToCypressEnvJson').returns('/path/to/cypress.env.json')
       this.watch = sinon.stub(this.project.watchers, 'watch')
     })
@@ -419,16 +435,14 @@ describe('lib/project', () => {
     })
 
     it('sets onChange event when {changeEvents: true}', function (done) {
-      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged () {
-        return done()
-      } })
+      this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: () => done() })
 
-      //# get the object passed to watchers.watch
+      // get the object passed to watchers.watch
       const obj = this.watch.getCall(0).args[1]
 
       expect(obj.onChange).to.be.a('function')
 
-      return obj.onChange()
+      obj.onChange()
     })
 
     it('does not call watch when {changeEvents: false}', function () {
@@ -438,24 +452,22 @@ describe('lib/project', () => {
     })
 
     it('does not call onSettingsChanged when generatedProjectIdTimestamp is less than 1 second', function () {
-      let timestamp
+      let timestamp = new Date()
 
-      this.project.generatedProjectIdTimestamp = (timestamp = new Date())
-
-      const emit = sinon.spy(this.project, 'emit')
+      this.project.generatedProjectIdTimestamp = timestamp
 
       const stub = sinon.stub()
 
       this.project.watchSettingsAndStartWebsockets({ onSettingsChanged: stub })
 
-      //# get the object passed to watchers.watch
+      // get the object passed to watchers.watch
       const obj = this.watch.getCall(0).args[1]
 
       obj.onChange()
 
       expect(stub).not.to.be.called
 
-      //# subtract 1 second from our timestamp
+      // subtract 1 second from our timestamp
       timestamp.setSeconds(timestamp.getSeconds() - 1)
 
       obj.onChange()
@@ -467,7 +479,7 @@ describe('lib/project', () => {
   context('#checkSupportFile', () => {
     beforeEach(function () {
       sinon.stub(fs, 'pathExists').resolves(true)
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
       this.project.server = { onTestFileChange: sinon.spy() }
       sinon.stub(preprocessor, 'getFile').resolves()
 
@@ -487,14 +499,16 @@ describe('lib/project', () => {
       fs.pathExists.resolves(false)
 
       return this.project.checkSupportFile(this.config)
-      .catch((e) => expect(e.message).to.include('The support file is missing or invalid.'))
+      .catch((e) => {
+        expect(e.message).to.include('The support file is missing or invalid.')
+      })
     })
   })
 
   context('#watchPluginsFile', () => {
     beforeEach(function () {
       sinon.stub(fs, 'pathExists').resolves(true)
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
       this.project.watchers = { watchTree: sinon.spy() }
       sinon.stub(plugins, 'init').resolves()
 
@@ -548,27 +562,27 @@ describe('lib/project', () => {
       const error = { name: 'foo', message: 'foo' }
 
       plugins.init.rejects(error)
-      this.project.watchPluginsFile(this.config, {
+
+      return this.project.watchPluginsFile(this.config, {
         onError (err) {
           expect(err).to.eql(error)
 
-          return done()
+          done()
         },
       })
       .then(() => {
-        return this.project.watchers.watchTree.firstCall.args[1].onChange()
+        this.project.watchers.watchTree.firstCall.args[1].onChange()
       })
     })
   })
 
   context('#watchSettingsAndStartWebsockets', () => {
     beforeEach(function () {
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
       this.project.watchers = {}
       this.project.server = sinon.stub({ startWebsockets () {} })
       sinon.stub(this.project, 'watchSettings')
-
-      return sinon.stub(Automation, 'create').returns('automation')
+      sinon.stub(Automation, 'create').returns('automation')
     })
 
     it('calls server.startWebsockets with automation + config', function () {
@@ -592,7 +606,7 @@ describe('lib/project', () => {
 
   context('#getProjectId', () => {
     beforeEach(function () {
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
       this.verifyExistence = sinon.stub(Project.prototype, 'verifyExistence').resolves()
     })
 
@@ -600,9 +614,7 @@ describe('lib/project', () => {
       sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
 
       return this.project.getProjectId()
-      .then(() => {
-        expect(this.verifyExistence).to.be.calledOnce
-      })
+      .then(() => expect(this.verifyExistence).to.be.calledOnce)
     })
 
     it('returns the project id from settings', function () {
@@ -635,21 +647,25 @@ describe('lib/project', () => {
       return this.project.getProjectId()
       .then((id) => {
         throw new Error('expected to fail, but did not')
-      }).catch((err) => expect(err.code).to.eq('EACCES'))
+      }).catch((err) => {
+        expect(err.code).to.eq('EACCES')
+      })
     })
   })
 
   context('#writeProjectId', () => {
     beforeEach(function () {
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
 
-      return sinon.stub(settings, 'write')
+      sinon.stub(settings, 'write')
       .withArgs(this.project.projectRoot, { projectId: 'id-123' })
       .resolves({ projectId: 'id-123' })
     })
 
     it('calls Settings.write with projectRoot and attrs', function () {
-      return this.project.writeProjectId('id-123').then((id) => expect(id).to.eq('id-123'))
+      return this.project.writeProjectId('id-123').then((id) => {
+        expect(id).to.eq('id-123')
+      })
     })
 
     it('sets generatedProjectIdTimestamp', function () {
@@ -661,31 +677,68 @@ describe('lib/project', () => {
 
   context('#getSpecUrl', () => {
     beforeEach(function () {
-      this.project2 = Project(this.idsPath)
+      this.project2 = new Project(this.idsPath)
 
       return settings.write(this.idsPath, { port: 2020 })
     })
 
     it('returns fully qualified url when spec exists', function () {
       return this.project2.getSpecUrl('cypress/integration/bar.js')
-      .then((str) => expect(str).to.eq('http://localhost:2020/__/#/tests/integration/bar.js'))
+      .then((str) => {
+        expect(str).to.eq('http://localhost:2020/__/#/tests/integration/bar.js')
+      })
     })
 
     it('returns fully qualified url on absolute path to spec', function () {
       const todosSpec = path.join(this.todosPath, 'tests/sub/sub_test.coffee')
 
       return this.project.getSpecUrl(todosSpec)
-      .then((str) => expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee'))
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee')
+      })
+    })
+
+    it('escapses %, &', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a&b%c.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%26b%25c.js')
+      })
+    })
+
+    // ? is invalid in Windows, but it can be tested here
+    // because it's a unit test and doesn't check the existence of files
+    it('escapes ?', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a?.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%3F.spec.js')
+      })
+    })
+
+    it('escapes %, &, ? in the url dir', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/s%&?ub/a.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/s%25%26%3Fub/a.spec.js')
+      })
     })
 
     it('returns __all spec url', function () {
       return this.project.getSpecUrl()
-      .then((str) => expect(str).to.eq('http://localhost:8888/__/#/tests/__all'))
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/__all')
+      })
     })
 
     it('returns __all spec url with spec is __all', function () {
       return this.project.getSpecUrl('__all')
-      .then((str) => expect(str).to.eq('http://localhost:8888/__/#/tests/__all'))
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/__all')
+      })
     })
   })
 
@@ -695,10 +748,8 @@ describe('lib/project', () => {
     })
 
     it('inserts path into cache', function () {
-      return Project.add(this.pristinePath)
-      .then(() => {
-        return cache.read()
-      }).then((json) => {
+      return Project.add(this.pristinePath, {})
+      .then(() => cache.read()).then((json) => {
         expect(json.PROJECTS).to.deep.eq([this.pristinePath])
       })
     })
@@ -707,7 +758,7 @@ describe('lib/project', () => {
       it('returns object containing path and id', function () {
         sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
 
-        return Project.add(this.pristinePath)
+        return Project.add(this.pristinePath, {})
         .then((project) => {
           expect(project.id).to.equal('id-123')
 
@@ -720,7 +771,7 @@ describe('lib/project', () => {
       it('returns object containing just the path', function () {
         sinon.stub(settings, 'read').rejects()
 
-        return Project.add(this.pristinePath)
+        return Project.add(this.pristinePath, {})
         .then((project) => {
           expect(project.id).to.be.undefined
 
@@ -728,24 +779,39 @@ describe('lib/project', () => {
         })
       })
     })
+
+    describe('if configFile is non-default', () => {
+      it('doesn\'t cache anything and returns object containing just the path', function () {
+        return Project.add(this.pristinePath, { configFile: false })
+        .then((project) => {
+          expect(project.id).to.be.undefined
+          expect(project.path).to.equal(this.pristinePath)
+
+          return cache.read()
+        }).then((json) => {
+          expect(json.PROJECTS).to.deep.eq([])
+        })
+      })
+    })
   })
 
   context('#createCiProject', () => {
     beforeEach(function () {
-      this.project = Project('/_test-output/path/to/project')
+      this.project = new Project('/_test-output/path/to/project')
       this.newProject = { id: 'project-id-123' }
 
       sinon.stub(this.project, 'writeProjectId').resolves('project-id-123')
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
       sinon.stub(commitInfo, 'getRemoteOrigin').resolves('remoteOrigin')
-
-      return sinon.stub(api, 'createProject')
+      sinon.stub(api, 'createProject')
       .withArgs({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
       .resolves(this.newProject)
     })
 
     it('calls api.createProject with user session', function () {
-      return this.project.createCiProject({ foo: 'bar' }).then(() => expect(api.createProject).to.be.calledWith({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123'))
+      return this.project.createCiProject({ foo: 'bar' }).then(() => {
+        expect(api.createProject).to.be.calledWith({ foo: 'bar' }, 'remoteOrigin', 'auth-token-123')
+      })
     })
 
     it('calls writeProjectId with id', function () {
@@ -764,15 +830,16 @@ describe('lib/project', () => {
   context('#getRecordKeys', () => {
     beforeEach(function () {
       this.recordKeys = []
-      this.project = Project(this.pristinePath)
+      this.project = new Project(this.pristinePath)
       sinon.stub(settings, 'read').resolves({ projectId: 'id-123' })
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-
-      return sinon.stub(api, 'getProjectRecordKeys').resolves(this.recordKeys)
+      sinon.stub(api, 'getProjectRecordKeys').resolves(this.recordKeys)
     })
 
     it('calls api.getProjectRecordKeys with project id + session', function () {
-      return this.project.getRecordKeys().then(() => expect(api.getProjectRecordKeys).to.be.calledWith('id-123', 'auth-token-123'))
+      return this.project.getRecordKeys().then(() => {
+        expect(api.getProjectRecordKeys).to.be.calledWith('id-123', 'auth-token-123')
+      })
     })
 
     it('returns ci keys', function () {
@@ -784,14 +851,15 @@ describe('lib/project', () => {
 
   context('#requestAccess', () => {
     beforeEach(function () {
-      this.project = Project(this.pristinePath)
+      this.project = new Project(this.pristinePath)
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-
-      return sinon.stub(api, 'requestAccess').resolves('response')
+      sinon.stub(api, 'requestAccess').resolves('response')
     })
 
     it('calls api.requestAccess with project id + auth token', function () {
-      return this.project.requestAccess('project-id-123').then(() => expect(api.requestAccess).to.be.calledWith('project-id-123', 'auth-token-123'))
+      return this.project.requestAccess('project-id-123').then(() => {
+        expect(api.requestAccess).to.be.calledWith('project-id-123', 'auth-token-123')
+      })
     })
 
     it('returns response', function () {
@@ -802,9 +870,15 @@ describe('lib/project', () => {
   })
 
   context('.remove', () => {
-    beforeEach(() => sinon.stub(cache, 'removeProject').resolves())
+    beforeEach(() => {
+      sinon.stub(cache, 'removeProject').resolves()
+    })
 
-    it('calls cache.removeProject with path', () => Project.remove('/_test-output/path/to/project').then(() => expect(cache.removeProject).to.be.calledWith('/_test-output/path/to/project')))
+    it('calls cache.removeProject with path', () => {
+      return Project.remove('/_test-output/path/to/project').then(() => {
+        expect(cache.removeProject).to.be.calledWith('/_test-output/path/to/project')
+      })
+    })
   })
 
   context('.id', () => {
@@ -818,22 +892,22 @@ describe('lib/project', () => {
   context('.getOrgs', () => {
     beforeEach(() => {
       sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
-
-      return sinon.stub(api, 'getOrgs').resolves([])
+      sinon.stub(api, 'getOrgs').resolves([])
     })
 
     it('calls api.getOrgs', () => {
       return Project.getOrgs().then((orgs) => {
         expect(orgs).to.deep.eq([])
         expect(api.getOrgs).to.be.calledOnce
-
         expect(api.getOrgs).to.be.calledWith('auth-token-123')
       })
     })
   })
 
   context('.paths', () => {
-    beforeEach(() => sinon.stub(cache, 'getProjectRoots').resolves([]))
+    beforeEach(() => {
+      sinon.stub(cache, 'getProjectRoots').resolves([])
+    })
 
     it('calls cache.getProjectRoots', () => {
       return Project.paths().then((ret) => {
@@ -851,7 +925,7 @@ describe('lib/project', () => {
         '/path/to/second',
       ])
 
-      return sinon.stub(settings, 'id').resolves('id-123')
+      sinon.stub(settings, 'id').resolves('id-123')
     })
 
     it('returns array of objects with paths and ids', () => {
@@ -871,13 +945,17 @@ describe('lib/project', () => {
   })
 
   context('.getProjectStatuses', () => {
-    beforeEach(() => sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123'))
+    beforeEach(() => {
+      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
+    })
 
     it('gets projects from api', () => {
       sinon.stub(api, 'getProjects').resolves([])
 
       return Project.getProjectStatuses([])
-      .then(() => expect(api.getProjects).to.have.been.calledWith('auth-token-123'))
+      .then(() => {
+        expect(api.getProjects).to.have.been.calledWith('auth-token-123')
+      })
     })
 
     it('returns array of projects', () => {
@@ -936,7 +1014,9 @@ describe('lib/project', () => {
     })
 
     describe('when client project has id and there is no matching user project', () => {
-      beforeEach(() => sinon.stub(api, 'getProjects').resolves([]))
+      beforeEach(() => {
+        sinon.stub(api, 'getProjects').resolves([])
+      })
 
       it('marks project as invalid if api 404s', () => {
         sinon.stub(api, 'getProject').rejects({ name: '', message: '', statusCode: 404 })
@@ -986,7 +1066,9 @@ describe('lib/project', () => {
         return Project.getProjectStatuses([{ id: 'id-123', path: '/_test-output/path/to/project' }])
         .then(() => {
           throw new Error('should have caught error but did not')
-        }).catch((err) => expect(err).to.equal(error))
+        }).catch((err) => {
+          expect(err).to.equal(error)
+        })
       })
     })
   })
@@ -998,14 +1080,16 @@ describe('lib/project', () => {
         path: '/_test-output/path/to/project',
       }
 
-      return sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
+      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
     })
 
     it('gets project from api', function () {
       sinon.stub(api, 'getProject').resolves([])
 
       return Project.getProjectStatus(this.clientProject)
-      .then(() => expect(api.getProject).to.have.been.calledWith('id-123', 'auth-token-123'))
+      .then(() => {
+        expect(api.getProject).to.have.been.calledWith('id-123', 'auth-token-123')
+      })
     })
 
     it('returns project merged with details', function () {
@@ -1075,19 +1159,25 @@ describe('lib/project', () => {
       return Project.getProjectStatus(this.clientProject)
       .then(() => {
         throw new Error('should have caught error but did not')
-      }).catch((err) => expect(err).to.equal(error))
+      }).catch((err) => {
+        expect(err).to.equal(error)
+      })
     })
   })
 
   context('.getSecretKeyByPath', () => {
-    beforeEach(() => sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123'))
+    beforeEach(() => {
+      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
+    })
 
     it('calls api.getProjectToken with id + session', function () {
       sinon.stub(api, 'getProjectToken')
       .withArgs(this.projectId, 'auth-token-123')
       .resolves('key-123')
 
-      return Project.getSecretKeyByPath(this.todosPath).then((key) => expect(key).to.eq('key-123'))
+      return Project.getSecretKeyByPath(this.todosPath).then((key) => {
+        expect(key).to.eq('key-123')
+      })
     })
 
     it('throws CANNOT_FETCH_PROJECT_TOKEN on error', function () {
@@ -1098,19 +1188,25 @@ describe('lib/project', () => {
       return Project.getSecretKeyByPath(this.todosPath)
       .then(() => {
         throw new Error('should have caught error but did not')
-      }).catch((err) => expect(err.type).to.eq('CANNOT_FETCH_PROJECT_TOKEN'))
+      }).catch((err) => {
+        expect(err.type).to.eq('CANNOT_FETCH_PROJECT_TOKEN')
+      })
     })
   })
 
   context('.generateSecretKeyByPath', () => {
-    beforeEach(() => sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123'))
+    beforeEach(() => {
+      sinon.stub(user, 'ensureAuthToken').resolves('auth-token-123')
+    })
 
     it('calls api.updateProjectToken with id + session', function () {
       sinon.stub(api, 'updateProjectToken')
       .withArgs(this.projectId, 'auth-token-123')
       .resolves('new-key-123')
 
-      return Project.generateSecretKeyByPath(this.todosPath).then((key) => expect(key).to.eq('new-key-123'))
+      return Project.generateSecretKeyByPath(this.todosPath).then((key) => {
+        expect(key).to.eq('new-key-123')
+      })
     })
 
     it('throws CANNOT_CREATE_PROJECT_TOKEN on error', function () {
@@ -1121,7 +1217,9 @@ describe('lib/project', () => {
       return Project.generateSecretKeyByPath(this.todosPath)
       .then(() => {
         throw new Error('should have caught error but did not')
-      }).catch((err) => expect(err.type).to.eq('CANNOT_CREATE_PROJECT_TOKEN'))
+      }).catch((err) => {
+        expect(err.type).to.eq('CANNOT_CREATE_PROJECT_TOKEN')
+      })
     })
   })
 })

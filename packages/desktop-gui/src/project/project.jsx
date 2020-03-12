@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
+import _ from 'lodash'
 
 import C from '../lib/constants'
 import projectsApi from '../projects/projects-api'
@@ -35,9 +36,15 @@ class Project extends Component {
   }
 
   render () {
-    if (this.props.project.isLoading) return <Loader color='#888' scale={0.5}/>
+    if (this.props.project.isLoading) {
+      return (
+        <div className='loader-wrap'>
+          <Loader color='#888' scale={0.5}/>
+        </div>
+      )
+    }
 
-    if (this.props.project.error) return <ErrorMessage error={this.props.project.error} onTryAgain={this._reopenProject}/>
+    if (this.props.project.error) return <ErrorMessage onTryAgain={this._reopenProject} project={this.props.project}/>
 
     return (
       <>
@@ -71,16 +78,41 @@ class Project extends Component {
   _renderWarnings = () => {
     const { warnings } = this.props.project
 
-    return warnings.map((warning, i) =>
-      (<WarningMessage key={i} warning={warning} onClearWarning={() => this._removeWarning(warning)}/>))
+    return _.map(warnings, (warning, i) => (
+      <WarningMessage
+        key={i}
+        warning={warning}
+        onRetry={() => this._retryPingingBaseUrl(warning)}
+        onDismissWarning={() => this._removeWarning(warning)}
+      />
+    ))
   }
 
   _removeWarning = (warning) => {
-    this.props.project.clearWarning(warning)
+    this.props.project.dismissWarning(warning)
   }
 
   _reopenProject = () => {
     projectsApi.reopenProject(this.props.project)
+  }
+
+  _retryPingingBaseUrl = (warning) => {
+    const { project } = this.props
+
+    warning.setRetrying(true)
+
+    projectsApi.pingBaseUrl(project.getConfigValue('baseUrl'))
+    .then(() => {
+      project.dismissWarning(warning)
+    })
+    .catch((err) => {
+      if (err && err.type === warning.type) return
+
+      project.setError(err)
+    })
+    .finally(() => {
+      warning.setRetrying(false)
+    })
   }
 }
 

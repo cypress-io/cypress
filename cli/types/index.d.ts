@@ -4,7 +4,7 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 2.8
+// TypeScript Version: 2.9
 // Updated by the Cypress team: https://www.cypress.io/about/
 
 /// <reference path="./cy-blob-util.d.ts" />
@@ -19,12 +19,27 @@
 /// <reference path="./jquery/index.d.ts" />
 /// <reference path="./chai-jquery/index.d.ts" />
 
+// jQuery includes dependency "sizzle" that provides types
+// so we include it too in "node_modules/sizzle".
+// This way jQuery can load it using 'reference types="sizzle"' directive
+
 // "moment" types are with "node_modules/moment"
 /// <reference types="moment" />
 
 // load ambient declaration for "cypress" NPM module
 // hmm, how to load it better?
 /// <reference path="./cypress-npm-api.d.ts" />
+
+// Cypress, cy, Log inherits EventEmitter.
+type EventEmitter2 = import("eventemitter2").EventEmitter2
+
+type Nullable<T> = T | null
+
+interface EventEmitter extends EventEmitter2 {
+  proxyTo: (cy: Cypress.cy) => null
+  emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
+  emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
+}
 
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
@@ -37,6 +52,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
+  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -49,14 +65,44 @@ declare namespace Cypress {
     password: string
   }
 
+  interface Backend {
+    /**
+     * Firefox only: Force Cypress to run garbage collection routines.
+     * No-op if not running in Firefox.
+     *
+     * @see https://on.cypress.io/firefox-gc-issue
+     */
+    (task: 'firefox:force:gc'): Promise<void>
+  }
+
+  type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
+
+  type BrowserChannel = 'stable' | 'canary' | 'beta' | 'dev' | 'nightly' | string
+
+  type BrowserFamily = 'chromium' | 'firefox'
+
   /**
    * Describes a browser Cypress can control
    */
   interface Browser {
-    name: "electron" | "chrome" | "canary" | "chromium" | "firefox"
-    displayName: "Electron" | "Chrome" | "Canary" | "Chromium" | "FireFox"
+    /**
+     * Short browser name.
+     */
+    name: BrowserName
+    /**
+     * The underlying engine for this browser.
+     */
+    family: BrowserFamily
+    /**
+     * The release channel of the browser.
+     */
+    channel: BrowserChannel
+    /**
+     * Human-readable browser name.
+     */
+    displayName: string
     version: string
-    majorVersion: string
+    majorVersion: number
     path: string
     isHeaded: boolean
     isHeadless: boolean
@@ -74,6 +120,36 @@ declare namespace Cypress {
      * @see https://on.cypress.io/clearlocalstorage
      */
     clear: (keys?: string[]) => void
+  }
+
+  interface ViewportPosition extends WindowPosition {
+    right: number
+    bottom: number
+  }
+
+  interface WindowPosition {
+    top: number
+    left: number
+    topCenter: number
+    leftCenter: number
+  }
+
+  interface ElementPositioning {
+    scrollTop: number
+    scrollLeft: number
+    width: number
+    height: number
+    fromElViewport: ViewportPosition
+    fromElWindow: WindowPosition
+    fromAutWindow: WindowPosition
+  }
+
+  interface ElementCoordinates {
+    width: number
+    height: number
+    fromElViewport: ViewportPosition & { x: number, y: number }
+    fromElWindow: WindowPosition & { x: number, y: number }
+    fromAutWindow: WindowPosition & { x: number, y: number }
   }
 
   /**
@@ -191,6 +267,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Promise wrapper for certain internal tasks.
+     */
+    backend: Backend
+
+    /**
      * Returns all configuration objects.
      * @see https://on.cypress.io/config
      * @example
@@ -265,6 +346,15 @@ declare namespace Cypress {
     env(object: ObjectLike): void
 
     /**
+     * Firefox only: Get the current number of tests that will run between forced garbage collections.
+     *
+     * Returns undefined if not in Firefox, returns a null or 0 if forced GC is disabled.
+     *
+     * @see https://on.cypress.io/firefox-gc-issue
+     */
+    getFirefoxGcInterval(): number | null | undefined
+
+    /**
      * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
      *
      * @see https://on.cypress.io/iscy
@@ -273,6 +363,14 @@ declare namespace Cypress {
      */
     isCy<TSubject = any>(obj: Chainable<TSubject>): obj is Chainable<TSubject>
     isCy(obj: any): obj is Chainable
+
+    /**
+     * Returns true if currently running the supplied browser name or matcher object.
+     * @example isBrowser('chrome') will be true for the browser 'chrome:canary' and 'chrome:stable'
+     * @example isBrowser({ name: 'firefox', channel: 'dev' }) will be true only for the browser 'firefox:dev' (Firefox Developer Edition)
+     * @param matcher browser name or matcher object to check.
+     */
+    isBrowser(name: BrowserName | Partial<Browser>): boolean
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -288,7 +386,6 @@ declare namespace Cypress {
       add(name: string, fn: (...args: any[]) => void): void
       add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
       overwrite(name: string, fn: (...args: any[]) => void): void
-      overwrite(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
     }
 
     /**
@@ -304,7 +401,85 @@ declare namespace Cypress {
      * @see https://on.cypress.io/dom
      */
     dom: {
+      /**
+       * Returns a jQuery object obtained by wrapping an object in jQuery.
+       */
+      wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
+      query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
+      /**
+       * Returns an array of raw elements pulled out from a jQuery object.
+       */
+      unwrap(obj: any): any
+      /**
+       * Returns a boolean indicating whether an object is a DOM object.
+       */
+      isDom(obj: any): boolean
+      isType(element: JQuery | HTMLElement , type: string): boolean
+      /**
+       * Returns a boolean indicating whether an element is visible.
+       */
+      isVisible(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is hidden.
+       */
       isHidden(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element can receive focus.
+       */
+      isFocusable(element: JQuery | HTMLElement): boolean
+      isTextLike(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is scrollable.
+       */
+      isScrollable(element: Window | JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element currently has focus.
+       */
+      isFocused(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is detached from the DOM.
+       */
+      isDetached(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is attached to the DOM.
+       */
+      isAttached(element: JQuery | HTMLElement | Window | Document): boolean
+      isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
+      /**
+       * Returns a boolean indicating whether an element is a descendent of another element.
+       */
+      isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an object is a DOM element.
+       */
+      isElement(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether a node is of document type.
+       */
+      isDocument(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a window object.
+       */
+      isWindow(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a jQuery object.
+       */
+      isJquery(obj: any): boolean
+      isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
+      stringify(element: JQuery | HTMLElement, form: string): string
+      getElements(element: JQuery): JQuery | HTMLElement[]
+      getContainsSelector(text: string, filter?: string): JQuery.Selector
+      getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
+      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getReasonIsHidden(element: JQuery | HTMLElement): string
+      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
+      getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
+      getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
+      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position: string): ElementCoordinates
+      getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
     }
 
     /**
@@ -315,7 +490,7 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/api/screenshot-api
+     * @see https://on.cypress.io/screenshot-api
      */
     Screenshot: {
       defaults(options: Partial<ScreenshotDefaultsOptions>): void
@@ -447,12 +622,12 @@ declare namespace Cypress {
      * @param {string} [key] - name of a particular item to remove (optional).
      * @example
       ```
-      // removes all local storage keys
+      // Removes all local storage keys
       cy.clearLocalStorage()
         .should(ls => {
           expect(ls.getItem('prop1')).to.be.null
         })
-      // removes item "todos"
+      // Removes item "todos"
       cy.clearLocalStorage("todos")
       ```
      */
@@ -464,11 +639,42 @@ declare namespace Cypress {
      * @param {RegExp} re - regular expression to match.
      * @example
     ```
-    // Clear all local storage matching /app-/
+    // Clears all local storage matching /app-/
     cy.clearLocalStorage(/app-/)
     ```
      */
     clearLocalStorage(re: RegExp): Chainable<Storage>
+   /**
+     * Clear data in local storage.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     * @param {options} [object] - options object
+     * @example
+      ```
+      // Removes all local storage items, without logging
+      cy.clearLocalStorage({ log: false })
+      ```
+     */
+    clearLocalStorage(options: Partial<Loggable>): Chainable<Storage>
+   /**
+     * Clear data in local storage.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     * @param {string} [key] - name of a particular item to remove (optional).
+     * @param {options} [object] - options object
+     * @example
+      ```
+      // Removes item "todos" without logging
+      cy.clearLocalStorage("todos", { log: false })
+      ```
+     */
+    clearLocalStorage(key: string, options: Partial<Loggable>): Chainable<Storage>
 
     /**
      * Click a DOM element.
@@ -483,13 +689,13 @@ declare namespace Cypress {
     /**
      * Click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').click('topRight')
      */
-    click(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    click(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Click a DOM element at specific coordinates
      *
@@ -582,7 +788,7 @@ declare namespace Cypress {
      *    // tries to find the given text for up to 1 second
      *    cy.contains('my text to find', {timeout: 1000})
      */
-    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
+    contains(content: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<Subject>
     /**
      * Get the child DOM element that contains given text.
      *
@@ -600,7 +806,7 @@ declare namespace Cypress {
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
      */
-    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get the DOM element using CSS "selector" containing the text or regular expression.
      *
@@ -609,14 +815,68 @@ declare namespace Cypress {
      *    // yields <... class="foo">... apples ...</...>
      *    cy.contains('.foo', 'apples')
      */
-    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<E>>
 
     /**
      * Double-click a DOM element.
      *
      * @see https://on.cypress.io/dblclick
      */
-    dblclick(options?: Partial<Loggable>): Chainable
+    dblclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Double-click a DOM element at specific corner / side.
+     *
+     * @param {PositionType} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/dblclick
+     * @example
+     *    cy.get('button').dblclick('topRight')
+     */
+    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Double-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/dblclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').dblclick(15, 40)
+    ```
+     */
+    dblclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element.
+     *
+     * @see https://on.cypress.io/rightclick
+     */
+    rightclick(options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific corner / side.
+     *
+     * @param {PositionType} position - The position where the click should be issued.
+     * The `center` position is the default position.
+     * @see https://on.cypress.io/click
+     * @example
+     *    cy.get('button').rightclick('topRight')
+     */
+    rightclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
+    /**
+     * Right-click a DOM element at specific coordinates
+     *
+     * @param {number} x The distance in pixels from the element’s left to issue the click.
+     * @param {number} y The distance in pixels from the element’s top to issue the click.
+     * @see https://on.cypress.io/rightclick
+     * @example
+    ```
+    // The click below will be issued inside of the element
+    // (15px from the left and 40px from the top).
+    cy.get('button').rightclick(15, 40)
+    ```
+     */
+    rightclick(x: number, y: number, options?: Partial<ClickOptions>): Chainable<Subject>
 
     /**
      * Set a debugger and log what the previous command yields.
@@ -811,14 +1071,34 @@ declare namespace Cypress {
 
     /**
      * Invoke a function on the previously yielded subject.
-     * This isn't possible to strongly type without generic override yet.
-     * If called on an object you can do this instead: `.then(s => s.show())`.
-     * If called on an array you can do this instead: `.each(s => s.show())`.
-     * From there the subject will be properly typed.
      *
      * @see https://on.cypress.io/invoke
      */
-    invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
+    invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
+      functionName: K,
+      ...args: any[]
+    ): Chainable<R>
+    invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
+      options: Loggable,
+      functionName: K,
+      ...args: any[]
+    ): Chainable<R>
+
+    /**
+     * Invoke a function in an array of functions.
+     * @see https://on.cypress.io/invoke
+     */
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
+
+     /**
+     * Invoke a function on the previously yielded subject by a property path.
+     * Property path invocation cannot be strongly-typed.
+     * Invoking by a property path will always result in any.
+     *
+     * @see https://on.cypress.io/invoke
+     */
+    invoke(propertyPath: string, ...args: any[]): Chainable
 
     /**
      * Get a property’s value on the previously yielded subject.
@@ -830,7 +1110,16 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K): Chainable<Subject[K]>
+    its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
+    its(propertyPath: string, options?: Loggable): Chainable
+
+    /**
+     * Get a value by index from an array yielded from the previous command.
+     * @see https://on.cypress.io/its
+     * @example
+     *    cy.wrap(['a', 'b']).its(1).should('equal', 'b')
+     */
+    its<T, Subject extends T[]>(index: number, options?: Loggable): Chainable<T>
 
     /**
      * Get the last DOM element within a set of DOM elements.
@@ -857,7 +1146,7 @@ declare namespace Cypress {
      *    // Assert on the href of the location
      *    cy.location('href').should('contain', '/tag/tutorials')
      */
-    location(key: string, options?: Partial<Loggable & Timeoutable>): Chainable<Location>
+    location<K extends keyof Location>(key: K, options?: Partial<Loggable & Timeoutable>): Chainable<Location[K]>
 
     /**
      * Print a message to the Cypress Command Log.
@@ -1010,7 +1299,7 @@ declare namespace Cypress {
     parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
 
     /**
-     * Stop cy commands from running and allow interaction with the application under test. You can then “resume” running all commands or choose to step through the “next” commands from the Command Log.
+     * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
      * This does not set a `debugger` in your code, unlike `.debug()`
      *
      * @see https://on.cypress.io/pause
@@ -1153,7 +1442,7 @@ declare namespace Cypress {
      * Get the root DOM element.
      * The root element yielded is `<html>` by default.
      * However, when calling `.root()` from a `.within()` command,
-     * the root element will point to the element you are “within”.
+     * the root element will point to the element you are "within".
      *
      * @see https://on.cypress.io/root
      */
@@ -1818,7 +2107,7 @@ declare namespace Cypress {
      * @example
      *    cy.$$('p')
      */
-    $$: JQueryStatic
+    $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -1911,6 +2200,18 @@ declare namespace Cypress {
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
     timeout: number
+  }
+
+  /**
+   * Options that check case sensitivity
+   */
+  interface CaseMatchable {
+    /**
+     * Check case sensitivity
+     *
+     * @default true
+     */
+    matchCase: boolean
   }
 
   /**
@@ -2045,10 +2346,25 @@ declare namespace Cypress {
      */
     integrationFolder: string
     /**
+     * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
+     * @default "bundled"
+     */
+    nodeVersion: "system" | "bundled"
+    /**
      * Path to plugins file. (Pass false to disable)
      * @default "cypress/plugins/index.js"
      */
     pluginsFile: string
+    /**
+     * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
+     * @default null
+     */
+    resolvedNodePath: string
+    /**
+     * The version of `node` that is being used to execute plugins.
+     * @example 1.2.3
+     */
+    resolvedNodeVersion: string
     /**
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
@@ -2109,6 +2425,24 @@ declare namespace Cypress {
      * @default true
      */
     waitForAnimations: boolean
+    /**
+     * Firefox-only: The number of tests that will run between forced garbage collections.
+     * If a number is supplied, it will apply to `run` mode and `open` mode.
+     * Set the interval to `null` or 0 to disable forced garbage collections.
+     * @default { runMode: 1, openMode: null }
+     */
+    firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
+  }
+
+  interface PluginConfigOptions extends ConfigOptions {
+    /**
+    * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
+    */
+    configFile: string | false
+    /**
+    * Absolute path to the root of the project
+    */
+    projectRoot: string
   }
 
   interface DebugOptions {
@@ -2170,11 +2504,19 @@ declare namespace Cypress {
     height: number
   }
 
+  type Padding =
+    | number
+    | [number]
+    | [number, number]
+    | [number, number, number]
+    | [number, number, number, number]
+
   interface ScreenshotOptions {
     blackout: string[]
     capture: 'runner' | 'viewport' | 'fullPage'
     clip: Dimensions
     disableTimersAndAnimations: boolean
+    padding: Padding
     scale: boolean
     beforeScreenshot: ($el: JQuery<HTMLElement>) => void
     afterScreenshot: ($el: JQuery<HTMLElement>, props: {
@@ -2363,6 +2705,11 @@ declare namespace Cypress {
      *    })
      */
     auth: Auth
+
+    /**
+     * Query parameters to append to the `url` of the request.
+     */
+    qs: object
   }
 
   /**
@@ -4107,6 +4454,62 @@ declare namespace Cypress {
     (fn: (currentSubject: Subject) => void): Chainable<Subject>
   }
 
+  interface BrowserLaunchOptions {
+    extensions: string[],
+    preferences: { [key: string]: any }
+    args: string[],
+  }
+
+  interface Dimensions {
+    width: number
+    height: number
+  }
+
+  interface ScreenshotDetails {
+    size: number
+    takenAt: string
+    duration: number
+    dimensions: Dimensions
+    multipart: boolean
+    pixelRatio: number
+    name: string
+    specName: string
+    testFailure: boolean
+    path: string
+    scaled: boolean
+    blackout: string[]
+  }
+
+  interface AfterScreenshotReturnObject {
+    path?: string
+    size?: number
+    dimensions?: Dimensions
+  }
+
+  interface FileObject {
+    filePath: string
+    outputPath: string
+    shouldWatch: boolean
+  }
+
+  /**
+   * Individual task callback. Receives a single argument and _should_ return
+   * anything but `undefined` or a promise that resolves anything but `undefined`
+   * TODO: find a way to express "anything but undefined" in TypeScript
+   */
+  type Task = (value: any) => any
+
+  interface Tasks {
+    [key: string]: Task
+  }
+
+  interface PluginEvents {
+    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
+    (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
+    (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
+    (action: 'task', tasks: Tasks): void
+  }
+
   // for just a few events like "window:alert" it makes sense to allow passing cy.stub() or
   // a user callback function. Others probably only need a callback function.
 
@@ -4250,6 +4653,10 @@ declare namespace Cypress {
      */
     (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
     /**
+     * Fires before the test and all **before** and **beforeEach** hooks run. If a `Promise` is returned, it will be awaited before proceeding.
+     */
+    (action: 'test:before:run:async', fn: (attributes: ObjectLike, test: Mocha.ITest) => void | Promise<any>): void
+    /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -4261,6 +4668,7 @@ declare namespace Cypress {
     logs(filters: any): any
     add(obj: any): any
     get(): any
+    get<K extends keyof CommandQueue>(key: string): CommandQueue[K]
     toJSON(): string[]
     create(): CommandQueue
   }
@@ -4378,7 +4786,7 @@ declare namespace Cypress {
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
-  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3'
+  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
     top: number,
     left: number
@@ -4419,7 +4827,7 @@ cy.get('button').click()
 cy.get('.result').contains('Expected text')
 ```
  */
-declare const cy: Cypress.cy
+declare const cy: Cypress.cy & EventEmitter
 
 /**
  * Global variable `Cypress` holds common utilities and constants.
@@ -4431,4 +4839,4 @@ Cypress.version // => "1.4.0"
 Cypress._ // => Lodash _
 ```
  */
-declare const Cypress: Cypress.Cypress
+declare const Cypress: Cypress.Cypress & EventEmitter

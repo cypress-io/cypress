@@ -5,6 +5,7 @@ execa = require('execa')
 path = require("path")
 Promise = require("bluebird")
 os = require("os")
+verify = require("../../cli/lib/tasks/verify")
 Fixtures = require("../../packages/server/test/support/helpers/fixtures")
 
 fs = Promise.promisifyAll(fse)
@@ -15,9 +16,10 @@ canRecordVideo = () ->
 shouldSkipProjectTest = () ->
   os.platform() == "win32"
 
-runSmokeTest = (buildAppExecutable) ->
-  rand = "" + Math.random()
+runSmokeTest = (buildAppExecutable, timeoutSeconds = 30) ->
+  rand = String(_.random(0, 1000))
   console.log("executable path #{buildAppExecutable}")
+  console.log("timeout #{timeoutSeconds} seconds")
 
   hasRightResponse = (stdout) ->
     # there could be more debug lines in the output, so find 1 line with
@@ -25,7 +27,11 @@ runSmokeTest = (buildAppExecutable) ->
     lines = stdout.split('\n').map((s) -> s.trim())
     return lines.includes(rand)
 
-  execa "#{buildAppExecutable}", ["--smoke-test", "--ping=#{rand}"], {timeout: 10000}
+  args = ["--smoke-test", "--ping=#{rand}"]
+  if verify.needsSandbox()
+    args.push("--no-sandbox")
+
+  execa "#{buildAppExecutable}", args, {timeout: timeoutSeconds*1000}
   .catch (err) ->
     console.error("smoke test failed with error %s", err.message)
     throw err
@@ -43,7 +49,7 @@ runProjectTest = (buildAppExecutable, e2e) ->
   console.log("running project test")
 
   new Promise (resolve, reject) ->
-    env = _.omit(process.env, "CYPRESS_ENV")
+    env = _.omit(process.env, "CYPRESS_INTERNAL_ENV")
 
     if !canRecordVideo()
       console.log("cannot record video on this platform yet, disabling")
@@ -53,6 +59,8 @@ runProjectTest = (buildAppExecutable, e2e) ->
       "--run-project=#{e2e}",
       "--spec=#{e2e}/cypress/integration/simple_passing_spec.coffee"
     ]
+    if verify.needsSandbox()
+      args.push("--no-sandbox")
     options = {
       stdio: "inherit", env: env
     }
@@ -84,14 +92,20 @@ runFailingProjectTest = (buildAppExecutable, e2e) ->
 
   spawn = ->
     new Promise (resolve, reject) ->
-      env = _.omit(process.env, "CYPRESS_ENV")
+      env = _.omit(process.env, "CYPRESS_INTERNAL_ENV")
 
-      cp.spawn(buildAppExecutable, [
+      args = [
         "--run-project=#{e2e}",
         "--spec=#{e2e}/cypress/integration/simple_failing_spec.coffee"
-      ], {
-        stdio: "inherit", env: env
-      })
+      ]
+      if verify.needsSandbox()
+        args.push("--no-sandbox")
+
+      options = {
+        stdio: "inherit",
+        env
+      }
+      cp.spawn(buildAppExecutable, args, options)
       .on "exit", (code) ->
         if code is 2
           resolve()

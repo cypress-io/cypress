@@ -9,28 +9,40 @@ import * as linuxHelper from './linux'
 import { log } from './log'
 import {
   Browser,
+  DetectedBrowser,
   FoundBrowser,
   NotDetectedAtPathError,
   NotInstalledError,
 } from './types'
 import * as windowsHelper from './windows'
 
-const setMajorVersion = (browser: FoundBrowser) => {
+type HasVersion = {
+  version?: string
+  majorVersion?: string | number
+  name: string
+}
+
+// TODO: make this function NOT change its argument
+export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
   if (browser.version) {
     browser.majorVersion = browser.version.split('.')[0]
     log(
       'browser %s version %s major version %s',
       browser.name,
       browser.version,
-      browser.majorVersion
+      browser.majorVersion,
     )
+
+    if (browser.majorVersion) {
+      browser.majorVersion = parseInt(browser.majorVersion)
+    }
   }
 
   return browser
 }
 
 type PlatformHelper = {
-  detect: (browser: Browser) => Promise<FoundBrowser>
+  detect: (browser: Browser) => Promise<DetectedBrowser>
   getVersionString: (path: string) => Promise<string>
 }
 
@@ -50,8 +62,8 @@ function getHelper (platform?: NodeJS.Platform): PlatformHelper {
 
 function lookup (
   platform: NodeJS.Platform,
-  browser: Browser
-): Promise<FoundBrowser> {
+  browser: Browser,
+): Promise<DetectedBrowser> {
   log('looking up %s on %s platform', browser.name, platform)
   const helper = getHelper(platform)
 
@@ -82,11 +94,14 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   const pickBrowserProps = pick([
     'name',
     'family',
+    'channel',
     'displayName',
     'type',
     'version',
     'path',
     'custom',
+    'warning',
+    'info',
   ])
 
   const logBrowser = (props: any) => {
@@ -124,7 +139,11 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
   const removeDuplicates = uniqBy((browser: FoundBrowser) => {
     return props(['name', 'version'], browser)
   })
-  const compactFalse = (browsers: any[]) => compact(browsers) as FoundBrowser[]
+  const compactFalse = (browsers: any[]) => {
+    return compact(browsers) as FoundBrowser[]
+  }
+
+  log('detecting if the following browsers are present %o', goalBrowsers)
 
   return Bluebird.mapSeries(goalBrowsers, checkBrowser)
   .then(flatten)
@@ -134,7 +153,7 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
 
 export const detectByPath = (
   path: string,
-  goalBrowsers?: Browser[]
+  goalBrowsers?: Browser[],
 ): Promise<FoundBrowser> => {
   if (!goalBrowsers) {
     goalBrowsers = browsers
@@ -153,14 +172,18 @@ export const detectByPath = (
 
     const regexExec = browser.versionRegex.exec(stdout) as Array<string>
 
-    return extend({}, browser, {
+    const parsedBrowser = {
+      name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
       custom: true,
       path,
       version: regexExec[1],
-      majorVersion: regexExec[1].split('.', 2)[0],
-    })
+    }
+
+    setMajorVersion(parsedBrowser)
+
+    return extend({}, browser, parsedBrowser)
   }
 
   return helper

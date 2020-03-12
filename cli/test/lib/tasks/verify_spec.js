@@ -1,5 +1,6 @@
 require('../../spec_helper')
 
+const path = require('path')
 const _ = require('lodash')
 const os = require('os')
 const cp = require('child_process')
@@ -23,7 +24,7 @@ const snapshot = require('../../support/snapshot')
 const packageVersion = '1.2.3'
 const cacheDir = '/cache/Cypress'
 const executablePath = '/cache/Cypress/1.2.3/Cypress.app/Contents/MacOS/Cypress'
-const binaryStatePath = '/cache/Cypress/1.2.3/Cypress.app/binary_state.json'
+const binaryStatePath = '/cache/Cypress/1.2.3/binary_state.json'
 
 let stdout
 let spawnedProcess
@@ -53,11 +54,12 @@ context('lib/tasks/verify', () => {
     sinon.stub(xvfb, 'stop').resolves()
     sinon.stub(xvfb, 'isNeeded').returns(false)
     sinon.stub(Promise.prototype, 'delay').resolves()
+    sinon.stub(process, 'geteuid').returns(1000)
 
     sinon.stub(_, 'random').returns('222')
 
     util.exec
-    .withArgs(executablePath, ['--smoke-test', '--ping=222'])
+    .withArgs(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
     .resolves(spawnedProcess)
   })
 
@@ -70,7 +72,6 @@ context('lib/tasks/verify', () => {
   })
 
   it('logs error and exits when no version of Cypress is installed', () => {
-
     return verify
     .start()
     .then(() => {
@@ -81,8 +82,48 @@ context('lib/tasks/verify', () => {
 
       snapshot(
         'no version of Cypress installed 1',
-        normalize(stdout.toString())
+        normalize(stdout.toString()),
       )
+    })
+  })
+
+  it('adds --no-sandbox when user is root', () => {
+    // make it think the executable exists
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0o777 }),
+      packageVersion,
+    })
+
+    process.geteuid.returns(0) // user is root
+    util.exec.resolves({
+      stdout: '222',
+      stderr: '',
+    })
+
+    return verify.start()
+    .then(() => {
+      expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
+    })
+  })
+
+  it('adds --no-sandbox when user is non-root', () => {
+    // make it think the executable exists
+    createfs({
+      alreadyVerified: false,
+      executable: mockfs.file({ mode: 0o777 }),
+      packageVersion,
+    })
+
+    process.geteuid.returns(1000) // user is non-root
+    util.exec.resolves({
+      stdout: '222',
+      stderr: '',
+    })
+
+    return verify.start()
+    .then(() => {
+      expect(util.exec).to.be.calledWith(executablePath, ['--no-sandbox', '--smoke-test', '--ping=222'])
     })
   })
 
@@ -118,7 +159,7 @@ context('lib/tasks/verify', () => {
     .catch(() => {
       return snapshot(
         'warning installed version does not match verified version 1',
-        normalize(stdout.toString())
+        normalize(stdout.toString()),
       )
     })
   })
@@ -158,7 +199,6 @@ context('lib/tasks/verify', () => {
     .then(() => {
       snapshot(normalize(slice(stdout.toString())))
     })
-
   })
 
   it('logs error when child process returns incorrect stdout (stderr when exists)', () => {
@@ -185,7 +225,6 @@ context('lib/tasks/verify', () => {
     .then(() => {
       snapshot(normalize(slice(stdout.toString())))
     })
-
   })
 
   it('logs error when child process returns incorrect stdout (stdout when no stderr)', () => {
@@ -211,7 +250,6 @@ context('lib/tasks/verify', () => {
     .then(() => {
       snapshot(normalize(slice(stdout.toString())))
     })
-
   })
 
   it('sets ELECTRON_ENABLE_LOGGING without mutating process.env', () => {
@@ -285,7 +323,7 @@ context('lib/tasks/verify', () => {
       .then(() => {
         return snapshot(
           'fails verifying Cypress 1',
-          normalize(slice(stdout.toString()))
+          normalize(slice(stdout.toString())),
         )
       })
     })
@@ -369,7 +407,7 @@ context('lib/tasks/verify', () => {
         expect(util.exec).to.have.been.calledTwice
         // user should have been warned
         expect(logger.warn).to.have.been.calledWithMatch(
-          'This is likely due to a misconfigured DISPLAY environment variable.'
+          'This is likely due to a misconfigured DISPLAY environment variable.',
         )
       })
     })
@@ -464,7 +502,7 @@ context('lib/tasks/verify', () => {
 
       return snapshot(
         'Cypress non-executable permissions 1',
-        normalize(stdout.toString())
+        normalize(stdout.toString()),
       )
     })
   })
@@ -479,7 +517,7 @@ context('lib/tasks/verify', () => {
     return verify.start().then(() => {
       return snapshot(
         'current version has not been verified 1',
-        normalize(stdout.toString())
+        normalize(stdout.toString()),
       )
     })
   })
@@ -494,7 +532,7 @@ context('lib/tasks/verify', () => {
     return verify.start().then(() => {
       return snapshot(
         'different version installed 1',
-        normalize(stdout.toString())
+        normalize(stdout.toString()),
       )
     })
   })
@@ -511,7 +549,7 @@ context('lib/tasks/verify', () => {
     return verify.start().then(() => {
       return snapshot(
         'silent verify 1',
-        normalize(`[no output]${stdout.toString()}`)
+        normalize(`[no output]${stdout.toString()}`),
       )
     })
   })
@@ -651,7 +689,7 @@ context('lib/tasks/verify', () => {
       })
 
       util.exec
-      .withArgs(realEnvBinaryPath, ['--smoke-test', '--ping=222'])
+      .withArgs(realEnvBinaryPath, ['--no-sandbox', '--smoke-test', '--ping=222'])
       .resolves(spawnedProcess)
 
       return verify.start().then(() => {
@@ -674,18 +712,60 @@ context('lib/tasks/verify', () => {
           logger.error(err)
           snapshot(
             `${platform}: error when invalid CYPRESS_RUN_BINARY 1`,
-            normalize(stdout.toString())
+            normalize(stdout.toString()),
           )
         })
       })
     })
   })
+
+  // tests for when Electron needs "--no-sandbox" CLI flag
+  context('.needsSandbox', () => {
+    it('needs --no-sandbox on Linux as a root', () => {
+      os.platform.returns('linux')
+      process.geteuid.returns(0) // user is root
+      expect(verify.needsSandbox()).to.be.true
+    })
+
+    it('needs --no-sandbox on Linux as a non-root', () => {
+      os.platform.returns('linux')
+      process.geteuid.returns(1000) // user is non-root
+      expect(verify.needsSandbox()).to.be.true
+    })
+
+    it('needs --no-sandbox on Mac as a non-root', () => {
+      os.platform.returns('darwin')
+      process.geteuid.returns(1000) // user is non-root
+      expect(verify.needsSandbox()).to.be.true
+    })
+
+    it('does not need --no-sandbox on Windows', () => {
+      os.platform.returns('win32')
+      expect(verify.needsSandbox()).to.be.false
+    })
+  })
 })
 
+// TODO this needs documentation with examples badly.
 function createfs ({ alreadyVerified, executable, packageVersion, customDir }) {
+  if (!customDir) {
+    customDir = '/cache/Cypress/1.2.3/Cypress.app'
+  }
+
+  // binary state is stored one folder higher than the runner itself
+  // see https://github.com/cypress-io/cypress/issues/6089
+  const binaryStateFolder = path.join(customDir, '..')
+
+  const binaryState = {
+    verified: alreadyVerified,
+  }
+  const binaryStateText = JSON.stringify(binaryState)
+
   let mockFiles = {
-    [customDir ? customDir : '/cache/Cypress/1.2.3/Cypress.app']: {
-      'binary_state.json': `{"verified": ${alreadyVerified}}`,
+    [binaryStateFolder]: {
+      'binary_state.json': binaryStateText,
+    },
+    [customDir]: {
       Contents: {
         MacOS: executable
           ? {

@@ -41,9 +41,7 @@ launchBrowser = (url, opts = {}) ->
       ## headless breaks automatic retries
       ## "--headless"
     ].concat(
-      chrome._getArgs({
-        browser: browser
-      })
+      chrome._getArgs(browser)
     ).filter (arg) ->
       ![
         ## seems to break chrome's automatic retries
@@ -222,6 +220,8 @@ describe "e2e network error handling", ->
     onVisit = null
     counts = {}
 
+  ## NOTE: We can just skip these tests, they are really only useful for learning
+  ## about how Chrome does it.
   context.skip "Google Chrome", ->
     testRetries = (path) ->
       launchBrowser("http://127.0.0.1:#{PORT}#{path}")
@@ -398,12 +398,11 @@ describe "e2e network error handling", ->
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
-        process.env.NO_PROXY = "" ## proxy everything including localhost
+        process.env.NO_PROXY = "<-loopback>" ## proxy everything including localhost
 
         e2e.exec(@, {
           spec: "https_passthru_spec.js"
           snapshot: true
-          expectedExitCode: 0
         })
         .then ->
           console.log("connect counts are", connectCounts)
@@ -423,12 +422,11 @@ describe "e2e network error handling", ->
       .start(PROXY_PORT)
       .then =>
         process.env.HTTP_PROXY = "http://localhost:#{PROXY_PORT}"
-        process.env.NO_PROXY = "localhost:13373" ## proxy everything except for the irrelevant test
+        process.env.NO_PROXY = "<-loopback>,localhost:13373" ## proxy everything except for the irrelevant test
 
         e2e.exec(@, {
           spec: "https_passthru_spec.js"
           snapshot: true
-          expectedExitCode: 0
           config: {
             baseUrl: "https://localhost:#{HTTPS_PORT}"
           }
@@ -458,7 +456,6 @@ describe "e2e network error handling", ->
             baseUrl: "http://localhost:#{PORT}"
             pageLoadTimeout: 4000
           }
-          expectedExitCode: 0
           snapshot: true
         })
 
@@ -478,7 +475,6 @@ describe "e2e network error handling", ->
               baseUrl: "http://localhost:#{PORT}"
               pageLoadTimeout: 4000
             }
-            expectedExitCode: 0
             snapshot: true
           })
 
@@ -508,6 +504,5 @@ describe "e2e network error handling", ->
             baseUrl: "http://localhost:#{PORT}"
             pageLoadTimeout: 4000
           }
-          expectedExitCode: 0
           snapshot: true
         })

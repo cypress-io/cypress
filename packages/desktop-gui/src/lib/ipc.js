@@ -11,7 +11,6 @@ const ipc = {
   handleUnauthed () {
     authStore.setUser(null)
 
-    ipc.clearGithubCookies()
     ipc.logOut()
   },
 }
@@ -32,7 +31,6 @@ const register = (eventName, isPromiseApi = true) => {
 register('add:project')
 register('begin:auth')
 register('on:auth:message', false)
-register('clear:github:cookies')
 register('close:browser')
 register('close:project')
 register('external:open')
@@ -57,6 +55,7 @@ register('on:spec:changed', false)
 register('on:project:error', false)
 register('on:project:warning', false)
 register('ping:api:server')
+register('ping:baseUrl')
 register('remove:project')
 register('request:access')
 register('setup:dashboard:project')
@@ -66,5 +65,6 @@ register('updater:run', false)
 register('window:open')
 register('window:close')
 register('onboarding:closed')
+register('set:clipboard:text')
 
 export default ipc

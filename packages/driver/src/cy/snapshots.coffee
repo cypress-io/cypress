@@ -1,6 +1,7 @@
 _ = require("lodash")
 $ = require("jquery")
 
+$dom = require('../dom')
 $SnapshotsCss = require("./snapshots_css")
 
 HIGHLIGHT_ATTR = "data-cypress-el"
@@ -83,7 +84,7 @@ create = ($$, state) ->
         </style>
         <p>&lt;iframe&gt; placeholder for #{iframe.src}</p>
       """
-      $placeholder[0].src = "data:text/html;charset=utf-8,#{encodeURI(contents)}"
+      $placeholder[0].src = "data:text/html;base64,#{window.btoa(contents)}"
 
   getStyles = (snapshot) ->
     styleIds = snapshotsMap.get(snapshot)
@@ -114,52 +115,67 @@ create = ($$, state) ->
 
   createSnapshot = (name, $elToHighlight) ->
     ## create a unique selector for this el
-    $elToHighlight.attr(HIGHLIGHT_ATTR, true) if $elToHighlight?.attr
+    ## but only IF the subject is truly an element. For example
+    ## we might be wrapping a primitive like "$([1, 2]).first()"
+    ## which arrives here as number 1
+    ## jQuery v2 allowed to silently try setting 1[HIGHLIGHT_ATTR] doing nothing
+    ## jQuery v3 runs in strict mode and throws an error if you attempt to set a property
 
-    ## TODO: throw error here if cy is undefined!
+    ## TODO: in firefox sometimes this throws a cross-origin access error
+    try
+      isJqueryElement = $dom.isElement($elToHighlight) and $dom.isJquery($elToHighlight)
 
-    $body = $$("body").clone()
+      if isJqueryElement
+        $elToHighlight.attr(HIGHLIGHT_ATTR, true)
 
-    ## for the head and body, get an array of all CSS,
-    ## whether it's links or style tags
-    ## if it's same-origin, it will get the actual styles as a string
-    ## it it's cross-domain, it will get a reference to the link's href
-    { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
+      ## TODO: throw error here if cy is undefined!
+    
+      $body = $$("body").clone()
 
-    ## replaces iframes with placeholders
-    replaceIframes($body)
+      ## for the head and body, get an array of all CSS,
+      ## whether it's links or style tags
+      ## if it's same-origin, it will get the actual styles as a string
+      ## it it's cross-domain, it will get a reference to the link's href
+      { headStyleIds, bodyStyleIds } = snapshotsCss.getStyleIds()
 
-    ## remove tags we don't want in body
-    $body.find("script,link[rel='stylesheet'],style").remove()
+      ## replaces iframes with placeholders
+      replaceIframes($body)
 
-    ## here we need to figure out if we're in a remote manual environment
-    ## if so we need to stringify the DOM:
-    ## 1. grab all inputs / textareas / options and set their value on the element
-    ## 2. convert DOM to string: body.prop("outerHTML")
-    ## 3. send this string via websocket to our server
-    ## 4. server rebroadcasts this to our client and its stored as a property
+      ## remove tags we don't want in body
+      $body.find("script,link[rel='stylesheet'],style").remove()
 
-    ## its also possible for us to store the DOM string completely on the server
-    ## without ever sending it back to the browser (until its requests).
-    ## we could just store it in memory and wipe it out intelligently.
-    ## this would also prevent having to store the DOM structure on the client,
-    ## which would reduce memory, and some CPU operations
+      ## here we need to figure out if we're in a remote manual environment
+      ## if so we need to stringify the DOM:
+      ## 1. grab all inputs / textareas / options and set their value on the element
+      ## 2. convert DOM to string: body.prop("outerHTML")
+      ## 3. send this string via websocket to our server
+      ## 4. server rebroadcasts this to our client and its stored as a property
 
-    ## now remove it after we clone
-    $elToHighlight.removeAttr(HIGHLIGHT_ATTR) if $elToHighlight?.removeAttr
+      ## its also possible for us to store the DOM string completely on the server
+      ## without ever sending it back to the browser (until its requests).
+      ## we could just store it in memory and wipe it out intelligently.
+      ## this would also prevent having to store the DOM structure on the client,
+      ## which would reduce memory, and some CPU operations
 
-    ## preserve attributes on the <html> tag
-    htmlAttrs = getHtmlAttrs($$("html")[0])
+      ## now remove it after we clone
+      if isJqueryElement
+        $elToHighlight.removeAttr(HIGHLIGHT_ATTR)
 
-    snapshot = {
-      name
-      htmlAttrs
-      body: $body
-    }
+      ## preserve attributes on the <html> tag
+      htmlAttrs = getHtmlAttrs($$("html")[0])
 
-    snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
+      snapshot = {
+        name
+        htmlAttrs
+        body: $body
+      }
 
-    return snapshot
+      snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
+
+      return snapshot
+
+    catch e
+      null
 
   return {
     createSnapshot

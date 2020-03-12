@@ -1,21 +1,7 @@
-/* eslint-disable
-    brace-style,
-    no-cond-assign,
-    no-console,
-    no-unused-vars,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS201: Simplify complex destructure assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../spec_helper')
+require('mocha-banner').register()
 
+const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
 const niv = require('npm-install-version')
@@ -23,6 +9,7 @@ const path = require('path')
 const http = require('http')
 const human = require('human-interval')
 const morgan = require('morgan')
+const stream = require('stream')
 const express = require('express')
 const Promise = require('bluebird')
 const snapshot = require('snap-shot-it')
@@ -31,12 +18,13 @@ const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
 const fs = require(`${root}../lib/util/fs`)
 const allowDestroy = require(`${root}../lib/util/server_destroy`)
-const user = require(`${root}../lib/user`)
 const cypress = require(`${root}../lib/cypress`)
-const Project = require(`${root}../lib/project`)
 const screenshots = require(`${root}../lib/screenshots`)
 const videoCapture = require(`${root}../lib/video_capture`)
 const settings = require(`${root}../lib/util/settings`)
+
+// mutates mocha test runner - needed for `test.titlePath`
+require(`${root}../lib/project`)
 
 cp = Promise.promisifyAll(cp)
 
@@ -49,41 +37,76 @@ Promise.config({
 const e2ePath = Fixtures.projectPath('e2e')
 const pathUpToProjectName = Fixtures.projectPath('')
 
-const stackTraceLinesRe = /^(\s+)at\s(.+)/gm
+const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
+
+const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g
+const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 
-const replaceStackTraceLines = (str) => str.replace(stackTraceLinesRe, '$1at stack trace line')
+// this captures an entire stack trace and replaces it with [stack trace lines]
+// so that the stdout can contain stack traces of different lengths
+// '@' will be present in firefox stack trace lines
+// 'at' will be present in chrome stack trace lines
+const replaceStackTraceLines = (str) => {
+  return str.replace(stackTraceLinesRe, (match, ...parts) => {
+    let pre = parts[0]
+    const isFirefoxStack = parts[1] === '@'
+    let post = parts[4]
+
+    if (isFirefoxStack) {
+      if (pre === '\n') {
+        pre = '\n    '
+      } else {
+        pre += pre.slice(1).repeat(2)
+      }
+
+      post = post.slice(-1)
+    }
+
+    return `${pre}[stack trace lines]${post}`
+  })
+}
 
 const replaceBrowserName = function (str, key, customBrowserPath, browserName, version, headless, whitespace) {
-  //# get the padding for the existing browser string
+  // get the padding for the existing browser string
   const lengthOfExistingBrowserString = _.sum([browserName.length, version.length, _.get(headless, 'length', 0), whitespace.length])
 
-  //# this ensures we add whitespace so the border is not shifted
+  // this ensures we add whitespace so the border is not shifted
   return key + customBrowserPath + _.padEnd('FooBrowser 88', lengthOfExistingBrowserString)
 }
 
 const replaceDurationSeconds = function (str, p1, p2, p3, p4) {
-  //# get the padding for the existing duration
+  // get the padding for the existing duration
   const lengthOfExistingDuration = _.sum([(p2 != null ? p2.length : undefined) || 0, p3.length, p4.length])
 
   return p1 + _.padEnd('X seconds', lengthOfExistingDuration)
 }
 
-const replaceDurationFromReporter = (str, p1, p2, p3) => //# duration='1589'
-
-{
+// duration='1589'
+const replaceDurationFromReporter = (str, p1, p2, p3) => {
   return p1 + _.padEnd('X', p2.length, 'X') + p3
 }
 
-const replaceDurationInTables = (str, p1, p2) => //# when swapping out the duration, ensure we pad the
-//# full length of the duration so it doesn't shift content
-{
+const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
+
+// when swapping out the duration, ensure we pad the
+// full length of the duration so it doesn't shift content
+const replaceDurationInTables = (str, p1, p2) => {
   return _.padStart('XX:XX', p1.length + p2.length)
 }
 
+// could be (1 second) or (10 seconds)
+// need to account for shortest and longest
+const replaceParenTime = (str, p1) => {
+  return _.padStart('(X second)', p1.length)
+}
+
+const replaceScreenshotDims = (str, p1) => _.padStart('(YxX)', p1.length)
+
 const replaceUploadingResults = function (orig, ...rest) {
-  const adjustedLength = Math.max(rest.length, 2); const match = rest.slice(0, adjustedLength - 2); const offset = rest[adjustedLength - 2]; const string = rest[adjustedLength - 1]
+  const adjustedLength = Math.max(rest.length, 2)
+  const match = rest.slice(0, adjustedLength - 2)
   const results = match[1].split('\n').map((res) => res.replace(/\(\d+\/(\d+)\)/g, '(*/$1)'))
   .sort()
   .join('\n')
@@ -93,50 +116,79 @@ const replaceUploadingResults = function (orig, ...rest) {
 }
 
 const normalizeStdout = function (str, options = {}) {
-  //# remove all of the dynamic parts of stdout
-  //# to normalize against what we expected
-  str = str
-  .split(pathUpToProjectName)
-  .join('/foo/bar/.projects')
-  .replace(availableBrowsersRe, '$1browser1, browser2, browser3')
-  .replace(browserNameVersionRe, replaceBrowserName)
-  .replace(/\s\(\d+([ms]|ms)\)/g, '') //# numbers in parenths
-  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables) //# durations in tables
-  .replace(/(coffee|js)-\d{3}/g, '$1-456')
-  .replace(/(.+)(\/.+\.mp4)/g, '$1/abc123.mp4') //# replace dynamic video names
-  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, '$11.2.3') //# replace Cypress: 2.1.0
-  .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
-  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter) //# replace duration='1589'
-  .replace(/\((\d+ minutes?,\s+)?\d+ seconds?\)/g, '(X seconds)')
-  .replace(/\r/g, '')
-  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults) //# replaces multiple lines of uploading results (since order not guaranteed)
+  const { normalizeStdoutAvailableBrowsers } = options
 
-  if ((options.browser !== undefined) && (options.browser !== 'electron')) {
-    str = str.replace(/\(\d{2,4}x\d{2,4}\)/g, '(YYYYxZZZZ)') //# screenshot dimensions
+  // remove all of the dynamic parts of stdout
+  // to normalize against what we expected
+  str = str
+  // /Users/jane/........../ -> //foo/bar/.projects/
+  // (Required when paths are printed outside of our own formatting)
+  .split(pathUpToProjectName).join('/foo/bar/.projects')
+
+  // unless normalization is explicitly turned off then
+  // always normalize the stdout replacing the browser text
+  if (normalizeStdoutAvailableBrowsers !== false) {
+    // usually we are not interested in the browsers detected on this particular system
+    // but some tests might filter / change the list of browsers
+    // in that case the test should pass "normalizeStdoutAvailableBrowsers: false" as options
+    str = str.replace(availableBrowsersRe, '$1browser1, browser2, browser3')
   }
 
-  return str.split('\n')
-  .map(replaceStackTraceLines)
-  .join('\n')
+  str = str
+  .replace(browserNameVersionRe, replaceBrowserName)
+  // numbers in parenths
+  .replace(/\s\(\d+([ms]|ms)\)/g, '')
+  // 12:35 -> XX:XX
+  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
+  .replace(/(coffee|js)-\d{3}/g, '$1-456')
+  // Cypress: 2.1.0 -> Cypress: 1.2.3
+  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, '$11.2.3')
+  // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
+  .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
+  // 15 seconds -> X second
+  .replace(/(Duration\:\s+)(\d+\sminutes?,\s+)?(\d+\sseconds?)(\s+)/g, replaceDurationSeconds)
+  // duration='1589' -> duration='XXXX'
+  .replace(/(duration\=\')(\d+)(\')/g, replaceDurationFromReporter)
+  // (15 seconds) -> (XX seconds)
+  .replace(/(\((\d+ minutes?,\s+)?\d+ seconds?\))/g, replaceParenTime)
+  .replace(/\r/g, '')
+  // replaces multiple lines of uploading results (since order not guaranteed)
+  .replace(/(Uploading Results.*?\n\n)((.*-.*[\s\S\r]){2,}?)(\n\n)/g, replaceUploadingResults)
+  // fix "Require stacks" for CI
+  .replace(/^(\- )(\/.*\/packages\/server\/)(.*)$/gm, '$1$3')
+  // Different browsers have different cross-origin error messages
+  .replace(crossOriginErrorRe, '[Cross origin error message]')
+
+  if (options.sanitizeScreenshotDimensions) {
+    // screenshot dimensions
+    str = str.replace(/(\(\d+x\d+\))/g, replaceScreenshotDims)
+  }
+
+  return replaceStackTraceLines(str)
+}
+
+const ensurePort = function (port) {
+  if (port === 5566) {
+    throw new Error('Specified port cannot be on 5566 because it conflicts with --inspect-brk=5566')
+  }
 }
 
 const startServer = function (obj) {
-  let s; let srv
   const { onServer, port, https } = obj
+
+  ensurePort(port)
 
   const app = express()
 
-  if (https) {
-    srv = httpsProxy.httpsServer(app)
-  } else {
-    srv = http.Server(app)
-  }
+  const srv = https ? httpsProxy.httpsServer(app) : new http.Server(app)
 
   allowDestroy(srv)
 
   app.use(morgan('dev'))
 
-  if (s = obj.static) {
+  const s = obj.static
+
+  if (s) {
     const opts = _.isObject(s) ? s : {}
 
     app.use(express.static(e2ePath, opts))
@@ -144,6 +196,7 @@ const startServer = function (obj) {
 
   return new Promise((resolve) => {
     return srv.listen(port, () => {
+      // eslint-disable-next-line no-console
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
         onServer(app, srv)
@@ -167,32 +220,158 @@ const copy = function () {
 
     debug('Copying Circle Artifacts', ca, videosFolder, screenshotsFolder)
 
-    //# copy each of the screenshots and videos
-    //# to artifacts using each basename of the folders
+    // copy each of the screenshots and videos
+    // to artifacts using each basename of the folders
     return Promise.join(
       screenshots.copy(
         screenshotsFolder,
-        path.join(ca, path.basename(screenshotsFolder))
+        path.join(ca, path.basename(screenshotsFolder)),
       ),
       videoCapture.copy(
         videosFolder,
-        path.join(ca, path.basename(videosFolder))
-      )
+        path.join(ca, path.basename(videosFolder)),
+      ),
     )
   }
 }
 
-module.exports = {
+const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
+  // if we've been told to skip this test
+  // or if we specified a particular browser and this
+  // doesn't match the one we're currently trying to run...
+  if (skip || (specifiedBrowser && (specifiedBrowser !== browser))) {
+    // then skip this test
+    return it.skip
+  }
+
+  if (only) {
+    return it.only
+  }
+
+  return it
+}
+
+function getBrowsers (browserPattern) {
+  if (!browserPattern.length) {
+    return DEFAULT_BROWSERS
+  }
+
+  let selected = []
+
+  const addBrowsers = _.clone(browserPattern)
+  const removeBrowsers = _.remove(addBrowsers, (b) => b.startsWith('!')).map((b) => b.slice(1))
+
+  if (removeBrowsers.length) {
+    selected = _.without(DEFAULT_BROWSERS, ...removeBrowsers)
+  } else {
+    selected = _.intersection(DEFAULT_BROWSERS, addBrowsers)
+  }
+
+  if (!selected.length) {
+    throw new Error(`options.browser: "${browserPattern}" matched no browsers`)
+  }
+
+  return selected
+}
+
+const normalizeToArray = (value) => {
+  if (value && !_.isArray(value)) {
+    return [value]
+  }
+
+  return value
+}
+
+const localItFn = function (title, opts = {}) {
+  opts.browser = normalizeToArray(opts.browser)
+
+  const DEFAULT_OPTIONS = {
+    exit: process.env.EXIT,
+    only: false,
+    skip: false,
+    browser: [],
+    snapshot: false,
+    spec: 'no spec name supplied!',
+    onStdout: _.noop,
+    onRun (execFn, browser, ctx) {
+      return execFn()
+    },
+  }
+
+  const options = _.defaults({}, opts, DEFAULT_OPTIONS)
+
+  if (!title) {
+    throw new Error('e2e.it(...) must be passed a title as the first argument')
+  }
+
+  // LOGIC FOR AUTOGENERATING DYNAMIC TESTS
+  // - create multiple tests for each default browser
+  // - if browser is specified in options:
+  //   ...skip the tests for each default browser if that browser
+  //   ...does not match the specified one (used in CI)
+
+  // run the tests for all the default browsers, or if a browser
+  // has been specified, only run it for that
+  const specifiedBrowser = process.env.BROWSER
+  const browsersToTest = getBrowsers(options.browser)
+
+  const browserToTest = function (browser) {
+    const mochaItFn = getMochaItFn(options.only, options.skip, browser, specifiedBrowser)
+
+    const testTitle = `${title} [${browser}]`
+
+    return mochaItFn(testTitle, function () {
+      if (options.useSeparateBrowserSnapshots) {
+        title = testTitle
+      }
+
+      const originalTitle = this.test.parent.titlePath().concat(title).join(' / ')
+
+      const ctx = this
+
+      const execFn = (overrides = {}) => {
+        return e2e.exec(ctx, _.extend({ originalTitle }, options, overrides, { browser }))
+      }
+
+      return options.onRun(execFn, browser, ctx)
+    })
+  }
+
+  return _.each(browsersToTest, browserToTest)
+}
+
+localItFn.only = function (title, options) {
+  options.only = true
+
+  return localItFn(title, options)
+}
+
+localItFn.skip = function (title, options) {
+  options.skip = true
+
+  return localItFn(title, options)
+}
+
+const maybeVerifyExitCode = (expectedExitCode, fn) => {
+  // bail if this is explicitly null so
+  // devs can turn off checking the exit code
+  if (expectedExitCode === null) {
+    return
+  }
+
+  return fn()
+}
+
+const e2e = {
+
+  replaceStackTraceLines,
+
   normalizeStdout,
+
+  it: localItFn,
 
   snapshot (...args) {
     args = _.compact(args)
-
-    //# grab the last element in index
-    const index = args.length - 1
-
-    //# normalize the stdout of it
-    args[index] = normalizeStdout(args[index])
 
     return snapshot.apply(null, args)
   },
@@ -200,9 +379,11 @@ module.exports = {
   setup (options = {}) {
     let npmI
 
-    if (npmI = options.npmInstall) {
+    npmI = options.npmInstall
+
+    if (npmI) {
       before(function () {
-        //# npm install needs extra time
+        // npm install needs extra time
         this.timeout(human('2 minutes'))
 
         return cp.execAsync('npm install', {
@@ -213,7 +394,7 @@ module.exports = {
           if (_.isArray(npmI)) {
             const copyToE2ENodeModules = (module) => {
               return fs.copyAsync(
-                path.resolve('node_modules', module), Fixtures.path(`projects/e2e/node_modules/${module}`)
+                path.resolve('node_modules', module), Fixtures.path(`projects/e2e/node_modules/${module}`),
               )
             }
 
@@ -221,23 +402,23 @@ module.exports = {
             .map(npmI, niv.install)
             .then(() => Promise.map(npmI, copyToE2ENodeModules))
           }
-        }).then(() => //# symlinks mess up fs.copySync
-        //# and bin files aren't necessary for these tests
-        {
+          // symlinks mess up fs.copySync
+          // and bin files aren't necessary for these tests
+        }).then(() => {
           return fs.removeAsync(Fixtures.path('projects/e2e/node_modules/.bin'))
         })
       })
 
-      after(() => //# now cleanup the node modules after because these add a lot
-      //# of copy time for the Fixtures scaffolding
-      {
+      // now cleanup the node modules after because these add a lot
+      // of copy time for the Fixtures scaffolding
+      after(() => {
         return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
       })
     }
 
     beforeEach(function () {
-      //# after installing node modules copying all of the fixtures
-      //# can take a long time (5-15 secs)
+      // after installing node modules copying all of the fixtures
+      // can take a long time (5-15 secs)
       this.timeout(human('2 minutes'))
 
       Fixtures.scaffold()
@@ -247,7 +428,9 @@ module.exports = {
       return Promise.try(() => {
         let servers
 
-        if (servers = options.servers) {
+        servers = options.servers
+
+        if (servers) {
           servers = [].concat(servers)
 
           return Promise.map(servers, startServer)
@@ -258,42 +441,46 @@ module.exports = {
 
         this.servers = null
       }).then(() => {
-        let s
+        const s = options.settings
 
-        if (s = options.settings) {
+        if (s) {
           return settings.write(e2ePath, s)
         }
       })
     })
 
     return afterEach(function () {
-      let s
-
       process.env = _.clone(env)
 
       this.timeout(human('2 minutes'))
 
       Fixtures.remove()
 
-      if (s = this.servers) {
+      const s = this.servers
+
+      if (s) {
         return Promise.map(s, stopServer)
       }
     })
   },
 
   options (ctx, options = {}) {
-    let spec
-
     _.defaults(options, {
-      browser: process.env.BROWSER,
+      browser: 'electron',
       project: e2ePath,
-      timeout: options.exit === false ? 3000000 : 120000,
+      timeout: 120000,
+      originalTitle: null,
+      expectedExitCode: 0,
+      sanitizeScreenshotDimensions: false,
+      normalizeStdoutAvailableBrowsers: true,
     })
 
     ctx.timeout(options.timeout)
 
-    if (spec = options.spec) {
-      //# normalize into array and then prefix
+    const { spec } = options
+
+    if (spec) {
+      // normalize into array and then prefix
       const specs = spec.split(',').map((spec) => {
         if (path.isAbsolute(spec)) {
           return spec
@@ -302,7 +489,7 @@ module.exports = {
         return path.join(options.project, 'cypress', 'integration', spec)
       })
 
-      //# normalize the path to the spec
+      // normalize the path to the spec
       options.spec = specs.join(',')
     }
 
@@ -310,9 +497,10 @@ module.exports = {
   },
 
   args (options = {}) {
-    let browser
+    debug('converting options to args %o', { options })
+
     const args = [
-      //# hides a user warning to go through NPM module
+      // hides a user warning to go through NPM module
       `--cwd=${process.cwd()}`,
       `--run-project=${options.project}`,
     ]
@@ -322,11 +510,12 @@ module.exports = {
     }
 
     if (options.port) {
+      ensurePort(options.port)
       args.push(`--port=${options.port}`)
     }
 
-    if (options.headed) {
-      args.push('--headed')
+    if (!_.isUndefined(options.headed)) {
+      args.push('--headed', options.headed)
     }
 
     if (options.record) {
@@ -357,8 +546,8 @@ module.exports = {
       args.push(`--reporter-options=${options.reporterOptions}`)
     }
 
-    if (browser = (options.browser)) {
-      args.push(`--browser=${browser}`)
+    if (options.browser) {
+      args.push(`--browser=${options.browser}`)
     }
 
     if (options.config) {
@@ -373,12 +562,22 @@ module.exports = {
       args.push('--output-path', options.outputPath)
     }
 
-    if (options.exit != null) {
+    if (options.exit === false) {
+      // prevent timeout in --no-exit mode (for debugging)
+      options.timeout = 3000000
       args.push('--exit', options.exit)
     }
 
     if (options.inspectBrk) {
       args.push('--inspect-brk')
+    }
+
+    if (options.tag) {
+      args.push(`--tag=${options.tag}`)
+    }
+
+    if (options.configFile) {
+      args.push(`--config-file=${options.configFile}`)
     }
 
     return args
@@ -390,11 +589,11 @@ module.exports = {
 
     return cypress.start(args)
     .then(() => {
-      let code
+      const { expectedExitCode } = options
 
-      if ((code = options.expectedExitCode) != null) {
-        expect(process.exit).to.be.calledWith(code)
-      }
+      maybeVerifyExitCode(expectedExitCode, () => {
+        expect(process.exit).to.be.calledWith(expectedExitCode)
+      })
     })
   },
 
@@ -408,49 +607,57 @@ module.exports = {
     let stderr = ''
 
     const exit = function (code) {
-      let expected
+      const { expectedExitCode } = options
 
-      if ((expected = options.expectedExitCode) != null) {
-        expect(code).to.eq(expected, 'expected exit code')
-      }
+      maybeVerifyExitCode(expectedExitCode, () => {
+        expect(code).to.eq(expectedExitCode, 'expected exit code')
+      })
 
-      //# snapshot the stdout!
+      // snapshot the stdout!
       if (options.snapshot) {
-        //# enable callback to modify stdout
-        let matches; let ostd; let str
+        // enable callback to modify stdout
+        const ostd = options.onStdout
 
-        if (ostd = options.onStdout) {
-          stdout = ostd(stdout)
+        if (ostd) {
+          const newStdout = ostd(stdout)
+
+          if (_.isString(newStdout)) {
+            stdout = newStdout
+          }
         }
 
-        //# if we have browser in the stdout make
-        //# sure its legit
-        if (matches = browserNameVersionRe.exec(stdout)) {
-          let browserName; let customBrowserPath; let headless; let key; let version;
+        // if we have browser in the stdout make
+        // sure its legit
+        const matches = browserNameVersionRe.exec(stdout)
 
-          [str, key, customBrowserPath, browserName, version, headless] = matches
+        if (matches) {
+          // eslint-disable-next-line no-unused-vars
+          const [str, key, customBrowserPath, browserName, version, headless] = matches
 
-          const {
-            browser,
-          } = options
+          const { browser } = options
 
           if (browser && !customBrowserPath) {
             expect(_.capitalize(browser)).to.eq(browserName)
           }
 
-          expect(parseFloat(version)).to.be.a('number')
+          expect(parseFloat(version)).to.be.a.number
 
-          //# if we are in headed mode or in a browser other
-          //# than electron
-          if (options.headed || (browser && (browser !== 'electron'))) {
+          // if we are in headed mode or headed is undefined in a browser other
+          // than electron
+          if (options.headed || (_.isUndefined(options.headed) && browser && browser !== 'electron')) {
             expect(headless).not.to.exist
           } else {
             expect(headless).to.include('(headless)')
           }
         }
 
-        str = normalizeStdout(stdout, options)
-        snapshot(str)
+        const str = normalizeStdout(stdout, options)
+
+        if (options.originalTitle) {
+          snapshot(options.originalTitle, str, { allowSharedSnapshot: true })
+        } else {
+          snapshot(str)
+        }
       }
 
       return {
@@ -461,32 +668,42 @@ module.exports = {
     }
 
     return new Promise((resolve, reject) => {
+      debug('spawning Cypress %o', { args })
       const sp = cp.spawn('node', args, {
         env: _.chain(process.env)
         .omit('CYPRESS_DEBUG')
         .extend({
-          //# FYI: color will already be disabled
-          //# because we are piping the child process
+          // FYI: color will be disabled
+          // because we are piping the child process
           COLUMNS: 100,
           LINES: 24,
         })
         .defaults({
+          FAKE_CWD_PATH: '/XXX/XXX/XXX',
           DEBUG_COLORS: '1',
-
-          //# prevent any Compression progress
-          //# messages from showing up
+          // prevent any Compression progress
+          // messages from showing up
           VIDEO_COMPRESSION_THROTTLE: 120000,
 
-          //# don't fail our own tests running from forked PR's
+          // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
         })
         .value(),
       })
 
-      //# pipe these to our current process
-      //# so we can see them in the terminal
-      sp.stdout.pipe(process.stdout)
-      sp.stderr.pipe(process.stderr)
+      const ColorOutput = function () {
+        const colorOutput = new stream.Transform()
+
+        colorOutput._transform = (chunk, encoding, cb) => cb(null, chalk.magenta(chunk.toString()))
+
+        return colorOutput
+      }
+
+      // pipe these to our current process
+      // so we can see them in the terminal
+      // color it so we can tell which is test output
+      sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
+      sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
 
       sp.stdout.on('data', (buf) => stdout += buf.toString())
       sp.stderr.on('data', (buf) => stderr += buf.toString())
@@ -512,3 +729,5 @@ module.exports = {
     }
   },
 }
+
+module.exports = e2e

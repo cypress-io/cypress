@@ -41,6 +41,7 @@ describe "src/cy/commands/angular", ->
           cy.ng("binding", "not-found")
 
         it "cancels additional finds when aborted", (done) ->
+          cy.timeout(1000)
           cy.stub(Cypress.runner, "stop")
 
           retry = _.after 2, =>
@@ -108,6 +109,7 @@ describe "src/cy/commands/angular", ->
           cy.ng("repeater", "not-found")
 
         it "cancels additional finds when aborted", (done) ->
+          cy.timeout(1000)
           cy.stub(Cypress.runner, "stop")
 
           retry = _.after 2, =>
@@ -199,7 +201,7 @@ describe "src/cy/commands/angular", ->
         ## to retry after the first one resolves
         cy.ng("model", "missing-input")
         .then ->
-          retry.reset()
+          retry.resetHistory()
         .wait(100)
         .then ->
           expect(retry.callCount).to.eq 0
@@ -221,6 +223,7 @@ describe "src/cy/commands/angular", ->
             done()
 
         it "cancels additional finds when aborted", (done) ->
+          cy.timeout(1000)
           cy.stub(Cypress.runner, "stop")
 
           retry = _.after 2, =>

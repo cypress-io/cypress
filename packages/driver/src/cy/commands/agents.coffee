@@ -4,13 +4,14 @@ sinon = require("sinon")
 Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 counts = null
 
 sinon.setFormatter($utils.stringifyArg.bind($utils))
 
 createSandbox = ->
-  sinon.sandbox.create().usingPromise(Promise)
+  sinon.createSandbox().usingPromise(Promise)
 
 display = (name) ->
   switch name
@@ -89,7 +90,7 @@ onInvoke = (Cypress, obj, args) ->
   Cypress.log(logProps)
 
 onError = (err) ->
-  $utils.throwErr(err)
+  $errUtils.throwErr(err)
 
 ## create a global sandbox
 ## to be used through all the tests
@@ -237,7 +238,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     stub: stub
 
     agents: ->
-      $utils.warnByPath("agents.deprecated_warning")
+      $errUtils.warnByPath("agents.deprecated_warning")
 
       return {stub, spy}
   })

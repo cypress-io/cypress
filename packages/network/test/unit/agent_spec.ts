@@ -15,6 +15,7 @@ import {
   regenerateRequestHead, CombinedAgent,
 } from '../../lib/agent'
 import { AsyncServer, Servers } from '../support/servers'
+import { allowDestroy } from '../../lib/allow-destroy'
 
 const expect = chai.expect
 
@@ -174,12 +175,14 @@ describe('lib/agent', function () {
         })
 
         it('HTTP websocket connections can be established and used', function () {
+          const socket = Io.client(`http://localhost:${HTTP_PORT}`, {
+            agent: this.agent,
+            transports: ['websocket'],
+            rejectUnauthorized: false,
+          })
+
           return new Bluebird((resolve) => {
-            Io.client(`http://localhost:${HTTP_PORT}`, {
-              agent: this.agent,
-              transports: ['websocket'],
-              rejectUnauthorized: false,
-            }).on('message', resolve)
+            socket.on('message', resolve)
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
@@ -187,16 +190,20 @@ describe('lib/agent', function () {
               expect(this.debugProxy.requests[0].ws).to.be.true
               expect(this.debugProxy.requests[0].url).to.include('http://localhost:31080')
             }
+
+            socket.close()
           })
         })
 
         it('HTTPS websocket connections can be established and used', function () {
+          const socket = Io.client(`https://localhost:${HTTPS_PORT}`, {
+            agent: this.agent,
+            transports: ['websocket'],
+            rejectUnauthorized: false,
+          })
+
           return new Bluebird((resolve) => {
-            Io.client(`https://localhost:${HTTPS_PORT}`, {
-              agent: this.agent,
-              transports: ['websocket'],
-              rejectUnauthorized: false,
-            }).on('message', resolve)
+            socket.on('message', resolve)
           })
           .then((msg) => {
             expect(msg).to.eq('It worked!')
@@ -205,6 +212,20 @@ describe('lib/agent', function () {
                 url: 'localhost:31443',
               })
             }
+
+            socket.close()
+          })
+        })
+
+        // https://github.com/cypress-io/cypress/issues/5729
+        it('does not warn when making a request to an IP address', function () {
+          const warningStub = sinon.spy(process, 'emitWarning')
+
+          return this.request({
+            url: `https://127.0.0.1:${HTTPS_PORT}/get`,
+          })
+          .then(() => {
+            expect(warningStub).to.not.be.called
           })
         })
       })
@@ -273,9 +294,11 @@ describe('lib/agent', function () {
 
       it('#createUpstreamProxyConnection throws when connection is accepted then closed', function () {
         const proxy = Bluebird.promisifyAll(
-          net.createServer((socket) => {
-            socket.end()
-          })
+          allowDestroy(
+            net.createServer((socket) => {
+              socket.end()
+            }),
+          ),
         ) as net.Server & AsyncServer
 
         const proxyPort = PROXY_PORT + 2
@@ -295,7 +318,7 @@ describe('lib/agent', function () {
         .catch((e) => {
           expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: The upstream proxy closed the socket after connecting but before sending a response.')
 
-          return proxy.closeAsync()
+          return proxy.destroyAsync()
         })
       })
     })
@@ -424,14 +447,15 @@ describe('lib/agent', function () {
 
       it(`detects correctly from ${testCase.protocol} websocket requests`, () => {
         const spy = sinon.spy(testCase.agent, 'addRequest')
+        const socket = Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
+          agent: <any>testCase.agent,
+          transports: ['websocket'],
+          timeout: 1,
+          rejectUnauthorized: false,
+        })
 
         return new Bluebird((resolve, reject) => {
-          Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
-            agent: <any>testCase.agent,
-            transports: ['websocket'],
-            timeout: 1,
-            rejectUnauthorized: false,
-          })
+          socket
           .on('message', reject)
           .on('connect_error', resolve)
         })
@@ -439,6 +463,8 @@ describe('lib/agent', function () {
           const requestOptions = spy.getCall(0).args[1]
 
           expect(isRequestHttps(requestOptions)).to.equal(testCase.expect)
+
+          socket.close()
         })
       })
     })

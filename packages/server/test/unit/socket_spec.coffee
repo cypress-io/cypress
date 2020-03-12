@@ -18,6 +18,7 @@ preprocessor = require("#{root}lib/plugins/preprocessor")
 fs           = require("#{root}lib/util/fs")
 open         = require("#{root}lib/util/open")
 Fixtures     = require("#{root}/test/support/helpers/fixtures")
+firefoxUtil  = require("#{root}lib/browsers/firefox-util").default
 
 describe "lib/socket", ->
   beforeEach ->
@@ -58,10 +59,10 @@ describe "lib/socket", ->
         {proxyUrl, socketIoRoute} = @cfg
 
         ## force node into legit proxy mode like a browser
-        agent = new httpsAgent("http://localhost:#{@cfg.port}")
+        @agent = new httpsAgent("http://localhost:#{@cfg.port}")
 
         @client = socketIo.client(proxyUrl, {
-          agent: agent
+          agent: @agent
           path: socketIoRoute
           transports: ["websocket"]
           parser: socketIo.circularParser
@@ -89,6 +90,7 @@ describe "lib/socket", ->
 
     context "on(automation:request)", ->
       describe "#onAutomation", ->
+        extensionBackgroundPage = null
         before ->
           global.chrome = {
             cookies: {
@@ -107,13 +109,14 @@ describe "lib/socket", ->
               executeScript: ->
             }
           }
+          extensionBackgroundPage =  require('@packages/extension/app/background')
 
         beforeEach (done) ->
           @socket.io.on "connection", (@extClient) =>
             @extClient.on "automation:client:connected", ->
               done()
 
-          extension.connect(@cfg.proxyUrl, @cfg.socketIoRoute, socketIo.client)
+          extensionBackgroundPage.connect(@cfg.proxyUrl, @cfg.socketIoRoute, { agent: @agent })
 
         afterEach ->
           @extClient.disconnect()
@@ -143,7 +146,7 @@ describe "lib/socket", ->
 
         it "does not clear any namespaced cookies", (done) ->
           sinon.stub(chrome.cookies, "getAll")
-          .withArgs({name: "session"})
+          .withArgs({name: "session", domain: "google.com"})
           .yieldsAsync([
             {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123, a: "a", b: "c"}
           ])
@@ -199,7 +202,7 @@ describe "lib/socket", ->
             done()
 
         it "returns true after retrying", (done) ->
-          sinon.stub(extension.app, "query").resolves(true)
+          sinon.stub(extensionBackgroundPage, "query").resolves(true)
 
           ## just force isSocketConnected to return false until the 4th retry
           iSC = sinon.stub(@socket, "isSocketConnected")
@@ -393,6 +396,24 @@ describe "lib/socket", ->
           expect(resp.error.timedOut).to.be.true
           done()
 
+    context "on(firefox:force:gc)", ->
+      it "calls firefoxUtil#collectGarbage", (done) ->
+        sinon.stub(firefoxUtil, "collectGarbage").resolves()
+
+        @client.emit "backend:request", "firefox:force:gc", (resp) =>
+          expect(firefoxUtil.collectGarbage).to.be.calledOnce
+          expect(resp.error).to.be.undefined
+          done()
+
+      it "errors when collectGarbage throws", (done) ->
+        err = new Error('foo')
+        sinon.stub(firefoxUtil, "collectGarbage").throws(err)
+
+        @client.emit "backend:request", "firefox:force:gc", (resp) =>
+          expect(firefoxUtil.collectGarbage).to.be.calledOnce
+          expect(resp.error.message).to.eq(err.message)
+          done()
+
     context "on(save:app:state)", ->
       it "calls onSavedStateChanged with the state", (done) ->
         @client.emit "save:app:state", { reporterWidth: 500 }, =>
@@ -427,13 +448,13 @@ describe "lib/socket", ->
     context "constructor", ->
       it "listens for 'file:updated' on preprocessor", ->
         @cfg.watchForFileChanges = true
-        socket = Socket(@cfg)
+        socket = new Socket(@cfg)
         expect(preprocessor.emitter.on).to.be.calledWith("file:updated")
 
       it "does not listen for 'file:updated' if config.watchForFileChanges is false", ->
         preprocessor.emitter.on.reset()
         @cfg.watchForFileChanges = false
-        socket = Socket(@cfg)
+        socket = new Socket(@cfg)
         expect(preprocessor.emitter.on).not.to.be.called
 
     context "#close", ->

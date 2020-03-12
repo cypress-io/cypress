@@ -1,14 +1,17 @@
+.fa { &:not(.fa-spin) { animation: none; } }
+
 .reporter {
+  min-height: 0; // needed for firefox or else scrolling gets funky
+
   .container {
     box-shadow: 0 1px 2px #aaa;
     flex-grow: 2;
-    overflow: auto;
-    padding-bottom: 40px;
+    overflow-y: auto;
   }
 
   .wrap {
     box-shadow: 0 1px 2px #aaa;
-    overflow: auto;
+    margin-bottom: 40px;
     padding-left: 0;
     width: 100%;
   }
@@ -57,7 +60,7 @@
       background-color: #f7f8f9;
       cursor: pointer;
 
-      > .runnable-wrapper .runnable-controls i.fa-repeat {
+      > .runnable-wrapper .runnable-controls i.fa-redo {
         visibility: visible !important;
       }
     }
@@ -74,6 +77,7 @@
       min-width: 12px;
       height: 18px;
       text-align: center;
+      font-size: 11px;
     }
 
     &.suite .collapsible-indicator  {
@@ -89,11 +93,20 @@
     &.runnable-processing > .runnable-wrapper .runnable-content-region {
       @include runnable-state-processing;
     }
+  
+    // &.runnable-processing > .runnable-wrapper {
+    //   .runnable-state {
+    //     @extend .far;
+    //     line-height: 18px; // @extend .far overrides line-height, so we need to set it again
+    //     @extend .#{$fa-css-prefix}-square;
+    //     color: #888;
+    //   }
+    // }
 
     &.test.runnable-failed > .runnable-wrapper {
       border-left: 10px solid $fail;
 
-      .fa-warning.has-command-failures {
+      .fa-exclamation-triangle.has-command-failures {
         visibility: visible;
       }
     }

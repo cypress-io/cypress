@@ -4,7 +4,9 @@ _        = require("lodash")
 path     = require("path")
 R        = require("ramda")
 config   = require("#{root}lib/config")
+errors   = require("#{root}lib/errors")
 configUtil = require("#{root}lib/util/config")
+findSystemNode = require("#{root}lib/util/find_system_node")
 scaffold = require("#{root}lib/scaffold")
 settings = require("#{root}lib/util/settings")
 
@@ -16,6 +18,27 @@ describe "lib/config", ->
 
   afterEach ->
     process.env = @env
+
+  context "environment name check", ->
+    it "throws an error for unknown CYPRESS_INTERNAL_ENV", ->
+      sinon.stub(errors, "throw").withArgs("INVALID_CYPRESS_INTERNAL_ENV", "foo-bar")
+      process.env.CYPRESS_INTERNAL_ENV = "foo-bar"
+      cfg = {
+        projectRoot: "/foo/bar/"
+      }
+      options = {}
+      config.mergeDefaults(cfg, options)
+      expect(errors.throw).have.been.calledOnce
+
+    it "allows production CYPRESS_INTERNAL_ENV", ->
+      sinon.stub(errors, "throw")
+      process.env.CYPRESS_INTERNAL_ENV = "production"
+      cfg = {
+        projectRoot: "/foo/bar/"
+      }
+      options = {}
+      config.mergeDefaults(cfg, options)
+      expect(errors.throw).not.to.be.called
 
   context ".get", ->
     beforeEach ->
@@ -202,11 +225,11 @@ describe "lib/config", ->
 
         it "fails if not a string or array", ->
           @setup({ignoreTestFiles: 5})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
 
         it "fails if not an array of strings", ->
           @setup({ignoreTestFiles: [5]})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
 
       context "integrationFolder", ->
@@ -299,9 +322,18 @@ describe "lib/config", ->
           @setup({testFiles: "**/*.coffee"})
           @expectValidationPasses()
 
-        it "fails if not a string", ->
+        it "passes if an array of strings", ->
+          @setup({testFiles: ["**/*.coffee", "**/*.jsx"]})
+          @expectValidationPasses()
+
+        it "fails if not a string or array", ->
           @setup({testFiles: 42})
-          @expectValidationFails("be a string")
+          @expectValidationFails("be a string or an array of strings")
+
+        it "fails if not an array of strings", ->
+          @setup({testFiles: [5]})
+          @expectValidationFails("be a string or an array of strings")
+          @expectValidationFails("the value was: `[5]`")
 
       context "supportFile", ->
         it "passes if a string", ->
@@ -412,12 +444,33 @@ describe "lib/config", ->
 
         it "fails if not a string or array", ->
           @setup({blacklistHosts: 5})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
 
         it "fails if not an array of strings", ->
           @setup({blacklistHosts: [5]})
-          @expectValidationFails("be a string or an array of string")
+          @expectValidationFails("be a string or an array of strings")
           @expectValidationFails("the value was: `[5]`")
+
+      context "firefoxGcInterval", ->
+        it "passes if a number", ->
+          @setup({ firefoxGcInterval: 1 })
+          @expectValidationPasses()
+
+        it "passes if null", ->
+          @setup({ firefoxGcInterval: null })
+          @expectValidationPasses()
+
+        it "passes if correctly shaped object", ->
+          @setup({ firefoxGcInterval: { runMode: 1, openMode: null } })
+          @expectValidationPasses()
+
+        it "fails if string", ->
+          @setup({ firefoxGcInterval: 'foo' })
+          @expectValidationFails("a positive number or null or an object")
+
+        it "fails if invalid object", ->
+          @setup({ firefoxGcInterval: { foo: 'bar' } })
+          @expectValidationFails("a positive number or null or an object")
 
   context ".getConfigKeys", ->
     beforeEach ->
@@ -686,7 +739,7 @@ describe "lib/config", ->
           bar: "baz"
           version: "1.0.1"
         })
-        expect(cfg.cypressEnv).to.eq(process.env["CYPRESS_ENV"])
+        expect(cfg.cypressEnv).to.eq(process.env["CYPRESS_INTERNAL_ENV"])
         expect(cfg).not.to.have.property("envFile")
 
     it "merges env into @config.env", ->
@@ -733,7 +786,8 @@ describe "lib/config", ->
             projectId:                  { value: null, from: "default" },
             port:                       { value: 1234, from: "cli" },
             hosts:                      { value: null, from: "default" }
-            blacklistHosts:             { value: null, from: "default" }
+            blacklistHosts:             { value: null, from: "default" },
+            browsers:                   { value: [], from: "default" },
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "json", from: "cli" },
             reporterOptions:            { value: null, from: "default" },
@@ -754,6 +808,7 @@ describe "lib/config", ->
             viewportWidth:              { value: 1000, from: "default" },
             viewportHeight:             { value: 660, from: "default" },
             fileServerFolder:           { value: "", from: "default" },
+            firefoxGcInterval:          { value: { openMode: null, runMode: 1 }, from: "default" },
             video:                      { value: true, from: "default" }
             videoCompression:           { value: 32, from: "default" }
             videoUploadOnPasses:        { value: true, from: "default" }
@@ -764,9 +819,10 @@ describe "lib/config", ->
             ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            testFiles:                  { value: "**/*.*", from: "default" }
-            numTestRetries:             { value: 0, from: "default"}
-            enableTestRetriesInOpenMode:{ value: false, from: "default"}
+            testFiles:                  { value: "**/*.*", from: "default" },
+            nodeVersion:                { value: "default", from: "default" },
+            numTestRetries:             { value: 0, from: "default"},
+            enableTestRetriesInOpenMode:{ value: false, from: "default"},
           })
 
       it "sets config, envFile and env", ->
@@ -802,6 +858,7 @@ describe "lib/config", ->
             port:                       { value: 2020, from: "config" },
             hosts:                      { value: null, from: "default" }
             blacklistHosts:             { value: null, from: "default" }
+            browsers:                   { value: [], from: "default" }
             userAgent:                  { value: null, from: "default" }
             reporter:                   { value: "spec", from: "default" },
             reporterOptions:            { value: null, from: "default" },
@@ -828,13 +885,15 @@ describe "lib/config", ->
             videosFolder:               { value: "cypress/videos", from: "default" },
             supportFile:                { value: "cypress/support", from: "default" },
             pluginsFile:                { value: "cypress/plugins", from: "default" },
+            firefoxGcInterval:          { value: { openMode: null, runMode: 1 }, from: "default" },
             fixturesFolder:             { value: "cypress/fixtures", from: "default" },
             ignoreTestFiles:            { value: "*.hot-update.js", from: "default" },
             integrationFolder:          { value: "cypress/integration", from: "default" },
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
-            testFiles:                  { value: "**/*.*", from: "default" }
-            numTestRetries:             { value: 0, from: "default" }
-            enableTestRetriesInOpenMode:{ value: false, from: "default" }
+            testFiles:                  { value: "**/*.*", from: "default" },
+            nodeVersion:                { value: "default", from: "default" },
+            numTestRetries:             { value: 0, from: "default" },
+            enableTestRetriesInOpenMode:{ value: false, from: "default" },
             env: {
               foo: {
                 value: "foo"
@@ -863,9 +922,82 @@ describe "lib/config", ->
             }
           })
 
+  context ".setPluginResolvedOn", ->
+    it "resolves an object with single property", ->
+      cfg = {}
+      obj = {
+        foo: "bar"
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg).to.deep.eq({
+        foo: {
+          value: "bar",
+          from: "plugin"
+        }
+      })
+
+    it "resolves an object with multiple properties", ->
+      cfg = {}
+      obj = {
+        foo: "bar",
+        baz: [1, 2, 3]
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg).to.deep.eq({
+        foo: {
+          value: "bar",
+          from: "plugin"
+        },
+        baz: {
+          value: [1, 2, 3],
+          from: "plugin"
+        }
+      })
+
+    it "resolves a nested object", ->
+      # we need at least the structure
+      cfg = {
+        foo: {
+          bar: 1
+        }
+      }
+      obj = {
+        foo: {
+          bar: 42
+        }
+      }
+      config.setPluginResolvedOn(cfg, obj)
+      expect(cfg, "foo.bar gets value").to.deep.eq({
+        foo: {
+          bar: {
+            value: 42,
+            from: "plugin"
+          }
+        }
+      })
+
+  context "_.defaultsDeep", ->
+    it "merges arrays", ->
+      # sanity checks to confirm how Lodash merges arrays in defaultsDeep
+      diffs = {
+        list: [1]
+      }
+      cfg = {
+        list: [1, 2]
+      }
+      merged = _.defaultsDeep({}, diffs, cfg)
+      expect(merged, "arrays are combined").to.deep.eq({
+        list: [1, 2]
+      })
+
   context ".updateWithPluginValues", ->
     it "is noop when no overrides", ->
       expect(config.updateWithPluginValues({foo: 'bar'}, null)).to.deep.eq({
+        foo: 'bar'
+      })
+
+    it "is noop with empty overrides", ->
+      expect(config.updateWithPluginValues({foo: 'bar'}, {})).to.deep.eq({
         foo: 'bar'
       })
 
@@ -879,6 +1011,7 @@ describe "lib/config", ->
           a: "a"
           b: "b"
         }
+        # previously resolved values
         resolved: {
           foo: { value: "bar", from: "default" }
           baz: { value: "quux", from: "cli" }
@@ -919,6 +1052,117 @@ describe "lib/config", ->
             a: { value: "a", from: "config" }
             b: { value: "bb", from: "plugin" }
             c: { value: "c", from: "plugin" }
+          }
+        }
+      })
+
+    it "keeps the list of browsers if the plugins returns empty object", ->
+      browser = {
+        name: "fake browser name",
+        family: "chromium",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browser],
+        resolved: {
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      }
+
+      overrides = {}
+
+      expect(config.updateWithPluginValues(cfg, overrides)).to.deep.eq({
+        browsers: [browser],
+        resolved: {
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      })
+
+    it "catches browsers=null returned from plugins", ->
+      browser = {
+        name: "fake browser name",
+        family: "chromium",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browser],
+        resolved: {
+          browsers: {
+            value: [browser],
+            from: "default"
+          }
+        }
+      }
+
+      overrides = {
+        browsers: null
+      }
+
+      sinon.stub(errors, "throw")
+      config.updateWithPluginValues(cfg, overrides)
+      expect(errors.throw).to.have.been.calledWith("CONFIG_VALIDATION_ERROR")
+
+    it "allows user to filter browsers", ->
+      browserOne = {
+        name: "fake browser name",
+        family: "chromium",
+        displayName: "My browser",
+        version: "x.y.z",
+        path: "/path/to/browser",
+        majorVersion: "x"
+      }
+      browserTwo = {
+        name: "fake electron",
+        family: "chromium",
+        displayName: "Electron",
+        version: "x.y.z",
+        # Electron browser is built-in, no external path
+        path: "",
+        majorVersion: "x"
+      }
+
+      cfg = {
+        browsers: [browserOne, browserTwo],
+        resolved: {
+          browsers: {
+            value: [browserOne, browserTwo],
+            from: "default"
+          }
+        }
+      }
+
+      overrides = {
+        browsers: [browserTwo]
+      }
+
+      updated = config.updateWithPluginValues(cfg, overrides)
+      expect(updated.resolved, "resolved values").to.deep.eq({
+        browsers: {
+          value: [browserTwo],
+          from: 'plugin'
+        }
+      })
+
+      expect(updated, "all values").to.deep.eq({
+        browsers: [browserTwo],
+        resolved: {
+          browsers: {
+            value: [browserTwo],
+            from: 'plugin'
           }
         }
       })
@@ -977,7 +1221,7 @@ describe "lib/config", ->
 
     it "does not merge reserved environment variables", ->
       obj = {
-        CYPRESS_ENV: "production"
+        CYPRESS_INTERNAL_ENV: "production"
         CYPRESS_FOO: "bar"
         CYPRESS_CRASH_REPORTS: "0"
         CYPRESS_PROJECT_ID: "abc123"
@@ -1222,6 +1466,57 @@ describe "lib/config", ->
         expected[folder] = "/_test-output/path/to/project/foo/bar"
 
         expect(config.setAbsolutePaths(obj)).to.deep.eq(expected)
+
+  context ".setNodeBinary", ->
+    beforeEach ->
+      @findSystemNode = sinon.stub(findSystemNode, "findNodePathAndVersion")
+      @nodeVersion = process.versions.node
+
+    it "sets current Node ver if nodeVersion != system", ->
+      config.setNodeBinary({
+        nodeVersion: undefined
+      })
+      .then (obj) =>
+        expect(@findSystemNode).to.not.be.called
+        expect(obj).to.deep.eq({
+          nodeVersion: undefined,
+          resolvedNodeVersion: @nodeVersion
+        })
+
+    it "sets found Node ver if nodeVersion = system and findNodePathAndVersion resolves", ->
+      @findSystemNode.resolves({
+        path: '/foo/bar/node',
+        version: '1.2.3'
+      })
+
+      config.setNodeBinary({
+        nodeVersion: "system"
+      })
+      .then (obj) =>
+        expect(@findSystemNode).to.be.calledOnce
+        expect(obj).to.deep.eq({
+          nodeVersion: "system",
+          resolvedNodeVersion: "1.2.3",
+          resolvedNodePath: "/foo/bar/node"
+        })
+
+    it "sets current Node ver and warns if nodeVersion = system and findNodePathAndVersion rejects", ->
+      err = new Error()
+      onWarning = sinon.stub()
+
+      @findSystemNode.rejects(err)
+
+      config.setNodeBinary({
+        nodeVersion: "system"
+      }, onWarning)
+      .then (obj) =>
+        expect(@findSystemNode).to.be.calledOnce
+        expect(onWarning).to.be.calledOnce
+        expect(obj).to.deep.eq({
+          nodeVersion: "system",
+          resolvedNodeVersion: @nodeVersion,
+        })
+        expect(obj.resolvedNodePath).to.be.undefined
 
 describe "lib/util/config", ->
 

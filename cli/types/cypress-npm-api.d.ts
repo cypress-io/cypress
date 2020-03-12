@@ -43,9 +43,9 @@ declare module 'cypress' {
      */
     reporter: string,
     /**
-     * A String glob pattern of the test files to load.
+     * A String or Array of string glob pattern of the test files to load.
      */
-    testFiles: string
+    testFiles: string | string[]
 
     //
     // timeouts
@@ -224,7 +224,7 @@ declare module 'cypress' {
     })
     ```
    */
-  interface CypressRunOptions {
+  interface CypressRunOptions extends CypressCommonOptions {
     /**
      * Specify different browser to run tests in, either by name or by filesystem path
     */
@@ -234,21 +234,17 @@ declare module 'cypress' {
      */
     ciBuildId: string
     /**
-     * Specify configuration
-     */
-    config: Partial<CypressConfiguration>
-    /**
-     * Specify environment variables
-     */
-    env: object
-    /**
      * Group recorded tests together under a single run name
      */
     group: string
     /**
-     * Display the Electron browser instead of running headlessly
+     * Display the browser instead of running headlessly
      */
     headed: boolean
+    /**
+     * Hide the browser instead of running headed
+     */
+    headless: boolean
     /**
      * Specify your secret record key
      */
@@ -265,10 +261,6 @@ declare module 'cypress' {
      * Override default port
      */
     port: number
-    /**
-     * Path to a specific project
-     */
-    project: string
     /**
      * Whether to record the test run
      */
@@ -302,23 +294,15 @@ declare module 'cypress' {
     })
     ```
    */
-  interface CypressOpenOptions {
+  interface CypressOpenOptions extends CypressCommonOptions {
     /**
      * Specify a filesystem path to a custom browser
      */
     browser: string
     /**
-     * Specify configuration
-     */
-    config: Partial<CypressConfiguration>
-    /**
      * Open Cypress in detached mode
      */
     detached: boolean
-    /**
-     * Specify environment variables
-     */
-    env: object
     /**
      * Run in global mode
      */
@@ -327,6 +311,28 @@ declare module 'cypress' {
      * Override default port
      */
     port: number
+  }
+
+  /**
+   * Options available for `cypress.open` and `cypress.run`
+   */
+  interface CypressCommonOptions {
+    /**
+     * Specify configuration
+     */
+    config: Partial<CypressConfiguration>
+    /**
+     * Path to the config file to be used.
+     *
+     * If `false` is passed, no config file will be used.
+     *
+     * @default "cypress.json"
+     */
+    configFile: string | false
+    /**
+     * Specify environment variables
+     */
+    env: object
     /**
      * Path to a specific project
      */
@@ -443,6 +449,7 @@ declare module 'cypress' {
 
   /**
    * Results returned by the test run.
+   * @see https://on.cypress.io/module-api
    */
   interface CypressRunResult {
     startedTestsAt: dateTimeISO
@@ -454,6 +461,11 @@ declare module 'cypress' {
     totalPassed: number
     totalPending: number
     totalSkipped: number
+    /**
+     * If Cypress test run is being recorded, full url will be provided.
+     * @see https://on.cypress.io/dashboard-introduction
+     */
+    runUrl?: string
     runs: RunResult[]
     browserPath: string
     browserName: string
@@ -463,6 +475,29 @@ declare module 'cypress' {
     cypressVersion: string
     // TODO add resolved object to the configuration
     config: CypressConfiguration
+    /**
+     * If Cypress fails to run at all (for example, if there are no spec files to run),
+     * then it will set failures to 1 and will have actual error message in the
+     * property "message". Check this property before checking other properties.
+     *
+     * @type {number}
+     * @example
+      ```
+      const result = await cypress.run()
+      if (result.failures) {
+        console.error(result.message)
+        process.exit(result.failures)
+      }
+      ```
+     */
+    failures?: number
+    /**
+     * If returned result has "failures" set, then this property gives
+     * the error message.
+     *
+     * @type {string}
+     */
+    message?: string
   }
 
   /**

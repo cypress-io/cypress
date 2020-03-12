@@ -27,7 +27,6 @@ const alreadyInstalledMsg = () => {
 }
 
 const displayCompletionMsg = () => {
-
   // check here to see if we are globally installed
   if (util.isInstalledGlobally()) {
     // if we are display a warning
@@ -51,7 +50,7 @@ const displayCompletionMsg = () => {
   logger.log()
   logger.log(
     'You can now open Cypress by running:',
-    chalk.cyan(path.join('node_modules', '.bin', 'cypress'), 'open')
+    chalk.cyan(path.join('node_modules', '.bin', 'cypress'), 'open'),
   )
 
   logger.log()
@@ -89,7 +88,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
           util.setTaskTitle(
             task,
             util.titleize(chalk.green('Downloaded Cypress')),
-            rendererOptions.renderer
+            rendererOptions.renderer,
           )
         })
       },
@@ -103,7 +102,6 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
     {
       title: util.titleize('Finishing Installation'),
       task: (ctx, task) => {
-
         const cleanup = () => {
           debug('removing zip file %s', downloadDestination)
 
@@ -117,7 +115,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
           util.setTaskTitle(
             task,
             util.titleize(chalk.green('Finished Installation'), chalk.gray(installDir)),
-            rendererOptions.renderer
+            rendererOptions.renderer,
           )
         })
       },
@@ -129,7 +127,6 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 }
 
 const start = (options = {}) => {
-
   // handle deprecated / removed
   if (util.getEnv('CYPRESS_BINARY_VERSION')) {
     return throwFormErrorText(errors.removed.CYPRESS_BINARY_VERSION)()
@@ -152,7 +149,6 @@ const start = (options = {}) => {
 
   // let this environment variable reset the binary version we need
   if (util.getEnv('CYPRESS_INSTALL_BINARY')) {
-
     // because passed file paths are often double quoted
     // and might have extra whitespace around, be robust and trim the string
     const trimAndRemoveDoubleQuotes = true
@@ -164,7 +160,7 @@ const start = (options = {}) => {
       debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
       logger.log(
         stripIndent`
-        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`
+        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`,
       )
 
       logger.log()
@@ -175,7 +171,6 @@ const start = (options = {}) => {
     // if this doesn't match the expected version
     // then print warning to the user
     if (envVarVersion !== needVersion) {
-
       // reset the version to the env var version
       needVersion = envVarVersion
     }
@@ -189,7 +184,7 @@ const start = (options = {}) => {
         ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
 
               Previous installs of Cypress may not be found.
-      `
+      `,
     )
 
     logger.log()
@@ -211,7 +206,6 @@ const start = (options = {}) => {
     return state.getBinaryPkgVersionAsync(binaryDir)
   })
   .then((binaryVersion) => {
-
     if (!binaryVersion) {
       debug('no binary installed under cli version')
 
@@ -260,7 +254,7 @@ const start = (options = {}) => {
             Instead we will install version: ${chalk.green(needVersion)}
 
             These versions may not work properly together.
-        `)
+        `),
       )
 
       logger.log()
@@ -343,7 +337,7 @@ const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
         util.setTaskTitle(
           task,
           util.titleize(chalk.green('Unzipped Cypress')),
-          rendererOptions.renderer
+          rendererOptions.renderer,
         )
       })
     },
@@ -361,7 +355,7 @@ const progessify = (task, title) => {
     util.setTaskTitle(
       task,
       util.titleize(title, percentComplete, remaining),
-      getRendererOptions().renderer
+      getRendererOptions().renderer,
     )
   }
 }

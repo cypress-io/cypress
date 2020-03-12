@@ -11,6 +11,8 @@ describe('Specs List', function () {
       this.win = win
       this.ipc = win.App.ipc
 
+      this.numSpecs = this.specs.integration.length + this.specs.unit.length
+
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
@@ -144,7 +146,7 @@ describe('Specs List', function () {
         })
 
         it('lists test specs', function () {
-          cy.get('.file a').last().should('contain', 'baz_list_spec.coffee')
+          cy.get('.file a').last().should('contain', 'last_list_spec.coffee')
           cy.get('.file a').last().should('not.contain', 'admin_users')
         })
       })
@@ -159,16 +161,16 @@ describe('Specs List', function () {
 
       context('run all specs', function () {
         it('displays run all specs button', () => {
-          cy.contains('.btn', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs')
         })
 
         it('has play icon', () => {
-          cy.contains('.btn', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs')
           .find('i').should('have.class', 'fa-play')
         })
 
         it('triggers browser launch on click of button', () => {
-          cy.contains('.btn', 'Run all specs').click()
+          cy.contains('.all-tests', 'Run all specs').click()
           .then(function () {
             const launchArgs = this.ipc.launchBrowser.lastCall.args
 
@@ -180,11 +182,11 @@ describe('Specs List', function () {
 
         describe('all specs running in browser', function () {
           beforeEach(() => {
-            cy.contains('.btn', 'Run all specs').as('allSpecs').click()
+            cy.contains('.all-tests', 'Run all specs').as('allSpecs').click()
           })
 
           it('updates spec icon', function () {
-            cy.get('@allSpecs').find('i').should('have.class', 'fa-dot-circle-o')
+            cy.get('@allSpecs').find('i').should('have.class', 'fa-dot-circle')
 
             cy.get('@allSpecs').find('i').should('not.have.class', 'fa-play')
           })
@@ -198,7 +200,6 @@ describe('Specs List', function () {
       context('displays list of specs', function () {
         it('lists main folders of specs', function () {
           cy.contains('.folder.level-0', 'integration')
-
           cy.contains('.folder.level-0', 'unit')
         })
 
@@ -211,8 +212,7 @@ describe('Specs List', function () {
         })
 
         it('lists folder with \'.\'', function () {
-          cy.get('.file').should('have.length', 7)
-
+          cy.get('.file').should('have.length', this.numSpecs)
           cy.get('.folder').should('have.length', 10)
         })
       })
@@ -226,10 +226,10 @@ describe('Specs List', function () {
         })
 
         it('hides children when folder clicked', function () {
-          cy.get('.file').should('have.length', 7)
+          cy.get('.file').should('have.length', this.numSpecs)
           cy.get('.folder .folder-name:first').click()
 
-          cy.get('.file').should('have.length', 2)
+          cy.get('.file').should('have.length', 8)
         })
 
         it('sets folder expanded when clicked twice', function () {
@@ -243,7 +243,7 @@ describe('Specs List', function () {
         it('hides children for every folder collapsed', function () {
           const lastExpandedFolderSelector = '.folder-expanded:last > div > .folder-name:last'
 
-          cy.get('.file').should('have.length', 7)
+          cy.get('.file').should('have.length', this.numSpecs)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 6)
@@ -279,7 +279,96 @@ describe('Specs List', function () {
       })
     })
 
+    context('expand/collapse root specs', function () {
+      describe('with folders', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, this.specs)
+
+          this.openProject.resolve(this.config)
+        })
+
+        it('collapsing root spec will keep root itself expanded', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+          cy.get('.folder.folder-collapsed').should('have.length', 3)
+          cy.get('.folder.folder-expanded').should('have.length', 2)
+        })
+
+        it('collapses all children folders', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+
+          const lastCollapsedFolderSelector = '.folder-collapsed:last .folder-name'
+          const rootSpecCollapsedFoldersSelector = '.folder-collapsed'
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 2)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 2)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 1)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 0)
+        })
+
+        it('expand all expands all sub folders', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+          cy.get('.folder-expanded').should('have.length', 2)
+          cy.get('.folder-collapsed').should('have.length', 3)
+
+          cy.get('.level-0 .folder-name').find('a:last').click({ multiple: true })
+          cy.get('.folder-expanded').should('have.length', 10)
+          cy.get('.folder-collapsed').should('have.length', 0)
+        })
+      })
+
+      describe('without folders', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, {
+            integration: [
+              {
+                name: 'app_spec.coffee',
+                relative: 'app_spec.coffee',
+              },
+              {
+                name: 'account_new_spec.coffee',
+                relative: 'account_new_spec.coffee',
+              },
+            ],
+            unit: [],
+          })
+
+          this.openProject.resolve(this.config)
+        })
+
+        it('hides expand/collapse buttons when there are no folders', function () {
+          cy.get('.level-0 .folder-name a').should('not.exist')
+        })
+      })
+    })
+
     context('filtering specs', function () {
+      it('scrolls the specs and not the filter', function () {
+        this.ipc.getSpecs.yields(null, this.specs)
+        this.openProject.resolve(this.config)
+
+        cy.contains('last_list_spec').scrollIntoView()
+        cy.get('.filter').should('be.visible')
+      })
+
       describe('typing the filter', function () {
         beforeEach(function () {
           this.ipc.getSpecs.yields(null, this.specs)
@@ -289,13 +378,13 @@ describe('Specs List', function () {
         })
 
         it('displays only matching spec', () => {
-          cy.get('.outer-files-container .file')
+          cy.get('.specs-list .file')
           .should('have.length', 1)
           .and('contain', 'account_new_spec.coffee')
         })
 
         it('only shows matching folders', () => {
-          cy.get('.outer-files-container .folder')
+          cy.get('.specs-list .folder')
           .should('have.length', 2)
         })
 
@@ -304,21 +393,21 @@ describe('Specs List', function () {
           cy.get('.filter')
           .should('have.value', '')
 
-          cy.get('.outer-files-container .file')
-          .should('have.length', 7)
+          cy.get('.specs-list .file')
+          .should('have.length', this.numSpecs)
         })
 
         it('clears the filter if the user press ESC key', function () {
           cy.get('.filter').type('{esc}')
           .should('have.value', '')
 
-          cy.get('.outer-files-container .file')
-          .should('have.length', 7)
+          cy.get('.specs-list .file')
+          .should('have.length', this.numSpecs)
         })
 
         it('shows empty message if no results', function () {
           cy.get('.filter').clear().type('foobarbaz')
-          cy.get('.outer-files-container').should('not.exist')
+          cy.get('.specs-list').should('not.exist')
 
           cy.get('.empty-well').should('contain', 'No specs match your search: "foobarbaz"')
         })
@@ -328,8 +417,8 @@ describe('Specs List', function () {
           cy.get('.btn').contains('Clear search').click()
           cy.focused().should('have.id', 'filter')
 
-          cy.get('.outer-files-container .file')
-          .should('have.length', 7)
+          cy.get('.specs-list .file')
+          .should('have.length', this.numSpecs)
         })
 
         it('saves the filter to local storage for the project', function () {
@@ -416,8 +505,8 @@ describe('Specs List', function () {
         })
 
         it('updates spec icon', function () {
-          cy.get('@firstSpec').find('i').should('have.class', 'fa-dot-circle-o')
-          cy.get('@firstSpec').find('i').should('not.have.class', 'fa-file-code-o')
+          cy.get('@firstSpec').find('i').should('have.class', 'fa-dot-circle')
+          cy.get('@firstSpec').find('i').should('not.have.class', 'fa-file-code')
         })
 
         it('sets spec as active', () => {
@@ -427,11 +516,11 @@ describe('Specs List', function () {
 
       context('choose deeper nested spec', function () {
         beforeEach(() => {
-          cy.get('.file a').contains('a', 'baz_list_spec.coffee').as('deepSpec').click()
+          cy.get('.file a').contains('a', 'last_list_spec.coffee').as('deepSpec').click()
         })
 
         it('updates spec icon', () => {
-          cy.get('@deepSpec').find('i').should('have.class', 'fa-dot-circle-o')
+          cy.get('@deepSpec').find('i').should('have.class', 'fa-dot-circle')
         })
 
         it('sets spec as active', () => {
@@ -453,8 +542,8 @@ describe('Specs List', function () {
       })
 
       it('updates spec icon', function () {
-        cy.get('@firstSpec').find('i').should('not.have.class', 'fa-dot-circle-o')
-        cy.get('@secondSpec').find('i').should('have.class', 'fa-dot-circle-o')
+        cy.get('@firstSpec').find('i').should('not.have.class', 'fa-dot-circle')
+        cy.get('@secondSpec').find('i').should('have.class', 'fa-dot-circle')
       })
 
       it('updates active spec', function () {

@@ -30,6 +30,12 @@ describe('lib/exec/xvfb', function () {
     })
   })
 
+  context('xvfbOptions', function () {
+    it('sets explicit screen', () => {
+      expect(xvfb._xvfbOptions).to.have.property('xvfb_args').that.includes('-screen')
+    })
+  })
+
   context('#start', function () {
     it('passes', function () {
       sinon.stub(xvfb._xvfb, 'startAsync').resolves()
@@ -71,7 +77,6 @@ describe('lib/exec/xvfb', function () {
   })
 
   context('#isNeeded', function () {
-
     it('does not need xvfb on osx', function () {
       os.platform.returns('darwin')
 

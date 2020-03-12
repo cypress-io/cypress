@@ -378,7 +378,8 @@ module.exports = {
     ## caused by jimp reading the image buffer
     if data.simple
       takenAt = new Date().toJSON()
-      return automate(data).then (dataUrl) ->
+      return automate(data)
+      .then (dataUrl) ->
         {
           takenAt
           multipart: false

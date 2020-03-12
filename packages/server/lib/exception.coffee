@@ -2,10 +2,8 @@ _        = require("lodash")
 Promise  = require("bluebird")
 pkg      = require("@packages/root")
 path     = require("path")
-
 api      = require("./api")
 user     = require("./user")
-Settings = require("./util/settings")
 system   = require("./util/system")
 
 ## strip everything but the file name to remove any sensitive
@@ -47,7 +45,7 @@ module.exports = {
       user and user.authToken
 
   create: (err) ->
-    if process.env["CYPRESS_ENV"] isnt "production" or
+    if process.env["CYPRESS_INTERNAL_ENV"] isnt "production" or
        process.env["CYPRESS_CRASH_REPORTS"] is "0"
       return Promise.resolve()
 

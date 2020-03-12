@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../spec_helper')
 
 const Promise = require('bluebird')
@@ -26,30 +16,26 @@ const random = require(`${root}../lib/util/random`)
 const system = require(`${root}../lib/util/system`)
 const specsUtil = require(`${root}../lib/util/specs`)
 
-const { spyOn, stdout, spyStdout } = require('../../support/helpers/utils.js')
-
 describe('lib/modes/run', () => {
   beforeEach(function () {
-    this.projectInstance = Project('/_test-output/path/to/project')
-
-    return spyStdout(runMode, [
-      'run',
-      // 'waitForTestsToFinishRunning'
-      // 'waitForBrowserToConnect'
-    ])
+    this.projectInstance = new Project('/_test-output/path/to/project')
   })
 
   context('.getProjectId', () => {
     it('resolves if id', () => {
       return runMode.getProjectId('project', 'id123')
-      .then((ret) => expect(ret).to.eq('id123'))
+      .then((ret) => {
+        expect(ret).to.eq('id123')
+      })
     })
 
     it('resolves if CYPRESS_PROJECT_ID set', () => {
       sinon.stub(env, 'get').withArgs('CYPRESS_PROJECT_ID').returns('envId123')
 
       return runMode.getProjectId('project')
-      .then((ret) => expect(ret).to.eq('envId123'))
+      .then((ret) => {
+        expect(ret).to.eq('envId123')
+      })
     })
 
     it('is null when no projectId', () => {
@@ -58,15 +44,21 @@ describe('lib/modes/run', () => {
       }
 
       return runMode.getProjectId(project)
-      .then((ret) => expect(ret).to.be.null)
+      .then((ret) => {
+        expect(ret).to.be.null
+      })
     })
   })
 
   context('.openProjectCreate', () => {
+    let onError
+
     beforeEach(() => {
       sinon.stub(openProject, 'create').resolves()
 
+      onError = sinon.spy()
       const options = {
+        onError,
         port: 8080,
         env: { foo: 'bar' },
         isTextTerminal: true,
@@ -89,12 +81,12 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('emits \'exitEarlyWithErr\' with error message onError', () => {
-      sinon.stub(openProject, 'emit')
-      expect(openProject.create.lastCall.args[2].onError).to.be.a('function')
-      openProject.create.lastCall.args[2].onError({ message: 'the message' })
+    it('calls options.onError with error message onError', () => {
+      const error = { message: 'the message' }
 
-      expect(openProject.emit).to.be.calledWith('exitEarlyWithErr', 'the message')
+      expect(openProject.create.lastCall.args[2].onError).to.be.a('function')
+      openProject.create.lastCall.args[2].onError(error)
+      expect(onError).to.be.calledWith(error)
     })
   })
 
@@ -117,28 +109,25 @@ describe('lib/modes/run', () => {
       expect(props.show).to.be.true
     })
 
-    it('sets recordFrameRate and onPaint when write is true', () => {
+    it('sets onScreencastFrame when write is true', () => {
       const write = sinon.stub()
 
       const image = {
-        toJPEG: sinon.stub().returns('imgdata'),
+        data: '',
       }
 
-      const props = runMode.getElectronProps(true, {}, write)
+      const props = runMode.getElectronProps(true, write)
 
-      expect(props.recordFrameRate).to.eq(20)
+      props.onScreencastFrame(image)
 
-      props.onPaint({}, false, image)
-
-      expect(write).to.be.calledWith('imgdata')
+      expect(write).to.be.calledOnce
     })
 
-    it('does not set recordFrameRate or onPaint when write is falsy', () => {
-      const props = runMode.getElectronProps(true, {}, false)
+    it('does not set onScreencastFrame when write is falsy', () => {
+      const props = runMode.getElectronProps(true, false)
 
       expect(props).not.to.have.property('recordFrameRate')
-
-      expect(props).not.to.have.property('onPaint')
+      expect(props).not.to.have.property('onScreencastFrame')
     })
 
     it('sets options.show = false onNewWindow callback', () => {
@@ -151,29 +140,27 @@ describe('lib/modes/run', () => {
       expect(options.show).to.eq(false)
     })
 
-    it('emits exitEarlyWithErr when webContents crashed', function () {
+    it('calls options.onError when webContents crashes', function () {
       sinon.spy(errors, 'get')
       sinon.spy(errors, 'log')
 
-      const emit = sinon.stub(this.projectInstance, 'emit')
-
-      const props = runMode.getElectronProps(true, this.projectInstance)
+      const onError = sinon.spy()
+      const props = runMode.getElectronProps(true, this.projectInstance, onError)
 
       props.onCrashed()
 
       expect(errors.get).to.be.calledWith('RENDERER_CRASHED')
       expect(errors.log).to.be.calledOnce
 
-      expect(emit).to.be.calledWithMatch('exitEarlyWithErr', 'We detected that the Chromium Renderer process just crashed.')
+      expect(onError).to.be.called
+      expect(onError.lastCall.args[0].message).to.include('We detected that the Chromium Renderer process just crashed.')
     })
   })
 
   context('.launchBrowser', () => {
     beforeEach(function () {
       this.launch = sinon.stub(openProject, 'launch')
-      sinon.stub(runMode, 'getElectronProps').returns({ foo: 'bar' })
-
-      return sinon.stub(runMode, 'screenshotMetadata').returns({ a: 'a' })
+      sinon.stub(runMode, 'screenshotMetadata').returns({ a: 'a' })
     })
 
     it('can launch electron', function () {
@@ -183,7 +170,11 @@ describe('lib/modes/run', () => {
         absolute: '/path/to/spec',
       }
 
-      const browser = { name: 'electron', isHeaded: false }
+      const browser = {
+        name: 'electron',
+        family: 'chromium',
+        isHeaded: false,
+      }
 
       runMode.launchBrowser({
         spec,
@@ -193,15 +184,11 @@ describe('lib/modes/run', () => {
         screenshots,
       })
 
-      expect(runMode.getElectronProps).to.be.calledWith(false, this.projectInstance, 'write')
-
-      expect(this.launch).to.be.calledWithMatch(browser, spec, { foo: 'bar' })
+      expect(this.launch).to.be.calledWithMatch(browser, spec)
 
       const browserOpts = this.launch.firstCall.args[2]
 
-      const {
-        onAfterResponse,
-      } = browserOpts.automationMiddleware
+      const { onAfterResponse } = browserOpts.automationMiddleware
 
       expect(onAfterResponse).to.be.a('function')
 
@@ -216,48 +203,81 @@ describe('lib/modes/run', () => {
         absolute: '/path/to/spec',
       }
 
-      const browser = { name: 'chrome', isHeaded: true }
+      const browser = {
+        name: 'chrome',
+        family: 'chromium',
+        isHeaded: true,
+      }
 
       runMode.launchBrowser({
         spec,
         browser,
+        project: {},
       })
-
-      expect(runMode.getElectronProps).not.to.be.called
 
       expect(this.launch).to.be.calledWithMatch(browser, spec, {})
     })
   })
 
   context('.postProcessRecording', () => {
-    beforeEach(() => sinon.stub(videoCapture, 'process').resolves())
+    beforeEach(() => {
+      sinon.stub(videoCapture, 'process').resolves()
+    })
 
     it('calls video process with name, cname and videoCompression', () => {
-      const endVideoCapture = () => Promise.resolve()
+      const endVideoCapture = () => {
+        return Promise.resolve()
+      }
 
       return runMode.postProcessRecording(endVideoCapture, 'foo', 'foo-compress', 32, true)
-      .then(() => expect(videoCapture.process).to.be.calledWith('foo', 'foo-compress', 32))
+      .then(() => {
+        expect(videoCapture.process).to.be.calledWith('foo', 'foo-compress', 32)
+      })
     })
 
     it('does not call video process when videoCompression is false', () => {
-      const endVideoCapture = () => Promise.resolve()
+      const endVideoCapture = () => {
+        return Promise.resolve()
+      }
 
       return runMode.postProcessRecording(endVideoCapture, 'foo', 'foo-compress', false, true)
-      .then(() => expect(videoCapture.process).not.to.be.called)
+      .then(() => {
+        expect(videoCapture.process).not.to.be.called
+      })
     })
 
     it('calls video process if we have been told to upload videos', () => {
-      const endVideoCapture = () => Promise.resolve()
+      const endVideoCapture = () => {
+        return Promise.resolve()
+      }
 
       return runMode.postProcessRecording(endVideoCapture, 'foo', 'foo-compress', 32, true)
-      .then(() => expect(videoCapture.process).to.be.calledWith('foo', 'foo-compress', 32))
+      .then(() => {
+        expect(videoCapture.process).to.be.calledWith('foo', 'foo-compress', 32)
+      })
     })
 
     it('does not call video process if there are no failing tests and we have set not to upload video on passing', () => {
-      const endVideoCapture = () => Promise.resolve()
+      const endVideoCapture = () => {
+        return Promise.resolve()
+      }
 
       return runMode.postProcessRecording(endVideoCapture, 'foo', 'foo-compress', 32, false)
-      .then(() => expect(videoCapture.process).not.to.be.called)
+      .then(() => {
+        expect(videoCapture.process).not.to.be.called
+      })
+    })
+
+    it('logs a warning on failure and resolves', () => {
+      sinon.stub(errors, 'warning')
+      const end = sinon.stub().rejects()
+
+      return runMode.postProcessRecording(end)
+      .then(() => {
+        expect(end).to.be.calledOnce
+
+        expect(errors.warning).to.be.calledWith('VIDEO_POST_PROCESSING_FAILED')
+      })
     })
   })
 
@@ -267,11 +287,13 @@ describe('lib/modes/run', () => {
       sinon.spy(errors, 'get')
       sinon.spy(openProject, 'closeBrowser')
       sinon.stub(runMode, 'launchBrowser').resolves()
-      sinon.stub(runMode, 'waitForSocketConnection').callsFake(() => Promise.delay(1000))
+      sinon.stub(runMode, 'waitForSocketConnection').callsFake(() => {
+        return Promise.delay(1000)
+      })
 
-      const emit = sinon.stub(this.projectInstance, 'emit')
+      const onError = sinon.spy()
 
-      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10 })
+      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10, onError })
       .then(() => {
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
@@ -279,7 +301,8 @@ describe('lib/modes/run', () => {
         expect(errors.warning).to.be.calledWith('TESTS_DID_NOT_START_RETRYING', 'Retrying again...')
         expect(errors.get).to.be.calledWith('TESTS_DID_NOT_START_FAILED')
 
-        expect(emit).to.be.calledWith('exitEarlyWithErr', 'The browser never connected. Something is wrong. The tests cannot run. Aborting...')
+        expect(onError).to.be.called
+        expect(onError.lastCall.args[0].message).to.include('The browser never connected. Something is wrong. The tests cannot run. Aborting...')
       })
     })
   })
@@ -314,7 +337,9 @@ describe('lib/modes/run', () => {
         })
 
         return runMode.waitForSocketConnection(this.projectInstance, 1234)
-        .then((ret) => expect(ret).to.be.undefined)
+        .then((ret) => {
+          expect(ret).to.be.undefined
+        })
       })
 
       it('does not resolve if socketId does not match id', function () {
@@ -349,17 +374,15 @@ describe('lib/modes/run', () => {
   context('.waitForTestsToFinishRunning', () => {
     beforeEach(function () {
       sinon.stub(this.projectInstance, 'getConfig').resolves({})
-
-      return sinon.spy(runMode, 'getVideoRecordingDelay')
+      sinon.spy(runMode, 'getVideoRecordingDelay')
     })
 
     it('end event resolves with obj, displays stats, displays screenshots, sets video timestamps', function () {
       const startedVideoCapture = new Date
       const screenshots = [{}, {}, {}]
-      const cfg = {}
-      const endVideoCapture = function () {}
+      const endVideoCapture = () => {}
       const results = {
-        tests: [1, 2, 3],
+        tests: [4, 5, 6],
         stats: {
           tests: 1,
           passes: 2,
@@ -369,7 +392,9 @@ describe('lib/modes/run', () => {
         },
       }
 
-      const setVideoTimestamp = sinon.stub(Reporter, 'setVideoTimestamp')
+      sinon.stub(Reporter, 'setVideoTimestamp')
+      .withArgs(startedVideoCapture, results.tests)
+      .returns([1, 2, 3])
 
       sinon.stub(runMode, 'postProcessRecording').resolves()
       sinon.spy(runMode, 'displayResults')
@@ -395,7 +420,7 @@ describe('lib/modes/run', () => {
         },
       })
       .then((obj) => {
-        //# since video was recording, there was a delay to let video finish
+        // since video was recording, there was a delay to let video finish
         expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
         expect(Promise.prototype.delay).to.be.calledWith(1000)
         expect(runMode.postProcessRecording).to.be.calledWith(endVideoCapture, 'foo.mp4', 'foo-compressed.mp4', 32, true)
@@ -422,19 +447,17 @@ describe('lib/modes/run', () => {
             duration: 5,
           },
         })
-
-        expect(setVideoTimestamp).calledWithMatch(startedVideoCapture, results.tests)
       })
     })
 
-    it('exitEarlyWithErr event resolves with no tests, and error', function () {
+    it('exiting early resolves with no tests, and error', function () {
       sinon.useFakeTimers({ shouldAdvanceTime: true })
 
       const err = new Error('foo')
       const startedVideoCapture = new Date
       const wallClock = new Date()
       const screenshots = [{}, {}, {}]
-      const endVideoCapture = function () {}
+      const endVideoCapture = () => {}
 
       sinon.stub(runMode, 'postProcessRecording').resolves()
       sinon.spy(runMode, 'displayResults')
@@ -442,10 +465,7 @@ describe('lib/modes/run', () => {
       sinon.spy(Promise.prototype, 'delay')
 
       process.nextTick(() => {
-        expect(this.projectInstance.listeners('exitEarlyWithErr')).to.have.length(1)
-        this.projectInstance.emit('exitEarlyWithErr', err.message)
-
-        expect(this.projectInstance.listeners('exitEarlyWithErr')).to.have.length(0)
+        runMode.exitEarly(err)
       })
 
       return runMode.waitForTestsToFinishRunning({
@@ -463,7 +483,7 @@ describe('lib/modes/run', () => {
         },
       })
       .then((obj) => {
-        //# since video was recording, there was a delay to let video finish
+        // since video was recording, there was a delay to let video finish
         expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
         expect(Promise.prototype.delay).to.be.calledWith(1000)
         expect(runMode.postProcessRecording).to.be.calledWith(endVideoCapture, 'foo.mp4', 'foo-compressed.mp4', 32, true)
@@ -532,7 +552,9 @@ describe('lib/modes/run', () => {
       return runMode.waitForTestsToFinishRunning({
         startedVideoCapture: null,
       })
-      .then(() => expect(runMode.getVideoRecordingDelay).to.have.returned(0))
+      .then(() => {
+        expect(runMode.getVideoRecordingDelay).to.have.returned(0)
+      })
     })
   })
 
@@ -587,7 +609,7 @@ describe('lib/modes/run', () => {
         integrationFolder: '/path/to/integrationFolder',
       })
 
-      return sinon.stub(specsUtil, 'find').resolves([
+      sinon.stub(specsUtil, 'find').resolves([
         {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
@@ -598,22 +620,25 @@ describe('lib/modes/run', () => {
 
     it('shows no warnings for default browser', () => {
       return runMode.run()
-      .then(() => expect(errors.warning).to.not.be.called)
+      .then(() => {
+        expect(errors.warning).to.not.be.called
+      })
     })
 
-    it('shows no warnings for electron browser', () => {
-      return runMode.run({ browser: 'electron' })
-      .then(() => expect(errors.warning).to.not.be.calledWith('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER'))
+    it('throws an error if invalid browser family supplied', () => {
+      const browser = { name: 'opera', family: 'opera - btw when is Opera support coming?' }
+
+      sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
+
+      expect(runMode.run({ browser: 'opera' }))
+      .to.be.rejectedWith(/invalid browser family in/)
     })
 
-    it('disables video recording on interactive mode runs', () => {
-      return runMode.run({ headed: true })
-      .then(() => expect(errors.warning).to.be.calledWith('CANNOT_RECORD_VIDEO_HEADED'))
-    })
-
-    it('disables video recording for non-electron browser', () => {
+    it('shows no warnings for chrome browser', () => {
       return runMode.run({ browser: 'chrome' })
-      .then(() => expect(errors.warning).to.be.calledWith('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER'))
+      .then(() => {
+        expect(errors.warning).to.not.be.called
+      })
     })
 
     it('names video file with spec name', () => {
@@ -644,6 +669,7 @@ describe('lib/modes/run', () => {
         name: 'fooBrowser',
         path: 'path/to/browser',
         version: '777',
+        family: 'chromium',
       })
 
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
@@ -656,8 +682,7 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'runSpecs')
       sinon.stub(openProject, 'launch').resolves()
       sinon.stub(openProject, 'getProject').resolves(this.projectInstance)
-
-      return sinon.stub(specsUtil, 'find').resolves([
+      sinon.stub(specsUtil, 'find').resolves([
         {
           name: 'foo_spec.js',
           path: 'cypress/integration/foo_spec.js',
@@ -668,19 +693,25 @@ describe('lib/modes/run', () => {
 
     it('no longer ensures user session', () => {
       return runMode.run()
-      .then(() => expect(user.ensureAuthToken).not.to.be.called)
+      .then(() => {
+        expect(user.ensureAuthToken).not.to.be.called
+      })
     })
 
     it('resolves with object and totalFailed', () => {
       return runMode.run()
-      .then((results) => expect(results).to.have.property('totalFailed', 10))
+      .then((results) => {
+        expect(results).to.have.property('totalFailed', 10)
+      })
     })
 
     it('passes projectRoot + options to openProject', () => {
       const opts = { projectRoot: '/path/to/project', foo: 'bar' }
 
       return runMode.run(opts)
-      .then(() => expect(openProject.create).to.be.calledWithMatch(opts.projectRoot, opts))
+      .then(() => {
+        expect(openProject.create).to.be.calledWithMatch(opts.projectRoot, opts)
+      })
     })
 
     it('passes project + id to waitForBrowserToConnect', function () {
@@ -703,7 +734,7 @@ describe('lib/modes/run', () => {
     })
 
     it('passes headed to openProject.launch', () => {
-      const browser = { name: 'electron' }
+      const browser = { name: 'electron', family: 'chromium' }
 
       browsers.ensureAndGetByNameOrPath.resolves(browser)
 
@@ -718,7 +749,7 @@ describe('lib/modes/run', () => {
           },
           {
             show: true,
-          }
+          },
         )
       })
     })

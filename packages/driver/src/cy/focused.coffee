@@ -66,9 +66,9 @@ create = (state) ->
     el.dispatchEvent(focusoutEvt)
 
   fireFocus = (el) ->
-    ## body will never emit focus events
+    ## body will never emit focus events (unless it's contenteditable)
     ## so we avoid simulating this
-    if $elements.isBody(el)
+    if $elements.isBody(el) && !$elements.isContentEditable(el)
       return
 
     ## if we are focusing a different element
@@ -146,7 +146,7 @@ create = (state) ->
     ## is always in focus
     $focused = getFocused()
 
-    if $elements.isFocusable($dom.wrap(el)) && (!$focused || $focused[0] isnt el)
+    if (!$focused || $focused[0] isnt el) && $elements.isW3CFocusable(el)
       fireFocus(el)
       return
 

@@ -3,6 +3,7 @@
 const { includeTypes } = require('./utils')
 const shell = require('shelljs')
 const { join } = require('path')
+const resolvePkg = require('resolve-pkg')
 
 shell.set('-v') // verbose
 shell.set('-e') // any error is fatal
@@ -15,24 +16,30 @@ shell.set('-e') // any error is fatal
 // because they can conflict with user's own libraries
 
 includeTypes.forEach((folder) => {
-  const source = join('node_modules', '@types', folder)
+  const source = resolvePkg(`@types/${folder}`, { cwd: join(__dirname, '..', '..') })
 
   shell.cp('-R', source, 'types')
 })
+
+// jQuery v3.3.x includes "dist" folder that just references back to itself
+// causing dtslint to think there are double definitions. Remove that folder.
+const typesJqueryDistFolder = join('types', 'jquery', 'dist')
+
+shell.rm('-rf', typesJqueryDistFolder)
 
 // fix paths to Chai, jQuery and other types to be relative
 shell.sed(
   '-i',
   '<reference types="chai" />',
   '<reference path="../chai/index.d.ts" />',
-  join('types', 'chai-jquery', 'index.d.ts')
+  join('types', 'chai-jquery', 'index.d.ts'),
 )
 
 shell.sed(
   '-i',
   '<reference types="jquery" />',
   '<reference path="../jquery/index.d.ts" />',
-  join('types', 'chai-jquery', 'index.d.ts')
+  join('types', 'chai-jquery', 'index.d.ts'),
 )
 
 const sinonChaiFilename = join('types', 'sinon-chai', 'index.d.ts')
@@ -41,7 +48,7 @@ shell.sed(
   '-i',
   '<reference types="chai" />',
   '<reference path="../chai/index.d.ts" />',
-  sinonChaiFilename
+  sinonChaiFilename,
 )
 
 // also use relative import via path for sinon-chai
@@ -50,7 +57,7 @@ shell.sed(
   '-i',
   '<reference types="sinon" />',
   '<reference path="../sinon/index.d.ts" />',
-  sinonChaiFilename
+  sinonChaiFilename,
 )
 
 // and an import sinon line to be changed to relative path

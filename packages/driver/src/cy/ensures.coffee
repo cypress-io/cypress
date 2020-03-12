@@ -1,6 +1,7 @@
 _ = require("lodash")
 $dom = require("../dom")
 $utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 $elements = require("../dom/elements")
 
 VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
@@ -70,13 +71,13 @@ create = (state, expect) ->
 
       if types.length > 1
         ## append a nice error message telling the user this
-        err = $utils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
+        err = $errUtils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
 
       throw err
 
   ensureRunnable = (name) ->
     if not state("runnable")
-      $utils.throwErrByPath("miscellaneous.outside_test_with_cmd", {
+      $errUtils.throwErrByPath("miscellaneous.outside_test_with_cmd", {
         args: {
           cmd: name
         }
@@ -87,7 +88,7 @@ create = (state, expect) ->
 
     ## bail if we dont yet have two points
     if lastTwo.length isnt 2
-      $utils.throwErrByPath("dom.animation_check_failed")
+      $errUtils.throwErrByPath("dom.animation_check_failed")
 
     [point1, point2] = lastTwo
 
@@ -97,27 +98,30 @@ create = (state, expect) ->
     if $utils.getDistanceBetween(point1, point2) > threshold
       cmd  = state("current").get("name")
       node = $dom.stringify($el)
-      $utils.throwErrByPath("dom.animating", {
+      $errUtils.throwErrByPath("dom.animating", {
         args: { cmd, node }
       })
 
-  ensureReceivability = (subject, onFail) ->
+  ensureNotDisabled = (subject, onFail) ->
     cmd = state("current").get("name")
 
     if subject.prop("disabled")
       node = $dom.stringify(subject)
 
-      $utils.throwErrByPath("dom.disabled", {
+      $errUtils.throwErrByPath("dom.disabled", {
         onFail
         args: { cmd, node }
       })
 
+  ensureNotReadonly = (subject, onFail) ->
+    cmd = state("current").get("name")
+
     # readonly can only be applied to input/textarea
     # not on checkboxes, radios, etc..
-    if $dom.isTextLike(subject) and subject.prop("readonly")
+    if $dom.isTextLike(subject.get(0)) and subject.prop("readonly")
       node = $dom.stringify(subject)
 
-      $utils.throwErrByPath("dom.readonly", {
+      $errUtils.throwErrByPath("dom.readonly", {
         onFail
         args: { cmd, node }
       })
@@ -127,34 +131,32 @@ create = (state, expect) ->
 
     # We overwrite the filter(":visible") in jquery
     # packages/driver/src/config/jquery.coffee#L51
-    # So that this effectively calls our logic 
+    # So that this effectively calls our logic
     # for $dom.isVisible aka !$dom.isHidden
     if not (subject.length is subject.filter(":visible").length)
       reason = $dom.getReasonIsHidden(subject)
       node   = $dom.stringify(subject)
-      $utils.throwErrByPath("dom.not_visible", {
+      $errUtils.throwErrByPath("dom.not_visible", {
         onFail
         args: { cmd, node, reason }
       })
 
   ensureAttached = (subject, name, onFail) ->
     if $dom.isDetached(subject)
-      prev = state("current").get("prev")
+      cmd = name ? state("current").get("name")
+      prev = state("current").get("prev").get("name")
+      node = $dom.stringify(subject)
 
-      $utils.throwErrByPath("subject.not_attached", {
+      $errUtils.throwErrByPath("subject.not_attached", {
         onFail
-        args: {
-          name
-          subject: $dom.stringify(subject),
-          previous: prev.get("name")
-        }
+        args: { cmd, prev, node }
       })
 
   ensureElement = (subject, name, onFail) ->
     if not $dom.isElement(subject)
       prev = state("current").get("prev")
 
-      $utils.throwErrByPath("subject.not_element", {
+      $errUtils.throwErrByPath("subject.not_element", {
         onFail
         args: {
           name
@@ -167,7 +169,7 @@ create = (state, expect) ->
     if not $dom.isWindow(subject)
       prev = state("current").get("prev")
 
-      $utils.throwErrByPath("subject.not_window_or_document", {
+      $errUtils.throwErrByPath("subject.not_window_or_document", {
         args: {
           name
           type: "window"
@@ -180,7 +182,7 @@ create = (state, expect) ->
     if not $dom.isDocument(subject)
       prev = state("current").get("prev")
 
-      $utils.throwErrByPath("subject.not_window_or_document", {
+      $errUtils.throwErrByPath("subject.not_window_or_document", {
         args: {
           name
           type: "document"
@@ -232,7 +234,7 @@ create = (state, expect) ->
       elInherited = $elements.findParent el, (el, prevEl) ->
         if win.getComputedStyle(el)[cssProperty] isnt cssValue
           return prevEl
-    
+
       element = $dom.stringify(el)
       elementInherited = (el isnt elInherited) && $dom.stringify(elInherited)
 
@@ -244,7 +246,7 @@ create = (state, expect) ->
         'Inherited From': elInherited
       })
 
-      $utils.throwErrByPath("dom.pointer_events_none", {
+      $errUtils.throwErrByPath("dom.pointer_events_none", {
         onFail
         args: {
           cmd
@@ -263,7 +265,7 @@ create = (state, expect) ->
       if $el2
         element1 = $dom.stringify($el1)
         element2 = $dom.stringify($el2)
-        $utils.throwErrByPath("dom.covered", {
+        $errUtils.throwErrByPath("dom.covered", {
           onFail
           args: { cmd, element1, element2 }
           errProps: {
@@ -274,7 +276,7 @@ create = (state, expect) ->
         })
       else
         node = $dom.stringify($el1)
-        $utils.throwErrByPath("dom.center_hidden", {
+        $errUtils.throwErrByPath("dom.center_hidden", {
           onFail
           args: { cmd, node }
           errProps: {
@@ -289,7 +291,7 @@ create = (state, expect) ->
     if position in VALID_POSITIONS
       return true
 
-    $utils.throwErrByPath("dom.invalid_position_argument", {
+    $errUtils.throwErrByPath("dom.invalid_position_argument", {
       onFail: log
       args: {
         position,
@@ -304,7 +306,7 @@ create = (state, expect) ->
     cmd   ?= state("current").get("name")
     node  = $dom.stringify($el)
 
-    $utils.throwErrByPath("dom.not_scrollable", {
+    $errUtils.throwErrByPath("dom.not_scrollable", {
       args: { cmd, node }
     })
 
@@ -325,7 +327,7 @@ create = (state, expect) ->
 
     ensureElementIsNotAnimating
 
-    ensureReceivability
+    ensureNotDisabled
 
     ensureVisibility
 
@@ -338,6 +340,8 @@ create = (state, expect) ->
     ensureValidPosition
 
     ensureScrollability
+
+    ensureNotReadonly
   }
 
 module.exports = {

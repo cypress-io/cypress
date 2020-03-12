@@ -15,7 +15,9 @@ module.exports = {
     exit: ->
     commandLine: {
       appendSwitch: ->
-    }
+      appendArgument: ->
+    },
+    disableHardwareAcceleration: ->
   }
   systemPreferences: {
     isDarkMode: ->
@@ -23,6 +25,9 @@ module.exports = {
   }
   BrowserWindow: {
     fromWebContents: ->
+    getExtensions: ->
+    removeExtension: ->
+    addExtension: ->
   }
   Menu: {
     buildFromTemplate: ->

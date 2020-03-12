@@ -7,7 +7,7 @@ import Err from '../lib/err-model'
 import Hook from '../hooks/hook-model'
 import Route from '../routes/route-model'
 
-export default class Attempt {
+export default class AttemptModel {
   @observable agents = []
   @observable attempts = []
   @observable commands = []

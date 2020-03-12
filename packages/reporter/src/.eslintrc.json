@@ -1,0 +1,20 @@
+{
+  "extends": [
+    "plugin:@cypress/dev/react",
+    "plugin:@cypress/dev/tests"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "no-unused-vars": "off",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".tsx"
+        ]
+      }
+    ]
+  }
+}

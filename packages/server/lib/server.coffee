@@ -1,8 +1,6 @@
 _            = require("lodash")
-exphbs       = require("express-handlebars")
 url          = require("url")
 http         = require("http")
-concatStream = require("concat-stream")
 stream       = require("stream")
 express      = require("express")
 Promise      = require("bluebird")
@@ -14,26 +12,56 @@ check        = require("check-more-types")
 httpsProxy   = require("@packages/https-proxy")
 compression  = require("compression")
 debug        = require("debug")("cypress:server:server")
-agent        = require("@packages/network").agent
-cors         = require("./util/cors")
-uri          = require("./util/uri")
+{
+  agent,
+  blacklist,
+  concatStream,
+  cors,
+  uri
+} = require("@packages/network")
+{ NetworkProxy } = require("@packages/proxy")
 origin       = require("./util/origin")
 ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
-buffers      = require("./util/buffers")
-blacklist    = require("./util/blacklist")
 statusCode   = require("./util/status_code")
 headersUtil  = require("./util/headers")
 allowDestroy = require("./util/server_destroy")
+{ SocketWhitelist } = require("./util/socket_whitelist")
 cwd          = require("./cwd")
 errors       = require("./errors")
 logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
+XhrServer    = require("./xhr_ws_server")
+templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
 fullyQualifiedRe       = /^https?:\/\//
+
+ALLOWED_PROXY_BYPASS_URLS = [
+  '/',
+  '/__cypress/runner/cypress_runner.css',
+  '/__cypress/static/favicon.ico'
+]
+
+_isNonProxiedRequest = (req) ->
+  ## proxied HTTP requests have a URL like: "http://example.com/foo"
+  ## non-proxied HTTP requests have a URL like: "/foo"
+  req.proxiedUrl.startsWith('/')
+
+_forceProxyMiddleware = (clientRoute) ->
+  ## normalize clientRoute to help with comparison
+  trimmedClientRoute = _.trimEnd(clientRoute, '/')
+
+  (req, res, next) ->
+    trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+
+    if _isNonProxiedRequest(req) and !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) and trimmedUrl isnt trimmedClientRoute
+      ## this request is non-proxied and non-whitelisted, redirect to the runner error page
+      return res.redirect(clientRoute)
+
+    next()
 
 isResponseHtml = (contentType, responseBuffer) ->
   if contentType
@@ -45,6 +73,12 @@ isResponseHtml = (contentType, responseBuffer) ->
   return false
 
 setProxiedUrl = (req) ->
+  ## proxiedUrl is the full URL with scheme, host, and port
+  ## it will only be fully-qualified if the request was proxied.
+
+  ## this function will set the URL of the request to be the path
+  ## only, which can then be used to proxy the request.
+
   ## bail if we've already proxied the url
   return if req.proxiedUrl
 
@@ -67,6 +101,7 @@ class Server
     if not (@ instanceof Server)
       return new Server()
 
+    @_socketWhitelist = new SocketWhitelist()
     @_request    = null
     @_middleware = null
     @_server     = null
@@ -77,7 +112,8 @@ class Server
     @_httpsProxy = null
     @_urlResolver = null
 
-  createExpressApp: (morgan) ->
+  createExpressApp: (config) ->
+    { morgan, clientRoute } = config
     app = express()
 
     ## set the cypress config from the cypress.json file
@@ -85,11 +121,7 @@ class Server
 
     ## since we use absolute paths, configure express-handlebars to not automatically find layouts
     ## https://github.com/cypress-io/cypress/issues/2891
-    app.engine("html", exphbs({
-      defaultLayout: false
-      layoutsDir: []
-      partialsDir: []
-    }))
+    app.engine("html", templateEngine.render)
 
     ## handle the proxied url in case
     ## we have not yet started our websocket server
@@ -104,6 +136,8 @@ class Server
       ## always continue on
 
       next()
+
+    app.use _forceProxyMiddleware(clientRoute)
 
     app.use require("cookie-parser")()
     app.use compression({filter: notSSE})
@@ -128,29 +162,40 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project, onWarning) ->
+  open: (config = {}, project, onError, onWarning) ->
+    debug("server open")
+
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
-      ## always reset any buffers
-      ## TODO: change buffers to be an instance
-      ## here and pass this dependency around
-      buffers.reset()
-
-      app = @createExpressApp(config.morgan)
+      app = @createExpressApp(config)
 
       logger.setSettings(config)
 
       ## generate our request instance
       ## and set the responseTimeout
+      ## TODO: might not be needed anymore
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
+      @_xhrServer = XhrServer.create()
 
       getRemoteState = => @_getRemoteState()
 
+      getFileServerToken = => @_fileServer.token
+
+      @_networkProxy = new NetworkProxy({ config, getRemoteState, getFileServerToken, request: @_request })
+
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_nodeProxy)
+      @createRoutes({
+        app
+        config
+        getDeferredResponse: @_xhrServer.getDeferredResponse
+        getRemoteState
+        networkProxy: @_networkProxy
+        onError
+        project
+      })
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -190,6 +235,8 @@ class Server
 
       @_server.on "connect", (req, socket, head) =>
         debug("Got CONNECT request from %s", req.url)
+
+        socket.once 'upstream-connected', @_socketWhitelist.add
 
         @_httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) =>
@@ -320,12 +367,16 @@ class Server
   _onRequest: (headers, automationRequest, options) ->
     @_request.sendPromise(headers, automationRequest, options)
 
-  _onResolveUrl: (urlStr, headers, automationRequest, options = {}) ->
+  _onResolveUrl: (urlStr, headers, automationRequest, options = { headers: {} }) ->
     debug("resolving visit %o", {
       url: urlStr
       headers
       options
     })
+
+    ## always clear buffers - reduces the possibility of a random HTTP request
+    ## accidentally retrieving buffered content at the wrong time
+    @_networkProxy.reset()
 
     startTime = new Date()
 
@@ -362,26 +413,13 @@ class Server
         _.invoke(reqStream, "abort")
         _.invoke(currentPromisePhase, "cancel")
 
-      ## if we have a buffer for this url
-      ## then just respond with its details
-      ## so we are idempotant and do not make
-      ## another request
-      if obj = buffers.getByOriginalUrl(urlStr)
-        debug("got previous request buffer for url:", urlStr)
-
-        ## reset the cookies from the existing stream's jar
-        return runPhase ->
-          resolve(
-            request.setJarCookies(obj.jar, automationRequest)
-            .then (c) ->
-              return obj.details
-          )
-
       redirects = []
       newUrl = null
 
       if not fullyQualifiedRe.test(urlStr)
         handlingLocalFile = true
+
+        options.headers['x-cypress-authorization'] = @_fileServer.token
 
         @_remoteVisitingUrl = true
 
@@ -412,14 +450,15 @@ class Server
             _.pick(incomingRes, "headers", "statusCode")
           )
 
-          jar = str.getJar()
+          newUrl ?= urlStr
 
           runPhase =>
-            request.setJarCookies(jar, automationRequest)
-            .then (c) =>
+            ## get the cookies that would be sent with this request so they can be rehydrated
+            automationRequest("get:cookies", {
+              domain: cors.getSuperDomain(newUrl)
+            })
+            .then (cookies) =>
               @_remoteVisitingUrl = false
-
-              newUrl ?= urlStr
 
               statusIs2xxOrAllowedFailure = ->
                 ## is our status code in the 2xx range, or have we disabled failing
@@ -434,7 +473,7 @@ class Server
                 contentType
                 url: newUrl
                 status: incomingRes.statusCode
-                cookies: c
+                cookies
                 statusText: statusCode.getText(incomingRes.statusCode)
                 redirects
                 originalUrl
@@ -452,11 +491,6 @@ class Server
                 ## this allows us to detect & reject ETIMEDOUT errors
                 ## where the headers have been sent but the
                 ## connection hangs before receiving a body.
-
-                if !_.get(responseBuffer, 'length')
-                  ## concatStream can yield an empty array, which is
-                  ## not a valid chunk
-                  responseBuffer = undefined
 
                 ## if there is not a content-type, try to determine
                 ## if the response content is HTML-like
@@ -482,11 +516,10 @@ class Server
 
                   responseBufferStream.end(responseBuffer)
 
-                  buffers.set({
+                  @_networkProxy.setHttpBuffer({
                     url: newUrl
-                    jar: jar
                     stream: responseBufferStream
-                    details: details
+                    details
                     originalUrl: originalUrl
                     response: incomingRes
                   })
@@ -624,7 +657,13 @@ class Server
 
   proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
     ## bail if this is our own namespaced socket.io request
-    return if req.url.startsWith(socketIoRoute)
+    if req.url.startsWith(socketIoRoute)
+      if not @_socketWhitelist.isRequestWhitelisted(req)
+        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
+        socket.end()
+
+      ## we can return here either way, if the socket is still valid socket.io will hook it up
+      return
 
     if (host = req.headers.host) and @_remoteProps and (remoteOrigin = @_remoteOrigin)
       ## get the port from @_remoteProps
@@ -635,30 +674,7 @@ class Server
       {hostname} = url.parse("http://#{host}")
 
       onProxyErr = (err, req, res) ->
-        ## by default http-proxy will call socket.end
-        ## with no data, so we need to override the end
-        ## function and write our own response
-        ## https://github.com/nodejitsu/node-http-proxy/blob/master/lib/http-proxy/passes/ws-incoming.js#L159
-        end = socket.end
-        socket.end = ->
-          socket.end = end
-
-          response = [
-            "HTTP/#{req.httpVersion} 502 #{statusCode.getText(502)}"
-            "X-Cypress-Proxy-Error-Message: #{err.message}"
-            "X-Cypress-Proxy-Error-Code: #{err.code}"
-          ].join("\r\n") + "\r\n\r\n"
-
-          proxiedUrl = "#{protocol}//#{hostname}:#{port}"
-
-          debug(
-            "Got ERROR proxying websocket connection to url: '%s' received error: '%s' with code '%s'",
-            proxiedUrl,
-            err.toString()
-            err.code
-          )
-
-          socket.end(response)
+        debug("Got ERROR proxying websocket connection", { err, port, protocol, hostname, req })
 
       proxy.ws(req, socket, head, {
         secure: false
@@ -675,7 +691,7 @@ class Server
       socket.end() if socket.writable
 
   reset: ->
-    buffers.reset()
+    @_networkProxy?.reset()
 
     @_onDomainSet(@_baseUrl ? "<root>")
 
@@ -726,10 +742,14 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
+    options.onIncomingXhr = @_xhrServer.onIncomingXhr
 
-    @_socket = Socket(config)
+    options.onResetServerState = =>
+      @_xhrServer.reset()
+      @_networkProxy.reset()
+
+    @_socket = new Socket(config)
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)
-    # handleListeners(@_server)
 
 module.exports = Server

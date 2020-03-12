@@ -46,7 +46,7 @@ if (!shouldBuildBinary()) {
 
 console.log('building Windows binary')
 
-const filename = `cypress-${process.env.NEXT_DEV_VERSION}.tgz`
+const filename = `cypress-v${process.env.NEXT_DEV_VERSION}.tgz`
 const version = process.env.NEXT_DEV_VERSION
 
 la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
@@ -54,7 +54,7 @@ la(is.unemptyString(version), 'missing NEXT_DEV_VERSION')
 console.log('building version', version)
 
 shell.exec(
-  `node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`
+  `node scripts/binary.js upload-npm-package --file cli/build/${filename} --version ${version}`,
 )
 
 const arch = os.arch()
@@ -62,22 +62,22 @@ const arch = os.arch()
 shell.echo(`Building for win32 [${arch}]...`)
 
 shell.cat('npm-package-url.json')
-shell.exec(`npm run binary-build -- --platform windows --version ${version}`)
+shell.exec(`yarn binary-build --platform windows --version ${version}`)
 
 // make sure we are not including dev dependencies accidentally
 // TODO how to get the server package folder?
 const serverPackageFolder = 'C:/projects/cypress/dist/win32/packages/server'
 
 shell.echo(`Checking prod and dev dependencies in ${serverPackageFolder}`)
-shell.exec('npm ls --prod --depth 0 || true', { cwd: serverPackageFolder })
-const result = shell.exec('npm ls --dev --depth 0 || true', {
+shell.exec('yarn list --prod --depth 0 || true')
+const result = shell.exec('yarn list --dev --depth 0 || true', {
   cwd: serverPackageFolder,
 })
 
 if (result.stdout.includes('nodemon')) {
   console.error('Hmm, server package includes dev dependency "coveralls"')
   console.error(
-    'which means somehow we are including dev dependencies in the output bundle'
+    'which means somehow we are including dev dependencies in the output bundle',
   )
 
   console.error('see https://github.com/cypress-io/cypress/issues/2896')
@@ -112,18 +112,18 @@ if (isPullRequest()) {
 } else {
   console.log('Zipping and upload binary')
 
-  shell.exec('npm run binary-zip')
+  shell.exec('yarn binary-zip')
   shell.ls('-l', '*.zip')
   shell.exec(
-    `node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`
+    `node scripts/binary.js upload-unique-binary --file cypress.zip --version ${version}`,
   )
 
   shell.cat('binary-url.json')
   shell.exec(
-    'node scripts/add-install-comment.js --npm npm-package-url.json --binary binary-url.json'
+    'node scripts/add-install-comment.js --npm npm-package-url.json --binary binary-url.json',
   )
 
   shell.exec(
-    'node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor'
+    'node scripts/test-other-projects.js --npm npm-package-url.json --binary binary-url.json --provider appVeyor',
   )
 }

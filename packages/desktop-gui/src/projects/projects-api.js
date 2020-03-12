@@ -120,7 +120,7 @@ const closeProject = (project) => {
 
   return Promise.join(
     closeBrowser(project),
-    ipc.closeProject()
+    ipc.closeProject(),
   )
 }
 
@@ -144,7 +144,13 @@ const openProject = (project) => {
   }
 
   const updateConfig = (config) => {
-    project.update({ id: config.projectId })
+    project.update({
+      id: config.projectId,
+      name: config.projectName,
+      configFile: config.configFile,
+      ..._.pick(config, ['resolvedNodeVersion', 'resolvedNodePath']),
+    })
+
     project.update({ name: config.projectName })
     project.setOnBoardingConfig(config)
     project.setBrowsers(config.browsers)
@@ -189,12 +195,16 @@ const openProject = (project) => {
 
 const reopenProject = (project) => {
   project.clearError()
-  project.clearWarning()
+  project.dismissWarning()
 
   return closeProject(project)
   .then(() => {
     return openProject(project)
   })
+}
+
+const pingBaseUrl = (url) => {
+  return ipc.pingBaseUrl(url)
 }
 
 const removeProject = (project) => {
@@ -228,4 +238,5 @@ export default {
   runSpec,
   closeBrowser,
   getRecordKeys,
+  pingBaseUrl,
 }

@@ -1,5 +1,6 @@
 _ = require("lodash")
-$utils = require("./utils")
+
+$errUtils = require("./error_utils")
 
 builtInCommands = [
   require("../cy/commands/actions/check")
@@ -47,7 +48,7 @@ getTypeByPrevSubject = (prevSubject) ->
     else
       "parent"
 
-create = (Cypress, cy, state, config, log) ->
+create = (Cypress, cy, state, config) ->
   ## create a single instance
   ## of commands
   commands = {}
@@ -64,7 +65,7 @@ create = (Cypress, cy, state, config, log) ->
     original = commandBackups[name] or commands[name]
 
     if not original
-      $utils.throwErrByPath("miscellaneous.invalid_overwrite", {
+      $errUtils.throwErrByPath("miscellaneous.invalid_overwrite", {
         args: {
           name: name
         }
@@ -154,7 +155,7 @@ create = (Cypress, cy, state, config, log) ->
 
   ## perf loop
   for cmd in builtInCommands
-    cmd(Commands, Cypress, cy, state, config, log)
+    cmd(Commands, Cypress, cy, state, config)
 
   return Commands
 

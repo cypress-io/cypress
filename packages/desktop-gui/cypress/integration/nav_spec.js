@@ -61,7 +61,7 @@ describe('Navigation', function () {
     })
 
     it('displays user name', () => {
-      cy.get('nav a').should(function ($a) {
+      cy.get('.user-dropdown .dropdown-chosen').should(function ($a) {
         expect($a).to.contain(this.user.name)
       })
     })
@@ -121,7 +121,7 @@ describe('Navigation', function () {
     })
 
     it('displays email instead of name', () => {
-      cy.get('nav a').should(function ($a) {
+      cy.get('.user-dropdown .dropdown-chosen').should(function ($a) {
         expect($a).to.contain(this.user.email)
       })
     })

@@ -1,7 +1,7 @@
 _ = require("lodash")
 Promise = require("bluebird")
 
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 viewports = {
   "macbook-15" : "1440x900"
@@ -9,11 +9,15 @@ viewports = {
   "macbook-11" : "1366x768"
   "ipad-2"     : "768x1024"
   "ipad-mini"  : "768x1024"
+  "iphone-xr"  : "414x896"
+  "iphone-x"   : "375x812"
   "iphone-6+"  : "414x736"
   "iphone-6"   : "375x667"
   "iphone-5"   : "320x568"
   "iphone-4"   : "320x480"
   "iphone-3"   : "320x480"
+  "samsung-s10" : "360x760"
+  "samsung-note9" : "414x846"
 }
 
 validOrientations = ["landscape", "portrait"]
@@ -84,7 +88,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       getWindow = =>
         window = state("window")
-        $utils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
+        $errUtils.throwErrByPath("window.iframe_undefined", { onFail: options._log }) if not window
 
         return window
 
@@ -112,7 +116,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       getDocument = =>
         win = state("window")
         ## TODO: add failing test around logging twice
-        $utils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
+        $errUtils.throwErrByPath("window.iframe_doc_undefined") if not win?.document
 
         return win.document
 
@@ -147,7 +151,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             obj
 
       throwErrBadArgs = =>
-        $utils.throwErrByPath "viewport.bad_args", { onFail: options._log }
+        $errUtils.throwErrByPath "viewport.bad_args", { onFail: options._log }
 
       widthAndHeightAreValidNumbers = (width, height) ->
         _.every [width, height], (val) ->
@@ -155,11 +159,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       widthAndHeightAreWithinBounds = (width, height) ->
         _.every [width, height], (val) ->
-          val >= 20 and val <= 3000
+          val >= 0
 
       switch
         when _.isString(presetOrWidth) and _.isBlank(presetOrWidth)
-          $utils.throwErrByPath "viewport.empty_string", { onFail: options._log }
+          $errUtils.throwErrByPath "viewport.empty_string", { onFail: options._log }
 
         when _.isString(presetOrWidth)
           getPresetDimensions = (preset) =>
@@ -167,7 +171,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               _.map(viewports[presetOrWidth].split("x"), Number)
             catch e
               presets = _.keys(viewports).join(", ")
-              $utils.throwErrByPath "viewport.missing_preset", {
+              $errUtils.throwErrByPath "viewport.missing_preset", {
                 onFail: options._log
                 args: { preset, presets }
               }
@@ -175,7 +179,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           orientationIsValidAndLandscape = (orientation) =>
             if orientation not in validOrientations
               all = validOrientations.join("' or '")
-              $utils.throwErrByPath "viewport.invalid_orientation", {
+              $errUtils.throwErrByPath "viewport.invalid_orientation", {
                 onFail: options._log
                 args: { all, orientation }
               }
@@ -199,7 +203,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           height = heightOrOrientation
 
           if not widthAndHeightAreWithinBounds(width, height)
-            $utils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
+            $errUtils.throwErrByPath "viewport.dimensions_out_of_range", { onFail: options._log }
 
         else
           throwErrBadArgs()

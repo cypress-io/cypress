@@ -14,14 +14,15 @@ exports['e2e return value failing1 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: return_value_spec.coffee...                                                     (1 of 1) 
+  Running:  return_value_spec.coffee                                                        (1 of 1)
 
 
   1) errors when invoking commands and return a different value
-  2) errors when invoking commands in custom command and returning differnet value
+  2) errors when invoking commands in custom command and returning different value
+  3) errors when not invoking commands, invoking done callback, and returning a promise
 
   0 passing
-  2 failing
+  3 failing
 
   1)  errors when invoking commands and return a different value:
      CypressError: Cypress detected that you invoked one or more cy commands but returned a different value.
@@ -37,24 +38,9 @@ For convenience, you can also simply omit any return value or return 'undefined'
 In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
 
 https://on.cypress.io/returning-value-and-commands-in-test
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
-  2)  errors when invoking commands in custom command and returning differnet value:
+  2)  errors when invoking commands in custom command and returning different value:
      CypressError: Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
 
 The custom command was:
@@ -72,47 +58,52 @@ For convenience, you can also simply omit any return value or return 'undefined'
 In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
 
 https://on.cypress.io/returning-value-and-commands-in-custom-command
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
+
+  3)  errors when not invoking commands, invoking done callback, and returning a promise:
+     Error: Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+
+Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callback
+
+-----------------------------------------------------------
+
+Original mocha error:
+
+Error: Resolution method is overspecified. Specify a callback *or* return a Promise; not both.
+    [stack trace lines]
 
 
 
 
   (Results)
 
-  ┌────────────────────────────────────────┐
-  │ Tests:        2                        │
-  │ Passing:      0                        │
-  │ Failing:      2                        │
-  │ Pending:      0                        │
-  │ Skipped:      0                        │
-  │ Screenshots:  2                        │
-  │ Video:        true                     │
-  │ Duration:     X seconds                │
-  │ Spec Ran:     return_value_spec.coffee │
-  └────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      3                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  3                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     return_value_spec.coffee                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands and return a different value (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/return_value_spec.coffee/errors when invoking commands in custom command and returning differnet value (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when invoking c     (1280x720)
+     ommands and return a different value (failed).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when invoking c     (1280x720)
+     ommands in custom command and returning different value (failed).png                           
+  -  /XXX/XXX/XXX/cypress/screenshots/return_value_spec.coffee/errors when not invoki     (1280x720)
+     ng commands, invoking done callback, and returning a promise (failed).png                      
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/return_value_spec.coffee.mp4        (X second)
 
 
 ====================================================================================================
@@ -120,11 +111,11 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ return_value_spec.coffee                  XX:XX        2        -        2        -        - │
+  │ ✖  return_value_spec.coffee                 XX:XX        3        -        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        2        -        2        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
 
 
 `

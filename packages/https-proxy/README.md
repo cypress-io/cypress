@@ -4,17 +4,10 @@ This package is responsible for acting as a CA authority and generating dynamic 
 
 This package enables Cypress to inspect and modify bytes coming in and out of the browser.
 
-## Installing
-
-The proxy's dependencies can be installed with:
-
-```bash
-cd packages/https-proxy
-npm install
-```
-
 ## Testing
 
 ```bash
-npm test
+yarn lerna run test --scope @packages/https-proxy --stream
+yarn lerna run test-watch --scope @packages/https-proxy --stream
+yarn lerna run test-debug --scope @packages/https-proxy --stream
 ```

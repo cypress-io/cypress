@@ -1,22 +1,6 @@
-/* eslint-disable
-    default-case,
-    no-cond-assign,
-    no-unused-vars,
-    prefer-rest-params,
-    prefer-spread,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS206: Consider reworking classes to avoid initClass
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
+const chai = require('chai')
 const blobUtil = require('blob-util')
 const minimatch = require('minimatch')
 const moment = require('moment')
@@ -32,107 +16,73 @@ const $Commands = require('./cypress/commands')
 const $Cookies = require('./cypress/cookies')
 const $Cy = require('./cypress/cy')
 const $Events = require('./cypress/events')
+const $FirefoxForcedGc = require('./util/firefox_forced_gc')
+const $Keyboard = require('./cy/keyboard')
 const $SetterGetter = require('./cypress/setter_getter')
-const $Keyboard = require('./cypress/keyboard')
 const $Log = require('./cypress/log')
 const $Location = require('./cypress/location')
 const $LocalStorage = require('./cypress/local_storage')
 const $Mocha = require('./cypress/mocha')
+const $Mouse = require('./cy/mouse')
 const $Runner = require('./cypress/runner')
 const $Server = require('./cypress/server')
 const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
+const $errUtils = require('./cypress/error_utils')
+const browserInfo = require('./cypress/browser')
+const debug = require('debug')('cypress:driver:cypress')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
   cy: 'detachDom getStyles'.split(' '),
 }
 
-const jqueryProxyFn = function () {
+const jqueryProxyFn = function (...args) {
   if (!this.cy) {
-    $utils.throwErrByPath('miscellaneous.no_cy')
+    $errUtils.throwErrByPath('miscellaneous.no_cy')
   }
 
-  return this.cy.$$.apply(this.cy, arguments)
+  return this.cy.$$.apply(this.cy, args)
 }
 
 _.extend(jqueryProxyFn, $)
 
-//# provide the old interface and
-//# throw a deprecation message
+// provide the old interface and
+// throw a deprecation message
 $Log.command = () => {
-  return $utils.throwErrByPath('miscellaneous.command_log_renamed')
+  return $errUtils.throwErrByPath('miscellaneous.command_log_renamed')
 }
 
-const throwDeprecatedCommandInterface = function (key, method) {
-  const signature = (() => {
-    switch (method) {
-      case 'addParentCommand':
-        return `'${key}', function(){...}`
-      case 'addChildCommand':
-        return `'${key}', { prevSubject: true }, function(){...}`
-      case 'addDualCommand':
-        return `'${key}', { prevSubject: 'optional' }, function(){...}`
-    }
-  })()
+const throwDeprecatedCommandInterface = (key, method) => {
+  let signature = ''
 
-  return $utils.throwErrByPath('miscellaneous.custom_command_interface_changed', {
+  switch (method) {
+    case 'addParentCommand':
+      signature = `'${key}', function(){...}`
+      break
+    case 'addChildCommand':
+      signature = `'${key}', { prevSubject: true }, function(){...}`
+      break
+    case 'addDualCommand':
+      signature = `'${key}', { prevSubject: 'optional' }, function(){...}`
+      break
+    default:
+      break
+  }
+
+  $errUtils.throwErrByPath('miscellaneous.custom_command_interface_changed', {
     args: { method, signature },
   })
 }
 
 const throwPrivateCommandInterface = (method) => {
-  return $utils.throwErrByPath('miscellaneous.private_custom_command_interface', {
+  $errUtils.throwErrByPath('miscellaneous.private_custom_command_interface', {
     args: { method },
   })
 }
 
 class $Cypress {
-  static initClass () {
-    this.prototype.$ = jqueryProxyFn
-
-    //# attach to $Cypress to access
-    //# all of the constructors
-    //# to enable users to monkeypatch
-    this.prototype.$Cypress = $Cypress
-    this.prototype.Cy = $Cy
-    this.prototype.Chainer = $Chainer
-    this.prototype.Cookies = $Cookies
-    this.prototype.Command = $Command
-    this.prototype.Commands = $Commands
-    this.prototype.dom = $dom
-    this.prototype.errorMessages = $errorMessages
-    this.prototype.Keyboard = $Keyboard
-    this.prototype.Location = $Location
-    this.prototype.Log = $Log
-    this.prototype.LocalStorage = $LocalStorage
-    this.prototype.Mocha = $Mocha
-    this.prototype.Runner = $Runner
-    this.prototype.Server = $Server
-    this.prototype.Screenshot = $Screenshot
-    this.prototype.SelectorPlayground = $SelectorPlayground
-    this.prototype.utils = $utils
-    this.prototype._ = _
-    this.prototype.moment = moment
-    this.prototype.Blob = blobUtil
-    this.prototype.Promise = Promise
-    this.prototype.minimatch = minimatch
-    this.prototype.sinon = sinon
-    this.prototype.lolex = lolex
-
-    //# proxy all of the methods in proxies
-    //# to their corresponding objects
-    _.each(proxies, (methods, key) => {
-      return _.each(methods, (method) => {
-        return $Cypress.prototype[method] = function () {
-          const prop = this[key]
-
-          return prop && prop[method].apply(prop, arguments)
-        }
-      })
-    })
-  }
   constructor (config = {}) {
     this.cy = null
     this.chai = null
@@ -147,7 +97,7 @@ class $Cypress {
   }
 
   setConfig (config = {}) {
-    //# config.remote
+    // config.remote
     // {
     //   origin: "http://localhost:2020"
     //   domainName: "localhost"
@@ -168,48 +118,51 @@ class $Cypress {
     //   }
     // }
 
-    //# set domainName but allow us to turn
-    //# off this feature in testing
-    let d
+    let d = config.remote ? config.remote.domainName : undefined
 
-    if (d = config.remote != null ? config.remote.domainName : undefined) {
+    // set domainName but allow us to turn
+    // off this feature in testing
+    if (d) {
       document.domain = d
     }
 
-    //# a few static props for the host OS, browser
-    //# and the current version of Cypress
+    // a few static props for the host OS, browser
+    // and the current version of Cypress
     this.arch = config.arch
     this.spec = config.spec
     this.version = config.version
     this.browser = config.browser
     this.platform = config.platform
 
-    //# normalize this into boolean
+    // normalize this into boolean
     config.isTextTerminal = !!config.isTextTerminal
 
-    //# we asumme we're interactive based on whether or
-    //# not we're in a text terminal, but we keep this
-    //# as a separate property so we can potentially
-    //# slice up the behavior
+    // we asumme we're interactive based on whether or
+    // not we're in a text terminal, but we keep this
+    // as a separate property so we can potentially
+    // slice up the behavior
     config.isInteractive = !config.isTextTerminal
 
-    //# enable long stack traces when
-    //# we not are running headlessly
-    //# for debuggability but disable
-    //# them when running headlessly for
-    //# performance since users cannot
-    //# interact with the stack traces
+    // enable long stack traces when
+    // we not are running headlessly
+    // for debuggability but disable
+    // them when running headlessly for
+    // performance since users cannot
+    // interact with the stack traces
     Promise.config({
       longStackTraces: config.isInteractive,
     })
 
-    const { env, remote } = config
+    const { env } = config
 
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state')
+
+    _.extend(this, browserInfo(config))
 
     this.state = $SetterGetter.create({})
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
+    this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this.config)
 
     this.Cookies = $Cookies.create(config.namespace, d)
 
@@ -217,51 +170,54 @@ class $Cypress {
   }
 
   initialize ($autIframe) {
-    //# push down the options
-    //# to the runner
-    this.mocha.options(this.runner)
-
     return this.cy.initialize($autIframe)
   }
 
   run (fn) {
     if (!this.runner) {
-      $utils.throwErrByPath('miscellaneous.no_runner')
+      $errUtils.throwErrByPath('miscellaneous.no_runner')
     }
 
     return this.runner.run(fn)
   }
 
-  //# onSpecWindow is called as the spec window
-  //# is being served but BEFORE any of the actual
-  //# specs or support files have been downloaded
-  //# or parsed. we have not received any custom commands
-  //# at this point
+  // onSpecWindow is called as the spec window
+  // is being served but BEFORE any of the actual
+  // specs or support files have been downloaded
+  // or parsed. we have not received any custom commands
+  // at this point
   onSpecWindow (specWindow) {
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
 
-    //# create cy and expose globally
-    this.cy = (window.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn))
+    // create cy and expose globally
+    this.cy = $Cy.create(specWindow, this, this.Cookies, this.state, this.config, logFn)
+    window.cy = this.cy
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)
-    this.mocha = $Mocha.create(specWindow)
+    this.mocha = $Mocha.create(specWindow, this)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy)
 
-    //# wire up command create to cy
-    this.Commands = $Commands.create(this, this.cy, this.state, this.config, this.log)
+    // wire up command create to cy
+    this.Commands = $Commands.create(this, this.cy, this.state, this.config)
 
     this.events.proxyTo(this.cy)
+
+    $FirefoxForcedGc.install(this)
 
     return null
   }
 
   action (eventName, ...args) {
-    //# normalizes all the various ways
-    //# other objects communicate intent
-    //# and 'action' to Cypress
+    // normalizes all the various ways
+    // other objects communicate intent
+    // and 'action' to Cypress
+    debug(eventName)
     switch (eventName) {
+      case 'recorder:frame':
+        return this.emit('recorder:frame', args[0])
+
       case 'cypress:stop':
         return this.emit('stop')
 
@@ -269,7 +225,7 @@ class $Cypress {
         return this.emit('config', args[0])
 
       case 'runner:start':
-        //# mocha runner has begun running the tests
+        // mocha runner has begun running the tests
         this.emit('run:start')
 
         if (this._RESUMED_AT_TEST) {
@@ -283,15 +239,15 @@ class $Cypress {
         break
 
       case 'runner:end':
-        //# mocha runner has finished running the tests
+        // mocha runner has finished running the tests
 
-        //# end may have been caused by an uncaught error
-        //# that happened inside of a hook.
-        //#
-        //# when this happens mocha aborts the entire run
-        //# and does not do the usual cleanup so that means
-        //# we have to fire the test:after:hooks and
-        //# test:after:run events ourselves
+        // end may have been caused by an uncaught error
+        // that happened inside of a hook.
+        //
+        // when this happens mocha aborts the entire run
+        // and does not do the usual cleanup so that means
+        // we have to fire the test:after:hooks and
+        // test:after:run events ourselves
         this.emit('run:end')
 
         if (this.config('isTextTerminal')) {
@@ -301,7 +257,7 @@ class $Cypress {
         break
 
       case 'runner:suite:start':
-        //# mocha runner started processing a suite
+        // mocha runner started processing a suite
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite', ...args)
         }
@@ -309,7 +265,7 @@ class $Cypress {
         break
 
       case 'runner:suite:end':
-        //# mocha runner finished processing a suite
+        // mocha runner finished processing a suite
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'suite end', ...args)
         }
@@ -317,7 +273,7 @@ class $Cypress {
         break
 
       case 'runner:hook:start':
-        //# mocha runner started processing a hook
+        // mocha runner started processing a hook
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'hook', ...args)
         }
@@ -325,7 +281,7 @@ class $Cypress {
         break
 
       case 'runner:hook:end':
-        //# mocha runner finished processing a hook
+        // mocha runner finished processing a hook
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'hook end', ...args)
         }
@@ -333,7 +289,7 @@ class $Cypress {
         break
 
       case 'runner:test:start':
-        //# mocha runner started processing a hook
+        // mocha runner started processing a hook
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'test', ...args)
         }
@@ -348,52 +304,71 @@ class $Cypress {
         break
 
       case 'runner:pass':
-        //# delayed mocha pass event after
-        //# all afterEach hooks have ran
+        // mocha runner calculated a pass
+        // this is delayed from when mocha would normally fire it
+        // since we fire it after all afterEach hooks have ran
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'pass', ...args)
         }
 
         break
 
-        //# retry event only fired in mocha version 6+
-        //# https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
-        // when "runner:retry"
-        //   ## mocha runner calculated a pass
-        //   if @config("isTextTerminal")
-        //     @emit("mocha", "retry", args...)
-
       case 'runner:pending':
-        //# mocha runner calculated a pending test
+        // mocha runner calculated a pending test
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'pending', ...args)
         }
 
         break
 
-      case 'runner:fail':
-        //# mocha runner calculated a failure
+      case 'runner:fail': {
+        // mocha runner calculated a failure
+
+        const err = args[0].err
+
+        if (err.actual) {
+          err.actual = chai.util.inspect(err.actual)
+        }
+
+        if (err.expected) {
+          err.expected = chai.util.inspect(err.expected)
+        }
+
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'fail', ...args)
         }
 
         break
+      }
+      // retry event only fired in mocha version 6+
+      // https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
+      case 'runner:retry': {
+        // mocha runner calculated a pass
+        if (this.config('isTextTerminal')) {
+          this.emit('mocha', 'retry', ...args)
+        }
+
+        break
+      }
+
+      // case 'mocha:runnable:run':
+      //   return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
-        //# get back to a clean slate
+        // get back to a clean slate
         this.cy.reset()
 
-        this.emit('test:before:run', ...args)
-
         if (this.config('isTextTerminal')) {
-          //# needed for handling test retries
-          return this.emit('mocha', 'test:before:run', args[0])
+          // needed for handling test retries
+          this.emit('mocha', 'test:before:run', args[0])
         }
+
+        this.emit('test:before:run', ...args)
 
         break
 
       case 'runner:test:before:run:async':
-        //# TODO: handle timeouts here? or in the runner?
+        // TODO: handle timeouts here? or in the runner?
         return this.emitThen('test:before:run:async', ...args)
 
       case 'runner:runnable:after:run:async':
@@ -402,14 +377,13 @@ class $Cypress {
       case 'runner:test:after:run':
         this.runner.cleanupQueue(this.config('numTestsKeptInMemory'))
 
-        //# this event is how the reporter knows how to display
-        //# stats and runnable properties such as errors
+        // this event is how the reporter knows how to display
+        // stats and runnable properties such as errors
         this.emit('test:after:run', ...args)
 
         if (this.config('isTextTerminal')) {
-          //# needed for calculating wallClockDuration
-          //# and the timings of after + afterEach hooks
-          // @emit("mocha", "pass", args[0])
+          // needed for calculating wallClockDuration
+          // and the timings of after + afterEach hooks
           return this.emit('mocha', 'test:after:run', args[0])
         }
 
@@ -438,7 +412,7 @@ class $Cypress {
         return this.emit('log:changed', ...args)
 
       case 'cy:fail':
-        //# comes from cypress errors fail()
+        // comes from cypress errors fail()
         return this.emitMap('fail', ...args)
 
       case 'cy:stability:changed':
@@ -526,22 +500,25 @@ class $Cypress {
 
       case 'spec:script:error':
         return this.emit('script:error', ...args)
+
+      default:
+        return
     }
   }
 
   backend (eventName, ...args) {
     return new Promise((resolve, reject) => {
       const fn = function (reply) {
-        let e
+        const e = reply.error
 
-        if (e = reply.error) {
-          //# clone the error object
-          //# and set stack cleaned
-          //# to prevent bluebird from
-          //# attaching long stace traces
-          //# which otherwise make this err
-          //# unusably long
-          const err = $utils.cloneErr(e)
+        if (e) {
+          // clone the error object
+          // and set stack cleaned
+          // to prevent bluebird from
+          // attaching long stace traces
+          // which otherwise make this err
+          // unusably long
+          const err = $errUtils.cloneErr(e)
 
           err.__stackCleaned__ = true
           err.backend = true
@@ -557,13 +534,13 @@ class $Cypress {
   }
 
   automation (eventName, ...args) {
-    //# wrap action in promise
+    // wrap action in promise
     return new Promise((resolve, reject) => {
       const fn = function (reply) {
-        let e
+        const e = reply.error
 
-        if (e = reply.error) {
-          const err = $utils.cloneErr(e)
+        if (e) {
+          const err = $errUtils.cloneErr(e)
 
           err.automation = true
 
@@ -584,23 +561,23 @@ class $Cypress {
     return this.action('cypress:stop')
   }
 
-  addChildCommand (key, fn) {
+  addChildCommand (key) {
     return throwDeprecatedCommandInterface(key, 'addChildCommand')
   }
 
-  addParentCommand (key, fn) {
+  addParentCommand (key) {
     return throwDeprecatedCommandInterface(key, 'addParentCommand')
   }
 
-  addDualCommand (key, fn) {
+  addDualCommand (key) {
     return throwDeprecatedCommandInterface(key, 'addDualCommand')
   }
 
-  addAssertionCommand (key, fn) {
+  addAssertionCommand () {
     return throwPrivateCommandInterface('addAssertionCommand')
   }
 
-  addUtilityCommand (key, fn) {
+  addUtilityCommand () {
     return throwPrivateCommandInterface('addUtilityCommand')
   }
 
@@ -608,10 +585,53 @@ class $Cypress {
     return new $Cypress(config)
   }
 }
-$Cypress.initClass()
 
-//# attaching these so they are accessible
-//# via the runner + integration spec helper
+$Cypress.prototype.$ = jqueryProxyFn
+
+// attach to $Cypress to access
+// all of the constructors
+// to enable users to monkeypatch
+$Cypress.prototype.$Cypress = $Cypress
+$Cypress.prototype.Cy = $Cy
+$Cypress.prototype.Chainer = $Chainer
+$Cypress.prototype.Cookies = $Cookies
+$Cypress.prototype.Command = $Command
+$Cypress.prototype.Commands = $Commands
+$Cypress.prototype.dom = $dom
+$Cypress.prototype.errorMessages = $errorMessages
+$Cypress.prototype.Keyboard = $Keyboard
+$Cypress.prototype.Location = $Location
+$Cypress.prototype.Log = $Log
+$Cypress.prototype.LocalStorage = $LocalStorage
+$Cypress.prototype.Mocha = $Mocha
+$Cypress.prototype.Mouse = $Mouse
+$Cypress.prototype.Runner = $Runner
+$Cypress.prototype.Server = $Server
+$Cypress.prototype.Screenshot = $Screenshot
+$Cypress.prototype.SelectorPlayground = $SelectorPlayground
+$Cypress.prototype.utils = $utils
+$Cypress.prototype._ = _
+$Cypress.prototype.moment = moment
+$Cypress.prototype.Blob = blobUtil
+$Cypress.prototype.Promise = Promise
+$Cypress.prototype.minimatch = minimatch
+$Cypress.prototype.sinon = sinon
+$Cypress.prototype.lolex = lolex
+
+// proxy all of the methods in proxies
+// to their corresponding objects
+_.each(proxies, (methods, key) => {
+  return _.each(methods, (method) => {
+    return $Cypress.prototype[method] = function (...args) {
+      const prop = this[key]
+
+      return prop && prop[method].apply(prop, args)
+    }
+  })
+})
+
+// attaching these so they are accessible
+// via the runner + integration spec helper
 $Cypress.$ = $
 
 module.exports = $Cypress

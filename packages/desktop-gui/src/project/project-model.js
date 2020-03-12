@@ -1,6 +1,8 @@
 import _ from 'lodash'
-import { computed, observable, action } from 'mobx'
+import { action, computed, observable, toJS } from 'mobx'
+
 import Browser from '../lib/browser-model'
+import Warning from './warning-model'
 
 const cacheProps = [
   'id',
@@ -18,6 +20,7 @@ const validProps = cacheProps.concat([
   'isChosen',
   'isLoading',
   'isNew',
+  'configFile',
   'browsers',
   'onBoardingModalOpen',
   'browserState',
@@ -25,6 +28,8 @@ const validProps = cacheProps.concat([
   'parentTestsFolderDisplay',
   'integrationExampleName',
   'scaffoldedFiles',
+  'resolvedNodePath',
+  'resolvedNodeVersion',
 ])
 
 export default class Project {
@@ -53,11 +58,14 @@ export default class Project {
   @observable browserState = 'closed'
   @observable resolvedConfig
   @observable error
-  @observable warnings = []
+  /** @type {{[key: string] : {warning:Error & {dismissed: boolean}}}} */
+  @observable _warnings = {}
   @observable apiError
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
   @observable scaffoldedFiles = []
+  @observable resolvedNodePath
+  @observable resolvedNodeVersion
   // should never change after first set
   @observable path
   // not observable
@@ -115,6 +123,10 @@ export default class Project {
 
   @computed get defaultBrowser () {
     return this.browsers[0]
+  }
+
+  @computed get warnings () {
+    return _.reject(this._warnings, { isDismissed: true })
   }
 
   @action update (props) {
@@ -203,6 +215,9 @@ export default class Project {
   }
 
   @action setError (err = {}) {
+    // for some reason, the original `stack` is unavailable on `err` once it is set on the model
+    // `stack2` remains usable though, for some reason
+    err.stack2 = err.stack
     this.error = err
   }
 
@@ -211,26 +226,24 @@ export default class Project {
   }
 
   @action addWarning (warning) {
-    if (!this.dismissedWarnings[this._serializeWarning(warning)]) {
-      this.warnings.push(warning)
+    const type = warning.type
+
+    if (type && this._warnings[type] && this._warnings[type].isDismissed) {
+      return
     }
+
+    this._warnings[type] = new Warning(warning)
   }
 
-  @action clearWarning (warning) {
+  @action dismissWarning (warning) {
     if (!warning) {
       // calling with no warning clears all warnings
-      return this.warnings.map((warning) => {
-        return this.clearWarning(warning)
-      })
+      return _.each(this._warnings, ((warning) => {
+        return this.dismissWarning(warning)
+      }))
     }
 
-    this.dismissedWarnings[this._serializeWarning(warning)] = true
-
-    this.warnings = _.without(this.warnings, warning)
-  }
-
-  _serializeWarning (warning) {
-    return `${warning.type}:${warning.name}:${warning.message}`
+    warning.setDismissed(true)
   }
 
   @action setApiError = (err = {}) => {
@@ -245,6 +258,12 @@ export default class Project {
 
   clientDetails () {
     return _.pick(this, 'id', 'path')
+  }
+
+  getConfigValue (key) {
+    if (!this.resolvedConfig) return
+
+    return toJS(this.resolvedConfig[key]).value
   }
 
   serialize () {

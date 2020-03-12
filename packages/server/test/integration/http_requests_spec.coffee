@@ -3,7 +3,9 @@ require("../spec_helper")
 _             = require("lodash")
 r             = require("request")
 rp            = require("request-promise")
+compression   = require("compression")
 dns           = require("dns")
+express       = require("express")
 http          = require("http")
 path          = require("path")
 url           = require("url")
@@ -11,7 +13,7 @@ zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
-cjsxify       = require("cjsxify")
+coffeeify       = require("coffeeify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
@@ -41,18 +43,32 @@ removeWhitespace = (c) ->
   c = str.lines(c).join(" ")
   c
 
+sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
+
+removeSourceMapContents = (fileContents) ->
+  fileContents.replace(sourceMapRegex, ";")
+
 browserifyFile = (filePath) ->
   streamToPromise(
-    browserify(filePath)
-    .transform(cjsxify)
-    .transform(babelify, {
-      plugins: ["add-module-exports", "@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-runtime"],
-      presets: ["@babel/preset-env", "@babel/preset-react"],
+    browserify({
+      entries: [filePath]
+      extensions: ['.js', '.jsx', '.coffee']
+      cache: {}
+      packageCache: {}
+      transform: [
+        [coffeeify, {}]
+        [babelify, {
+          plugins: ["add-module-exports", "@babel/plugin-proposal-class-properties", "@babel/plugin-proposal-object-rest-spread", "@babel/plugin-transform-runtime"],
+          presets: ["@babel/preset-env", "@babel/preset-react"],
+        }]
+      ]
     })
     .bundle()
   )
 
 describe "Routes", ->
+  require("mocha-banner").register()
+
   beforeEach ->
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -108,7 +124,7 @@ describe "Routes", ->
           rp(options)
 
         open = =>
-          project = Project("/path/to/project")
+          project = new Project("/path/to/project")
 
           Promise.all([
             ## open our https server
@@ -246,14 +262,24 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(/Runner.start\(.+\)/)
 
-    it "routes even without a proxy set", ->
+    it "clientRoute routes to 'not launched through Cypress' without a proxy set", ->
       @rp({
         url: @proxy + "/__"
         proxy: null
       })
       .then (res) ->
         expect(res.statusCode).to.eq(200)
-        expect(res.body).to.match(/Runner.start/)
+        expect(res.body).to.match(/This browser was not launched through Cypress\./)
+
+    it "other URLs redirect to clientRoute without a proxy set", ->
+      ## test something that isn't the clientRoute
+      @rp({
+        url: @proxy + "/__cypress/xhrs/foo"
+        proxy: null
+      })
+      .then (res) ->
+        expect(res.statusCode).to.eq(302)
+        expect(res.headers['location']).to.eq('/__/')
 
     it "routes when baseUrl is set", ->
       @setup({baseUrl: "http://localhost:9999/app"})
@@ -269,8 +295,12 @@ describe "Routes", ->
         @rp("http://localhost:9999/__")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include("version")
-          expect(res.body).to.include(pkg.version)
+
+          base64Config = /Runner\.start\(.*, "(.*)"\)/.exec(res.body)[1]
+          configStr = Buffer.from(base64Config, 'base64').toString()
+
+          expect(configStr).to.include("version")
+          expect(configStr).to.include(pkg.version)
 
   context "GET /__cypress/runner/*", ->
     beforeEach ->
@@ -326,7 +356,7 @@ describe "Routes", ->
 
               body = res.body
 
-              expect(body.integration).to.have.length(3)
+              expect(body.integration).to.have.length(4)
 
               ## remove the absolute path key
               body.integration = _.map body.integration, (obj) ->
@@ -334,6 +364,10 @@ describe "Routes", ->
 
               expect(res.body).to.deep.eq({
                 integration: [
+                  {
+                    "name": "sub/a&b%c.js"
+                    "relative": "tests/sub/a&b%c.js"
+                  }
                   {
                     name: "sub/sub_test.coffee"
                     relative: "tests/sub/sub_test.coffee"
@@ -455,7 +489,7 @@ describe "Routes", ->
 
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
 
       it "processes dom.jsx spec", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js")
@@ -464,7 +498,7 @@ describe "Routes", ->
 
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/baz.js"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
             expect(res.body).to.include("React.createElement(")
 
       it "serves error javascript file when the file is missing", ->
@@ -508,7 +542,7 @@ describe "Routes", ->
 
           browserifyFile(Fixtures.path("projects/no-server/my-tests/test1.js"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
 
       it "processes helpers/includes.js javascripts", ->
         @rp("http://localhost:2020/__cypress/tests?p=helpers/includes.js")
@@ -517,7 +551,7 @@ describe "Routes", ->
 
           browserifyFile(Fixtures.path("projects/no-server/helpers/includes.js"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
 
   context "ALL /__cypress/xhrs/*", ->
     beforeEach ->
@@ -658,6 +692,23 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.deep.eq({test: "We’ll"})
+
+      context "deferred", ->
+        it "closes connection if no stub is received before a reset", ->
+          p = @rp({
+            url: "http://localhost:2020/__cypress/xhrs/users/1"
+            json: true
+            headers: {
+              "x-cypress-id": "foo1"
+              "x-cypress-responsedeferred": true
+            }
+          })
+
+          setTimeout =>
+            @server._xhrServer.reset()
+          , 100
+
+          expect(p).to.be.rejectedWith('Error: socket hang up')
 
       context "fixture", ->
         beforeEach ->
@@ -1003,6 +1054,44 @@ describe "Routes", ->
           expect(res.body).not.to.include("document.domain = 'github.com'")
           expect(res.body).to.include("</html>")
 
+      ## https://github.com/cypress-io/cypress/issues/1746
+      it "can ungzip utf-8 javascript and inject without corrupting it", ->
+        js = ""
+
+        app = express()
+
+        app.use compression({ chunkSize: 64, threshold: 1 })
+
+        app.get "/", (req, res) =>
+          res.setHeader('content-type', 'application/javascript; charset=UTF-8')
+          res.setHeader('transfer-encoding', 'chunked')
+
+          write = (chunk) =>
+            js += chunk
+            res.write(chunk)
+
+          write("function ")
+          _.times 100, =>
+            write("😡😈".repeat(10))
+          write(" () { }")
+          res.end()
+
+        server = http.createServer(app)
+
+        Promise.fromCallback (cb) =>
+          server.listen(12345, cb)
+        .then =>
+          @rp({
+            url: "http://localhost:12345"
+            gzip: true
+          })
+          .then (res) ->
+            expect(res.statusCode).to.eq(200)
+            expect(res.body).to.deep.eq(js)
+        .finally =>
+          Promise.fromCallback (cb) =>
+            server.close(cb)
+
     context "accept-encoding", ->
       beforeEach ->
         @setup("http://www.github.com")
@@ -1254,6 +1343,20 @@ describe "Routes", ->
           throw new Error("should not reach")
         .catch (err) ->
           expect(err.message).to.eq('Error: socket hang up')
+
+      it "sends back 401 when file server does not receive correct auth", ->
+        @setup("<root>", {
+          config: {
+            fileServerFolder: "/Users/bmann/Dev/projects"
+          }
+        })
+        .then =>
+          rp("http://localhost:#{@server._fileServer.port()}/foo/views/test/index.html", {
+            resolveWithFullResponse: true
+            simple: false
+          })
+        .then (res) =>
+          expect(res.statusCode).to.eq(401)
 
       it "sends back 404 when file does not exist locally", ->
         @setup("<root>", {
@@ -2390,8 +2493,7 @@ describe "Routes", ->
             "Cookie": "__cypress.initial=false"
           }
 
-          if type?
-            headers["Accept"] = type
+          headers["Accept"] = type
 
           @rp({
             url: "http://www.google.com/iframe"
@@ -2614,20 +2716,6 @@ describe "Routes", ->
 
               ## shouldn't be more than 500ms
               expect(reqTime).to.be.lt(500)
-
-              # b = res.body
-              #
-              # console.time("1")
-              # b.replace(topOrParentEqualityBeforeRe, "$self")
-              # console.timeEnd("1")
-              #
-              # console.time("2")
-              # b.replace(topOrParentEqualityAfterRe, "self$2")
-              # console.timeEnd("2")
-              #
-              # console.time("3")
-              # b.replace(topOrParentLocationOrFramesRe, "$1self$3$4")
-              # console.timeEnd("3")
 
       describe "off with config", ->
         beforeEach ->
@@ -3119,7 +3207,7 @@ describe "Routes", ->
       afterEach ->
         @httpSrv.close()
 
-      [204, 304, 101, 102, 103].forEach (status) ->
+      [204, 304].forEach (status) ->
         it "passes through a #{status} response immediately", ->
           @rp({
             url: "http://localhost:#{@port}/?status=#{status}"

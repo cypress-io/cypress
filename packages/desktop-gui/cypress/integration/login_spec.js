@@ -18,7 +18,6 @@ describe('Login', function () {
       cy.stub(this.ipc, 'openProject').resolves(this.config)
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
       cy.stub(this.ipc, 'externalOpen')
-      cy.stub(this.ipc, 'clearGithubCookies')
       cy.stub(this.ipc, 'logOut').resolves()
 
       cy.stub(this.ipc, 'onAuthMessage').callsFake((function (_this) {
@@ -97,9 +96,7 @@ describe('Login', function () {
           })
 
           it('displays username in UI', function () {
-            cy.get('nav a').should(function ($a) {
-              expect($a).to.contain(this.user.name)
-            })
+            cy.get('.user-dropdown .dropdown-chosen').should('contain', this.user.name)
           })
 
           it('displays username in success dialog', () => {
@@ -118,22 +115,14 @@ describe('Login', function () {
 
             context('log out', function () {
               it('displays login button on logout', () => {
-                cy.get('nav a').contains('Jane').click()
+                cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
 
                 cy.contains('Log Out').click()
                 cy.get('.nav').contains('Log In')
               })
 
-              it('calls clear:github:cookies', function () {
-                cy.get('nav a').contains('Jane').click()
-
-                cy.contains('Log Out').click().then(function () {
-                  expect(this.ipc.clearGithubCookies).to.be.called
-                })
-              })
-
               it('calls log:out', function () {
-                cy.get('nav a').contains('Jane').click()
+                cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
 
                 cy.contains('Log Out').click().then(function () {
                   expect(this.ipc.logOut).to.be.called
@@ -141,7 +130,7 @@ describe('Login', function () {
               })
 
               it('has login button enabled when returning to login after logout', function () {
-                cy.get('nav a').contains('Jane').click()
+                cy.get('.user-dropdown .dropdown-chosen').contains('Jane').click()
                 cy.contains('Log Out').click()
                 cy.contains('Log In').click()
 

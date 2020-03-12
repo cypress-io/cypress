@@ -1,7 +1,9 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
-shell       = require("electron").shell
+{ shell, clipboard } = require('electron')
 debug       = require('debug')('cypress:server:events')
+pluralize   = require("pluralize")
+stripAnsi   = require("strip-ansi")
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
@@ -91,13 +93,6 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .then(send)
       .catch(sendErr)
 
-    when "clear:github:cookies"
-      Windows.getBrowserAutomation(event.sender)
-      .clearCookies({domain: "github.com"})
-      .return(null)
-      .then(send)
-      .catch(sendErr)
-
     when "external:open"
       shell.openExternal(arg)
 
@@ -114,7 +109,10 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onBrowserClose: ->
           send({browserClosed: true})
       })
-      .catch(sendErr)
+      .catch (err) =>
+        err.title ?= 'Error launching browser'
+
+        sendErr(err)
 
     when "begin:auth"
       onMessage = (msg) ->
@@ -186,7 +184,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "add:project"
-      Project.add(arg)
+      Project.add(arg, options)
       .then(send)
       .catch(sendErr)
 
@@ -196,6 +194,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
+      debug("open:project")
+
       onSettingsChanged = ->
         bus.emit("config:changed")
 
@@ -211,15 +211,17 @@ handleEvent = (options, bus, event, id, type, arg) ->
         bus.emit("project:error", errors.clone(err, {html: true}))
 
       onWarning = (warning) ->
+        warning.message = stripAnsi(warning.message)
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
       browsers.getAllBrowsersWith(options.browser)
       .then (browsers = []) ->
+        debug("setting found %s on the config", pluralize("browser", browsers.length, true))
         options.config = _.assign(options.config, { browsers })
       .then ->
         chromePolicyCheck.run (err) ->
           options.config.browsers.forEach (browser) ->
-            if browser.family == 'chrome'
+            if browser.family == 'chromium'
               browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
 
         openProject.create(arg, options, {
@@ -299,6 +301,18 @@ handleEvent = (options, bus, event, id, type, arg) ->
           err.message = subErr.message or "#{subErr.code} #{subErr.address}:#{subErr.port}"
         err.apiUrl = apiUrl
         sendErr(err)
+
+    when "ping:baseUrl"
+      baseUrl = arg
+      ensureUrl.isListening(baseUrl)
+      .then(send)
+      .catch (err) ->
+        warning = errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+        sendErr(warning)
+
+    when "set:clipboard:text"
+      clipboard.writeText(arg)
+      sendNull()
 
     else
       throw new Error("No ipc event registered for: '#{type}'")

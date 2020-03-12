@@ -1,5 +1,6 @@
 import mockRequire from 'mock-require'
 import { JSDOM } from 'jsdom'
+import * as ansiEscapes from 'ansi-escapes'
 
 declare global {
   module NodeJS {
@@ -13,6 +14,7 @@ export const register = ({
   enzyme,
   EnzymeAdapter,
   chaiEnzyme,
+  requireOverride,
 }) => {
   const jsdom = new JSDOM('<!doctype html><html><body></body></html>')
   const { window } = jsdom
@@ -59,13 +61,22 @@ export const register = ({
   const Module = require('module')
 
   const overrideRequire = () => {
-
     const _load = Module._load
 
     Module._load = function (...args) {
       let browserPkg = args
 
-      if (!['path'].includes(args[0])) {
+      if (requireOverride) {
+        const mockedDependency = requireOverride(...args)
+
+        if (mockedDependency != null) {
+          return mockedDependency
+        }
+      }
+
+      // Follow browser-field spec for importing modules
+      // except chalk so we dont mess up mocha coloring
+      if (!['path'].includes(args[0]) && !(args[1] && args[1].id.includes('chalk'))) {
         try {
           browserPkg = [bresolve.sync.apply(this, args)]
         } catch (e) {
@@ -73,13 +84,28 @@ export const register = ({
         }
       }
 
-      return _load.apply(this, browserPkg)
-    }
+      // Stub out all webpack-specific imports
+      if (args[0].includes('!')) {
+        return {}
+      }
 
+      if (args[0].endsWith('.png')) {
+        return args[0]
+      }
+
+      const ret = _load.apply(this, browserPkg)
+
+      return ret
+    }
   }
 
   overrideRequire()
 }
+
+// eslint-disable-next-line
+after(() => {
+  process.stdout.write(ansiEscapes.cursorShow)
+})
 
 export const returnMockRequire = (name, modExport = {}) => {
   mockRequire(name, modExport)

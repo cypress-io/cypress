@@ -8,16 +8,15 @@ preprocessor = require("#{root}../../lib/plugins/child/preprocessor")
 task = require("#{root}../../lib/plugins/child/task")
 runPlugins = require("#{root}../../lib/plugins/child/run_plugins")
 util = require("#{root}../../lib/plugins/util")
+browserUtils = require("#{root}../../lib/browsers/utils")
 Fixtures = require("#{root}../../test/support/helpers/fixtures")
 
 colorCodeRe = /\[[0-9;]+m/gm
 pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
-stackPathRe = /\(?\/?([a-z0-9_-]+\/)*([a-z0-9_-]+\.\w+)[:0-9]+\)?/gmi
 
 withoutStack = (err) -> _.omit(err, "stack")
 withoutColorCodes = (str) -> str.replace(colorCodeRe, "<color-code>")
 withoutPath = (str) -> str.replace(pathRe, '<path>$2)')
-withoutStackPaths = (stack) -> stack.replace(stackPathRe, '<path>$2')
 
 describe "lib/plugins/child/run_plugins", ->
   beforeEach ->
@@ -35,7 +34,7 @@ describe "lib/plugins/child/run_plugins", ->
     mockery.registerSubstitute("plugins-file", "/does/not/exist.coffee")
     runPlugins(@ipc, "plugins-file")
     expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
-    snapshot(withoutStackPaths(@ipc.send.lastCall.args[3]))
+    snapshot(@ipc.send.lastCall.args[3].split('\n')[0])
 
   it "sends error message if requiring pluginsFile errors", ->
     ## path for substitute is relative to lib/plugins/child/plugins_child.js
@@ -45,7 +44,7 @@ describe "lib/plugins/child/run_plugins", ->
     )
     runPlugins(@ipc, "plugins-file")
     expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
-    snapshot(withoutStackPaths(@ipc.send.lastCall.args[3]))
+    snapshot(@ipc.send.lastCall.args[3].split('\n')[0])
 
   it "sends error message if pluginsFile has syntax error", ->
     ## path for substitute is relative to lib/plugins/child/plugins_child.js
@@ -106,15 +105,20 @@ describe "lib/plugins/child/run_plugins", ->
   describe "on 'execute' message", ->
     beforeEach ->
       sinon.stub(preprocessor, "wrap")
+
       @onFilePreprocessor = sinon.stub().resolves()
       @beforeBrowserLaunch = sinon.stub().resolves()
       @taskRequested = sinon.stub().resolves("foo")
+
       pluginsFn = (register) =>
         register("file:preprocessor", @onFilePreprocessor)
         register("before:browser:launch", @beforeBrowserLaunch)
         register("task", @taskRequested)
+
       mockery.registerMock("plugins-file", pluginsFn)
+
       runPlugins(@ipc, "plugins-file")
+
       @ipc.on.withArgs("load").yield()
 
     context "file:preprocessor", ->
@@ -130,7 +134,7 @@ describe "lib/plugins/child/run_plugins", ->
         expect(preprocessor.wrap.lastCall.args[2]).to.equal(@ids)
         expect(preprocessor.wrap.lastCall.args[3]).to.equal(args)
 
-      it "invokes registered function when invoked by preprocessor handler", ->
+      it "invokes registered function when invoked by handler", ->
         @ipc.on.withArgs("execute").yield("file:preprocessor", @ids, [])
         preprocessor.wrap.lastCall.args[1](2, ["one", "two"])
         expect(@onFilePreprocessor).to.be.calledWith("one", "two")
@@ -138,22 +142,26 @@ describe "lib/plugins/child/run_plugins", ->
     context "before:browser:launch", ->
       beforeEach ->
         sinon.stub(util, "wrapChildPromise")
+
+        browser = {}
+        launchOptions = browserUtils.getDefaultLaunchOptions({})
+
+        @args = [browser, launchOptions]
         @ids = { eventId: 1, invocationId: "00" }
 
       it "wraps child promise", ->
         args = ["arg1", "arg2"]
-        @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, args)
+        @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, @args)
         expect(util.wrapChildPromise).to.be.called
         expect(util.wrapChildPromise.lastCall.args[0]).to.equal(@ipc)
         expect(util.wrapChildPromise.lastCall.args[1]).to.be.a("function")
         expect(util.wrapChildPromise.lastCall.args[2]).to.equal(@ids)
-        expect(util.wrapChildPromise.lastCall.args[3]).to.equal(args)
+        expect(util.wrapChildPromise.lastCall.args[3]).to.equal(@args)
 
-      it "invokes registered function when invoked by preprocessor handler", ->
-        @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, [])
-        args = ["one", "two"]
-        util.wrapChildPromise.lastCall.args[1](3, args)
-        expect(@beforeBrowserLaunch).to.be.calledWith("one", "two")
+      it "invokes registered function when invoked by handler", ->
+        @ipc.on.withArgs("execute").yield("before:browser:launch", @ids, @args)
+        util.wrapChildPromise.lastCall.args[1](3, @args)
+        expect(@beforeBrowserLaunch).to.be.calledWith(@args...)
 
     context "task", ->
       beforeEach ->

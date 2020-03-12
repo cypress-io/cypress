@@ -40,8 +40,6 @@ getParentTitle = (runnable, titles) ->
 createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
-  if obj.file
-    console.log('has file:', obj.file)
   suite.file = obj.file
   return suite
 

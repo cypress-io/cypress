@@ -39,7 +39,6 @@ describe "e2e reporters", ->
   it "supports junit reporter and reporter options", ->
     e2e.exec(@, {
       spec: "simple_passing_spec.coffee"
-      expectedExitCode: 0
       snapshot: true
       reporter: "junit"
       reporterOptions: "mochaFile=junit-output/result.[hash].xml,testCaseSwitchClassnameAndName=true"
@@ -59,9 +58,17 @@ describe "e2e reporters", ->
     e2e.exec(@, {
       spec: "simple_passing_spec.coffee"
       snapshot: true
-      expectedExitCode: 0
       reporter: "reporters/custom.js"
     })
+
+  it "sends file to reporter", ->
+    e2e.exec(@, {
+      spec: "simple_passing_spec.coffee"
+      reporter: "reporters/uses-file.js"
+    })
+    .get("stdout")
+    .then (stdout) ->
+      expect(stdout).to.include("suite.file: cypress/integration/simple_passing_spec.coffee")
 
   describe "mochawesome", ->
     mochaAwesomes.forEach (ma) ->
@@ -69,7 +76,6 @@ describe "e2e reporters", ->
         e2e.exec(@, {
           spec: "simple_passing_spec.coffee"
           snapshot: true
-          expectedExitCode: 0
           reporter: ma
         })
         .then ->
@@ -111,7 +117,6 @@ describe "e2e reporters", ->
   it "supports teamcity reporter and reporter options", ->
     e2e.exec(@, {
       spec: "simple_passing_spec.coffee"
-      expectedExitCode: 0
       snapshot: true
       reporter: "teamcity"
       reporterOptions: "topLevelSuite=top suite,flowId=12345,useStdError='true',useStdError='true',recordHookFailures='true',actualVsExpected='true'"

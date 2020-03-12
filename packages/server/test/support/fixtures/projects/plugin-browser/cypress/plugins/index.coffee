@@ -1,5 +1,5 @@
 module.exports = (onFn, config) ->
-  onFn 'before:browser:launch', (browser = {}, args) ->
+  onFn 'before:browser:launch', (browser, options) ->
     { name } = browser
 
     switch name
@@ -7,8 +7,10 @@ module.exports = (onFn, config) ->
         return [name, "foo", "bar", "baz"]
       when "electron"
         return {
-          browser: "electron"
-          foo: "bar"
+          preferences: {
+            browser: "electron"
+            foo: "bar"
+          }
         }
       else
         throw new Error("unrecognized browser name: '#{name}' for before:browser:launch")

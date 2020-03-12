@@ -121,7 +121,7 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
         debug(text)
 
         throw new Error(text)
-      }
+      },
     )
   }
 
@@ -176,7 +176,6 @@ const verifyDownloadedFile = (filename, expectedSize, expectedChecksum) => {
   debug('downloaded file lacks checksum or size to verify')
 
   return Promise.resolve()
-
 }
 
 // downloads from given url
@@ -254,7 +253,7 @@ const downloadFromUrl = ({ url, downloadDestination, progress }) => {
           Failed downloading the Cypress binary.
           Response code: ${response.statusCode}
           Response message: ${response.statusMessage}
-        `
+        `,
         )
 
         reject(err)

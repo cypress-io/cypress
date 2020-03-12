@@ -22,13 +22,13 @@ class SpecsList extends Component {
     if (!specsStore.filter && !specsStore.specs.length) return this._empty()
 
     return (
-      <div id='tests-list-page'>
+      <div className='specs'>
         <header>
           <div className={cs('search', {
             'show-clear-filter': !!specsStore.filter,
           })}>
             <label htmlFor='filter'>
-              <i className='fa fa-search'></i>
+              <i className='fas fa-search'></i>
             </label>
             <input
               id='filter'
@@ -43,11 +43,11 @@ class SpecsList extends Component {
               title='Clear search'
               className='browser-info-tooltip cy-tooltip'
             >
-              <a className='clear-filter fa fa-times' onClick={this._clearFilter} />
+              <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
-          <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests btn btn-default', { active: specsStore.isChosen(allSpecsSpec) })}>
-            <i className={`fa fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
+          <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
+            <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
             {allSpecsSpec.displayName}
           </a>
         </header>
@@ -66,14 +66,14 @@ class SpecsList extends Component {
             this._clearFilter()
             this.filterRef.current.focus()
           }} className='btn btn-link'>
-            <i className='fa fa-times'/> Clear search
+            <i className='fas fa-times'/> Clear search
           </a>
         </div>
       )
     }
 
     return (
-      <ul className='outer-files-container list-as-table'>
+      <ul className='specs-list list-as-table'>
         {_.map(specsStore.specs, (spec) => this._specItem(spec, 0))}
       </ul>
     )
@@ -84,11 +84,11 @@ class SpecsList extends Component {
   }
 
   _allSpecsIcon (allSpecsChosen) {
-    return allSpecsChosen ? 'fa-dot-circle-o green' : 'fa-play'
+    return allSpecsChosen ? 'far fa-dot-circle green' : 'fas fa-play'
   }
 
   _specIcon (isChosen) {
-    return isChosen ? 'fa-dot-circle-o green' : 'fa-file-code-o'
+    return isChosen ? 'far fa-dot-circle green' : 'far fa-file'
   }
 
   _clearFilter = () => {
@@ -117,10 +117,18 @@ class SpecsList extends Component {
     return projectsApi.runSpec(project, spec, project.chosenBrowser)
   }
 
+  _setExpandRootFolder (specFolderPath, isExpanded, e) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    specsStore.setExpandSpecChildren(specFolderPath, isExpanded)
+    specsStore.setExpandSpecFolder(specFolderPath, true)
+  }
+
   _selectSpecFolder (specFolderPath, e) {
     e.preventDefault()
 
-    specsStore.setExpandSpecFolder(specFolderPath)
+    specsStore.toggleExpandSpecFolder(specFolderPath)
   }
 
   _folderContent (spec, nestingLevel) {
@@ -130,9 +138,22 @@ class SpecsList extends Component {
       <li key={spec.path} className={`folder level-${nestingLevel} ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
           <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
-            <i className={`folder-collapse-icon fa fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
-            <i className={`fa fa-fw ${isExpanded ? 'fa-folder-open-o' : 'fa-folder-o'}`}></i>
-            {nestingLevel === 0 ? `${spec.displayName} tests` : spec.displayName}
+            <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
+            <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`}></i>
+            {
+              nestingLevel === 0 ?
+                <>
+                  {spec.displayName} tests
+                  {specsStore.specHasFolders(spec) ?
+                    <span>
+                      <a onClick={this._setExpandRootFolder.bind(this, spec, false)}>collapse all</a>{' | '}
+                      <a onClick={this._setExpandRootFolder.bind(this, spec, true)}>expand all</a>
+                    </span> :
+                    null
+                  }
+                </> :
+                spec.displayName
+            }
           </div>
           {
             isExpanded ?
@@ -154,7 +175,7 @@ class SpecsList extends Component {
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: specsStore.isChosen(spec) })}>
           <div>
             <div className="file-name">
-              <i className={`fa fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
+              <i className={`fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
               {spec.displayName}
             </div>
           </div>
@@ -168,7 +189,7 @@ class SpecsList extends Component {
 
   _empty () {
     return (
-      <div id='tests-list-page'>
+      <div className='specs'>
         <div className='empty-well'>
           <h5>
             No files found in
@@ -177,7 +198,7 @@ class SpecsList extends Component {
             </code>
           </h5>
           <a className='helper-docs-link' onClick={this._openHelp}>
-            <i className='fa fa-question-circle'></i>{' '}
+            <i className='fas fa-question-circle'></i>{' '}
               Need help?
           </a>
         </div>
