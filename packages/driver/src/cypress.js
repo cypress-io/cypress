@@ -328,7 +328,7 @@ class $Cypress {
         // mocha runner calculated a failure
         const err = args[0].err
 
-        if ($dom.isDom(err.actual) || $dom.isDom(err.expected)) {
+        if (err.type === 'existence' || $dom.isDom(err.actual) || $dom.isDom(err.expected)) {
           err.showDiff = false
         }
 
