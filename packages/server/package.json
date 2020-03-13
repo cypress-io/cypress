@@ -27,7 +27,7 @@
     "@cypress/get-windows-proxy": "1.6.0",
     "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
-    "@ffmpeg-installer/ffmpeg": "1.0.19",
+    "@ffmpeg-installer/ffmpeg": "1.0.20",
     "ansi_up": "4.0.4",
     "black-hole-stream": "0.0.1",
     "bluebird": "3.7.0",
