@@ -287,7 +287,6 @@ const processErr = (errObj = {}, config) => {
 module.exports = {
   appendErrMsg,
   cypressErr,
-  cypressErrObj,
   CypressErrorRe,
   errMsgByPath,
   errObjByPath,
