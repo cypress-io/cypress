@@ -33,8 +33,12 @@ describe('e2e cdp', function () {
     expectedExitCode: 1,
     snapshot: true,
     onStdout: (stdout) => {
+      const expectedError = '\nThe automation client disconnected. Cannot continue running tests.\n'
+
+      expect(stdout).to.include(expectedError)
+
       // the location of this warning is non-deterministic
-      return stdout.replace('The automation client disconnected. Cannot continue running tests.\n', '')
+      return stdout.replace(expectedError, '')
     },
   })
 })
