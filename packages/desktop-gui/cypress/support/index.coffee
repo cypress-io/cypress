@@ -20,8 +20,12 @@ Cypress.Commands.add "shouldBeOnIntro", ->
   cy.get(".main-nav .logo")
 
 Cypress.Commands.add "shouldBeOnProjectSpecs", ->
-  cy.contains(".folder", "integration")
-  cy.contains(".folder", "unit")
+  cy.contains(".folder", "integration", {
+    matchCase: false
+  })
+  cy.contains(".folder", "unit", {
+    matchCase: false
+  })
 
 Cypress.Commands.add "logOut", ->
   cy.contains("Jane Lane").click()
