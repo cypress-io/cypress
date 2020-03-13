@@ -168,7 +168,7 @@
     "mocked-env": "1.2.4",
     "mockery": "2.1.0",
     "multiparty": "4.2.1",
-    "nock": "9.6.1",
+    "nock": "12.0.2",
     "npm-install-version": "6.0.2",
     "proxyquire": "2.1.0",
     "react": "15.6.2",
