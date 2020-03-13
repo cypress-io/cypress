@@ -124,7 +124,7 @@
     "@babel/preset-react": "7.0.0",
     "@babel/runtime": "7.4.4",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/json-schemas": "5.34.0",
+    "@cypress/json-schemas": "5.34.1",
     "@cypress/sinon-chai": "1.1.0",
     "@packages/coffee": "*",
     "@packages/desktop-gui": "*",
