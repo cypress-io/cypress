@@ -246,7 +246,7 @@ describe "src/cy/commands/actions/select", ->
       it "throws when finding duplicate values", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.select()` matched more than one `option` by value or text: `bm`"
-          expect(err.docsUrl).to.eq("https://on.cypress.io/select")          
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
         cy.get("select[name=names]").select("bm")
@@ -254,7 +254,7 @@ describe "src/cy/commands/actions/select", ->
       it "throws when passing an array to a non multiple select", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.include "`cy.select()` was called with an array of arguments but does not have a `multiple` attribute set."
-          expect(err.docsUrl).to.eq("https://on.cypress.io/select")          
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
         cy.get("select[name=names]").select(["bm", "ss"])

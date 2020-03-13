@@ -15,29 +15,34 @@ const wrapErr = (err) => {
   return $utils.reduceProps(err, ERROR_PROPS)
 }
 
-const mergeErrProps = (origErr, newProps) => {
-  return _.extend(origErr, newProps)
+const mergeErrProps = (origErr, ...newProps) => {
+  return _.extend(origErr, ...newProps)
+}
+
+const replaceMsgInStack = (err, newMsg) => {
+  const { message, name, stack } = err
+
+  if (!stack) return stack
+
+  if (message) {
+    // reset stack by replacing the original message with the new one
+    return stack.replace(message, newMsg)
+  }
+
+  // if message is undefined or an empty string, the error (in Chrome at least)
+  // is 'Error\n\n<stack>' and it results in wrongly prepending the
+  // new message, looking like '<newMsg>Error\n\n<stack>'
+  return stack.replace(name, `${name}: ${newMsg}`)
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
-  let { stack, message } = err
-
   err = normalizeErrorStack(err)
 
-  // preserve message
-  const originalErrMsg = message
+  const newMsg = cb(err.message, newErrMsg)
+  const newStack = replaceMsgInStack(err, newMsg)
 
-  // modify message
-  message = cb(originalErrMsg, newErrMsg)
-
-  if (stack) {
-    // reset stack by replacing the original
-    // first line with the new one
-    stack = stack.replace(originalErrMsg, message)
-  }
-
-  err.message = message
-  err.stack = stack
+  err.message = newMsg
+  err.stack = newStack
 
   return err
 }
@@ -71,7 +76,7 @@ const makeErrFromObj = (obj) => {
 
 const throwErr = (err, options = {}) => {
   if (_.isString(err)) {
-    err = cypressErr(err)
+    err = cypressErr({ message: err })
   }
 
   if (options.noStackTrace) {
@@ -104,16 +109,12 @@ const throwErr = (err, options = {}) => {
 }
 
 const throwErrByPath = (errPath, options = {}) => {
-  const { args } = options
   let err
 
   try {
-    const obj = errObjByPath($errorMessages, errPath, args)
-
-    err = cypressErr(obj.message)
-    _.defaults(err, obj)
-  } catch (e) {
-    err = internalErr(e)
+    err = cypressErrByPath(errPath, options)
+  } catch (internalError) {
+    err = internalErr(internalError)
   }
 
   return throwErr(err, options)
@@ -131,22 +132,21 @@ const warnByPath = (errPath, options = {}) => {
 }
 
 const internalErr = (err) => {
-  err = new Error(err)
-  err.name = 'InternalError'
+  const newErr = new Error(err)
 
-  return err
+  return mergeErrProps(newErr, err, { name: 'InternalError' })
 }
 
-const cypressErrObj = (errObj) => {
-  errObj.name = 'CypressError'
+const cypressErr = (err) => {
+  const newErr = new Error(err.message)
 
-  return errObj
+  return mergeErrProps(newErr, err, { name: 'CypressError' })
 }
 
-const cypressErr = (msg) => {
-  const err = new Error(msg)
+const cypressErrByPath = (errPath, options = {}) => {
+  const errObj = errObjByPath($errorMessages, errPath, options.args)
 
-  return cypressErrObj(err)
+  return cypressErr(errObj)
 }
 
 const normalizeMsgNewLines = (message) => {
@@ -176,7 +176,7 @@ const errObjByPath = (errLookupObj, errPath, args) => {
   let errObjStrOrFn = getObjValueByPath(errLookupObj, errPath)
 
   if (!errObjStrOrFn) {
-    throw new Error(`Error message path: '${errPath}' does not exist`)
+    throw new Error(`Error message path '${errPath}' does not exist`)
   }
 
   let errObj = errObjStrOrFn
@@ -281,21 +281,21 @@ const enhanceStack = ({ err, stack, projectRoot }) => {
   return err
 }
 
-//// all errors flow through this function before they're finally thrown
-//// or used to reject promises
+// all errors flow through this function before they're finally thrown
+// or used to reject promises
 const processErr = (errObj = {}, config) => {
   if (config('isInteractive') || !errObj.docsUrl) {
     return errObj
   }
 
   // append the docs url when not interactive so it appears in the stdout
-  return appendErrMsg(errObj, `${errObj.docsUrl}\n`)
+  return appendErrMsg(errObj, errObj.docsUrl)
 }
 
 module.exports = {
   appendErrMsg,
   cypressErr,
-  cypressErrObj,
+  cypressErrByPath,
   CypressErrorRe,
   enhanceStack,
   errMsgByPath,

@@ -16,15 +16,9 @@ errorMessage = (err = {}) ->
   .replace(/From previous event:\n?/g, "")
 
 clientSideError = (err) ->
-  console.log(err.stack)
+  console.log(err.message)
 
   err = errorMessage(err)
-  ## \n doesn't come through properly so preserve it so the
-  ## runner can do the right thing
-  .replace(/\n/g, '{newline}')
-  ## babel adds syntax highlighting for the console in the form of
-  ## [90m that need to be stripped out or they appear in the error message
-  .replace(/\[\d{1,3}m/g, '')
 
   """
   (function () {
@@ -93,7 +87,7 @@ module.exports = {
       baseEmitter.once "close", ->
         debug("base emitter native close event")
         fileObject.emit("close")
- 
+
     if not plugins.has("file:preprocessor")
       setDefaultPreprocessor(config)
 

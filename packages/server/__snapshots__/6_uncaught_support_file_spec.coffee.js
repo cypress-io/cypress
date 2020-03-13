@@ -22,12 +22,16 @@ exports['e2e uncaught support file errors failing 1'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     bar
+     Error: bar
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  bar
   
+  Cypress could not associate this error to any specific test.
+  
+  We dynamically generated a new test to display this failure.
 
 
 

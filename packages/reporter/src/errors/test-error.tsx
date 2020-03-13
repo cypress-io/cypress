@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import React from 'react'
+import React, { MouseEvent } from 'react'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
 // @ts-ignore
@@ -21,7 +21,9 @@ const TestError = observer((props: Props) => {
 
   md.enable(['backticks', 'emphasis', 'escape'])
 
-  const onPrint = () => {
+  const onPrint = (e: MouseEvent) => {
+    e.stopPropagation()
+
     events.emit('show:error', props.model.id)
   }
 

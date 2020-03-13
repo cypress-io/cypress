@@ -11,7 +11,7 @@ const Events = require('../gui/events')
 const Windows = require('../gui/windows')
 
 const isDev = () => {
-  return process.env['CYPRESS_ENV'] === 'development'
+  return process.env['CYPRESS_INTERNAL_ENV'] === 'development'
 }
 
 module.exports = {

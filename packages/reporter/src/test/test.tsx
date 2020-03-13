@@ -96,6 +96,7 @@ class Test extends Component<Props> {
           </div>
         </div>
         {this._contents()}
+        <TestError model={model} />
       </div>
     )
   }

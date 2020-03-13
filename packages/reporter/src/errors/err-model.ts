@@ -1,3 +1,4 @@
+/* eslint-disable padding-line-between-statements */
 import { computed, observable } from 'mobx'
 
 export interface ErrProps {
@@ -41,50 +42,16 @@ export default class Err {
   update (props?: ErrProps) {
     if (!props) return
 
-    this.name = props.name
-    this.message = props.message
-    this.mdMessage = props.mdMessage || props.message
-    this.stack = props.stack
-    this.sourceMappedStack = props.sourceMappedStack
-    this.parsedStack = props.parsedStack
-    this.docsUrl = props.docsUrl
-    this.templateType = props.templateType
-    this.codeFrame = props.codeFrame
+    if (props.name) this.name = props.name
+    if (props.message) this.message = props.message
+    // @ts-ignore
+    if (props.mdMessage || props.message) this.mdMessage = props.mdMessage || props.message
+    if (props.stack) this.stack = props.stack
+    if (props.docsUrl) this.docsUrl = props.docsUrl
+    if (props.sourceMappedStack) this.sourceMappedStack = props.sourceMappedStack
+    // @ts-ignore
+    if (props.parsedStack) this.parsedStack = props.parsedStack
+    if (props.templateType) this.templateType = props.templateType
+    if (props.codeFrame) this.codeFrame = props.codeFrame
   }
 }
-
-// import { computed, observable } from 'mobx'
-
-// export default class Err {
-//   @observable name = ''
-//   @observable message = ''
-//   @observable stack = ''
-
-//   constructor (props) {
-//     this.update(props)
-//   }
-
-//   @computed get displayMessage () {
-//     if (!this.name && !this.mdMessage) return ''
-
-//     return `${this.name}: ${this.mdMessage}`
-//   }
-
-//   @computed get isCommandErr () {
-//     return /(AssertionError|CypressError)/.test(this.name)
-//   }
-
-//   update (props) {
-//     if (!props) return
-
-//     this.name = props.name
-//     this.message = props.message
-//     this.mdMessage = props.mdMessage || props.message
-//     this.stack = props.stack
-//     this.sourceMappedStack = props.sourceMappedStack
-//     this.parsedStack = props.parsedStack
-//     this.docsUrl = props.docsUrl
-//     this.templateType = props.templateType
-//     this.codeFrame = props.codeFrame
-//   }
-// }

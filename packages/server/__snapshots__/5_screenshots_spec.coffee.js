@@ -55,29 +55,34 @@ exports['e2e screenshots / passes'] = `
   5 failing
 
   1) taking screenshots generates pngs on failure:
-     fail whale
+     Error: fail whale
+  fail whale
       [stack trace lines]
 
   2) taking screenshots ensures unique paths when there's a non-named screenshot and a failure:
-     failing on purpose
+     Error: failing on purpose
+  failing on purpose
       [stack trace lines]
 
   3) taking screenshots before hooks "before all" hook for "empty test 1":
-     before hook failing
+     Error: before hook failing
 
-Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 'before hooks'
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`before hooks\`
+  before hook failing
       [stack trace lines]
 
   4) taking screenshots each hooks "before each" hook for "empty test 2":
-     before each hook failed
+     Error: before each hook failed
 
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'each hooks'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`each hooks\`
+  before each hook failed
       [stack trace lines]
 
   5) taking screenshots each hooks "after each" hook for "empty test 2":
-     after each hook failed
+     Error: after each hook failed
 
-Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: 'each hooks'
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`each hooks\`
+  after each hook failed
       [stack trace lines]
 
 

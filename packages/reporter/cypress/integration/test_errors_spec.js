@@ -212,7 +212,7 @@ describe('test errors', function () {
 
     it('clicking prints to console', function () {
       cy.spy(this.runner, 'emit')
-      cy.get('.runnable-err-print').click().then(() => {
+      cy.get('.runnable-err-print').click().should(() => {
         expect(this.runner.emit).to.be.calledWith('runner:console:error')
 
         const err = this.runner.emit.withArgs('runner:console:error').lastCall.args[1].err
@@ -221,18 +221,23 @@ describe('test errors', function () {
         expect(err.stack).to.equal(this.commandErr.stack)
       })
     })
+
+    it('does not collapse test when clicking', () => {
+      cy.get('.runnable-err-print').click()
+      cy.get('.command-wrapper').should('be.visible')
+    })
   })
 
   describe('stack trace', function () {
-    it('hides stack trace by default', function () {
+    beforeEach(function () {
       this.setError(this.commandErr)
+    })
 
+    it('hides stack trace by default', function () {
       cy.get('.runnable-err-stack-trace').should('not.be.visible')
     })
 
     it('opens stack trace on click', function () {
-      this.setError(this.commandErr)
-
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace').should('be.visible')
     })

@@ -141,6 +141,7 @@ class Socket {
       serveClient: false,
       cookie,
       parser: socketIo.circularParser,
+      transports: ['websocket'],
     })
   }
 
@@ -391,7 +392,7 @@ class Socket {
               return task.run(config.pluginsFile, args[0])
             default:
               throw new Error(
-                `You requested a backend event we cannot handle: ${eventName}`
+                `You requested a backend event we cannot handle: ${eventName}`,
               )
           }
         }

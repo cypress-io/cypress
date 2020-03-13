@@ -93,7 +93,7 @@ describe "src/cy/commands/clock", ->
       it "throws if methods is not an array (or options object)", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.equal("`cy.clock()` only accepts an array of function names or an `options` object for its second argument. You passed: `\"setTimeout\"`")
-          expect(err.docsUrl).to.equal("https://on.cypress.io/clock")          
+          expect(err.docsUrl).to.equal("https://on.cypress.io/clock")
           done()
 
         cy.clock(0, "setTimeout")
@@ -101,7 +101,7 @@ describe "src/cy/commands/clock", ->
       it "throws if methods is not an array of strings (or options object)", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.equal("`cy.clock()` only accepts an array of function names or an `options` object for its second argument. You passed: `[42]`")
-          expect(err.docsUrl).to.equal("https://on.cypress.io/clock")          
+          expect(err.docsUrl).to.equal("https://on.cypress.io/clock")
           done()
 
         cy.clock(0, [42])
@@ -286,7 +286,7 @@ describe "src/cy/commands/clock", ->
       it "throws if there is not a clock", (done) ->
         cy.on "fail", (err) ->
           expect(err.message).to.equal("`cy.tick()` cannot be called without first calling `cy.clock()`")
-          expect(err.docsUrl).to.equal('https://on.cypress.io/tick')          
+          expect(err.docsUrl).to.equal('https://on.cypress.io/tick')
           done()
 
         cy.tick()

@@ -44,7 +44,6 @@ const getHandlersByType = (type) => {
           return launchOptions
         },
         onTask: { assertPsOutput: assertPsOutput('--foo') },
-
       }
 
     case 'return-launch-options-mutate-only-args-property':
@@ -57,7 +56,6 @@ const getHandlersByType = (type) => {
           return launchOptions
         },
         onTask: { assertPsOutput: assertPsOutput(['--foo', '--bar']) },
-
       }
 
     case 'return-undefined-mutate-array':
@@ -70,7 +68,6 @@ const getHandlersByType = (type) => {
           return
         },
         onTask: { assertPsOutput: assertPsOutput([]) },
-
       }
 
     case 'return-unknown-properties':
@@ -83,6 +80,7 @@ const getHandlersByType = (type) => {
 
           return launchOptions
         },
+        onTask: {},
       }
 
     case 'throw-explicit-error':
@@ -90,6 +88,7 @@ const getHandlersByType = (type) => {
         onBeforeBrowserLaunch (browser, launchOptions) {
           throw new Error('Error thrown from plugins handler')
         },
+        onTask: {},
       }
 
     case 'reject-promise':
@@ -101,6 +100,7 @@ const getHandlersByType = (type) => {
             throw new Error('Promise rejected from plugins handler')
           })
         },
+        onTask: {},
       }
 
     default: () => {

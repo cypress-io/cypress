@@ -92,7 +92,8 @@ exports['e2e config fails 1'] = `
   1 failing
 
   1) config times out looking for a missing element:
-     Timed out retrying: Expected to find element: \`#bar\`, but never found it.
+     AssertionError: Timed out retrying: Expected to find element: \`#bar\`, but never found it.
+  Timed out retrying: Expected to find element: \`#bar\`, but never found it.
       [stack trace lines]
 
 
@@ -149,6 +150,6 @@ Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 exports['e2e config catches invalid browser in the configuration file 1'] = `
 We found an invalid value in the file: \`cypress.json\`
 
-Found an error while validating the \`browsers\` list. Expected \`family\` to be either electron, chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
+Found an error while validating the \`browsers\` list. Expected \`family\` to be either chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`
 
 `

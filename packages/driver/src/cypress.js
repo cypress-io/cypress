@@ -32,6 +32,7 @@ const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
 const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
+const debug = require('debug')('cypress:driver:cypress')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
@@ -224,6 +225,7 @@ class $Cypress {
     // normalizes all the various ways
     // other objects communicate intent
     // and 'action' to Cypress
+    debug(eventName)
     switch (eventName) {
       case 'recorder:frame':
         return this.emit('recorder:frame', args[0])
@@ -336,8 +338,11 @@ class $Cypress {
 
       case 'runner:fail': {
         // mocha runner calculated a failure
-
         const err = args[0].err
+
+        if (err.type === 'existence' || $dom.isDom(err.actual) || $dom.isDom(err.expected)) {
+          err.showDiff = false
+        }
 
         if (err.actual) {
           err.actual = chai.util.inspect(err.actual)

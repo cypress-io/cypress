@@ -27,81 +27,132 @@ exports['e2e web security / when enabled / fails'] = `
   3 failing
 
   1) web security fails when clicking <a> to another origin:
-     Cypress detected a cross origin error happened on page load:
+     CypressError: Cypress detected a cross origin error happened on page load:
 
   > [Cross origin error message]
 
 Before the page load, you were bound to the origin policy:
+
   > http://localhost:4466
 
-  A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
-  This typically happens in one of three ways:
+A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-  1. You clicked an \`<a>\` that routed you outside of your application
-  2. You submitted a \`form\` and your server redirected you outside of your application
-  3. You used a JavaScript redirect to a page outside of your application
-
-  Cypress does not allow you to change superdomains within a single test.
+Cypress does not allow you to navigate to a different origin URL within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
+Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
 
 https://on.cypress.io/cross-origin-violation
 
+https://on.cypress.io/cross-origin-violation
+  Cypress detected a cross origin error happened on page load:
+  
+    > [Cross origin error message]
+  
+  Before the page load, you were bound to the origin policy:
+  
+    > http://localhost:4466
+  
+  A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+  
+  A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+  
+  Cypress does not allow you to navigate to a different origin URL within a single test.
+  
+  You may need to restructure some of your test code to avoid this problem.
+  
+  Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
+  
+  https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
   2) web security fails when submitted a form and being redirected to another origin:
-     Cypress detected a cross origin error happened on page load:
+     CypressError: Cypress detected a cross origin error happened on page load:
 
   > [Cross origin error message]
 
 Before the page load, you were bound to the origin policy:
+
   > http://localhost:4466
 
-  A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
-  This typically happens in one of three ways:
+A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-  1. You clicked an \`<a>\` that routed you outside of your application
-  2. You submitted a \`form\` and your server redirected you outside of your application
-  3. You used a JavaScript redirect to a page outside of your application
-
-  Cypress does not allow you to change superdomains within a single test.
+Cypress does not allow you to navigate to a different origin URL within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
+Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
 
 https://on.cypress.io/cross-origin-violation
 
+https://on.cypress.io/cross-origin-violation
+  Cypress detected a cross origin error happened on page load:
+  
+    > [Cross origin error message]
+  
+  Before the page load, you were bound to the origin policy:
+  
+    > http://localhost:4466
+  
+  A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+  
+  A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+  
+  Cypress does not allow you to navigate to a different origin URL within a single test.
+  
+  You may need to restructure some of your test code to avoid this problem.
+  
+  Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
+  
+  https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
   3) web security fails when using a javascript redirect to another origin:
-     Cypress detected a cross origin error happened on page load:
+     CypressError: Cypress detected a cross origin error happened on page load:
 
   > [Cross origin error message]
 
 Before the page load, you were bound to the origin policy:
+
   > http://localhost:4466
 
-  A cross origin error happens when your application navigates to a new superdomain which does not match the origin policy above.
+A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
 
-  This typically happens in one of three ways:
+A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
 
-  1. You clicked an \`<a>\` that routed you outside of your application
-  2. You submitted a \`form\` and your server redirected you outside of your application
-  3. You used a JavaScript redirect to a page outside of your application
-
-  Cypress does not allow you to change superdomains within a single test.
+Cypress does not allow you to navigate to a different origin URL within a single test.
 
 You may need to restructure some of your test code to avoid this problem.
 
-Alternatively you can also disable Chrome Web Security which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
+Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
 
 https://on.cypress.io/cross-origin-violation
 
+https://on.cypress.io/cross-origin-violation
+  Cypress detected a cross origin error happened on page load:
+  
+    > [Cross origin error message]
+  
+  Before the page load, you were bound to the origin policy:
+  
+    > http://localhost:4466
+  
+  A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
+  
+  A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
+  
+  Cypress does not allow you to navigate to a different origin URL within a single test.
+  
+  You may need to restructure some of your test code to avoid this problem.
+  
+  Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
+  
+  https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
 
@@ -211,71 +262,6 @@ exports['e2e web security / when disabled / passes'] = `
   │ ✔  web_security_spec.coffee                 XX:XX        3        3        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
-
-
-`
-
-exports['firefox / displays warning when firefox and chromeWebSecurity:false'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  simple_passing_spec.coffee                                                      (1 of 1)
-
-Your project has set the configuration option: \`chromeWebSecurity: false\`
-
-This option will not have an effect in Firefox. Tests that rely on web security being disabled will not run as expected.
-
-
-  simple passing spec
-    ✓ passes
-
-
-  1 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple_passing_spec.coffee                                                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4      (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
 
 `

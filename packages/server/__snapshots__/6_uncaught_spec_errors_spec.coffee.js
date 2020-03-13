@@ -23,12 +23,16 @@ exports['e2e uncaught errors / failing1'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     foo is not defined
+     ReferenceError: foo is not defined
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  foo is not defined
   
+  Cypress could not associate this error to any specific test.
+  
+  We dynamically generated a new test to display this failure.
 
 
 
@@ -101,12 +105,16 @@ exports['e2e uncaught errors / failing2'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     foo is not defined
+     ReferenceError: foo is not defined
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  foo is not defined
   
+  Cypress could not associate this error to any specific test.
+  
+  We dynamically generated a new test to display this failure.
 
 
 
@@ -181,11 +189,16 @@ exports['e2e uncaught errors / failing3'] = `
   1 failing
 
   1) foo bar:
-     foo is not defined
+     Uncaught ReferenceError: foo is not defined
 
 This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+  foo is not defined
+  
+  This error originated from your test code, not from Cypress.
+  
+  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
 
 
@@ -263,13 +276,18 @@ exports['e2e uncaught errors / failing4'] = `
   1 failing
 
   1) foo "before all" hook for "does not run":
-     foo is not defined
+     Uncaught ReferenceError: foo is not defined
 
 This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
-Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: 'foo'
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`foo\`
+  foo is not defined
+  
+  This error originated from your test code, not from Cypress.
+  
+  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
 
 
@@ -351,19 +369,22 @@ exports['e2e uncaught errors / failing5'] = `
   4 failing
 
   1) foo baz fails:
-     foo is not defined
+     ReferenceError: foo is not defined
+  foo is not defined
       [stack trace lines]
 
   2) foo bar fails:
-     foo is not defined
+     ReferenceError: foo is not defined
+  foo is not defined
       [stack trace lines]
 
   3) foo quux fails:
-     foo is not defined
+     ReferenceError: foo is not defined
+  foo is not defined
       [stack trace lines]
 
   4) foo quux2 fails:
-     foo is not defined
+     ReferenceError: foo is not defined
       [stack trace lines]
 
 

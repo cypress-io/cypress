@@ -75,9 +75,10 @@ Fix the error in your code and re-run your tests.
   1 failing
 
   1) record fails "before each" hook for "fails 1":
-     foo
+     Error: foo
 
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`record fails\`
+  foo
       [stack trace lines]
 
 
@@ -168,12 +169,16 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     instantly fails
+     Error: instantly fails
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  instantly fails
   
+  Cypress could not associate this error to any specific test.
+  
+  We dynamically generated a new test to display this failure.
 
 
 
@@ -995,9 +1000,10 @@ Fix the error in your code and re-run your tests.
   1 failing
 
   1) record fails "before each" hook for "fails 1":
-     foo
+     Error: foo
 
-Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`record fails\`
+  foo
       [stack trace lines]
 
 
@@ -1048,12 +1054,16 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     instantly fails
+     Error: instantly fails
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  instantly fails
   
+  Cypress could not associate this error to any specific test.
+  
+  We dynamically generated a new test to display this failure.
 
 
 

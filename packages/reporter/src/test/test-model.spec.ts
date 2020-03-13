@@ -170,7 +170,7 @@ describe('Test model', () => {
     })
 
     it('returns undefined if there are no commands with errors', () => {
-      const test = new TestModel({ err: { name: 'SomeError' } as Err } as TestProps, 0)
+      const test = new TestModel({ err: { message: 'SomeError' } as Err } as TestProps, 0)
 
       test.addCommand(new Command({} as CommandProps), 'some hook')
       test.addCommand(new Command({} as CommandProps), 'some hook')

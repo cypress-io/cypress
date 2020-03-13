@@ -225,7 +225,7 @@ create = (state, expect) ->
     ## TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
     ## OR GO THROUGH I18N
 
-    cy.ensureExistence($el)
+    ensureExistence($el)
 
   ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, onFail) ->
     cmd = state("current").get("name")

@@ -73,7 +73,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
         _.includes(actual, expected),
         `expected #{this} to contain ${message}`,
         `expected #{this} not to contain ${notMessage}`,
-        ...args
+        ...args,
       )
     }
 
@@ -83,7 +83,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       actual === expected,
       `expected #{this} to have ${message}`,
       `expected #{this} not to have ${notMessage}`,
-      ...args
+      ...args,
     )
   }
 
@@ -106,7 +106,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       wrap(this).hasClass(className),
       'expected #{this} to have class #{exp}',
       'expected #{this} not to have class #{exp}',
-      className
+      className,
     )
   })
 
@@ -117,7 +117,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       wrap(this).prop('id') === id,
       'expected #{this} to have id #{exp}',
       'expected #{this} not to have id #{exp}',
-      id
+      id,
     )
   })
 
@@ -127,7 +127,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'html',
       'expected #{this} to have HTML #{exp}',
       'expected #{this} not to have HTML #{exp}',
-      html
+      html,
     )
 
     const actual = wrap(this).html()
@@ -140,7 +140,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'HTML #{exp}, but the HTML was #{act}',
       'HTML #{exp}',
       html,
-      actual
+      actual,
     )
   })
 
@@ -150,7 +150,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'text',
       'expected #{this} to have text #{exp}',
       'expected #{this} not to have text #{exp}',
-      text
+      text,
     )
 
     const actual = wrap(this).text()
@@ -163,7 +163,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'text #{exp}, but the text was #{act}',
       'text #{exp}',
       text,
-      actual
+      actual,
     )
   })
 
@@ -173,7 +173,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'value',
       'expected #{this} to have value #{exp}',
       'expected #{this} not to have value #{exp}',
-      value
+      value,
     )
 
     const actual = wrap(this).val()
@@ -186,7 +186,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       'value #{exp}, but the value was #{act}',
       'value #{exp}',
       value,
-      actual
+      actual,
     )
   })
 
@@ -197,7 +197,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       wrap(this).has(selector).length > 0,
       'expected #{this} to have descendants #{exp}',
       'expected #{this} not to have descendants #{exp}',
-      selector
+      selector,
     )
   })
 
@@ -210,7 +210,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           wrap(this).is(':empty'),
           'expected #{this} to be #{exp}',
           'expected #{this} not to be #{exp}',
-          'empty'
+          'empty',
         )
       }
 
@@ -229,7 +229,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           wrap(this).is(selector),
           'expected #{this} to match #{exp}',
           'expected #{this} not to match #{exp}',
-          selector
+          selector,
         )
       }
 
@@ -245,7 +245,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
         wrap(this).is(`:${selector}`),
         'expected #{this} to be #{exp}',
         'expected #{this} not to be #{exp}',
-        selectorName
+        selectorName,
       )
     })
   })
@@ -257,7 +257,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
         attr,
         `expected #{this} to have ${description} #{exp}`,
         `expected #{this} not to have ${description} #{exp}`,
-        name
+        name,
       )
 
       const actual = wrap(this)[attr](name)
@@ -270,7 +270,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           actual !== undefined,
           `expected #{this} to have ${description} #{exp}`,
           `expected #{this} not to have ${description} #{exp}`,
-          name
+          name,
         )
 
         // change the subject
@@ -297,7 +297,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           message,
           negatedMessage,
           val,
-          actual
+          actual,
         )
       }
 

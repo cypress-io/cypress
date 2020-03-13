@@ -369,7 +369,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               current: command.get('name'),
               called: enqueuedCmd.name,
             },
-          }
+          },
         )
       }
 
@@ -390,7 +390,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               current: command.get('name'),
               returned: ret,
             },
-          }
+          },
         )
       }
 
@@ -709,7 +709,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
-    $errUtils.normalizeErrorStack(err)
+    err = $errUtils.normalizeErrorStack(err)
+
+    err = $errUtils.processErr(err, config)
 
     const stack = getInvocationStack(err)
 
@@ -759,7 +761,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
       // and if any of these throw synchronously immediately error
-      finish($errUtils.normalizeErrorStack(err2))
+      return finish($errUtils.normalizeErrorStack(err2))
     }
 
     // bail if we had callbacks attached
@@ -1029,7 +1031,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
                   current: current.get('name'),
                   called: name,
                 },
-              }
+              },
             )
           }
         }
@@ -1076,7 +1078,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     now (name, ...args) {
       return Promise.resolve(
-        commandFns[name].apply(cy, args)
+        commandFns[name].apply(cy, args),
       )
     },
 

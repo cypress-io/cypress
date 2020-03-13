@@ -57,7 +57,6 @@ describe "src/cypress/selector_playground", ->
     it "throws if onElement is not a function", ->
       fn = () =>
         SelectorPlayground.defaults({ onElement: "foo" })
-        
       expect(fn).to.throw()
       .with.property("message")
       .and.include("`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `foo`")
@@ -65,7 +64,7 @@ describe "src/cypress/selector_playground", ->
       expect(fn).to.throw()
       .with.property("docsUrl")
       .and.include("https://on.cypress.io/selector-playground-api")
-      
+
   context ".getSelector", ->
     it "uses defaults.selectorPriority", ->
       $div = $("<div data-cy='main button 123' data-foo-bar-baz='quux' data-test='qwerty' data-foo='bar' />")

@@ -2,12 +2,25 @@ _      = require("lodash")
 cache  = require("../cache")
 send   = require("send")
 os     = require("os")
+fs     = require("../util/fs")
+path   = require("path")
 debug  = require("debug")("cypress:server:runner")
 pkg    = require("@packages/root")
 runner = require("@packages/runner/lib/resolve-dist")
 
+PATH_TO_NON_PROXIED_ERROR = path.join(__dirname, "..", "html", "non_proxied_error.html")
+
+_serveNonProxiedError = (res) ->
+  fs.readFile(PATH_TO_NON_PROXIED_ERROR)
+  .then (html) =>
+    res.type('html').end(html)
+
 module.exports = {
   serve: (req, res, options = {}) ->
+    if req.proxiedUrl.startsWith('/')
+      debug('request was not proxied via Cypress, erroring %o', _.pick(req, 'proxiedUrl'))
+      return _serveNonProxiedError(res)
+
     { config, getRemoteState, project } = options
 
     { spec, browser } = project.getCurrentSpecAndBrowser()

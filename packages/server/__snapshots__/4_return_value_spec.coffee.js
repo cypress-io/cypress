@@ -25,8 +25,7 @@ exports['e2e return value failing1 1'] = `
   3 failing
 
   1)  errors when invoking commands and return a different value:
-     [object Object]
-Cypress detected that you invoked one or more cy commands but returned a different value.
+     CypressError: Cypress detected that you invoked one or more cy commands but returned a different value.
 
 The return value was:
 
@@ -40,11 +39,24 @@ In previous versions of Cypress we automatically detected this and forced the cy
 
 https://on.cypress.io/returning-value-and-commands-in-test
 
+https://on.cypress.io/returning-value-and-commands-in-test
+  Cypress detected that you invoked one or more cy commands but returned a different value.
+  
+  The return value was:
+  
+    > {}, 1, 2, foo, function(){}
+  
+  Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+  
+  For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
+  
+  In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+  
+  https://on.cypress.io/returning-value-and-commands-in-test
       [stack trace lines]
 
   2)  errors when invoking commands in custom command and returning different value:
-     [object Object]
-Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
+     CypressError: Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
 
 The custom command was:
 
@@ -62,11 +74,33 @@ In previous versions of Cypress we automatically detected this and forced the cy
 
 https://on.cypress.io/returning-value-and-commands-in-custom-command
 
+https://on.cypress.io/returning-value-and-commands-in-custom-command
+  Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
+  
+  The custom command was:
+  
+    > \`cy.foo()\`
+  
+  The return value was:
+  
+    > bar
+  
+  Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
+  
+  For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
+  
+  In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
+  
+  https://on.cypress.io/returning-value-and-commands-in-custom-command
       [stack trace lines]
 
   3)  errors when not invoking commands, invoking done callback, and returning a promise:
-     TypeError: $errUtils.errMessageByPath is not a function
-      [stack trace lines]
+     Error: Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
+
+Original mocha error:
+
+Error: Resolution method is overspecified. Specify a callback *or* return a Promise; not both.
+    [stack trace lines]
 
 
 
