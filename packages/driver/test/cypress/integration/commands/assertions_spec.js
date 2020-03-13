@@ -425,7 +425,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws err when not available chainable', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer: \'dee\' was not found. Could not build assertion.')
+          expect(err.message).to.eq('The chainer `dee` was not found. Could not build assertion.')
 
           done()
         })
@@ -435,7 +435,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws err when ends with a non available chainable', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer: \'eq2\' was not found. Could not build assertion.')
+          expect(err.message).to.eq('The chainer `eq2` was not found. Could not build assertion.')
 
           done()
         })
@@ -543,7 +543,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('The \'eventually\' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.')
+          expect(err.message).to.eq('The `eventually` assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -752,7 +752,7 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    it('does not replaces instances of word: \'but\' with \'and\' for failing assertion', (done) => {
+    it('does not replaces instances of word \'but\' with \'and\' for failing assertion', (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')

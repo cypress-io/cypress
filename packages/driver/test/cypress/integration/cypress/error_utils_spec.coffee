@@ -3,12 +3,30 @@ $errorMessages = require("../../../../src/cypress/error_messages")
 
 describe "driver/src/cypress/error_utils", ->
   context ".throwErr", ->
-    it "throws the error as sent", ->
+    it "throws error as a cypress error when it is a message string", ->
       fn = -> $errUtils.throwErr("Something unexpected")
 
       expect(fn).to.throw().and.satisfy (err) ->
         expect(err.message).to.include "Something unexpected"
         expect(err.name).to.eq "CypressError"
+
+    it "throws error when it is an object", ->
+      fn = -> $errUtils.throwErr({ name: "SomeError", message: "Something unexpected", extraProp: "extra prop" })
+
+      expect(fn).to.throw().and.satisfy (err) ->
+        expect(err.message).to.include("Something unexpected")
+        expect(err.name).to.eq("SomeError")
+        expect(err.extraProp).to.eq("extra prop")
+
+    it "throws error when it is an error", ->
+      err = new Error("Something unexpected")
+      err.extraProp = "extra prop"
+      fn = -> $errUtils.throwErr(err)
+
+      expect(fn).to.throw().and.satisfy (err) ->
+        expect(err.message).to.include("Something unexpected")
+        expect(err.name).to.eq("Error")
+        expect(err.extraProp).to.eq("extra prop")
 
     it "removes stack if noStackTrace: true", ->
       fn = -> $errUtils.throwErr("Something unexpected", { noStackTrace: true })

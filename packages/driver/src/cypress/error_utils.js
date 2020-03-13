@@ -75,7 +75,7 @@ const makeErrFromObj = (obj) => {
 
 const throwErr = (err, options = {}) => {
   if (_.isString(err)) {
-    err = cypressErr(err)
+    err = cypressErr({ message: err })
   }
 
   if (options.noStackTrace) {
