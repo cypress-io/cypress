@@ -1,7 +1,7 @@
 import Command, { CommandProps } from '../commands/command-model'
 import Agent from '../agents/agent-model'
 import Route from '../routes/route-model'
-import Err from '../lib/err-model'
+import Err from '../errors/err-model'
 
 import TestModel, { TestProps } from './test-model'
 
@@ -159,18 +159,18 @@ describe('Test model', () => {
 
   context('#commandMatchingErr', () => {
     it('returns last command matching the error', () => {
-      const test = new TestModel({ err: { name: 'SomeError' } as Err } as TestProps, 0)
+      const test = new TestModel({ err: { message: 'SomeError' } as Err } as TestProps, 0)
 
-      test.addCommand(new Command({ err: { name: 'SomeError' } as Err } as CommandProps), 'some hook')
+      test.addCommand(new Command({ err: { message: 'SomeError' } as Err } as CommandProps), 'some hook')
       test.addCommand(new Command({ err: {} as Err } as CommandProps), 'some hook')
-      test.addCommand(new Command({ err: { name: 'SomeError' } as Err } as CommandProps), 'some hook')
+      test.addCommand(new Command({ err: { message: 'SomeError' } as Err } as CommandProps), 'some hook')
       test.addCommand(new Command({ err: {} as Err } as CommandProps), 'another hook')
-      test.addCommand(new Command({ name: 'The One', err: { name: 'SomeError' } as Err } as CommandProps), 'another hook')
+      test.addCommand(new Command({ name: 'The One', err: { message: 'SomeError' } as Err } as CommandProps), 'another hook')
       expect(test.commandMatchingErr()!.name).to.equal('The One')
     })
 
     it('returns undefined if there are no commands with errors', () => {
-      const test = new TestModel({ err: { name: 'SomeError' } as Err } as TestProps, 0)
+      const test = new TestModel({ err: { message: 'SomeError' } as Err } as TestProps, 0)
 
       test.addCommand(new Command({} as CommandProps), 'some hook')
       test.addCommand(new Command({} as CommandProps), 'some hook')
