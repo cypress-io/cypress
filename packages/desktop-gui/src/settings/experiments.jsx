@@ -12,30 +12,15 @@ const openHelp = (e) => {
 const Experiments = observer(({ project }) => {
   const experiments = getExperiments(project)
 
-  let message
-
-  if (_.isEmpty(experiments)) {
-    message = (
-      <p className='experiment-intro-empty'>
-        This panel lists experimental features. Currently there are no ongoing experiments.
-      </p>
-    )
-  } else {
-    message = (
-      <p className='experiment-intro'>
-        If you'd like to try out what we're working on, you can enable these beta features for your project by setting configuration using the <code>experimental</code> prefix.
-      </p>
-    )
-  }
-
   return (
     <div>
       <a href='#' className='learn-more' data-cy='experiments' onClick={openHelp}>
         <i className='fas fa-info-circle'></i> Learn more
       </a>
-
       <div>
-        {message}
+        <p className='experiment-intro'>
+          If you'd like to try out what we're working on, you can enable these beta features for your project by setting configuration using the <code>experimental</code> prefix.
+        </p>
       </div>
       {!_.isEmpty(experiments) &&
         <ul className='experiments-list'>
