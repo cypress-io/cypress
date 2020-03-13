@@ -660,13 +660,13 @@ describe('Settings', () => {
       })
     })
 
-    describe('componentTesting', () => {
+    describe('experimental feature exists', () => {
       beforeEach(function () {
         // do not overwrite the shared object reference -
         // because it is used by the app's code.
-        this.win.experimental.names.experimentalComponentTesting = 'Component Testing'
-        this.win.experimental.summaries.experimentalComponentTesting = `
-          Enables component testing
+        this.win.experimental.names.experimentalCoolFeature = 'Cool Feature'
+        this.win.experimental.summaries.experimentalCoolFeature = `
+          Enables super cool feature from Cypress where you can see the cool feature
         `
       })
 
@@ -679,8 +679,8 @@ describe('Settings', () => {
 
       context('enabled', () => {
         beforeEach(function () {
-          this.config.experimentalComponentTesting = true
-          this.config.resolved.experimentalComponentTesting = {
+          this.config.experimentalCoolFeature = true
+          this.config.resolved.experimentalCoolFeature = {
             value: true,
           }
 
@@ -695,7 +695,7 @@ describe('Settings', () => {
         it('has learn more link', hasLearnMoreLink)
 
         it('displays experiment', () => {
-          cy.get('.settings-experiments').contains('Component Testing')
+          cy.get('.settings-experiments').contains('Cool Feature')
           cy.get('.experiment-status-sign').should('have.class', 'enabled')
           .and('have.text', 'ON')
         })
@@ -703,8 +703,8 @@ describe('Settings', () => {
 
       context('disabled', () => {
         beforeEach(function () {
-          this.config.experimentalComponentTesting = false
-          this.config.resolved.experimentalComponentTesting = {
+          this.config.experimentalCoolFeature = false
+          this.config.resolved.experimentalCoolFeature = {
             value: false,
             from: 'default',
           }
@@ -718,7 +718,7 @@ describe('Settings', () => {
         })
 
         it('displays experiment', () => {
-          cy.get('.settings-experiments').contains('Component Testing')
+          cy.get('.settings-experiments').contains('Cool Feature')
           cy.get('.experiment-status-sign').should('not.have.class', 'disabled')
           .and('have.text', 'OFF')
         })

@@ -256,42 +256,32 @@
 
   .experiment {
     list-style: none;
-    display: flex;
-    align-items: center;
     margin-bottom: 15px;
   }
 
   .experiment-desc {
-    width: 80%;
-
-    h5 {
-      font-size: 14px;
-      margin-bottom: 5px;
-    }
+    display: flex;
+    align-items: center;
 
     p {
-      margin-bottom: 5px; 
+      width: 80%;
+      margin-bottom: 0; 
+    }
+
+    .experiment-status {
+      margin-left: auto;
     }
   }
 
-  .experiment-status {
-    margin-left: auto;
-  }
   
   .experiment-status-sign {
-    background-color: #9d9ea9;
+    margin-left: 10px;
+    color: #9d9ea9;
     line-height: 28px;
-    height: 28px;
-    width: 40px;
-    border-radius: 14px;
-    color: white;
-    vertical-align: center;
-    display: inline-block;
     font-weight: bold;
-    text-align: center;
 
     &.enabled {
-      background-color: #1aae73;
+      color: #1aae73;
     }
   }
 }
