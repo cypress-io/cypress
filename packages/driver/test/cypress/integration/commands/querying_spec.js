@@ -1915,16 +1915,20 @@ space
         })
       })
 
-      it(`collapses white spaces when white-space: pre-line`, () => {
-        $(`<button id="whitespace" style="white-space: pre-line">   this
-      field    should preserve all
-      whitespace   
-</button>`).appendTo(cy.$$('body'))
+      // It doesn't work in Firefox.
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1622216
+      if (window.chrome) {
+        it(`collapses white spaces when white-space: pre-line`, () => {
+          $(`<button id="whitespace" style="white-space: pre-line">   this
+        field    should preserve all
+        whitespace   
+  </button>`).appendTo(cy.$$('body'))
 
-        cy.get('#whitespace').contains('this\nfield should preserve all\nwhitespace', {
-          matchWhitespace: true,
+          cy.get('#whitespace').contains('this\nfield should preserve all\nwhitespace', {
+            matchWhitespace: true,
+          })
         })
-      })
+      }
     })
 
     describe('case sensitivity', () => {
