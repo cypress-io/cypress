@@ -104,7 +104,6 @@ module.exports = {
       onFocus: ->
       onBlur: ->
       onClose: ->
-      onCrashed: ->
       onNewWindow: ->
       webPreferences:  {
         partition:            null
@@ -145,9 +144,6 @@ module.exports = {
       win.webContents.on "did-start-loading", ->
         if not win.isDestroyed()
           win.focusOnWebView()
-
-    win.webContents.on "crashed", ->
-      options.onCrashed.apply(win, arguments)
 
     win.webContents.on "new-window", ->
       options.onNewWindow.apply(win, arguments)

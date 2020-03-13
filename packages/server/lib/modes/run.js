@@ -517,11 +517,6 @@ const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
     width: 1280,
     height: 720,
     show: isHeaded,
-    onCrashed () {
-      const err = errors.get('BROWSER_CRASHED', 'Electron')
-
-      onError(err)
-    },
     onNewWindow (e, url, frameName, disposition, options) {
       // force new windows to automatically open with show: false
       // this prevents window.open inside of javascript client code

@@ -139,21 +139,6 @@ describe('lib/modes/run', () => {
 
       expect(options.show).to.eq(false)
     })
-
-    it('calls options.onError when webContents crashes', function () {
-      sinon.spy(errors, 'get')
-      sinon.spy(errors, 'log')
-
-      const onError = sinon.spy()
-      const props = runMode.getElectronProps(true, this.projectInstance, onError)
-
-      props.onCrashed()
-
-      expect(errors.get).to.be.calledWith('BROWSER_CRASHED')
-
-      expect(onError).to.be.called
-      expect(onError.lastCall.args[0].message).to.include('We detected that the Electron process running your tests just exited unexpectedly')
-    })
   })
 
   context('.launchBrowser', () => {
