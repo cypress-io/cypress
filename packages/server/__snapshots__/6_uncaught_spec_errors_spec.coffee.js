@@ -371,8 +371,7 @@ exports['e2e uncaught errors / failing5'] = `
       [stack trace lines]
 
   4) foo quux2 fails:
-     ReferenceError: foo is not defined (and Mocha's done() called multiple times)
-  ReferenceError: foo is not defined
+     ReferenceError: foo is not defined
       [stack trace lines]
 
 

@@ -720,8 +720,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
       $errUtils.normalizeErrorStack(err2)
+
       // and if any of these throw synchronously immediately error
-      finish(err2)
+      return finish(err2)
     }
 
     // bail if we had callbacks attached
