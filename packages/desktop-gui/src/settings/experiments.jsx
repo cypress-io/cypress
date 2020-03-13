@@ -22,30 +22,28 @@ const Experiments = observer(({ project }) => {
           If you'd like to try out what we're working on, you can enable these beta features for your project by setting configuration using the <code>experimental</code> prefix.
         </p>
       </div>
-      {!_.isEmpty(experiments) &&
-        <ul className='experiments-list'>
-          {
-            _.map(experiments, (experiment, i) => (
-              <li className='experiment' key={i}>
-                <h5>
-                  {experiment.name}
-                  <span className={`experiment-status-sign ${experiment.enabled ? 'enabled' : ''}`}>
-                    {experiment.enabled ? 'ON' : 'OFF'}
-                  </span>
-                </h5>
-                <div className='experiment-desc'>
-                  <p className="text-muted">
-                    {experiment.summary}
-                  </p>
-                  <div className='experiment-status'>
-                    <code>{experiment.key}</code>
-                  </div>
+      <ul className='experiments-list'>
+        {
+          _.map(experiments, (experiment, i) => (
+            <li className='experiment' key={i}>
+              <h5>
+                {experiment.name}
+                <span className={`experiment-status-sign ${experiment.enabled ? 'enabled' : ''}`}>
+                  {experiment.enabled ? 'ON' : 'OFF'}
+                </span>
+              </h5>
+              <div className='experiment-desc'>
+                <p className="text-muted">
+                  {experiment.summary}
+                </p>
+                <div className='experiment-status'>
+                  <code>{experiment.key}</code>
                 </div>
-              </li>
-            ))
-          }
-        </ul>
-      }
+              </div>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   )
 })
