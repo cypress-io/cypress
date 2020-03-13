@@ -96,6 +96,11 @@ describe('test errors', function () {
         expect(err.stack).to.equal(this.commandErr.stack)
       })
     })
+
+    it('does not collapse test when clicking', () => {
+      cy.get('.runnable-err-print').click()
+      cy.get('.command-wrapper').should('be.visible')
+    })
   })
 
   describe('stack trace', function () {
