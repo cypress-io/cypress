@@ -14,8 +14,8 @@ const wrapErr = (err) => {
   return $utils.reduceProps(err, ERROR_PROPS)
 }
 
-const mergeErrProps = (origErr, newProps) => {
-  return _.extend(origErr, newProps)
+const mergeErrProps = (origErr, ...newProps) => {
+  return _.extend(origErr, ...newProps)
 }
 
 const replaceMsgInStack = (err, newMsg) => {
@@ -108,16 +108,12 @@ const throwErr = (err, options = {}) => {
 }
 
 const throwErrByPath = (errPath, options = {}) => {
-  const { args } = options
   let err
 
   try {
-    const obj = errObjByPath($errorMessages, errPath, args)
-
-    err = cypressErr(obj.message)
-    _.defaults(err, obj)
-  } catch (e) {
-    err = internalErr(e)
+    err = cypressErrByPath(errPath, options)
+  } catch (internalError) {
+    err = internalErr(internalError)
   }
 
   return throwErr(err, options)
@@ -135,22 +131,21 @@ const warnByPath = (errPath, options = {}) => {
 }
 
 const internalErr = (err) => {
-  err = new Error(err)
-  err.name = 'InternalError'
+  const newErr = new Error(err)
 
-  return err
+  return mergeErrProps(newErr, err, { name: 'InternalError' })
 }
 
-const cypressErrObj = (errObj) => {
-  errObj.name = 'CypressError'
+const cypressErr = (err) => {
+  const newErr = new Error(err.message)
 
-  return errObj
+  return mergeErrProps(newErr, err, { name: 'CypressError' })
 }
 
-const cypressErr = (msg) => {
-  const err = new Error(msg)
+const cypressErrByPath = (errPath, options = {}) => {
+  const errObj = errObjByPath($errorMessages, errPath, options.args)
 
-  return cypressErrObj(err)
+  return cypressErr(errObj)
 }
 
 const normalizeMsgNewLines = (message) => {
@@ -287,6 +282,7 @@ const processErr = (errObj = {}, config) => {
 module.exports = {
   appendErrMsg,
   cypressErr,
+  cypressErrByPath,
   CypressErrorRe,
   errMsgByPath,
   errObjByPath,

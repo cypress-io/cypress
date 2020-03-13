@@ -257,6 +257,7 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/element-is-animating"
     }
+    animation_coords_history_invalid: "coordsHistory must be at least 2 sets of coords"
     animation_check_failed: "Not enough coord points provided to calculate distance."
     center_hidden: {
       message: """
@@ -1185,6 +1186,10 @@ module.exports = {
       message: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
       docsUrl: "https://on.cypress.io/setcookie"
     }
+
+  should:
+    chainer_not_found: "The chainer `{{chainer}}` was not found. Could not build assertion."
+    eventually_deprecated: "The `eventually` assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before."
 
   spread:
     invalid_type: {

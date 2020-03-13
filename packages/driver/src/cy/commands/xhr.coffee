@@ -168,7 +168,7 @@ startXhrServer = (cy, state, config) ->
         log.snapshot("response").end()
 
     onNetworkError: (xhr) ->
-      err = $errUtils.cypressErr($errUtils.errMsgByPath("xhr.network_error"))
+      err = $errUtils.cypressErrByPath("xhr.network_error")
 
       if log = logs[xhr.id]
         log.snapshot("failed").error(err)
