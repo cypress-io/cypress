@@ -21,7 +21,6 @@
     "@packages/socket": "*",
     "@packages/web-config": "*",
     "@types/chai-enzyme": "0.6.7",
-    "@types/enzyme": "3.10.4",
     "chai": "3.5.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
