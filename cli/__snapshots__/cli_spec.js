@@ -200,6 +200,7 @@ exports['cli help command shows help 1'] = `
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
+    init [options]     Scaffold Cypress project
     install [options]  Installs the Cypress executable matching this package's
                        version
     verify [options]   Verifies that Cypress is installed correctly and
@@ -236,6 +237,7 @@ exports['cli help command shows help for -h 1'] = `
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
+    init [options]     Scaffold Cypress project
     install [options]  Installs the Cypress executable matching this package's
                        version
     verify [options]   Verifies that Cypress is installed correctly and
@@ -272,6 +274,7 @@ exports['cli help command shows help for --help 1'] = `
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
+    init [options]     Scaffold Cypress project
     install [options]  Installs the Cypress executable matching this package's
                        version
     verify [options]   Verifies that Cypress is installed correctly and
@@ -309,6 +312,7 @@ exports['cli unknown command shows usage and exits 1'] = `
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
+    init [options]     Scaffold Cypress project
     install [options]  Installs the Cypress executable matching this package's
                        version
     verify [options]   Verifies that Cypress is installed correctly and
@@ -415,6 +419,7 @@ exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] 
     version            prints Cypress version
     run [options]      Runs Cypress tests from the CLI without the GUI
     open [options]     Opens Cypress in the interactive GUI.
+    init [options]     Scaffold Cypress project
     install [options]  Installs the Cypress executable matching this package's
                        version
     verify [options]   Verifies that Cypress is installed correctly and
