@@ -281,7 +281,7 @@ module.exports = {
     .option('--dev', text('dev'), coerceFalse)
     .action((opts) => {
       require('./exec/init')
-      .start(opts) // TODO: create parseInitOpts() in util.js
+      .start(util.parseInitOpts(opts))
       .catch(util.logErrorExit1)
     })
 

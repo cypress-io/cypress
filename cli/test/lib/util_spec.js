@@ -591,4 +591,33 @@ describe('util', () => {
       })
     })
   })
+
+  context('parseInitOpts', () => {
+    it('passes normal options and strips unknown ones', () => {
+      const result = util.parseInitOpts({
+        unknownOptions: true,
+        force: true,
+        yes: true,
+        config: 'video=false',
+        example: true,
+        typescript: true,
+        ts: true,
+        noEslint: true,
+        chaiFriendly: true,
+        dev: true,
+      })
+
+      expect(result).to.deep.equal({
+        force: true,
+        yes: true,
+        config: 'video=false',
+        example: true,
+        typescript: true,
+        ts: true,
+        noEslint: true,
+        chaiFriendly: true,
+        dev: true,
+      })
+    })
+  })
 })

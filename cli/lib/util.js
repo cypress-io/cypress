@@ -237,6 +237,19 @@ const parseOpts = (opts) => {
   return cleanOpts
 }
 
+const parseInitOpts = (opts) => {
+  return _.pick(opts,
+    'force',
+    'yes',
+    'config',
+    'example',
+    'typescript',
+    'ts',
+    'noEslint',
+    'chaiFriendly',
+    'dev')
+}
+
 /**
  * Copy of packages/server/lib/browsers/utils.ts
  * because we need same functionality in CLI to show the path :(
@@ -260,6 +273,7 @@ const getApplicationDataFolder = (...paths) => {
 const util = {
   normalizeModuleOptions,
   parseOpts,
+  parseInitOpts,
   isValidCypressInternalEnvValue,
   isNonProductionCypressInternalEnvValue,
   printNodeOptions,

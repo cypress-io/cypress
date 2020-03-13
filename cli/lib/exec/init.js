@@ -11,30 +11,8 @@ module.exports = {
 
     const args = ['--init-project']
 
-    if (options.config) {
-      args.push('--config', options.config)
-    }
-
-    if (options.configFile !== undefined) {
-      args.push('--config-file', options.configFile)
-    }
-
-    if (options.force) {
+    if (options.force || options.yes) {
       args.push('--force')
-    }
-
-    if (options.noExample) {
-      args.push('--no-example')
-    }
-
-    if (options.typescript) {
-      args.push('--typescript')
-    }
-
-    if (options.eslint === '') {
-      args.push('--eslint')
-    } else if (options.eslint === 'chai-friendly') {
-      args.push('--eslint-chai-friendly')
     }
 
     debug('init cypress from options %j', options)
