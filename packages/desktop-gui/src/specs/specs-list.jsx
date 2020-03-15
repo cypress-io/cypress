@@ -13,7 +13,14 @@ import specsStore, { allSpecsSpec } from './specs-store'
 class SpecsList extends Component {
   constructor (props) {
     super(props)
-    this.state = { hiddenSearchTips: true }
+    this.state = {
+      isFocused: false,
+    }
+
+    this._setFocus = this._setFocus.bind(this)
+    this._setBlur = this._setBlur.bind(this)
+    this._togglePlaceholderSearchTips = this._togglePlaceholderSearchTips.bind(this)
+
     this.filterRef = React.createRef()
   }
 
@@ -34,10 +41,12 @@ class SpecsList extends Component {
             <input
               id='filter'
               className='filter'
-              placeholder={this._toggleSearchTips()}
+              placeholder={this._togglePlaceholderSearchTips()}
               value={specsStore.filter || ''}
               ref={this.filterRef}
+              onBlur={this._setBlur}
               onChange={this._updateFilter}
+              onFocus={this._setFocus}
               onKeyUp={this._executeFilterAction}
             />
 
@@ -50,10 +59,6 @@ class SpecsList extends Component {
               <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
-
-          <label className='search-info'>
-            <i className='fas fa-info' onClick={this._setSearchKeyTips}></i>
-          </label>
 
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)} className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
             <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
@@ -92,22 +97,28 @@ class SpecsList extends Component {
     return spec.hasChildren ? this._folderContent(spec, nestingLevel) : this._specContent(spec, nestingLevel)
   }
 
+  _setFocus () {
+    this.setState({
+      isFocused: !this.state.isFocused,
+    })
+  }
+
+  _setBlur () {
+    this.setState({
+      isFocused: !this.state.isFocused,
+    })
+  }
+
+  _togglePlaceholderSearchTips () {
+    return (!this.state.isFocused) ? 'Search' : 'Press CTRL + F (or CMD + F on Mac) to make a quick search...'
+  }
+
   _allSpecsIcon (allSpecsChosen) {
     return allSpecsChosen ? 'far fa-dot-circle green' : 'fas fa-play'
   }
 
   _specIcon (isChosen) {
     return isChosen ? 'far fa-dot-circle green' : 'far fa-file'
-  }
-
-  _setSearchKeyTips = () => {
-    this.setState({
-      hiddenSearchTips: !this.state.hiddenSearchTips,
-    })
-  }
-
-  _toggleSearchTips () {
-    return (this.state.hiddenSearchTips) ? 'Search...' : 'Press CTRL + F (or CMD + F on Mac) to make a quick search...'
   }
 
   _clearFilter = () => {
