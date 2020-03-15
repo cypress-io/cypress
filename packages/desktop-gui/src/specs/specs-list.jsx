@@ -6,6 +6,7 @@ import Loader from 'react-loader'
 import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
+import os from 'os'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allSpecsSpec } from './specs-store'
 
@@ -109,8 +110,14 @@ class SpecsList extends Component {
     })
   }
 
+  _isMac () {
+    return (os.platform() === 'darwin')
+      ? 'Press Cmd + F to make a quick search...'
+      : 'Press Ctrl + F to make a quick search...'
+  }
+
   _togglePlaceholderSearchTips () {
-    return (!this.state.isFocused) ? 'Search' : 'Press CTRL + F (or CMD + F on Mac) to make a quick search...'
+    return (!this.state.isFocused) ? 'Search' : this._isMac()
   }
 
   _allSpecsIcon (allSpecsChosen) {
