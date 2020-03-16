@@ -76,7 +76,7 @@ onServer = (app) ->
         """
         HTTP/1.1 200 OK
         Content-Type: text/html
-        X-Foo: #{String.fromCharCode(0)}
+        X-Foo: #{String.fromCharCode(1)}
 
         foo
         """
