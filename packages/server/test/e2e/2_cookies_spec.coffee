@@ -129,6 +129,12 @@ describe "e2e cookies", ->
     }
   })
 
+  beforeEach =>
+    process.env.DEBUG = 'cypress:'
+
+  afterEach =>
+    process.env.DEBUG = ''
+
   ## this is a big chunky test that runs cookies_spec with all combinations of these:
   ## - cookies on `localhost`, fully-qualified-domain-name, and IP address domains
   ## - `https` baseurls, `http` baseurls, and no baseurls set
