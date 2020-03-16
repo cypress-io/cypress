@@ -1,9 +1,3 @@
-// if running in production mode (CYPRESS_ENV)
-// all transpile should have been done already
-// and these calls should do nothing
-require('@packages/ts/register')
-require('@packages/coffee/register')
-
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
@@ -21,6 +15,11 @@ if (process.env.CY_NET_PROFILE && isRunningElectron) {
 process.env.UV_THREADPOOL_SIZE = 128
 
 require('graceful-fs').gracefulify(require('fs'))
+// if running in production mode (CYPRESS_ENV)
+// all transpile should have been done already
+// and these calls should do nothing
+require('@packages/ts/register')
+require('@packages/coffee/register')
 
 if (isRunningElectron) {
   require('./lib/util/process_profiler').start()

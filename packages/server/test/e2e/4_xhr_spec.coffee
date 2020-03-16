@@ -1,5 +1,4 @@
 bodyParser = require("body-parser")
-mockedEnv  = require("mocked-env")
 e2e        = require("../support/helpers/e2e")
 
 onServer = (app) ->
