@@ -10,7 +10,7 @@ const debug = debugModule('cypress:server:util:node_options')
  * @returns {boolean} does Cypress have the expected NODE_OPTIONS?
  */
 export function needsOptions (): boolean {
-  if ((process.env.NODE_OPTIONS || '').includes(`--max-http-header-size=${1024 ** 2}`)) {
+  if ((process.env.NODE_OPTIONS || '').includes(`--max-http-header-size=${1024 ** 2} --http-parser=legacy`)) {
     debug('NODE_OPTIONS check passed, not forking %o', { NODE_OPTIONS: process.env.NODE_OPTIONS })
 
     return false
@@ -31,7 +31,7 @@ export function needsOptions (): boolean {
  */
 export function forkWithCorrectOptions (): void {
   // this should only happen when running from global mode, when the CLI couldn't set the NODE_OPTIONS
-  const NODE_OPTIONS = `--max-http-header-size=${1024 * 1024}`
+  const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2} --http-parser=legacy`
 
   process.env.ORIGINAL_NODE_OPTIONS = process.env.NODE_OPTIONS || ''
   process.env.NODE_OPTIONS = `${NODE_OPTIONS} ${process.env.ORIGINAL_NODE_OPTIONS}`
@@ -50,7 +50,7 @@ export function forkWithCorrectOptions (): void {
       // This is actually the correct way to do it, despite TS - ['inherit', 'inherit', 'inherit'] won't work with cp.fork
       // @see https://github.com/nodejs/node/blob/2f45ad8060e13d5ac912335096d21526f2f9602b/lib/child_process.js#L106-L115
       stdio: 'inherit',
-    }
+    },
   )
   .on('error', () => {})
   .on('exit', (code) => {
