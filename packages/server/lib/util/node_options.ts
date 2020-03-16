@@ -3,6 +3,8 @@ import debugModule from 'debug'
 
 const debug = debugModule('cypress:server:util:node_options')
 
+const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2} --http-parser=legacy`
+
 /**
  * If Cypress was not launched via CLI, it may be missing certain startup
  * options. This checks that those startup options were applied.
@@ -10,7 +12,7 @@ const debug = debugModule('cypress:server:util:node_options')
  * @returns {boolean} does Cypress have the expected NODE_OPTIONS?
  */
 export function needsOptions (): boolean {
-  if ((process.env.NODE_OPTIONS || '').includes(`--max-http-header-size=${1024 ** 2} --http-parser=legacy`)) {
+  if ((process.env.NODE_OPTIONS || '').includes(NODE_OPTIONS)) {
     debug('NODE_OPTIONS check passed, not forking %o', { NODE_OPTIONS: process.env.NODE_OPTIONS })
 
     return false
@@ -31,8 +33,6 @@ export function needsOptions (): boolean {
  */
 export function forkWithCorrectOptions (): void {
   // this should only happen when running from global mode, when the CLI couldn't set the NODE_OPTIONS
-  const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2} --http-parser=legacy`
-
   process.env.ORIGINAL_NODE_OPTIONS = process.env.NODE_OPTIONS || ''
   process.env.NODE_OPTIONS = `${NODE_OPTIONS} ${process.env.ORIGINAL_NODE_OPTIONS}`
 

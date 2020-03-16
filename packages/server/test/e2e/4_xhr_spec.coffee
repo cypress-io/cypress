@@ -29,7 +29,6 @@ describe "e2e xhr", ->
   e2e.it "passes in global mode", {
     spec: "xhr_spec.coffee"
     snapshot: true
-    expectedExitCode: 0
   }
 
   e2e.it "passes through CLI", {
