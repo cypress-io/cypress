@@ -5,16 +5,17 @@ const itHandlesFileOpening = (containerSelector) => {
   beforeEach(function () {
     cy.stub(this.runner, 'emit').callThrough()
     this.setError(this.commandErr)
-    cy.contains('View stack trace').click()
   })
 
-  describe('when user has already set opener and open file', function () {
+  describe('when user has already set opener and opens file', function () {
     beforeEach(function () {
       this.editor = {}
 
       this.runner.emit.withArgs('get:user:editor').yields({
         preferredOpener: this.editor,
       })
+
+      cy.contains('View stack trace').click()
     })
 
     it('opens in preferred opener', function () {
@@ -43,6 +44,7 @@ const itHandlesFileOpening = (containerSelector) => {
       this.runner.emit.withArgs('get:user:editor').yields({ availableEditors })
       // usual viewport of only reporter is a bit cramped for the modal
       cy.viewport(600, 600)
+      cy.contains('View stack trace').click()
       cy.get(`${containerSelector} a`).first().click()
     })
 
