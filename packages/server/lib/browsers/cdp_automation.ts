@@ -168,7 +168,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
       case 'remote:debugger:protocol':
         return sendDebuggerCommandFn(data.command, data.params)
       case 'take:screenshot':
-        return sendDebuggerCommandFn('Page.captureScreenshot')
+        return sendDebuggerCommandFn('Page.captureScreenshot', { format: 'png' })
         .catch((err) => {
           throw new Error(`The browser responded with an error when Cypress attempted to take a screenshot.\n\nDetails:\n${err.message}`)
         })
