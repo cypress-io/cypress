@@ -459,6 +459,10 @@ declare namespace Cypress {
        */
       isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
       /**
+       * Returns a boolean indicating whether object is undefined or html, body, or document.
+       */
+      isUndefinedOrHTMLBodyDoc(obj: any): boolean
+      /**
        * Returns a boolean indicating whether an object is a DOM element.
        */
       isElement(obj: any): boolean
