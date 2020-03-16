@@ -1,3 +1,5 @@
-it('passes', () => {
-  expect(true).to.be.true
+describe('it', () => {
+  it('passes', () => {
+    expect(true).to.be.true
+  })
 })
