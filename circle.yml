@@ -1444,6 +1444,7 @@ mac-workflow: &mac-workflow
     - post-pre-release-install-comment:
         context: test-runner:commit-status-checks
         name: Post Mac pre-release install comment
+        executor: mac
         filters:
           branches:
             only:
