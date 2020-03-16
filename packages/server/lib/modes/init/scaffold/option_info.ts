@@ -12,26 +12,26 @@ export const optionInfo = [
     "options": [
       {
         "name": "baseUrl",
-        "default": "null",
+        "default": null,
         "type": "text",
         "description": "URL used as prefix for `cy.visit()` or `cy.request()` command's URL"
       },
       {
         "name": "env",
-        "default": "{}",
+        "default": {},
         "type": "object",
         "description": "Any values to be set as 'environment variables'"
       },
       {
         "name": "numTestsKeptInMemory",
-        "default": "50",
+        "default": 50,
         "type": "number",
         "description": "The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run."
       },
       {
         "name": "port",
-        "default": "null",
-        "type": "text",
+        "default": null,
+        "type": "number",
         "description": "Port used to host Cypress. Normally this is a randomly generated port"
       },
       {
@@ -42,13 +42,13 @@ export const optionInfo = [
       },
       {
         "name": "reporterOptions",
-        "default": "null",
-        "type": "text",
+        "default": null,
+        "type": "object",
         "description": "The 'reporter options' used. Supported options depend on the reporter."
       },
       {
         "name": "watchForFileChanges",
-        "default": "true",
+        "default": true,
         "type": "text",
         "description": "Whether Cypress will watch and restart tests on test file changes"
       }
@@ -59,37 +59,37 @@ export const optionInfo = [
     "options": [
       {
         "name": "defaultCommandTimeout",
-        "default": "4000",
+        "default": 4000,
         "type": "number",
         "description": "Time, in milliseconds, to wait until most DOM based commands are considered timed out"
       },
       {
         "name": "execTimeout",
-        "default": "60000",
+        "default": 60000,
         "type": "number",
         "description": "Time, in milliseconds, to wait for a system command to finish executing during a `cy.exec()` command"
       },
       {
         "name": "taskTimeout",
-        "default": "60000",
+        "default": 60000,
         "type": "number",
         "description": "Time, in milliseconds, to wait for a task to finish executing during a `cy.task()` command"
       },
       {
         "name": "pageLoadTimeout",
-        "default": "60000",
+        "default": 60000,
         "type": "number",
         "description": "Time, in milliseconds, to wait for `page transition events` or `cy.visit()`, `cy.go()`, `cy.reload()` commands to fire their page `load` events. Network requests are limited by the underlying operating system, and may still time out if this value is increased."
       },
       {
         "name": "requestTimeout",
-        "default": "5000",
+        "default": 5000,
         "type": "number",
         "description": "Time, in milliseconds, to wait for an XHR request to go out in a `cy.wait()` command"
       },
       {
         "name": "responseTimeout",
-        "default": "30000",
+        "default": 30000,
         "type": "number",
         "description": "Time, in milliseconds, to wait until a response in a `cy.request()`, `cy.wait()`, `cy.fixture()`, `cy.getCookie()`, `cy.getCookies()`, `cy.setCookie()`, `cy.clearCookie()`, `cy.clearCookies()`, and `cy.screenshot()` commands"
       }
@@ -165,7 +165,7 @@ export const optionInfo = [
       },
       {
         "name": "trashAssetsBeforeRuns",
-        "default": "true",
+        "default": true,
         "type": "text",
         "description": "Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before tests run with `cypress run`."
       }
@@ -176,13 +176,13 @@ export const optionInfo = [
     "options": [
       {
         "name": "trashAssetsBeforeRuns",
-        "default": "true",
+        "default": true,
         "type": "text",
         "description": "Whether Cypress will trash assets within the `screenshotsFolder` and `videosFolder` before tests run with `cypress run`."
       },
       {
         "name": "videoCompression",
-        "default": "32",
+        "default": 32,
         "type": "number",
         "description": "The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be `false` to disable compression or a value between `0` and `51`, where a lower value results in better quality (at the expense of a higher file size)."
       },
@@ -194,13 +194,13 @@ export const optionInfo = [
       },
       {
         "name": "video",
-        "default": "true",
+        "default": true,
         "type": "text",
         "description": "Whether Cypress will capture a video of the tests run with `cypress run`."
       },
       {
         "name": "videoUploadOnPasses",
-        "default": "true",
+        "default": true,
         "type": "text",
         "description": "Whether Cypress will process, compress, and upload videos to the \"Dashboard\" even when all tests in a spec file are passing. This only applies when recording your runs to the Dashboard. Turn this off if you'd like to only upload the spec file's video when there are failing tests."
       }
@@ -211,25 +211,25 @@ export const optionInfo = [
     "options": [
       {
         "name": "chromeWebSecurity",
-        "default": "true",
+        "default": true,
         "type": "text",
         "description": "Whether Chrome Web Security for same-origin policy and insecure mixed content is enabled. 'Read more about this here'"
       },
       {
         "name": "userAgent",
-        "default": "null",
+        "default": null,
         "type": "text",
         "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See \"User-Agent MDN Documentation\" for example user agent values."
       },
       {
         "name": "blacklistHosts",
-        "default": "null",
-        "type": "text",
+        "default": null,
+        "type": "array",
         "description": "A String or Array of hosts that you wish to block traffic for. 'Please read the notes for examples on using this.'"
       },
       {
         "name": "modifyObstructiveCode",
-        "default": "true",
+        "default": true,
         "type": "text",
         "description": "Whether Cypress will search for and replace obstructive JS code in `.js` or `.html` files. 'Please read the notes for more information on this setting.'"
       }
@@ -240,13 +240,13 @@ export const optionInfo = [
     "options": [
       {
         "name": "viewportHeight",
-        "default": "660",
+        "default": 660,
         "type": "number",
         "description": "Default height in pixels for the application under tests' viewport (Override with `cy.viewport()` command)"
       },
       {
         "name": "viewportWidth",
-        "default": "1000",
+        "default": 1000,
         "type": "number",
         "description": "Default width in pixels for the application under tests' viewport. (Override with `cy.viewport()` command)"
       }
@@ -257,13 +257,13 @@ export const optionInfo = [
     "options": [
       {
         "name": "animationDistanceThreshold",
-        "default": "5",
+        "default": 5,
         "type": "number",
         "description": "The distance in pixels an element must exceed over time to be considered animating"
       },
       {
         "name": "waitForAnimations",
-        "default": "true",
+        "default": true,
         "type": "text",
         "description": "Whether to wait for elements to finish animating before executing commands"
       }
@@ -281,3 +281,41 @@ export const optionInfo = [
     ]
   }
 ]
+
+export const defaultValues = {
+  "baseUrl": null,
+  "env": {},
+  "numTestsKeptInMemory": 50,
+  "port": null,
+  "reporter": "spec",
+  "reporterOptions": null,
+  "watchForFileChanges": true,
+  "defaultCommandTimeout": 4000,
+  "execTimeout": 60000,
+  "taskTimeout": 60000,
+  "pageLoadTimeout": 60000,
+  "requestTimeout": 5000,
+  "responseTimeout": 30000,
+  "fileServerFolder": "root project folder",
+  "fixturesFolder": "cypress/fixtures",
+  "ignoreTestFiles": "*.hot-update.js",
+  "integrationFolder": "cypress/integration",
+  "pluginsFile": "cypress/plugins/index.js",
+  "screenshotsFolder": "cypress/screenshots",
+  "supportFile": "cypress/support/index.js",
+  "testFiles": "**/*.*",
+  "videosFolder": "cypress/videos",
+  "trashAssetsBeforeRuns": true,
+  "videoCompression": 32,
+  "video": true,
+  "videoUploadOnPasses": true,
+  "chromeWebSecurity": true,
+  "userAgent": null,
+  "blacklistHosts": null,
+  "modifyObstructiveCode": true,
+  "viewportHeight": 660,
+  "viewportWidth": 1000,
+  "animationDistanceThreshold": 5,
+  "waitForAnimations": true,
+  "nodeVersion": "bundled"
+}
