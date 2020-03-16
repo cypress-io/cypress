@@ -1,5 +1,6 @@
 require('../spec_helper')
 
+import _ from 'lodash'
 import * as linuxHelper from '../../lib/linux'
 import 'chai-as-promised'
 import { log } from '../log'
@@ -35,6 +36,24 @@ describe('linux browser detection', () => {
         name: 'test-browser-name',
         path: 'test-browser',
         version: '100.1.2.3',
+      })
+    }
+
+    // @ts-ignore
+    return linuxHelper.detect(goal).then(checkBrowser)
+  })
+
+  // https://github.com/cypress-io/cypress/issues/6669
+  it('detects browser if the --version stdout is multiline', () => {
+    stdout.withArgs('multiline-foo', ['--version'])
+    .resolves('Running without a11y support!\nfoo-browser v9001.1.2.3')
+
+    const goal = _.defaults({ binary: 'multiline-foo' }, _.find(goalBrowsers, { name: 'foo-browser' }))
+    const checkBrowser = (browser) => {
+      expect(browser).to.deep.equal({
+        name: 'foo-browser',
+        path: 'multiline-foo',
+        version: '9001.1.2.3',
       })
     }
 

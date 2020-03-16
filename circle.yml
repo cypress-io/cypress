@@ -43,7 +43,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.8.1-chrome80-ff72
+      - image: cypress/browsers:node12.13.0-chrome80-ff74
     environment:
       PLATFORM: linux
 
@@ -237,7 +237,7 @@ jobs:
       - run: ls $(yarn global bin)/../lib/node_modules
 
       # try several times, because flaky NPM installs ...
-      - run: yarn || yarn
+      - run: yarn --frozen-lockfile || yarn --frozen-lockfile
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -270,7 +270,6 @@ jobs:
           at: ~/
       - run: mkdir -p cli/visual-snapshots
       - run:
-          # TODO sanitize "cypress info" output to be consistent
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
           environment:
             FORCE_COLOR: 2
@@ -306,6 +305,9 @@ jobs:
           expectedResultCount: 6
       - store_test_results:
           path: /tmp/cypress
+      # CLI tests generate HTML files with sample CLI command output
+      - store_artifacts:
+          path: cli/test/html
       - store-npm-logs
 
   lint-types:
