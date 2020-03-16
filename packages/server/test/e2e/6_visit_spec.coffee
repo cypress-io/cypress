@@ -76,7 +76,7 @@ onServer = (app) ->
         """
         HTTP/1.1 200 OK
         Content-Type: text/html
-        X-Foo: #{String.fromCharCode(1)}
+        Set-Cookie: foo=bar-#{String.fromCharCode(1)}-baz
 
         foo
         """

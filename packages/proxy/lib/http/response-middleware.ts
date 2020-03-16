@@ -119,16 +119,70 @@ const LogResponse: ResponseMiddleware = function () {
 }
 
 const PatchExpressSetHeader: ResponseMiddleware = function () {
+  const { incomingRes } = this
   const originalSetHeader = this.res.setHeader
 
-  // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
-  // but we don't want to change it at all!
-  this.res.setHeader = (k, v) => {
-    if (k === 'content-type') {
-      v = this.incomingRes.headers['content-type'] || v
+  // Node uses their own Symbol object, so use this to get the internal kOutHeaders
+  // symbol - Symbol.for('kOutHeaders') will not work
+  const getKOutHeadersSymbol = () => {
+    const findKOutHeadersSymbol = (): symbol => {
+      return _.find(Object.getOwnPropertySymbols(this.res), (sym) => {
+        return sym.toString() === 'Symbol(kOutHeaders)'
+      })!
     }
 
-    return originalSetHeader.call(this.res, k, v)
+    let sym = findKOutHeadersSymbol()
+
+    if (sym) {
+      return sym
+    }
+
+    // force creation of a new header field so the kOutHeaders key is available
+    this.res.setHeader('X-Cypress-HTTP-Response', 'X')
+    this.res.removeHeader('X-Cypress-HTTP-Response')
+
+    sym = findKOutHeadersSymbol()
+
+    if (!sym) {
+      throw new Error('unable to find kOutHeaders symbol')
+    }
+
+    return sym
+  }
+
+  let kOutHeaders
+
+  this.res.setHeader = function (k, v) {
+    // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
+    // but we don't want to change it at all!
+    if (k === 'content-type') {
+      v = incomingRes.headers['content-type'] || v
+    }
+
+    // run the original function - if an "invalid header char" error is raised,
+    // set the header manually. this way we can retain Node's original error behavior
+    try {
+      return originalSetHeader.call(this, k, v)
+    } catch (err) {
+      if (err.code !== 'ERR_INVALID_CHAR') {
+        throw err
+      }
+
+      debug('setHeader error ignored %o', { code: err.code, err })
+
+      if (!kOutHeaders) {
+        kOutHeaders = getKOutHeadersSymbol()
+      }
+
+      // https://github.com/nodejs/node/blob/42cce5a9d0fd905bf4ad7a2528c36572dfb8b5ad/lib/_http_outgoing.js#L483-L495
+      let headers = this[kOutHeaders]
+
+      if (!headers) {
+        this[kOutHeaders] = headers = Object.create(null)
+      }
+
+      headers[k.toLowerCase()] = [k, v]
+    }
   }
 
   this.next()
