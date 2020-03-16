@@ -122,6 +122,36 @@ declare namespace Cypress {
     clear: (keys?: string[]) => void
   }
 
+  interface ViewportPosition extends WindowPosition {
+    right: number
+    bottom: number
+  }
+
+  interface WindowPosition {
+    top: number
+    left: number
+    topCenter: number
+    leftCenter: number
+  }
+
+  interface ElementPositioning {
+    scrollTop: number
+    scrollLeft: number
+    width: number
+    height: number
+    fromElViewport: ViewportPosition
+    fromElWindow: WindowPosition
+    fromAutWindow: WindowPosition
+  }
+
+  interface ElementCoordinates {
+    width: number
+    height: number
+    fromElViewport: ViewportPosition & { x: number, y: number }
+    fromElWindow: WindowPosition & { x: number, y: number }
+    fromAutWindow: WindowPosition & { x: number, y: number }
+  }
+
   /**
    * Several libraries are bundled with Cypress by default.
    *
@@ -177,6 +207,15 @@ declare namespace Cypress {
      *   new Cypress.Promise((resolve, reject) => { ... })
      */
     Promise: Bluebird.BluebirdStatic
+    /**
+     * Cypress includes Sinon.js library used in `cy.spy` and `cy.stub`.
+     *
+     * @see https://sinonjs.org/
+     * @see https://on.cypress.io/stubs-spies-and-clocks
+     * @see https://example.cypress.io/commands/spies-stubs-clocks
+     */
+    sinon: sinon.SinonApi
+
     /**
      * Cypress version string. i.e. "1.1.2"
      * @see https://on.cypress.io/version
@@ -371,7 +410,89 @@ declare namespace Cypress {
      * @see https://on.cypress.io/dom
      */
     dom: {
+      /**
+       * Returns a jQuery object obtained by wrapping an object in jQuery.
+       */
+      wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
+      query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
+      /**
+       * Returns an array of raw elements pulled out from a jQuery object.
+       */
+      unwrap(obj: any): any
+      /**
+       * Returns a boolean indicating whether an object is a DOM object.
+       */
+      isDom(obj: any): boolean
+      isType(element: JQuery | HTMLElement , type: string): boolean
+      /**
+       * Returns a boolean indicating whether an element is visible.
+       */
+      isVisible(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is hidden.
+       */
       isHidden(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element can receive focus.
+       */
+      isFocusable(element: JQuery | HTMLElement): boolean
+      isTextLike(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is scrollable.
+       */
+      isScrollable(element: Window | JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element currently has focus.
+       */
+      isFocused(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is detached from the DOM.
+       */
+      isDetached(element: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether an element is attached to the DOM.
+       */
+      isAttached(element: JQuery | HTMLElement | Window | Document): boolean
+      isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
+      /**
+       * Returns a boolean indicating whether an element is a descendent of another element.
+       */
+      isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether object is undefined or html, body, or document.
+       */
+      isUndefinedOrHTMLBodyDoc(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a DOM element.
+       */
+      isElement(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether a node is of document type.
+       */
+      isDocument(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a window object.
+       */
+      isWindow(obj: any): boolean
+      /**
+       * Returns a boolean indicating whether an object is a jQuery object.
+       */
+      isJquery(obj: any): boolean
+      isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
+      stringify(element: JQuery | HTMLElement, form: string): string
+      getElements(element: JQuery): JQuery | HTMLElement[]
+      getContainsSelector(text: string, filter?: string): JQuery.Selector
+      getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
+      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getReasonIsHidden(element: JQuery | HTMLElement): string
+      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
+      getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
+      getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
+      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position: string): ElementCoordinates
+      getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
     }
 
     /**
@@ -514,12 +635,12 @@ declare namespace Cypress {
      * @param {string} [key] - name of a particular item to remove (optional).
      * @example
       ```
-      // removes all local storage keys
+      // Removes all local storage keys
       cy.clearLocalStorage()
         .should(ls => {
           expect(ls.getItem('prop1')).to.be.null
         })
-      // removes item "todos"
+      // Removes item "todos"
       cy.clearLocalStorage("todos")
       ```
      */
@@ -531,11 +652,42 @@ declare namespace Cypress {
      * @param {RegExp} re - regular expression to match.
      * @example
     ```
-    // Clear all local storage matching /app-/
+    // Clears all local storage matching /app-/
     cy.clearLocalStorage(/app-/)
     ```
      */
     clearLocalStorage(re: RegExp): Chainable<Storage>
+   /**
+     * Clear data in local storage.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     * @param {options} [object] - options object
+     * @example
+      ```
+      // Removes all local storage items, without logging
+      cy.clearLocalStorage({ log: false })
+      ```
+     */
+    clearLocalStorage(options: Partial<Loggable>): Chainable<Storage>
+   /**
+     * Clear data in local storage.
+     * Cypress automatically runs this command before each test to prevent state from being
+     * shared across tests. You shouldn’t need to use this command unless you’re using it
+     * to clear localStorage inside a single test. Yields `localStorage` object.
+     *
+     * @see https://on.cypress.io/clearlocalstorage
+     * @param {string} [key] - name of a particular item to remove (optional).
+     * @param {options} [object] - options object
+     * @example
+      ```
+      // Removes item "todos" without logging
+      cy.clearLocalStorage("todos", { log: false })
+      ```
+     */
+    clearLocalStorage(key: string, options: Partial<Loggable>): Chainable<Storage>
 
     /**
      * Click a DOM element.
@@ -550,13 +702,13 @@ declare namespace Cypress {
     /**
      * Click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').click('topRight')
      */
-    click(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    click(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Click a DOM element at specific coordinates
      *
@@ -687,13 +839,13 @@ declare namespace Cypress {
     /**
      * Double-click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/dblclick
      * @example
      *    cy.get('button').dblclick('topRight')
      */
-    dblclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    dblclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Double-click a DOM element at specific coordinates
      *
@@ -717,13 +869,13 @@ declare namespace Cypress {
     /**
      * Right-click a DOM element at specific corner / side.
      *
-     * @param {String} position - The position where the click should be issued.
+     * @param {PositionType} position - The position where the click should be issued.
      * The `center` position is the default position.
      * @see https://on.cypress.io/click
      * @example
      *    cy.get('button').rightclick('topRight')
      */
-    rightclick(position: string, options?: Partial<ClickOptions>): Chainable<Subject>
+    rightclick(position: PositionType, options?: Partial<ClickOptions>): Chainable<Subject>
     /**
      * Right-click a DOM element at specific coordinates
      *
@@ -931,23 +1083,35 @@ declare namespace Cypress {
     hash(options?: Partial<Loggable & Timeoutable>): Chainable<string>
 
     /**
+     * Invoke a function on the previously yielded subject.
+     *
+     * @see https://on.cypress.io/invoke
+     */
+    invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
+      functionName: K,
+      ...args: any[]
+    ): Chainable<R>
+    invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
+      options: Loggable,
+      functionName: K,
+      ...args: any[]
+    ): Chainable<R>
+
+    /**
      * Invoke a function in an array of functions.
      * @see https://on.cypress.io/invoke
      */
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
 
-    /**
-     * Invoke a function on the previously yielded subject.
-     * This isn't possible to strongly type without generic override yet.
-     * If called on an object you can do this instead: `.then(s => s.show())`.
-     * If called on an array you can do this instead: `.each(s => s.show())`.
-     * From there the subject will be properly typed.
+     /**
+     * Invoke a function on the previously yielded subject by a property path.
+     * Property path invocation cannot be strongly-typed.
+     * Invoking by a property path will always result in any.
      *
      * @see https://on.cypress.io/invoke
      */
-    invoke(functionName: keyof Subject, ...args: any[]): Chainable<Subject> // don't have a way to express return types yet
-    invoke(options: Loggable, functionName: keyof Subject, ...args: any[]): Chainable<Subject>
+    invoke(propertyPath: string, ...args: any[]): Chainable
 
     /**
      * Get a property’s value on the previously yielded subject.
@@ -960,6 +1124,7 @@ declare namespace Cypress {
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
     its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
+    its(propertyPath: string, options?: Loggable): Chainable
 
     /**
      * Get a value by index from an array yielded from the previous command.

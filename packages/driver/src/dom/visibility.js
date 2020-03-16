@@ -245,13 +245,9 @@ const elIsNotElementFromPoint = function ($el) {
 
 const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent()) {
   // no ancestor, not out of bounds!
-  if (!$ancestor || !$ancestor[0]) {
-    return false
-  }
-
   // if we've reached the top parent, which is not a normal DOM el
   // then we're in bounds all the way up, return false
-  if ($ancestor.is('body,html') || $document.isDocument($ancestor)) {
+  if ($elements.isUndefinedOrHTMLBodyDoc($ancestor)) {
     return false
   }
 
@@ -294,7 +290,7 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
   // in case there is no body
   // or if parent is the document which can
   // happen if we already have an <html> element
-  if (!$parent.length || $parent.is('body,html') || $document.isDocument($parent)) {
+  if ($elements.isUndefinedOrHTMLBodyDoc($parent)) {
     return false
   }
 
@@ -310,7 +306,7 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
 
 const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
   // if we've walked all the way up to body or html then return false
-  if (!$el.length || $el.is('body,html')) {
+  if ($elements.isUndefinedOrHTMLBodyDoc($el)) {
     return false
   }
 

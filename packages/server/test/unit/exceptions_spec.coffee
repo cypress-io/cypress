@@ -122,11 +122,11 @@ describe "lib/exceptions", ->
 
   context ".create", ->
     beforeEach ->
-      @env = process.env["CYPRESS_ENV"]
+      @env = process.env["CYPRESS_INTERNAL_ENV"]
       sinon.stub(api, "createCrashReport")
 
     afterEach ->
-      process.env["CYPRESS_ENV"] = @env
+      process.env["CYPRESS_INTERNAL_ENV"] = @env
 
     describe "with CYPRESS_CRASH_REPORTS=0", ->
       beforeEach ->
@@ -142,7 +142,7 @@ describe "lib/exceptions", ->
 
     describe "development", ->
       beforeEach ->
-        process.env["CYPRESS_ENV"] = "development"
+        process.env["CYPRESS_INTERNAL_ENV"] = "development"
 
       it "immediately resolves", ->
         exception.create()
@@ -151,7 +151,7 @@ describe "lib/exceptions", ->
 
     describe "production", ->
       beforeEach ->
-        process.env["CYPRESS_ENV"] = "production"
+        process.env["CYPRESS_INTERNAL_ENV"] = "production"
 
         @err = {name: "ReferenceError", message: "undefined is not a function", stack: "asfd"}
 

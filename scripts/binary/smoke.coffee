@@ -31,7 +31,7 @@ runSmokeTest = (buildAppExecutable, timeoutSeconds = 30) ->
   if verify.needsSandbox()
     args.push("--no-sandbox")
 
-  execa "#{buildAppExecutable}", args, {timeout: timeoutSeconds*1000}
+  execa "#{buildAppExecutable}", args, {timeout: timeoutSeconds * 1000}
   .catch (err) ->
     console.error("smoke test failed with error %s", err.message)
     throw err
@@ -49,7 +49,7 @@ runProjectTest = (buildAppExecutable, e2e) ->
   console.log("running project test")
 
   new Promise (resolve, reject) ->
-    env = _.omit(process.env, "CYPRESS_ENV")
+    env = _.omit(process.env, "CYPRESS_INTERNAL_ENV")
 
     if !canRecordVideo()
       console.log("cannot record video on this platform yet, disabling")
@@ -92,7 +92,7 @@ runFailingProjectTest = (buildAppExecutable, e2e) ->
 
   spawn = ->
     new Promise (resolve, reject) ->
-      env = _.omit(process.env, "CYPRESS_ENV")
+      env = _.omit(process.env, "CYPRESS_INTERNAL_ENV")
 
       args = [
         "--run-project=#{e2e}",

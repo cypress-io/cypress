@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const { expect } = require('../spec_helper')
 
 let fs = require('fs-extra')
@@ -15,7 +16,12 @@ describe('lib/ca', () => {
 
     return fs.ensureDirAsync(this.dir)
     .then(() => {
+      console.time('creating CA')
+
       return CA.create(this.dir)
+      .tap(() => {
+        console.timeEnd('creating CA')
+      })
     }).then((ca) => {
       this.ca = ca
     })
@@ -27,8 +33,11 @@ describe('lib/ca', () => {
 
   context('#generateServerCertificateKeys', () => {
     it('generates certs for each host', function () {
+      console.time('generating cert')
+
       return this.ca.generateServerCertificateKeys('www.cypress.io')
       .spread((certPem, keyPrivatePem) => {
+        console.timeEnd('generating cert')
         expect(certPem).to.include('-----BEGIN CERTIFICATE-----')
 
         expect(keyPrivatePem).to.include('-----BEGIN RSA PRIVATE KEY-----')
@@ -74,11 +83,60 @@ describe('lib/ca', () => {
     describe('existing CA folder', () => {
       beforeEach(function () {
         this.sandbox.spy(CA.prototype, 'loadCA')
-        this.sandbox.spy(CA.prototype, 'generateCA')
+        this.generateCA = this.sandbox.spy(CA.prototype, 'generateCA')
 
         return CA.create(this.dir)
         .then((ca2) => {
           this.ca2 = ca2
+        })
+      })
+
+      describe('CA versioning', () => {
+        beforeEach(function () {
+          this.removeAll = this.sandbox.spy(CA.prototype, 'removeAll')
+        })
+
+        it('clears out CA folder with no ca_version.txt', function () {
+          expect(this.generateCA).to.not.be.called
+
+          return fs.remove(path.join(this.dir, 'ca_version.txt'))
+          .then(() => {
+            return CA.create(this.dir)
+          }).then(() => {
+            expect(this.removeAll).to.be.calledOnce
+            expect(this.generateCA).to.be.calledOnce
+          })
+        })
+
+        it('clears out CA folder with old ca_version', function () {
+          expect(this.generateCA).to.not.be.called
+
+          return fs.outputFile(path.join(this.dir, 'ca_version.txt'), '0')
+          .then(() => {
+            return CA.create(this.dir)
+          }).then(() => {
+            expect(this.removeAll).to.be.calledOnce
+            expect(this.generateCA).to.be.calledOnce
+          })
+        })
+
+        it('keeps CA folder with version of at least 1', function () {
+          expect(this.generateCA).to.not.be.called
+
+          return fs.outputFile(path.join(this.dir, 'ca_version.txt'), '1')
+          .then(() => {
+            return CA.create(this.dir)
+          }).then(() => {
+            expect(this.removeAll).to.not.be.called
+            expect(this.generateCA).to.not.be.called
+
+            return fs.outputFile(path.join(this.dir, 'ca_version.txt'), '100')
+          }).then(() => {
+            return CA.create(this.dir)
+          }).then(() => {
+            expect(this.removeAll).to.not.be.called
+            expect(this.generateCA).to.not.be.called
+          })
         })
       })
 

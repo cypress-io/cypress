@@ -1,13 +1,19 @@
-const $ = Cypress.$.bind(Cypress)
+declare namespace Cypress {
+  interface cy {
+    state(key: 'window'): Window
+  }
+}
 
 describe('src/dom/elements', () => {
+  const $ = Cypress.$.bind(Cypress)
+
   context('.isAttached', () => {
     beforeEach(() => {
       cy.visit('/fixtures/iframe-outer.html')
     })
 
     it('no elements', () => {
-      const $el = $(null)
+      const $el = $(null!)
 
       expect(Cypress.dom.isAttached($el)).to.be.false
     })
@@ -68,9 +74,9 @@ describe('src/dom/elements', () => {
 
     it('element in iframe', (done) => {
       cy.get('iframe').then(($iframe) => {
-        const $doc = $iframe.contents()
+        const $doc = $iframe.contents() as JQuery<Document>
 
-        const $btn = $doc.find('button')
+        const $btn = $doc.find('button') as unknown as JQuery<HTMLButtonElement>
 
         expect($btn.length).to.eq(1)
 
@@ -84,7 +90,7 @@ describe('src/dom/elements', () => {
           done()
         })
 
-        const win = $doc.get(0).defaultView
+        const win = $doc.get(0).defaultView!
 
         win.location.reload()
       })
@@ -93,7 +99,7 @@ describe('src/dom/elements', () => {
 
   context('.isDetached', () => {
     it('opposite of attached', () => {
-      const $el = $(null)
+      const $el = $(null!)
 
       expect(Cypress.dom.isDetached($el)).to.be.true
     })
@@ -116,6 +122,55 @@ describe('src/dom/elements', () => {
 
       expect(Cypress.dom.isInputType($el, ['number', 'text', 'email'])).to.be.true
       expect(Cypress.dom.isInputType($el, ['text', 'email'])).to.be.false
+    })
+  })
+
+  context('.isUndefinedOrHTMLBodyDoc', () => {
+    it('when $el undefined', () => {
+      const $el = undefined
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when $el[0] undefined', () => {
+      const $el = []
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('DOM element does not exist', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('foo-bar-baz')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when html', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('html')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when body', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('body')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when document', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('document')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when existing DOM element', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('input')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.false
     })
   })
 })

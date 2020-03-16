@@ -6,6 +6,7 @@
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "https": "node https.js",
+    "regenerate:certs": "cd ./test/helpers/certs && ./regenerate-certs.sh",
     "start": "node index.js",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -28,7 +29,7 @@
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",
-    "request": "2.88.0",
+    "request": "cypress-io/request#b5af0d1fa47eec97ba980cde90a13e69a2afcd16",
     "request-promise": "4.2.4",
     "sinon": "1.17.7",
     "sinon-as-promised": "4.0.3",
