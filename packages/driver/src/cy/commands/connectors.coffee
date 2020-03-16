@@ -4,7 +4,6 @@ Promise = require("bluebird")
 $dom = require("../../dom")
 $utils = require("../../cypress/utils")
 $errUtils = require("../../cypress/error_utils")
-$errMessages = require("../../cypress/error_messages")
 
 returnFalseIfThenable = (key, args...) ->
   if key is "then" and _.isFunction(args[0]) and _.isFunction(args[1])
@@ -357,9 +356,6 @@ module.exports = (Commands, Cypress, cy, state, config) ->
               Subject: getFormattedElement(actualSubject)
               Yielded: getFormattedElement(value)
             })
-
-            if traversalErr
-              obj.Error = "#{traversalErr.name}: #{traversalErr.message}"
 
             return obj
         })
