@@ -12,14 +12,14 @@ const client = require('./controllers/client')
 const files = require('./controllers/files')
 const staticCtrl = require('./controllers/static')
 
-module.exports = ({ app, config, getDeferredResponse, getRemoteState, networkProxy, project, onError }) => {
+module.exports = function (app, config, request, getRemoteState, getDeferredResponse, project, networkProxy) {
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {
     // slice out the cache buster
     const test = CacheBuster.strip(req.query.p)
 
-    spec.handle(test, req, res, config, next, onError)
+    spec.handle(test, req, res, config, next, project)
   })
 
   app.get('/__cypress/socket.io.js', (req, res) => {

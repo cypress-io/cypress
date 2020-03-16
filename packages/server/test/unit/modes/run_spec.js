@@ -51,14 +51,10 @@ describe('lib/modes/run', () => {
   })
 
   context('.openProjectCreate', () => {
-    let onError
-
     beforeEach(() => {
       sinon.stub(openProject, 'create').resolves()
 
-      onError = sinon.spy()
       const options = {
-        onError,
         port: 8080,
         env: { foo: 'bar' },
         isTextTerminal: true,
@@ -81,12 +77,12 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('calls options.onError with error message onError', () => {
-      const error = { message: 'the message' }
-
+    it('emits \'exitEarlyWithErr\' with error message onError', () => {
+      sinon.stub(openProject, 'emit')
       expect(openProject.create.lastCall.args[2].onError).to.be.a('function')
-      openProject.create.lastCall.args[2].onError(error)
-      expect(onError).to.be.calledWith(error)
+      openProject.create.lastCall.args[2].onError({ message: 'the message' })
+
+      expect(openProject.emit).to.be.calledWith('exitEarlyWithErr', 'the message')
     })
   })
 
@@ -116,7 +112,7 @@ describe('lib/modes/run', () => {
         data: '',
       }
 
-      const props = runMode.getElectronProps(true, write)
+      const props = runMode.getElectronProps(true, {}, write)
 
       props.onScreencastFrame(image)
 
@@ -124,9 +120,10 @@ describe('lib/modes/run', () => {
     })
 
     it('does not set onScreencastFrame when write is falsy', () => {
-      const props = runMode.getElectronProps(true, false)
+      const props = runMode.getElectronProps(true, {}, false)
 
       expect(props).not.to.have.property('recordFrameRate')
+
       expect(props).not.to.have.property('onScreencastFrame')
     })
 
@@ -275,9 +272,9 @@ describe('lib/modes/run', () => {
         return Promise.delay(1000)
       })
 
-      const onError = sinon.spy()
+      const emit = sinon.stub(this.projectInstance, 'emit')
 
-      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10, onError })
+      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10 })
       .then(() => {
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
@@ -285,8 +282,7 @@ describe('lib/modes/run', () => {
         expect(errors.warning).to.be.calledWith('TESTS_DID_NOT_START_RETRYING', 'Retrying again...')
         expect(errors.get).to.be.calledWith('TESTS_DID_NOT_START_FAILED')
 
-        expect(onError).to.be.called
-        expect(onError.lastCall.args[0].message).to.include('The browser never connected. Something is wrong. The tests cannot run. Aborting...')
+        expect(emit).to.be.calledWith('exitEarlyWithErr', 'The browser never connected. Something is wrong. The tests cannot run. Aborting...')
       })
     })
   })
@@ -434,7 +430,7 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('exiting early resolves with no tests, and error', function () {
+    it('exitEarlyWithErr event resolves with no tests, and error', function () {
       sinon.useFakeTimers({ shouldAdvanceTime: true })
 
       const err = new Error('foo')
@@ -449,7 +445,10 @@ describe('lib/modes/run', () => {
       sinon.spy(Promise.prototype, 'delay')
 
       process.nextTick(() => {
-        runMode.exitEarly(err)
+        expect(this.projectInstance.listeners('exitEarlyWithErr')).to.have.length(1)
+        this.projectInstance.emit('exitEarlyWithErr', err.message)
+
+        expect(this.projectInstance.listeners('exitEarlyWithErr')).to.have.length(0)
       })
 
       return runMode.waitForTestsToFinishRunning({

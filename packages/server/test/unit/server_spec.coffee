@@ -75,19 +75,14 @@ describe "lib/server", ->
         expect(@server.createServer).to.be.calledWith(obj, @config)
 
     it "calls #createRoutes with app + config", ->
-      app = {}
-      project = {}
-      onError = sinon.spy()
-      sinon.stub(@server, "createRoutes")
-      sinon.stub(@server, "createExpressApp").returns(app)
+      obj = {}
 
-      @server.open(@config, project, onError)
+      sinon.stub(@server, "createRoutes")
+      sinon.stub(@server, "createExpressApp").returns(obj)
+
+      @server.open(@config)
       .then =>
-        expect(@server.createRoutes).to.be.called
-        expect(@server.createRoutes.lastCall.args[0].app).to.equal(app)
-        expect(@server.createRoutes.lastCall.args[0].config).to.equal(@config)
-        expect(@server.createRoutes.lastCall.args[0].project).to.equal(project)
-        expect(@server.createRoutes.lastCall.args[0].onError).to.equal(onError)
+        expect(@server.createRoutes).to.be.calledWith(obj)
 
     it "calls #createServer with port + fileServerFolder + socketIoRoute + app", ->
       obj = {}

@@ -450,11 +450,11 @@ const getProjectId = Promise.method((project, id) => {
   })
 })
 
-const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame, onError) => {
+const getDefaultBrowserOptsByFamily = (browser, project, writeVideoFrame) => {
   la(browserUtils.isBrowserFamily(browser.family), 'invalid browser family in', browser)
 
   if (browser.name === 'electron') {
-    return getElectronProps(browser.isHeaded, writeVideoFrame, onError)
+    return getElectronProps(browser.isHeaded, project, writeVideoFrame)
   }
 
   if (browser.family === 'chromium') {
@@ -511,7 +511,7 @@ const getChromeProps = (writeVideoFrame) => {
   .value()
 }
 
-const getElectronProps = (isHeaded, writeVideoFrame, onError) => {
+const getElectronProps = (isHeaded, project, writeVideoFrame) => {
   return _
   .chain({
     width: 1280,
@@ -567,13 +567,24 @@ const openProjectCreate = (projectRoot, socketId, args) => {
     // to give user's plugins file a chance to change it
     browsers: args.browsers,
     onWarning,
-    onError: args.onError,
+    onError (err) {
+      console.log('')
+      if (err.details) {
+        console.log(err.message)
+        console.log('')
+        console.log(chalk.yellow(err.details))
+      } else {
+        console.log(err.stack)
+      }
+
+      return openProject.emit('exitEarlyWithErr', err.message)
+    },
   }
 
   return openProject
   .create(projectRoot, args, options)
   .catch({ portInUse: true }, (err) => {
-    // TODO: this needs to move to call exitEarly
+    // TODO: this needs to move to emit exitEarly
     // so we record the failure in CI
     return errors.throw('PORT_IN_USE_LONG', err.port)
   })
@@ -699,12 +710,6 @@ module.exports = {
   getChromeProps,
 
   getElectronProps,
-
-  exitEarly (err) {
-    debug('set early exit error: %s', err.stack)
-
-    this.earlyExitErr = err
-  },
 
   displayResults (obj = {}, estimated) {
     const results = collectTestResults(obj, estimated)
@@ -882,9 +887,9 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot, onError } = options
+    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot } = options
 
-    const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
+    const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame)
 
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) => {
@@ -926,15 +931,12 @@ module.exports = {
         }
       }
 
-      const onEarlyExit = function (err) {
-        console.log('')
-        errors.log(err)
-
+      const onEarlyExit = function (errMsg) {
         // probably should say we ended
         // early too: (Ended Early: true)
         // in the stats
         const obj = {
-          error: errors.stripAnsi(err.message),
+          error: errors.stripAnsi(errMsg),
           stats: {
             failures: 1,
             tests: 0,
@@ -948,7 +950,7 @@ module.exports = {
           },
         }
 
-        debug('project received exitEarly %o', { err })
+        debug('project received exitEarly %o', { errMsg })
 
         return resolve(obj)
       }
@@ -963,20 +965,12 @@ module.exports = {
       // resolve the promise
       project.once('end', onEnd)
 
-      // if we already received a reason to exit early, go ahead and do it
-      if (this.earlyExitErr) {
-        return onEarlyExit(this.earlyExitErr)
-      }
-
-      // otherwise override exitEarly so we exit as soon as there is a reason
-      this.exitEarly = (err) => {
-        onEarlyExit(err)
-      }
+      return project.once('exitEarlyWithErr', onEarlyExit)
     })
   },
 
   waitForBrowserToConnect (options = {}) {
-    const { project, socketId, timeout, onError } = options
+    const { project, socketId, timeout } = options
 
     let attempts = 0
 
@@ -1015,7 +1009,7 @@ module.exports = {
           err = errors.get('TESTS_DID_NOT_START_FAILED')
           errors.log(err)
 
-          onError(err)
+          return project.emit('exitEarlyWithErr', err.message)
         })
       })
     }
@@ -1220,7 +1214,7 @@ module.exports = {
   },
 
   runSpec (spec = {}, options = {}, estimated) {
-    const { project, browser, onError } = options
+    const { project, browser } = options
 
     const { isHeadless } = browser
 
@@ -1270,7 +1264,6 @@ module.exports = {
           project,
           browser,
           screenshots,
-          onError,
           writeVideoFrame: videoRecordProps.writeVideoFrame,
           socketId: options.socketId,
           webSecurity: options.webSecurity,
@@ -1307,13 +1300,9 @@ module.exports = {
 
     const socketId = random.id()
 
-    const { projectRoot, record, key, ciBuildId, parallel, group, browser: browserName, tag } = options
+    const { projectRoot, record, key, ciBuildId, parallel, group, tag } = options
 
-    // this needs to be a closure over `this.exitEarly` and not a reference
-    // because `this.exitEarly` gets overwritten in `this.listenForMochaEndEvent`
-    options.onError = (err) => {
-      this.exitEarly(err)
-    }
+    const browserName = options.browser
 
     // alias and coerce to null
     let specPattern = options.spec || null

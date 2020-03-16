@@ -165,7 +165,9 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
       enqueuedCommands = []
     })
     .catch((err) => {
-      onAsynchronousError(errors.get('CDP_COULD_NOT_RECONNECT', err))
+      const err2 = new Error(`There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.\n\n${err.message}`)
+
+      onAsynchronousError(err2)
     })
   }
 

@@ -162,7 +162,7 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project, onError, onWarning) ->
+  open: (config = {}, project, onWarning) ->
     debug("server open")
 
     la(_.isPlainObject(config), "expected plain config object", config)
@@ -187,15 +187,7 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes({
-        app
-        config
-        getDeferredResponse: @_xhrServer.getDeferredResponse
-        getRemoteState
-        networkProxy: @_networkProxy
-        onError
-        project
-      })
+      @createRoutes(app, config, @_request, getRemoteState, @_xhrServer.getDeferredResponse, project, @_networkProxy)
 
       @createServer(app, config, project, @_request, onWarning)
 
