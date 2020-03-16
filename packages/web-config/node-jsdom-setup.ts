@@ -75,7 +75,8 @@ export const register = ({
       }
 
       // Follow browser-field spec for importing modules
-      if (!['path'].includes(args[0])) {
+      // except chalk so we dont mess up mocha coloring
+      if (!['path'].includes(args[0]) && !(args[1] && args[1].id.includes('chalk'))) {
         try {
           browserPkg = [bresolve.sync.apply(this, args)]
         } catch (e) {

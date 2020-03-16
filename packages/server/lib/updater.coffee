@@ -61,7 +61,7 @@ class Updater
     @request    = null
     @callbacks  = callbacks
 
-    if process.env["CYPRESS_ENV"] isnt "production"
+    if process.env["CYPRESS_INTERNAL_ENV"] isnt "production"
       @patchAppPath()
 
   patchAppPath: ->

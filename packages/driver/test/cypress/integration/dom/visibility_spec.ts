@@ -1,7 +1,8 @@
 const $dom = Cypress.dom
-const $ = Cypress.$.bind(Cypress)
 
 describe('src/cypress/dom/visibility', () => {
+  const $ = Cypress.$.bind(Cypress)
+
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
   })
@@ -13,7 +14,7 @@ describe('src/cypress/dom/visibility', () => {
 
     it('throws when not passed a DOM element', () => {
       const fn = () => {
-        $dom.isHidden(null)
+        $dom.isHidden(null!)
       }
 
       expect(fn).to.throw('Cypress.dom.isHidden() failed because it requires a DOM element. The subject received was: \'null\'')
@@ -27,6 +28,7 @@ describe('src/cypress/dom/visibility', () => {
 
     it('throws when not passed a DOM element', () => {
       const fn = () => {
+        // @ts-ignore
         $dom.isVisible('form')
       }
 
