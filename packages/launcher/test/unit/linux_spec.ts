@@ -45,7 +45,7 @@ describe('linux browser detection', () => {
 
   // https://github.com/cypress-io/cypress/issues/6669
   it('detects browser if the --version stdout is multiline', () => {
-    stdout.withArgs('multiline-foo', ['--version'])
+    execa.withArgs('multiline-foo', ['--version'])
     .resolves('Running without a11y support!\nfoo-browser v9001.1.2.3')
 
     const goal = _.defaults({ binary: 'multiline-foo' }, _.find(goalBrowsers, { name: 'foo-browser' }))
