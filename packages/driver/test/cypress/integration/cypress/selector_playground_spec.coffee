@@ -57,6 +57,7 @@ describe "src/cypress/selector_playground", ->
     it "throws if onElement is not a function", ->
       fn = () =>
         SelectorPlayground.defaults({ onElement: "foo" })
+
       expect(fn).to.throw()
       .with.property("message")
       .and.include("`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `foo`")
