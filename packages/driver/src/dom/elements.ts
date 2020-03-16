@@ -766,12 +766,6 @@ const isInputAllowingImplicitFormSubmission = function ($el) {
 }
 
 const isScrollable = ($el) => {
-  const el = $el[0]
-
-  if (!el) {
-    return false
-  }
-
   const checkDocumentElement = (win, documentElement) => {
     // Check if body height is higher than window height
     if (win.innerHeight < documentElement.scrollHeight) {
@@ -797,6 +791,13 @@ const isScrollable = ($el) => {
     const win = $el
 
     return checkDocumentElement(win, win.document.documentElement)
+  }
+
+  const el = $el[0]
+
+  // window.getComputedStyle(el) will error if el is undefined
+  if (!el) {
+    return false
   }
 
   // if we're any other element, we do some css calculations
