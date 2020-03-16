@@ -69,7 +69,7 @@ describe('driver/src/cypress/source_map_utils', () => {
     before(() => {
       return Promise.join(
         extractSourceMap(file1, fileContents),
-        extractSourceMap(file2, testContent)
+        extractSourceMap(file2, testContent),
       )
     })
 

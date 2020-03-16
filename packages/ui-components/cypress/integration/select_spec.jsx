@@ -13,17 +13,17 @@ describe('<Select />', () => {
   it('optionally provide a name', () => {
     cy.render(render, (
       <>
-      <Select value="v2" name="myName">
-        <SelectItem value="v1" data-test="v1" />
-        <SelectItem value="v2" data-test="v2" />
-        <SelectItem value="v3" data-test="v3" />
-      </Select>
-      <br/>
-      <Select value="v1">
-        <SelectItem value="v1" data-test="v1" />
-        <SelectItem value="v2" data-test="v2" />
-        <SelectItem value="v3" data-test="v3" />
-      </Select>
+        <Select value="v2" name="myName">
+          <SelectItem value="v1" data-test="v1" />
+          <SelectItem value="v2" data-test="v2" />
+          <SelectItem value="v3" data-test="v3" />
+        </Select>
+        <br/>
+        <Select value="v1">
+          <SelectItem value="v1" data-test="v1" />
+          <SelectItem value="v2" data-test="v2" />
+          <SelectItem value="v3" data-test="v3" />
+        </Select>
       </>
     ))
 
@@ -37,23 +37,23 @@ describe('<Select />', () => {
   it('can render multiple groups on the same page', () => {
     cy.render(render, (
       <>
-      <Select value="v2" name="myName">
-        <SelectItem value="v1" data-test="v1" />
-        <SelectItem value="v2" data-test="v2" />
-        <SelectItem value="v3" data-test="v3" />
-      </Select>
-      <br/>
-      <Select value="v1">
-        <SelectItem value="v1" data-test="v1" />
-        <SelectItem value="v2" data-test="v2" />
-        <SelectItem value="v3" data-test="v3" />
-      </Select>
-      <br/>
-      <Select value="v3">
-        <SelectItem value="v1" data-test="v1" />
-        <SelectItem value="v2" data-test="v2" />
-        <SelectItem value="v3" data-test="v3" />
-      </Select>
+        <Select value="v2" name="myName">
+          <SelectItem value="v1" data-test="v1" />
+          <SelectItem value="v2" data-test="v2" />
+          <SelectItem value="v3" data-test="v3" />
+        </Select>
+        <br/>
+        <Select value="v1">
+          <SelectItem value="v1" data-test="v1" />
+          <SelectItem value="v2" data-test="v2" />
+          <SelectItem value="v3" data-test="v3" />
+        </Select>
+        <br/>
+        <Select value="v3">
+          <SelectItem value="v1" data-test="v1" />
+          <SelectItem value="v2" data-test="v2" />
+          <SelectItem value="v3" data-test="v3" />
+        </Select>
       </>
     ))
 
