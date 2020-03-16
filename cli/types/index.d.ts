@@ -208,6 +208,15 @@ declare namespace Cypress {
      */
     Promise: Bluebird.BluebirdStatic
     /**
+     * Cypress includes Sinon.js library used in `cy.spy` and `cy.stub`.
+     *
+     * @see https://sinonjs.org/
+     * @see https://on.cypress.io/stubs-spies-and-clocks
+     * @see https://example.cypress.io/commands/spies-stubs-clocks
+     */
+    sinon: sinon.SinonApi
+
+    /**
      * Cypress version string. i.e. "1.1.2"
      * @see https://on.cypress.io/version
      * @example
@@ -449,6 +458,10 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an element is a descendent of another element.
        */
       isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
+      /**
+       * Returns a boolean indicating whether object is undefined or html, body, or document.
+       */
+      isUndefinedOrHTMLBodyDoc(obj: any): boolean
       /**
        * Returns a boolean indicating whether an object is a DOM element.
        */

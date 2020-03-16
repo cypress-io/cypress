@@ -34,7 +34,7 @@ const tryToCall = function (win, method) {
   }
 }
 
-const getAutomation = function (win) {
+const _getAutomation = function (win, options) {
   const sendCommand = Bluebird.method((...args) => {
     return tryToCall(win, () => {
       return win.webContents.debugger.sendCommand
@@ -42,7 +42,28 @@ const getAutomation = function (win) {
     })
   })
 
-  return CdpAutomation(sendCommand)
+  const automation = CdpAutomation(sendCommand)
+
+  if (!options.onScreencastFrame) {
+    // after upgrading to Electron 8, CDP screenshots can hang if a screencast is not also running
+    // workaround: start and stop screencasts between screenshots
+    // @see https://github.com/cypress-io/cypress/pull/6555#issuecomment-596747134
+    automation.onRequest = _.wrap(automation.onRequest, async (fn, message, data) => {
+      if (message !== 'take:screenshot') {
+        return fn(message, data)
+      }
+
+      await sendCommand('Page.startScreencast')
+
+      const ret = await fn(message, data)
+
+      await sendCommand('Page.stopScreencast')
+
+      return ret
+    })
+  }
+
+  return automation
 }
 
 const _installExtensions = function (extensionPaths = [], options) {
@@ -61,13 +82,11 @@ const _maybeRecordVideo = function (webContents, options) {
   return async () => {
     const { onScreencastFrame } = options
 
-    if (!onScreencastFrame) {
-      debug('options.onScreencastFrame is falsy')
+    debug('maybe recording video %o', { onScreencastFrame })
 
+    if (!onScreencastFrame) {
       return
     }
-
-    debug('starting screencast')
 
     webContents.debugger.on('message', (event, method, params) => {
       if (method === 'Page.screencastFrame') {
@@ -132,12 +151,12 @@ module.exports = {
     return _.defaultsDeep({}, options, defaults)
   },
 
-  _getAutomation: getAutomation,
+  _getAutomation,
 
   _render (url, projectRoot, automation, options = {}) {
     const win = Windows.create(projectRoot, options)
 
-    automation.use(getAutomation(win))
+    automation.use(_getAutomation(win, options))
 
     return this._launch(win, url, options)
     .tap(_maybeRecordVideo(win.webContents, options))
@@ -215,11 +234,9 @@ module.exports = {
 
   _attachDebugger (webContents) {
     try {
-      webContents.debugger.attach()
+      webContents.debugger.attach('1.3')
       debug('debugger attached')
-    } catch (error) {
-      const err = error
-
+    } catch (err) {
       debug('debugger attached failed %o', { err })
       throw err
     }
@@ -263,10 +280,7 @@ module.exports = {
   _enableDebugger (webContents) {
     debug('debugger: enable Console and Network')
 
-    return Bluebird.join(
-      webContents.debugger.sendCommand('Console.enable'),
-      webContents.debugger.sendCommand('Network.enable'),
-    )
+    return webContents.debugger.sendCommand('Console.enable')
   },
 
   _getPartition (options) {
