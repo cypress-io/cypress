@@ -1421,10 +1421,10 @@
   resolved "https://registry.yarnpkg.com/@cypress/icons/-/icons-0.7.0.tgz#415d3729a8dc8c7eb5cd24f79f2404a65751d303"
   integrity sha1-QV03KajcjH61zST3nyQEpldR0wM=
 
-"@cypress/json-schemas@5.34.0":
-  version "5.34.0"
-  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.34.0.tgz#18a7b61d5f9218cfe6d62306af6bcb289d1d3306"
-  integrity sha512-NxTY+BoaOgduyIocZNpIlcOk4eZodsMXKP0UkRjAFhpNxjm8s/vDNFeBHfNoIFiw8gYeRQXi33rHhzTnQzvLmw==
+"@cypress/json-schemas@5.34.1":
+  version "5.34.1"
+  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.34.1.tgz#ddf52da1ee469d1e8638216a138ee63d705428ee"
+  integrity sha512-iLBkT1xQrdfjN4/EiKtGsYjQ9ZJM4DKqLyM9OeRSHgL6dfair6scKllfpjY6tgkcp/bRoXlVM0ZHX4JGw/fwcg==
   dependencies:
     "@cypress/schema-tools" "4.7.3"
     lodash.clonedeep "^4.5.0"
