@@ -152,23 +152,23 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 
   let kOutHeaders
 
-  this.res.setHeader = function (k, v) {
+  this.res.setHeader = function (name, value) {
     // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
     // but we don't want to change it at all!
-    if (k === 'content-type') {
-      v = incomingRes.headers['content-type'] || v
+    if (name === 'content-type') {
+      value = incomingRes.headers['content-type'] || value
     }
 
     // run the original function - if an "invalid header char" error is raised,
     // set the header manually. this way we can retain Node's original error behavior
     try {
-      return originalSetHeader.call(this, k, v)
+      return originalSetHeader.call(this, name, value)
     } catch (err) {
       if (err.code !== 'ERR_INVALID_CHAR') {
         throw err
       }
 
-      debug('setHeader error ignored %o', { code: err.code, err })
+      debug('setHeader error ignored %o', { name, value, code: err.code, err })
 
       if (!kOutHeaders) {
         kOutHeaders = getKOutHeadersSymbol()
@@ -181,7 +181,7 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
         this[kOutHeaders] = headers = Object.create(null)
       }
 
-      headers[k.toLowerCase()] = [k, v]
+      headers[name.toLowerCase()] = [name, value]
     }
   }
 
