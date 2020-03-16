@@ -15,6 +15,41 @@ module.exports = {
       args.push('--force')
     }
 
+    if (options.noFixtures) {
+      args.push('--no-fixtures')
+    }
+
+    if (options.fixturesPath) {
+      args.push('--fixtures-path')
+      args.push(options.fixturesPath)
+    }
+
+    if (options.noSupport) {
+      args.push('--no-support')
+    }
+
+    if (options.supportPath) {
+      args.push('--support-path')
+      args.push(options.supportPath)
+    }
+
+    if (options.integrationPath) {
+      args.push('--integration-path')
+      args.push(options.integrationPath)
+    }
+
+    if (options.noVideo) {
+      args.push('--no-video')
+    }
+
+    if (options.example) {
+      args.push('--example')
+    }
+
+    if (options.typescript || options.ts) {
+      args.push('--typescript')
+    }
+
     debug('init cypress from options %j', options)
     debug('command line arguments %j', args)
 
