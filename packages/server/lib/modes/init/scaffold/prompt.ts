@@ -3,8 +3,18 @@ import prompts from 'prompts'
 
 import { optionInfo } from './option_info'
 import fs from '../../../util/fs'
-import { Config } from '../config'
 import scaffold from './old_scaffold'
+
+export interface Config {
+  projectRoot: string
+  fixturesFolder?: string | false
+  integrationFolder?: string
+  pluginsFile?: string | false
+  supportFile?: string | false
+  screenshotsFolder?: string
+  videosFolder?: string
+  video?: boolean
+}
 
 export const prompt = async (options: any) => {
   const { customize } = await prompts({
