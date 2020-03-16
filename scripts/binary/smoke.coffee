@@ -31,7 +31,7 @@ runSmokeTest = (buildAppExecutable, timeoutSeconds = 30) ->
   if verify.needsSandbox()
     args.push("--no-sandbox")
 
-  execa "#{buildAppExecutable}", args, {timeout: timeoutSeconds*1000}
+  execa "#{buildAppExecutable}", args, {timeout: timeoutSeconds * 1000}
   .catch (err) ->
     console.error("smoke test failed with error %s", err.message)
     throw err
