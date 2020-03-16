@@ -1551,14 +1551,14 @@ describe "Routes", ->
             "__cypress.initial=true; Domain=localhost; Path=/"
           ]
 
-      it "ignores invalid cookies", ->
+      it "passes invalid cookies", ->
         nock(@server._remoteOrigin)
         .get("/invalid")
         .reply 200, "OK", {
           "set-cookie": [
             "foo=bar; Path=/"
-             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900" ## this is okay
-             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900" ## should ignore this
+             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
+             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900"
            ]
         }
 
@@ -1568,6 +1568,7 @@ describe "Routes", ->
           expect(res.headers["set-cookie"]).to.deep.eq [
             "foo=bar; Path=/"
              "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
+             "___utmvbXluIZsM=bZM    XtQOGalF: VtR; path=/; Max-Age=900"
           ]
 
       it "forwards other headers from incoming responses", ->
