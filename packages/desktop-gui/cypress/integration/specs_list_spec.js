@@ -218,10 +218,12 @@ describe('Specs List', function () {
       })
 
       context('collapsing specs', function () {
-        it('sets folder collapsed when clicked', function () {
+        it('sets folder collapsed when clicked with correct icon', () => {
           cy.get('.folder:first').should('have.class', 'folder-expanded')
+          cy.get('.folder-collapse-icon:first').should('have.class', 'fa-caret-down')
           cy.get('.folder .folder-name:first').click()
 
+          cy.get('.folder-collapse-icon:first').should('have.class', 'fa-caret-right')
           cy.get('.folder:first').should('have.class', 'folder-collapsed')
         })
 
@@ -450,6 +452,33 @@ describe('Specs List', function () {
           this.openProject.resolve(this.config)
 
           cy.get('.filter').should('have.value', '')
+        })
+      })
+
+      describe('when project has null id', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, this.specs)
+          this.config.projectId = null
+        })
+
+        it('saves the filter to local storage', function () {
+          this.openProject.resolve(this.config)
+
+          cy.get('.filter').type('my-filter')
+          cy.window().then((win) => {
+            expect(win.localStorage[`specsFilter-<no-id>-/foo/bar`]).to.be.a('string')
+
+            expect(JSON.parse(win.localStorage[`specsFilter-<no-id>-/foo/bar`])).to.equal('my-filter')
+          })
+        })
+
+        it('applies the saved filter when returning to the project', function () {
+          cy.window().then(function (win) {
+            win.localStorage[`specsFilter-<no-id>-/foo/bar`] = JSON.stringify('my-filter')
+            this.openProject.resolve(this.config)
+          })
+
+          cy.get('.filter').should('have.value', 'my-filter')
         })
       })
     })

@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 
 import AnError, { Error } from '../errors/an-error'
 import Runnable from './runnable-and-suite'
-import { RunnablesStore } from './runnables-store'
+import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
 
@@ -16,15 +16,19 @@ const noTestsError = (specPath: string) => ({
   message: 'We could not detect any tests in the above file. Write some tests and re-run.',
 })
 
-const RunnablesList = observer(({ runnables, config }) => (
+interface RunnablesListProps {
+  runnables: RunnableArray
+}
+
+const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} config={config} />)}
+      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
     </ul>
   </div>
 ))
 
-function content ({ isReady, runnables }: RunnablesStore, specPath: string, config: object, error?: Error) {
+function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
   if (!isReady) return null
 
   // show error if there are no tests, but only if there
@@ -33,7 +37,7 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, conf
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} config={config} />
+  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
 }
 
 interface RunnablesProps {
@@ -48,11 +52,11 @@ interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, specPath, config } = this.props
+    const { error, runnablesStore, specPath } = this.props
 
     return (
       <div ref='container' className='container'>
-        {content(runnablesStore, specPath, config, error)}
+        {content(runnablesStore, specPath, error)}
       </div>
     )
   }

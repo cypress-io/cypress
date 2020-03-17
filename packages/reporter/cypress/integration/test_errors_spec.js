@@ -286,6 +286,11 @@ describe('test errors', function () {
       .should('have.text', 'cypress/integration/foo_spec.js:5:2')
     })
 
+    it('does not collapse test when clicking', () => {
+      cy.contains('View stack trace').click()
+      cy.get('.command-wrapper').should('be.visible')
+    })
+
     itHandlesFileOpening('.runnable-err-stack-trace')
   })
 

@@ -318,7 +318,7 @@ https://on.cypress.io/request
     "content-type": "text/plain; charset=utf-8",
     "content-length": "19",
     "etag": "W/\\"13-/70LdyMNgL+PAJa+Q/RtnRF82z8\\"",
-    "date": "Mon, 16 Mar 2020    XX:XX GMT",
+    "date": "Tue, 17 Mar 2020    XX:XX GMT",
     "connection": "keep-alive"
   }
   Body: Service Unavailable
@@ -489,7 +489,7 @@ https://on.cypress.io/request
     "x-content-type-options": "nosniff",
     "content-type": "text/html; charset=utf-8",
     "content-length": "301",
-    "date": "Mon, 16 Mar 2020    XX:XX GMT",
+    "date": "Tue, 17 Mar 2020    XX:XX GMT",
     "connection": "keep-alive"
   }
   Body: <!DOCTYPE html>

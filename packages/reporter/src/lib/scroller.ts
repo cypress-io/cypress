@@ -129,7 +129,7 @@ export class Scroller {
     this._container = null
     this._userScroll = true
     this._userScrollCount = 0
-    clearTimeout(this._countUserScrollsTimeout)
+    clearTimeout(this._countUserScrollsTimeout as TimeoutID)
     this._countUserScrollsTimeout = undefined
   }
 }
