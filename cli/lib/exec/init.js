@@ -21,7 +21,7 @@ module.exports = {
 
     if (options.fixturesPath) {
       args.push('--fixtures-path')
-      args.push(options.fixturesPath)
+      args.push(options.fixturesPath.trim())
     }
 
     if (options.noSupport) {
@@ -30,7 +30,7 @@ module.exports = {
 
     if (options.supportPath) {
       args.push('--support-path')
-      args.push(options.supportPath)
+      args.push(options.supportPath.trim())
     }
 
     if (options.noPlugins) {
@@ -39,12 +39,12 @@ module.exports = {
 
     if (options.pluginsPath) {
       args.push('--plugins-path')
-      args.push(options.pluginsPath)
+      args.push(options.pluginsPath.trim())
     }
 
     if (options.integrationPath) {
       args.push('--integration-path')
-      args.push(options.integrationPath)
+      args.push(options.integrationPath.trim())
     }
 
     if (options.noVideo) {

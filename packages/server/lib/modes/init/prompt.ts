@@ -1,9 +1,12 @@
 import * as Scaffold from './scaffold'
+import { Args } from './args'
 
-export const prompt = async (options) => {
-  const scaffoldOption: any = options.force
-    ? Scaffold.option.fromCommandArgs(options)
-    : Scaffold.option.fromPrompts(options)
+export const prompt = async (args: Args) => {
+  Scaffold.option.checkArgs(args)
 
-  await Scaffold.create(options.cwd, scaffoldOption)
+  const scaffoldOption: any = args.force
+    ? Scaffold.option.fromCommandArgs(args)
+    : Scaffold.option.fromPrompts(args)
+
+  await Scaffold.create(args.cwd, scaffoldOption)
 }

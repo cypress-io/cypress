@@ -1,6 +1,7 @@
-import { fromCommandArgs, fromPrompts } from './options'
+import { checkArgs, fromCommandArgs, fromPrompts } from './options'
 
 export const option = {
+  checkArgs,
   fromCommandArgs,
   fromPrompts,
 }
