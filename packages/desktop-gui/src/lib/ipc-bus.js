@@ -62,18 +62,6 @@ const ipcBus = (...args) => {
   // get the last argument
   const lastArg = args.pop()
 
-  // remove nodes that cannot be cloned
-  // https://github.com/cypress-io/cypress/issues/6750
-  args = args.map((arg) => {
-    return _.cloneDeepWith(arg, (val) => {
-      if (_.isFunction(val) || _.isElement(val)) {
-        return null
-      }
-
-      return val
-    })
-  })
-
   let fn
 
   // enable the last arg to be a function
@@ -107,6 +95,16 @@ const ipcBus = (...args) => {
       })
     }
   }
+
+  // remove nodes that cannot be cloned
+  // https://github.com/cypress-io/cypress/issues/6750
+  args = args.map((arg) => {
+    return _.cloneDeepWith(arg, (val) => {
+      if (_.isFunction(val) || _.isElement(val)) {
+        return null
+      }
+    })
+  })
 
   // pass in request, id, and remaining args
   ipc.send(...['request', id].concat(args))

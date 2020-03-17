@@ -28,8 +28,6 @@ removeUnserializableValues = (obj) =>
     if _.isFunction(val)
       return null
 
-    return val
-
 handleEvent = (options, bus, event, id, type, arg) ->
   debug("got request for event: %s, %o", type, arg)
 
