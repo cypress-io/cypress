@@ -5,6 +5,6 @@ ARGS="$2"
 
 npm run --silent $CMD $ARGS & \
 chokidar 'test/**/*' 'lib/**/*' \
--c "npm run --silent $CMD $ARGS" \
+-c "yarn --silent $CMD $ARGS" \
 --polling \
 --poll-interval=250

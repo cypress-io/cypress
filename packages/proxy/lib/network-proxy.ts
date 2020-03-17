@@ -6,6 +6,7 @@ export class NetworkProxy {
   constructor (opts: {
     config: any
     getRemoteState: () => any
+    getFileServerToken: () => string
     middleware?: any
     request: any
   }) {

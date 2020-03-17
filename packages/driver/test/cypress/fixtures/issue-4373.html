@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <main></main>
+  <script>
+    // ORIGINAL SOURCE: https://unpkg.com/@lwc/engine@0.37.4-220.2/dist/umd/es2017/engine.js
+    /*
+    * Copyright (c) 2018, salesforce.com, inc.
+    * All rights reserved.
+    * SPDX-License-Identifier: MIT
+    * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+    */
+
+    (function (global, factory) {
+      typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+        typeof define === 'function' && define.amd ? define(['exports'], factory) :
+          (factory((global.Engine = {})));
+    }(this, (function (exports) {
+      const { create, assign, defineProperty, getPrototypeOf, setPrototypeOf, getOwnPropertyDescriptor, getOwnPropertyNames } = Object;
+      function isUndefined(obj) {
+        return obj === undefined;
+      }
+      function isNull(obj) {
+        return obj === null;
+      }
+      function isTrue(obj) {
+        return obj === true;
+      }
+      function isFunction(obj) {
+        return typeof obj === 'function';
+      }
+
+      const { appendChild, insertBefore } = Node.prototype;
+      const parentNodeGetter = getOwnPropertyDescriptor(Node.prototype, 'parentNode').get;
+      function createFieldName(key) {
+        return Symbol(key);
+      }
+      function setInternalField(o, fieldName, value) {
+        defineProperty(o, fieldName, {
+          value,
+        });
+      }
+      function getInternalField(o, fieldName) {
+        return o[fieldName];
+      }
+
+      const hiddenFieldsMap = new WeakMap();
+      const setHiddenField = (o, fieldName, value) => {
+        let valuesByField = hiddenFieldsMap.get(o);
+        if (isUndefined(valuesByField)) {
+          valuesByField = create(null);
+          hiddenFieldsMap.set(o, valuesByField);
+        }
+        valuesByField[fieldName] = value;
+      }
+      const getHiddenField = (o, fieldName) => {
+        const valuesByField = hiddenFieldsMap.get(o);
+        return !isUndefined(valuesByField) && valuesByField[fieldName];
+      }
+
+      const ViewModelReflection = createFieldName('ViewModel');
+
+      const signedDecoratorToMetaMap = new Map();
+      function registerDecorators(Ctor, meta) {
+        const props = getPublicPropertiesHash(Ctor, meta.publicProps);
+        const methods = getPublicMethodsHash(Ctor, meta.publicMethods);
+        signedDecoratorToMetaMap.set(Ctor, {
+          props,
+          methods,
+        });
+        return Ctor;
+      }
+      function getDecoratorsRegisteredMeta(Ctor) {
+        return signedDecoratorToMetaMap.get(Ctor);
+      }
+
+      function getPublicPropertiesHash(target, props) {
+        if (isUndefined(props) || getOwnPropertyNames(props).length === 0) {
+          return {};
+        }
+        return getOwnPropertyNames(props).reduce((propsHash, propName) => {
+          propsHash[propName] = assign({}, props[propName]);
+          return propsHash;
+        }, create(null));
+      }
+      function getPublicMethodsHash(target, publicMethods) {
+        if (isUndefined(publicMethods) || publicMethods.length === 0) {
+          return {};
+        }
+      }
+
+      const { createDocumentFragment: createDocumentFragment$1 } = document;
+      function attachShadow() {
+        return createDocumentFragment$1.call(document);
+      }
+
+      const OwnerKey = '$$OwnerKey$$';
+
+      function getNodeNearestOwnerKey(node) {
+        let ownerNode = node;
+        let ownerKey;
+        while (!isNull(ownerNode)) {
+          ownerKey = ownerNode[OwnerKey];
+          if (!isUndefined(ownerKey)) {
+            return ownerKey;
+          }
+          ownerNode = parentNodeGetter.call(ownerNode);
+        }
+      }
+
+      function getShadowParent(node, value) {
+        if (value instanceof Element) {
+          if (getNodeNearestOwnerKey(node) === getNodeNearestOwnerKey(value)) {
+            return value;
+          }
+        }
+      }
+      function PatchedNode(node) {
+        const Ctor = getPrototypeOf(node).constructor;
+        class PatchedNodeClass {
+          get parentNode() {
+            const value = parentNodeGetter.call(this);
+            return getShadowParent(this, value);
+          }
+        }
+        setPrototypeOf(PatchedNodeClass.prototype, Ctor.prototype);
+        return PatchedNodeClass;
+      }
+
+      function PatchedElement(elm) {
+        const Ctor = PatchedNode(elm);
+        return class PatchedHTMLElement extends Ctor { };
+      }
+
+      let { addEventListener: windowAddEventListener, removeEventListener: windowRemoveEventListener, } = window;
+      windowAddEventListener = windowAddEventListener;
+      windowRemoveEventListener = windowRemoveEventListener;
+
+      function PatchedCustomElement(Base) {
+        const Ctor = PatchedElement(Base);
+        return class PatchedHTMLElement extends Ctor {
+          attachShadow(options) {
+            return attachShadow(this, options);
+          }
+        };
+      }
+
+      const TagToProtoCache = create(null);
+      function getPatchedElementClass(elm) {
+        return PatchedElement(elm);
+      }
+      function patchElementProto(elm, options) {
+        const { sel } = options;
+        let proto = TagToProtoCache[sel];
+        if (isUndefined(proto)) {
+          proto = TagToProtoCache[sel] = getPatchedElementClass(elm).prototype;
+        }
+        setPrototypeOf(elm, proto);
+      }
+      function patchCustomElementProto(elm, options) {
+        const { def } = options;
+        let patchedBridge = def.patchedBridge;
+        if (isUndefined(patchedBridge)) {
+          patchedBridge = def.patchedBridge = PatchedCustomElement(elm);
+        }
+        setPrototypeOf(elm, patchedBridge.prototype);
+      }
+
+      function isVNode(vnode) {
+        return vnode != null;
+      }
+      function addVnodes(parentElm, before, vnodes, startIdx, endIdx) {
+        for (; startIdx <= endIdx; ++startIdx) {
+          const ch = vnodes[startIdx];
+          if (isVNode(ch)) {
+            ch.hook.create(ch);
+            ch.hook.insert(ch, parentElm, before);
+          }
+        }
+      }
+
+      function updateStaticChildren(parentElm, oldCh, newCh) {
+        const { length } = newCh;
+        if (oldCh.length === 0) {
+          addVnodes(parentElm, null, newCh, 0, length);
+        }
+      }
+
+      function insertNodeHook(vnode, parentNode, referenceNode) {
+        insertBefore.call(parentNode, vnode.elm, referenceNode);
+      }
+
+      (function () { })();
+      function createElmHook(vnode) {
+        const { owner } = vnode;
+        const elm = vnode.elm;
+        setNodeOwnerKey$1(elm, owner.uid);
+        if (isTrue(owner.fallback)) {
+          const { data: { }, } = vnode;
+          patchElementProto(elm, {});
+        }
+      }
+      function insertCustomElmHook(vnode) {
+        const vm = getCustomElementVM(vnode.elm);
+        appendVM(vm);
+      }
+
+      function createCustomElmHook(vnode) {
+        const elm = vnode.elm;
+        const { ctor, owner } = vnode;
+        const { fallback } = owner;
+        const def = getComponentDef(ctor);
+        setElementProto(elm, def);
+        if (isTrue(fallback)) {
+          patchCustomElementProto(elm, {
+            def,
+          });
+        }
+        createVM(vnode.sel, elm, ctor, {
+          fallback,
+        });
+      }
+      function createCustomElmDefaultHook() {
+      }
+      function createChildrenHook(vnode) {
+        const { elm, children } = vnode;
+        for (let j = 0; j < children.length; ++j) {
+          const ch = children[j];
+          if (ch != null) {
+            ch.hook.create(ch);
+            ch.hook.insert(ch, elm, null);
+          }
+        }
+      }
+
+      const { createElement: createElement$1, createElementNS: createElementNS$1, createTextNode: createTextNode$1, createComment: createComment$1 } = document;
+      const TextHook = {
+        create: (vnode) => {
+          if (isUndefined(vnode.elm)) {
+            vnode.elm = createTextNode$1.call(document, vnode.text);
+          }
+        },
+        insert: insertNodeHook,
+      };
+
+      const ElementHook = {
+        create: (vnode) => {
+          const { data, sel, elm } = vnode;
+          const { ns, create: create$$1 } = data;
+          if (isUndefined(elm)) {
+            vnode.elm = isUndefined(ns)
+              ? createElement$1.call(document, sel)
+              : createElementNS$1.call(document, ns, sel);
+          }
+          createElmHook(vnode);
+        },
+        insert: (vnode, parentNode, referenceNode) => {
+          insertNodeHook(vnode, parentNode, referenceNode);
+          createChildrenHook(vnode);
+        },
+      };
+      const CustomElementHook = {
+        create: (vnode) => {
+          const { sel, data: { create: create$$1 }, elm, } = vnode;
+          if (isUndefined(elm)) {
+            vnode.elm = createElement$1.call(document, sel);
+          }
+          createCustomElmHook(vnode);
+          create$$1(vnode);
+        },
+        insert: (vnode, parentNode, referenceNode) => {
+          insertNodeHook(vnode, parentNode, referenceNode);
+          insertCustomElmHook(vnode);
+        },
+      };
+
+      function h(sel, data, children) {
+        const vnode = {
+          data,
+          children,
+          hook: ElementHook,
+          owner: vmBeingRendered,
+        };
+
+        return vnode;
+      }
+
+      function c(sel, Ctor, data, children) {
+        if (isUndefined(data.create)) {
+          data.create = createCustomElmDefaultHook;
+        }
+        children = arguments.length === 3 ? [] : children;
+        const vnode = {
+          sel,
+          data,
+          hook: CustomElementHook,
+          ctor: Ctor,
+          owner: vmBeingRendered,
+        };
+        return vnode;
+      }
+
+      function t() {
+        return {
+          hook: TextHook,
+        };
+      }
+
+      function d(value) {
+        return t(value);
+      }
+
+      var api$1 = Object.freeze({
+        h: h,
+        c: c,
+        t: t,
+        d: d,
+      });
+
+      function registerTemplate(tpl) {
+        return tpl;
+      }
+
+      function evaluateTemplate(vm, html) {
+        const { component, context, cmpSlots } = vm;
+        const vnodes = html.call(undefined, api$1, component, cmpSlots, context.tplCache);
+        return vnodes;
+      }
+
+      let vmBeingRendered = null;
+      let vmBeingConstructed = null;
+
+      function invokeComponentConstructor(vm, Ctor) {
+        vmBeingConstructed = vm;
+        try {
+          new Ctor();
+        }
+        finally { }
+      }
+      function invokeComponentRenderMethod(vm) {
+        const { def: { render }, callHook, component, context, owner, } = vm;
+        const vmBeingRenderedInception = vmBeingRendered;
+        vmBeingRendered = vm;
+        let result;
+        runWithBoundaryProtection(vm, owner, () => {
+          vmBeingRendered = vm;
+        }, () => {
+          const html = callHook(component, render);
+          result = evaluateTemplate(vm, html);
+        }, () => {
+          vmBeingRendered = vmBeingRenderedInception;
+        });
+        return result
+      }
+
+      const signedComponentToMetaMap = new Map();
+      function registerComponent(Ctor, { name, tmpl: template }) {
+        signedComponentToMetaMap.set(Ctor, { name, template });
+        return Ctor;
+      }
+      function getComponentRegisteredMeta(Ctor) {
+        return signedComponentToMetaMap.get(Ctor);
+      }
+      function createComponent(uninitializedVm, Ctor) {
+        invokeComponentConstructor(uninitializedVm, Ctor);
+      }
+
+      function renderComponent(vm) {
+        const vnodes = invokeComponentRenderMethod(vm);
+        return vnodes;
+      }
+      const HTMLElementOriginalDescriptors = create(null);
+
+      function BaseLightningElement() {
+        const vm = vmBeingConstructed;
+        const { elm, cmpRoot } = vm;
+        const component = this;
+        vm.component = component;
+        setHiddenField(component, ViewModelReflection, vm);
+        setInternalField(elm, ViewModelReflection, vm);
+        setInternalField(cmpRoot, ViewModelReflection, vm);
+      }
+      BaseLightningElement.prototype = {
+        constructor: BaseLightningElement,
+        render() {
+          const vm = getComponentVM(this);
+          const { template } = vm.def;
+          return template;
+        },
+      };
+
+      const cachedSetterByKey = create(null);
+
+      function createSetter(key) {
+        let fn = cachedSetterByKey[key];
+        if (isUndefined(fn)) {
+          fn = cachedSetterByKey[key] = function (newValue) {
+            const vm = getCustomElementVM(this);
+            const { setHook } = vm;
+            setHook(vm.component, key, newValue);
+          };
+        }
+        return fn;
+      }
+
+      function HTMLBridgeElementFactory(SuperClass, props) {
+        let HTMLBridgeElement;
+
+        if (isFunction(SuperClass)) {
+          HTMLBridgeElement = class extends SuperClass { };
+        }
+        const descriptors = create(null);
+        for (let i = 0, len = props.length; i < len; i += 1) {
+          const propName = props[i];
+          descriptors[propName] = {
+            set: createSetter(propName),
+          };
+        }
+        return HTMLBridgeElement;
+      }
+      const BaseBridgeElement = HTMLBridgeElementFactory(HTMLElement, getOwnPropertyNames(HTMLElementOriginalDescriptors), []);
+      const CtorToDefMap = new WeakMap();
+      function createComponentDef(Ctor, meta) {
+        const { template } = meta;
+        let decoratorsMeta = getDecoratorsRegisteredMeta(Ctor);
+        let { props, methods } = decoratorsMeta || {};
+        const proto = Ctor.prototype;
+        let { render } = proto;
+        const bridge = HTMLBridgeElementFactory(BaseBridgeElement, getOwnPropertyNames(props), getOwnPropertyNames(methods));
+        props = assign(create(null), {}, props);
+        const def = {
+          bridge,
+          template,
+          render,
+        };
+        return def;
+      }
+
+      function getComponentDef(Ctor, subclassComponentName) {
+        let def = CtorToDefMap.get(Ctor);
+        if (isUndefined(def)) {
+          let meta = getComponentRegisteredMeta(Ctor);
+          def = createComponentDef(Ctor, meta, subclassComponentName || Ctor.name);
+          CtorToDefMap.set(Ctor, def);
+        }
+        return def;
+      }
+
+      function setElementProto(elm, def) {
+        setPrototypeOf(elm, def.bridge.prototype);
+      }
+
+      let idx = 0;
+      let uid = 0;
+      function callHook(cmp, fn, args = []) {
+        return fn.apply(cmp, args);
+      }
+      function setHook(cmp, prop, newValue) {
+        cmp[prop] = newValue;
+      }
+
+      const OwnerKey$1 = '$$OwnerKey$$';
+
+      function appendRootVM(vm) {
+        rehydrate(vm);
+      }
+      function appendVM(vm) {
+        rehydrate(vm);
+      }
+
+      function createVM(tagName, elm, Ctor, options) {
+        const def = getComponentDef(Ctor);
+        const { fallback } = options;
+        uid += 1;
+        idx += 1;
+        const uninitializedVm = {
+          uid,
+          isDirty: true,
+          fallback,
+          def,
+          elm,
+          context: create(null),
+          cmpRoot: elm.attachShadow({}),
+          callHook,
+          setHook,
+          children: [],
+        };
+        createComponent(uninitializedVm, Ctor);
+      }
+      function rehydrate(vm) {
+        if (isTrue(vm.isDirty)) {
+          const children = renderComponent(vm);
+          patchShadowRoot(vm, children);
+        }
+      }
+      function patchShadowRoot(vm, newCh) {
+        const { elm, cmpRoot, fallback, children: oldCh } = vm;
+        vm.children = newCh;
+        if (newCh.length > 0 || oldCh.length > 0) {
+          if (oldCh !== newCh) {
+            const parentNode = fallback ? elm : cmpRoot;
+            const fn = updateStaticChildren;
+            runWithBoundaryProtection(vm, vm, () => {
+            }, () => {
+              fn(parentNode, oldCh, newCh);
+            }, () => {
+            });
+          }
+        }
+      }
+      function setNodeOwnerKey$1(node, value) {
+        {
+          node[OwnerKey$1] = value;
+        }
+      }
+      function getCustomElementVM(elm) {
+        return getInternalField(elm, ViewModelReflection);
+      }
+      function getComponentVM(component) {
+        return getHiddenField(component, ViewModelReflection);
+      }
+      function runWithBoundaryProtection(vm, owner, pre, job, post) {
+        try {
+          job();
+        }
+        finally {
+          post();
+        }
+      }
+
+      const ConnectingSlot = createFieldName('connecting');
+      function callNodeSlot(node, slot) {
+        const fn = getInternalField(node, slot);
+        if (!isUndefined(fn)) {
+          fn();
+        }
+        return node;
+      }
+      assign(Node.prototype, {
+        appendChild(newChild) {
+          const appendedNode = appendChild.call(this, newChild);
+          return callNodeSlot(appendedNode, ConnectingSlot);
+        },
+      });
+
+      function createElement$2(sel, options) {
+        let Ctor = options.is;
+        const mode = 'closed';
+        const fallback = true
+        const element = document.createElement(sel);
+        const def = getComponentDef(Ctor);
+        setElementProto(element, def);
+        patchCustomElementProto(element, {
+          def,
+        });
+        createVM(sel, element, Ctor, { mode, fallback, isRoot: true, owner: null });
+        setInternalField(element, ConnectingSlot, () => {
+          const vm = getCustomElementVM(element);
+          appendRootVM(vm);
+        });
+        return element;
+      }
+
+      exports.createElement = createElement$2;
+      exports.LightningElement = BaseLightningElement;
+      exports.registerTemplate = registerTemplate;
+      exports.registerComponent = registerComponent;
+      exports.registerDecorators = registerDecorators;
+
+      Object.defineProperty(exports, '__esModule', { value: true });
+    })));
+
+    (function (lwc) {
+      function tmpl($api, $cmp) {
+        const {
+          d: api_dynamic
+        } = $api;
+        return [api_dynamic($cmp.label)];
+      }
+
+      var _tmpl = lwc.registerTemplate(tmpl);
+
+      class LightningBadge extends lwc.LightningElement { }
+
+      lwc.registerDecorators(LightningBadge, {
+        publicProps: {
+          label: {}
+        }
+      });
+
+      var _lightningBadge = lwc.registerComponent(LightningBadge, {
+        tmpl: _tmpl
+      });
+
+      function tmpl$1($api, $cmp) {
+        const {
+          h: api_element,
+          c: api_custom_element
+        } = $api;
+
+        return [
+          api_element("div", {}, [
+            api_custom_element("lightning-badge", _lightningBadge, {
+              props: { "label": $cmp.material }
+            })
+          ])
+        ];
+      }
+
+      class App extends lwc.LightningElement {
+        constructor(...args) {
+          super(...args);
+          this.material = 'Steel';
+        }
+      }
+
+      lwc.registerDecorators(App, {});
+
+      var main = lwc.registerComponent(App, {
+        tmpl: lwc.registerTemplate(tmpl$1)
+      });
+
+      const element = lwc.createElement('c-app', { is: main });
+      document.querySelector('main').appendChild(element);
+    }(Engine));
+  </script>
+</body>
+
+</html>

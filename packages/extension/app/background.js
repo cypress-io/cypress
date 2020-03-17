@@ -17,7 +17,7 @@ const firstOrNull = (cookies) => {
   return cookies[0] != null ? cookies[0] : null
 }
 
-const connect = function (host, path) {
+const connect = function (host, path, extraOpts) {
   const listenToCookieChanges = once(() => {
     return browser.cookies.onChanged.addListener((info) => {
       if (info.cause !== 'overwrite') {
@@ -46,7 +46,7 @@ const connect = function (host, path) {
     })
   }
 
-  const ws = client.connect(host, path)
+  const ws = client.connect(host, path, extraOpts)
 
   ws.on('automation:request', (id, msg, data) => {
     switch (msg) {

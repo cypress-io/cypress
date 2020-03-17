@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import { Dropdown } from '@packages/ui-components'
 
 import appStore from '../lib/app-store'
 import authApi from '../auth/auth-api'
@@ -8,8 +9,6 @@ import viewStore from '../lib/view-store'
 import ipc from '../lib/ipc'
 import { gravatarUrl } from '../lib/utils'
 import { Link, routes } from '../lib/routing'
-
-import Dropdown from '../dropdown/dropdown'
 
 @observer
 export default class Nav extends Component {
@@ -87,7 +86,7 @@ export default class Nav extends Component {
 
     return (
       <Dropdown
-        className='dropdown-toggle'
+        className='user-dropdown'
         chosen={{ id: 'user' }}
         others={[{ id: 'logout' }]}
         onSelect={this._select}

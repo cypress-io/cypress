@@ -17,7 +17,7 @@ module.exports = (fileInfo, api) => {
     const ifStatement = j.ifStatement(
       node.test.left,
       node.consequent,
-      node.alternate
+      node.alternate,
     )
 
     return [
