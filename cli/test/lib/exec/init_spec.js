@@ -55,6 +55,20 @@ describe('exec init', () => {
       })
     })
 
+    it('spawns with no-plugins', () => {
+      return init.start({ noPlugins: true })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--init-project', '--no-plugins'])
+      })
+    })
+
+    it('spawns with plugins-path', () => {
+      return init.start({ pluginsPath: 'goodbye/this' })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--init-project', '--plugins-path', 'goodbye/this'])
+      })
+    })
+
     it('spawns with integration-path', () => {
       return init.start({ integrationPath: 'aloha/world' })
       .then(() => {

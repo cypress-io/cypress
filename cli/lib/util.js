@@ -246,6 +246,8 @@ const parseInitOpts = (opts) => {
     'fixturesPath',
     'noSupport',
     'supportPath',
+    'noPlugins',
+    'pluginsPath',
     'integrationPath',
     'noVideo',
     'example',

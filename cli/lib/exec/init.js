@@ -33,6 +33,15 @@ module.exports = {
       args.push(options.supportPath)
     }
 
+    if (options.noPlugins) {
+      args.push('--no-plugins')
+    }
+
+    if (options.pluginsPath) {
+      args.push('--plugins-path')
+      args.push(options.pluginsPath)
+    }
+
     if (options.integrationPath) {
       args.push('--integration-path')
       args.push(options.integrationPath)
