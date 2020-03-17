@@ -69,6 +69,7 @@ describe('Err model', () => {
     })
 
     it('does nothing if props is null', () => {
+      // @ts-ignore
       err.update(null)
       expect(err.name).to.equal('BadError')
     })
