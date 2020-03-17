@@ -698,6 +698,12 @@ describe('Settings', () => {
       cy.stub(this.ipc, 'getUserEditor').returns(this.getUserEditor.promise)
       cy.stub(this.ipc, 'setUserEditor').resolves()
 
+      this.openProject.resolve(this.config)
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+
       cy.contains('File Opener Preference').click()
     })
 
