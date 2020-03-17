@@ -5,6 +5,7 @@ const { app } = require('electron')
 const image = require('electron').nativeImage
 const Promise = require('bluebird')
 const cyIcons = require('@cypress/icons')
+const electronApp = require('../util/electron-app')
 const savedState = require('../saved_state')
 const menu = require('../gui/menu')
 const Events = require('../gui/events')
@@ -117,6 +118,8 @@ module.exports = {
         return app.on('ready', resolve)
       })
     }
+
+    electronApp.allowRendererProcessReuse()
 
     return Promise.any([
       waitForReady(),
