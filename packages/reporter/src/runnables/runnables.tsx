@@ -46,7 +46,6 @@ interface RunnablesProps {
   specPath: string
   scroller: Scroller
   appState?: AppState
-  config: object
 }
 
 @observer
