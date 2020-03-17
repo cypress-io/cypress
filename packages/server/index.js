@@ -32,6 +32,12 @@ require && require.extensions && delete require.extensions['.coffee.md']
 // https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
 process.enablePromiseAPIs = process.env.CYPRESS_INTERNAL_ENV !== 'production'
 
+// don't show any electron deprecation warnings in prod
+process.noDeprecation = process.env.CYPRESS_INTERNAL_ENV === 'production'
+
+// always show stack traces for Electron deprecation warnings
+process.traceDeprecation = true
+
 require('./lib/util/suppress_unauthorized_warning').suppress()
 
 module.exports = require('./lib/cypress').start(process.argv)
