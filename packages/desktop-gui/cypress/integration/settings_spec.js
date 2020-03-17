@@ -14,6 +14,9 @@ describe('Settings', () => {
     this.goToSettings = () => {
       cy.get('.navbar-default')
       cy.get('a').contains('Settings').click()
+      // make sure the common sections are shown
+      cy.get('.settings-config')
+      cy.get('.settings-proxy')
     }
 
     cy.visitIndex().then(function (win) {
@@ -471,7 +474,6 @@ describe('Settings', () => {
         this.getProjectStatus.resolve(this.projectStatuses[0])
         this.goToSettings()
 
-        cy.get('.settings-proxy tr:nth-child(2) > td').should('contain', 'none')
         cy.contains('h5', 'Record Keys').should('not.exist')
         cy.percySnapshot()
       })
@@ -646,6 +648,7 @@ describe('Settings', () => {
 
       it('displays panel with no experiments', () => {
         hasNoExperimentsPanel()
+        cy.percySnapshot()
       })
     })
 
@@ -704,8 +707,11 @@ describe('Settings', () => {
 
         it('displays experiment', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
-          cy.get('.experiment-status-sign').should('have.class', 'enabled')
+          cy.get('.experiment-status-sign')
+          .should('have.class', 'enabled')
           .and('have.text', 'ON')
+
+          cy.percySnapshot()
         })
       })
 
@@ -727,8 +733,11 @@ describe('Settings', () => {
 
         it('displays experiment', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
-          cy.get('.experiment-status-sign').should('not.have.class', 'disabled')
+          cy.get('.experiment-status-sign')
+          .should('not.have.class', 'disabled')
           .and('have.text', 'OFF')
+
+          cy.percySnapshot()
         })
       })
     })
