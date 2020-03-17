@@ -1,23 +1,18 @@
-/* eslint-disable
-    no-console,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:saved_state')
-const FileUtil = require('./util/file')
+const md5 = require('md5')
+const path = require('path')
+const Promise = require('bluebird')
+const sanitize = require('sanitize-filename')
+
 const appData = require('./util/app_data')
-const savedStateUtil = require('./util/saved_state')
+const cwd = require('./cwd')
+const FileUtil = require('./util/file')
+const fs = require('./util/fs')
 
 const stateFiles = {}
 
-const whitelist = `\
+const whitelist = `
 appWidth
 appHeight
 appX
@@ -30,10 +25,64 @@ browserY
 isAppDevToolsOpen
 isBrowserDevToolsOpen
 reporterWidth
-showedOnBoardingModal\
+showedOnBoardingModal
+preferredOpener
 `.trim().split(/\s+/)
 
-const normalizeAndWhitelistSet = function (set, key, value) {
+const toHashName = function (projectRoot) {
+  if (!projectRoot) {
+    throw new Error('Missing project path')
+  }
+
+  if (!path.isAbsolute(projectRoot)) {
+    throw new Error(`Expected project absolute path, not just a name ${projectRoot}`)
+  }
+
+  const name = sanitize(path.basename(projectRoot))
+  const hash = md5(projectRoot)
+
+  return `${name}-${hash}`
+}
+
+const formStatePath = (projectRoot) => {
+  return Promise.try(() => {
+    debug('making saved state from %s', cwd())
+
+    if (projectRoot) {
+      debug('for project path %s', projectRoot)
+
+      return projectRoot
+    }
+
+    debug('missing project path, looking for project here')
+
+    const cypressJsonPath = cwd('cypress.json')
+
+    return fs.pathExistsAsync(cypressJsonPath)
+    .then((found) => {
+      if (found) {
+        debug('found cypress file %s', cypressJsonPath)
+        projectRoot = cwd()
+      }
+
+      return projectRoot
+    })
+  }).then((projectRoot) => {
+    const fileName = 'state.json'
+
+    if (projectRoot) {
+      debug(`state path for project ${projectRoot}`)
+
+      return path.join(toHashName(projectRoot), fileName)
+    }
+
+    debug('state path for global mode')
+
+    return path.join('__global__', fileName)
+  })
+}
+
+const normalizeAndWhitelistSet = (set, key, value) => {
   const valueObject = (() => {
     if (_.isString(key)) {
       const tmp = {}
@@ -51,20 +100,21 @@ const normalizeAndWhitelistSet = function (set, key, value) {
   })
 
   if (invalidKeys.length) {
-    console.error(`WARNING: attempted to save state for non-whitelisted key(s): ${invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.coffee`)
+    // eslint-disable-next-line no-console
+    console.error(`WARNING: attempted to save state for non-whitelisted key(s): ${invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.js`)
   }
 
   return set(_.pick(valueObject, whitelist))
 }
 
-module.exports = function (projectRoot, isTextTerminal) {
+const create = (projectRoot, isTextTerminal) => {
   if (isTextTerminal) {
     debug('noop saved state')
 
     return Promise.resolve(FileUtil.noopFile)
   }
 
-  return savedStateUtil.formStatePath(projectRoot)
+  return formStatePath(projectRoot)
   .then((statePath) => {
     const fullStatePath = appData.projectsPath(statePath)
 
@@ -84,4 +134,10 @@ module.exports = function (projectRoot, isTextTerminal) {
 
     return stateFile
   })
+}
+
+module.exports = {
+  create,
+  formStatePath,
+  toHashName,
 }
