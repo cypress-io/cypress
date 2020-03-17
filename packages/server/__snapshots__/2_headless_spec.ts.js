@@ -142,12 +142,6 @@ exports['e2e headless / tests in headed mode pass in electron'] = `
                                                                                                     
   Running:  headless_spec.js                                                                (1 of 1)
 
-Warning: Cypress can only record videos of Electron when running headlessly.
-
-You have set the Electron browser to run headed.
-
-A video will not be recorded when using this mode.
-
 
   e2e headless spec
     ✓ has the expected values for Cypress.browser
@@ -167,10 +161,16 @@ A video will not be recorded when using this mode.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
+  │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     headless_spec.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/headless_spec.js.mp4                (X second)
 
 
 ====================================================================================================

@@ -2,6 +2,10 @@ require('../../spec_helper')
 
 const Promise = require('bluebird')
 const electron = require('electron')
+const stripAnsi = require('strip-ansi')
+const snapshot = require('snap-shot-it')
+const R = require('ramda')
+const pkg = require('@packages/root')
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const config = require(`${root}../lib/config`)
@@ -15,6 +19,7 @@ const env = require(`${root}../lib/util/env`)
 const random = require(`${root}../lib/util/random`)
 const system = require(`${root}../lib/util/system`)
 const specsUtil = require(`${root}../lib/util/specs`)
+const { experimental } = require(`${root}../lib/experiments`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
@@ -51,10 +56,14 @@ describe('lib/modes/run', () => {
   })
 
   context('.openProjectCreate', () => {
+    let onError
+
     beforeEach(() => {
       sinon.stub(openProject, 'create').resolves()
 
+      onError = sinon.spy()
       const options = {
+        onError,
         port: 8080,
         env: { foo: 'bar' },
         isTextTerminal: true,
@@ -77,12 +86,12 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('emits \'exitEarlyWithErr\' with error message onError', () => {
-      sinon.stub(openProject, 'emit')
-      expect(openProject.create.lastCall.args[2].onError).to.be.a('function')
-      openProject.create.lastCall.args[2].onError({ message: 'the message' })
+    it('calls options.onError with error message onError', () => {
+      const error = { message: 'the message' }
 
-      expect(openProject.emit).to.be.calledWith('exitEarlyWithErr', 'the message')
+      expect(openProject.create.lastCall.args[2].onError).to.be.a('function')
+      openProject.create.lastCall.args[2].onError(error)
+      expect(onError).to.be.calledWith(error)
     })
   })
 
@@ -105,28 +114,25 @@ describe('lib/modes/run', () => {
       expect(props.show).to.be.true
     })
 
-    it('sets recordFrameRate and onPaint when write is true', () => {
+    it('sets onScreencastFrame when write is true', () => {
       const write = sinon.stub()
 
       const image = {
-        toJPEG: sinon.stub().returns('imgdata'),
+        data: '',
       }
 
-      const props = runMode.getElectronProps(true, {}, write)
+      const props = runMode.getElectronProps(true, write)
 
-      expect(props.recordFrameRate).to.eq(20)
+      props.onScreencastFrame(image)
 
-      props.onPaint({}, false, image)
-
-      expect(write).to.be.calledWith('imgdata')
+      expect(write).to.be.calledOnce
     })
 
-    it('does not set recordFrameRate or onPaint when write is falsy', () => {
-      const props = runMode.getElectronProps(true, {}, false)
+    it('does not set onScreencastFrame when write is falsy', () => {
+      const props = runMode.getElectronProps(true, false)
 
       expect(props).not.to.have.property('recordFrameRate')
-
-      expect(props).not.to.have.property('onPaint')
+      expect(props).not.to.have.property('onScreencastFrame')
     })
 
     it('sets options.show = false onNewWindow callback', () => {
@@ -139,20 +145,20 @@ describe('lib/modes/run', () => {
       expect(options.show).to.eq(false)
     })
 
-    it('emits exitEarlyWithErr when webContents crashed', function () {
+    it('calls options.onError when webContents crashes', function () {
       sinon.spy(errors, 'get')
       sinon.spy(errors, 'log')
 
-      const emit = sinon.stub(this.projectInstance, 'emit')
-
-      const props = runMode.getElectronProps(true, this.projectInstance)
+      const onError = sinon.spy()
+      const props = runMode.getElectronProps(true, this.projectInstance, onError)
 
       props.onCrashed()
 
       expect(errors.get).to.be.calledWith('RENDERER_CRASHED')
       expect(errors.log).to.be.calledOnce
 
-      expect(emit).to.be.calledWithMatch('exitEarlyWithErr', 'We detected that the Chromium Renderer process just crashed.')
+      expect(onError).to.be.called
+      expect(onError.lastCall.args[0].message).to.include('We detected that the Chromium Renderer process just crashed.')
     })
   })
 
@@ -290,9 +296,9 @@ describe('lib/modes/run', () => {
         return Promise.delay(1000)
       })
 
-      const emit = sinon.stub(this.projectInstance, 'emit')
+      const onError = sinon.spy()
 
-      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10 })
+      return runMode.waitForBrowserToConnect({ project: this.projectInstance, timeout: 10, onError })
       .then(() => {
         expect(openProject.closeBrowser).to.be.calledThrice
         expect(runMode.launchBrowser).to.be.calledThrice
@@ -300,7 +306,8 @@ describe('lib/modes/run', () => {
         expect(errors.warning).to.be.calledWith('TESTS_DID_NOT_START_RETRYING', 'Retrying again...')
         expect(errors.get).to.be.calledWith('TESTS_DID_NOT_START_FAILED')
 
-        expect(emit).to.be.calledWith('exitEarlyWithErr', 'The browser never connected. Something is wrong. The tests cannot run. Aborting...')
+        expect(onError).to.be.called
+        expect(onError.lastCall.args[0].message).to.include('The browser never connected. Something is wrong. The tests cannot run. Aborting...')
       })
     })
   })
@@ -448,7 +455,7 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('exitEarlyWithErr event resolves with no tests, and error', function () {
+    it('exiting early resolves with no tests, and error', function () {
       sinon.useFakeTimers({ shouldAdvanceTime: true })
 
       const err = new Error('foo')
@@ -463,10 +470,7 @@ describe('lib/modes/run', () => {
       sinon.spy(Promise.prototype, 'delay')
 
       process.nextTick(() => {
-        expect(this.projectInstance.listeners('exitEarlyWithErr')).to.have.length(1)
-        this.projectInstance.emit('exitEarlyWithErr', err.message)
-
-        expect(this.projectInstance.listeners('exitEarlyWithErr')).to.have.length(0)
+        runMode.exitEarly(err)
       })
 
       return runMode.waitForTestsToFinishRunning({
@@ -626,20 +630,6 @@ describe('lib/modes/run', () => {
       })
     })
 
-    it('shows no warnings for electron browser', () => {
-      return runMode.run({ browser: 'electron' })
-      .then(() => {
-        expect(errors.warning).to.not.be.calledWith('CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER')
-      })
-    })
-
-    it('disables video recording on headed runs', () => {
-      return runMode.run({ headed: true })
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CANNOT_RECORD_VIDEO_HEADED')
-      })
-    })
-
     it('throws an error if invalid browser family supplied', () => {
       const browser = { name: 'opera', family: 'opera - btw when is Opera support coming?' }
 
@@ -792,6 +782,121 @@ describe('lib/modes/run', () => {
           },
         })
       })
+    })
+  })
+
+  context('#displayRunStarting', () => {
+    // restore pkg.version property
+    // for some reason I cannot stub property value using Sinon
+    let version
+    // save a copy of "true" experiments right away
+    const names = R.clone(experimental.names)
+
+    before(() => {
+      // reset experiments names before each test
+      experimental.names = {}
+      version = pkg.version
+    })
+
+    afterEach(() => {
+      pkg.version = version
+      experimental.names = names
+    })
+
+    it('returns heading with experiments', () => {
+      pkg.version = '1.2.3'
+
+      experimental.names = {
+        experimentalFeatureA: 'experimentalFeatureA',
+        experimentalFeatureB: 'experimentalFeatureB',
+      }
+
+      const options = {
+        browser: {
+          displayName: 'Electron',
+          majorVersion: 99,
+          isHeadless: true,
+        },
+        config: {
+          resolved: {
+            experimentalFeatureA: {
+              value: true,
+              from: 'config',
+            },
+            experimentalFeatureB: {
+              value: 4,
+              from: 'cli',
+            },
+          },
+        },
+      }
+      const heading = runMode.displayRunStarting(options)
+
+      snapshot('enabled experiments', stripAnsi(heading))
+    })
+
+    it('resets the experiments names', () => {
+      expect(experimental.names, 'experiments were reset').to.deep.equal(names)
+    })
+
+    it('returns heading with some enabled experiments', () => {
+      pkg.version = '1.2.3'
+
+      experimental.names = {
+        experimentalFeatureA: 'experimentalFeatureA',
+        experimentalFeatureB: 'experimentalFeatureB',
+      }
+
+      const options = {
+        browser: {
+          displayName: 'Electron',
+          majorVersion: 99,
+          isHeadless: true,
+        },
+        config: {
+          resolved: {
+            // means this feature is not enabled, should not appear in the heading
+            experimentalFeatureA: {
+              value: true,
+              from: 'default',
+            },
+            experimentalFeatureB: {
+              value: 4,
+              from: 'cli',
+            },
+          },
+        },
+      }
+      const heading = runMode.displayRunStarting(options)
+
+      const text = stripAnsi(heading)
+
+      snapshot('some enabled experiments', text)
+      // explicit assertions for test clarity
+      expect(text).to.not.include('experimentalFeatureA')
+      expect(text).to.include('experimentalFeatureB')
+    })
+
+    it('returns heading without experiments', () => {
+      pkg.version = '1.2.3'
+
+      const options = {
+        browser: {
+          displayName: 'Electron',
+          majorVersion: 99,
+          isHeadless: true,
+        },
+        config: {
+          resolved: {},
+        },
+      }
+      const heading = runMode.displayRunStarting(options)
+
+      snapshot('without enabled experiments', stripAnsi(heading))
+    })
+
+    it('restores pkg.version', () => {
+      expect(pkg.version).to.not.equal('1.2.3')
     })
   })
 })

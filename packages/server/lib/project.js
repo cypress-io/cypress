@@ -28,6 +28,7 @@ const fs = require('./util/fs')
 const keys = require('./util/keys')
 const settings = require('./util/settings')
 const specsUtil = require('./util/specs')
+const { escapeFilenameInUrl } = require('./util/escape_filename')
 
 const localCwd = cwd()
 
@@ -77,8 +78,6 @@ class Project extends EE {
     debug('project options %o', options)
     this.options = options
 
-    this.onWarning = options.onWarning
-
     return this.getConfig(options)
     .tap((cfg) => {
       process.chdir(this.projectRoot)
@@ -112,7 +111,7 @@ class Project extends EE {
         return updatedConfig
       })
     }).then((cfg) => {
-      return this.server.open(cfg, this, options.onWarning)
+      return this.server.open(cfg, this, options.onError, options.onWarning)
       .spread((port, warning) => {
         // if we didnt have a cfg.port
         // then get the port once we
@@ -415,6 +414,8 @@ class Project extends EE {
     }
 
     if (this.cfg) {
+      debug('project has config %o', this.cfg)
+
       return Promise.resolve(this.cfg)
     }
 
@@ -524,7 +525,7 @@ class Project extends EE {
     return [
       browserUrl,
       '#/tests',
-      specUrl,
+      escapeFilenameInUrl(specUrl),
     ].join('/').replace(multipleForwardSlashesRe, replacer)
   }
 

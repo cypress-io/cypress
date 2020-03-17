@@ -286,6 +286,7 @@ const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
+    exit: process.env.EXIT,
     only: false,
     skip: false,
     browser: [],
@@ -561,7 +562,7 @@ const e2e = {
       args.push('--output-path', options.outputPath)
     }
 
-    if (options.exit != null) {
+    if (options.exit === false) {
       args.push('--exit', options.exit)
     }
 

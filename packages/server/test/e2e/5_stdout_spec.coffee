@@ -26,22 +26,15 @@ describe "e2e stdout", ->
       snapshot: true
     })
 
-  it "logs that electron cannot be recorded in headed mode", ->
-    e2e.exec(@, {
-      spec: "simple_spec.coffee"
-      headed: true
-      snapshot: true
-    })
-
-  e2e.it "logs that chrome cannot be recorded", {
-    spec: "simple_spec.coffee"
-    browser: "chrome"
-    snapshot: true
-  }
-
   it "displays fullname of nested specfile", ->
     e2e.exec(@, {
       port: 2020
       snapshot: true
       spec: "nested-1/nested-2/nested-3/*"
     })
+
+  e2e.it("displays assertion errors", {
+    spec: "stdout_assertion_errors_spec.js"
+    snapshot: true
+    expectedExitCode: 4
+  })

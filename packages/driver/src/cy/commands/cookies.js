@@ -92,7 +92,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       $errUtils.throwErrByPath('cookies.backend_error', {
         args: {
           action,
-          command,
+          cmd: command,
           browserDisplayName: Cypress.browser.displayName,
           errMessage: err.message,
           errStack: err.stack,

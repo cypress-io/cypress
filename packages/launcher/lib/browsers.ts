@@ -11,7 +11,7 @@ export const browsers: Browser[] = [
     family: 'chromium',
     channel: 'stable',
     displayName: 'Chrome',
-    versionRegex: /Google Chrome (\S+)/,
+    versionRegex: /Google Chrome (\S+)/m,
     profile: true,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
   },
@@ -21,7 +21,7 @@ export const browsers: Browser[] = [
     // technically Chromium is always in development
     channel: 'stable',
     displayName: 'Chromium',
-    versionRegex: /Chromium (\S+)/,
+    versionRegex: /Chromium (\S+)/m,
     profile: true,
     binary: ['chromium-browser', 'chromium'],
   },
@@ -30,7 +30,7 @@ export const browsers: Browser[] = [
     family: 'chromium',
     channel: 'canary',
     displayName: 'Canary',
-    versionRegex: /Google Chrome Canary (\S+)/,
+    versionRegex: /Google Chrome Canary (\S+)/m,
     profile: true,
     binary: 'google-chrome-canary',
   },
@@ -41,7 +41,7 @@ export const browsers: Browser[] = [
     displayName: 'Firefox',
     info: firefoxInfo,
     // Mozilla Firefox 70.0.1
-    versionRegex: /^Mozilla Firefox ([^\sab]+)$/,
+    versionRegex: /^Mozilla Firefox ([^\sab]+)$/m,
     profile: true,
     binary: 'firefox',
   },
@@ -52,7 +52,7 @@ export const browsers: Browser[] = [
     displayName: 'Firefox Developer Edition',
     info: firefoxInfo,
     // Mozilla Firefox 73.0b12
-    versionRegex: /^Mozilla Firefox (\S+b\S*)$/,
+    versionRegex: /^Mozilla Firefox (\S+b\S*)$/m,
     profile: true,
     // ubuntu PPAs install it as firefox
     binary: ['firefox-developer-edition', 'firefox'],
@@ -64,7 +64,7 @@ export const browsers: Browser[] = [
     displayName: 'Firefox Nightly',
     info: firefoxInfo,
     // Mozilla Firefox 74.0a1
-    versionRegex: /^Mozilla Firefox (\S+a\S*)$/,
+    versionRegex: /^Mozilla Firefox (\S+a\S*)$/m,
     profile: true,
     // ubuntu PPAs install it as firefox-trunk
     binary: ['firefox-nightly', 'firefox-trunk'],
@@ -74,7 +74,7 @@ export const browsers: Browser[] = [
     family: 'chromium',
     channel: 'stable',
     displayName: 'Edge',
-    versionRegex: /Microsoft Edge (\S+)/,
+    versionRegex: /Microsoft Edge (\S+)/m,
     profile: true,
     binary: 'edge',
   },
@@ -83,7 +83,7 @@ export const browsers: Browser[] = [
     family: 'chromium',
     channel: 'canary',
     displayName: 'Edge Canary',
-    versionRegex: /Microsoft Edge Canary (\S+)/,
+    versionRegex: /Microsoft Edge Canary (\S+)/m,
     profile: true,
     binary: 'edge-canary',
   },
@@ -92,7 +92,7 @@ export const browsers: Browser[] = [
     family: 'chromium',
     channel: 'beta',
     displayName: 'Edge Beta',
-    versionRegex: /Microsoft Edge Beta (\S+)/,
+    versionRegex: /Microsoft Edge Beta (\S+)/m,
     profile: true,
     binary: 'edge-beta',
   },
@@ -101,7 +101,7 @@ export const browsers: Browser[] = [
     family: 'chromium',
     channel: 'dev',
     displayName: 'Edge Dev',
-    versionRegex: /Microsoft Edge Dev (\S+)/,
+    versionRegex: /Microsoft Edge Dev (\S+)/m,
     profile: true,
     binary: 'edge-dev',
   },
@@ -113,7 +113,7 @@ export function launch (
   url: string,
   args: string[] = [],
 ) {
-  log('launching browser %o to open %s', browser, url)
+  log('launching browser %o', { browser, url })
 
   if (!browser.path) {
     throw new Error(`Browser ${browser.name} is missing path`)
@@ -123,7 +123,21 @@ export function launch (
     args = [url].concat(args)
   }
 
-  log('spawning browser %o with args %s', browser, args.join(' '))
+  log('spawning browser with args %o', { args })
 
-  return cp.spawn(browser.path, args, { stdio: 'ignore' })
+  const proc = cp.spawn(browser.path, args, { stdio: ['ignore', 'pipe', 'pipe'] })
+
+  proc.stdout.on('data', (buf) => {
+    log('%s stdout: %s', browser.name, String(buf).trim())
+  })
+
+  proc.stderr.on('data', (buf) => {
+    log('%s stderr: %s', browser.name, String(buf).trim())
+  })
+
+  proc.on('exit', (code, signal) => {
+    log('%s exited: %o', browser.name, { code, signal })
+  })
+
+  return proc
 }

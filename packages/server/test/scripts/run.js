@@ -68,9 +68,10 @@ if (isWindows()) {
   commandAndArguments.args = run.slice()
 } else {
   commandAndArguments.command = 'xvfb-maybe'
+  // this should always match cli/lib/exec/xvfb.js
   commandAndArguments.args = [
     '--xvfb-run-args ' +
-    '"-as \\"-screen 0 1280x1024x8\\""',
+    '"-as \\"-screen 0 1280x1024x24\\""',
     'node',
   ]
 }
@@ -119,7 +120,7 @@ commandAndArguments.args.push(
 const env = _.clone(process.env)
 
 env.NODE_ENV = 'test'
-env.CYPRESS_ENV = 'test'
+env.CYPRESS_INTERNAL_ENV = 'test'
 
 if (env.VERBOSE === '1') {
   _.extend(env, {
@@ -142,6 +143,10 @@ if (env.VERBOSE === '1') {
 
 if (options.browser) {
   env.BROWSER = options.browser
+}
+
+if (options.exit != null) {
+  env.EXIT = options.exit
 }
 
 const cmd = `${commandAndArguments.command} ${

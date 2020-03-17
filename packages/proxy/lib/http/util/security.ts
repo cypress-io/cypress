@@ -6,6 +6,7 @@ const topOrParentEqualityBeforeRe = /((?:window|self)(?:\.|\[['"](?:top|self)['"
 const topOrParentEqualityAfterRe = /(top|parent)((?:["']\])?\s*[!=]==?\s*(?:window|self))/g
 const topOrParentLocationOrFramesRe = /([^\da-zA-Z\(\)])?(top|parent)([.])(location|frames)/g
 const jiraTopWindowGetterRe = /(!function\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*}\(\w{1}\))/g
+const jiraTopWindowGetterUnMinifiedRe = /(function\s*\w{1,}\s*\((\w{1})\)\s*{\s*return\s*\w{1}\s*(?:={2,})\s*\w{1}\.parent)(\s*;\s*})/g
 
 export function strip (html: string) {
   return html
@@ -13,6 +14,7 @@ export function strip (html: string) {
   .replace(topOrParentEqualityAfterRe, 'self$2')
   .replace(topOrParentLocationOrFramesRe, '$1self$3$4')
   .replace(jiraTopWindowGetterRe, '$1 || $2.parent.__Cypress__$3')
+  .replace(jiraTopWindowGetterUnMinifiedRe, '$1 || $2.parent.__Cypress__$3')
 }
 
 export function stripStream () {
@@ -24,11 +26,13 @@ export function stripStream () {
         topOrParentEqualityAfterRe,
         topOrParentLocationOrFramesRe,
         jiraTopWindowGetterRe,
+        jiraTopWindowGetterUnMinifiedRe,
       ],
       [
         '$1self',
         'self$2',
         '$1self$3$4',
+        '$1 || $2.parent.__Cypress__$3',
         '$1 || $2.parent.__Cypress__$3',
       ],
     ),

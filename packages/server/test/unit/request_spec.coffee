@@ -411,14 +411,14 @@ describe "lib/request", ->
             "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com"}
             "Request URL":      "http://www.github.com/dashboard"
             "Response Body":    null
-            "Response Headers": {"location": "/auth"}
+            "Response Headers": {"content-type": "application/json", "location": "/auth"}
             "Response Status":  301
           }, {
             "Request Body":     null
             "Request Headers":  {"accept": "*/*", "accept-encoding": "gzip, deflate", "connection": "keep-alive", "host": "www.github.com", "referer": "http://www.github.com/dashboard"}
             "Request URL":      "http://www.github.com/auth"
             "Response Body":    null
-            "Response Headers": {"location": "/login"}
+            "Response Headers": {"content-type": "application/json", "location": "/login"}
             "Response Status":  302
           }, {
             "Request Body":     null
