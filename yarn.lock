@@ -1238,10 +1238,10 @@
     jsonpointer "^4.0.0"
     xtend "^4.0.0"
 
-"@benmalka/foxdriver@0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@benmalka/foxdriver/-/foxdriver-0.2.3.tgz#c1c1ad1cf0d26d1eb4ed0028af1008868f46d54b"
-  integrity sha512-Uj+eyWw/MxlJoX8LTXs7qsCC8WVGtq5Wk0LQzQZNIMmYf+gxP5snsTYEhiSs+njgJ0C0X6iTF6gwBZRUWYK7aQ==
+"@benmalka/foxdriver@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@benmalka/foxdriver/-/foxdriver-0.3.0.tgz#e9764a789a3b7be5eda70ad8330e258939b29deb"
+  integrity sha512-rNb8VmwDRhKeTWS4ewRVBD80YFmnCmwuFjMsgEePvp8rC8rnIAicMITTtYtaTixenpoDY1PpNu5xpe9Mab+cnA==
   dependencies:
     fs-extra "^4.0.1"
     get-port "^3.2.0"
