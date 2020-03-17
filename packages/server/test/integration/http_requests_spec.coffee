@@ -870,9 +870,8 @@ describe "Routes", ->
           body = removeWhitespace(res.body)
           expect(body).to.eq contents
 
-      it "can send back all tests", ->
+      it.only "can send back all tests", ->
         contents = removeLeadingWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
-        console.log(contents)
 
         @rp("http://localhost:2020/__cypress/iframes/__all")
         .then (res) ->
