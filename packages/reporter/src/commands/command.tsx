@@ -46,7 +46,7 @@ interface AliasReferenceProps {
 const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }: AliasReferenceProps) => {
   if (shouldShowCount(aliasesWithDuplicates, aliasObj.name, model)) {
     return (
-      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`}>
+      <Tooltip placement='top' title={`Found ${aliasObj.ordinal} alias for: '${aliasObj.name}'`} className='cy-tooltip'>
         <span>
           <span className={`command-alias ${model.aliasType} show-count`}>@{aliasObj.name}</span>
           <span className={'command-alias-count'}>{aliasObj.cardinal}</span>
@@ -56,7 +56,7 @@ const AliasReference = observer(({ aliasObj, model, aliasesWithDuplicates }: Ali
   }
 
   return (
-    <Tooltip placement='top' title={`Found an alias for: '${aliasObj.name}'`}>
+    <Tooltip placement='top' title={`Found an alias for: '${aliasObj.name}'`} className='cy-tooltip'>
       <span className={`command-alias ${model.aliasType}`}>@{aliasObj.name}</span>
     </Tooltip>
   )
@@ -88,7 +88,7 @@ const Aliases = observer(({ model, aliasesWithDuplicates }: AliasesProps) => {
   return (
     <span>
       {_.map(([] as Array<Alias>).concat(model.alias), (alias) => (
-        <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`}>
+        <Tooltip key={alias} placement='top' title={`${model.displayMessage} aliased as: '${alias}'`} className='cy-tooltip'>
           <span className={cs('command-alias', `${model.aliasType}`, { 'show-count': shouldShowCount(aliasesWithDuplicates, alias, model) })}>
             {alias}
           </span>
@@ -183,15 +183,15 @@ class Command extends Component<Props> {
               {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
             </span>
             <span className='command-controls'>
-              <Tooltip placement='top' title={visibleMessage(model)}>
+              <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
                 <i className='command-invisible far fa-eye-slash'></i>
               </Tooltip>
-              <Tooltip placement='top' title={`${model.numElements} matched elements`}>
+              <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
                 <span className='num-elements'>{model.numElements}</span>
               </Tooltip>
               <span className='alias-container'>
                 <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`}>
+                <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
                   <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
                 </Tooltip>
               </span>
