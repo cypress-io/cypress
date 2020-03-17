@@ -23,7 +23,7 @@ exports['e2e task fails 1'] = `
   1 failing
 
   1)  fails because the 'task' event is not registered in plugins file:
-     CypressError: cy.task('some:task') failed with the following error:
+     CypressError: \`cy.task('some:task')\` failed with the following error:
 
 The 'task' event has not been registered in the plugins file. You must register it before using cy.task()
 

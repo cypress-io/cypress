@@ -51,4 +51,133 @@
       list-style: decimal;
     }
   }
+
+  .runnable-err-wrapper {
+    cursor: default;
+    margin: 5px 0 5px 5px;
+    padding-left: 10px;
+    border-left: 1px dotted #DDD;
+  }
+
+  .runnable-err {
+    border-left: 2px solid $fail;
+    background-color: $err-background;
+    clear: both;
+    color: $err-text;
+    margin-bottom: 0;
+    margin-top: 5px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    user-select: initial;
+    overflow: auto;
+  }
+
+  .runnable-err-header {
+    display: flex;
+    justify-content: space-between;
+    background-color: $err-header-background;
+    padding: 5px 10px;
+    font-weight: bold;
+
+    .runnable-err-name {
+      flex-grow: 2;
+      font-size: 13px;
+      line-height: 22px;;
+
+      i {
+        font-size: 10px;
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .runnable-err-print {
+    background: none;
+    border: solid 2px $err-text;
+    border-radius: 3px;
+    color: $err-text;
+    font-size: 8px;
+    padding: 0.4em;
+
+    &:hover,
+    &:focus {
+      background: rgba(255, 255, 255, 0.6);
+      outline: none;
+    }
+  }
+
+  .runnable-err-docs-url {
+    margin-left: 0.5em;
+    cursor: pointer;
+    color: $err-text;
+    text-decoration: underline;
+
+    i {
+      position: relative;
+      top: 1px;
+      font-size: 10px;
+      margin-left: 5px;
+      display: inline;
+    }
+
+    &:hover,
+    &:focus {
+      cursor: pointer;
+      color: lighten($err-text, 10%);
+    }
+  }
+
+  .runnable-err-message {
+    padding: 10px;
+    font-family: $monospace;
+    color: $err-text;
+    font-size: 1em;
+
+    code {
+      background-color: $err-code-background;
+      border-radius: 5px;
+      padding: 2px 5px;
+    }
+
+    strong {
+      color: $err-text;
+      font-weight: bold;
+    }
+  }
+
+  .runnable-err-stack-expander {
+    cursor: pointer;
+    outline: none;
+    padding: 0 10px 2px 5px;
+
+    &:hover,
+    &:focus {
+      color: lighten($err-text, 10%);
+    }
+
+    .collapsible-header-text {
+      text-decoration: underline;
+      font-size: 13px;
+    }
+
+    .collapsible-indicator {
+      line-height: 18px;
+      color: #eb535e !important;
+    }
+
+    .collapsible-more {
+      display: none;
+    }
+  }
+
+  .runnable-err-stack-trace {
+    overflow: auto;
+    padding: 10px;
+    font-family: $monospace;
+    margin-left: 15px;
+
+    .err-stack-line {
+      white-space: pre;
+    }
+  }
 }
