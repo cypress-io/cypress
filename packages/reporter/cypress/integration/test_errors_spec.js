@@ -82,7 +82,7 @@ describe('test errors', function () {
 
     it('hovering shows tooltip', function () {
       cy.get('.runnable-err-print').trigger('mouseover')
-      cy.get('.tooltip').should('have.text', 'Print error to console')
+      cy.get('.cy-tooltip').should('have.text', 'Print error to console')
     })
 
     it('clicking prints to console', function () {
