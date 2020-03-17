@@ -1,4 +1,5 @@
 import sinon from 'sinon'
+
 import Hook from './hook-model'
 
 import CommandModel from '../commands/command-model'

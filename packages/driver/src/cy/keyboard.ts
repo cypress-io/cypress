@@ -7,6 +7,8 @@ import { USKeyboard } from '../cypress/UsKeyboardLayout'
 import * as $dom from '../dom'
 import * as $document from '../dom/document'
 import * as $elements from '../dom/elements'
+// eslint-disable-next-line no-duplicate-imports
+import { HTMLTextLikeElement, HTMLTextLikeInputElement } from '../dom/elements'
 import * as $selection from '../dom/selection'
 import $window from '../dom/window'
 
@@ -583,6 +585,7 @@ const keyToModifierMap = {
 }
 
 export interface typeOptions {
+  id: string
   $el: JQuery
   chars: string
   force?: boolean
@@ -601,7 +604,6 @@ export interface typeOptions {
   onNoMatchingSpecialChars?: Function
   onBeforeSpecialCharAction?: Function
   prevValue?: string
-  id?: string
 }
 
 export class Keyboard {
@@ -735,7 +737,7 @@ export class Keyboard {
 
           // simulatedDefaultOnly keys will not send any events, and cannot be canceled
           if (key.simulatedDefaultOnly) {
-            key.simulatedDefault!(activeEl, key, options)
+            key.simulatedDefault!(activeEl as HTMLTextLikeElement, key, options)
 
             return null
           }
@@ -1124,7 +1126,7 @@ export class Keyboard {
       return
     }
 
-    return simulatedDefault(el, key, options)
+    return simulatedDefault(el as HTMLTextLikeElement, key, options)
   }
 }
 
