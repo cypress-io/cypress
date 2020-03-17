@@ -30,7 +30,7 @@ clientSideError = (err) ->
   """
 
 getOutputPath = (config, filePath) ->
-  appData.projectsPath(toHashName(config.projectRoot), "bundles", filePath)
+  appData.projectsPath(savedState.toHashName(config.projectRoot), "bundles", filePath)
 
 baseEmitter = new EE()
 fileObjects = {}
