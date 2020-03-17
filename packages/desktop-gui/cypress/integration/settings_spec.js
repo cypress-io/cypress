@@ -14,6 +14,9 @@ describe('Settings', () => {
     this.goToSettings = () => {
       cy.get('.navbar-default')
       cy.get('a').contains('Settings').click()
+      // make sure the common sections are shown
+      cy.get('.settings-config')
+      cy.get('.settings-proxy')
     }
 
     cy.visitIndex().then(function (win) {
@@ -67,6 +70,7 @@ describe('Settings', () => {
       cy.contains('Your project\'s configuration is displayed').should('not.exist')
       cy.contains('Record Keys allow you to').should('not.exist')
       cy.contains(this.config.projectId).should('not.exist')
+      cy.percySnapshot()
     })
 
     context('on:focus:tests clicked', () => {
@@ -103,6 +107,8 @@ describe('Settings', () => {
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
         cy.get('.config-vars').invoke('text')
         .should('contain', '0:Chrome')
+
+        cy.percySnapshot()
       })
 
       it('removes the summary list of values once a key is expanded', () => {
@@ -443,6 +449,8 @@ describe('Settings', () => {
 
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
+
+          cy.percySnapshot()
         })
       })
     })
@@ -457,6 +465,7 @@ describe('Settings', () => {
         this.goToSettings()
 
         cy.contains('h5', 'Record Keys').should('not.exist')
+        cy.percySnapshot()
       })
 
       it('does not show ci Keys section when project is invalid', function () {
@@ -466,6 +475,7 @@ describe('Settings', () => {
         this.goToSettings()
 
         cy.contains('h5', 'Record Keys').should('not.exist')
+        cy.percySnapshot()
       })
     })
 
@@ -638,6 +648,7 @@ describe('Settings', () => {
 
       it('displays panel with no experiments', () => {
         hasNoExperimentsPanel()
+        cy.percySnapshot()
       })
     })
 
@@ -696,8 +707,11 @@ describe('Settings', () => {
 
         it('displays experiment', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
-          cy.get('.experiment-status-sign').should('have.class', 'enabled')
+          cy.get('.experiment-status-sign')
+          .should('have.class', 'enabled')
           .and('have.text', 'ON')
+
+          cy.percySnapshot()
         })
       })
 
@@ -719,8 +733,11 @@ describe('Settings', () => {
 
         it('displays experiment', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
-          cy.get('.experiment-status-sign').should('not.have.class', 'disabled')
+          cy.get('.experiment-status-sign')
+          .should('not.have.class', 'disabled')
           .and('have.text', 'OFF')
+
+          cy.percySnapshot()
         })
       })
     })

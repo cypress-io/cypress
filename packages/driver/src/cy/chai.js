@@ -49,16 +49,12 @@ chai.use((chai, u) => {
 
   $chaiJquery(chai, chaiUtils, {
     onInvalid (method, obj) {
-      const err = $errUtils.cypressErr(
-        $errUtils.errMsgByPath(
-          'chai.invalid_jquery_obj', {
-            assertion: method,
-            subject: $utils.stringifyActual(obj),
-          },
-        ),
-      )
-
-      throw err
+      $errUtils.throwErrByPath('chai.invalid_jquery_obj', {
+        args: {
+          assertion: method,
+          subject: $utils.stringifyActual(obj),
+        },
+      })
     },
 
     onError (err, method, obj, negated) {
@@ -253,7 +249,7 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const err = $errUtils.cypressErr($errUtils.errMsgByPath('chai.match_invalid_argument', { regExp }))
+        const err = $errUtils.cypressErrByPath('chai.match_invalid_argument', { args: { regExp } })
 
         err.retry = false
         throw err
@@ -340,11 +336,11 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.displayMessage = getLongLengthMessage(obj.length, length)
+              e1.message = getLongLengthMessage(obj.length, length)
               throw e1
             }
 
-            const e2 = $errUtils.cypressErr($errUtils.errMsgByPath('chai.length_invalid_argument', { length }))
+            const e2 = $errUtils.cypressErrByPath('chai.length_invalid_argument', { args: { length } })
 
             e2.retry = false
             throw e2
@@ -397,10 +393,10 @@ chai.use((chai, u) => {
                 return `Expected ${node} not to exist in the DOM, but it was continuously found.`
               }
 
-              return `Expected to find element: '${obj.selector}', but never found it.`
+              return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.displayMessage = getLongExistsMessage(obj)
+            e1.message = getLongExistsMessage(obj)
             throw e1
           }
         }

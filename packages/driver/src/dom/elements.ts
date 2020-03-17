@@ -644,7 +644,7 @@ const isAttached = function ($el) {
   // is technically bound to a different document
   // but c'mon
   const isIn = (el) => {
-    return $.contains(doc, el)
+    return $.contains(doc as any, el)
   }
 
   // make sure the document is currently
