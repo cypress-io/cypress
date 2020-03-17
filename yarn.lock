@@ -11378,10 +11378,10 @@ fira@cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d:
   version "1.0.0"
   resolved "https://codeload.github.com/cypress-io/fira/tar.gz/fb63362742eea8cdce0d90825ab9264d77719e3d"
 
-firefox-profile@1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/firefox-profile/-/firefox-profile-1.3.0.tgz#36c74c30d67e898a2ef0fb7983f975e44f1312b2"
-  integrity sha512-3d7JPnFC3GrwGW8wonAqy2E4YCI7A8MO7yVDkqS09uQ3tLvMLCY3Ytt4ntvVXvyzjVMRmrLW9W/CubnnzrdLCA==
+firefox-profile@1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/firefox-profile/-/firefox-profile-1.3.1.tgz#1418d36b79c191984d6117bd772d3cbf9675a92b"
+  integrity sha512-8q7DnwVIXvuJuBm1shr5ivRh0Ih2ytWwOIMwHInDSlVyrjQVXy7Ik0frItDdWb/P5CIpQFcMk9fPsUwNqi2lyQ==
   dependencies:
     adm-zip "~0.4.x"
     archiver "~2.1.0"
