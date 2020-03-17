@@ -50,7 +50,9 @@ interface StringValues {
   }
   ```
 */
-const _summaries: StringValues = {}
+const _summaries: StringValues = {
+  experimentalComponentTesting: 'Framework-specific component testing',
+}
 
 /**
  * Keeps short names for experiments. When adding new experiments, add a short name.
@@ -62,7 +64,9 @@ const _summaries: StringValues = {}
   }
   ```
 */
-const _names: StringValues = {}
+const _names: StringValues = {
+  experimentalComponentTesting: 'Component Testing',
+}
 
 /**
  * Export this object for easy stubbing from end-to-end tests.
