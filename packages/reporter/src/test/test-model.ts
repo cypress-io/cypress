@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
 import AttemptModel from '../attempts/attempt-model'
-import Err from '../lib/err-model'
+import Err from '../errors/err-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import Hook from '../hooks/hook-model'
 import Command, { CommandProps } from '../commands/command-model'

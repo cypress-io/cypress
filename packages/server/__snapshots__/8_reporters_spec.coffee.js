@@ -239,7 +239,7 @@ exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom repor
          "before each" hook for "never gets here":
      Error: fail1
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`beforeEach hooks\`
       [stack trace lines]
 
   2) simple failing hook spec
@@ -247,7 +247,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
          "after each" hook for "runs this":
      Error: fail2
 
-Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`afterEach hooks\`
       [stack trace lines]
 
   3) simple failing hook spec
@@ -255,7 +255,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
          "after all" hook for "fails on this":
      Error: fail3
 
-Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`after hooks\`
       [stack trace lines]
 
 
@@ -417,7 +417,7 @@ exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom repor
          "before each" hook for "never gets here":
      Error: fail1
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`beforeEach hooks\`
       [stack trace lines]
 
   2) simple failing hook spec
@@ -425,7 +425,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
          "after each" hook for "runs this":
      Error: fail2
 
-Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`afterEach hooks\`
       [stack trace lines]
 
   3) simple failing hook spec
@@ -433,7 +433,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
          "after all" hook for "fails on this":
      Error: fail3
 
-Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`after hooks\`
       [stack trace lines]
 
 
@@ -595,7 +595,7 @@ exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom repor
          "before each" hook for "never gets here":
      Error: fail1
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'beforeEach hooks'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`beforeEach hooks\`
       [stack trace lines]
 
   2) simple failing hook spec
@@ -603,7 +603,7 @@ Because this error occurred during a 'before each' hook we are skipping the rema
          "after each" hook for "runs this":
      Error: fail2
 
-Because this error occurred during a 'after each' hook we are skipping the remaining tests in the current suite: 'afterEach hooks'
+Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`afterEach hooks\`
       [stack trace lines]
 
   3) simple failing hook spec
@@ -611,7 +611,7 @@ Because this error occurred during a 'after each' hook we are skipping the remai
          "after all" hook for "fails on this":
      Error: fail3
 
-Because this error occurred during a 'after all' hook we are skipping the remaining tests in the current suite: 'after hooks'
+Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`after hooks\`
       [stack trace lines]
 
 

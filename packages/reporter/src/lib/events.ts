@@ -163,25 +163,15 @@ const events: Events = {
       runner.emit('runner:console:log', commandId)
     })
 
-    localBus.on('show:error', (testId, attemptIndex) => {
+    localBus.on('show:error', (testId) => {
       const test = runnablesStore.testById(testId)
-      let model = test
+      const command = test.err.isCommandErr && test.commandMatchingErr()
 
-      if (attemptIndex != null) {
-        model = test.getAttemptByIndex(attemptIndex)
-      }
-
-      if (model.err.isCommandErr) {
-        const command = model.commandMatchingErr()
-
-        if (!command) return
-
-        runner.emit('runner:console:log', command.id)
-
-        return
-      }
-
-      runner.emit('runner:console:error', testId)
+      runner.emit('runner:console:error', {
+        err: test.err,
+        // attemptIndex,
+        commandId: command ? command.id : undefined,
+      })
     })
 
     localBus.on('show:snapshot', (commandId) => {

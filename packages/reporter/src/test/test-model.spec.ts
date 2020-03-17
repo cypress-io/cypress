@@ -1,3 +1,5 @@
+import Command, { CommandProps } from '../commands/command-model'
+import Err from '../errors/err-model'
 import sinon from 'sinon'
 
 import TestModel, { TestProps } from './test-model'
@@ -127,8 +129,24 @@ describe('Test model', () => {
       const command = {}
 
       sinon.stub(attempt, 'commandMatchingErr').returns(command)
-
       expect(test.commandMatchingErr()).to.equal(command)
+    })
+
+    it('returns last command matching the error', () => {
+      const test = new TestModel({ err: { message: 'SomeError' } as Err } as TestProps, 0)
+
+      test.addCommand(new Command({ err: { message: 'SomeError' } as Err } as CommandProps), 'some hook')
+      test.addCommand(new Command({ err: {} as Err } as CommandProps), 'some hook')
+      test.addCommand(new Command({ err: { message: 'SomeError' } as Err } as CommandProps), 'some hook')
+      test.addCommand(new Command({ err: {} as Err } as CommandProps), 'another hook')
+      test.addCommand(new Command({ name: 'The One', err: { message: 'SomeError' } as Err } as CommandProps), 'another hook')
+      expect(test.commandMatchingErr()!.name).to.equal('The One')
+    })
+
+    it('returns undefined if there are no commands with errors', () => {
+      const test = new TestModel({ err: { message: 'SomeError' } as Err } as TestProps, 0)
+
+      expect(test.commandMatchingErr()).eq(undefined)
     })
   })
 })

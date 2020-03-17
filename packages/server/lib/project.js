@@ -414,6 +414,8 @@ class Project extends EE {
     }
 
     if (this.cfg) {
+      debug('project has config %o', this.cfg)
+
       return Promise.resolve(this.cfg)
     }
 

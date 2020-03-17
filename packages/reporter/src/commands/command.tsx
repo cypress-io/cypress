@@ -98,12 +98,16 @@ const Aliases = observer(({ model, aliasesWithDuplicates }: AliasesProps) => {
   )
 })
 
-const Message = observer(({ model }) => (
+interface MessageProps {
+  model: CommandModel
+}
+
+const Message = observer(({ model }: MessageProps) => (
   <span>
     <i className={`fas fa-circle ${model.renderProps.indicator}`}></i>
     <span
       className='command-message-text'
-      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
     />
   </span>
 ))

@@ -5,14 +5,17 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import events, { Events } from '../lib/events'
+import appState, { AppState } from '../lib/app-state'
 import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
+import TestError from '../errors/test-error'
 
 import Attempts from '../attempts/attempts'
 
 interface Props {
   events: Events
+  appState: AppState
   runnablesStore: RunnablesStore
   model: TestModel
 }
@@ -21,6 +24,7 @@ interface Props {
 class Test extends Component<Props> {
   static defaultProps = {
     events,
+    appState,
     runnablesStore,
   }
 
@@ -38,7 +42,7 @@ class Test extends Component<Props> {
         <div className='runnable-content-region'>
           <i aria-hidden="true" className='runnable-state fa'></i>
           <span
-            aria-expanded={model.isOpen}
+            aria-expanded={!!model.isOpen}
             className='runnable-title'
             onKeyPress={onEnterOrSpace(model.toggleOpen)}
             role='button'
@@ -54,6 +58,7 @@ class Test extends Component<Props> {
           </div>
         </div>
         {this._contents()}
+        <TestError model={model} />
       </div>
     )
   }

@@ -5,12 +5,12 @@ $utils = require("../../cypress/utils")
 module.exports = (Commands, Cypress, cy, state, config) ->
   command = (ctx, name, args...) ->
     if not ctx[name]
-      cmds = _.keys($Chainer.prototype).join(", ")
+      cmds = "\`#{_.keys($Chainer.prototype).join("`, `")}\`"
       $errUtils.throwErrByPath("miscellaneous.invalid_command", {
         args: { name, cmds }
       })
 
-    ctx[name].apply(window, args)
+    ctx[name].apply(ctx, args)
 
   Commands.addChainer({
     command: (chainer, args) ->

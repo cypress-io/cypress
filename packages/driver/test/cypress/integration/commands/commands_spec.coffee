@@ -70,8 +70,8 @@ describe "src/cy/commands/commands", ->
         cmds = _.keys(cy.getChainer().prototype)
         expect(cmds).to.include.members('get should click type visit'.split(' '))
         expect(cmds.length).to.be.gt(1)
-        expect(err.message).to.eq("Could not find a command for: 'fooDoesNotExist'.\n\nAvailable commands are: #{cmds.join(", ")}.\n")
-
+        expect(err.message).to.eq("Could not find a command for: `fooDoesNotExist`.\n\nAvailable commands are: \`#{cmds.join("`, `")}\`.\n")
+        expect(err.docsUrl).to.eq("https://on.cypress.io/api")
         done()
 
       cy.get("body").command("fooDoesNotExist", "bar", "baz")

@@ -93,6 +93,11 @@ systemConfigKeys = toWords """
   browsers
 """
 
+# Know experimental flags / values
+# each should start with "experimental" and be camel cased
+# example: experimentalComponentTesting
+experimentalConfigKeys = []
+
 CONFIG_DEFAULTS = {
   port:                          null
   hosts:                         null
@@ -149,6 +154,10 @@ CONFIG_DEFAULTS = {
 
   ## deprecated
   javascripts:                   []
+
+  ## experimental keys (should all start with "experimental" prefix)
+  # example for component testing with subkeys
+  # experimentalComponentTesting: { componentFolder: 'cypress/component' }
 }
 
 validationRules = {
@@ -190,6 +199,7 @@ validationRules = {
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
   firefoxGcInterval: v.isValidFirefoxGcInterval
+  # experimental flag validation below
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -233,7 +243,7 @@ hideSpecialVals = (val, key) ->
   return val
 
 module.exports = {
-  getConfigKeys: -> configKeys
+  getConfigKeys: -> configKeys.concat(experimentalConfigKeys)
 
   isValidCypressInternalEnvValue: (value) ->
     # names of config environments, see "config/app.yml"
@@ -241,7 +251,11 @@ module.exports = {
     _.includes(names, value)
 
   whitelist: (obj = {}) ->
-    propertyNames = configKeys.concat(breakingConfigKeys).concat(systemConfigKeys)
+    propertyNames = configKeys
+      .concat(breakingConfigKeys)
+      .concat(systemConfigKeys)
+      .concat(experimentalConfigKeys)
+
     _.pick(obj, propertyNames)
 
   get: (projectRoot, options = {}) ->
@@ -400,6 +414,7 @@ module.exports = {
     ## and change the resolved values of cfg
     ## to point to the plugin
     if diffs
+      debug("resolved config before diffs %o", cfg.resolved)
       @setPluginResolvedOn(cfg.resolved, diffs)
       debug("resolved config object %o", cfg.resolved)
 
@@ -432,7 +447,7 @@ module.exports = {
     ## pick out only known configuration keys
     _
     .chain(config)
-    .pick(configKeys.concat(systemConfigKeys))
+    .pick(configKeys.concat(systemConfigKeys).concat(experimentalConfigKeys))
     .mapValues (val, key) ->
       source = (s) ->
         {
