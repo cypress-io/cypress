@@ -2,13 +2,7 @@ import Err from './err-model'
 
 describe('Err model', () => {
   context('.displayMessage', () => {
-    it('returns combo of name and mdMessage', () => {
-      const err = new Err({ name: 'BadError', mdMessage: 'Something went poorly', message: 'Something went wrong' })
-
-      expect(err.displayMessage).to.equal('BadError: Something went poorly')
-    })
-
-    it('returns combo of name and message if no mdMessage', () => {
+    it('returns combo of name and message', () => {
       const err = new Err({ name: 'BadError', message: 'Something went wrong' })
 
       expect(err.displayMessage).to.equal('BadError: Something went wrong')

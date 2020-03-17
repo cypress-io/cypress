@@ -134,7 +134,6 @@ describe('test errors', function () {
     this.commandErr = {
       name: 'CommandError',
       message: '`foo` \\`bar\\` **baz** *fizz* ** buzz **',
-      mdMessage: '`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`',
       stack: `Some Error
         at foo.bar (my/app.js:2:7)
           at baz.qux (cypress/integration/foo_spec.js:5:2)

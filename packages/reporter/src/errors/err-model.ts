@@ -4,7 +4,6 @@ import { computed, observable } from 'mobx'
 export interface ErrProps {
   name?: string
   message?: string
-  mdMessage?: string
   stack?: string
   sourceMappedStack?: string
   parsedStack?: object[]
@@ -19,7 +18,6 @@ export default class Err {
   @observable stack = ''
   @observable sourceMappedStack = ''
   @observable.ref parsedStack = []
-  @observable mdMessage = ''
   @observable docsUrl = ''
   @observable templateType = ''
   // @ts-ignore
@@ -30,9 +28,7 @@ export default class Err {
   }
 
   @computed get displayMessage () {
-    if (!this.name && !this.mdMessage) return ''
-
-    return `${this.name}: ${this.mdMessage}`
+    return `${this.name}: ${this.message}`
   }
 
   @computed get isCommandErr () {
@@ -45,7 +41,6 @@ export default class Err {
     if (props.name) this.name = props.name
     if (props.message) this.message = props.message
     // @ts-ignore
-    if (props.mdMessage || props.message) this.mdMessage = props.mdMessage || props.message
     if (props.stack) this.stack = props.stack
     if (props.docsUrl) this.docsUrl = props.docsUrl
     if (props.sourceMappedStack) this.sourceMappedStack = props.sourceMappedStack
