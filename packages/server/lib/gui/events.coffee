@@ -20,7 +20,7 @@ ensureUrl   = require("../util/ensure-url")
 chromePolicyCheck = require("../util/chrome_policy_check")
 browsers    = require("../browsers")
 konfig      = require("../konfig")
-editors = require("../util/editors")
+editors     = require("../util/editors")
 
 nullifyUnserializableValues = (obj) =>
   ## nullify values that cannot be cloned
