@@ -5,6 +5,7 @@ EE       = require("events")
 extension = require("@packages/extension")
 electron = require("electron")
 Promise  = require("bluebird")
+debug    = require("debug")("test")
 chromePolicyCheck = require("#{root}../lib/util/chrome_policy_check")
 cache    = require("#{root}../lib/cache")
 logger   = require("#{root}../lib/logger")
@@ -703,15 +704,31 @@ describe "lib/gui/events", ->
     describe "launch:browser", ->
       it "launches browser via openProject", ->
         sinon.stub(openProject, 'launch').callsFake (browser, spec, opts) ->
-          expect(browser).to.eq('foo')
-          expect(spec).to.eq('bar')
+          debug("spec was %o", spec)
+          expect(browser, "browser").to.eq('foo')
+          expect(spec, "spec").to.deep.equal({
+            name: "bar",
+            absolute: "/path/to/bar",
+            relative: "to/bar",
+            specType: "integration"
+          })
 
           opts.onBrowserOpen()
           opts.onBrowserClose()
 
           Promise.resolve()
 
-        @handleEvent("launch:browser", { browser: 'foo', spec: 'bar' }).then =>
+        spec = {
+          name: "bar",
+          absolute: "/path/to/bar",
+          relative: "to/bar"
+        }
+        arg = {
+          browser: 'foo',
+          spec,
+          specType: 'integration'
+        }
+        @handleEvent("launch:browser", arg).then =>
           expect(@send.getCall(0).args[1].data).to.include({ browserOpened: true })
           expect(@send.getCall(1).args[1].data).to.include({ browserClosed: true })
 
