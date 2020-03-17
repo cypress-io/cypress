@@ -41,16 +41,10 @@ export function forkWithCorrectOptions (): void {
     ORIGINAL_NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS,
   })
 
-  cp.fork(
-    // @ts-ignore
-    require.main.filename,
+  cp.spawn(
+    process.execPath,
     process.argv.slice(1),
-    // @ts-ignore
-    {
-      // This is actually the correct way to do it, despite TS - ['inherit', 'inherit', 'inherit'] won't work with cp.fork
-      // @see https://github.com/nodejs/node/blob/2f45ad8060e13d5ac912335096d21526f2f9602b/lib/child_process.js#L106-L115
-      stdio: 'inherit',
-    },
+    { stdio: 'inherit' },
   )
   .on('error', () => {})
   .on('exit', (code) => {
