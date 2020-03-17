@@ -324,7 +324,7 @@ module.exports = {
 
     debug('open %o', { browser, url })
 
-    return savedState(projectRoot, isTextTerminal)
+    return savedState.create(projectRoot, isTextTerminal)
     .then((state) => {
       return state.get()
     }).then((state) => {
