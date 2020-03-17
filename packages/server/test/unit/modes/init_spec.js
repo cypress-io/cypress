@@ -122,6 +122,168 @@ describe('/lib/modes/init', () => {
           })
         })
       })
+
+      describe('fromCommandArgs', () => {
+        describe('config options', () => {
+          it('noFixtures', () => {
+            const option = scaffold.option.fromCommandArgs({
+              noFixtures: true,
+            })
+
+            expect(option).to.deep.eq({
+              config: {
+                fixturesFolder: false,
+              },
+            })
+          })
+
+          it('fixturesPath', () => {
+            const option = scaffold.option.fromCommandArgs({
+              fixturesPath: 'hello/path',
+            })
+
+            expect(option).to.deep.eq({
+              config: {
+                fixturesFolder: 'hello/path',
+              },
+            })
+          })
+
+          it('fixturesPath is ignored if default', () => {
+            const option = scaffold.option.fromCommandArgs({
+              fixturesPath: defaultValues['fixturesFolder'],
+            })
+
+            expect(option).to.deep.eq({
+              config: { },
+            })
+          })
+
+          it('noSupport', () => {
+            const option = scaffold.option.fromCommandArgs({
+              noSupport: true,
+            })
+
+            expect(option).to.deep.eq({
+              config: {
+                supportFile: false,
+              },
+            })
+          })
+
+          it('supportPath', () => {
+            const option = scaffold.option.fromCommandArgs({
+              supportPath: 'hi/path.js',
+            })
+
+            expect(option).to.deep.eq({
+              config: {
+                supportFile: 'hi/path.js',
+              },
+            })
+          })
+
+          it('supportPath is ignored if default', () => {
+            const option = scaffold.option.fromCommandArgs({
+              supportPath: defaultValues['supportFile'],
+            })
+
+            expect(option).to.deep.eq({
+              config: { },
+            })
+          })
+
+          it('noPlugins', () => {
+            const option = scaffold.option.fromCommandArgs({
+              noPlugins: true,
+            })
+
+            expect(option).to.deep.eq({
+              config: {
+                pluginsFile: false,
+              },
+            })
+          })
+
+          it('pluginsPath', () => {
+            const option = scaffold.option.fromCommandArgs({
+              pluginsPath: 'good/plugin.js',
+            })
+
+            expect(option).to.deep.eq({
+              config: {
+                pluginsFile: 'good/plugin.js',
+              },
+            })
+          })
+
+          it('pluginsPath is ignored if default', () => {
+            const option = scaffold.option.fromCommandArgs({
+              pluginsPath: defaultValues['pluginsFile'],
+            })
+
+            expect(option).to.deep.eq({
+              config: { },
+            })
+          })
+
+          it('integrationPath', () => {
+            const option = scaffold.option.fromCommandArgs({
+              integrationPath: 'int/egra/tion',
+            })
+
+            expect(option).to.deep.eq({
+              config: {
+                integrationFolder: 'int/egra/tion',
+              },
+            })
+          })
+
+          it('integrationPath is ignored if default', () => {
+            const option = scaffold.option.fromCommandArgs({
+              integrationPath: defaultValues['integrationFolder'],
+            })
+
+            expect(option).to.deep.eq({
+              config: { },
+            })
+          })
+
+          it('noVideo', () => {
+            const option = scaffold.option.fromCommandArgs({
+              noVideo: true,
+            })
+
+            expect(option).to.deep.eq({
+              config: {
+                video: false,
+              },
+            })
+          })
+        })
+
+        it('example', () => {
+          const option = scaffold.option.fromCommandArgs({
+            example: true,
+          })
+
+          expect(option).to.deep.eq({
+            config: {},
+            example: true,
+          })
+        })
+
+        it('typescript', () => {
+          const option = scaffold.option.fromCommandArgs({
+            typescript: true,
+          })
+
+          expect(option).to.deep.eq({
+            config: {},
+            typescript: true,
+          })
+        })
+      })
     })
 
     describe('create', () => {

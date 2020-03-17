@@ -1,4 +1,4 @@
-import { Args } from '../args'
+import { Args, InitConfig } from '../types'
 import { defaultValues } from './option_info'
 
 export const checkArgs = (args: Args) => {
@@ -72,10 +72,52 @@ export const checkArgs = (args: Args) => {
   })
 }
 
-export const fromCommandArgs = (args) => {
-  return {
+export const fromCommandArgs = (args: Args) => {
+  const result: InitConfig = {
     config: {},
   }
+
+  if (args.example) {
+    result.example = true
+  }
+
+  if (args.typescript) {
+    result.typescript = true
+  }
+
+  if (args.noFixtures) {
+    result.config.fixturesFolder = false
+  }
+
+  if (args.fixturesPath && args.fixturesPath !== defaultValues['fixturesFolder']) {
+    result.config.fixturesFolder = args.fixturesPath
+  }
+
+  if (args.noSupport) {
+    result.config.supportFile = false
+  }
+
+  if (args.supportPath && args.supportPath !== defaultValues['supportFile']) {
+    result.config.supportFile = args.supportPath
+  }
+
+  if (args.integrationPath && args.integrationPath !== defaultValues['integrationFolder']) {
+    result.config.integrationFolder = args.integrationPath
+  }
+
+  if (args.noPlugins) {
+    result.config.pluginsFile = false
+  }
+
+  if (args.pluginsPath && args.pluginsPath !== defaultValues['pluginsFile']) {
+    result.config.pluginsFile = args.pluginsPath
+  }
+
+  if (args.noVideo) {
+    result.config.video = false
+  }
+
+  return result
 }
 
 export const fromPrompts = (args) => {

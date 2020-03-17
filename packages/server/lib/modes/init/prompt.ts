@@ -1,5 +1,5 @@
 import * as Scaffold from './scaffold'
-import { Args } from './args'
+import { Args } from './types'
 
 export const prompt = async (args: Args) => {
   Scaffold.option.checkArgs(args)

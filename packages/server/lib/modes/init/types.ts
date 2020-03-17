@@ -12,3 +12,17 @@ export interface Args {
   example?: boolean
   typescript?: boolean
 }
+
+export interface Config {
+  fixturesFolder?: string | false
+  supportFile?: string | false
+  pluginsFile?: string | false
+  integrationFolder?: string
+  video?: boolean
+}
+
+export interface InitConfig {
+  config: Config
+  example?: boolean
+  typescript?: boolean
+}
