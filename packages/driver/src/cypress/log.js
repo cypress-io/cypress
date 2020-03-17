@@ -229,7 +229,7 @@ const Log = function (cy, state, config, obj) {
       .omit('error')
       .omitBy(_.isFunction)
       .extend({
-        err: $errUtils.serializeError(this.get('error')),
+        err: $errUtils.wrapErr(this.get('error')),
         consoleProps: this.invoke('consoleProps'),
         renderProps: this.invoke('renderProps'),
       })

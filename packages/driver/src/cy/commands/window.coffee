@@ -178,7 +178,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           orientationIsValidAndLandscape = (orientation) =>
             if orientation not in validOrientations
-              all = validOrientations.join("' or '")
+              all = validOrientations.join("` or `")
               $errUtils.throwErrByPath "viewport.invalid_orientation", {
                 onFail: options._log
                 args: { all, orientation }
