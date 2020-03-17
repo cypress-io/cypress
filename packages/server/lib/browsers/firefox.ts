@@ -10,7 +10,9 @@ import firefoxUtil from './firefox-util'
 import utils from './utils'
 import * as launcherDebug from '@packages/launcher/lib/log'
 import { Browser } from './types'
+import os from 'os'
 const errors = require('../errors')
+const exec = require('child_process').exec
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -419,5 +421,38 @@ export async function open (browser: Browser, url, options: any = {}) {
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
   })
 
+  // Override the .kill method for Windows so that the Browsers closes b/w specs
+  if (os.platform() === 'win32') {
+    browserInstance.kill = async (...args) => {
+      debug('closing firefox on Windows')
+
+      killFirefoxInstanceWin32(browserInstance)
+    }
+  }
+
   return browserInstance
+}
+
+const killFirefoxInstanceWin32 = (browserInstance) => {
+  let instanceKill = `TASKKILL /T /PID ${browserInstance.pid}`
+
+  let parentPidFile = browserInstance.spawnargs[browserInstance.spawnargs.length - 1].split('\\')
+  let parentPidWithFilename = parentPidFile[parentPidFile.length - 1].split('-')
+  let parentPid = parentPidWithFilename[parentPidWithFilename.length - 1]
+
+  let parentKill = `TASKKILL /T /PID ${parentPid}`
+
+  exec(instanceKill, { shell: 'cmd.exe' }, (error, stdout, stderr) => {
+    debug('killed child process in exec')
+    debug('instance/child process kill error:', error)
+    debug('instance/child process kill stdout', stdout)
+    debug('instance/child process kill stderr', stderr)
+
+    exec(parentKill, { shell: 'cmd.exe' }, (error, stdout, stderr) => {
+      debug('killed parent process in exec')
+      debug('parent process kill error:', error)
+      debug('parent process kill stdout', stdout)
+      debug('parent process kill stderr', stderr)
+    })
+  })
 }
