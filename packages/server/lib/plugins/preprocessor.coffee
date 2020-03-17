@@ -6,7 +6,7 @@ Promise = require("bluebird")
 appData = require("../util/app_data")
 cwd = require("../cwd")
 plugins = require("../plugins")
-{ toHashName } = require("../saved_state")
+savedState = require("../saved_state")
 
 errorMessage = (err = {}) ->
   (err.stack ? err.annotated ? err.message ? err.toString())

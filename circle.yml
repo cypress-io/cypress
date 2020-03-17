@@ -610,6 +610,11 @@ jobs:
       - run:
           command: yarn workspace @packages/desktop-gui build-prod
       - run:
+          name: Desktop GUI server
+          command: yarn start
+          working_directory: packages/desktop-gui
+          background: true
+      - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -618,6 +623,27 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
+
+  desktop-gui-visual-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn lerna exec --scope @packages/desktop-gui "yarn build-prod"
+      - run:
+          name: Desktop GUI server
+          command: yarn start
+          working_directory: packages/desktop-gui
+          background: true
+      - run:
+          # will use PERCY_TOKEN environment variable if available
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            yarn lerna exec --scope @packages/desktop-gui "yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js"
+      # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
   "reporter-integration-tests":
@@ -1229,6 +1255,9 @@ linux-workflow: &linux-workflow
     #     requires:
     #       - build
     - desktop-gui-integration-tests-2x:
+        requires:
+          - build
+    - desktop-gui-visual-tests:
         requires:
           - build
     - reporter-integration-tests:

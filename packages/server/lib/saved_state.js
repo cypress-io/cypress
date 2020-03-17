@@ -101,7 +101,7 @@ const normalizeAndWhitelistSet = (set, key, value) => {
 
   if (invalidKeys.length) {
     // eslint-disable-next-line no-console
-    console.error(`WARNING: attempted to save state for non-whitelisted key(s): ${invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.coffee`)
+    console.error(`WARNING: attempted to save state for non-whitelisted key(s): ${invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.js`)
   }
 
   return set(_.pick(valueObject, whitelist))
