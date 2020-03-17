@@ -4,7 +4,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:driver:actionability')
 
 const $dom = require('../dom')
-const $utils = require('../cypress/utils')
+const $errUtils = require('../cypress/error_utils')
 
 const delay = 50
 
@@ -207,7 +207,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
       // start nudging
       return scrollContainers(
-        getAllScrollables([], $el)
+        getAllScrollables([], $el),
       )
     }
   }
@@ -251,7 +251,7 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
   // if we dont have at least 2 points
   // then automatically retry
   if (coordsHistory.length < 2) {
-    throw $utils.cypressErr('coordsHistory must be at least 2 sets of coords')
+    $errUtils.throwErrByPath('dom.animation_coords_history_invalid')
   }
 
   // verify that our element is not currently animating
@@ -315,6 +315,8 @@ const verify = function (cy, $el, options, callbacks) {
         // scroll the element into view
         $el.get(0).scrollIntoView()
 
+        debug('scrollIntoView:', $el[0])
+
         if (onScroll) {
           onScroll($el, 'element')
         }
@@ -351,7 +353,7 @@ const verify = function (cy, $el, options, callbacks) {
         ensureNotAnimating(cy, $el, coordsHistory, options.animationDistanceThreshold)
 
         // now that we know our element isn't animating its time
-        // to figure out if its being covered by another element.
+        // to figure out if it's being covered by another element.
         // this calculation is relative from the viewport so we
         // only care about fromElViewport coords
         $elAtCoords = options.ensure.notCovered && ensureElIsNotCovered(cy, win, $el, coords.fromElViewport, options, _log, onScroll)

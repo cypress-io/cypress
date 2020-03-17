@@ -7,6 +7,9 @@ specsUtil   = require("../util/specs")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
 debug       = require("debug")("cypress:server:controllers")
+{ escapeFilenameInUrl } = require('../util/escape_filename')
+
+SPEC_URL_PREFIX = "/__cypress/tests?p"
 
 module.exports = {
   handleFiles: (req, res, config) ->
@@ -24,6 +27,12 @@ module.exports = {
 
     @getSpecs(test, config)
     .then (specs) =>
+      specs = specs.map((fileName) =>
+        fileName = fileName.replace(SPEC_URL_PREFIX, "__CYPRESS_SPEC_URL_PREFIX__")
+
+        return escapeFilenameInUrl(fileName).replace("__CYPRESS_SPEC_URL_PREFIX__", SPEC_URL_PREFIX)
+      )
+
       @getJavascripts(config)
       .then (js) =>
         res.render iframePath, {
@@ -67,7 +76,7 @@ module.exports = {
 
   getTestUrl: (file) ->
     file += CacheBuster.get()
-    "/__cypress/tests?p=#{file}"
+    "#{SPEC_URL_PREFIX}=#{file}"
 
   getTitle: (test) ->
     if test is "__all" then "All Tests" else test

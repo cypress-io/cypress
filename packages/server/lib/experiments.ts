@@ -22,6 +22,9 @@ type CypressProject = unknown
 interface CypressExperiment {
   enabled: boolean // is the experiment enabled
   value: unknown // current value
+  key: string // usually the config key used to control the experiment
+  name: string // short name of the experiment
+  summary: string // one or two line experiment summary
 }
 
 /**
@@ -31,7 +34,48 @@ interface CypressExperiments {
   [key: string]: CypressExperiment
 }
 
-export const getExperimentsFromResolved = (resolvedConfig): CypressExperiments => {
+interface StringValues {
+  [key: string]: string
+}
+
+/**
+ * Keeps summaries of experiments. Each summary is 1 - 2 sentences
+ * describing the purpose of the experiment.
+ * When adding an experiment, add its summary text here.
+ *
+ * @example
+  ```
+  {
+    experimentalComponentTesting: 'Allows mounting and testing framework-specific components'
+  }
+  ```
+*/
+const _summaries: StringValues = {}
+
+/**
+ * Keeps short names for experiments. When adding new experiments, add a short name.
+ * The name and summary will be shown in the Settings tab of the Desktop GUI.
+ * @example
+  ```
+  {
+    experimentalComponentTesting: 'Component Testing'
+  }
+  ```
+*/
+const _names: StringValues = {}
+
+/**
+ * Export this object for easy stubbing from end-to-end tests.
+ * If you cannot easily pass "names" and "summaries" arguments
+ * to "getExperimentsFromResolved" function, then use this
+ * object to change "experiments.names" and "experimental.summaries" objects.
+*/
+export const experimental = {
+  names: _names,
+  summaries: _summaries,
+}
+
+export const getExperimentsFromResolved = (resolvedConfig, names = experimental.names, summaries = experimental.summaries): CypressExperiments => {
   const experiments: CypressExperiments = {}
 
   if (!resolvedConfig) {
@@ -40,13 +84,26 @@ export const getExperimentsFromResolved = (resolvedConfig): CypressExperiments =
     return experiments
   }
 
-  const experimentalKeys = Object.keys(resolvedConfig).filter((key) => key.startsWith('experimental'))
+  const isExperimentKey = (key) => key.startsWith('experimental')
+  const experimentalKeys = Object.keys(resolvedConfig).filter(isExperimentKey)
 
   experimentalKeys.forEach((key) => {
+    const name = get(names, key)
+
+    if (!name) {
+      // ignore unknown experiments
+      return
+    }
+
+    const summary = get(summaries, key, 'top secret')
+
     // it would be nice to have default value in the resolved config
     experiments[key] = {
+      key,
       value: resolvedConfig[key].value,
       enabled: resolvedConfig[key].from !== 'default',
+      name,
+      summary,
     }
   })
 
@@ -58,8 +115,17 @@ export const getExperimentsFromResolved = (resolvedConfig): CypressExperiments =
  * and have non-default values and returns a simple object with {key: {value, enabled}}
  * where "on" is set to true if the value is different from default..
  */
-export const getExperiments = (project: CypressProject): CypressExperiments => {
+export const getExperiments = (project: CypressProject, names = experimental.names, summaries = experimental.summaries): CypressExperiments => {
   const resolvedEnv = get(project, 'resolvedConfig', {})
 
-  return getExperimentsFromResolved(resolvedEnv)
+  return getExperimentsFromResolved(resolvedEnv, names, summaries)
+}
+
+/**
+ * Whilelist known experiments here to avoid accidentally showing
+ * any config key that starts with "experimental" prefix
+*/
+// @ts-ignore
+export const isKnownExperiment = (experiment, key) => {
+  return Object.keys(experimental.names).includes(key)
 }

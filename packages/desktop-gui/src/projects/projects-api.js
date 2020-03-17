@@ -127,7 +127,7 @@ const closeProject = (project) => {
 
   return Promise.join(
     closeBrowser(project),
-    ipc.closeProject()
+    ipc.closeProject(),
   )
 }
 
@@ -202,12 +202,16 @@ const openProject = (project) => {
 
 const reopenProject = (project) => {
   project.clearError()
-  project.clearWarning()
+  project.dismissWarning()
 
   return closeProject(project)
   .then(() => {
     return openProject(project)
   })
+}
+
+const pingBaseUrl = (url) => {
+  return ipc.pingBaseUrl(url)
 }
 
 const removeProject = (project) => {
@@ -241,4 +245,5 @@ export default {
   runSpec,
   closeBrowser,
   getRecordKeys,
+  pingBaseUrl,
 }

@@ -5,7 +5,7 @@ Promise = require("bluebird")
 
 $Screenshot = require("../../cypress/screenshot")
 $dom = require("../../dom")
-$utils = require("../../cypress/utils")
+$errUtils = require("../../cypress/error_utils")
 
 getViewportHeight = (state) ->
   ## TODO this doesn't seem correct
@@ -55,9 +55,9 @@ automateScreenshot = (state, options = {}) ->
     automate()
     .timeout(timeout)
     .catch (err) ->
-      $utils.throwErr(err, { onFail: options.log })
+      $errUtils.throwErr(err, { onFail: options.log })
     .catch Promise.TimeoutError, (err) ->
-      $utils.throwErrByPath "screenshot.timed_out", {
+      $errUtils.throwErrByPath "screenshot.timed_out", {
         onFail: options.log
         args: { timeout }
       }
@@ -83,7 +83,7 @@ scrollOverrides = (win, doc) ->
 
 validateNumScreenshots = (numScreenshots, automationOptions) ->
   if numScreenshots < 1
-    $utils.throwErrByPath("screenshot.invalid_height", {
+    $errUtils.throwErrByPath("screenshot.invalid_height", {
       log: automationOptions.log
     })
 
@@ -170,7 +170,7 @@ takeElementScreenshot = ($el, state, automationOptions) ->
 
   scrolls = _.map _.times(numScreenshots), (index) ->
     y = elPosition.fromElWindow.top + (viewportHeight * index)
-    
+
     afterScroll = ->
       elPosition = applyPaddingToElementPositioning(
         $dom.getElementPositioning($el),
@@ -190,14 +190,14 @@ takeElementScreenshot = ($el, state, automationOptions) ->
       if index + 1 is numScreenshots
         overlap = (numScreenshots - 1) * viewportHeight + elPosition.fromElViewport.top
         heightLeft = elPosition.fromElViewport.bottom - overlap
-        
+
         return {
           x: x
           y: overlap
           width: width
           height: heightLeft
         }
-        
+
       return {
         x: x
         y: Math.max(0, elPosition.fromElViewport.top)
@@ -352,7 +352,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       isWin = $dom.isWindow(subject)
 
       screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "padding", "clip", "onBeforeScreenshot", "onAfterScreenshot")
-      screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
+      screenshotConfig = $Screenshot.validate(screenshotConfig, "screenshot", options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
 
       ## set this regardless of options.log b/c its used by the
@@ -374,7 +374,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
       if not isWin and subject and subject.length > 1
-        $utils.throwErrByPath("screenshot.multiple_elements", {
+        $errUtils.throwErrByPath("screenshot.multiple_elements", {
           log: options._log
           args: { numElements: subject.length }
         })

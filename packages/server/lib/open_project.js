@@ -121,11 +121,13 @@ const moduleFactory = () => {
             }
           }
 
+          options.onError = openProject.options.onError
+
           relaunchBrowser = () => {
             debug(
               'launching browser: %o, spec: %s',
               browser,
-              spec.relative
+              spec.relative,
             )
 
             return browsers.open(browser, options, automation)
@@ -203,7 +205,7 @@ const moduleFactory = () => {
                 'found \'%d\' specs using spec pattern \'%s\': %o',
                 names.length,
                 cfg.testFiles,
-                names
+                names,
               )
             }
 

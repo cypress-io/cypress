@@ -14,6 +14,9 @@ describe('Settings', () => {
     this.goToSettings = () => {
       cy.get('.navbar-default')
       cy.get('a').contains('Settings').click()
+      // make sure the common sections are shown
+      cy.get('.settings-config')
+      cy.get('.settings-proxy')
     }
 
     cy.visitIndex().then(function (win) {
@@ -67,6 +70,7 @@ describe('Settings', () => {
       cy.contains('Your project\'s configuration is displayed').should('not.exist')
       cy.contains('Record Keys allow you to').should('not.exist')
       cy.contains(this.config.projectId).should('not.exist')
+      cy.percySnapshot()
     })
 
     context('on:focus:tests clicked', () => {
@@ -103,6 +107,8 @@ describe('Settings', () => {
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
         cy.get('.config-vars').invoke('text')
         .should('contain', '0:Chrome')
+
+        cy.percySnapshot()
       })
 
       it('removes the summary list of values once a key is expanded', () => {
@@ -443,6 +449,8 @@ describe('Settings', () => {
 
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
+
+          cy.percySnapshot()
         })
       })
     })
@@ -457,6 +465,7 @@ describe('Settings', () => {
         this.goToSettings()
 
         cy.contains('h5', 'Record Keys').should('not.exist')
+        cy.percySnapshot()
       })
 
       it('does not show ci Keys section when project is invalid', function () {
@@ -466,6 +475,7 @@ describe('Settings', () => {
         this.goToSettings()
 
         cy.contains('h5', 'Record Keys').should('not.exist')
+        cy.percySnapshot()
       })
     })
 
@@ -522,9 +532,53 @@ describe('Settings', () => {
     })
   })
 
+  describe('errors', () => {
+    beforeEach(function () {
+      this.err = {
+        title: 'Foo Title',
+        message: 'Port \'2020\' is already in use.',
+        name: 'Error',
+        port: 2020,
+        portInUse: true,
+        stack: '[object Object]↵  at Object.API.get (/Users/jennifer/Dev/Projects/cypress-app/lib/errors.coffee:55:15)↵  at Object.wrapper [as get] (/Users/jennifer/Dev/Projects/cypress-app/node_modules/lodash/lodash.js:4414:19)↵  at Server.portInUseErr (/Users/jennifer/Dev/Projects/cypress-app/lib/server.coffee:58:16)↵  at Server.onError (/Users/jennifer/Dev/Projects/cypress-app/lib/server.coffee:86:19)↵  at Server.g (events.js:273:16)↵  at emitOne (events.js:90:13)↵  at Server.emit (events.js:182:7)↵  at emitErrorNT (net.js:1253:8)↵  at _combinedTickCallback (internal/process/next_tick.js:74:11)↵  at process._tickDomainCallback (internal/process/next_tick.js:122:9)↵From previous event:↵    at fn (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:57919:14)↵    at Object.appIpc [as ipc] (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:57939:10)↵    at openProject (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:59135:24)↵    at new Project (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:58848:34)↵    at ReactCompositeComponentMixin._constructComponentWithoutOwner (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44052:27)↵    at ReactCompositeComponentMixin._constructComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44034:21)↵    at ReactCompositeComponentMixin.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:43953:21)↵    at Object.ReactReconciler.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51315:35)↵    at ReactCompositeComponentMixin.performInitialMount (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44129:34)↵    at ReactCompositeComponentMixin.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44016:21)↵    at Object.ReactReconciler.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51315:35)↵    at ReactDOMComponent.ReactMultiChild.Mixin._mountChildAtIndex (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50247:40)↵    at ReactDOMComponent.ReactMultiChild.Mixin._updateChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50163:43)↵    at ReactDOMComponent.ReactMultiChild.Mixin.updateChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50123:12)↵    at ReactDOMComponent.Mixin._updateDOMChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45742:12)↵    at ReactDOMComponent.Mixin.updateComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45571:10)↵    at ReactDOMComponent.Mixin.receiveComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45527:10)↵    at Object.ReactReconciler.receiveComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51396:22)↵    at ReactCompositeComponentMixin._updateRenderedComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44547:23)',
+        type: 'PORT_IN_USE_SHORT',
+      }
+
+      this.config.resolved.baseUrl.value = 'http://localhost:7777'
+
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+      this.openProject.resolve(this.config)
+      this.goToSettings()
+      cy.contains('Configuration').click()
+
+      cy.contains('http://localhost:7777').then(() => {
+        this.ipc.openProject.onCall(1).rejects(this.err)
+
+        this.ipc.onConfigChanged.yield()
+      })
+    })
+
+    it('displays errors', () => {
+      cy.contains('Foo Title')
+    })
+
+    it('displays config after error is fixed', function () {
+      cy.contains('Foo Title').then(() => {
+        this.ipc.openProject.onCall(1).resolves(this.config)
+
+        this.ipc.onConfigChanged.yield()
+      })
+
+      cy.contains('Configuration')
+    })
+  })
+
   describe('proxy settings panel', () => {
     beforeEach(function () {
       this.openProject.resolve(this.config)
+      this.config.resolved.baseUrl.value = 'http://localhost:7777'
+
       this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
 
@@ -562,11 +616,6 @@ describe('Settings', () => {
         proxyServer: 'http://foo-bar.baz',
         proxyBypassList: 'a,b,c,d',
       })
-
-      cy.get('.settings-proxy').should('contain', 'from environment variables')
-      cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
-
-      cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
     })
 
     it('with no bypass list but a proxy set shows \'none\' in bypass list', () => {
@@ -580,9 +629,13 @@ describe('Settings', () => {
   })
 
   describe('experiments panel', () => {
-    beforeEach(() => {
-      cy.viewport(800, 800)
-    })
+    const hasNoExperimentsPanel = () => {
+      // there are several settings panels,
+      // let's make sure they are loaded
+      cy.get('[class*=settings-]').should('have.length.gt', 1)
+      // but the experiments panel should not be there at all
+      cy.get('.settings-experiments').should('not.exist')
+    }
 
     describe('no experimental features turned on', () => {
       beforeEach(function () {
@@ -591,66 +644,108 @@ describe('Settings', () => {
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
         this.goToSettings()
-        cy.contains('Experiments').click()
       })
 
-      it('has learn more link', () => {
+      it('displays panel with no experiments', () => {
+        hasNoExperimentsPanel()
+        cy.percySnapshot()
+      })
+    })
+
+    describe('unknown experiments', () => {
+      beforeEach(function () {
+        this.config.experimentalFoo = true
+        this.config.resolved.experimentalFoo = {
+          value: true,
+        }
+
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
+      })
+
+      it('are not shown', () => {
+        hasNoExperimentsPanel()
+      })
+    })
+
+    describe('experimental feature exists', () => {
+      beforeEach(function () {
+        // do not overwrite the shared object reference -
+        // because it is used by the app's code.
+        this.win.experimental.names.experimentalCoolFeature = 'Cool Feature'
+        this.win.experimental.summaries.experimentalCoolFeature = `
+          Enables super cool feature from Cypress where you can see the cool feature
+        `
+      })
+
+      const hasLearnMoreLink = () => {
         cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
         .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
         })
-      })
-
-      it('displays panel with no experiments', () => {
-        cy.get('.settings-experiments').contains('you can enable these beta')
-      })
-    })
-
-    describe('componentTesting', function () {
-      const openExperiments = (self) => {
-        self.openProject.resolve(self.config)
-        self.projectStatuses[0].id = self.config.projectId
-        self.getProjectStatus.resolve(self.projectStatuses[0])
-
-        self.goToSettings()
-        cy.contains('Experiments').click()
       }
 
       context('enabled', () => {
         beforeEach(function () {
-          this.config.resolved.experimentalComponentTesting = {
+          this.config.experimentalCoolFeature = true
+          this.config.resolved.experimentalCoolFeature = {
             value: true,
-            from: 'config', // anything but default means experiment was enabled
           }
 
-          openExperiments(this)
+          this.openProject.resolve(this.config)
+          this.projectStatuses[0].id = this.config.projectId
+          this.getProjectStatus.resolve(this.projectStatuses[0])
+
+          this.goToSettings()
+          cy.contains('Experiments').click()
         })
 
+        it('has learn more link', hasLearnMoreLink)
+
         it('displays experiment', () => {
-          cy.get('.settings-experiments').contains('Component Testing')
-          cy.get('[data-cy=component-testing]').find('.experiment-status').should('have.text', 'ON')
+          cy.get('.settings-experiments').contains('Cool Feature')
+          cy.get('.experiment-status-sign')
+          .should('have.class', 'enabled')
+          .and('have.text', 'ON')
+
+          cy.percySnapshot()
         })
       })
 
-      context('disabled', function () {
+      context('disabled', () => {
         beforeEach(function () {
-          this.config.resolved.experimentalComponentTesting = {
-            value: true,
-            from: 'default', // default value means experiment was not enabled
+          this.config.experimentalCoolFeature = false
+          this.config.resolved.experimentalCoolFeature = {
+            value: false,
+            from: 'default',
           }
 
-          openExperiments(this)
+          this.openProject.resolve(this.config)
+          this.projectStatuses[0].id = this.config.projectId
+          this.getProjectStatus.resolve(this.projectStatuses[0])
+
+          this.goToSettings()
+          cy.contains('Experiments').click()
         })
 
         it('displays experiment', () => {
-          cy.get('.settings-experiments').contains('Component Testing')
-          cy.get('[data-cy=component-testing]').find('.experiment-status').should('have.text', 'OFF')
+          cy.get('.settings-experiments').contains('Cool Feature')
+          cy.get('.experiment-status-sign')
+          .should('not.have.class', 'disabled')
+          .and('have.text', 'OFF')
+
+          cy.percySnapshot()
         })
       })
     })
   })
 
   describe('errors', () => {
+    const errorText = 'An unexpected error occurred'
+
     beforeEach(function () {
       this.err = {
         message: 'Port \'2020\' is already in use.',
@@ -677,11 +772,11 @@ describe('Settings', () => {
     })
 
     it('displays errors', () => {
-      cy.contains('Can\'t start server')
+      cy.contains(errorText)
     })
 
     it('displays config after error is fixed', function () {
-      cy.contains('Can\'t start server').then(() => {
+      cy.contains(errorText).then(() => {
         this.ipc.openProject.onCall(1).resolves(this.config)
 
         this.ipc.onConfigChanged.yield()

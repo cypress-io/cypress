@@ -19,6 +19,9 @@ describe('Warning Message', function () {
       cy.stub(this.ipc, 'onProjectWarning')
       cy.stub(this.ipc, 'externalOpen')
 
+      this.pingBaseUrl = this.util.deferred()
+      cy.stub(this.ipc, 'pingBaseUrl').returns(this.pingBaseUrl.promise)
+
       this.start()
     })
   })
@@ -38,7 +41,7 @@ describe('Warning Message', function () {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
 
-    cy.get('.alert-warning button').click()
+    cy.get('.alert-warning .close').click()
 
     cy.get('.alert-warning').should('not.exist')
   })
@@ -48,7 +51,7 @@ describe('Warning Message', function () {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
 
-    cy.get('.alert-warning button').click()
+    cy.get('.alert-warning .close').click()
     cy.get('.alert-warning').should('not.exist').then(() => {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
@@ -61,7 +64,7 @@ describe('Warning Message', function () {
       this.ipc.onProjectWarning.yield(null, this.warningObj)
     })
 
-    cy.get('.alert-warning button').click()
+    cy.get('.alert-warning .close').click()
     cy.get('.alert-warning').should('not.exist').then(() => {
       this.ipc.onProjectWarning.yield(null, {
         type: 'PRETTY_BAD_WARNING',
@@ -132,6 +135,64 @@ describe('Warning Message', function () {
     cy.get('.specs').invoke('position').its('top').should('gt', 100)
   })
 
+  it('does not show retry button for non-baseUrl warnings', function () {
+    cy.shouldBeOnProjectSpecs().then(() => {
+      this.ipc.onProjectWarning.yield(null, this.warningObj)
+    })
+
+    cy.contains('Try Again').should('not.exist')
+  })
+
+  context('baseUrl warnings', function () {
+    beforeEach(function () {
+      this.warningObj.type = 'CANNOT_CONNECT_BASE_URL_WARNING'
+
+      cy.shouldBeOnProjectSpecs().then(() => {
+        this.ipc.onProjectWarning.yield(null, this.warningObj)
+      })
+    })
+
+    it('shows retry button', function () {
+      cy.contains('Try Again')
+    })
+
+    it('pings baseUrl and disables retry button when clicked', function () {
+      cy.contains('Try Again').click()
+      .should('be.disabled')
+      .should('have.text', 'Retrying...')
+      .find('i').should('have.class', 'fa-spin')
+
+      cy.wrap(this.ipc.pingBaseUrl).should('be.called')
+    })
+
+    it('shows warning and enables retry button if baseUrl is still unreachable', function () {
+      cy.contains('Try Again').click().then(function () {
+        this.pingBaseUrl.reject(this.warningObj)
+      })
+
+      cy.get('.alert-warning').should('be.visible')
+      cy.contains('Try Again').should('not.be.disabled')
+      cy.contains('Try Again').find('i').should('not.have.class', 'fa-spin')
+    })
+
+    it('does not show warning if baseUrl is reachable', function () {
+      cy.contains('Try Again').click().then(function () {
+        this.pingBaseUrl.resolve()
+      })
+
+      cy.get('.alert-warning').should('not.be.visible')
+    })
+
+    it('shows real error if one results from pinging baseUrl', function () {
+      cy.contains('Try Again').click().then(function () {
+        this.pingBaseUrl.reject(new Error('Some other error'))
+      })
+
+      cy.contains('An unexpected error occurred')
+      cy.contains('Some other error')
+    })
+  })
+
   context('with multiple warnings', function () {
     beforeEach(function () {
       this.warningObj2 = {
@@ -166,12 +227,12 @@ describe('Warning Message', function () {
       .should('contain', 'Some warning')
       .should('contain', 'Other message')
 
-      cy.get('.alert-warning button').first().click()
+      cy.get('.alert-warning .close').first().click()
       cy.get('.alert-warning')
       .should('not.contain', 'Some warning')
       .should('contain', 'Other message')
 
-      cy.get('.alert-warning button').click()
+      cy.get('.alert-warning .close').click()
       cy.get('.alert-warning')
       .should('not.contain', 'Some warning')
       .should('not.contain', 'Other message')

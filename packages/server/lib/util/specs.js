@@ -39,7 +39,7 @@ function findSpecsOfType (searchOptions, specPattern) {
 
   debug(
     'looking for test specs in the folder:',
-    searchFolderPath
+    searchFolderPath,
   )
 
   if (specPattern) {
@@ -57,7 +57,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     fixturesFolderPath = path.join(
       searchOptions.fixturesFolder,
       '**',
-      '*'
+      '*',
     )
   }
 

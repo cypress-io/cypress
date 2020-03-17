@@ -45,7 +45,7 @@ module.exports = {
       user and user.authToken
 
   create: (err) ->
-    if process.env["CYPRESS_ENV"] isnt "production" or
+    if process.env["CYPRESS_INTERNAL_ENV"] isnt "production" or
        process.env["CYPRESS_CRASH_REPORTS"] is "0"
       return Promise.resolve()
 

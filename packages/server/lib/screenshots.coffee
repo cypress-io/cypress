@@ -166,47 +166,6 @@ pixelConditionFn = (data, image) ->
 
 multipartImages = []
 
-# compareUntilPixelsDiffer = (img1, img2) ->
-  ## NOTE: this is for comparing pixel by pixel which is useful
-  ## if you're trying to dig into the specific pixel differences
-  ##
-  ## we're making this as efficient as possible because
-  ## there are significant performance problems
-  ## getting a hash or buffer of all the image data.
-  ##
-  ## instead we will walk through two images comparing
-  ## them pixel by pixel until they don't match.
-  #
-  # iterations = 0
-  #
-  # { width, height } = img2.bitmap
-  #
-  # data1 = img1.bitmap.data
-  # data2 = img2.bitmap.data
-  #
-  # ret = (differences) ->
-  #   return {
-  #     iterations
-  #     differences
-  #   }
-  #
-  # for y in [0...height]
-  #   for x in [0...width]
-  #     iterations += 1
-  #
-  #     idx = (width * y + x) << 2
-  #
-  #     pix1 = data1.readUInt32BE(idx)
-  #     pix2 = data2.readUInt32BE(idx)
-  #
-  #     if pix1 isnt pix2
-  #       return ret([
-  #         intToRGBA(pix1),
-  #         intToRGBA(pix2)
-  #       ])
-  #
-  # return ret(null)
-
 clearMultipartState = ->
   debug("clearing %d cached multipart images", multipartImages.length)
   multipartImages = []

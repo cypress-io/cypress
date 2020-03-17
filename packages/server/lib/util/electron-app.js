@@ -14,6 +14,9 @@ const waitForReady = () => {
   const Promise = require('bluebird')
   const { app } = require('electron')
 
+  // @see https://github.com/electron/electron/issues/18397
+  app.allowRendererProcessReuse = true
+
   // electron >= 5.0.0 will exit the app if all browserwindows are closed,
   // this is obviously undesirable in run mode
   // https://github.com/cypress-io/cypress/pull/4720#issuecomment-514316695
