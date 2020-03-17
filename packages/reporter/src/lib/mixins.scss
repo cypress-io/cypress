@@ -1,14 +1,17 @@
 @mixin runnable-state-active {
   .runnable-state {
-    @extend .#{$fa-css-prefix}-refresh;
+    @extend .#{$fa-css-prefix}-sync-alt;
     @extend .#{$fa-css-prefix}-spin;
   }
 }
 
 @mixin runnable-state-processing {
   .runnable-state {
-    @extend .#{$fa-css-prefix}-square-o;
+    @extend .far;
+    @extend .#{$fa-css-prefix}-square;
     color: #888;
+    line-height: 18px; // @extend .far overrides line-height, so we need to set it again
+
   }
 }
 
@@ -35,7 +38,7 @@
 
 @mixin runnable-state-pending {
   .runnable-state {
-    @extend .#{$fa-css-prefix}-circle-o-notch;
+    @extend .#{$fa-css-prefix}-circle-notch;
     color: lighten($pending, 20%);
   }
 }

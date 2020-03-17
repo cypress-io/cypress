@@ -32,7 +32,7 @@ const ui = (specWindow, _mocha) => {
     this._ui = Mocha.interfaces[name]
 
     if (!this._ui) {
-      $utils.throwErrByPath('mocha.invalid_interface', { args: { name } })
+      $errUtils.throwErrByPath('mocha.invalid_interface', { args: { name } })
     }
 
     this._ui = this._ui(this.suite)

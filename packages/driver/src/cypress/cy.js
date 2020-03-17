@@ -928,7 +928,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     addChainer (name, fn) {
       // add this function to our chainer class
-      return $Chainer.add(name, fn)
+      return Chainer.add(name, fn)
     },
 
     addCommand ({ name, fn, type, prevSubject }) {
@@ -967,7 +967,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
         // this is the first call on cypress
         // so create a new chainer instance
-        const chain = $Chainer.create(name, args)
+        const chain = Chainer.create(name, args)
 
         // store the chain so we can access it later
         state('chain', chain)

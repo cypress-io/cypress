@@ -153,9 +153,9 @@ class RunnablesStore {
     })
   }
 
-  runnableStarted ({ id }: TestModel) {
-    this._withTest(id, (test) => {
-      return test.start()
+  runnableStarted (props: TestModel) {
+    this._withTest(props.id, (test) => {
+      return test.start(props)
     })
   }
 

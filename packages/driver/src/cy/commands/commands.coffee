@@ -6,7 +6,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   command = (ctx, name, args...) ->
     if not ctx[name]
       cmds = _.keys($Chainer.prototype).join(", ")
-      $utils.throwErrByPath("miscellaneous.invalid_command", {
+      $errUtils.throwErrByPath("miscellaneous.invalid_command", {
         args: { name, cmds }
       })
 

@@ -636,6 +636,7 @@ module.exports = {
 
 
     https://on.cypress.io/test-retries
+    """
 
   navigation:
     cross_origin: ({ message, originPolicy, configFile }) -> """
