@@ -32,7 +32,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       ## ensure the subject is not window itself
       ## cause how are you gonna scroll the window into view...
       if subject is state("window")
-        $utils.throwErrByPath("scrollIntoView.subject_is_window")
+        $errUtils.throwErrByPath("scrollIntoView.subject_is_window")
 
       ## throw if we're trying to scroll to multiple elements
       if subject.length > 1

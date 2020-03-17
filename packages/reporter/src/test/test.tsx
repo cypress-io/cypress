@@ -6,7 +6,6 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState, { AppState } from '../lib/app-state'
-import events, { Events } from '../lib/events'
 import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import scroller, { Scroller } from '../lib/scroller'
@@ -28,7 +27,6 @@ const NoCommands = observer(() => (
 
 interface Props {
   appState: AppState
-  events: Events
   runnablesStore: RunnablesStore
   scroller: Scroller
   model: TestModel
@@ -38,7 +36,6 @@ interface Props {
 class Test extends Component<Props> {
   static defaultProps = {
     appState,
-    events,
     runnablesStore,
     scroller,
   }
@@ -69,7 +66,7 @@ class Test extends Component<Props> {
   }
 
   render () {
-    const { events, model } = this.props
+    const { model } = this.props
 
     if (!model.shouldRender) return null
 
@@ -99,7 +96,7 @@ class Test extends Component<Props> {
           </div>
         </div>
         {this._contents()}
-        <TestError events={events} model={model} />
+        <TestError model={model} />
       </div>
     )
   }
