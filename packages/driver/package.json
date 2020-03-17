@@ -48,7 +48,7 @@
     "method-override": "3.0.0",
     "methods": "1.1.2",
     "minimatch": "3.0.4",
-    "minimist": "1.2.2",
+    "minimist": "1.2.5",
     "mocha": "7.0.1",
     "moment": "2.24.0",
     "morgan": "1.9.1",
