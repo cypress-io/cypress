@@ -8,6 +8,18 @@ describe('Err model', () => {
       expect(err.displayMessage).to.equal('BadError: Something went wrong')
     })
 
+    it('returns name if no message', () => {
+      const err = new Err({ name: 'BadError' })
+
+      expect(err.displayMessage).to.equal('BadError')
+    })
+
+    it('returns message if no name', () => {
+      const err = new Err({ message: 'Something went wrong' })
+
+      expect(err.displayMessage).to.equal('Something went wrong')
+    })
+
     it('returns empty string if no name or message', () => {
       const err = new Err()
 

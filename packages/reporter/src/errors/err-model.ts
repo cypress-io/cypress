@@ -1,4 +1,5 @@
 /* eslint-disable padding-line-between-statements */
+import _ from 'lodash'
 import { computed, observable } from 'mobx'
 
 export interface ErrProps {
@@ -28,7 +29,7 @@ export default class Err {
   }
 
   @computed get displayMessage () {
-    return `${this.name}: ${this.message}`
+    return _.compact([this.name, this.message]).join(': ')
   }
 
   @computed get isCommandErr () {
