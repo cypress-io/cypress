@@ -18,7 +18,7 @@
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "clean": "lerna run clean --parallel",
-    "clean-deps": "lerna run clean-deps --parallel && rm -rf node_modules",
+    "clean-deps": "find . -depth -name node_modules -type d -exec rm -rf {} \\;",
     "precypress:open": "yarn ensure-deps",
     "cypress:open": "node $(yarn bin cypress) open --dev --global",
     "precypress:open:debug": "yarn ensure-deps",
