@@ -31,6 +31,7 @@ const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
 const browserInfo = require('./cypress/browser')
+const debug = require('debug')('cypress:driver:cypress')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
@@ -53,7 +54,7 @@ $Log.command = () => {
   return $errUtils.throwErrByPath('miscellaneous.command_log_renamed')
 }
 
-const throwDeprecatedCommandInterface = (key, method) => {
+const throwDeprecatedCommandInterface = (key = 'commandName', method) => {
   let signature = ''
 
   switch (method) {
@@ -212,6 +213,7 @@ class $Cypress {
     // normalizes all the various ways
     // other objects communicate intent
     // and 'action' to Cypress
+    debug(eventName)
     switch (eventName) {
       case 'recorder:frame':
         return this.emit('recorder:frame', args[0])
@@ -324,8 +326,11 @@ class $Cypress {
 
       case 'runner:fail': {
         // mocha runner calculated a failure
-
         const err = args[0].err
+
+        if (err.type === 'existence' || $dom.isDom(err.actual) || $dom.isDom(err.expected)) {
+          err.showDiff = false
+        }
 
         if (err.actual) {
           err.actual = chai.util.inspect(err.actual)
@@ -502,7 +507,7 @@ class $Cypress {
           // attaching long stace traces
           // which otherwise make this err
           // unusably long
-          const err = $errUtils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.__stackCleaned__ = true
           err.backend = true
@@ -524,7 +529,7 @@ class $Cypress {
         const e = reply.error
 
         if (e) {
-          const err = $errUtils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.automation = true
 

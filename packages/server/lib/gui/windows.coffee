@@ -101,7 +101,6 @@ module.exports = {
       recordFrameRate: null
       # extension:       null ## TODO add these once we update electron
       # devToolsExtension: null ## since these API's were added in 1.7.6
-      onPaint:         null
       onFocus: ->
       onBlur: ->
       onClose: ->
@@ -168,18 +167,6 @@ module.exports = {
         window: win
       })
 
-    if options.onPaint
-      win.webContents.on "paint", (event, dirty, image) ->
-        ## https://github.com/cypress-io/cypress/issues/705
-        ## if win is destroyed this will throw
-        try
-          if fr = options.recordFrameRate
-            win.webContents.frameRate = fr
-
-          options.onPaint.apply(win, arguments)
-        catch err
-          ## do nothing
-
     win
 
   open: (projectRoot, options = {}) ->
@@ -244,7 +231,7 @@ module.exports = {
       newState[keys.height] = height
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectRoot, isTextTerminal)
+      savedState.create(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -256,7 +243,7 @@ module.exports = {
       newState = {}
       newState[keys.x] = x
       newState[keys.y] = y
-      savedState(projectRoot, isTextTerminal)
+      savedState.create(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
     , 500
@@ -264,14 +251,14 @@ module.exports = {
     win.webContents.on "devtools-opened", ->
       newState = {}
       newState[keys.devTools] = true
-      savedState(projectRoot, isTextTerminal)
+      savedState.create(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 
     win.webContents.on "devtools-closed", ->
       newState = {}
       newState[keys.devTools] = false
-      savedState(projectRoot, isTextTerminal)
+      savedState.create(projectRoot, isTextTerminal)
       .then (state) ->
         state.set(newState)
 

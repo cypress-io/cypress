@@ -105,9 +105,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const warnMixingPromisesAndCommands = function () {
     const title = state('runnable').fullTitle()
 
-    const msg = $errUtils.errMsgByPath('miscellaneous.mixing_promises_and_commands', title)
-
-    return $utils.warning(msg)
+    $errUtils.warnByPath('miscellaneous.mixing_promises_and_commands', {
+      args: { title },
+    })
   }
 
   const $$ = function (selector, context) {
@@ -369,7 +369,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               current: command.get('name'),
               called: enqueuedCmd.name,
             },
-          }
+          },
         )
       }
 
@@ -390,7 +390,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               current: command.get('name'),
               returned: ret,
             },
-          }
+          },
         )
       }
 
@@ -678,7 +678,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
-    $errUtils.normalizeErrorStack(err)
+    err = $errUtils.normalizeErrorStack(err)
+
+    err = $errUtils.processErr(err, config)
 
     // store the error on state now
     state('error', err)
@@ -718,12 +720,13 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
       $errUtils.normalizeErrorStack(err2)
+
       // and if any of these throw synchronously immediately error
-      finish(err2)
+      return finish(err2)
     }
 
     // bail if we had callbacks attached
-    if (rets.length) {
+    if (rets && rets.length) {
       return
     }
 
@@ -988,7 +991,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
                   current: current.get('name'),
                   called: name,
                 },
-              }
+              },
             )
           }
         }
@@ -1033,7 +1036,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     now (name, ...args) {
       return Promise.resolve(
-        commandFns[name].apply(cy, args)
+        commandFns[name].apply(cy, args),
       )
     },
 
@@ -1269,7 +1272,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               $utils.stringify(ret)
 
             $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands', {
-              args: ret,
+              args: { returned: ret },
             })
           }
 

@@ -72,7 +72,7 @@ function generateIfStatement (j, cases) {
     ifStatement = j.ifStatement(
       c.test,
       content,
-      ifStatement
+      ifStatement,
     )
   })
 

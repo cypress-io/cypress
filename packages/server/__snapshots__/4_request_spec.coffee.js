@@ -98,7 +98,7 @@ exports['e2e requests fails when network immediately fails 1'] = `
   1 failing
 
   1) when network connection cannot be established fails:
-     CypressError: cy.request() failed trying to load:
+     CypressError: \`cy.request()\` failed trying to load:
 
 http://localhost:16795/
 
@@ -128,6 +128,8 @@ The stack trace for this error is:
 RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
     [stack trace lines]
 
+
+https://on.cypress.io/request
   
 
 
@@ -203,7 +205,7 @@ exports['e2e requests fails on status code 1'] = `
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
-     CypressError: cy.request() failed on:
+     CypressError: \`cy.request()\` failed on:
 
 http://localhost:2294/statusCode?code=503
 
@@ -211,9 +213,9 @@ The response we received from your web server was:
 
   > 503: Service Unavailable
 
-This was considered a failure because the status code was not '2xx' or '3xx'.
+This was considered a failure because the status code was not \`2xx\` or \`3xx\`.
 
-If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
 
 -----------------------------------------------------------
 
@@ -243,6 +245,8 @@ Headers: {
 }
 Body: Service Unavailable
 
+
+https://on.cypress.io/request
       [stack trace lines]
 
 
@@ -318,7 +322,7 @@ exports['e2e requests prints long http props on fail 1'] = `
   1 failing
 
   1) when status code isnt 2xx or 3xx fails:
-     CypressError: cy.request() failed on:
+     CypressError: \`cy.request()\` failed on:
 
 http://localhost:2294/myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong
 
@@ -326,9 +330,9 @@ The response we received from your web server was:
 
   > 404: Not Found
 
-This was considered a failure because the status code was not '2xx' or '3xx'.
+This was considered a failure because the status code was not \`2xx\` or \`3xx\`.
 
-If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
 
 -----------------------------------------------------------
 
@@ -367,6 +371,8 @@ Body: <!DOCTYPE html>
 <pre>Cannot GET /myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong</pre>
 </body>
 </html>
+
+https://on.cypress.io/request
       [stack trace lines]
 
 

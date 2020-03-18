@@ -105,7 +105,7 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
 const getFirstWorkingFamily = (
   { port, host }: http.RequestOptions,
   familyCache: FamilyCache,
-  cb: Function
+  cb: Function,
 ) => {
   // this is a workaround for localhost (and potentially others) having invalid
   // A records but valid AAAA records. here, we just cache the family of the first
@@ -262,10 +262,6 @@ class HttpsAgent extends https.Agent {
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
-    // allow requests to use older TLS versions
-    // https://github.com/cypress-io/cypress/issues/5446
-    options.minVersion = 'TLSv1'
-
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
@@ -353,6 +349,7 @@ class HttpsAgent extends https.Agent {
 
       const connectReq = buildConnectReqHead(hostname, port, proxy)
 
+      proxySocket.setNoDelay(true)
       proxySocket.write(connectReq)
     })
   }

@@ -9,7 +9,6 @@ import { AppState } from '../lib/app-state'
 import { RunnablesStore } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import TestModel from '../test/test-model'
-import Test from '../test/test'
 
 type AppStateStub = AppState & {
   temporarilySetAutoScrolling: SinonSpy
@@ -44,7 +43,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub({ runnables: [{ id: 1 }] as TestModel[] })}
         scroller={scrollerStub()}
         specPath=''
-      />
+      />,
     )
 
     expect(component.find(RunnablesList)).to.exist
@@ -56,7 +55,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub()}
         scroller={scrollerStub()}
         specPath='/path/to/foo_spec.js'
-      />
+      />,
     )
 
     expect(component.find(AnError)).to.exist
@@ -74,7 +73,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub({ isReady: false })}
         scroller={scrollerStub()}
         specPath=''
-      />
+      />,
     )
 
     expect(component.find('.wrap')).to.be.empty
@@ -87,7 +86,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
         specPath=''
-      />
+      />,
     )
 
     expect(scroller.setContainer).to.have.been.calledWith(component.ref('container'))
@@ -103,7 +102,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
         specPath=''
-      />
+      />,
     )
 
     scroller.setContainer.callArg(1)
@@ -120,7 +119,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
         specPath=''
-      />
+      />,
     )
 
     scroller.setContainer.callArg(1)

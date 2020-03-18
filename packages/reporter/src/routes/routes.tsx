@@ -18,7 +18,7 @@ const Route = observer(({ model }: RouteProps) => (
     <td>{model.url}</td>
     <td>{model.isStubbed ? 'Yes' : 'No'}</td>
     <td>
-      <Tooltip placement='top' title={`Aliased this route as: '${model.alias}'`}>
+      <Tooltip placement='top' title={`Aliased this route as: '${model.alias}'`} className='cy-tooltip'>
         <span className='route-alias'>{model.alias}</span>
       </Tooltip>
     </td>
@@ -66,7 +66,9 @@ const Routes = observer(({ model }: RoutesProps) => (
                   <th>Stubbed</th>
                   <th>Alias</th>
                   <th>
-                    <Tooltip placement='top' title='Number of responses which matched this route'><span>#</span></Tooltip>
+                    <Tooltip placement='top' title='Number of responses which matched this route' className='cy-tooltip'>
+                      <span>#</span>
+                    </Tooltip>
                   </th>
                 </tr>
               </thead>

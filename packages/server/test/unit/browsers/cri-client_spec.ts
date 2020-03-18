@@ -1,5 +1,6 @@
 import Bluebird from 'bluebird'
 import { create } from '../../../lib/browsers/cri-client'
+import EventEmitter from 'events'
 
 const { expect, proxyquire, sinon } = require('../../spec_helper')
 
@@ -11,22 +12,24 @@ describe('lib/browsers/cri-client', function () {
   }
   let send: sinon.SinonStub
   let criImport: sinon.SinonStub
+  let onError: sinon.SinonStub
 
   function getClient () {
-    return criClient.create(DEBUGGER_URL)
+    return criClient.create(DEBUGGER_URL, onError)
   }
 
   beforeEach(function () {
     sinon.stub(Bluebird, 'promisify').returnsArg(0)
 
     send = sinon.stub()
+    onError = sinon.stub()
 
     criImport = sinon.stub()
     .withArgs({
       target: DEBUGGER_URL,
       local: true,
     })
-    .resolves({ send })
+    .resolves({ send, _notifier: new EventEmitter() })
 
     criClient = proxyquire('../lib/browsers/cri-client', {
       'chrome-remote-interface': criImport,

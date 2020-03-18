@@ -33,7 +33,7 @@ The return value was:
 
 Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 
-For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
 In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
 
@@ -45,7 +45,7 @@ https://on.cypress.io/returning-value-and-commands-in-test
 
 The custom command was:
 
-  > cy.foo()
+  > \`cy.foo()\`
 
 The return value was:
 
@@ -53,7 +53,7 @@ The return value was:
 
 Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 
-For convenience, you can also simply omit any return value or return 'undefined' and Cypress will not error.
+For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
 In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.
 
@@ -62,10 +62,6 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
 
   3)  errors when not invoking commands, invoking done callback, and returning a promise:
      Error: Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
-
-Read  more here: https://on.cypress.io/returning-promise-and-invoking-done-callback
-
------------------------------------------------------------
 
 Original mocha error:
 

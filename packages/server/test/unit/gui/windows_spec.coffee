@@ -75,7 +75,7 @@ describe "lib/gui/windows", ->
 
   context ".trackState", ->
     beforeEach ->
-      savedState()
+      savedState.create()
       .then (@state) =>
         sinon.stub(@state, "set")
 

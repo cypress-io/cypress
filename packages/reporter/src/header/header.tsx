@@ -28,9 +28,13 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Props
 
   const showOptions = appState.isPaused ? false : state.isShowingOptions
 
+  const viewAllTests = (
+    <p>View All Tests <span className='kbd'>F</span></p>
+  )
+
   return (
     <header>
-      <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests'>
+      <Tooltip placement='bottom' title={viewAllTests} wrapperClassName='focus-tests' className='cy-tooltip'>
         <button onClick={() => events.emit('focus:tests')}>
           <i className='fas fa-chevron-left'></i>
           <span>Tests</span>

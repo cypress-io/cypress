@@ -440,6 +440,7 @@ describe "lib/util/ci_provider", ->
       CI_PROJECT_URL: "ciProjectUrl"
       CI_REPOSITORY_URL: "ciRepositoryUrl"
       CI_ENVIRONMENT_URL: "ciEnvironmentUrl"
+      CI_DEFAULT_BRANCH: "ciDefaultBranch"
 
       CI_COMMIT_SHA: "ciCommitSha"
       CI_COMMIT_REF_NAME: "ciCommitRefName"
@@ -461,6 +462,7 @@ describe "lib/util/ci_provider", ->
       ciProjectUrl: "ciProjectUrl"
       ciRepositoryUrl: "ciRepositoryUrl"
       ciEnvironmentUrl: "ciEnvironmentUrl"
+      ciDefaultBranch: "ciDefaultBranch"
     })
     expectsCommitParams({
       sha: "ciCommitSha"
@@ -468,6 +470,8 @@ describe "lib/util/ci_provider", ->
       message: "ciCommitMessage"
       authorName: "gitlabUserName"
       authorEmail: "gitlabUserEmail"
+      remoteOrigin: "ciRepositoryUrl"
+      defaultBranch: "ciDefaultBranch"
     })
 
     resetEnv = mockedEnv({

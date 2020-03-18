@@ -352,7 +352,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       isWin = $dom.isWindow(subject)
 
       screenshotConfig = _.pick(options, "capture", "scale", "disableTimersAndAnimations", "blackout", "waitForCommandSynchronization", "padding", "clip", "onBeforeScreenshot", "onAfterScreenshot")
-      screenshotConfig = $Screenshot.validate(screenshotConfig, "cy.screenshot", options._log)
+      screenshotConfig = $Screenshot.validate(screenshotConfig, "screenshot", options._log)
       screenshotConfig = _.extend($Screenshot.getConfig(), screenshotConfig)
 
       ## set this regardless of options.log b/c its used by the
