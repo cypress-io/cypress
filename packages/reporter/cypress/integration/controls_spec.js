@@ -38,24 +38,25 @@ describe('controls', () => {
 
     it('shows correct tooltip when options are closed', () => {
       cy.get('.toggle-options').trigger('mouseover')
-      cy.get('.tooltip').should('have.text', 'Show Options')
+      cy.get('.cy-tooltip').should('have.text', 'Show Options')
     })
 
     it('shows correct tooltip when options are open', () => {
       cy.get('.toggle-options').click()
       cy.get('.toggle-options').trigger('mouseover')
-      cy.get('.tooltip').should('have.text', 'Hide Options')
+      cy.get('.cy-tooltip').should('have.text', 'Hide Options')
     })
   })
 
   describe('auto-scrolling', () => {
     beforeEach(() => {
       cy.get('.toggle-options').click()
+      cy.get('.toggle-options').trigger('mouseout')
     })
 
     it('shows tooltip with info icon', () => {
       cy.get('.auto-scroll-info').trigger('mouseover')
-      cy.get('.tooltip').invoke('text').should('include', 'automatically scroll')
+      cy.get('.cy-tooltip').invoke('text').should('include', 'automatically scroll')
     })
 
     it('is enabled by default', () => {

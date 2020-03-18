@@ -38,7 +38,7 @@ const Options = observer(({ appState, events = defaultEvents }: Props) => {
         >
           <i className='auto-scrolling-indicator fas' />
         </button>
-        <Tooltip title='When enabled, the command log will automatically scroll to keep the currently running test in view'>
+        <Tooltip title='When enabled, the command log will automatically scroll to keep the currently running test in view' className='cy-tooltip'>
           <i className='auto-scroll-info fas fa-info-circle' />
         </Tooltip>
       </div>
