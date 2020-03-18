@@ -35,7 +35,7 @@ const replaceMsgInStack = (err, newMsg) => {
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
-  err = $stackUtils.normalizeErrorStack(err)
+  err = $stackUtils.normalizeStack(err)
 
   const newMsg = cb(err.message, newErrMsg)
   const newStack = replaceMsgInStack(err, newMsg)
