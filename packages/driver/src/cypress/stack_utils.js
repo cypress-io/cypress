@@ -176,8 +176,26 @@ const getSourceStack = (stack, projectRoot) => {
   }
 }
 
+const normalizeStack = (err) => {
+  // Firefox errors do not include the name/message in the stack, whereas
+  // Chromium-based errors do, so we normalize them so that the stack
+  // always includes the name/message
+  const errString = err.toString()
+  const errStack = err.stack || ''
+  const firstErrLine = errString.slice(0, errString.indexOf('\n'))
+  const firstStackLine = errStack.slice(0, errStack.indexOf('\n'))
+  const stackIncludesMsg = firstStackLine.includes(firstErrLine)
+
+  if (!stackIncludesMsg) {
+    err.stack = `${errString}\n${errStack}`
+  }
+
+  return err
+}
+
 module.exports = {
   combineMessageAndStack,
   getCodeFrame,
   getSourceStack,
+  normalizeStack,
 }

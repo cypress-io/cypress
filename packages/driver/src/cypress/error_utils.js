@@ -35,7 +35,7 @@ const replaceMsgInStack = (err, newMsg) => {
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
-  err = normalizeErrorStack(err)
+  err = $stackUtils.normalizeErrorStack(err)
 
   const newMsg = cb(err.message, newErrMsg)
   const newStack = replaceMsgInStack(err, newMsg)
@@ -234,18 +234,6 @@ const getErrStack = (err) => {
   return err.stack
 }
 
-const normalizeErrorStack = (err) => {
-  // normalize error message + stack for firefox
-  const errString = err.toString()
-  const errStack = err.stack || ''
-
-  if (!errStack.slice(0, errStack.indexOf('\n')).includes(errString.slice(0, errString.indexOf('\n')))) {
-    err.stack = `${errString}\n${errStack}`
-  }
-
-  return err
-}
-
 const getObjValueByPath = (obj, keyPath) => {
   if (!_.isObject(obj)) {
     throw new Error('The first parameter to utils.getObjValueByPath() must be an object')
@@ -307,7 +295,6 @@ module.exports = {
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,
-  normalizeErrorStack,
   normalizeMsgNewLines,
   processErr,
   throwErr,

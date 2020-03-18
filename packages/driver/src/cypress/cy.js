@@ -6,6 +6,7 @@ const Promise = require('bluebird')
 const $dom = require('../dom')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
+const $stackUtils = require('./stack_utils')
 const $Chai = require('../cy/chai')
 const $Xhrs = require('../cy/xhrs')
 const $jQuery = require('../cy/jquery')
@@ -709,7 +710,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
-    err = $errUtils.normalizeErrorStack(err)
+    err = $stackUtils.normalizeStack(err)
 
     err = $errUtils.processErr(err, config)
 
@@ -761,7 +762,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (err2) {
       // and if any of these throw synchronously immediately error
-      return finish($errUtils.normalizeErrorStack(err2))
+      return finish($stackUtils.normalizeStack(err2))
     }
 
     // bail if we had callbacks attached

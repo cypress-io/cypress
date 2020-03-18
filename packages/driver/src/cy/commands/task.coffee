@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
 $errUtils = require("../../cypress/error_utils")
+$stackUtils = require("../../cypress/stack_utils")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
@@ -64,7 +65,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         ## re-throw if timedOut error from above
         throw error if error.name is "CypressError"
 
-        $errUtils.normalizeErrorStack(error)
+        $stackUtils.normalizeStack(error)
 
         if error?.isKnownError
           $errUtils.throwErrByPath("task.known_error", {

@@ -1,6 +1,7 @@
 _ = require("lodash")
 $dom = require("../dom")
 $errUtils = require("../cypress/error_utils")
+$stackUtils = require("../cypress/stack_utils")
 $errorMessages = require('../cypress/error_messages')
 
 crossOriginScriptRe = /^script error/i
@@ -67,7 +68,7 @@ create = (state, config, log) ->
         l.error(uncaughtErr)
 
     ## normalize error message for firefox
-    $errUtils.normalizeErrorStack(uncaughtErr)
+    $stackUtils.normalizeStack(uncaughtErr)
 
     return uncaughtErr
 
