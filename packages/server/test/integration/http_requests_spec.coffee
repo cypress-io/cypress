@@ -693,23 +693,6 @@ describe "Routes", ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.deep.eq({test: "We’ll"})
 
-      context "deferred", ->
-        it "closes connection if no stub is received before a reset", ->
-          p = @rp({
-            url: "http://localhost:2020/__cypress/xhrs/users/1"
-            json: true
-            headers: {
-              "x-cypress-id": "foo1"
-              "x-cypress-responsedeferred": true
-            }
-          })
-
-          setTimeout =>
-            @server._xhrServer.reset()
-          , 100
-
-          expect(p).to.be.rejectedWith('Error: socket hang up')
-
       context "fixture", ->
         beforeEach ->
           Fixtures.scaffold("todos")
@@ -1568,14 +1551,14 @@ describe "Routes", ->
             "__cypress.initial=true; Domain=localhost; Path=/"
           ]
 
-      it "ignores invalid cookies", ->
+      it "passes invalid cookies", ->
         nock(@server._remoteOrigin)
         .get("/invalid")
         .reply 200, "OK", {
           "set-cookie": [
             "foo=bar; Path=/"
-             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900" ## this is okay
-             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900" ## should ignore this
+             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
+             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900"
            ]
         }
 
@@ -1585,6 +1568,7 @@ describe "Routes", ->
           expect(res.headers["set-cookie"]).to.deep.eq [
             "foo=bar; Path=/"
              "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
+             "___utmvbXluIZsM=bZM    XtQOGalF: VtR; path=/; Max-Age=900"
           ]
 
       it "forwards other headers from incoming responses", ->
