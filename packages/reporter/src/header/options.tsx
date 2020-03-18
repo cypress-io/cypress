@@ -29,18 +29,20 @@ const Options = observer(({ appState, events = defaultEvents }: Props) => {
 
   return (
     <div className='options'>
-      <button
-        aria-label={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
-        className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
-        onClick={toggleAutoScrolling}
-      >
-        <i className='auto-scrolling-indicator fas' /> Auto-scrolling
+      <div className='option'>
+        <label>Auto-scrolling:</label>
+        <button
+          aria-label={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
+          className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
+          onClick={toggleAutoScrolling}
+        >
+          <i className='auto-scrolling-indicator fas' />
+        </button>
         <Tooltip title='When enabled, the command log will automatically scroll to keep the currently running test in view'>
-          <i className='fas fa-info-circle' />
+          <i className='auto-scroll-info fas fa-info-circle' />
         </Tooltip>
-      </button>
-
-      <div className='test-filter'>
+      </div>
+      <div className='option test-filter'>
         <label>Filter:</label>
         <div className='test-filter-group button-group' role='group'>
           <button className={cs('filter-passed', { active: filter === 'passed' })} onClick={setFilter('passed')}>
@@ -55,7 +57,7 @@ const Options = observer(({ appState, events = defaultEvents }: Props) => {
         </div>
         {!!filter && (
           <button className='clear-filter' onClick={setFilter(null)}>
-            <i className='fas fa-times' /> Clear filter
+            <i className='fas fa-times' /> Clear
           </button>
         )}
       </div>

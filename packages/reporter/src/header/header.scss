@@ -140,9 +140,29 @@
     border-top: 1px solid #ddd;
     padding: 0.5rem 1rem;
 
-    .toggle-auto-scrolling {
-      font-weight: normal;
+    .option {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
       margin-bottom: 1em;
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+
+      label {
+        background: none;
+        color: #333;
+        font-size: 14px;
+        font-weight: bold;
+        margin-right: 0.6em;
+        padding: 0;
+      }
+    }
+
+    .toggle-auto-scrolling {
+      background: none;
+      font-weight: normal;
       padding: 0;
       width: auto;
 
@@ -155,7 +175,7 @@
       .auto-scrolling-indicator {
         @extend .#{$fa-css-prefix}-toggle-off;
         color: #999;
-        font-size: 110%;
+        font-size: 150%;
         margin-right: 0.3em;
       }
 
@@ -173,19 +193,6 @@
     }
 
     .test-filter {
-      align-items: center;
-      display: flex;
-      flex-wrap: wrap;
-
-      label {
-        background: none;
-        color: #333;
-        font-size: 14px;
-        font-weight: normal;
-        margin-right: 0.6em;
-        padding: 0;
-      }
-
       .filter-passed i {
         color: #23AE89;
       }
