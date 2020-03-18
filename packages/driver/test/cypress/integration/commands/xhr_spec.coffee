@@ -70,7 +70,7 @@ describe "src/cy/commands/xhr", ->
           expect(xhr.status).to.eq(404)
 
     ## NOTE: flaky about 50% of the time in Firefox...
-    ## temporarily skipping for now, but this needs 
+    ## temporarily skipping for now, but this needs
     ## to be reenabled after launch once we have time
     ## to look at the underlying failure cause
     it.skip "allows multiple readystatechange calls", ->
@@ -227,6 +227,7 @@ describe "src/cy/commands/xhr", ->
             expect(onreadystatechanged).to.be.true
             expect(xhr.status).to.eq(200)
 
+    ## FIXME: I have no idea why this is skipped, this test is rly old
     describe.skip "filtering requests", ->
       beforeEach ->
         cy.server()
@@ -380,16 +381,15 @@ describe "src/cy/commands/xhr", ->
             expect(@open).to.be.calledWith("GET", "/__cypress/xhrs/http://localhost:3500/fixtures/phones/phones.json")
 
       it "does not rewrite CORS", ->
-        cy
-          .window().then (win) ->
-            @open = cy.spy(cy.state("server").options, "onOpen")
-            new Promise (resolve) ->
-              win.$.get("http://www.google.com/phones/phones.json").fail ->
-                resolve()
-          .then ->
-            xhr = cy.state("requests")[0].xhr
-            expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
-            expect(@open).to.be.calledWith("GET", "http://www.google.com/phones/phones.json")
+        cy.window().then (win) ->
+          @open = cy.spy(cy.state("server").options, "onOpen")
+          new Promise (resolve) ->
+            win.$.get("http://www.google.com/phones/phones.json").fail ->
+              resolve()
+        .then ->
+          xhr = cy.state("requests")[0].xhr
+          expect(xhr.url).to.eq("http://www.google.com/phones/phones.json")
+          expect(@open).to.be.calledWith("GET", "http://www.google.com/phones/phones.json")
 
       it "can stub real CORS requests too", ->
         cy
@@ -818,12 +818,11 @@ describe "src/cy/commands/xhr", ->
           expect(uncaughtException).calledOnce
           done()
 
-        cy
-          .window().then (win) ->
-            new Promise (resolve) ->
-              win.$.get("http://www.google.com/foo.json")
-              .fail ->
-                foo.bar()
+        cy.window().then (win) ->
+          new Promise (resolve) ->
+            win.$.get("http://www.google.com/foo.json")
+            .fail ->
+              foo.bar()
 
       it "causes errors caused by onreadystatechange callback function", (done) ->
         e = new Error("onreadystatechange caused this error")
@@ -906,21 +905,22 @@ describe "src/cy/commands/xhr", ->
         _.each ["asdf", 123, null, undefined], (arg) ->
           it "throws on bad argument: #{arg}", (done) ->
             cy.on "fail", (err) ->
-              expect(err.message).to.include "cy.server() accepts only an object literal as its argument"
+              expect(err.message).to.include "`cy.server()` accepts only an object literal as its argument"
+              expect(err.docsUrl).to.eq("https://on.cypress.io/server")
               done()
 
             cy.server(arg)
 
       it "after turning off server it throws attempting to route", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.route() cannot be invoked before starting the cy.server()")
+          expect(err.message).to.eq("`cy.route()` cannot be invoked before starting the `cy.server()`")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/server")
           done()
 
-        cy
-          .server()
-          .route(/app/, {})
-          .server({enable: false})
-          .route(/app/, {})
+        cy.server()
+        cy.route(/app/, {})
+        cy.server({enable: false})
+        cy.route(/app/, {})
 
       describe ".log", ->
         beforeEach ->
@@ -960,7 +960,7 @@ describe "src/cy/commands/xhr", ->
             .window().then (win) ->
               win.$.get("/foo").done ->
                 throw new Error("specific ajax error")
-
+  ## FIXME: I have no idea why this is skipped, this test is rly old
   context.skip "#server", ->
     beforeEach ->
       defaults = {
@@ -1233,7 +1233,7 @@ describe "src/cy/commands/xhr", ->
           response: {}
         })
 
-    ## FIXME
+    ## FIXME: I have no idea why this is skipped, this test is rly old
     it.skip "can explicitly done() in onRequest function from options", (done) ->
       cy
         .server()
@@ -1328,6 +1328,7 @@ describe "src/cy/commands/xhr", ->
 
       cy.route(getUsers)
 
+    ## FIXME: I have no idea why this is skipped, this test is rly old
     it.skip "adds multiple routes to the responses array", ->
       cy
         .route("foo", {})
@@ -1363,9 +1364,11 @@ describe "src/cy/commands/xhr", ->
       cy.route("GET", "/foo%25bar")
       .then ->
         expect(Cypress.utils.warning).to.be.calledWith """
-        A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.
+        A `url` with percent-encoded characters was passed to `cy.route()`, but `cy.route()` expects a decoded `url`.
 
         Did you mean to pass "/foo%bar"?
+
+        https://on.cypress.io/route
         """
 
     it "does not warn if an invalid percent-encoded URL is used", ->
@@ -1375,6 +1378,7 @@ describe "src/cy/commands/xhr", ->
       .then ->
         expect(Cypress.utils.warning).to.not.be.called
 
+    ## FIXME: I have no idea why this is skipped, this test is rly old
     it.skip "does not error when response is null but respond is false", ->
       cy.route
         url: /foo/
@@ -1385,16 +1389,19 @@ describe "src/cy/commands/xhr", ->
         @warn = cy.spy(window.top.console, "warn")
 
       it "logs on {force404: false}", ->
-        cy
-          .server({force404: false})
+        cy.server({force404: false})
           .then ->
-            expect(@warn).to.be.calledWith("Cypress Warning: Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.")
+            expect(@warn).to.be.calledWith("Cypress Warning: Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option.")
 
       it "does not log on {force404: true}", ->
-        cy
-          .server({force404: true})
+        cy.server({force404: true})
           .then ->
             expect(@warn).not.to.be.called
+
+      it "logs on {stub: false}", ->
+        cy.server({stub: false})
+          .then ->
+            expect(@warn).to.be.calledWithMatch("Cypress Warning: Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`.\n\nhttps://on.cypress.io/deprecated-stub-false-on-server")
 
     describe "request response alias", ->
       it "matches xhrs with lowercase methods", ->
@@ -1497,14 +1504,15 @@ describe "src/cy/commands/xhr", ->
         cy.state("serverIsStubbed", false)
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() cannot be invoked before starting the cy.server()"
+          expect(err.message).to.include "`cy.route()` cannot be invoked before starting the `cy.server()`"
           done()
 
         cy.route()
 
       it "url must be a string or regexp", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was called with an invalid url. Url must be either a string or regular expression."
+          expect(err.message).to.include "`cy.route()` was called with an invalid `url`. `url` must be either a string or regular expression."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/route")
           done()
 
         cy.route({
@@ -1513,7 +1521,8 @@ describe "src/cy/commands/xhr", ->
 
       it "url must be a string or regexp when a function", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was called with an invalid url. Url must be either a string or regular expression."
+          expect(err.message).to.include "`cy.route()` was called with an invalid `url`. `url` must be either a string or regular expression."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/route")
           done()
 
         getUrl = ->
@@ -1535,14 +1544,16 @@ describe "src/cy/commands/xhr", ->
 
       it "fails when method is invalid", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was called with an invalid method: 'POSTS'."
+          expect(err.message).to.include "`cy.route()` was called with an invalid method: `POSTS`."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/route")
+
           done()
 
         cy.route("posts", "/foo", {})
 
       it "requires a url when given a response", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() must be called with a url. It can be a string or regular expression."
+          expect(err.message).to.include "`cy.route()` must be called with a `url`. It can be a string or regular expression."
           done()
 
         cy.route({})
@@ -1550,21 +1561,23 @@ describe "src/cy/commands/xhr", ->
       _.each [null, undefined], (val) ->
         it "throws if response options was explicitly set to #{val}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            expect(err.message).to.include "`cy.route()` cannot accept an `undefined` or `null` response. It must be set to something, even an empty string will work."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/route")
             done()
 
           cy.route({url: /foo/, response: val})
 
         it "throws if response argument was explicitly set to #{val}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.route() cannot accept an undefined or null response. It must be set to something, even an empty string will work."
+            expect(err.message).to.include "`cy.route()` cannot accept an `undefined` or `null` response. It must be set to something, even an empty string will work."
             done()
 
           cy.route(/foo/, val)
 
       it "requires arguments", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.route() was not provided any arguments. You must provide valid arguments."
+          expect(err.message).to.include "`cy.route()` was not provided any arguments. You must provide valid arguments."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/route")
           done()
 
         cy.route()
@@ -1586,7 +1599,7 @@ describe "src/cy/commands/xhr", ->
           .window().then (win) ->
             win.$.get("foo_bar").done ->
               foo.bar()
-
+      ## FIXME: I have no idea why this is skipped, this test is rly old
       it.skip "explodes if response fixture signature errors", (done) ->
         @trigger = cy.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {__error: "some error"})
 
@@ -1647,7 +1660,7 @@ describe "src/cy/commands/xhr", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.eq "cy.route() could not find a registered alias for: '@bar'.\nAvailable aliases are: 'foo'."
+          expect(err.message).to.eq "`cy.route()` could not find a registered alias for: `@bar`.\nAvailable aliases are: `foo`."
           expect(lastLog.get("name")).to.eq "route"
           expect(lastLog.get("error")).to.eq err
           expect(lastLog.get("message")).to.eq "/foo/, @bar"
@@ -2092,6 +2105,7 @@ describe "src/cy/commands/xhr", ->
             xhr.onload = resolve
         .wait("@getFoo").its("url").should("include", "/foo")
 
+  ## FIXME: I have no idea why this is skipped, this test is rly old
   context.skip "#cancel", ->
     it "calls server#cancel", (done) ->
       cancel = null
@@ -2104,6 +2118,7 @@ describe "src/cy/commands/xhr", ->
         cancel = cy.spy cy.state("server"), "cancel"
         @Cypress.trigger "abort"
 
+  ## FIXME: I have no idea why this is skipped, this test is rly old
   context.skip "#respond", ->
     it "calls server#respond", ->
       respond = null
@@ -2123,7 +2138,7 @@ describe "src/cy/commands/xhr", ->
 
       it "errors without a server", (done) ->
         cy.on "fail", (err) =>
-          expect(err.message).to.eq "cy.respond() cannot be invoked before starting the cy.server()"
+          expect(err.message).to.eq "cy.respond() cannot be invoked before starting the `cy.server()`"
           done()
 
         cy.respond()

@@ -352,7 +352,7 @@ const getTagName = (el) => {
 // should be true for elements:
 //   - with [contenteditable]
 //   - with document.designMode = 'on'
-const isContentEditable = (el: any): el is HTMLContentEditableElement => {
+const isContentEditable = (el: HTMLElement): el is HTMLContentEditableElement => {
   return getNativeProp(el, 'isContentEditable') || $document.getDocumentFromElement(el).designMode === 'on'
 }
 
@@ -401,9 +401,9 @@ const isSvg = function (el): el is SVGElement {
 }
 
 // active element is the default if its null
-// or its equal to document.body
-const activeElementIsDefault = (activeElement, body) => {
-  return !activeElement || activeElement === body
+// or it's equal to document.body that is not contenteditable
+const activeElementIsDefault = (activeElement, body: HTMLElement) => {
+  return !activeElement || (activeElement === body && !isContentEditable(body))
 }
 
 const isFocused = (el) => {
@@ -423,23 +423,59 @@ const isFocused = (el) => {
 }
 
 const isFocusedOrInFocused = (el: HTMLElement) => {
+  debug('isFocusedOrInFocus', el)
+
   const doc = $document.getDocumentFromElement(el)
+
+  if (!doc.hasFocus()) {
+    return false
+  }
 
   const { activeElement } = doc
 
   let elToCheckCurrentlyFocused
 
+  let isContentEditableEl = false
+
   if (isFocusable($(el))) {
     elToCheckCurrentlyFocused = el
   } else if (isContentEditable(el)) {
+    isContentEditableEl = true
     elToCheckCurrentlyFocused = $selection.getHostContenteditable(el)
   }
 
+  debug('elToCheckCurrentlyFocused', elToCheckCurrentlyFocused)
+
   if (elToCheckCurrentlyFocused && elToCheckCurrentlyFocused === activeElement) {
+    if (isContentEditableEl) {
+      // we make sure the the current document selection (blinking cursor) is inside the element
+      const sel = doc.getSelection()
+
+      if (sel?.rangeCount) {
+        const range = sel.getRangeAt(0)
+        const curSelectionContainer = range.commonAncestorContainer
+
+        const selectionInsideElement = el.contains(curSelectionContainer)
+
+        debug('isInFocused by document selection?', selectionInsideElement, ':', curSelectionContainer, 'is inside', el)
+
+        return selectionInsideElement
+      }
+
+      // no selection, not in focused
+      return false
+    }
+
     return true
   }
 
   return false
+}
+
+// mostly useful when traversing up parent nodes and wanting to
+// stop traversal if el is undefined or is html, body, or document
+const isUndefinedOrHTMLBodyDoc = ($el: JQuery<HTMLElement>) => {
+  return !$el || !$el[0] || $el.is('body,html') || $document.isDocument($el[0])
 }
 
 const isElement = function (obj): obj is HTMLElement | JQuery<HTMLElement> {
@@ -608,7 +644,7 @@ const isAttached = function ($el) {
   // is technically bound to a different document
   // but c'mon
   const isIn = (el) => {
-    return $.contains(doc, el)
+    return $.contains(doc as any, el)
   }
 
   // make sure the document is currently
@@ -757,11 +793,16 @@ const isScrollable = ($el) => {
     return checkDocumentElement(win, win.document.documentElement)
   }
 
+  const el = $el[0]
+
+  // window.getComputedStyle(el) will error if el is undefined
+  if (!el) {
+    return false
+  }
+
   // if we're any other element, we do some css calculations
   // to see that the overflow is correct and the scroll
   // area is larger than the actual height or width
-  const el = $el[0]
-
   const { overflow, overflowY, overflowX } = window.getComputedStyle(el)
 
   // y axis
@@ -848,9 +889,9 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {
-  // return null if we're at body/html/document
+  // return null if undefined or we're at body/html/document
   // cuz that means nothing has fixed position
-  if (!$el[0] || !tagName || $el.is('body,html') || $document.isDocument($el)) {
+  if (isUndefinedOrHTMLBodyDoc($el) || !tagName) {
     return null
   }
 
@@ -864,14 +905,9 @@ const getFirstParentWithTagName = ($el, tagName) => {
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
-  // don't continue if we're undefined
-  if (!$el || !$el[0]) {
-    return null
-  }
-
-  // return null if we're at not a normal DOM el
+  // return null if we're undefined or at not a normal DOM el
   // cuz that means nothing has fixed position
-  if ($el.is('body,html') || $document.isDocument($el)) {
+  if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
 
@@ -885,9 +921,9 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
 }
 
 const getFirstStickyPositionParent = ($el) => {
-  // return null if we're at body/html
+  // return null if we're undefined or at body/html/document
   // cuz that means nothing has sticky position
-  if (!$el || $el.is('body,html')) {
+  if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
 
@@ -907,20 +943,12 @@ const getFirstScrollableParent = ($el) => {
   const search = ($el) => {
     const $parent = $el.parent()
 
-    // we have no more parents
-    if (!($parent || $parent.length)) {
-      return null
-    }
-
-    // we match the scrollingElement
-    // if $parent[0] is scrollingElement
-    //   return $parent
-
+    // parent is undefined or
     // instead of fussing with scrollingElement
     // we'll simply return null here and let our
     // caller deal with situations where they're
     // needing to scroll the window or scrollableElement
-    if ($parent.is('html,body') || $document.isDocument($parent)) {
+    if (isUndefinedOrHTMLBodyDoc($parent)) {
       return null
     }
 
@@ -1123,6 +1151,7 @@ const stringify = (el, form = 'long') => {
 
 export {
   isElement,
+  isUndefinedOrHTMLBodyDoc,
   isSelector,
   isScrollOrAuto,
   isFocusable,

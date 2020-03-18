@@ -19,6 +19,7 @@ const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
 const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file'.split(' ')
 
+const debug = require('debug')('cypress:driver:runner')
 // ## initial payload
 // {
 //   suites: [
@@ -66,6 +67,7 @@ const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFrom
 // }
 
 const fire = function (event, runnable, Cypress) {
+  debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
   }
@@ -943,7 +945,11 @@ const create = function (specWindow, mocha, Cypress, cy) {
       let lifecycleStart; let test
 
       if (!runnable.id) {
-        throw new Error('runnable must have an id', runnable.id)
+        if (!_stopped) {
+          throw new Error('runnable must have an id', runnable.id)
+        }
+
+        return
       }
 
       switch (runnable.type) {

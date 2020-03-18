@@ -333,8 +333,7 @@ describe "src/cy/commands/request", ->
         .then (resp) ->
           ## make sure it really was 500!
           expect(resp.status).to.eq(500)
-
-          expect(warning).to.be.calledWith("The cy.request() 'failOnStatus' option has been renamed to 'failOnStatusCode'. Please update your code. This option will be removed at a later time.")
+          expect(warning.lastCall.args[0]).to.include("The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.")
 
     describe "failOnStatusCode", ->
       it "does not fail on status 401", ->
@@ -607,7 +606,8 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() requires a url. You did not provide a url.")
+          expect(err.message).to.eq("`cy.request()` requires a `url`. You did not provide a `url`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request()
@@ -622,7 +622,8 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in 'cypress.json'. Neither of those values were present.")
+          expect(err.message).to.eq("`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window's origin or the `baseUrl` in `cypress.json`. Neither of those values were present.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request("/foo/bar")
@@ -638,7 +639,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in 'cypress.json' (currently disabled by --config-file=false). Neither of those values were present.")
+          expect(err.message).to.eq("`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window's origin or the `baseUrl` in `cypress.json` (currently disabled by --config-file=false). Neither of those values were present.")
           done()
 
         cy.request("/foo/bar")
@@ -654,7 +655,7 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() must be provided a fully qualified url - one that begins with 'http'. By default cy.request() will use either the current window's origin or the 'baseUrl' in 'foo.json'. Neither of those values were present.")
+          expect(err.message).to.eq("`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window's origin or the `baseUrl` in `foo.json`. Neither of those values were present.")
           done()
 
         cy.request("/foo/bar")
@@ -666,7 +667,8 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() requires the url to be a string.")
+          expect(err.message).to.eq("`cy.request()` requires the `url` to be a string.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -680,7 +682,8 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() must be passed an object literal for the 'auth' option.")
+          expect(err.message).to.eq("`cy.request()` must be passed an object literal for the `auth` option.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -695,7 +698,8 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() requires the 'headers' option to be an object literal.")
+          expect(err.message).to.eq("`cy.request()` requires the `headers` option to be an object literal.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -710,7 +714,8 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() was called with an invalid method: 'FOO'. Method can be: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, or any other method supported by Node's HTTP parser.")
+          expect(err.message).to.eq("`cy.request()` was called with an invalid method: `FOO`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node's HTTP parser.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -725,7 +730,8 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() requires the 'gzip' option to be a boolean.")
+          expect(err.message).to.eq("`cy.request()` requires the `gzip` option to be a boolean.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -740,7 +746,8 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
-          expect(err.message).to.eq("cy.request() requires the 'form' option to be a boolean.\n\nIf you're trying to send a x-www-form-urlencoded request then pass either a string or object literal to the 'body' property.")
+          expect(err.message).to.eq("`cy.request()` requires the `form` option to be a boolean.\n\nIf you're trying to send a `x-www-form-urlencoded` request then pass either a string or object literal to the `body` property.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -750,7 +757,8 @@ describe "src/cy/commands/request", ->
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          expect(err.message).to.contain "`cy.request()` was invoked with `{ failOnStatusCode: false, retryOnStatusCodeFailure: true }`."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           done()
 
         cy.request({
@@ -785,8 +793,9 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           expect(err.message).to.include("""
-            cy.request() failed on:
+            `cy.request()` failed on:
 
             http://localhost:1234/foo
 
@@ -794,9 +803,9 @@ describe "src/cy/commands/request", ->
 
               > 500: Server Error
 
-            This was considered a failure because the status code was not '2xx' or '3xx'.
+            This was considered a failure because the status code was not `2xx` or `3xx`.
 
-            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+            If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
 
             -----------------------------------------------------------
 
@@ -839,7 +848,7 @@ describe "src/cy/commands/request", ->
           cy.request("http://0.0.0.0:12345")
 
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.include "`cy.request()` failed trying to load:"
           done()
 
       it "displays body_circular when body is circular", (done) ->
@@ -863,10 +872,11 @@ describe "src/cy/commands/request", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq """
-          The `body` parameter supplied to cy.request() contained a circular reference at the path "bar.baz.quux".
+          The `body` parameter supplied to `cy.request()` contained a circular reference at the path "bar.baz.quux".
 
           `body` can only be a string or an object with no circular references.
           """
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
 
           done()
 
@@ -893,8 +903,9 @@ describe "src/cy/commands/request", ->
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
           expect(err.message).to.include("""
-            cy.request() failed on:
+            `cy.request()` failed on:
 
             http://localhost:1234/foo
 
@@ -902,9 +913,9 @@ describe "src/cy/commands/request", ->
 
               > 500: Server Error
 
-            This was considered a failure because the status code was not '2xx' or '3xx'.
+            This was considered a failure because the status code was not `2xx` or `3xx`.
 
-            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+            If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
 
             -----------------------------------------------------------
 
@@ -958,7 +969,7 @@ describe "src/cy/commands/request", ->
       ## https://github.com/cypress-io/cypress/issues/5274
       it "dont throw UNESCAPED_CHARACTERS error for url with ’ character in pathname", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -966,7 +977,7 @@ describe "src/cy/commands/request", ->
 
       it "dont throw UNESCAPED_CHARACTERS error for url with % character in pathname", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -974,7 +985,7 @@ describe "src/cy/commands/request", ->
 
       it "dont throw UNESCAPED_CHARACTERS error for url with ’ escaped in pathname", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -982,7 +993,7 @@ describe "src/cy/commands/request", ->
 
       it "dont throw UNESCAPED_CHARACTERS error for url with Unicode in pathname from BMP to Astral Plane", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -990,7 +1001,7 @@ describe "src/cy/commands/request", ->
 
       it "dont throw UNESCAPED_CHARACTERS error for url with any Unicode escaped character in pathname", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.request() failed trying to load:"
+          expect(err.message).to.contain "`cy.request()` failed trying to load:"
           expect(err.message).to.not.contain "ERR_UNESCAPED_CHARACTERS"
           done()
 
@@ -1007,7 +1018,7 @@ describe "src/cy/commands/request", ->
 
           cy.on "fail", (err) =>
             expect(err.message).to.include("""
-            cy.request() failed trying to load:
+            `cy.request()` failed trying to load:
 
             http://localhost:1234/foo
 
@@ -1034,7 +1045,7 @@ describe "src/cy/commands/request", ->
 
             The stack trace for this error is:
             """)
-
+            expect(err.docsUrl).to.eq("https://on.cypress.io/request")
             done()
 
           cy.request("http://localhost:1234/foo")
@@ -1050,8 +1061,9 @@ describe "src/cy/commands/request", ->
             expect(@logs.length).to.eq(1)
             expect(lastLog.get("error")).to.eq(err)
             expect(lastLog.get("state")).to.eq("failed")
+            expect(err.docsUrl).to.eq("https://on.cypress.io/request")
             expect(err.message).to.eq("""
-              cy.request() timed out waiting 50ms for a response from your server.
+              `cy.request()` timed out waiting `50ms` for a response from your server.
 
               The request we sent was:
 

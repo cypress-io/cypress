@@ -29,7 +29,7 @@ class FlashOnClick extends Component<Props> {
     const child = Children.only<ReactNode>(this.props.children)
 
     return (
-      <Tooltip placement='top' title={this.props.message} visible={this._show}>
+      <Tooltip placement='top' title={this.props.message} visible={this._show} className='cy-tooltip'>
         {cloneElement(child as ReactElement, { onClick: this._onClick })}
       </Tooltip>
     )

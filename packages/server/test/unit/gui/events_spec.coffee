@@ -158,7 +158,7 @@ describe "lib/gui/events", ->
       it "calls Windows#open with args and resolves with return of Windows.open", ->
         @handleEvent("window:open", {type: "INDEX"})
         .then (assert) =>
-          assert.sendCalledWith(@win)
+          assert.sendCalledWith(events.nullifyUnserializableValues(@win))
 
       it "catches errors", ->
         err = new Error("foo")
