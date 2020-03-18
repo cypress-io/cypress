@@ -146,5 +146,5 @@ namespace BlobTests {
 cy.window().then(window => {
   window // $ExpectType Window & typeof globalThis
 
-  window.eval('1')'
+  window.eval('1')
 })
