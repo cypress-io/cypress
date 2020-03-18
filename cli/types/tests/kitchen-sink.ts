@@ -120,7 +120,7 @@ cy.spy(obj, 'foo').as('my-spy')
 cy.window().then(window => {
   window // $ExpectType Window & typeof globalThis
 
-  window.eval('1')'
+  window.eval('1')
 })
 
 // clearLocalStorage signatures
