@@ -1,4 +1,4 @@
-rp = require("request-promise")
+rp = require("@cypress/request-promise")
 path = require("path")
 Promise = require("bluebird")
 bodyParser = require("body-parser")
