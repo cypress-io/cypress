@@ -24,21 +24,6 @@ const splitStack = (stack) => {
   }, [[], []])
 }
 
-// stacks from command failures and assertion failures have the right message
-// but the stack points to cypress internals. here we combine the message
-// with the invocation stack, which points to the user's code
-const combineMessageAndStack = (message, stack = '') => {
-  if (!message) return stack
-
-  // eslint-disable-next-line no-unused-vars
-  const [__, stackLines] = splitStack(stack)
-  const relevantStackLines = _.reject(stackLines, (line) => {
-    return line.indexOf('__getSpecFrameStack') > -1
-  })
-
-  return [message].concat(relevantStackLines).join('\n')
-}
-
 const getLanguageFromExtension = (filePath) => {
   return (path.extname(filePath) || '').toLowerCase().replace('.', '') || null
 }
@@ -193,9 +178,22 @@ const normalizeStack = (err) => {
   return err
 }
 
+const replaceStack = (err, newStack) => {
+  const errString = err.toString()
+
+  const [__, stackLines] = splitStack(newStack) // eslint-disable-line no-unused-vars
+  const relevantStackLines = _.reject(stackLines, (line) => {
+    return line.indexOf('__getSpecFrameStack') > -1
+  })
+
+  err.stack = [errString].concat(relevantStackLines).join('\n')
+
+  return err
+}
+
 module.exports = {
-  combineMessageAndStack,
   getCodeFrame,
   getSourceStack,
   normalizeStack,
+  replaceStack,
 }

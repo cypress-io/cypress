@@ -46,8 +46,8 @@ const modifyErrMsg = (err, newErrMsg, cb) => {
   return err
 }
 
-const appendErrMsg = (err, messageOrObj) => {
-  return modifyErrMsg(err, messageOrObj, (msg1, msg2) => {
+const appendErrMsg = (err, errMsg) => {
+  return modifyErrMsg(err, errMsg, (msg1, msg2) => {
     // we don't want to just throw in extra
     // new lines if there isn't even a msg
     if (!msg1) return msg2
@@ -257,7 +257,10 @@ const getObjValueByPath = (obj, keyPath) => {
 }
 
 const enhanceStack = ({ err, stack, projectRoot }) => {
-  err.stack = $stackUtils.combineMessageAndStack(err.message, stack)
+  // stacks from command failures and assertion failures have the right message
+  // but the stack points to cypress internals. here we replace the internal
+  // cypress stack with the invocation stack, which points to the user's code
+  err = $stackUtils.replaceStack(err, stack)
 
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)
 
