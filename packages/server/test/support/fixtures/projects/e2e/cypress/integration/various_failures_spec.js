@@ -175,7 +175,7 @@ describe('various failures', () => {
 
   verify('should assertion', {
     column: 6,
-    message: 'Timed out retrying: expected {} to have a property \'foo\'',
+    message: 'Timed out retrying: expected {} to have property \'foo\'',
   })
 
   // -----
@@ -352,7 +352,7 @@ describe('various failures', () => {
     column: 4,
     support: true,
     codeFrameText: 'add(\'failShouldAssertion\'',
-    message: 'Timed out retrying: expected {} to have a property \'foo\'',
+    message: 'Timed out retrying: expected {} to have property \'foo\'',
   })
 
   // -----
