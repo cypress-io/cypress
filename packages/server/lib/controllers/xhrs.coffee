@@ -104,7 +104,7 @@ module.exports = {
 
   parseContentType: (response) ->
     ret = (type) ->
-      mime.lookup(type) #+ "; charset=utf-8"
+      mime.getType(type) #+ "; charset=utf-8"
 
     switch
       when isValidJSON(response)
