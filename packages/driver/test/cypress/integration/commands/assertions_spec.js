@@ -1854,7 +1854,7 @@ describe('src/cy/commands/assertions', () => {
           const l6 = this.logs[5]
 
           // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.eq('expected `<div>` to be `hidden`')
+          expect(l6.get('error').message).to.eq('expected \'<div>\' to be \'hidden\'')
         }
       })
 

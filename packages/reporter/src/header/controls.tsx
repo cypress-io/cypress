@@ -11,7 +11,7 @@ const ifThen = (condition: boolean, component: React.ReactNode) => (
   condition ? component : null
 )
 
-interface Props {
+export interface Props {
   events?: Events
   appState: AppState
   isShowingOptions: boolean
