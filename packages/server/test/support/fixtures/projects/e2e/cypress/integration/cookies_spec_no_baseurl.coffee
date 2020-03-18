@@ -138,3 +138,43 @@ describe "cookies", ->
 
     it "issue: #2724 does not fail on invalid cookies", ->
       cy.request("#{httpsUrl}/invalidCookies")
+
+    context "with SameSite", ->
+      expectedCookie = { foo: 'bar' }
+      httpPortSuffix = String(Cypress.Location.create(httpUrl).port || '')
+
+      if httpPortSuffix
+        httpPortSuffix = ":#{httpPortSuffix}"
+
+      mainBase= "http://foo.bar.net#{httpPortSuffix}/"
+      altBase = "http://notfoo.bar.net#{httpPortSuffix}/"
+
+      context "with cy.request", ->
+        it "Strict sends to an exact domain match", ->
+          cy.request("#{mainBase}samesite/Strict")
+          cy.request("#{mainBase}requestCookies")
+          .its('body').should('deep.eq', expectedCookie)
+          cy.request("#{altBase}requestCookies")
+          .its('body').should('deep.eq', {})
+
+        it "Lax sends to a superdomain match", ->
+          cy.request("#{mainBase}samesite/Lax")
+          cy.request("#{mainBase}requestCookies")
+          .its('body').should('deep.eq', expectedCookie)
+          cy.request("#{altBase}requestCookies")
+          .its('body').should('deep.eq', expectedCookie)
+
+      context "with cy.visit", ->
+        it "Strict sends to an exact domain match", ->
+          cy.visit("#{mainBase}samesite/Strict")
+          cy.visit("#{mainBase}requestCookiesHtml")
+          .get('body').should('have.text', JSON.stringify(expectedCookie))
+          cy.visit("#{altBase}requestCookiesHtml")
+          .get('body').should('have.text', '{}')
+
+        it "Lax sends to a superdomain match", ->
+          cy.visit("#{mainBase}samesite/Lax")
+          cy.visit("#{mainBase}requestCookiesHtml")
+          .get('body').should('have.text', JSON.stringify(expectedCookie))
+          cy.visit("#{altBase}requestCookiesHtml")
+          .get('body').should('have.text', JSON.stringify(expectedCookie))

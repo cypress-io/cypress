@@ -95,6 +95,9 @@ onServer = (app) ->
 
     return res.type('html').end()
 
+  app.get "/samesite/:value", (req, res) ->
+    res.setHeader("Set-Cookie", "foo=bar; SameSite=#{req.params.value}")
+
 haveRoot = !process.env.USE_HIGH_PORTS && process.geteuid() == 0
 
 if not haveRoot
