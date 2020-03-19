@@ -1,46 +1,24 @@
 const $stackUtils = require('../../../../src/cypress/stack_utils')
 const $sourceMapUtils = require('../../../../src/cypress/source_map_utils')
 
-const getError = (message) => {
-  return new Error(message)
-}
-
-const __getSpecFrameStack = (message) => {
-  return new Error(message)
-}
-
 describe('driver/src/cypress/stack_utils', () => {
-  context('.combineMessageAndStack', () => {
-    const newMessage = 'We want this message\n\nand this line'
-    const message = 'not this line\n\n or this line'
+  context('.replaceStack', () => {
+    const message = 'Original error\n\nline 2'
 
-    it('returns stack if no error', () => {
-      const err = getError(message)
+    it('replaces stack in error', () => {
+      const err = new Error(message)
+      const newStack = 'at foo (path/to/file.js:1:1)\nat bar (path/to/file.js:2:2)'
+      const modifiedErr = $stackUtils.replaceStack(err, newStack)
 
-      expect($stackUtils.combineMessageAndStack(undefined, err.stack)).to.equal(err.stack)
-    })
-
-    it('returns message of error combined with stack', () => {
-      const err = getError(message)
-
-      const expectedStack = err.stack.replace(`Error: ${message}\n`, '')
-
-      expect($stackUtils.combineMessageAndStack(newMessage, err.stack)).to.equal(`We want this message
-
-and this line
-${expectedStack}`)
+      expect(modifiedErr.stack).to.equal(`Error: ${message}\n${newStack}`)
     })
 
     it('removes lines with __getSpecFrameStack', () => {
-      const err = __getSpecFrameStack(message)
-      const expectedStack = err.stack.replace(`Error: ${message}\n`, '').split('\n').filter((line) => {
-        return line.indexOf('__getSpecFrameStack') === -1
-      }).join('\n')
+      const err = new Error(message)
+      const newStack = 'at __getSpecFrameStack (path/to/file.js:1:1)\nat bar (path/to/file.js:2:2)'
+      const modifiedErr = $stackUtils.replaceStack(err, newStack)
 
-      expect($stackUtils.combineMessageAndStack(newMessage, err.stack)).to.equal(`We want this message
-
-and this line
-${expectedStack}`)
+      expect(modifiedErr.stack).to.equal(`Error: ${message}\nat bar (path/to/file.js:2:2)`)
     })
   })
 

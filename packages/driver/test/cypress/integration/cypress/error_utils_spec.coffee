@@ -474,7 +474,7 @@ describe "driver/src/cypress/error_utils", ->
     codeFrame = {}
 
     beforeEach ->
-      cy.stub($stackUtils, "combineMessageAndStack").returns("new stack")
+      cy.stub($stackUtils, "replaceStack").returns({ stack: "new stack" })
       cy.stub($stackUtils, "getSourceStack").returns(sourceStack)
       cy.stub($stackUtils, "getCodeFrame").returns(codeFrame)
 
