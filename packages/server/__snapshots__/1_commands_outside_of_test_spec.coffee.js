@@ -38,19 +38,7 @@ We dynamically generated a new test to display this failure.
 https://on.cypress.io/cannot-execute-commands-outside-test
 
 https://on.cypress.io/cannot-execute-commands-outside-test
-  Cannot call \`cy.viewport()\` outside a running test.
   
-  This usually happens when you accidentally write commands outside an \`it(...)\` test.
-  
-  If that is the case, just move these commands inside an \`it(...)\` test.
-  
-  Check your test file for errors.
-  
-  Cypress could not associate this error to any specific test.
-  
-  We dynamically generated a new test to display this failure.
-  
-  https://on.cypress.io/cannot-execute-commands-outside-test
 
 
 
@@ -128,11 +116,7 @@ exports['e2e commands outside of test / fails on failing assertions'] = `
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  expected true to be false
   
-  Cypress could not associate this error to any specific test.
-  
-  We dynamically generated a new test to display this failure.
 
 
 

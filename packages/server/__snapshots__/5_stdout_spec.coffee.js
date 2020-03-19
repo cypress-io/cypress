@@ -32,7 +32,6 @@ exports['e2e stdout displays errors from failures 1'] = `
 
   1) stdout_failing_spec fails:
      Error: foo
-  foo
       [stack trace lines]
 
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
@@ -49,17 +48,6 @@ The internal Cypress web server responded with:
   > 404: Not Found
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`failing hook\`
-  \`cy.visit()\` failed trying to load:
-  
-  /does-not-exist.html
-  
-  We failed looking for this file at the path:
-  
-  /foo/bar/.projects/e2e/does-not-exist.html
-  
-  The internal Cypress web server responded with:
-  
-    > 404: Not Found
       [stack trace lines]
 
   3) stdout_failing_spec passing hook is failing:
@@ -74,17 +62,6 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-  \`cy.visit()\` failed trying to load:
-  
-  /does-not-exist.html
-  
-  We failed looking for this file at the path:
-  
-  /foo/bar/.projects/e2e/does-not-exist.html
-  
-  The internal Cypress web server responded with:
-  
-    > 404: Not Found
       [stack trace lines]
 
 
@@ -468,7 +445,6 @@ exports['e2e stdout / displays assertion errors'] = `
       -[]
       +[ 1, 2, 3 ]
       
-  expected [] to deeply equal [ 1, 2, 3 ]
       [stack trace lines]
 
   2) assertion errors fails with assertion diff, with retries:
@@ -479,17 +455,14 @@ exports['e2e stdout / displays assertion errors'] = `
       -[]
       +[ 1, 2, 3 ]
       
-  Timed out retrying: expected [] to deeply equal [ 1, 2, 3 ]
       [stack trace lines]
 
   3) assertion errors fails with dom assertion without diff, with retries:
      AssertionError: expected '<body>' to have class 'foo'
-  expected '<body>' to have class 'foo'
       [stack trace lines]
 
   4) assertion errors fails with dom assertion without diff, with retries:
      AssertionError: Timed out retrying: expected '<body>' to have class 'foo'
-  Timed out retrying: expected '<body>' to have class 'foo'
       [stack trace lines]
 
 

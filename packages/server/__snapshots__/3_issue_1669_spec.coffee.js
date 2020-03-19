@@ -28,7 +28,7 @@ exports['e2e issue 1669 passes 1'] = `
      Error: some error, without stack
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`issue-1669 undefined err.st...\`
-  some error, without stack
+  
 
 
 
