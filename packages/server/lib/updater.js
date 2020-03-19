@@ -1,102 +1,135 @@
-_              = require("lodash")
-debug          = require("debug")("cypress:server:updater")
-semver         = require("semver")
-request        = require("@cypress/request")
-NwUpdater      = require("node-webkit-updater")
-pkg            = require("@packages/root")
-agent          = require("@packages/network").agent
-cwd            = require("./cwd")
-konfig         = require("./konfig")
-{ machineId }  = require('./util/machine_id')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _              = require("lodash");
+const debug          = require("debug")("cypress:server:updater");
+const semver         = require("semver");
+const request        = require("@cypress/request");
+const NwUpdater      = require("node-webkit-updater");
+const pkg            = require("@packages/root");
+const {
+  agent
+} = require("@packages/network");
+const cwd            = require("./cwd");
+const konfig         = require("./konfig");
+const { machineId }  = require('./util/machine_id');
 
-## backup the original cwd
-localCwd = cwd()
+//# backup the original cwd
+const localCwd = cwd();
 
-osxAppRe   = /\.app$/
-linuxAppRe = /Cypress$/i
+const osxAppRe   = /\.app$/;
+const linuxAppRe = /Cypress$/i;
 
-NwUpdater.prototype.checkNewVersion = (cb) ->
-  gotManifest = (err, req, data) ->
-    if err
-      return cb(err)
+NwUpdater.prototype.checkNewVersion = function(cb) {
+  const gotManifest = function(err, req, data) {
+    let e, newVersion;
+    if (err) {
+      return cb(err);
+    }
 
-    if req.statusCode < 200 or req.statusCode > 299
-      return cb(new Error(req.statusCode))
+    if ((req.statusCode < 200) || (req.statusCode > 299)) {
+      return cb(new Error(req.statusCode));
+    }
 
-    try
-      data = JSON.parse(data)
-    catch e
-      return cb(e)
+    try {
+      data = JSON.parse(data);
+    } catch (error) {
+      e = error;
+      return cb(e);
+    }
 
-    try
-      ## semver may throw here on invalid version
-      newVersion = semver.gt(data.version, @manifest.version)
-    catch e
-      newVersion = false
+    try {
+      //# semver may throw here on invalid version
+      newVersion = semver.gt(data.version, this.manifest.version);
+    } catch (error1) {
+      e = error1;
+      newVersion = false;
+    }
 
-    cb(null, newVersion, data)
+    return cb(null, newVersion, data);
+  };
 
-  sendReq = (id) =>
-    request.get({
-      url: @manifest.manifestUrl,
+  const sendReq = id => {
+    return request.get({
+      url: this.manifest.manifestUrl,
       headers: {
-        "x-cypress-version": pkg.version
+        "x-cypress-version": pkg.version,
         "x-machine-id": id
       },
-      agent: agent
+      agent,
       proxy: null
-    }, gotManifest.bind(@))
+    }, gotManifest.bind(this));
+  };
 
-  ## return hashed value because we dont care nor want
-  ## to know anything about you or your machine
-  machineId()
-  .then(sendReq)
+  //# return hashed value because we dont care nor want
+  //# to know anything about you or your machine
+  return machineId()
+  .then(sendReq);
+};
 
-class Updater
-  constructor: (callbacks) ->
-    if not (@ instanceof Updater)
-      return new Updater(callbacks)
+class Updater {
+  constructor(callbacks) {
+    if (!(this instanceof Updater)) {
+      return new Updater(callbacks);
+    }
 
-    @client     = new NwUpdater @getPackage()
-    @request    = null
-    @callbacks  = callbacks
+    this.client     = new NwUpdater(this.getPackage());
+    this.request    = null;
+    this.callbacks  = callbacks;
 
-    if process.env["CYPRESS_INTERNAL_ENV"] isnt "production"
-      @patchAppPath()
+    if (process.env["CYPRESS_INTERNAL_ENV"] !== "production") {
+      this.patchAppPath();
+    }
+  }
 
-  patchAppPath: ->
-    @getClient().getAppPath = -> cwd()
+  patchAppPath() {
+    return this.getClient().getAppPath = () => cwd();
+  }
 
-  getPackage: ->
-    _.extend({}, pkg, {manifestUrl: konfig("desktop_manifest_url")})
+  getPackage() {
+    return _.extend({}, pkg, {manifestUrl: konfig("desktop_manifest_url")});
+  }
 
-  getClient: ->
-    ## requiring inline due to easier testability
-    @client ? throw new Error("missing Updater#client")
+  getClient() {
+    //# requiring inline due to easier testability
+    return this.client != null ? this.client : (() => { throw new Error("missing Updater#client"); })();
+  }
 
-  trigger: (event, args...) ->
-    ## normalize event name
-    event = "on" + event[0].toUpperCase() + event.slice(1)
-    if cb = @callbacks and @callbacks[event]
-      cb.apply(@, args)
+  trigger(event, ...args) {
+    //# normalize event name
+    let cb;
+    event = "on" + event[0].toUpperCase() + event.slice(1);
+    if (cb = this.callbacks && this.callbacks[event]) {
+      return cb.apply(this, args);
+    }
+  }
 
-  check: (options = {}) ->
-    debug("checking for new version of Cypress. current version is", pkg.version)
+  check(options = {}) {
+    debug("checking for new version of Cypress. current version is", pkg.version);
 
-    @getClient().checkNewVersion (err, newVersionExists, manifest) =>
-      return @trigger("error", err) if err
+    return this.getClient().checkNewVersion((err, newVersionExists, manifest) => {
+      if (err) { return this.trigger("error", err); }
 
-      if manifest
-        debug("latest version of Cypress is:", manifest.version)
+      if (manifest) {
+        debug("latest version of Cypress is:", manifest.version);
+      }
 
-      if newVersionExists
-        debug("new version of Cypress exists:", manifest.version)
-        options.onNewVersion?(manifest)
-      else
-        debug("new version of Cypress does not exist")
-        options.onNoNewVersion?()
+      if (newVersionExists) {
+        debug("new version of Cypress exists:", manifest.version);
+        return (typeof options.onNewVersion === 'function' ? options.onNewVersion(manifest) : undefined);
+      } else {
+        debug("new version of Cypress does not exist");
+        return (typeof options.onNoNewVersion === 'function' ? options.onNoNewVersion() : undefined);
+      }
+    });
+  }
 
-  @check = (options = {}) ->
-    Updater().check(options)
+  static check(options = {}) {
+    return Updater().check(options);
+  }
+}
 
-module.exports = Updater
+module.exports = Updater;
