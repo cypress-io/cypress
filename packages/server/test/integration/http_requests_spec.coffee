@@ -1,8 +1,8 @@
 require("../spec_helper")
 
 _             = require("lodash")
-r             = require("request")
-rp            = require("request-promise")
+r             = require("@cypress/request")
+rp            = require("@cypress/request-promise")
 compression   = require("compression")
 dns           = require("dns")
 express       = require("express")
