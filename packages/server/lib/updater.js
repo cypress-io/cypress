@@ -1,36 +1,17 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:updater')
 const semver = require('semver')
 const request = require('@cypress/request')
 const NwUpdater = require('node-webkit-updater')
 const pkg = require('@packages/root')
-const {
-  agent,
-} = require('@packages/network')
+const { agent } = require('@packages/network')
 const cwd = require('./cwd')
 const konfig = require('./konfig')
 const { machineId } = require('./util/machine_id')
 
-// backup the original cwd
-const localCwd = cwd()
-
-const osxAppRe = /\.app$/
-const linuxAppRe = /Cypress$/i
-
 NwUpdater.prototype.checkNewVersion = function (cb) {
   const gotManifest = function (err, req, data) {
-    let e; let newVersion
+    let newVersion
 
     if (err) {
       return cb(err)
@@ -43,16 +24,13 @@ NwUpdater.prototype.checkNewVersion = function (cb) {
     try {
       data = JSON.parse(data)
     } catch (error) {
-      e = error
-
-      return cb(e)
+      return cb(error)
     }
 
     try {
       // semver may throw here on invalid version
       newVersion = semver.gt(data.version, this.manifest.version)
-    } catch (error1) {
-      e = error1
+    } catch (error) {
       newVersion = false
     }
 
@@ -104,7 +82,7 @@ class Updater {
 
   getClient () {
     // requiring inline due to easier testability
-    return this.client != null ? this.client : (() => {
+    return this.client || (() => {
       throw new Error('missing Updater#client')
     })()
   }
@@ -136,12 +114,16 @@ class Updater {
       if (newVersionExists) {
         debug('new version of Cypress exists:', manifest.version)
 
-        return (typeof options.onNewVersion === 'function' ? options.onNewVersion(manifest) : undefined)
+        if (typeof options.onNewVersion === 'function') {
+          return options.onNewVersion(manifest)
+        }
       }
 
       debug('new version of Cypress does not exist')
 
-      return (typeof options.onNoNewVersion === 'function' ? options.onNoNewVersion() : undefined)
+      if (typeof options.onNoNewVersion === 'function') {
+        options.onNoNewVersion()
+      }
     })
   }
 
