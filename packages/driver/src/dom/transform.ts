@@ -33,7 +33,11 @@ interface TransformInfo {
 }
 
 const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []): TransformInfo[] => {
-  list.push(extractTransformInfo($el))
+  const info = extractTransformInfo($el)
+
+  if (info !== null) {
+    list.push(info)
+  }
 
   const $parent = $el.parent()
 
@@ -44,15 +48,17 @@ const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []):
   return extractTransformInfoFromElements($parent, list)
 }
 
-const extractTransformInfo = ($el): TransformInfo => {
+const extractTransformInfo = ($el): TransformInfo | null => {
   const el = $el[0]
   const style = getComputedStyle(el)
 
-  return {
-    backfaceVisibility: style.getPropertyValue('backface-visibility') as BackfaceVisibility,
-    transformStyle: style.getPropertyValue('transform-style') as TransformStyle,
-    transform: style.getPropertyValue('transform'),
-  }
+  return style.getPropertyValue('backface-visibility') !== ''
+    ? {
+      backfaceVisibility: style.getPropertyValue('backface-visibility') as BackfaceVisibility,
+      transformStyle: style.getPropertyValue('transform-style') as TransformStyle,
+      transform: style.getPropertyValue('transform'),
+    }
+    : null
 }
 
 const existsInvisibleBackface = (list: TransformInfo[]) => {
