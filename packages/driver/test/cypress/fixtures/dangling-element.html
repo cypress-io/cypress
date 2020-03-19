@@ -34,18 +34,18 @@
 
     container.classList.add('container')
 
-    const content = document.createElement('div')
+    const p = document.createElement('p')
 
-    content.innerText = 'hello world'
-    content.classList.add('hello')
+    p.innerText = 'hello world'
+    p.classList.add('hello')
 
     parent.appendChild(container)
-    container.appendChild(content)
+    container.appendChild(p)
 
-    // 2. vue-fragment adds content to the parent.
-    // but forcefully set the content's parentNode to container.
-    parent.appendChild(content)
-    freeze(content, 'parentNode', container)
+    // 2. vue-fragment adds the p to the parent.
+    // but forcefully set the p's parentNode to container.
+    parent.appendChild(p)
+    freeze(p, 'parentNode', container)
 
     // 3. vue-fragment removes container from the parent.
     // but forcefully set the container's parentNode to parent.
