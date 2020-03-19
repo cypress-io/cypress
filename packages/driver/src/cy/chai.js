@@ -38,12 +38,6 @@ let chaiUtils = null
 
 chai.use(sinonChai)
 
-const getType = function (val) {
-  const match = /\[object (.*)\]/.exec(Object.prototype.toString.call(val))
-
-  return match && match[1]
-}
-
 chai.use((chai, u) => {
   chaiUtils = u
 
@@ -91,10 +85,6 @@ chai.use((chai, u) => {
 
   // prevent tunneling into Window objects (can throw cross-origin errors)
   setFormatValueHook((ctx, val) => {
-    if (val && (getType(val) === 'Window')) {
-      return '[window]'
-    }
-
     // https://github.com/cypress-io/cypress/issues/5270
     // When name attribute exists in <iframe>,
     // Firefox returns [object Window] but Chrome returns [object Object]
