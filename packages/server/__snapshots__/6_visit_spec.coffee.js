@@ -122,28 +122,7 @@ The stack trace for this error is:
 Error: connect ECONNREFUSED 127.0.0.1:16795
     [stack trace lines]
 
-  \`cy.visit()\` failed trying to load:
-  
-  http://localhost:16795/
-  
-  We attempted to make an http request to this URL but the request failed without a response.
-  
-  We received this error at the network level:
-  
-    > Error: connect ECONNREFUSED 127.0.0.1:16795
-  
-  Common situations why this would fail:
-    - you don't have internet access
-    - you forgot to run / boot your web server
-    - your web server isn't accessible
-    - you have weird network configuration settings on your computer
-  
-  The stack trace for this error is:
-  
-  Error: connect ECONNREFUSED 127.0.0.1:16795
-      [stack trace lines]
-  
-      [stack trace lines]
+    [stack trace lines]
 
 
 
@@ -229,17 +208,6 @@ The response we received from your web server was:
 This was considered a failure because the status code was not \`2xx\`.
 
 If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
-  \`cy.visit()\` failed trying to load:
-  
-  http://localhost:3434/fail
-  
-  The response we received from your web server was:
-  
-    > 500: Server Error
-  
-  This was considered a failure because the status code was not \`2xx\`.
-  
-  If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
       [stack trace lines]
 
 
@@ -326,17 +294,6 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-  \`cy.visit()\` failed trying to load:
-  
-  /static/does-not-exist.html
-  
-  We failed looking for this file at the path:
-  
-  /foo/bar/.projects/e2e/static/does-not-exist.html
-  
-  The internal Cypress web server responded with:
-  
-    > 404: Not Found
       [stack trace lines]
 
 
@@ -425,19 +382,6 @@ This was considered a failure because responses must have \`content-type: 'text/
 However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
 \`cy.request()\` will automatically get and set cookies and enable you to parse responses.
-  \`cy.visit()\` failed trying to load:
-  
-  /static/hello.txt
-  
-  The \`content-type\` of the response we received from this local file was:
-  
-    > \`text/plain\`
-  
-  This was considered a failure because responses must have \`content-type: 'text/html'\`
-  
-  However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
-  
-  \`cy.request()\` will automatically get and set cookies and enable you to parse responses.
       [stack trace lines]
 
 
@@ -523,15 +467,6 @@ You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
 When this \`load\` event occurs, Cypress will continue running commands.
-  Timed out after waiting \`1000ms\` for your remote page to load.
-  
-  Your page did not fire its \`load\` event within \`1000ms\`.
-  
-  You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
-  
-  Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
-  
-  When this \`load\` event occurs, Cypress will continue running commands.
       [stack trace lines]
 
   2) when visit times out fails timeout exceeds timeout option:
@@ -544,15 +479,6 @@ You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait
 Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
 When this \`load\` event occurs, Cypress will continue running commands.
-  Timed out after waiting \`500ms\` for your remote page to load.
-  
-  Your page did not fire its \`load\` event within \`500ms\`.
-  
-  You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
-  
-  Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
-  
-  When this \`load\` event occurs, Cypress will continue running commands.
       [stack trace lines]
 
 
@@ -653,28 +579,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-  \`cy.visit()\` failed trying to load:
-  
-  http://localhost:3434/response_never_finishes
-  
-  We attempted to make an http request to this URL but the request failed without a response.
-  
-  We received this error at the network level:
-  
-    > Error: ESOCKETTIMEDOUT
-  
-  Common situations why this would fail:
-    - you don't have internet access
-    - you forgot to run / boot your web server
-    - your web server isn't accessible
-    - you have weird network configuration settings on your computer
-  
-  The stack trace for this error is:
-  
-  Error: ESOCKETTIMEDOUT
-      [stack trace lines]
-  
-      [stack trace lines]
+    [stack trace lines]
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
      CypressError: \`cy.visit()\` failed trying to load:
@@ -698,28 +603,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-  \`cy.visit()\` failed trying to load:
-  
-  http://localhost:3434/response_never_finishes
-  
-  We attempted to make an http request to this URL but the request failed without a response.
-  
-  We received this error at the network level:
-  
-    > Error: ESOCKETTIMEDOUT
-  
-  Common situations why this would fail:
-    - you don't have internet access
-    - you forgot to run / boot your web server
-    - your web server isn't accessible
-    - you have weird network configuration settings on your computer
-  
-  The stack trace for this error is:
-  
-  Error: ESOCKETTIMEDOUT
-      [stack trace lines]
-  
-      [stack trace lines]
+    [stack trace lines]
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
      CypressError: \`cy.visit()\` failed trying to load:
@@ -743,28 +627,7 @@ The stack trace for this error is:
 Error: ESOCKETTIMEDOUT
     [stack trace lines]
 
-  \`cy.visit()\` failed trying to load:
-  
-  http://localhost:3434/timeout?ms=1000
-  
-  We attempted to make an http request to this URL but the request failed without a response.
-  
-  We received this error at the network level:
-  
-    > Error: ESOCKETTIMEDOUT
-  
-  Common situations why this would fail:
-    - you don't have internet access
-    - you forgot to run / boot your web server
-    - your web server isn't accessible
-    - you have weird network configuration settings on your computer
-  
-  The stack trace for this error is:
-  
-  Error: ESOCKETTIMEDOUT
-      [stack trace lines]
-  
-      [stack trace lines]
+    [stack trace lines]
 
 
 

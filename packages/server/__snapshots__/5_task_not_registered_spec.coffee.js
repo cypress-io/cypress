@@ -31,14 +31,6 @@ Fix this in your plugins file here:
 /foo/bar/.projects/task-not-registered/cypress/plugins/index.js
 
 https://on.cypress.io/api/task
-  \`cy.task('some:task')\` failed with the following error:
-  
-  The 'task' event has not been registered in the plugins file. You must register it before using cy.task()
-  
-  Fix this in your plugins file here:
-  /foo/bar/.projects/task-not-registered/cypress/plugins/index.js
-  
-  https://on.cypress.io/api/task
       [stack trace lines]
 
 

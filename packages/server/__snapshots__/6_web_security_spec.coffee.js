@@ -48,25 +48,6 @@ Alternatively you can also disable Chrome Web Security in Chromium-based browser
 https://on.cypress.io/cross-origin-violation
 
 https://on.cypress.io/cross-origin-violation
-  Cypress detected a cross origin error happened on page load:
-  
-    > [Cross origin error message]
-  
-  Before the page load, you were bound to the origin policy:
-  
-    > http://localhost:4466
-  
-  A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
-  
-  A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
-  
-  Cypress does not allow you to navigate to a different origin URL within a single test.
-  
-  You may need to restructure some of your test code to avoid this problem.
-  
-  Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
-  
-  https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
   2) web security fails when submitted a form and being redirected to another origin:
@@ -91,25 +72,6 @@ Alternatively you can also disable Chrome Web Security in Chromium-based browser
 https://on.cypress.io/cross-origin-violation
 
 https://on.cypress.io/cross-origin-violation
-  Cypress detected a cross origin error happened on page load:
-  
-    > [Cross origin error message]
-  
-  Before the page load, you were bound to the origin policy:
-  
-    > http://localhost:4466
-  
-  A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
-  
-  A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
-  
-  Cypress does not allow you to navigate to a different origin URL within a single test.
-  
-  You may need to restructure some of your test code to avoid this problem.
-  
-  Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
-  
-  https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
   3) web security fails when using a javascript redirect to another origin:
@@ -134,25 +96,6 @@ Alternatively you can also disable Chrome Web Security in Chromium-based browser
 https://on.cypress.io/cross-origin-violation
 
 https://on.cypress.io/cross-origin-violation
-  Cypress detected a cross origin error happened on page load:
-  
-    > [Cross origin error message]
-  
-  Before the page load, you were bound to the origin policy:
-  
-    > http://localhost:4466
-  
-  A cross origin error happens when your application navigates to a new URL which does not match the origin policy above.
-  
-  A new URL does not match the origin policy if the 'protocol', 'port' (if specified), and/or 'host' (unless of the same superdomain) are different.
-  
-  Cypress does not allow you to navigate to a different origin URL within a single test.
-  
-  You may need to restructure some of your test code to avoid this problem.
-  
-  Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
-  
-  https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
 
