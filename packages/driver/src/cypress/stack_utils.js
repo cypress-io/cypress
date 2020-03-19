@@ -181,7 +181,7 @@ const normalizeStack = (err) => {
 const replaceStack = (err, newStack) => {
   // if err already lacks a stack or we've removed the stack
   // for some reason, keep it stackless
-  if (!err.stack) return
+  if (!err.stack) return err
 
   const errString = err.toString()
 
