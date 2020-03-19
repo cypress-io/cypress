@@ -90,9 +90,10 @@ chai.use((chai, u) => {
     // Firefox returns [object Window] but Chrome returns [object Object]
     // So, we try throwing an error and check the error message.
     try {
-      val && val.document
+      val && (val.document || val.inspect)
     } catch (e) {
-      if (e.stack.indexOf('cross-origin') !== -1) {
+      if (e.stack.indexOf('cross-origin') !== -1 || // chrome
+      e.message.indexOf('cross-origin') !== -1) { // firefox
         return `[window]`
       }
     }
