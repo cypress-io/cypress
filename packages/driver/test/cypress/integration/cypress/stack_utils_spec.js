@@ -20,6 +20,15 @@ describe('driver/src/cypress/stack_utils', () => {
 
       expect(modifiedErr.stack).to.equal(`Error: ${message}\nat bar (path/to/file.js:2:2)`)
     })
+
+    it('does not replace stack if error has no stack', () => {
+      const err = new Error(message)
+
+      err.stack = ''
+      const modifiedErr = $stackUtils.replaceStack(err, 'new stack')
+
+      expect(modifiedErr.stack).to.equal('')
+    })
   })
 
   context('.getCodeFrame', () => {

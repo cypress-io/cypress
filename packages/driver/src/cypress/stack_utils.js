@@ -179,6 +179,10 @@ const normalizeStack = (err) => {
 }
 
 const replaceStack = (err, newStack) => {
+  // if err already lacks a stack or we've removed the stack
+  // for some reason, keep it stackless
+  if (!err.stack) return
+
   const errString = err.toString()
 
   const [__, stackLines] = splitStack(newStack) // eslint-disable-line no-unused-vars
