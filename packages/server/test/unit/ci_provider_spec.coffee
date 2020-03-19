@@ -752,6 +752,42 @@ describe "lib/util/ci_provider", ->
     expectsCiParams(null)
     expectsCommitParams(null)
 
+  it "netlify", ->
+    resetEnv = mockedEnv({
+      NETLIFY: "true"
+
+      BUILD_ID: "buildId"
+      CONTEXT: "deployContent"
+      REPOSITORY_URL: "repositoryUrl"
+      # deploy env variables
+      URL: "url"
+      DEPLOY_URL: "individualDeployUrl"
+      DEPLOY_PRIME_URL: "primeDeployUrl"
+      DEPLOY_ID: "deployId"
+
+      COMMIT_REF: "commit"
+      BRANCH: "branch"
+      HEAD: "head"
+      CACHED_COMMIT_REF: "previousCommit"
+      PULL_REQUEST: "pullRequestTrueOrFalse"
+      REVIEW_ID: "pullRequestReviewId"
+    }, {clear: true})
+
+    expectsName("netlify")
+    expectsCiParams({
+      buildId: "buildId"
+      context: "deployContent"
+      repositoryUrl: "repositoryUrl"
+      url: "url"
+      deployUrl: "individualDeployUrl"
+      deployPrimeUrl: "primeDeployUrl"
+      deployId: "deployId"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+    })
+
   it "azure", ->
     resetEnv = mockedEnv({
       # these two variables tell us it is Azure CI

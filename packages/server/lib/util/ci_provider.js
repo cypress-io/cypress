@@ -101,6 +101,7 @@ const CI_PROVIDERS = {
   'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
   'wercker': isWercker,
+  netlify: 'NETLIFY',
 }
 
 const _detectProviderName = () => {
@@ -341,6 +342,16 @@ const _providerCiParams = () => {
       'TRAVIS_PULL_REQUEST_SHA',
     ]),
     wercker: null,
+    // https://docs.netlify.com/configure-builds/environment-variables/#deploy-urls-and-metadata
+    netlify: extract([
+      'BUILD_ID',
+      'CONTEXT',
+      'REPOSITORY_URL',
+      'URL',
+      'DEPLOY_URL',
+      'DEPLOY_PRIME_URL',
+      'DEPLOY_ID',
+    ]),
   }
 }
 
@@ -505,6 +516,10 @@ const _providerCommitParams = () => {
       // defaultBranch: ???
     },
     wercker: null,
+    netlify: {
+      sha: env.COMMIT_REF,
+      branch: env.BRANCH,
+    },
   }
 }
 
