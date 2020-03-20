@@ -10,6 +10,11 @@ describe "visits", ->
   it "can load a local file with a huge amount of elements without timing out", ->
     cy.visit("/elements.html", {timeout: 5000})
 
+  ## https://github.com/cypress-io/cypress/issues/5602
+  it "can load a website which uses invalid HTTP header chars", ->
+    cy.visit("http://localhost:3434/invalid-header-char")
+    .contains('foo')
+
   ## https://github.com/cypress-io/cypress/issues/5446
   it "can load a site via TLSv1", ->
     cy.visit("https://localhost:6776")

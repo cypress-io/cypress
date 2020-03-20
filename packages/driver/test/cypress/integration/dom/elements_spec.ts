@@ -124,4 +124,53 @@ describe('src/dom/elements', () => {
       expect(Cypress.dom.isInputType($el, ['text', 'email'])).to.be.false
     })
   })
+
+  context('.isUndefinedOrHTMLBodyDoc', () => {
+    it('when $el undefined', () => {
+      const $el = undefined
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when $el[0] undefined', () => {
+      const $el = []
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('DOM element does not exist', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('foo-bar-baz')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when html', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('html')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when body', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('body')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when document', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('document')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.true
+    })
+
+    it('when existing DOM element', () => {
+      cy.visit('/fixtures/dom.html')
+      const $el = $('input')
+
+      expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.false
+    })
+  })
 })

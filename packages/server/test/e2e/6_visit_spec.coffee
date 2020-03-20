@@ -69,6 +69,21 @@ onServer = (app) ->
     ## dont ever end this response
     res.type("html").write("foo\n")
 
+  ## https://github.com/cypress-io/cypress/issues/5602
+  app.get "/invalid-header-char", (req, res) ->
+    ## express/node may interfere if we just use res.setHeader
+    res.connection.write(
+        """
+        HTTP/1.1 200 OK
+        Content-Type: text/html
+        Set-Cookie: foo=bar-#{String.fromCharCode(1)}-baz
+
+        foo
+        """
+    )
+
+    res.connection.end()
+
 describe "e2e visit", ->
   require("mocha-banner").register()
 

@@ -3,7 +3,7 @@ import { concatStream } from '@packages/network'
 import { expect } from 'chai'
 import fs from 'fs'
 import Promise from 'bluebird'
-import rp from 'request-promise'
+import rp from '@cypress/request-promise'
 import * as security from '../../../../lib/http/util/security'
 
 const original = `\
