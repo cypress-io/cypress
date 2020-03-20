@@ -1,198 +1,194 @@
 /**
- * This tests various failure scenarios where a an error and code frame is displayed
+ * This tests various failure scenarios where an error and code frame is displayed
  * It does this by having a test fail and then a subsequent test run that
  * tests the appearance of the command log
  * Because of this, the test order is important
  * There should be the same number of failing tests as there are passing
  * tests, because each failure has a verification test (e.g. 11 fail, 11 pass)
- * Each test is nested inside a `describe` because otherwise the subsequent
- * test will not be run
  */
 import outsideError from '../../../todos/throws-error'
 
-describe('various failures', () => {
-  let counter = 0
+const fail = (ctx, test) => {
+  it(`✗ FAIL - ${ctx.title}`, test)
+}
 
-  const failure = (testName, test) => {
-    describe(`f-${++counter}`, () => {
-      it(`✗ SHOULD FAIL - ${testName}`, test)
-    })
+const verify = (ctx, { column, codeFrameText, message, support = false, regex }) => {
+  // test only the column number because the line number is brittle
+  // since any changes to this file can affect it
+  if (!regex) {
+    regex = support ?
+      new RegExp(`cypress\/support\/index\.js:\\d+:${column}`) :
+      new RegExp(`cypress\/integration\/various_failures_spec\.js:\\d+:${column}`)
   }
 
-  const verify = (testName, { column, codeFrameText, message, support = false, regex }) => {
-    // test only the column number because the line number is brittle
-    // since any changes to this file can affect it
-    if (!regex) {
-      regex = support ?
-        new RegExp(`cypress\/support\/index\.js:\\d+:${column}`) :
-        new RegExp(`cypress\/integration\/various_failures_spec\.js:\\d+:${column}`)
-    }
+  it(`✓ VERIFY`, () => {
+    cy.wrap(Cypress.$(window.top.document.body))
+    .find('.reporter')
+    .contains(`FAIL - ${ctx.title}`)
+    .closest('.runnable-wrapper')
+    .within(() => {
+      cy.get('.runnable-err-message')
+      .should('include.text', message)
 
-    describe(`v-${counter}`, () => {
-      it(`✓ SHOULD PASS - ${testName}`, () => {
-        cy.wrap(Cypress.$(window.top.document.body))
-        .find('.reporter')
-        .contains(`SHOULD FAIL - ${testName}`)
-        .closest('.runnable-wrapper')
-        .within(() => {
-          cy.get('.runnable-err-message')
-          .should('include.text', message)
+      cy.get('.runnable-err-stack-trace')
+      .invoke('text')
+      .should('match', regex)
 
-          cy.get('.runnable-err-stack-trace')
-          .invoke('text')
-          .should('match', regex)
+      cy
+      .get('.test-err-code-frame .runnable-err-file-path')
+      .invoke('text')
+      .should('match', regex)
 
-          cy
-          .get('.test-err-code-frame .runnable-err-file-path')
-          .invoke('text')
-          .should('match', regex)
-
-          // most code frames will have the `testName` in them but for some
-          // it's cut off due to the code frame only showing 2 lines before
-          // and after the highlighted, so we prefer the `codeFrameText`
-          cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText || testName)
-        })
-      })
+      // most code frames will show `fail(this,()=>` as the 1st line but
+      // for some it's cut off due to the test code being more lines,
+      // so we prefer the `codeFrameText`
+      cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText || 'fail(this,()=>')
     })
-  }
+  })
+}
 
-  failure('assertion', () => {
+//
+// Begin Test Cases
+//
+
+describe('assertion', function () {
+  fail(this, () => {
     expect(true).to.be.false
     expect(false).to.be.false
   })
 
-  verify('assertion', {
+  verify(this, {
     column: 5,
     message: 'expected true to be false',
   })
+})
 
-  // -----
-
-  failure('exception', () => {
+describe('exception', function () {
+  fail(this, () => {
     ({}).bar()
   })
 
-  verify('exception', {
+  verify(this, {
     column: 10,
     message: 'bar is not a function',
   })
+})
 
-  // -----
-
-  failure('exception in file outside project', () => {
+describe('exception in file outside project', function () {
+  fail(this, () => {
     outsideError()
   })
 
-  verify('exception in file outside project', {
+  verify(this, {
     column: 9,
     message: 'An outside error',
     regex: /todos\/throws\-error\.js:5:9/,
     codeFrameText: `thrownewError('An outside error')`,
   })
+})
 
-  // -----
-
-  failure('command', () => {
+describe('command', function () {
+  fail(this, () => {
     cy.get('h1', { timeout: 1 })
   })
 
-  verify('command', {
+  verify(this, {
     column: 8,
     message: 'Timed out retrying: Expected to find element: h1, but never found it',
   })
+})
 
-  // -----
-
-  failure('chained command', () => {
+describe('chained command', function () {
+  fail(this, () => {
     cy.get('div').find('h1', { timeout: 1 })
   })
 
-  verify('chained command', {
+  verify(this, {
     column: 19,
     message: 'Timed out retrying: Expected to find element: h1, but never found it',
   })
+})
 
-  // -----
-
-  failure('then assertion', () => {
+describe('then assertion', function () {
+  fail(this, () => {
     cy.wrap({}).then(() => {
       expect(true).to.be.false
       expect(false).to.be.false
     })
   })
 
-  verify('then assertion', {
+  verify(this, {
     column: 7,
     message: 'expected true to be false',
   })
+})
 
-  // -----
-
-  failure('should callback assertion', () => {
+describe('should callback assertion', function () {
+  fail(this, () => {
     cy.wrap({}).should(() => {
       expect(true).to.be.false
       expect(false).to.be.false
     })
   })
 
-  verify('should callback assertion', {
+  verify(this, {
     column: 7,
     message: 'expected true to be false',
   })
+})
 
-  // -----
-
-  failure('then exception', () => {
+describe('then exception', function () {
+  fail(this, () => {
     cy.wrap({}).then(() => {
       ({}).bar()
     })
   })
 
-  verify('then exception', {
+  verify(this, {
     column: 12,
     message: 'bar is not a function',
   })
+})
 
-  // -----
-
-  failure('should callback exception', () => {
+describe('should callback exception', function () {
+  fail(this, () => {
     cy.wrap({}).should(() => {
       ({}).bar()
     })
   })
 
-  verify('should callback exception', {
+  verify(this, {
     column: 12,
     message: 'bar is not a function',
   })
+})
 
-  // -----
-
-  failure('should assertion', () => {
+describe('should assertion', function () {
+  fail(this, () => {
     cy.wrap({})
     .should('have.property', 'foo')
   })
 
-  verify('should assertion', {
+  verify(this, {
     column: 6,
     message: 'Timed out retrying: expected {} to have property \'foo\'',
   })
+})
 
-  // -----
-
-  failure('after multiple shoulds', () => {
+describe('after multiple shoulds', function () {
+  fail(this, () => {
     cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
     .should('equal', 'bar')
   })
 
-  verify('after multiple shoulds', {
+  verify(this, {
     column: 6,
     message: 'Timed out retrying: expected \'foo\' to equal \'bar\'',
   })
+})
 
-  // -----
-
-  failure('after multiple should callbacks exception', () => {
+describe('after multiple should callbacks exception', function () {
+  fail(this, () => {
     cy.wrap({ foo: 'foo' })
     .should(() => {
       expect(true).to.be.true
@@ -202,15 +198,15 @@ describe('various failures', () => {
     })
   })
 
-  verify('after multiple should callbacks exception', {
+  verify(this, {
     column: 12,
     codeFrameText: '({}).bar()',
     message: 'bar is not a function',
   })
+})
 
-  // -----
-
-  failure('after multiple should callbacks assertion', () => {
+describe('after multiple should callbacks assertion', function () {
+  fail(this, () => {
     cy.wrap({ foo: 'foo' })
     .should(() => {
       expect(true).to.be.true
@@ -220,187 +216,187 @@ describe('various failures', () => {
     })
   })
 
-  verify('after multiple should callbacks assertion', {
+  verify(this, {
     column: 7,
     codeFrameText: '.should(()=>',
     message: 'expected true to be false',
   })
+})
 
-  // -----
-
-  failure('command after should success', () => {
+describe('command after should success', function () {
+  fail(this, () => {
     cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
     cy.get('h1', { timeout: 1 })
   })
 
-  verify('command after should success', {
+  verify(this, {
     column: 8,
     message: 'Timed out retrying: Expected to find element: h1, but never found it',
   })
+})
 
-  // -----
-
-  failure('custom command - assertion', () => {
+describe('custom command - assertion', function () {
+  fail(this, () => {
     cy.failAssertion()
   })
 
-  verify('custom command - assertion', {
+  verify(this, {
     column: 3,
     support: true,
     codeFrameText: 'add(\'failAssertion\'',
     message: 'expected true to be false',
   })
+})
 
-  // -----
-
-  failure('custom command - exception', () => {
+describe('custom command - exception', function () {
+  fail(this, () => {
     cy.failException()
   })
 
-  verify('custom command - exception', {
+  verify(this, {
     column: 8,
     support: true,
     codeFrameText: 'add(\'failException\'',
     message: 'bar is not a function',
   })
+})
 
-  // -----
-
-  failure('custom command - command', () => {
+describe('custom command - command', function () {
+  fail(this, () => {
     cy.failCommand()
   })
 
-  verify('custom command - command', {
+  verify(this, {
     column: 6,
     support: true,
     codeFrameText: 'add(\'failCommand\'',
     message: 'Timed out retrying: Expected to find element: h1, but never found it',
   })
+})
 
-  // -----
-
-  failure('custom command - chained command', () => {
+describe('custom command - chained command', function () {
+  fail(this, () => {
     cy.failChainedCommand()
   })
 
-  verify('custom command - chained command', {
+  verify(this, {
     column: 17,
     support: true,
     codeFrameText: 'add(\'failChainedCommand\'',
     message: 'Timed out retrying: Expected to find element: h1, but never found it',
   })
+})
 
-  // -----
-
-  failure('custom command - then assertion', () => {
+describe('custom command - then assertion', function () {
+  fail(this, () => {
     cy.failThenAssertion()
   })
 
-  verify('custom command - then assertion', {
+  verify(this, {
     column: 5,
     support: true,
     codeFrameText: 'add(\'failThenAssertion\'',
     message: 'expected true to be false',
   })
+})
 
-  // -----
-
-  failure('custom command - should callback assertion', () => {
+describe('custom command - should callback assertion', function () {
+  fail(this, () => {
     cy.failShouldCallbackAssertion()
   })
 
-  verify('custom command - should callback assertion', {
+  verify(this, {
     column: 5,
     support: true,
     codeFrameText: 'add(\'failShouldCallbackAssertion\'',
     message: 'expected true to be false',
   })
+})
 
-  // -----
-
-  failure('custom command - then exception', () => {
+describe('custom command - then exception', function () {
+  fail(this, () => {
     cy.failThenException()
   })
 
-  verify('custom command - then exception', {
+  verify(this, {
     column: 10,
     support: true,
     codeFrameText: 'add(\'failThenException\'',
     message: 'bar is not a function',
   })
+})
 
-  // -----
-
-  failure('custom command - should callback exception', () => {
+describe('custom command - should callback exception', function () {
+  fail(this, () => {
     cy.failShouldCallbackException()
   })
 
-  verify('custom command - should callback exception', {
+  verify(this, {
     column: 10,
     support: true,
     codeFrameText: 'add(\'failShouldCallbackException\'',
     message: 'bar is not a function',
   })
+})
 
-  // -----
-
-  failure('custom command - should assertion', () => {
+describe('custom command - should assertion', function () {
+  fail(this, () => {
     cy.failShouldAssertion()
   })
 
-  verify('custom command - should assertion', {
+  verify(this, {
     column: 4,
     support: true,
     codeFrameText: 'add(\'failShouldAssertion\'',
     message: 'Timed out retrying: expected {} to have property \'foo\'',
   })
+})
 
-  // -----
-
-  failure('custom command - after multiple shoulds', () => {
+describe('custom command - after multiple shoulds', function () {
+  fail(this, () => {
     cy.failAfterMultipleShoulds()
   })
 
-  verify('custom command - after multiple shoulds', {
+  verify(this, {
     column: 4,
     support: true,
     codeFrameText: 'add(\'failAfterMultipleShoulds\'',
     message: 'Timed out retrying: expected \'foo\' to equal \'bar\'',
   })
+})
 
-  // -----
-
-  failure('custom command - after multiple should callbacks exception', () => {
+describe('custom command - after multiple should callbacks exception', function () {
+  fail(this, () => {
     cy.failAfterMultipleShouldCallbacksException()
   })
 
-  verify('custom command - after multiple should callbacks exception', {
+  verify(this, {
     column: 10,
     support: true,
     codeFrameText: '({}).bar()',
     message: 'bar is not a function',
   })
+})
 
-  // -----
-
-  failure('custom command - after multiple should callbacks assertion', () => {
+describe('custom command - after multiple should callbacks assertion', function () {
+  fail(this, () => {
     cy.failAfterMultipleShouldCallbacksAssertion()
   })
 
-  verify('custom command - after multiple should callbacks assertion', {
+  verify(this, {
     column: 5,
     support: true,
     codeFrameText: '.should(()=>',
     message: 'expected true to be false',
   })
+})
 
-  // -----
-
-  failure('custom command - command failure after should success', () => {
+describe('custom command - command failure after should success', function () {
+  fail(this, () => {
     cy.failCommandAfterShouldSuccess()
   })
 
-  verify('custom command - command failure after should success', {
+  verify(this, {
     column: 6,
     support: true,
     codeFrameText: 'add(\'failCommandAfterShouldSuccess\'',
