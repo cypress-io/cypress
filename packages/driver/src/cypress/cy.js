@@ -122,7 +122,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const queue = $CommandQueue.create()
 
   $VideoRecorder.create(Cypress)
-  const Chainer = $Chainer.create()
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
@@ -138,7 +137,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const { expect } = $Chai.create(specWindow, assertions.assert)
 
   const xhrs = $Xhrs.create(state)
-  const aliases = $Aliases.create(jquery.getRemotejQueryInstance, state)
+  const aliases = $Aliases.create(cy)
 
   const errors = $Errors.create(state, config, log)
   const ensures = $Ensures.create(state, expect)
@@ -146,7 +145,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const snapshots = $Snapshots.create($$, state)
 
   const isCy = (val) => {
-    return (val === cy) || $utils.isInstanceOf(val, Chainer)
+    return (val === cy) || $utils.isInstanceOf(val, $Chainer)
   }
 
   const runnableCtx = function (name) {
@@ -931,7 +930,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     addChainer (name, fn) {
       // add this function to our chainer class
-      return Chainer.add(name, fn)
+      return $Chainer.add(name, fn)
     },
 
     addCommand ({ name, fn, type, prevSubject }) {
@@ -970,7 +969,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
         // this is the first call on cypress
         // so create a new chainer instance
-        const chain = Chainer.create(name, args)
+        const chain = $Chainer.create(name, args)
 
         // store the chain so we can access it later
         state('chain', chain)

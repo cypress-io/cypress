@@ -7,7 +7,7 @@ import CommandModel, { CommandProps } from '../commands/command-model'
 import RouteModel, { RouteProps } from '../routes/route-model'
 import scroller, { Scroller } from '../lib/scroller'
 import SuiteModel, { SuiteProps } from './suite-model'
-import TestModel, { TestProps, UpdateTestCallback } from '../test/test-model'
+import TestModel, { TestProps, UpdateTestCallback, UpdatableTestProps } from '../test/test-model'
 import RunnableModel from './runnable-model'
 
 const defaults = {
@@ -143,21 +143,21 @@ class RunnablesStore {
     this._initialScrollTop = initialScrollTop
   }
 
-  setIsOpen ({ id, isOpen }: TestModel, cb) {
+  setIsOpen ({ id, isOpen }: {id: string, isOpen: boolean}, cb: UpdateTestCallback) {
     this._withTest(id, (test) => {
       test.setIsOpen(isOpen, cb)
     })
   }
 
-  updateTest (props: TestProps, cb: UpdateTestCallback) {
-    this._withTest(props.id, (test) => {
-      return test.update(props, cb)
-    })
-  }
+  // updateTest (props: UpdatableTestProps, cb: UpdateTestCallback) {
+  //   this._withTest(props.id, (test) => {
+  //     return test.update(props, cb)
+  //   })
+  // }
 
   runnableStarted (props: TestModel) {
     this._withTest(props.id, (test) => {
-      return test.start(props)
+      test.start(props)
     })
   }
 
@@ -177,7 +177,7 @@ class RunnablesStore {
     })
   }
 
-  _withTest (id: number, cb: ((test: TestModel) => void)) {
+  _withTest (id: string, cb: ((test: TestModel) => void)) {
     // we get events for suites and tests, but only tests change during a run,
     // so if the id isn't found in this._tests, we ignore it b/c it's a suite
     const test = this._tests[id]

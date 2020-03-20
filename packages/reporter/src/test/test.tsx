@@ -35,7 +35,9 @@ class Test extends Component<Props> {
 
     return (
       <div
+        ref='container'
         className={cs('runnable-wrapper', { 'is-open': model.isOpen })}
+        data-testid={model.id}
         onClick={model.toggleOpen}
         style={{ paddingLeft: indent(model.level) }}
       >
@@ -79,7 +81,7 @@ class Test extends Component<Props> {
 
   _onErrorClick = (e:Event) => {
     e.stopPropagation()
-    this.props.events.emit('show:error', this.props.model.id)
+    this.props.events.emit('show:error', this.props.model)
   }
 }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { shallow } from 'enzyme'
+import { shallow, mount } from 'enzyme'
 import sinon from 'sinon'
 
 import Collapsible from './collapsible'
@@ -64,7 +64,7 @@ describe('<Collapsible />', () => {
 
   it('calls onToggle when toggled', () => {
     const onToggle = sinon.spy()
-    const component = shallow(<Collapsible onToggle={onToggle} />)
+    const component = mount(<Collapsible onToggle={onToggle} />)
 
     component.find('.collapsible-header').simulate('click')
     expect(onToggle).to.have.been.calledWith(true)

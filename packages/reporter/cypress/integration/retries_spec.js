@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import { EventEmitter } from 'events'
 import { addLog, updateLog } from '../support/util'
 
@@ -6,6 +8,31 @@ const _ = Cypress._
 const makeRunnables = ({ base }, tests) => {
   return _.set(base, 'suites[0].tests', tests)
 }
+
+// same as lodash.throttle but drops calls instead of buffering them.
+const throttleDrop = function (fn, timeout) {
+  let cooleddown = true
+
+  return function (...args) {
+    if (!cooleddown) return
+
+    cooleddown = false
+    setTimeout(() => {
+      cooleddown = true
+    }, timeout)
+
+    fn.apply(this, args)
+  }
+}
+
+// HACK: auto-rerun tests when webpack reloads app
+const rerunTests = throttleDrop(() => {
+  cy.$$('button.restart', top.document).click()
+}, 1000)
+
+Cypress.on('window:load', () => {
+  rerunTests()
+})
 
 describe('retries', function () {
   beforeEach(function () {
@@ -17,7 +44,6 @@ describe('retries', function () {
     cy.route('/foo')
 
     cy.visit('cypress/support/index.html').then((win) => {
-
       cy.spy(win, 'btoa')
 
       win.render({
@@ -47,11 +73,11 @@ describe('retries', function () {
     }
   })
 
-  it('does not shows attempts if there are no retries', function () {
+  it('does not show attempts if there are no retries', function () {
     this.start(this.data.singleTestSingleAttempt)
     this.finish()
-
     // ensure the test is open or the not.be.visible below will be a false positive
+    // test should auto-open if its the only test
     cy.contains('.hook-item', 'test').should('be.visible')
     cy.contains('Attempt 1').should('not.be.visible')
   })
@@ -186,7 +212,7 @@ describe('retries', function () {
     .contains('Attempt 1')
     .click()
     .closest('.attempt-item')
-    .find('.attempt-error')
+    .find('.runnable-err')
     .should('be.visible')
     .invoke('text')
     .should('include', 'failed to visit')
@@ -195,7 +221,7 @@ describe('retries', function () {
     .contains('Attempt 2')
     .click()
     .closest('.attempt-item')
-    .find('.attempt-error')
+    .find('.runnable-err')
     .should('be.visible')
     .invoke('text')
     .should('include', 'expected <.foo> to have text')
@@ -212,13 +238,13 @@ describe('retries', function () {
     .contains('Attempt 1')
     .click()
     .closest('.attempt-item')
-    .find('.attempt-error')
+    .find('.runnable-err-print')
     .click()
 
     cy
-    .contains('Printed output to your console')
     .then(() => {
-      expect(this.runner.emit).to.be.calledWith('runner:console:error', 'r3')
+      expect(this.runner.emit.lastCall.args[0]).eq('runner:console:error')
+      expect(this.runner.emit.lastCall.args[1].err.message).eq('failed to visit')
     })
 
     // command errors are logged by command id
@@ -226,13 +252,13 @@ describe('retries', function () {
     .contains('Attempt 2')
     .click()
     .closest('.attempt-item')
-    .find('.attempt-error')
+    .find('.runnable-err-print')
     .click()
 
     cy
-    .contains('Printed output to your console')
     .then(() => {
-      expect(this.runner.emit).to.be.calledWith('runner:console:log', 'c5')
+      expect(this.runner.emit.lastCall.args[0]).eq('runner:console:error')
+      expect(this.runner.emit.lastCall.args[1].err.message).eq('expected <.foo> to have text foo, but it was bar')
     })
   })
 
@@ -316,7 +342,6 @@ describe('retries', function () {
         id: 'r3',
         isOpen: true,
       }, stub)
-
     })
 
     cy.contains('visit').should('be.visible')

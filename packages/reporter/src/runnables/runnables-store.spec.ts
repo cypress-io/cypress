@@ -38,8 +38,8 @@ const createSuite = (id: number, tests: Array<TestProps>, suites: Array<SuitePro
 const createAgent = (id: number, testId: number) => {
   return { id, testId, instrument: 'agent' } as AgentProps
 }
-const createCommand = (id: number, testId: number, testCurrentRetry = 0) => {
-  return { id, testId, instrument: 'command', testCurrentRetry } as CommandProps
+const createCommand = (id: number, testId: number) => {
+  return { id, testId, instrument: 'command' } as CommandProps
 }
 const createRoute = (id: number, testId: number) => {
   return { id, testId, instrument: 'route' } as RouteProps
@@ -96,9 +96,9 @@ describe('runnables store', () => {
       rootRunnable.tests![0].commands = [createCommand(1, 1)]
       rootRunnable.tests![0].routes = [createRoute(1, 1), createRoute(2, 1)]
       instance.setRunnables(rootRunnable)
-      expect((instance.runnables[0] as TestModel).attempts[0].agents.length).to.equal(3)
-      expect((instance.runnables[0] as TestModel).attempts[0].commands.length).to.equal(1)
-      expect((instance.runnables[0] as TestModel).attempts[0].routes.length).to.equal(2)
+      expect((instance.runnables[0] as TestModel).agents.length).to.equal(3)
+      expect((instance.runnables[0] as TestModel).commands.length).to.equal(1)
+      expect((instance.runnables[0] as TestModel).routes.length).to.equal(2)
     })
 
     it('sets the appropriate nesting levels', () => {
@@ -206,8 +206,8 @@ describe('runnables store', () => {
     it('updates the log', () => {
       instance.setRunnables({ tests: [createTest(1)] })
       instance.addLog(createCommand(1, 1))
-      instance.updateLog({ id: 1, testId: 1, testCurrentRetry: 0, name: 'new name' } as LogProps)
-      expect(instance.testById(1).attempts[0].commands[0].name).to.equal('new name')
+      instance.updateLog({ id: 1, testId: 1, name: 'new name' } as LogProps)
+      expect(instance.testById(1).commands[0].name).to.equal('new name')
     })
   })
 

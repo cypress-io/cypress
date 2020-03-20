@@ -799,7 +799,6 @@ module.exports = {
       {{error}}
       """
       docsUrl: "https://on.cypress.io/returning-promise-and-invoking-done-callback"
-
     }
     manually_set_retries_test: """Cannot set number of test retries at test run-time.
       use
@@ -818,7 +817,6 @@ module.exports = {
 
       https://on.cypress.io/test-retries
     """
-
 
   navigation:
     cross_origin: ({ message, originPolicy, configFile }) -> {

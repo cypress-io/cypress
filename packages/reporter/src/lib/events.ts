@@ -4,6 +4,7 @@ import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
+import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
 
 const localBus = new EventEmitter()
 
@@ -67,7 +68,9 @@ const events: Events = {
     }))
 
     runner.on('reporter:log:state:changed', action('log:update', (log: LogProps) => {
-      runnablesStore.updateLog(log)
+      runnablesStore._withTest(log.testId, (test) => {
+        test.updateLog(log)
+      })
     }))
 
     runner.on('reporter:restart:test:run', action('restart:test:run', () => {
@@ -105,7 +108,7 @@ const events: Events = {
       }
     })
 
-    runner.on('test:set:state', action('test:set:state', (props, cb) => {
+    runner.on('test:set:state', action('test:set:state', (props, cb: UpdateTestCallback) => {
       runnablesStore.setIsOpen(props, cb)
     }))
 
@@ -163,13 +166,11 @@ const events: Events = {
       runner.emit('runner:console:log', commandId)
     })
 
-    localBus.on('show:error', (testId) => {
-      const test = runnablesStore.testById(testId)
+    localBus.on('show:error', (test: TestModel) => {
       const command = test.err.isCommandErr && test.commandMatchingErr()
 
       runner.emit('runner:console:error', {
         err: test.err,
-        // attemptIndex,
         commandId: command ? command.id : undefined,
       })
     })

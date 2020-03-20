@@ -3,7 +3,7 @@ import { action, computed, observable } from 'mobx'
 
 import Agent from '../agents/agent-model'
 import Command from '../commands/command-model'
-import Err from '../lib/err-model'
+import ErrorModel from '../errors/err-model'
 import Hook from '../hooks/hook-model'
 import Route from '../routes/route-model'
 
@@ -11,7 +11,7 @@ export default class AttemptModel {
   @observable agents = []
   @observable attempts = []
   @observable commands = []
-  @observable err = new Err({})
+  @observable err = new ErrorModel({})
   @observable hooks = []
   @observable isActive = null
   @observable _isOpen = null
@@ -22,7 +22,7 @@ export default class AttemptModel {
 
   constructor (props, test) {
     this.testId = props.id
-    this.id = props._currentRetry
+    this.id = props.currentRetry
     this.test = test
     this._state = props.state
     this.err.update(props.err)
@@ -51,7 +51,7 @@ export default class AttemptModel {
   }
 
   @computed get isLast () {
-    return this === this.test._lastAttempt
+    return this === this.test.lastAttempt
   }
 
   @computed get isOpen () {

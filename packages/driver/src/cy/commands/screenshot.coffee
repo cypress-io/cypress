@@ -306,7 +306,6 @@ takeScreenshot = (Cypress, state, screenshotConfig, options = {}) ->
       else
         automateScreenshot(state, automationOptions)
   .then (props) ->
-
     onAfterScreenshot and onAfterScreenshot.call(state("ctx"), $el, props)
 
     $Screenshot.onAfterScreenshot($el, props)

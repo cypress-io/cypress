@@ -9,6 +9,7 @@ interface Props {
   headerStyle?: CSSProperties
   header?: ReactNode
   contentClass?: string
+  onToggle?: Function
 }
 
 interface State {
@@ -65,9 +66,7 @@ class Collapsible extends Component<Props, State> {
 
     this.setState({ isOpen })
 
-    if (this.props.onToggle) {
-      this.props.onToggle(isOpen)
-    }
+    this.props.onToggle && this.props.onToggle(isOpen)
   }
 
   _onClick = (e: MouseEvent) => {

@@ -13,6 +13,7 @@ import TestModel from '../test/test-model'
 
 interface Props {
   model: TestModel
+  isTestError?: boolean
 }
 
 const TestError = observer((props: Props) => {
@@ -23,7 +24,7 @@ const TestError = observer((props: Props) => {
   const onPrint = (e: MouseEvent) => {
     e.stopPropagation()
 
-    events.emit('show:error', props.model.id)
+    events.emit('show:error', props.model)
   }
 
   const formattedMessage = (message?: string) => {
@@ -49,7 +50,7 @@ const TestError = observer((props: Props) => {
             </button>
           </Tooltip>
         </div>
-        <div className={cs('runnable-err-message', { 'test-err-message': props.isTestError })}>
+        <div className={cs('runnable-err-message', { 'test-error': props.isTestError })}>
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></span>
           {err.docsUrl &&
             <a className='runnable-err-docs-url' href={err.docsUrl} target='_blank'>

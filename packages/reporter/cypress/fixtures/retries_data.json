@@ -17,7 +17,7 @@
     {
       "id": "r3",
       "title": "no retries",
-      "_currentRetry": 0,
+      "currentRetry": 0,
       "state": "passed",
       "commands": [
         {
@@ -38,7 +38,7 @@
     {
       "id": "r3",
       "title": "no retries",
-      "_currentRetry": 0,
+      "currentRetry": 0,
       "state": "failed",
       "err": {
         "name": "CommandError",
@@ -62,7 +62,7 @@
     }
   ],
   "singleTestThreeAttempts": [{
-    "_currentRetry": 2,
+    "currentRetry": 2,
     "id": "r3",
     "state": "passed",
     "title": "passed with retries",
@@ -125,7 +125,7 @@
     ],
     "prevAttempts": [
       {
-        "_currentRetry": 0,
+        "currentRetry": 0,
         "id": "r3",
         "state": "failed",
         "err": {
@@ -136,7 +136,7 @@
         "agents": [
           {
             "callCount": 0,
-            "functionName": "btoa",
+            "functionName": "btddoa",
             "hookName": "before each",
             "id": "a1",
             "instrument": "agent",
@@ -180,7 +180,7 @@
         ]
       },
       {
-        "_currentRetry": 1,
+        "currentRetry": 1,
         "id": "r3",
         "state": "failed",
         "err": {
@@ -255,7 +255,7 @@
   }],
 
   "attempt": {
-    "_currentRetry": 1,
+    "currentRetry": 1,
     "title": "no retries",
     "id": "r3",
     "state": "passed"

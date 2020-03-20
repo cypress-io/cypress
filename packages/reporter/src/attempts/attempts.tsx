@@ -12,6 +12,8 @@ import Collapsible from '../collapsible/collapsible'
 import Hooks from '../hooks/hooks'
 import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
+import TestModel from '../test/test-model'
+import AttemptModel from './attempt-model'
 
 const NoCommands = () => (
   <ul className='hooks-container'>
@@ -21,7 +23,7 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index, isOpen }) => (
+const AttemptHeader = ({ index, isOpen }:{index: number, isOpen: boolean}) => (
   <span className='attempt-tag'>
     <span className={cs('open-close-indicator', { 'is-open': isOpen })}>
       <i className='fa fa-fw fa-angle-up' />
@@ -33,7 +35,7 @@ const AttemptHeader = ({ index, isOpen }) => (
 )
 
 @observer
-class AttemptContent extends Component {
+class AttemptContent extends Component<{model: AttemptModel}> {
   render () {
     const { model } = this.props
 
@@ -51,14 +53,14 @@ class AttemptContent extends Component {
         <div className='attempt-error-region'>
           <TestError events={events} model={model} isTestError={model.isLast} displayMessage={model.err.displayMessage}/>
         </div>
+        }
       </Fragment>
     )
   }
 }
 
 @observer
-class Attempt extends Component {
-
+class Attempt extends Component<{model: AttemptModel}> {
   static defaultProps = {
     appState,
     scroller,
@@ -84,17 +86,17 @@ class Attempt extends Component {
   }
 
   render () {
-    const { index, model } = this.props
+    const { model } = this.props
 
     return (
       <li
         ref='container'
         className={cs('attempt-item', `attempt-state-${model.state}`, {
-          'attempt-failed': model.failed,
+          'attempt-failed': model.state === 'failed',
         })}
       >
         <Collapsible
-          header={<AttemptHeader index={index} isOpen={model.isOpen} />}
+          header={<AttemptHeader index={model.id} isOpen={model.isOpen} />}
           headerClass='attempt-name'
           isOpen={model.isOpen}
           onToggle={model.toggleOpen}
@@ -106,18 +108,16 @@ class Attempt extends Component {
       </li>
     )
   }
-
 }
 
-const Attempts = observer(({ test }) => (
+const Attempts = observer(({ test }: {test: TestModel}) => (
   <ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
   })}>
-    {_.map(test.attempts, (attempt, index) => {
+    {_.map(test.attempts, (attempt) => {
       return (
         <Attempt
           key={attempt.id}
-          index={index}
           model={attempt}
         />
       )
