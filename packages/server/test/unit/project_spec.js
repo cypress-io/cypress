@@ -68,12 +68,12 @@ describe('lib/project', () => {
       sinon.stub(this.project, 'determineIsNewProject').withArgs(integrationFolder).resolves(false)
       this.project.cfg = { integrationFolder }
 
-      return savedState(this.project.projectRoot)
+      return savedState.create(this.project.projectRoot)
       .then((state) => state.remove())
     })
 
     afterEach(function () {
-      return savedState(this.project.projectRoot)
+      return savedState.create(this.project.projectRoot)
       .then((state) => state.remove())
     })
 
@@ -112,7 +112,7 @@ describe('lib/project', () => {
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
-      return savedState(this.todosPath)
+      return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
@@ -146,7 +146,7 @@ describe('lib/project', () => {
     })
 
     it('sets cfg.isNewProject to true when state.showedOnBoardingModal is true', function () {
-      return savedState(this.todosPath)
+      return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ showedOnBoardingModal: true })
 

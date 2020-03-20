@@ -2,7 +2,7 @@ const chai = require('chai')
 const sinon = require('sinon')
 const Promise = require('bluebird')
 const sinonChai = require('sinon-chai')
-const request = require('request-promise')
+const request = require('@cypress/request-promise')
 const supertest = require('supertest')
 
 require('sinon-as-promised')(Promise)

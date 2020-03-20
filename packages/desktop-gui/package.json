@@ -21,7 +21,7 @@
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@packages/web-config": "*",
-    "bluebird": "3.7.2",
+    "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
     "cross-env": "6.0.3",
