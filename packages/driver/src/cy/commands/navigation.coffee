@@ -98,7 +98,7 @@ specifyFileByRelativePath = (url, log) ->
     }
   })
 
-aboutBlank = (win) ->
+aboutBlank = (cy, win) ->
   new Promise (resolve) ->
     cy.once("window:load", resolve)
 
@@ -173,7 +173,7 @@ formSubmitted = (Cypress, e) ->
     }
   })
 
-pageLoading = (bool, state) ->
+pageLoading = (bool, Cypress, state) ->
   return if state("pageLoading") is bool
 
   state("pageLoading", bool)
@@ -187,7 +187,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
       ## if we're currently visiting about blank
       ## and becoming unstable for the first time
       ## notifiy that we're page loading
-      pageLoading(true, state)
+      pageLoading(true, Cypress, state)
       return
     else
       ## else wait until after we finish visiting
@@ -195,7 +195,7 @@ stabilityChanged = (Cypress, state, config, stable, event) ->
       return
 
   ## let the world know that the app is page:loading
-  pageLoading(!stable, state)
+  pageLoading(!stable, Cypress, state)
 
   ## if we aren't becoming unstable
   ## then just return now

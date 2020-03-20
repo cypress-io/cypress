@@ -7,10 +7,10 @@ describe "lib/util/path_helpers", ->
     check = path_helpers.checkIfResolveChangedRootFolder
 
     it "ignores non-absolute paths", ->
-      expect(check('foo/index.js', 'foo')).to.be.false()
+      expect(check('foo/index.js', 'foo')).to.be.false
 
     it "handles paths that do not switch", ->
-      expect(check('/foo/index.js', '/foo')).to.be.false()
+      expect(check('/foo/index.js', '/foo')).to.be.false
 
     it "detects path switch", ->
-      expect(check('/private/foo/index.js', '/foo')).to.be.true()
+      expect(check('/private/foo/index.js', '/foo')).to.be.true

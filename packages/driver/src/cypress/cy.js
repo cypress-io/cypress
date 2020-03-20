@@ -5,6 +5,7 @@ const Promise = require('bluebird')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
+const $selection = require('../dom/selection')
 const $errUtils = require('./error_utils')
 const $Chai = require('../cy/chai')
 const $Xhrs = require('../cy/xhrs')
@@ -24,7 +25,6 @@ const $Timers = require('../cy/timers')
 const $Timeouts = require('../cy/timeouts')
 const $Retries = require('../cy/retries')
 const $Stability = require('../cy/stability')
-const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
@@ -91,6 +91,7 @@ const setTopOnError = function (cy) {
 }
 
 const create = function (specWindow, Cypress, Cookies, state, config, log) {
+  let cy = {}
   let stopped = false
   const commandFns = {}
 
@@ -124,7 +125,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
-  const assertions = $Assertions.create(state, queue, retries.retry)
+  const assertions = $Assertions.create(Cypress, cy)
 
   const jquery = $jQuery.create(state)
   const location = $Location.create(state)
@@ -136,7 +137,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const { expect } = $Chai.create(specWindow, assertions.assert)
 
   const xhrs = $Xhrs.create(state)
-  const aliases = $Aliases.create(state)
+  const aliases = $Aliases.create(cy)
 
   const errors = $Errors.create(state, config, log)
   const ensures = $Ensures.create(state, expect)
@@ -734,7 +735,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return finish(err)
   }
 
-  const cy = {
+  _.extend(cy, {
     id: _.uniqueId('cy'),
 
     // synchrounous querying
@@ -1328,7 +1329,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         }
       }
     },
-  }
+  })
 
   _.each(privateProps, (obj, key) => {
     return Object.defineProperty(cy, key, {
