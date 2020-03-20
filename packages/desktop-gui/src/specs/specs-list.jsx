@@ -18,10 +18,6 @@ class SpecsList extends Component {
       isFocused: false,
     }
 
-    this._setFocus = this._setFocus.bind(this)
-    this._setBlur = this._setBlur.bind(this)
-    this._togglePlaceholderSearchTips = this._togglePlaceholderSearchTips.bind(this)
-
     this.filterRef = React.createRef()
   }
 
@@ -98,13 +94,13 @@ class SpecsList extends Component {
     return spec.hasChildren ? this._folderContent(spec, nestingLevel) : this._specContent(spec, nestingLevel)
   }
 
-  _setFocus () {
+  _setFocus = () => {
     this.setState({
       isFocused: !this.state.isFocused,
     })
   }
 
-  _setBlur () {
+  _setBlur = () => {
     this.setState({
       isFocused: !this.state.isFocused,
     })
@@ -116,7 +112,7 @@ class SpecsList extends Component {
       : 'Press Ctrl + F to make a quick search...'
   }
 
-  _togglePlaceholderSearchTips () {
+  _togglePlaceholderSearchTips = () => {
     return (!this.state.isFocused) ? 'Search' : this._isMac()
   }
 
