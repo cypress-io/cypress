@@ -1,39 +1,80 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create the custom command: 'login'.
-//
-// The commands.js file is a great place to
-// modify existing commands and create custom
-// commands for use throughout your tests.
-//
-// You can read more about custom commands here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-// Cypress.addParentCommand("login", function(email, password){
-//   var email    = email || "joe@example.com"
-//   var password = password || "foobar"
-//
-//   var log = Cypress.Log.command({
-//     name: "login",
-//     message: [email, password],
-//     consoleProps: function(){
-//       return {
-//         email: email,
-//         password: password
-//       }
-//     }
-//   })
-//
-//   cy
-//     .visit("/login", {log: false})
-//     .contains("Log In", {log: false})
-//     .get("#email", {log: false}).type(email, {log: false})
-//     .get("#password", {log: false}).type(password, {log: false})
-//     .get("button", {log: false}).click({log: false}) //this should submit the form
-//     .get("h1", {log: false}).contains("Dashboard", {log: false}) //we should be on the dashboard now
-//     .url({log: false}).should("match", /dashboard/, {log: false})
-//     .then(function(){
-//       log.snapshot().end()
-//     })
-// })
+Cypress.Commands.add('failAssertion', () => {
+  expect(true).to.be.false
+})
+
+Cypress.Commands.add('failException', () => {
+  ({}).bar()
+})
+
+Cypress.Commands.add('failCommand', () => {
+  cy.get('h1', { timeout: 1 })
+})
+
+Cypress.Commands.add('failChainedCommand', () => {
+  cy.get('div').find('h1', { timeout: 1 })
+})
+
+Cypress.Commands.add('failThenAssertion', () => {
+  cy.wrap({}).then(() => {
+    expect(true).to.be.false
+  })
+})
+
+Cypress.Commands.add('failShouldCallbackAssertion', () => {
+  cy.wrap({}).should(() => {
+    expect(true).to.be.false
+  })
+})
+
+Cypress.Commands.add('failThenException', () => {
+  cy.wrap({}).then(() => {
+    ({}).bar()
+  })
+})
+
+Cypress.Commands.add('failThenCommandFailure', () => {
+  cy.wrap({}).then(() => {
+    cy.get('h1', { timeout: 1 })
+  })
+})
+
+Cypress.Commands.add('failShouldCallbackException', () => {
+  cy.wrap({}).should(() => {
+    ({}).bar()
+  })
+})
+
+Cypress.Commands.add('failShouldAssertion', () => {
+  cy.wrap({})
+  .should('have.property', 'foo')
+})
+
+Cypress.Commands.add('failAfterMultipleShoulds', () => {
+  cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
+  .should('equal', 'bar')
+})
+
+Cypress.Commands.add('failAfterMultipleShouldCallbacksException', () => {
+  cy.wrap({})
+  .should(() => {
+    expect(true).to.be.true
+  })
+  .should(() => {
+    ({}).bar()
+  })
+})
+
+Cypress.Commands.add('failAfterMultipleShouldCallbacksAssertion', () => {
+  cy.wrap({})
+  .should(() => {
+    expect(true).to.be.true
+  })
+  .should(() => {
+    expect(true).to.be.false
+  })
+})
+
+Cypress.Commands.add('failCommandAfterShouldSuccess', () => {
+  cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
+  cy.get('h1', { timeout: 1 })
+})
