@@ -132,7 +132,7 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 https://on.cypress.io/request
 
 https://on.cypress.io/request
-      [stack trace lines]
+  
 
 
 
