@@ -94,6 +94,14 @@ module.exports = {
     const lengths = {}
 
     const writeVideoFrame = function (data) {
+      // when `data` is empty, it is sent as an empty object (`{}`)
+      // so check for that and skip it.
+      if (_.isEmpty(data)) {
+        debug('empty chunk received %o', data)
+
+        return
+      }
+
       // make sure we haven't ended
       // our stream yet because paint
       // events can linger beyond
