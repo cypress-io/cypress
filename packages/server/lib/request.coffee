@@ -1,6 +1,6 @@
 _          = require("lodash")
-r          = require("request")
-rp         = require("request-promise")
+r          = require("@cypress/request")
+rp         = require("@cypress/request-promise")
 url        = require("url")
 tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
@@ -376,9 +376,9 @@ module.exports = (options = {}) ->
   rp = rp.defaults(defaults)
 
   return {
-    r: require("request")
+    r: require("@cypress/request")
 
-    rp: require("request-promise")
+    rp: require("@cypress/request-promise")
 
     getDelayForRetry
 
