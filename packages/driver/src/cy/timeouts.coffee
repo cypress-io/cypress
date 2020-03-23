@@ -1,3 +1,4 @@
+_ = require("lodash")
 $errUtils = require("../cypress/error_utils")
 
 create = (state) ->
@@ -8,7 +9,7 @@ create = (state) ->
       if not runnable
         $errUtils.throwErrByPath("miscellaneous.outside_test")
 
-      if ms
+      if _.isFinite(ms)
         ## if delta is true then we add (or subtract) from the
         ## runnables current timeout instead of blanketingly setting it
         ms = if delta then runnable.timeout() + ms else ms
