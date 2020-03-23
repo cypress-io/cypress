@@ -7,9 +7,11 @@
  * tests, because each failure has a verification test (e.g. 11 fail, 11 pass)
  */
 import outsideError from '../../../todos/throws-error'
-import { fail, verify, sendXhr, abortXhr } from '../support/util'
+import { fail, verify, setup, sendXhr, abortXhr } from '../support/util'
 
-describe('assertion failure', function () {
+setup({ verifyStackLineIsSpecFile: true })
+
+context('assertion failure', function () {
   fail(this, () => {
     expect(true).to.be.false
     expect(false).to.be.false
@@ -49,7 +51,7 @@ context('exceptions', function () {
 context('commands', function () {
   describe('failure', function () {
     fail(this, () => {
-      cy.get('h1', { timeout: 1 })
+      cy.get('h1')
     })
 
     verify(this, {
@@ -70,7 +72,7 @@ context('commands', function () {
   })
 })
 
-describe('cy.then', function () {
+context('cy.then', function () {
   describe('assertion failure', function () {
     fail(this, () => {
       cy.wrap({}).then(() => {
@@ -100,7 +102,7 @@ describe('cy.then', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.wrap({}).then(() => {
-        cy.get('h1', { timeout: 1 })
+        cy.get('h1')
       })
     })
 
@@ -111,7 +113,7 @@ describe('cy.then', function () {
   })
 })
 
-describe('cy.should', function () {
+context('cy.should', function () {
   describe('callback assertion failure', function () {
     fail(this, () => {
       cy.wrap({}).should(() => {
@@ -201,7 +203,7 @@ describe('cy.should', function () {
   describe('command after success', function () {
     fail(this, () => {
       cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
-      cy.get('h1', { timeout: 1 })
+      cy.get('h1')
     })
 
     verify(this, {
@@ -241,7 +243,7 @@ context('cy.each', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.wrap([1]).each(() => {
-        cy.get('h1', { timeout: 1 })
+        cy.get('h1')
       })
     })
 
@@ -282,7 +284,7 @@ context('cy.spread', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.wrap([1, 2, 3]).spread(() => {
-        cy.get('h1', { timeout: 1 })
+        cy.get('h1')
       })
     })
 
@@ -323,7 +325,7 @@ context('cy.within', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.get('body').within(() => {
-        cy.get('h1', { timeout: 1 })
+        cy.get('h1')
       })
     })
 
@@ -364,7 +366,7 @@ context('cy.wrap', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.wrap(() => {
-        cy.get('h1', { timeout: 1 })
+        cy.get('h1')
       }).then((fn) => fn())
     })
 
@@ -471,7 +473,7 @@ context('cy.route', () => {
   describe('command failure', function () {
     fail(this, () => {
       cy.server().route(() => {
-        cy.get('h1', { timeout: 1 })
+        cy.get('h1')
 
         return '/foo'
       })

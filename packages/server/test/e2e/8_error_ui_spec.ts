@@ -12,9 +12,7 @@ const expectedFailures = 48
 const verifyPassedAndFailedAreSame = function ({ code, stdout }) {
   const passes = stdout.match(/✓ ✓ VERIFY/g)
 
-  expect(code).to.equal(expectedFailures)
-
-  return expect(passes.length).to.equal(expectedFailures)
+  expect(passes.length, 'number of passes should equal the number of failures').to.equal(expectedFailures)
 }
 
 describe('e2e reporters', function () {
@@ -31,7 +29,7 @@ describe('e2e reporters', function () {
     .then(verifyPassedAndFailedAreSame)
   })
 
-  return it('displays correct UI for errors in custom commands', function () {
+  it('displays correct UI for errors in custom commands', function () {
     return e2e.exec(this, {
       spec: 'various_failures_custom_commands_spec.js',
       expectedExitCode: expectedFailures,

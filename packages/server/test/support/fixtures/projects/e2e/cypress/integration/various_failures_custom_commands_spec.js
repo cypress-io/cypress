@@ -6,9 +6,9 @@
 import outsideError from '../../../todos/throws-error'
 import { setup, fail, verify } from '../support/util'
 
-setup({ support: true })
+setup({ verifyStackLineIsSpecFile: false })
 
-describe('assertion failure', function () {
+context('assertion failure', function () {
   fail(this, () => {
     cy.failAssertion()
   })
@@ -21,7 +21,7 @@ describe('assertion failure', function () {
   })
 })
 
-describe('exceptions', function () {
+context('exceptions', function () {
   describe('in commands file', function () {
     fail(this, () => {
       cy.failException()
@@ -73,7 +73,7 @@ context('commands', function () {
   })
 })
 
-describe('cy.then', function () {
+context('cy.then', function () {
   describe('assertion failure', function () {
     fail(this, () => {
       cy.failThenAssertion()
@@ -111,7 +111,7 @@ describe('cy.then', function () {
   })
 })
 
-describe('cy.should', function () {
+context('cy.should', function () {
   describe('callback assertion failure', function () {
     fail(this, () => {
       cy.failShouldCallbackAssertion()

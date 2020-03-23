@@ -1,5 +1,5 @@
 let count = 1
-let isSupport = false
+let shouldVerifyStackLineIsSpecFile = true
 
 // ensure title is unique since it's necessary for querying the UI
 // in the verification step
@@ -9,21 +9,27 @@ const getTitle = (ctx) => {
   return `${parentTitle} ${ctx.title}`.trim()
 }
 
-export const setup = ({ support }) => {
-  isSupport = support
+export const setup = ({ verifyStackLineIsSpecFile }) => {
+  shouldVerifyStackLineIsSpecFile = verifyStackLineIsSpecFile
 }
 
 export const fail = (ctx, test) => {
-  it(`${count++}) ✗ FAIL - ${getTitle(ctx)}`, test)
+  // NOTE: use { defaultCommandTimeout: 0 } once per-test configuration is
+  // implemented (https://github.com/cypress-io/cypress/pull/5346)
+  it(`${count++}) ✗ FAIL - ${getTitle(ctx)}`, () => {
+    cy.timeout(0) // speed up failures to not retry since we know they should fail
+
+    return test()
+  })
 }
 
 export const verify = (ctx, { column, codeFrameText, message, regex }) => {
   // test only the column number because the line number is brittle
   // since any changes to this file can affect it
   if (!regex) {
-    regex = isSupport ?
-      new RegExp(`cypress\/support\/commands\.js:\\d+:${column}`) :
-      new RegExp(`cypress\/integration\/various_failures(_custom_commands)?_spec\.js:\\d+:${column}`)
+    regex = shouldVerifyStackLineIsSpecFile ?
+      new RegExp(`${Cypress.spec.relative}:\\d+:${column}`) :
+      new RegExp(`cypress\/support\/commands\.js:\\d+:${column}`)
   }
 
   it(`✓ VERIFY`, () => {
