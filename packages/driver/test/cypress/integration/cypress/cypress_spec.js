@@ -1,9 +1,4 @@
-const {
-  $,
-} = Cypress
-const {
-  Promise,
-} = Cypress
+const { $, Promise } = Cypress
 
 describe('driver/src/cypress/index', () => {
   beforeEach(function () {
