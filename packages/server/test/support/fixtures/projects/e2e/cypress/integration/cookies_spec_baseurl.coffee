@@ -205,7 +205,8 @@ describe "cookies", ->
                 value: 'foo'
               })
 
-            cy.request('/requestCookies').its('body').should('include', { 'domaincookie': 'foo' })
+            cy.request("#{Cypress.config('baseUrl')}/requestCookies").its('body').should('include', { 'domaincookie': 'foo' })
+            cy.request('POST', "#{Cypress.config('baseUrl')}/requestCookies").its('body').should('include', { 'domaincookie': 'foo' })
 
           it "is set properly with redirects", ->
             cy[cmd]("/setDomainCookie?domain=#{setCookieDomain}&redirect=/requestCookiesHtml")
@@ -219,10 +220,11 @@ describe "cookies", ->
               })
 
             if cmd == 'visit'
-              cy.url().should('include', '/requestCookies')
+              cy.url().should('include', "#{Cypress.config('baseUrl')}/requestCookies")
               cy.contains('domaincookie')
 
-            cy.request('/requestCookies').its('body').should('include', { 'domaincookie': 'foo' })
+            cy.request("#{Cypress.config('baseUrl')}/requestCookies").its('body').should('include', { 'domaincookie': 'foo' })
+            cy.request('POST', "#{Cypress.config('baseUrl')}/requestCookies").its('body').should('include', { 'domaincookie': 'foo' })
 
         [
           ['HTTP', otherUrl]
