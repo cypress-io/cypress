@@ -13,9 +13,9 @@ UrlParse = require("url-parse")
 ## and we need to move this to use
 ## node over websockets so we dont
 ## have to send it to the client
-parseDomain = require("parse-domain")
+parseDomain = require("@cypress/parse-domain")
 
-ipAddressRe = /^[\d\.]+$/
+customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
 
 reHttp = /^https?:\/\//
 reWww = /^www/
@@ -92,7 +92,7 @@ class $Location
     ## if we couldn't get a parsed domain
     if not parsed = parseDomain(hostname, {
       privateTlds: true ## use the public suffix
-      customTlds: ipAddressRe
+      customTlds: customTldsRe
     })
 
       ## then just fall back to a dumb check
