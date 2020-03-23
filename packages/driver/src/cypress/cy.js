@@ -72,22 +72,27 @@ const setTopOnError = function (cy) {
 
   curCy = cy
 
-  const onTopError = function () {
-    return curCy.onUncaughtException.apply(curCy, arguments)
+  // prevent overriding top.onerror twice when loading more than one
+  // instance of test runner.
+  if (!top.__cypress__onerror) {
+    top.__cypress__onerror = true
+    const onTopError = function () {
+      return curCy.onUncaughtException.apply(curCy, arguments)
+    }
+
+    top.onerror = onTopError
+
+    // Prevent Mocha from setting top.onerror which would override our handler
+    // Since the setter will change which event handler gets invoked, we make it a noop
+    return Object.defineProperty(top, 'onerror', {
+      set () {},
+      get () {
+        return onTopError
+      },
+      configurable: false,
+      enumerable: true,
+    })
   }
-
-  top.onerror = onTopError
-
-  // Prevent Mocha from setting top.onerror which would override our handler
-  // Since the setter will change which event handler gets invoked, we make it a noop
-  return Object.defineProperty(top, 'onerror', {
-    set () {},
-    get () {
-      return onTopError
-    },
-    configurable: false,
-    enumerable: true,
-  })
 }
 
 const create = function (specWindow, Cypress, Cookies, state, config, log) {

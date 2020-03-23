@@ -117,9 +117,12 @@ const createCypress = (mochaTests, opts = {}) => {
 
         cy.stub(autCypress, 'automation').snapshot(enableStubSnapshots)
         .callThrough()
+        .withArgs('clear:cookies')
+        .resolves({
+          foo: 'bar',
+        })
         .withArgs('take:screenshot')
         .resolves({
-          testAttemptIndex: 0,
           path: '/path/to/screenshot',
           size: 12,
           dimensions: { width: 20, height: 20 },
@@ -146,7 +149,9 @@ const createCypress = (mochaTests, opts = {}) => {
           const noCall = _.includes(['window:before:unload', 'mocha'], arguments[0])
           const isMocha = _.includes(['mocha'], arguments[0])
 
-          isMocha && mochaStubs.apply(this, arguments)
+          if (isMocha) {
+            mochaStubs.apply(this, arguments)
+          }
 
           noLog || allStubs.apply(this, ['emit'].concat([].slice.call(arguments)))
 
@@ -219,6 +224,9 @@ const createCypress = (mochaTests, opts = {}) => {
         cb(opts.state)
       })
 
+      .withArgs('backend:request', 'reset:server:state')
+      .yieldsAsync({})
+
       .withArgs('backend:request', 'resolve:url')
       .yieldsAsync({ response: {
         isOkStatusCode: true,
@@ -245,14 +253,14 @@ const createCypress = (mochaTests, opts = {}) => {
 
       cy.stub(win.channel, 'on').snapshot(enableStubSnapshots)
 
-      win.Runner.start(win.document.getElementById('app'), c)
+      win.Runner.start(win.document.getElementById('app'), window.btoa(JSON.stringify(c)))
     })
   })
 }
 
 describe('src/cypress/runner', () => {
   describe('isolated test runner', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       window.cy = backupCy
       window.Cypress = backupCypress
     })
@@ -288,8 +296,7 @@ describe('src/cypress/runner', () => {
         .then(shouldHaveTestResults(0, 1))
         .then(() => {
           // render exactly one error
-          cy.get('pre:contains(AssertionError)').should('have.length', 1)
-          .should('have.class', 'test-error')
+          cy.get('.runnable-err:contains(AssertionError)').should('have.length', 1)
         })
       })
 
@@ -403,7 +410,7 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
-            cy.get('.test-error:visible').invoke('text').then((text) => expect(text).to.matchSnapshot())
+            cy.get('.runnable-err:visible').invoke('text').should('contain', 'Because this error occurred during a before all hook')
           })
           .then(() => {
             snapshotEvents(snapshots.FAIL_IN_BEFORE)
@@ -466,7 +473,7 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(1, 1))
           .then(() => {
-            cy.get('.test-error:visible').invoke('text').then((text) => expect(text).to.matchSnapshot())
+            cy.get('.runnable-err:visible').invoke('text').should('contain', 'Because this error occurred during a after all hook')
           })
           .then(() => {
             snapshotEvents(snapshots.FAIL_IN_AFTER)
@@ -558,7 +565,8 @@ describe('src/cypress/runner', () => {
         })
       })
 
-      describe('retries', () => {
+      // NOTE: for test-retries
+      describe.skip('retries', () => {
         it('can set retry config', () => {
           createCypress({}, { config: { numTestRetries: 1 } })
           .then(() => {
@@ -784,7 +792,8 @@ describe('src/cypress/runner', () => {
           })
         })
 
-        describe('can configure retries', () => {
+        // NOTE: for test-retries
+        describe.skip('can configure retries', () => {
           const getAttemptTag = (sel) => {
             return cy.get(`.runnable-wrapper:contains${sel} .attempt-tag`)
           }
@@ -828,7 +837,7 @@ describe('src/cypress/runner', () => {
             })
             .then(shouldHaveTestResults(0, 1))
             .then(() => {
-              cy.get('.test-error').should('contain', 'numTestRetries')
+              cy.get('.runnable-err').should('contain', 'numTestRetries')
             })
           })
 
@@ -846,7 +855,7 @@ describe('src/cypress/runner', () => {
             })
             .then(shouldHaveTestResults(0, 1))
             .then(() => {
-              cy.get('.test-error').should('contain', 'numTestRetries')
+              cy.get('.runnable-err').should('contain', 'numTestRetries')
             })
           })
 
@@ -862,7 +871,7 @@ describe('src/cypress/runner', () => {
             })
             .then(shouldHaveTestResults(0, 1))
             .then(() => {
-              cy.get('.test-error').should('contain', 'numTestRetries')
+              cy.get('.runnable-err').should('contain', 'numTestRetries')
             })
           })
         })
@@ -934,7 +943,8 @@ describe('src/cypress/runner', () => {
           })
         })
 
-        describe('retries', () => {
+        // NOTE: for test-retries
+        describe.skip('retries', () => {
           let realState
 
           let runCount = 0
@@ -1038,13 +1048,13 @@ describe('src/cypress/runner', () => {
         .then(() => {
           cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
           cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
-          cy.contains('.attempt-error', 'AssertionError: beforeEach').scrollIntoView().should('be.visible')
+          cy.contains('.runnable-err', 'AssertionError: beforeEach').scrollIntoView().should('be.visible').then((v) => console.log(v.text()))
 
           cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
 
           cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
           cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
-          cy.contains('.attempt-error', 'AssertionError: afterEach').should('be.visible')
+          cy.contains('.runnable-err', 'AssertionError: afterEach').should('be.visible')
 
           cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
 
@@ -1052,7 +1062,7 @@ describe('src/cypress/runner', () => {
 
           cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
           cy.contains('.command', 'after').should('have.class', 'command-state-failed')
-          cy.contains('.attempt-error', 'AssertionError: after').should('be.visible')
+          cy.contains('.runnable-err', 'AssertionError: after').should('be.visible')
         })
       })
 
@@ -1114,110 +1124,113 @@ describe('src/cypress/runner', () => {
           }
         })
 
-        it('screenshot during each failed attempt', () => {
-          createCypress({
-            suites: {
-              'suite 1': {
-                tests: [
-                  {
-                    name: 'test 1',
-                    fn: () => {
-                      assert(false, 'some error')
+        // NOTE: for test-retries
+        describe.skip('retries', () => {
+          it('screenshot during each failed attempt', () => {
+            createCypress({
+              suites: {
+                'suite 1': {
+                  tests: [
+                    {
+                      name: 'test 1',
+                      fn: () => {
+                        assert(false, 'some error')
+                      },
+                      eval: true,
                     },
-                    eval: true,
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          }, { config: { numTestRetries: 2 } })
-          .then(() => {
+            }, { config: { numTestRetries: 2 } })
+            .then(() => {
             // sent to server
-            expect(autCypress.automation.withArgs('take:screenshot')).calledThrice
-            expect(autCypress.automation.withArgs('take:screenshot').args).matchDeep([
-              { 1: { testAttemptIndex: 0 } },
-              { 1: { testAttemptIndex: 1 } },
-              { 1: { testAttemptIndex: 2 } },
-            ])
+              expect(autCypress.automation.withArgs('take:screenshot')).calledThrice
+              expect(autCypress.automation.withArgs('take:screenshot').args).matchDeep([
+                { 1: { testAttemptIndex: 0 } },
+                { 1: { testAttemptIndex: 1 } },
+                { 1: { testAttemptIndex: 2 } },
+              ])
 
-            // on('after:screenshot')
-            expect(onAfterScreenshotListener.args[0][0]).to.matchDeep({ testAttemptIndex: 0 })
-            expect(onAfterScreenshotListener.args[1][0]).to.matchDeep({ testAttemptIndex: 1 })
+              // on('after:screenshot')
+              expect(onAfterScreenshotListener.args[0][0]).to.matchDeep({ testAttemptIndex: 0 })
+              expect(onAfterScreenshotListener.args[1][0]).to.matchDeep({ testAttemptIndex: 1 })
 
-            // Screenshot.onAfterScreenshot
-            expect(autCypress.Screenshot.onAfterScreenshot.args[0]).to.matchSnapshot(
-              { '^.0': stringifyShort, 'test': stringifyShort, takenAt: match.string },
-            )
+              // Screenshot.onAfterScreenshot
+              expect(autCypress.Screenshot.onAfterScreenshot.args[0]).to.matchSnapshot(
+                { '^.0': stringifyShort, 'test': stringifyShort, takenAt: match.string },
+              )
+            })
           })
-        })
 
-        it('retry screenshot in test body', () => {
-          createCypress({
-            suites: {
-              'suite 1': {
-                tests: [
-                  {
-                    name: 'test 1',
-                    fn: () => {
-                      cy.screenshot()
-                      cy.then(() => assert(false))
+          it('retry screenshot in test body', () => {
+            createCypress({
+              suites: {
+                'suite 1': {
+                  tests: [
+                    {
+                      name: 'test 1',
+                      fn: () => {
+                        cy.screenshot()
+                        cy.then(() => assert(false))
+                      },
+                      eval: true,
                     },
-                    eval: true,
-                  },
-                ],
+                  ],
+                },
               },
-            },
-          }, { config: { numTestRetries: 1 } })
-          .then(() => {
-            expect(autCypress.automation.withArgs('take:screenshot')).callCount(4)
-            expect(autCypress.automation.withArgs('take:screenshot').args).matchDeep([
-              { 1: { testAttemptIndex: 0 } },
-              { 1: { testAttemptIndex: 0 } },
-              { 1: { testAttemptIndex: 1 } },
-              { 1: { testAttemptIndex: 1 } },
-            ])
+            }, { config: { numTestRetries: 1 } })
+            .then(() => {
+              expect(autCypress.automation.withArgs('take:screenshot')).callCount(4)
+              expect(autCypress.automation.withArgs('take:screenshot').args).matchDeep([
+                { 1: { testAttemptIndex: 0 } },
+                { 1: { testAttemptIndex: 0 } },
+                { 1: { testAttemptIndex: 1 } },
+                { 1: { testAttemptIndex: 1 } },
+              ])
 
-            expect(autCypress.automation.withArgs('take:screenshot').args[0]).matchSnapshot({ startTime: match.string, testAttemptIndex: match(0) })
-            expect(onAfterScreenshotListener.args[0][0]).to.matchSnapshot({ testAttemptIndex: match(0) })
-            expect(onAfterScreenshotListener.args[2][0]).to.matchDeep({ testAttemptIndex: 1 })
-            expect(autCypress.Screenshot.onAfterScreenshot.args[0]).to.matchSnapshot(
-              { '^.0': stringifyShort, 'test': stringifyShort, takenAt: match.string },
-            )
+              expect(autCypress.automation.withArgs('take:screenshot').args[0]).matchSnapshot({ startTime: match.string, testAttemptIndex: match(0) })
+              expect(onAfterScreenshotListener.args[0][0]).to.matchSnapshot({ testAttemptIndex: match(0) })
+              expect(onAfterScreenshotListener.args[2][0]).to.matchDeep({ testAttemptIndex: 1 })
+              expect(autCypress.Screenshot.onAfterScreenshot.args[0]).to.matchSnapshot(
+                { '^.0': stringifyShort, 'test': stringifyShort, takenAt: match.string },
+              )
+            })
           })
-        })
 
-        it('retry screenshot in hook', () => {
-          createCypress({
-            suites: {
-              'suite 1': {
-                hooks: [
-                  {
-                    type: 'beforeEach',
-                    fn: () => {
-                      cy.screenshot()
-                      cy.then(() => assert(false))
+          it('retry screenshot in hook', () => {
+            createCypress({
+              suites: {
+                'suite 1': {
+                  hooks: [
+                    {
+                      type: 'beforeEach',
+                      fn: () => {
+                        cy.screenshot()
+                        cy.then(() => assert(false))
+                      },
+                      eval: true,
                     },
-                    eval: true,
-                  },
-                ],
-                tests: [
-                  {
-                    name: 'test 1',
-                  },
-                ],
+                  ],
+                  tests: [
+                    {
+                      name: 'test 1',
+                    },
+                  ],
+                },
               },
-            },
-          }, { config: { numTestRetries: 1 } })
-          .then(() => {
-            expect(autCypress.automation.withArgs('take:screenshot')).callCount(4)
-            expect(autCypress.automation.withArgs('take:screenshot').args).matchDeep([
-              { 1: { testAttemptIndex: 0 } },
-              { 1: { testAttemptIndex: 0 } },
-              { 1: { testAttemptIndex: 1 } },
-              { 1: { testAttemptIndex: 1 } },
-            ])
+            }, { config: { numTestRetries: 1 } })
+            .then(() => {
+              expect(autCypress.automation.withArgs('take:screenshot')).callCount(4)
+              expect(autCypress.automation.withArgs('take:screenshot').args).matchDeep([
+                { 1: { testAttemptIndex: 0 } },
+                { 1: { testAttemptIndex: 0 } },
+                { 1: { testAttemptIndex: 1 } },
+                { 1: { testAttemptIndex: 1 } },
+              ])
 
-            expect(onAfterScreenshotListener.args[0][0]).matchDeep({ testAttemptIndex: 0 })
-            expect(onAfterScreenshotListener.args[3][0]).matchDeep({ testAttemptIndex: 1 })
+              expect(onAfterScreenshotListener.args[0][0]).matchDeep({ testAttemptIndex: 0 })
+              expect(onAfterScreenshotListener.args[3][0]).matchDeep({ testAttemptIndex: 1 })
+            })
           })
         })
       })

@@ -825,7 +825,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 
-          aboutBlank(win)
+          aboutBlank(cy, win)
           .then ->
             currentlyVisitingAboutBlank = false
 
