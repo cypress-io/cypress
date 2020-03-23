@@ -51,3 +51,18 @@ export const verify = (ctx, { column, codeFrameText, message, regex }) => {
     })
   })
 }
+
+export const sendXhr = (win) => {
+  const xhr = new win.XMLHttpRequest()
+
+  xhr.open('GET', '/foo')
+  xhr.send()
+
+  return xhr
+}
+
+export const abortXhr = (win) => {
+  const xhr = sendXhr(win)
+
+  xhr.abort()
+}

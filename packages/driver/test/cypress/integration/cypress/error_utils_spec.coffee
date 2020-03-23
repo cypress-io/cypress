@@ -464,9 +464,9 @@ describe "driver/src/cypress/error_utils", ->
       objVal = $errUtils.getObjValueByPath @obj, "bar.baz.nope"
       expect(objVal).to.be.undefined
 
-  context ".enhanceErr", ->
+  context ".enhanceStack", ->
     err = {}
-    stack = "the stack"
+    invocationStack = "the stack"
     sourceStack = {
       sourceMapped: "source mapped stack"
       parsed: []
@@ -478,7 +478,7 @@ describe "driver/src/cypress/error_utils", ->
       cy.stub($stackUtils, "getSourceStack").returns(sourceStack)
       cy.stub($stackUtils, "getCodeFrame").returns(codeFrame)
 
-      @result = $errUtils.enhanceStack({ err, stack })
+      @result = $errUtils.enhanceStack({ err, invocationStack })
 
     it "combines error message and stack", ->
       expect(@result.stack).to.equal("new stack")

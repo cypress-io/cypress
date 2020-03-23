@@ -7,7 +7,7 @@
  * tests, because each failure has a verification test (e.g. 11 fail, 11 pass)
  */
 import outsideError from '../../../todos/throws-error'
-import { fail, verify } from '../support/util'
+import { fail, verify, sendXhr, abortXhr } from '../support/util'
 
 describe('assertion failure', function () {
   fail(this, () => {
@@ -207,6 +207,529 @@ describe('cy.should', function () {
     verify(this, {
       column: 10,
       message: 'Timed out retrying: Expected to find element: h1, but never found it',
+    })
+  })
+})
+
+context('cy.each', function () {
+  describe('assertion failure', function () {
+    fail(this, () => {
+      cy.wrap([1]).each(() => {
+        expect(true).to.be.false
+      })
+    })
+
+    verify(this, {
+      column: 9,
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('exception', function () {
+    fail(this, () => {
+      cy.wrap([1]).each(() => {
+        ({}).bar()
+      })
+    })
+
+    verify(this, {
+      column: 14,
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('command failure', function () {
+    fail(this, () => {
+      cy.wrap([1]).each(() => {
+        cy.get('h1', { timeout: 1 })
+      })
+    })
+
+    verify(this, {
+      column: 12,
+      message: 'Expected to find element: h1, but never found it',
+    })
+  })
+})
+
+context('cy.spread', function () {
+  describe('assertion failure', function () {
+    fail(this, () => {
+      cy.wrap([1, 2, 3]).spread(() => {
+        expect(true).to.be.false
+      })
+    })
+
+    verify(this, {
+      column: 9,
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('exception', function () {
+    fail(this, () => {
+      cy.wrap([1, 2, 3]).spread(() => {
+        ({}).bar()
+      })
+    })
+
+    verify(this, {
+      column: 14,
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('command failure', function () {
+    fail(this, () => {
+      cy.wrap([1, 2, 3]).spread(() => {
+        cy.get('h1', { timeout: 1 })
+      })
+    })
+
+    verify(this, {
+      column: 12,
+      message: 'Expected to find element: h1, but never found it',
+    })
+  })
+})
+
+context('cy.within', function () {
+  describe('assertion failure', function () {
+    fail(this, () => {
+      cy.get('body').within(() => {
+        expect(true).to.be.false
+      })
+    })
+
+    verify(this, {
+      column: 9,
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('exception', function () {
+    fail(this, () => {
+      cy.get('body').within(() => {
+        ({}).bar()
+      })
+    })
+
+    verify(this, {
+      column: 14,
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('command failure', function () {
+    fail(this, () => {
+      cy.get('body').within(() => {
+        cy.get('h1', { timeout: 1 })
+      })
+    })
+
+    verify(this, {
+      column: 12,
+      message: 'Expected to find element: h1, but never found it',
+    })
+  })
+})
+
+context('cy.wrap', function () {
+  describe('assertion failure', function () {
+    fail(this, () => {
+      cy.wrap(() => {
+        expect(true).to.be.false
+      }).then((fn) => fn())
+    })
+
+    verify(this, {
+      column: 9,
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('exception', function () {
+    fail(this, () => {
+      cy.wrap(() => {
+        ({}).bar()
+      }).then((fn) => fn())
+    })
+
+    verify(this, {
+      column: 14,
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('command failure', function () {
+    fail(this, () => {
+      cy.wrap(() => {
+        cy.get('h1', { timeout: 1 })
+      }).then((fn) => fn())
+    })
+
+    verify(this, {
+      column: 12,
+      message: 'Expected to find element: h1, but never found it',
+    })
+  })
+})
+
+context('cy.visit', () => {
+  describe('onBeforeLoad assertion failure', function () {
+    fail(this, () => {
+      cy.visit('/index.html', {
+        onBeforeLoad () {
+          expect(true).to.be.false
+        },
+      })
+    })
+
+    verify(this, {
+      column: 11,
+      codeFrameText: 'onBeforeLoad',
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('onBeforeLoad exception', function () {
+    fail(this, () => {
+      cy.visit('/index.html', {
+        onBeforeLoad () {
+          ({}).bar()
+        },
+      })
+    })
+
+    verify(this, {
+      column: 16,
+      codeFrameText: 'onBeforeLoad',
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('onLoad assertion failure', function () {
+    fail(this, () => {
+      cy.visit('/index.html', {
+        onLoad () {
+          expect(true).to.be.false
+        },
+      })
+    })
+
+    verify(this, {
+      column: 11,
+      codeFrameText: 'onLoad',
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('onLoad exception', function () {
+    fail(this, () => {
+      cy.visit('/index.html', {
+        onLoad () {
+          ({}).bar()
+        },
+      })
+    })
+
+    verify(this, {
+      column: 16,
+      codeFrameText: 'onLoad',
+      message: '{}.bar is not a function',
+    })
+  })
+})
+
+context('cy.route', () => {
+  describe('callback assertion failure', function () {
+    fail(this, () => {
+      cy.server().route(() => {
+        expect(true).to.be.false
+      })
+    })
+
+    verify(this, {
+      column: 9,
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('callback exception', function () {
+    fail(this, () => {
+      cy.server().route(() => {
+        ({}).bar()
+      })
+    })
+
+    verify(this, {
+      column: 14,
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('command failure', function () {
+    fail(this, () => {
+      cy.server().route(() => {
+        cy.get('h1', { timeout: 1 })
+
+        return '/foo'
+      })
+    })
+
+    verify(this, {
+      column: 12,
+      message: 'Expected to find element: h1, but never found it',
+    })
+  })
+
+  describe('onAbort assertion failure', function () {
+    fail(this, () => {
+      cy.server().route({
+        url: '/foo',
+        onAbort () {
+          expect(true).to.be.false
+        },
+      })
+      .window().then(abortXhr)
+    })
+
+    verify(this, {
+      column: 11,
+      codeFrameText: 'onAbort',
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('onAbort exception', function () {
+    fail(this, () => {
+      cy.server().route({
+        url: '/foo',
+        onAbort () {
+          ({}).bar()
+        },
+      })
+      .window().then(abortXhr)
+    })
+
+    verify(this, {
+      column: 16,
+      codeFrameText: 'onAbort',
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('onRequest assertion failure', function () {
+    fail(this, () => {
+      cy.server().route({
+        url: '/foo',
+        onRequest () {
+          expect(true).to.be.false
+        },
+      })
+      .window().then(sendXhr)
+    })
+
+    verify(this, {
+      column: 11,
+      codeFrameText: 'onRequest',
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('onRequest exception', function () {
+    fail(this, () => {
+      cy.server().route({
+        url: '/foo',
+        onRequest () {
+          ({}).bar()
+        },
+      })
+      .window().then(sendXhr)
+    })
+
+    verify(this, {
+      column: 16,
+      codeFrameText: 'onRequest',
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('onResponse assertion failure', function () {
+    fail(this, () => {
+      cy.server().route({
+        url: '/users',
+        onResponse () {
+          expect(true).to.be.false
+        },
+      })
+      .visit('/xhr.html').get('#fetch').click()
+    })
+
+    verify(this, {
+      column: 11,
+      codeFrameText: 'onResponse',
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('onResponse exception', function () {
+    fail(this, () => {
+      cy.server().route({
+        url: '/users',
+        onResponse () {
+          ({}).bar()
+        },
+      })
+      .visit('/xhr.html').get('#fetch').click()
+    })
+
+    verify(this, {
+      column: 16,
+      codeFrameText: 'onResponse',
+      message: '{}.bar is not a function',
+    })
+  })
+})
+
+context('cy.server', () => {
+  describe('onAbort assertion failure', function () {
+    fail(this, () => {
+      cy.server({
+        onAbort () {
+          expect(true).to.be.false
+        },
+      })
+      .route('/foo')
+      .window().then(abortXhr)
+    })
+
+    verify(this, {
+      column: 11,
+      codeFrameText: 'onAbort',
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('onAbort exception', function () {
+    fail(this, () => {
+      cy.server({
+        onAbort () {
+          ({}).bar()
+        },
+      })
+      .route('/foo')
+      .window().then(abortXhr)
+    })
+
+    verify(this, {
+      column: 16,
+      codeFrameText: 'onAbort',
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('onRequest assertion failure', function () {
+    fail(this, () => {
+      cy.server({
+        onRequest () {
+          expect(true).to.be.false
+        },
+      })
+      .route('/foo')
+      .window().then(sendXhr)
+    })
+
+    verify(this, {
+      column: 11,
+      codeFrameText: 'onRequest',
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('onRequest exception', function () {
+    fail(this, () => {
+      cy.server({
+        onRequest () {
+          ({}).bar()
+        },
+      })
+      .route('/foo')
+      .window().then(sendXhr)
+    })
+
+    verify(this, {
+      column: 16,
+      codeFrameText: 'onRequest',
+      message: '{}.bar is not a function',
+    })
+  })
+
+  describe('onResponse assertion failure', function () {
+    fail(this, () => {
+      cy.server({
+        onResponse () {
+          expect(true).to.be.false
+        },
+      })
+      .route('/users')
+      .visit('/xhr.html').get('#fetch').click()
+    })
+
+    verify(this, {
+      column: 11,
+      codeFrameText: 'onResponse',
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('onResponse exception', function () {
+    fail(this, () => {
+      cy.server({
+        onResponse () {
+          ({}).bar()
+        },
+      })
+      .route('/users')
+      .visit('/xhr.html').get('#fetch').click()
+    })
+
+    verify(this, {
+      column: 16,
+      codeFrameText: 'onResponse',
+      message: '{}.bar is not a function',
+    })
+  })
+})
+
+context('event handlers', () => {
+  describe('event assertion failure', function (done) {
+    fail(this, () => {
+      cy.on('window:load', () => {
+        expect(true).to.be.false
+      })
+
+      cy.visit('http://localhost:1919')
+    })
+
+    verify(this, {
+      column: 9,
+      message: 'expected true to be false',
+    })
+  })
+
+  describe('event exception', function (done) {
+    fail(this, () => {
+      cy.on('window:load', () => {
+        ({}).bar()
+      })
+
+      cy.visit('http://localhost:1919')
+    })
+
+    verify(this, {
+      column: 14,
+      message: '{}.bar is not a function',
     })
   })
 })

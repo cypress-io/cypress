@@ -680,29 +680,15 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const getInvocationStack = (err) => {
     const current = state('current')
-    const currentName = current && current.get('name')
-
-    if (err.stack && (
-      // cy.then will not error on its own, but will have an
-      // invocation stack, so we need to prefer the actual error's stack
-      (currentName === 'then') ||
-      // cy.should does not register as the current command at all
-      // so we ignore the current command's invocation stack if cy.should
-      // is used with a callback
-      (current && current.get('followedByShouldCallback')) ||
-      // calling a custom command gets set as current, so if it's just wrapping
-      // an assertion or a synchronous error occurs, we prefer that
-      (current && current.get('isCustom'))
-    )) {
-      return err.stack
-    }
-
-    // cy.should without a callback will assign its invocation stack to the
-    // current command since it does not register as the current command itself
     const currentAssertion = current && current.get('currentAssertion')
     const withInvocationStack = currentAssertion || current
+    const invocationStack = withInvocationStack && withInvocationStack.get('invocationStack')
 
-    return withInvocationStack && withInvocationStack.get('invocationStack')
+    if (invocationStack && (
+      !$stackUtils.hasStack(err) || $stackUtils.isFromCypress(err)
+    )) {
+      return invocationStack
+    }
   }
 
   const fail = (err) => {
@@ -714,11 +700,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     err = $errUtils.processErr(err, config)
 
-    const stack = getInvocationStack(err)
-
     err = $errUtils.enhanceStack({
       err,
-      stack: stack || err.stack,
+      invocationStack: getInvocationStack(err),
       projectRoot: config('projectRoot'),
     })
 

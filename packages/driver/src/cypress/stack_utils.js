@@ -195,9 +195,26 @@ const replaceStack = (err, newStack) => {
   return err
 }
 
+const hasStack = (err) => {
+  if (!err.stack) return false
+
+  const [__, stackLines] = splitStack(err.stack) // eslint-disable-line no-unused-vars
+
+  return !!stackLines.length
+}
+
+const isFromCypress = (err) => {
+  const [__, stackLines] = splitStack(err.stack) // eslint-disable-line no-unused-vars
+  const firstStackLine = stackLines[0]
+
+  return firstStackLine && firstStackLine.indexOf('cypress://') > -1
+}
+
 module.exports = {
   getCodeFrame,
   getSourceStack,
+  hasStack,
+  isFromCypress,
   normalizeStack,
   replaceStack,
 }

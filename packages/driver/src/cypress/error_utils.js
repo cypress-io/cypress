@@ -256,11 +256,13 @@ const getObjValueByPath = (obj, keyPath) => {
   return val
 }
 
-const enhanceStack = ({ err, stack, projectRoot }) => {
+const enhanceStack = ({ err, invocationStack, projectRoot }) => {
   // stacks from command failures and assertion failures have the right message
   // but the stack points to cypress internals. here we replace the internal
   // cypress stack with the invocation stack, which points to the user's code
-  err = $stackUtils.replaceStack(err, stack)
+  if (invocationStack) {
+    err = $stackUtils.replaceStack(err, invocationStack)
+  }
 
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)
 
