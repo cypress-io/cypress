@@ -95,7 +95,10 @@ module.exports = {
 
     const writeVideoFrame = function (data) {
       // when `data` is empty, it is sent as an empty object (`{}`)
-      // so check for that and skip it.
+      // which can crash the process. this can happen if there are
+      // errors in the video capture process, which are handled later
+      // on, so just skip empty frames here.
+      // @see https://github.com/cypress-io/cypress/pull/6818
       if (_.isEmpty(data)) {
         debug('empty chunk received %o', data)
 
