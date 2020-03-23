@@ -820,6 +820,7 @@ describe "lib/util/ci_provider", ->
 
       TRAVIS_JOB_ID: "travisJobId"
       TRAVIS_BUILD_ID: "travisBuildId"
+      TRAVIS_BUILD_WEB_URL: "https://travis-ci.org/github/project/123"
       TRAVIS_REPO_SLUG: "travisRepoSlug"
       TRAVIS_JOB_NUMBER: "travisJobNumber"
       TRAVIS_EVENT_TYPE: "travisEventType"
@@ -838,6 +839,7 @@ describe "lib/util/ci_provider", ->
     expectsCiParams({
       travisJobId: "travisJobId"
       travisBuildId: "travisBuildId"
+      travisBuildWebUrl: "https://travis-ci.org/github/project/123"
       travisRepoSlug: "travisRepoSlug"
       travisJobNumber: "travisJobNumber"
       travisEventType: "travisEventType"
