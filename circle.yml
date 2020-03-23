@@ -319,8 +319,6 @@ jobs:
           command: ls -la types
           working_directory: cli
       - run:
-          command: yarn lerna exec  --scope cypress "yarn dtslint"
-      - run:
           command: yarn type-check --ignore-progress
       - store-npm-logs
 
