@@ -519,6 +519,7 @@ const _providerCommitParams = () => {
     netlify: {
       sha: env.COMMIT_REF,
       branch: env.BRANCH,
+      remoteOrigin: env.REPOSITORY_URL
     },
   }
 }
