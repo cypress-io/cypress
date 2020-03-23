@@ -758,7 +758,6 @@ describe "lib/util/ci_provider", ->
 
       BUILD_ID: "buildId"
       CONTEXT: "deployContent"
-      REPOSITORY_URL: "repositoryUrl"
       # deploy env variables
       URL: "url"
       DEPLOY_URL: "individualDeployUrl"
