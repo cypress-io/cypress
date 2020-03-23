@@ -206,6 +206,7 @@ module.exports = {
     return startCapturing()
     .then(({ cmd, startedVideoCapture }) => {
       return {
+        _pt: pt,
         cmd,
         endVideoCapture,
         writeVideoFrame,
