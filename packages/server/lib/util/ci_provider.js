@@ -346,7 +346,6 @@ const _providerCiParams = () => {
     netlify: extract([
       'BUILD_ID',
       'CONTEXT',
-      'REPOSITORY_URL',
       'URL',
       'DEPLOY_URL',
       'DEPLOY_PRIME_URL',
@@ -519,7 +518,7 @@ const _providerCommitParams = () => {
     netlify: {
       sha: env.COMMIT_REF,
       branch: env.BRANCH,
-      remoteOrigin: env.REPOSITORY_URL
+      remoteOrigin: env.REPOSITORY_URL,
     },
   }
 }

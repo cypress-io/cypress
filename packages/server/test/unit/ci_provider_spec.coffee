@@ -771,13 +771,13 @@ describe "lib/util/ci_provider", ->
       CACHED_COMMIT_REF: "previousCommit"
       PULL_REQUEST: "pullRequestTrueOrFalse"
       REVIEW_ID: "pullRequestReviewId"
+      REPOSITORY_URL: "repositoryUrl"
     }, {clear: true})
 
     expectsName("netlify")
     expectsCiParams({
       buildId: "buildId"
       context: "deployContent"
-      repositoryUrl: "repositoryUrl"
       url: "url"
       deployUrl: "individualDeployUrl"
       deployPrimeUrl: "primeDeployUrl"
@@ -786,6 +786,7 @@ describe "lib/util/ci_provider", ->
     expectsCommitParams({
       sha: "commit"
       branch: "branch"
+      remoteOrigin: "repositoryUrl"
     })
 
   it "azure", ->
