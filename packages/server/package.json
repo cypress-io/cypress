@@ -24,7 +24,7 @@
     "@benmalka/foxdriver": "0.3.0",
     "@cypress/browserify-preprocessor": "2.1.4",
     "@cypress/commit-info": "2.2.0",
-    "@cypress/get-windows-proxy": "1.6.0",
+    "@cypress/get-windows-proxy": "1.6.1",
     "@cypress/icons": "0.7.0",
     "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@cypress/request": "2.88.5",
