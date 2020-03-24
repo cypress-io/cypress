@@ -394,6 +394,28 @@ describe "src/cy/commands/cookies", ->
       cy.setCookie("foo", "bar", {}).then ->
         expect(options).deep.eq({})
 
+    it "can set cookies with sameSite", ->
+      Cypress.automation.restore()
+      Cypress.utils.addTwentyYears.restore()
+
+      Cypress.sinon.stub(Cypress, 'config').callThrough()
+      .withArgs('experimentalGetCookiesSameSite').returns(true)
+
+      cy.setCookie('one', 'bar', { sameSite: 'none' })
+      cy.getCookie('one').should('include', { sameSite: 'no_restriction' })
+
+      cy.setCookie('two', 'bar', { sameSite: 'no_restriction' })
+      cy.getCookie('two').should('include', { sameSite: 'no_restriction' })
+
+      cy.setCookie('three', 'bar', { sameSite: 'Lax' })
+      cy.getCookie('three').should('include', { sameSite: 'lax' })
+
+      cy.setCookie('four', 'bar', { sameSite: 'Strict' })
+      cy.getCookie('four').should('include', { sameSite: 'strict' })
+
+      cy.setCookie('five', 'bar')
+      cy.getCookie('five').should('include', { sameSite: 'unspecified' })
+
     describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
         Cypress.config("responseTimeout", 2500)
