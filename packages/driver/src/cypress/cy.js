@@ -707,8 +707,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     err = $stackUtils.normalizeStack(err)
 
-    err = $errUtils.processErr(err, config)
-
     err = $errUtils.enhanceStack({
       err,
       invocationStack: getInvocationStack(err),
