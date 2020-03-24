@@ -1124,6 +1124,38 @@ describe('src/cypress/runner', () => {
           }
         })
 
+        it('screenshot after failed test', () => {
+          createCypress({
+            suites: {
+              'suite 1': {
+                tests: [
+                  {
+                    name: 'test 1',
+                    fn: () => {
+                      assert(false, 'some error')
+                    },
+                    eval: true,
+                  },
+                ],
+              },
+            },
+          })
+          .then(() => {
+          // sent to server
+            expect(autCypress.automation.withArgs('take:screenshot').args).to.matchSnapshot(cleanseRunStateMap)
+
+            //// on('after:screenshot')
+            // TODO: for some reason snapshot is not properly saved
+            // expect(onAfterScreenshotListener.args).to.matchSnapshot(cleanseRunStateMap)
+
+            //// Screenshot.onAfterScreenshot
+            // TODO: for some reason snapshot is not properly saved
+            // expect(autCypress.Screenshot.onAfterScreenshot.args).to.matchSnapshot(
+            //   { '^.0.0': stringifyShort, 'test': stringifyShort, takenAt: match.string },
+            // )
+          })
+        })
+
         // NOTE: for test-retries
         describe.skip('retries', () => {
           it('screenshot during each failed attempt', () => {
@@ -1264,11 +1296,7 @@ describe('src/cypress/runner', () => {
 })
 
 const getRunState = (Cypress) => {
-  // cypress normally accesses `id` via a closure
   const currentRunnable = Cypress.cy.state('runnable')
-  // const currentTest = currentRunnable && getTestFromRunnable(currentRunnable)
-  // const currentId = currentTest && currentTest.id
-
   const currentId = currentRunnable && currentRunnable.id
 
   const s = {
@@ -1296,23 +1324,6 @@ const cleanseRunStateMap = {
   startTime: new Date(0),
   'err.stack': '[err stack]',
 }
-
-// const formatEvents = (stub) => {
-//   return _.flatMap(stub.args, (args) => {
-//     args = args.slice(1)
-//     if (['mocha', 'automation:request', 'log:changed'].includes(args[0])) {
-//       return []
-//     }
-
-//     let ret = [args[0]]
-
-//     if (args[1] != null) {
-//       ret = ret.concat([args[1]])
-//     }
-
-//     return [ret]
-//   })
-// }
 
 const shouldHaveTestResults = (passed, failed) => {
   return (exitCode) => {

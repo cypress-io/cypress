@@ -10,6 +10,16 @@ const debug = Debug('plugin:snapshot')
 // window.localStorage.debug = 'spec* plugin:snapshot'
 // Debug.enable('plugin:snapshot')
 
+// prints nice assertion error in command log with modified error message
+function throwErr (e, message, exp, ctx) {
+  try {
+    ctx.assert(false, message, 'sdf', exp, e.act, true)
+  } catch (err) {
+    err.message += `\n\n**- expected  + actual:**\n${e.message}`
+    throw err
+  }
+}
+
 const registerInCypress = () => {
   _ = Cypress._
   sinon = Cypress.sinon
@@ -21,10 +31,12 @@ const registerInCypress = () => {
 
   const matchDeepCypress = function (...args) {
     const exp = args[1] || args[0]
+    const ctx = this
 
     try {
       const res = matchDeep.apply(this, [args[0], args[1], { Cypress, expectedOnly: true }])
 
+      ctx.assert(true, `Expected **${chai.util.objDisplay(res.act)}** to deep match: **${chai.util.objDisplay(exp)}**`)
       Cypress.log({
         name: 'assert',
         message: `Expected **${chai.util.objDisplay(res.act)}** to deep match: **${chai.util.objDisplay(exp)}**`,
@@ -36,19 +48,12 @@ const registerInCypress = () => {
         },
       })
     } catch (e) {
-      Cypress.log({
-        name: 'assert',
-        message: `Expected **${chai.util.objDisplay(e.act)}** to deep match: **${chai.util.objDisplay(args[1] || args[0])}**`,
-        state: 'failed',
-        consoleProps: () => {
-          return {
-            Actual: e.act,
-            Expected: exp,
-          }
-        },
-      })
-
-      throw e
+      throwErr(
+        e,
+        `Expected **${chai.util.objDisplay(e.act)}** to deep match: **${chai.util.objDisplay(args[1] || args[0])}**`,
+        exp,
+        ctx,
+      )
     }
   }
 
@@ -65,34 +70,15 @@ const registerInCypress = () => {
         file,
         exactSpecName,
       }, { log: false })
-      .then((exp) => {
+      .then(function (exp) {
         try {
           snapshotIndex[testName] = snapshotIndex[testName] + 1
           const res = matchDeep.call(ctx, m, exp, { message: 'to match snapshot', Cypress, isSnapshot: true, sinon })
 
-          Cypress.log({
-            name: 'assert',
-            message: `snapshot matched: **${exactSpecName}**`,
-            state: 'passed',
-            consoleProps: () => {
-              return {
-                Actual: res.act,
-              }
-            },
-          })
+          ctx.assert(true, `snapshot matched: **${exactSpecName}**`, res.act)
         } catch (e) {
           if (Cypress.env('SNAPSHOT_UPDATE') && !e.failedMatcher && e.act) {
-            Cypress.log({
-              name: 'assert',
-              message: `snapshot updated: **${exactSpecName}**`,
-              state: 'passed',
-              consoleProps: () => {
-                return {
-                  Expected: exp,
-                  Actual: e.act,
-                }
-              },
-            })
+            ctx.assert(true, `snapshot updated: **${exactSpecName}**`, 'dsf', exp, e.act)
 
             return cy.task('saveSnapshot', {
               file,
@@ -101,19 +87,7 @@ const registerInCypress = () => {
             }, { log: false })
           }
 
-          Cypress.log({
-            name: 'assert',
-            message: `**snapshot failed match**: ${exactSpecName}`,
-            state: 'failed',
-            consoleProps: () => {
-              return {
-                Expected: exp,
-                Actual: e.act,
-              }
-            },
-          })
-
-          throw e
+          throwErr(e, `**snapshot failed match**: ${exactSpecName}`, exp, ctx)
         }
       })
     })
@@ -316,11 +290,11 @@ function keyChanged (key, text) {
 }
 
 function keyRemoved (key, variable) {
-  return options.wrap('removed', `- ${key}: ${printVar(variable)}`) + options.newLineChar
+  return options.wrap('removed', `**- ${key}: ${printVar(variable)}**`) + options.newLineChar
 }
 
 function keyAdded (key, variable) {
-  return options.wrap('added', `+ ${key}: ${printVar(variable)}`) + options.newLineChar
+  return options.wrap('added', `**+ ${key}: ${printVar(variable)}**`) + options.newLineChar
 }
 
 function parseMatcher (obj, match) {

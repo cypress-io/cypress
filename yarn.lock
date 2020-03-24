@@ -21681,7 +21681,7 @@ snap-shot-core@10.2.0:
     quote "0.4.0"
     ramda "0.26.1"
 
-snap-shot-core@^7.4.0:
+snap-shot-core@7.4.0:
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-7.4.0.tgz#b3215fbb3e3bbc734706a56feff175040bb06254"
   integrity sha512-rSRDbrfvYFp7dwtSJhFw+SUT4tS1tKSty7RsW9f9erP2fFyn7VIfYe9cgmseZytSMovB0I9WxATwKhGAsbYBCQ==

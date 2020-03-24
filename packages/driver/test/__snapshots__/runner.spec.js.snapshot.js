@@ -3494,6 +3494,35 @@ exports['serialize state - hooks'] = {
   "numLogs": 0
 }
 
+exports['src/cypress/runner isolated test runner other specs screenshots screenshot after failed test #1'] = [
+  [
+    "take:screenshot",
+    {
+      "titles": [
+        "suite 1",
+        "test 1"
+      ],
+      "testId": "r3",
+      "simple": true,
+      "testFailure": true,
+      "capture": "runner",
+      "clip": {
+        "x": 0,
+        "y": 0,
+        "width": 1000,
+        "height": 660
+      },
+      "viewport": {
+        "width": 1000,
+        "height": 660
+      },
+      "scaled": true,
+      "blackout": [],
+      "startTime": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+]
+
 exports['src/cypress/runner isolated test runner test events hook failures fail in [after] #1'] = `
 AssertionErrorafter
 

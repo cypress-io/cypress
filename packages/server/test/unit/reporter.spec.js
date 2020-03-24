@@ -63,48 +63,6 @@ describe('reporter retries', () => {
   const snapshot = (name) => {
     if (!name) throw new Error('snapshot name cannot be empty')
 
-    /*
-      expect(currentReporter.runnables).to.matchSnapshot({
-        parent: stringifyShort,
-        'addListener': undefined,
-        'clearTimeout': undefined,
-        'clone': undefined,
-        'currentRetry': undefined,
-        'emit': undefined,
-        'enableTimeouts': undefined,
-        'eventNames': undefined,
-        'fullTitle': undefined,
-        'getMaxListeners': undefined,
-        'globals': undefined,
-        'inspect': undefined,
-        'listenerCount': undefined,
-        'listeners': undefined,
-        'on': undefined,
-        'once': undefined,
-        'prependListener': undefined,
-        'prependOnceListener': undefined,
-        'removeAllListeners': undefined,
-        'removeListener': undefined,
-        'resetTimeout': undefined,
-        'retries': undefined,
-        'run': undefined,
-        'setMaxListeners': undefined,
-        'skip': undefined,
-        'slow': undefined,
-        'timeout': undefined,
-        'titlePath': undefined,
-        'addSuite': undefined,
-        'addTest': undefined,
-        'afterAll': undefined,
-        'afterEach': undefined,
-        'bail': undefined,
-        'beforeAll': undefined,
-        'beforeEach': undefined,
-        'eachTest': undefined,
-        'total': undefined,
-        'speed': undefined,
-      }, `${name} runnables`)
-    */
     expect(currentStubs.runnerEmit.args).to.matchSnapshot(runnerEmitCleanseMap, `${name} runner emit`)
     expect(currentReporter.results()).to.matchSnapshot({
       'reporterStats.end': match.date,
