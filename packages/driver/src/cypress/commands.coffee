@@ -116,12 +116,6 @@ create = (Cypress, cy, state, config) ->
         obj = options
         options = {}
 
-      ## this is a bit of a hack. we need to know if a command is built-in or
-      ## custom for error display purposes. almost all built-in commands go through
-      ## this method and it's undocumented for users, so we use it to mark them
-      ## as not being custom
-      options.isCustom = false
-
       ## perf loop
       for name, fn of obj
         Commands.add(name, options, fn)
@@ -134,9 +128,7 @@ create = (Cypress, cy, state, config) ->
         fn = options
         options = {}
 
-      { prevSubject, isCustom } = options
-
-      isCustom ?= true
+      { prevSubject } = options
 
       ## normalize type by how they validate their
       ## previous subject (unless they're explicitly set)
@@ -147,7 +139,6 @@ create = (Cypress, cy, state, config) ->
         fn
         type
         prevSubject
-        isCustom
       })
 
     addChainer: (obj) ->

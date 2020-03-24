@@ -46,8 +46,6 @@ convertRowFontSize = ($row, message) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   shouldFnWithCallback = (subject, fn) ->
-    state("current")?.set("followedByShouldCallback", true)
-
     Promise
     .try =>
       remoteSubject = cy.getRemotejQueryInstance(subject)
