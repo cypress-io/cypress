@@ -14,13 +14,13 @@
     "watch": "npm run build-for-tests -- --watch --progress"
   },
   "devDependencies": {
-    "@babel/core": "7.8.4",
+    "@babel/core": "7.8.7",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-proposal-decorators": "7.8.3",
-    "@babel/preset-env": "7.8.4",
+    "@babel/preset-env": "7.8.7",
     "@babel/preset-react": "7.8.3",
     "@cypress/eslint-plugin-dev": "5.0.0",
-    "@cypress/webpack-preprocessor": "4.1.2",
+    "@cypress/webpack-preprocessor": "4.1.3",
     "@fortawesome/fontawesome-free": "5.12.1",
     "@reach/visually-hidden": "0.6.2",
     "babel-loader": "8.0.6",

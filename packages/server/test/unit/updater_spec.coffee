@@ -2,7 +2,7 @@ require("../spec_helper")
 
 nmi         = require("node-machine-id")
 cwd         = require("#{root}lib/cwd")
-request     = require("request")
+request     = require("@cypress/request")
 Updater     = require("#{root}lib/updater")
 pkg         = require("@packages/root")
 _           = require("lodash")
