@@ -8,7 +8,7 @@ import { setup, fail, verify } from '../support/util'
 
 setup({ verifyStackLineIsSpecFile: false })
 
-context('assertion failure', function () {
+describe('assertion failure', function () {
   fail(this, () => {
     cy.failAssertion()
   })

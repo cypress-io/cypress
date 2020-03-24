@@ -11,7 +11,7 @@ import { fail, verify, setup, sendXhr, abortXhr } from '../support/util'
 
 setup({ verifyStackLineIsSpecFile: true })
 
-context('assertion failure', function () {
+describe('assertion failure', function () {
   fail(this, () => {
     expect(true).to.be.false
     expect(false).to.be.false

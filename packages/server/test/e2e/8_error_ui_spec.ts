@@ -9,7 +9,7 @@ const onServer = function (app) {
 
 const expectedFailures = 48
 
-const verifyPassedAndFailedAreSame = function ({ code, stdout }) {
+const verifyPassedAndFailedAreSame = function ({ stdout }) {
   const passes = stdout.match(/✓ ✓ VERIFY/g)
 
   expect(passes.length, 'number of passes should equal the number of failures').to.equal(expectedFailures)
