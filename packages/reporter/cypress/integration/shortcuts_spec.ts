@@ -1,3 +1,5 @@
+/// <reference types="cypress" />
+
 import sinon, { SinonStub, SinonSpy } from 'sinon'
 import { EventEmitter } from 'events'
 
