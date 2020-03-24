@@ -310,7 +310,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws when should(\'have.length\') isnt a number', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('You must provide a valid number to a length assertion. You passed: \'asdf\'')
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
           done()
         })
@@ -425,7 +425,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws err when not available chainable', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer: \'dee\' was not found. Could not build assertion.')
+          expect(err.message).to.eq('The chainer `dee` was not found. Could not build assertion.')
 
           done()
         })
@@ -435,7 +435,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws err when ends with a non available chainable', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer: \'eq2\' was not found. Could not build assertion.')
+          expect(err.message).to.eq('The chainer `eq2` was not found. Could not build assertion.')
 
           done()
         })
@@ -483,7 +483,7 @@ describe('src/cy/commands/assertions', () => {
           // when we check for the element to be detached
           // it never actually runs the assertion
           expect(names).to.deep.eq(['get', 'click'])
-          expect(err.message).to.include('cy.should() failed because this element is detached')
+          expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
         })
@@ -507,7 +507,7 @@ describe('src/cy/commands/assertions', () => {
 
           // should is present here due to the retry
           expect(names).to.deep.eq(['get', 'click', 'assert'])
-          expect(err.message).to.include('cy.should() failed because this element is detached')
+          expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
         })
@@ -524,7 +524,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(3)
-          expect(err.message).to.eq('You must provide a valid number to a length assertion. You passed: \'foo\'')
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `foo`')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -543,7 +543,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('The \'eventually\' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.')
+          expect(err.message).to.eq('The `eventually` assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -580,7 +580,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('\'match\' requires its argument be a \'RegExp\'. You passed: \'foo\'')
+          expect(err.message).to.eq('`match` requires its argument be a `RegExp`. You passed: `foo`')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -752,7 +752,7 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    it('does not replaces instances of word: \'but\' with \'and\' for failing assertion', (done) => {
+    it('does not replaces instances of word \'but\' with \'and\' for failing assertion', (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
@@ -1171,12 +1171,12 @@ describe('src/cy/commands/assertions', () => {
           expect('foo').to.match('foo')
         }
 
-        expect(fn).to.throw('\'match\' requires its argument be a \'RegExp\'. You passed: \'foo\'')
+        expect(fn).to.throw('`match` requires its argument be a `RegExp`. You passed: `foo`')
       })
 
       it('throws with cy.should', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('\'match\' requires its argument be a \'RegExp\'. You passed: \'bar\'')
+          expect(err.message).to.eq('`match` requires its argument be a `RegExp`. You passed: `bar`')
 
           done()
         })
@@ -1790,13 +1790,8 @@ describe('src/cy/commands/assertions', () => {
           const l6 = this.logs[5]
 
           // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.eq(
-            `\
-expected '<div>' to be 'visible'
-
-This element '<div>' is not visible because it has CSS property: 'display: none'\
-`,
-          )
+          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
+          expect(l6.get('error').message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
         }
       })
 
@@ -2624,6 +2619,18 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
 
         expect({}).to.have.css('foo')
       })
+    })
+  })
+
+  context('cross-origin iframe', () => {
+    it(`doesn't throw when iframe exists`, () => {
+      cy.visit('fixtures/cross_origin.html')
+      cy.get('.foo').should('not.be.visible')
+    })
+
+    it(`doesn't throw when iframe with name attribute exists`, () => {
+      cy.visit('fixtures/cross_origin_name.html')
+      cy.get('.foo').should('not.be.visible')
     })
   })
 })

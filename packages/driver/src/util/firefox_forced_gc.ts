@@ -1,4 +1,4 @@
-import { get, isNumber } from 'lodash'
+import { get, isNumber, isNull } from 'lodash'
 
 export function createIntervalGetter (config) {
   return () => {
@@ -8,7 +8,7 @@ export function createIntervalGetter (config) {
 
     const intervals = config('firefoxGcInterval')
 
-    if (isNumber(intervals)) {
+    if (isNumber(intervals) || isNull(intervals)) {
       return intervals
     }
 

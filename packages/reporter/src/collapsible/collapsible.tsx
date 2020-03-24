@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import React, { Component, CSSProperties, ReactNode } from 'react'
+import React, { Component, CSSProperties, MouseEvent, ReactNode } from 'react'
 
 import { onEnterOrSpace } from '../lib/util'
 
@@ -41,14 +41,16 @@ class Collapsible extends Component<Props, State> {
         <div
           aria-expanded={this.state.isOpen}
           className={cs('collapsible-header', this.props.headerClass)}
-          onClick={this._toggleOpen}
-          onKeyPress={onEnterOrSpace(this._toggleOpen)}
+          onClick={this._onClick}
+          onKeyPress={onEnterOrSpace(this._onKeyPress)}
           role='button'
           style={this.props.headerStyle}
           tabIndex={0}
         >
           <i className='collapsible-indicator fa-fw fas'></i>
-          {this.props.header}
+          <span className='collapsible-header-text'>
+            {this.props.header}
+          </span>
           <i className='collapsible-more fas fa-ellipsis-h'></i>
         </div>
         <div className={cs('collapsible-content', this.props.contentClass)}>
@@ -60,6 +62,15 @@ class Collapsible extends Component<Props, State> {
 
   _toggleOpen = () => {
     this.setState({ isOpen: !this.state.isOpen })
+  }
+
+  _onClick = (e: MouseEvent) => {
+    e.stopPropagation()
+    this._toggleOpen()
+  }
+
+  _onKeyPress = () => {
+    this._toggleOpen()
   }
 }
 
