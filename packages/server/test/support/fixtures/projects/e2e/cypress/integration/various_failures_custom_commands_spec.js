@@ -4,7 +4,7 @@
  */
 
 import outsideError from '../../../todos/throws-error'
-import { setup, fail, verify } from '../support/util'
+import { setup, fail, verify, verifyInternalError } from '../support/util'
 
 setup({ verifyStackLineIsSpecFile: false })
 
@@ -584,9 +584,9 @@ context('cy.server', () => {
 })
 
 context('event handlers', () => {
-  describe('event assertion failure', function (done) {
+  describe('event assertion failure', function () {
     fail(this, () => {
-      cy.failEventHandlerAssertion(done)
+      cy.failEventHandlerAssertion()
     })
 
     verify(this, {
@@ -596,15 +596,52 @@ context('event handlers', () => {
     })
   })
 
-  describe('event exception', function (done) {
+  describe('event exception', function () {
     fail(this, () => {
-      cy.failEventHandlerException(done)
+      cy.failEventHandlerException()
     })
 
     verify(this, {
       column: 10,
       codeFrameText: 'failEventHandlerException',
       message: '{}.bar is not a function',
+    })
+  })
+})
+
+// covering cases where there is a bug in Cypress and we shouldn't show
+// the invocation stack. it should show the original stack even if it is
+// thrown within a command
+context('unexpected errors', () => {
+  describe('Cypress method error', function () {
+    const isJquery = Cypress.dom.isJquery
+
+    beforeEach(() => {
+      Cypress.dom.isJquery = isJquery
+    })
+
+    fail(this, () => {
+      cy.failInternalCypressMethod()
+    })
+
+    verifyInternalError(this, {
+      method: 'Cypress.dom.isJquery',
+    })
+  })
+
+  describe('cy method error', function () {
+    const cyExpect = cy.expect
+
+    beforeEach(() => {
+      cy.expect = cyExpect
+    })
+
+    fail(this, () => {
+      cy.failInternalCyMethod()
+    })
+
+    verifyInternalError(this, {
+      method: 'cy.expect',
     })
   })
 })

@@ -58,6 +58,25 @@ export const verify = (ctx, { column, codeFrameText, message, regex }) => {
   })
 }
 
+export const verifyInternalError = (ctx, { method }) => {
+  it(`✓ VERIFY`, () => {
+    cy.wrap(Cypress.$(window.top.document.body))
+    .find('.reporter')
+    .contains(`FAIL - ${getTitle(ctx)}`)
+    .closest('.runnable-wrapper')
+    .within(() => {
+      cy.get('.runnable-err-message')
+      .should('include.text', `thrown in ${method.replace(/\./g, '')}`)
+
+      cy.get('.runnable-err-stack-trace')
+      .should('include.text', method)
+
+      cy.get('.test-err-code-frame')
+      .should('not.exist')
+    })
+  })
+}
+
 export const sendXhr = (win) => {
   const xhr = new win.XMLHttpRequest()
 

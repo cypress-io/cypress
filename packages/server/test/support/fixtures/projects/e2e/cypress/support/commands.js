@@ -325,7 +325,7 @@ Cypress.Commands.add('failServerOnResponseException', () => {
   .visit('/xhr.html').get('#fetch').click()
 })
 
-Cypress.Commands.add('failEventHandlerAssertion', (done) => {
+Cypress.Commands.add('failEventHandlerAssertion', () => {
   cy.on('window:load', () => {
     expect(true).to.be.false
   })
@@ -333,10 +333,22 @@ Cypress.Commands.add('failEventHandlerAssertion', (done) => {
   cy.visit('http://localhost:1919')
 })
 
-Cypress.Commands.add('failEventHandlerException', (done) => {
+Cypress.Commands.add('failEventHandlerException', () => {
   cy.on('window:load', () => {
     ({}).bar()
   })
 
   cy.visit('http://localhost:1919')
+})
+
+Cypress.Commands.add('failInternalCypressMethod', () => {
+  top.window.eval(`Cypress.dom.isJquery = () => { throw new Error('thrown in CypressdomisJquery') }`)
+
+  cy.get('body')
+})
+
+Cypress.Commands.add('failInternalCyMethod', () => {
+  top.window.eval(`cy.expect = () => { throw new Error('thrown in cyexpect') }`)
+
+  cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
 })

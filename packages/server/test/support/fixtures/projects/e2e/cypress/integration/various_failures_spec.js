@@ -7,7 +7,7 @@
  * tests, because each failure has a verification test (e.g. 11 fail, 11 pass)
  */
 import outsideError from '../../../todos/throws-error'
-import { fail, verify, setup, sendXhr, abortXhr } from '../support/util'
+import { fail, verify, verifyInternalError, setup, sendXhr, abortXhr } from '../support/util'
 
 setup({ verifyStackLineIsSpecFile: true })
 
@@ -705,7 +705,7 @@ context('cy.server', () => {
 })
 
 context('event handlers', () => {
-  describe('event assertion failure', function (done) {
+  describe('event assertion failure', function () {
     fail(this, () => {
       cy.on('window:load', () => {
         expect(true).to.be.false
@@ -720,7 +720,7 @@ context('event handlers', () => {
     })
   })
 
-  describe('event exception', function (done) {
+  describe('event exception', function () {
     fail(this, () => {
       cy.on('window:load', () => {
         ({}).bar()
@@ -739,68 +739,40 @@ context('event handlers', () => {
 // covering cases where there is a bug in Cypress and we shouldn't show
 // the invocation stack. it should show the original stack even if it is
 // thrown within a command
-context('programmer errors', () => {
-  describe('default assertion', () => {
+context('unexpected errors', () => {
+  describe('Cypress method error', function () {
     const isJquery = Cypress.dom.isJquery
 
     beforeEach(() => {
       Cypress.dom.isJquery = isJquery
     })
 
-    it('uses default assertion', () => {
-      top.window.eval(`Cypress.dom.isJquery = () => { throw new Error('programmer error') }`)
+    fail(this, () => {
+      top.window.eval(`Cypress.dom.isJquery = () => { throw new Error('thrown in CypressdomisJquery') }`)
 
       cy.get('body')
     })
 
-    it('verifies UI', () => {
-      cy.wrap(Cypress.$(window.top.document.body))
-      .find('.reporter')
-      .contains('uses default assertion')
-      .closest('.runnable-wrapper')
-      .within(() => {
-        cy.get('.runnable-err-message')
-        .should('include.text', 'programmer error')
-
-        cy.get('.runnable-err-stack-trace')
-        .should('include.text', 'Cypress.dom.isJquery')
-
-        cy
-        .get('.test-err-code-frame')
-        .should('not.exist')
-      })
+    verifyInternalError(this, {
+      method: 'Cypress.dom.isJquery',
     })
   })
 
-  describe('internal cy error', () => {
+  describe('internal cy error', function () {
     const cyExpect = cy.expect
 
     beforeEach(() => {
       cy.expect = cyExpect
     })
 
-    it('throws in cy.expect', () => {
-      top.window.eval(`cy.expect = () => { throw new Error('thrown in cy.expect') }`)
+    fail(this, () => {
+      top.window.eval(`cy.expect = () => { throw new Error('thrown in cyexpect') }`)
 
       cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
     })
 
-    it('verifies UI', () => {
-      cy.wrap(Cypress.$(window.top.document.body))
-      .find('.reporter')
-      .contains('throws in cy.expect')
-      .closest('.runnable-wrapper')
-      .within(() => {
-        cy.get('.runnable-err-message')
-        .should('include.text', 'thrown in cy.expect')
-
-        cy.get('.runnable-err-stack-trace')
-        .should('include.text', 'cy.expect')
-
-        cy
-        .get('.test-err-code-frame')
-        .should('not.exist')
-      })
+    verifyInternalError(this, {
+      method: 'cy.expect',
     })
   })
 })
