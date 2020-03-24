@@ -6,7 +6,7 @@ import debugModule from 'debug'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
-interface CyCookie {
+export interface CyCookie {
   name: string
   value: string
   expirationDate: number
