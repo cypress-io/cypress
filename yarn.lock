@@ -1194,10 +1194,10 @@
     lodash "^4.17.15"
     shelljs "^0.8.3"
 
-"@cypress/get-windows-proxy@1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@cypress/get-windows-proxy/-/get-windows-proxy-1.6.0.tgz#46fc0e52bfe99e9f2540d74d1425ceb26555abed"
-  integrity sha512-pm8ZCmO7FPi2H62J+kMVS9TsrsqmFEWKmd0CajnoT1WEvmmnjQ08SFTy2La0OFJBg39xJwBOD6EVKvClmRoALw==
+"@cypress/get-windows-proxy@1.6.1":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@cypress/get-windows-proxy/-/get-windows-proxy-1.6.1.tgz#61a29d0271b38deaafc24b22a661bab684b6743f"
+  integrity sha512-RSKgb1YGilZECRRZkCSQpMtXWqxKiXHvBu1ecL1iZQp4SNzdTsDqW/ps/zIdjr+AgvsRBRr/GKqCse3hCC4Wsg==
   dependencies:
     debug "4.1.1"
   optionalDependencies:
