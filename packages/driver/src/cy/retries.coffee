@@ -32,13 +32,6 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
 
       { error } = options
 
-      ## TODO: remove this once the codeframe PR is in since that
-      ## correctly handles not rewrapping errors so that stack
-      ## traces are correctly displayed
-      if debug.enabled and error and not $errUtils.CypressErrorRe.test(error.name)
-        debug('retrying due to caught error...')
-        console.error(error)
-
       interval = options.interval ? options._interval
 
       ## we calculate the total time we've been retrying

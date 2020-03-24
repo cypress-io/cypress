@@ -14,6 +14,14 @@ const wrapErr = (err) => {
   return $utils.reduceProps(err, ERROR_PROPS)
 }
 
+const isCypressErr = (err = {}) => {
+  return err.name === 'CypressError'
+}
+
+const isCypressOrAssertionErr = (err = {}) => {
+  return CypressErrorRe.test(err.name)
+}
+
 const mergeErrProps = (origErr, ...newProps) => {
   return _.extend(origErr, ...newProps)
 }
@@ -225,9 +233,8 @@ const getErrMessage = (err) => {
 }
 
 const getErrStack = (err) => {
-  // if cypress or assertion error
-  // don't return the stack
-  if (CypressErrorRe.test(err.name)) {
+  // if cypress or assertion error, don't return the stack
+  if (isCypressOrAssertionErr(err)) {
     return err.toString()
   }
 
@@ -288,7 +295,6 @@ module.exports = {
   appendErrMsg,
   cypressErr,
   cypressErrByPath,
-  CypressErrorRe,
   enhanceStack,
   errMsgByPath,
   errObjByPath,
@@ -296,6 +302,8 @@ module.exports = {
   getErrMsgWithObjByPath,
   getErrStack,
   getObjValueByPath,
+  isCypressErr,
+  isCypressOrAssertionErr,
   internalErr,
   makeErrFromObj,
   mergeErrProps,

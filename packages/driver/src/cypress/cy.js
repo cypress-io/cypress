@@ -696,6 +696,15 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
+    // auto-log the error if it's unexpected, because it's likely a bug
+    // in Cypress itself
+    if (!$errUtils.isCypressOrAssertionErr(err)) {
+      /* eslint-disable no-console */
+      console.log('An unexpected error occurred:')
+      console.error(err)
+      /* eslint-enable no-console */
+    }
+
     err = $stackUtils.normalizeStack(err)
 
     err = $errUtils.processErr(err, config)
