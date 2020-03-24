@@ -4413,7 +4413,7 @@ anymatch@^2.0.0:
     micromatch "^3.1.4"
     normalize-path "^2.1.1"
 
-anymatch@~3.1.1:
+anymatch@^3.1.1, anymatch@~3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/anymatch/-/anymatch-3.1.1.tgz#c55ecf02185e2469259399310c173ce31233b142"
   integrity sha512-mM8522psRCqzV+6LhomX5wgp25YVibjh8Wj23I5RPkPppSVSjyKD2A2mBJmWGa+KN7f2D6LNh9jkBCeyLktzjg==
@@ -24156,11 +24156,12 @@ webpack-cli@3.3.2:
     v8-compile-cache "^2.0.2"
     yargs "^12.0.5"
 
-webpack-livereload-plugin@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/webpack-livereload-plugin/-/webpack-livereload-plugin-2.2.0.tgz#47a19f318f9e83733c26265c445f80eb0a4436c6"
-  integrity sha512-sx9xA5mHoNOUgLQI0PmXT3KV9ecsVmUaTgr+fsoL69qAOHw/7VzkL1+ZMDQ8n0dPbWounswK6cBRSgMod7Nhgg==
+webpack-livereload-plugin@2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/webpack-livereload-plugin/-/webpack-livereload-plugin-2.3.0.tgz#61994e0500a0c1e27355ff753a9642641bef5d6a"
+  integrity sha512-vVBLQLlNpElt2sfsBG+XLDeVbQFS4RrniVU8Hi1/hX5ycSfx6mtW8MEEITr2g0Cvo36kuPWShFFDuy+DS7KFMA==
   dependencies:
+    anymatch "^3.1.1"
     portfinder "^1.0.17"
     tiny-lr "^1.1.1"
 

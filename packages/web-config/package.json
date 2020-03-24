@@ -41,6 +41,6 @@
     "sinon-chai": "3.3.0",
     "webpack": "4.41.6",
     "webpack-cli": "3.3.11",
-    "webpack-livereload-plugin": "2.2.0"
+    "webpack-livereload-plugin": "2.3.0"
   }
 }
