@@ -130,9 +130,7 @@ RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
 
 
 https://on.cypress.io/request
-
-https://on.cypress.io/request
-  
+      [stack trace lines]
 
 
 
@@ -247,8 +245,6 @@ Headers: {
 }
 Body: Service Unavailable
 
-
-https://on.cypress.io/request
 
 https://on.cypress.io/request
       [stack trace lines]
@@ -375,8 +371,6 @@ Body: <!DOCTYPE html>
 <pre>Cannot GET /myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong</pre>
 </body>
 </html>
-
-https://on.cypress.io/request
 
 https://on.cypress.io/request
       [stack trace lines]

@@ -173,8 +173,6 @@ Cypress could not associate this error to any specific test.
 We dynamically generated a new test to display this failure.
 
 https://on.cypress.io/cannot-execute-commands-outside-test
-
-https://on.cypress.io/cannot-execute-commands-outside-test
   
 
 

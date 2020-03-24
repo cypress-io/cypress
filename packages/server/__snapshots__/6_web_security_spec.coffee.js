@@ -46,8 +46,6 @@ You may need to restructure some of your test code to avoid this problem.
 Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
 
 https://on.cypress.io/cross-origin-violation
-
-https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
   2) web security fails when submitted a form and being redirected to another origin:
@@ -70,8 +68,6 @@ You may need to restructure some of your test code to avoid this problem.
 Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
 
 https://on.cypress.io/cross-origin-violation
-
-https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
   3) web security fails when using a javascript redirect to another origin:
@@ -92,8 +88,6 @@ Cypress does not allow you to navigate to a different origin URL within a single
 You may need to restructure some of your test code to avoid this problem.
 
 Alternatively you can also disable Chrome Web Security in Chromium-based browsers which will turn off this restriction by setting { chromeWebSecurity: false } in \`cypress.json\`.
-
-https://on.cypress.io/cross-origin-violation
 
 https://on.cypress.io/cross-origin-violation
       [stack trace lines]
