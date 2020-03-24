@@ -31,6 +31,10 @@ yarn test-debug --scope cypress
 
 This will take and compare snapshots of the CLI output. To update snapshots, see `snap-shot-it` instructions: https://github.com/bahmutov/snap-shot-it#advanced-use
 
+#### Type Linting
+
+When testing with `dtslint`, you may need to remove existing typescript installations before running the type linter (for instance, on OS X, you might `rm -rf ~/.dts/typescript-installs`) in order to reproduce issues with new versions of typescript (i.e., `@next`).
+
 ### Manual
 
 To build and test an NPM package:

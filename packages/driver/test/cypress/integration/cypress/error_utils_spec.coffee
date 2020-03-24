@@ -3,12 +3,36 @@ $errorMessages = require("../../../../src/cypress/error_messages")
 
 describe "driver/src/cypress/error_utils", ->
   context ".throwErr", ->
-    it "throws the error as sent", ->
-      try
-        $errUtils.throwErr("Something unexpected")
-      catch e
-        expect(e.message).to.include "Something unexpected"
-        expect(e.name).to.eq "CypressError"
+    it "throws error as a cypress error when it is a message string", ->
+      fn = -> $errUtils.throwErr("Something unexpected")
+
+      expect(fn).to.throw().and.satisfy (err) ->
+        expect(err.message).to.include "Something unexpected"
+        expect(err.name).to.eq "CypressError"
+
+    it "throws error when it is an object", ->
+      fn = -> $errUtils.throwErr({ name: "SomeError", message: "Something unexpected", extraProp: "extra prop" })
+
+      expect(fn).to.throw().and.satisfy (err) ->
+        expect(err.message).to.include("Something unexpected")
+        expect(err.name).to.eq("SomeError")
+        expect(err.extraProp).to.eq("extra prop")
+
+    it "throws error when it is an error", ->
+      err = new Error("Something unexpected")
+      err.extraProp = "extra prop"
+      fn = -> $errUtils.throwErr(err)
+
+      expect(fn).to.throw().and.satisfy (err) ->
+        expect(err.message).to.include("Something unexpected")
+        expect(err.name).to.eq("Error")
+        expect(err.extraProp).to.eq("extra prop")
+
+    it "removes stack if noStackTrace: true", ->
+      fn = -> $errUtils.throwErr("Something unexpected", { noStackTrace: true })
+
+      expect(fn).to.throw().and.satisfy (err) ->
+        expect(err.stack).to.equal("")
 
   context ".throwErrByPath", ->
     beforeEach ->
@@ -231,3 +255,19 @@ describe "driver/src/cypress/error_utils", ->
     it "returns undefined for non-existent deeper path", ->
       objVal = $errUtils.getObjValueByPath @obj, "bar.baz.nope"
       expect(objVal).to.be.undefined
+
+  context ".appendErrMsg", ->
+    it "replaces old stack message with new one", ->
+      err = new Error("old message")
+      newErr = $errUtils.appendErrMsg(err, "new message")
+
+      expect(newErr.message).to.equal("old message\n\nnew message")
+      expect(newErr.stack).to.include("Error: old message\n\nnew message\n")
+
+    it "properly replaces stack message when error has no message", ->
+      err = new Error()
+      newErr = $errUtils.appendErrMsg(err, "new message")
+
+      expect(newErr.message).to.equal("new message")
+      expect(newErr.stack).to.include("Error: new message\n")
+      expect(newErr.stack).not.to.include("\nError")

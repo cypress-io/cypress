@@ -123,7 +123,20 @@ cy.window().then(window => {
   window.eval('1')
 })
 
-// clearLocalStorage signatures
+// use path-based access for nested structures
+cy.wrap({
+  foo: {
+    bar: 1
+  }
+}).its('foo.bar')
+
+cy.wrap({
+  foo: {
+    quux: () => 2
+  }
+}).invoke('foo.quux')
+
+// different clearLocalStorage signatures
 cy.clearLocalStorage()
 cy.clearLocalStorage('todos')
 cy.clearLocalStorage('todos', { log: false })

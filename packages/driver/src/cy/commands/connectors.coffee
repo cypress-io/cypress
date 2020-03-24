@@ -211,47 +211,45 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         args: { cmd: name }
       })
 
-    ## TODO: use the new error utils that are part of
-    ## the error message enhancements PR
     propertyNotOnSubjectErr = (prop) ->
-      $errUtils.cypressErr(
-        $errUtils.errMsgByPath("invoke_its.nonexistent_prop", {
+      $errUtils.cypressErrByPath("invoke_its.nonexistent_prop", {
+        args: {
           prop,
           cmd: name
-        })
-      )
+        }
+      })
 
     propertyValueNullOrUndefinedErr = (prop, value) ->
       errMessagePath = if isCmdIts then "its" else "invoke"
 
-      $errUtils.cypressErr(
-        $errUtils.errMsgByPath("#{errMessagePath}.null_or_undefined_prop_value", {
+      $errUtils.cypressErrByPath("#{errMessagePath}.null_or_undefined_prop_value", {
+        args: {
           prop,
           value,
-          cmd: name
-        })
-      )
+        }
+        cmd: name
+      })
 
     subjectNullOrUndefinedErr = (prop, value) ->
       errMessagePath = if isCmdIts then "its" else "invoke"
 
-      $errUtils.cypressErr(
-        $errUtils.errMsgByPath("#{errMessagePath}.subject_null_or_undefined", {
+      $errUtils.cypressErrByPath("#{errMessagePath}.subject_null_or_undefined", {
+        args: {
           prop,
-          value,
           cmd: name
-        })
-      )
+          value,
+        }
+      })
 
     propertyNotOnPreviousNullOrUndefinedValueErr = (prop, value, previousProp) ->
-      $errUtils.cypressErr(
-        $errUtils.errMsgByPath("invoke_its.previous_prop_null_or_undefined", {
+      $errUtils.cypressErrByPath("invoke_its.previous_prop_null_or_undefined", {
+        args: {
           prop,
           value,
           previousProp,
           cmd: name
-        })
-      )
+        }
+      })
 
     traverseObjectAtPath = (acc, pathsArray, index = 0) ->
       ## traverse at this depth
