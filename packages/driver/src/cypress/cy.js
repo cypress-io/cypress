@@ -454,10 +454,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // and set the subject
       // TODO DRY THIS LOGIC UP
       if (command && command.get('skip')) {
-        if (command.is('assertion')) {
-          state('assertionStack', command.get('invocationStack'))
-        }
-
         // must set prev + next since other
         // operations depend on this state being correct
         command.set({ prev: queue.at(index - 1), next: queue.at(index + 1) })
@@ -1287,25 +1283,25 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
             state('done', done)
           }
 
-          let returned = fn.apply(this, arguments)
+          let ret = fn.apply(this, arguments)
 
           // if we returned a value from fn
           // and enqueued some new commands
           // and the value isnt currently cy
           // or a promise
-          if (returned &&
+          if (ret &&
             (queue.length > currentLength) &&
-              (!isCy(returned)) &&
-                (!isPromiseLike(returned))) {
+              (!isCy(ret)) &&
+                (!isPromiseLike(ret))) {
             // TODO: clean this up in the utility function
             // to conditionally stringify functions
-            returned = _.isFunction(returned) ?
-              returned.toString()
+            ret = _.isFunction(ret) ?
+              ret.toString()
               :
-              $utils.stringify(returned)
+              $utils.stringify(ret)
 
             $errUtils.throwErrByPath('miscellaneous.returned_value_and_commands', {
-              args: { returned },
+              args: { returned: ret },
             })
           }
 
@@ -1317,12 +1313,12 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // due to overspecifying a resolution.
           // in those cases we need to remove
           // returning a promise
-          if (fn.length && returned && returned.catch) {
-            returned = returned.catch(done)
+          if (fn.length && ret && ret.catch) {
+            ret = ret.catch(done)
           }
 
           // if we returned a promise like object
-          if ((!isCy(returned)) && isPromiseLike(returned)) {
+          if ((!isCy(ret)) && isPromiseLike(ret)) {
             // indicate we've returned a custom promise
             state('returnedCustomPromise', true)
 
@@ -1333,11 +1329,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
               warnMixingPromisesAndCommands()
             }
 
-            return returned
+            return ret
           }
 
           // if we're cy or we've enqueued commands
-          if (isCy(returned) || (queue.length > currentLength)) {
+          if (isCy(ret) || (queue.length > currentLength)) {
             if (fn.length) {
               // if user has passed done callback don't return anything
               // so we don't get an 'overspecified' error from mocha
@@ -1349,7 +1345,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           }
 
           // else just return ret
-          return returned
+          return ret
         } catch (error) {
           // if our runnable.fn throw synchronously
           // then it didnt fail from a cypress command
