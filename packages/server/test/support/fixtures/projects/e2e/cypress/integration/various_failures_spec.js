@@ -735,3 +735,72 @@ context('event handlers', () => {
     })
   })
 })
+
+// covering cases where there is a bug in Cypress and we shouldn't show
+// the invocation stack. it should show the original stack even if it is
+// thrown within a command
+context('programmer errors', () => {
+  describe('default assertion', () => {
+    const isJquery = Cypress.dom.isJquery
+
+    beforeEach(() => {
+      Cypress.dom.isJquery = isJquery
+    })
+
+    it('uses default assertion', () => {
+      top.window.eval(`Cypress.dom.isJquery = () => { throw new Error('programmer error') }`)
+
+      cy.get('body')
+    })
+
+    it('verifies UI', () => {
+      cy.wrap(Cypress.$(window.top.document.body))
+      .find('.reporter')
+      .contains('uses default assertion')
+      .closest('.runnable-wrapper')
+      .within(() => {
+        cy.get('.runnable-err-message')
+        .should('include.text', 'programmer error')
+
+        cy.get('.runnable-err-stack-trace')
+        .should('include.text', 'Cypress.dom.isJquery')
+
+        cy
+        .get('.test-err-code-frame')
+        .should('not.exist')
+      })
+    })
+  })
+
+  describe('internal cy error', () => {
+    const cyExpect = cy.expect
+
+    beforeEach(() => {
+      cy.expect = cyExpect
+    })
+
+    it('throws in cy.expect', () => {
+      top.window.eval(`cy.expect = () => { throw new Error('thrown in cy.expect') }`)
+
+      cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
+    })
+
+    it('verifies UI', () => {
+      cy.wrap(Cypress.$(window.top.document.body))
+      .find('.reporter')
+      .contains('throws in cy.expect')
+      .closest('.runnable-wrapper')
+      .within(() => {
+        cy.get('.runnable-err-message')
+        .should('include.text', 'thrown in cy.expect')
+
+        cy.get('.runnable-err-stack-trace')
+        .should('include.text', 'cy.expect')
+
+        cy
+        .get('.test-err-code-frame')
+        .should('not.exist')
+      })
+    })
+  })
+})
