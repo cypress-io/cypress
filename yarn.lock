@@ -1351,10 +1351,10 @@
   dependencies:
     css.escape "^1.5.1"
 
-"@cypress/webpack-preprocessor@4.1.2":
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-4.1.2.tgz#de734bc54ab9e9f5370d6be1bb7eab5e0fe55465"
-  integrity sha512-WhqwENr8XN6i4I0Hfil8MI/jCfXkFj2gU7zXhKMjXynAX7c9fSoneMDTobpYbd5Cgw5uA5f5vDXO8NM+hL3Pjw==
+"@cypress/webpack-preprocessor@4.1.3":
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-4.1.3.tgz#d5fad767a304c16ec05ca08034827c601f1c9c0c"
+  integrity sha512-VtTzStrKtwyftLkcgopwCHzgjefK3uHHL6FgbAQP1o5N1pa/zYUb0g7hH2skrMAlKOmLGdbySlISkUl18Y3wHg==
   dependencies:
     bluebird "3.7.1"
     debug "4.1.1"
