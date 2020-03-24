@@ -18,7 +18,7 @@ function convertSameSiteExtensionToCdp (str: chrome.cookies.SameSiteStatus): Opt
 
 function convertSameSiteCdpToExtension (str: cdp.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
   if (_.isUndefined(str)) {
-    return 'unspecified'
+    return str
   }
 
   if (str === 'None') {

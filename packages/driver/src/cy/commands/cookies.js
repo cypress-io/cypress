@@ -33,12 +33,16 @@ const mergeDefaults = function (obj) {
   return merge(obj)
 }
 
-// https://developer.chrome.com/extensions/cookies#type-SameSiteStatus
-const VALID_SAMESITE_VALUES = ['no_restriction', 'lax', 'strict', 'unspecified']
+// from https://developer.chrome.com/extensions/cookies#type-SameSiteStatus
+// note that `unspecified` is purposely omitted - Firefox and Chrome set
+// different defaults, and Firefox lacks support for `unspecified`, so
+// `undefined` is used in lieu of `unspecified`
+// @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
+const VALID_SAMESITE_VALUES = ['no_restriction', 'lax', 'strict']
 
 const normalizeSameSite = (sameSite) => {
   if (_.isUndefined(sameSite)) {
-    sameSite = 'unspecified'
+    return sameSite
   }
 
   if (_.isString(sameSite)) {
@@ -259,7 +263,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       cookie.sameSite = normalizeSameSite(cookie.sameSite)
 
-      if (!VALID_SAMESITE_VALUES.includes(cookie.sameSite)) {
+      if (!_.isUndefined(cookie.sameSite) && !VALID_SAMESITE_VALUES.includes(cookie.sameSite)) {
         $errUtils.throwErrByPath('setCookie.invalid_samesite', {
           onFail,
           args: {

@@ -413,8 +413,11 @@ describe "src/cy/commands/cookies", ->
       cy.setCookie('four', 'bar', { sameSite: 'Strict' })
       cy.getCookie('four').should('include', { sameSite: 'strict' })
 
+      ## @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
+      defaultSameSite = if Cypress.isBrowser('firefox') then 'no_restriction' else 'unspecified'
+
       cy.setCookie('five', 'bar')
-      cy.getCookie('five').should('include', { sameSite: 'unspecified' })
+      cy.getCookie('five').should('include', { sameSite: defaultSameSite })
 
     describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
