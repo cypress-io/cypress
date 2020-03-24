@@ -84,6 +84,17 @@ describe('Settings', () => {
     })
   })
 
+  /**
+   * Opens "Configuration" panel of the Settings tab
+   * and checks that configuration element is fully visible.
+   * This helps to ensure no flake down the line
+   */
+  const openConfiguration = () => {
+    cy.contains('Configuration').click()
+    cy.get('.config-vars').should('be.visible')
+    .invoke('height').should('be.gt', 400)
+  }
+
   describe('configuration panel', () => {
     describe('displays config', () => {
       beforeEach(function () {
@@ -92,7 +103,7 @@ describe('Settings', () => {
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
         this.goToSettings()
-        cy.contains('Configuration').click()
+        openConfiguration()
       })
 
       it('displays config section', () => {
@@ -296,7 +307,7 @@ describe('Settings', () => {
 
         this.goToSettings()
 
-        cy.contains('Configuration').click()
+        openConfiguration()
       })
 
       it('displays updated config', function () {
@@ -318,7 +329,7 @@ describe('Settings', () => {
 
         this.goToSettings()
 
-        cy.contains('Configuration').click()
+        openConfiguration()
       })
 
       it('notes that cypress.json is disabled', () => {
@@ -334,7 +345,7 @@ describe('Settings', () => {
 
         this.goToSettings()
 
-        cy.contains('Configuration').click()
+        openConfiguration()
       })
 
       it('notes that a custom config is in use', () => {
@@ -550,7 +561,7 @@ describe('Settings', () => {
       this.getProjectStatus.resolve(this.projectStatuses[0])
       this.openProject.resolve(this.config)
       this.goToSettings()
-      cy.contains('Configuration').click()
+      openConfiguration()
 
       cy.contains('http://localhost:7777').then(() => {
         this.ipc.openProject.onCall(1).rejects(this.err)
@@ -762,7 +773,7 @@ describe('Settings', () => {
       this.getProjectStatus.resolve(this.projectStatuses[0])
       this.openProject.resolve(this.config)
       this.goToSettings()
-      cy.contains('Configuration').click()
+      openConfiguration()
 
       cy.contains('http://localhost:7777').then(() => {
         this.ipc.openProject.onCall(1).rejects(this.err)

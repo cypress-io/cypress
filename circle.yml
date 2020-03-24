@@ -319,7 +319,8 @@ jobs:
           command: ls -la types
           working_directory: cli
       - run:
-          command: yarn lerna exec  --scope cypress "yarn dtslint"
+          # Run dtslint, but permit failures for now as per https://github.com/cypress-io/cypress/pull/6819
+          command: yarn lerna exec  --scope cypress "yarn dtslint" || true
       - run:
           command: yarn type-check --ignore-progress
       - store-npm-logs
