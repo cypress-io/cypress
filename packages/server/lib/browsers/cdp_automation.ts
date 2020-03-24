@@ -6,7 +6,7 @@ import debugModule from 'debug'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
-type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly' | 'sameSite'>
+export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly' | 'sameSite'>
 
 function convertSameSiteExtensionToCdp (str: chrome.cookies.SameSiteStatus): Optional<cdp.Network.CookieSameSite> {
   return ({
