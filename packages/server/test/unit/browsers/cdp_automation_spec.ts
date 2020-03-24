@@ -1,21 +1,16 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-require('../../spec_helper')
-const {
+const { expect, sinon } = require('../../spec_helper')
+
+import {
   CdpAutomation,
   _cookieMatches,
   _domainIsWithinSuperdomain,
-} = require(`${root}../lib/browsers/cdp_automation`)
+  CyCookie,
+} from '../../../lib/browsers/cdp_automation'
 
 context('lib/browsers/cdp_automation', () => {
   context('._domainIsWithinSuperdomain', () => {
     it('matches as expected', () => {
-      return [
+      [
         {
           domain: 'a.com',
           suffix: 'a.com',
@@ -54,7 +49,7 @@ context('lib/browsers/cdp_automation', () => {
 
   context('._cookieMatches', () => {
     it('matches as expected', () => {
-      return [
+      [
         {
           cookie: { domain: 'example.com' },
           filter: { domain: 'example.com' },
@@ -66,7 +61,7 @@ context('lib/browsers/cdp_automation', () => {
           expected: true,
         },
       ].forEach(({ cookie, filter, expected }) => {
-        expect(_cookieMatches(cookie, filter)).to.eq(expected)
+        expect(_cookieMatches(cookie as CyCookie, filter)).to.eq(expected)
       })
     })
   })
@@ -87,7 +82,7 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('get:cookies', () => {
       beforeEach(function () {
-        return this.sendDebuggerCommand.withArgs('Network.getAllCookies')
+        this.sendDebuggerCommand.withArgs('Network.getAllCookies')
         .resolves({
           cookies: [
             { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expires: 123 },
@@ -109,7 +104,7 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('get:cookie', () => {
       beforeEach(function () {
-        return this.sendDebuggerCommand.withArgs('Network.getAllCookies')
+        this.sendDebuggerCommand.withArgs('Network.getAllCookies')
         .resolves({
           cookies: [
             { name: 'session', value: 'key', path: '/login', domain: 'google.com', secure: true, httpOnly: true, expires: 123 },
@@ -134,7 +129,7 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('set:cookie', () => {
       beforeEach(function () {
-        return this.sendDebuggerCommand.withArgs('Network.setCookie', { domain: '.google.com', name: 'session', value: 'key', path: '/', expires: undefined })
+        this.sendDebuggerCommand.withArgs('Network.setCookie', { domain: '.google.com', name: 'session', value: 'key', path: '/', expires: undefined })
         .resolves({ success: true })
         .withArgs('Network.setCookie', { domain: 'foo', path: '/bar', name: '', value: '', expires: undefined })
         .rejects(new Error('some error'))
