@@ -72,7 +72,7 @@ browserifyFile = (filePath) ->
 browserifyFileTs = (filePath) ->
   streamToPromise(
     browserify(filePath)
-    .transform(cjsxify)
+    .transform(coffeeify)
     .transform(simpleTsify, {
       typescript: require("typescript"),
     })
@@ -512,6 +512,12 @@ describe "Routes", ->
           projectRoot: Fixtures.projectPath("ids")
         })
 
+      checkTranspilation = (body, file) ->
+        b = removeSourceMapContents(body).replace(/\n/g, '')
+        f = file.toString().replace(/\n/g, '')
+
+        expect(b).to.equal f
+
       it "processes foo.coffee spec", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee")
         .then (res) ->
@@ -519,7 +525,7 @@ describe "Routes", ->
 
           browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            checkTranspilation(res.body, file)
 
       it "processes dom.jsx spec", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js")
@@ -528,7 +534,7 @@ describe "Routes", ->
 
           browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/baz.js"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            checkTranspilation(res.body, file)
             expect(res.body).to.include("React.createElement(")
 
       it "processes qux.ts spec", ->
@@ -538,7 +544,7 @@ describe "Routes", ->
 
           browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/qux.ts"))
           .then (file) ->
-            expect(res.body).to.equal file.toString()
+            checkTranspilation(res.body, file)
 
       it "processes quux.tsx spec", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/quux.tsx")
