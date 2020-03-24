@@ -275,6 +275,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
       .then((resp) => {
+        maybeStripSameSiteProp(resp)
+
         options.cookie = resp
 
         return resp
