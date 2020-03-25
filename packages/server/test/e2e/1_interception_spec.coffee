@@ -59,5 +59,4 @@ describe "e2e interception spec", ->
           baseUrl: "http://localhost:9876"
         }
         snapshot: true
-        expectedExitCode: 0
       })

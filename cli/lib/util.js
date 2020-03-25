@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const R = require('ramda')
 const os = require('os')
+const ospath = require('ospath')
 const crypto = require('crypto')
 const la = require('lazy-ass')
 const is = require('check-more-types')
@@ -120,13 +121,13 @@ function stdoutLineMatches (expectedLine, stdout) {
 }
 
 /**
- * Confirms if given value is a valid CYPRESS_ENV value. Undefined values
+ * Confirms if given value is a valid CYPRESS_INTERNAL_ENV value. Undefined values
  * are valid, because the system can set the default one.
  *
  * @param {string} value
- * @example util.isValidCypressEnvValue(process.env.CYPRESS_ENV)
+ * @example util.isValidCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
  */
-function isValidCypressEnvValue (value) {
+function isValidCypressInternalEnvValue (value) {
   if (_.isUndefined(value)) {
     // will get default value
     return true
@@ -136,6 +137,17 @@ function isValidCypressEnvValue (value) {
   const names = ['development', 'test', 'staging', 'production']
 
   return _.includes(names, value)
+}
+
+/**
+ * Confirms if given value is a non-production CYPRESS_INTERNAL_ENV value.
+ * Undefined values are valid, because the system can set the default one.
+ *
+ * @param {string} value
+ * @example util.isNonProductionCypressInternalEnvValue(process.env.CYPRESS_INTERNAL_ENV)
+ */
+function isNonProductionCypressInternalEnvValue (value) {
+  return !_.isUndefined(value) && value !== 'production'
 }
 
 /**
@@ -158,6 +170,8 @@ function printNodeOptions (log = debug) {
  * Removes double quote characters
  * from the start and end of the given string IF they are both present
  *
+ * @param {string} str Input string
+ * @returns {string} Trimmed string or the original string if there are no double quotes around it.
  * @example
   ```
   dequote('"foo"')
@@ -175,16 +189,86 @@ const dequote = (str) => {
   return str
 }
 
+const parseOpts = (opts) => {
+  opts = _.pick(opts,
+    'browser',
+    'cachePath',
+    'cacheList',
+    'cacheClear',
+    'ciBuildId',
+    'config',
+    'configFile',
+    'cypressVersion',
+    'destination',
+    'detached',
+    'dev',
+    'exit',
+    'env',
+    'force',
+    'global',
+    'group',
+    'headed',
+    'headless',
+    'key',
+    'path',
+    'parallel',
+    'port',
+    'project',
+    'reporter',
+    'reporterOptions',
+    'record',
+    'spec',
+    'tag')
+
+  if (opts.exit) {
+    opts = _.omit(opts, 'exit')
+  }
+
+  // some options might be quoted - which leads to unexpected results
+  // remove double quotes from certain options
+  const removeQuotes = {
+    group: dequote,
+    ciBuildId: dequote,
+  }
+  const cleanOpts = R.evolve(removeQuotes, opts)
+
+  debug('parsed cli options %o', cleanOpts)
+
+  return cleanOpts
+}
+
+/**
+ * Copy of packages/server/lib/browsers/utils.ts
+ * because we need same functionality in CLI to show the path :(
+ */
+const getApplicationDataFolder = (...paths) => {
+  const { env } = process
+
+  // allow overriding the app_data folder
+  const folder = env.CYPRESS_KONFIG_ENV || env.CYPRESS_INTERNAL_ENV || 'development'
+
+  const PRODUCT_NAME = pkg.productName || pkg.name
+  const OS_DATA_PATH = ospath.data()
+
+  const ELECTRON_APP_DATA_PATH = path.join(OS_DATA_PATH, PRODUCT_NAME)
+
+  const p = path.join(ELECTRON_APP_DATA_PATH, 'cy', folder, ...paths)
+
+  return p
+}
+
 const util = {
   normalizeModuleOptions,
-  isValidCypressEnvValue,
+  parseOpts,
+  isValidCypressInternalEnvValue,
+  isNonProductionCypressInternalEnvValue,
   printNodeOptions,
 
   isCi () {
     return isCi
   },
 
-  getEnvOverrides () {
+  getEnvOverrides (options = {}) {
     return _
     .chain({})
     .extend(util.getEnvColors())
@@ -193,7 +277,33 @@ const util = {
     .mapValues((value) => { // stringify to 1 or 0
       return value ? '1' : '0'
     })
+    .extend(util.getNodeOptions(options))
     .value()
+  },
+
+  getNodeOptions (options, nodeVersion) {
+    if (!nodeVersion) {
+      nodeVersion = Number(process.versions.node.split('.')[0])
+    }
+
+    if (options.dev && nodeVersion < 12) {
+      // `node` is used instead of Electron when --dev is passed, so this won't work if Node is too old
+      debug('NODE_OPTIONS=--max-http-header-size could not be set because we\'re in dev mode and Node is < 12.0.0')
+
+      return
+    }
+
+    // https://github.com/cypress-io/cypress/issues/5431
+    const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2} --http-parser=legacy`
+
+    if (_.isString(process.env.NODE_OPTIONS)) {
+      return {
+        NODE_OPTIONS: `${NODE_OPTIONS} ${process.env.NODE_OPTIONS}`,
+        ORIGINAL_NODE_OPTIONS: process.env.NODE_OPTIONS || '',
+      }
+    }
+
+    return { NODE_OPTIONS }
   },
 
   getForceTty () {
@@ -326,7 +436,15 @@ const util = {
       }
 
       return os.release()
+    })
+  },
 
+  getPlatformInfo () {
+    return util.getOsVersionAsync().then((version) => {
+      return stripIndent`
+        Platform: ${os.platform()} (${version})
+        Cypress Version: ${util.pkgVersion()}
+      `
     })
   },
 
@@ -407,6 +525,8 @@ const util = {
   getFileChecksum,
 
   getFileSize,
+
+  getApplicationDataFolder,
 }
 
 module.exports = util

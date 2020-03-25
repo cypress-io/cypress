@@ -14,12 +14,12 @@ describe('Project', function () {
       cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
       cy.stub(this.ipc, 'closeProject').resolves()
       cy.stub(this.ipc, 'onConfigChanged')
+      cy.stub(this.ipc, 'onProjectWarning')
 
       this.getProjectStatus = this.util.deferred()
       cy.stub(this.ipc, 'getProjectStatus').returns(this.getProjectStatus.promise)
 
       this.updaterCheck = this.util.deferred()
-
       cy.stub(this.ipc, 'updaterCheck').resolves(this.updaterCheck.promise)
     })
   })

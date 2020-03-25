@@ -14,7 +14,7 @@ exports['e2e stdout displays errors from failures 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: stdout_failing_spec.coffee...                                                   (1 of 1) 
+  Running:  stdout_failing_spec.coffee                                                      (1 of 1)
 
 
   stdout_failing_spec
@@ -32,10 +32,10 @@ exports['e2e stdout displays errors from failures 1'] = `
 
   1) stdout_failing_spec fails:
      Error: foo
-      at stack trace line
+      [stack trace lines]
 
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 /does-not-exist.html
 
@@ -47,24 +47,11 @@ The internal Cypress web server responded with:
 
   > 404: Not Found
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'failing hook'
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`failing hook\`
+      [stack trace lines]
 
   3) stdout_failing_spec passing hook is failing:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 /does-not-exist.html
 
@@ -75,50 +62,40 @@ We failed looking for this file at the path:
 The internal Cypress web server responded with:
 
   > 404: Not Found
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
-      at stack trace line
+      [stack trace lines]
 
 
 
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        5                          │
-  │ Passing:      2                          │
-  │ Failing:      3                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  3                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     stdout_failing_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        5                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      3                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  3                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     stdout_failing_spec.coffee                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- fails (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- failing hook -- is failing -- before each hook (failed).png (1280x720)
-  - /foo/bar/.projects/e2e/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec -- passing hook -- is failing (failed).png (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
+     -- fails (failed).png                                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
+     -- failing hook -- is failing -- before each hook (failed).png                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
+     -- passing hook -- is failing (failed).png                                                     
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.coffee.mp4      (X second)
 
 
 ====================================================================================================
@@ -126,11 +103,11 @@ The internal Cypress web server responded with:
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ stdout_failing_spec.coffee                XX:XX        5        2        3        -        - │
+  │ ✖  stdout_failing_spec.coffee               XX:XX        5        2        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        5        2        3        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        5        2        3        -        -  
 
 
 `
@@ -144,25 +121,26 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_exit_early_failing_spec.coffee)                                    │
-  │ Searched:   cypress/integration/stdout_exit_early_failing_spec.coffee                          │
+  │ Specs:      1 found (stdout_exit_early_failing_spec.js)                                        │
+  │ Searched:   cypress/integration/stdout_exit_early_failing_spec.js                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: stdout_exit_early_failing_spec.coffee...                                        (1 of 1) 
+  Running:  stdout_exit_early_failing_spec.js                                               (1 of 1)
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee
+  /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
 
 The error was:
 
-/foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.coffee:1
-+>
- ^
-ParseError: unexpected >
+SyntaxError: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js: Unexpected token (1:1)
+
+> 1 | +>
+    |  ^
+  2 |  while parsing file: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -173,23 +151,24 @@ Fix the error in your code and re-run your tests.
 
   (Results)
 
-  ┌─────────────────────────────────────────────────────┐
-  │ Tests:        0                                     │
-  │ Passing:      0                                     │
-  │ Failing:      1                                     │
-  │ Pending:      0                                     │
-  │ Skipped:      0                                     │
-  │ Screenshots:  0                                     │
-  │ Video:        true                                  │
-  │ Duration:     X seconds                             │
-  │ Spec Ran:     stdout_exit_early_failing_spec.coffee │
-  └─────────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     stdout_exit_early_failing_spec.js                                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_exit_early_failing_spec.     (X second)
+                          js.mp4                                                                    
 
 
 ====================================================================================================
@@ -197,11 +176,11 @@ Fix the error in your code and re-run your tests.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖ stdout_exit_early_failing_spec.coffee     XX:XX        -        -        1        -        - │
+  │ ✖  stdout_exit_early_failing_spec.js        XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    1 of 1 failed (100%)                        XX:XX        -        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `
@@ -222,7 +201,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: stdout_passing_spec.coffee...                                                   (1 of 1) 
+  Running:  stdout_passing_spec.coffee                                                      (1 of 1)
 
 
   stdout_passing_spec
@@ -245,23 +224,23 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
   (Results)
 
-  ┌──────────────────────────────────────────┐
-  │ Tests:        8                          │
-  │ Passing:      8                          │
-  │ Failing:      0                          │
-  │ Pending:      0                          │
-  │ Skipped:      0                          │
-  │ Screenshots:  0                          │
-  │ Video:        true                       │
-  │ Duration:     X seconds                  │
-  │ Spec Ran:     stdout_passing_spec.coffee │
-  └──────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        8                                                                                │
+  │ Passing:      8                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     stdout_passing_spec.coffee                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
-  - Started processing:   Compressing to 32 CRF
-  - Finished processing:  /foo/bar/.projects/e2e/cypress/videos/abc123.mp4 (X seconds)
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_passing_spec.coffee.mp4      (X second)
 
 
 ====================================================================================================
@@ -269,16 +248,16 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ stdout_passing_spec.coffee                XX:XX        8        8        -        -        - │
+  │ ✔  stdout_passing_spec.coffee               XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        8        8        -        -        -  
+    ✔  All specs passed!                        XX:XX        8        8        -        -        -  
 
 
 `
 
-exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
+exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ====================================================================================================
 
@@ -287,40 +266,123 @@ exports['e2e stdout logs that electron cannot be recorded in headed mode 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_spec.coffee)                                                       │
-  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  │ Specs:      3 found (nested-1/nested-2/nested-3/spec.coffee, nested-1/nested-2/nested-3/stdout │
+  │             _specfile_display_spec_with_a_really_long_name_that_never_has_a_line_break_or_new_ │
+  │             line.coffee, nested-1/nested-2/nested-3/stdout_specfile.coffee)                    │
+  │ Searched:   cypress/integration/nested-1/nested-2/nested-3/*                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_spec.coffee...                                                           (1 of 1) 
-
-Warning: Cypress can only record videos when running headlessly.
-
-You have set the 'electron' browser to run headed.
-
-A video will not be recorded when using this mode.
+  Running:  nested-1/nested-2/nested-3/spec.coffee                                          (1 of 3)
 
 
-  ✓ is true
+  stdout_specfile_display_spec
+    ✓ passes
+
 
   1 passing
 
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        1                  │
-  │ Passing:      1                  │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        false              │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     simple_spec.coffee │
-  └──────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     nested-1/nested-2/nested-3/spec.coffee                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/spec     (X second)
+                          .coffee.mp4                                                               
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  nested-1/nested-2/nested-3/stdout_specfile_display_spec_with_a_reall            (2 of 3)
+            y_long_name_that_never_has_a_line_break_or_new_line.coffee                              
+
+
+  stdout_specfile_display_spec
+    ✓ passes
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     nested-1/nested-2/nested-3/stdout_specfile_display_spec_with_a_really_long_name_ │
+  │               that_never_has_a_line_break_or_new_line.coffee                                   │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/nested-1/nested-2/nested-3/stdout_specfile_disp     (1000x660)
+     lay_spec_with_a_really_long_name_that_never_has_a_line_break_or_new_line.coffee/               
+     stdout_specfile_display_spec -- passes.png                                                     
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo     (X second)
+                          ut_specfile_display_spec_with_a_really_long_name_that_never               
+                          _has_a_line_break_or_new_line.coffee.mp4                                  
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  nested-1/nested-2/nested-3/stdout_specfile.coffee                               (3 of 3)
+
+
+  stdout_specfile_display_spec
+    ✓ passes
+
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     nested-1/nested-2/nested-3/stdout_specfile.coffee                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/nested-1/nested-2/nested-3/stdo     (X second)
+                          ut_specfile.coffee.mp4                                                    
 
 
 ====================================================================================================
@@ -328,16 +390,25 @@ A video will not be recorded when using this mode.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
+  │ ✔  nested-1/nested-2/nested-3/spec.cof      XX:XX        1        1        -        -        - │
+  │    fee                                                                                         │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  nested-1/nested-2/nested-3/stdout_s      XX:XX        1        1        -        -        - │
+  │    pecfile_display_spec_with_a_really_                                                         │
+  │    long_name_that_never_has_a_line_bre                                                         │
+  │    ak_or_new_line.coffee                                                                       │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  nested-1/nested-2/nested-3/stdout_s      XX:XX        1        1        -        -        - │
+  │    pecfile.coffee                                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `
 
-exports['e2e stdout logs that chrome cannot be recorded 1'] = `
+exports['e2e stdout / displays assertion errors'] = `
 
 ====================================================================================================
 
@@ -346,40 +417,89 @@ exports['e2e stdout logs that chrome cannot be recorded 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_spec.coffee)                                                       │
-  │ Searched:   cypress/integration/simple_spec.coffee                                             │
+  │ Specs:      1 found (stdout_assertion_errors_spec.js)                                          │
+  │ Searched:   cypress/integration/stdout_assertion_errors_spec.js                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running: simple_spec.coffee...                                                           (1 of 1) 
-
-Warning: Cypress can only record videos when using the built in 'electron' browser.
-
-You have set the browser to: 'chrome'
-
-A video will not be recorded when using this browser.
+  Running:  stdout_assertion_errors_spec.js                                                 (1 of 1)
 
 
-  ✓ is true
+  assertion errors
+    1) fails with assertion diff, no retries
+    2) fails with assertion diff, with retries
+    3) fails with dom assertion without diff, with retries
+    4) fails with dom assertion without diff, with retries
 
-  1 passing
+
+  0 passing
+  4 failing
+
+  1) assertion errors fails with assertion diff, no retries:
+
+      AssertionError: expected [] to deeply equal [ 1, 2, 3 ]
+      + expected - actual
+
+      -[]
+      +[ 1, 2, 3 ]
+      
+      [stack trace lines]
+
+  2) assertion errors fails with assertion diff, with retries:
+
+      AssertionError: Timed out retrying: expected [] to deeply equal [ 1, 2, 3 ]
+      + expected - actual
+
+      -[]
+      +[ 1, 2, 3 ]
+      
+      [stack trace lines]
+
+  3) assertion errors fails with dom assertion without diff, with retries:
+     AssertionError: expected '<body>' to have class 'foo'
+      [stack trace lines]
+
+  4) assertion errors fails with dom assertion without diff, with retries:
+     AssertionError: Timed out retrying: expected '<body>' to have class 'foo'
+      [stack trace lines]
+
+
 
 
   (Results)
 
-  ┌──────────────────────────────────┐
-  │ Tests:        1                  │
-  │ Passing:      1                  │
-  │ Failing:      0                  │
-  │ Pending:      0                  │
-  │ Skipped:      0                  │
-  │ Screenshots:  0                  │
-  │ Video:        false              │
-  │ Duration:     X seconds          │
-  │ Spec Ran:     simple_spec.coffee │
-  └──────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      4                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  4                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     stdout_assertion_errors_spec.js                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
+     s -- fails with assertion diff, no retries (failed).png                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
+     s -- fails with assertion diff, with retries (failed).png                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
+     s -- fails with dom assertion without diff, with retries (failed).png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
+     s -- fails with dom assertion without diff, with retries (failed) (1).png                      
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_assertion_errors_spec.js     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -387,11 +507,11 @@ A video will not be recorded when using this browser.
   (Run Finished)
 
 
-      Spec                                                Tests  Passing  Failing  Pending  Skipped 
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔ simple_spec.coffee                        XX:XX        1        1        -        -        - │
+  │ ✖  stdout_assertion_errors_spec.js          XX:XX        4        -        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    All specs passed!                           XX:XX        1        1        -        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        4        -        4        -        -  
 
 
 `

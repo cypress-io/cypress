@@ -28,10 +28,10 @@ describe('controls', function () {
     })
   })
 
-  describe('shortcuts', function () {
-    it('stops tests', function () {
+  describe('shortcuts', () => {
+    it('stops tests', () => {
       cy.get('body').then(() => {
-        expect(runner.emit).to.not.have.been.calledWith('runner:stop')
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
       })
 
       cy.get('body').type('s').then(() => {
@@ -39,9 +39,9 @@ describe('controls', function () {
       })
     })
 
-    it('resumes tests', function () {
+    it('resumes tests', () => {
       cy.get('body').then(() => {
-        expect(runner.emit).to.not.have.been.calledWith('runner:restart')
+        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })
 
       cy.get('body').type('r').then(() => {
@@ -49,9 +49,9 @@ describe('controls', function () {
       })
     })
 
-    it('focuses on specs', function () {
+    it('focuses on specs', () => {
       cy.get('body').then(() => {
-        expect(runner.emit).to.not.have.been.calledWith('focus:tests')
+        expect(runner.emit).not.to.have.been.calledWith('focus:tests')
       })
 
       cy.get('body').type('f').then(() => {
@@ -59,17 +59,30 @@ describe('controls', function () {
       })
     })
 
+    it('does not run shortcut if typed into an input', () => {
+      cy.get('body')
+      .then(($body) => {
+        // this realistically happens with the selector playground, but
+        // need to add an input since this environment is isolated
+        $body.append('<input id="temp-input" />')
+      })
+      .get('#temp-input').type('r')
+      .then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
+      })
+    })
+
     it('has shortcut in tooltips', () => {
       cy.get('.focus-tests > button').trigger('mouseover')
-      cy.get('.tooltip').should('have.text', 'View All Tests F')
+      cy.get('.cy-tooltip').should('have.text', 'View All Tests F')
       cy.get('.focus-tests > button').trigger('mouseout')
 
       cy.get('button.restart').trigger('mouseover')
-      cy.get('.tooltip').should('have.text', 'Run All Tests R')
+      cy.get('.cy-tooltip').should('have.text', 'Run All Tests R')
 
       cy.window().then((win) => win.state.isRunning = true)
       cy.get('button.stop').trigger('mouseover')
-      cy.get('.tooltip').should('have.text', 'Stop Running S')
+      cy.get('.cy-tooltip').should('have.text', 'Stop Running S')
     })
   })
 })

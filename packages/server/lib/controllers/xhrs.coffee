@@ -46,6 +46,11 @@ module.exports = {
         if _.isObject(data)
           data = JSON.stringify(data)
 
+        ## when data is null, JSON.stringify returns null.
+        ## handle that case. 
+        if data is null
+          data = ''
+
         chunk = Buffer.from(data, encoding)
 
         headers["content-length"] = chunk.length
@@ -86,7 +91,7 @@ module.exports = {
 
   parseContentType: (response) ->
     ret = (type) ->
-      mime.lookup(type) #+ "; charset=utf-8"
+      mime.getType(type) #+ "; charset=utf-8"
 
     switch
       when isValidJSON(response)

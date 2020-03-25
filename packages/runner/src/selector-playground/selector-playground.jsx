@@ -40,13 +40,15 @@ class SelectorPlayground extends Component {
       })}>
         <div className='selector'>
           <Tooltip
-            title='Click an element to see a suggested selector'>
+            title='Click an element to see a suggested selector'
+            className='cy-tooltip'
+          >
             <button
               className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
               onClick={this._toggleEnablingSelectorPlayground}>
               <span className='fa-stack'>
-                <i className='fa fa-square-o fa-stack-1x'></i>
-                <i className='fa fa-mouse-pointer fa-stack-1x'></i>
+                <i className='far fa-square fa-stack-1x'></i>
+                <i className='fas fa-mouse-pointer fa-stack-1x'></i>
               </span>
             </button>
           </Tooltip>
@@ -67,16 +69,16 @@ class SelectorPlayground extends Component {
             /><span>{'\''}</span>
             <span>)</span>
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-            <Tooltip title={model.infoHelp || ''}>
+            <Tooltip title={model.infoHelp || ''} className='cy-tooltip'>
               <span className='info num-elements'>
                 {model.isValid ?
                   model.numElements :
-                  <i className='fa fa-exclamation-triangle'></i>
+                  <i className='fas fa-exclamation-triangle'></i>
                 }
               </span>
             </Tooltip>
           </div>
-          <Tooltip title={this.copyText || ''} updateCue={`${selectorText}${this.copyText}`}>
+          <Tooltip title={this.copyText || ''} updateCue={`${selectorText}${this.copyText}`} className='cy-tooltip'>
             <button
               ref={(node) => this._copyButton = node}
               className='copy-to-clipboard'
@@ -84,10 +86,10 @@ class SelectorPlayground extends Component {
               disabled={!model.numElements || !model.isValid}
               onMouseOut={fixMouseOut(this._resetCopyText, () => this._copyButton)}
             >
-              <i className='fa fa-copy' />
+              <i className='far fa-copy' />
             </button>
           </Tooltip>
-          <Tooltip title={this.printText || ''} updateCue={`${selectorText}${this.printText}`}>
+          <Tooltip title={this.printText || ''} updateCue={`${selectorText}${this.printText}`} className='cy-tooltip'>
             <button
               ref={(node) => this._printButton = node}
               className='print-to-console'
@@ -95,12 +97,12 @@ class SelectorPlayground extends Component {
               disabled={!model.numElements || !model.isValid}
               onMouseOut={fixMouseOut(this._resetPrintText, () => this._printButton)}
             >
-              <i className='fa fa-terminal' />
+              <i className='fas fa-terminal' />
             </button>
           </Tooltip>
         </div>
         <a className='selector-info' href='https://on.cypress.io/selector-playground' target="_blank">
-          <i className='fa fa-question-circle'></i>{' '}
+          <i className='fas fa-question-circle'></i>{' '}
           Learn more
         </a>
         <button className='close' onClick={this._togglePlaygroundOpen}>x</button>
@@ -142,7 +144,7 @@ class SelectorPlayground extends Component {
         'is-showing': this.showingMethodPicker,
       })}>
         <button onClick={this._toggleMethodPicker}>
-          <i className='fa fa-caret-down'></i>{' '}
+          <i className='fas fa-caret-down'></i>{' '}
           cy.{model.method}
         </button>
         <div className='method-picker'>

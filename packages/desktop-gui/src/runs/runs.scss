@@ -165,6 +165,17 @@
     }
   }
 
+  .browser-icon {
+    width: 15px;
+    height: 15px;
+    position: relative;
+    top: -1px;
+
+    &.fa-globe {
+      top: 0;
+    }
+  }
+
   .user-avatar {
     position: relative;
     margin-right: 3px;
@@ -322,6 +333,15 @@
 }
 
 .setup-project-modal {
+  form {
+    overflow: visible;
+  }
+
+  .loader {
+    position: relative;
+    min-height: 181px;
+  }
+
   a>i {
     color: #999;
     cursor: pointer;
@@ -345,23 +365,7 @@
   }
 
   .owner-parts {
-    overflow: auto;
     clear: both;
-  }
-
-  .owner-part-one {
-    float: left;
-    width: 42%;
-    margin-right: 1%;
-  }
-
-  .owner-part-two {
-    float: left;
-    width: 57%;
-  }
-
-  .radio + .radio {
-    margin-bottom: 0;
   }
 
   .form-horizontal {
@@ -369,10 +373,6 @@
     margin: 0;
     padding: 0;
     border: 0;
-
-    .form-group {
-      overflow: auto;
-    }
   }
 
   .help-block {
@@ -390,22 +390,10 @@
     border-color: #dadada !important;
   }
 
-  .btn-group .btn {
-    padding: 4px 12px;
-
-    i {
-      font-size: 12px;
-      position: relative;
-      top: -1px;
-      margin-right: 2px;
-    }
-  }
-
   .manage-orgs-btn {
     padding: 0;
     font-size: 12px;
-    margin-top: 20px;
-    line-height: 30px;
+    line-height: 20px;
     margin-left: 10px;
   }
 
@@ -415,7 +403,7 @@
   }
 
   .well.empty-select-orgs {
-    margin-top: 20px;
+    margin-top: 10px;
 
     a.btn.btn-link {
       padding: 0;
@@ -429,6 +417,7 @@
   .user-avatar {
     position: relative;
     top: -2px;
+    margin-right: 5px;
   }
 
   .control-label {
@@ -443,7 +432,7 @@
 
   input[type='text'].form-control {
     padding: 3px 6px;
-    height: 28px;
+    height: 38px;
   }
 
   .privacy-radio {
@@ -469,6 +458,8 @@
 
   .actions.form-group {
     margin-bottom: 0;
+    display: flex;
+    flex-direction: row-reverse;
 
     button {
       position: relative;
@@ -478,12 +469,13 @@
   .text-danger {
     margin-bottom: 0;
   }
-  .alert-danger {
-    margin: 0 0 1em;
+  pre.alert-danger {
+    margin: 1em 0;
     padding: 5px;
     max-height: 200px;
     overflow: auto;
     text-align: left;
+    border-radius: 5px;
   }
 }
 
@@ -531,11 +523,9 @@
 }
 
 .select-orgs {
-  overflow: auto;
-
   select {
     float: left;
     width: 205px;
-    margin-top: 20px;
+    margin-top: 10px;
   }
 }

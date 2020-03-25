@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Tooltip from '@cypress/react-tooltip'
-import Dropdown from '../dropdown/dropdown'
-import MarkdownRenderer from '../lib/markdown-renderer'
+import { BrowserIcon, Dropdown } from '@packages/ui-components'
 
+import MarkdownRenderer from '../lib/markdown-renderer'
 import projectsApi from '../projects/projects-api'
 
 @observer
@@ -35,7 +35,7 @@ export default class Browsers extends Component {
       return (
         <li className='close-browser'>
           <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
-            <i className='fa fa-fw fa-times'></i>
+            <i className='fas fa-fw fa-times'></i>
             Stop
           </button>
         </li>
@@ -58,25 +58,27 @@ export default class Browsers extends Component {
     let prefixText
 
     if (project.browserState === 'opening') {
-      icon = 'refresh fa-spin'
+      icon = <i className='fas fa-sync-alt fa-spin' />
       prefixText = 'Opening'
     } else if (project.browserState === 'opened') {
-      icon = 'check-circle-o green'
+      icon = <i className='fas fa-check-circle green far' />
       prefixText = 'Running'
     } else {
-      icon = browser.icon
+      icon = <BrowserIcon browserName={browser.displayName} />
       prefixText = ''
     }
 
     return (
-      <span className={browser.name}>
-        <i className={`fa fa-${icon}`}></i>{' '}
+      <>
+        {icon}{' '}
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
-        {this._warn(browser)}
+        {browser.family === 'firefox' && <span className='browser-beta'>beta</span>}
         {this._info(browser)}
-      </span>
+        {this._warn(browser)}
+
+      </>
     )
   }
 
@@ -90,7 +92,7 @@ export default class Browsers extends Component {
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
-          <i className='fa fa-exclamation-triangle' />
+          <i className='fas fa-exclamation-triangle' />
         </Tooltip>
       </span>
     )
@@ -102,11 +104,11 @@ export default class Browsers extends Component {
     return (
       <span className='browser-info'>
         <Tooltip
-          title={browser.info}
+          title={<MarkdownRenderer markdown={browser.info}/>}
           placement='bottom'
           className='browser-info-tooltip cy-tooltip'
         >
-          <i className='fa fa-info-circle' />
+          <i className='fas fa-info-circle' />
         </Tooltip>
       </span>
     )

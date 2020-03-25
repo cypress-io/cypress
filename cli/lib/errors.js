@@ -1,4 +1,3 @@
-const os = require('os')
 const chalk = require('chalk')
 const { stripIndent, stripIndents } = require('common-tags')
 const { merge } = require('ramda')
@@ -37,7 +36,7 @@ const failedUnzip = {
 const missingApp = (binaryDir) => {
   return {
     description: `No version of Cypress is installed in: ${chalk.cyan(
-      binaryDir
+      binaryDir,
     )}`,
     solution: stripIndent`
     \nPlease reinstall Cypress by running: ${chalk.cyan('cypress install')}
@@ -168,34 +167,54 @@ const versionMismatch = {
   solution: 'Install Cypress and verify app again',
 }
 
+const incompatibleHeadlessFlags = {
+  description: '`--headed` and `--headless` cannot both be passed.',
+  solution: 'Either pass `--headed` or `--headless`, but not both.',
+}
+
+const solutionUnknown = stripIndent`
+  Please search Cypress documentation for possible solutions:
+
+    ${chalk.blue(docsUrl)}
+
+  Check if there is a GitHub issue describing this crash:
+
+    ${chalk.blue(util.issuesUrl)}
+
+  Consider opening a new issue.
+`
 const unexpected = {
   description:
     'An unexpected error occurred while verifying the Cypress executable.',
-  solution: stripIndent`
-    Please search Cypress documentation for possible solutions:
-
-      ${chalk.blue(docsUrl)}
-
-    Check if there is a GitHub issue describing this crash:
-
-      ${chalk.blue(util.issuesUrl)}
-
-    Consider opening a new issue.
-  `,
+  solution: solutionUnknown,
 }
 
 const invalidCypressEnv = {
   description:
-    chalk.red('The environment variable with the reserved name "CYPRESS_ENV" is set.'),
-  solution: chalk.red('Unset the "CYPRESS_ENV" environment variable and run Cypress again.'),
+    chalk.red('The environment variable with the reserved name "CYPRESS_INTERNAL_ENV" is set.'),
+  solution: chalk.red('Unset the "CYPRESS_INTERNAL_ENV" environment variable and run Cypress again.'),
   exitCode: 11,
+}
+
+/**
+ * This error happens when CLI detects that the child Test Runner process
+ * was killed with a signal, like SIGBUS
+ * @see https://github.com/cypress-io/cypress/issues/5808
+ * @param {'close'|'event'} eventName Child close event name
+ * @param {string} signal Signal that closed the child process, like "SIGBUS"
+*/
+const childProcessKilled = (eventName, signal) => {
+  return {
+    description: `The Test Runner unexpectedly exited via a ${chalk.cyan(eventName)} event with signal ${chalk.cyan(signal)}`,
+    solution: solutionUnknown,
+  }
 }
 
 const removed = {
   CYPRESS_BINARY_VERSION: {
     description: stripIndent`
     The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green(
-    '3.0.0'
+    '3.0.0',
   )}
     `,
     solution: stripIndent`
@@ -205,7 +224,7 @@ const removed = {
   CYPRESS_SKIP_BINARY_INSTALL: {
     description: stripIndent`
     The environment variable CYPRESS_SKIP_BINARY_INSTALL has been removed as of version ${chalk.green(
-    '3.0.0'
+    '3.0.0',
   )}
     `,
     solution: stripIndent`
@@ -225,18 +244,31 @@ const CYPRESS_RUN_BINARY = {
   },
 }
 
-function getPlatformInfo () {
-  return util.getOsVersionAsync().then((version) => {
-    return stripIndent`
-    Platform: ${os.platform()} (${version})
-    Cypress Version: ${util.pkgVersion()}
-  `
+function addPlatformInformation (info) {
+  return util.getPlatformInfo().then((platform) => {
+    return merge(info, { platform })
   })
 }
 
-function addPlatformInformation (info) {
-  return getPlatformInfo().then((platform) => {
-    return merge(info, { platform })
+/**
+ * Given an error object (see the errors above), forms error message text with details,
+ * then resolves with Error instance you can throw or reject with.
+ * @param {object} errorObject
+ * @returns {Promise<Error>} resolves with an Error
+ * @example
+  ```js
+  // inside a Promise with "resolve" and "reject"
+  const errorObject = childProcessKilled('exit', 'SIGKILL')
+  return getError(errorObject).then(reject)
+  ```
+ */
+function getError (errorObject) {
+  return formErrorText(errorObject).then((errorMessage) => {
+    const err = new Error(errorMessage)
+
+    err.known = true
+
+    return err
   })
 }
 
@@ -255,7 +287,7 @@ function formErrorText (info, msg, prevMessage) {
     la(
       is.unemptyString(obj.description),
       'expected error description to be text',
-      obj.description
+      obj.description,
     )
 
     // assuming that if there the solution is a function it will handle
@@ -275,7 +307,7 @@ function formErrorText (info, msg, prevMessage) {
       la(
         is.unemptyString(obj.solution),
         'expected error solution to be text',
-        obj.solution
+        obj.solution,
       )
 
       add(`
@@ -355,6 +387,7 @@ module.exports = {
   // formError,
   formErrorText,
   throwFormErrorText,
+  getError,
   hr,
   errors: {
     nonZeroExitCodeXvfb,
@@ -373,5 +406,7 @@ module.exports = {
     removed,
     CYPRESS_RUN_BINARY,
     smokeTestFailure,
+    childProcessKilled,
+    incompatibleHeadlessFlags,
   },
 }

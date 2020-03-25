@@ -7,6 +7,7 @@ const { stripIndent } = require('common-tags')
 const Promise = require('bluebird')
 const logSymbols = require('log-symbols')
 const path = require('path')
+const os = require('os')
 
 const { throwFormErrorText, errors } = require('../errors')
 const util = require('../util')
@@ -54,7 +55,7 @@ const runSmokeTest = (binaryDir, options) => {
         debug('error timedOut is true')
 
         return throwFormErrorText(
-          errors.smokeTestFailure(smokeTestCommand, true)
+          errors.smokeTestFailure(smokeTestCommand, true),
         )(errMessage)
       }
 
@@ -82,13 +83,14 @@ const runSmokeTest = (binaryDir, options) => {
 
     if (needsSandbox()) {
       // electron requires --no-sandbox to run as root
+      debug('disabling Electron sandbox')
       args.unshift('--no-sandbox')
     }
 
     if (options.dev) {
       executable = 'node'
       args.unshift(
-        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
       )
     }
 
@@ -166,9 +168,12 @@ const runSmokeTest = (binaryDir, options) => {
 function testBinary (version, binaryDir, options) {
   debug('running binary verification check', version)
 
-  logger.log(stripIndent`
-  It looks like this is your first time using Cypress: ${chalk.cyan(version)}
-  `)
+  // if running from 'cypress verify', don't print this message
+  if (!options.force) {
+    logger.log(stripIndent`
+    It looks like this is your first time using Cypress: ${chalk.cyan(version)}
+    `)
+  }
 
   logger.log()
 
@@ -206,9 +211,9 @@ function testBinary (version, binaryDir, options) {
             task,
             util.titleize(
               chalk.green('Verified Cypress!'),
-              chalk.gray(binaryDir)
+              chalk.gray(binaryDir),
             ),
-            rendererOptions.renderer
+            rendererOptions.renderer,
           )
         })
       },
@@ -221,7 +226,6 @@ function testBinary (version, binaryDir, options) {
 const maybeVerify = (installedVersion, binaryDir, options) => {
   return state.getBinaryVerifiedAsync(binaryDir)
   .then((isVerified) => {
-
     debug('is Verified ?', isVerified)
 
     let shouldVerify = !isVerified
@@ -317,7 +321,6 @@ const start = (options = {}) => {
     return state.getBinaryPkgVersionAsync(binaryDir)
   })
   .then((binaryVersion) => {
-
     if (!binaryVersion) {
       debug('no Cypress binary found for cli version ', packageVersion)
 
@@ -356,15 +359,18 @@ const start = (options = {}) => {
   })
 }
 
-const isLinuxLike = () => process.platform !== 'win32'
-
-const isRootUser = () => process.geteuid() === 0
+const isLinuxLike = () => os.platform() !== 'win32'
 
 /**
  * Returns true if running on a system where Electron needs "--no-sandbox" flag.
  * @see https://crbug.com/638180
+ *
+ * On Debian we had problems running in sandbox even for non-root users.
+ * @see https://github.com/cypress-io/cypress/issues/5434
+ * Seems there is a lot of discussion around this issue among Electron users
+ * @see https://github.com/electron/electron/issues/17972
 */
-const needsSandbox = () => isLinuxLike() && isRootUser()
+const needsSandbox = () => isLinuxLike()
 
 module.exports = {
   start,

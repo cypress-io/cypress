@@ -161,16 +161,16 @@ describe('Specs List', function () {
 
       context('run all specs', function () {
         it('displays run all specs button', () => {
-          cy.contains('.btn', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs')
         })
 
         it('has play icon', () => {
-          cy.contains('.btn', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs')
           .find('i').should('have.class', 'fa-play')
         })
 
         it('triggers browser launch on click of button', () => {
-          cy.contains('.btn', 'Run all specs').click()
+          cy.contains('.all-tests', 'Run all specs').click()
           .then(function () {
             const launchArgs = this.ipc.launchBrowser.lastCall.args
 
@@ -182,11 +182,11 @@ describe('Specs List', function () {
 
         describe('all specs running in browser', function () {
           beforeEach(() => {
-            cy.contains('.btn', 'Run all specs').as('allSpecs').click()
+            cy.contains('.all-tests', 'Run all specs').as('allSpecs').click()
           })
 
           it('updates spec icon', function () {
-            cy.get('@allSpecs').find('i').should('have.class', 'fa-dot-circle-o')
+            cy.get('@allSpecs').find('i').should('have.class', 'fa-dot-circle')
 
             cy.get('@allSpecs').find('i').should('not.have.class', 'fa-play')
           })
@@ -218,10 +218,12 @@ describe('Specs List', function () {
       })
 
       context('collapsing specs', function () {
-        it('sets folder collapsed when clicked', function () {
+        it('sets folder collapsed when clicked with correct icon', () => {
           cy.get('.folder:first').should('have.class', 'folder-expanded')
+          cy.get('.folder-collapse-icon:first').should('have.class', 'fa-caret-down')
           cy.get('.folder .folder-name:first').click()
 
+          cy.get('.folder-collapse-icon:first').should('have.class', 'fa-caret-right')
           cy.get('.folder:first').should('have.class', 'folder-collapsed')
         })
 
@@ -275,6 +277,87 @@ describe('Specs List', function () {
           cy.get(lastExpandedFolderSelector).click()
 
           cy.get('.file').should('have.length', 0)
+        })
+      })
+    })
+
+    context('expand/collapse root specs', function () {
+      describe('with folders', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, this.specs)
+
+          this.openProject.resolve(this.config)
+        })
+
+        it('collapsing root spec will keep root itself expanded', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+          cy.get('.folder.folder-collapsed').should('have.length', 3)
+          cy.get('.folder.folder-expanded').should('have.length', 2)
+        })
+
+        it('collapses all children folders', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+
+          const lastCollapsedFolderSelector = '.folder-collapsed:last .folder-name'
+          const rootSpecCollapsedFoldersSelector = '.folder-collapsed'
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 3)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 2)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 2)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 1)
+
+          cy.get(lastCollapsedFolderSelector).click()
+          cy.get(rootSpecCollapsedFoldersSelector).should('have.length', 0)
+        })
+
+        it('expand all expands all sub folders', function () {
+          cy.get('.level-0 .folder-name').find('a:first').click({ multiple: true })
+          cy.get('.folder-expanded').should('have.length', 2)
+          cy.get('.folder-collapsed').should('have.length', 3)
+
+          cy.get('.level-0 .folder-name').find('a:last').click({ multiple: true })
+          cy.get('.folder-expanded').should('have.length', 10)
+          cy.get('.folder-collapsed').should('have.length', 0)
+        })
+      })
+
+      describe('without folders', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, {
+            integration: [
+              {
+                name: 'app_spec.coffee',
+                relative: 'app_spec.coffee',
+              },
+              {
+                name: 'account_new_spec.coffee',
+                relative: 'account_new_spec.coffee',
+              },
+            ],
+            unit: [],
+          })
+
+          this.openProject.resolve(this.config)
+        })
+
+        it('hides expand/collapse buttons when there are no folders', function () {
+          cy.get('.level-0 .folder-name a').should('not.exist')
         })
       })
     })
@@ -371,6 +454,33 @@ describe('Specs List', function () {
           cy.get('.filter').should('have.value', '')
         })
       })
+
+      describe('when project has null id', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, this.specs)
+          this.config.projectId = null
+        })
+
+        it('saves the filter to local storage', function () {
+          this.openProject.resolve(this.config)
+
+          cy.get('.filter').type('my-filter')
+          cy.window().then((win) => {
+            expect(win.localStorage[`specsFilter-<no-id>-/foo/bar`]).to.be.a('string')
+
+            expect(JSON.parse(win.localStorage[`specsFilter-<no-id>-/foo/bar`])).to.equal('my-filter')
+          })
+        })
+
+        it('applies the saved filter when returning to the project', function () {
+          cy.window().then(function (win) {
+            win.localStorage[`specsFilter-<no-id>-/foo/bar`] = JSON.stringify('my-filter')
+            this.openProject.resolve(this.config)
+          })
+
+          cy.get('.filter').should('have.value', 'my-filter')
+        })
+      })
     })
 
     context('click on spec', function () {
@@ -424,8 +534,8 @@ describe('Specs List', function () {
         })
 
         it('updates spec icon', function () {
-          cy.get('@firstSpec').find('i').should('have.class', 'fa-dot-circle-o')
-          cy.get('@firstSpec').find('i').should('not.have.class', 'fa-file-code-o')
+          cy.get('@firstSpec').find('i').should('have.class', 'fa-dot-circle')
+          cy.get('@firstSpec').find('i').should('not.have.class', 'fa-file-code')
         })
 
         it('sets spec as active', () => {
@@ -439,7 +549,7 @@ describe('Specs List', function () {
         })
 
         it('updates spec icon', () => {
-          cy.get('@deepSpec').find('i').should('have.class', 'fa-dot-circle-o')
+          cy.get('@deepSpec').find('i').should('have.class', 'fa-dot-circle')
         })
 
         it('sets spec as active', () => {
@@ -461,8 +571,8 @@ describe('Specs List', function () {
       })
 
       it('updates spec icon', function () {
-        cy.get('@firstSpec').find('i').should('not.have.class', 'fa-dot-circle-o')
-        cy.get('@secondSpec').find('i').should('have.class', 'fa-dot-circle-o')
+        cy.get('@firstSpec').find('i').should('not.have.class', 'fa-dot-circle')
+        cy.get('@secondSpec').find('i').should('have.class', 'fa-dot-circle')
       })
 
       it('updates active spec', function () {

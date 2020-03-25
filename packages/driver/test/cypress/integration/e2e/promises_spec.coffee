@@ -19,8 +19,8 @@ describe "promises", ->
         msg = top.console.warn.firstCall.args[0]
 
         expect(msg).to.include("Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.")
-
         expect(msg).to.include(title)
+        expect(msg).to.include("https://on.cypress.io/returning-promise-and-commands-in-test")
 
         expect(top.console.warn).to.be.calledOnce
 
@@ -38,8 +38,8 @@ describe "promises", ->
       msg = top.console.warn.firstCall.args[0]
 
       expect(msg).to.include("Cypress detected that you returned a promise in a test, but also invoked one or more cy commands inside of that promise.")
-
       expect(msg).to.include(title)
+      expect(msg).to.include("https://on.cypress.io/returning-promise-and-commands-in-test")
 
       expect(top.console.warn).to.be.calledOnce
 
@@ -59,8 +59,9 @@ describe "promises", ->
       expect(lastLog.get("error")).to.eq(err)
 
       expect(err.message).to.include("Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.")
-      expect(err.message).to.include("> cy.foo()")
-      expect(err.message).to.include("> cy.wrap()")
+      expect(err.message).to.include("> `cy.foo()`")
+      expect(err.message).to.include("> `cy.wrap()`")
+      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-promise-and-commands-in-another-command")
 
       done()
 
@@ -88,8 +89,8 @@ describe "promises", ->
       expect(lastLog.get("error")).to.eq(err)
 
       expect(err.message).to.include("Cypress detected that you returned a promise from a command while also invoking one or more cy commands in that promise.")
-      expect(err.message).to.include("> cy.foo()")
-      expect(err.message).to.include("> cy.wrap()")
+      expect(err.message).to.include("> `cy.foo()`")
+      expect(err.message).to.include("> `cy.wrap()`")
 
       done()
 
@@ -106,7 +107,7 @@ describe "promises", ->
 
     cy.foo()
 
-  it "can return a promise that throws on its own without warning", (done) ->
+  it "can return a promise that throws on its own without warning", ->
     Cypress.Promise
     .delay(10)
     .then ->
@@ -116,7 +117,6 @@ describe "promises", ->
 
       throw new Error("foo")
     .catch ->
-      done()
 
   it "can still fail cypress commands", (done) ->
     cy.on "fail", (err) ->
@@ -128,3 +128,4 @@ describe "promises", ->
     .then ->
       cy.wrap({}).then ->
         throw new Error("foo")
+    return

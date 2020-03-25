@@ -4,12 +4,14 @@ const os = require('os')
 const cli = require(`${lib}/cli`)
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
+const info = require(`${lib}/exec/info`)
 const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
 const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('../support/snapshot')
+const debug = require('debug')('test')
 const execa = require('execa-wrap')
 
 describe('cli', () => {
@@ -22,7 +24,11 @@ describe('cli', () => {
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
     this.exec = (args) => {
-      return cli.init(`node test ${args}`.split(' '))
+      const cliArgs = `node test ${args}`.split(' ')
+
+      debug('calling cli.init with: %o', cliArgs)
+
+      return cli.init(cliArgs)
     }
   })
 
@@ -73,7 +79,7 @@ describe('cli', () => {
     })
   })
 
-  context('CYPRESS_ENV', () => {
+  context('CYPRESS_INTERNAL_ENV', () => {
     /**
      * Replaces line "Platform: ..." with "Platform: xxx"
      * @param {string} s
@@ -98,13 +104,12 @@ describe('cli', () => {
       .join(os.eol)
     }
 
-    it('allows staging environment', () => {
+    it('allows and warns when staging environment', () => {
       const options = {
         env: {
-          CYPRESS_ENV: 'staging',
+          CYPRESS_INTERNAL_ENV: 'staging',
         },
-        // we are only interested in the exit code
-        filter: ['code', 'stderr'],
+        filter: ['code', 'stderr', 'stdout'],
       }
 
       return execa('bin/cypress', ['help'], options).then(snapshot)
@@ -113,7 +118,7 @@ describe('cli', () => {
     it('catches environment "foo"', () => {
       const options = {
         env: {
-          CYPRESS_ENV: 'foo',
+          CYPRESS_INTERNAL_ENV: 'foo',
         },
         // we are only interested in the exit code
         filter: ['code', 'stderr'],
@@ -224,13 +229,6 @@ describe('cli', () => {
       expect(run.start).to.be.calledWith({ port: '7878' })
     })
 
-    it('calls run with spec', () => {
-      this.exec('run --spec cypress/integration/foo_spec.js')
-      expect(run.start).to.be.calledWith({
-        spec: 'cypress/integration/foo_spec.js',
-      })
-    })
-
     it('calls run with port with -p arg', () => {
       this.exec('run -p 8989')
       expect(run.start).to.be.calledWith({ port: '8989' })
@@ -300,18 +298,73 @@ describe('cli', () => {
       expect(run.start).to.be.calledWith({ group: 'staging' })
     })
 
-    it('calls run with space-separated --specs', () => {
+    it('calls run with spec', () => {
+      this.exec('run --spec cypress/integration/foo_spec.js')
+      expect(run.start).to.be.calledWith({
+        spec: 'cypress/integration/foo_spec.js',
+      })
+    })
+
+    it('calls run with space-separated --spec', () => {
       this.exec('run --spec a b c d e f g')
       expect(run.start).to.be.calledWith({ spec: 'a,b,c,d,e,f,g' })
       this.exec('run --dev bang --spec foo bar baz -P ./')
       expect(run.start).to.be.calledWithMatch({ spec: 'foo,bar,baz' })
     })
 
-    it('warns with space-separated --specs', (done) => {
+    it('warns with space-separated --spec', (done) => {
       sinon.spy(logger, 'warn')
       this.exec('run --spec a b c d e f g --dev')
       snapshot(logger.warn.getCall(0).args[0])
       done()
+    })
+
+    it('calls run with --tag', () => {
+      this.exec('run --tag nightly')
+      expect(run.start).to.be.calledWith({ tag: 'nightly' })
+    })
+
+    it('calls run comma-separated --tag', () => {
+      this.exec('run --tag nightly,staging')
+      expect(run.start).to.be.calledWith({ tag: 'nightly,staging' })
+    })
+
+    it('does not remove double quotes from --tag', () => {
+      // I think it is a good idea to lock down this behavior
+      // to make sure we either preserve it or change it in the future
+      this.exec('run --tag "nightly"')
+      expect(run.start).to.be.calledWith({ tag: '"nightly"' })
+    })
+
+    it('calls run comma-separated --spec', () => {
+      this.exec('run --spec main_spec.js,view_spec.js')
+      expect(run.start).to.be.calledWith({ spec: 'main_spec.js,view_spec.js' })
+    })
+
+    it('calls run with space-separated --tag', () => {
+      this.exec('run --tag a b c d e f g')
+      expect(run.start).to.be.calledWith({ tag: 'a,b,c,d,e,f,g' })
+      this.exec('run --dev bang --tag foo bar baz -P ./')
+      expect(run.start).to.be.calledWithMatch({ tag: 'foo,bar,baz' })
+    })
+
+    it('warns with space-separated --tag', (done) => {
+      sinon.spy(logger, 'warn')
+      this.exec('run --tag a b c d e f g --dev')
+      snapshot(logger.warn.getCall(0).args[0])
+      done()
+    })
+
+    it('calls run with space-separated --tag and --spec', () => {
+      this.exec('run --tag a b c d e f g --spec h i j k l')
+      expect(run.start).to.be.calledWith({ tag: 'a,b,c,d,e,f,g', spec: 'h,i,j,k,l' })
+      this.exec('run --dev bang --tag foo bar baz -P ./ --spec fizz buzz --headed false')
+      expect(run.start).to.be.calledWithMatch({ tag: 'foo,bar,baz', spec: 'fizz,buzz' })
+    })
+
+    it('removes stray double quotes from --ci-build-id and --group', () => {
+      this.exec('run --ci-build-id "123" --group "staging"')
+      expect(run.start).to.be.calledWith({ ciBuildId: '123', group: 'staging' })
     })
   })
 
@@ -399,6 +452,18 @@ describe('cli', () => {
         expect(e).to.eq(err)
         done()
       })
+    })
+  })
+
+  context('cypress info', () => {
+    beforeEach(() => {
+      sinon.stub(info, 'start').resolves(0)
+      sinon.stub(util, 'exit').withArgs(0)
+    })
+
+    it('calls info start', () => {
+      this.exec('info')
+      expect(info.start).to.have.been.calledWith()
     })
   })
 })

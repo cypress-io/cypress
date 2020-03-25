@@ -1,6 +1,6 @@
 _          = require("lodash")
-r          = require("request")
-rp         = require("request-promise")
+r          = require("@cypress/request")
+rp         = require("@cypress/request-promise")
 url        = require("url")
 tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
@@ -15,6 +15,7 @@ SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secur
 NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND".split(" ")
 VERBOSE_REQUEST_OPTS = "followRedirect strictSSL".split(" ")
 HTTP_CLIENT_REQUEST_EVENTS = "abort connect continue information socket timeout upgrade".split(" ")
+TLS_VERSION_ERROR_RE =  /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
@@ -81,7 +82,15 @@ maybeRetryOnNetworkFailure = (err, options = {}) ->
 
   debug("received an error making http request %o", merge(opts, { err }))
 
-  if not isRetriableError(err, retryOnNetworkFailure)
+  isTlsVersionError = TLS_VERSION_ERROR_RE.test(err.message)
+
+  if isTlsVersionError
+    ## because doing every connection via TLSv1 can lead to slowdowns, we set it only on failure
+    ## https://github.com/cypress-io/cypress/pull/6705
+    debug('detected TLS version error, setting min version to TLSv1')
+    opts.minVersion = 'TLSv1'
+
+  if not isTlsVersionError and not isRetriableError(err, retryOnNetworkFailure)
     return onElse()
 
   ## else see if we have more delays left...
@@ -106,9 +115,10 @@ maybeRetryOnStatusCodeFailure = (res, options = {}) ->
     onElse,
   } = options
 
-  debug("received status code on request %o", {
+  debug("received status code & headers on request %o", {
     requestId,
-    statusCode: res.statusCode
+    statusCode: res.statusCode,
+    headers: _.pick(res.headers, 'content-type', 'set-cookie', 'location')
   })
 
   ## is this a retryable status code failure?
@@ -324,6 +334,17 @@ caseInsensitiveGet = (obj, property) ->
     if key.toLowerCase() == lowercaseProperty
       return obj[key]
 
+## first, attempt to set on an existing property with differing case
+## if that fails, set the lowercase `property`
+caseInsensitiveSet = (obj, property, val) ->
+  lowercaseProperty = property.toLowerCase()
+
+  for key in Object.keys(obj)
+    if key.toLowerCase() == lowercaseProperty
+      return obj[key] = val
+
+  obj[lowercaseProperty] = val
+
 setDefaults = (opts) ->
   _
   .chain(opts)
@@ -355,9 +376,9 @@ module.exports = (options = {}) ->
   rp = rp.defaults(defaults)
 
   return {
-    r: require("request")
+    r: require("@cypress/request")
 
-    rp: require("request-promise")
+    rp: require("@cypress/request-promise")
 
     getDelayForRetry
 
@@ -416,15 +437,23 @@ module.exports = (options = {}) ->
 
       return response
 
-    setRequestCookieHeader: (req, reqUrl, automationFn) ->
+    setRequestCookieHeader: (req, reqUrl, automationFn, existingHeader) ->
       automationFn('get:cookies', { url: reqUrl })
       .then (cookies) ->
-        debug('getting cookies from browser %o', { reqUrl, cookies })
+        debug('got cookies from browser %o', { reqUrl, cookies })
         header = cookies.map (cookie) ->
           "#{cookie.name}=#{cookie.value}"
         .join("; ") || undefined
-        req.headers.Cookie = header
-        header
+
+        if header
+          if existingHeader
+            ## existingHeader = whatever Cookie header the user is already trying to set
+            debug('there is an existing cookie header, merging %o', { header, existingHeader })
+            ## order does not not matter here
+            ## @see https://tools.ietf.org/html/rfc6265#section-4.2.2
+            header = [existingHeader, header].join(';')
+
+          caseInsensitiveSet(req.headers, 'Cookie', header)
 
     setCookiesOnBrowser: (res, resUrl, automationFn) ->
       cookies = res.headers['set-cookie']
@@ -435,18 +464,25 @@ module.exports = (options = {}) ->
         cookies = [cookies]
 
       parsedUrl = url.parse(resUrl)
-      debug('setting cookies on browser %o', { url: parsedUrl, cookies })
+      defaultDomain = parsedUrl.hostname
 
-      Promise.map cookies, (cookie) ->
-        cookie = tough.Cookie.parse(cookie, { loose: true })
+      debug('setting cookies on browser %o', { url: parsedUrl.href, defaultDomain, cookies })
+
+      Promise.map cookies, (cyCookie) ->
+        cookie = tough.Cookie.parse(cyCookie, { loose: true })
+
+        debug('parsing cookie %o', { cyCookie, toughCookie: cookie })
+
         cookie.name = cookie.key
 
         if not cookie.domain
           ## take the domain from the URL
-          cookie.domain = parsedUrl.hostname
+          cookie.domain = defaultDomain
           cookie.hostOnly = true
 
-        return if not tough.domainMatch(cookie.domain, parsedUrl.hostname)
+        if not tough.domainMatch(defaultDomain, cookie.domain)
+          debug('domain match failed:', { defaultDomain })
+          return
 
         expiry = cookie.expiryTime()
         if isFinite(expiry)
@@ -475,26 +511,26 @@ module.exports = (options = {}) ->
 
       followRedirect = options.followRedirect
 
-      options.followRedirect = (incomingRes) ->
-        req = @
+      currentUrl = options.url
 
-        newUrl = url.resolve(options.url, incomingRes.headers.location)
+      options.followRedirect = (incomingRes) ->
+        if followRedirect and not followRedirect(incomingRes)
+          return false
+
+        newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 
         ## and when we know we should follow the redirect
         ## we need to override the init method and
         ## first set the received cookies on the browser
         ## and then grab the cookies for the new url
-        req.init = _.wrap req.init, (orig, opts) =>
-          options.onBeforeReqInit ->
-            self.setCookiesOnBrowser(incomingRes, options.url, automationFn)
-            .then (cookies) ->
-              self.setRequestCookieHeader(req, newUrl, automationFn)
-            .then (cookieHeader) ->
-              orig.call(req, opts)
+        self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+        .then (cookies) =>
+          self.setRequestCookieHeader(@, newUrl, automationFn)
+        .then =>
+          currentUrl = newUrl
+          true
 
-        followRedirect.call(req, incomingRes)
-
-      @setRequestCookieHeader(options, options.url, automationFn)
+      @setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
       .then =>
         return =>
           debug("sending request as stream %o", merge(options))
@@ -551,32 +587,27 @@ module.exports = (options = {}) ->
         push = (response) ->
           requestResponses.push(pick(response))
 
+        currentUrl = options.url
+
         if options.followRedirect
           options.followRedirect = (incomingRes) ->
-            newUrl = url.resolve(options.url, incomingRes.headers.location)
+            newUrl = url.resolve(currentUrl, incomingRes.headers.location)
 
             ## normalize the url
             redirects.push([incomingRes.statusCode, newUrl].join(": "))
 
             push(incomingRes)
 
-            req = @
-
             ## and when we know we should follow the redirect
             ## we need to override the init method and
             ## first set the new cookies on the browser
             ## and then grab the cookies for the new url
-            req.init = _.wrap req.init, (orig, opts) =>
-              self.setCookiesOnBrowser(incomingRes, options.url, automationFn)
-              .then ->
-                self.setRequestCookieHeader(req, newUrl, automationFn)
-              .then ->
-                orig.call(req, opts)
-
-            ## cause the redirect to happen
-            ## but swallow up the incomingRes
-            ## so we can build an array of responses
-            return true
+            self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
+            .then =>
+              self.setRequestCookieHeader(@, newUrl, automationFn)
+            .then =>
+              currentUrl = newUrl
+              true
 
         @create(options, true)
         .then(@normalizeResponse.bind(@, push))
@@ -596,24 +627,12 @@ module.exports = (options = {}) ->
             ## the current url
             resp.redirectedToUrl = url.resolve(options.url, loc)
 
-          @setCookiesOnBrowser(resp, options.url, automationFn)
+          @setCookiesOnBrowser(resp, currentUrl, automationFn)
           .return(resp)
 
       if c = options.cookies
-        ## if we have a cookie object then just
-        ## send the request up!
-        if _.isObject(c)
-          cookieHeader = _.keys(c).map (k) ->
-            "#{k}=#{c[k]}"
-          .join('; ')
-          if cookieHeader
-            options.headers.Cookie = cookieHeader
-          send()
-        else
-          ## else go get the cookies first
-          ## then make the request
-          self.setRequestCookieHeader(options, options.url, automationFn)
-          .then(send)
+        self.setRequestCookieHeader(options, options.url, automationFn, caseInsensitiveGet(options.headers, 'cookie'))
+        .then(send)
       else
         send()
 

@@ -24,9 +24,9 @@ meta = require("./meta")
 smoke = require("./smoke")
 packages = require("./util/packages")
 xvfb = require("../../cli/lib/exec/xvfb")
-linkPackages = require('../link-packages')
 { transformRequires } = require('./util/transform-requires')
 { testStaticAssets } = require('./util/testStaticAssets')
+performanceTracking = require('../../packages/server/test/support/helpers/performance.js')
 
 rootPackage = require("@packages/root")
 
@@ -39,9 +39,6 @@ logger = (msg, platform) ->
 
 logBuiltAllPackages = () ->
   console.log("built all packages")
-
-logBuiltAllJs = () ->
-  console.log("built all JS")
 
 # can pass options to better control the build
 # for example
@@ -73,6 +70,7 @@ buildCypressApp = (platform, version, options = {}) ->
       console.log('built app version', result.stdout)
       la(result.stdout == version, "different version reported",
         result.stdout, "from input version to build", version)
+      console.log('✅ using node --version works')
 
   testBuiltStaticAssets = ->
     log('#testBuiltStaticAssets')
@@ -118,8 +116,6 @@ buildCypressApp = (platform, version, options = {}) ->
     packages.runAllBuild()
     # Promise.resolve()
     .then(R.tap(logBuiltAllPackages))
-    .then(packages.runAllBuildJs)
-    .then(R.tap(logBuiltAllJs))
 
   copyPackages = ->
     log("#copyPackages")
@@ -133,11 +129,11 @@ buildCypressApp = (platform, version, options = {}) ->
     .then (replaceCount) ->
       la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
 
-
   npmInstallPackages = ->
     log("#npmInstallPackages")
 
-    packages.npmInstallAll(distDir("packages", "*"), options)
+    pathToPackages = distDir("packages", "*")
+    packages.npmInstallAll(pathToPackages)
 
   createRootPackage = ->
     log("#createRootPackage #{platform} #{version}")
@@ -153,7 +149,7 @@ buildCypressApp = (platform, version, options = {}) ->
     })
     .then =>
       str = """
-      process.env.CYPRESS_ENV = process.env.CYPRESS_ENV || 'production'
+      process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
       require('./packages/server')
       """
 
@@ -172,6 +168,38 @@ buildCypressApp = (platform, version, options = {}) ->
     .then (paths) ->
       console.log(
         "deleted %d TS %s",
+        paths.length,
+        pluralize("file", paths.length)
+      )
+      console.log(paths)
+
+  # we also don't need ".bin" links inside Electron application
+  # thus we can go through dist/packages/*/node_modules and remove all ".bin" folders
+  removeBinFolders = ->
+    log("#removeBinFolders")
+
+    searchMask = distDir("packages", "*", "node_modules", ".bin")
+    console.log("searching for", searchMask)
+
+    del([searchMask])
+    .then (paths) ->
+      console.log(
+        "deleted %d .bin %s",
+        paths.length,
+        pluralize("folder", paths.length)
+      )
+      console.log(paths)
+
+  removeCyFolders = ->
+    log("#removeCyFolders")
+
+    searchMask = distDir("packages", "server", ".cy")
+    console.log("searching", searchMask)
+
+    del([searchMask])
+    .then (paths) ->
+      console.log(
+        "deleted %d .cy %s",
         paths.length,
         pluralize("file", paths.length)
       )
@@ -204,19 +232,51 @@ buildCypressApp = (platform, version, options = {}) ->
       .on("end", resolve)
       .on("error", reject)
 
-  elBuilder = ->
-    log("#elBuilder")
-    dir = distDir()
-    dist = buildDir()
-    console.log("from #{dir}")
-    console.log("into #{dist}")
+  getIconFilename = (platform) ->
+    filenames = {
+      darwin: "cypress.icns"
+      win32: "cypress.ico"
+      linux: "icon_512x512.png"
+    }
+    iconFilename = electron.icons().getPathToIcon(filenames[platform])
+    console.log("For platform #{platform} using icon #{iconFilename}")
+    iconFilename
 
-    electron.install({
-      dir
-      dist
-      platform
-      appVersion: version
-    })
+  electronPackAndSign = ->
+    log("#electronPackAndSign")
+
+    # See the internal wiki document "Signing Test Runner on MacOS"
+    # to learn how to get the right Mac certificate for signing and notarizing
+    # the built Test Runner application
+
+    appFolder = distDir()
+    outputFolder = meta.buildRootDir(platform)
+    electronVersion = electron.getElectronVersion()
+    la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion)
+    iconFilename = getIconFilename(platform)
+
+    console.log("output folder: #{outputFolder}")
+
+    args = [
+      "--publish=never",
+      "--c.electronVersion=#{electronVersion}",
+      "--c.directories.app=#{appFolder}",
+      "--c.directories.output=#{outputFolder}",
+      "--c.icon=#{iconFilename}",
+      # for now we cannot pack source files in asar file
+      # because electron-builder does not copy nested folders
+      # from packages/*/node_modules
+      # see https://github.com/electron-userland/electron-builder/issues/3185
+      # so we will copy those folders later ourselves
+      "--c.asar=false"
+    ]
+    opts = {
+      stdio: "inherit"
+    }
+    console.log("electron-builder arguments:")
+    console.log(args.join(' '))
+
+    execa('electron-builder', args, opts)
 
   removeDevElectronApp = ->
     log("#removeDevElectronApp")
@@ -228,18 +288,30 @@ buildCypressApp = (platform, version, options = {}) ->
     # hint: you can see all symlinks in the build folder
     # using "find build/darwin/Cypress.app/ -type l -ls"
     console.log("platform", platform)
-    electronDistFolder = meta.buildAppDir(platform, "packages", "electron", "dist")
+    electronDistFolder = distDir("packages", "electron", "dist")
     la(check.unemptyString(electronDistFolder),
       "empty electron dist folder for platform", platform)
 
     console.log("Removing unnecessary folder '#{electronDistFolder}'")
-    fs.removeAsync(electronDistFolder).catch(_.noop)
+    fs.removeAsync(electronDistFolder) # .catch(_.noop) why are we ignoring an error here?!
+
+  lsDistFolder = ->
+    log('#lsDistFolder')
+    buildFolder = buildDir()
+    console.log("in build folder %s", buildFolder)
+    execa('ls', ['-la', buildFolder])
+    .then R.prop("stdout")
+    .then console.log
 
   runSmokeTests = ->
     log("#runSmokeTests")
 
     run = ->
-      smoke.test(meta.buildAppExecutable(platform))
+      # make sure to use a longer timeout - on Mac the first
+      # launch of a built application invokes gatekeeper check
+      # which takes a couple of seconds
+      executablePath = meta.buildAppExecutable(platform)
+      smoke.test(executablePath)
 
     if xvfb.isNeeded()
       xvfb.start()
@@ -247,44 +319,6 @@ buildCypressApp = (platform, version, options = {}) ->
       .finally(xvfb.stop)
     else
       run()
-
-  codeSign = Promise.method ->
-    if platform isnt "darwin"
-      # do we need to code sign on Windows?
-      return
-
-    appFolder = meta.zipDir(platform)
-    fiveMinutes = humanInterval("5 minutes")
-
-    execaBuild = Promise.method ->
-      log("#codeSign #{appFolder}")
-
-      execa('build', ["--publish", "never", "--prepackaged", appFolder], {
-        stdio: "inherit"
-      })
-      .catch (err) ->
-        ## ignore canceled errors
-        if err.isCanceled
-          return
-
-        throw err
-
-    ## try to build and if we timeout in 5 minutes
-    ## then try again - which sometimes happens in
-    ## circle CI
-    b = execaBuild()
-
-    b
-    .timeout(fiveMinutes)
-    .catch Promise.TimeoutError, (err) ->
-      console.log(
-        chalk.red("timed out signing binary after #{fiveMinutes}ms. retrying...")
-      )
-
-      b.cancel()
-
-      execaBuild()
-
 
   verifyAppCanOpen = ->
     if (platform != "darwin") then return Promise.resolve()
@@ -301,6 +335,46 @@ buildCypressApp = (platform, version, options = {}) ->
         else
           reject new Error("Verifying App via GateKeeper failed")
 
+  printPackageSizes = ->
+    appFolder = meta.buildAppDir(platform, "packages")
+    log("#printPackageSizes #{appFolder}")
+
+    if (platform == "win32") then return Promise.resolve()
+
+    # "du" - disk usage utility
+    # -d -1 depth of 1
+    # -h human readable sizes (K and M)
+    args = ["-d", "1", appFolder]
+
+    parseDiskUsage = (result) ->
+      lines = result.stdout.split(os.EOL)
+      # will store {package name: package size}
+      data = {}
+
+      lines.forEach (line) ->
+        parts = line.split('\t')
+        packageSize = parseFloat(parts[0])
+        folder = parts[1]
+
+        packageName = path.basename(folder)
+        if packageName is "packages"
+          return # root "packages" information
+
+        data[packageName] = packageSize
+
+      return data
+
+    printDiskUsage = (sizes) ->
+      bySize = R.sortBy(R.prop('1'))
+      console.log(bySize(R.toPairs(sizes)))
+
+    execa("du", args)
+    .then(parseDiskUsage)
+    .then(R.tap(printDiskUsage))
+    .then((sizes) ->
+      performanceTracking.track('test runner size', sizes)
+    )
+
   Promise.resolve()
   .then(checkPlatform)
   .then(cleanupPlatform)
@@ -314,12 +388,15 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(transformSymlinkRequires)
   .then(testVersion(distDir))
   .then(testBuiltStaticAssets)
-  .then(elBuilder) # should we delete everything in the buildDir()?
+  .then(removeBinFolders)
+  .then(removeCyFolders)
   .then(removeDevElectronApp)
+  .then(electronPackAndSign)
+  .then(lsDistFolder)
   .then(testVersion(buildAppDir))
   .then(runSmokeTests)
-  .then(codeSign) ## codesign after running smoke tests due to changing .cy
   .then(verifyAppCanOpen)
+  .then(printPackageSizes)
   .return({
     buildDir: buildDir()
   })

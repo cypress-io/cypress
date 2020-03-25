@@ -23,8 +23,8 @@ describe "e2e system node", ->
             }
           }
           spec: "spec.js"
+          sanitizeScreenshotDimensions: true
           snapshot: true
-          expectedExitCode: 0
         })
         .then ({ stderr }) ->
           expect(stderr).to.contain("Plugin Node version: #{expectedNodeVersion}")

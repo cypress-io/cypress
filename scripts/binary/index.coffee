@@ -139,9 +139,11 @@ deploy = {
   build: (options) ->
     console.log('#build')
     options ?= @parseOptions(process.argv)
+    debug("parsed build options %o", options)
 
     askMissingOptions(['version', 'platform'])(options)
     .then ->
+      debug("building binary: platform %s version %s", options.platform, options.version)
       build(options.platform, options.version, options)
 
   zip: (options) ->
@@ -150,6 +152,7 @@ deploy = {
     askMissingOptions(['platform'])(options)
     .then (options) ->
       zipDir = meta.zipDir(options.platform)
+      console.log("directory to zip %s", zipDir)
       options.zip = path.resolve(zippedFilename(options.platform))
       zip.ditto(zipDir, options.zip)
 

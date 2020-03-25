@@ -68,45 +68,40 @@
     font-size: 13px;
     border: 1px solid #ddd;
     border-radius: 3px;
-    background-color: #252831;
+    background: #fff;
     color: #eee;
     margin: 0;
-    padding: 10px;
+    padding: 8px 12px;
     font-family: $font-mono;
+    > span {
+      color: #000;
+    }
 
-    .envFile:hover, .env:hover, .config:hover, .cli:hover, .plugin:hover, .default:hover {
+    ol[role="tree"] {
+        > li > div{
+        display: none;
+      }
+    }
+
+    .key-value-pair-value {
+      margin-left: 2px;
+      display: inline-block;
+      line-height: 1;
+      padding: 2px;
+      border-bottom: 1px solid transparent
+    }
+
+    .key-value-pair-value:hover {
       border-bottom: 1px dotted #777;
     }
 
     p {
       margin-bottom: 0;
     }
-
-    .key {
-      color: #ccc;
-    }
-
-    .comma, .colon, {
-      color: #ccc;
-    }
-
-    .line {
-      margin-left: 15px;
-      color: #eee;
-    }
-
-    .nested {
-      margin-left: 15px;
-
-      .line {
-        margin-left: 30px;
-      }
-    }
   }
 
   .envFile, .env, .config, .cli, .plugin, .default {
     font-family: $font-mono;
-
     padding: 2px;
   }
 
@@ -138,7 +133,7 @@
 }
 
 .settings-wrapper {
-  padding: 20px 20px 0;
+  padding: 20px;
 
   pre {
     border-radius: 3px;
@@ -247,5 +242,46 @@
 
   td, th {
     padding: 3px;
+  }
+}
+
+.experiment-intro {
+  padding-bottom: 15px;
+  margin-bottom: 0px; 
+  border-bottom: 1px solid #ddd;
+}
+
+.experiments-list {
+  padding-left: 0;
+
+  .experiment {
+    list-style: none;
+    margin-bottom: 15px;
+  }
+
+  .experiment-desc {
+    display: flex;
+    align-items: center;
+
+    p {
+      width: 80%;
+      margin-bottom: 0; 
+    }
+
+    .experiment-status {
+      margin-left: auto;
+    }
+  }
+
+  
+  .experiment-status-sign {
+    margin-left: 10px;
+    color: #9d9ea9;
+    line-height: 28px;
+    font-weight: bold;
+
+    &.enabled {
+      color: #1aae73;
+    }
   }
 }

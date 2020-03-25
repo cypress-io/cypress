@@ -16,9 +16,10 @@ canRecordVideo = () ->
 shouldSkipProjectTest = () ->
   os.platform() == "win32"
 
-runSmokeTest = (buildAppExecutable) ->
+runSmokeTest = (buildAppExecutable, timeoutSeconds = 30) ->
   rand = String(_.random(0, 1000))
   console.log("executable path #{buildAppExecutable}")
+  console.log("timeout #{timeoutSeconds} seconds")
 
   hasRightResponse = (stdout) ->
     # there could be more debug lines in the output, so find 1 line with
@@ -26,11 +27,19 @@ runSmokeTest = (buildAppExecutable) ->
     lines = stdout.split('\n').map((s) -> s.trim())
     return lines.includes(rand)
 
-  args = ["--smoke-test", "--ping=#{rand}"]
+  args = []
   if verify.needsSandbox()
     args.push("--no-sandbox")
 
-  execa "#{buildAppExecutable}", args, {timeout: 10000}
+  # separate any Electron command line arguments from Cypress args
+  args.push("--")
+  args.push("--smoke-test")
+  args.push("--ping=#{rand}")
+
+  options = {
+    timeout: timeoutSeconds * 1000
+  }
+  execa "#{buildAppExecutable}", args, options
   .catch (err) ->
     console.error("smoke test failed with error %s", err.message)
     throw err
@@ -38,6 +47,7 @@ runSmokeTest = (buildAppExecutable) ->
     stdout = stdout.replace(/\s/, "")
     if !hasRightResponse(stdout)
       throw new Error("Stdout: '#{stdout}' did not match the random number: '#{rand}'")
+    console.log("smoke test response", stdout)
     console.log("smokeTest passes")
 
 runProjectTest = (buildAppExecutable, e2e) ->
@@ -45,10 +55,8 @@ runProjectTest = (buildAppExecutable, e2e) ->
     console.log("skipping project test")
     return Promise.resolve()
 
-  console.log("running project test")
-
   new Promise (resolve, reject) ->
-    env = _.omit(process.env, "CYPRESS_ENV")
+    env = _.omit(process.env, "CYPRESS_INTERNAL_ENV")
 
     if !canRecordVideo()
       console.log("cannot record video on this platform yet, disabling")
@@ -91,7 +99,7 @@ runFailingProjectTest = (buildAppExecutable, e2e) ->
 
   spawn = ->
     new Promise (resolve, reject) ->
-      env = _.omit(process.env, "CYPRESS_ENV")
+      env = _.omit(process.env, "CYPRESS_INTERNAL_ENV")
 
       args = [
         "--run-project=#{e2e}",

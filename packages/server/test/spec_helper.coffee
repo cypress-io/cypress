@@ -1,9 +1,12 @@
 require("../lib/environment")
 
+chai = require('chai')
+chai.use(require('chai-subset'))
+
 global.root      = "../../"
 global.supertest = require("supertest")
 global.nock      = require("nock")
-global.expect    = require("chai").expect
+global.expect    = chai.expect
 global.mockery   = require("mockery")
 global.proxyquire = require("proxyquire")
 global.sinon     = require("sinon")
@@ -16,6 +19,7 @@ appData          = require("../lib/util/app_data")
 require("chai")
 .use(require("@cypress/sinon-chai"))
 .use(require("chai-uuid"))
+.use(require("chai-as-promised"))
 
 if process.env.UPDATE
   throw new Error("You're using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1")
@@ -76,7 +80,7 @@ before ->
   if hasOnly
     @test.parent._onlyTests = [true]
 
-  appData.ensure()
+  # appData.ensure()
 
 beforeEach ->
   @originalEnv = originalEnv
@@ -95,3 +99,10 @@ afterEach ->
   nock.enableNetConnect()
 
   process.env = _.clone(env)
+
+module.exports = {
+  expect: global.expect
+  nock: global.nock
+  proxyquire: global.proxyquire
+  sinon: global.sinon
+}

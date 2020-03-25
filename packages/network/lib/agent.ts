@@ -11,13 +11,21 @@ const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 
-interface RequestOptionsWithProxy extends http.RequestOptions {
+type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
   shouldRetry?: boolean
 }
 
+type RequestOptionsWithProxy = WithProxyOpts<http.RequestOptions>
+
+type HttpsRequestOptions = https.RequestOptions & {
+  minVersion?: 'TLSv1'
+}
+
+type HttpsRequestOptionsWithProxy = WithProxyOpts<HttpsRequestOptions>
+
 type FamilyCache = {
-  [host: string] : 4 | 6
+  [host: string]: 4 | 6
 }
 
 export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
@@ -97,7 +105,7 @@ export const regenerateRequestHead = (req: http.ClientRequest) => {
 const getFirstWorkingFamily = (
   { port, host }: http.RequestOptions,
   familyCache: FamilyCache,
-  cb: Function
+  cb: Function,
 ) => {
   // this is a workaround for localhost (and potentially others) having invalid
   // A records but valid AAAA records. here, we just cache the family of the first
@@ -253,14 +261,14 @@ class HttpsAgent extends https.Agent {
     super(opts)
   }
 
-  createConnection (options: http.RequestOptions, cb: http.SocketCallback) {
+  createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 
       if (proxy) {
         options.proxy = <string>proxy
 
-        return this.createUpstreamProxyConnection(<RequestOptionsWithProxy>options, cb)
+        return this.createUpstreamProxyConnection(<HttpsRequestOptionsWithProxy>options, cb)
       }
     }
 
@@ -268,7 +276,7 @@ class HttpsAgent extends https.Agent {
     cb(null, super.createConnection(options))
   }
 
-  createUpstreamProxyConnection (options: RequestOptionsWithProxy, cb: http.SocketCallback) {
+  createUpstreamProxyConnection (options: HttpsRequestOptionsWithProxy, cb: http.SocketCallback) {
     // heavily inspired by
     // https://github.com/mknj/node-keepalive-proxy-agent/blob/master/index.js
     debug(`Creating proxied socket for ${options.href} through ${options.proxy}`)
@@ -322,7 +330,12 @@ class HttpsAgent extends https.Agent {
         if (options._agentKey) {
           // https.Agent will upgrade and reuse this socket now
           options.socket = proxySocket
-          options.servername = hostname
+
+          // as of Node 12, a ServerName cannot be an IP address
+          // https://github.com/cypress-io/cypress/issues/5729
+          if (!net.isIP(hostname)) {
+            options.servername = hostname
+          }
 
           return cb(undefined, super.createConnection(options, undefined))
         }
@@ -336,6 +349,7 @@ class HttpsAgent extends https.Agent {
 
       const connectReq = buildConnectReqHead(hostname, port, proxy)
 
+      proxySocket.setNoDelay(true)
       proxySocket.write(connectReq)
     })
   }

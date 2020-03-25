@@ -6,13 +6,13 @@ import ipc from '../lib/ipc'
 
 const openHelp = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/configuration#Node-Version')
+  ipc.externalOpen('https://on.cypress.io/node-version')
 }
 
 const renderLearnMore = () => {
   return (
     <a href='#' className='learn-more' onClick={openHelp}>
-      <i className='fa fa-info-circle'></i> Learn more
+      <i className='fas fa-info-circle'></i> Learn more
     </a>
   )
 }

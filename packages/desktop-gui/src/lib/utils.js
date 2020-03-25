@@ -10,25 +10,12 @@ const osIconLookup = {
   linux: 'linux',
 }
 
-const browserIconLookup = {
-  chrome: 'chrome',
-  Electron: 'chrome',
-  firefox: 'firefox',
-  safari: 'safari',
-}
-
 export const durationFormatted = duration.format
 
 export const osIcon = (osName) => {
   if (!osName) return ''
 
   return osIconLookup[osName] || 'desktop'
-}
-
-export const browserIcon = (browserName) => {
-  if (!browserName) return ''
-
-  return browserIconLookup[browserName] || 'globe'
 }
 
 export const browserNameFormatted = (browserName) => {
@@ -65,7 +52,7 @@ export const getStatusIcon = (status) => {
     case 'passed':
       return 'check-circle'
     case 'running':
-      return 'refresh fa-spin'
+      return 'sync-alt fa-spin'
     case 'overLimit':
       return 'exclamation-triangle'
     case 'timedOut':
@@ -110,5 +97,4 @@ export function stripSharedDirsFromDir2 (dir1, dir2, osName) {
   })
   .join(sep)
   .value()
-
 }

@@ -5,6 +5,7 @@ $max-nesting-level: 14;
   display: flex;
   flex-direction: column;
   width: 100%;
+  min-height: 0;
 
   .empty-well code {
     display: block;
@@ -95,7 +96,7 @@ $max-nesting-level: 14;
     }
 
     i {
-      font-size: 10px;
+      font-size: 8px;
       position: relative;
       top: -1px;
     }
@@ -118,7 +119,7 @@ $max-nesting-level: 14;
       align-items: center;
 
       i {
-        font-size: 13px;
+        font-size: 12px;
         margin-right: 5px;
         flex-shrink: 0;
       }
@@ -143,7 +144,7 @@ $max-nesting-level: 14;
 
     &.level-0 {
       >div>.folder-name {
-        padding: 5px 20px;
+        padding: 5px 10px 5px 20px;
         background-color: #F9F9F9;
         font-weight: normal;
         text-transform: uppercase;
@@ -152,10 +153,17 @@ $max-nesting-level: 14;
         color: #777;
         line-height: 18px;
         font-family: $font-sans;
+        display: flex;
+        flex-direction: row;
 
         i {
-          display: none;
+          display: block;
           margin-right: 5px;
+        }
+
+        span {
+          font-size: 10px;
+          margin-left: 10px;
         }
       }
     }

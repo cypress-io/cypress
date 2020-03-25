@@ -36,6 +36,11 @@ describe "src/cy/commands/agents", ->
         @obj.foo()
         expect(@originalCalled).to.be.false
 
+      it "can callThrough on constructors", ->
+        cy.stub(window, 'Notification').callThroughWithNew().as('Notification')
+        new Notification('Hello')
+        cy.get('@Notification').should('have.been.calledWith', 'Hello')
+
     describe ".stub(obj, 'method', replacerFn)", ->
       beforeEach ->
         @originalCalled = false
@@ -230,7 +235,7 @@ describe "src/cy/commands/agents", ->
           expect(@myStub.displayName).to.eq("myStub")
 
         it "stores the lookup as an alias", ->
-          expect(cy.state("aliases").myStub).to.be.defined
+          expect(cy.state("aliases").myStub).to.exist
 
         it "stores the agent as the subject", ->
           expect(cy.state("aliases").myStub.subject).to.eq(@stub)
@@ -241,21 +246,21 @@ describe "src/cy/commands/agents", ->
         it "retries until assertions pass", ->
           cy.on "command:retry", _.after 2, =>
             @myStub("foo")
-          
+
           cy.get("@myStub").should("be.calledWith", "foo")
 
         describe "errors", ->
           _.each [null, undefined, {}, [], 123], (value) =>
             it "throws when passed: #{value}", ->
-              expect(=> cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
+              expect(=> cy.stub().as(value)).to.throw("`cy.as()` can only accept a string.")
 
           it "throws on blank string", ->
-            expect(=> cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
+            expect(=> cy.stub().as("")).to.throw("`cy.as()` cannot be passed an empty string.")
 
           _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
             it "throws on a blacklisted word: #{blacklist}", ->
-              expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
-      
+              expect(=> cy.stub().as(blacklist)).to.throw("`cy.as()` cannot be aliased as: `#{blacklist}`. This word is reserved.")
+
       context "with dots", ->
         beforeEach ->
           @logs = []
@@ -285,7 +290,7 @@ describe "src/cy/commands/agents", ->
           expect(@["my.stub"].displayName).to.eq("my.stub")
 
         it "stores the lookup as an alias", ->
-          expect(cy.state("aliases")["my.stub"]).to.be.defined
+          expect(cy.state("aliases")["my.stub"]).to.exist
 
         it "stores the agent as the subject", ->
           expect(cy.state("aliases")["my.stub"].subject).to.eq(@stub)
@@ -296,20 +301,20 @@ describe "src/cy/commands/agents", ->
         it "retries until assertions pass", ->
           cy.on "command:retry", _.after 2, =>
             @["my.stub"]("foo")
-          
+
           cy.get("@my.stub").should("be.calledWith", "foo")
 
         describe "errors", ->
           _.each [null, undefined, {}, [], 123], (value) =>
             it "throws when passed: #{value}", ->
-              expect(=> cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
+              expect(=> cy.stub().as(value)).to.throw("`cy.as()` can only accept a string.")
 
           it "throws on blank string", ->
-            expect(=> cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
+            expect(=> cy.stub().as("")).to.throw("`cy.as()` cannot be passed an empty string.")
 
           _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
             it "throws on a blacklisted word: #{blacklist}", ->
-              expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
+              expect(=> cy.stub().as(blacklist)).to.throw("`cy.as()` cannot be aliased as: `#{blacklist}`. This word is reserved.")
 
     describe "logging", ->
       beforeEach ->
@@ -478,6 +483,11 @@ describe "src/cy/commands/agents", ->
       @obj.foo()
       expect(@originalCalled).to.be.true
 
+    it "can spy on constructors", ->
+      cy.spy(window, 'Notification').as('Notification')
+      new Notification('Hello')
+      cy.get('@Notification').should('have.been.calledWith', 'Hello')
+
     context "#as", ->
       ## same as cy.stub(), so just some smoke tests here
       beforeEach ->
@@ -518,7 +528,7 @@ describe "src/cy/commands/agents", ->
       @agents = cy.agents()
 
     it "logs deprecation warning", ->
-      expect(top.console.warn).to.be.calledWith("Cypress Warning: cy.agents() is deprecated. Use cy.stub() and cy.spy() instead.")
+      expect(top.console.warn).to.be.calledWith("Cypress Warning: `cy.agents()` is deprecated. Use `cy.stub()` and `cy.spy()` instead.")
 
     it "synchronously returns #spy and #stub methods", ->
       expect(@agents.spy).to.be.a("function")

@@ -17,7 +17,7 @@ const ProjectListItem = observer(({ project, onSelect, onRemove }) => (
       e.stopPropagation()
       onRemove()
     }}>
-      <i className='fa fa-remove' />
+      <i className='fas fa-times' />
     </button>
   </li>
 ))
@@ -46,7 +46,7 @@ class ProjectsList extends Component {
     return (
       <div className='alert alert-danger'>
         <p>
-          <i className='fa fa-warning'></i>{' '}
+          <i className='fas fa-exclamation-triangle'></i>{' '}
           <strong>Error</strong>
         </p>
         <p dangerouslySetInnerHTML={{

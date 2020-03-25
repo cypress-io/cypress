@@ -1,13 +1,16 @@
-_       = require("lodash")
-strip   = require("strip-ansi")
-chalk   = require("chalk")
-ansi_up = require("ansi_up")
+_ = require("lodash")
+strip = require("strip-ansi")
+chalk = require("chalk")
+AU = require('ansi_up')
 Promise = require("bluebird")
+
+ansi_up = new AU.default
+ansi_up.use_classes = true
 
 twoOrMoreNewLinesRe = /\n{2,}/
 
 isProduction = ->
-  process.env["CYPRESS_ENV"] is "production"
+  process.env["CYPRESS_INTERNAL_ENV"] is "production"
 
 listItems = (paths) ->
   _
@@ -59,7 +62,7 @@ trimMultipleNewLines = (str) ->
 isCypressErr = (err) ->
   Boolean(err.isCypressErr)
 
-getMsgByType = (type, arg1 = {}, arg2) ->
+getMsgByType = (type, arg1 = {}, arg2, arg3) ->
   switch type
     when "CANNOT_TRASH_ASSETS"
       """
@@ -93,14 +96,29 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{arg1}
       """
-    when "BROWSER_NOT_FOUND_BY_NAME"
+    when "CHROME_WEB_SECURITY_NOT_SUPPORTED"
       """
+      Your project has set the configuration option: `chromeWebSecurity: false`
+
+      This option will not have an effect in #{_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.
+      """
+    when "BROWSER_NOT_FOUND_BY_NAME"
+      str = """
       Can't run because you've entered an invalid browser name.
 
       Browser: '#{arg1}' was not found on your system.
 
       Available browsers found are: #{arg2}
       """
+
+      if arg1 is 'canary'
+        str += """
+        \n\nNote: In Cypress 4.0, Canary must be launched as `chrome:canary`, not `canary`.
+
+        See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.
+        """
+
+      return str
     when "BROWSER_NOT_FOUND_BY_PATH"
       msg = """
       We could not identify a known browser at the path you provided: `#{arg1}`
@@ -108,22 +126,6 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The output from the command we ran was:
       """
       return {msg: msg, details: arg2}
-    when "CANNOT_RECORD_VIDEO_HEADED"
-      """
-      Warning: Cypress can only record videos when running headlessly.
-
-      You have set the 'electron' browser to run headed.
-
-      A video will not be recorded when using this mode.
-      """
-    when "CANNOT_RECORD_VIDEO_FOR_THIS_BROWSER"
-      """
-      Warning: Cypress can only record videos when using the built in 'electron' browser.
-
-      You have set the browser to: '#{arg1}'
-
-      A video will not be recorded when using this browser.
-      """
     when "NOT_LOGGED_IN"
       """
       You're not logged in.
@@ -166,6 +168,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       There is likely something wrong with the request.
 
       #{displayFlags(arg1.flags, {
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -191,6 +194,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       You cannot parallelize a run that has been complete for that long.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -207,6 +211,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -221,6 +226,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       The existing run is: #{arg1.runUrl}
 
       #{displayFlags(arg1, {
+        tags: "--tag"
         group: "--group",
         parallel: "--parallel",
         ciBuildId: "--ciBuildId",
@@ -309,10 +315,11 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
     when "RECORD_PARAMS_WITHOUT_RECORDING"
       """
-      You passed the --ci-build-id, --group, or --parallel flag without also passing the --record flag.
+      You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
       #{displayFlags(arg1, {
         ciBuildId: "--ci-build-id",
+        tags: "--tag",
         group: "--group",
         parallel: "--parallel"
       })}
@@ -517,7 +524,6 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
         #{chalk.blue(arg2)}
         """
-
     when "RENDERER_CRASHED"
       """
       We detected that the Chromium Renderer process just crashed.
@@ -581,11 +587,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """.trim()
 
       return {msg: msg, details: arg2}
-    when "PLUGINS_ERROR"
+    when "PLUGINS_UNEXPECTED_ERROR"
       msg = """
-      The following error was thrown by a plugin. We've stopped running your tests because a plugin crashed.
+      The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (`#{arg1}`)
       """.trim()
-      return {msg: msg, details: arg1}
+      return {msg: msg, details: arg2}
+    when "PLUGINS_VALIDATION_ERROR"
+      msg = """
+      The following validation error was thrown by your plugins file (`#{arg1}`).
+      """.trim()
+      return {msg: msg, details: arg2}
     when "BUNDLE_ERROR"
       ## IF YOU MODIFY THIS MAKE SURE TO UPDATE
       ## THE ERROR MESSAGE IN THE RUNNER TOO
@@ -605,6 +616,7 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Fix the error in your code and re-run your tests.
       """
+    # happens when there is an error in configuration file like "cypress.json"
     when "SETTINGS_VALIDATION_ERROR"
       filePath = "`#{arg1}`"
       """
@@ -612,6 +624,16 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       #{chalk.yellow(arg2)}
       """
+    # happens when there is an invalid config value returnes from the
+    # project's plugins file like "cypress/plugins.index.js"
+    when "PLUGINS_CONFIG_VALIDATION_ERROR"
+      filePath = "`#{arg1}`"
+      """
+      An invalid configuration value returned from the plugins file: #{chalk.blue(filePath)}
+
+      #{chalk.yellow(arg2)}
+      """
+    # general configuration error not-specific to configuration or plugins files
     when "CONFIG_VALIDATION_ERROR"
       """
       We found an invalid configuration value:
@@ -826,6 +848,14 @@ getMsgByType = (type, arg1 = {}, arg2) ->
       """
       Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy
       """
+    when "EXTENSION_NOT_LOADED"
+      """
+      #{arg1} could not install the extension at path:
+
+       > #{arg2}
+
+      Please verify that this is the path to a valid, unpacked WebExtension.
+      """
     when "COULD_NOT_FIND_SYSTEM_NODE"
       """
       `nodeVersion` is set to `system`, but Cypress could not find a usable Node executable on your PATH.
@@ -834,17 +864,85 @@ getMsgByType = (type, arg1 = {}, arg2) ->
 
       Cypress will use the built-in Node version (v#{arg1}) instead.
       """
-    when "INVALID_CYPRESS_ENV"
+    when "INVALID_CYPRESS_INTERNAL_ENV"
       """
-      We have detected unknown or unsupported CYPRESS_ENV value
+      We have detected an unknown or unsupported "CYPRESS_INTERNAL_ENV" value
 
         #{chalk.yellow(arg1)}
 
-      Please do not modify CYPRESS_ENV value.
+      "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
+
+      Do not modify the "CYPRESS_INTERNAL_ENV" value.
+      """
+    when "CDP_VERSION_TOO_OLD"
+      """
+      A minimum CDP version of v#{arg1} is required, but the current browser has #{if arg2.major != 0 then "v#{arg2.major}.#{arg2.minor}" else 'an older version'}.
+      """
+    when "CDP_COULD_NOT_CONNECT"
+      """
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+
+      This usually indicates there was a problem opening the Chrome browser.
+
+      The CDP port requested was #{chalk.yellow(arg1)}.
+
+      Error details:
+
+      #{arg2.stack}
+      """
+    when "CDP_COULD_NOT_RECONNECT"
+      """
+      There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
+
+      #{arg1.stack}
+      """
+    when "CDP_RETRYING_CONNECTION"
+      """
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
+      """
+    when "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS"
+      """
+      Deprecation Warning: The `before:browser:launch` plugin event changed its signature in version `4.0.0`
+
+      The `before:browser:launch` plugin event switched from yielding the second argument as an `array` of browser arguments to an options `object` with an `args` property.
+
+      We've detected that your code is still using the previous, deprecated interface signature.
+
+      This code will not work in a future version of Cypress. Please see the upgrade guide: #{chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}
+      """
+    when "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES"
+      """
+      The `launchOptions` object returned by your plugin's `before:browser:launch` handler contained unexpected properties:
+
+      #{listItems(arg1)}
+
+      `launchOptions` may only contain the properties:
+
+      #{listItems(arg2)}
+
+      https://on.cypress.io/browser-launch-api
+      """
+    when "COULD_NOT_PARSE_ARGUMENTS"
+      """
+      Cypress encountered an error while parsing the argument #{chalk.gray(arg1)}
+
+      You passed: #{arg2}
+
+      The error was: #{arg3}
+      """
+    when "FIREFOX_MARIONETTE_FAILURE"
+      """
+      Cypress could not connect to Firefox.
+
+      An unexpected error was received from Marionette #{arg1}:
+
+      #{arg2}
+
+      To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
       """
 
-get = (type, arg1, arg2) ->
-  msg = getMsgByType(type, arg1, arg2)
+get = (type, arg1, arg2, arg3) ->
+  msg = getMsgByType(type, arg1, arg2, arg3)
 
   if _.isObject(msg)
     details = msg.details
@@ -865,8 +963,8 @@ warning = (type, arg1, arg2) ->
 
   return null
 
-throwErr = (type, arg1, arg2) ->
-  throw get(type, arg1, arg2)
+throwErr = (type, arg1, arg2, arg3) ->
+  throw get(type, arg1, arg2, arg3)
 
 clone = (err, options = {}) ->
   _.defaults options, {
@@ -877,9 +975,7 @@ clone = (err, options = {}) ->
   obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber")
 
   if options.html
-    obj.message = ansi_up.ansi_to_html(err.message, {
-      use_classes: true
-    })
+    obj.message = ansi_up.ansi_to_html(err.message)
   else
     obj.message = err.message
 
@@ -933,4 +1029,6 @@ module.exports = {
   throw: throwErr
 
   stripAnsi: strip
+
+  displayFlags
 }

@@ -16,10 +16,15 @@ describe "return values", ->
 
     return undefined
 
+  it "can return cy and have done callback", (done) ->
+    cy.wrap({}).then ->
+      done()
+
   it "throws when returning a non promise and invoking cy commands", (done) ->
     cy.on "fail", (err) ->
       expect(err.message).to.include("> foo")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
+      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-test")
 
       done()
 
@@ -32,6 +37,7 @@ describe "return values", ->
       expect(err.message).to.include("> function")
       expect(err.message).to.include("return \"foo\";")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
+      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-test")
 
       done()
 
@@ -57,9 +63,10 @@ describe "return values", ->
       expect(@logs.length).to.eq(1)
       expect(lastLog.get("name")).to.eq("foo")
       expect(lastLog.get("error")).to.eq(err)
-      expect(err.message).to.include("> cy.foo()")
+      expect(err.message).to.include("> `cy.foo()`")
       expect(err.message).to.include("> bar")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.")
+      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-custom-command")
 
       done()
 
@@ -77,8 +84,8 @@ describe "return values", ->
       expect(@logs.length).to.eq(1)
       expect(lastLog.get("name")).to.eq("foo")
       expect(lastLog.get("error")).to.eq(err)
-      expect(err.message).to.include("> cy.foo()")
-      expect(err.message).to.include("> function")
+      expect(err.message).to.include("> `cy.foo()`")
+      expect(err.message).to.include("> function() {")
       expect(err.message).to.include("return \"bar\";")
       expect(err.message).to.include("Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.")
 
@@ -91,3 +98,23 @@ describe "return values", ->
         return "bar"
 
     cy.foo()
+
+  describe "without invoking cy", ->
+    it "handles returning undefined", ->
+      return undefined
+
+    it "handles synchronously invoking and returning done callback", (done) ->
+      return done()
+
+    it "handles synchronously invoking done callback and returning undefined", (done) ->
+      done()
+      return undefined
+
+    it "handles synchronously invoking done callback and returning a value", (done) ->
+      done()
+      return "foo"
+
+    it "handles asynchronously invoking done callback", (done) ->
+      setTimeout ->
+        done()
+      return "foo"

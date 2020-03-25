@@ -1,4 +1,5 @@
 const { _ } = Cypress
+const { each, flow, get, isString, join, map, merge, set, sortBy, toPairs } = require('lodash/fp')
 
 describe('Settings', () => {
   beforeEach(function () {
@@ -13,6 +14,9 @@ describe('Settings', () => {
     this.goToSettings = () => {
       cy.get('.navbar-default')
       cy.get('a').contains('Settings').click()
+      // make sure the common sections are shown
+      cy.get('.settings-config')
+      cy.get('.settings-proxy')
     }
 
     cy.visitIndex().then(function (win) {
@@ -45,7 +49,7 @@ describe('Settings', () => {
     })
   })
 
-  describe('any case / project is set up for ci', () => {
+  describe('general functionality', () => {
     beforeEach(function () {
       this.openProject.resolve(this.config)
       this.projectStatuses[0].id = this.config.projectId
@@ -66,28 +70,127 @@ describe('Settings', () => {
       cy.contains('Your project\'s configuration is displayed').should('not.exist')
       cy.contains('Record Keys allow you to').should('not.exist')
       cy.contains(this.config.projectId).should('not.exist')
+      cy.percySnapshot()
     })
 
-    describe('when config panel is opened', () => {
-      beforeEach(() => {
-        cy.contains('Configuration').click()
+    context('on:focus:tests clicked', () => {
+      beforeEach(function () {
+        this.ipc.onFocusTests.yield()
+      })
+
+      it('routes to specs page', () => {
+        cy.shouldBeOnProjectSpecs()
+      })
+    })
+  })
+
+  /**
+   * Opens "Configuration" panel of the Settings tab
+   * and checks that configuration element is fully visible.
+   * This helps to ensure no flake down the line
+   */
+  const openConfiguration = () => {
+    cy.contains('Configuration').click()
+    cy.get('.config-vars').should('be.visible')
+    .invoke('height').should('be.gt', 400)
+  }
+
+  describe('configuration panel', () => {
+    describe('displays config', () => {
+      beforeEach(function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
+        openConfiguration()
       })
 
       it('displays config section', () => {
         cy.contains('Your project\'s configuration is displayed')
       })
 
-      it('displays legend in table', () => {
-        cy.get('table>tbody>tr').should('have.length', 6)
+      it('displays browser information which is collapsed by default', () => {
+        cy.contains('.config-vars', 'browsers')
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', '0:Chrome')
+
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('contain', '0:Chrome')
+
+        cy.percySnapshot()
       })
 
-      it('wraps config line in proper classes', () => {
-        cy.get('.line').first().within(() => {
-          cy.contains('animationDistanceThreshold').should('have.class', 'key')
-          cy.contains(':').should('have.class', 'colon')
-          cy.contains('5').should('have.class', 'default')
-          cy.contains(',').should('have.class', 'comma')
-        })
+      it('removes the summary list of values once a key is expanded', () => {
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', 'Chrome, Chromium')
+
+        cy.get('.config-vars').invoke('text')
+        .should('contain', '0:Chrome')
+      })
+
+      it('distinguishes between Arrays and Objects when expanded', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', 'browsers: Array (4)')
+
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').invoke('text')
+        .should('contain', 'browsers: Array (4)')
+      })
+
+      it('applies the same color treatment to expanded key values as the root key', () => {
+        cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+        cy.get('.config-vars').as('config-vars')
+        .contains('span', 'Chrome').parent('span').should('have.class', 'plugin')
+
+        cy.get('@config-vars')
+        .contains('span', 'Chromium').parent('span').should('have.class', 'plugin')
+
+        cy.get('@config-vars')
+        .contains('span', 'Canary').parent('span').should('have.class', 'plugin')
+
+        cy.get('@config-vars')
+        .contains('span', 'Electron').parent('span').should('have.class', 'plugin')
+
+        cy.contains('span', 'blacklistHosts').parents('div').first().find('span').first().click()
+        cy.get('@config-vars')
+        .contains('span', 'www.google-analytics.com').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', 'hotjar.com').parent('span').should('have.class', 'config')
+
+        cy.contains('span', 'hosts').parents('div').first().find('span').first().click()
+        cy.get('@config-vars')
+        .contains('span', '127.0.0.1').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', '127.0.0.2').parent('span').should('have.class', 'config')
+
+        cy.get('@config-vars')
+        .contains('span', 'Electron').parents('div').first().find('span').first().click()
+
+        cy.get('@config-vars').contains('span', 'electron').parents('li').eq(1).find('.line .plugin').should('have.length', 6)
+      })
+
+      it('displays string values as quoted strings', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('contain', 'baseUrl:"http://localhost:8080"')
+      })
+
+      it('displays undefined and null without quotations', () => {
+        cy.get('.config-vars').invoke('text')
+        .should('not.contain', '"undefined"')
+        .should('not.contain', '"null"')
+      })
+
+      it('does not show the root config label', () => {
+        cy.get('.config-vars').find('> ol > li > div').should('have.css', 'display', 'none')
+      })
+
+      it('displays legend in table', () => {
+        cy.get('table>tbody>tr').should('have.length', 6)
       })
 
       it('displays "true" values', () => {
@@ -99,26 +202,13 @@ describe('Settings', () => {
       })
 
       it('displays "object" values for env and hosts', () => {
-        cy.get('.nested-obj').eq(0)
-        .contains('fixturesFolder')
+        cy.get('.line').contains('www.google-analytics.com, hotjar.com')
 
-        cy.get('.nested-obj').eq(1)
-        .contains('*.foobar.com')
+        cy.get('.line').contains('*.foobar.com, *.bazqux.com')
       })
 
       it('displays "array" values for blacklistHosts', () => {
-        cy.get('.nested-arr')
-        .parent()
-        .should('contain', '[')
-        .and('contain', ']')
-        .and('not.contain', '0')
-        .and('not.contain', '1')
-        .find('.line .config').should(($lines) => {
-          expect($lines).to.have.length(2)
-          expect($lines).to.contain('www.google-analytics.com')
-
-          expect($lines).to.contain('hotjar.com')
-        })
+        cy.contains('.line', 'blacklistHosts').contains('www.google-analytics.com, hotjar.com')
       })
 
       it('opens help link on click', () => {
@@ -126,20 +216,167 @@ describe('Settings', () => {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/guides/configuration')
         })
       })
-    })
 
-    describe('when project id panel is opened', () => {
-      beforeEach(() => {
-        cy.contains('Project ID').click()
+      it('displays null when env settings are empty or not defined', function () {
+        this.ipc.openProject.resolves(setConfigEnv(this.config, undefined))
+        this.ipc.onConfigChanged.yield()
+
+        cy.contains('.line', 'env:null').then(() => {
+          this.ipc.openProject.resolves(this.config)
+          this.ipc.onConfigChanged.yield()
+
+          cy.contains('.line', 'env:fileServerFolder')
+          .then(() => {
+            this.ipc.openProject.resolves(setConfigEnv(this.config, null))
+            this.ipc.onConfigChanged.yield()
+            cy.contains('.line', 'env:null').then(() => {
+              this.ipc.openProject.resolves(this.config)
+              this.ipc.onConfigChanged.yield()
+
+              cy.contains('.line', 'env:fileServerFolder')
+              .then(() => {
+                this.ipc.openProject.resolves(setConfigEnv(this.config, {}))
+                this.ipc.onConfigChanged.yield()
+                cy.contains('.line', 'env:null')
+              })
+            })
+          })
+        })
       })
 
-      it('displays project id section', function () {
-        cy.contains(this.config.projectId)
+      it('displays env settings', () => {
+        cy.get('@config').then(({ resolved }) => {
+          const getEnvKeys = flow([
+            get('env'),
+            toPairs,
+            map(([key]) => key),
+            sortBy(get('')),
+          ])
+
+          const assertKeyExists = each((key) => cy.contains('.line', key))
+          const assertKeyValuesExists = flow([
+            map((key) => {
+              return flow([
+                get(['env', key, 'value']),
+                (v) => {
+                  if (isString(v)) {
+                    return `"${v}"`
+                  }
+
+                  return v
+                },
+              ])(resolved)
+            }),
+            each((v) => {
+              cy.contains('.key-value-pair-value', v)
+            }),
+          ])
+
+          const assertFromTooltipsExist = flow([
+            map((key) => {
+              return [key,
+                flow([
+                  get(['env', key, 'from']),
+                  (from) => `.${from}`,
+                ])(resolved)]
+            }),
+            each(([key, fromTooltipClassName]) => {
+              cy.contains(key).parents('.line').first().find(fromTooltipClassName)
+            }),
+          ])
+
+          cy.contains('.line', 'env').contains(flow([getEnvKeys, join(', ')])(resolved))
+          cy.contains('.line', 'env').click()
+          flow([getEnvKeys, assertKeyExists])(resolved)
+          flow([getEnvKeys, assertKeyValuesExists])(resolved)
+          flow([getEnvKeys, assertFromTooltipsExist])(resolved)
+        })
       })
     })
 
-    describe('when record key panel is opened', () => {
-      beforeEach(() => {
+    context('on config changes', () => {
+      beforeEach(function () {
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+        const newConfig = this.util.deepClone(this.config)
+
+        newConfig.clientUrl = 'http://localhost:8888'
+        newConfig.clientUrlDisplay = 'http://localhost:8888'
+        newConfig.browsers = this.browsers
+        this.openProject.resolve(newConfig)
+
+        this.goToSettings()
+
+        openConfiguration()
+      })
+
+      it('displays updated config', function () {
+        const newConfig = this.util.deepClone(this.config)
+
+        newConfig.resolved.baseUrl.value = 'http://localhost:7777'
+        this.ipc.openProject.onCall(1).resolves(newConfig)
+        this.ipc.onConfigChanged.yield()
+
+        cy.contains('http://localhost:7777')
+      })
+    })
+
+    context('when configFile is false', () => {
+      beforeEach(function () {
+        this.openProject.resolve(Cypress._.assign({
+          configFile: false,
+        }, this.config))
+
+        this.goToSettings()
+
+        openConfiguration()
+      })
+
+      it('notes that cypress.json is disabled', () => {
+        cy.contains('set from cypress.json file (currently disabled by --config-file false)')
+      })
+    })
+
+    context('when configFile is set', function () {
+      beforeEach(function () {
+        this.openProject.resolve(Cypress._.assign({
+          configFile: 'special-cypress.json',
+        }, this.config))
+
+        this.goToSettings()
+
+        openConfiguration()
+      })
+
+      it('notes that a custom config is in use', () => {
+        cy.contains('set from custom config file special-cypress.json')
+      })
+    })
+  })
+
+  describe('project id panel', () => {
+    beforeEach(function () {
+      this.openProject.resolve(this.config)
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+      cy.contains('Project ID').click()
+    })
+
+    it('displays project id section', function () {
+      cy.contains(this.config.projectId)
+    })
+  })
+
+  describe('record key panel', () => {
+    context('when project is set up and you have access', () => {
+      beforeEach(function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
         cy.contains('Record Key').click()
       })
 
@@ -223,101 +460,52 @@ describe('Settings', () => {
 
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
+
+          cy.percySnapshot()
         })
       })
     })
 
-    describe('when proxy settings panel is opened', () => {
-      beforeEach(() => {
-        cy.contains('Proxy Settings').click()
+    context('when project is not set up for CI', () => {
+      it('does not show ci Keys section when project has no id', function () {
+        const newConfig = this.util.deepClone(this.config)
+
+        newConfig.projectId = null
+        this.openProject.resolve(newConfig)
+        this.getProjectStatus.resolve(this.projectStatuses)
+        this.goToSettings()
+
+        cy.contains('h5', 'Record Keys').should('not.exist')
+        cy.percySnapshot()
       })
 
-      it('with no proxy config set informs the user no proxy configuration is active', () => {
-        cy.get('.settings-proxy').should('contain', 'There is no active proxy configuration.')
-      })
+      it('does not show ci Keys section when project is invalid', function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].state = 'INVALID'
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+        this.goToSettings()
 
-      it('opens help link on click', () => {
-        cy.get('.settings-proxy .learn-more').click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/proxy-configuration')
-        })
-      })
-
-      it('with Windows proxy settings indicates proxy and the source', () => {
-        cy.setAppStore({
-          projectRoot: '/foo/bar',
-          proxySource: 'win32',
-          proxyServer: 'http://foo-bar.baz',
-          proxyBypassList: 'a,b,c,d',
-        })
-
-        cy.get('.settings-proxy').should('contain', 'from Windows system settings')
-        cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
-
-        cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
-      })
-
-      it('with environment proxy settings indicates proxy and the source', () => {
-        cy.setAppStore({
-          projectRoot: '/foo/bar',
-          proxyServer: 'http://foo-bar.baz',
-          proxyBypassList: 'a,b,c,d',
-        })
-
-        cy.get('.settings-proxy').should('contain', 'from environment variables')
-        cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
-
-        cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
-      })
-
-      it('with no bypass list but a proxy set shows \'none\' in bypass list', () => {
-        cy.setAppStore({
-          projectRoot: '/foo/bar',
-          proxyServer: 'http://foo-bar.baz',
-        })
-
-        cy.get('.settings-proxy tr:nth-child(2) > td').should('contain', 'none')
+        cy.contains('h5', 'Record Keys').should('not.exist')
+        cy.percySnapshot()
       })
     })
 
-    context('on:focus:tests clicked', () => {
+    context('when you are not a user of this projects org', () => {
       beforeEach(function () {
-        this.ipc.onFocusTests.yield()
+        this.openProject.resolve(this.config)
       })
 
-      it('routes to specs page', () => {
-        cy.shouldBeOnProjectSpecs()
+      it('does not show record key', function () {
+        this.projectStatuses[0].state = 'UNAUTHORIZED'
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+        this.goToSettings()
+
+        cy.contains('h5', 'Record Keys').should('not.exist')
       })
     })
   })
 
-  context('on config changes', () => {
-    beforeEach(function () {
-      this.projectStatuses[0].id = this.config.projectId
-      this.getProjectStatus.resolve(this.projectStatuses[0])
-      const newConfig = this.util.deepClone(this.config)
-
-      newConfig.clientUrl = 'http://localhost:8888'
-      newConfig.clientUrlDisplay = 'http://localhost:8888'
-      newConfig.browsers = this.browsers
-      this.openProject.resolve(newConfig)
-
-      this.goToSettings()
-
-      cy.contains('Configuration').click()
-    })
-
-    it('displays updated config', function () {
-      const newConfig = this.util.deepClone(this.config)
-
-      newConfig.resolved.baseUrl.value = 'http://localhost:7777'
-      this.ipc.openProject.onCall(1).resolves(newConfig)
-      this.ipc.onConfigChanged.yield()
-
-      cy.contains('http://localhost:7777')
-    })
-  })
-
-  describe('when node version panel is opened', () => {
+  describe('node version panel', () => {
     const bundledNodeVersion = '1.2.3'
     const systemNodePath = '/foo/bar/node'
     const systemNodeVersion = '4.5.6'
@@ -358,6 +546,7 @@ describe('Settings', () => {
   describe('errors', () => {
     beforeEach(function () {
       this.err = {
+        title: 'Foo Title',
         message: 'Port \'2020\' is already in use.',
         name: 'Error',
         port: 2020,
@@ -372,7 +561,7 @@ describe('Settings', () => {
       this.getProjectStatus.resolve(this.projectStatuses[0])
       this.openProject.resolve(this.config)
       this.goToSettings()
-      cy.contains('Configuration').click()
+      openConfiguration()
 
       cy.contains('http://localhost:7777').then(() => {
         this.ipc.openProject.onCall(1).rejects(this.err)
@@ -382,11 +571,11 @@ describe('Settings', () => {
     })
 
     it('displays errors', () => {
-      cy.contains('Can\'t start server')
+      cy.contains('Foo Title')
     })
 
     it('displays config after error is fixed', function () {
-      cy.contains('Can\'t start server').then(() => {
+      cy.contains('Foo Title').then(() => {
         this.ipc.openProject.onCall(1).resolves(this.config)
 
         this.ipc.onConfigChanged.yield()
@@ -396,71 +585,223 @@ describe('Settings', () => {
     })
   })
 
-  context('when project is not set up for CI', () => {
-    it('does not show ci Keys section when project has no id', function () {
-      const newConfig = this.util.deepClone(this.config)
-
-      newConfig.projectId = null
-      this.openProject.resolve(newConfig)
-      this.getProjectStatus.resolve(this.projectStatuses)
-      this.goToSettings()
-
-      cy.contains('h5', 'Record Keys').should('not.exist')
-    })
-
-    it('does not show ci Keys section when project is invalid', function () {
-      this.openProject.resolve(this.config)
-      this.projectStatuses[0].state = 'INVALID'
-      this.getProjectStatus.resolve(this.projectStatuses[0])
-      this.goToSettings()
-
-      cy.contains('h5', 'Record Keys').should('not.exist')
-    })
-  })
-
-  context('when you are not a user of this projects org', () => {
+  describe('proxy settings panel', () => {
     beforeEach(function () {
       this.openProject.resolve(this.config)
-    })
+      this.config.resolved.baseUrl.value = 'http://localhost:7777'
 
-    it('does not show record key', function () {
-      this.projectStatuses[0].state = 'UNAUTHORIZED'
+      this.projectStatuses[0].id = this.config.projectId
       this.getProjectStatus.resolve(this.projectStatuses[0])
-      this.goToSettings()
 
-      cy.contains('h5', 'Record Keys').should('not.exist')
+      this.goToSettings()
+      cy.contains('Proxy Settings').click()
+    })
+
+    it('with no proxy config set informs the user no proxy configuration is active', () => {
+      cy.get('.settings-proxy').should('contain', 'There is no active proxy configuration.')
+    })
+
+    it('opens help link on click', () => {
+      cy.get('.settings-proxy .learn-more').click().then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/proxy-configuration')
+      })
+    })
+
+    it('with Windows proxy settings indicates proxy and the source', () => {
+      cy.setAppStore({
+        projectRoot: '/foo/bar',
+        proxySource: 'win32',
+        proxyServer: 'http://foo-bar.baz',
+        proxyBypassList: 'a,b,c,d',
+      })
+
+      cy.get('.settings-proxy').should('contain', 'from Windows system settings')
+      cy.get('.settings-proxy tr:nth-child(1) > td > code').should('contain', 'http://foo-bar.baz')
+
+      cy.get('.settings-proxy tr:nth-child(2) > td > code').should('contain', 'a, b, c, d')
+    })
+
+    it('with environment proxy settings indicates proxy and the source', () => {
+      cy.setAppStore({
+        projectRoot: '/foo/bar',
+        proxyServer: 'http://foo-bar.baz',
+        proxyBypassList: 'a,b,c,d',
+      })
+    })
+
+    it('with no bypass list but a proxy set shows \'none\' in bypass list', () => {
+      cy.setAppStore({
+        projectRoot: '/foo/bar',
+        proxyServer: 'http://foo-bar.baz',
+      })
+
+      cy.get('.settings-proxy tr:nth-child(2) > td').should('contain', 'none')
     })
   })
 
-  context('when configFile is false', () => {
-    beforeEach(function () {
-      this.openProject.resolve(Cypress._.assign({
-        configFile: false,
-      }, this.config))
+  describe('experiments panel', () => {
+    const hasNoExperimentsPanel = () => {
+      // there are several settings panels,
+      // let's make sure they are loaded
+      cy.get('[class*=settings-]').should('have.length.gt', 1)
+      // but the experiments panel should not be there at all
+      cy.get('.settings-experiments').should('not.exist')
+    }
 
-      this.goToSettings()
+    describe('no experimental features turned on', () => {
+      beforeEach(function () {
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
 
-      cy.contains('Configuration').click()
+        this.goToSettings()
+      })
+
+      it('displays panel with no experiments', () => {
+        hasNoExperimentsPanel()
+        cy.percySnapshot()
+      })
     })
 
-    it('notes that cypress.json is disabled', () => {
-      cy.contains('set from cypress.json file (currently disabled by --config-file false)')
+    describe('unknown experiments', () => {
+      beforeEach(function () {
+        this.config.experimentalFoo = true
+        this.config.resolved.experimentalFoo = {
+          value: true,
+        }
+
+        this.openProject.resolve(this.config)
+        this.projectStatuses[0].id = this.config.projectId
+        this.getProjectStatus.resolve(this.projectStatuses[0])
+
+        this.goToSettings()
+      })
+
+      it('are not shown', () => {
+        hasNoExperimentsPanel()
+      })
+    })
+
+    describe('experimental feature exists', () => {
+      beforeEach(function () {
+        // do not overwrite the shared object reference -
+        // because it is used by the app's code.
+        this.win.experimental.names.experimentalCoolFeature = 'Cool Feature'
+        this.win.experimental.summaries.experimentalCoolFeature = `
+          Enables super cool feature from Cypress where you can see the cool feature
+        `
+      })
+
+      const hasLearnMoreLink = () => {
+        cy.get('[data-cy=experiments]').contains('a', 'Learn more').click()
+        .then(function () {
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/experiments')
+        })
+      }
+
+      context('enabled', () => {
+        beforeEach(function () {
+          this.config.experimentalCoolFeature = true
+          this.config.resolved.experimentalCoolFeature = {
+            value: true,
+          }
+
+          this.openProject.resolve(this.config)
+          this.projectStatuses[0].id = this.config.projectId
+          this.getProjectStatus.resolve(this.projectStatuses[0])
+
+          this.goToSettings()
+          cy.contains('Experiments').click()
+        })
+
+        it('has learn more link', hasLearnMoreLink)
+
+        it('displays experiment', () => {
+          cy.get('.settings-experiments').contains('Cool Feature')
+          cy.get('.experiment-status-sign')
+          .should('have.class', 'enabled')
+          .and('have.text', 'ON')
+
+          cy.percySnapshot()
+        })
+      })
+
+      context('disabled', () => {
+        beforeEach(function () {
+          this.config.experimentalCoolFeature = false
+          this.config.resolved.experimentalCoolFeature = {
+            value: false,
+            from: 'default',
+          }
+
+          this.openProject.resolve(this.config)
+          this.projectStatuses[0].id = this.config.projectId
+          this.getProjectStatus.resolve(this.projectStatuses[0])
+
+          this.goToSettings()
+          cy.contains('Experiments').click()
+        })
+
+        it('displays experiment', () => {
+          cy.get('.settings-experiments').contains('Cool Feature')
+          cy.get('.experiment-status-sign')
+          .should('not.have.class', 'disabled')
+          .and('have.text', 'OFF')
+
+          cy.percySnapshot()
+        })
+      })
     })
   })
 
-  context('when configFile is set', function () {
+  describe('errors', () => {
+    const errorText = 'An unexpected error occurred'
+
     beforeEach(function () {
-      this.openProject.resolve(Cypress._.assign({
-        configFile: 'special-cypress.json',
-      }, this.config))
+      this.err = {
+        message: 'Port \'2020\' is already in use.',
+        name: 'Error',
+        port: 2020,
+        portInUse: true,
+        stack: '[object Object]↵  at Object.API.get (/Users/jennifer/Dev/Projects/cypress-app/lib/errors.coffee:55:15)↵  at Object.wrapper [as get] (/Users/jennifer/Dev/Projects/cypress-app/node_modules/lodash/lodash.js:4414:19)↵  at Server.portInUseErr (/Users/jennifer/Dev/Projects/cypress-app/lib/server.coffee:58:16)↵  at Server.onError (/Users/jennifer/Dev/Projects/cypress-app/lib/server.coffee:86:19)↵  at Server.g (events.js:273:16)↵  at emitOne (events.js:90:13)↵  at Server.emit (events.js:182:7)↵  at emitErrorNT (net.js:1253:8)↵  at _combinedTickCallback (internal/process/next_tick.js:74:11)↵  at process._tickDomainCallback (internal/process/next_tick.js:122:9)↵From previous event:↵    at fn (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:57919:14)↵    at Object.appIpc [as ipc] (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:57939:10)↵    at openProject (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:59135:24)↵    at new Project (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:58848:34)↵    at ReactCompositeComponentMixin._constructComponentWithoutOwner (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44052:27)↵    at ReactCompositeComponentMixin._constructComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44034:21)↵    at ReactCompositeComponentMixin.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:43953:21)↵    at Object.ReactReconciler.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51315:35)↵    at ReactCompositeComponentMixin.performInitialMount (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44129:34)↵    at ReactCompositeComponentMixin.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44016:21)↵    at Object.ReactReconciler.mountComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51315:35)↵    at ReactDOMComponent.ReactMultiChild.Mixin._mountChildAtIndex (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50247:40)↵    at ReactDOMComponent.ReactMultiChild.Mixin._updateChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50163:43)↵    at ReactDOMComponent.ReactMultiChild.Mixin.updateChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:50123:12)↵    at ReactDOMComponent.Mixin._updateDOMChildren (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45742:12)↵    at ReactDOMComponent.Mixin.updateComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45571:10)↵    at ReactDOMComponent.Mixin.receiveComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:45527:10)↵    at Object.ReactReconciler.receiveComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:51396:22)↵    at ReactCompositeComponentMixin._updateRenderedComponent (file:///Users/jennifer/Dev/Projects/cypress-core-desktop-gui/dist/app.js:44547:23)',
+        type: 'PORT_IN_USE_SHORT',
+      }
 
+      this.config.resolved.baseUrl.value = 'http://localhost:7777'
+
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+      this.openProject.resolve(this.config)
       this.goToSettings()
+      openConfiguration()
 
-      cy.contains('Configuration').click()
+      cy.contains('http://localhost:7777').then(() => {
+        this.ipc.openProject.onCall(1).rejects(this.err)
+
+        this.ipc.onConfigChanged.yield()
+      })
     })
 
-    it('notes that a custom config is in use', () => {
-      cy.contains('set from custom config file special-cypress.json')
+    it('displays errors', () => {
+      cy.contains(errorText)
+    })
+
+    it('displays config after error is fixed', function () {
+      cy.contains(errorText).then(() => {
+        this.ipc.openProject.onCall(1).resolves(this.config)
+
+        this.ipc.onConfigChanged.yield()
+      })
+
+      cy.contains('Configuration')
     })
   })
 })
+
+// --
+function setConfigEnv (config, v) {
+  return flow([
+    merge(config),
+    set('resolved.env', v),
+  ])({})
+}

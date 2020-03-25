@@ -1,7 +1,9 @@
 _ = require("lodash")
 Promise = require("bluebird")
+debug = require('debug')('cypress:driver:retries')
 
 $utils = require("../cypress/utils")
+$errUtils = require("../cypress/error_utils")
 
 create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
   return {
@@ -28,6 +30,15 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
         _name: current?.get("name")
       })
 
+      { error } = options
+
+      ## TODO: remove this once the codeframe PR is in since that
+      ## correctly handles not rewrapping errors so that stack
+      ## traces are correctly displayed
+      if debug.enabled and error and not $errUtils.CypressErrorRe.test(error.name)
+        debug('retrying due to caught error...')
+        console.error(error)
+
       interval = options.interval ? options._interval
 
       ## we calculate the total time we've been retrying
@@ -48,15 +59,19 @@ create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) -
         if assertions = options.assertions
           finishAssertions(assertions)
 
-        getErrMessage = (err) ->
-          _.get(err, 'displayMessage') or
-            _.get(err, 'message') or
-              err
+        { error, onFail } = options
 
-        $utils.throwErrByPath "miscellaneous.retry_timed_out", {
-          onFail: (options.onFail or log)
-          args: { error: getErrMessage(options.error) }
-        }
+        prependMsg = $errUtils.errMsgByPath("miscellaneous.retry_timed_out")
+
+        retryErrProps = $errUtils.modifyErrMsg(error, prependMsg, (msg1, msg2) ->
+          return "#{msg2}#{msg1}"
+        )
+
+        retryErr = $errUtils.mergeErrProps(error, retryErrProps)
+
+        $errUtils.throwErr(retryErr, {
+          onFail: onFail or log
+        })
 
       runnableHasChanged = ->
         ## if we've changed runnables don't retry!

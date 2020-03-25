@@ -25,7 +25,7 @@ konfig   = require("#{root}../lib/konfig")
 
 describe "lib/gui/events", ->
   beforeEach ->
-    @send    = sinon.spy()
+    @send    = sinon.stub()
     @options = {}
     @cookies = sinon.stub({
       get: ->
@@ -158,7 +158,7 @@ describe "lib/gui/events", ->
       it "calls Windows#open with args and resolves with return of Windows.open", ->
         @handleEvent("window:open", {type: "INDEX"})
         .then (assert) =>
-          assert.sendCalledWith(@win)
+          assert.sendCalledWith(events.nullifyUnserializableValues(@win))
 
       it "catches errors", ->
         err = new Error("foo")
@@ -475,7 +475,7 @@ describe "lib/gui/events", ->
         sinon.stub(openProject, "create").resolves()
         @options.browser = "/foo"
 
-        browsers.getAllBrowsersWith.withArgs("/foo").resolves([{family: 'chrome'}, {family: 'some other'}])
+        browsers.getAllBrowsersWith.withArgs("/foo").resolves([{family: 'chromium'}, {family: 'some other'}])
 
         sinon.stub(chromePolicyCheck, "run").callsArgWith(0, new Error)
 
@@ -488,7 +488,7 @@ describe "lib/gui/events", ->
               config: {
                 browsers: [
                   {
-                    family: "chrome"
+                    family: "chromium"
                     warning: "Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy"
                   },
                   {
@@ -699,3 +699,25 @@ describe "lib/gui/events", ->
           expect(err.name).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.message).to.equal("ECONNREFUSED 127.0.0.1:1234")
           expect(err.apiUrl).to.equal(konfig("api_url"))
+
+    describe "launch:browser", ->
+      it "launches browser via openProject", ->
+        sinon.stub(openProject, 'launch').callsFake (browser, spec, opts) ->
+          expect(browser).to.eq('foo')
+          expect(spec).to.eq('bar')
+
+          opts.onBrowserOpen()
+          opts.onBrowserClose()
+
+          Promise.resolve()
+
+        @handleEvent("launch:browser", { browser: 'foo', spec: 'bar' }).then =>
+          expect(@send.getCall(0).args[1].data).to.include({ browserOpened: true })
+          expect(@send.getCall(1).args[1].data).to.include({ browserClosed: true })
+
+      it "wraps error titles if not set", ->
+        err = new Error('foo')
+        sinon.stub(openProject, 'launch').rejects(err)
+
+        @handleEvent("launch:browser", {}).then =>
+          expect(@send.getCall(0).args[1].__error).to.include({ message: 'foo', title: 'Error launching browser' })

@@ -1,20 +1,22 @@
 const _ = require('lodash')
+const la = require('lazy-ass')
+const is = require('check-more-types')
 const path = require('path')
 const debug = require('debug')('cypress:server:args')
 const minimist = require('minimist')
 const coerceUtil = require('./coerce')
 const configUtil = require('../config')
 const proxyUtil = require('./proxy')
+const errors = require('../errors')
 
 const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const whitelist = 'cwd appPath execPath apiKey smokeTest getKey generateKey runProject project spec reporter reporterOptions port env ci record updating ping key logs clearLogs returnPkg version mode headed config exit exitWithCode browser runMode outputPath parallel ciBuildId group inspectBrk configFile proxySource'.split(' ')
-
+const whitelist = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version'.split(' ')
 // returns true if the given string has double quote character "
 // only at the last position.
-const hasStrayEndQuote = function (s) {
+const hasStrayEndQuote = (s) => {
   const quoteAt = s.indexOf('"')
 
   return quoteAt === (s.length - 1)
@@ -24,16 +26,15 @@ const removeLastCharacter = (s) => {
   return s.substr(0, s.length - 1)
 }
 
-const normalizeBackslash = function (s) {
+const normalizeBackslash = (s) => {
   if (hasStrayEndQuote(s)) {
     return removeLastCharacter(s)
   }
 
   return s
-
 }
 
-const normalizeBackslashes = function (options) {
+const normalizeBackslashes = (options) => {
   // remove stray double quote from runProject and other path properties
   // due to bug in NPM passing arguments with
   // backslash at the end
@@ -50,7 +51,7 @@ const normalizeBackslashes = function (options) {
   return options
 }
 
-const stringify = function (val) {
+const stringify = (val) => {
   if (_.isObject(val)) {
     return JSON.stringify(val)
   }
@@ -58,7 +59,7 @@ const stringify = function (val) {
   return val
 }
 
-const strToArray = function (str) {
+const strToArray = (str) => {
   const parsed = tryJSONParse(str)
 
   if (parsed) {
@@ -69,7 +70,7 @@ const strToArray = function (str) {
 }
 
 // swap out comma's for bars
-const commasToPipes = (match, p1, p2, p3) => {
+const commasToPipes = (match) => {
   return match.split(',').join('|')
 }
 
@@ -79,7 +80,7 @@ const pipesToCommas = (str) => {
   return str.split('|').join(',')
 }
 
-const tryJSONParse = function (str) {
+const tryJSONParse = (str) => {
   try {
     return JSON.parse(str)
   } catch (err) {
@@ -87,7 +88,7 @@ const tryJSONParse = function (str) {
   }
 }
 
-const JSONOrCoerce = function (str) {
+const JSONOrCoerce = (str) => {
   // valid JSON? horray
   const parsed = tryJSONParse(str)
 
@@ -109,32 +110,41 @@ const JSONOrCoerce = function (str) {
   return coerceUtil(str)
 }
 
-const sanitizeAndConvertNestedArgs = function (str) {
+const sanitizeAndConvertNestedArgs = (str, argname) => {
+  la(is.unemptyString(argname), 'missing config argname to be parsed')
+
+  try {
   // if this is valid JSON then just
   // parse it and call it a day
-  const parsed = tryJSONParse(str)
+    const parsed = tryJSONParse(str)
 
-  if (parsed) {
-    return parsed
+    if (parsed) {
+      return parsed
+    }
+
+    // invalid JSON, so assume mixed usage
+    // first find foo={a:b,b:c} and bar=[1,2,3]
+    // syntax and turn those into
+    // foo: a:b|b:c
+    // bar: 1|2|3
+
+    return _
+    .chain(str)
+    .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
+    .replace(nestedArraysInSquareBracketsRe, commasToPipes)
+    .split(',')
+    .map((pair) => {
+      return pair.split(everythingAfterFirstEqualRe)
+    })
+    .fromPairs()
+    .mapValues(JSONOrCoerce)
+    .value()
+  } catch (err) {
+    debug('could not pass config %s value %s', argname, str)
+    debug('error %o', err)
+
+    return errors.throw('COULD_NOT_PARSE_ARGUMENTS', argname, str, err.message)
   }
-
-  // invalid JSON, so assume mixed usage
-  // first find foo={a:b,b:c} and bar=[1,2,3]
-  // syntax and turn those into
-  // foo: a:b|b:c
-  // bar: 1|2|3
-
-  return _
-  .chain(str)
-  .replace(nestedObjectsInCurlyBracesRe, commasToPipes)
-  .replace(nestedArraysInSquareBracketsRe, commasToPipes)
-  .split(',')
-  .map((pair) => {
-    return pair.split(everythingAfterFirstEqualRe)
-  })
-  .fromPairs()
-  .mapValues(JSONOrCoerce)
-  .value()
 }
 
 module.exports = {
@@ -199,7 +209,7 @@ module.exports = {
     }
 
     let { spec } = options
-    const { env, config, reporterOptions, outputPath } = options
+    const { env, config, reporterOptions, outputPath, tag } = options
     const project = options.project || options.runProject
 
     if (spec) {
@@ -216,8 +226,12 @@ module.exports = {
       options.spec = strToArray(spec).map(resolvePath)
     }
 
+    if (tag) {
+      options.tag = strToArray(tag)
+    }
+
     if (env) {
-      options.env = sanitizeAndConvertNestedArgs(env)
+      options.env = sanitizeAndConvertNestedArgs(env, 'env')
     }
 
     const proxySource = proxyUtil.loadSystemProxySettings()
@@ -232,13 +246,13 @@ module.exports = {
     }
 
     if (reporterOptions) {
-      options.reporterOptions = sanitizeAndConvertNestedArgs(reporterOptions)
+      options.reporterOptions = sanitizeAndConvertNestedArgs(reporterOptions, 'reporterOptions')
     }
 
     if (config) {
       // convert config to an object
-      // annd store the config
-      options.config = sanitizeAndConvertNestedArgs(config)
+      // and store the config
+      options.config = sanitizeAndConvertNestedArgs(config, 'config')
     }
 
     // get a list of the available config keys

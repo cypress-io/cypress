@@ -16,9 +16,9 @@ class SnapshotControls extends Component {
       >
         {this._selectionToggle()}
         {this._states()}
-        <Tooltip title='Unpin'>
+        <Tooltip title='Unpin' className='cy-tooltip'>
           <button className='unpin' onClick={this._unpin}>
-            <i className='fa fa-close' />
+            <i className='fas fa-times' />
           </button>
         </Tooltip>
       </span>
@@ -31,9 +31,9 @@ class SnapshotControls extends Component {
     const showingHighlights = this.props.state.snapshot.showingHighlights
 
     return (
-      <Tooltip title={`${showingHighlights ? 'Hide' : 'Show'} Highlights`}>
+      <Tooltip title={`${showingHighlights ? 'Hide' : 'Show'} Highlights`} className='cy-tooltip'>
         <button className='toggle-selection' onClick={this._toggleHighlights}>
-          <i className='fa fa-object-group' />
+          <i className='far fa-object-group' />
         </button>
       </Tooltip>
     )

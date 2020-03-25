@@ -1,7 +1,9 @@
 _           = require("lodash")
 ipc         = require("electron").ipcMain
-shell       = require("electron").shell
+{ shell, clipboard } = require('electron')
 debug       = require('debug')('cypress:server:events')
+pluralize   = require("pluralize")
+stripAnsi   = require("strip-ansi")
 dialog      = require("./dialog")
 pkg         = require("./package")
 logs        = require("./logs")
@@ -19,12 +21,21 @@ chromePolicyCheck = require("../util/chrome_policy_check")
 browsers    = require("../browsers")
 konfig      = require("../konfig")
 
+nullifyUnserializableValues = (obj) =>
+  ## nullify values that cannot be cloned
+  ## https://github.com/cypress-io/cypress/issues/6750
+  _.cloneDeepWith obj, (val) =>
+    if _.isFunction(val)
+      return null
+
 handleEvent = (options, bus, event, id, type, arg) ->
   debug("got request for event: %s, %o", type, arg)
 
-  sendResponse = (data = {}) ->
+  sendResponse = (originalData = {}) ->
     try
-      debug("sending ipc data %o", {type: type, data: data})
+      data = nullifyUnserializableValues(originalData)
+
+      debug("sending ipc data %o", { type, data, originalData })
       event.sender.send("response", data)
 
   sendErr = (err) ->
@@ -107,7 +118,10 @@ handleEvent = (options, bus, event, id, type, arg) ->
         onBrowserClose: ->
           send({browserClosed: true})
       })
-      .catch(sendErr)
+      .catch (err) =>
+        err.title ?= 'Error launching browser'
+
+        sendErr(err)
 
     when "begin:auth"
       onMessage = (msg) ->
@@ -189,6 +203,8 @@ handleEvent = (options, bus, event, id, type, arg) ->
       .catch(sendErr)
 
     when "open:project"
+      debug("open:project")
+
       onSettingsChanged = ->
         bus.emit("config:changed")
 
@@ -204,15 +220,17 @@ handleEvent = (options, bus, event, id, type, arg) ->
         bus.emit("project:error", errors.clone(err, {html: true}))
 
       onWarning = (warning) ->
+        warning.message = stripAnsi(warning.message)
         bus.emit("project:warning", errors.clone(warning, {html: true}))
 
       browsers.getAllBrowsersWith(options.browser)
       .then (browsers = []) ->
+        debug("setting found %s on the config", pluralize("browser", browsers.length, true))
         options.config = _.assign(options.config, { browsers })
       .then ->
         chromePolicyCheck.run (err) ->
           options.config.browsers.forEach (browser) ->
-            if browser.family == 'chrome'
+            if browser.family == 'chromium'
               browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
 
         openProject.create(arg, options, {
@@ -293,11 +311,25 @@ handleEvent = (options, bus, event, id, type, arg) ->
         err.apiUrl = apiUrl
         sendErr(err)
 
+    when "ping:baseUrl"
+      baseUrl = arg
+      ensureUrl.isListening(baseUrl)
+      .then(send)
+      .catch (err) ->
+        warning = errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+        sendErr(warning)
+
+    when "set:clipboard:text"
+      clipboard.writeText(arg)
+      sendNull()
+
     else
       throw new Error("No ipc event registered for: '#{type}'")
 
 module.exports = {
-  handleEvent: handleEvent
+  nullifyUnserializableValues
+
+  handleEvent
 
   stop: ->
     ipc.removeAllListeners()

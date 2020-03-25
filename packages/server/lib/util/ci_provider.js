@@ -30,6 +30,10 @@ const isAzureCi = () => {
   return process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
 }
 
+const isBamboo = () => {
+  return process.env.bamboo_buildNumber
+}
+
 const isCodeshipBasic = () => {
   return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
 }
@@ -78,7 +82,7 @@ const isWercker = () => {
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
   'azure': isAzureCi,
-  'bamboo': 'bamboo.buildNumber',
+  'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
   'circle': 'CIRCLECI',
@@ -86,6 +90,7 @@ const CI_PROVIDERS = {
   'codeshipPro': isCodeshipPro,
   'concourse': isConcourse,
   'drone': 'DRONE',
+  githubActions: 'GITHUB_ACTIONS',
   'gitlab': isGitlab,
   'goCD': 'GO_JOB_NAME',
   'googleCloud': isGoogleCloud,
@@ -96,13 +101,14 @@ const CI_PROVIDERS = {
   'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
   'wercker': isWercker,
+  netlify: 'NETLIFY',
 }
 
-const _detectProviderName = function () {
+const _detectProviderName = () => {
   const { env } = process
-
   // return the key of the first provider
   // which is truthy
+
   return _.findKey(CI_PROVIDERS, (value) => {
     if (_.isString(value)) {
       return env[value]
@@ -134,10 +140,10 @@ const _providerCiParams = () => {
       'BUILD_REPOSITORY_URI',
     ]),
     bamboo: extract([
-      'bamboo.resultsUrl',
-      'bamboo.buildNumber',
-      'bamboo.buildResultsUrl',
-      'bamboo.planRepository.repositoryUrl',
+      'bamboo_buildNumber',
+      'bamboo_buildResultsUrl',
+      'bamboo_planRepository_repositoryUrl',
+      'bamboo_buildKey',
     ]),
     bitbucket: extract([
       'BITBUCKET_REPO_SLUG',
@@ -198,6 +204,14 @@ const _providerCiParams = () => {
       'DRONE_BUILD_NUMBER',
       'DRONE_PULL_REQUEST',
     ]),
+    // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables#default-environment-variables
+    githubActions: extract([
+      'GITHUB_WORKFLOW',
+      'GITHUB_ACTION',
+      'GITHUB_EVENT_NAME',
+      'GITHUB_RUN_ID',
+      'GITHUB_REPOSITORY',
+    ]),
     // see https://docs.gitlab.com/ee/ci/variables/
     gitlab: extract([
     // pipeline is common among all jobs
@@ -207,12 +221,14 @@ const _providerCiParams = () => {
       'CI_BUILD_ID', // build id and job id are aliases
       'CI_JOB_ID',
       'CI_JOB_URL',
+      'CI_JOB_NAME',
       // other information
       'GITLAB_HOST',
       'CI_PROJECT_ID',
       'CI_PROJECT_URL',
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
+      'CI_DEFAULT_BRANCH',
     // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
@@ -316,6 +332,7 @@ const _providerCiParams = () => {
     travis: extract([
       'TRAVIS_JOB_ID',
       'TRAVIS_BUILD_ID',
+      'TRAVIS_BUILD_WEB_URL',
       'TRAVIS_REPO_SLUG',
       'TRAVIS_JOB_NUMBER',
       'TRAVIS_EVENT_TYPE',
@@ -323,14 +340,24 @@ const _providerCiParams = () => {
       'TRAVIS_BUILD_NUMBER',
       'TRAVIS_PULL_REQUEST',
       'TRAVIS_PULL_REQUEST_BRANCH',
+      'TRAVIS_PULL_REQUEST_SHA',
     ]),
     wercker: null,
+    // https://docs.netlify.com/configure-builds/environment-variables/#deploy-urls-and-metadata
+    netlify: extract([
+      'BUILD_ID',
+      'CONTEXT',
+      'URL',
+      'DEPLOY_URL',
+      'DEPLOY_PRIME_URL',
+      'DEPLOY_ID',
+    ]),
   }
 }
 
 // tries to grab commit information from CI environment variables
 // very useful to fill missing information when Git cannot grab correct values
-const _providerCommitParams = function () {
+const _providerCommitParams = () => {
   const { env } = process
 
   return {
@@ -356,12 +383,12 @@ const _providerCommitParams = function () {
       authorEmail: env.BUILD_REQUESTEDFOREMAIL,
     },
     bamboo: {
-      // sha: ???
-      branch: env['bamboo.planRepository.branch'],
+      sha: env.bamboo_planRepository_revision,
+      branch: env.bamboo_planRepository_branch,
       // message: ???
-      // authorName: ???
+      authorName: env.bamboo_planRepository_username,
       // authorEmail: ???
-      // remoteOrigin: ???
+      remoteOrigin: env.bamboo_planRepository_repositoryURL,
       // defaultBranch: ???
     },
     bitbucket: {
@@ -418,14 +445,20 @@ const _providerCommitParams = function () {
       // remoteOrigin: ???
       defaultBranch: env.DRONE_REPO_BRANCH,
     },
+    githubActions: {
+      sha: env.GITHUB_SHA,
+      branch: env.GH_BRANCH || env.GITHUB_REF,
+      defaultBranch: env.GITHUB_BASE_REF,
+      remoteBranch: env.GITHUB_HEAD_REF,
+    },
     gitlab: {
       sha: env.CI_COMMIT_SHA,
       branch: env.CI_COMMIT_REF_NAME,
       message: env.CI_COMMIT_MESSAGE,
       authorName: env.GITLAB_USER_NAME,
       authorEmail: env.GITLAB_USER_EMAIL,
-      // remoteOrigin: ???
-      // defaultBranch: ???
+      remoteOrigin: env.CI_REPOSITORY_URL,
+      defaultBranch: env.CI_DEFAULT_BRANCH,
     },
     googleCloud: {
       sha: env.COMMIT_SHA,
@@ -473,7 +506,7 @@ const _providerCommitParams = function () {
       authorName: env.BUILD_SOURCEVERSIONAUTHOR,
     },
     travis: {
-      sha: env.TRAVIS_COMMIT,
+      sha: env.TRAVIS_PULL_REQUEST_SHA || env.TRAVIS_COMMIT,
       // for PRs, TRAVIS_BRANCH is the base branch being merged into
       branch: env.TRAVIS_PULL_REQUEST_BRANCH || env.TRAVIS_BRANCH,
       // authorName: ???
@@ -483,14 +516,19 @@ const _providerCommitParams = function () {
       // defaultBranch: ???
     },
     wercker: null,
+    netlify: {
+      sha: env.COMMIT_REF,
+      branch: env.BRANCH,
+      remoteOrigin: env.REPOSITORY_URL,
+    },
   }
 }
 
-const provider = function () {
+const provider = () => {
   return _detectProviderName() || null
 }
 
-const omitUndefined = function (ret) {
+const omitUndefined = (ret) => {
   if (_.isObject(ret)) {
     return _.omitBy(ret, _.isUndefined)
   }
@@ -513,7 +551,7 @@ const commitParams = () => {
   return _get(_providerCommitParams)
 }
 
-const commitDefaults = function (existingInfo) {
+const commitDefaults = (existingInfo) => {
   debug('git commit existing info')
   debug(existingInfo)
 
