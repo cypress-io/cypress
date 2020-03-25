@@ -103,7 +103,7 @@
     "@types/mocha": "5.2.7",
     "@types/node": "12.12.21",
     "@types/ramda": "0.25.47",
-    "@types/react": "16.9.23",
+    "@types/react": "16.9.25",
     "@types/react-dom": "16.9.4",
     "@types/request-promise": "4.1.45",
     "@types/sinon-chai": "3.2.3",
@@ -127,19 +127,21 @@
     "debug": "4.1.1",
     "decaffeinate": "6.0.9",
     "del": "3.0.0",
-    "electron-builder": "20.39.0",
+    "electron-builder": "22.3.6",
+    "electron-notarize": "0.2.1",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "6.8.0",
     "eslint-plugin-cypress": "2.10.3",
     "eslint-plugin-json-format": "2.0.0",
     "eslint-plugin-mocha": "6.1.0",
     "eslint-plugin-react": "7.18.3",
-    "execa": "1.0.0",
+    "execa": "4.0.0",
     "execa-wrap": "1.4.0",
     "filesize": "4.1.2",
     "find-package-json": "1.2.0",
     "fs-extra": "8.1.0",
     "gift": "0.10.2",
+    "globby": "10.0.1",
     "gulp": "4.0.2",
     "gulp-awspublish": "4.0.0",
     "gulp-coffee": "3.0.3",
@@ -227,6 +229,10 @@
     "packages": [
       "cli",
       "packages/*"
+    ],
+    "nohoist": [
+      "**/@ffmpeg-installer",
+      "**/@ffmpeg-installer/**"
     ]
   },
   "lint-staged": {

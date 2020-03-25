@@ -332,6 +332,7 @@ const _providerCiParams = () => {
     travis: extract([
       'TRAVIS_JOB_ID',
       'TRAVIS_BUILD_ID',
+      'TRAVIS_BUILD_WEB_URL',
       'TRAVIS_REPO_SLUG',
       'TRAVIS_JOB_NUMBER',
       'TRAVIS_EVENT_TYPE',
