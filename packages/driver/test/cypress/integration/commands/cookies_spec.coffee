@@ -401,10 +401,10 @@ describe "src/cy/commands/cookies", ->
       Cypress.sinon.stub(Cypress, 'config').callThrough()
       .withArgs('experimentalGetCookiesSameSite').returns(true)
 
-      cy.setCookie('one', 'bar', { sameSite: 'none' })
+      cy.setCookie('one', 'bar', { sameSite: 'none', secure: true })
       cy.getCookie('one').should('include', { sameSite: 'no_restriction' })
 
-      cy.setCookie('two', 'bar', { sameSite: 'no_restriction' })
+      cy.setCookie('two', 'bar', { sameSite: 'no_restriction', secure: true })
       cy.getCookie('two').should('include', { sameSite: 'no_restriction' })
 
       cy.setCookie('three', 'bar', { sameSite: 'Lax' })
@@ -413,11 +413,13 @@ describe "src/cy/commands/cookies", ->
       cy.setCookie('four', 'bar', { sameSite: 'Strict' })
       cy.getCookie('four').should('include', { sameSite: 'strict' })
 
-      ## @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
-      defaultSameSite = if Cypress.isBrowser('firefox') then 'no_restriction' else 'unspecified'
-
       cy.setCookie('five', 'bar')
-      cy.getCookie('five').should('include', { sameSite: defaultSameSite })
+
+      ## @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
+      if Cypress.isBrowser('firefox')
+        cy.getCookie('five').should('include', { sameSite: 'no_restriction' })
+      else
+        cy.getCookie('five').should('not.have.property', 'sameSite')
 
     describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
@@ -538,6 +540,22 @@ describe "src/cy/commands/cookies", ->
           done()
 
         cy.setCookie('foo', 'bar', { sameSite: 'bad' })
+
+      it "when samesite=none is supplied and secure is not set", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error").message).to.eq """
+          Only cookies with the `secure` flag set to `true` can use `sameSite: 'None'`.
+
+          Pass `secure: true` to `cy.setCookie()` to set a cookie with `sameSite: 'None'`.
+          """
+          expect(lastLog.get("error").docsUrl).to.eq "https://on.cypress.io/setcookie"
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.setCookie('foo', 'bar', { sameSite: 'None' })
 
       context "when setting an invalid cookie", ->
         it "throws an error if the backend responds with an error", (done) ->

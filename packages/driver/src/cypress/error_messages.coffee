@@ -1195,6 +1195,14 @@ module.exports = {
       """
       docsUrl: "https://on.cypress.io/setcookie"
     }
+    secure_not_set_with_samesite_none: ({ validValues, value }) => {
+      message: """
+      Only cookies with the `secure` flag set to `true` can use `sameSite: '{{value}}'`.
+
+      Pass `secure: true` to #{cmd('setCookie')} to set a cookie with `sameSite: '{{value}}'`.
+      """
+      docsUrl: "https://on.cypress.io/setcookie"
+    }
 
   should:
     chainer_not_found: "The chainer `{{chainer}}` was not found. Could not build assertion."

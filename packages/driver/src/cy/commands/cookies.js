@@ -273,6 +273,17 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         })
       }
 
+      // cookies with SameSite=None must also set Secure
+      // @see https://web.dev/samesite-cookies-explained/#changes-to-the-default-behavior-without-samesite
+      if (cookie.sameSite === 'no_restriction' && cookie.secure !== true) {
+        $errUtils.throwErrByPath('setCookie.secure_not_set_with_samesite_none', {
+          onFail,
+          args: {
+            value: options.sameSite, // for clarity, throw the error with the user's unnormalized option
+          },
+        })
+      }
+
       if (!_.isString(name) || !_.isString(value)) {
         $errUtils.throwErrByPath('setCookie.invalid_arguments', { onFail })
       }
