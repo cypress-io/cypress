@@ -2,6 +2,8 @@ require('../../spec_helper')
 
 const fs = require(`${root}../lib/util/fs`)
 const scaffold = require(`${root}../lib/modes/init/scaffold`)
+const cypressEx = require('@packages/example')
+const { join, basename } = require('path')
 const { defaultValues } = require(`${root}../lib/modes/init/scaffold/option_info`)
 
 describe('/lib/modes/init', () => {
@@ -9,6 +11,7 @@ describe('/lib/modes/init', () => {
     beforeEach(() => {
       sinon.stub(fs, 'writeFile').resolves()
       sinon.stub(fs, 'ensureDir').resolves()
+      sinon.stub(fs, 'copy').resolves()
     })
 
     describe('options', () => {
@@ -308,11 +311,66 @@ describe('/lib/modes/init', () => {
         it('generates at the given path', async () => {
           const projRoot = '/home/user/src/cypress'
 
-          await scaffold.create(projRoot, { config: {
-            integrationFolder: '/home/user/given/cypress',
-          } })
+          await scaffold.create(projRoot, {
+            config: {
+              integrationFolder: '/home/user/given/cypress',
+            },
+          })
 
           expect(fs.ensureDir).to.be.calledWith('/home/user/given/cypress')
+        })
+
+        it('examples are not generated without example option', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              integrationFolder: '/home/user/int',
+            },
+          })
+
+          expect(fs.ensureDir).to.not.be.calledWith('/home/user/int/examples')
+        })
+
+        it('examples are generated with example option', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              integrationFolder: '/home/user/int',
+            },
+            example: true,
+          })
+
+          expect(fs.ensureDir).to.be.calledWith('/home/user/int/examples')
+
+          const paths = await cypressEx.getPathToExamples()
+
+          paths.forEach((path) => {
+            expect(fs.copy).to.be.calledWith(path, join('/home/user/int/examples', basename(path)))
+          })
+        })
+
+        it('examples are generated in ts files with example and typescript options', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              integrationFolder: '/home/user/int',
+            },
+            example: true,
+            typescript: true,
+          })
+
+          expect(fs.ensureDir).to.be.calledWith('/home/user/int/examples')
+
+          const paths = await cypressEx.getPathToExamples()
+
+          paths.forEach((path) => {
+            const filename = basename(path).replace('.js', '.ts')
+
+            expect(fs.copy).to.be.calledWith(path, join('/home/user/int/examples', filename))
+          })
         })
       })
     })
