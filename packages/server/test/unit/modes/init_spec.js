@@ -8,6 +8,7 @@ describe('/lib/modes/init', () => {
   describe('scaffold', () => {
     beforeEach(() => {
       sinon.stub(fs, 'writeFile').resolves()
+      sinon.stub(fs, 'ensureDir').resolves()
     })
 
     describe('options', () => {
@@ -287,12 +288,32 @@ describe('/lib/modes/init', () => {
     })
 
     describe('create', () => {
-      it('generates cypress.json with empty object', () => {
+      it('generates cypress.json with empty object', async () => {
         const projRoot = '/home/user/src/cypress'
 
-        scaffold.create(projRoot, { config: {} })
+        await scaffold.create(projRoot, { config: {} })
 
         expect(fs.writeFile).to.be.calledWith(`${projRoot}/cypress.json`, '{}')
+      })
+
+      describe('integration folder', () => {
+        it('generates at the default path when it is undefined', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, { config: {} })
+
+          expect(fs.ensureDir).to.be.calledWith(`${projRoot}/${defaultValues['integrationFolder']}`)
+        })
+
+        it('generates at the given path', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, { config: {
+            integrationFolder: '/home/user/given/cypress',
+          } })
+
+          expect(fs.ensureDir).to.be.calledWith('/home/user/given/cypress')
+        })
       })
     })
   })
