@@ -485,7 +485,7 @@ context('cy.route', () => {
     })
   })
 
-  describe('onAbort assertion failure', function () {
+  describe('onAbort assertion failure', function (done) {
     fail(this, () => {
       cy.server().route({
         url: '/foo',
@@ -503,7 +503,7 @@ context('cy.route', () => {
     })
   })
 
-  describe('onAbort exception', function () {
+  describe('onAbort exception', function (done) {
     fail(this, () => {
       cy.server().route({
         url: '/foo',
@@ -521,7 +521,7 @@ context('cy.route', () => {
     })
   })
 
-  describe('onRequest assertion failure', function () {
+  describe('onRequest assertion failure', function (done) {
     fail(this, () => {
       cy.server().route({
         url: '/foo',
@@ -539,7 +539,7 @@ context('cy.route', () => {
     })
   })
 
-  describe('onRequest exception', function () {
+  describe('onRequest exception', function (done) {
     fail(this, () => {
       cy.server().route({
         url: '/foo',
@@ -557,7 +557,7 @@ context('cy.route', () => {
     })
   })
 
-  describe('onResponse assertion failure', function () {
+  describe('onResponse assertion failure', function (done) {
     fail(this, () => {
       cy.server().route({
         url: '/users',
@@ -575,7 +575,7 @@ context('cy.route', () => {
     })
   })
 
-  describe('onResponse exception', function () {
+  describe('onResponse exception', function (done) {
     fail(this, () => {
       cy.server().route({
         url: '/users',
@@ -595,7 +595,7 @@ context('cy.route', () => {
 })
 
 context('cy.server', () => {
-  describe('onAbort assertion failure', function () {
+  describe('onAbort assertion failure', function (done) {
     fail(this, () => {
       cy.server({
         onAbort () {
@@ -613,7 +613,7 @@ context('cy.server', () => {
     })
   })
 
-  describe('onAbort exception', function () {
+  describe('onAbort exception', function (done) {
     fail(this, () => {
       cy.server({
         onAbort () {
@@ -631,7 +631,7 @@ context('cy.server', () => {
     })
   })
 
-  describe('onRequest assertion failure', function () {
+  describe('onRequest assertion failure', function (done) {
     fail(this, () => {
       cy.server({
         onRequest () {
@@ -649,7 +649,7 @@ context('cy.server', () => {
     })
   })
 
-  describe('onRequest exception', function () {
+  describe('onRequest exception', function (done) {
     fail(this, () => {
       cy.server({
         onRequest () {
@@ -667,7 +667,7 @@ context('cy.server', () => {
     })
   })
 
-  describe('onResponse assertion failure', function () {
+  describe('onResponse assertion failure', function (done) {
     fail(this, () => {
       cy.server({
         onResponse () {
@@ -685,7 +685,7 @@ context('cy.server', () => {
     })
   })
 
-  describe('onResponse exception', function () {
+  describe('onResponse exception', function (done) {
     fail(this, () => {
       cy.server({
         onResponse () {
