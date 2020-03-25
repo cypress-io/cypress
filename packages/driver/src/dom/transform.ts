@@ -35,7 +35,7 @@ interface TransformInfo {
 const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []): TransformInfo[] => {
   const info = extractTransformInfo($el)
 
-  if (info !== null) {
+  if (info) {
     list.push(info)
   }
 
