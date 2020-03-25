@@ -373,6 +373,86 @@ describe('/lib/modes/init', () => {
           })
         })
       })
+
+      describe('fixtures folder', () => {
+        it('generates at the default path when it is undefined', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, { config: {} })
+
+          expect(fs.ensureDir).to.be.calledWith(`${projRoot}/${defaultValues['fixturesFolder']}`)
+        })
+
+        it('generates at the given path', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              fixturesFolder: '/home/user/given/fixtures',
+            },
+          })
+
+          expect(fs.ensureDir).to.be.calledWith('/home/user/given/fixtures')
+        })
+
+        it('does not generate when fixturesFolder is false', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, { config: {
+            fixturesFolder: false,
+          } })
+
+          expect(fs.ensureDir).to.not.be.calledWith(`${projRoot}/${defaultValues['fixturesFolder']}`)
+          expect(fs.ensureDir).to.not.be.calledWith('/home/user/given/fixtures')
+        })
+
+        it('example.json is not generated without example option', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              fixturesFolder: '/home/user/given/fixtures',
+            },
+          })
+
+          expect(fs.copy).to.not.be.calledWith(
+            join(__dirname, '../../../../', 'lib/scaffold/fixtures/example.json'),
+            '/home/user/given/fixtures/example.json',
+          )
+        })
+
+        it('example.json is generated with example option', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              fixturesFolder: '/home/user/given/fixtures',
+            },
+            example: true,
+          })
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../../', 'lib/scaffold/fixtures/example.json'),
+            '/home/user/given/fixtures/example.json',
+          )
+        })
+
+        it('example.json is not generated with example option but fixturesFolder is false', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              fixturesFolder: false,
+            },
+            example: true,
+          })
+
+          expect(fs.copy).to.not.be.calledWith(
+            join(__dirname, '../../../', 'lib/scaffold/fixtures/example.json'),
+            '/home/user/given/fixtures/example.json',
+          )
+        })
+      })
     })
   })
 })

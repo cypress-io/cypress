@@ -15,6 +15,7 @@ export const create = async (projRoot: string, config: InitConfig) => {
 
 const generateFolders = async (projRoot: string, config: InitConfig) => {
   await integrationFolder(projRoot, config)
+  await fixturesFolder(projRoot, config)
 }
 
 const integrationFolder = async (projRoot: string, config: InitConfig) => {
@@ -37,5 +38,22 @@ const integrationFolder = async (projRoot: string, config: InitConfig) => {
 
       fs.copy(path, join(exampleFolder, filename))
     })
+  }
+}
+
+const fixturesFolder = async (projRoot: string, config: InitConfig) => {
+  if (config.config.fixturesFolder === false) {
+    return
+  }
+
+  const folderPath = config.config.fixturesFolder ?? `${projRoot}/${defaultValues['fixturesFolder']}`
+
+  await fs.ensureDir(folderPath)
+
+  if (config.example) {
+    fs.copy(
+      join(__dirname, '../../../', 'scaffold/fixtures/example.json'),
+      join(folderPath, 'example.json'),
+    )
   }
 }
