@@ -224,6 +224,43 @@ describe "cookies", ->
 
             cy.request('/requestCookies').its('body').should('include', { 'domaincookie': 'foo' })
 
+        context "with SameSite", ->
+          [
+            { header: 'None', sameSite: 'no_restriction' }
+            { header: 'Strict', sameSite: 'strict' }
+            { header: 'Lax', sameSite: 'lax' }
+          ].forEach ({ header, sameSite }) ->
+            it "#{header} is set and sent with subsequent requests", ->
+              name = "ss#{header}"
+              cy.getCookie(name).should('be.null')
+
+              sameSiteUrl = "/samesite/#{header}"
+              cookieDumpUrl = "/requestCookies"
+
+              if header is "None"
+                ## None should only be sent + set with HTTPS requests
+                cookieDumpUrl = [httpsUrl, cookieDumpUrl].join('')
+                sameSiteUrl = [httpsUrl, sameSiteUrl].join('')
+
+              cy[cmd](sameSiteUrl)
+
+              cy.getCookie(name).should('include', {
+                name,
+                value: 'someval',
+                sameSite
+              })
+
+              cy.visit("#{cookieDumpUrl}Html")
+              .then (res) ->
+                cy.get('body').then (body) ->
+                  JSON.parse(body.text())
+              .then (body) ->
+                expect(body).to.have.property(name).and.eq('someval')
+
+              cy.request(cookieDumpUrl)
+              .then ({ body }) ->
+                expect(body).to.have.property(name).and.eq('someval')
+
         [
           ['HTTP', otherUrl]
           ['HTTPS', otherHttpsUrl],
@@ -246,7 +283,8 @@ describe "cookies", ->
                       "path": "/",
                       "domain": if i % 2 == 8 - n then expectedDomain else altDomain,
                       "secure": false,
-                      "httpOnly": false
+                      "httpOnly": false,
+                      "sameSite": 'no_restriction'
                     })
 
                 expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))

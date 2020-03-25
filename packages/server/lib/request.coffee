@@ -11,7 +11,7 @@ agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 streamBuffer = require("./util/stream_buffer").streamBuffer
 
-SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly']
+SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly', 'sameSite']
 NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND".split(" ")
 VERBOSE_REQUEST_OPTS = "followRedirect strictSSL".split(" ")
 HTTP_CLIENT_REQUEST_EVENTS = "abort connect continue information socket timeout upgrade".split(" ")

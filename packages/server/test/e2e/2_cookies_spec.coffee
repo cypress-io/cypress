@@ -96,7 +96,14 @@ onServer = (app) ->
     return res.type('html').end()
 
   app.get "/samesite/:value", (req, res) ->
-    res.setHeader("Set-Cookie", "foo=bar; SameSite=#{req.params.value}")
+    { value } = req.params
+    header = "ss#{value}=someval; Path=/; SameSite=#{value}"
+
+    if value is 'None'
+      header += '; Secure'
+
+    res.setHeader("Set-Cookie", header)
+    res.type('html').end()
 
 haveRoot = !process.env.USE_HIGH_PORTS && process.geteuid() == 0
 
@@ -160,6 +167,7 @@ describe "e2e cookies", ->
       ]) ->
         e2e.it "passes with baseurl: #{baseUrl}", {
           config: {
+            experimentalGetCookiesSameSite: true
             baseUrl
             env: {
               baseUrl
@@ -181,6 +189,7 @@ describe "e2e cookies", ->
 
       e2e.it "passes with no baseurl", {
         config: {
+          experimentalGetCookiesSameSite: true
           env: {
             httpUrl
             httpsUrl
