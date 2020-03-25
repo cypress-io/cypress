@@ -11,7 +11,7 @@ export const detectVisibility = ($el: any) => {
   return elIsTransformedToZero(list) ? 'transformed' : 'visible'
 }
 
-type BackfaceVisibility = 'hidden' | 'visible'
+type BackfaceVisibility = 'hidden' | 'visible' | ''
 type TransformStyle = 'flat' | 'preserve-3d'
 type Matrix2D = [
   number, number, number,
@@ -52,8 +52,8 @@ const extractTransformInfo = ($el): TransformInfo | null => {
   const el = $el[0]
   const style = getComputedStyle(el)
 
-  const backfaceVisibility = style.getPropertyValue('backface-visibility')
-  
+  const backfaceVisibility = style.getPropertyValue('backface-visibility') as BackfaceVisibility
+
   // When an element is not in the DOM tree, getComputedStyle() returns empty string.
   // In an edge case from frameworks like `vue-fragment`
   // `parentNode` is modified and out of the DOM tree.
@@ -62,9 +62,9 @@ const extractTransformInfo = ($el): TransformInfo | null => {
   if (backfaceVisibility === '') {
     return null
   }
-  
+
   return {
-    backfaceVisibility as BackfaceVisibility,
+    backfaceVisibility,
     transformStyle: style.getPropertyValue('transform-style') as TransformStyle,
     transform: style.getPropertyValue('transform'),
   }
