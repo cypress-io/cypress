@@ -205,7 +205,7 @@ context('lib/browsers/cdp_automation', () => {
         this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
         this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
 
-        expect(this.onRequest('take:screenshot'))
+        return expect(this.onRequest('take:screenshot'))
         .to.eventually.equal('data:image/png;base64,foo')
       })
 
@@ -213,7 +213,7 @@ context('lib/browsers/cdp_automation', () => {
         this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
         this.sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
 
-        expect(this.onRequest('take:screenshot'))
+        return expect(this.onRequest('take:screenshot'))
         .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
       })
     })
