@@ -1,4 +1,3 @@
-cp      = require("child_process")
 Promise = require("bluebird")
 os      = require("os")
 execa   = require("execa")
@@ -8,11 +7,24 @@ fs      = require("fs")
 R       = require("ramda")
 filesize = require("filesize")
 
+# prints disk usage numbers using "du" utility
+# available on Linux and Mac
+printFileSizes = (folder) ->
+  console.log("File sizes in #{folder}")
+  paths = path.join(folder, "*")
+  options = {
+    stdio: "inherit",
+    shell: true
+  }
+  execa("du -hs #{paths}", options)
+
 # resolves with zipped filename
 macZip = (src, dest) ->
-  new Promise (resolve, reject) =>
+  printFileSizes(src)
+  .then () ->
     if os.platform() != "darwin"
       throw new Error("Can only zip on Mac platform")
+
     # Ditto (Mac) options
     # http://www.unix.com/man-page/OSX/1/ditto/
     # -c create archive
@@ -25,12 +37,24 @@ macZip = (src, dest) ->
     #     foo/
     #        ...
     zip = "ditto -c -k --sequesterRsrc --keepParent #{src} #{dest}"
+    options = {
+      stdio: "inherit",
+      shell: true
+    }
     console.log(zip)
-    cp.exec zip, {}, (err, stdout, stderr) ->
-      return reject(err) if err
 
-      console.log("✅ ditto zip finished")
-      resolve(dest)
+    onZipFinished = () ->
+      console.log("✅ ditto finished")
+
+    onError = (err) ->
+      console.error("⛔️ could not zip #{src} into #{dest}")
+      console.error(err.message)
+      throw err
+
+    execa(zip, options)
+    .then onZipFinished
+    .then R.always(dest)
+    .catch onError
 
 megaBytes = (bytes) ->
   1024 * 1024 * bytes
@@ -44,14 +68,8 @@ checkZipSize = (zipPath) ->
   if stats.size > MAX_ZIP_FILE_SIZE
     throw new Error("Zip file is too large: #{zipSize} (#{stats.size} bytes) exceeds #{MAX_ZIP_FILE_SIZE} bytes")
 
-# resolves with zipped filename
-linuxZip = (src, dest) ->
-  # in Linux switch to the folder containing source folder
-  la(path.isAbsolute(src), "source path should be absolute", src)
-  la(path.isAbsolute(dest), "destination path should be absolute", dest)
-  parentFolder = path.dirname(src)
-  relativeSource = path.basename(src)
-
+linuxZipAction = (parentFolder, dest, relativeSource) ->
+  console.log("zipping #{parentFolder}")
   cmd = "cd #{parentFolder} && zip -r9 #{dest} #{relativeSource}"
   console.log("linux zip: #{cmd}")
 
@@ -59,15 +77,48 @@ linuxZip = (src, dest) ->
     console.log("✅ zip finished")
 
   onError = (err) ->
-    console.error("⛔️ could not zip #{src} into #{dest}")
+    console.error("⛔️ could not zip #{relativeSource} in folder #{parentFolder}")
+    console.error("to produce #{dest}")
     console.error(err.message)
     throw err
 
-  execa.shell(cmd)
+  execa(cmd, {shell: true})
   .then onZipFinished
   .then R.always(dest)
   .then R.tap(checkZipSize)
   .catch onError
+
+# src is built folder with packed Cypress application
+# like /root/app/build/linux-unpacked
+# and we want to always have /root/app/build/Cypress
+renameFolder = (src) ->
+  parentFolder = path.dirname(src)
+  folderName = path.basename(src)
+  if folderName is "Cypress"
+    console.log("nothing to rename, folder ends with Cypress")
+    return Promise.resolve(src)
+
+  renamed = path.join(parentFolder, "Cypress")
+  console.log("renaming #{src} to #{renamed}")
+  fs.promises.rename(src, renamed)
+  .then R.always(renamed)
+
+# resolves with zipped filename
+linuxZip = (src, dest) ->
+  # in Linux switch to the folder containing source folder
+  la(path.isAbsolute(src), "source path should be absolute", src)
+  la(path.isAbsolute(dest), "destination path should be absolute", dest)
+
+  # on Linux, make sure the folder name is "Cypress" first
+  renameFolder(src)
+  .then (renamedSource) ->
+    printFileSizes(renamedSource)
+    .then R.always(renamedSource)
+  .then (renamedSource) ->
+    console.log("will zip folder #{renamedSource}")
+    parentFolder = path.dirname(renamedSource)
+    relativeSource = path.basename(renamedSource)
+    linuxZipAction(parentFolder, dest, relativeSource)
 
 # resolves with zipped filename
 windowsZip = (src, dest) ->
@@ -84,14 +135,14 @@ windowsZip = (src, dest) ->
   console.log("windows zip: #{cmd}")
 
   onZipFinished = () ->
-    console.log("✅ zip finished")
+    console.log("✅ 7z finished")
 
   onError = (err) ->
     console.error("⛔️ could not zip #{src} into #{dest}")
     console.error(err.message)
     throw err
 
-  execa.shell(cmd)
+  execa(cmd, {shell: true})
   .then onZipFinished
   .then R.always(dest)
   .then R.tap(checkZipSize)
@@ -104,10 +155,13 @@ zippers = {
 }
 
 module.exports = {
+  # zip Cypress folder to create destination zip file
+  # uses tool depending on the platform
   ditto: (src, dest) ->
     platform = os.platform()
     console.log("#zip", platform)
     console.log("Zipping %s into %s", src, dest)
+
     zipper = zippers[platform]
     if !zipper
       throw new Error("Missing zip function for platform #{platform}")
