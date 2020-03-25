@@ -26,10 +26,22 @@ export default class MarkdownRenderer extends React.PureComponent {
   }
 
   render () {
+    let html = md.render(this.props.markdown)
+
+    // markdown-it wraps the markdown in a <p> tag, this removes it to prevent
+    // styling issues
+    if (this.props.noParagraphWrapper) {
+      const matches = /^<p>([^<]*)<\/p>\n$/.exec(html)
+
+      if (matches) {
+        html = matches[1]
+      }
+    }
+
     return (
       <span ref={(node) => this.node = node}
         dangerouslySetInnerHTML={{
-          __html: md.render(this.props.markdown),
+          __html: html,
         }}>
       </span>
     )

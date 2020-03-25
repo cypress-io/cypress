@@ -28,14 +28,14 @@ const Experiments = observer(({ project }) => {
           _.map(experiments, (experiment, i) => (
             <li className='experiment' key={i}>
               <h5>
-                <MarkdownRenderer markdown={experiment.name}/>
+                <MarkdownRenderer markdown={experiment.name} noParagraphWrapper/>
                 <span className={`experiment-status-sign ${experiment.enabled ? 'enabled' : ''}`}>
                   {experiment.enabled ? 'ON' : 'OFF'}
                 </span>
               </h5>
               <div className='experiment-desc'>
                 <p className="text-muted">
-                  <MarkdownRenderer markdown={experiment.summary}/>
+                  <MarkdownRenderer markdown={experiment.summary} noParagraphWrapper/>
                 </p>
                 <div className='experiment-status'>
                   <code>{experiment.key}</code>
