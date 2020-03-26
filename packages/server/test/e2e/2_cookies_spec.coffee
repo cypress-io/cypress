@@ -121,6 +121,16 @@ otherDomain = "quux.bar.net"
 otherUrl = "http://#{otherDomain}#{if haveRoot then '' else ":#{httpPort}"}"
 otherHttpsUrl = "https://#{otherDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
 
+chromiumSameSiteFeatures = '--enable-features=SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure'
+
+## SameSite is loosely enforced in some versions of FF/Electron/Chromium,
+## but all have options we can use to force it to be strict
+FORCED_SAMESITE_ENV = {
+  ELECTRON_EXTRA_LAUNCH_ARGS: chromiumSameSiteFeatures
+  CHROMIUM_EXTRA_LAUNCH_ARGS: chromiumSameSiteFeatures
+  FIREFOX_FORCE_STRICT_SAMESITE: 1
+}
+
 describe "e2e cookies", ->
   e2e.setup({
     servers: [{
@@ -159,43 +169,53 @@ describe "e2e cookies", ->
       httpsUrl = "https://#{baseDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
 
       [
-        [httpUrl, false],
-        [httpsUrl, true]
+        [FORCED_SAMESITE_ENV, 'with forced SameSite']
+        [{}, 'without forced SameSite']
       ].forEach ([
-        baseUrl,
-        https
+        processEnv,
+        samesite
       ]) ->
-        e2e.it "passes with baseurl: #{baseUrl}", {
-          config: {
-            experimentalGetCookiesSameSite: true
-            baseUrl
-            env: {
-              baseUrl
-              expectedDomain: baseDomain
-              https
-              httpUrl
-              httpsUrl
-              otherUrl
-              otherHttpsUrl
+        context samesite, ->
+          [
+            [httpUrl, false],
+            [httpsUrl, true]
+          ].forEach ([
+            baseUrl,
+            https
+          ]) ->
+            e2e.it "passes with baseurl: #{baseUrl}", {
+              config: {
+                experimentalGetCookiesSameSite: true
+                baseUrl
+                env: {
+                  baseUrl
+                  expectedDomain: baseDomain
+                  https
+                  httpUrl
+                  httpsUrl
+                  otherUrl
+                  otherHttpsUrl
+                }
+              }
+              processEnv: FORCED_SAMESITE_ENV
+              spec: "cookies_spec_baseurl.coffee"
+              snapshot: true
+              onRun: (exec) =>
+                exec({
+                  originalTitle: "e2e cookies with baseurl"
+                })
             }
-          }
-          spec: "cookies_spec_baseurl.coffee"
-          snapshot: true
-          onRun: (exec) =>
-            exec({
-              originalTitle: "e2e cookies with baseurl"
-            })
-        }
 
-      e2e.it "passes with no baseurl", {
-        config: {
-          experimentalGetCookiesSameSite: true
-          env: {
-            httpUrl
-            httpsUrl
+          e2e.it "passes with no baseurl", {
+            config: {
+              experimentalGetCookiesSameSite: true
+              env: {
+                httpUrl
+                httpsUrl
+              }
+            }
+            processEnv: FORCED_SAMESITE_ENV
+            originalTitle: "e2e cookies with no baseurl"
+            spec: "cookies_spec_no_baseurl.coffee"
+            snapshot: true
           }
-        }
-        originalTitle: "e2e cookies with no baseurl"
-        spec: "cookies_spec_no_baseurl.coffee"
-        snapshot: true
-      }
