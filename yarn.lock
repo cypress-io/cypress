@@ -1400,6 +1400,15 @@
   dependencies:
     mocha ">=1.13.0"
 
+"@cypress/parse-domain@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@cypress/parse-domain/-/parse-domain-2.4.0.tgz#3034b50babfd0adffa2a018aa03264b1e5be4d9e"
+  integrity sha512-zEVjGz94SuA65kOCMRjVu6/mRyWWjVtoZIZt9xLePUWz4qxgOx1SPR1sv3jb+KpmeQxZxpHYtGUj6S16Ltyhbw==
+  dependencies:
+    got "^8.3.2"
+    mkdirp "^0.5.1"
+    npm-run-all "^4.1.5"
+
 "@cypress/questions-remain@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@cypress/questions-remain/-/questions-remain-1.0.1.tgz#334dc830323192995b43d7bbae9dd6db5e551a22"
@@ -18637,14 +18646,6 @@ parse-bmfont-xml@^1.1.4:
   dependencies:
     xml-parse-from-string "^1.0.0"
     xml2js "^0.4.5"
-
-parse-domain@bahmutov/parse-domain#fb60bd4:
-  version "2.3.4"
-  resolved "https://codeload.github.com/bahmutov/parse-domain/tar.gz/fb60bd4d19523e6c26dee19fb3397e916524576e"
-  dependencies:
-    got "^8.3.2"
-    mkdirp "^0.5.1"
-    npm-run-all "^4.1.5"
 
 parse-filepath@^1.0.1:
   version "1.0.2"
