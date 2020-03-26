@@ -12,8 +12,8 @@ registerInMocha()
 
 const { match } = sinon
 
-const events = require('../../../driver/test/__snapshots__/runner.spec.js.snapshot')
-const { EventSnapshots } = require('../../../driver/test/cypress/integration/cypress/eventSnapshots')
+const events = require('../../../runner/test/__snapshots__/runner.spec.js.snapshot')
+const { EventSnapshots } = require('../../../runner/test/cypress/support/eventSnapshots')
 
 let currentReporter
 let currentStubs

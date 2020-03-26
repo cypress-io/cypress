@@ -1,15 +1,16 @@
 /* eslint prefer-rest-params: "off", no-console: "off", arrow-body-style: "off"*/
 
 const { _ } = Cypress
-const helpers = require('../../support/helpers')
+const helpers = require('../support/helpers')
 
-const { registerInCypress, stringifyShort } = require('../../plugins/snapshot/command')
+const snapshotPlugin = require('../plugins/snapshot/command')
 
-const snapshots = require('./eventSnapshots').EventSnapshots
+const snapshots = require('../support/eventSnapshots').EventSnapshots
 
 const sinon = require('sinon')
 
-registerInCypress()
+snapshotPlugin.registerInCypress()
+const { stringifyShort } = snapshotPlugin
 /**
  * @type {sinon.SinonMatch}
  */
@@ -86,7 +87,7 @@ const createCypress = (mochaTests, opts = {}) => {
     config: {},
   })
 
-  return cy.visit('/fixtures/isolated-runner.html#/tests/integration/cypress/empty_spec.js')
+  return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
   .then({ timeout: 60000 }, (win) => {
     win.channel.destroy()
 

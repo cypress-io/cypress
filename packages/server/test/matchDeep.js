@@ -1,5 +1,5 @@
-const { matchDeep } = require('../../driver/test/cypress/plugins/snapshot/command')
-const { getSnapshot, saveSnapshot } = require('../../driver/test/cypress/plugins/snapshot')
+const { matchDeep } = require('../../runner/test/cypress/plugins/snapshot/command')
+const { getSnapshot, saveSnapshot } = require('../../runner/test/cypress/plugins/snapshot')
 const chai = require('chai')
 const _ = require('lodash')
 const sinon = require('sinon')

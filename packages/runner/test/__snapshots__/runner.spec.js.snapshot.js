@@ -14,7 +14,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -265,7 +265,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -285,7 +285,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js",
+      "file": "cypress/integration/runner.spec.js",
       "tests": [],
       "suites": [
         {
@@ -334,7 +334,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -506,7 +506,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -526,7 +526,7 @@ exports['FAIL_IN_AFTEREACH.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js",
+      "file": "cypress/integration/runner.spec.js",
       "tests": [],
       "suites": [
         {
@@ -568,7 +568,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -666,7 +666,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -686,7 +686,7 @@ exports['FAIL_IN_BEFORE.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js",
+      "file": "cypress/integration/runner.spec.js",
       "tests": [],
       "suites": [
         {
@@ -728,7 +728,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -838,7 +838,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -858,7 +858,7 @@ exports['FAIL_IN_BEFOREEACH.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js",
+      "file": "cypress/integration/runner.spec.js",
       "tests": [],
       "suites": [
         {
@@ -900,7 +900,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -1246,7 +1246,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -1266,7 +1266,7 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js",
+      "file": "cypress/integration/runner.spec.js",
       "tests": [],
       "suites": [
         {
@@ -1309,7 +1309,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -1645,7 +1645,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -1665,7 +1665,7 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js",
+      "file": "cypress/integration/runner.spec.js",
       "tests": [],
       "suites": [
         {
@@ -1708,7 +1708,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -1820,7 +1820,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -1840,7 +1840,7 @@ exports['SIMPLE_SINGLE_TEST.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js",
+      "file": "cypress/integration/runner.spec.js",
       "tests": [],
       "suites": [
         {
@@ -1882,7 +1882,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -2569,7 +2569,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js"
     }
   ],
   [
@@ -2589,7 +2589,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js",
+      "file": "cypress/integration/runner.spec.js",
       "tests": [],
       "suites": [
         {

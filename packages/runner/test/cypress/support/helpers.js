@@ -1,14 +1,6 @@
 const { _ } = Cypress
 const debug = require('debug')('spec')
 
-const getFirstSubjectByName = (name) => {
-  return cy.queue.find({ name }).get('subject')
-}
-
-const getQueueNames = () => {
-  return _.map(cy.queue, 'name')
-}
-
 const createHooks = (win, hooks = []) => {
   _.each(hooks, (hook) => {
     if (_.isString(hook)) {
@@ -136,13 +128,7 @@ const generateMochaTestsForWin = (win, obj) => {
   createSuites(win, obj.suites)
 }
 
-// window.localStorage.debug = 'spec*'
-
 module.exports = {
-  getQueueNames,
-
-  getFirstSubjectByName,
-
   generateMochaTestsForWin,
 }
 

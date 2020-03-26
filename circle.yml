@@ -351,8 +351,8 @@ jobs:
       - store-npm-logs
 
   "server-performance-tests":
-      <<: *defaults
-      steps:
+    <<: *defaults
+    steps:
       - attach_workspace:
           at: ~/
       - run:
@@ -533,6 +533,48 @@ jobs:
           browser: firefox
           chunk: 8
 
+  "runner-integration-tests-chrome":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn workspace @packages/driver start
+          background: true
+      - run:
+          command: yarn wait-on http://localhost:3500
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-chrome --browser chrome
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
+  "runner-integration-tests-firefox":
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn workspace @packages/driver start
+          background: true
+      - run:
+          command: yarn wait-on http://localhost:3500
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-chrome --browser firefox
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
   "driver-integration-tests-chrome":
     <<: *defaults
     parallelism: 5
@@ -626,7 +668,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command:  yarn workspace @packages/reporter build-for-tests
+          command: yarn workspace @packages/reporter build-for-tests
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
@@ -1044,7 +1086,6 @@ jobs:
           command: "npm run cypress:run"
           wait-on: "http://localhost:2222"
 
-
   "test-binary-against-realworld-firefox":
     <<: *defaults
     steps:
@@ -1224,6 +1265,13 @@ linux-workflow: &linux-workflow
     - driver-integration-tests-firefox:
         requires:
           - build
+    - runner-integration-tests-chrome:
+        requires:
+          - build
+    - runner-integration-tests-firefox:
+        requires:
+          - build
+
     ## TODO: add these back in when flaky tests are fixed
     # - driver-integration-tests-electron:
     #     requires:

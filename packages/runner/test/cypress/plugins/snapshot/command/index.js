@@ -561,5 +561,4 @@ module.exports = {
   registerInCypress,
   matchDeep,
   stringifyShort,
-
 }

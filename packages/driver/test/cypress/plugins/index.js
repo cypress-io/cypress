@@ -5,7 +5,6 @@ const _ = require('lodash')
 const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
-const { getSnapshot, saveSnapshot } = require('./snapshot')
 const webpack = require('@cypress/webpack-preprocessor')
 
 process.env.NO_LIVERELOAD = '1'
@@ -34,10 +33,5 @@ module.exports = (on) => {
 
       return null
     },
-
-    getSnapshot,
-
-    saveSnapshot,
-
   })
 }
