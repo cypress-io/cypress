@@ -36,7 +36,7 @@ export default class MarkdownRenderer extends React.PureComponent {
     return (
       <span ref={(node) => this.node = node}
         dangerouslySetInnerHTML={{
-          __html: renderFn(this.props.markdown),
+          __html: renderFn.call(md, this.props.markdown),
         }}>
       </span>
     )
