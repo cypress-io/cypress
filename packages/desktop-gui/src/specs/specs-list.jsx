@@ -133,12 +133,13 @@ class SpecsList extends Component {
 
   _folderContent (spec, nestingLevel) {
     const isExpanded = spec.isExpanded
+    const arrowIcon = <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
 
     return (
       <li key={spec.path} className={`folder level-${nestingLevel} ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
           <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
-            <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
+            {nestingLevel === 0 && arrowIcon}
             {nestingLevel !== 0 ? <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`}></i> : null}
             {
               nestingLevel === 0 ?
@@ -154,6 +155,7 @@ class SpecsList extends Component {
                 </> :
                 spec.displayName
             }
+            {nestingLevel !== 0 && arrowIcon}
           </div>
           {
             isExpanded ?

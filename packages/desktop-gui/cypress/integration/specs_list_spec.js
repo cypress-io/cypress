@@ -215,6 +215,16 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', this.numSpecs)
           cy.get('.folder').should('have.length', 10)
         })
+
+        it('folders arrow icons positioning', () => {
+          cy.get('.folder.level-0').within(() => {
+            cy.get('.folder-name *').first().should('have.class', 'folder-collapse-icon')
+          })
+
+          cy.get('.folder.level-1, .folder.level-2').within(() => {
+            cy.get('.folder-name *').last().should('have.class', 'folder-collapse-icon')
+          })
+        })
       })
 
       context('collapsing specs', function () {
