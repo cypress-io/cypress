@@ -48,19 +48,6 @@ const threeTestsWithHooks = {
   suites: { 'suite 1': { hooks: ['before', 'beforeEach', 'afterEach', 'after'], tests: ['test 1', 'test 2', 'test 3'] } },
 }
 
-const threeTestsWithRetry = {
-  suites: {
-    'suite 1': {
-      hooks: ['before', 'beforeEach', 'afterEach', 'after'],
-      tests: [
-        'test 1',
-        { name: 'test 2', fail: 2 },
-        'test 3',
-      ],
-    },
-  },
-}
-
 const enableStubSnapshots = false
 // const enableStubSnapshots = true
 
@@ -787,15 +774,6 @@ describe('src/cypress/runner', () => {
         createCypress(threeTestsWithHooks)
         .then(() => {
           snapshotEvents(snapshots.THREE_TESTS_WITH_HOOKS)
-        })
-      })
-
-      it('three tests with retry', () => {
-        createCypress(threeTestsWithRetry, { config: {
-          numTestRetries: 2,
-        } })
-        .then(() => {
-          snapshotEvents(snapshots.THREE_TESTS_WITH_RETRY)
         })
       })
     })

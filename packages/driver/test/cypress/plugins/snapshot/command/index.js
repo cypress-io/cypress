@@ -523,7 +523,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       act = printVar(act)
 
       if (exp !== act) {
-        text = options.wrap('modified', `${exp} ➡️  ${act}`)
+        text = options.wrap('modified', `**${exp} ⮕ ${act}**`)
         changed = true
       }
     }
