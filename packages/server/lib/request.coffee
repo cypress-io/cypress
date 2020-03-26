@@ -22,7 +22,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
 ## sameSite from tough-cookie is slightly different from webextension API
 convertSameSiteToughToExtension = (sameSite, setCookie) =>
-  ## tough-cookie uses 'none' as a default, so run this regex to detect if
+  ## tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
   ## SameSite=None was not explicitly set
   ## @see https://github.com/salesforce/tough-cookie/issues/191
   isUnspecified = sameSite is "none" and !SAMESITE_NONE_RE.test(setCookie)
