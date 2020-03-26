@@ -22,7 +22,8 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 ## sameSite from tough-cookie is slightly different from webextension API
 convertSameSiteToughToExtension = (str) =>
   if str is "none"
-    return "no_restriction"
+    ## tough-cookie uses 'none' as a default, so pass `undefined` to use the browser's default
+    return undefined
 
   return str
 
