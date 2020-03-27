@@ -170,6 +170,8 @@ describe "e2e cookies", ->
       httpUrl = "http://#{baseDomain}#{if haveRoot then '' else ":#{httpPort}"}"
       httpsUrl = "https://#{baseDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
 
+      ## once browsers are shipping with the options in FORCED_SAMESITE_ENV as default,
+      ## we can remove this extra test condition
       [
         [FORCED_SAMESITE_ENV, 'with forced SameSite']
         [{}, 'without forced SameSite']
@@ -208,16 +210,14 @@ describe "e2e cookies", ->
                 })
             }
 
-          e2e.it "passes with no baseurl", {
-            config: {
-              experimentalGetCookiesSameSite: true
-              env: {
-                httpUrl
-                httpsUrl
-              }
-            }
-            processEnv: FORCED_SAMESITE_ENV
-            originalTitle: "e2e cookies with no baseurl"
-            spec: "cookies_spec_no_baseurl.coffee"
-            snapshot: true
+      e2e.it "passes with no baseurl", {
+        config: {
+          env: {
+            httpUrl
+            httpsUrl
           }
+        }
+        originalTitle: "e2e cookies with no baseurl"
+        spec: "cookies_spec_no_baseurl.coffee"
+        snapshot: true
+      }

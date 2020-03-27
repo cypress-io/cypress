@@ -14,6 +14,14 @@ setCookieDomain = ".#{baseUrlLocation.getSuperDomain()}"
 if ['localhost', '127.0.0.1'].includes(expectedDomain)
   setCookieDomain = expectedDomain
 
+## chrome defaults to "unspecified"
+defaultSameSite = undefined
+
+if Cypress.isBrowser('firefox')
+  ## firefox will default to "no_restriction"
+  ## @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
+  defaultSameSite = 'no_restriction'
+
 describe "cookies", ->
   before ->
     if Cypress.env('noBaseUrl')
@@ -34,36 +42,31 @@ describe "cookies", ->
       })
 
     it "can get all cookies", ->
+      expectedCookieKeys = ["domain", "name", "value", "path", "secure", "httpOnly", "expiry"]
+
+      if defaultSameSite
+        ## samesite will only be present if it is defined
+        expectedCookieKeys.push('sameSite')
+
+      assertFirstCookie = (c) ->
+        expect(c.domain).to.eq(setCookieDomain)
+        expect(c.httpOnly).to.eq(false)
+        expect(c.name).to.eq("foo")
+        expect(c.value).to.eq("bar")
+        expect(c.path).to.eq("/")
+        expect(c.secure).to.eq(false)
+        expect(c.expiry).to.be.a("number")
+        expect(c.sameSite).to.eq(defaultSameSite)
+
+        expect(c).to.have.keys(expectedCookieKeys)
+
       cy
         .clearCookie("foo1")
-        .setCookie("foo", "bar").then (c) ->
-          expect(c.domain).to.eq(setCookieDomain)
-          expect(c.httpOnly).to.eq(false)
-          expect(c.name).to.eq("foo")
-          expect(c.value).to.eq("bar")
-          expect(c.path).to.eq("/")
-          expect(c.secure).to.eq(false)
-          expect(c.expiry).to.be.a("number")
-
-          expect(c).to.have.keys(
-            "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-          )
+        .setCookie("foo", "bar").then assertFirstCookie
         .getCookies()
           .should("have.length", 1)
-          .then (cookies) ->
-            c = cookies[0]
-
-            expect(c.domain).to.eq(setCookieDomain)
-            expect(c.httpOnly).to.eq(false)
-            expect(c.name).to.eq("foo")
-            expect(c.value).to.eq("bar")
-            expect(c.path).to.eq("/")
-            expect(c.secure).to.eq(false)
-            expect(c.expiry).to.be.a("number")
-
-            expect(c).to.have.keys(
-              "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-            )
+          .its(0)
+          .then assertFirstCookie
         .clearCookies()
           .should("be.null")
         .setCookie("wtf", "bob", {httpOnly: true, path: "/foo", secure: true})
@@ -75,10 +78,9 @@ describe "cookies", ->
           expect(c.path).to.eq("/foo")
           expect(c.secure).to.eq(true)
           expect(c.expiry).to.be.a("number")
+          expect(c.sameSite).to.eq(defaultSameSite)
 
-          expect(c).to.have.keys(
-            "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-          )
+          expect(c).to.have.keys(expectedCookieKeys)
         .clearCookie("wtf")
           .should("be.null")
         .getCookie("doesNotExist")
@@ -282,15 +284,19 @@ describe "cookies", ->
 
                 _.times n + 1, (i) =>
                   ['foo', 'bar'].forEach (tag) ->
-                    expectedGetCookiesArray.push({
+                    expectedCookie = {
                       "name": "name#{tag}#{i}",
                       "value": "val#{tag}#{i}",
                       "path": "/",
                       "domain": if i % 2 == 8 - n then expectedDomain else altDomain,
                       "secure": false,
                       "httpOnly": false,
-                      "sameSite": 'no_restriction'
-                    })
+                    }
+
+                    if defaultSameSite
+                      expectedCookie.sameSite = defaultSameSite
+
+                    expectedGetCookiesArray.push(expectedCookie)
 
                 expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
 

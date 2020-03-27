@@ -56,7 +56,10 @@ module.exports = (on, config) => {
 
     if (browser.family === 'firefox' && process.env.FIREFOX_FORCE_STRICT_SAMESITE) {
       // @see https://www.jardinesoftware.net/2019/10/28/samesite-by-default-in-2020/
-      options.preferences['network.cookie.sameSite.laxByDefault'] = true
+      // this option will eventually become default, but for now, it seems to have inconsistent
+      // behavior in the extension vs regular web browsing - default in webextension is still
+      // "no_restriction"
+      // options.preferences['network.cookie.sameSite.laxByDefault'] = true
       options.preferences['network.cookie.sameSite.noneRequiresSecure'] = true
     }
 
