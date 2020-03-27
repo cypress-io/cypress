@@ -95,8 +95,8 @@ context('lib/browsers/cdp_automation', () => {
         return this.onRequest('get:cookies', { domain: 'localhost' })
         .then((resp) => {
           expect(resp).to.deep.eq([
-            { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123 },
-            { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456 },
+            { name: 'foo', value: 'f', path: '/', domain: 'localhost', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
+            { name: 'bar', value: 'b', path: '/', domain: 'localhost', secure: false, httpOnly: false, expirationDate: 456, sameSite: undefined },
           ])
         })
       })
@@ -115,7 +115,7 @@ context('lib/browsers/cdp_automation', () => {
       it('returns a specific cookie by name', function () {
         return this.onRequest('get:cookie', { domain: 'google.com', name: 'session' })
         .then((resp) => {
-          expect(resp).to.deep.eq({ name: 'session', value: 'key', path: '/login', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123 })
+          expect(resp).to.deep.eq({ name: 'session', value: 'key', path: '/login', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined })
         })
       })
 
@@ -129,9 +129,9 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('set:cookie', () => {
       beforeEach(function () {
-        this.sendDebuggerCommand.withArgs('Network.setCookie', { domain: '.google.com', name: 'session', value: 'key', path: '/', expires: undefined })
+        this.sendDebuggerCommand.withArgs('Network.setCookie', { domain: '.google.com', name: 'session', value: 'key', path: '/', expires: undefined, sameSite: undefined })
         .resolves({ success: true })
-        .withArgs('Network.setCookie', { domain: 'foo', path: '/bar', name: '', value: '', expires: undefined })
+        .withArgs('Network.setCookie', { domain: 'foo', path: '/bar', name: '', value: '', expires: undefined, sameSite: undefined })
         .rejects(new Error('some error'))
         .withArgs('Network.getAllCookies')
         .resolves({
@@ -144,7 +144,7 @@ context('lib/browsers/cdp_automation', () => {
       it('resolves with the cookie props', function () {
         return this.onRequest('set:cookie', { domain: 'google.com', name: 'session', value: 'key', path: '/' })
         .then((resp) => {
-          expect(resp).to.deep.eq({ domain: '.google.com', expirationDate: undefined, httpOnly: false, name: 'session', value: 'key', path: '/', secure: false })
+          expect(resp).to.deep.eq({ domain: '.google.com', expirationDate: undefined, httpOnly: false, name: 'session', value: 'key', path: '/', secure: false, sameSite: undefined })
         })
       })
 
@@ -178,7 +178,7 @@ context('lib/browsers/cdp_automation', () => {
         return this.onRequest('clear:cookie', { domain: 'google.com', name: 'session' })
         .then((resp) => {
           expect(resp).to.deep.eq(
-            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123 },
+            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
           )
         })
       })
@@ -205,7 +205,7 @@ context('lib/browsers/cdp_automation', () => {
         this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
         this.sendDebuggerCommand.withArgs('Page.captureScreenshot').resolves({ data: 'foo' })
 
-        expect(this.onRequest('take:screenshot'))
+        return expect(this.onRequest('take:screenshot'))
         .to.eventually.equal('data:image/png;base64,foo')
       })
 
@@ -213,7 +213,7 @@ context('lib/browsers/cdp_automation', () => {
         this.sendDebuggerCommand.withArgs('Browser.getVersion').resolves({ protocolVersion: '1.3' })
         this.sendDebuggerCommand.withArgs('Page.captureScreenshot').rejects()
 
-        expect(this.onRequest('take:screenshot'))
+        return expect(this.onRequest('take:screenshot'))
         .to.be.rejectedWith('The browser responded with an error when Cypress attempted to take a screenshot.')
       })
     })

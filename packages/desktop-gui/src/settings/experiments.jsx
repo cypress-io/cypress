@@ -3,6 +3,7 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import ipc from '../lib/ipc'
 import { getExperiments } from '@packages/server/lib/experiments'
+import MarkdownRenderer from '../lib/markdown-renderer'
 
 const openHelp = (e) => {
   e.preventDefault()
@@ -27,14 +28,14 @@ const Experiments = observer(({ project }) => {
           _.map(experiments, (experiment, i) => (
             <li className='experiment' key={i}>
               <h5>
-                {experiment.name}
+                <MarkdownRenderer markdown={experiment.name} noParagraphWrapper/>
                 <span className={`experiment-status-sign ${experiment.enabled ? 'enabled' : ''}`}>
                   {experiment.enabled ? 'ON' : 'OFF'}
                 </span>
               </h5>
               <div className='experiment-desc'>
                 <p className="text-muted">
-                  {experiment.summary}
+                  <MarkdownRenderer markdown={experiment.summary} noParagraphWrapper/>
                 </p>
                 <div className='experiment-status'>
                   <code>{experiment.key}</code>
