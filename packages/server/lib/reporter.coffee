@@ -1,6 +1,8 @@
 _     = require("lodash")
 path  = require("path")
-Mocha = require("mocha")
+## mocha-v* is used to allow us to have later versions of mocha specified in devDependencies
+## and prevents accidently upgrading this one
+Mocha = require("mocha-v2")
 debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
 
@@ -20,7 +22,7 @@ Mocha.Suite.prototype.titlePath = ->
     result = result.concat(@parent.titlePath())
 
   if !@root
-    result.push(@title);
+    result.push(@title)
 
   return result
 
