@@ -1186,6 +1186,23 @@ module.exports = {
       message: "#{cmd('setCookie')} must be passed an RFC-6265-compliant cookie value. You passed:\n\n`{{value}}`"
       docsUrl: "https://on.cypress.io/setcookie"
     }
+    invalid_samesite: ({ validValues, value }) => {
+      message: """
+      If a `sameSite` value is supplied to #{cmd('setCookie')}, it must be a string from the following list:
+        > #{validValues.join(', ')}
+      You passed:
+        > #{format(value)}
+      """
+      docsUrl: "https://on.cypress.io/setcookie"
+    }
+    secure_not_set_with_samesite_none: ({ validValues, value }) => {
+      message: """
+      Only cookies with the `secure` flag set to `true` can use `sameSite: '{{value}}'`.
+
+      Pass `secure: true` to #{cmd('setCookie')} to set a cookie with `sameSite: '{{value}}'`.
+      """
+      docsUrl: "https://on.cypress.io/setcookie"
+    }
 
   should:
     chainer_not_found: "The chainer `{{chainer}}` was not found. Could not build assertion."

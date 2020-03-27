@@ -140,7 +140,7 @@
     "@packages/static": "*",
     "@packages/ts": "*",
     "@types/chai-as-promised": "7.1.2",
-    "@types/chrome": "0.0.91",
+    "@types/chrome": "0.0.101",
     "@types/node": "8.10.55",
     "babel-plugin-add-module-exports": "1.0.2",
     "babelify": "10.0.0",
