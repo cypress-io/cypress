@@ -136,3 +136,141 @@ Fix the error in your code and re-run your tests.
 
 
 `
+
+exports['e2e typescript passes 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (browserify_typescript_passing_spec.ts)                                    │
+  │ Searched:   cypress/integration/browserify_typescript_passing_spec.ts                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  browserify_typescript_passing_spec.ts                                           (1 of 1)
+
+
+  imports work
+    ✓ foo coffee
+    ✓ bar babel
+    ✓ dom jsx
+
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     browserify_typescript_passing_spec.ts                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_typescript_passing_s     (X second)
+                          pec.ts.mp4                                                                
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  browserify_typescript_passing_spec.      XX:XX        3        3        -        -        - │
+  │    ts                                                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+
+
+`
+
+exports['e2e typescript fails 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (browserify_typescript_failing_spec.ts)                                    │
+  │ Searched:   cypress/integration/browserify_typescript_failing_spec.ts                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  browserify_typescript_failing_spec.ts                                           (1 of 1)
+
+Oops...we found an error preparing this test file:
+
+  /foo/bar/.projects/e2e/cypress/integration/browserify_typescript_failing_spec.ts
+
+The error was:
+
+/foo/bar/.projects/e2e/cypress/integration/browserify_typescript_failing_spec.ts:1
+describe('fail', - > );
+                   ^
+ParseError: Unexpected token
+
+This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
+
+- A missing file or dependency
+- A syntax error in the file or one of its dependencies
+
+Fix the error in your code and re-run your tests.
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        0                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     browserify_typescript_failing_spec.ts                                            │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_typescript_failing_s     (X second)
+                          pec.ts.mp4                                                                
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  browserify_typescript_failing_spec.      XX:XX        -        -        1        -        - │
+  │    ts                                                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
+
+
+`

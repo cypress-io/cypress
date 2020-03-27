@@ -46,7 +46,7 @@ setDefaultPreprocessor = (config) ->
 
   tsPath = resolve.typescript(config)
 
-  if tsPath isnt null 
+  if tsPath isnt null
     options.browserifyOptions.extensions.push('.ts', '.tsx');
     options.browserifyOptions.transform.pop()
     options.browserifyOptions.transform.push([
