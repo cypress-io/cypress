@@ -51,7 +51,7 @@ interface StringValues {
   ```
 */
 const _summaries: StringValues = {
-  experimentalGetCookiesSameSite: 'Adds `sameSite` values to the objects returned by `cy.getCookie` and `cy.getCookies`. Will become the default behavior in Cypress 5.0.',
+  experimentalGetCookiesSameSite: 'Adds `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.',
 }
 
 /**

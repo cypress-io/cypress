@@ -2451,7 +2451,8 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * Enable receiving `sameSite` from `cy.cookies` commands.
+     * If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`,
+     * `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.
      * @default false
      */
     experimentalGetCookiesSameSite: boolean
