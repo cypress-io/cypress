@@ -1,35 +1,47 @@
-_ = require("lodash")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
 
-$Cypress = require("../cypress")
+const $Cypress = require("../cypress");
 
-class $Chainer
-  constructor: ->
-    @chainerId = _.uniqueId("chainer")
-    @firstCall = true
+class $Chainer {
+  constructor() {
+    this.chainerId = _.uniqueId("chainer");
+    this.firstCall = true;
+  }
 
-  @remove = (key) ->
-    delete $Chainer.prototype[key]
+  static remove(key) {
+    return delete $Chainer.prototype[key];
+  }
 
-  @add = (key, fn) ->
-    ## when our instance methods are invoked
-    ## we know we are chaining on an existing series
-    $Chainer.prototype[key] = (args...) ->
-      ## call back the original function with our new args
-      ## pass args an as array and not a destructured invocation
-      if fn(@, args)
-        ## no longer the first call
-        @firstCall = false
+  static add(key, fn) {
+    //# when our instance methods are invoked
+    //# we know we are chaining on an existing series
+    return $Chainer.prototype[key] = function(...args) {
+      //# call back the original function with our new args
+      //# pass args an as array and not a destructured invocation
+      if (fn(this, args)) {
+        //# no longer the first call
+        this.firstCall = false;
+      }
 
-      ## return the chainer so additional calls
-      ## are slurped up by the chainer instead of cy
-      return @
+      //# return the chainer so additional calls
+      //# are slurped up by the chainer instead of cy
+      return this;
+    };
+  }
 
-  ## creates a new chainer instance
-  @create = (key, args) ->
-    chainer = new $Chainer
+  //# creates a new chainer instance
+  static create(key, args) {
+    const chainer = new $Chainer;
 
-    ## since this is the first function invocation
-    ## we need to pass through onto our instance methods
-    chainer[key].apply(chainer, args)
+    //# since this is the first function invocation
+    //# we need to pass through onto our instance methods
+    return chainer[key].apply(chainer, args);
+  }
+}
 
-module.exports = $Chainer
+module.exports = $Chainer;
