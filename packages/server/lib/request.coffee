@@ -20,7 +20,6 @@ SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-## sameSite from tough-cookie is slightly different from webextension API
 convertSameSiteToughToExtension = (sameSite, setCookie) =>
   ## tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
   ## SameSite=None was not explicitly set
