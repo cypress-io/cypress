@@ -547,7 +547,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-chrome --browser chrome
+            yarn workspace @packages/runner cypress:run --record --group runner-integration-chrome --browser chrome
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
