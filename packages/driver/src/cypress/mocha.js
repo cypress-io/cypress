@@ -114,7 +114,7 @@ const patchRunnerFail = () => {
     const errMessage = _.get(err, 'message')
 
     if (errMessage && errMessage.indexOf('Resolution method is overspecified') > -1) {
-      err.message = $errUtils.errMsgByPath('mocha.overspecified', { error: err.stack })
+      err.message = $errUtils.errByPath('mocha.overspecified', { error: err.stack }).message
     }
 
     // if this isnt a correct error object then just bail
@@ -171,9 +171,9 @@ const patchRunnableResetTimeout = () => {
     }
 
     this.timer = setTimeout(() => {
-      const errMessage = $errUtils.errMsgByPath(getErrPath(), { ms })
+      const err = $errUtils.errByPath(getErrPath(), { ms })
 
-      runnable.callback(new Error(errMessage))
+      runnable.callback(err)
       runnable.timedOut = true
     }, ms)
   }

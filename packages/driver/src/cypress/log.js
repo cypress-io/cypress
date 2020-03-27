@@ -359,7 +359,7 @@ const Log = function (cy, state, config, obj) {
     },
 
     getError (err) {
-      return $errUtils.getErrStack(err)
+      return err.stack || err.message
     },
 
     setElAttrs () {

@@ -95,9 +95,33 @@ describe('driver/src/cypress/error_utils', () => {
         return true
       })
     })
+
+    it('attaches onFail to the error when it is a function', () => {
+      const onFail = function () {}
+      const fn = () => $errUtils.throwErr(new Error('foo'), { onFail })
+
+      expect(fn).throw().and.satisfy((err) => {
+        expect(err.onFail).to.equal(onFail)
+
+        return true
+      })
+    })
+
+    it('attaches onFail to the error when it is a command', () => {
+      const command = { error: cy.spy() }
+      const fn = () => $errUtils.throwErr(new Error('foo'), { onFail: command })
+
+      expect(fn).throw().and.satisfy((err) => {
+        err.onFail('the error')
+
+        expect(command.error).to.be.calledWith('the error')
+
+        return true
+      })
+    })
   })
 
-  context('.throwErrByPath', () => {
+  context('.errByPath', () => {
     beforeEach(() => {
       $errorMessages.__test_errors = {
         obj: {
@@ -159,293 +183,154 @@ describe('driver/src/cypress/error_utils', () => {
       }
     })
 
-    it('has correct name and message when error message path does not exist', () => {
-      const fn = () => $errUtils.throwErrByPath('not.there')
+    it('returns internal error when message path does not exist', () => {
+      const err = $errUtils.errByPath('not.there')
 
-      expect(fn).to.throw().and.satisfy((err) => {
-        expect(err.name).to.eq('InternalError')
-        expect(err.message).to.include(`Error message path 'not.there' does not exist`)
+      expect(err.name).to.eq('InternalCypressError')
+      expect(err.message).to.include(`Error message path 'not.there' does not exist`)
+    })
+
+    describe('when message value is an object', () => {
+      it('has correct name, message, and docs url when path exists', () => {
+        const err = $errUtils.errByPath('__test_errors.obj')
+
+        expect(err.name).to.eq('CypressError')
+        expect(err.message).to.include('This is a simple error message')
+        expect(err.docsUrl).to.include('https://on.link.io')
+      })
+
+      it('uses args provided for the error', () => {
+        const err = $errUtils.errByPath('__test_errors.obj_with_args', {
+          foo: 'foo', bar: ['bar', 'qux'],
+        })
+
+        expect(err.message).to.include('This has args like \'foo\' and bar,qux')
+        expect(err.docsUrl).to.include('https://on.link.io')
+      })
+
+      it('handles args being used multiple times in message', () => {
+        const err = $errUtils.errByPath('__test_errors.obj_with_multi_args', {
+          foo: 'foo', bar: ['bar', 'qux'],
+        })
+
+        expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
+        expect(err.docsUrl).to.include('https://on.link.io')
+      })
+
+      it('formats markdown in the error message', () => {
+        const err = $errUtils.errByPath('__test_errors.obj_with_markdown', {
+          foo: 'foo', bar: ['bar', 'qux'],
+        })
+
+        expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
+        expect(err.docsUrl).to.include('https://on.link.io')
+      })
+    })
+
+    describe('when message value is a string', () => {
+      it('has correct name, message, and docs url', () => {
+        const err = $errUtils.errByPath('__test_errors.str')
+
+        expect(err.name).to.eq('CypressError')
+        expect(err.message).to.include('This is a simple error message')
+        expect(err.docsUrl).to.be.undefined
+      })
+
+      it('uses args provided for the error', () => {
+        const err = $errUtils.errByPath('__test_errors.str_with_args', {
+          foo: 'foo', bar: ['bar', 'qux'],
+        })
+
+        expect(err.message).to.include('This has args like \'foo\' and bar,qux')
+      })
+
+      it('handles args being used multiple times in message', () => {
+        const err = $errUtils.errByPath('__test_errors.str_with_multi_args', {
+          foo: 'foo', bar: ['bar', 'qux'],
+        })
+
+        expect(err.message).to.include(`This has args like 'foo' and bar,qux, and 'foo' is used twice`)
+      })
+
+      it('formats markdown in the error message', () => {
+        const err = $errUtils.errByPath('__test_errors.str_with_markdown', {
+          foo: 'foo', bar: ['bar', 'qux'],
+        })
+
+        expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
+      })
+    })
+
+    describe('when message value is a function that returns a string', () => {
+      it('has correct name and message', () => {
+        const err = $errUtils.errByPath('__test_errors.fn')
+
+        expect(err.name).to.eq('CypressError')
+        expect(err.message).to.include('This is a simple error message')
 
         return true
       })
-    })
-
-    describe('when error is an object', () => {
-      it('has correct name, message, and docs url when path exists', () => {
-        const fn = () => $errUtils.throwErrByPath('__test_errors.obj')
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.name).to.eq('CypressError')
-          expect(err.message).to.include('This is a simple error message')
-          expect(err.docsUrl).to.include('https://on.link.io')
-
-          return true
-        })
-      })
-
-      it('uses args provided for the error', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.obj_with_args', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include('This has args like \'foo\' and bar,qux')
-          expect(err.docsUrl).to.include('https://on.link.io')
-
-          return true
-        })
-      })
-
-      it('handles args being used multiple times in message', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.obj_with_multi_args', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
-          expect(err.docsUrl).to.include('https://on.link.io')
-
-          return true
-        })
-      })
-
-      it('formats markdown in the error message', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.obj_with_markdown', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
-          expect(err.docsUrl).to.include('https://on.link.io')
-
-          return true
-        })
-      })
-    })
-
-    describe('when error is a string', () => {
-      it('has correct name, message, and docs url', () => {
-        const fn = () => $errUtils.throwErrByPath('__test_errors.str')
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.name).to.eq('CypressError')
-          expect(err.message).to.include('This is a simple error message')
-          expect(err.docsUrl).to.be.undefined
-
-          return true
-        })
-      })
-
-      it('uses args provided for the error', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.str_with_args', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include('This has args like \'foo\' and bar,qux')
-
-          return true
-        })
-      })
-
-      it('handles args being used multiple times in message', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.str_with_multi_args', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include(`This has args like 'foo' and bar,qux, and 'foo' is used twice`)
-
-          return true
-        })
-      })
-
-      it('formats markdown in the error message', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.str_with_markdown', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
-
-          return true
-        })
-      })
-    })
-
-    describe('when error is a function that returns a string', () => {
-      it('has correct name and message', () => {
-        const fn = () => $errUtils.throwErrByPath('__test_errors.fn')
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.name).to.eq('CypressError')
-          expect(err.message).to.include('This is a simple error message')
-
-          return true
-        })
-      })
 
       it('uses args in the error message', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.fn_with_args', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include('This has args like \'foo\' and bar,qux')
-
-          return true
+        const err = $errUtils.errByPath('__test_errors.fn_with_args', {
+          foo: 'foo', bar: ['bar', 'qux'],
         })
+
+        expect(err.message).to.include('This has args like \'foo\' and bar,qux')
       })
 
       it('handles args being used multiple times in message', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.fn_with_multi_args', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
-
-          return true
+        const err = $errUtils.errByPath('__test_errors.fn_with_multi_args', {
+          foo: 'foo', bar: ['bar', 'qux'],
         })
+
+        expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
       })
 
       it('formats markdown in the error message', () => {
-        const fn = () => {
-          $errUtils.throwErrByPath('__test_errors.fn_with_markdown', {
-            args: {
-              foo: 'foo', bar: ['bar', 'qux'],
-            },
-          })
-        }
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
-
-          return true
+        const err = $errUtils.errByPath('__test_errors.fn_with_markdown', {
+          foo: 'foo', bar: ['bar', 'qux'],
         })
+
+        expect(err.message).to.include('This has markdown like `foo`, *bar,qux*, **foo**, and _bar,qux_')
       })
     })
 
-    describe('when error is a function that returns an object', () => {
+    describe('when message value is a function that returns an object', () => {
       describe('when no args are provided for the error', () => {
         it('has an err.name of CypressError', () => {
-          const fn = () => $errUtils.throwErrByPath('__test_errors.fn_returns_obj')
+          const err = $errUtils.errByPath('__test_errors.fn_returns_obj')
 
-          expect(fn).to.throw().and.satisfy((err) => {
-            expect(err.name).to.eq('CypressError')
-
-            return true
-          })
+          expect(err.name).to.eq('CypressError')
         })
 
         it('has the right message and docs url', () => {
-          const fn = () => $errUtils.throwErrByPath('__test_errors.fn_returns_obj')
+          const err = $errUtils.errByPath('__test_errors.fn_returns_obj')
 
-          expect(fn).to.throw().and.satisfy((err) => {
-            expect(err.message).to.include('This is a simple error message')
-            expect(err.docsUrl).to.include('https://on.link.io')
-
-            return true
-          })
+          expect(err.message).to.include('This is a simple error message')
+          expect(err.docsUrl).to.include('https://on.link.io')
         })
       })
 
       describe('when args are provided for the error', () => {
         it('uses them in the error message', () => {
-          const fn = () => {
-            $errUtils.throwErrByPath('__test_errors.fn_returns_obj_with_args', {
-              args: {
-                foo: 'foo', bar: ['bar', 'qux'],
-              },
-            })
-          }
-
-          expect(fn).to.throw().and.satisfy((err) => {
-            expect(err.message).to.include('This has args like \'foo\' and bar,qux')
-            expect(err.docsUrl).to.include('https://on.link.io')
-
-            return true
+          const err = $errUtils.errByPath('__test_errors.fn_returns_obj_with_args', {
+            foo: 'foo', bar: ['bar', 'qux'],
           })
+
+          expect(err.message).to.include('This has args like \'foo\' and bar,qux')
+          expect(err.docsUrl).to.include('https://on.link.io')
         })
       })
 
       describe('when args are provided for the error and some are used multiple times in message', () => {
         it('uses them in the error message', () => {
-          const fn = () => {
-            $errUtils.throwErrByPath('__test_errors.fn_returns_obj_with_multi_args', {
-              args: {
-                foo: 'foo', bar: ['bar', 'qux'],
-              },
-            })
-          }
-
-          expect(fn).to.throw().and.satisfy((err) => {
-            expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
-            expect(err.docsUrl).to.include('https://on.link.io')
-
-            return true
+          const err = $errUtils.errByPath('__test_errors.fn_returns_obj_with_multi_args', {
+            foo: 'foo', bar: ['bar', 'qux'],
           })
-        })
-      })
-    })
 
-    describe('when onFail is provided as a function', () => {
-      it('attaches the function to the error', () => {
-        const onFail = function () {}
-        const fn = () => $errUtils.throwErrByPath('__test_errors.obj', { onFail })
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          expect(err.onFail).to.equal(onFail)
-
-          return true
-        })
-      })
-    })
-
-    describe('when onFail is provided as a command', () => {
-      it('attaches the handler to the error', () => {
-        const command = { error: cy.spy() }
-
-        const fn = () => $errUtils.throwErrByPath('__test_errors.obj', { onFail: command })
-
-        expect(fn).to.throw().and.satisfy((err) => {
-          err.onFail('the error')
-
-          expect(command.error).to.be.calledWith('the error')
-
-          return true
+          expect(err.message).to.include('This has args like \'foo\' and bar,qux, and \'foo\' is used twice')
+          expect(err.docsUrl).to.include('https://on.link.io')
         })
       })
     })
@@ -459,168 +344,13 @@ describe('driver/src/cypress/error_utils', () => {
     })
   })
 
-  context('.errObjByPath', () => {
-    let errMsgs
+  context('.throwErrByPath', () => {
+    it('looks up error and throws it', () => {
+      $errorMessages.__test_error = 'simple error message'
 
-    beforeEach(() => {
-      errMsgs = {
-        command: {
-          obj: {
-            message: '`{{cmd}}` simple error message',
-            docsUrl: 'https://on.cypress.io',
-          },
-          str: '`{{cmd}}` simple error message',
-          fn (obj) {
-            return `\`${obj.cmd}\` simple error message`
-          },
-        },
-      }
-    })
+      const fn = () => $errUtils.throwErrByPath('__test_error')
 
-    it('returns obj when err is object', () => {
-      const obj = $errUtils.errObjByPath(errMsgs, 'command.obj', {
-        cmd: 'click',
-      })
-
-      expect(obj).to.deep.eq({
-        message: '`click` simple error message',
-        docsUrl: 'https://on.cypress.io',
-      })
-    })
-
-    it('returns obj when err is string', () => {
-      const obj = $errUtils.errObjByPath(errMsgs, 'command.str', {
-        cmd: 'click',
-      })
-
-      expect(obj).to.deep.eq({
-        message: '`click` simple error message',
-      })
-    })
-
-    it('returns obj when err is function', () => {
-      const obj = $errUtils.errObjByPath(errMsgs, 'command.fn', {
-        cmd: 'click',
-      })
-
-      expect(obj).to.deep.eq({
-        message: '`click` simple error message',
-      })
-    })
-
-    it('does not mutate the error message when it is an object', () => {
-      $errUtils.errObjByPath(errMsgs, 'command.obj', {
-        cmd: 'click',
-      })
-
-      const obj = $errUtils.errObjByPath(errMsgs, 'command.obj', {
-        cmd: 'dblclick',
-      })
-
-      expect(obj).to.deep.eq({
-        docsUrl: 'https://on.cypress.io',
-        message: '`dblclick` simple error message',
-      })
-    })
-  })
-
-  context('.getErrMsgWithObjByPath', () => {
-    let errMsgs
-
-    beforeEach(() => {
-      errMsgs = {
-        command: {
-          obj: {
-            message: '{{cmd}} simple error message',
-            docsurl: '',
-          },
-          str: '{{cmd}} simple error message',
-          fn (obj) {
-            return `\
-${obj.cmd} simple error message\
-`
-          },
-        },
-      }
-    })
-
-    it('returns the message when err is object', () => {
-      const msg = $errUtils.getErrMsgWithObjByPath(errMsgs, 'command.obj', {
-        cmd: 'click',
-      })
-
-      expect(msg).to.eq('click simple error message')
-    })
-
-    it('returns the message when err is string', () => {
-      const msg = $errUtils.getErrMsgWithObjByPath(errMsgs, 'command.str', {
-        cmd: 'click',
-      })
-
-      expect(msg).to.eq('click simple error message')
-    })
-
-    it('returns the message when err is function', () => {
-      const msg = $errUtils.getErrMsgWithObjByPath(errMsgs, 'command.str', {
-        cmd: 'click',
-      })
-
-      expect(msg).to.eq('click simple error message')
-    })
-  })
-
-  context('.getObjValueByPath', () => {
-    let obj
-
-    beforeEach(() => {
-      obj = {
-        foo: 'foo',
-        bar: {
-          baz: {
-            qux: 'qux',
-          },
-        },
-      }
-    })
-
-    it('throws if object not provided as first argument', () => {
-      const fn = () => {
-        return $errUtils.getObjValueByPath('foo')
-      }
-
-      expect(fn).to.throw('The first parameter to utils.getObjValueByPath() must be an object')
-    })
-
-    it('throws if path not provided as second argument', () => {
-      const fn = () => {
-        return $errUtils.getObjValueByPath(obj)
-      }
-
-      expect(fn).to.throw('The second parameter to utils.getObjValueByPath() must be a string')
-    })
-
-    it('returns value for shallow path', () => {
-      const objVal = $errUtils.getObjValueByPath(obj, 'foo')
-
-      expect(objVal).to.equal('foo')
-    })
-
-    it('returns value for deeper path', () => {
-      const objVal = $errUtils.getObjValueByPath(obj, 'bar.baz.qux')
-
-      expect(objVal).to.equal('qux')
-    })
-
-    it('returns undefined for non-existent shallow path', () => {
-      const objVal = $errUtils.getObjValueByPath(obj, 'nope')
-
-      expect(objVal).to.be.undefined
-    })
-
-    it('returns undefined for non-existent deeper path', () => {
-      const objVal = $errUtils.getObjValueByPath(obj, 'bar.baz.nope')
-
-      expect(objVal).to.be.undefined
+      expect(fn).to.throw('simple error message')
     })
   })
 

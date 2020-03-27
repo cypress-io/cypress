@@ -189,7 +189,7 @@ startXhrServer = (cy, state, config) ->
     onXhrAbort: (xhr, stack) =>
       setResponse(state, xhr)
 
-      err = new Error $errUtils.errMsgByPath("xhr.aborted")
+      err = $errUtils.errByPath("xhr.aborted")
       err.name = "AbortError"
       err.stack = stack
 

@@ -51,19 +51,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             onFail: (err) ->
               return unless err.type is "existence"
 
-              { message, docsUrl } = if contents?
-                ## file exists but it shouldn't
-                $errUtils.errObjByPath($errMessages, "files.existent", {
-                  file, filePath
-                })
-              else
-                ## file doesn't exist but it should
-                $errUtils.errObjByPath($errMessages, "files.nonexistent", {
-                  file, filePath
-                })
+              errPath = if contents? then "files.existent" else "files.nonexistent"
 
-              err.message = message
-              err.docsUrl = docsUrl
+              $errUtils.cypressErrByPath(errPath, {
+                args: { file, filePath },
+              })
 
             onRetry: verifyAssertions
           })

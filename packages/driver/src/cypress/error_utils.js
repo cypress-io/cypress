@@ -5,7 +5,7 @@ const $utils = require('./utils')
 const $stackUtils = require('./stack_utils')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
-const CypressErrorRe = /(AssertionError|CypressError)/
+const CypressErrorRe = /^(AssertionError|CypressError)$/
 const twoOrMoreNewLinesRe = /\n{2,}/
 
 const wrapErr = (err) => {
@@ -116,19 +116,13 @@ const throwErr = (err, options = {}) => {
 }
 
 const throwErrByPath = (errPath, options = {}) => {
-  let err
-
-  try {
-    err = cypressErrByPath(errPath, options)
-  } catch (internalError) {
-    err = internalErr(internalError)
-  }
+  const err = errByPath(errPath, options)
 
   return throwErr(err, options)
 }
 
 const warnByPath = (errPath, options = {}) => {
-  const errObj = errObjByPath($errorMessages, errPath, options.args)
+  const errObj = errByPath(errPath, options.args)
   let err = errObj.message
 
   if (errObj.docsUrl) {
@@ -138,27 +132,50 @@ const warnByPath = (errPath, options = {}) => {
   $utils.warning(err)
 }
 
-const internalErr = (err) => {
-  const newErr = new Error(err)
+class InternalCypressError extends Error {
+  constructor (message) {
+    super(message)
 
-  return mergeErrProps(newErr, err, { name: 'InternalError' })
+    this.name = 'InternalCypressError'
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, InternalCypressError)
+    }
+  }
+}
+
+class CypressError extends Error {
+  constructor (message) {
+    super(message)
+
+    this.name = 'CypressError'
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CypressError)
+    }
+  }
+}
+
+const internalErr = (err) => {
+  const newErr = new InternalCypressError(err.message)
+
+  return mergeErrProps(newErr, err)
 }
 
 const cypressErr = (err) => {
-  const newErr = new Error(err.message)
+  const newErr = new CypressError(err.message)
 
-  return mergeErrProps(newErr, err, { name: 'CypressError' })
+  return mergeErrProps(newErr, err)
 }
 
 const cypressErrByPath = (errPath, options = {}) => {
-  const errObj = errObjByPath($errorMessages, errPath, options.args)
+  const errObj = errByPath(errPath, options.args)
 
   return cypressErr(errObj)
 }
 
 const normalizeMsgNewLines = (message) => {
-  //# normalize more than 2 new lines
-  //# into only exactly 2 new lines
+  // normalize more than 2 new lines into only exactly 2 new lines
   return _
   .chain(message)
   .split(twoOrMoreNewLinesRe)
@@ -179,88 +196,47 @@ const replaceErrMsgTokens = (errMessage, args) => {
   return normalizeMsgNewLines(getMsg(args))
 }
 
-const errObjByPath = (errLookupObj, errPath, args) => {
-  let errObjStrOrFn = getObjValueByPath(errLookupObj, errPath)
+const errByPath = (msgPath, args) => {
+  let msgValue = _.get($errorMessages, msgPath)
 
-  if (!errObjStrOrFn) {
-    throw new Error(`Error message path '${errPath}' does not exist`)
+  if (!msgValue) {
+    return internalErr({ message: `Error message path '${msgPath}' does not exist` })
   }
 
-  let errObj = errObjStrOrFn
+  let msgObj = msgValue
 
-  if (_.isFunction(errObjStrOrFn)) {
-    errObj = errObjStrOrFn(args)
+  if (_.isFunction(msgValue)) {
+    msgObj = msgValue(args)
   }
 
-  if (_.isString(errObj)) {
-    // normalize into object if given string
-    errObj = {
-      message: errObj,
+  if (_.isString(msgObj)) {
+    msgObj = {
+      message: msgObj,
     }
   }
 
-  let extendErrObj = {
-    message: replaceErrMsgTokens(errObj.message, args),
-  }
-
-  if (errObj.docsUrl) {
-    extendErrObj.docsUrl = replaceErrMsgTokens(errObj.docsUrl, args)
-  }
-
-  return _.extend({}, errObj, extendErrObj)
+  return cypressErr({
+    message: replaceErrMsgTokens(msgObj.message, args),
+    docsUrl: msgObj.docsUrl ? replaceErrMsgTokens(msgObj.docsUrl, args) : undefined,
+  })
 }
 
-const errMsgByPath = (errPath, args) => {
-  return getErrMsgWithObjByPath($errorMessages, errPath, args)
-}
+const createUncaughtException = (type, err) => {
+  const errPath = type === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+  let uncaughtErr = errByPath(errPath, {
+    errMsg: err.message,
+  })
 
-const getErrMsgWithObjByPath = (errLookupObj, errPath, args) => {
-  const errObj = errObjByPath(errLookupObj, errPath, args)
+  uncaughtErr = mergeErrProps(uncaughtErr, {
+    name: `Uncaught ${err.name}`,
+    // $stackUtils.replaceStack won't replace stack if one isn't
+    // already present on error
+    stack: 'stack',
+  })
 
-  return errObj.message
-}
+  uncaughtErr = $stackUtils.replaceStack(uncaughtErr, err.stack)
 
-const getErrMessage = (err) => {
-  if (err && err.displayMessage) {
-    return err.displayMessage
-  }
-
-  if (err && err.message) {
-    return err.message
-  }
-
-  return err
-}
-
-const getErrStack = (err) => {
-  // if cypress or assertion error, don't return the stack
-  if (isCypressOrAssertionErr(err)) {
-    return err.toString()
-  }
-
-  return err.stack
-}
-
-const getObjValueByPath = (obj, keyPath) => {
-  if (!_.isObject(obj)) {
-    throw new Error('The first parameter to utils.getObjValueByPath() must be an object')
-  }
-
-  if (!_.isString(keyPath)) {
-    throw new Error('The second parameter to utils.getObjValueByPath() must be a string')
-  }
-
-  const keys = keyPath.split('.')
-  let val = obj
-
-  for (let key of keys) {
-    val = val[key]
-    if (!val) {
-      break
-    }
-  }
-
-  return val
+  return $stackUtils.normalizeStack(uncaughtErr)
 }
 
 const enhanceStack = ({ err, invocationStack, projectRoot }) => {
@@ -293,18 +269,13 @@ const processErr = (errObj = {}, config) => {
 
 module.exports = {
   appendErrMsg,
+  createUncaughtException,
   cypressErr,
   cypressErrByPath,
   enhanceStack,
-  errMsgByPath,
-  errObjByPath,
-  getErrMessage,
-  getErrMsgWithObjByPath,
-  getErrStack,
-  getObjValueByPath,
+  errByPath,
   isCypressErr,
   isCypressOrAssertionErr,
-  internalErr,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,

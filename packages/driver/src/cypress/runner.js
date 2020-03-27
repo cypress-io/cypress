@@ -743,10 +743,10 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       // we're skipping the remaining tests in this suite
       err = $errUtils.appendErrMsg(
         err,
-        $errUtils.errMsgByPath('uncaught.error_in_hook', {
+        $errUtils.errByPath('uncaught.error_in_hook', {
           parentTitle,
           hookName,
-        }),
+        }).message,
       )
     }
 
