@@ -26,12 +26,14 @@ const Experiments = observer(({ project }) => {
         {
           _.map(experiments, (experiment, i) => (
             <li className='experiment' key={i}>
-              <h5>
-                {experiment.name}
-                <span className={`experiment-status-sign ${experiment.enabled ? 'enabled' : ''}`}>
-                  {experiment.enabled ? 'ON' : 'OFF'}
+              <div className='experiment-header'>
+                <h5>
+                  {experiment.name}
+                </h5>
+                <span className={`experiment-status-sign ${experiment.enabled ? 'enabled' : 'disabled'}`}>
+                  {experiment.enabled ? 'enabled' : 'disabled'}
                 </span>
-              </h5>
+              </div>
               <div className='experiment-desc'>
                 <p className="text-muted">
                   {experiment.summary}
