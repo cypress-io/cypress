@@ -22,6 +22,14 @@ module.exports = {
     return install.package.apply(install, args)
   },
 
+  getElectronVersion () {
+    return install.getElectronVersion()
+  },
+
+  icons () {
+    return install.icons()
+  },
+
   cli (argv = []) {
     const opts = minimist(argv)
 

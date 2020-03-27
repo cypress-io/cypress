@@ -687,9 +687,7 @@ describe('Settings', () => {
         // do not overwrite the shared object reference -
         // because it is used by the app's code.
         this.win.experimental.names.experimentalCoolFeature = 'Cool Feature'
-        this.win.experimental.summaries.experimentalCoolFeature = `
-          Enables super cool feature from Cypress where you can see the cool feature
-        `
+        this.win.experimental.summaries.experimentalCoolFeature = 'Enables super cool feature from Cypress where you can see the cool feature'
       })
 
       const hasLearnMoreLink = () => {

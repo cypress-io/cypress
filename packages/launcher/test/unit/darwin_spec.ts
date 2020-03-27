@@ -2,7 +2,7 @@ import _ from 'lodash'
 import * as darwinHelper from '../../lib/darwin'
 import * as linuxHelper from '../../lib/linux'
 import * as darwinUtil from '../../lib/darwin/util'
-import execa from 'execa'
+import { utils } from '../../lib/utils'
 import { expect } from 'chai'
 import sinon, { SinonStub } from 'sinon'
 import { browsers } from '../../lib/browsers'
@@ -24,9 +24,9 @@ function generatePlist (key, value) {
 }
 
 function stubBrowser (findAppParams: darwinUtil.FindAppParams) {
-  (execa.stdout as SinonStub)
+  (utils.execa as unknown as SinonStub)
   .withArgs(`mdfind 'kMDItemCFBundleIdentifier=="${findAppParams.appId}"' | head -1`)
-  .resolves(`/Applications/${findAppParams.appName}`)
+  .resolves({ stdout: `/Applications/${findAppParams.appName}` })
 
   ;(fse.readFile as SinonStub)
   .withArgs(`/Applications/${findAppParams.appName}/Contents/Info.plist`)
@@ -36,7 +36,7 @@ function stubBrowser (findAppParams: darwinUtil.FindAppParams) {
 describe('darwin browser detection', () => {
   beforeEach(() => {
     sinon.stub(fse, 'readFile').rejects({ code: 'ENOENT' })
-    sinon.stub(execa, 'stdout').resolves('')
+    sinon.stub(utils, 'execa').resolves({ stdout: '' })
   })
 
   it('detects browsers as expected', async () => {

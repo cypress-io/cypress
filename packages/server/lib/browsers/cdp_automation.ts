@@ -6,15 +6,26 @@ import debugModule from 'debug'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
-interface CyCookie {
-  name: string
-  value: string
-  expirationDate: number
-  hostOnly: boolean
-  domain: string
-  path: string
-  secure: boolean
-  httpOnly: boolean
+export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly' | 'sameSite'>
+
+function convertSameSiteExtensionToCdp (str: chrome.cookies.SameSiteStatus): Optional<cdp.Network.CookieSameSite> {
+  return ({
+    'no_restriction': 'None',
+    'lax': 'Lax',
+    'strict': 'Strict',
+  })[str]
+}
+
+function convertSameSiteCdpToExtension (str: cdp.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
+  if (_.isUndefined(str)) {
+    return str
+  }
+
+  if (str === 'None') {
+    return 'no_restriction'
+  }
+
+  return str.toLowerCase() as chrome.cookies.SameSiteStatus
 }
 
 // Cypress uses the webextension-style filtering
@@ -53,6 +64,9 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     }
 
     // @ts-ignore
+    cookie.sameSite = convertSameSiteCdpToExtension(cookie.sameSite)
+
+    // @ts-ignore
     cookie.expirationDate = cookie.expires
     delete cookie.expires
 
@@ -76,6 +90,8 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
 
     // @ts-ignore
     cookie.expires = cookie.expirationDate
+    // @ts-ignore
+    cookie.sameSite = convertSameSiteExtensionToCdp(cookie.sameSite)
 
     // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
     if (!cookie.hostOnly && cookie.domain[0] !== '.') {
@@ -93,7 +109,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     delete cookie.hostOnly
     delete cookie.expirationDate
 
-    return cookie
+    return cookie as any
   }
 
   const getAllCookies = (filter: CyCookieFilter) => {
