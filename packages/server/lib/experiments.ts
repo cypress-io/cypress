@@ -50,7 +50,9 @@ interface StringValues {
   }
   ```
 */
-const _summaries: StringValues = {}
+const _summaries: StringValues = {
+  experimentalGetCookiesSameSite: 'Adds `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.',
+}
 
 /**
  * Keeps short names for experiments. When adding new experiments, add a short name.
@@ -62,7 +64,9 @@ const _summaries: StringValues = {}
   }
   ```
 */
-const _names: StringValues = {}
+const _names: StringValues = {
+  experimentalGetCookiesSameSite: 'Set `sameSite` property when retrieving cookies',
+}
 
 /**
  * Export this object for easy stubbing from end-to-end tests.
