@@ -286,7 +286,7 @@ const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
-    exit: process.env.EXIT,
+    exit: process.env.EXIT === 'false' ? false : null,
     only: false,
     skip: false,
     browser: [],
@@ -422,6 +422,11 @@ const e2e = {
       this.timeout(human('2 minutes'))
 
       Fixtures.scaffold()
+
+      if (process.env.EXIT === 'false') {
+        Fixtures.scaffoldWatch()
+        process.env.CYPRESS_INTERNAL_E2E_TESTS
+      }
 
       sinon.stub(process, 'exit')
 
@@ -685,6 +690,8 @@ const e2e = {
 
           // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
+
+          ...(process.env.EXIT === 'false' ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
         .value(),
