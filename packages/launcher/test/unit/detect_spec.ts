@@ -2,7 +2,7 @@ require('../spec_helper')
 import { detect, detectByPath, setMajorVersion } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
-import execa from 'execa'
+import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 const os = require('os')
 import { log } from '../log'
@@ -50,21 +50,21 @@ describe('browser detection', () => {
   })
 
   context('#detectByPath', () => {
-    let stdout: SinonStub
+    let execa: SinonStub
 
     beforeEach(() => {
-      stdout = sinon.stub(execa, 'stdout')
+      execa = sinon.stub(utils, 'execa')
 
-      stdout.withArgs('/Applications/My Shiny New Browser.app', ['--version'])
-      .resolves('foo-browser v100.1.2.3')
+      execa.withArgs('/Applications/My Shiny New Browser.app', ['--version'])
+      .resolves({ stdout: 'foo-browser v100.1.2.3' })
 
-      stdout.withArgs('/foo/bar/browser', ['--version'])
-      .resolves('foo-browser v9001.1.2.3')
+      execa.withArgs('/foo/bar/browser', ['--version'])
+      .resolves({ stdout: 'foo-browser v9001.1.2.3' })
 
-      stdout.withArgs('/not/a/browser', ['--version'])
-      .resolves('not a browser version string')
+      execa.withArgs('/not/a/browser', ['--version'])
+      .resolves({ stdout: 'not a browser version string' })
 
-      stdout.withArgs('/not/a/real/path', ['--version'])
+      execa.withArgs('/not/a/real/path', ['--version'])
       .rejects()
     })
 

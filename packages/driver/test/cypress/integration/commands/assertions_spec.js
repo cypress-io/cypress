@@ -2621,4 +2621,16 @@ describe('src/cy/commands/assertions', () => {
       })
     })
   })
+
+  context('cross-origin iframe', () => {
+    it(`doesn't throw when iframe exists`, () => {
+      cy.visit('fixtures/cross_origin.html')
+      cy.get('.foo').should('not.be.visible')
+    })
+
+    it(`doesn't throw when iframe with name attribute exists`, () => {
+      cy.visit('fixtures/cross_origin_name.html')
+      cy.get('.foo').should('not.be.visible')
+    })
+  })
 })

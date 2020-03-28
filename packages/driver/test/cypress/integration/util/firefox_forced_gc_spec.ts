@@ -27,6 +27,15 @@ describe('driver/src/util/firefox_forced_gc', () => {
       })).to.eq(99)
     })
 
+    it('returns null if firefoxGcInterval is null', () => {
+      expect(run({
+        browser: {
+          family: 'firefox',
+        },
+        firefoxGcInterval: null,
+      })).to.eq(null)
+    })
+
     it('returns the appropriate interval for open mode', () => {
       expect(run({
         browser: {

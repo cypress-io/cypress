@@ -2,6 +2,7 @@ path = require("path")
 la = require("lazy-ass")
 check = require("check-more-types")
 R = require("ramda")
+os = require("os")
 
 # canonical platform names
 platforms = {
@@ -16,6 +17,9 @@ checkPlatform = (platform) ->
   la(isValidPlatform(platform),
     "invalid build platform", platform, "valid choices", R.values(platforms))
 
+buildRootDir = () ->
+  path.resolve("build")
+
 ## returns a path into the /build directory
 ## the output folder should look something like this
 ## build/
@@ -23,13 +27,20 @@ checkPlatform = (platform) ->
 ##     ... platform-specific files
 buildDir = (platform, args...) ->
   checkPlatform(platform)
+  root = buildRootDir()
   switch platform
     when "darwin"
-      path.resolve("build", platform, args...)
+      # the new electron-builder for some reason adds its own platform
+      # subfolder and it is NOT "darwin" but "mac"
+      path.resolve(root, "mac", args...)
     when "linux"
-      path.resolve("build", platform, "Cypress", args...)
+      path.resolve(root, "linux-unpacked", args...)
     when "win32"
-      path.resolve("build", platform, "Cypress", args...)
+      if os.arch() == "x64"
+        path.resolve(root, "win-unpacked", args...)
+      else
+        # x86 32bit architecture
+        path.resolve(root, "win-ia32-unpacked", args...)
 
 ## returns a path into the /dist directory
 distDir = (platform, args...) ->
@@ -71,6 +82,7 @@ buildAppExecutable = (platform) ->
 
 module.exports = {
   isValidPlatform
+  buildRootDir
   buildDir
   distDir
   zipDir

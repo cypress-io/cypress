@@ -835,6 +835,12 @@ describe('src/cypress/dom/visibility', () => {
           expect(el).to.be.visible
         })
 
+        // https://github.com/cypress-io/cypress/issues/6745
+        it('is visible even if there is a dangling element in the tree', () => {
+          cy.visit('/fixtures/dangling-element.html')
+          cy.get('.hello')
+        })
+
         it('is hidden when an element is scaled to X axis in 0', () => {
           const el = add(`<div style="transform: scaleX(0)">ScaleX(0)</div>`)
 

@@ -8,14 +8,7 @@
 
 _ = require("lodash")
 UrlParse = require("url-parse")
-
-## TODO: this adds 30kb gzipped
-## and we need to move this to use
-## node over websockets so we dont
-## have to send it to the client
-parseDomain = require("parse-domain")
-
-ipAddressRe = /^[\d\.]+$/
+cors = require("@packages/network/lib/cors")
 
 reHttp = /^https?:\/\//
 reWww = /^www/
@@ -83,31 +76,7 @@ class $Location
     ]).join(":")
 
   getSuperDomain: ->
-    hostname = @getHostName()
-
-    ## TODO: this code is almost identical to
-    ## the code in server/util/cors
-    ## refactor this to share it together
-
-    ## if we couldn't get a parsed domain
-    if not parsed = parseDomain(hostname, {
-      privateTlds: true ## use the public suffix
-      customTlds: ipAddressRe
-    })
-
-      ## then just fall back to a dumb check
-      ## based on assumptions that the tld
-      ## is the last segment after the final
-      ## '.' and that the domain is the segment
-      ## before that
-      segments = hostname.split(".")
-
-      parsed = {
-        tld:    segments[segments.length - 1] ? ""
-        domain: segments[segments.length - 2] ? ""
-      }
-
-    return _.compact([parsed.domain, parsed.tld]).join(".")
+    cors.getSuperDomain(@remote.href)
 
   getToString: ->
     @remote.toString()
