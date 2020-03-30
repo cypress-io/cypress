@@ -707,7 +707,7 @@ exports['e2e reporters mochawesome fails with npm custom reporter 1'] = `
 ##teamcity[testStarted name='passes' captureStandardOutput='true' flowId='12345']
 ##teamcity[testFinished name='passes' duration='XXXX' flowId='12345']
 ##teamcity[testSuiteFinished name='simple passing spec' duration='XXXX' flowId='12345']
-##teamcity[testSuiteFinished name='top suite' duration='XXXX' flowId='12345']
+##teamcity[testSuiteFinished name='top suite' flowId='12345']
 
   (Results)
 
