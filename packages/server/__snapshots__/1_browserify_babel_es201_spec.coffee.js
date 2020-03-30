@@ -315,7 +315,7 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-/foo/bar/.projects/e2e/cypress/integration/browserify_typescript_failing_spec.ts:1
+/foo/bar/.projects/e2e/cypress/integration/browserify_typescript_failing_spec.ts:3
 describe('fail', - > );
                    ^
 ParseError: Unexpected token
