@@ -116,6 +116,7 @@ commandAndArguments.args.push(
   'mocha-multi-reporters',
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
+  '--exit',
 )
 
 const env = _.clone(process.env)
