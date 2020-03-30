@@ -19,7 +19,7 @@ const isVisible = (el) => {
 // because of circular references
 const isHidden = (el, name = 'isHidden()') => {
   if (!$elements.isElement(el)) {
-    throw new Error(`Cypress.dom.${name} failed because it requires a DOM element. The subject received was: '${el}'`)
+    throw new Error(`\`Cypress.dom.${name}\` failed because it requires a DOM element. The subject received was: \`${el}\``)
   }
 
   const $el = $jquery.wrap(el)
@@ -379,51 +379,51 @@ const getReasonIsHidden = function ($el) {
 
   // returns the reason in human terms why an element is considered not visible
   if (elHasDisplayNone($el)) {
-    return `This element '${node}' is not visible because it has CSS property: 'display: none'`
+    return `This element \`${node}\` is not visible because it has CSS property: \`display: none\``
   }
 
   if ($parent = parentHasDisplayNone($el.parent())) {
     parentNode = $elements.stringify($parent, 'short')
 
-    return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'display: none'`
+    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`display: none\``
   }
 
   if ($parent = parentHasVisibilityHidden($el.parent())) {
     parentNode = $elements.stringify($parent, 'short')
 
-    return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'visibility: hidden'`
+    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`visibility: hidden\``
   }
 
   if ($parent = parentHasVisibilityCollapse($el.parent())) {
     parentNode = $elements.stringify($parent, 'short')
 
-    return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'visibility: collapse'`
+    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`visibility: collapse\``
   }
 
   if ($elements.isDetached($el)) {
-    return `This element '${node}' is not visible because it is detached from the DOM`
+    return `This element \`${node}\` is not visible because it is detached from the DOM`
   }
 
   if (elHasVisibilityHidden($el)) {
-    return `This element '${node}' is not visible because it has CSS property: 'visibility: hidden'`
+    return `This element \`${node}\` is not visible because it has CSS property: \`visibility: hidden\``
   }
 
   if (elHasVisibilityCollapse($el)) {
-    return `This element '${node}' is not visible because it has CSS property: 'visibility: collapse'`
+    return `This element \`${node}\` is not visible because it has CSS property: \`visibility: collapse\``
   }
 
   if (elHasNoOffsetWidthOrHeight($el)) {
-    return `This element '${node}' is not visible because it has an effective width and height of: '${width} x ${height}' pixels.`
+    return `This element \`${node}\` is not visible because it has an effective width and height of: \`${width} x ${height}\` pixels.`
   }
 
   const transformResult = $transform.detectVisibility($el)
 
   if (transformResult === 'transformed') {
-    return `This element '${node}' is not visible because it is hidden by transform.`
+    return `This element \`${node}\` is not visible because it is hidden by transform.`
   }
 
   if (transformResult === 'backface') {
-    return `This element '${node}' is not visible because it is rotated and its backface is hidden.`
+    return `This element \`${node}\` is not visible because it is rotated and its backface is hidden.`
   }
 
   if ($parent = parentHasNoOffsetWidthOrHeightAndOverflowHidden($el.parent())) {
@@ -431,7 +431,7 @@ const getReasonIsHidden = function ($el) {
     width = elOffsetWidth($parent)
     height = elOffsetHeight($parent)
 
-    return `This element '${node}' is not visible because its parent '${parentNode}' has CSS property: 'overflow: hidden' and an effective width and height of: '${width} x ${height}' pixels.`
+    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`overflow: hidden\` and an effective width and height of: \`${width} x ${height}\` pixels.`
   }
 
   // nested else --___________--
@@ -441,22 +441,18 @@ const getReasonIsHidden = function ($el) {
       const covered = $elements.stringify(elAtCenterPoint($el))
 
       if (covered) {
-        return `\
-This element '${node}' is not visible because it has CSS property: 'position: fixed' and its being covered by another element:
-
-${covered}\
-`
+        return `This element \`${node}\` is not visible because it has CSS property: \`position: fixed\` and it's being covered by another element:\n\n\`${covered}\``
       }
 
-      return `This element '${node}' is not visible because its ancestor has 'position: fixed' CSS property and it is overflowed by other elements. How about scrolling to the element with cy.scrollIntoView()?`
+      return `This element \`${node}\` is not visible because its ancestor has \`position: fixed\` CSS property and it is overflowed by other elements. How about scrolling to the element with \`cy.scrollIntoView()\`?`
     }
   } else {
     if (elIsOutOfBoundsOfAncestorsOverflow($el)) {
-      return `This element '${node}' is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: 'hidden', 'scroll' or 'auto'`
+      return `This element \`${node}\` is not visible because its content is being clipped by one of its parent elements, which has a CSS property of overflow: \`hidden\`, \`scroll\` or \`auto\``
     }
   }
 
-  return `This element '${node}' is not visible.`
+  return `This element \`${node}\` is not visible.`
 }
 /* eslint-enable no-cond-assign */
 

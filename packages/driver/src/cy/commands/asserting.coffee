@@ -84,7 +84,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     options = {}
 
     if reEventually.test(chainers)
-      err = $errUtils.cypressErr("The 'eventually' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.")
+      err = $errUtils.cypressErrByPath('should.eventually_deprecated')
       err.retry = false
       throwAndLogErr(err)
 
@@ -123,7 +123,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       newExp = _.reduce chainers, (memo, value) =>
         if value not of memo
-          err = $errUtils.cypressErr("The chainer: '#{value}' was not found. Could not build assertion.")
+          err = $errUtils.cypressErrByPath('should.chainer_not_found', { args: { chainer: value } })
           err.retry = false
           throwAndLogErr(err)
 

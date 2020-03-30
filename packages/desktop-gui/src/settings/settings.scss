@@ -247,7 +247,7 @@
 
 .experiment-intro {
   padding-bottom: 15px;
-  margin-bottom: 0px; 
+  margin-bottom: 0px;
   border-bottom: 1px solid #ddd;
 }
 
@@ -265,20 +265,24 @@
 
     p {
       width: 80%;
-      margin-bottom: 0; 
+      margin-bottom: 0;
     }
 
     .experiment-status {
       margin-left: auto;
     }
   }
-
+  .experiment-header {
+    display: flex;
+    align-items: center;
+  }
   
   .experiment-status-sign {
-    margin-left: 10px;
+    margin-left: auto;
     color: #9d9ea9;
     line-height: 28px;
     font-weight: bold;
+    text-transform: uppercase;
 
     &.enabled {
       color: #1aae73;
