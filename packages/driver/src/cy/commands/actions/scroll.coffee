@@ -26,12 +26,10 @@ isNaNOrInfinity = (item) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
     scrollIntoView: (subject, options = {}) ->
-      if !_.isObject(options)
-        $errUtils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
       userOptions = options
 
       if !_.isObject(userOptions)
-        $utils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: userOptions }})
+        $errUtils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: userOptions }})
 
       ## ensure the subject is not window itself
       ## cause how are you gonna scroll the window into view...

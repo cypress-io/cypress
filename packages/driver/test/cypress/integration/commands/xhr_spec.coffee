@@ -2181,7 +2181,7 @@ describe "src/cy/commands/xhr", ->
       .window().then ->
         expect(options).to.deep.eq({ enable: false })
     
-    it "does not mutate options for cy.route()", -> 
+    it "does not mutate options for cy.route()", ->
       options = {
         url: /foo/
         respond: false

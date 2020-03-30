@@ -393,15 +393,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           forceReload ?= false
           userOptions     ?= {}
 
+          if not _.isObject(userOptions)
+            throwArgsErr()
+
           options = _.defaults {}, userOptions, {
             log: true
             timeout: config("pageLoadTimeout")
           }
 
           if not _.isBoolean(forceReload)
-            throwArgsErr()
-
-          if not _.isObject(userOptions)
             throwArgsErr()
 
           if options.log

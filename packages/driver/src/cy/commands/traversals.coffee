@@ -13,10 +13,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if _.isObject(arg2) and not _.isFunction(arg2)
         options = arg2
 
-      if options 
-        userOptions = options
-      else 
-        userOptions = {}
+      userOptions = if options then options else {}
 
       options = _.defaults({}, userOptions, {log: true})
 

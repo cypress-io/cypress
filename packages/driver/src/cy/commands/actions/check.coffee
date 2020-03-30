@@ -24,10 +24,11 @@ checkOrUncheck = (type, subject, values = [], userOptions = {}) ->
   ## to new filtered subjects
   matchingElements = []
 
-  options = _.defaults {}, userOptions,
+  options = _.defaults {}, userOptions, {
     $el: subject
     log: true
     force: false
+  }
 
   isNoop = ($el) ->
     switch type
@@ -78,13 +79,14 @@ checkOrUncheck = (type, subject, values = [], userOptions = {}) ->
       ## figure out the userOptions which actually change the behavior of clicks
       deltaOptions = $utils.filterOutOptions(options)
 
-      options._log = Cypress.log
+      options._log = Cypress.log {
         message: deltaOptions
         $el: $el
         consoleProps: ->
           _.extend consoleProps, {
             Options: deltaOptions
           }
+      }
 
       options._log.snapshot("before", {next: "after"})
 

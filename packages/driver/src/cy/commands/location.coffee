@@ -26,7 +26,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
     hash: (options = {}) ->
       userOptions = options
-      options = _.defaults({}, options, { log: true })
+      options = _.defaults({}, userOptions, { log: true })
 
       if options.log isnt false
         options._log = Cypress.log({
@@ -51,7 +51,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
       userOptions ?= {}
 
-      options = _.defaults({}, options, { log: true })
+      options = _.defaults({}, userOptions, { log: true })
 
       getLocation = =>
         location = cy.getRemoteLocation()
