@@ -205,7 +205,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
     plugins = require(pluginsFile)
 
     // Handle export default () => {}
-    if (typeof plugins.default === 'function') {
+    if (plugins && typeof plugins.default === 'function') {
       plugins = plugins.default
     }
   } catch (err) {
