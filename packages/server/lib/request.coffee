@@ -19,6 +19,13 @@ TLS_VERSION_ERROR_RE =  /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
+## sameSite from tough-cookie is slightly different from webextension API
+convertSameSiteToughToExtension = (str) =>
+  if str is "none"
+    return "no_restriction"
+
+  return str
+
 getOriginalHeaders = (req = {}) ->
   ## the request instance holds an instance
   ## of the original ClientRequest
@@ -492,6 +499,9 @@ module.exports = (options = {}) ->
 
         if expiry <= 0
           return automationFn('clear:cookie', cookie)
+
+        cookie.sameSite = convertSameSiteToughToExtension(cookie.sameSite)
+
         automationFn('set:cookie', cookie)
 
     sendStream: (headers, automationFn, options = {}) ->

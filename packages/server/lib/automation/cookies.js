@@ -5,7 +5,7 @@ const debug = require('debug')('cypress:server:cookies')
 
 // match the w3c webdriver spec on return cookies
 // https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-const COOKIE_PROPERTIES = 'name value path domain secure httpOnly expiry hostOnly'.split(' ')
+const COOKIE_PROPERTIES = 'name value path domain secure httpOnly expiry hostOnly sameSite'.split(' ')
 
 const normalizeCookies = (cookies) => {
   return _.map(cookies, normalizeCookieProps)
