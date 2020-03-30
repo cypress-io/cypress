@@ -2450,6 +2450,12 @@ declare namespace Cypress {
      * @default { runMode: 1, openMode: null }
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
+    /**
+     * If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`,
+     * `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.
+     * @default false
+     */
+    experimentalGetCookiesSameSite: boolean
   }
 
   interface PluginConfigOptions extends ConfigOptions {
@@ -2608,12 +2614,15 @@ declare namespace Cypress {
     onAnyAbort(route: RouteOptions, proxy: any): void
   }
 
+  type SameSiteStatus = 'no_restriction' | 'strict' | 'lax'
+
   interface SetCookieOptions extends Loggable, Timeoutable {
     path: string
     domain: string
     secure: boolean
     httpOnly: boolean
     expiry: number
+    sameSite: SameSiteStatus
   }
 
   /**
@@ -4715,6 +4724,7 @@ declare namespace Cypress {
     httpOnly: boolean
     secure: boolean
     expiry?: string
+    sameSite?: SameSiteStatus
   }
 
   interface EnqueuedCommand {

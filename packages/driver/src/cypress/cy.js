@@ -72,9 +72,17 @@ const setTopOnError = function (cy) {
 
   curCy = cy
 
+  // prevent overriding top.onerror twice when loading more than one
+  // instance of test runner.
+  if (top.onerror && top.onerror.isCypressHandler) {
+    return
+  }
+
   const onTopError = function () {
     return curCy.onUncaughtException.apply(curCy, arguments)
   }
+
+  onTopError.isCypressHandler = true
 
   top.onerror = onTopError
 

@@ -70,7 +70,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@getUsers')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found an alias for: 'getUsers'")
 
     describe "with consecutive duplicates", ->
@@ -123,7 +123,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@getPosts')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found 1st alias for: 'getPosts'")
 
         cy.contains('.command-number', '2')
@@ -133,7 +133,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@getPosts')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found 2nd alias for: 'getPosts'")
 
       it "render with counts in event commands when collapsed", ->
@@ -219,7 +219,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@getPosts')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found 1st alias for: 'getPosts'")
 
         cy.contains('.command-number', '3')
@@ -229,7 +229,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@getPosts')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found 2nd alias for: 'getPosts'")
 
   context "element aliases", ->
@@ -284,7 +284,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@barAlias')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found an alias for: 'barAlias'")
 
     describe "with consecutive duplicates", ->
@@ -336,7 +336,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@dropdown')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")
 
         cy.contains('.command-number', '2')
@@ -346,7 +346,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@dropdown')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")
 
       it "render without counts in event commands when collapsed", ->
@@ -427,7 +427,7 @@ describe "aliases", ->
             cy.contains('.command-alias', '@dropdown')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")
 
         cy.contains('.command-number', '3')
@@ -437,6 +437,6 @@ describe "aliases", ->
             cy.contains('.command-alias', '@dropdown')
               .trigger("mouseover")
 
-        cy.get(".tooltip span").should ($tooltip) ->
+        cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")
 

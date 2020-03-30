@@ -12,23 +12,23 @@
     "test-watch": "yarn test-unit --watch"
   },
   "dependencies": {
+    "@cypress/parse-domain": "2.4.0",
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
     "debug": "4.1.1",
     "lodash": "4.17.15",
-    "parse-domain": "bahmutov/parse-domain#fb60bd4",
     "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
+    "@cypress/request": "2.88.5",
+    "@cypress/request-promise": "4.2.6",
     "@packages/https-proxy": "*",
     "@packages/socket": "*",
     "@packages/ts": "*",
     "@types/concat-stream": "1.6.0",
     "express": "4.16.4",
     "mocha": "6.2.2",
-    "request": "cypress-io/request#b5af0d1fa47eec97ba980cde90a13e69a2afcd16",
-    "request-promise": "4.2.4",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
     "typescript": "3.5.3"

@@ -303,7 +303,7 @@ getPath = (data, ext, screenshotsFolder) ->
   ensureUniquePath(withoutExt, ext)
 
 getPathToScreenshot = (data, details, screenshotsFolder) ->
-  ext = mime.extension(getType(details))
+  ext = mime.getExtension(getType(details))
 
   getPath(data, ext, screenshotsFolder)
 

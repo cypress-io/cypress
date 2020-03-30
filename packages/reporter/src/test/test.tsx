@@ -54,7 +54,7 @@ class Test extends Component<Props> {
             <span className="visually-hidden">{model.state}</span>
           </span>
           <div className='runnable-controls'>
-            <Tooltip placement='top' title='One or more commands failed'>
+            <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
               <i className='fas fa-exclamation-triangle'></i>
             </Tooltip>
           </div>

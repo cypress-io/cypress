@@ -86,7 +86,7 @@ cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl
       previousUrl: previousUrlVisited
       attemptedUrl: origin
     }
-  } 
+  }
 
   $errUtils.throwErrByPath("visit.cannot_visit_different_origin", errOpts)
 
@@ -293,6 +293,10 @@ normalizeTimeoutOptions = (options) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
+
+  Cypress.on "test:before:run:async", ->
+    ## reset any state on the backend
+    Cypress.backend('reset:server:state')
 
   Cypress.on("test:before:run", reset)
 

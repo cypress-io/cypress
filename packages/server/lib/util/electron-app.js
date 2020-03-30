@@ -8,14 +8,22 @@ const scale = () => {
   }
 }
 
+const allowRendererProcessReuse = () => {
+  const { app } = require('electron')
+
+  // @see https://github.com/electron/electron/issues/18397
+  // NOTE: in Electron 9, this can be removed, since it will be the new default
+  app.allowRendererProcessReuse = true
+}
+
+// NOTE: this function is only called in run mode
 const waitForReady = () => {
   const debug = require('debug')('cypress:server:electron-app')
 
   const Promise = require('bluebird')
   const { app } = require('electron')
 
-  // @see https://github.com/electron/electron/issues/18397
-  app.allowRendererProcessReuse = true
+  allowRendererProcessReuse()
 
   // electron >= 5.0.0 will exit the app if all browserwindows are closed,
   // this is obviously undesirable in run mode
@@ -42,6 +50,8 @@ const isRunning = () => {
 }
 
 module.exports = {
+  allowRendererProcessReuse,
+
   scale,
 
   waitForReady,

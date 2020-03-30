@@ -24,7 +24,7 @@
     "minimist": "1.2.5"
   },
   "devDependencies": {
-    "electron": "8.1.1",
+    "electron": "8.2.0",
     "mocha": "3.5.3"
   },
   "files": [

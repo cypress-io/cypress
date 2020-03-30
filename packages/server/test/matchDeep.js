@@ -1,5 +1,5 @@
-const { matchDeep } = require('../../driver/test/cypress/plugins/snapshot/command')
-const { getSnapshot, saveSnapshot } = require('../../driver/test/cypress/plugins/snapshot')
+const { matchDeep } = require('../../runner/test/cypress/plugins/snapshot/command')
+const { getSnapshot, saveSnapshot } = require('../../runner/test/cypress/plugins/snapshot')
 const chai = require('chai')
 const _ = require('lodash')
 const sinon = require('sinon')
@@ -10,7 +10,6 @@ const sinon = require('sinon')
 let currentTest
 
 const registerInMocha = () => {
-
   let snapshotIndex = {}
 
   global.beforeEach(function () {
@@ -53,7 +52,6 @@ const registerInMocha = () => {
   }
 
   const matchDeepMocha = function (...args) {
-
     let ret
     let act
 
@@ -109,7 +107,6 @@ const parseMatcher = (matcher) => {
     const parsed = regex.exec(matcher)
 
     if (parsed) {
-
       return parsed[1]
     }
   }
@@ -132,7 +129,6 @@ const parseSnapshot = (s) => {
       if (_.isObjectLike(value)) {
         return recurse(value)
       }
-
     })
   }
 

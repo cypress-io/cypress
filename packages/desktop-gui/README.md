@@ -57,6 +57,15 @@ You can also run all of the Desktop GUI's tests locally. We don't really recomme
 
 It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
 
+First, start local http server
+
+```bash
+## from repo root
+yarn lerna run start --scope @packages/desktop-gui
+```
+
+Then run Cypress with
+
 ```bash
 ## from repo root
 yarn lerna run cypress:run --scope @packages/desktop-gui --stream
@@ -67,6 +76,15 @@ yarn lerna run cypress:run --scope @packages/desktop-gui --stream
 ### In Cypress
 
 This project is tested with Cypress itself. It acts exactly like any other Cypress project.
+
+First, start local http server
+
+```bash
+## from repo root
+yarn lerna run start --scope @packages/desktop-gui
+```
+
+Then open Cypress with
 
 ```bash
 ## from repo root

@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 const _write = process.stdout.write
 const _ = require('lodash')
 const stripAnsi = require('strip-ansi')
@@ -25,14 +26,12 @@ const stdout = {
     const write = process.stdout.write
 
     process.stdout.write = function (str) {
-
       logs.push(str)
 
       const args = (args) => {
         debug.extend('stdout')(...args)
 
         return _.map(_.map(args, stripAnsi), (v) => _.isString(v) && chalk.rgb(160, 100, 160)(v))
-
       }
 
       write.apply(this, args(arguments))
@@ -58,12 +57,10 @@ const spyOn = (obj, props, fn, fn2) => {
   }
 
   const rets = _.map(props, (prop) => {
-
     const _fn = obj[prop]
 
     const stub = obj[prop] = sinon.stub()
     .callsFake(function () {
-
       fn && fn.apply(this, arguments)
 
       let ret = _fn.apply(this, arguments)
@@ -77,7 +74,6 @@ const spyOn = (obj, props, fn, fn2) => {
       }
 
       return ret
-
     })
 
     return stub
@@ -86,7 +82,6 @@ const spyOn = (obj, props, fn, fn2) => {
   if (rets.length === 1) return rets[0]
 
   return rets
-
 }
 
 module.exports = {

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dangling element</title>
+  </head>
+  <body>
+    <div>Some content</div>
+  </body>
+  <script>
+    // Simplified version of what vue-fragment do.
+    // https://github.com/y-nk/vue-fragment/blob/master/src/component.js
+
+    const freeze = (object, property, value) => {
+      Object.defineProperty(object, property, {
+        configurable: true,
+        get () {
+          return value
+        },
+        set (v) {
+          // eslint-disable-next-line no-console
+          console.warn(`tried to set frozen property ${property} with ${v}`)
+        },
+      })
+    }
+
+    // If you want to see what's going on here visually, 
+    // check https://github.com/cypress-io/cypress/pull/6787
+
+    // 1. What vue does by default: 
+    // Create component and append it to the DOM tree.
+    const parent = document.getElementsByTagName('body')[0]
+
+    const container = document.createElement('div')
+
+    container.classList.add('container')
+
+    const p = document.createElement('p')
+
+    p.innerText = 'hello world'
+    p.classList.add('hello')
+
+    parent.appendChild(container)
+    container.appendChild(p)
+
+    // 2. vue-fragment adds the p to the parent.
+    // but forcefully set the p's parentNode to container.
+    parent.appendChild(p)
+    freeze(p, 'parentNode', container)
+
+    // 3. vue-fragment removes container from the parent.
+    // but forcefully set the container's parentNode to parent.
+    parent.removeChild(container)
+    freeze(container, 'parentNode', parent)
+  </script>
+</html>
