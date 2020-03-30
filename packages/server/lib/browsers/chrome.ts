@@ -453,6 +453,9 @@ export = {
     // and when the connection is ready
     // navigate to the actual url
     const criClient = await this._connectToChromeRemoteInterface(port, options.onError)
+    .tapCatch(() => {
+      launchedBrowser.kill()
+    })
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 
