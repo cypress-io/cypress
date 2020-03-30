@@ -5,10 +5,11 @@ exports['e2e cookies with baseurl'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cookies_spec_baseurl.coffee)                                              │
-  │ Searched:   cypress/integration/cookies_spec_baseurl.coffee                                    │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (cookies_spec_baseurl.coffee)                                            │
+  │ Searched:     cypress/integration/cookies_spec_baseurl.coffee                                  │
+  │ Experiments:  experimentalGetCookiesSameSite=true                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -35,6 +36,10 @@ exports['e2e cookies with baseurl'] = `
         with Domain = superdomain
           ✓ is set properly with no redirects
           ✓ is set properly with redirects
+        with SameSite
+          ✓ None is set and sent with subsequent requests
+          ✓ Strict is set and sent with subsequent requests
+          ✓ Lax is set and sent with subsequent requests
         when redirected to a HTTP URL
           ✓ can set cookies on lots of redirects, ending with different domain
           ✓ can set cookies on lots of redirects, ending with same domain
@@ -46,6 +51,10 @@ exports['e2e cookies with baseurl'] = `
         with Domain = superdomain
           ✓ is set properly with no redirects
           ✓ is set properly with redirects
+        with SameSite
+          ✓ None is set and sent with subsequent requests
+          ✓ Strict is set and sent with subsequent requests
+          ✓ Lax is set and sent with subsequent requests
         when redirected to a HTTP URL
           ✓ can set cookies on lots of redirects, ending with different domain
           ✓ can set cookies on lots of redirects, ending with same domain
@@ -54,14 +63,14 @@ exports['e2e cookies with baseurl'] = `
           ✓ can set cookies on lots of redirects, ending with same domain
 
 
-  24 passing
+  30 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        24                                                                               │
-  │ Passing:      24                                                                               │
+  │ Tests:        30                                                                               │
+  │ Passing:      30                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -85,9 +94,9 @@ exports['e2e cookies with baseurl'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec_baseurl.coffee              XX:XX       24       24        -        -        - │
+  │ ✔  cookies_spec_baseurl.coffee              XX:XX       30       30        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       24       24        -        -        -  
+    ✔  All specs passed!                        XX:XX       30       30        -        -        -  
 
 
 `
