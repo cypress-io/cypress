@@ -4,6 +4,8 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
+const tsnode = require('ts-node')
+const resolve = require('resolve')
 
 const errors = require('../../errors')
 const preprocessor = require('./preprocessor')
@@ -154,7 +156,9 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
-module.exports = (ipc, pluginsFile) => {
+let registerTS = false
+
+module.exports = (ipc, pluginsFile, projectRoot) => {
   debug('pluginsFile:', pluginsFile)
 
   process.on('uncaughtException', (err) => {
@@ -173,9 +177,37 @@ module.exports = (ipc, pluginsFile) => {
     return false
   })
 
+  if (!registerTS) {
+    try {
+      const tsPath = resolve.sync('typescript', {
+        basedir: this.projectRoot,
+      })
+
+      debug('typescript path: %s', tsPath)
+
+      tsnode.register({
+        compiler: tsPath,
+        transpileOnly: true,
+        compilerOptions: {
+
+          esModuleInterop: true,
+        },
+      })
+    } catch (e) {
+      debug(`typescript doesn't exist. ts-node setup passed.`)
+    }
+
+    registerTS = true
+  }
+
   try {
     debug('require pluginsFile')
     plugins = require(pluginsFile)
+
+    // Handle export default () => {}
+    if (typeof plugins.default === 'function') {
+      plugins = plugins.default
+    }
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
