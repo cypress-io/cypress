@@ -116,7 +116,7 @@ const throwErr = (err, options = {}) => {
 }
 
 const throwErrByPath = (errPath, options = {}) => {
-  const err = errByPath(errPath, options)
+  const err = errByPath(errPath, options.args)
 
   return throwErr(err, options)
 }

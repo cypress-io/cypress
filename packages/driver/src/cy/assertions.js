@@ -224,11 +224,7 @@ const create = function (state, queue, retryFn) {
       try {
         if (_.isFunction(onFail)) {
           // pass in the err and the upcoming assertion commands
-          const modifiedErr = onFail.call(this, err, isDefaultAssertionErr, cmds)
-
-          if (modifiedErr) {
-            options.error = modifiedErr
-          }
+          onFail.call(this, err, isDefaultAssertionErr, cmds)
         }
       } catch (e3) {
         finishAssertions(options.assertions)

@@ -52,7 +52,7 @@ create = (state, config, log) ->
       when "app" then "uncaught.fromApp"
       when "spec" then "uncaught.fromSpec"
 
-    uncaughtErrObj = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
+    uncaughtErrObj = $errUtils.errByPath(uncaughtErrLookup)
 
     err.name = "Uncaught " + err.name
 
