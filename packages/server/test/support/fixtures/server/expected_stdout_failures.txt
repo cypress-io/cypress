@@ -21,7 +21,7 @@
       at Context.<anonymous> (http://localhost:2020/__cypress/tests?p=cypress/integration/stdout_failing_spec.coffee-456:6:13)
 
   2) stdout_failing_spec failing hook "before each" hook for "is failing":
-     CypressError: cy.visit() failed trying to load:
+     CypressError: `cy.visit()` failed trying to load:
 
 /does-not-exist.html
 

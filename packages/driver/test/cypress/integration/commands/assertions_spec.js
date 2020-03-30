@@ -310,7 +310,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws when should(\'have.length\') isnt a number', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('You must provide a valid number to a length assertion. You passed: \'asdf\'')
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
           done()
         })
@@ -425,7 +425,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws err when not available chainable', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer: \'dee\' was not found. Could not build assertion.')
+          expect(err.message).to.eq('The chainer `dee` was not found. Could not build assertion.')
 
           done()
         })
@@ -435,7 +435,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws err when ends with a non available chainable', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer: \'eq2\' was not found. Could not build assertion.')
+          expect(err.message).to.eq('The chainer `eq2` was not found. Could not build assertion.')
 
           done()
         })
@@ -483,7 +483,7 @@ describe('src/cy/commands/assertions', () => {
           // when we check for the element to be detached
           // it never actually runs the assertion
           expect(names).to.deep.eq(['get', 'click'])
-          expect(err.message).to.include('cy.should() failed because this element is detached')
+          expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
         })
@@ -507,7 +507,7 @@ describe('src/cy/commands/assertions', () => {
 
           // should is present here due to the retry
           expect(names).to.deep.eq(['get', 'click', 'assert'])
-          expect(err.message).to.include('cy.should() failed because this element is detached')
+          expect(err.message).to.include('`cy.should()` failed because this element is detached')
 
           done()
         })
@@ -524,7 +524,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(3)
-          expect(err.message).to.eq('You must provide a valid number to a length assertion. You passed: \'foo\'')
+          expect(err.message).to.eq('You must provide a valid number to a `length` assertion. You passed: `foo`')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -543,7 +543,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('The \'eventually\' assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.')
+          expect(err.message).to.eq('The `eventually` assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -580,7 +580,7 @@ describe('src/cy/commands/assertions', () => {
           const { lastLog } = this
 
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('\'match\' requires its argument be a \'RegExp\'. You passed: \'foo\'')
+          expect(err.message).to.eq('`match` requires its argument be a `RegExp`. You passed: `foo`')
           expect(lastLog.get('name')).to.eq('should')
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
@@ -752,7 +752,7 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    it('does not replaces instances of word: \'but\' with \'and\' for failing assertion', (done) => {
+    it('does not replaces instances of word \'but\' with \'and\' for failing assertion', (done) => {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'assert') {
           cy.removeAllListeners('log:added')
@@ -1061,7 +1061,7 @@ describe('src/cy/commands/assertions', () => {
         () => expect(`\'cypress\'`).to.eq(`\'cypress\'`),
         // ****'cypress'**** -> ** for emphasizing result string  + ** for emphasizing the entire result.
         `expected **'cypress'** to equal ****'cypress'****`,
-        done
+        done,
       )
     })
 
@@ -1073,7 +1073,7 @@ describe('src/cy/commands/assertions', () => {
           })
         },
         `expected **<body>** to contain **div**`,
-        done
+        done,
       )
     })
 
@@ -1085,7 +1085,7 @@ describe('src/cy/commands/assertions', () => {
       expectMarkdown(
         () => expect({ foo: 'bar' }).to.deep.eq({ foo: 'bar' }),
         `expected **{ foo: bar }** to deeply equal **{ foo: bar }**`,
-        done
+        done,
       )
     })
 
@@ -1098,7 +1098,7 @@ describe('src/cy/commands/assertions', () => {
       expectMarkdown(
         () => expect(person).to.have.all.keys('name', 'age'),
         `expected **{ name: Joe, age: 20 }** to have keys **name**, and **age**`,
-        done
+        done,
       )
     })
 
@@ -1171,12 +1171,12 @@ describe('src/cy/commands/assertions', () => {
           expect('foo').to.match('foo')
         }
 
-        expect(fn).to.throw('\'match\' requires its argument be a \'RegExp\'. You passed: \'foo\'')
+        expect(fn).to.throw('`match` requires its argument be a `RegExp`. You passed: `foo`')
       })
 
       it('throws with cy.should', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('\'match\' requires its argument be a \'RegExp\'. You passed: \'bar\'')
+          expect(err.message).to.eq('`match` requires its argument be a `RegExp`. You passed: `bar`')
 
           done()
         })
@@ -1349,11 +1349,11 @@ describe('src/cy/commands/assertions', () => {
         const l3 = this.logs[2]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div.foo.bar>** to have class **foo**'
+          'expected **<div.foo.bar>** to have class **foo**',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **<div.foo.bar>** not to have class **baz**'
+          'expected **<div.foo.bar>** not to have class **baz**',
         )
       })
 
@@ -1361,7 +1361,7 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected \'foo\' to have class \'bar\''
+            'expected \'foo\' to have class \'bar\'',
           )
 
           expect(err.message).to.include('> class')
@@ -1420,11 +1420,11 @@ describe('src/cy/commands/assertions', () => {
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div#foo>** to have id **foo**'
+          'expected **<div#foo>** to have id **foo**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div#foo>** not to have id **bar**'
+          'expected **<div#foo>** not to have id **bar**',
         )
       })
 
@@ -1432,7 +1432,7 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected [] to have id \'foo\''
+            'expected [] to have id \'foo\'',
           )
 
           expect(err.message).to.include('> id')
@@ -1462,23 +1462,23 @@ describe('src/cy/commands/assertions', () => {
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to have HTML **<button>button</button>**'
+          'expected **<div>** to have HTML **<button>button</button>**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** not to have HTML **foo**'
+          'expected **<div>** not to have HTML **foo**',
         )
 
         this.clearLogs()
         expect(this.$div).to.contain.html('<button>')
         expect(this.logs[0].get('message')).to.eq(
-          'expected **<div>** to contain HTML **<button>**'
+          'expected **<div>** to contain HTML **<button>**',
         )
 
         this.clearLogs()
         expect(this.$div).to.not.contain.html('foo') // 4
         expect(this.logs[0].get('message')).to.eq(
-          'expected **<div>** not to contain HTML **foo**'
+          'expected **<div>** not to contain HTML **foo**',
         )
 
         this.clearLogs()
@@ -1486,7 +1486,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$div).to.have.html('<span>span</span>')
         } catch (error) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<div>** to have HTML **<span>span</span>**, but the HTML was **<button>button</button>**'
+            'expected **<div>** to have HTML **<span>span</span>**, but the HTML was **<button>button</button>**',
           )
         }
 
@@ -1495,7 +1495,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$div).to.contain.html('<span>span</span>')
         } catch (error1) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<div>** to contain HTML **<span>span</span>**, but the HTML was **<button>button</button>**'
+            'expected **<div>** to contain HTML **<span>span</span>**, but the HTML was **<button>button</button>**',
           )
         }
       })
@@ -1504,7 +1504,7 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected null to have HTML \'foo\''
+            'expected null to have HTML \'foo\'',
           )
 
           expect(err.message).to.include('> html')
@@ -1543,23 +1543,23 @@ describe('src/cy/commands/assertions', () => {
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to have text **foo**'
+          'expected **<div>** to have text **foo**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** not to have text **bar**'
+          'expected **<div>** not to have text **bar**',
         )
 
         this.clearLogs()
         expect(this.$div).to.contain.text('f')
         expect(this.logs[0].get('message')).to.eq(
-          'expected **<div>** to contain text **f**'
+          'expected **<div>** to contain text **f**',
         )
 
         this.clearLogs()
         expect(this.$div).to.not.contain.text('foob')
         expect(this.logs[0].get('message')).to.eq(
-          'expected **<div>** not to contain text **foob**'
+          'expected **<div>** not to contain text **foob**',
         )
 
         this.clearLogs()
@@ -1567,7 +1567,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$div).to.have.text('bar')
         } catch (error) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<div>** to have text **bar**, but the text was **foo**'
+            'expected **<div>** to have text **bar**, but the text was **foo**',
           )
         }
 
@@ -1576,7 +1576,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$div).to.contain.text('bar')
         } catch (error1) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<div>** to contain text **bar**, but the text was **foo**'
+            'expected **<div>** to contain text **bar**, but the text was **foo**',
           )
         }
       })
@@ -1594,7 +1594,7 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected undefined to have text \'foo\''
+            'expected undefined to have text \'foo\'',
           )
 
           expect(err.message).to.include('> text')
@@ -1625,23 +1625,23 @@ describe('src/cy/commands/assertions', () => {
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<input>** to have value **foo**'
+          'expected **<input>** to have value **foo**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<input>** not to have value **bar**'
+          'expected **<input>** not to have value **bar**',
         )
 
         this.clearLogs()
         expect(this.$input).to.contain.value('foo')
         expect(this.logs[0].get('message')).to.eq(
-          'expected **<input>** to contain value **foo**'
+          'expected **<input>** to contain value **foo**',
         )
 
         this.clearLogs()
         expect(this.$input).not.to.contain.value('bar')
         expect(this.logs[0].get('message')).to.eq(
-          'expected **<input>** not to contain value **bar**'
+          'expected **<input>** not to contain value **bar**',
         )
 
         this.clearLogs()
@@ -1649,7 +1649,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$input).to.have.value('bar')
         } catch (error) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<input>** to have value **bar**, but the value was **foo**'
+            'expected **<input>** to have value **bar**, but the value was **foo**',
           )
         }
 
@@ -1658,7 +1658,7 @@ describe('src/cy/commands/assertions', () => {
           expect(this.$input).to.contain.value('bar')
         } catch (error1) {
           expect(this.logs[0].get('message')).to.eq(
-            'expected **<input>** to contain value **bar**, but the value was **foo**'
+            'expected **<input>** to contain value **bar**, but the value was **foo**',
           )
         }
       })
@@ -1667,7 +1667,7 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have value \'foo\''
+            'expected {} to have value \'foo\'',
           )
 
           expect(err.message).to.include('> value')
@@ -1723,11 +1723,11 @@ describe('src/cy/commands/assertions', () => {
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to have descendants **button**'
+          'expected **<div>** to have descendants **button**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** not to have descendants **input**'
+          'expected **<div>** not to have descendants **input**',
         )
       })
 
@@ -1735,7 +1735,7 @@ describe('src/cy/commands/assertions', () => {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have descendants \'foo\''
+            'expected {} to have descendants \'foo\'',
           )
 
           expect(err.message).to.include('> descendants')
@@ -1777,11 +1777,11 @@ describe('src/cy/commands/assertions', () => {
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to be **visible**'
+          'expected **<div>** to be **visible**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** not to be **visible**'
+          'expected **<div>** not to be **visible**',
         )
 
         try {
@@ -1790,13 +1790,8 @@ describe('src/cy/commands/assertions', () => {
           const l6 = this.logs[5]
 
           // the error on this log should have this message appended to it
-          expect(l6.get('error').message).to.eq(
-            `\
-expected '<div>' to be 'visible'
-
-This element '<div>' is not visible because it has CSS property: 'display: none'\
-`
-          )
+          expect(l6.get('error').message).to.include(`expected '<div>' to be 'visible'`)
+          expect(l6.get('error').message).to.include(`This element \`<div>\` is not visible because it has CSS property: \`display: none\``)
         }
       })
 
@@ -1804,7 +1799,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'visible\''
+            'expected {} to be \'visible\'',
           )
 
           expect(err.message).to.include('> visible')
@@ -1846,11 +1841,11 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to be **hidden**'
+          'expected **<div>** to be **hidden**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** not to be **hidden**'
+          'expected **<div>** not to be **hidden**',
         )
 
         try {
@@ -1867,7 +1862,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'hidden\''
+            'expected {} to be \'hidden\'',
           )
 
           expect(err.message).to.include('> hidden')
@@ -1903,11 +1898,11 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<option>** to be **selected**'
+          'expected **<option>** to be **selected**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<option>** not to be **selected**'
+          'expected **<option>** not to be **selected**',
         )
       })
 
@@ -1915,7 +1910,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'selected\''
+            'expected {} to be \'selected\'',
           )
 
           expect(err.message).to.include('> selected')
@@ -1951,11 +1946,11 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<input>** to be **checked**'
+          'expected **<input>** to be **checked**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<input>** not to be **checked**'
+          'expected **<input>** not to be **checked**',
         )
       })
 
@@ -1963,7 +1958,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'checked\''
+            'expected {} to be \'checked\'',
           )
 
           expect(err.message).to.include('> checked')
@@ -1999,11 +1994,11 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<input>** to be **enabled**'
+          'expected **<input>** to be **enabled**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<input>** not to be **enabled**'
+          'expected **<input>** not to be **enabled**',
         )
       })
 
@@ -2011,7 +2006,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'enabled\''
+            'expected {} to be \'enabled\'',
           )
 
           expect(err.message).to.include('> enabled')
@@ -2047,11 +2042,11 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l2 = this.logs[1]
 
         expect(l1.get('message')).to.eq(
-          'expected **<input>** to be **disabled**'
+          'expected **<input>** to be **disabled**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<input>** not to be **disabled**'
+          'expected **<input>** not to be **disabled**',
         )
       })
 
@@ -2059,7 +2054,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to be \'disabled\''
+            'expected {} to be \'disabled\'',
           )
 
           expect(err.message).to.include('> disabled')
@@ -2085,15 +2080,15 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l3 = this.logs[2]
 
         expect(l1.get('message')).to.eq(
-          'expected **[]** to exist'
+          'expected **[]** to exist',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **{}** to exist'
+          'expected **{}** to exist',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **foo** to exist'
+          'expected **foo** to exist',
         )
       })
     })
@@ -2123,15 +2118,15 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l3 = this.logs[2]
 
         expect(l1.get('message')).to.eq(
-          'expected **[]** to be empty'
+          'expected **[]** to be empty',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **{}** to be empty'
+          'expected **{}** to be empty',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **\'\'** to be empty'
+          'expected **\'\'** to be empty',
         )
       })
 
@@ -2150,19 +2145,19 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l4 = this.logs[3]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to be **empty**'
+          'expected **<div>** to be **empty**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** not to be **empty**'
+          'expected **<div>** not to be **empty**',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **<div>** to be **empty**'
+          'expected **<div>** to be **empty**',
         )
 
         expect(l4.get('message')).to.eq(
-          'expected **<div>** not to be **empty**'
+          'expected **<div>** not to be **empty**',
         )
       })
     })
@@ -2206,19 +2201,19 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l4 = this.logs[3]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div#div>** not to be **focused**'
+          'expected **<div#div>** not to be **focused**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div#div>** not to be **focused**'
+          'expected **<div#div>** not to be **focused**',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **<div#div>** to be **focused**'
+          'expected **<div#div>** to be **focused**',
         )
 
         expect(l4.get('message')).to.eq(
-          'expected **<div#div>** to be **focused**'
+          'expected **<div#div>** to be **focused**',
         )
       })
 
@@ -2245,7 +2240,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.contain(
-            'expected {} to be \'focused\''
+            'expected {} to be \'focused\'',
           )
 
           expect(err.message).to.include('> focus')
@@ -2286,7 +2281,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l1 = this.logs[0]
 
         expect(l1.get('message')).to.eq(
-          'expected **foo** to match /f/'
+          'expected **foo** to match /f/',
         )
       })
 
@@ -2305,19 +2300,19 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l4 = this.logs[3]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to match **div**'
+          'expected **<div>** to match **div**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** not to match **button**'
+          'expected **<div>** not to match **button**',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **<div>** to match **div**'
+          'expected **<div>** to match **div**',
         )
 
         expect(l4.get('message')).to.eq(
-          'expected **<div>** not to match **button**'
+          'expected **<div>** not to match **button**',
         )
       })
     })
@@ -2336,19 +2331,19 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l4 = this.logs[3]
 
         expect(l1.get('message')).to.eq(
-          'expected **[ foo ]** to include **foo**'
+          'expected **[ foo ]** to include **foo**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **{ foo: bar, baz: quux }** to have property **foo**'
+          'expected **{ foo: bar, baz: quux }** to have property **foo**',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **{ foo: bar, baz: quux }** to have property **foo** of **bar**'
+          'expected **{ foo: bar, baz: quux }** to have property **foo** of **bar**',
         )
 
         expect(l4.get('message')).to.eq(
-          'expected **foo** to include **fo**'
+          'expected **foo** to include **fo**',
         )
       })
     })
@@ -2396,43 +2391,43 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l10 = this.logs[9]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to have attribute **foo**'
+          'expected **<div>** to have attribute **foo**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** to have attribute **foo** with the value **bar**'
+          'expected **<div>** to have attribute **foo** with the value **bar**',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **<div>** not to have attribute **bar**'
+          'expected **<div>** not to have attribute **bar**',
         )
 
         expect(l4.get('message')).to.eq(
-          'expected **<div>** not to have attribute **bar**'
+          'expected **<div>** not to have attribute **bar**',
         )
 
         expect(l5.get('message')).to.eq(
-          'expected **<div>** not to have attribute **foo** with the value **baz**'
+          'expected **<div>** not to have attribute **foo** with the value **baz**',
         )
 
         expect(l6.get('message')).to.eq(
-          'expected **<a>** to have attribute **href**'
+          'expected **<a>** to have attribute **href**',
         )
 
         expect(l7.get('message')).to.eq(
-          'expected **https://google.com** to match /google/'
+          'expected **https://google.com** to match /google/',
         )
 
         expect(l8.get('message')).to.eq(
-          'expected **<a>** to have attribute **href** with the value **https://google.com**'
+          'expected **<a>** to have attribute **href** with the value **https://google.com**',
         )
 
         expect(l9.get('message')).to.eq(
-          'expected **<a>** to have text **google**'
+          'expected **<a>** to have text **google**',
         )
 
         expect(l10.get('message')).to.eq(
-          'expected **<a>** not to have attribute **href** with the value **https://google.com**, but the value was **https://google.com**'
+          'expected **<a>** not to have attribute **href** with the value **https://google.com**, but the value was **https://google.com**',
         )
       })
 
@@ -2440,7 +2435,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have attribute \'foo\''
+            'expected {} to have attribute \'foo\'',
           )
 
           expect(err.message).to.include('> attr')
@@ -2499,43 +2494,43 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l10 = this.logs[9]
 
         expect(l1.get('message')).to.eq(
-          'expected **<input>** to have property **checked**'
+          'expected **<input>** to have property **checked**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<input>** to have property **checked** with the value **true**'
+          'expected **<input>** to have property **checked** with the value **true**',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **<input>** not to have property **bar**'
+          'expected **<input>** not to have property **bar**',
         )
 
         expect(l4.get('message')).to.eq(
-          'expected **<input>** not to have property **bar**'
+          'expected **<input>** not to have property **bar**',
         )
 
         expect(l5.get('message')).to.eq(
-          'expected **<input>** not to have property **checked** with the value **baz**'
+          'expected **<input>** not to have property **checked** with the value **baz**',
         )
 
         expect(l6.get('message')).to.eq(
-          'expected **<a>** to have property **href**'
+          'expected **<a>** to have property **href**',
         )
 
         expect(l7.get('message')).to.eq(
-          `expected **${href}** to match /foo/`
+          `expected **${href}** to match /foo/`,
         )
 
         expect(l8.get('message')).to.eq(
-          `expected **<a>** to have property **href** with the value **${href}**`
+          `expected **<a>** to have property **href** with the value **${href}**`,
         )
 
         expect(l9.get('message')).to.eq(
-          'expected **<a>** to have text **google**'
+          'expected **<a>** to have text **google**',
         )
 
         expect(l10.get('message')).to.eq(
-          `expected **<a>** not to have property **href** with the value **${href}**, but the value was **${href}**`
+          `expected **<a>** not to have property **href** with the value **${href}**, but the value was **${href}**`,
         )
       })
 
@@ -2543,7 +2538,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have property \'foo\''
+            'expected {} to have property \'foo\'',
           )
 
           expect(err.message).to.include('> prop')
@@ -2585,27 +2580,27 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         const l6 = this.logs[5]
 
         expect(l1.get('message')).to.eq(
-          'expected **<div>** to have CSS property **display**'
+          'expected **<div>** to have CSS property **display**',
         )
 
         expect(l2.get('message')).to.eq(
-          'expected **<div>** to have CSS property **display** with the value **none**'
+          'expected **<div>** to have CSS property **display** with the value **none**',
         )
 
         expect(l3.get('message')).to.eq(
-          'expected **<div>** not to have CSS property **bar**'
+          'expected **<div>** not to have CSS property **bar**',
         )
 
         expect(l4.get('message')).to.eq(
-          'expected **<div>** not to have CSS property **bar**'
+          'expected **<div>** not to have CSS property **bar**',
         )
 
         expect(l5.get('message')).to.eq(
-          'expected **<div>** not to have CSS property **display** with the value **inline**'
+          'expected **<div>** not to have CSS property **display** with the value **inline**',
         )
 
         expect(l6.get('message')).to.eq(
-          'expected **<div>** not to have CSS property **display** with the value **none**, but the value was **none**'
+          'expected **<div>** not to have CSS property **display** with the value **none**, but the value was **none**',
         )
       })
 
@@ -2613,7 +2608,7 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
           expect(this.logs[0].get('error').message).to.eq(
-            'expected {} to have CSS property \'foo\''
+            'expected {} to have CSS property \'foo\'',
           )
 
           expect(err.message).to.include('> css')
@@ -2624,6 +2619,18 @@ This element '<div>' is not visible because it has CSS property: 'display: none'
 
         expect({}).to.have.css('foo')
       })
+    })
+  })
+
+  context('cross-origin iframe', () => {
+    it(`doesn't throw when iframe exists`, () => {
+      cy.visit('fixtures/cross_origin.html')
+      cy.get('.foo').should('not.be.visible')
+    })
+
+    it(`doesn't throw when iframe with name attribute exists`, () => {
+      cy.visit('fixtures/cross_origin_name.html')
+      cy.get('.foo').should('not.be.visible')
     })
   })
 })

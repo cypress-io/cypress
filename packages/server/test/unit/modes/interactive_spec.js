@@ -84,21 +84,21 @@ describe('gui/interactive', () => {
       })
 
       it('calls menu.set withDevTools: true when in dev env', () => {
-        const env = process.env['CYPRESS_ENV']
+        const env = process.env['CYPRESS_INTERNAL_ENV']
 
-        process.env['CYPRESS_ENV'] = 'development'
+        process.env['CYPRESS_INTERNAL_ENV'] = 'development'
         interactiveMode.getWindowArgs({}).onFocus()
         expect(menu.set.lastCall.args[0].withDevTools).to.be.true
-        process.env['CYPRESS_ENV'] = env
+        process.env['CYPRESS_INTERNAL_ENV'] = env
       })
 
       it('calls menu.set withDevTools: false when not in dev env', () => {
-        const env = process.env['CYPRESS_ENV']
+        const env = process.env['CYPRESS_INTERNAL_ENV']
 
-        process.env['CYPRESS_ENV'] = 'production'
+        process.env['CYPRESS_INTERNAL_ENV'] = 'production'
         interactiveMode.getWindowArgs({}).onFocus()
         expect(menu.set.lastCall.args[0].withDevTools).to.be.false
-        process.env['CYPRESS_ENV'] = env
+        process.env['CYPRESS_INTERNAL_ENV'] = env
       })
     })
   })
@@ -113,7 +113,7 @@ describe('gui/interactive', () => {
       sinon.stub(Windows, 'open').resolves(this.win)
       sinon.stub(Windows, 'trackState')
 
-      const state = savedState()
+      const state = savedState.create()
 
       sinon.stub(state, 'get').resolves(this.state)
     })
@@ -137,24 +137,24 @@ describe('gui/interactive', () => {
     })
 
     it('calls menu.set withDevTools: true when in dev env', () => {
-      const env = process.env['CYPRESS_ENV']
+      const env = process.env['CYPRESS_INTERNAL_ENV']
 
-      process.env['CYPRESS_ENV'] = 'development'
+      process.env['CYPRESS_INTERNAL_ENV'] = 'development'
 
       return interactiveMode.ready({}).then(() => {
         expect(menu.set.lastCall.args[0].withDevTools).to.be.true
-        process.env['CYPRESS_ENV'] = env
+        process.env['CYPRESS_INTERNAL_ENV'] = env
       })
     })
 
     it('calls menu.set withDevTools: false when not in dev env', () => {
-      const env = process.env['CYPRESS_ENV']
+      const env = process.env['CYPRESS_INTERNAL_ENV']
 
-      process.env['CYPRESS_ENV'] = 'production'
+      process.env['CYPRESS_INTERNAL_ENV'] = 'production'
 
       return interactiveMode.ready({}).then(() => {
         expect(menu.set.lastCall.args[0].withDevTools).to.be.false
-        process.env['CYPRESS_ENV'] = env
+        process.env['CYPRESS_INTERNAL_ENV'] = env
       })
     })
 

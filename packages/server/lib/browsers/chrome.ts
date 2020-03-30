@@ -240,7 +240,7 @@ const _disableRestorePagesPrompt = function (userDir) {
 
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port) {
+const _connectToChromeRemoteInterface = function (port, onError) {
   // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
 
@@ -250,7 +250,7 @@ const _connectToChromeRemoteInterface = function (port) {
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
-    return CriClient.create(wsUrl)
+    return CriClient.create(wsUrl, onError)
   })
 }
 
@@ -288,7 +288,7 @@ const _navigateUsingCRI = async function (client, url) {
 
 const _setAutomation = (client, automation) => {
   return automation.use(
-    CdpAutomation(client.send)
+    CdpAutomation(client.send),
   )
 }
 
@@ -379,6 +379,10 @@ export = {
 
     if (isHeadless) {
       args.push('--headless')
+
+      // set the window size for headless to a better default
+      // https://github.com/cypress-io/cypress/issues/6210
+      args.push('--window-size=1280,720')
     }
 
     // force ipv4
@@ -420,7 +424,7 @@ export = {
     const [extDest] = await Bluebird.all([
       this._writeExtension(
         browser,
-        options
+        options,
       ),
       _removeRootExtension(),
       _disableRestorePagesPrompt(userDir),
@@ -448,7 +452,7 @@ export = {
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port)
+    const criClient = await this._connectToChromeRemoteInterface(port, options.onError)
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 

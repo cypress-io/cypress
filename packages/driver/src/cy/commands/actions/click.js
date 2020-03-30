@@ -255,7 +255,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                   formatMouseEvents(domEvents.clickEvents[1]),
                   formatMouseEvents({
                     dblclick: domEvents.dblclick,
-                  })
+                  }),
                 ),
               }
             },
@@ -286,7 +286,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                 data: _.concat(
                   formatMouseEvents(domEvents.moveEvents.events),
                   formatMouseEvents(domEvents.clickEvents),
-                  formatMouseEvents(domEvents.contextmenuEvent)
+                  formatMouseEvents(domEvents.contextmenuEvent),
                 ),
               }
             },

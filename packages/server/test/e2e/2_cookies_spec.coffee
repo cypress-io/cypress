@@ -125,6 +125,7 @@ describe "e2e cookies", ->
       hosts: {
         "*.foo.com": "127.0.0.1"
         "*.bar.net": "127.0.0.1"
+        "*.cypress.test": "127.0.0.1"
       }
     }
   })
@@ -138,6 +139,7 @@ describe "e2e cookies", ->
   [
     ["localhost", "localhost"],
     ["FQDN", "www.bar.foo.com"],
+    ["private FQDN", "local.cypress.test"],
     ["IP", "127.0.0.1"],
   ]
   .forEach ([

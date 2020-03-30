@@ -252,14 +252,14 @@ describe "src/cy/commands/agents", ->
         describe "errors", ->
           _.each [null, undefined, {}, [], 123], (value) =>
             it "throws when passed: #{value}", ->
-              expect(=> cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
+              expect(=> cy.stub().as(value)).to.throw("`cy.as()` can only accept a string.")
 
           it "throws on blank string", ->
-            expect(=> cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
+            expect(=> cy.stub().as("")).to.throw("`cy.as()` cannot be passed an empty string.")
 
           _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
             it "throws on a blacklisted word: #{blacklist}", ->
-              expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
+              expect(=> cy.stub().as(blacklist)).to.throw("`cy.as()` cannot be aliased as: `#{blacklist}`. This word is reserved.")
 
       context "with dots", ->
         beforeEach ->
@@ -307,14 +307,14 @@ describe "src/cy/commands/agents", ->
         describe "errors", ->
           _.each [null, undefined, {}, [], 123], (value) =>
             it "throws when passed: #{value}", ->
-              expect(=> cy.stub().as(value)).to.throw("cy.as() can only accept a string.")
+              expect(=> cy.stub().as(value)).to.throw("`cy.as()` can only accept a string.")
 
           it "throws on blank string", ->
-            expect(=> cy.stub().as("")).to.throw("cy.as() cannot be passed an empty string.")
+            expect(=> cy.stub().as("")).to.throw("`cy.as()` cannot be passed an empty string.")
 
           _.each ["test", "runnable", "timeout", "slow", "skip", "inspect"], (blacklist) ->
             it "throws on a blacklisted word: #{blacklist}", ->
-              expect(=> cy.stub().as(blacklist)).to.throw("cy.as() cannot be aliased as: '#{blacklist}'. This word is reserved.")
+              expect(=> cy.stub().as(blacklist)).to.throw("`cy.as()` cannot be aliased as: `#{blacklist}`. This word is reserved.")
 
     describe "logging", ->
       beforeEach ->
@@ -528,7 +528,7 @@ describe "src/cy/commands/agents", ->
       @agents = cy.agents()
 
     it "logs deprecation warning", ->
-      expect(top.console.warn).to.be.calledWith("Cypress Warning: cy.agents() is deprecated. Use cy.stub() and cy.spy() instead.")
+      expect(top.console.warn).to.be.calledWith("Cypress Warning: `cy.agents()` is deprecated. Use `cy.stub()` and `cy.spy()` instead.")
 
     it "synchronously returns #spy and #stub methods", ->
       expect(@agents.spy).to.be.a("function")

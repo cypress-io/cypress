@@ -21,6 +21,7 @@ exports['e2e visit / low response timeout / passes'] = `
     ✓ scrolls automatically to div with id=foo
     ✓ can load an http page with a huge amount of elements without timing out
     ✓ can load a local file with a huge amount of elements without timing out
+    ✓ can load a website which uses invalid HTTP header chars
     ✓ can load a site via TLSv1
     issue #225: hash urls
       ✓ can visit a hash url and loads
@@ -36,14 +37,14 @@ exports['e2e visit / low response timeout / passes'] = `
       ✓ sets accept header to text/html,*/*
 
 
-  12 passing
+  13 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        12                                                                               │
-  │ Passing:      12                                                                               │
+  │ Tests:        13                                                                               │
+  │ Passing:      13                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -67,9 +68,9 @@ exports['e2e visit / low response timeout / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  visit_spec.coffee                        XX:XX       12       12        -        -        - │
+  │ ✔  visit_spec.coffee                        XX:XX       13       13        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       12       12        -        -        -  
+    ✔  All specs passed!                        XX:XX       13       13        -        -        -  
 
 
 `
@@ -101,7 +102,7 @@ exports['e2e visit / low response timeout / fails when network connection immedi
   1 failing
 
   1) when network connection cannot be established fails:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:16795/
 
@@ -197,7 +198,7 @@ exports['e2e visit / low response timeout / fails when server responds with 500'
   1 failing
 
   1) when server response is 500 fails:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/fail
 
@@ -205,9 +206,9 @@ The response we received from your web server was:
 
   > 500: Server Error
 
-This was considered a failure because the status code was not '2xx'.
+This was considered a failure because the status code was not \`2xx\`.
 
-If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+If you do not want status codes to cause failures pass the option: \`failOnStatusCode: false\`
       [stack trace lines]
 
 
@@ -283,7 +284,7 @@ exports['e2e visit / low response timeout / fails when file server responds with
   1 failing
 
   1) when file server response is 404 fails:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 /static/does-not-exist.html
 
@@ -369,19 +370,19 @@ exports['e2e visit / low response timeout / fails when content type isnt html'] 
   1 failing
 
   1) when content type is plain/text fails:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 /static/hello.txt
 
-The content-type of the response we received from this local file was:
+The \`content-type\` of the response we received from this local file was:
 
-  > text/plain
+  > \`text/plain\`
 
-This was considered a failure because responses must have content-type: 'text/html'
+This was considered a failure because responses must have \`content-type: 'text/html'\`
 
-However, you can likely use cy.request() instead of cy.visit().
+However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
-cy.request() will automatically get and set cookies and enable you to parse responses.
+\`cy.request()\` will automatically get and set cookies and enable you to parse responses.
       [stack trace lines]
 
 
@@ -458,27 +459,27 @@ exports['e2e visit / normal response timeouts / fails when visit times out'] = `
   2 failing
 
   1) when visit times out fails timeout exceeds pageLoadTimeout:
-     CypressError: Timed out after waiting '1000ms' for your remote page to load.
+     CypressError: Timed out after waiting \`1000ms\` for your remote page to load.
 
-Your page did not fire its 'load' event within '1000ms'.
+Your page did not fire its \`load\` event within \`1000ms\`.
 
-You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
-Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
-When this 'load' event occurs, Cypress will continue running commands.
+When this \`load\` event occurs, Cypress will continue running commands.
       [stack trace lines]
 
   2) when visit times out fails timeout exceeds timeout option:
-     CypressError: Timed out after waiting '500ms' for your remote page to load.
+     CypressError: Timed out after waiting \`500ms\` for your remote page to load.
 
-Your page did not fire its 'load' event within '500ms'.
+Your page did not fire its \`load\` event within \`500ms\`.
 
-You can try increasing the 'pageLoadTimeout' value in 'cypress.json' to wait longer.
+You can try increasing the \`pageLoadTimeout\` value in \`cypress.json\` to wait longer.
 
-Browsers will not fire the 'load' event until all stylesheets and scripts are done downloading.
+Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
-When this 'load' event occurs, Cypress will continue running commands.
+When this \`load\` event occurs, Cypress will continue running commands.
       [stack trace lines]
 
 
@@ -558,7 +559,7 @@ exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when re
   3 failing
 
   1) response timeouts result in an error handles no response errors on the initial visit:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/response_never_finishes
 
@@ -582,7 +583,7 @@ Error: ESOCKETTIMEDOUT
   
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/response_never_finishes
 
@@ -606,7 +607,7 @@ Error: ESOCKETTIMEDOUT
   
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
-     CypressError: cy.visit() failed trying to load:
+     CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/timeout?ms=1000
 

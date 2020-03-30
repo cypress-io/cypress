@@ -220,7 +220,7 @@ describe "src/cy/commands/actions/select", ->
 
         cy.on "fail", (err) ->
           expect(selected).to.eq 1
-          expect(err.message).to.include "cy.select() failed because this element"
+          expect(err.message).to.include "`cy.select()` failed because this element"
           done()
 
         cy.get("#select-maps").select("de_dust2").select("de_aztec")
@@ -229,30 +229,32 @@ describe "src/cy/commands/actions/select", ->
         num = cy.$$("select").length
 
         cy.on "fail", (err) =>
-          expect(err.message).to.include "cy.select() can only be called on a single <select>. Your subject contained #{num} elements."
+          expect(err.message).to.include "`cy.select()` can only be called on a single `<select>`. Your subject contained #{num} elements."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
-        cy
-          .get("select")
-          .select("foo")
+        cy.get("select").select("foo")
 
       it "throws on anything other than a select", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.select() can only be called on a <select>. Your subject is a: <input id=\"input\">"
+          expect(err.message).to.include "`cy.select()` can only be called on a `<select>`. Your subject is a: `<input id=\"input\">`"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
         cy.get("input:first").select("foo")
 
       it "throws when finding duplicate values", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.select() matched more than one option by value or text: bm"
+          expect(err.message).to.include "`cy.select()` matched more than one `option` by value or text: `bm`"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
         cy.get("select[name=names]").select("bm")
 
       it "throws when passing an array to a non multiple select", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.select() was called with an array of arguments but does not have a 'multiple' attribute set."
+          expect(err.message).to.include "`cy.select()` was called with an array of arguments but does not have a `multiple` attribute set."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
         cy.get("select[name=names]").select(["bm", "ss"])
@@ -261,28 +263,31 @@ describe "src/cy/commands/actions/select", ->
         select = cy.$$("#select-maps").show().hide()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.select() failed because this element is not visible"
+          expect(err.message).to.include "`cy.select()` failed because this element is not visible"
           done()
 
         cy.get("#select-maps").select("de_dust2")
 
       it "throws when value or text does not exist", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("cy.select() failed because it could not find a single <option> with value or text matching: 'foo'")
+          expect(err.message).to.include("`cy.select()` failed because it could not find a single `<option>` with value or text matching: `foo`")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
         cy.get("select[name=foods]").select("foo")
 
       it "throws when the <select> itself is disabled", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("cy.select() failed because this element is currently disabled:")
+          expect(err.message).to.include("`cy.select()` failed because this element is currently disabled:")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
         cy.get("select[name=disabled]").select("foo")
 
       it "throws when options are disabled", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include("cy.select() failed because this <option> you are trying to select is currently disabled:")
+          expect(err.message).to.include("`cy.select()` failed because this `<option>` you are trying to select is currently disabled:")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
           done()
 
         cy.get("select[name=opt-disabled]").select("bar")

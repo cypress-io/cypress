@@ -3,7 +3,7 @@ import chai from 'chai'
 import http from 'http'
 import https from 'https'
 import net from 'net'
-import request from 'request-promise'
+import request from '@cypress/request-promise'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import tls from 'tls'
@@ -297,8 +297,8 @@ describe('lib/agent', function () {
           allowDestroy(
             net.createServer((socket) => {
               socket.end()
-            })
-          )
+            }),
+          ),
         ) as net.Server & AsyncServer
 
         const proxyPort = PROXY_PORT + 2

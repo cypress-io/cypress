@@ -302,30 +302,41 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('runner:console:log', 'command id')
     })
 
-    it('emits runner:console:log on show:error when it is a command error and there is a matching command', () => {
+    it('emits runner:console:error with test id on show:error', () => {
+      const err = { isCommandErr: false }
+
+      runnablesStore.testById.returns({ err })
+      events.emit('show:error', 'test id')
+      expect(runner.emit).to.have.been.calledWith('runner:console:error', {
+        err,
+        commandId: undefined,
+      })
+    })
+
+    it('emits runner:console:error with test id and command id on show:error when it is a command error and there is a matching command', () => {
       const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
         return { id: 'matching command id' }
       } }
 
       runnablesStore.testById.returns(test)
       events.emit('show:error', 'test id')
-      expect(runner.emit).to.have.been.calledWith('runner:console:log', 'matching command id')
+      expect(runner.emit).to.have.been.calledWith('runner:console:error', {
+        err: test.err,
+        commandId: 'matching command id',
+      })
     })
 
-    it('does not emit anything on show:error it is a command error but there not a matching command', () => {
+    it('emits runner:console:error with test id on show:error when it is a command error but there not a matching command', () => {
       const test = { err: { isCommandErr: true }, commandMatchingErr: () => {
         return null
       } }
 
       runnablesStore.testById.returns(test)
       events.emit('show:error', 'test id')
-      expect(runner.emit).not.to.have.been.called
-    })
-
-    it('emits runner:console:error on show:error when it is not a command error', () => {
-      runnablesStore.testById.returns({ err: { isCommandErr: false } })
-      events.emit('show:error', 'test id')
-      expect(runner.emit).to.have.been.calledWith('runner:console:error', 'test id')
+      expect(runner.emit).to.have.been.calledWith('runner:console:error', {
+        err: test.err,
+        commandId: undefined,
+      })
     })
 
     it('emits runner:show:snapshot on show:snapshot', () => {

@@ -102,14 +102,14 @@ module.exports = {
           // the launch cmd to be 'npm run dev'
           executable = 'node'
           args.unshift(
-            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+            path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
           )
 
           debug('in dev mode the args became %o', args)
         }
 
         const { onStderrData, electronLogging } = overrides
-        const envOverrides = util.getEnvOverrides()
+        const envOverrides = util.getEnvOverrides(options)
         const electronArgs = _.clone(args)
         const node11WindowsFix = isPlatform('win32')
 

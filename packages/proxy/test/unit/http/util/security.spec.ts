@@ -3,7 +3,7 @@ import { concatStream } from '@packages/network'
 import { expect } from 'chai'
 import fs from 'fs'
 import Promise from 'bluebird'
-import rp from 'request-promise'
+import rp from '@cypress/request-promise'
 import * as security from '../../../../lib/http/util/security'
 
 const original = `\
@@ -153,6 +153,28 @@ for (; !function (n) {
 function(n){for(;!function(l){return l===l.parent}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}\
 `
 
+      const jira3 = `\
+function satisfiesSameOrigin(w) {
+    try {
+        // Accessing location.href from a window on another origin will throw an exception.
+        if ( w.location.href == undefined) {
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+function isTopMostWindow(w) {
+    return w === w.parent;
+}
+
+while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
+    parentOf = parentOf.parent;
+}\
+`
+
       expect(security.strip(jira)).to.eq(`\
 for (; !function (n) {
   return n === n.parent || n.parent.__Cypress__
@@ -161,6 +183,28 @@ for (; !function (n) {
 
       expect(security.strip(jira2)).to.eq(`\
 function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}\
+`)
+
+      expect(security.strip(jira3)).to.eq(`\
+function satisfiesSameOrigin(w) {
+    try {
+        // Accessing location.href from a window on another origin will throw an exception.
+        if ( w.location.href == undefined) {
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+function isTopMostWindow(w) {
+    return w === w.parent || w.parent.__Cypress__;
+}
+
+while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
+    parentOf = parentOf.parent;
+}\
 `)
     })
 
@@ -253,7 +297,7 @@ function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&f
             if (lib === 'hugeApp') {
               stripped = stripped.replace(
                 'window.self !== window.self',
-                'window.self !== window.top'
+                'window.self !== window.top',
               )
             }
 

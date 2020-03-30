@@ -11,7 +11,7 @@ export const detectVisibility = ($el: any) => {
   return elIsTransformedToZero(list) ? 'transformed' : 'visible'
 }
 
-type BackfaceVisibility = 'hidden' | 'visible'
+type BackfaceVisibility = 'hidden' | 'visible' | ''
 type TransformStyle = 'flat' | 'preserve-3d'
 type Matrix2D = [
   number, number, number,
@@ -33,7 +33,11 @@ interface TransformInfo {
 }
 
 const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []): TransformInfo[] => {
-  list.push(extractTransformInfo($el))
+  const info = extractTransformInfo($el)
+
+  if (info) {
+    list.push(info)
+  }
 
   const $parent = $el.parent()
 
@@ -44,12 +48,23 @@ const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []):
   return extractTransformInfoFromElements($parent, list)
 }
 
-const extractTransformInfo = ($el): TransformInfo => {
+const extractTransformInfo = ($el): TransformInfo | null => {
   const el = $el[0]
   const style = getComputedStyle(el)
 
+  const backfaceVisibility = style.getPropertyValue('backface-visibility') as BackfaceVisibility
+
+  // When an element is not in the DOM tree, getComputedStyle() returns empty string.
+  // In an edge case from frameworks like `vue-fragment`
+  // `parentNode` is modified and out of the DOM tree.
+  // @see https://github.com/cypress-io/cypress/pull/6787
+  // @see https://github.com/cypress-io/cypress/issues/6745
+  if (backfaceVisibility === '') {
+    return null
+  }
+
   return {
-    backfaceVisibility: style.getPropertyValue('backface-visibility') as BackfaceVisibility,
+    backfaceVisibility,
     transformStyle: style.getPropertyValue('transform-style') as TransformStyle,
     transform: style.getPropertyValue('transform'),
   }

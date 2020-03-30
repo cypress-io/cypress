@@ -101,6 +101,7 @@ const CI_PROVIDERS = {
   'teamfoundation': isTeamFoundation,
   'travis': 'TRAVIS',
   'wercker': isWercker,
+  netlify: 'NETLIFY',
 }
 
 const _detectProviderName = () => {
@@ -227,6 +228,7 @@ const _providerCiParams = () => {
       'CI_PROJECT_URL',
       'CI_REPOSITORY_URL',
       'CI_ENVIRONMENT_URL',
+      'CI_DEFAULT_BRANCH',
     // for PRs: https://gitlab.com/gitlab-org/gitlab-ce/issues/23902
     ]),
     // https://docs.gocd.org/current/faq/dev_use_current_revision_in_build.html#standard-gocd-environment-variables
@@ -330,6 +332,7 @@ const _providerCiParams = () => {
     travis: extract([
       'TRAVIS_JOB_ID',
       'TRAVIS_BUILD_ID',
+      'TRAVIS_BUILD_WEB_URL',
       'TRAVIS_REPO_SLUG',
       'TRAVIS_JOB_NUMBER',
       'TRAVIS_EVENT_TYPE',
@@ -340,6 +343,15 @@ const _providerCiParams = () => {
       'TRAVIS_PULL_REQUEST_SHA',
     ]),
     wercker: null,
+    // https://docs.netlify.com/configure-builds/environment-variables/#deploy-urls-and-metadata
+    netlify: extract([
+      'BUILD_ID',
+      'CONTEXT',
+      'URL',
+      'DEPLOY_URL',
+      'DEPLOY_PRIME_URL',
+      'DEPLOY_ID',
+    ]),
   }
 }
 
@@ -445,8 +457,8 @@ const _providerCommitParams = () => {
       message: env.CI_COMMIT_MESSAGE,
       authorName: env.GITLAB_USER_NAME,
       authorEmail: env.GITLAB_USER_EMAIL,
-      // remoteOrigin: ???
-      // defaultBranch: ???
+      remoteOrigin: env.CI_REPOSITORY_URL,
+      defaultBranch: env.CI_DEFAULT_BRANCH,
     },
     googleCloud: {
       sha: env.COMMIT_SHA,
@@ -504,6 +516,11 @@ const _providerCommitParams = () => {
       // defaultBranch: ???
     },
     wercker: null,
+    netlify: {
+      sha: env.COMMIT_REF,
+      branch: env.BRANCH,
+      remoteOrigin: env.REPOSITORY_URL,
+    },
   }
 }
 

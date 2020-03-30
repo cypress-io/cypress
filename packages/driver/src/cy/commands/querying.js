@@ -72,7 +72,7 @@ module.exports = (Commands, Cypress, cy) => {
       const userOptions = options
       const ctx = this
 
-      if ((userOptions === null) || Array.isArray(userOptions) || (typeof userOptions !== 'object')) {
+      if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
         return $errUtils.throwErrByPath('get.invalid_options', {
           args: { options: userOptions },
         })
@@ -507,7 +507,7 @@ module.exports = (Commands, Cypress, cy) => {
 
                   break
                 case 'existence':
-                  return err.displayMessage = getErr(err)
+                  return err.message = getErr(err)
                 default:
                   break
               }

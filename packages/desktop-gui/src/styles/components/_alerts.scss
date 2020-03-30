@@ -56,6 +56,10 @@
 
   .alert-content {
     text-align: left;
+
+    p {
+      line-height: 1.5;
+    }
   }
 
   code, pre {
@@ -96,6 +100,17 @@
   flex-grow: 0;
   flex-shrink: 0;
   position: relative;
+
+  .retry-button {
+    font-size: 12px;
+    position: unset;
+    top: unset;
+    right: unset;
+
+    i {
+      margin-right: 0.5em;
+    }
+  }
 
   code, pre {
     border: none;
