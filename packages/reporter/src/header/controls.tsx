@@ -32,14 +32,14 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         </span>
       ))}
       {ifThen(appState.isPaused, (
-        <Tooltip placement='bottom' title='Resume'>
+        <Tooltip placement='bottom' title='Resume' className='cy-tooltip'>
           <button aria-label='Resume' className='play' onClick={emit('resume')}>
             <i className='fas fa-play'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(!appState.isPaused, (
-        <Tooltip placement='bottom' title={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}>
+        <Tooltip placement='bottom' title={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`} className='cy-tooltip'>
           <button
             aria-label={`${appState.autoScrollingEnabled ? 'Disable' : 'Enable'} Auto-scrolling`}
             className={cs('toggle-auto-scrolling', { 'auto-scrolling-enabled': appState.autoScrollingEnabled })}
@@ -51,21 +51,21 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         </Tooltip>
       ))}
       {ifThen(appState.isRunning && !appState.isPaused, (
-        <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>}>
+        <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip'>
           <button aria-label='Stop' className='stop' onClick={emit('stop')}>
             <i className='fas fa-stop'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
-        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>}>
+        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip'>
           <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')}>
             <i className='fas fa-redo'></i>
           </button>
         </Tooltip>
       ))}
       {ifThen(!!appState.nextCommandName, (
-        <Tooltip placement='bottom' title={`Next: '${appState.nextCommandName}'`}>
+        <Tooltip placement='bottom' title={`Next: '${appState.nextCommandName}'`} className='cy-tooltip'>
           <button aria-label={`Next: '${appState.nextCommandName}'`} className='next' onClick={emit('next')}>
             <i className='fas fa-step-forward'></i>
           </button>

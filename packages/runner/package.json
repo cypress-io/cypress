@@ -24,7 +24,7 @@
     "@packages/socket": "*",
     "@packages/web-config": "*",
     "ansi-to-html": "0.6.14",
-    "bluebird": "3.5.0",
+    "bluebird": "3.5.3",
     "chai": "4.2.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
