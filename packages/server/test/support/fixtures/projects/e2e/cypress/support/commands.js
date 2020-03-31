@@ -341,6 +341,25 @@ Cypress.Commands.add('failEventHandlerException', () => {
   cy.visit('http://localhost:1919')
 })
 
+Cypress.Commands.add('failSyncAppException', () => {
+  cy.visit('/js_errors.html')
+  cy.get('.sync-error').click()
+})
+
+Cypress.Commands.add('failAsyncAppException', () => {
+  cy.visit('/js_errors.html')
+  cy.get('.async-error').click()
+  cy.wait(10000)
+})
+
+Cypress.Commands.add('failAsyncException', () => {
+  setTimeout(() => {
+    ({}).bar()
+  })
+
+  cy.wait(10000)
+})
+
 Cypress.Commands.add('failInternalCypressMethod', () => {
   top.window.eval(`Cypress.dom.isJquery = () => { throw new Error('thrown in CypressdomisJquery') }`)
 

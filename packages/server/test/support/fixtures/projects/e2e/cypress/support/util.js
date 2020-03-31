@@ -13,17 +13,33 @@ export const setup = ({ verifyStackLineIsSpecFile }) => {
   shouldVerifyStackLineIsSpecFile = verifyStackLineIsSpecFile
 }
 
+// NOTE: use { defaultCommandTimeout: 0 } once per-test configuration is
+// implemented (https://github.com/cypress-io/cypress/pull/5346)
 export const fail = (ctx, test) => {
-  // NOTE: use { defaultCommandTimeout: 0 } once per-test configuration is
-  // implemented (https://github.com/cypress-io/cypress/pull/5346)
-  it(`${count++}) ✗ FAIL - ${getTitle(ctx)}`, () => {
+  const title = `${count++}) ✗ FAIL - ${getTitle(ctx)}`
+  const withDone = test.length > 0
+
+  if (withDone) {
+    it(title, (done) => {
+      cy.timeout(0) // speed up failures to not retry since we know they should fail
+
+      return test(done)
+    })
+
+    return
+  }
+
+  it(title, () => {
     cy.timeout(0) // speed up failures to not retry since we know they should fail
 
     return test()
   })
 }
 
-export const verify = (ctx, { column, codeFrameText, message, regex }) => {
+export const verify = (ctx, options) => {
+  const { hasCodeFrame = true, column, codeFrameText, message } = options
+  let { regex } = options
+
   // test only the column number because the line number is brittle
   // since any changes to this file can affect it
   if (!regex) {
@@ -38,12 +54,24 @@ export const verify = (ctx, { column, codeFrameText, message, regex }) => {
     .contains(`FAIL - ${getTitle(ctx)}`)
     .closest('.runnable-wrapper')
     .within(() => {
-      cy.get('.runnable-err-message')
-      .should('include.text', message)
+      Cypress._.each([].concat(message), (msg) => {
+        cy.get('.runnable-err-message')
+        .should('include.text', msg)
+
+        cy.contains('View stack trace').click()
+
+        // TODO: get this working. it currently fails in a bizarre way
+        // displayed stack trace should not include message
+        // cy.get('.runnable-err-stack-trace')
+        // .invoke('text')
+        // .should('not.include.text', msg)
+      })
 
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
       .should('match', regex)
+
+      if (!hasCodeFrame) return
 
       cy
       .get('.test-err-code-frame .runnable-err-file-path')

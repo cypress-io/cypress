@@ -557,14 +557,12 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       state('resolve', resolve)
-
-      return state('reject', rejectOuterAndCancelInner)
+      state('reject', rejectOuterAndCancelInner)
     })
     .catch((err) => {
       // since this failed this means that a
       // specific command failed and we should
       // highlight it in red or insert a new command
-
       err.name = err.name || 'CypressError'
       errors.commandRunningFailed(err)
 
@@ -1158,20 +1156,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       runnable = state('runnable')
 
       if (runnable) {
-        // we're using an explicit done callback here
-        let d; let r
+        fail(err)
 
-        d = state('done')
-
-        if (d) {
-          d(err)
-        }
-
-        r = state('reject')
-
-        if (r) {
-          return r(err)
-        }
+        return
       }
 
       // else pass the error along
@@ -1346,13 +1333,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
           // else just return ret
           return ret
-        } catch (error) {
-          // if our runnable.fn throw synchronously
-          // then it didnt fail from a cypress command
-          // but we should still teardown and handle
+        } catch (err) {
+          // if runnable.fn threw synchronously, then it didnt fail from
+          // a cypress command, but we should still teardown and handle
           // the error
-          const err = error
-
           return fail(err, runnable)
         }
       }

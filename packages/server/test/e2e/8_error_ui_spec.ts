@@ -7,7 +7,7 @@ const onServer = function (app) {
   return app.get('/response', (req, res) => res.json({ ok: true }))
 }
 
-const expectedFailures = 50
+const expectedFailures = 54
 
 const verifyPassedAndFailedAreSame = function ({ stdout }) {
   const passes = stdout.match(/✓ ✓ VERIFY/g)

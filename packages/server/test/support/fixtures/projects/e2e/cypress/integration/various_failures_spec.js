@@ -7,7 +7,14 @@
  * tests, because each failure has a verification test (e.g. 11 fail, 11 pass)
  */
 import outsideError from '../../../todos/throws-error'
-import { fail, verify, verifyInternalError, setup, sendXhr, abortXhr } from '../support/util'
+import {
+  fail,
+  verify,
+  verifyInternalError,
+  setup,
+  sendXhr,
+  abortXhr,
+} from '../support/util'
 
 setup({ verifyStackLineIsSpecFile: true })
 
@@ -732,6 +739,76 @@ context('event handlers', () => {
     verify(this, {
       column: 14,
       message: '{}.bar is not a function',
+    })
+  })
+})
+
+context('uncaught errors', () => {
+  describe('sync app exception', function () {
+    fail(this, () => {
+      cy.visit('/js_errors.html')
+      cy.get('.sync-error').click()
+    })
+
+    verify(this, {
+      message: [
+        'The following error originated from your application code',
+        '{}.bar is not a function',
+      ],
+      regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
+      hasCodeFrame: false,
+    })
+  })
+
+  describe('async app exception', function () {
+    fail(this, () => {
+      cy.visit('/js_errors.html')
+      cy.get('.async-error').click()
+      cy.wait(10000)
+    })
+
+    verify(this, {
+      message: [
+        'The following error originated from your application code',
+        '{}.bar is not a function',
+      ],
+      regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
+      hasCodeFrame: false,
+    })
+  })
+
+  describe('async exception', function () {
+    fail(this, () => {
+      setTimeout(() => {
+        ({}).bar()
+      })
+
+      cy.wait(10000)
+    })
+
+    verify(this, {
+      column: 14,
+      message: [
+        '{}.bar is not a function',
+        'The following error originated from your test code',
+      ],
+    })
+  })
+
+  describe('async exception with done', function () {
+    fail(this, (done) => {
+      setTimeout(() => {
+        ({}).bar()
+      }, 20)
+    })
+
+    verify(this, {
+      column: 14,
+      message: [
+        '{}.bar is not a function',
+        'The following error originated from your test code',
+      ],
+      codeFrameText: 'fail(this,(done)=>',
     })
   })
 })

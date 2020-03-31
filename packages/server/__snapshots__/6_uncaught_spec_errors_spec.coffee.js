@@ -23,12 +23,16 @@ exports['e2e uncaught errors / failing1'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     ReferenceError: foo is not defined
+     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
+
+  > foo is not defined
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
@@ -101,12 +105,16 @@ exports['e2e uncaught errors / failing2'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     ReferenceError: foo is not defined
+     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
+
+  > foo is not defined
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
@@ -174,18 +182,52 @@ exports['e2e uncaught errors / failing3'] = `
 
 
   foo
-    1) bar
+    1) fails with setTimeout
+    2) fails with setTimeout and done
+    ✓ passes with fail handler after failing with setTimeout
+    3) fails with async app code error
+    ✓ passes with fail handler after failing with async app code error
+    - fails with promise
 
 
-  0 passing
-  1 failing
+  2 passing
+  1 pending
+  3 failing
 
-  1) foo bar:
-     Uncaught ReferenceError: foo is not defined
+  1) foo fails with setTimeout:
+     Uncaught Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
 
-This error originated from your test code, not from Cypress.
+  > The following error originated from your test code, not from Cypress.
+
+  > foo is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
+      [stack trace lines]
+
+  2) foo fails with setTimeout and done:
+     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
+
+  > foo is not defined
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+      [stack trace lines]
+
+  3) foo fails with async app code error:
+     Uncaught TypeError: The following error originated from your application code, not from Cypress.
+
+  > {}.bar is not a function
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
 
@@ -194,12 +236,12 @@ When Cypress detects uncaught errors originating from your test code it will aut
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
+  │ Tests:        6                                                                                │
+  │ Passing:      2                                                                                │
+  │ Failing:      3                                                                                │
+  │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  3                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     uncaught_during_test_spec.coffee                                                 │
@@ -208,8 +250,12 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- bar (fa     (1280x720)
-     iled).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- fails w     (1280x720)
+     ith setTimeout (failed).png                                                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- fails w     (1280x720)
+     ith setTimeout and done (failed).png                                                           
+  -  /XXX/XXX/XXX/cypress/screenshots/uncaught_during_test_spec.coffee/foo -- fails w     (1280x720)
+     ith async app code error (failed).png                                                          
 
 
   (Video)
@@ -226,9 +272,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  uncaught_during_test_spec.coffee         XX:XX        1        -        1        -        - │
+  │ ✖  uncaught_during_test_spec.coffee         XX:XX        6        2        3        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        6        2        3        1        -  
 
 
 `
@@ -263,11 +309,19 @@ exports['e2e uncaught errors / failing4'] = `
   1 failing
 
   1) foo "before all" hook for "does not run":
-     Uncaught ReferenceError: foo is not defined
+     Uncaught Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
 
-This error originated from your test code, not from Cypress.
+  > The following error originated from your test code, not from Cypress.
+
+  > foo is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+
+https://on.cypress.io/uncaught-exception-from-application
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`foo\`
       [stack trace lines]

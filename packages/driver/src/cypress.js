@@ -212,6 +212,8 @@ class $Cypress {
 
     $scriptUtils.runScripts(specWindow, scripts)
     .catch((err) => {
+      err = $errUtils.createUncaughtException('spec', err)
+
       this.runner.onScriptError(err)
     })
     .then(() => {

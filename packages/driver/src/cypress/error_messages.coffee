@@ -1450,15 +1450,15 @@ module.exports = {
         msg += "all of the remaining tests."
 
       msg
-
     error: (obj) ->
       {msg, source, lineno} = obj
 
       msg + if source and lineno then " (#{source}:#{lineno})" else ""
-
     fromApp: {
       message: """
-        This error originated from your application code, not from Cypress.
+        The following error originated from your application code, not from Cypress.
+
+          > {{errMsg}}
 
         When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -1468,7 +1468,9 @@ module.exports = {
     }
     fromSpec:
       message: """
-        This error originated from your test code, not from Cypress.
+        The following error originated from your test code, not from Cypress.
+
+          > {{errMsg}}
 
         When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       """

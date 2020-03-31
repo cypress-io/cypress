@@ -794,28 +794,22 @@ const create = function (specWindow, mocha, Cypress, cy) {
       return true
     }
 
-    const todoMsg = function () {
+    const todoMsg = () => {
       if (!Cypress.config('isTextTerminal')) {
         return 'Check your console for the stack trace or click this message to see where it originated from.'
       }
     }
 
-    const append = () => {
-      return _.chain([
-        'Cypress could not associate this error to any specific test.',
-        'We dynamically generated a new test to display this failure.',
-        todoMsg(),
-      ])
-      .compact()
-      .join('\n\n')
-      .value()
-    }
+    const appendMsg = _.chain([
+      'Cypress could not associate this error to any specific test.',
+      'We dynamically generated a new test to display this failure.',
+      todoMsg(),
+    ])
+    .compact()
+    .join('\n\n')
+    .value()
 
-    // else  do the same thing as mocha here
-    err = $errUtils.appendErrMsg(err, append())
-
-    // remove this error's stack since it gives no valuable context
-    err.stack = ''
+    err = $errUtils.appendErrMsg(err, appendMsg)
 
     const throwErr = function () {
       throw err
@@ -833,7 +827,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
   specWindow.onerror = function () {
     const err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
 
-    onScriptError(err)
+    return onScriptError(err)
   }
 
   // hold onto the _runnables for faster lookup later

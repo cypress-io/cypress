@@ -609,6 +609,68 @@ context('event handlers', () => {
   })
 })
 
+context('uncaught errors', () => {
+  describe('sync app exception', function () {
+    fail(this, () => {
+      cy.failSyncAppException()
+    })
+
+    verify(this, {
+      message: [
+        'The following error originated from your application code',
+        '{}.bar is not a function',
+      ],
+      regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
+      hasCodeFrame: false,
+    })
+  })
+
+  describe('async app exception', function () {
+    fail(this, () => {
+      cy.failAsyncAppException()
+    })
+
+    verify(this, {
+      message: [
+        'The following error originated from your application code',
+        '{}.bar is not a function',
+      ],
+      regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
+      hasCodeFrame: false,
+    })
+  })
+
+  describe('async exception', function () {
+    fail(this, () => {
+      cy.failAsyncException()
+    })
+
+    verify(this, {
+      column: 10,
+      message: [
+        '{}.bar is not a function',
+        'The following error originated from your test code',
+      ],
+      codeFrameText: 'failAsyncException',
+    })
+  })
+
+  describe('async exception with done', function () {
+    fail(this, (done) => {
+      cy.failAsyncException()
+    })
+
+    verify(this, {
+      column: 10,
+      message: [
+        '{}.bar is not a function',
+        'The following error originated from your test code',
+      ],
+      codeFrameText: 'failAsyncException',
+    })
+  })
+})
+
 // covering cases where there is a bug in Cypress and we shouldn't show
 // the invocation stack. it should show the original stack even if it is
 // thrown within a command
