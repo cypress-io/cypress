@@ -39,6 +39,19 @@ yarn lerna run build-prod --scope @packages/runner --stream
 
 ## Testing
 
+
+### Node Unit Tests
 ```bash
 yarn lerna run test --scope @packages/runner --stream
 ```
+
+
+### Cypress
+
+Run Cypress tests found in `test/cypress/integration`.
+
+```bash
+yarn lerna run cypress:open --scope @packages/runner --stream
+```
+
+You'll want to run `yarn lerna run watch --scope @packages/runner --stream` to get changes to the main Cypress reporter while testing.
