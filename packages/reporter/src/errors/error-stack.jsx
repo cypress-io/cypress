@@ -12,7 +12,7 @@ const ErrorStack = ({ err }) => {
   const stackLines = _.filter(err.parsedStack, ({ message }, index) => {
     if (foundFirstStackLine) return true
 
-    if (message) return false
+    if (message != null) return false
 
     foundFirstStackLine = true
 

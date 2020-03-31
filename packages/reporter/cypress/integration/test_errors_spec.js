@@ -142,6 +142,13 @@ describe('test errors', function () {
       `,
       parsedStack: [{
         message: 'Some Error',
+        whitespace: '',
+      }, {
+        message: '',
+        whitespace: '',
+      }, {
+        message: 'Message line below blank line',
+        whitespace: '  ',
       }, {
         relativeFile: 'my/app.js',
         absoluteFile: '/me/dev/my/app.js',
@@ -270,6 +277,7 @@ describe('test errors', function () {
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
       .should('not.include', 'Some Error')
+      .should('not.include', 'Message line below blank line')
     })
 
     it('turns files into links', function () {
