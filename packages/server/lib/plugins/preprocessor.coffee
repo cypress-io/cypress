@@ -41,21 +41,11 @@ setDefaultPreprocessor = (config) ->
   debug("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
-
-  options = browserify.defaultOptions;
-
   tsPath = resolve.typescript(config)
 
-  if tsPath isnt null
-    options.browserifyOptions.extensions.push('.ts', '.tsx');
-    options.browserifyOptions.transform.pop()
-    options.browserifyOptions.transform.push([
-      path.join(__dirname, './simple_tsify'), {
-        typescript: require(tsPath),
-      },
-    ])
-
-  plugins.register("file:preprocessor", browserify(options));
+  plugins.register("file:preprocessor", browserify({
+    typescript: tsPath
+  }))
 
 plugins.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
