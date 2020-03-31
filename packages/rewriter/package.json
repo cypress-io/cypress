@@ -9,13 +9,13 @@
     "test": "bin-up mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
   "dependencies": {
-    "ast-types": "0.13.2",
-    "bluebird": "3.5.3",
+    "ast-types": "0.13.3",
+    "bluebird": "3.7.2",
     "debug": "4.1.1",
-    "duplexify": "^4.1.1",
-    "hyntax": "^1.1.2",
+    "duplexify": "4.1.1",
+    "hyntax": "1.1.4",
     "lodash": "4.17.15",
-    "recast": "0.18.5"
+    "recast": "0.18.8"
   },
   "devDependencies": {
     "bin-up": "1.2.0"
