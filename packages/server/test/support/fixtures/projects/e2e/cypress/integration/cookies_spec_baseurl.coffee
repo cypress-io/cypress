@@ -14,6 +14,14 @@ setCookieDomain = ".#{baseUrlLocation.getSuperDomain()}"
 if ['localhost', '127.0.0.1'].includes(expectedDomain)
   setCookieDomain = expectedDomain
 
+## chrome defaults to "unspecified"
+defaultSameSite = undefined
+
+if Cypress.isBrowser('firefox')
+  ## firefox will default to "no_restriction"
+  ## @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
+  defaultSameSite = 'no_restriction'
+
 describe "cookies", ->
   before ->
     if Cypress.env('noBaseUrl')
@@ -34,36 +42,31 @@ describe "cookies", ->
       })
 
     it "can get all cookies", ->
+      expectedCookieKeys = ["domain", "name", "value", "path", "secure", "httpOnly", "expiry"]
+
+      if defaultSameSite
+        ## samesite will only be present if it is defined
+        expectedCookieKeys.push('sameSite')
+
+      assertFirstCookie = (c) ->
+        expect(c.domain).to.eq(setCookieDomain)
+        expect(c.httpOnly).to.eq(false)
+        expect(c.name).to.eq("foo")
+        expect(c.value).to.eq("bar")
+        expect(c.path).to.eq("/")
+        expect(c.secure).to.eq(false)
+        expect(c.expiry).to.be.a("number")
+        expect(c.sameSite).to.eq(defaultSameSite)
+
+        expect(c).to.have.keys(expectedCookieKeys)
+
       cy
         .clearCookie("foo1")
-        .setCookie("foo", "bar").then (c) ->
-          expect(c.domain).to.eq(setCookieDomain)
-          expect(c.httpOnly).to.eq(false)
-          expect(c.name).to.eq("foo")
-          expect(c.value).to.eq("bar")
-          expect(c.path).to.eq("/")
-          expect(c.secure).to.eq(false)
-          expect(c.expiry).to.be.a("number")
-
-          expect(c).to.have.keys(
-            "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-          )
+        .setCookie("foo", "bar").then assertFirstCookie
         .getCookies()
           .should("have.length", 1)
-          .then (cookies) ->
-            c = cookies[0]
-
-            expect(c.domain).to.eq(setCookieDomain)
-            expect(c.httpOnly).to.eq(false)
-            expect(c.name).to.eq("foo")
-            expect(c.value).to.eq("bar")
-            expect(c.path).to.eq("/")
-            expect(c.secure).to.eq(false)
-            expect(c.expiry).to.be.a("number")
-
-            expect(c).to.have.keys(
-              "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-            )
+          .its(0)
+          .then assertFirstCookie
         .clearCookies()
           .should("be.null")
         .setCookie("wtf", "bob", {httpOnly: true, path: "/foo", secure: true})
@@ -75,10 +78,9 @@ describe "cookies", ->
           expect(c.path).to.eq("/foo")
           expect(c.secure).to.eq(true)
           expect(c.expiry).to.be.a("number")
+          expect(c.sameSite).to.eq(defaultSameSite)
 
-          expect(c).to.have.keys(
-            "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-          )
+          expect(c).to.have.keys(expectedCookieKeys)
         .clearCookie("wtf")
           .should("be.null")
         .getCookie("doesNotExist")
@@ -229,6 +231,43 @@ describe "cookies", ->
             cy.request(requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
             cy.request('POST', requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
 
+        context "with SameSite", ->
+          [
+            { header: 'None', sameSite: 'no_restriction' }
+            { header: 'Strict', sameSite: 'strict' }
+            { header: 'Lax', sameSite: 'lax' }
+          ].forEach ({ header, sameSite }) ->
+            it "#{header} is set and sent with subsequent requests", ->
+              name = "ss#{header}"
+              cy.getCookie(name).should('be.null')
+
+              sameSiteUrl = "/samesite/#{header}"
+              cookieDumpUrl = "/requestCookies"
+
+              if header is "None"
+                ## None should only be sent + set with HTTPS requests
+                cookieDumpUrl = [httpsUrl, cookieDumpUrl].join('')
+                sameSiteUrl = [httpsUrl, sameSiteUrl].join('')
+
+              cy[cmd](sameSiteUrl)
+
+              cy.getCookie(name).should('include', {
+                name,
+                value: 'someval',
+                sameSite
+              })
+
+              cy.visit("#{cookieDumpUrl}Html")
+              .then (res) ->
+                cy.get('body').then (body) ->
+                  JSON.parse(body.text())
+              .then (body) ->
+                expect(body).to.have.property(name).and.eq('someval')
+
+              cy.request(cookieDumpUrl)
+              .then ({ body }) ->
+                expect(body).to.have.property(name).and.eq('someval')
+
         [
           ['HTTP', otherUrl]
           ['HTTPS', otherHttpsUrl],
@@ -245,14 +284,19 @@ describe "cookies", ->
 
                 _.times n + 1, (i) =>
                   ['foo', 'bar'].forEach (tag) ->
-                    expectedGetCookiesArray.push({
+                    expectedCookie = {
                       "name": "name#{tag}#{i}",
                       "value": "val#{tag}#{i}",
                       "path": "/",
                       "domain": if i % 2 == 8 - n then expectedDomain else altDomain,
                       "secure": false,
-                      "httpOnly": false
-                    })
+                      "httpOnly": false,
+                    }
+
+                    if defaultSameSite
+                      expectedCookie.sameSite = defaultSameSite
+
+                    expectedGetCookiesArray.push(expectedCookie)
 
                 expectedGetCookiesArray = _.reverse(_.sortBy(expectedGetCookiesArray, _.property('name')))
 
