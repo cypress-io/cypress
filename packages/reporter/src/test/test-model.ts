@@ -22,11 +22,12 @@ export interface TestProps extends RunnableProps {
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
   prevAttempts: Array<AttemptModel>
-  currentRetry?: number
+  currentRetry: number
   retries?: number
 }
 
 export interface UpdatableTestProps {
+  id: TestProps['id']
   state?: TestProps['state']
   err?: TestProps['err']
   hookName?: string
@@ -40,7 +41,7 @@ export default class Test extends Runnable {
   @observable commands: Array<Command> = []
   @observable hooks: Array<Hook> = []
   @observable routes: Array<Route> = []
-  @observable _state?: TestState | null = null
+  // @observable _state?: TestState | null = null
   type = 'test'
 
   callbackAfterUpdate: (() => void) | null = null
@@ -119,7 +120,7 @@ export default class Test extends Runnable {
   }
 
   @action start (props) {
-    let attempt = this.getAttemptByIndex(props._currentRetry)
+    let attempt = this.getAttemptByIndex(props.currentRetry)
 
     if (!attempt) {
       attempt = this._addAttempt(props)
@@ -130,6 +131,22 @@ export default class Test extends Runnable {
 
   @action toggleOpen = () => {
     this._isOpen = !this.isOpen
+  }
+
+  @action update (props: UpdatableTestProps, cb?: UpdateTestCallback) {
+    this._withAttempt(props.currentRetry, (attempt) => {
+      attempt.update(props)
+    })
+
+    if (props.isOpen != null && (this.isOpen !== props.isOpen)) {
+      this.setIsOpen(props.isOpen)
+
+      return
+    }
+
+    cb()
+
+    return
   }
 
   // this is called to sync up the command log UI for the sake of

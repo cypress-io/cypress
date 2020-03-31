@@ -9,6 +9,8 @@ import appState, { AppState } from '../lib/app-state'
 import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
+import scroller, { Scroller } from '../lib/scroller'
+
 import TestError from '../errors/test-error'
 
 import Attempts from '../attempts/attempts'
@@ -26,6 +28,30 @@ class Test extends Component<Props> {
     events,
     appState,
     runnablesStore,
+    scroller,
+  }
+
+  componentDidMount () {
+    this._scrollIntoView()
+  }
+
+  componentDidUpdate () {
+    this._scrollIntoView()
+
+    const cb = this.props.model.callbackAfterUpdate
+
+    if (cb) {
+      cb()
+    }
+  }
+
+  _scrollIntoView () {
+    const { appState, model, scroller } = this.props
+    const { isActive, shouldRender } = model
+
+    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive === true) {
+      scroller.scrollIntoView(this.refs.container as HTMLElement)
+    }
   }
 
   render () {

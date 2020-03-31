@@ -50,7 +50,6 @@ export default class Command extends Instrument {
 
   constructor (props: CommandProps) {
     super(props)
-    console.log('new Command')
 
     this.err.update(props.err)
     this.event = props.event
@@ -63,7 +62,6 @@ export default class Command extends Instrument {
   }
 
   update (props: CommandProps) {
-    console.log('command:update', props)
     super.update(props)
 
     this.err.update(props.err)
@@ -102,7 +100,6 @@ export default class Command extends Instrument {
     }
 
     if (this._becameNonPending()) {
-      console.log('becameNonPending')
       clearTimeout(this._pendingTimeout as TimeoutID)
       action('became:inactive', () => {
         return this.isLongRunning = false
@@ -113,21 +110,14 @@ export default class Command extends Instrument {
   }
 
   _startTimingPending () {
-    console.log('start timing pending')
     this._pendingTimeout = setTimeout(action('became:long:running', () => {
       if (this._isPending()) {
-        console.log('became long-running')
         this.isLongRunning = true
       }
     }), LONG_RUNNING_THRESHOLD)
   }
 
   _becamePending () {
-    console.log({
-      _wasPending: this._wasPending(),
-      _isPending: this._isPending(),
-    })
-
     return !this._wasPending() && this._isPending()
   }
 

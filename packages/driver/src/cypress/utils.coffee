@@ -77,6 +77,9 @@ module.exports = {
 
     _.reduce props, (memo, prop) ->
       if _.has(obj, prop) or (obj[prop] isnt undefined)
+        if typeof obj[prop] is 'function'
+          memo[prop] = obj[prop]()
+          return memo
         memo[prop] = obj[prop]
       memo
     , {}

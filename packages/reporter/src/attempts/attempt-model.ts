@@ -1,26 +1,32 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
-import Agent from '../agents/agent-model'
-import Command from '../commands/command-model'
+import AgentModel, { AgentProps } from '../agents/agent-model'
+import CommandModel, { CommandProps } from '../commands/command-model'
 import ErrorModel from '../errors/err-model'
-import Hook from '../hooks/hook-model'
-import Route from '../routes/route-model'
+import RouteModel, { RouteProps } from '../routes/route-model'
+import TestModel, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
+import HookModel from '../hooks/hook-model'
+import { LogProps } from '../runnables/runnables-store'
+import Log from '../instruments/instrument-model'
 
 export default class AttemptModel {
-  @observable agents = []
-  @observable attempts = []
-  @observable commands = []
+  @observable agents: AgentModel[] = []
+  @observable commands: CommandModel[] = []
   @observable err = new ErrorModel({})
-  @observable hooks = []
-  @observable isActive = null
-  @observable _isOpen = null
-  @observable routes = []
-  @observable _state = null
+  @observable hooks: HookModel[] = []
+  @observable isActive: boolean|null = null
+  @observable routes: RouteModel[] = []
+  @observable _isOpen: boolean|null = null
+  @observable _state: TestState|null = null
 
-  _logs = {}
+  testId: string
+  @observable id: number
+  test: TestModel
 
-  constructor (props, test) {
+  _logs: {[key: string]: Log} = {}
+
+  constructor (props: TestProps, test: TestModel) {
     this.testId = props.id
     this.id = props.currentRetry
     this.test = test
@@ -62,7 +68,7 @@ export default class AttemptModel {
     return this._isOpen
   }
 
-  addLog = (props) => {
+  addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
         this._addCommand(props)
@@ -82,7 +88,7 @@ export default class AttemptModel {
     }
   }
 
-  updateLog (props) {
+  updateLog (props: LogProps) {
     const log = this._logs[props.id]
 
     if (log) {
@@ -103,16 +109,23 @@ export default class AttemptModel {
     this.isActive = true
   }
 
-  @action update ({ state, err, hookName }) {
-    this._state = state
-    this.err.update(err)
+  @action update (props: UpdatableTestProps) {
+    if (props.state) {
+      this._state = props.state
+    }
 
-    if (hookName) {
-      const hook = _.find(this.hooks, { name: hookName })
+    this.err.update(props.err)
+
+    if (props.hookName) {
+      const hook = _.find(this.hooks, { name: props.hookName })
 
       if (hook) {
-        hook.failed = true
+        hook
       }
+    }
+
+    if (props.isOpen != null) {
+      this._isOpen = props.isOpen
     }
   }
 
@@ -120,27 +133,27 @@ export default class AttemptModel {
     this._isOpen = !this.isOpen
   }
 
-  @action setIsOpen (isOpen, cb) {
-    // if isOpen is not changing at all, callback immediately
-    // because there won't be a re-render to trigger it
+  // @action setIsOpen (isOpen, cb) {
+  //   // if isOpen is not changing at all, callback immediately
+  //   // because there won't be a re-render to trigger it
 
-    if (!this.test.isOpen && !isOpen) {
-      cb()
+  //   if (!this.test.isOpen && !isOpen) {
+  //     cb()
 
-      return
-    }
+  //     return
+  //   }
 
-    if (this.test.isOpen && this.isOpen && isOpen) {
-      cb()
+  //   if (this.test.isOpen && this.isOpen && isOpen) {
+  //     cb()
 
-      return
-    }
+  //     return
+  //   }
 
-    // changing isOpen will trigger a re-render and the callback will
-    // be called by attempts.jsx Attempt#componentDidUpdate
-    this._callbackAfterUpdate = cb
-    this._isOpen = isOpen
-  }
+  //   // changing isOpen will trigger a re-render and the callback will
+  //   // be called by attempts.jsx Attempt#componentDidUpdate
+  //   this._callbackAfterUpdate = cb
+  //   this._isOpen = isOpen
+  // }
 
   callbackAfterUpdate () {
     if (this._callbackAfterUpdate) {
@@ -154,22 +167,22 @@ export default class AttemptModel {
     this.isActive = false
   }
 
-  _addAgent (props) {
-    const agent = new Agent(props)
+  _addAgent (props: AgentProps) {
+    const agent = new AgentModel(props)
 
     this._logs[props.id] = agent
     this.agents.push(agent)
   }
 
-  _addRoute (props) {
-    const route = new Route(props)
+  _addRoute (props: RouteProps) {
+    const route = new RouteModel(props)
 
     this._logs[props.id] = route
     this.routes.push(route)
   }
 
-  _addCommand (props) {
-    const command = new Command(props)
+  _addCommand (props: CommandProps) {
+    const command = new CommandModel(props)
     const hook = this._findOrCreateHook(props.hookName)
 
     this._logs[props.id] = command
@@ -177,12 +190,12 @@ export default class AttemptModel {
     hook.addCommand(command)
   }
 
-  _findOrCreateHook (name) {
+  _findOrCreateHook (name: string) {
     const hook = _.find(this.hooks, { name })
 
     if (hook) return hook
 
-    const newHook = new Hook({ name })
+    const newHook = new HookModel({ name })
 
     this.hooks.push(newHook)
 

@@ -4,7 +4,7 @@ import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
-import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
+import TestModel, { UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
 
 const localBus = new EventEmitter()
 
@@ -95,21 +95,17 @@ const events: Events = {
       }
     }))
 
-    runner.on('test:before:run:async', (runnable) => {
+    runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestModel) => {
       runnablesStore.runnableStarted(runnable)
-    })
+    }))
 
-    runner.on('test:after:run', (runnable) => {
+    runner.on('test:after:run', action('test:after:run', (runnable: UpdatableTestProps) => {
       runnablesStore.runnableFinished(runnable)
-      runnablesStore.testById(runnable.id)
+      statsStore.incrementCount(runnable.state)
+    }))
 
-      if (runnable.final) {
-        statsStore.incrementCount(runnable.state)
-      }
-    })
-
-    runner.on('test:set:state', action('test:set:state', (props, cb: UpdateTestCallback) => {
-      runnablesStore.setIsOpen(props, cb)
+    runner.on('test:set:state', action('test:set:state', (props: UpdatableTestProps, cb: UpdateTestCallback) => {
+      runnablesStore.updateTest(props, cb)
     }))
 
     runner.on('paused', action('paused', (nextCommandName: string) => {

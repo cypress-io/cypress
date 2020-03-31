@@ -9,7 +9,7 @@ export interface AliasObject {
 export type Alias = string | Array<string> | null | AliasObject
 
 export interface InstrumentProps {
-  id: number
+  id: string
   alias?: Alias
   aliasType?: string | null
   displayName?: string

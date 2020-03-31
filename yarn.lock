@@ -22048,7 +22048,7 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#unpatched-has-bin
     circular-json "0.5.9"
     component-emitter "1.2.1"
     debug "~4.1.0"
-    has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
+    has-binary2 "~1.0.2"
 
 socket.io-client@2.3.0:
   version "2.3.0"
@@ -23413,10 +23413,9 @@ toposort@^1.0.0:
   resolved "https://registry.yarnpkg.com/toposort/-/toposort-1.0.7.tgz#2e68442d9f64ec720b8cc89e6443ac6caa950029"
   integrity sha1-LmhELZ9k7HILjMieZEOsbKqVACk=
 
-tough-cookie@>=0.12.0:
+tough-cookie@>=0.12.0, tough-cookie@salesforce/tough-cookie#2524513d49b7fab37639dfb7c6b87994c2bd7791:
   version "4.0.0"
-  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-4.0.0.tgz#d822234eeca882f991f0f908824ad2622ddbece4"
-  integrity sha512-tHdtEpQCMrc1YLrMaqXXcj6AxhYi/xgit6mZu1+EDWUn+qhUf8wMQoFIy9NXuq23zAwtcB0t/MjACGR18pcRbg==
+  resolved "https://codeload.github.com/salesforce/tough-cookie/tar.gz/2524513d49b7fab37639dfb7c6b87994c2bd7791"
   dependencies:
     psl "^1.1.33"
     punycode "^2.1.1"
@@ -23429,14 +23428,6 @@ tough-cookie@^2.3.3, tough-cookie@^2.3.4, tough-cookie@^2.5.0, tough-cookie@~2.5
   dependencies:
     psl "^1.1.28"
     punycode "^2.1.1"
-
-tough-cookie@salesforce/tough-cookie#2524513d49b7fab37639dfb7c6b87994c2bd7791:
-  version "4.0.0"
-  resolved "https://codeload.github.com/salesforce/tough-cookie/tar.gz/2524513d49b7fab37639dfb7c6b87994c2bd7791"
-  dependencies:
-    psl "^1.1.33"
-    punycode "^2.1.1"
-    universalify "^0.1.2"
 
 tough-cookie@~2.3.0:
   version "2.3.4"

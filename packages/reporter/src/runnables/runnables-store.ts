@@ -28,7 +28,7 @@ export type LogProps = AgentProps | CommandProps | RouteProps
 
 export type RunnableArray = Array<TestModel | SuiteModel>
 
-type Log = AgentModel | CommandModel | RouteModel
+export type Log = AgentModel | CommandModel | RouteModel
 
 export interface RootRunnable {
   tests?: Array<TestProps>
@@ -143,9 +143,9 @@ class RunnablesStore {
     this._initialScrollTop = initialScrollTop
   }
 
-  setIsOpen ({ id, isOpen }: {id: string, isOpen: boolean}, cb: UpdateTestCallback) {
-    this._withTest(id, (test) => {
-      test.setIsOpen(isOpen, cb)
+  updateTest (props: UpdatableTestProps, cb: UpdateTestCallback) {
+    this._withTest(props.id, (test) => {
+      test.update(props, cb)
     })
   }
 
@@ -161,7 +161,7 @@ class RunnablesStore {
     })
   }
 
-  runnableFinished (props: TestModel) {
+  runnableFinished (props: UpdatableTestProps) {
     this._withTest(props.id, (test) => {
       test.finish(props)
     })

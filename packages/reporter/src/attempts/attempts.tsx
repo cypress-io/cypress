@@ -53,7 +53,6 @@ class AttemptContent extends Component<{model: AttemptModel}> {
         <div className='attempt-error-region'>
           <TestError events={events} model={model} isTestError={model.isLast} displayMessage={model.err.displayMessage}/>
         </div>
-        }
       </Fragment>
     )
   }
@@ -90,6 +89,7 @@ class Attempt extends Component<{model: AttemptModel}> {
 
     return (
       <li
+        key={model.id}
         ref='container'
         className={cs('attempt-item', `attempt-state-${model.state}`, {
           'attempt-failed': model.state === 'failed',
@@ -118,6 +118,7 @@ const Attempts = observer(({ test }: {test: TestModel}) => (
       return (
         <Attempt
           key={attempt.id}
+
           model={attempt}
         />
       )
