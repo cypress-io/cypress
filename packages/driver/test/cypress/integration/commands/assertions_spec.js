@@ -838,7 +838,7 @@ describe('src/cy/commands/assertions', () => {
             expected: false,
             actual: true,
             Message: 'expected true to be false',
-            Error: log.get('error').toString(),
+            Error: log.get('error').stack,
           })
 
           done()

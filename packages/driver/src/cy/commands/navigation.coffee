@@ -813,7 +813,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   onFail: options._log
                   args: {
                     url:   url
-                    error: err.message
+                    error: err
                     stack: err.stack
                   }
                   noStackTrace: true
