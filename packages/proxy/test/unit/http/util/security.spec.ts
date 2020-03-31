@@ -1,7 +1,7 @@
 import _ from 'lodash'
-// import { concatStream } from '@packages/network'
+import { concatStream } from '@packages/network'
 import { expect } from 'chai'
-import fs from 'fs'
+import fse from 'fs-extra'
 import Promise from 'bluebird'
 import rp from '@cypress/request-promise'
 import * as security from '../../../../lib/http/util/security'
@@ -103,34 +103,34 @@ const expected = `\
     parent.bar
 
     <script type="text/javascript">
-      if (self != self) run()
-      if (self!=self) run()
-      if (self !== self) run()
-      if (self!==self) run()
-      if (self === self) return
-      if (self.location!=self.location&&(self.location.href=self.location.href)) run()
-      if (self.location != self.location) run()
-      if (self.location != location) run()
-      if (self.location != self.location) run()
-      if (self.frames.length > 0) run()
-      if (window != self) run()
-      if (window.self !== window.self) run()
-      if (window.self!==window.self) run()
-      if (window.self != window.self) run()
-      if (window.self != window.self) run()
-      if (window["self"] != window["self"]) run()
-      if (window['self'] != window['self']) run()
-      if (window["self"] != self['self']) run()
-      if (parent && self != window) run()
-      if (parent && self != self) run()
-      if (parent && window != self) run()
-      if (parent && self != self) run()
-      if (parent && self.frames && self.frames.length > 0) run()
-      if ((self.parent && !(self.self === self)) && (self.self.frames.length != 0)) run()
-      if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
-      if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
-      if (self===self) return
-      if (self==self) return
+      if ((top === window['top'] ? window.top.Cypress.resolveWindowReference(window, window, 'top') : top) != self) run()
+      if ((top === window['top'] ? window.top.Cypress.resolveWindowReference(window, window, 'top') : top)!=self) run()
+      if (self !== (top === window['top'] ? window.top.Cypress.resolveWindowReference(window, window, 'top') : top)) run()
+      if (self!==(top === window['top'] ? window.top.Cypress.resolveWindowReference(window, window, 'top') : top)) run()
+      if (self === (top === window['top'] ? window.top.Cypress.resolveWindowReference(window, window, 'top') : top)) return
+      if (window.top.Cypress.resolveWindowReference(window, top, 'location')!=window.top.Cypress.resolveWindowReference(window, self, 'location')&&(window.top.Cypress.resolveWindowReference(window, top, 'location').href=window.top.Cypress.resolveWindowReference(window, self, 'location').href)) run()
+      if (window.top.Cypress.resolveWindowReference(window, top, 'location') != window.top.Cypress.resolveWindowReference(window, self, 'location')) run()
+      if (window.top.Cypress.resolveWindowReference(window, top, 'location') != location) run()
+      if (window.top.Cypress.resolveWindowReference(window, self, 'location') != window.top.Cypress.resolveWindowReference(window, top, 'location')) run()
+      if (window.top.Cypress.resolveWindowReference(window, parent, 'frames').length > 0) run()
+      if (window != (top === window['top'] ? window.top.Cypress.resolveWindowReference(window, window, 'top') : top)) run()
+      if (window.top.Cypress.resolveWindowReference(window, window, 'top') !== window.self) run()
+      if (window.top.Cypress.resolveWindowReference(window, window, 'top')!==window.self) run()
+      if (window.self != window.top.Cypress.resolveWindowReference(window, window, 'top')) run()
+      if (window.top.Cypress.resolveWindowReference(window, window, 'top') != window.self) run()
+      if (window.top.Cypress.resolveWindowReference(window, window, 'top') != window.top.Cypress.resolveWindowReference(window, window, 'parent')) run()
+      if (window.top.Cypress.resolveWindowReference(window, window, 'top') != window.top.Cypress.resolveWindowReference(window, window, 'parent')) run()
+      if (window.top.Cypress.resolveWindowReference(window, window, 'top') != window.top.Cypress.resolveWindowReference(window, self, 'parent')) run()
+      if (parent && (parent === window['parent'] ? window.top.Cypress.resolveWindowReference(window, window, 'parent') : parent) != window) run()
+      if (parent && (parent === window['parent'] ? window.top.Cypress.resolveWindowReference(window, window, 'parent') : parent) != self) run()
+      if (parent && window != (parent === window['parent'] ? window.top.Cypress.resolveWindowReference(window, window, 'parent') : parent)) run()
+      if (parent && self != (parent === window['parent'] ? window.top.Cypress.resolveWindowReference(window, window, 'parent') : parent)) run()
+      if (parent && window.top.Cypress.resolveWindowReference(window, parent, 'frames') && window.top.Cypress.resolveWindowReference(window, parent, 'frames').length > 0) run()
+      if ((window.top.Cypress.resolveWindowReference(window, self, 'parent') && !(window.top.Cypress.resolveWindowReference(window, self, 'parent') === self)) && (window.top.Cypress.resolveWindowReference(window, self.parent, 'frames').length != 0)) run()
+      if ((parent === window['parent'] ? window.top.Cypress.resolveWindowReference(window, window, 'parent') : parent) !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if (null !== (parent === window['parent'] ? window.top.Cypress.resolveWindowReference(window, window, 'parent') : parent) && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
+      if ((top === window['top'] ? window.top.Cypress.resolveWindowReference(window, window, 'top') : top)===self) return
+      if ((top === window['top'] ? window.top.Cypress.resolveWindowReference(window, window, 'top') : top)==self) return
     </script>
   </body>
 </html>\
@@ -182,7 +182,11 @@ describe('http/util/security', () => {
         // more apple goodness - `e` is an element
         [
           'e.top = "0"',
-          `(window.top.Cypress.resolveWindowReference(window, e, 'top', "0"))`,
+          `window.top.Cypress.resolveWindowReference(window, e, 'top', "0")`,
+        ],
+        [
+          'if (a = (e.top = "0")) { }',
+          `if (a = (window.top.Cypress.resolveWindowReference(window, e, 'top', "0"))) { }`,
         ],
         // test that double quotes remain double-quoted
         [
@@ -204,9 +208,8 @@ describe('http/util/security', () => {
       })
     })
 
-    // TODO: needs to be updated
-    it.skip('replaces obstructive code', () => {
-      expect(security.strip(original)).to.eq(expected)
+    it('replaces obstructive code', () => {
+      expect(security.strip(original, { isHtml: true })).to.eq(expected)
     })
 
     it('replaces jira window getter', () => {
@@ -244,19 +247,19 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 
       expect(security.strip(jira)).to.eq(`\
 for (; !function (n) {
-  return n === ${match('n', 'parent')}
+  return n === ${match('n', 'parent')};
 }(n);) {}\
 `)
 
       expect(security.strip(jira2)).to.eq(`\
-(function(n){for(;!function(l){return l===${match('l', 'parent')}}(l)&&function(l){try{if(void 0==${match('l', 'location')}.href)return!1}catch(l){return!1}return!0}(${match('l', 'parent')});)l=${match('l', 'parent')};return l})\
+(function(n){for(;!function(l){return l===${match('l', 'parent')};}(l)&&function(l){try{if(void 0==${match('l', 'location')}.href)return!1}catch(l){return!1}return!0}(${match('l', 'parent')});)l=${match('l', 'parent')};return l})\
 `)
 
       expect(security.strip(jira3)).to.eq(`\
 function satisfiesSameOrigin(w) {
     try {
         // Accessing location.href from a window on another origin will throw an exception.
-        if ( w.location.href == undefined) {
+        if ( ${match('w', 'location')}.href == undefined) {
             return false;
         }
     } catch (e) {
@@ -266,17 +269,17 @@ function satisfiesSameOrigin(w) {
 }
 
 function isTopMostWindow(w) {
-    return w === w.parent || w.parent.__Cypress__;
+    return w === ${match('w', 'parent')};
 }
 
-while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
-    parentOf = parentOf.parent;
+while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(${match('parentOf', 'parent')})) {
+    parentOf = ${match('parentOf', 'parent')};
 }\
 `)
     })
 
     // TODO: needs to be updated
-    describe.skip('libs', () => {
+    describe('libs', () => {
       const cdnUrl = 'https://cdnjs.cloudflare.com/ajax/libs'
 
       const needsDash = ['backbone', 'underscore']
@@ -286,19 +289,20 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         jqueryui: `${cdnUrl}/jqueryui/1.12.1/jquery-ui.js`,
         angular: `${cdnUrl}/angular.js/1.6.5/angular.js`,
         bootstrap: `${cdnUrl}/twitter-bootstrap/4.0.0/js/bootstrap.js`,
-        fontawesome: `${cdnUrl}/font-awesome/4.7.0/css/font-awesome.css`,
         moment: `${cdnUrl}/moment.js/2.20.1/moment.js`,
         lodash: `${cdnUrl}/lodash.js/4.17.5/lodash.js`,
         vue: `${cdnUrl}/vue/2.5.13/vue.js`,
         backbone: `${cdnUrl}/backbone.js/1.3.3/backbone.js`,
         cycle: `${cdnUrl}/cyclejs-core/7.0.0/cycle.js`,
         d3: `${cdnUrl}/d3/4.13.0/d3.js`,
-        normalize: `${cdnUrl}/normalize/8.0.0/normalize.css`,
         underscore: `${cdnUrl}/underscore.js/1.8.3/underscore.js`,
         foundation: `${cdnUrl}/foundation/6.4.3/js/foundation.js`,
         require: `${cdnUrl}/require.js/2.3.5/require.js`,
         rxjs: `${cdnUrl}/rxjs/5.5.6/Rx.js`,
         bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`,
+        // NOTE: fontawesome/normalize are css, new rewriter won't intercept CSS
+        // fontawesome: `${cdnUrl}/font-awesome/4.7.0/css/font-awesome.css`,
+        // normalize: `${cdnUrl}/normalize/8.0.0/normalize.css`,
       }
 
       libs = _
@@ -333,7 +337,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
         it(`does not corrupt code from '${lib}'`, function () {
           // nock.enableNetConnect()
 
-          this.timeout(10000)
+          this.timeout(20000)
 
           const pathToLib = `/tmp/${lib}`
 
@@ -341,74 +345,55 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
             return rp(url)
             .then((resp) => {
               return Promise.fromCallback((cb) => {
-                fs.writeFile(pathToLib, resp, cb)
+                fse.writeFile(pathToLib, resp, cb)
               })
               .return(resp)
             })
           }
 
-          // fs
-          // .readFileAsync(pathToLib, 'utf8')
-          // .catch(downloadFile)
-          // .then((libCode) => {
-          //   let stripped = security.strip(libCode)
-
-          //   expect(() => eval(stripped), 'is valid JS').to.not.throw
-
-          // ensure stripStream matches strip
-          // const rs = fs.createReadStream(pathToLib, 'utf8')
-
-          return Promise.fromCallback((cb) => {
-            fs.readFile(pathToLib, 'utf8', cb)
-          })
+          return fse
+          .readFile(pathToLib, 'utf8')
           .catch(downloadFile)
           .then((libCode) => {
-            let stripped = security.strip(libCode)
-            // nothing should have changed!
+            const stripped = security.strip(libCode)
 
-            // TODO: this is currently failing but we're
-            // going to accept this for now and make this
-            // test pass, but need to refactor to using
-            // inline expressions and change the strategy
-            // for removing obstructive code
-            if (lib === 'hugeApp') {
-              stripped = stripped.replace(
-                'window.self !== window.self',
-                'window.self !== window.top',
-              )
-            }
+            expect(() => eval(stripped), 'is valid JS').to.not.throw
 
-            try {
-              expect(stripped).to.eq(libCode)
-            } catch (err) {
-              throw new Error(`code from '${lib}' was different`)
-            }
+            return new Promise((resolve, reject) => {
+              fse.createReadStream(pathToLib, { encoding: 'utf8' })
+              .on('error', reject)
+              .pipe(security.stripStream())
+              .on('error', reject)
+              .pipe(concatStream({ encoding: 'string' }, resolve))
+              .on('error', reject)
+            })
+            .then((streamStripped) => {
+              expect(streamStripped, 'streamed version matches nonstreamed version').to.eq(stripped)
+            })
           })
         })
       })
     })
+
+    // context('.stripStream', () => {
+    //   it('replaces obstructive code', (done) => {
+    //     const lines = original.split('\n')
+
+    //     const replacer = security.stripStream({ isHtml: true })
+
+    //     replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
+    //       const actual = str.toString().trim()
+
+    //       expect(actual).to.eq(expected)
+
+    //       done()
+    //     }))
+
+    //     lines.forEach((line) => {
+    //       replacer.write(line)
+    //     })
+
+    //     replacer.end()
+    //   })
   })
-
-  // TODO: needs to be updated
-  // context('.stripStream', () => {
-  //   it('replaces obstructive code', (done) => {
-  //     const haystacks = original.split('\n')
-
-  //     const replacer = security.stripStream()
-
-  //     replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
-  //       const string = str.toString().trim()
-
-  //       try {
-  //         expect(string).to.eq(expected)
-
-  //           rs.pipe(security.stripStream()).pipe(concat((body) => {
-  //             expect(body.toString()).to.eq(stripped)
-  //             done()
-  //           }))
-  //         })
-  //       })
-  //     })
-  //   })
-  // })
 })

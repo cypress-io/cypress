@@ -8,7 +8,7 @@ type RewriteFn = (token: Token) => string
 
 // input: raw HTML
 // output: rewritten HTML
-export function HtmlRewriter (rewriteTokenFn: RewriteFn) : stream.Transform {
+export function HtmlRewriter (rewriteTokenFn: RewriteFn): stream.Transform {
   const htmlTokenizer = new hyntax.StreamTokenizer()
   const output = new stream.PassThrough()
 
@@ -37,7 +37,7 @@ export function HtmlRewriter (rewriteTokenFn: RewriteFn) : stream.Transform {
   return rewriter
 }
 
-export function rewriteHtml (html: string, rewriteTokenFn: RewriteFn) : string {
+export function rewriteHtml (html: string, rewriteTokenFn: RewriteFn): string {
   let lastEndPosition = 0
 
   return hyntax.tokenize(html)
@@ -47,7 +47,7 @@ export function rewriteHtml (html: string, rewriteTokenFn: RewriteFn) : string {
       let out = ''
 
       if (token.startPosition > lastEndPosition + 1) {
-        out = ' '.repeat(token.startPosition - lastEndPosition + 1)
+        out = ' '.repeat(token.startPosition - lastEndPosition - 1)
       }
 
       lastEndPosition = token.endPosition
@@ -74,10 +74,10 @@ function _htmlJsRewriteFn (rewriteJsFn: js.RewriteNodeFn, rewriteHtmlFn?: Rewrit
   }
 }
 
-export function rewriteHtmlJs (html: string, rewriteJsFn: js.RewriteNodeFn, rewriteHtmlFn?: RewriteFn) : string {
+export function rewriteHtmlJs (html: string, rewriteJsFn: js.RewriteNodeFn, rewriteHtmlFn?: RewriteFn): string {
   return rewriteHtml(html, _htmlJsRewriteFn(rewriteJsFn, rewriteHtmlFn))
 }
 
-export function HtmlJsRewriter (rewriteJsFn: js.RewriteNodeFn, rewriteHtmlFn?: RewriteFn) : stream.Transform {
+export function HtmlJsRewriter (rewriteJsFn: js.RewriteNodeFn, rewriteHtmlFn?: RewriteFn): stream.Transform {
   return HtmlRewriter(_htmlJsRewriteFn(rewriteJsFn, rewriteHtmlFn))
 }
