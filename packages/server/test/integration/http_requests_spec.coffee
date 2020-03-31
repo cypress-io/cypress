@@ -14,7 +14,6 @@ str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
 coffeeify       = require("coffeeify")
-simpleTsify  = require("#{root}lib/plugins/simple_tsify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
@@ -73,9 +72,6 @@ browserifyFileTs = (filePath) ->
   streamToPromise(
     browserify(filePath)
     .transform(coffeeify)
-    .transform(simpleTsify, {
-      typescript: require("typescript"),
-    })
     .bundle()
   )
 
@@ -444,14 +440,6 @@ describe "Routes", ->
                   name: "noop.coffee"
                   relative: "cypress/integration/noop.coffee"
                 }
-                {
-                  name: "quux.tsx"
-                  relative: "cypress/integration/quux.tsx"
-                }
-                {
-                  name: "qux.ts"
-                  relative: "cypress/integration/qux.ts"
-                }
               ]
             })
 
@@ -492,14 +480,6 @@ describe "Routes", ->
                   name: "noop.coffee"
                   relative: "cypress/integration/noop.coffee"
                 }
-                {
-                  name: "quux.tsx"
-                  relative: "cypress/integration/quux.tsx"
-                }
-                {
-                  name: "qux.ts"
-                  relative: "cypress/integration/qux.ts"
-                }
               ]
             })
 
@@ -536,31 +516,6 @@ describe "Routes", ->
           .then (file) ->
             checkTranspilation(res.body, file)
             expect(res.body).to.include("React.createElement(")
-
-      it "processes qux.ts spec", ->
-        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/qux.ts")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-          browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/qux.ts"))
-          .then (file) ->
-            checkTranspilation(res.body, file)
-
-      it "processes quux.tsx spec", ->
-        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/quux.tsx")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-
-          browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/quux.tsx"))
-          .then (file) ->
-            ## Commented out because they return the same result with different structure.
-            ## res.body with Foo component at the bottom
-            ## while file.toString() with Foo component at the top
-            ## expect(res.body).to.equal file.toString()
-
-            ## So, we're checking the important parts are transpiled correctly.
-            expect(res.body).to.include("exports.Foo = function (_a) {")
-            expect(res.body).to.include("react_1.default.createElement(\"div\", null, greeting)")
 
       it "serves error javascript file when the file is missing", ->
         @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
@@ -602,20 +557,6 @@ describe "Routes", ->
             expect(removeSourceMapContents(res.body)).to.equal(file.toString())
             expect(res.body).to.include("React.createElement(")
       
-      it "processes qux.ts spec", ->
-        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/qux.ts")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include("Unexpected token")
-
-      it "processes quux.tsx spec", ->
-        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/quux.tsx")
-        .then (res) ->
-          expect(res.statusCode).to.eq(200)
-          expect(res.body).to.include('Cypress.action("spec:script:error", {')
-          expect(res.body).to.include("\'import\' and \'export\' may appear only with \'sourceType: module\'")
-
       it "serves error javascript file when the file is missing", ->
         @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
         .then (res) ->
