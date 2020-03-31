@@ -59,7 +59,7 @@ module.exports = {
           token
 
           port: ->
-            srv.address()?.port
+            srv.address().port
 
           address: ->
             "http://localhost:" + @port()

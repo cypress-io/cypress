@@ -399,12 +399,10 @@ describe('Proxy Performance', function () {
         // eslint-disable-next-line no-console
         console.table(testCases)
 
-        return cyServer.close().then(() => {
-          return Promise.map(testCases, (testCase) => {
-            testCase['URL'] = urlUnderTest
+        return Promise.map(testCases, (testCase) => {
+          testCase['URL'] = urlUnderTest
 
-            return performance.track('Proxy Performance', testCase)
-          })
+          return performance.track('Proxy Performance', testCase)
         })
       })
     })
