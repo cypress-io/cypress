@@ -473,7 +473,7 @@ const e2e = {
       browser: 'electron',
       project: e2ePath,
       exit: process.env.EXIT === 'false' ? false : null,
-      timeout: options.exit === false ? 3000000 : 120000,
+      timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
@@ -568,6 +568,7 @@ const e2e = {
     }
 
     if (options.exit === false) {
+      options.timeout = 3000000
       args.push('--exit', options.exit)
     }
 
