@@ -480,6 +480,12 @@ const e2e = {
       normalizeStdoutAvailableBrowsers: true,
     })
 
+    if (options.exit === false) {
+      options.timeout = 3000000
+    }
+
+    ctx.timeout(options.timeout)
+
     const { spec } = options
 
     if (spec) {
@@ -495,8 +501,6 @@ const e2e = {
       // normalize the path to the spec
       options.spec = specs.join(',')
     }
-
-    ctx.timeout(options.timeout)
 
     return options
   },
@@ -568,7 +572,6 @@ const e2e = {
     }
 
     if (options.exit === false) {
-      options.timeout = 3000000
       args.push('--exit', options.exit)
     }
 
