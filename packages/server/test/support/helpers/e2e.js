@@ -480,8 +480,6 @@ const e2e = {
       normalizeStdoutAvailableBrowsers: true,
     })
 
-    ctx.timeout(options.timeout)
-
     const { spec } = options
 
     if (spec) {
@@ -497,6 +495,8 @@ const e2e = {
       // normalize the path to the spec
       options.spec = specs.join(',')
     }
+
+    ctx.timeout(options.timeout)
 
     return options
   },
