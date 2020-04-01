@@ -474,6 +474,115 @@ describe('/lib/modes/init', () => {
           )
         })
       })
+
+      describe('support file', () => {
+        const projRoot = '/home/user/src/cypress'
+        const supportFileDefault = `${projRoot}/${defaultValues['supportFile']}`
+        const supportFileDefaultDir = dirname(`${projRoot}/${defaultValues['supportFile']}`)
+
+        it('generates files at the default path when it is undefined', async () => {
+          await scaffold.create(projRoot, { config: {} })
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/index.js'),
+            `${supportFileDefaultDir}/index.js`,
+          )
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/commands.js'),
+            `${supportFileDefaultDir}/commands.js`,
+          )
+        })
+
+        it('skips when the given path is not the default', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              supportFile: '/home/user/given/path/to/support.js',
+            },
+          })
+
+          expect(fs.ensureDir).to.not.be.calledWith('/home/user/given/path/to/')
+        })
+
+        it('generates files when the given path is the default (relative)', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              supportFile: defaultValues['supportFile'],
+            },
+          })
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/index.js'),
+            `${supportFileDefaultDir}/index.js`,
+          )
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/commands.js'),
+            `${supportFileDefaultDir}/commands.js`,
+          )
+        })
+
+        it('generates files when the given path is the default (absolute)', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            config: {
+              supportFile: supportFileDefault,
+            },
+          })
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/index.js'),
+            `${supportFileDefaultDir}/index.js`,
+          )
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/commands.js'),
+            `${supportFileDefaultDir}/commands.js`,
+          )
+        })
+
+        it('does not generate when supportFile is false', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, { config: {
+            supportFile: false,
+          } })
+
+          expect(fs.copy).to.not.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/index.js'),
+            `${supportFileDefaultDir}/index.js`,
+          )
+
+          expect(fs.copy).to.not.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/commands.js'),
+            `${supportFileDefaultDir}/commands.js`,
+          )
+        })
+
+        it('generates ts file when typescript option is given', async () => {
+          const projRoot = '/home/user/src/cypress'
+
+          await scaffold.create(projRoot, {
+            typescript: true,
+            config: {},
+          })
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/index.js'),
+            `${supportFileDefaultDir}/index.ts`,
+          )
+
+          expect(fs.copy).to.be.calledWith(
+            join(__dirname, '../../..', 'lib/scaffold/support/commands.js'),
+            `${supportFileDefaultDir}/commands.ts`,
+          )
+        })
+      })
     })
   })
 })

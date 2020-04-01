@@ -1,7 +1,7 @@
 import fs from '../../../util/fs'
 import { InitConfig } from '../types'
 import { defaultValues } from './option_info'
-import { join, basename, extname, isAbsolute } from 'path'
+import { join, basename, extname, isAbsolute, dirname } from 'path'
 import {
   getFolderName as exampleFolderName,
   getPathToExamples as getExampleSpecPaths,
@@ -16,6 +16,7 @@ export const create = async (projRoot: string, config: InitConfig) => {
 const generateFolders = async (projRoot: string, config: InitConfig) => {
   await integrationFolder(projRoot, config)
   await fixturesFolder(projRoot, config)
+  await supportFile(projRoot, config)
 }
 
 const integrationFolder = async (projRoot: string, config: InitConfig) => {
@@ -30,13 +31,13 @@ const integrationFolder = async (projRoot: string, config: InitConfig) => {
 
     const filePaths = await getExampleSpecPaths()
 
-    filePaths.forEach((path) => {
+    filePaths.forEach(async (path) => {
       const ext = extname(path)
       const filename = config.typescript
         ? basename(path).replace(ext, '.ts')
         : basename(path)
 
-      fs.copy(path, join(exampleFolder, filename))
+      await fs.copy(path, join(exampleFolder, filename))
     })
   }
 }
@@ -61,9 +62,48 @@ const fixturesFolder = async (projRoot: string, { example, config: { fixturesFol
   await fs.ensureDir(defaultPath)
 
   if (example) {
-    fs.copy(
+    await fs.copy(
       join(__dirname, '../../../', 'scaffold/fixtures/example.json'),
       join(defaultPath, 'example.json'),
     )
   }
+}
+
+const supportFile = async (projRoot: string, { typescript, config: { supportFile } }: InitConfig) => {
+  if (supportFile === false) {
+    return
+  }
+
+  const defaultPath = `${projRoot}/${defaultValues['supportFile']}`
+
+  if (supportFile) {
+    const supportFilePath = isAbsolute(supportFile)
+      ? supportFile
+      : `${projRoot}/${supportFile}`
+
+    if (supportFilePath !== defaultPath) {
+      return
+    }
+  }
+
+  const defaultRoot = dirname(defaultPath)
+  const scaffoldRoot = join(__dirname, '../../..', 'scaffold/support')
+
+  await fs.ensureDir(defaultRoot)
+
+  const filename = (root, name) => {
+    return typescript
+      ? join(root, name).replace('.js', '.ts')
+      : join(root, name)
+  }
+
+  await fs.copy(
+    join(scaffoldRoot, 'index.js'),
+    filename(defaultRoot, 'index.js'),
+  )
+
+  await fs.copy(
+    join(scaffoldRoot, 'commands.js'),
+    filename(defaultRoot, 'commands.js'),
+  )
 }
