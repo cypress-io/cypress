@@ -168,12 +168,16 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Error: instantly fails
+     Uncaught Error: The following error originated from your test code, not from Cypress.
+
+  > instantly fails
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
@@ -1048,12 +1052,16 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Error: instantly fails
+     Uncaught Error: The following error originated from your test code, not from Cypress.
+
+  > instantly fails
+
+When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
