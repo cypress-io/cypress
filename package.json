@@ -196,8 +196,8 @@
     "wait-on": "3.3.0"
   },
   "engines": {
-    "node": ">=12.8.1",
-    "yarn": ">=1.17.3"
+    "node": "13.12.0",
+    "yarn": "1.22.4"
   },
   "productName": "Cypress",
   "license": "MIT",
