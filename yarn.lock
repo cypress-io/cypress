@@ -1082,10 +1082,10 @@
     jsonpointer "^4.0.0"
     xtend "^4.0.0"
 
-"@benmalka/foxdriver@0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@benmalka/foxdriver/-/foxdriver-0.3.0.tgz#e9764a789a3b7be5eda70ad8330e258939b29deb"
-  integrity sha512-rNb8VmwDRhKeTWS4ewRVBD80YFmnCmwuFjMsgEePvp8rC8rnIAicMITTtYtaTixenpoDY1PpNu5xpe9Mab+cnA==
+"@benmalka/foxdriver@0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@benmalka/foxdriver/-/foxdriver-0.4.0.tgz#aecd158a785a09e104da036efe7611a13af4ed11"
+  integrity sha512-Uc9n5TTRV2AhfYaqkaDc5k72pfKxyd6LDVrQJyNLZ7uY4ThgEcQMjpVRkB8C7v16gKhubH4gmD0lad5pGvDUBg==
   dependencies:
     fs-extra "^4.0.1"
     get-port "^3.2.0"
