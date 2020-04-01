@@ -154,8 +154,8 @@ function showVersions () {
   return require('./exec/versions')
   .getVersions()
   .then((versions = {}) => {
-    logger.log('Cypress package version:', versions.package)
-    logger.log('Cypress binary version:', versions.binary)
+    logger.always('Cypress package version:', versions.package)
+    logger.always('Cypress binary version:', versions.binary)
     process.exit(0)
   })
   .catch(util.logErrorExit1)
