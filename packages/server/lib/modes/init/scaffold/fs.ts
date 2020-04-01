@@ -1,7 +1,7 @@
 import fs from '../../../util/fs'
 import { InitConfig } from '../types'
 import { defaultValues } from './option_info'
-import { join, basename, extname } from 'path'
+import { join, basename, extname, isAbsolute } from 'path'
 import {
   getFolderName as exampleFolderName,
   getPathToExamples as getExampleSpecPaths,
@@ -41,19 +41,29 @@ const integrationFolder = async (projRoot: string, config: InitConfig) => {
   }
 }
 
-const fixturesFolder = async (projRoot: string, config: InitConfig) => {
-  if (config.config.fixturesFolder === false) {
+const fixturesFolder = async (projRoot: string, { example, config: { fixturesFolder } }: InitConfig) => {
+  if (fixturesFolder === false) {
     return
   }
 
-  const folderPath = config.config.fixturesFolder ?? `${projRoot}/${defaultValues['fixturesFolder']}`
+  const defaultPath = `${projRoot}/${defaultValues['fixturesFolder']}`
 
-  await fs.ensureDir(folderPath)
+  if (fixturesFolder) {
+    const fixturesFolderPath = isAbsolute(fixturesFolder)
+      ? fixturesFolder
+      : `${projRoot}/${fixturesFolder}`
 
-  if (config.example) {
+    if (fixturesFolderPath !== defaultPath) {
+      return
+    }
+  }
+
+  await fs.ensureDir(defaultPath)
+
+  if (example) {
     fs.copy(
       join(__dirname, '../../../', 'scaffold/fixtures/example.json'),
-      join(folderPath, 'example.json'),
+      join(defaultPath, 'example.json'),
     )
   }
 }
