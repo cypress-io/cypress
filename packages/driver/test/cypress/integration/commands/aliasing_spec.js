@@ -1,433 +1,497 @@
+/* eslint-disable
+    brace-style,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const $ = Cypress.$.bind(Cypress);
+const $ = Cypress.$.bind(Cypress)
 const {
-  _
-} = Cypress;
+  _,
+} = Cypress
 
-describe("src/cy/commands/aliasing", function() {
-  before(() => cy
-    .visit("/fixtures/dom.html")
-    .then(function(win) {
-      return this.body = win.document.body.outerHTML;
-  }));
+describe('src/cy/commands/aliasing', function () {
+  before(() => {
+    return cy
+    .visit('/fixtures/dom.html')
+    .then(function (win) {
+      this.body = win.document.body.outerHTML
+    })
+  })
 
-  beforeEach(function() {
-    const doc = cy.state("document");
+  beforeEach(function () {
+    const doc = cy.state('document')
 
-    return $(doc.body).empty().html(this.body);
-  });
+    return $(doc.body).empty().html(this.body)
+  })
 
-  context("#as", function() {
-    it("is special utility command", () => cy.wrap("foo").as("f").then(function() {
-      const cmd = cy.queue.find({name: "as"});
-      return expect(cmd.get("type")).to.eq("utility");
-    }));
+  context('#as', function () {
+    it('is special utility command', () => {
+      return cy.wrap('foo').as('f').then(() => {
+        const cmd = cy.queue.find({ name: 'as' })
 
-    it("does not change the subject", function() {
-      const body = cy.$$("body");
+        return expect(cmd.get('type')).to.eq('utility')
+      })
+    })
 
-      return cy.get("body").as("b").then($body => expect($body.get(0)).to.eq(body.get(0)));
-    });
+    it('does not change the subject', () => {
+      const body = cy.$$('body')
 
-    it("stores the lookup as an alias", () => cy.get("body").as("b").then(() => expect(cy.state("aliases").b).to.exist));
+      return cy.get('body').as('b').then(($body) => expect($body.get(0)).to.eq(body.get(0)))
+    })
 
-    it("stores the resulting subject as the alias", function() {
-      const $body = cy.$$("body");
+    it('stores the lookup as an alias', () => cy.get('body').as('b').then(() => expect(cy.state('aliases').b).to.exist))
 
-      return cy.get("body").as("b").then(() => expect(cy.state("aliases").b.subject.get(0)).to.eq($body.get(0)));
-    });
+    it('stores the resulting subject as the alias', () => {
+      const $body = cy.$$('body')
 
-    it("stores subject of chained aliases", function() {
-      const li = cy.$$("#list li").eq(0);
+      return cy.get('body').as('b').then(() => expect(cy.state('aliases').b.subject.get(0)).to.eq($body.get(0)))
+    })
 
-      return cy.get("#list li").eq(0).as("firstLi").then($li => expect($li).to.match(li));
-    });
+    it('stores subject of chained aliases', () => {
+      const li = cy.$$('#list li').eq(0)
 
-    it("retries primitives and assertions", function() {
-      const obj = {};
+      return cy.get('#list li').eq(0).as('firstLi').then(($li) => expect($li).to.match(li))
+    })
 
-      cy.on("command:retry", _.after(2, () => obj.foo = "bar")
-      );
+    it('retries primitives and assertions', () => {
+      const obj = {}
 
-      cy.wrap(obj).as("obj");
+      cy.on('command:retry', _.after(2, () => obj.foo = 'bar'))
 
-      return cy.get("@obj").should("deep.eq", { foo: "bar" });
-    });
+      cy.wrap(obj).as('obj')
 
-    it("allows dot in alias names", () => cy.get("body").as("body.foo").then(function() {
-      expect(cy.state("aliases")['body.foo']).to.exist;
-      return cy.get('@body.foo').should("exist");
-    }));
+      return cy.get('@obj').should('deep.eq', { foo: 'bar' })
+    })
 
-    it("recognizes dot and non dot with same alias names", function() {
-      cy.get("body").as("body").then(function() {
-        expect(cy.state("aliases")['body']).to.exist;
-        return cy.get('@body').should("exist");
-      });
+    it('allows dot in alias names', () => {
+      return cy.get('body').as('body.foo').then(() => {
+        expect(cy.state('aliases')['body.foo']).to.exist
 
-      return cy.contains("foo").as("body.foo").then(function() {
-        expect(cy.state("aliases")['body.foo']).to.exist;
-        cy.get('@body.foo').should("exist");
-        return cy.get('@body.foo').then(bodyFoo => cy.get('@body').should("not.equal", bodyFoo));
-      });
-    });
+        return cy.get('@body.foo').should('exist')
+      })
+    })
 
-    context("DOM subjects", () => it("assigns the remote jquery instance", function() {
-      const obj = {};
+    it('recognizes dot and non dot with same alias names', () => {
+      cy.get('body').as('body').then(() => {
+        expect(cy.state('aliases')['body']).to.exist
 
-      const jquery = () => obj;
+        return cy.get('@body').should('exist')
+      })
 
-      cy.state("jQuery", jquery);
+      return cy.contains('foo').as('body.foo').then(() => {
+        expect(cy.state('aliases')['body.foo']).to.exist
+        cy.get('@body.foo').should('exist')
 
-      return cy.get("input:first").as("input").then(function($input) {
-        return expect(this.input).to.eq(obj);
-      });
-    }));
+        return cy.get('@body.foo').then((bodyFoo) => cy.get('@body').should('not.equal', bodyFoo))
+      })
+    })
 
-    context("#assign", function() {
-      beforeEach(() => cy.noop("foo").as("foo"));
+    context('DOM subjects', () => {
+      return it('assigns the remote jquery instance', function () {
+        const obj = {}
 
-      afterEach(function() {
+        const jquery = () => obj
+
+        cy.state('jQuery', jquery)
+
+        return cy.get('input:first').as('input').then(function ($input) {
+          return expect(this.input).to.eq(obj)
+        })
+      })
+    })
+
+    context('#assign', function () {
+      beforeEach(() => cy.noop('foo').as('foo'))
+
+      afterEach(function () {
         if (!this.foo) {
-          return this.test.error(new Error("this.foo not defined"));
+          return this.test.error(new Error('this.foo not defined'))
         }
-      });
+      })
 
-      it("assigns subject to runnable ctx", () => cy
-        .noop({}).as("baz").then(function(obj) {
-          return expect(this.baz).to.eq(obj);
-      }));
+      it('assigns subject to runnable ctx', () => {
+        return cy
+        .noop({}).as('baz').then(function (obj) {
+          return expect(this.baz).to.eq(obj)
+        })
+      })
 
-      it("assigns subject with dot to runnable ctx", () => cy.noop({}).as("bar.baz").then(function(obj) {
-        return expect(this["bar.baz"]).to.eq(obj);
-      }));
+      it('assigns subject with dot to runnable ctx', () => {
+        return cy.noop({}).as('bar.baz').then(function (obj) {
+          return expect(this['bar.baz']).to.eq(obj)
+        })
+      })
 
-      describe("nested hooks", function() {
-        afterEach(function() {
+      describe('nested hooks', function () {
+        afterEach(function () {
           if (!this.bar) {
-            this.test.error(new Error("this.bar not defined"));
+            this.test.error(new Error('this.bar not defined'))
           }
 
           if (!this.foo) {
-            return this.test.error(new Error("this.foo not defined"));
+            return this.test.error(new Error('this.foo not defined'))
           }
-        });
+        })
 
-        return it("assigns bar", () => cy.noop("bar").as("bar"));
-      });
+        return it('assigns bar', () => cy.noop('bar').as('bar'))
+      })
 
-      return describe("nested functions", function() {
-        beforeEach(function() {
-          return this.assign = () => {
-            return cy.noop("quux").as("quux");
-          };
-        });
+      return describe('nested functions', function () {
+        beforeEach(function () {
+          this.assign = () => {
+            return cy.noop('quux').as('quux')
+          }
+        })
 
-        afterEach(function() {
+        afterEach(function () {
           if (!this.quux) {
-            return this.test.error(new Error("this.quux not defined"));
+            return this.test.error(new Error('this.quux not defined'))
           }
-        });
+        })
 
-        return it("shares this ctx with hooks", function() {
-          return this.assign().then(function() {
-            return expect(this.quux).to.eq("quux");
-          });
-        });
-      });
-    });
+        return it('shares this ctx with hooks', function () {
+          return this.assign().then(function () {
+            return expect(this.quux).to.eq('quux')
+          })
+        })
+      })
+    })
 
-    describe("errors", function() {
-      it("throws as a parent command", function(done) {
-        cy.on("fail", function(err) {
-          expect(err.message).to.include("before running a parent command");
-          expect(err.message).to.include("`cy.as(\"foo\")`");
-          return done();
-        });
+    describe('errors', () => {
+      it('throws as a parent command', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('before running a parent command')
+          expect(err.message).to.include('`cy.as("foo")`')
 
-        return cy.as("foo");
-      });
+          return done()
+        })
 
-      _.each([null, undefined, {}, [], 123], value => {
-        return it(`throws if when passed: ${value}`, function(done) {
-          cy.on("fail", function(err) {
-            expect(err.message).to.eq("`cy.as()` can only accept a string.");
-            expect(err.docsUrl).to.eq("https://on.cypress.io/as");
-            return done();
-          });
+        return cy.as('foo')
+      })
 
-          return cy.get("div:first").as(value);
-        });
-      });
+      _.each([null, undefined, {}, [], 123], (value) => {
+        return it(`throws if when passed: ${value}`, (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eq('`cy.as()` can only accept a string.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/as')
 
-      it("throws on blank string", function(done) {
-        cy.on("fail", function(err) {
-          expect(err.message).to.eq("`cy.as()` cannot be passed an empty string.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/as");
-          return done();
-        });
+            return done()
+          })
 
-        return cy.get("div:first").as("");
-      });
+          return cy.get('div:first').as(value)
+        })
+      })
 
-      it("throws on alias starting with @ char", function(done) {
-        cy.on("fail", function(err) {
-          expect(err.message).to.eq("`@myAlias` cannot be named starting with the `@` symbol. Try renaming the alias to `myAlias`, or something else that does not start with the `@` symbol.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/as");
-          return done();
-        });
+      it('throws on blank string', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('`cy.as()` cannot be passed an empty string.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/as')
 
-        return cy.get("div:first").as("@myAlias");
-      });
+          return done()
+        })
 
-      it("throws on alias starting with @ char and dots", function(done) {
-        cy.on("fail", function(err) {
-          expect(err.message).to.eq("`@my.alias` cannot be named starting with the `@` symbol. Try renaming the alias to `my.alias`, or something else that does not start with the `@` symbol.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/as");
-          return done();
-        });
+        return cy.get('div:first').as('')
+      })
 
-        return cy.get("div:first").as("@my.alias");
-      });
+      it('throws on alias starting with @ char', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('`@myAlias` cannot be named starting with the `@` symbol. Try renaming the alias to `myAlias`, or something else that does not start with the `@` symbol.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/as')
 
-      it("does not throw on alias with @ char in non-starting position", function() {
-        cy.get("div:first").as("my@Alias");
-        return cy.get("@my@Alias");
-      });
+          return done()
+        })
 
-      return _.each(["test", "runnable", "timeout", "slow", "skip", "inspect"], blacklist => it(`throws on a blacklisted word: ${blacklist}`, function(done) {
-        cy.on("fail", function(err) {
-          expect(err.message).to.eq(`\`cy.as()\` cannot be aliased as: \`${blacklist}\`. This word is reserved.`);
-          expect(err.docsUrl).to.eq("https://on.cypress.io/as");
-          return done();
-        });
+        return cy.get('div:first').as('@myAlias')
+      })
 
-        return cy.get("div:first").as(blacklist);
-      }));
-    });
+      it('throws on alias starting with @ char and dots', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('`@my.alias` cannot be named starting with the `@` symbol. Try renaming the alias to `my.alias`, or something else that does not start with the `@` symbol.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/as')
 
-    return describe("log", function() {
-      beforeEach(function() {
-        this.logs = [];
+          return done()
+        })
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+        return cy.get('div:first').as('@my.alias')
+      })
 
-        return null;
-      });
+      it('does not throw on alias with @ char in non-starting position', () => {
+        cy.get('div:first').as('my@Alias')
 
-      it("sets aliasType to 'primitive'", () => cy.wrap({}).as("obj").then(function() {
-        const {
-          lastLog
-        } = this;
+        return cy.get('@my@Alias')
+      })
 
-        return expect(lastLog.get("aliasType")).to.eq("primitive");
-      }));
-      it("sets aliasType to 'dom'", () => cy.get("body").find("button:first").click().as("button").then(function() {
-        const {
-          lastLog
-        } = this;
+      return _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (blacklist) => {
+        return it(`throws on a blacklisted word: ${blacklist}`, (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.eq(`\`cy.as()\` cannot be aliased as: \`${blacklist}\`. This word is reserved.`)
+            expect(err.docsUrl).to.eq('https://on.cypress.io/as')
 
-        return expect(lastLog.get("aliasType")).to.eq("dom");
-      }));
+            return done()
+          })
 
-      it("aliases previous command / non event / matching chainerId", function() {
-        Cypress.Commands.addAll({
-          foo() {
-            const cmd = Cypress.log({});
+          return cy.get('div:first').as(blacklist)
+        })
+      })
+    })
 
-            return cy.get("ul:first li", {log: false}).first({log: false}).then(function($li) {
-              cmd.snapshot().end();
-              return undefined;
-            });
-          }
-        });
+    return describe('log', function () {
+      beforeEach(function () {
+        this.logs = []
 
-        return cy.foo().as("foo").then(function() {
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+
+          return this.logs.push(log)
+        })
+
+        return null
+      })
+
+      it('sets aliasType to \'primitive\'', () => {
+        return cy.wrap({}).as('obj').then(function () {
           const {
-            lastLog
-          } = this;
+            lastLog,
+          } = this
 
-          expect(this.logs.length).to.eq(1);
-          expect(lastLog.get("alias")).to.eq("foo");
-          return expect(lastLog.get("aliasType")).to.eq("dom");
-        });
-      });
+          return expect(lastLog.get('aliasType')).to.eq('primitive')
+        })
+      })
 
-      return it("does not match alias when the alias has already been applied", () => cy
-        .visit("/fixtures/commands.html")
+      it('sets aliasType to \'dom\'', () => {
+        return cy.get('body').find('button:first').click().as('button').then(function () {
+          const {
+            lastLog,
+          } = this
+
+          return expect(lastLog.get('aliasType')).to.eq('dom')
+        })
+      })
+
+      it('aliases previous command / non event / matching chainerId', function () {
+        Cypress.Commands.addAll({
+          foo () {
+            const cmd = Cypress.log({})
+
+            return cy.get('ul:first li', { log: false }).first({ log: false }).then(($li) => {
+              cmd.snapshot().end()
+
+              return undefined
+            })
+          },
+        })
+
+        return cy.foo().as('foo').then(function () {
+          const {
+            lastLog,
+          } = this
+
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('alias')).to.eq('foo')
+
+          return expect(lastLog.get('aliasType')).to.eq('dom')
+        })
+      })
+
+      return it('does not match alias when the alias has already been applied', () => {
+        return cy
+        .visit('/fixtures/commands.html')
         .server()
-        .route(/foo/, {}).as("getFoo")
-        .then(function() {
-          //# 1 log from visit
-          //# 1 log from route
-          expect(this.logs.length).to.eq(2);
+        .route(/foo/, {}).as('getFoo')
+        .then(function () {
+        // 1 log from visit
+        // 1 log from route
+          expect(this.logs.length).to.eq(2)
 
-          expect(this.logs[0].get("name")).to.eq("visit");
-          expect(this.logs[0].get("alias")).not.to.be.ok;
-          expect(this.logs[0].get("aliasType")).not.to.be.ok;
+          expect(this.logs[0].get('name')).to.eq('visit')
+          expect(this.logs[0].get('alias')).not.to.be.ok
+          expect(this.logs[0].get('aliasType')).not.to.be.ok
 
-          expect(this.logs[1].get("name")).to.eq("route");
-          return expect(this.logs[1].get("alias")).to.eq("getFoo");
-      }));
-    });
-  });
+          expect(this.logs[1].get('name')).to.eq('route')
 
-  context("#replayCommandsFrom", function() {
-    describe("subject in document", () => it("returns if subject is still in the document", () => cy
-      .get("#list").as("list").then(function() {
-        const currentLength = cy.queue.length;
+          return expect(this.logs[1].get('alias')).to.eq('getFoo')
+        })
+      })
+    })
+  })
 
-        return cy.get("@list").then(() => //# should only add the .get() and the .then()
-        expect(cy.queue.length).to.eq(currentLength + 2));
-    })));
+  context('#replayCommandsFrom', function () {
+    describe('subject in document', () => {
+      return it('returns if subject is still in the document', () => {
+        return cy
+        .get('#list').as('list').then(() => {
+          const currentLength = cy.queue.length
 
-    return describe("subject not in document", function() {
-      it("inserts into the queue", function() {
-        const existingNames = cy.queue.names();
+          return cy.get('@list').then(() => // should only add the .get() and the .then()
+          {
+            return expect(cy.queue.length).to.eq(currentLength + 2)
+          })
+        })
+      })
+    })
+
+    return describe('subject not in document', function () {
+      it('inserts into the queue', () => {
+        const existingNames = cy.queue.names()
 
         return cy
-          .get("#list li").eq(0).as("firstLi").then($li => $li.remove()).get("@firstLi").then(() => expect(cy.queue.names()).to.deep.eq(
-          existingNames.concat(
-            ["get", "eq", "as", "then", "get", "get", "eq", "then"]
+        .get('#list li').eq(0).as('firstLi').then(($li) => $li.remove()).get('@firstLi').then(() => {
+          return expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'eq', 'as', 'then', 'get', 'get', 'eq', 'then'],
+            ),
           )
-        ));
-      });
+        })
+      })
 
-      it("replays from last root to current", function() {
-        const first = cy.$$("#list li").eq(0);
-        const second = cy.$$("#list li").eq(1);
-
-        return cy
-          .get("#list li").eq(0).as("firstLi").then(function($li) {
-            expect($li.get(0)).to.eq(first.get(0));
-            return $li.remove();}).get("@firstLi").then($li => expect($li.get(0)).to.eq(second.get(0)));
-      });
-
-      it("replays up until first root command", function() {
-        const existingNames = cy.queue.names();
+      it('replays from last root to current', () => {
+        const first = cy.$$('#list li').eq(0)
+        const second = cy.$$('#list li').eq(1)
 
         return cy
-          .get("body").noop({})
-          .get("#list li").eq(0).as("firstLi").then($li => $li.remove()).get("@firstLi").then(() => expect(cy.queue.names()).to.deep.eq(
-          existingNames.concat(
-            ["get", "noop", "get", "eq", "as", "then", "get", "get", "eq", "then"]
+        .get('#list li').eq(0).as('firstLi').then(($li) => {
+          expect($li.get(0)).to.eq(first.get(0))
+
+          return $li.remove()
+        }).get('@firstLi').then(($li) => expect($li.get(0)).to.eq(second.get(0)))
+      })
+
+      it('replays up until first root command', () => {
+        const existingNames = cy.queue.names()
+
+        return cy
+        .get('body').noop({})
+        .get('#list li').eq(0).as('firstLi').then(($li) => $li.remove()).get('@firstLi').then(() => {
+          return expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'noop', 'get', 'eq', 'as', 'then', 'get', 'get', 'eq', 'then'],
+            ),
           )
-        ));
-      });
+        })
+      })
 
-      it("resets the chainerId allow subjects to be carried on", function() {
+      it('resets the chainerId allow subjects to be carried on', () => {
         cy
-          .get("#dom").find("#button").as("button").then(function($button) {
-            $button.remove();
+        .get('#dom').find('#button').as('button').then(($button) => {
+          $button.remove()
 
-            cy.$$("#dom").append($("<button />", {id: "button"}));
+          cy.$$('#dom').append($('<button />', { id: 'button' }))
 
-            return null;
-        });
+          return null
+        })
 
-        //# when cy is a separate chainer there *was* a bug
-        //# that cause the subject to null because of different
-        //# chainer id's
-        return cy.get("@button").then($button => expect($button).to.have.id("button"));
-      });
+        // when cy is a separate chainer there *was* a bug
+        // that cause the subject to null because of different
+        // chainer id's
+        return cy.get('@button').then(($button) => expect($button).to.have.id('button'))
+      })
 
-      it("skips commands which did not change, and starts at the first valid subject or parent command", function() {
-        const existingNames = cy.queue.names();
+      it('skips commands which did not change, and starts at the first valid subject or parent command', function () {
+        const existingNames = cy.queue.names()
 
-        cy.$$("#list li").click(function() {
-          const ul  = $(this).parent();
-          const lis = ul.children().clone();
+        cy.$$('#list li').click(function () {
+          const ul = $(this).parent()
+          const lis = ul.children().clone()
 
-          //# this simulates a re-render
-          ul.children().remove();
-          ul.append(lis);
-          return lis.first().remove();
-        });
+          // this simulates a re-render
+          ul.children().remove()
+          ul.append(lis)
+
+          return lis.first().remove()
+        })
 
         return cy
-          .get("#list li")
-          .then($lis => $lis).as("items")
-          .first()
-          .click()
-          .as("firstItem")
-          .then(() => expect(cy.queue.names()).to.deep.eq(
-          existingNames.concat(
-            ["get", "then", "as", "first", "click", "as", "then", "get", "should", "then", "get", "should", "then"]
+        .get('#list li')
+        .then(($lis) => $lis).as('items')
+        .first()
+        .click()
+        .as('firstItem')
+        .then(() => {
+          return expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'then', 'as', 'first', 'click', 'as', 'then', 'get', 'should', 'then', 'get', 'should', 'then'],
+            ),
           )
-        )).get("@items")
-          .should("have.length", 2)
-          .then(() => expect(cy.queue.names()).to.deep.eq(
-          existingNames.concat(
-            ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "should", "then"]
+        }).get('@items')
+        .should('have.length', 2)
+        .then(() => {
+          return expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'then', 'as', 'first', 'click', 'as', 'then', 'get', 'get', 'should', 'then', 'get', 'should', 'then'],
+            ),
           )
-        )).get("@firstItem")
-          .should("contain", "li 1")
-          .then(() => expect(cy.queue.names()).to.deep.eq(
-          existingNames.concat(
-            ["get", "then", "as", "first", "click", "as", "then", "get", "get", "should", "then", "get", "get", "first", "should", "then"]
+        }).get('@firstItem')
+        .should('contain', 'li 1')
+        .then(() => {
+          return expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'then', 'as', 'first', 'click', 'as', 'then', 'get', 'get', 'should', 'then', 'get', 'get', 'first', 'should', 'then'],
+            ),
           )
-        ));
-      });
+        })
+      })
 
-      return it("inserts assertions", function(done) {
-        const existingNames = cy.queue.names();
-
-        return cy
-          .get("#checkboxes input")
-          .eq(0)
-          .should("be.checked", "cockatoo")
-          .as("firstItem")
-          .then($input => $input.remove()).get("@firstItem")
-          .then(function() {
-            expect(cy.queue.names()).to.deep.eq(
-              existingNames.concat(
-                ["get", "eq", "should", "as", "then", "get", "get", "eq", "should", "then"]
-              )
-            );
-            return done();
-        });
-      });
-    });
-  });
-
-  return context("#getAlias", function() {
-    it("retrieves aliases", () => cy
-      .get("body").as("b")
-      .get("input:first").as("firstInput")
-      .get("div:last").as("lastDiv")
-      .then(() => expect(cy.getAlias("@firstInput")).to.exist));
-
-    return describe("errors", function() {
-      it("throws when an alias cannot be found", function(done) {
-        cy.on("fail", function(err) {
-          expect(err.message).to.include("`cy.get()` could not find a registered alias for: `@lastDiv`.\nAvailable aliases are: `b, firstInput`.");
-          return done();
-        });
+      return it('inserts assertions', (done) => {
+        const existingNames = cy.queue.names()
 
         return cy
-          .get("body").as("b")
-          .get("input:first").as("firstInput")
-          .get("@lastDiv");
-      });
+        .get('#checkboxes input')
+        .eq(0)
+        .should('be.checked', 'cockatoo')
+        .as('firstItem')
+        .then(($input) => $input.remove()).get('@firstItem')
+        .then(() => {
+          expect(cy.queue.names()).to.deep.eq(
+            existingNames.concat(
+              ['get', 'eq', 'should', 'as', 'then', 'get', 'get', 'eq', 'should', 'then'],
+            ),
+          )
 
-      return it("throws when alias is missing '@' but matches an available alias", function(done) {
-        cy.on("fail", function(err) {
-          expect(err.message).to.eq("Invalid alias: `getAny`.\nYou forgot the `@`. It should be written as: `@getAny`.");
-          return done();
-        });
+          return done()
+        })
+      })
+    })
+  })
+
+  return context('#getAlias', () => {
+    it('retrieves aliases', () => {
+      return cy
+      .get('body').as('b')
+      .get('input:first').as('firstInput')
+      .get('div:last').as('lastDiv')
+      .then(() => expect(cy.getAlias('@firstInput')).to.exist)
+    })
+
+    return describe('errors', () => {
+      it('throws when an alias cannot be found', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.get()` could not find a registered alias for: `@lastDiv`.\nAvailable aliases are: `b, firstInput`.')
+
+          return done()
+        })
 
         return cy
-          .server()
-          .route("*", {}).as("getAny")
-          .wait("getAny").then(function() {});
-      });
-    });
-  });
-});
+        .get('body').as('b')
+        .get('input:first').as('firstInput')
+        .get('@lastDiv')
+      })
+
+      return it('throws when alias is missing \'@\' but matches an available alias', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('Invalid alias: `getAny`.\nYou forgot the `@`. It should be written as: `@getAny`.')
+
+          return done()
+        })
+
+        return cy
+        .server()
+        .route('*', {}).as('getAny')
+        .wait('getAny').then(() => {})
+      })
+    })
+  })
+})

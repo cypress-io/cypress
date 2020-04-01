@@ -1,88 +1,100 @@
+/* eslint-disable
+    default-case,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("src/cy/commands/popups", function() {
-  context("alert", function() {
-    beforeEach(function() {
-      cy.visit("/fixtures/generic.html");
+describe('src/cy/commands/popups', function () {
+  context('alert', function () {
+    beforeEach(function () {
+      cy.visit('/fixtures/generic.html')
 
-      this.logs = [];
+      this.logs = []
 
-      cy.on("log:added", (attrs, log) => {
-        if (attrs.name === "alert") {
-          return this.logs.push(log);
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'alert') {
+          return this.logs.push(log)
         }
-      });
+      })
 
-      return null;
-    });
+      return null
+    })
 
-    return it("logs the alert", () => cy.window().then(win => win.alert("fooooo")).then(function() {
-      expect(this.logs.length).to.eq(1);
-      expect(this.logs[0].get("name")).to.eq("alert");
-      expect(this.logs[0].get("message")).to.eq("fooooo");
+    return it('logs the alert', () => {
+      return cy.window().then((win) => win.alert('fooooo')).then(function () {
+        expect(this.logs.length).to.eq(1)
+        expect(this.logs[0].get('name')).to.eq('alert')
+        expect(this.logs[0].get('message')).to.eq('fooooo')
 
-      const consoleProps = this.logs[0].invoke("consoleProps");
+        const consoleProps = this.logs[0].invoke('consoleProps')
 
-      return expect(consoleProps).to.deep.eq({
-        Event: "alert",
-        Alerted: "fooooo"
-      });
-    }));
-  });
+        return expect(consoleProps).to.deep.eq({
+          Event: 'alert',
+          Alerted: 'fooooo',
+        })
+      })
+    })
+  })
 
-  return context("confirm", function() {
-    beforeEach(function() {
-      cy.visit("/fixtures/generic.html");
+  return context('confirm', function () {
+    beforeEach(function () {
+      cy.visit('/fixtures/generic.html')
 
-      this.logs = [];
+      this.logs = []
 
-      cy.on("log:added", (attrs, log) => {
-        if (attrs.name === "confirm") {
-          return this.logs.push(log);
+      cy.on('log:added', (attrs, log) => {
+        if (attrs.name === 'confirm') {
+          return this.logs.push(log)
         }
-      });
+      })
 
-      return null;
-    });
+      return null
+    })
 
-    it("logs the confirm", () => cy.window().then(win => win.confirm("Delete hard drive?")).then(function() {
-      expect(this.logs.length).to.eq(1);
-      expect(this.logs[0].get("name")).to.eq("confirm");
-      expect(this.logs[0].get("message")).to.eq("Delete hard drive?");
+    it('logs the confirm', () => {
+      return cy.window().then((win) => win.confirm('Delete hard drive?')).then(function () {
+        expect(this.logs.length).to.eq(1)
+        expect(this.logs[0].get('name')).to.eq('confirm')
+        expect(this.logs[0].get('message')).to.eq('Delete hard drive?')
 
-      const consoleProps = this.logs[0].invoke("consoleProps");
+        const consoleProps = this.logs[0].invoke('consoleProps')
 
-      return expect(consoleProps).to.deep.eq({
-        Event: "confirm",
-        Prompted: "Delete hard drive?",
-        Confirmed: true
-      });
-    }));
+        return expect(consoleProps).to.deep.eq({
+          Event: 'confirm',
+          Prompted: 'Delete hard drive?',
+          Confirmed: true,
+        })
+      })
+    })
 
-    return it("can turn on and off confirmation", function() {
-      cy.on("window:confirm", function(str) {
+    return it('can turn on and off confirmation', () => {
+      cy.on('window:confirm', (str) => {
         switch (str) {
-          case "foo": return false;
-          case "bar": return true;
-          case "baz": return undefined;
+          case 'foo': return false
+          case 'bar': return true
+          case 'baz': return undefined
         }
-      });
+      })
 
-      return cy.window().then(function(win) {
-        const confirmedFoo = win.confirm("foo");
-        expect(confirmedFoo).to.be.false;
+      return cy.window().then((win) => {
+        const confirmedFoo = win.confirm('foo')
 
-        const confirmedBar = win.confirm("bar");
-        expect(confirmedBar).to.be.true;
+        expect(confirmedFoo).to.be.false
 
-        //# undefined is not strictly false
-        //# so the confirmation should be true
-        const confirmedBaz = win.confirm("baz");
-        return expect(confirmedBaz).to.be.true;
-      });
-    });
-  });
-});
+        const confirmedBar = win.confirm('bar')
+
+        expect(confirmedBar).to.be.true
+
+        // undefined is not strictly false
+        // so the confirmation should be true
+        const confirmedBaz = win.confirm('baz')
+
+        return expect(confirmedBaz).to.be.true
+      })
+    })
+  })
+})
