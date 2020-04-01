@@ -1,33 +1,44 @@
-$errUtils = require("../cypress/error_utils")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $errUtils = require("../cypress/error_utils");
 
-create = (state) ->
+const create = function(state) {
   return {
-    timeout: (ms, delta = false) ->
-      runnable = state("runnable")
+    timeout(ms, delta = false) {
+      const runnable = state("runnable");
 
-      if not runnable
-        $errUtils.throwErrByPath("miscellaneous.outside_test")
+      if (!runnable) {
+        $errUtils.throwErrByPath("miscellaneous.outside_test");
+      }
 
-      if ms
-        ## if delta is true then we add (or subtract) from the
-        ## runnables current timeout instead of blanketingly setting it
-        ms = if delta then runnable.timeout() + ms else ms
-        runnable.timeout(ms)
-        return @
-      else
-        runnable.timeout()
+      if (ms) {
+        //# if delta is true then we add (or subtract) from the
+        //# runnables current timeout instead of blanketingly setting it
+        ms = delta ? runnable.timeout() + ms : ms;
+        runnable.timeout(ms);
+        return this;
+      } else {
+        return runnable.timeout();
+      }
+    },
 
-    clearTimeout: ->
-      runnable = state("runnable")
+    clearTimeout() {
+      const runnable = state("runnable");
 
-      if not runnable
-        $errUtils.throwErrByPath("miscellaneous.outside_test")
+      if (!runnable) {
+        $errUtils.throwErrByPath("miscellaneous.outside_test");
+      }
 
-      runnable.clearTimeout()
+      runnable.clearTimeout();
 
-      return @
-  }
+      return this;
+    }
+  };
+};
 
 module.exports = {
   create
-}
+};

@@ -1,92 +1,114 @@
-_ = require("lodash")
-$ = require("jquery")
-Promise = require("bluebird")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const $ = require("jquery");
+const Promise = require("bluebird");
 
-$errUtils = require("../../cypress/error_utils")
+const $errUtils = require("../../cypress/error_utils");
 
-ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
+const ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-'];
 
-module.exports = (Commands, Cypress, cy, state, config) ->
-  findByNgBinding = (binding, options) ->
-    selector = ".ng-binding"
+module.exports = function(Commands, Cypress, cy, state, config) {
+  const findByNgBinding = function(binding, options) {
+    let resolveElements;
+    const selector = ".ng-binding";
 
-    angular = state("window").angular
+    const {
+      angular
+    } = state("window");
 
-    _.extend options, {verify: false, log: false}
+    _.extend(options, {verify: false, log: false});
 
-    getEl = ($elements) ->
-      filtered = $elements.filter (index, el) ->
-        dataBinding = angular.element(el).data("$binding")
+    const getEl = function($elements) {
+      const filtered = $elements.filter(function(index, el) {
+        const dataBinding = angular.element(el).data("$binding");
 
-        if dataBinding
-          bindingName = dataBinding.exp or dataBinding[0].exp or dataBinding
-          return binding in bindingName
+        if (dataBinding) {
+          const bindingName = dataBinding.exp || dataBinding[0].exp || dataBinding;
+          return bindingName.includes(binding);
+        }
+      });
 
-      ## if we have items return
-      ## those filtered items
-      if filtered.length
-        return filtered
+      //# if we have items return
+      //# those filtered items
+      if (filtered.length) {
+        return filtered;
+      }
 
-      ## else return null element
-      return $(null)
+      //# else return null element
+      return $(null);
+    };
 
-    do resolveElements = =>
-      cy.now("get", selector, options).then ($elements) =>
-        cy.verifyUpcomingAssertions(getEl($elements), options, {
-          onRetry: resolveElements
-          onFail: (err) ->
-            err.message = "Could not find element for binding: '#{binding}'."
-        })
+    return (resolveElements = () => {
+      return cy.now("get", selector, options).then($elements => {
+        return cy.verifyUpcomingAssertions(getEl($elements), options, {
+          onRetry: resolveElements,
+          onFail(err) {
+            return err.message = `Could not find element for binding: '${binding}'.`;
+          }
+        });
+      });
+    })();
+  };
 
-  findByNgAttr = (name, attr, el, options) ->
+  const findByNgAttr = function(name, attr, el, options) {
 
-    selectors = []
-    error = "Could not find element for #{name}: '#{el}'.  Searched "
+    const selectors = [];
+    let error = `Could not find element for ${name}: '${el}'.  Searched `;
 
-    _.extend options, {verify: false, log: false}
+    _.extend(options, {verify: false, log: false});
 
-    finds = _.map ngPrefixes, (prefix) =>
-      selector = "[#{prefix}#{attr}'#{el}']"
-      selectors.push(selector)
+    const finds = _.map(ngPrefixes, prefix => {
+      let resolveElements;
+      const selector = `[${prefix}${attr}'${el}']`;
+      selectors.push(selector);
 
-      do resolveElements = =>
-        cy.now("get", selector, options).then ($elements) =>
-          cy.verifyUpcomingAssertions($elements, options, {
+      return (resolveElements = () => {
+        return cy.now("get", selector, options).then($elements => {
+          return cy.verifyUpcomingAssertions($elements, options, {
             onRetry: resolveElements
-          })
+          });
+        });
+      })();
+    });
 
-    error += selectors.join(", ") + "."
+    error += selectors.join(", ") + ".";
 
-    cancelAll = ->
-      _.invokeMap(finds, "cancel")
+    const cancelAll = () => _.invokeMap(finds, "cancel");
 
-    Promise
+    return Promise
     .any(finds)
-    .then (subject) ->
-      cancelAll()
-      return subject
-    .catch Promise.AggregateError, (err) ->
-      $errUtils.throwErr error
+    .then(function(subject) {
+      cancelAll();
+      return subject;}).catch(Promise.AggregateError, err => $errUtils.throwErr(error));
+  };
 
-  Commands.addAll({
-    ng: (type, selector, options = {}) ->
-      ## what about requirejs / browserify?
-      ## we need to intelligently check to see if we're using those
-      ## and if angular is available through them.  throw a very specific
-      ## error message here that's different depending on what module
-      ## system you're using
-      $errUtils.throwErrByPath "ng.no_global" if not state("window").angular
+  return Commands.addAll({
+    ng(type, selector, options = {}) {
+      //# what about requirejs / browserify?
+      //# we need to intelligently check to see if we're using those
+      //# and if angular is available through them.  throw a very specific
+      //# error message here that's different depending on what module
+      //# system you're using
+      if (!state("window").angular) { $errUtils.throwErrByPath("ng.no_global"); }
 
-      _.defaults options, {log: true}
+      _.defaults(options, {log: true});
 
-      if options.log
-        options._log = Cypress.log()
+      if (options.log) {
+        options._log = Cypress.log();
+      }
 
-      switch type
-        when "model"
-          findByNgAttr("model", "model=", selector, options)
-        when "repeater"
-          findByNgAttr("repeater", "repeat*=", selector, options)
-        when "binding"
-          findByNgBinding(selector, options)
-  })
+      switch (type) {
+        case "model":
+          return findByNgAttr("model", "model=", selector, options);
+        case "repeater":
+          return findByNgAttr("repeater", "repeat*=", selector, options);
+        case "binding":
+          return findByNgBinding(selector, options);
+      }
+    }
+  });
+};

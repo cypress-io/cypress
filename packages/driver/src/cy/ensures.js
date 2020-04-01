@@ -1,351 +1,401 @@
-_ = require("lodash")
-$dom = require("../dom")
-$utils = require("../cypress/utils")
-$errUtils = require("../cypress/error_utils")
-$elements = require("../dom/elements")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const $dom = require("../dom");
+const $utils = require("../cypress/utils");
+const $errUtils = require("../cypress/error_utils");
+const $elements = require("../dom/elements");
 
-VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ")
+const VALID_POSITIONS = "topLeft top topRight left center right bottomLeft bottom bottomRight".split(" ");
 
-## TODO: in 4.0 we should accept a new validation type called 'elements'
-## which accepts an array of elements (and they all have to be elements!!)
-## this would fix the TODO below, and also ensure that commands understand
-## they may need to work with both element arrays, or specific items
-## such as a single element, a single document, or single window
+//# TODO: in 4.0 we should accept a new validation type called 'elements'
+//# which accepts an array of elements (and they all have to be elements!!)
+//# this would fix the TODO below, and also ensure that commands understand
+//# they may need to work with both element arrays, or specific items
+//# such as a single element, a single document, or single window
 
-returnFalse = -> return false
+let returnFalse = () => false;
 
-create = (state, expect) ->
-  ## TODO: we should probably normalize all subjects
-  ## into an array and loop through each and verify
-  ## each element in the array is valid. as it stands
-  ## we only validate the first
-  validateType = (subject, type, cmd) ->
-    name = cmd.get("name")
-    prev = cmd.get("prev")
+const create = function(state, expect) {
+  //# TODO: we should probably normalize all subjects
+  //# into an array and loop through each and verify
+  //# each element in the array is valid. as it stands
+  //# we only validate the first
+  const validateType = function(subject, type, cmd) {
+    const name = cmd.get("name");
+    const prev = cmd.get("prev");
 
-    switch type
-      when "element"
-        ## if this is an element then ensure its currently attached
-        ## to its document context
-        if $dom.isElement(subject)
-          ensureAttached(subject, name)
+    switch (type) {
+      case "element":
+        //# if this is an element then ensure its currently attached
+        //# to its document context
+        if ($dom.isElement(subject)) {
+          ensureAttached(subject, name);
+        }
 
-        ## always ensure this is an element
-        ensureElement(subject, name)
+        //# always ensure this is an element
+        return ensureElement(subject, name);
 
-      when "document"
-        ensureDocument(subject, name)
+      case "document":
+        return ensureDocument(subject, name);
 
-      when "window"
-        ensureWindow(subject, name)
+      case "window":
+        return ensureWindow(subject, name);
+    }
+  };
 
-  ensureSubjectByType = (subject, type, name) ->
-    current = state("current")
+  const ensureSubjectByType = function(subject, type, name) {
+    let err;
+    const current = state("current");
 
-    types = [].concat(type)
+    let types = [].concat(type);
 
-    ## if we have an optional subject and nothing's
-    ## here then just return cuz we good to go
-    if ("optional" in types) and _.isUndefined(subject)
-      return
+    //# if we have an optional subject and nothing's
+    //# here then just return cuz we good to go
+    if ((types.includes("optional")) && _.isUndefined(subject)) {
+      return;
+    }
 
-    ## okay we either have a subject and either way
-    ## slice out optional so we can verify against
-    ## the various types
-    types = _.without(types, "optional")
+    //# okay we either have a subject and either way
+    //# slice out optional so we can verify against
+    //# the various types
+    types = _.without(types, "optional");
 
-    ## if we have no types then bail
-    return if types.length is 0
+    //# if we have no types then bail
+    if (types.length === 0) { return; }
 
-    errors = []
+    const errors = [];
 
-    for type in types
-      try
-        validateType(subject, type, current)
-      catch err
-        errors.push(err)
+    for (type of types) {
+      try {
+        validateType(subject, type, current);
+      } catch (error) {
+        err = error;
+        errors.push(err);
+      }
+    }
 
-    ## every validation failed and we had more than one validation
-    if (errors.length is types.length)
-      err = errors[0]
+    //# every validation failed and we had more than one validation
+    if (errors.length === types.length) {
+      err = errors[0];
 
-      if types.length > 1
-        ## append a nice error message telling the user this
-        errProps = $errUtils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
+      if (types.length > 1) {
+        //# append a nice error message telling the user this
+        const errProps = $errUtils.appendErrMsg(err, `All ${types.length} subject validations failed on this subject.`);
 
-        $errUtils.mergeErrProps(err, errProps)
+        $errUtils.mergeErrProps(err, errProps);
+      }
 
-      throw err
+      throw err;
+    }
+  };
 
-  ensureRunnable = (name) ->
-    if not state("runnable")
-      $errUtils.throwErrByPath("miscellaneous.outside_test_with_cmd", {
+  const ensureRunnable = function(name) {
+    if (!state("runnable")) {
+      return $errUtils.throwErrByPath("miscellaneous.outside_test_with_cmd", {
         args: {
           cmd: name
         }
-      })
+      });
+    }
+  };
 
-  ensureElementIsNotAnimating = ($el, coords = [], threshold) ->
-    lastTwo = coords.slice(-2)
+  const ensureElementIsNotAnimating = function($el, coords = [], threshold) {
+    const lastTwo = coords.slice(-2);
 
-    ## bail if we dont yet have two points
-    if lastTwo.length isnt 2
-      $errUtils.throwErrByPath("dom.animation_check_failed")
+    //# bail if we dont yet have two points
+    if (lastTwo.length !== 2) {
+      $errUtils.throwErrByPath("dom.animation_check_failed");
+    }
 
-    [point1, point2] = lastTwo
+    const [point1, point2] = lastTwo;
 
-    ## verify that there is not a distance
-    ## greater than a default of '5' between
-    ## the points
-    if $utils.getDistanceBetween(point1, point2) > threshold
-      cmd  = state("current").get("name")
-      node = $dom.stringify($el)
-      $errUtils.throwErrByPath("dom.animating", {
+    //# verify that there is not a distance
+    //# greater than a default of '5' between
+    //# the points
+    if ($utils.getDistanceBetween(point1, point2) > threshold) {
+      const cmd  = state("current").get("name");
+      const node = $dom.stringify($el);
+      return $errUtils.throwErrByPath("dom.animating", {
         args: { cmd, node }
-      })
+      });
+    }
+  };
 
-  ensureNotDisabled = (subject, onFail) ->
-    cmd = state("current").get("name")
+  const ensureNotDisabled = function(subject, onFail) {
+    const cmd = state("current").get("name");
 
-    if subject.prop("disabled")
-      node = $dom.stringify(subject)
+    if (subject.prop("disabled")) {
+      const node = $dom.stringify(subject);
 
-      $errUtils.throwErrByPath("dom.disabled", {
-        onFail
+      return $errUtils.throwErrByPath("dom.disabled", {
+        onFail,
         args: { cmd, node }
-      })
+      });
+    }
+  };
 
-  ensureNotReadonly = (subject, onFail) ->
-    cmd = state("current").get("name")
+  const ensureNotReadonly = function(subject, onFail) {
+    const cmd = state("current").get("name");
 
-    # readonly can only be applied to input/textarea
-    # not on checkboxes, radios, etc..
-    if $dom.isTextLike(subject.get(0)) and subject.prop("readonly")
-      node = $dom.stringify(subject)
+    // readonly can only be applied to input/textarea
+    // not on checkboxes, radios, etc..
+    if ($dom.isTextLike(subject.get(0)) && subject.prop("readonly")) {
+      const node = $dom.stringify(subject);
 
-      $errUtils.throwErrByPath("dom.readonly", {
-        onFail
+      return $errUtils.throwErrByPath("dom.readonly", {
+        onFail,
         args: { cmd, node }
-      })
+      });
+    }
+  };
 
-  ensureVisibility = (subject, onFail) ->
-    cmd = state("current").get("name")
+  const ensureVisibility = function(subject, onFail) {
+    const cmd = state("current").get("name");
 
-    # We overwrite the filter(":visible") in jquery
-    # packages/driver/src/config/jquery.coffee#L51
-    # So that this effectively calls our logic
-    # for $dom.isVisible aka !$dom.isHidden
-    if not (subject.length is subject.filter(":visible").length)
-      reason = $dom.getReasonIsHidden(subject)
-      node   = $dom.stringify(subject)
-      $errUtils.throwErrByPath("dom.not_visible", {
-        onFail
+    // We overwrite the filter(":visible") in jquery
+    // packages/driver/src/config/jquery.coffee#L51
+    // So that this effectively calls our logic
+    // for $dom.isVisible aka !$dom.isHidden
+    if (!(subject.length === subject.filter(":visible").length)) {
+      const reason = $dom.getReasonIsHidden(subject);
+      const node   = $dom.stringify(subject);
+      return $errUtils.throwErrByPath("dom.not_visible", {
+        onFail,
         args: { cmd, node, reason }
-      })
+      });
+    }
+  };
 
-  ensureAttached = (subject, name, onFail) ->
-    if $dom.isDetached(subject)
-      cmd = name ? state("current").get("name")
-      prev = state("current").get("prev").get("name")
-      node = $dom.stringify(subject)
+  var ensureAttached = function(subject, name, onFail) {
+    if ($dom.isDetached(subject)) {
+      const cmd = name != null ? name : state("current").get("name");
+      const prev = state("current").get("prev").get("name");
+      const node = $dom.stringify(subject);
 
-      $errUtils.throwErrByPath("subject.not_attached", {
-        onFail
+      return $errUtils.throwErrByPath("subject.not_attached", {
+        onFail,
         args: { cmd, prev, node }
-      })
+      });
+    }
+  };
 
-  ensureElement = (subject, name, onFail) ->
-    if not $dom.isElement(subject)
-      prev = state("current").get("prev")
+  var ensureElement = function(subject, name, onFail) {
+    if (!$dom.isElement(subject)) {
+      const prev = state("current").get("prev");
 
-      $errUtils.throwErrByPath("subject.not_element", {
-        onFail
+      return $errUtils.throwErrByPath("subject.not_element", {
+        onFail,
         args: {
-          name
-          subject: $utils.stringifyActual(subject)
+          name,
+          subject: $utils.stringifyActual(subject),
           previous: prev.get("name")
         }
-      })
+      });
+    }
+  };
 
-  ensureWindow = (subject, name, log) ->
-    if not $dom.isWindow(subject)
-      prev = state("current").get("prev")
+  var ensureWindow = function(subject, name, log) {
+    if (!$dom.isWindow(subject)) {
+      const prev = state("current").get("prev");
 
-      $errUtils.throwErrByPath("subject.not_window_or_document", {
+      return $errUtils.throwErrByPath("subject.not_window_or_document", {
         args: {
-          name
-          type: "window"
-          subject: $utils.stringifyActual(subject)
+          name,
+          type: "window",
+          subject: $utils.stringifyActual(subject),
           previous: prev.get("name")
         }
-      })
+      });
+    }
+  };
 
-  ensureDocument = (subject, name, log) ->
-    if not $dom.isDocument(subject)
-      prev = state("current").get("prev")
+  var ensureDocument = function(subject, name, log) {
+    if (!$dom.isDocument(subject)) {
+      const prev = state("current").get("prev");
 
-      $errUtils.throwErrByPath("subject.not_window_or_document", {
+      return $errUtils.throwErrByPath("subject.not_window_or_document", {
         args: {
-          name
-          type: "document"
-          subject: $utils.stringifyActual(subject)
+          name,
+          type: "document",
+          subject: $utils.stringifyActual(subject),
           previous: prev.get("name")
         }
-      })
+      });
+    }
+  };
 
-  ensureExistence = (subject) ->
-    returnFalse = ->
-      cleanup()
+  const ensureExistence = function(subject) {
+    returnFalse = function() {
+      cleanup();
 
-      return false
+      return false;
+    };
 
-    cleanup = ->
-      state("onBeforeLog", null)
+    var cleanup = () => state("onBeforeLog", null);
 
-    ## prevent any additional logs this is an implicit assertion
-    state("onBeforeLog", returnFalse)
+    //# prevent any additional logs this is an implicit assertion
+    state("onBeforeLog", returnFalse);
 
-    ## verify the $el exists and use our default error messages
-    ## TODO: always unbind if our expectation failed
-    try
-      expect(subject).to.exist
-    catch err
-      cleanup()
+    //# verify the $el exists and use our default error messages
+    //# TODO: always unbind if our expectation failed
+    try {
+      return expect(subject).to.exist;
+    } catch (err) {
+      cleanup();
 
-      throw err
+      throw err;
+    }
+  };
 
-  ensureElExistence = ($el) ->
-    ## dont throw if this isnt even a DOM object
-    # return if not $dom.isJquery($el)
+  const ensureElExistence = function($el) {
+    //# dont throw if this isnt even a DOM object
+    // return if not $dom.isJquery($el)
 
-    ## ensure that we either had some assertions
-    ## or that the element existed
-    return if $el and $el.length
+    //# ensure that we either had some assertions
+    //# or that the element existed
+    if ($el && $el.length) { return; }
 
-    ## TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
-    ## OR GO THROUGH I18N
+    //# TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
+    //# OR GO THROUGH I18N
 
-    ensureExistence($el)
+    return ensureExistence($el);
+  };
 
-  ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, onFail) ->
-    cmd = state("current").get("name")
-    el = $el[0]
-    win = $dom.getWindowByElement(el)
-    value = win.getComputedStyle(el)[cssProperty]
-    if value is cssValue
-      elInherited = $elements.findParent el, (el, prevEl) ->
-        if win.getComputedStyle(el)[cssProperty] isnt cssValue
-          return prevEl
+  const ensureElDoesNotHaveCSS = function($el, cssProperty, cssValue, onFail) {
+    const cmd = state("current").get("name");
+    const el = $el[0];
+    const win = $dom.getWindowByElement(el);
+    const value = win.getComputedStyle(el)[cssProperty];
+    if (value === cssValue) {
+      const elInherited = $elements.findParent(el, function(el, prevEl) {
+        if (win.getComputedStyle(el)[cssProperty] !== cssValue) {
+          return prevEl;
+        }
+      });
 
-      element = $dom.stringify(el)
-      elementInherited = (el isnt elInherited) && $dom.stringify(elInherited)
+      const element = $dom.stringify(el);
+      const elementInherited = (el !== elInherited) && $dom.stringify(elInherited);
 
-      consoleProps = {
-        'But it has CSS': "#{cssProperty}: #{cssValue}"
-      }
+      const consoleProps = {
+        'But it has CSS': `${cssProperty}: ${cssValue}`
+      };
 
-      if elementInherited then _.extend(consoleProps, {
+      if (elementInherited) { _.extend(consoleProps, {
         'Inherited From': elInherited
-      })
+      }); }
 
-      $errUtils.throwErrByPath("dom.pointer_events_none", {
-        onFail
+      return $errUtils.throwErrByPath("dom.pointer_events_none", {
+        onFail,
         args: {
-          cmd
-          element
+          cmd,
+          element,
           elementInherited
-        }
+        },
         errProps: {
           consoleProps
         }
-      })
+      });
+    }
+  };
 
-  ensureDescendents = ($el1, $el2, onFail) ->
-    cmd = state("current").get("name")
+  const ensureDescendents = function($el1, $el2, onFail) {
+    const cmd = state("current").get("name");
 
-    if not $dom.isDescendent($el1, $el2)
-      if $el2
-        element1 = $dom.stringify($el1)
-        element2 = $dom.stringify($el2)
-        $errUtils.throwErrByPath("dom.covered", {
-          onFail
-          args: { cmd, element1, element2 }
+    if (!$dom.isDescendent($el1, $el2)) {
+      if ($el2) {
+        const element1 = $dom.stringify($el1);
+        const element2 = $dom.stringify($el2);
+        return $errUtils.throwErrByPath("dom.covered", {
+          onFail,
+          args: { cmd, element1, element2 },
           errProps: {
             consoleProps: {
               "But its Covered By": $dom.getElements($el2)
             }
           }
-        })
-      else
-        node = $dom.stringify($el1)
-        $errUtils.throwErrByPath("dom.center_hidden", {
-          onFail
-          args: { cmd, node }
+        });
+      } else {
+        const node = $dom.stringify($el1);
+        return $errUtils.throwErrByPath("dom.center_hidden", {
+          onFail,
+          args: { cmd, node },
           errProps: {
             consoleProps: {
               "But its Covered By": $dom.getElements($el2)
             }
           }
-        })
+        });
+      }
+    }
+  };
 
-  ensureValidPosition = (position, log) ->
-    ## make sure its valid first!
-    if position in VALID_POSITIONS
-      return true
+  const ensureValidPosition = function(position, log) {
+    //# make sure its valid first!
+    if (VALID_POSITIONS.includes(position)) {
+      return true;
+    }
 
-    $errUtils.throwErrByPath("dom.invalid_position_argument", {
-      onFail: log
+    return $errUtils.throwErrByPath("dom.invalid_position_argument", {
+      onFail: log,
       args: {
         position,
         validPositions: VALID_POSITIONS.join(', ')
       }
-    })
+    });
+  };
 
-  ensureScrollability = ($el, cmd) ->
-    return true if $dom.isScrollable($el)
+  const ensureScrollability = function($el, cmd) {
+    if ($dom.isScrollable($el)) { return true; }
 
-    ## prep args to throw in error since we can't scroll
-    cmd   ?= state("current").get("name")
-    node  = $dom.stringify($el)
+    //# prep args to throw in error since we can't scroll
+    if (cmd == null) {   cmd = state("current").get("name"); }
+    const node  = $dom.stringify($el);
 
-    $errUtils.throwErrByPath("dom.not_scrollable", {
+    return $errUtils.throwErrByPath("dom.not_scrollable", {
       args: { cmd, node }
-    })
+    });
+  };
 
   return {
-    ensureSubjectByType
+    ensureSubjectByType,
 
-    ensureElement
+    ensureElement,
 
-    ensureAttached
+    ensureAttached,
 
-    ensureRunnable
+    ensureRunnable,
 
-    ensureWindow
+    ensureWindow,
 
-    ensureDocument
+    ensureDocument,
 
-    ensureElDoesNotHaveCSS
+    ensureElDoesNotHaveCSS,
 
-    ensureElementIsNotAnimating
+    ensureElementIsNotAnimating,
 
-    ensureNotDisabled
+    ensureNotDisabled,
 
-    ensureVisibility
+    ensureVisibility,
 
-    ensureExistence
+    ensureExistence,
 
-    ensureElExistence
+    ensureElExistence,
 
-    ensureDescendents
+    ensureDescendents,
 
-    ensureValidPosition
+    ensureValidPosition,
 
-    ensureScrollability
+    ensureScrollability,
 
     ensureNotReadonly
-  }
+  };
+};
 
 module.exports = {
   create
-}
+};

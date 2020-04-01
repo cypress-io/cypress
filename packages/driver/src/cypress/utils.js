@@ -1,255 +1,299 @@
-$ = require("jquery")
-_ = require("lodash")
-methods = require("methods")
-moment = require("moment")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $ = require("jquery");
+const _ = require("lodash");
+const methods = require("methods");
+const moment = require("moment");
 
-$jquery = require("../dom/jquery")
-$Location = require("./location")
+const $jquery = require("../dom/jquery");
+const $Location = require("./location");
 
-tagOpen     = /\[([a-z\s='"-]+)\]/g
-tagClosed   = /\[\/([a-z]+)\]/g
-quotesRe    = /('|")/g
+const tagOpen     = /\[([a-z\s='"-]+)\]/g;
+const tagClosed   = /\[\/([a-z]+)\]/g;
+const quotesRe    = /('|")/g;
 
-defaultOptions = {
-  delay: 10
-  force: false
-  timeout: null
-  interval: null
-  multiple: false
-  waitForAnimations: true
+const defaultOptions = {
+  delay: 10,
+  force: false,
+  timeout: null,
+  interval: null,
+  multiple: false,
+  waitForAnimations: true,
   animationDistanceThreshold: 5
-}
+};
 
-USER_FRIENDLY_TYPE_DETECTORS = _.map([
-  [_.isUndefined, "undefined"]
-  [_.isNull, "null"]
-  [_.isBoolean, "boolean"]
-  [_.isNumber, "number"]
-  [_.isString, "string"]
-  [_.isRegExp, "regexp"]
-  [_.isSymbol, "symbol"]
-  [_.isElement, "element"]
-  [_.isError, "error"]
-  [_.isSet, "set"]
-  [_.isWeakSet, "set"]
-  [_.isMap, "map"]
-  [_.isWeakMap, "map"]
-  [_.isFunction, "function"]
-  [_.isArrayLikeObject, "array"]
-  [_.isBuffer, "buffer"]
-  [_.isDate, "date"]
-  [_.isObject, "object"]
+const USER_FRIENDLY_TYPE_DETECTORS = _.map([
+  [_.isUndefined, "undefined"],
+  [_.isNull, "null"],
+  [_.isBoolean, "boolean"],
+  [_.isNumber, "number"],
+  [_.isString, "string"],
+  [_.isRegExp, "regexp"],
+  [_.isSymbol, "symbol"],
+  [_.isElement, "element"],
+  [_.isError, "error"],
+  [_.isSet, "set"],
+  [_.isWeakSet, "set"],
+  [_.isMap, "map"],
+  [_.isWeakMap, "map"],
+  [_.isFunction, "function"],
+  [_.isArrayLikeObject, "array"],
+  [_.isBuffer, "buffer"],
+  [_.isDate, "date"],
+  [_.isObject, "object"],
   [_.stubTrue, "unknown"]
-], ([ fn, type]) ->
-  return [fn, _.constant(type)]
-)
+], ([ fn, type]) => [fn, _.constant(type)]);
 
 module.exports = {
-  warning: (msg) ->
-    console.warn("Cypress Warning: " + msg)
+  warning(msg) {
+    return console.warn("Cypress Warning: " + msg);
+  },
 
-  log: (msgs...) ->
-    console.log(msgs...)
+  log(...msgs) {
+    return console.log(...msgs);
+  },
 
-  unwrapFirst: (val) ->
-    ## this method returns the first item in an array
-    ## and if its still a jquery object, then we return
-    ## the first() jquery element
-    item = [].concat(val)[0]
+  unwrapFirst(val) {
+    //# this method returns the first item in an array
+    //# and if its still a jquery object, then we return
+    //# the first() jquery element
+    const item = [].concat(val)[0];
 
-    if $jquery.isJquery(item)
-      return item.first()
+    if ($jquery.isJquery(item)) {
+      return item.first();
+    }
 
-    return item
+    return item;
+  },
 
-  switchCase: (value, casesObj, defaultKey = "default") ->
-    if _.has(casesObj, value)
-      return _.result(casesObj, value)
+  switchCase(value, casesObj, defaultKey = "default") {
+    if (_.has(casesObj, value)) {
+      return _.result(casesObj, value);
+    }
 
-    if _.has(casesObj, defaultKey)
-      return _.result(casesObj, defaultKey)
+    if (_.has(casesObj, defaultKey)) {
+      return _.result(casesObj, defaultKey);
+    }
 
-    keys = _.keys(casesObj)
-    throw new Error("The switch/case value: '#{value}' did not match any cases: #{keys.join(', ')}.")
+    const keys = _.keys(casesObj);
+    throw new Error(`The switch/case value: '${value}' did not match any cases: ${keys.join(', ')}.`);
+  },
 
-  reduceProps: (obj, props = []) ->
-    return null if not obj
+  reduceProps(obj, props = []) {
+    if (!obj) { return null; }
 
-    _.reduce props, (memo, prop) ->
-      if _.has(obj, prop) or (obj[prop] isnt undefined)
-        memo[prop] = obj[prop]
-      memo
-    , {}
+    return _.reduce(props, function(memo, prop) {
+      if (_.has(obj, prop) || (obj[prop] !== undefined)) {
+        memo[prop] = obj[prop];
+      }
+      return memo;
+    }
+    , {});
+  },
 
-  normalizeObjWithLength: (obj) ->
-    ## lodash shits the bed if our object has a 'length'
-    ## property so we have to normalize that
-    if _.has(obj, "length")
-      obj.Length = obj.length
-      delete obj.length
+  normalizeObjWithLength(obj) {
+    //# lodash shits the bed if our object has a 'length'
+    //# property so we have to normalize that
+    if (_.has(obj, "length")) {
+      obj.Length = obj.length;
+      delete obj.length;
+    }
 
-    obj
+    return obj;
+  },
 
-  ## return a new object if the obj
-  ## contains the properties of filter
-  ## and the values are different
-  filterOutOptions: (obj, filter = {}) ->
-    _.defaults filter, defaultOptions
+  //# return a new object if the obj
+  //# contains the properties of filter
+  //# and the values are different
+  filterOutOptions(obj, filter = {}) {
+    _.defaults(filter, defaultOptions);
 
-    @normalizeObjWithLength(filter)
+    this.normalizeObjWithLength(filter);
 
-    whereFilterHasSameKeyButDifferentValue = (value, key) ->
-      upperKey = _.capitalize(key)
+    const whereFilterHasSameKeyButDifferentValue = function(value, key) {
+      const upperKey = _.capitalize(key);
 
-      (_.has(filter, key) or _.has(filter, upperKey)) and
-        filter[key] isnt value
+      return (_.has(filter, key) || _.has(filter, upperKey)) &&
+        (filter[key] !== value);
+    };
 
-    obj = _.pickBy(obj, whereFilterHasSameKeyButDifferentValue)
+    obj = _.pickBy(obj, whereFilterHasSameKeyButDifferentValue);
 
-    if _.isEmpty(obj) then undefined else obj
+    if (_.isEmpty(obj)) { return undefined; } else { return obj; }
+  },
 
-  stringifyActualObj: (obj) ->
-    obj = @normalizeObjWithLength(obj)
+  stringifyActualObj(obj) {
+    obj = this.normalizeObjWithLength(obj);
 
-    str = _.reduce obj, (memo, value, key) =>
-      memo.push "#{key}".toLowerCase() + ": " + @stringifyActual(value)
-      memo
-    , []
+    const str = _.reduce(obj, (memo, value, key) => {
+      memo.push(`${key}`.toLowerCase() + ": " + this.stringifyActual(value));
+      return memo;
+    }
+    , []);
 
-    "{" + str.join(", ") + "}"
+    return "{" + str.join(", ") + "}";
+  },
 
-  stringifyActual: (value) ->
-    $dom = require("../dom")
+  stringifyActual(value) {
+    const $dom = require("../dom");
 
-    switch
-      when $dom.isDom(value)
-        $dom.stringify(value, "short")
+    switch (false) {
+      case !$dom.isDom(value):
+        return $dom.stringify(value, "short");
 
-      when _.isFunction(value)
-        "function(){}"
+      case !_.isFunction(value):
+        return "function(){}";
 
-      when _.isArray(value)
-        len = value.length
-        if len > 3
-          "Array[#{len}]"
-        else
-          "[" + _.map(value, _.bind(@stringifyActual, @)).join(", ") + "]"
+      case !_.isArray(value):
+        var len = value.length;
+        if (len > 3) {
+          return `Array[${len}]`;
+        } else {
+          return "[" + _.map(value, _.bind(this.stringifyActual, this)).join(", ") + "]";
+        }
 
-      when _.isRegExp(value)
-        value.toString()
+      case !_.isRegExp(value):
+        return value.toString();
 
-      when _.isObject(value)
-        len = _.keys(value).length
-        if len > 2
-          "Object{#{len}}"
-        else
-          @stringifyActualObj(value)
+      case !_.isObject(value):
+        len = _.keys(value).length;
+        if (len > 2) {
+          return `Object{${len}}`;
+        } else {
+          return this.stringifyActualObj(value);
+        }
 
-      when _.isSymbol(value)
-        "Symbol"
+      case !_.isSymbol(value):
+        return "Symbol";
 
-      when _.isUndefined(value)
-        undefined
+      case !_.isUndefined(value):
+        return undefined;
 
-      else
-        "" + value
+      default:
+        return "" + value;
+    }
+  },
 
-  ## give us some user-friendly "types"
-  stringifyFriendlyTypeof: _.cond(USER_FRIENDLY_TYPE_DETECTORS)
+  //# give us some user-friendly "types"
+  stringifyFriendlyTypeof: _.cond(USER_FRIENDLY_TYPE_DETECTORS),
 
-  stringify: (values) ->
-    ## if we already have an array
-    ## then nest it again so that
-    ## its formatted properly
-    values = [].concat(values)
+  stringify(values) {
+    //# if we already have an array
+    //# then nest it again so that
+    //# its formatted properly
+    values = [].concat(values);
 
-    _
+    return _
     .chain(values)
-    .map(_.bind(@stringifyActual, @))
+    .map(_.bind(this.stringifyActual, this))
     .without(undefined)
     .join(", ")
-    .value()
+    .value();
+  },
 
-  stringifyArg: (arg) ->
-    switch
-      when _.isString(arg) or _.isNumber(arg) or _.isBoolean(arg)
-        JSON.stringify(arg)
-      when _.isNull(arg)
-        "null"
-      when _.isUndefined(arg)
-        "undefined"
-      else
-        @stringifyActual(arg)
+  stringifyArg(arg) {
+    switch (false) {
+      case !_.isString(arg) && !_.isNumber(arg) && !_.isBoolean(arg):
+        return JSON.stringify(arg);
+      case !_.isNull(arg):
+        return "null";
+      case !_.isUndefined(arg):
+        return "undefined";
+      default:
+        return this.stringifyActual(arg);
+    }
+  },
 
-  plural: (obj, plural, singular) ->
-    obj = if _.isNumber(obj) then obj else obj.length
-    if obj > 1 then plural else singular
+  plural(obj, plural, singular) {
+    obj = _.isNumber(obj) ? obj : obj.length;
+    if (obj > 1) { return plural; } else { return singular; }
+  },
 
-  convertHtmlTags: (html) ->
-    html
+  convertHtmlTags(html) {
+    return html
       .replace(tagOpen, "<$1>")
-      .replace(tagClosed, "</$1>")
+      .replace(tagClosed, "</$1>");
+  },
 
-  isInstanceOf: (instance, constructor) ->
-    try
-      instance instanceof constructor
-    catch e
-      false
+  isInstanceOf(instance, constructor) {
+    try {
+      return instance instanceof constructor;
+    } catch (e) {
+      return false;
+    }
+  },
 
-  escapeQuotes: (text) ->
-    ## convert to str and escape any single
-    ## or double quotes
-    ("" + text).replace(quotesRe, "\\$1")
+  escapeQuotes(text) {
+    //# convert to str and escape any single
+    //# or double quotes
+    return ("" + text).replace(quotesRe, "\\$1");
+  },
 
-  normalizeNumber: (num) ->
-    parsed = Number(num)
+  normalizeNumber(num) {
+    const parsed = Number(num);
 
-    ## return num if this isNaN else return parsed
-    if _.isNaN(parsed) then num else parsed
+    //# return num if this isNaN else return parsed
+    if (_.isNaN(parsed)) { return num; } else { return parsed; }
+  },
 
-  isValidHttpMethod: (str) ->
-    _.isString(str) and _.includes(methods, str.toLowerCase())
+  isValidHttpMethod(str) {
+    return _.isString(str) && _.includes(methods, str.toLowerCase());
+  },
 
-  addTwentyYears: ->
-    moment().add(20, "years").unix()
+  addTwentyYears() {
+    return moment().add(20, "years").unix();
+  },
 
-  locReload: (forceReload, win) ->
-    win.location.reload(forceReload)
+  locReload(forceReload, win) {
+    return win.location.reload(forceReload);
+  },
 
-  locHref: (url, win) ->
-    win.location.href = url
+  locHref(url, win) {
+    return win.location.href = url;
+  },
 
-  # locReplace: (win, url) ->
-  #   win.location.replace(url)
+  // locReplace: (win, url) ->
+  //   win.location.replace(url)
 
-  locToString: (win) ->
-    win.location.toString()
+  locToString(win) {
+    return win.location.toString();
+  },
 
-  locExisting: ->
-    $Location.create(window.location.href)
+  locExisting() {
+    return $Location.create(window.location.href);
+  },
 
-  iframeSrc: ($autIframe, url) ->
-    $autIframe.prop("src", url)
+  iframeSrc($autIframe, url) {
+    return $autIframe.prop("src", url);
+  },
 
-  getDistanceBetween: (point1, point2) ->
-    deltaX = point1.x - point2.x
-    deltaY = point1.y - point2.y
+  getDistanceBetween(point1, point2) {
+    const deltaX = point1.x - point2.x;
+    const deltaY = point1.y - point2.y;
 
-    Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+    return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+  },
 
-  memoize: (func, cacheInstance = new Map()) ->
-    memoized = (args...) ->
-      key = args[0]
-      cache = memoized.cache
+  memoize(func, cacheInstance = new Map()) {
+    var memoized = function(...args) {
+      const key = args[0];
+      const {
+        cache
+      } = memoized;
 
-      return cache.get(key) if cache.has(key)
+      if (cache.has(key)) { return cache.get(key); }
 
-      result = func.apply(this, args)
-      memoized.cache = cache.set(key, result) || cache
+      const result = func.apply(this, args);
+      memoized.cache = cache.set(key, result) || cache;
 
-      return result
+      return result;
+    };
 
-    memoized.cache = cacheInstance
+    memoized.cache = cacheInstance;
 
-    return memoized
-}
+    return memoized;
+  }
+};

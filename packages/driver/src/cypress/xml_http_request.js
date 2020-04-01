@@ -1,145 +1,183 @@
-$utils = require("./utils")
-$errUtils = require("./error_utils")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $utils = require("./utils");
+const $errUtils = require("./error_utils");
 
-isCypressHeaderRe = /^X-Cypress-/i
+const isCypressHeaderRe = /^X-Cypress-/i;
 
-parseJSON = (text) ->
-  try
-    JSON.parse(text)
-  catch
-    text
-
-## maybe rename this to XMLHttpRequest ?
-## so it shows up correctly as an instance in the console
-class XMLHttpRequest
-  constructor: (@xhr) ->
-    @id            = @xhr.id
-    @url           = @xhr.url
-    @method        = @xhr.method
-    @status        = null
-    @statusMessage = null
-    @request       = {}
-    @response      = null
-
-  _getXhr: ->
-    @xhr ? $errUtils.throwErrByPath("xhr.missing")
-
-  _setDuration: (timeStart) ->
-    @duration = (new Date) - timeStart
-
-  _setStatus: ->
-    @status = @xhr.status
-    @statusMessage = "#{@xhr.status} (#{@xhr.statusText})"
-
-  _setRequestBody: (requestBody = null) ->
-    @request.body = parseJSON(requestBody)
-
-  _setResponseBody: ->
-    @response ?= {}
-
-    ## if we are a responseType of arraybuffer
-    ## then touching responseText will throw and
-    ## our ArrayBuffer should just be on the response
-    ## object
-    @response.body =
-      try
-        parseJSON(@xhr.responseText)
-      catch e
-        @xhr.response
-
-  _setResponseHeaders: ->
-    ## parse response header string into object
-    ## https://gist.github.com/monsur/706839
-    headerStr = @xhr.getAllResponseHeaders()
-
-    set = (resp) =>
-      @response ?= {}
-      @response.headers = resp
-
-    headers = {}
-    if not headerStr
-      return set(headers)
-
-    headerPairs = headerStr.split('\u000d\u000a')
-    for headerPair in headerPairs
-      # Can't use split() here because it does the wrong thing
-      # if the header value has the string ": " in it.
-      index = headerPair.indexOf('\u003a\u0020')
-      if index > 0
-        key = headerPair.substring(0, index)
-        val = headerPair.substring(index + 2)
-        headers[key] = val
-
-    set(headers)
-
-  _getFixtureError: ->
-    body = @response and @response.body
-
-    if body and err = body.__error
-      return err
-
-  _setRequestHeader: (key, val) ->
-    return if isCypressHeaderRe.test(key)
-
-    @request.headers ?= {}
-
-    current = @request.headers[key]
-
-    ## if we already have a request header
-    ## then prepend val with ', '
-    if current
-      val = current + ", " + val
-
-    @request.headers[key] = val
-
-  setRequestHeader: ->
-    @xhr.setRequestHeader.apply(@xhr, arguments)
-
-  getResponseHeader: ->
-    @xhr.getResponseHeader.apply(@xhr, arguments)
-
-  getAllResponseHeaders: ->
-    @xhr.getAllResponseHeaders.apply(@xhr, arguments)
-
-  @add = (xhr) ->
-    new XMLHttpRequest(xhr)
-
-Object.defineProperties XMLHttpRequest.prototype,
-  requestHeaders: {
-    get: ->
-      @request?.headers
+const parseJSON = function(text) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return text;
   }
+};
+
+//# maybe rename this to XMLHttpRequest ?
+//# so it shows up correctly as an instance in the console
+class XMLHttpRequest {
+  constructor(xhr) {
+    this.xhr = xhr;
+    this.id            = this.xhr.id;
+    this.url           = this.xhr.url;
+    this.method        = this.xhr.method;
+    this.status        = null;
+    this.statusMessage = null;
+    this.request       = {};
+    this.response      = null;
+  }
+
+  _getXhr() {
+    return this.xhr != null ? this.xhr : $errUtils.throwErrByPath("xhr.missing");
+  }
+
+  _setDuration(timeStart) {
+    return this.duration = (new Date) - timeStart;
+  }
+
+  _setStatus() {
+    this.status = this.xhr.status;
+    return this.statusMessage = `${this.xhr.status} (${this.xhr.statusText})`;
+  }
+
+  _setRequestBody(requestBody = null) {
+    return this.request.body = parseJSON(requestBody);
+  }
+
+  _setResponseBody() {
+    if (this.response == null) { this.response = {}; }
+
+    //# if we are a responseType of arraybuffer
+    //# then touching responseText will throw and
+    //# our ArrayBuffer should just be on the response
+    //# object
+    return this.response.body =
+      (() => { try {
+        return parseJSON(this.xhr.responseText);
+      } catch (e) {
+        return this.xhr.response;
+      } })();
+  }
+
+  _setResponseHeaders() {
+    //# parse response header string into object
+    //# https://gist.github.com/monsur/706839
+    const headerStr = this.xhr.getAllResponseHeaders();
+
+    const set = resp => {
+      if (this.response == null) { this.response = {}; }
+      return this.response.headers = resp;
+    };
+
+    const headers = {};
+    if (!headerStr) {
+      return set(headers);
+    }
+
+    const headerPairs = headerStr.split('\u000d\u000a');
+    for (let headerPair of headerPairs) {
+      // Can't use split() here because it does the wrong thing
+      // if the header value has the string ": " in it.
+      const index = headerPair.indexOf('\u003a\u0020');
+      if (index > 0) {
+        const key = headerPair.substring(0, index);
+        const val = headerPair.substring(index + 2);
+        headers[key] = val;
+      }
+    }
+
+    return set(headers);
+  }
+
+  _getFixtureError() {
+    let err;
+    const body = this.response && this.response.body;
+
+    if (body && (err = body.__error)) {
+      return err;
+    }
+  }
+
+  _setRequestHeader(key, val) {
+    if (isCypressHeaderRe.test(key)) { return; }
+
+    if (this.request.headers == null) { this.request.headers = {}; }
+
+    const current = this.request.headers[key];
+
+    //# if we already have a request header
+    //# then prepend val with ', '
+    if (current) {
+      val = current + ", " + val;
+    }
+
+    return this.request.headers[key] = val;
+  }
+
+  setRequestHeader() {
+    return this.xhr.setRequestHeader.apply(this.xhr, arguments);
+  }
+
+  getResponseHeader() {
+    return this.xhr.getResponseHeader.apply(this.xhr, arguments);
+  }
+
+  getAllResponseHeaders() {
+    return this.xhr.getAllResponseHeaders.apply(this.xhr, arguments);
+  }
+
+  static add(xhr) {
+    return new XMLHttpRequest(xhr);
+  }
+}
+
+Object.defineProperties(XMLHttpRequest.prototype, {
+  requestHeaders: {
+    get() {
+      return (this.request != null ? this.request.headers : undefined);
+    }
+  },
 
   requestBody: {
-    get: ->
-      @request?.body
-  }
+    get() {
+      return (this.request != null ? this.request.body : undefined);
+    }
+  },
 
   responseHeaders: {
-    get: ->
-      @response?.headers
-  }
+    get() {
+      return (this.response != null ? this.response.headers : undefined);
+    }
+  },
 
   responseBody: {
-    get: ->
-      @response?.body
-  }
+    get() {
+      return (this.response != null ? this.response.body : undefined);
+    }
+  },
 
   requestJSON: {
-    get: ->
-      $errUtils.warnByPath("xhr.requestjson_deprecated")
-      @requestBody
-  }
+    get() {
+      $errUtils.warnByPath("xhr.requestjson_deprecated");
+      return this.requestBody;
+    }
+  },
 
   responseJSON: {
-    get: ->
-      $errUtils.warnByPath("xhr.responsejson_deprecated")
-      @responseBody
+    get() {
+      $errUtils.warnByPath("xhr.responsejson_deprecated");
+      return this.responseBody;
+    }
   }
+});
 
-create = (xhr) ->
-  new XMLHttpRequest(xhr)
+const create = xhr => new XMLHttpRequest(xhr);
 
 module.exports = {
   create
-}
+};

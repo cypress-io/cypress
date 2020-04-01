@@ -1,71 +1,95 @@
-_ = require("lodash")
-Promise = require("bluebird")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const Promise = require("bluebird");
 
-$errUtils = require("../../cypress/error_utils")
-$Location = require("../../cypress/location")
+const $errUtils = require("../../cypress/error_utils");
+const $Location = require("../../cypress/location");
 
-module.exports = (Commands, Cypress, cy, state, config) ->
-  Commands.addAll({
-    url: (options = {}) ->
-      _.defaults options, {log: true}
+module.exports = (Commands, Cypress, cy, state, config) => Commands.addAll({
+  url(options = {}) {
+    let resolveHref;
+    _.defaults(options, {log: true});
 
-      if options.log isnt false
-        options._log = Cypress.log
-          message: ""
+    if (options.log !== false) {
+      options._log = Cypress.log({
+        message: ""});
+    }
 
-      getHref = =>
-        cy.getRemoteLocation("href")
+    const getHref = () => {
+      return cy.getRemoteLocation("href");
+    };
 
-      do resolveHref = =>
-        Promise.try(getHref).then (href) =>
-          cy.verifyUpcomingAssertions(href, options, {
-            onRetry: resolveHref
-          })
+    return (resolveHref = () => {
+      return Promise.try(getHref).then(href => {
+        return cy.verifyUpcomingAssertions(href, options, {
+          onRetry: resolveHref
+        });
+      });
+    })();
+  },
 
-    hash: (options = {}) ->
-      _.defaults options, {log: true}
+  hash(options = {}) {
+    let resolveHash;
+    _.defaults(options, {log: true});
 
-      if options.log isnt false
-        options._log = Cypress.log
-          message: ""
+    if (options.log !== false) {
+      options._log = Cypress.log({
+        message: ""});
+    }
 
-      getHash = =>
-        cy.getRemoteLocation("hash")
+    const getHash = () => {
+      return cy.getRemoteLocation("hash");
+    };
 
-      do resolveHash = =>
-        Promise.try(getHash).then (hash) =>
-          cy.verifyUpcomingAssertions(hash, options, {
-            onRetry: resolveHash
-          })
+    return (resolveHash = () => {
+      return Promise.try(getHash).then(hash => {
+        return cy.verifyUpcomingAssertions(hash, options, {
+          onRetry: resolveHash
+        });
+      });
+    })();
+  },
 
-    location: (key, options) ->
-      ## normalize arguments allowing key + options to be undefined
-      ## key can represent the options
-      if _.isObject(key) and _.isUndefined(options)
-        options = key
+  location(key, options) {
+    //# normalize arguments allowing key + options to be undefined
+    //# key can represent the options
+    let resolveLocation;
+    if (_.isObject(key) && _.isUndefined(options)) {
+      options = key;
+    }
 
-      options ?= {}
+    if (options == null) { options = {}; }
 
-      _.defaults options, {log: true}
+    _.defaults(options, {log: true});
 
-      getLocation = =>
-        location = cy.getRemoteLocation()
+    const getLocation = () => {
+      let ret;
+      const location = cy.getRemoteLocation();
 
-        ret = if _.isString(key)
-          ## use existential here because we only want to throw
-          ## on null or undefined values (and not empty strings)
-          location[key] ?
-            $errUtils.throwErrByPath("location.invalid_key", { args: { key } })
-        else
-          location
+      return ret = _.isString(key) ?
+        //# use existential here because we only want to throw
+        //# on null or undefined values (and not empty strings)
+        location[key] != null ? location[key] : $errUtils.throwErrByPath("location.invalid_key", { args: { key } })
+      :
+        location;
+    };
 
-      if options.log isnt false
-        options._log = Cypress.log
-          message: key ? ""
+    if (options.log !== false) {
+      options._log = Cypress.log({
+        message: key != null ? key : ""});
+    }
 
-      do resolveLocation = =>
-        Promise.try(getLocation).then (ret) =>
-          cy.verifyUpcomingAssertions(ret, options, {
-            onRetry: resolveLocation
-          })
-  })
+    return (resolveLocation = () => {
+      return Promise.try(getLocation).then(ret => {
+        return cy.verifyUpcomingAssertions(ret, options, {
+          onRetry: resolveLocation
+        });
+      });
+    })();
+  }
+});

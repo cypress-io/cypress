@@ -1,42 +1,54 @@
-_ = require("lodash")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
 
-$dom = require("../../dom")
+const $dom = require("../../dom");
 
-module.exports = (Commands, Cypress, cy, state, config) ->
+module.exports = function(Commands, Cypress, cy, state, config) {
   Commands.addAll({ prevSubject: "optional" }, {
-    end: ->
-      null
-  })
+    end() {
+      return null;
+    }
+  });
 
-  Commands.addAll({
-    noop: (arg) -> arg
+  return Commands.addAll({
+    noop(arg) { return arg; },
 
-    log: (msg, args) ->
+    log(msg, args) {
       Cypress.log({
-        end: true
-        snapshot: true
-        message: [msg, args]
-        consoleProps: ->
-          {
-            message: msg
-            args:    args
-          }
+        end: true,
+        snapshot: true,
+        message: [msg, args],
+        consoleProps() {
+          return {
+            message: msg,
+            args
+          };
+        }
+      });
+
+      return null;
+    },
+
+    wrap(arg, options = {}) {
+      let resolveWrap;
+      _.defaults(options, { log: true });
+
+      if (options.log !== false) {
+        options._log = Cypress.log();
+
+        if ($dom.isElement(arg)) {
+          options._log.set({$el: arg});
+        }
+      }
+
+      return (resolveWrap = () => cy.verifyUpcomingAssertions(arg, options, {
+        onRetry: resolveWrap
       })
-
-      return null
-
-    wrap: (arg, options = {}) ->
-      _.defaults(options, { log: true })
-
-      if options.log isnt false
-        options._log = Cypress.log()
-
-        if $dom.isElement(arg)
-          options._log.set({$el: arg})
-
-      do resolveWrap = ->
-        cy.verifyUpcomingAssertions(arg, options, {
-          onRetry: resolveWrap
-        })
-        .return(arg)
-  })
+      .return(arg))();
+    }
+  });
+};

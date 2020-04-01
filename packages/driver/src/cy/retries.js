@@ -1,118 +1,128 @@
-_ = require("lodash")
-Promise = require("bluebird")
-debug = require('debug')('cypress:driver:retries')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const Promise = require("bluebird");
+const debug = require('debug')('cypress:driver:retries');
 
-$utils = require("../cypress/utils")
-$errUtils = require("../cypress/error_utils")
+const $utils = require("../cypress/utils");
+const $errUtils = require("../cypress/error_utils");
 
-create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) ->
-  return {
-    retry: (fn, options, log) ->
-      ## remove the runnables timeout because we are now in retry
-      ## mode and should be handling timing out ourselves and dont
-      ## want to accidentally time out via mocha
-      if not options._runnableTimeout
-        runnableTimeout = options.timeout ? timeout()
-        clearTimeout()
+const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) => ({
+  retry(fn, options, log) {
+    //# remove the runnables timeout because we are now in retry
+    //# mode and should be handling timing out ourselves and dont
+    //# want to accidentally time out via mocha
+    let runnableTimeout, total;
+    if (!options._runnableTimeout) {
+      runnableTimeout = options.timeout != null ? options.timeout : timeout();
+      clearTimeout();
+    }
 
-      current = state("current")
+    const current = state("current");
 
-      ## use the log if passed in, else fallback to options._log
-      ## else fall back to just grabbing the last log per our current command
-      log ?= options._log ? current?.getLastLog()
+    //# use the log if passed in, else fallback to options._log
+    //# else fall back to just grabbing the last log per our current command
+    if (log == null) { log = options._log != null ? options._log : (current != null ? current.getLastLog() : undefined); }
 
-      _.defaults(options, {
-        _runnable: state("runnable")
-        _runnableTimeout: runnableTimeout
-        _interval: 16
-        _retries: 0
-        _start: new Date
-        _name: current?.get("name")
-      })
+    _.defaults(options, {
+      _runnable: state("runnable"),
+      _runnableTimeout: runnableTimeout,
+      _interval: 16,
+      _retries: 0,
+      _start: new Date,
+      _name: (current != null ? current.get("name") : undefined)
+    });
 
-      { error } = options
+    let { error } = options;
 
-      ## TODO: remove this once the codeframe PR is in since that
-      ## correctly handles not rewrapping errors so that stack
-      ## traces are correctly displayed
-      if debug.enabled and error and not $errUtils.CypressErrorRe.test(error.name)
-        debug('retrying due to caught error...')
-        console.error(error)
+    //# TODO: remove this once the codeframe PR is in since that
+    //# correctly handles not rewrapping errors so that stack
+    //# traces are correctly displayed
+    if (debug.enabled && error && !$errUtils.CypressErrorRe.test(error.name)) {
+      debug('retrying due to caught error...');
+      console.error(error);
+    }
 
-      interval = options.interval ? options._interval
+    const interval = options.interval != null ? options.interval : options._interval;
 
-      ## we calculate the total time we've been retrying
-      ## so we dont exceed the runnables timeout
-      options.total = total = (new Date - options._start)
+    //# we calculate the total time we've been retrying
+    //# so we dont exceed the runnables timeout
+    options.total = (total = (new Date - options._start));
 
-      ## increment retries
-      options._retries += 1
+    //# increment retries
+    options._retries += 1;
 
-      ## if our total exceeds the timeout OR the total + the interval
-      ## exceed the runnables timeout, then bail
-      if total + interval >= options._runnableTimeout
-        ## snapshot the DOM since we are bailing
-        ## so the user can see the state we're in
-        ## when we fail
-        log.snapshot() if log
+    //# if our total exceeds the timeout OR the total + the interval
+    //# exceed the runnables timeout, then bail
+    if ((total + interval) >= options._runnableTimeout) {
+      //# snapshot the DOM since we are bailing
+      //# so the user can see the state we're in
+      //# when we fail
+      let assertions, onFail;
+      if (log) { log.snapshot(); }
 
-        if assertions = options.assertions
-          finishAssertions(assertions)
+      if (assertions = options.assertions) {
+        finishAssertions(assertions);
+      }
 
-        { error, onFail } = options
+      ({ error, onFail } = options);
 
-        prependMsg = $errUtils.errMsgByPath("miscellaneous.retry_timed_out")
+      const prependMsg = $errUtils.errMsgByPath("miscellaneous.retry_timed_out");
 
-        retryErrProps = $errUtils.modifyErrMsg(error, prependMsg, (msg1, msg2) ->
-          return "#{msg2}#{msg1}"
-        )
+      const retryErrProps = $errUtils.modifyErrMsg(error, prependMsg, (msg1, msg2) => `${msg2}${msg1}`);
 
-        retryErr = $errUtils.mergeErrProps(error, retryErrProps)
+      const retryErr = $errUtils.mergeErrProps(error, retryErrProps);
 
-        $errUtils.throwErr(retryErr, {
-          onFail: onFail or log
-        })
+      $errUtils.throwErr(retryErr, {
+        onFail: onFail || log
+      });
+    }
 
-      runnableHasChanged = ->
-        ## if we've changed runnables don't retry!
-        options._runnable isnt state("runnable")
+    const runnableHasChanged = () => //# if we've changed runnables don't retry!
+    options._runnable !== state("runnable");
 
-      ended = ->
-        ## we should NOT retry if
-        ## 1. our promise has been canceled
-        ## 2. or we have an error
-        ## 3. or if the runnables has changed
+    const ended = () => //# we should NOT retry if
+    //# 1. our promise has been canceled
+    //# 2. or we have an error
+    //# 3. or if the runnables has changed
 
-        ## although bluebird SHOULD cancel these retries
-        ## since they're all connected - apparently they
-        ## are not and the retry code is happening between
-        ## runnables which is bad likely due to the issue below
-        ##
-        ## bug in bluebird with not propagating cancelations
-        ## fast enough in a series of promises
-        ## https://github.com/petkaantonov/bluebird/issues/1424
-        state("canceled") or state("error") or runnableHasChanged()
+    //# although bluebird SHOULD cancel these retries
+    //# since they're all connected - apparently they
+    //# are not and the retry code is happening between
+    //# runnables which is bad likely due to the issue below
+    //#
+    //# bug in bluebird with not propagating cancelations
+    //# fast enough in a series of promises
+    //# https://github.com/petkaantonov/bluebird/issues/1424
+    state("canceled") || state("error") || runnableHasChanged();
 
-      Promise
-      .delay(interval)
-      .then ->
-        return if ended()
+    return Promise
+    .delay(interval)
+    .then(function() {
+      if (ended()) { return; }
 
-        Cypress.action("cy:command:retry", options)
+      Cypress.action("cy:command:retry", options);
 
-        return if ended()
+      if (ended()) { return; }
 
-        ## if we are unstable then remove
-        ## the start since we need to retry
-        ## fresh once we become stable again!
-        if state("isStable") is false
-          options._start = undefined
+      //# if we are unstable then remove
+      //# the start since we need to retry
+      //# fresh once we become stable again!
+      if (state("isStable") === false) {
+        options._start = undefined;
+      }
 
-        ## invoke the passed in retry fn
-        ## once we reach stability
-        whenStable(fn)
+      //# invoke the passed in retry fn
+      //# once we reach stability
+      return whenStable(fn);
+    });
   }
+});
 
 module.exports = {
   create
-}
+};

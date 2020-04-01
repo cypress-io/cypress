@@ -1,4 +1,4 @@
-moment = require("moment")
+const moment = require("moment");
 
 moment.updateLocale("en", {
   relativeTime: {
@@ -16,4 +16,4 @@ moment.updateLocale("en", {
       y:  "1y",
       yy: "%dy"
   }
-})
+});
