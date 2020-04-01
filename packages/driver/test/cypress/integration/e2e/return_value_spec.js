@@ -1,120 +1,144 @@
-describe "return values", ->
-  beforeEach ->
-    @logs = []
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("return values", function() {
+  beforeEach(function() {
+    this.logs = [];
 
-    cy.on "log:added", (attrs, log) =>
-      @lastLog = log
+    cy.on("log:added", (attrs, log) => {
+      this.lastLog = log;
 
-      @logs.push(log)
+      return this.logs.push(log);
+    });
 
-    return null
+    return null;
+  });
 
-  it "can return undefined and invoke cy commands", (done) ->
-    cy.wrap(null).then ->
-      expect(@logs.length).to.eq(1)
-      done()
+  it("can return undefined and invoke cy commands", function(done) {
+    cy.wrap(null).then(function() {
+      expect(this.logs.length).to.eq(1);
+      return done();
+    });
 
-    return undefined
+    return undefined;
+  });
 
-  it "can return cy and have done callback", (done) ->
-    cy.wrap({}).then ->
-      done()
+  it("can return cy and have done callback", done => cy.wrap({}).then(() => done()));
 
-  it "throws when returning a non promise and invoking cy commands", (done) ->
-    cy.on "fail", (err) ->
-      expect(err.message).to.include("> foo")
-      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
-      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-test")
+  it("throws when returning a non promise and invoking cy commands", function(done) {
+    cy.on("fail", function(err) {
+      expect(err.message).to.include("> foo");
+      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.");
+      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-test");
 
-      done()
+      return done();
+    });
 
-    cy.wrap(null)
+    cy.wrap(null);
 
-    return "foo"
+    return "foo";
+  });
 
-  it "stringifies function bodies", (done) ->
-    cy.on "fail", (err) ->
-      expect(err.message).to.include("> function")
-      expect(err.message).to.include("return \"foo\";")
-      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.")
-      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-test")
+  it("stringifies function bodies", function(done) {
+    cy.on("fail", function(err) {
+      expect(err.message).to.include("> function");
+      expect(err.message).to.include("return \"foo\";");
+      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands but returned a different value.");
+      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-test");
 
-      done()
+      return done();
+    });
 
-    cy.wrap(null)
+    cy.wrap(null);
 
-    return ->
-      return "foo"
+    return () => "foo";
+  });
 
-  it "can return undefined when invoking cy commands in custom command", (done) ->
-    Cypress.Commands.add "foo", ->
-      cy.wrap(null).then ->
-        expect(@logs.length).to.eq(1)
-        done()
+  it("can return undefined when invoking cy commands in custom command", function(done) {
+    Cypress.Commands.add("foo", function() {
+      cy.wrap(null).then(function() {
+        expect(this.logs.length).to.eq(1);
+        return done();
+      });
 
-      return undefined
+      return undefined;
+    });
 
-    cy.foo()
+    return cy.foo();
+  });
 
-  it "throws when returning a non promise and invoking cy commands from a custom command", (done) ->
-    cy.on "fail", (err) =>
-      lastLog = @lastLog
+  it("throws when returning a non promise and invoking cy commands from a custom command", function(done) {
+    cy.on("fail", err => {
+      const {
+        lastLog
+      } = this;
 
-      expect(@logs.length).to.eq(1)
-      expect(lastLog.get("name")).to.eq("foo")
-      expect(lastLog.get("error")).to.eq(err)
-      expect(err.message).to.include("> `cy.foo()`")
-      expect(err.message).to.include("> bar")
-      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.")
-      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-custom-command")
+      expect(this.logs.length).to.eq(1);
+      expect(lastLog.get("name")).to.eq("foo");
+      expect(lastLog.get("error")).to.eq(err);
+      expect(err.message).to.include("> `cy.foo()`");
+      expect(err.message).to.include("> bar");
+      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.");
+      expect(err.docsUrl).to.eq("https://on.cypress.io/returning-value-and-commands-in-custom-command");
 
-      done()
+      return done();
+    });
 
-    Cypress.Commands.add "foo", ->
-      cy.wrap(null)
+    Cypress.Commands.add("foo", function() {
+      cy.wrap(null);
 
-      return "bar"
+      return "bar";
+    });
 
-    cy.foo()
+    return cy.foo();
+  });
 
-  it "stringifies function return values", (done) ->
-    cy.on "fail", (err) =>
-      lastLog = @lastLog
+  it("stringifies function return values", function(done) {
+    cy.on("fail", err => {
+      const {
+        lastLog
+      } = this;
 
-      expect(@logs.length).to.eq(1)
-      expect(lastLog.get("name")).to.eq("foo")
-      expect(lastLog.get("error")).to.eq(err)
-      expect(err.message).to.include("> `cy.foo()`")
-      expect(err.message).to.include("> function() {")
-      expect(err.message).to.include("return \"bar\";")
-      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.")
+      expect(this.logs.length).to.eq(1);
+      expect(lastLog.get("name")).to.eq("foo");
+      expect(lastLog.get("error")).to.eq(err);
+      expect(err.message).to.include("> `cy.foo()`");
+      expect(err.message).to.include("> function() {");
+      expect(err.message).to.include("return \"bar\";");
+      expect(err.message).to.include("Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.");
 
-      done()
+      return done();
+    });
 
-    Cypress.Commands.add "foo", ->
-      cy.wrap(null)
+    Cypress.Commands.add("foo", function() {
+      cy.wrap(null);
 
-      return ->
-        return "bar"
+      return () => "bar";
+    });
 
-    cy.foo()
+    return cy.foo();
+  });
 
-  describe "without invoking cy", ->
-    it "handles returning undefined", ->
-      return undefined
+  return describe("without invoking cy", function() {
+    it("handles returning undefined", () => undefined);
 
-    it "handles synchronously invoking and returning done callback", (done) ->
-      return done()
+    it("handles synchronously invoking and returning done callback", done => done());
 
-    it "handles synchronously invoking done callback and returning undefined", (done) ->
-      done()
-      return undefined
+    it("handles synchronously invoking done callback and returning undefined", function(done) {
+      done();
+      return undefined;
+    });
 
-    it "handles synchronously invoking done callback and returning a value", (done) ->
-      done()
-      return "foo"
+    it("handles synchronously invoking done callback and returning a value", function(done) {
+      done();
+      return "foo";
+    });
 
-    it "handles asynchronously invoking done callback", (done) ->
-      setTimeout ->
-        done()
-      return "foo"
+    return it("handles asynchronously invoking done callback", function(done) {
+      setTimeout(() => done());
+      return "foo";
+    });
+  });
+});

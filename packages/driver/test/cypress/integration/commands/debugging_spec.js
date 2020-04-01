@@ -1,78 +1,100 @@
-Promise = Cypress.Promise
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {
+  Promise
+} = Cypress;
 
-describe "src/cy/commands/debugging", ->
-  context "#debug", ->
-    beforeEach ->
-      @utilsLog = cy.stub(Cypress.utils, "log")
+describe("src/cy/commands/debugging", function() {
+  context("#debug", function() {
+    beforeEach(function() {
+      return this.utilsLog = cy.stub(Cypress.utils, "log");
+    });
 
-    it "does not change the subject", ->
-      cy.wrap({}).debug().then (subject) ->
-        expect(subject).to.deep.eq({})
+    it("does not change the subject", () => cy.wrap({}).debug().then(subject => expect(subject).to.deep.eq({})));
 
-    it "logs current subject", ->
-      obj = {foo: "bar"}
+    it("logs current subject", function() {
+      const obj = {foo: "bar"};
 
-      cy.wrap(obj).its("foo").debug().then ->
-        expect(@utilsLog).to.be.calledWithMatch("Current Subject: ", "bar")
+      return cy.wrap(obj).its("foo").debug().then(function() {
+        return expect(this.utilsLog).to.be.calledWithMatch("Current Subject: ", "bar");
+      });
+    });
 
-    it "logs previous command", ->
-      cy.wrap({}).debug().then ->
-        expect(@utilsLog).to.be.calledWithMatch("Command Name: ", "wrap")
-        expect(@utilsLog).to.be.calledWithMatch("Command Args: ", [{}])
-        expect(@utilsLog).to.be.calledWithMatch("Current Subject: ", {})
+    it("logs previous command", () => cy.wrap({}).debug().then(function() {
+      expect(this.utilsLog).to.be.calledWithMatch("Command Name: ", "wrap");
+      expect(this.utilsLog).to.be.calledWithMatch("Command Args: ", [{}]);
+      return expect(this.utilsLog).to.be.calledWithMatch("Current Subject: ", {});
+    }));
 
-    it "logs undefined on being parent", ->
-      cy.debug().then ->
-        expect(@utilsLog).to.be.calledWithMatch("Current Subject: ", undefined)
-        expect(@utilsLog).to.be.calledWithMatch("Command Name: ", undefined)
+    it("logs undefined on being parent", () => cy.debug().then(function() {
+      expect(this.utilsLog).to.be.calledWithMatch("Current Subject: ", undefined);
+      return expect(this.utilsLog).to.be.calledWithMatch("Command Name: ", undefined);
+    }));
 
-    describe ".log", ->
-      beforeEach ->
-        cy.on "log:added", (attrs, log) =>
-          if attrs.name is "debug"
-            @lastLog = log
+    return describe(".log", function() {
+      beforeEach(function() {
+        cy.on("log:added", (attrs, log) => {
+          if (attrs.name === "debug") {
+            return this.lastLog = log;
+          }
+        });
 
-        return null
+        return null;
+      });
 
-      it "can turn off logging", ->
-        cy
-          .wrap([], {log: false})
-          .debug({log: false}).then ->
-            expect(@lastLog).to.be.undefined
+      return it("can turn off logging", () => cy
+        .wrap([], {log: false})
+        .debug({log: false}).then(function() {
+          return expect(this.lastLog).to.be.undefined;
+      }));
+    });
+  });
 
-  context "#pause", ->
-    beforeEach ->
-      cy.on "log:added", (attrs, log) =>
-        if attrs.name is "pause"
-          @lastLog = log
+  return context("#pause", function() {
+    beforeEach(function() {
+      cy.on("log:added", (attrs, log) => {
+        if (attrs.name === "pause") {
+          return this.lastLog = log;
+        }
+      });
 
-      return null
+      return null;
+    });
 
-    it "can pause between each command and skips assertions", ->
-      expected = false
+    return it("can pause between each command and skips assertions", function() {
+      let expected = false;
 
-      cy.once "paused", (name) =>
-        ## should be pending
-        expect(@lastLog.get("state")).to.eq("pending")
+      cy.once("paused", name => {
+        //# should be pending
+        expect(this.lastLog.get("state")).to.eq("pending");
 
-        expect(name).to.eq("wrap")
+        expect(name).to.eq("wrap");
 
-        cy.once "paused", (name) ->
-          expected = true
+        cy.once("paused", function(name) {
+          expected = true;
 
-          expect(name).to.eq("then")
+          expect(name).to.eq("then");
 
-          ## resume the rest of the commands so this
-          ## test ends
-          Cypress.emit("resume:all")
+          //# resume the rest of the commands so this
+          //# test ends
+          return Cypress.emit("resume:all");
+        });
 
-        Cypress.emit("resume:next")
+        return Cypress.emit("resume:next");
+      });
 
-      cy.pause().wrap({}).should("deep.eq", {}).then ->
-        expect(expected).to.be.true
+      return cy.pause().wrap({}).should("deep.eq", {}).then(function() {
+        expect(expected).to.be.true;
 
-        ## should be pending
-        expect(@lastLog.get("state")).to.eq("passed")
+        //# should be pending
+        expect(this.lastLog.get("state")).to.eq("passed");
 
-        ## should no longer have onPaused
-        expect(cy.state("onPaused")).to.be.null
+        //# should no longer have onPaused
+        return expect(cy.state("onPaused")).to.be.null;
+      });
+    });
+  });
+});

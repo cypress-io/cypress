@@ -1,208 +1,242 @@
-_ = Cypress._
-Promise = Cypress.Promise
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {
+  _
+} = Cypress;
+const {
+  Promise
+} = Cypress;
 
-describe "src/cy/commands/fixtures", ->
-  beforeEach ->
-    Cypress.emit("clear:fixtures:cache")
+describe("src/cy/commands/fixtures", function() {
+  beforeEach(() => Cypress.emit("clear:fixtures:cache"));
 
-  ## call all of the fixture triggers async to simulate
-  ## the real browser environment
-  context "#fixture", ->
-    beforeEach ->
-      ## call through normally on everything
-      cy.stub(Cypress, "backend").callThrough()
+  //# call all of the fixture triggers async to simulate
+  //# the real browser environment
+  return context("#fixture", function() {
+    beforeEach(() => //# call through normally on everything
+    cy.stub(Cypress, "backend").callThrough());
 
-    it "triggers 'fixture' on Cypress", ->
-      Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"})
+    it("triggers 'fixture' on Cypress", function() {
+      Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"});
 
-      cy.fixture("foo").as("f").then (obj) ->
-        expect(obj).to.deep.eq {foo: "bar"}
+      return cy.fixture("foo").as("f").then(function(obj) {
+        expect(obj).to.deep.eq({foo: "bar"});
 
-        expect(Cypress.backend).to.be.calledWith("get:fixture", "foo", {})
+        return expect(Cypress.backend).to.be.calledWith("get:fixture", "foo", {});
+      });
+    });
 
-    it "can support an array of fixtures"
+    it("can support an array of fixtures");
 
-    it "can have encoding as second argument", ->
-      Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"})
+    it("can have encoding as second argument", function() {
+      Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"});
 
-      cy.fixture("foo", "ascii").then (obj) ->
-        expect(obj).to.deep.eq {foo: "bar"}
+      return cy.fixture("foo", "ascii").then(function(obj) {
+        expect(obj).to.deep.eq({foo: "bar"});
 
-        expect(Cypress.backend).to.be.calledWith("get:fixture", "foo", {
+        return expect(Cypress.backend).to.be.calledWith("get:fixture", "foo", {
           encoding: "ascii"
-        })
+        });
+      });
+    });
 
-    it "can have encoding as second argument and options as third argument", ->
-      Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"})
+    it("can have encoding as second argument and options as third argument", function() {
+      Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"});
 
-      cy.fixture("foo", "ascii", {timeout: 1000}).then (obj) ->
-        expect(obj).to.deep.eq {foo: "bar"}
+      return cy.fixture("foo", "ascii", {timeout: 1000}).then(function(obj) {
+        expect(obj).to.deep.eq({foo: "bar"});
 
-        expect(Cypress.backend).to.be.calledWith("get:fixture", "foo", {
+        return expect(Cypress.backend).to.be.calledWith("get:fixture", "foo", {
           encoding: "ascii"
-        })
+        });
+      });
+    });
 
-    it "really works", ->
-      cy.fixture("example").should("deep.eq", { example: true })
+    it("really works", () => cy.fixture("example").should("deep.eq", { example: true }));
 
-    it "can read a fixture without extension with multiple dots in the name", ->
-      cy.fixture("foo.bar.baz").should("deep.eq", { quux: "quuz" })
+    it("can read a fixture without extension with multiple dots in the name", () => cy.fixture("foo.bar.baz").should("deep.eq", { quux: "quuz" }));
 
-    it "looks for csv without extension", ->
-      cy.fixture("comma-separated").should "equal", """
-        One,Two,Three
-        1,2,3
+    it("looks for csv without extension", () => cy.fixture("comma-separated").should("equal", `\
+One,Two,Three
+1,2,3
+\
+`
+    ));
 
-      """
+    it("handles files with unknown extensions, reading them as utf-8", () => cy.fixture("yaml.yaml").should("equal", `\
+- foo
+- bar
+- 
+\
+`
+    ));
 
-    it "handles files with unknown extensions, reading them as utf-8", ->
-      cy.fixture("yaml.yaml").should "equal", """
-        - foo
-        - bar
-        - 
+    describe("errors", function() {
+      beforeEach(function() {
+        Cypress.config("defaultCommandTimeout", 50);
 
-      """
+        this.logs = [];
 
-    describe "errors", ->
-      beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
+        cy.on("log:added", (attrs, log) => {
+          if (attrs.name === "fixture") {
+            this.lastLog = log;
+            return this.logs.push(log);
+          }
+        });
 
-        @logs = []
+        return null;
+      });
 
-        cy.on "log:added", (attrs, log) =>
-          if attrs.name is "fixture"
-            @lastLog = log
-            @logs.push(log)
+      it("throws if fixturesFolder is set to false", function(done) {
+        Cypress.config("fixturesFolder", false);
 
-        return null
+        cy.on("fail", () => {
+          const {
+            lastLog
+          } = this;
 
-      it "throws if fixturesFolder is set to false", (done) ->
-        Cypress.config("fixturesFolder", false)
+          expect(this.logs.length).to.eq(1);
+          expect(lastLog.get("error").message).to.eq("`cy.fixture()` is not valid because you have configured `fixturesFolder` to `false`.");
+          expect(lastLog.get("error").docsUrl).to.eq("https://on.cypress.io/fixture");
+          expect(lastLog.get("state")).to.eq("failed");
+          expect(lastLog.get("name")).to.eq("fixture");
+          return done();
+        });
 
-        cy.on "fail", =>
-          lastLog = @lastLog
+        return cy.fixture("foo");
+      });
 
-          expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error").message).to.eq("`cy.fixture()` is not valid because you have configured `fixturesFolder` to `false`.")
-          expect(lastLog.get("error").docsUrl).to.eq("https://on.cypress.io/fixture")
-          expect(lastLog.get("state")).to.eq("failed")
-          expect(lastLog.get("name")).to.eq "fixture"
-          done()
+      it("throws when fixture cannot be found without extension", function(done) {
+        cy.on("fail", err => {
+          const {
+            lastLog
+          } = this;
 
-        cy.fixture("foo")
+          expect(this.logs.length).to.eq(1);
+          expect(lastLog.get("error")).to.eq(err);
+          expect(lastLog.get("state")).to.eq("failed");
+          expect(lastLog.get("name")).to.eq("fixture");
+          expect(lastLog.get("message")).to.eq("err");
 
-      it "throws when fixture cannot be found without extension", (done) ->
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+          expect(err.message).to.include("A fixture file could not be found");
+          expect(err.message).to.include("cypress/fixtures/err");
+          return done();
+        });
 
-          expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.eq(err)
-          expect(lastLog.get("state")).to.eq("failed")
-          expect(lastLog.get("name")).to.eq "fixture"
-          expect(lastLog.get("message")).to.eq "err"
+        return cy.fixture("err");
+      });
 
-          expect(err.message).to.include "A fixture file could not be found"
-          expect(err.message).to.include "cypress/fixtures/err"
-          done()
+      it("throws when fixture cannot be found with extension", function(done) {
+        cy.on("fail", err => {
+          const {
+            lastLog
+          } = this;
 
-        cy.fixture("err")
+          expect(this.logs.length).to.eq(1);
+          expect(lastLog.get("error")).to.eq(err);
+          expect(lastLog.get("state")).to.eq("failed");
+          expect(lastLog.get("name")).to.eq("fixture");
+          expect(lastLog.get("message")).to.eq("err.txt");
 
-      it "throws when fixture cannot be found with extension", (done) ->
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+          expect(err.message).to.include("A fixture file could not be found");
+          expect(err.message).to.include("cypress/fixtures/err.txt");
+          return done();
+        });
 
-          expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.eq(err)
-          expect(lastLog.get("state")).to.eq("failed")
-          expect(lastLog.get("name")).to.eq "fixture"
-          expect(lastLog.get("message")).to.eq "err.txt"
+        return cy.fixture("err.txt");
+      });
 
-          expect(err.message).to.include "A fixture file could not be found"
-          expect(err.message).to.include "cypress/fixtures/err.txt"
-          done()
+      return it("throws after timing out", function(done) {
+        Cypress.backend.withArgs("get:fixture").resolves(Promise.delay(1000));
 
-        cy.fixture("err.txt")
+        cy.on("fail", err => {
+          const {
+            lastLog
+          } = this;
 
-      it "throws after timing out", (done) ->
-        Cypress.backend.withArgs("get:fixture").resolves(Promise.delay(1000))
+          expect(this.logs.length).to.eq(1);
+          expect(lastLog.get("error")).to.eq(err);
+          expect(lastLog.get("state")).to.eq("failed");
+          expect(lastLog.get("name")).to.eq("fixture");
+          expect(lastLog.get("message")).to.eq("foo, {timeout: 50}");
+          expect(err.message).to.eq("`cy.fixture()` timed out waiting `50ms` to receive a fixture. No fixture was ever sent by the server.");
+          expect(err.docsUrl).to.eq("https://on.cypress.io/fixture");
+          return done();
+        });
 
-        cy.on "fail", (err) =>
-          lastLog = @lastLog
+        return cy.fixture("foo", {timeout: 50});
+      });
+    });
 
-          expect(@logs.length).to.eq(1)
-          expect(lastLog.get("error")).to.eq(err)
-          expect(lastLog.get("state")).to.eq("failed")
-          expect(lastLog.get("name")).to.eq "fixture"
-          expect(lastLog.get("message")).to.eq "foo, {timeout: 50}"
-          expect(err.message).to.eq("`cy.fixture()` timed out waiting `50ms` to receive a fixture. No fixture was ever sent by the server.")
-          expect(err.docsUrl).to.eq("https://on.cypress.io/fixture")
-          done()
+    describe("timeout", function() {
+      it("sets timeout to Cypress.config(responseTimeout)", function() {
+        Cypress.config("responseTimeout", 2500);
 
-        cy.fixture("foo", {timeout: 50})
+        Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"});
 
-    describe "timeout", ->
-      it "sets timeout to Cypress.config(responseTimeout)", ->
-        Cypress.config("responseTimeout", 2500)
+        const timeout = cy.spy(Promise.prototype, "timeout");
 
-        Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"})
+        return cy.fixture("foo").then(() => expect(timeout).to.be.calledWith(2500));
+      });
 
-        timeout = cy.spy(Promise.prototype, "timeout")
+      it("can override timeout", function() {
+        Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"});
 
-        cy.fixture("foo").then ->
-          expect(timeout).to.be.calledWith(2500)
+        const timeout = cy.spy(Promise.prototype, "timeout");
 
-      it "can override timeout", ->
-        Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"})
+        return cy.fixture("foobar", {timeout: 1000}).then(() => expect(timeout).to.be.calledWith(1000));
+      });
 
-        timeout = cy.spy(Promise.prototype, "timeout")
+      return it("clears the current timeout and restores after success", function() {
+        Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"});
 
-        cy.fixture("foobar", {timeout: 1000}).then ->
-          expect(timeout).to.be.calledWith(1000)
+        cy.timeout(100);
 
-      it "clears the current timeout and restores after success", ->
-        Cypress.backend.withArgs("get:fixture").resolves({foo: "bar"})
+        cy.spy(cy, "clearTimeout");
 
-        cy.timeout(100)
+        return cy.fixture("foo").then(function() {
+          expect(cy.clearTimeout).to.be.calledWith("get:fixture");
 
-        cy.spy(cy, "clearTimeout")
+          //# restores the timeout afterwards
+          return expect(cy.timeout()).to.eq(100);
+        });
+      });
+    });
 
-        cy.fixture("foo").then ->
-          expect(cy.clearTimeout).to.be.calledWith("get:fixture")
+    return describe("caching", function() {
+      beforeEach(() => Cypress.backend
+      .withArgs("get:fixture", "foo")
+      .resolves({foo: "bar"})
+      .withArgs("get:fixture", "bar")
+      .resolves({bar: "baz"}));
 
-          ## restores the timeout afterwards
-          expect(cy.timeout()).to.eq(100)
+      it("caches fixtures by name", () => cy.fixture("foo").then(obj => {
+        expect(obj).to.deep.eq({foo: "bar"});
 
-    describe "caching", ->
-      beforeEach ->
-        Cypress.backend
-        .withArgs("get:fixture", "foo")
-        .resolves({foo: "bar"})
-        .withArgs("get:fixture", "bar")
-        .resolves({bar: "baz"})
+        return cy.fixture("bar").then(obj => {
+          expect(obj).to.deep.eq({bar: "baz"});
 
-      it "caches fixtures by name", ->
-        cy.fixture("foo").then (obj) =>
-          expect(obj).to.deep.eq({foo: "bar"})
+          return cy.fixture("foo").then(obj => {
+            return expect(obj).to.deep.eq({foo: "bar"});
+        });
+      });
+    })
 
-          cy.fixture("bar").then (obj) =>
-            expect(obj).to.deep.eq {bar: "baz"}
+      .then(() => expect(Cypress.backend).to.be.calledTwice));
 
-            cy.fixture("foo").then (obj) =>
-              expect(obj).to.deep.eq {foo: "bar"}
+      return it("clones fixtures to prevent accidental mutation", () => cy.fixture("foo").then(function(obj) {
+        //# mutate the object
+        obj.baz = "quux";
 
-        .then ->
-          expect(Cypress.backend).to.be.calledTwice
+        return cy.fixture("foo").then(function(obj2) {
+          obj2.lorem = "ipsum";
+          expect(obj2).not.to.have.property("baz");
 
-      it "clones fixtures to prevent accidental mutation", ->
-        cy.fixture("foo").then (obj) ->
-          ## mutate the object
-          obj.baz = "quux"
-
-          cy.fixture("foo").then (obj2) ->
-            obj2.lorem = "ipsum"
-            expect(obj2).not.to.have.property("baz")
-
-            cy.fixture("foo").then (obj3) ->
-              expect(obj3).not.to.have.property("lorem")
-          .then ->
-            expect(Cypress.backend).to.be.calledOnce
+          return cy.fixture("foo").then(obj3 => expect(obj3).not.to.have.property("lorem"));}).then(() => expect(Cypress.backend).to.be.calledOnce);
+      }));
+    });
+  });
+});

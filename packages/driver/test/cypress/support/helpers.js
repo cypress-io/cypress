@@ -1,13 +1,18 @@
-_ = Cypress._
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const {
+  _
+} = Cypress;
 
-getFirstSubjectByName = (name) ->
-  cy.queue.find({name: name}).get("subject")
+const getFirstSubjectByName = name => cy.queue.find({name}).get("subject");
 
-getQueueNames = ->
-  _.map(cy.queue, "name")
+const getQueueNames = () => _.map(cy.queue, "name");
 
 module.exports = {
-  getQueueNames
+  getQueueNames,
 
   getFirstSubjectByName
-}
+};

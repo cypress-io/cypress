@@ -1,19 +1,20 @@
-describe "react v15.6.0", ->
-  context "fires onChange events", ->
-    beforeEach ->
-      cy.visit("/fixtures/react-15.html")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("react v15.6.0", () => context("fires onChange events", function() {
+  beforeEach(() => cy.visit("/fixtures/react-15.html"));
 
-    it "input", ->
-      cy
-        .get("#react-container input[type=text]").type("foo").blur()
-        .window().its("onChangeEvents").should("eq", 3)
+  it("input", () => cy
+    .get("#react-container input[type=text]").type("foo").blur()
+    .window().its("onChangeEvents").should("eq", 3));
 
-    it "email", ->
-      cy
-        .get("#react-container input[type=email]").type("foo").blur()
-        .window().its("onChangeEvents").should("eq", 3)
+  it("email", () => cy
+    .get("#react-container input[type=email]").type("foo").blur()
+    .window().its("onChangeEvents").should("eq", 3));
 
-    it "number", ->
-      cy
-        .get("#react-container input[type=number]").type("123").blur()
-        .window().its("onChangeEvents").should("eq", 3)
+  return it("number", () => cy
+    .get("#react-container input[type=number]").type("123").blur()
+    .window().its("onChangeEvents").should("eq", 3));
+}));
