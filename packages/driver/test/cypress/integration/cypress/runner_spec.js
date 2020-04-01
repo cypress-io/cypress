@@ -11,10 +11,10 @@ describe('src/cypress/runner', () => {
     cy.once('log:added', (log) => {
       expect(log.hookName).to.equal('test')
 
-      return done()
+      done()
     })
 
-    return cy.wrap({})
+    cy.wrap({})
   })
 
   context('pending tests', () => {

@@ -1,20 +1,6 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const minimatch = require('minimatch')
 
-const $utils = require('./utils')
 const $errUtils = require('./error_utils')
 const $XHR = require('./xml_http_request')
 
@@ -71,9 +57,8 @@ const warnOnForce404Default = function (obj) {
     return $errUtils.warnByPath('server.force404_deprecated')
   }
 }
-
-const whitelist = (xhr) => // whitelist if we're GET + looks like we're fetching regular resources
-{
+// whitelist if we're GET + looks like we're fetching regular resources
+const whitelist = (xhr) => {
   return xhr.method === 'GET' && regularResourcesRe.test(xhr.url)
 }
 
@@ -163,10 +148,9 @@ const getFullyQualifiedUrl = function (contentWindow, url) {
   return a.href
 }
 
-// override the defaults for all
-// servers
-const defaults = (obj = {}) => // merge obj into defaults
-{
+// override the defaults for all servers
+// merge obj into defaults
+const defaults = (obj = {}) => {
   return _.extend(serverDefaults, obj)
 }
 
@@ -439,8 +423,8 @@ const create = function (options = {}) {
       } = XHR.prototype
       const srh = XHR.prototype.setRequestHeader
 
-      restoreFn = () => // restore the property back on the window
-      {
+      // restore the property back on the window
+      restoreFn = () => {
         return _.each(
           { send, open, abort, setRequestHeader: srh },
           (value, key) => XHR.prototype[key] = value,
@@ -539,9 +523,9 @@ const create = function (options = {}) {
           // catch synchronous errors caused
           // by the onload function
           try {
-            let ol
+            const ol = fns.onload
 
-            if (_.isFunction(ol = fns.onload)) {
+            if (_.isFunction(ol)) {
               ol.apply(xhr, arguments)
             }
 
@@ -560,9 +544,9 @@ const create = function (options = {}) {
           // its possible our real onerror handler
           // throws so we need to catch those errors too
           try {
-            let oe
+            const oe = fns.onerror
 
-            if (_.isFunction(oe = fns.onerror)) {
+            if (_.isFunction(oe)) {
               oe.apply(xhr, arguments)
             }
 
@@ -576,13 +560,13 @@ const create = function (options = {}) {
           // catch synchronous errors caused
           // by the onreadystatechange function
           try {
-            let orst
+            const orst = fns.onreadystatechange
 
             if (isAbortedThroughUnload(xhr)) {
               server.abortXhr(xhr)
             }
 
-            if (_.isFunction(orst = fns.onreadystatechange)) {
+            if (_.isFunction(orst)) {
               return orst.apply(xhr, arguments)
             }
           } catch (err) {

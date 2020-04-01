@@ -20,7 +20,7 @@ const run = () => {
       const xhr = new win.XMLHttpRequest()
 
       xhr.open('GET', '/basic_auth')
-      xhr.onload = function () {
+      xhr.onload = () => {
         try {
           expect(this.responseText).to.include('basic auth worked')
 
@@ -39,7 +39,7 @@ const run = () => {
       const xhr = new win.XMLHttpRequest()
 
       xhr.open('GET', 'http://localhost:3501/basic_auth')
-      xhr.onload = function () {
+      xhr.onload = () => {
         try {
           expect(this.status).to.eq(401)
 

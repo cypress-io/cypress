@@ -1,14 +1,3 @@
-/* eslint-disable
-    indent,
-    no-console,
-    no-trailing-spaces,
-    no-undef,
-    no-unused-vars,
-    padded-blocks,
-    padding-line-between-statements,
-    prefer-template,
-    semi,
-*/
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -16,7 +5,6 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const $ = require('jquery')
 const _ = require('lodash')
 const methods = require('methods')
 const moment = require('moment')
@@ -62,10 +50,12 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
 
 module.exports = {
   warning (msg) {
+    // eslint-disable-next-line
     return console.warn(`Cypress Warning: ${msg}`)
   },
 
   log (...msgs) {
+    // eslint-disable-next-line
     return console.log(...msgs)
   },
 
@@ -160,35 +150,49 @@ module.exports = {
   },
 
   stringifyActual (value) {
-    const $dom = require('../dom');
+    const $dom = require('../dom')
 
     if ($dom.isDom(value)) {
-      return $dom.stringify(value, 'short');
-    } if (_.isFunction(value)) {
-      return 'function(){}';
-    } if (_.isArray(value)) {
+      return $dom.stringify(value, 'short')
+    }
+
+    if (_.isFunction(value)) {
+      return 'function(){}'
+    }
+
+    if (_.isArray(value)) {
       const len = value.length
+
       if (len > 3) {
         return `Array[${len}]`
-      } 
-        return '[' + _.map(value, _.bind(this.stringifyActual, this)).join(', ') + ']';
-      
-    } if (_.isRegExp(value)) {
+      }
+
+      return `[${_.map(value, _.bind(this.stringifyActual, this)).join(', ')}]`
+    }
+
+    if (_.isRegExp(value)) {
       return value.toString()
-    } if (_.isObject(value)) {
-      len = _.keys(value).length
+    }
+
+    if (_.isObject(value)) {
+      const len = _.keys(value).length
+
       if (len > 2) {
         return `Object{${len}}`
-      } 
-        return this.stringifyActualObj(value)
-      
-    } if (_.isSymbol(value)) {
-      return 'Symbol';
-    } if (_.isUndefined(value)) {
+      }
+
+      return this.stringifyActualObj(value)
+    }
+
+    if (_.isSymbol(value)) {
+      return 'Symbol'
+    }
+
+    if (_.isUndefined(value)) {
       return undefined
-    } 
-      return '' + value
-    
+    }
+
+    return `${value}`
   },
 
   // give us some user-friendly "types"

@@ -20,7 +20,7 @@ it('sets the AUT document.hasFocus to top.document.hasFocus', () => {
   cy.visit('/timeout')
   .then(() => {
     if (top.document.hasFocus()) {
-      return cy.document().invoke('hasFocus').should('be.true')
+      cy.document().invoke('hasFocus').should('be.true')
     }
 
     cy.document().invoke('hasFocus').should('be.false')

@@ -64,7 +64,7 @@ describe('driver/src/cypress/cy', () => {
       })
     })
 
-    it('queues in the correct order', function () {
+    it('queues in the correct order', () => {
       const existing = cy.queue.names()
 
       setup(() => {
@@ -74,7 +74,7 @@ describe('driver/src/cypress/cy', () => {
       })
     })
 
-    it('nested command should reference url as next property', function () {
+    it('nested command should reference url as next property', () => {
       setup(() => {
         const nested = cy.queue.find({ name: 'nested' })
 
@@ -181,11 +181,11 @@ describe('driver/src/cypress/cy', () => {
         Cypress.Commands.add('elWinOnly', { prevSubject: ['element', 'window'] }, () => {})
       })
 
-      it('is called with the correct ctx', function () {
+      it('is called with the correct ctx', () => {
         const ctx = this
         let expected = false
 
-        Cypress.Commands.add('childCtx', { prevSubject: true }, function () {
+        Cypress.Commands.add('childCtx', { prevSubject: true }, () => {
           expect(this).to.equal(ctx)
           expected = true
         })
@@ -248,7 +248,7 @@ describe('driver/src/cypress/cy', () => {
       })
 
       it('fails when previous subject becomes detached', (done) => {
-        cy.$$('#button').click(function () {
+        cy.$$('#button').click(() => {
           return $(this).remove()
         })
 
@@ -391,7 +391,7 @@ describe('driver/src/cypress/cy', () => {
       })
     })
 
-    it('has the current runnable ctx', function () {
+    it('has the current runnable ctx', () => {
       const _this = this
 
       cy.noop((ctx) => {

@@ -150,7 +150,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
   })
 
   describe('assertion verification', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       cy.on('log:added', (attrs, log) => {
         if (log.get('name') === 'assert') {
           this.lastLog = log
@@ -159,14 +159,14 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
 
     it('eventually passes the assertion', () => {
-      cy.$$('input:first').keyup(function () {
+      cy.$$('input:first').keyup(() => {
         _.delay(() => {
           $(this).addClass('cleared')
         }
         , 100)
       })
 
-      cy.get('input:first').clear().should('have.class', 'cleared').then(function () {
+      cy.get('input:first').clear().should('have.class', 'cleared').then(() => {
         const { lastLog } = this
 
         expect(lastLog.get('name')).to.eq('assert')
@@ -177,7 +177,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
 
     it('eventually passes the assertion on multiple inputs', () => {
-      cy.$$('input').keyup(function () {
+      cy.$$('input').keyup(() => {
         _.delay(() => {
           $(this).addClass('cleared')
         }
@@ -189,7 +189,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
   })
 
   describe('errors', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       Cypress.config('defaultCommandTimeout', 100)
 
       this.logs = []
@@ -388,7 +388,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
   })
 
   describe('.log', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       cy.on('log:added', (attrs, log) => {
         this.lastLog = log
       })
@@ -444,7 +444,7 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
 
     it('logs deltaOptions', () => {
-      cy.get('input:first').clear({ force: true, timeout: 1000 }).then(function () {
+      cy.get('input:first').clear({ force: true, timeout: 1000 }).then(() => {
         const { lastLog } = this
 
         expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')

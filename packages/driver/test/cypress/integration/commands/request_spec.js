@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const {
   _,
 } = Cypress
@@ -18,15 +7,15 @@ const {
 const RESPONSE_TIMEOUT = 22222
 
 describe('src/cy/commands/request', () => {
-  return context('#request', function () {
+  context('#request', () => {
     beforeEach(() => {
       cy.stub(Cypress, 'backend').callThrough()
 
-      return Cypress.config('responseTimeout', RESPONSE_TIMEOUT)
+      Cypress.config('responseTimeout', RESPONSE_TIMEOUT)
     })
 
-    describe('argument signature', function () {
-      beforeEach(function () {
+    describe('argument signature', () => {
+      beforeEach(() => {
         const backend = Cypress.backend
         .withArgs('http:request')
         .resolves({ isOkStatusCode: true, status: 200 })
@@ -51,7 +40,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts object with url', () => {
-        return cy.request({ url: 'http://localhost:8000/foo' }).then(function () {
+        cy.request({ url: 'http://localhost:8000/foo' }).then(() => {
           return this.expectOptionsToBe({
             url: 'http://localhost:8000/foo',
           })
@@ -59,14 +48,14 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts object with url, method, headers, body', () => {
-        return cy.request({
+        cy.request({
           url: 'http://github.com/users',
           method: 'POST',
           body: { name: 'brian' },
           headers: {
             'x-token': 'abc123',
           },
-        }).then(function () {
+        }).then(() => {
           return this.expectOptionsToBe({
             url: 'http://github.com/users',
             method: 'POST',
@@ -80,7 +69,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts object with url + timeout', () => {
-        return cy.request({ url: 'http://localhost:8000/foo', timeout: 23456 }).then(function () {
+        cy.request({ url: 'http://localhost:8000/foo', timeout: 23456 }).then(() => {
           return this.expectOptionsToBe({
             url: 'http://localhost:8000/foo',
             timeout: 23456,
@@ -89,7 +78,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts string url', () => {
-        return cy.request('http://localhost:8080/status').then(function () {
+        cy.request('http://localhost:8080/status').then(() => {
           return this.expectOptionsToBe({
             url: 'http://localhost:8080/status',
           })
@@ -97,7 +86,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts method + url', () => {
-        return cy.request('DELETE', 'http://localhost:1234/users/1').then(function () {
+        cy.request('DELETE', 'http://localhost:1234/users/1').then(() => {
           return this.expectOptionsToBe({
             url: 'http://localhost:1234/users/1',
             method: 'DELETE',
@@ -106,7 +95,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts method + url + body', () => {
-        return cy.request('POST', 'http://localhost:8080/users', { name: 'brian' }).then(function () {
+        cy.request('POST', 'http://localhost:8080/users', { name: 'brian' }).then(() => {
           return this.expectOptionsToBe({
             url: 'http://localhost:8080/users',
             method: 'POST',
@@ -117,7 +106,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts url + body', () => {
-        return cy.request('http://www.github.com/projects/foo', { commits: true }).then(function () {
+        cy.request('http://www.github.com/projects/foo', { commits: true }).then(() => {
           return this.expectOptionsToBe({
             url: 'http://www.github.com/projects/foo',
             body: { commits: true },
@@ -127,7 +116,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('accepts url + string body', () => {
-        return cy.request('http://www.github.com/projects/foo', 'foo').then(function () {
+        cy.request('http://www.github.com/projects/foo', 'foo').then(() => {
           return this.expectOptionsToBe({
             url: 'http://www.github.com/projects/foo',
             body: 'foo',
@@ -136,8 +125,8 @@ describe('src/cy/commands/request', () => {
       })
 
       context('method normalization', () => {
-        return it('uppercases method', () => {
-          return cy.request('post', 'https://www.foo.com').then(function () {
+        it('uppercases method', () => {
+          cy.request('post', 'https://www.foo.com').then(() => {
             return this.expectOptionsToBe({
               url: 'https://www.foo.com/',
               method: 'POST',
@@ -146,11 +135,11 @@ describe('src/cy/commands/request', () => {
         })
       })
 
-      context('url normalization', function () {
-        it('uses absolute urls and adds trailing slash', function () {
+      context('url normalization', () => {
+        it('uses absolute urls and adds trailing slash', () => {
           Cypress.config('baseUrl', 'http://localhost:8080/app')
 
-          return cy.request('https://www.foo.com').then(function () {
+          cy.request('https://www.foo.com').then(() => {
             return this.expectOptionsToBe({
               url: 'https://www.foo.com/',
             })
@@ -158,7 +147,7 @@ describe('src/cy/commands/request', () => {
         })
 
         it('uses localhost urls', () => {
-          return cy.request('localhost:1234').then(function () {
+          cy.request('localhost:1234').then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:1234/',
             })
@@ -166,29 +155,29 @@ describe('src/cy/commands/request', () => {
         })
 
         it('uses www urls', () => {
-          return cy.request('www.foo.com').then(function () {
+          cy.request('www.foo.com').then(() => {
             return this.expectOptionsToBe({
               url: 'http://www.foo.com/',
             })
           })
         })
 
-        it('prefixes with baseUrl when origin is empty', function () {
+        it('prefixes with baseUrl when origin is empty', () => {
           cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
           Cypress.config('baseUrl', 'http://localhost:8080/app')
 
-          return cy.request('/foo/bar?cat=1').then(function () {
+          cy.request('/foo/bar?cat=1').then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8080/app/foo/bar?cat=1',
             })
           })
         })
 
-        it('prefixes with baseUrl over current origin', function () {
+        it('prefixes with baseUrl over current origin', () => {
           Cypress.config('baseUrl', 'http://localhost:8080/app')
           cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('http://localhost:1234')
 
-          return cy.request('foobar?cat=1').then(function () {
+          cy.request('foobar?cat=1').then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8080/app/foobar?cat=1',
             })
@@ -197,7 +186,7 @@ describe('src/cy/commands/request', () => {
 
         // https://github.com/cypress-io/cypress/issues/5274
         it('encode url with ’ character in pathname', () => {
-          return cy.request({ url: 'http://localhost:1234/’' }).then(function () {
+          cy.request({ url: 'http://localhost:1234/’' }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:1234/%E2%80%99',
             })
@@ -205,7 +194,7 @@ describe('src/cy/commands/request', () => {
         })
 
         it('dont re-encode url with ’ escaped in pathname', () => {
-          return cy.request({ url: encodeURI('http://localhost:1234/’') }).then(function () {
+          cy.request({ url: encodeURI('http://localhost:1234/’') }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:1234/%E2%80%99',
             })
@@ -213,7 +202,7 @@ describe('src/cy/commands/request', () => {
         })
 
         it('encode url with % character in pathname', () => {
-          return cy.request({ url: 'http://localhost:1234/%' }).then(function () {
+          cy.request({ url: 'http://localhost:1234/%' }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:1234/%',
             })
@@ -221,7 +210,7 @@ describe('src/cy/commands/request', () => {
         })
 
         it('dont re-encode url with % escaped in pathname', () => {
-          return cy.request({ url: encodeURI('http://localhost:1234/%') }).then(function () {
+          cy.request({ url: encodeURI('http://localhost:1234/%') }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:1234/%25',
             })
@@ -229,7 +218,7 @@ describe('src/cy/commands/request', () => {
         })
 
         it('encode url with Astral Plane Unicode in pathname', () => {
-          return cy.request({ url: 'http://localhost:1234/😀' }).then(function () {
+          cy.request({ url: 'http://localhost:1234/😀' }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:1234/%F0%9F%98%80',
             })
@@ -237,7 +226,7 @@ describe('src/cy/commands/request', () => {
         })
 
         it('dont re-encode url with Astral Plane Unicode escaped character in pathname', () => {
-          return cy.request({ url: encodeURI('http://localhost:1234/😀') }).then(function () {
+          cy.request({ url: encodeURI('http://localhost:1234/😀') }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:1234/%F0%9F%98%80',
             })
@@ -245,15 +234,15 @@ describe('src/cy/commands/request', () => {
         })
 
         it('should percent escape Unicode in pathname and convert Unicode in domain name properly', () => {
-          return cy.request({ url: 'http://localhost😀:1234/😀' }).then(function () {
+          cy.request({ url: 'http://localhost😀:1234/😀' }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://xn--localhost-ob26h:1234/%F0%9F%98%80',
             })
           })
         })
 
-        return it('should percent escape Unicode in pathname and convert Unicode in domain name with URI encoded URL', () => {
-          return cy.request({ url: encodeURI('http://localhost😀:1234/😀') }).then(function () {
+        it('should percent escape Unicode in pathname and convert Unicode in domain name with URI encoded URL', () => {
+          cy.request({ url: encodeURI('http://localhost😀:1234/😀') }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://xn--localhost-ob26h:1234/%F0%9F%98%80',
             })
@@ -262,11 +251,11 @@ describe('src/cy/commands/request', () => {
       })
 
       context('gzip', () => {
-        return it('can turn off gzipping', () => {
-          return cy.request({
+        it('can turn off gzipping', () => {
+          cy.request({
             url: 'http://localhost:8080',
             gzip: false,
-          }).then(function () {
+          }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8080/',
               gzip: false,
@@ -276,14 +265,14 @@ describe('src/cy/commands/request', () => {
       })
 
       context('auth', () => {
-        return it('sends auth when it is an object', () => {
-          return cy.request({
+        it('sends auth when it is an object', () => {
+          cy.request({
             url: 'http://localhost:8888',
             auth: {
               user: 'brian',
               pass: 'password',
             },
-          }).then(function () {
+          }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8888/',
               auth: {
@@ -295,10 +284,10 @@ describe('src/cy/commands/request', () => {
         })
       })
 
-      context('followRedirect', function () {
+      context('followRedirect', () => {
         it('is true by default', () => {
-          return cy.request('http://localhost:8888')
-          .then(function () {
+          cy.request('http://localhost:8888')
+          .then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8888/',
             })
@@ -306,11 +295,11 @@ describe('src/cy/commands/request', () => {
         })
 
         it('can be set to false', () => {
-          return cy.request({
+          cy.request({
             url: 'http://localhost:8888',
             followRedirect: false,
           })
-          .then(function () {
+          .then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8888/',
               followRedirect: false,
@@ -318,12 +307,12 @@ describe('src/cy/commands/request', () => {
           })
         })
 
-        return it('normalizes followRedirects -> followRedirect', () => {
-          return cy.request({
+        it('normalizes followRedirects -> followRedirect', () => {
+          cy.request({
             url: 'http://localhost:8888',
             followRedirects: false,
           })
-          .then(function () {
+          .then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8888/',
               followRedirect: false,
@@ -333,14 +322,14 @@ describe('src/cy/commands/request', () => {
       })
 
       context('qs', () => {
-        return it('accepts an object literal', () => {
-          return cy.request({
+        it('accepts an object literal', () => {
+          cy.request({
             url: 'http://localhost:8888',
             qs: {
               foo: 'bar',
             },
           })
-          .then(function () {
+          .then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8888/',
               qs: { foo: 'bar' },
@@ -349,16 +338,16 @@ describe('src/cy/commands/request', () => {
         })
       })
 
-      return context('form', function () {
+      context('form', () => {
         it('accepts an object literal for body', () => {
-          return cy.request({
+          cy.request({
             url: 'http://localhost:8888',
             form: true,
             body: {
               foo: 'bar',
             },
           })
-          .then(function () {
+          .then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8888/',
               form: true,
@@ -368,12 +357,12 @@ describe('src/cy/commands/request', () => {
         })
 
         it('accepts a string for body', () => {
-          return cy.request({
+          cy.request({
             url: 'http://localhost:8888',
             form: true,
             body: 'foo=bar&baz=quux',
           })
-          .then(function () {
+          .then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8888/',
               form: true,
@@ -383,15 +372,15 @@ describe('src/cy/commands/request', () => {
         })
 
         // https://github.com/cypress-io/cypress/issues/2923
-        return it('application/x-www-form-urlencoded w/ an object body uses form: true', () => {
-          return cy.request({
+        it('application/x-www-form-urlencoded w/ an object body uses form: true', () => {
+          cy.request({
             url: 'http://localhost:8888',
             headers: {
               'a': 'b',
               'Content-type': 'application/x-www-form-urlencoded',
             },
             body: { foo: 'bar' },
-          }).then(function () {
+          }).then(() => {
             return this.expectOptionsToBe({
               url: 'http://localhost:8888/',
               form: true,
@@ -407,14 +396,13 @@ describe('src/cy/commands/request', () => {
     })
 
     describe('failOnStatus', () => {
-      return it('is deprecated but does not fail even on 500 when failOnStatus=false', () => {
+      it('is deprecated but does not fail even on 500 when failOnStatus=false', () => {
         const warning = cy.spy(Cypress.utils, 'warning')
 
-        const backend = Cypress.backend
         .withArgs('http:request')
         .resolves({ isOkStatusCode: false, status: 500 })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:1234/foo',
           failOnStatus: false,
         })
@@ -422,42 +410,41 @@ describe('src/cy/commands/request', () => {
           // make sure it really was 500!
           expect(resp.status).to.eq(500)
 
-          return expect(warning.lastCall.args[0]).to.include('The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.')
+          expect(warning.lastCall.args[0]).to.include('The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.')
         })
       })
     })
 
     describe('failOnStatusCode', () => {
-      return it('does not fail on status 401', () => {
-        const backend = Cypress.backend
+      it('does not fail on status 401', () => {
+        Cypress.backend
         .withArgs('http:request')
         .resolves({ isOkStatusCode: false, status: 401 })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:1234/foo',
           failOnStatusCode: false,
         })
-        .then((resp) => // make sure it really was 500!
-        {
-          return expect(resp.status).to.eq(401)
+        .then((resp) => {
+          expect(resp.status).to.eq(401)
         })
       })
     })
 
     describe('method', () => {
-      return it('can use M-SEARCH method', () => {
-        return cy.request({
+      it('can use M-SEARCH method', () => {
+        cy.request({
           url: 'http://localhost:3500/dump-method',
           method: 'm-Search',
         }).then((res) => {
-          return expect(res.body).to.contain('M-SEARCH')
+          expect(res.body).to.contain('M-SEARCH')
         })
       })
     })
 
     describe('headers', () => {
-      return it('can send user-agent header', () => {
-        return cy.request({
+      it('can send user-agent header', () => {
+        cy.request({
           url: 'http://localhost:3500/dump-headers',
           headers: {
             'user-agent': 'something special',
@@ -467,7 +454,7 @@ describe('src/cy/commands/request', () => {
     })
 
     describe('subjects', () => {
-      return it('resolves with response obj', () => {
+      it('resolves with response obj', () => {
         const resp = {
           status: 200,
           isOkStatusCode: true,
@@ -475,19 +462,17 @@ describe('src/cy/commands/request', () => {
           headers: { foo: 'bar' },
         }
 
-        const backend = Cypress.backend
+        Cypress.backend
         .withArgs('http:request')
         .resolves(resp)
 
-        return cy.request('http://www.foo.com').then((subject) => expect(subject).to.deep.eq(resp))
+        cy.request('http://www.foo.com').then((subject) => expect(subject).to.deep.eq(resp))
       })
     })
 
     describe('timeout', () => {
       beforeEach(() => {
-        let backend
-
-        backend = Cypress.backend
+        Cypress.backend
         .withArgs('http:request')
         .resolves({ isOkStatusCode: true, status: 200 })
       })
@@ -497,31 +482,31 @@ describe('src/cy/commands/request', () => {
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.request('http://www.foo.com').then(() => expect(timeout).to.be.calledWith(2500))
+        cy.request('http://www.foo.com').then(() => expect(timeout).to.be.calledWith(2500))
       })
 
       it('can override timeout', () => {
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.request({ url: 'http://www.foo.com', timeout: 1000 }).then(() => expect(timeout).to.be.calledWith(1000))
+        cy.request({ url: 'http://www.foo.com', timeout: 1000 }).then(() => expect(timeout).to.be.calledWith(1000))
       })
 
-      return it('clears the current timeout and restores after success', () => {
+      it('clears the current timeout and restores after success', () => {
         cy.timeout(100)
 
         cy.spy(cy, 'clearTimeout')
 
-        return cy.request('http://www.foo.com').then(() => {
+        cy.request('http://www.foo.com').then(() => {
           expect(cy.clearTimeout).to.be.calledWith('http:request')
 
           // restores the timeout afterwards
-          return expect(cy.timeout()).to.eq(100)
+          expect(cy.timeout()).to.eq(100)
         })
       })
     })
 
-    describe('.log', function () {
-      beforeEach(function () {
+    describe('.log', () => {
+      beforeEach(() => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'request') {
             this.lastLog = log
@@ -531,21 +516,21 @@ describe('src/cy/commands/request', () => {
         return null
       })
 
-      it('can turn off logging', function () {
-        const backend = Cypress.backend
+      it('can turn off logging', () => {
+        Cypress.backend
         .withArgs('http:request')
         .resolves({ isOkStatusCode: true, status: 200 })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:8080',
           log: false,
-        }).then(function () {
-          return expect(this.lastLog).to.be.undefined
+        }).then(() => {
+          expect(this.lastLog).to.be.undefined
         })
       })
 
       it('logs immediately before resolving', (done) => {
-        const backend = Cypress.backend
+        Cypress.backend
         .withArgs('http:request')
         .resolves({ isOkStatusCode: true, status: 200 })
 
@@ -554,30 +539,30 @@ describe('src/cy/commands/request', () => {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('message')).to.eq('')
 
-            return done()
+            done()
           }
         })
 
-        return cy.request('http://localhost:8080')
+        cy.request('http://localhost:8080')
       })
 
-      it('snapshots after clicking', function () {
-        const backend = Cypress.backend
+      it('snapshots after clicking', () => {
+        Cypress.backend
         .withArgs('http:request')
         .resolves({ isOkStatusCode: true, status: 200 })
 
-        return cy.request('http://localhost:8080').then(function () {
+        cy.request('http://localhost:8080').then(() => {
           const {
             lastLog,
           } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
 
-          return expect(lastLog.get('snapshots')[0]).to.be.an('object')
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
         })
       })
 
-      it('.consoleProps', function () {
+      it('.consoleProps', () => {
         const allRequestResponse = {
           'Request URL': 'http://localhost:8080/foo',
           'Request Headers': { 'x-token': 'ab123' },
@@ -588,7 +573,7 @@ describe('src/cy/commands/request', () => {
           'Response Body': { id: 123 },
         }
 
-        const backend = Cypress.backend
+        Cypress.backend
         .withArgs('http:request')
         .resolves({
           duration: 10,
@@ -603,13 +588,13 @@ describe('src/cy/commands/request', () => {
           allRequestResponses: [allRequestResponse],
         })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:8080/foo',
           headers: { 'x-token': 'abc123' },
           method: 'POST',
           body: { first: 'brian' },
-        }).then(function () {
-          return expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+        }).then(() => {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'request',
             Request: allRequestResponse,
             Yielded: {
@@ -624,7 +609,7 @@ describe('src/cy/commands/request', () => {
         })
       })
 
-      it('.consoleProps with array of allRequestResponses', function () {
+      it('.consoleProps with array of allRequestResponses', () => {
         const allRequestResponses = [{
           'Request URL': 'http://localhost:8080/foo',
           'Request Headers': { 'x-token': 'ab123' },
@@ -643,7 +628,7 @@ describe('src/cy/commands/request', () => {
           'Response Body': { id: 123 },
         }]
 
-        const backend = Cypress.backend
+        Cypress.backend
         .withArgs('http:request')
         .resolves({
           duration: 10,
@@ -658,13 +643,13 @@ describe('src/cy/commands/request', () => {
           allRequestResponses,
         })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:8080/foo',
           headers: { 'x-token': 'abc123' },
           method: 'POST',
           body: { first: 'brian' },
-        }).then(function () {
-          return expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+        }).then(() => {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'request',
             Requests: allRequestResponses,
             Yielded: {
@@ -679,51 +664,51 @@ describe('src/cy/commands/request', () => {
         })
       })
 
-      return describe('.renderProps', function () {
+      describe('.renderProps', () => {
         describe('in any case', () => {
-          return it('sends correct message', function () {
-            const backend = Cypress.backend
+          it('sends correct message', () => {
+            Cypress.backend
             .withArgs('http:request')
             .resolves({ isOkStatusCode: true, status: 201 })
 
-            return cy.request('http://localhost:8080/foo').then(function () {
-              return expect(this.lastLog.invoke('renderProps').message).to.equal('GET 201 http://localhost:8080/foo')
+            cy.request('http://localhost:8080/foo').then(() => {
+              expect(this.lastLog.invoke('renderProps').message).to.equal('GET 201 http://localhost:8080/foo')
             })
           })
         })
 
         describe('when response is successful', () => {
-          return it('sends correct indicator', function () {
-            const backend = Cypress.backend
+          it('sends correct indicator', () => {
+            Cypress.backend
             .withArgs('http:request')
             .resolves({ isOkStatusCode: true, status: 201 })
 
-            return cy.request('http://localhost:8080/foo').then(function () {
-              return expect(this.lastLog.invoke('renderProps').indicator).to.equal('successful')
+            cy.request('http://localhost:8080/foo').then(() => {
+              expect(this.lastLog.invoke('renderProps').indicator).to.equal('successful')
             })
           })
         })
 
-        return describe('when response is outside 200 range', () => {
-          return it('sends correct indicator', function (done) {
+        describe('when response is outside 200 range', () => {
+          it('sends correct indicator', function (done) {
             cy.on('fail', (err) => {
               expect(this.lastLog.invoke('renderProps').indicator).to.equal('bad')
 
-              return done()
+              done()
             })
 
-            const backend = Cypress.backend
+            Cypress.backend
             .withArgs('http:request')
             .resolves({ status: 500 })
 
-            return cy.request('http://localhost:8080/foo')
+            cy.request('http://localhost:8080/foo')
           })
         })
       })
     })
 
-    return describe('errors', function () {
-      beforeEach(function () {
+    describe('errors', () => {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 50)
 
         this.logs = []
@@ -751,10 +736,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.eq('`cy.request()` requires a `url`. You did not provide a `url`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request()
+        cy.request()
       })
 
       it('throws when url is not FQDN', function (done) {
@@ -772,10 +757,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `cypress.json`. Neither of those values were present.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request('/foo/bar')
+        cy.request('/foo/bar')
       })
 
       it('throws when url is not FQDN, notes that configFile is disabled', function (done) {
@@ -793,10 +778,10 @@ describe('src/cy/commands/request', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `cypress.json` (currently disabled by --config-file=false). Neither of those values were present.')
 
-          return done()
+          done()
         })
 
-        return cy.request('/foo/bar')
+        cy.request('/foo/bar')
       })
 
       it('throws when url is not FQDN, notes that configFile is non-default', function (done) {
@@ -814,10 +799,10 @@ describe('src/cy/commands/request', () => {
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.request()` must be provided a fully qualified `url` - one that begins with `http`. By default `cy.request()` will use either the current window\'s origin or the `baseUrl` in `foo.json`. Neither of those values were present.')
 
-          return done()
+          done()
         })
 
-        return cy.request('/foo/bar')
+        cy.request('/foo/bar')
       })
 
       it('throws when url isnt a string', function (done) {
@@ -832,10 +817,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.eq('`cy.request()` requires the `url` to be a string.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           url: [],
         })
       })
@@ -852,10 +837,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.eq('`cy.request()` must be passed an object literal for the `auth` option.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:1234/foo',
           auth: 'foobar',
         })
@@ -873,10 +858,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.eq('`cy.request()` requires the `headers` option to be an object literal.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:1234/foo',
           headers: 'foo=bar',
         })
@@ -894,10 +879,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.eq('`cy.request()` was called with an invalid method: `FOO`. Method can be: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, or any other method supported by Node\'s HTTP parser.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:1234/foo',
           method: 'FOO',
         })
@@ -915,10 +900,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.eq('`cy.request()` requires the `gzip` option to be a boolean.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:1234/foo',
           gzip: {},
         })
@@ -936,10 +921,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.eq('`cy.request()` requires the `form` option to be a boolean.\n\nIf you\'re trying to send a `x-www-form-urlencoded` request then pass either a string or object literal to the `body` property.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           url: 'http://localhost:1234/foo',
           form: { foo: 'bar' },
         })
@@ -950,10 +935,10 @@ describe('src/cy/commands/request', () => {
           expect(err.message).to.contain('`cy.request()` was invoked with `{ failOnStatusCode: false, retryOnStatusCodeFailure: true }`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           url: 'http://foobarbaz',
           failOnStatusCode: false,
           retryOnStatusCodeFailure: true,
@@ -961,7 +946,7 @@ describe('src/cy/commands/request', () => {
       })
 
       it('throws when status code doesnt start with 2 and failOnStatusCode is true', function (done) {
-        const backend = Cypress.backend
+        Cypress.backend
         .withArgs('http:request')
         .resolves({
           isOkStatusCode: false,
@@ -1027,10 +1012,10 @@ Headers: {
 Body: response body\
 `)
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           method: 'POST',
           url: 'http://localhost:1234/foo',
           body: {
@@ -1044,10 +1029,10 @@ Body: response body\
         cy.request('http://localhost:3500/dump-method')
         .then(() => cy.request('http://0.0.0.0:12345'))
 
-        return cy.on('fail', (err) => {
+        cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.request()` failed trying to load:')
 
-          return done()
+          done()
         })
       })
 
@@ -1066,7 +1051,7 @@ Body: response body\
           body: foo,
         })
 
-        return cy.on('fail', (err) => {
+        cy.on('fail', (err) => {
           const {
             lastLog,
           } = this
@@ -1082,12 +1067,12 @@ The \`body\` parameter supplied to \`cy.request()\` contained a circular referen
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-          return done()
+          done()
         })
       })
 
       it('does not include redirects when there were no redirects', function (done) {
-        const backend = Cypress.backend
+        Cypress.backend
         .withArgs('http:request')
         .resolves({
           isOkStatusCode: false,
@@ -1147,10 +1132,10 @@ Headers: {
 Body: response body\
 `)
 
-          return done()
+          done()
         })
 
-        return cy.request({
+        cy.request({
           method: 'POST',
           url: 'http://localhost:1234/foo',
           body: {
@@ -1164,7 +1149,7 @@ Body: response body\
 
         error.backend = true
 
-        const backend = Cypress.backend
+        Cypress.backend
         .withArgs('http:request')
         .rejects(error)
 
@@ -1177,10 +1162,10 @@ Body: response body\
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
-          return done()
+          done()
         })
 
-        return cy.request('http://localhost:1234/foo')
+        cy.request('http://localhost:1234/foo')
       })
 
       // https://github.com/cypress-io/cypress/issues/5274
@@ -1189,10 +1174,10 @@ Body: response body\
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
 
-          return done()
+          done()
         })
 
-        return cy.request('http://localhost:1234/’')
+        cy.request('http://localhost:1234/’')
       })
 
       it('dont throw UNESCAPED_CHARACTERS error for url with % character in pathname', (done) => {
@@ -1200,10 +1185,10 @@ Body: response body\
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
 
-          return done()
+          done()
         })
 
-        return cy.request('http://localhost:1234/%')
+        cy.request('http://localhost:1234/%')
       })
 
       it('dont throw UNESCAPED_CHARACTERS error for url with ’ escaped in pathname', (done) => {
@@ -1211,10 +1196,10 @@ Body: response body\
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
 
-          return done()
+          done()
         })
 
-        return cy.request(encodeURI('http://localhost:1234/’'))
+        cy.request(encodeURI('http://localhost:1234/’'))
       })
 
       it('dont throw UNESCAPED_CHARACTERS error for url with Unicode in pathname from BMP to Astral Plane', (done) => {
@@ -1222,10 +1207,10 @@ Body: response body\
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
 
-          return done()
+          done()
         })
 
-        return cy.request('http://localhost:1234/😀')
+        cy.request('http://localhost:1234/😀')
       })
 
       it('dont throw UNESCAPED_CHARACTERS error for url with any Unicode escaped character in pathname', (done) => {
@@ -1233,19 +1218,19 @@ Body: response body\
           expect(err.message).to.contain('`cy.request()` failed trying to load:')
           expect(err.message).to.not.contain('ERR_UNESCAPED_CHARACTERS')
 
-          return done()
+          done()
         })
 
-        return cy.request(encodeURI('http://localhost:1234/😀'))
+        cy.request(encodeURI('http://localhost:1234/😀'))
       })
 
-      return context('displays error', function () {
+      context('displays error', () => {
         it('displays method and url in error', (done) => {
           const error = new Error('request failed')
 
           error.backend = true
 
-          const backend = Cypress.backend
+          Cypress.backend
           .withArgs('http:request')
           .rejects(error)
 
@@ -1281,14 +1266,14 @@ The stack trace for this error is:\
 
             expect(err.docsUrl).to.eq('https://on.cypress.io/request')
 
-            return done()
+            done()
           })
 
-          return cy.request('http://localhost:1234/foo')
+          cy.request('http://localhost:1234/foo')
         })
 
-        return it('throws after timing out', function (done) {
-          const backend = Cypress.backend
+        it('throws after timing out', function (done) {
+          Cypress.backend
           .withArgs('http:request')
           .resolves(Promise.delay(1000))
 
@@ -1312,10 +1297,10 @@ URL: http://localhost:1234/foo
 No response was received within the timeout.\
 `)
 
-            return done()
+            done()
           })
 
-          return cy.request({ url: 'http://localhost:1234/foo', timeout: 50 })
+          cy.request({ url: 'http://localhost:1234/foo', timeout: 50 })
         })
       })
     })

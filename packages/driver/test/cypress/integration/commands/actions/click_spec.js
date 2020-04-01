@@ -315,7 +315,7 @@ describe('src/cy/commands/actions/click', () => {
     it('does not fire a focus, mouseup, or click event when element has been removed on mousedown', () => {
       const $btn = cy.$$('button:first')
 
-      $btn.on('mousedown', function () {
+      $btn.on('mousedown', () => {
         // synchronously remove this button
         $(this).remove()
       })
@@ -535,7 +535,7 @@ describe('src/cy/commands/actions/click', () => {
     it('does not fire a click when element has been removed on mouseup', () => {
       const $btn = cy.$$('button:first')
 
-      $btn.on('mouseup', function () {
+      $btn.on('mouseup', () => {
         // synchronously remove this button
         $(this).remove()
       })
@@ -554,7 +554,7 @@ describe('src/cy/commands/actions/click', () => {
     it('does not fire a click or mouseup when element has been removed on pointerup', () => {
       const $btn = cy.$$('button:first')
 
-      $btn.on('pointerup', function () {
+      $btn.on('pointerup', () => {
         // synchronously remove this button
         $(this).remove()
       })
@@ -848,7 +848,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('pointer-events:none', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo(cy.$$('#dom'))
         this.ptrNone = cy.$$(`<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>`).appendTo(cy.$$('#dom'))
         cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red">#ptrNone > div</div>').appendTo(this.ptrNone)
@@ -869,7 +869,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#ptrNone').click({ timeout: 300, force: true })
       })
 
-      it('should error with message about pointer-events', function () {
+      it('should error with message about pointer-events', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
@@ -895,7 +895,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('should error with message about pointer-events and include inheritance', function () {
+      it('should error with message about pointer-events and include inheritance', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
@@ -926,7 +926,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('pointer-events:none', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo(cy.$$('#dom'))
         this.ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>').appendTo(cy.$$('#dom'))
         cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red">#ptrNone > div</div>').appendTo(this.ptrNone)
@@ -947,7 +947,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#ptrNone').click({ timeout: 300, force: true })
       })
 
-      it('should error with message about pointer-events', function () {
+      it('should error with message about pointer-events', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
@@ -973,7 +973,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('should error with message about pointer-events and include inheritance', function () {
+      it('should error with message about pointer-events and include inheritance', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
@@ -1479,7 +1479,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('assertion verification', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
             this.lastLog = log
@@ -1490,7 +1490,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('eventually passes the assertion', () => {
-        cy.$$('button:first').click(function () {
+        cy.$$('button:first').click(() => {
           _.delay(() => {
             $(this).addClass('clicked')
           }
@@ -1499,7 +1499,7 @@ describe('src/cy/commands/actions/click', () => {
           return false
         })
 
-        cy.get('button:first').click().should('have.class', 'clicked').then(function () {
+        cy.get('button:first').click().should('have.class', 'clicked').then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
@@ -1510,7 +1510,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('eventually passes the assertion on multiple buttons', () => {
-        cy.$$('button').click(function () {
+        cy.$$('button').click(() => {
           _.delay(() => {
             $(this).addClass('clicked')
           }
@@ -1860,7 +1860,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('errors', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 100)
 
         this.logs = []
@@ -2178,7 +2178,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('.log', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -2218,7 +2218,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('snapshots after clicking', () => {
-        cy.get('button:first').click().then(function () {
+        cy.get('button:first').click().then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(2)
@@ -2296,7 +2296,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('logs { multiple: true} options', () => {
-        cy.get('span').invoke('slice', 0, 2).click({ multiple: true, timeout: 1000 }).then(function () {
+        cy.get('span').invoke('slice', 0, 2).click({ multiple: true, timeout: 1000 }).then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{multiple: true, timeout: 1000}')
@@ -2337,7 +2337,7 @@ describe('src/cy/commands/actions/click', () => {
         .css({ padding: 5, display: 'inline-block', backgroundColor: 'yellow' })
         .appendTo($btn)
 
-        cy.get('#button-covered-in-span').click().then(function () {
+        cy.get('#button-covered-in-span').click().then(() => {
           expect(this.lastLog.invoke('consoleProps')['Actual Element Clicked']).to.eq($span.get(0))
         })
       })
@@ -2345,7 +2345,7 @@ describe('src/cy/commands/actions/click', () => {
       it('#consoleProps groups MouseDown', () => {
         cy.$$('input:first').mousedown(_.stubFalse)
 
-        cy.get('input:first').click().then(function () {
+        cy.get('input:first').click().then(() => {
           const consoleProps = this.lastLog.invoke('consoleProps')
 
           expect(consoleProps.table[1]()).to.containSubset({
@@ -2413,7 +2413,7 @@ describe('src/cy/commands/actions/click', () => {
       it('#consoleProps groups MouseUp', () => {
         cy.$$('input:first').mouseup(_.stubFalse)
 
-        cy.get('input:first').click().then(function () {
+        cy.get('input:first').click().then(() => {
           expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
               'Event Type': 'pointerdown',
@@ -2452,7 +2452,7 @@ describe('src/cy/commands/actions/click', () => {
       it('#consoleProps groups Click', () => {
         cy.$$('input:first').click(_.stubFalse)
 
-        cy.get('input:first').click().then(function () {
+        cy.get('input:first').click().then(() => {
           expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
               'Event Type': 'pointerover',
@@ -2526,7 +2526,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.getAll('btn', 'mousemove mouseover').each(shouldBeCalledOnce)
         cy.getAll('btn', 'pointerdown mousedown pointerup mouseup click').each(shouldBeCalledWithCount(2))
-        .then(function () {
+        .then(() => {
           const { logs } = this
           const logsArr = logs.map((x) => x.invoke('consoleProps'))
 
@@ -2581,7 +2581,7 @@ describe('src/cy/commands/actions/click', () => {
       it('#consoleProps groups have activated modifiers', () => {
         cy.$$('input:first').click(_.stubFalse)
 
-        cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(function () {
+        cy.get('input:first').type('{ctrl}{shift}', { release: false }).click().then(() => {
           expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
               'Event Type': 'pointerdown',
@@ -2630,12 +2630,12 @@ describe('src/cy/commands/actions/click', () => {
       it('#consoleProps when no click due to detached', () => {
         const $btn = cy.$$('button:first')
 
-        $btn.on('mouseup', function () {
+        $btn.on('mouseup', () => {
           // synchronously remove this button
           $(this).remove()
         })
 
-        cy.contains('button').click().then(function () {
+        cy.contains('button').click().then(() => {
           expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
               'Event Type': 'pointerover',
@@ -2712,7 +2712,7 @@ describe('src/cy/commands/actions/click', () => {
           cy.$$('div#tabindex').css(overlayStyle)
         })
 
-        cy.contains('button').click().then(function () {
+        cy.contains('button').click().then(() => {
           expect(this.lastLog.invoke('consoleProps').table[1]().data).to.containSubset([
             {
               'Event Type': 'pointerdown',
@@ -2756,7 +2756,7 @@ describe('src/cy/commands/actions/click', () => {
       it('does not fire a click when element has been removed on mouseup', () => {
         const $btn = cy.$$('button:first')
 
-        $btn.on('mouseup', function () {
+        $btn.on('mouseup', () => {
           // synchronously remove this button
           $(this).remove()
         })
@@ -2771,7 +2771,7 @@ describe('src/cy/commands/actions/click', () => {
       it('logs deltaOptions', () => {
         cy
         .get('button:first').click({ force: true, timeout: 1000 })
-        .then(function () {
+        .then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
@@ -2999,7 +2999,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('errors', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 100)
 
         this.logs = []
@@ -3075,7 +3075,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('.log', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -3103,7 +3103,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('snapshots after clicking', () => {
-        cy.get('button:first').dblclick().then(function () {
+        cy.get('button:first').dblclick().then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots')).to.have.length(2)
@@ -3165,12 +3165,12 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('#consoleProps', function () {
+      it('#consoleProps', () => {
         cy.on('log:added', (attrs, log) => {
           this.log = log
         })
 
-        cy.get('button').first().dblclick().then(function () {
+        cy.get('button').first().dblclick().then(() => {
           const { lastLog } = this
 
           const consoleProps = lastLog.invoke('consoleProps')
@@ -3437,7 +3437,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('errors', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 100)
 
         this.logs = []
@@ -3511,7 +3511,7 @@ describe('src/cy/commands/actions/click', () => {
     })
 
     describe('.log', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -3539,7 +3539,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       it('snapshots after clicking', () => {
-        cy.get('button:first').rightclick().then(function () {
+        cy.get('button:first').rightclick().then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots')).to.have.length(2)
@@ -3586,7 +3586,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('#consoleProps', function () {
+      it('#consoleProps', () => {
         cy.on('log:added', (attrs, log) => {
           this.log = log
         })
@@ -4401,7 +4401,7 @@ describe('mouse state', () => {
       })
       .then(($iframe) => {
         // cypress does not wrap this as a DOM element (does not wrap in jquery)
-        return cy.wrap($iframe.first().contents().find('body'))
+        cy.wrap($iframe.first().contents().find('body'))
       })
       .within(() => {
         cy.get('a#hashchange')

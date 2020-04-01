@@ -1,11 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 
 const $errUtils = require('./error_utils')
@@ -166,10 +158,9 @@ const create = function (Cypress, cy, state, config) {
       }
 
       const { prevSubject } = options
-
-      // normalize type by how they validate their
-      // previous subject (unless they're explicitly set)
-      const type = options.type != null ? options.type : (options.type = getTypeByPrevSubject(prevSubject))
+      const type = options.type != null
+        ? options.type
+        : getTypeByPrevSubject(prevSubject)
 
       return store({
         name,

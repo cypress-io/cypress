@@ -3,7 +3,7 @@ const { $, Promise } = Cypress
 describe('driver/src/cypress/index', () => {
   let CypressInstance
 
-  beforeEach(function () {
+  beforeEach(() => {
     cy.stub(Promise, 'config')
 
     CypressInstance = Cypress.$Cypress.create({})
@@ -38,7 +38,7 @@ describe('driver/src/cypress/index', () => {
   })
 
   context('#backend', () => {
-    it('sets __stackCleaned__ on errors', function () {
+    it('sets __stackCleaned__ on errors', () => {
       cy.stub(CypressInstance, 'emit')
       .withArgs('backend:request')
       .yieldsAsync({
@@ -49,7 +49,7 @@ describe('driver/src/cypress/index', () => {
         },
       })
 
-      return CypressInstance.backend('foo')
+      CypressInstance.backend('foo')
       .catch((err) => {
         expect(err.backend).to.be.true
 
@@ -65,7 +65,7 @@ describe('driver/src/cypress/index', () => {
 
       foo.bar.baz = foo
 
-      return Cypress.backend('foo', foo)
+      Cypress.backend('foo', foo)
       .then(() => {
         throw new Error('should not reach')
       }).catch((e) => {

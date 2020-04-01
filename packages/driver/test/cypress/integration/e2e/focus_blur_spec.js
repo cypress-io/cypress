@@ -45,12 +45,12 @@ const chaiSubset = require('chai-subset')
 
 chai.use(chaiSubset)
 
-const windowHasFocus = function () {
+const windowHasFocus = () => {
   if (top.document.hasFocus()) return true
 
   let hasFocus = false
 
-  window.addEventListener('focus', function () {
+  window.addEventListener('focus', () => {
     hasFocus = true
   })
 
@@ -522,7 +522,7 @@ describe('intercept blur methods correctly', () => {
       let called = false
 
       cy.get('@selectionchange').then((v) => {
-        v.callsFake(function () {
+        v.callsFake(() => {
           if (called) return
 
           called = true

@@ -1,15 +1,8 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const lolex = require('lolex')
 
 const install = (win, now, methods) => {
-  return lolex.withGlobal(win).install({
+  lolex.withGlobal(win).install({
     target: win,
     now,
     toFake: methods,
@@ -43,18 +36,13 @@ const create = function (win, now, methods) {
   }
 
   const bind = (win) => clock = install(win, now, methods)
-
   const details = () => _.pick(clock, 'now', 'methods')
 
   return {
     tick,
-
     restore,
-
     bind,
-
     details,
-
   }
 }
 

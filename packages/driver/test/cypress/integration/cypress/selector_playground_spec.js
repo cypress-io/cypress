@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { SelectorPlayground, $ } = Cypress
 
 const SELECTOR_DEFAULTS = [
@@ -15,15 +5,14 @@ const SELECTOR_DEFAULTS = [
 ]
 
 describe('src/cypress/selector_playground', () => {
-  beforeEach(() => // reset state since this is a singleton
-  {
-    return SelectorPlayground.reset()
+  beforeEach(() => {
+    SelectorPlayground.reset()
   })
 
   it('has defaults', () => {
     expect(SelectorPlayground.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
 
-    return expect(SelectorPlayground.getOnElement()).to.be.null
+    expect(SelectorPlayground.getOnElement()).to.be.null
   })
 
   context('.defaults', () => {
@@ -31,7 +20,7 @@ describe('src/cypress/selector_playground', () => {
       SelectorPlayground.defaults({})
       expect(SelectorPlayground.getSelectorPriority()).to.deep.eq(SELECTOR_DEFAULTS)
 
-      return expect(SelectorPlayground.getOnElement()).to.be.null
+      expect(SelectorPlayground.getOnElement()).to.be.null
     })
 
     it('sets selector:playground:priority if selectorPriority specified', () => {
@@ -39,15 +28,15 @@ describe('src/cypress/selector_playground', () => {
         selectorPriority: ['foo'],
       })
 
-      return expect(SelectorPlayground.getSelectorPriority()).to.eql(['foo'])
+      expect(SelectorPlayground.getSelectorPriority()).to.eql(['foo'])
     })
 
     it('sets selector:playground:on:element if onElement specified', () => {
-      const onElement = function () {}
+      const onElement = () => {}
 
       SelectorPlayground.defaults({ onElement })
 
-      return expect(SelectorPlayground.getOnElement()).to.equal(onElement)
+      expect(SelectorPlayground.getOnElement()).to.equal(onElement)
     })
 
     it('throws if not passed an object', () => {
@@ -59,7 +48,7 @@ describe('src/cypress/selector_playground', () => {
       .with.property('message')
       .and.include('`Cypress.SelectorPlayground.defaults()` must be called with an object. You passed: ')
 
-      return expect(fn).to.throw()
+      expect(fn).to.throw()
       .with.property('docsUrl')
       .and.include('https://on.cypress.io/selector-playground-api')
     })
@@ -73,12 +62,12 @@ describe('src/cypress/selector_playground', () => {
       .with.property('message')
       .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `selectorPriority` property. It must be an array. You passed: `foo`')
 
-      return expect(fn).to.throw()
+      expect(fn).to.throw()
       .with.property('docsUrl')
       .and.include('https://on.cypress.io/selector-playground-api')
     })
 
-    return it('throws if onElement is not a function', () => {
+    it('throws if onElement is not a function', () => {
       const fn = () => {
         return SelectorPlayground.defaults({ onElement: 'foo' })
       }
@@ -87,14 +76,14 @@ describe('src/cypress/selector_playground', () => {
       .with.property('message')
       .and.include('`Cypress.SelectorPlayground.defaults()` called with invalid `onElement` property. It must be a function. You passed: `foo`')
 
-      return expect(fn).to.throw()
+      expect(fn).to.throw()
       .with.property('docsUrl')
       .and.include('https://on.cypress.io/selector-playground-api')
     })
   })
 
-  return context('.getSelector', () => {
-    return it('uses defaults.selectorPriority', () => {
+  context('.getSelector', () => {
+    it('uses defaults.selectorPriority', () => {
       const $div = $('<div data-cy=\'main button 123\' data-foo-bar-baz=\'quux\' data-test=\'qwerty\' data-foo=\'bar\' />')
 
       Cypress.$('body').append($div)
@@ -121,7 +110,7 @@ describe('src/cypress/selector_playground', () => {
         },
       })
 
-      return expect(SelectorPlayground.getSelector($div)).to.eq('[data-foo=bar]')
+      expect(SelectorPlayground.getSelector($div)).to.eq('[data-foo=bar]')
     })
   })
 })

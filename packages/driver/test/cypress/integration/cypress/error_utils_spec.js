@@ -268,7 +268,7 @@ describe('driver/src/cypress/error_utils', () => {
 
     describe('when onFail is provided as a function', () => {
       it('attaches the function to the error', () => {
-        const onFail = function () {}
+        const onFail = () => {}
 
         try {
           $errUtils.throwErrByPath('__test_errors.obj', { onFail })

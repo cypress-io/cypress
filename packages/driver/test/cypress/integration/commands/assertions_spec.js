@@ -9,14 +9,14 @@ describe('src/cy/commands/assertions', () => {
     })
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     const doc = cy.state('document')
 
     $(doc.body).empty().html(this.body)
   })
 
   context('#should', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
@@ -123,7 +123,7 @@ describe('src/cy/commands/assertions', () => {
         }
         , 100)
 
-        return cy.wrap(obj)
+        cy.wrap(obj)
       }).should('deep.eq', { foo: 'baz' })
     })
 
@@ -149,7 +149,7 @@ describe('src/cy/commands/assertions', () => {
 
         cy.wrap(obj).should((o) => {
           expect(o).to.have.property('foo').and.eq('bar')
-        }).then(function () {
+        }).then(() => {
           // wrap + have property + and eq
           expect(this.logs.length).to.eq(3)
         })
@@ -171,7 +171,7 @@ describe('src/cy/commands/assertions', () => {
           expect($body).to.have.class('foo')
 
           expect($body).to.have.id('bar')
-        }).then(function () {
+        }).then(() => {
           cy.$$('body').removeClass('foo').removeAttr('id')
 
           expect(this.logs.length).to.eq(3)
@@ -200,7 +200,7 @@ describe('src/cy/commands/assertions', () => {
           expect($body.attr('class')).to.match(/foo/)
 
           expect($body.attr('id')).to.include('bar')
-        }).then(function () {
+        }).then(() => {
           cy.$$('body').removeClass('foo').removeAttr('id')
 
           const types = _.map(this.logs, (l) => l.get('type'))
@@ -225,7 +225,7 @@ describe('src/cy/commands/assertions', () => {
           expect(subject).to.eq('ab')
           expect(subject).not.to.contain('c')
         })
-        .then(function () {
+        .then(() => {
           expect(this.logs.length).to.eq(8)
 
           this.logs.slice(1).forEach((log) => {
@@ -235,14 +235,14 @@ describe('src/cy/commands/assertions', () => {
       })
 
       context('remote jQuery instances', () => {
-        beforeEach(function () {
+        beforeEach(() => {
           this.remoteWindow = cy.state('window')
         })
 
-        it('yields the remote jQuery instance', function () {
+        it('yields the remote jQuery instance', () => {
           let fn
 
-          this.remoteWindow.$.fn.__foobar = (fn = function () {})
+          this.remoteWindow.$.fn.__foobar = (fn = () => {})
 
           cy
           .get('input:first').should(function ($input) {
@@ -290,7 +290,7 @@ describe('src/cy/commands/assertions', () => {
 
     describe('have.text', () => {
       it('resolves the assertion', () => {
-        cy.get('#list li').eq(0).should('have.text', 'li 0').then(function () {
+        cy.get('#list li').eq(0).should('have.text', 'li 0').then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
@@ -383,7 +383,7 @@ describe('src/cy/commands/assertions', () => {
           cy.$$('#foo').addClass('active')
         }))
 
-        cy.contains('foo').should('have.class', 'active').then(function () {
+        cy.contains('foo').should('have.class', 'active').then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
@@ -472,7 +472,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('throws when the subject isnt in the DOM', function (done) {
-        cy.$$('button:first').click(function () {
+        cy.$$('button:first').click(() => {
           $(this).addClass('foo').remove()
         })
 
@@ -618,7 +618,7 @@ describe('src/cy/commands/assertions', () => {
 
     describe('.log', () => {
       it('is type child', () => {
-        cy.get('button').should('match', 'button').then(function () {
+        cy.get('button').should('match', 'button').then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
@@ -628,7 +628,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       it('is type child when alias between assertions', () => {
-        cy.get('button').as('btn').should('match', 'button').then(function () {
+        cy.get('button').as('btn').should('match', 'button').then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
@@ -646,7 +646,7 @@ describe('src/cy/commands/assertions', () => {
   })
 
   context('#assert', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
@@ -990,7 +990,7 @@ describe('src/cy/commands/assertions', () => {
   })
 
   context('chai assert', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
@@ -1000,19 +1000,19 @@ describe('src/cy/commands/assertions', () => {
       return null
     })
 
-    it('equal', function () {
+    it('equal', () => {
       assert.equal(1, 1, 'one is one')
 
       expect(this.logs[0].get('message')).to.eq('one is one: expected **1** to equal **1**')
     })
 
-    it('isOk', function () {
+    it('isOk', () => {
       assert.isOk({}, 'is okay')
 
       expect(this.logs[0].get('message')).to.eq('is okay: expected **{}** to be truthy')
     })
 
-    it('isFalse', function () {
+    it('isFalse', () => {
       assert.isFalse(false, 'is false')
 
       expect(this.logs[0].get('message')).to.eq('is false: expected **false** to be false')
@@ -1124,12 +1124,12 @@ describe('src/cy/commands/assertions', () => {
   })
 
   context('chai overrides', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       this.$body = cy.$$('body')
     })
 
     describe('#contain', () => {
-      it('can find input type submit by value', function () {
+      it('can find input type submit by value', () => {
         // $input creates an HTML element to be tested.
         // eslint-disable-next-line no-unused-vars
         const $input = cy.$$('<input type=\'submit\' value=\'click me\' />').appendTo(this.$body)
@@ -1266,7 +1266,7 @@ describe('src/cy/commands/assertions', () => {
         cy.noop([1, 2, 3]).should('have.length', 3)
       })
 
-      it('rejects any element not in the document', function () {
+      it('rejects any element not in the document', () => {
         cy.$$('<button />').appendTo(this.$body)
         cy.$$('<button />').appendTo(this.$body)
 
@@ -1284,7 +1284,7 @@ describe('src/cy/commands/assertions', () => {
   })
 
   context('chai plugins', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       this.logs = []
 
       this.clearLogs = () => {
@@ -1299,14 +1299,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('data', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div data-foo=\'bar\' />')
-        this.$div.data = function () {
+        this.$div.data = () => {
           throw new Error('data called')
         }
       })
 
-      it('no prop, with prop, negation, and chainable', function () {
+      it('no prop, with prop, negation, and chainable', () => {
         expect(this.$div).to.have.data('foo') // 1
         expect(this.$div).to.have.data('foo', 'bar') // 2,3
         expect(this.$div).to.have.data('foo').and.eq('bar') // 4,5
@@ -1331,14 +1331,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('class', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div class=\'foo bar\' />')
-        this.$div.hasClass = function () {
+        this.$div.hasClass = () => {
           throw new Error('hasClass called')
         }
       })
 
-      it('class, not class', function () {
+      it('class, not class', () => {
         expect(this.$div).to.have.class('foo') // 1
         expect(this.$div).to.have.class('bar') // 2
         expect(this.$div).not.to.have.class('baz') // 3
@@ -1375,38 +1375,38 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('id', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div id=\'foo\' />')
-        this.$div.prop = function () {
+        this.$div.prop = () => {
           throw new Error('prop called')
         }
 
-        this.$div.attr = function () {
+        this.$div.attr = () => {
           throw new Error('attr called')
         }
 
         this.$div2 = $('<div />')
         this.$div2.prop('id', 'foo')
-        this.$div2.prop = function () {
+        this.$div2.prop = () => {
           throw new Error('prop called')
         }
 
-        this.$div2.attr = function () {
+        this.$div2.attr = () => {
           throw new Error('attr called')
         }
 
         this.$div3 = $('<div />')
         this.$div3.attr('id', 'foo')
-        this.$div3.prop = function () {
+        this.$div3.prop = () => {
           throw new Error('prop called')
         }
 
-        this.$div3.attr = function () {
+        this.$div3.attr = () => {
           throw new Error('attr called')
         }
       })
 
-      it('id, not id', function () {
+      it('id, not id', () => {
         expect(this.$div).to.have.id('foo') // 1
         expect(this.$div).not.to.have.id('bar') // 2
 
@@ -1446,14 +1446,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('html', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div><button>button</button></div>')
-        this.$div.html = function () {
+        this.$div.html = () => {
           throw new Error('html called')
         }
       })
 
-      it('html, not html, contain html', function () {
+      it('html, not html, contain html', () => {
         expect(this.$div).to.have.html('<button>button</button>') // 1
         expect(this.$div).not.to.have.html('foo') // 2
         expect(this.logs.length).to.eq(2)
@@ -1516,7 +1516,7 @@ describe('src/cy/commands/assertions', () => {
         expect(null).to.have.html('foo')
       })
 
-      it('partial match', function () {
+      it('partial match', () => {
         expect(this.$div).to.contain.html('button')
         expect(this.$div).to.include.html('button')
         expect(this.$div).to.not.contain.html('span')
@@ -1526,14 +1526,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('text', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div>foo</div>')
-        this.$div.text = function () {
+        this.$div.text = () => {
           throw new Error('text called')
         }
       })
 
-      it('text, not text, contain text', function () {
+      it('text, not text, contain text', () => {
         expect(this.$div).to.have.text('foo') // 1
         expect(this.$div).not.to.have.text('bar') // 2
 
@@ -1581,7 +1581,7 @@ describe('src/cy/commands/assertions', () => {
         }
       })
 
-      it('partial match', function () {
+      it('partial match', () => {
         expect(this.$div).to.have.text('foo')
         expect(this.$div).to.contain.text('o')
         expect(this.$div).to.include.text('o')
@@ -1608,14 +1608,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('value', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$input = $('<input value=\'foo\' />')
-        this.$input.val = function () {
+        this.$input.val = () => {
           throw new Error('val called')
         }
       })
 
-      it('value, not value, contain value', function () {
+      it('value, not value, contain value', () => {
         expect(this.$input).to.have.value('foo') // 1
         expect(this.$input).not.to.have.value('bar') // 2
 
@@ -1679,7 +1679,7 @@ describe('src/cy/commands/assertions', () => {
         expect({}).to.have.value('foo')
       })
 
-      it('partial match', function () {
+      it('partial match', () => {
         expect(this.$input).to.contain.value('oo')
         expect(this.$input).to.not.contain.value('oof')
         // make sure "includes" is an alias of "include"
@@ -1706,14 +1706,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('descendants', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div><button>button</button></div>')
-        this.$div.has = function () {
+        this.$div.has = () => {
           throw new Error('has called')
         }
       })
 
-      it('descendants, not descendants', function () {
+      it('descendants, not descendants', () => {
         expect(this.$div).to.have.descendants('button') // 1
         expect(this.$div).not.to.have.descendants('input') // 2
 
@@ -1749,25 +1749,25 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('visible', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div>div</div>').appendTo($('body'))
-        this.$div.is = function () {
+        this.$div.is = () => {
           throw new Error('is called')
         }
 
         this.$div2 = $('<div style=\'display: none\'>div</div>').appendTo($('body'))
-        this.$div2.is = function () {
+        this.$div2.is = () => {
           throw new Error('is called')
         }
       })
 
-      afterEach(function () {
+      afterEach(() => {
         this.$div.remove()
 
         this.$div2.remove()
       })
 
-      it('visible, not visible, adds to error', function () {
+      it('visible, not visible, adds to error', () => {
         expect(this.$div).to.be.visible // 1
         expect(this.$div2).not.to.be.visible // 2
 
@@ -1813,25 +1813,25 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('hidden', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div style=\'display: none\'>div</div>').appendTo($('body'))
-        this.$div.is = function () {
+        this.$div.is = () => {
           throw new Error('is called')
         }
 
         this.$div2 = $('<div>div</div>').appendTo($('body'))
-        this.$div2.is = function () {
+        this.$div2.is = () => {
           throw new Error('is called')
         }
       })
 
-      afterEach(function () {
+      afterEach(() => {
         this.$div.remove()
 
         this.$div2.remove()
       })
 
-      it('hidden, not hidden, adds to error', function () {
+      it('hidden, not hidden, adds to error', () => {
         expect(this.$div).to.be.hidden // 1
         expect(this.$div2).not.to.be.hidden // 2
 
@@ -1876,19 +1876,19 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('selected', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$option = $('<option selected>option</option>')
-        this.$option.is = function () {
+        this.$option.is = () => {
           throw new Error('is called')
         }
 
         this.$option2 = $('<option>option</option>')
-        this.$option2.is = function () {
+        this.$option2.is = () => {
           throw new Error('is called')
         }
       })
 
-      it('selected, not selected', function () {
+      it('selected, not selected', () => {
         expect(this.$option).to.be.selected // 1
         expect(this.$option2).not.to.be.selected // 2
 
@@ -1924,19 +1924,19 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('checked', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$input = $('<input type=\'checkbox\' checked />')
-        this.$input.is = function () {
+        this.$input.is = () => {
           throw new Error('is called')
         }
 
         this.$input2 = $('<input type=\'checkbox\' />')
-        this.$input2.is = function () {
+        this.$input2.is = () => {
           throw new Error('is called')
         }
       })
 
-      it('checked, not checked', function () {
+      it('checked, not checked', () => {
         expect(this.$input).to.be.checked // 1
         expect(this.$input2).not.to.be.checked // 2
 
@@ -1972,19 +1972,19 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('enabled', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$input = $('<input />')
-        this.$input.is = function () {
+        this.$input.is = () => {
           throw new Error('is called')
         }
 
         this.$input2 = $('<input disabled />')
-        this.$input2.is = function () {
+        this.$input2.is = () => {
           throw new Error('is called')
         }
       })
 
-      it('enabled, not enabled', function () {
+      it('enabled, not enabled', () => {
         expect(this.$input).to.be.enabled // 1
         expect(this.$input2).not.to.be.enabled // 2
 
@@ -2020,19 +2020,19 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('disabled', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$input = $('<input disabled />')
-        this.$input.is = function () {
+        this.$input.is = () => {
           throw new Error('is called')
         }
 
         this.$input2 = $('<input />')
-        this.$input2.is = function () {
+        this.$input2.is = () => {
           throw new Error('is called')
         }
       })
 
-      it('disabled, not disabled', function () {
+      it('disabled, not disabled', () => {
         expect(this.$input).to.be.disabled // 1
         expect(this.$input2).not.to.be.disabled // 2
 
@@ -2068,7 +2068,7 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('exist', () => {
-      it('passes thru non DOM', function () {
+      it('passes thru non DOM', () => {
         expect([]).to.exist
         expect({}).to.exist
         expect('foo').to.exist
@@ -2094,19 +2094,19 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('empty', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.div = $('<div></div>')
-        this.div.is = function () {
+        this.div.is = () => {
           throw new Error('is called')
         }
 
         this.div2 = $('<div><button>button</button></div>')
-        this.div2.is = function () {
+        this.div2.is = () => {
           throw new Error('is called')
         }
       })
 
-      it('passes thru non DOM', function () {
+      it('passes thru non DOM', () => {
         expect([]).to.be.empty
         expect({}).to.be.empty
         expect('').to.be.empty
@@ -2130,7 +2130,7 @@ describe('src/cy/commands/assertions', () => {
         )
       })
 
-      it('empty, not empty, raw dom documents', function () {
+      it('empty, not empty, raw dom documents', () => {
         expect(this.div).to.be.empty // 1
         expect(this.div2).not.to.be.empty // 2
 
@@ -2163,19 +2163,19 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('focused', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.div = $('<div id=\'div\' tabindex=0></div>').appendTo($('body'))
-        this.div.is = function () {
+        this.div.is = () => {
           throw new Error('is called')
         }
 
         this.div2 = $('<div id=\'div2\' tabindex=1><button>button</button></div>').appendTo($('body'))
-        this.div2.is = function () {
+        this.div2.is = () => {
           throw new Error('is called')
         }
       })
 
-      it('focus, not focus, raw dom documents', function () {
+      it('focus, not focus, raw dom documents', () => {
         expect(this.div).to.not.be.focused
         expect(this.div[0]).to.not.be.focused
         this.div.focus()
@@ -2217,7 +2217,7 @@ describe('src/cy/commands/assertions', () => {
         )
       })
 
-      it('works with focused or focus', function () {
+      it('works with focused or focus', () => {
         expect(this.div).to.not.have.focus
         expect(this.div).to.not.have.focused
         expect(this.div).to.not.be.focus
@@ -2266,14 +2266,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('match', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.div = $('<div></div>')
-        this.div.is = function () {
+        this.div.is = () => {
           throw new Error('is called')
         }
       })
 
-      it('passes thru non DOM', function () {
+      it('passes thru non DOM', () => {
         expect('foo').to.match(/f/)
 
         expect(this.logs.length).to.eq(1)
@@ -2285,7 +2285,7 @@ describe('src/cy/commands/assertions', () => {
         )
       })
 
-      it('match, not match, raw dom documents', function () {
+      it('match, not match, raw dom documents', () => {
         expect(this.div).to.match('div') // 1
         expect(this.div).not.to.match('button') // 2
 
@@ -2318,7 +2318,7 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('contain', () => {
-      it('passes thru non DOM', function () {
+      it('passes thru non DOM', () => {
         expect(['foo']).to.contain('foo') // 1
         expect({ foo: 'bar', baz: 'quux' }).to.contain({ foo: 'bar' }) // 2, 3
         expect('foo').to.contain('fo') // 4
@@ -2349,19 +2349,19 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('attr', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div foo=\'bar\'>foo</div>')
-        this.$div.attr = function () {
+        this.$div.attr = () => {
           throw new Error('attr called')
         }
 
         this.$a = $('<a href=\'https://google.com\'>google</a>')
-        this.$a.attr = function () {
+        this.$a.attr = () => {
           throw new Error('attr called')
         }
       })
 
-      it('attr, not attr', function () {
+      it('attr, not attr', () => {
         expect(this.$div).to.have.attr('foo') // 1
         expect(this.$div).to.have.attr('foo', 'bar') // 2
         expect(this.$div).not.to.have.attr('bar') // 3
@@ -2449,20 +2449,20 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('prop', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$input = $('<input type=\'checkbox\' />')
         this.$input.prop('checked', true)
-        this.$input.prop = function () {
+        this.$input.prop = () => {
           throw new Error('prop called')
         }
 
         this.$a = $('<a href=\'/foo\'>google</a>')
-        this.$a.prop = function () {
+        this.$a.prop = () => {
           throw new Error('prop called')
         }
       })
 
-      it('prop, not prop', function () {
+      it('prop, not prop', () => {
         expect(this.$input).to.have.prop('checked') // 1
         expect(this.$input).to.have.prop('checked', true) // 2
         expect(this.$input).not.to.have.prop('bar') // 3
@@ -2552,14 +2552,14 @@ describe('src/cy/commands/assertions', () => {
     })
 
     context('css', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$div = $('<div style=\'display: none\'>div</div>')
-        this.$div.css = function () {
+        this.$div.css = () => {
           throw new Error('css called')
         }
       })
 
-      it('css, not css', function () {
+      it('css, not css', () => {
         expect(this.$div).to.have.css('display') // 1
         expect(this.$div).to.have.css('display', 'none') // 2
         expect(this.$div).not.to.have.css('bar') // 3

@@ -7,7 +7,7 @@ const {
 } = require('../../../support/utils')
 
 describe('src/cy/commands/actions/type - #type special chars', () => {
-  before(function () {
+  before(() => {
     cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
@@ -1061,7 +1061,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
   })
 
   context('{enter}', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       this.$forms = cy.$$('#form-submits')
     })
 
@@ -1229,7 +1229,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         cy.get('#single-input input').type('foo{enter}')
       })
 
-      it('triggers form submit synchronously before type logs or resolves', function () {
+      it('triggers form submit synchronously before type logs or resolves', () => {
         const events = []
 
         cy.on('command:start', (cmd) => {
@@ -1265,7 +1265,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         })
       })
 
-      it('triggers 2 form submit event', function () {
+      it('triggers 2 form submit event', () => {
         const submitted = cy.stub()
 
         this.$forms.find('#single-input').submit((e) => {
@@ -1378,7 +1378,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     context('2 inputs, no \'submit\' elements, only 1 input allowing implicit submission', () => {
-      it('does submit event', function () {
+      it('does submit event', () => {
         const submit = cy.stub().as('submit')
 
         this.$forms.find('#no-buttons-and-only-one-input-allowing-implicit-submission').submit((e) => {
@@ -1478,7 +1478,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     context(`2 inputs, 1 'submit' button[type=submit], 1 'reset' button[type=reset]`, () => {
-      it('triggers form submit', function () {
+      it('triggers form submit', () => {
         const submit = cy.stub()
 
         this.$forms.find('#multiple-inputs-and-reset-and-submit-buttons').submit((e) => {
@@ -1628,7 +1628,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     })
 
     context('disabled default button', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$forms.find('#multiple-inputs-and-multiple-submits').find('button').prop('disabled', true)
       })
 

@@ -32,7 +32,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     describe('assertion verification', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
             this.lastLog = log
@@ -47,7 +47,7 @@ describe('src/cy/commands/querying', () => {
           cy.$$(':text:first').addClass('focused').focus()
         }))
 
-        cy.focused().should('have.class', 'focused').then(function () {
+        cy.focused().should('have.class', 'focused').then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
@@ -67,7 +67,7 @@ describe('src/cy/commands/querying', () => {
           $input.get(0).focus()
         }))
 
-        cy.focused().should('have.value', '1234').then(function () {
+        cy.focused().should('have.value', '1234').then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('name')).to.eq('assert')
@@ -79,7 +79,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     describe('.log', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         cy.$$('input:first').get(0).focus()
 
         cy.on('log:added', (attrs, log) => {
@@ -92,7 +92,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('is a parent command', () => {
-        cy.get('body').focused().then(function () {
+        cy.get('body').focused().then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('type')).to.eq('parent')
@@ -100,7 +100,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('ends immediately', () => {
-        cy.focused().then(function () {
+        cy.focused().then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('ended')).to.be.true
@@ -110,7 +110,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('snapshots immediately', () => {
-        cy.focused().then(function () {
+        cy.focused().then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
@@ -143,7 +143,7 @@ describe('src/cy/commands/querying', () => {
         button.get(0).focus()
         button.get(0).blur()
 
-        cy.focused().should('not.exist').then(function () {
+        cy.focused().should('not.exist').then(() => {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             Command: 'focused',
             Yielded: '--nothing--',
@@ -154,7 +154,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     describe('errors', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 100)
 
         this.logs = []
@@ -226,10 +226,10 @@ describe('src/cy/commands/querying', () => {
   })
 
   context('#within', () => {
-    it('invokes callback function with runnable.ctx', function () {
+    it('invokes callback function with runnable.ctx', () => {
       const ctx = this
 
-      cy.get('div:first').within(function () {
+      cy.get('div:first').within(() => {
         expect(ctx === this).to.be.true
       })
     })
@@ -357,7 +357,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     describe('.log', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -372,7 +372,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('can silence logging', () => {
-        cy.get('div:first').within({ log: false }, () => {}).then(function () {
+        cy.get('div:first').within({ log: false }, () => {}).then(() => {
           expect(this.logs.length).to.eq(0)
         })
       })
@@ -395,7 +395,7 @@ describe('src/cy/commands/querying', () => {
 
       it('snapshots after clicking', () => {
         cy.get('div:first').within(() => {})
-        .then(function () {
+        .then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
@@ -406,7 +406,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     describe('errors', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 50)
 
         this.logs = []
@@ -502,7 +502,7 @@ describe('src/cy/commands/querying', () => {
 
     describe('.log', () => {
       beforeEach(() => {
-        beforeEach(function () {
+        beforeEach(() => {
           this.logs = []
 
           cy.on('log:added', (attrs, log) => {
@@ -518,7 +518,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('can turn off logging', () => {
-        cy.root({ log: false }).then(function () {
+        cy.root({ log: false }).then(() => {
           expect(this.log).to.be.undefined
         })
       })
@@ -537,7 +537,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('snapshots after clicking', () => {
-        cy.root().then(function () {
+        cy.root().then(() => {
           const { lastLog } = this
 
           expect(lastLog.get('snapshots').length).to.eq(1)
@@ -549,7 +549,7 @@ describe('src/cy/commands/querying', () => {
       it('sets $el to document', () => {
         const html = cy.$$('html')
 
-        cy.root().then(function () {
+        cy.root().then(() => {
           expect(this.lastLog.get('$el').get(0)).to.eq(html.get(0))
         })
       })
@@ -915,7 +915,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     describe('.log', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -949,7 +949,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('logs exist: false', () => {
-        cy.get('#does-not-exist').should('not.exist').then(function () {
+        cy.get('#does-not-exist').should('not.exist').then(() => {
           expect(this.lastLog.get('message')).to.eq('#does-not-exist')
 
           expect(this.lastLog.get('$el').get(0)).not.to.be.ok
@@ -964,7 +964,7 @@ describe('src/cy/commands/querying', () => {
           win.$.get('/users')
         })
 
-        cy.get('@get.users').then(function () {
+        cy.get('@get.users').then(() => {
           expect(this.lastLog.pick('message', 'referencesAlias', 'aliasType')).to.deep.eq({
             message: '@get.users',
             referencesAlias: { name: 'get.users' },
@@ -1009,7 +1009,7 @@ describe('src/cy/commands/querying', () => {
       it('snapshots and ends when consuming an alias', () => {
         cy
         .get('body').as('b')
-        .get('@b').then(function () {
+        .get('@b').then(() => {
           expect(this.lastLog.get('ended')).to.be.true
           expect(this.lastLog.get('state')).to.eq('passed')
           expect(this.lastLog.get('snapshots').length).to.eq(1)
@@ -1311,7 +1311,7 @@ describe('src/cy/commands/querying', () => {
     //     expect(cy.get("something")).to.be.a("function")
 
     describe('errors', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 50)
 
         this.logs = []
@@ -2045,7 +2045,7 @@ space
     })
 
     describe('.log', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -2075,7 +2075,7 @@ space
       })
 
       it('snapshots and ends after finding element', () => {
-        cy.contains('foo').then(function () {
+        cy.contains('foo').then(() => {
           expect(this.lastLog.get('ended')).to.be.true
           expect(this.lastLog.get('state')).to.eq('passed')
           expect(this.lastLog.get('snapshots').length).to.eq(1)
@@ -2103,23 +2103,23 @@ space
       })
 
       it('sets type to parent when subject isnt element', () => {
-        cy.window().contains('foo').then(function () {
+        cy.window().contains('foo').then(() => {
           expect(this.lastLog.get('type')).to.eq('parent')
 
-          cy.document().contains('foo').then(function () {
+          cy.document().contains('foo').then(() => {
             expect(this.lastLog.get('type')).to.eq('parent')
           })
         })
       })
 
       it('sets type to child when used as a child command', () => {
-        cy.get('body').contains('foo').then(function () {
+        cy.get('body').contains('foo').then(() => {
           expect(this.lastLog.get('type')).to.eq('child')
         })
       })
 
       it('logs when not exists', () => {
-        cy.contains('does-not-exist').should('not.exist').then(function () {
+        cy.contains('does-not-exist').should('not.exist').then(() => {
           expect(this.lastLog.get('message')).to.eq('does-not-exist')
 
           expect(this.lastLog.get('$el').length).to.eq(0)
@@ -2152,7 +2152,7 @@ space
     })
 
     describe('errors', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 100)
 
         this.logs = []

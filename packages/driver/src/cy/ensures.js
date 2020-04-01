@@ -1,15 +1,3 @@
-/* eslint-disable
-    default-case,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $dom = require('../dom')
 const $utils = require('../cypress/utils')
@@ -33,7 +21,6 @@ const create = function (state, expect) {
   // we only validate the first
   const validateType = function (subject, type, cmd) {
     const name = cmd.get('name')
-    const prev = cmd.get('prev')
 
     switch (type) {
       case 'element':
@@ -51,6 +38,8 @@ const create = function (state, expect) {
 
       case 'window':
         return ensureWindow(subject, name)
+
+      default: null
     }
   }
 

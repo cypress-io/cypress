@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const {
   _,
 } = Cypress
@@ -24,43 +14,43 @@ const xhrGet = function (win, url) {
 }
 
 describe('src/cy/commands/waiting', () => {
-  return context('#wait', function () {
-    describe('number argument', function () {
+  context('#wait', () => {
+    describe('number argument', () => {
       it('passes delay onto Promise', () => {
         const delay = cy.spy(Promise, 'delay')
 
-        return cy.wait(50).then(() => expect(delay).to.be.calledWith(50, 'wait'))
+        cy.wait(50).then(() => expect(delay).to.be.calledWith(50, 'wait'))
       })
 
       it('does not change the subject', () => {
-        return cy
+        cy
         .wrap({})
         .then(function (subject) {
           this.subject = subject
         }).wait(10).then(function (subject) {
-          return expect(subject).to.eq(this.subject)
+          expect(subject).to.eq(this.subject)
         })
       })
 
-      return it('increases timeout by delta', () => {
+      it('increases timeout by delta', () => {
         const timeout = cy.spy(cy, 'timeout')
 
-        return cy
+        cy
         .wait(50)
         .then(() => expect(timeout).to.be.calledWith(50, true, 'wait'))
       })
     })
 
     describe('function argument', () => {
-      return describe('errors thrown', () => {
-        return it('is deprecated', (done) => {
+      describe('errors thrown', () => {
+        it('is deprecated', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('`cy.wait(fn)` has been deprecated. Change this command to be `cy.should(fn)`.')
 
-            return done()
+            done()
           })
 
-          return cy.get('body').wait(($body) => expect($body).to.match('body'))
+          cy.get('body').wait(($body) => expect($body).to.match('body'))
         })
       })
     })
@@ -71,7 +61,7 @@ describe('src/cy/commands/waiting', () => {
       it('waits for a route alias to have a response', () => {
         const response = { foo: 'foo' }
 
-        return cy
+        cy
         .server()
         .route('GET', /.*/, response).as('fetch')
         .window().then((win) => {
@@ -90,28 +80,29 @@ describe('src/cy/commands/waiting', () => {
           return null
         }))
 
-        return cy
+        cy
         .server({ delay: 1000 })
         .route(/users/, {}).as('getUsers')
         .wait('@getUsers.request').then((xhr) => {
           expect(xhr.url).to.include('/users')
 
-          return expect(xhr.response).to.be.null
+          expect(xhr.response).to.be.null
         })
       })
 
       it('passes timeout option down to requestTimeout of wait', (done) => {
-        const retry = _.after(3, _.once(() => {
-          return cy.state('window').$.get('/foo')
+        // retry
+        _.after(3, _.once(() => {
+          cy.state('window').$.get('/foo')
         }))
 
         cy.on('command:retry', (options) => {
           expect(options.timeout).to.eq(900)
 
-          return done()
+          done()
         })
 
-        return cy
+        cy
         .server()
         .route('GET', /.*/, {}).as('fetch')
         .wait('@fetch', { timeout: 900 })
@@ -121,12 +112,12 @@ describe('src/cy/commands/waiting', () => {
         const prevTimeout = cy.timeout()
 
         const retry = _.after(3, _.once(() => {
-          return cy.state('window').$.get('/foo')
+          cy.state('window').$.get('/foo')
         }))
 
         cy.on('command:retry', retry)
 
-        return cy
+        cy
         .server()
         .route('GET', /.*/, {}).as('fetch')
         .wait('@fetch').then(() => expect(cy.timeout()).to.eq(prevTimeout))
@@ -138,10 +129,10 @@ describe('src/cy/commands/waiting', () => {
         cy.on('command:retry', (options) => {
           expect(options.timeout).to.eq(199)
 
-          return done()
+          done()
         })
 
-        return cy
+        cy
         .server()
         .route('GET', '*', {}).as('fetch')
         .wait('@fetch').then(() => expect(cy.timeout()).to.eq(199))
@@ -152,10 +143,10 @@ describe('src/cy/commands/waiting', () => {
           expect(options.type).to.eq('request')
           expect(options.timeout).to.eq(199)
 
-          return done()
+          done()
         })
 
-        return cy
+        cy
         .server()
         .route('GET', '*', {}).as('fetch')
         .wait('@fetch', { requestTimeout: 199 })
@@ -167,10 +158,10 @@ describe('src/cy/commands/waiting', () => {
         cy.on('command:retry', (options) => {
           expect(options.timeout).to.eq(299)
 
-          return done()
+          done()
         })
 
-        return cy
+        cy
         .server({ delay: 100 })
         .route('GET', '*', {}).as('fetch')
         .window().then((win) => {
@@ -185,10 +176,10 @@ describe('src/cy/commands/waiting', () => {
           expect(options.type).to.eq('response')
           expect(options.timeout).to.eq(299)
 
-          return done()
+          done()
         })
 
-        return cy
+        cy
         .server({ delay: 100 })
         .route('GET', '*', {}).as('fetch')
         .window().then((win) => {
@@ -217,11 +208,11 @@ describe('src/cy/commands/waiting', () => {
             expect(options.type).to.eq('response')
             expect(options.timeout).to.eq(299)
 
-            return done()
+            done()
           }
         })
 
-        return cy
+        cy
         .server({ delay: 100 })
         .route('GET', '*', {}).as('fetch')
         .wait('@fetch', { requestTimeout: 100, responseTimeout: 299 })
@@ -229,7 +220,7 @@ describe('src/cy/commands/waiting', () => {
 
       // https://github.com/cypress-io/cypress/issues/369
       it('does not mutate 2nd route methods when using shorthand route', () => {
-        return cy
+        cy
         .server()
         .route('POST', /foo/, {}).as('getFoo')
         .route(/bar/, {}).as('getBar')
@@ -241,7 +232,7 @@ describe('src/cy/commands/waiting', () => {
         }).wait('@getBar')
       })
 
-      return describe('errors', () => {
+      describe('errors', () => {
         beforeEach(() => Cypress.config('defaultCommandTimeout', 50))
 
         it('throws when alias doesnt match a route', (done) => {
@@ -249,10 +240,10 @@ describe('src/cy/commands/waiting', () => {
             expect(err.message).to.include('`cy.wait()` only accepts aliases for routes.\nThe alias: `b` did not match a route.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
 
-            return done()
+            done()
           })
 
-          return cy.get('body').as('b').wait('@b')
+          cy.get('body').as('b').wait('@b')
         })
 
         it('throws when route is never resolved', (done) => {
@@ -261,13 +252,13 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `fetch`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
           cy.server()
           cy.route('GET', /.*/, {}).as('fetch')
 
-          return cy.wait('@fetch')
+          cy.wait('@fetch')
         })
 
         it('throws when alias is never requested', (done) => {
@@ -276,10 +267,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `foo`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('foo')
           .wait('@foo.request')
@@ -289,10 +280,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('Invalid alias: `getAny`.\nYou forgot the `@`. It should be written as: `@getAny`.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route('*', {}).as('getAny')
           .wait('getAny').then(() => {})
@@ -302,10 +293,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('`cy.wait()` could not find a registered alias for: `@bar`.\nAvailable aliases are: `foo`.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('foo')
           .window().then((win) => {
@@ -319,10 +310,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('Invalid alias: `bar`.\nYou forgot the `@`. It should be written as: `@bar`.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('foo')
           .route(/bar/, {}).as('bar')
@@ -338,10 +329,10 @@ describe('src/cy/commands/waiting', () => {
             expect(err.message).to.include('`cy.wait()` only accepts aliases for routes.\nThe alias: `bar` did not match a route.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('foo')
           .get('body').as('bar')
@@ -358,7 +349,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `1000ms` for the 1st request to the route: `foo`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
           cy.on('command:retry', (options) => {
@@ -368,7 +359,7 @@ describe('src/cy/commands/waiting', () => {
             }
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('foo')
           .route(/bar/, {}).as('bar')
@@ -381,7 +372,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `bar`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
           cy.on('command:retry', _.once(() => {
@@ -392,7 +383,7 @@ describe('src/cy/commands/waiting', () => {
             return null
           }))
 
-          return cy
+          cy
           .server()
           .route(/foo/, { foo: 'foo' }).as('foo')
           .route(/bar/, { bar: 'bar' }).as('bar')
@@ -405,7 +396,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `foo`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
           cy.on('command:retry', _.once(() => {
@@ -416,7 +407,7 @@ describe('src/cy/commands/waiting', () => {
             return null
           }))
 
-          return cy
+          cy
           .server()
           .route(/foo/, { foo: 'foo' }).as('foo')
           .route(/bar/, { bar: 'bar' }).as('bar')
@@ -431,10 +422,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('Invalid alias: `bar`.\nYou forgot the `@`. It should be written as: `@bar`.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('foo')
           .route(/bar/, {}).as('bar')
@@ -450,10 +441,10 @@ describe('src/cy/commands/waiting', () => {
             expect(err.message).to.eq('`cy.wait()` only accepts aliases for routes.\nThe alias: `bar` did not match a route.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('foo')
           .get('body').as('bar')
@@ -473,10 +464,10 @@ describe('src/cy/commands/waiting', () => {
           })
 
           cy.on('fail', (err) => {
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, { foo: 'foo' }).as('foo')
           .route(/bar/, { bar: 'bar' }).as('bar')
@@ -492,7 +483,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `200ms` for the 3rd request to the route: `get.users`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
           cy.on('command:retry', () => {
@@ -500,7 +491,7 @@ describe('src/cy/commands/waiting', () => {
 
             // dont send the 3rd response
             if (response === 3) {
-              return cy.removeAllListeners('command:retry')
+              cy.removeAllListeners('command:retry')
             }
 
             const win = cy.state('window')
@@ -511,7 +502,7 @@ describe('src/cy/commands/waiting', () => {
           cy.server()
           cy.route(/users/, resp).as('get.users')
 
-          return cy.wait(['@get.users', '@get.users', '@get.users'])
+          cy.wait(['@get.users', '@get.users', '@get.users'])
         })
 
         it('throws waiting for the 2nd response', (done) => {
@@ -523,7 +514,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `200ms` for the 2nd request to the route: `getUsers`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
           // dont send the 2nd response
@@ -534,7 +525,7 @@ describe('src/cy/commands/waiting', () => {
             return win.$.get('/users', { num: response })
           }))
 
-          return cy
+          cy
           .server()
           .route(/users/, resp).as('getUsers')
           .wait('@getUsers')
@@ -550,7 +541,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `200ms` for the 2nd request to the route: `getUsers`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
           // dont send the 2nd request
@@ -561,7 +552,7 @@ describe('src/cy/commands/waiting', () => {
             return win.$.get('/users', { num: request })
           }))
 
-          return cy
+          cy
           .server()
           .route(/users/, resp).as('getUsers')
           .wait('@getUsers.request')
@@ -574,10 +565,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `100ms` for the 1st response to the route: `response`. No response ever occurred.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route('*').as('response')
           .window().then((win) => {
@@ -593,10 +584,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `200ms` for the 2nd response to the route: `response`. No response ever occurred.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route('*').as('response')
           .window().then((win) => {
@@ -613,10 +604,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `200ms` for the 1st response to the route: `bar`. No response ever occurred.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route('/timeout?ms=0').as('foo')
           .route('/timeout?ms=5000').as('bar')
@@ -642,16 +633,16 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `200ms` for the 2nd request to the route: `getUsers`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server({ delay: 200 })
           .route(/users/, {}).as('getUsers')
           .wait('@getUsers.request').then((xhr) => {
             expect(xhr.url).to.include('/users')
 
-            return expect(xhr.response).to.be.null
+            expect(xhr.response).to.be.null
           }).wait('@getUsers')
         })
 
@@ -670,7 +661,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `500ms` for the 1st request to the route: `get.three`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
           cy.server()
@@ -678,7 +669,7 @@ describe('src/cy/commands/waiting', () => {
           cy.route('/timeout?ms=2002').as('getTwo')
           cy.route(/three/, {}).as('get.three')
 
-          return cy.wait(['@getOne', '@getTwo', '@get.three'])
+          cy.wait(['@getOne', '@getTwo', '@get.three'])
         })
 
         it('throws when waiting on the 3rd response on array of aliases', (done) => {
@@ -696,10 +687,10 @@ describe('src/cy/commands/waiting', () => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('`cy.wait()` timed out waiting `1000ms` for the 1st response to the route: `getThree`. No response ever occurred.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route('/timeout?ms=1').as('getOne')
           .route('/timeout?ms=2').as('getTwo')
@@ -713,15 +704,15 @@ describe('src/cy/commands/waiting', () => {
           }).wait(['@getOne', '@getTwo', '@getThree'])
         })
 
-        return it('throws when passed multiple string arguments', (done) => {
+        it('throws when passed multiple string arguments', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('`cy.wait()` was passed invalid arguments. You cannot pass multiple strings. If you\'re trying to wait for multiple routes, use an array.')
             expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
 
-            return done()
+            done()
           })
 
-          return cy.wait('@foo', '@bar')
+          cy.wait('@foo', '@bar')
         })
       })
     })
@@ -729,7 +720,7 @@ describe('src/cy/commands/waiting', () => {
     describe('multiple alias arguments', () => {
       before(() => cy.visit('/fixtures/jquery.html'))
 
-      return it('can wait for all requests to have a response', () => {
+      it('can wait for all requests to have a response', () => {
         const resp1 = { foo: 'foo' }
         const resp2 = { bar: 'bar' }
 
@@ -743,10 +734,10 @@ describe('src/cy/commands/waiting', () => {
           return null
         })
 
-        return cy.wait(['@getUsers', '@get.posts']).spread((xhr1, xhr2) => {
+        cy.wait(['@getUsers', '@get.posts']).spread((xhr1, xhr2) => {
           expect(xhr1.responseBody).to.deep.eq(resp1)
 
-          return expect(xhr2.responseBody).to.deep.eq(resp2)
+          expect(xhr2.responseBody).to.deep.eq(resp2)
         })
       })
     })
@@ -768,21 +759,21 @@ describe('src/cy/commands/waiting', () => {
           }
         })
 
-        return cy
+        cy
         .server()
         .route(/users/, resp).as('getUsers')
         .wait('@getUsers').then((xhr) => {
           expect(xhr.url).to.include('/users?num=1')
 
-          return expect(xhr.responseBody).to.deep.eq(resp)
+          expect(xhr.responseBody).to.deep.eq(resp)
         }).wait('@getUsers').then((xhr) => {
           expect(xhr.url).to.include('/users?num=2')
 
-          return expect(xhr.responseBody).to.deep.eq(resp)
+          expect(xhr.responseBody).to.deep.eq(resp)
         }).wait('@getUsers').then((xhr) => {
           expect(xhr.url).to.include('/users?num=3')
 
-          return expect(xhr.responseBody).to.deep.eq(resp)
+          expect(xhr.responseBody).to.deep.eq(resp)
         })
       })
 
@@ -803,18 +794,18 @@ describe('src/cy/commands/waiting', () => {
           }
         })
 
-        return cy
+        cy
         .server()
         .route(/users/, resp).as('getUsers')
         .wait(['@getUsers', '@getUsers', '@getUsers']).spread((xhr1, xhr2, xhr3) => {
           expect(xhr1.url).to.include('/users?num=1')
           expect(xhr2.url).to.include('/users?num=2')
 
-          return expect(xhr3.url).to.include('/users?num=3')
+          expect(xhr3.url).to.include('/users?num=3')
         }).wait('@getUsers').then((xhr) => {
           expect(xhr.url).to.include('/users?num=4')
 
-          return expect(xhr.responseBody).to.deep.eq(resp)
+          expect(xhr.responseBody).to.deep.eq(resp)
         })
       })
 
@@ -822,7 +813,7 @@ describe('src/cy/commands/waiting', () => {
     })
 
     describe('errors', () => {
-      return describe('invalid 1st argument', () => {
+      describe('invalid 1st argument', () => {
         beforeEach(() => Cypress.config('defaultCommandTimeout', 50))
 
         return _.each([
@@ -835,22 +826,22 @@ describe('src/cy/commands/waiting', () => {
           { type: 'Object', val: {} },
           { type: 'Symbol', val: Symbol.iterator, errVal: 'Symbol(Symbol.iterator)' },
         ], (attrs) => {
-          return it(`throws when 1st arg is ${attrs.type}`, (done) => {
+          it(`throws when 1st arg is ${attrs.type}`, (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq(`\`cy.wait()\` only accepts a number, an alias of a route, or an array of aliases of routes. You passed: \`${attrs.errVal || JSON.stringify(attrs.val)}\``)
               expect(err.docsUrl).to.eq('https://on.cypress.io/wait')
 
-              return done()
+              done()
             })
 
-            return cy.get('body').wait(attrs.val)
+            cy.get('body').wait(attrs.val)
           })
         })
       })
     })
 
-    return describe('.log', function () {
-      beforeEach(function () {
+    describe('.log', () => {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -863,83 +854,83 @@ describe('src/cy/commands/waiting', () => {
       })
 
       it('can turn off logging', () => {
-        return cy.wait(10, { log: false }).then(function () {
+        cy.wait(10, { log: false }).then(() => {
           const {
             lastLog,
           } = this
 
-          return expect(lastLog).to.be.undefined
+          expect(lastLog).to.be.undefined
         })
       })
 
-      describe('number argument', function () {
-        it('does not immediately end', function () {
+      describe('number argument', () => {
+        it('does not immediately end', () => {
           cy.on('log:added', (attrs, log) => {
             if (attrs.name === 'wait') {
-              return expect(log.get('state')).not.to.eq('passed')
+              expect(log.get('state')).not.to.eq('passed')
             }
           })
 
-          return cy.noop({}).wait(10).then(function () {
+          cy.noop({}).wait(10).then(() => {
             const {
               lastLog,
             } = this
 
-            return expect(lastLog.get('state')).to.eq('passed')
+            expect(lastLog.get('state')).to.eq('passed')
           })
         })
 
-        it('does not immediately snapshot', function () {
+        it('does not immediately snapshot', () => {
           cy.on('log:added', (attrs, log) => {
             if (attrs.name === 'wait') {
-              return expect(log.get('snapshots')).not.to.be.ok
+              expect(log.get('snapshots')).not.to.be.ok
             }
           })
 
-          return cy.noop({}).wait(10).then(function () {
+          cy.noop({}).wait(10).then(() => {
             const {
               lastLog,
             } = this
 
             expect(lastLog.get('snapshots').length).to.eq(1)
 
-            return expect(lastLog.get('snapshots')[0]).to.be.an('object')
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
           })
         })
 
         it('is a type: child if subject', () => {
-          return cy.noop({}).wait(10).then(function () {
+          cy.noop({}).wait(10).then(() => {
             const {
               lastLog,
             } = this
 
-            return expect(lastLog.get('type')).to.eq('child')
+            expect(lastLog.get('type')).to.eq('child')
           })
         })
 
-        it('is a type: child if subject is false', function () {
-          cy.noop(false).wait(10).then(function () {
+        it('is a type: child if subject is false', () => {
+          cy.noop(false).wait(10).then(() => {
             const {
               lastLog,
             } = this
 
             expect(lastLog.get('type')).to.eq('child')
 
-            return it('is a type: parent if subject is null or undefined', () => {})
+            it('is a type: parent if subject is null or undefined', () => {})
           })
 
-          return cy.wait(10).then(function () {
+          cy.wait(10).then(() => {
             const {
               lastLog,
             } = this
 
-            return expect(lastLog.get('type')).to.eq('parent')
+            expect(lastLog.get('type')).to.eq('parent')
           })
         })
 
         it('#consoleProps', () => {
-          return cy.wait(10).then(function () {
-            return expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+          cy.wait(10).then(() => {
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
               'Waited For': '10ms before continuing',
               'Yielded': undefined,
@@ -947,9 +938,9 @@ describe('src/cy/commands/waiting', () => {
           })
         })
 
-        return it('#consoleProps as a child', () => {
-          return cy.wrap({}).wait(10).then(function () {
-            return expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+        it('#consoleProps as a child', () => {
+          cy.wrap({}).wait(10).then(() => {
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
               'Waited For': '10ms before continuing',
               'Yielded': {},
@@ -958,7 +949,7 @@ describe('src/cy/commands/waiting', () => {
         })
       })
 
-      describe('alias argument errors', function () {
+      describe('alias argument errors', () => {
         it('.log', function (done) {
           Cypress.config('requestTimeout', 100)
 
@@ -981,10 +972,10 @@ describe('src/cy/commands/waiting', () => {
             } = this
 
             _.each(obj, (value, key) => {
-              return expect(lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
+              expect(lastLog.get(key)).deep.eq(value, `expected key: ${key} to eq value: ${value}`)
             })
 
-            return done()
+            done()
           })
 
           cy.on('command:retry', () => numRetries += 1)
@@ -992,7 +983,7 @@ describe('src/cy/commands/waiting', () => {
           cy.server()
           cy.route(/foo/, {}).as('getFoo')
 
-          return cy.noop({}).wait('@getFoo')
+          cy.noop({}).wait('@getFoo')
         })
 
         it('only logs once', function (done) {
@@ -1000,13 +991,13 @@ describe('src/cy/commands/waiting', () => {
             expect(this.logs.length).to.eq(1)
             expect(err.message).to.eq('`cy.wait()` could not find a registered alias for: `@foo`.\nYou have not aliased anything yet.')
 
-            return done()
+            done()
           })
 
-          return cy.wait('@foo')
+          cy.wait('@foo')
         })
 
-        return it('#consoleProps multiple aliases', function (done) {
+        it('#consoleProps multiple aliases', function (done) {
           Cypress.config('requestTimeout', 100)
 
           cy.on('fail', (err) => {
@@ -1017,10 +1008,10 @@ describe('src/cy/commands/waiting', () => {
             expect(lastLog.get('error')).to.eq(err)
             expect(err.message).to.include('`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `getBar`. No request ever occurred.')
 
-            return done()
+            done()
           })
 
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('getFoo')
           .route(/bar/, {}).as('getBar')
@@ -1035,29 +1026,29 @@ describe('src/cy/commands/waiting', () => {
       describe('function argument errors', () => {
         it('.log')
 
-        return it('#consoleProps')
+        it('#consoleProps')
       })
 
-      return describe('alias argument', function () {
+      describe('alias argument', () => {
         it('is a parent command', () => {
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('getFoo')
           .window().then((win) => {
             xhrGet(win, '/foo')
 
             return null
-          }).wait('@getFoo').then(function () {
+          }).wait('@getFoo').then(() => {
             const {
               lastLog,
             } = this
 
-            return expect(lastLog.get('type')).to.eq('parent')
+            expect(lastLog.get('type')).to.eq('parent')
           })
         })
 
         it('passes as array of referencesAlias', () => {
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('getFoo')
           .route(/bar/, {}).as('getBar')
@@ -1072,7 +1063,7 @@ describe('src/cy/commands/waiting', () => {
               lastLog,
             } = this
 
-            return expect(lastLog.get('referencesAlias')).to.deep.eq([
+            expect(lastLog.get('referencesAlias')).to.deep.eq([
               {
                 name: 'getFoo',
                 cardinal: 1,
@@ -1093,7 +1084,7 @@ describe('src/cy/commands/waiting', () => {
         })
 
         it('#consoleProps waiting on 1 alias', () => {
-          return cy
+          cy
           .server()
           .route(/foo/, {}).as('getFoo')
           .window().then((win) => {
@@ -1101,7 +1092,7 @@ describe('src/cy/commands/waiting', () => {
 
             return null
           }).wait('@getFoo').then(function (xhr) {
-            return expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
               'Waited For': 'getFoo',
               Yielded: xhr,
@@ -1109,8 +1100,8 @@ describe('src/cy/commands/waiting', () => {
           })
         })
 
-        return it('#consoleProps waiting on multiple aliases', () => {
-          return cy
+        it('#consoleProps waiting on multiple aliases', () => {
+          cy
           .server()
           .route(/foo/, {}).as('getFoo')
           .route(/bar/, {}).as('getBar')
@@ -1120,7 +1111,7 @@ describe('src/cy/commands/waiting', () => {
 
             return null
           }).wait(['@getFoo', '@getBar']).then(function (xhrs) {
-            return expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
               'Waited For': 'getFoo, getBar',
               Yielded: [xhrs[0], xhrs[1]], // explictly create the array here

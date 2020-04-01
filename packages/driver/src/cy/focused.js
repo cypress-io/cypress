@@ -1,23 +1,13 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $dom = require('../dom')
 const $window = require('../dom/window')
 const $elements = require('../dom/elements')
 const $actionability = require('./actionability')
 
 const create = function (state) {
-  const documentHasFocus = () => // hardcode document has focus as true
+  // hardcode document has focus as true
   // since the test should assume the window
   // is in focus the entire time
-  {
+  const documentHasFocus = () => {
     return true
   }
 

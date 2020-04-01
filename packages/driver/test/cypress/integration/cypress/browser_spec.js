@@ -1,63 +1,49 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const {
-  _,
-} = Cypress
+import browserProps from '../../../../src/cypress/browser'
 
-const browserProps = require('../../../../src/cypress/browser')
-
-describe('src/cypress/browser', function () {
-  beforeEach(function () {
+describe('src/cypress/browser', () => {
+  beforeEach(() => {
     this.commands = (browser = { name: 'chrome', family: 'chromium' }) => browserProps({ browser })
   })
 
   context('.browser', () => {
-    return it('returns the current browser', function () {
-      return expect(this.commands().browser).to.eql({ name: 'chrome', family: 'chromium' })
+    it('returns the current browser', () => {
+      expect(this.commands().browser).to.eql({ name: 'chrome', family: 'chromium' })
     })
   })
 
-  return context('.isBrowser', function () {
-    it('returns true if it\'s a match', function () {
+  context('.isBrowser', () => {
+    it('returns true if it\'s a match', () => {
       expect(this.commands().isBrowser('chrome')).to.be.true
 
-      return expect(this.commands().isBrowser({ family: 'chromium' })).to.be.true
+      expect(this.commands().isBrowser({ family: 'chromium' })).to.be.true
     })
 
-    it('returns false if it\'s not a match', function () {
-      return expect(this.commands().isBrowser('firefox')).to.be.false
+    it('returns false if it\'s not a match', () => {
+      expect(this.commands().isBrowser('firefox')).to.be.false
     })
 
-    it('is case-insensitive', function () {
-      return expect(this.commands().isBrowser('Chrome')).to.be.true
+    it('is case-insensitive', () => {
+      expect(this.commands().isBrowser('Chrome')).to.be.true
     })
 
-    it('throws if arg is not a string or object', function () {
-      return expect(() => {
-        return this.commands().isBrowser(true)
+    it('throws if arg is not a string or object', () => {
+      expect(() => {
+        this.commands().isBrowser(true)
       }).to.throw('`Cypress.isBrowser()` must be passed the name of a browser or an object to filter with. You passed: `true`')
     })
 
-    it('returns true if it\'s a match or a \'parent\' browser', function () {
+    it('returns true if it\'s a match or a \'parent\' browser', () => {
       expect(this.commands().isBrowser('chrome')).to.be.true
       expect(this.commands({ name: 'electron' }).isBrowser('chrome')).to.be.false
       expect(this.commands({ name: 'chromium' }).isBrowser('chrome')).to.be.false
       expect(this.commands({ name: 'canary' }).isBrowser('chrome')).to.be.false
       expect(this.commands({ name: 'firefox' }).isBrowser('firefox')).to.be.true
 
-      return expect(this.commands({ name: 'ie' }).isBrowser('ie')).to.be.true
+      expect(this.commands({ name: 'ie' }).isBrowser('ie')).to.be.true
     })
 
-    return it('matches on name if has unknown family', function () {
-      return expect(this.commands({ name: 'customFoo' }).isBrowser('customfoo')).to.be.true
+    it('matches on name if has unknown family', () => {
+      expect(this.commands({ name: 'customFoo' }).isBrowser('customfoo')).to.be.true
     })
   })
 })

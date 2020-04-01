@@ -1,63 +1,56 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-describe('src/cy/commands/clock', function () {
-  beforeEach(function () {
+describe('src/cy/commands/clock', () => {
+  beforeEach(() => {
     this.window = cy.state('window')
 
     this.setTimeoutSpy = cy.spy(this.window, 'setTimeout')
     this.setIntervalSpy = cy.spy(this.window, 'setInterval')
   })
 
-  describe('#clock', function () {
+  describe('#clock', () => {
     it('sets clock as subject', () => {
-      return cy.clock().then((clock) => {
+      cy.clock().then((clock) => {
         expect(clock).to.exist
 
-        return expect(clock.tick).to.be.a('function')
+        expect(clock.tick).to.be.a('function')
       })
     })
 
     it('assigns clock to test context', () => {
-      return cy.clock().then(function (clock) {
-        return expect(clock).to.eq(this.clock)
+      cy.clock().then(function (clock) {
+        expect(clock).to.eq(this.clock)
       })
     })
 
     it('proxies lolex clock, replacing window time methods', function (done) {
       expect(this.setTimeoutSpy).not.to.be.called
 
-      return cy.clock().then(function (clock) {
+      cy.clock().then(function (clock) {
         // lolex calls setTimeout once as part of its setup
         // but it shouldn't be called again by the @window.setTimeout()
         expect(this.setTimeoutSpy).to.be.calledOnce
         this.window.setTimeout(() => {
           expect(this.setTimeoutSpy).to.be.calledOnce
 
-          return done()
+          done()
         })
 
         return clock.tick()
       })
     })
 
-    it('takes now arg', function () {
+    it('takes now arg', () => {
       const now = 1111111111111
 
-      return cy.clock(now).then(function (clock) {
+      cy.clock(now).then(function (clock) {
         expect(new this.window.Date().getTime()).to.equal(now)
         clock.tick(4321)
 
-        return expect(new this.window.Date().getTime()).to.equal(now + 4321)
+        expect(new this.window.Date().getTime()).to.equal(now + 4321)
       })
     })
 
     it('restores window time methods when calling restore', (done) => {
-      return cy.clock().then(function (clock) {
+      cy.clock().then(function (clock) {
         this.window.setTimeout(() => {
           expect(this.setTimeoutSpy).to.be.calledOnce
           clock.restore()
@@ -66,7 +59,7 @@ describe('src/cy/commands/clock', function () {
           return this.window.setTimeout(() => {
             expect(this.setTimeoutSpy).to.be.calledTwice
 
-            return done()
+            done()
           })
         })
 
@@ -75,27 +68,27 @@ describe('src/cy/commands/clock', function () {
     })
 
     it('unsets clock after restore', () => {
-      return cy.clock().then(function (clock) {
+      cy.clock().then(function (clock) {
         expect(cy.state('clock')).to.exist
         clock.restore()
         expect(cy.state('clock')).to.be.null
 
-        return expect(this.clock).to.be.null
+        expect(this.clock).to.be.null
       })
     })
 
     it('automatically restores clock on \'restore\' event', () => {
-      return cy.clock().then((clock) => {
+      cy.clock().then((clock) => {
         const r = cy.spy(clock, 'restore')
 
         Cypress.emit('test:before:run', {})
 
-        return expect(r).to.be.called
+        expect(r).to.be.called
       })
     })
 
     it('returns clock on subsequent calls, ignoring arguments', () => {
-      return cy
+      cy
       .clock()
       .clock(400)
       .then((clock) => expect(clock.details().now).to.equal(0))
@@ -104,22 +97,22 @@ describe('src/cy/commands/clock', function () {
     it('new Date() is an instance of Date', () => {
       cy.clock()
 
-      return cy.window().then((win) => {
+      cy.window().then((win) => {
         expect(new win.Date()).to.be.an.instanceof(win.Date)
 
-        return expect(new win.Date() instanceof win.Date).to.be.true
+        expect(new win.Date() instanceof win.Date).to.be.true
       })
     })
 
     // this test was written to catch a bug in lolex (dep) 3 and is fixed by lolex 4 upgrade,
     it('doesn\'t override window.performance members', () => {
-      return cy.clock()
+      cy.clock()
       .then((clock) => {
-        return cy.window().then((win) => {
+        cy.window().then((win) => {
           expect(win.performance.getEntries()).to.deep.eq([])
           clock.restore()
 
-          return expect(win.performance.getEntries().length).to.be.at.least(1)
+          expect(win.performance.getEntries().length).to.be.at.least(1)
         })
       })
     })
@@ -130,10 +123,10 @@ describe('src/cy/commands/clock', function () {
           expect(err.message).to.equal('`cy.clock()` only accepts a number or an `options` object for its first argument. You passed: `"250"`')
           expect(err.docsUrl).to.equal('https://on.cypress.io/clock')
 
-          return done()
+          done()
         })
 
-        return cy.clock('250')
+        cy.clock('250')
       })
 
       it('throws if methods is not an array (or options object)', (done) => {
@@ -141,39 +134,39 @@ describe('src/cy/commands/clock', function () {
           expect(err.message).to.equal('`cy.clock()` only accepts an array of function names or an `options` object for its second argument. You passed: `"setTimeout"`')
           expect(err.docsUrl).to.equal('https://on.cypress.io/clock')
 
-          return done()
+          done()
         })
 
-        return cy.clock(0, 'setTimeout')
+        cy.clock(0, 'setTimeout')
       })
 
-      return it('throws if methods is not an array of strings (or options object)', (done) => {
+      it('throws if methods is not an array of strings (or options object)', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.equal('`cy.clock()` only accepts an array of function names or an `options` object for its second argument. You passed: `[42]`')
           expect(err.docsUrl).to.equal('https://on.cypress.io/clock')
 
-          return done()
+          done()
         })
 
-        return cy.clock(0, [42])
+        cy.clock(0, [42])
       })
     })
 
-    context('arg for which functions to replace', function () {
+    context('arg for which functions to replace', () => {
       it('replaces specified functions', (done) => {
-        return cy.clock(null, ['setTimeout']).then(function (clock) {
+        cy.clock(null, ['setTimeout']).then(function (clock) {
           this.window.setTimeout(() => {
             expect(this.setTimeoutSpy).to.be.calledOnce
 
-            return done()
+            done()
           })
 
           return clock.tick()
         })
       })
 
-      return it('does not replace other functions', function (done) {
-        return cy.clock(null, ['setTimeout']).then((clock) => {
+      it('does not replace other functions', function (done) {
+        cy.clock(null, ['setTimeout']).then((clock) => {
           let interval
 
           interval = this.window.setInterval(() => {
@@ -182,7 +175,7 @@ describe('src/cy/commands/clock', function () {
             this.window.setTimeout(() => {
               expect(this.setTimeoutSpy).to.be.calledOnce
 
-              return done()
+              done()
             })
 
             return clock.tick()
@@ -192,8 +185,8 @@ describe('src/cy/commands/clock', function () {
       })
     })
 
-    context('options', function () {
-      beforeEach(function () {
+    context('options', () => {
+      beforeEach(() => {
         this.logged = false
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'clock') {
@@ -204,34 +197,34 @@ describe('src/cy/commands/clock', function () {
         return null
       })
 
-      it('can be first arg', function () {
-        return cy.clock({ log: false }).then(() => {
-          return expect(this.logged).to.be.false
+      it('can be first arg', () => {
+        cy.clock({ log: false }).then(() => {
+          expect(this.logged).to.be.false
         })
       })
 
-      it('can be second arg', function () {
-        return cy.clock(new Date().getTime(), { log: false }).then(() => {
-          return expect(this.logged).to.be.false
+      it('can be second arg', () => {
+        cy.clock(new Date().getTime(), { log: false }).then(() => {
+          expect(this.logged).to.be.false
         })
       })
 
-      return it('can be third arg', function () {
-        return cy.clock(new Date().getTime(), ['setTimeout'], { log: false }).then(() => {
-          return expect(this.logged).to.be.false
+      it('can be third arg', () => {
+        cy.clock(new Date().getTime(), ['setTimeout'], { log: false }).then(() => {
+          expect(this.logged).to.be.false
         })
       })
     })
 
     context('window changes', () => {
       it('binds to default window before visit', () => {
-        return cy.clock(null, ['setTimeout']).then((clock) => {
+        cy.clock(null, ['setTimeout']).then((clock) => {
           const onSetTimeout = cy.spy()
 
           cy.state('window').setTimeout(onSetTimeout)
           clock.tick()
 
-          return expect(onSetTimeout).to.be.called
+          expect(onSetTimeout).to.be.called
         })
       })
 
@@ -245,26 +238,26 @@ describe('src/cy/commands/clock', function () {
           },
         }
 
-        return cy.clock(null, ['setTimeout']).then((clock) => {
+        cy.clock(null, ['setTimeout']).then((clock) => {
           Cypress.emit('window:before:load', newWindow)
           const onSetTimeout = cy.spy()
 
           newWindow.setTimeout(onSetTimeout)
           clock.tick()
 
-          return expect(onSetTimeout).to.be.called
+          expect(onSetTimeout).to.be.called
         })
       })
 
-      return it('binds to window if called before visit', () => {
+      it('binds to window if called before visit', () => {
         cy.clock()
 
-        return cy.visit('/fixtures/dom.html')
+        cy.visit('/fixtures/dom.html')
       })
     }) // should not throw
 
-    return context('logging', function () {
-      beforeEach(function () {
+    context('logging', () => {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -278,8 +271,8 @@ describe('src/cy/commands/clock', function () {
         return null
       })
 
-      it('logs when created', function () {
-        return cy.clock().then(() => {
+      it('logs when created', () => {
+        cy.clock().then(() => {
           const log = this.logs[0]
 
           expect(this.logs.length).to.equal(1)
@@ -289,12 +282,12 @@ describe('src/cy/commands/clock', function () {
           expect(log.get('state')).to.eq('passed')
           expect(log.get('snapshots').length).to.eq(1)
 
-          return expect(log.get('snapshots')[0]).to.be.an('object')
+          expect(log.get('snapshots')[0]).to.be.an('object')
         })
       })
 
-      it('logs when restored', function () {
-        return cy.clock().then((clock) => {
+      it('logs when restored', () => {
+        cy.clock().then((clock) => {
           clock.restore()
 
           const log = this.logs[1]
@@ -302,83 +295,83 @@ describe('src/cy/commands/clock', function () {
           expect(this.logs.length).to.equal(2)
           expect(log.get('name')).to.eq('restore')
 
-          return expect(log.get('message')).to.eq('')
+          expect(log.get('message')).to.eq('')
         })
       })
 
       it('does not log when auto-restored', function (done) {
-        return cy.clock().then(() => {
+        cy.clock().then(() => {
           Cypress.emit('test:before:run', {})
           expect(this.logs.length).to.equal(1)
 
-          return done()
+          done()
         })
       })
 
-      it('does not log when log: false', function () {
-        return cy.clock({ log: false }).then((clock) => {
+      it('does not log when log: false', () => {
+        cy.clock({ log: false }).then((clock) => {
           clock.tick()
           clock.restore()
 
-          return expect(this.logs.length).to.equal(0)
+          expect(this.logs.length).to.equal(0)
         })
       })
 
-      it('only logs the first call', function () {
-        return cy
+      it('only logs the first call', () => {
+        cy
         .clock()
         .clock()
         .clock()
         .then(() => {
-          return expect(this.logs.length).to.equal(1)
+          expect(this.logs.length).to.equal(1)
         })
       })
 
-      return context('#consoleProps', function () {
+      context('#consoleProps', () => {
         beforeEach(() => {
-          return cy.clock(100, ['setTimeout']).then(function (clock) {
+          cy.clock(100, ['setTimeout']).then(function (clock) {
             this.clock = clock
 
             return this.clock.tick(100)
           })
         })
 
-        it('includes clock\'s now value', function () {
+        it('includes clock\'s now value', () => {
           const consoleProps = this.logs[0].invoke('consoleProps')
 
-          return expect(consoleProps['Now']).to.equal(100)
+          expect(consoleProps['Now']).to.equal(100)
         })
 
-        it('includes methods replaced by clock', function () {
+        it('includes methods replaced by clock', () => {
           const consoleProps = this.logs[0].invoke('consoleProps')
 
-          return expect(consoleProps['Methods replaced']).to.eql(['setTimeout'])
+          expect(consoleProps['Methods replaced']).to.eql(['setTimeout'])
         })
 
-        it('logs ticked amount on tick', function () {
+        it('logs ticked amount on tick', () => {
           const createdConsoleProps = this.logs[0].invoke('consoleProps')
 
           expect(createdConsoleProps['Ticked']).to.be.undefined
           const tickedConsoleProps = this.logs[1].invoke('consoleProps')
 
-          return expect(tickedConsoleProps['Ticked']).to.equal('100 milliseconds')
+          expect(tickedConsoleProps['Ticked']).to.equal('100 milliseconds')
         })
 
-        return it('properties are unaffected by future actions', function () {
+        it('properties are unaffected by future actions', () => {
           this.clock.tick(100)
           this.clock.restore()
           const consoleProps = this.logs[1].invoke('consoleProps')
 
           expect(consoleProps['Now']).to.equal(200)
 
-          return expect(consoleProps['Methods replaced']).to.eql(['setTimeout'])
+          expect(consoleProps['Methods replaced']).to.eql(['setTimeout'])
         })
       })
     })
   })
 
-  return describe('#tick', function () {
-    beforeEach(function () {
+  describe('#tick', () => {
+    beforeEach(() => {
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {
@@ -391,7 +384,7 @@ describe('src/cy/commands/clock', function () {
     })
 
     it('moves time ahead and triggers callbacks', function (done) {
-      return cy
+      cy
       .clock()
       .then(() => {
         return this.window.setTimeout(() => done()
@@ -400,19 +393,19 @@ describe('src/cy/commands/clock', function () {
     })
 
     it('returns the clock object', () => {
-      return cy
+      cy
       .clock()
       .tick(1000).then(function (clock) {
-        return expect(clock).to.equal(this.clock)
+        expect(clock).to.equal(this.clock)
       })
     })
 
     it('defaults to 0ms', () => {
-      return cy.clock()
+      cy.clock()
       .tick().then(function (clock) {
         const consoleProps = this.logs[0].invoke('consoleProps')
 
-        return expect(consoleProps['Ticked']).to.equal('0 milliseconds')
+        expect(consoleProps['Ticked']).to.equal('0 milliseconds')
       })
     })
 
@@ -422,50 +415,50 @@ describe('src/cy/commands/clock', function () {
           expect(err.message).to.equal('`cy.tick()` cannot be called without first calling `cy.clock()`')
           expect(err.docsUrl).to.equal('https://on.cypress.io/tick')
 
-          return done()
+          done()
         })
 
-        return cy.tick()
+        cy.tick()
       })
 
-      return it('throws if ms is not undefined or a number', (done) => {
+      it('throws if ms is not undefined or a number', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.equal('`clock.tick()`/`cy.tick()` only accepts a number as their argument. You passed: `"100"`')
           expect(err.docsUrl).to.equal('https://on.cypress.io/tick')
 
-          return done()
+          done()
         })
 
-        return cy.clock().tick('100')
+        cy.clock().tick('100')
       })
     })
 
-    return context('logging', function () {
+    context('logging', () => {
       it('logs number of milliseconds', () => {
-        return cy
+        cy
         .clock()
         .tick(250)
-        .then(function () {
+        .then(() => {
           const log = this.logs[0]
 
           expect(this.logs.length).to.equal(1)
           expect(log.get('name')).to.eq('tick')
 
-          return expect(log.get('message')).to.eq('250ms')
+          expect(log.get('message')).to.eq('250ms')
         })
       })
 
-      return it('logs before and after snapshots', () => {
-        return cy
+      it('logs before and after snapshots', () => {
+        cy
         .clock()
         .tick(250)
-        .then(function () {
+        .then(() => {
           const log = this.logs[0]
 
           expect(log.get('snapshots').length).to.eq(2)
           expect(log.get('snapshots')[0].name).to.equal('before')
 
-          return expect(log.get('snapshots')[1].name).to.equal('after')
+          expect(log.get('snapshots')[1].name).to.equal('after')
         })
       })
     })

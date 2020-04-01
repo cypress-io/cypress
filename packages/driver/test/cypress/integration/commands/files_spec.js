@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const {
   _,
 } = Cypress
@@ -17,18 +7,18 @@ const okResponse = {
   filePath: '/path/to/foo.json',
 }
 
-describe('src/cy/commands/files', function () {
-  beforeEach(() => // call through normally on everything
-  {
-    return cy.stub(Cypress, 'backend').callThrough()
+describe('src/cy/commands/files', () => {
+  beforeEach(() => {
+    // call through normally on everything
+    cy.stub(Cypress, 'backend').callThrough()
   })
 
-  describe('#readFile', function () {
+  describe('#readFile', () => {
     it('triggers \'read:file\' with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.readFile('foo.json').then(() => {
-        return expect(Cypress.backend).to.be.calledWith(
+      cy.readFile('foo.json').then(() => {
+        expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
           { encoding: 'utf8' },
@@ -39,8 +29,8 @@ describe('src/cy/commands/files', function () {
     it('can take encoding as second argument', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.readFile('foo.json', 'ascii').then(() => {
-        return expect(Cypress.backend).to.be.calledWith(
+      cy.readFile('foo.json', 'ascii').then(() => {
+        expect(Cypress.backend).to.be.calledWith(
           'read:file',
           'foo.json',
           { encoding: 'ascii' },
@@ -51,7 +41,7 @@ describe('src/cy/commands/files', function () {
     it('sets the contents as the subject', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.readFile('foo.json').then((subject) => expect(subject).to.equal('contents'))
+      cy.readFile('foo.json').then((subject) => expect(subject).to.equal('contents'))
     })
 
     it('retries to read when ENOENT', () => {
@@ -69,7 +59,7 @@ describe('src/cy/commands/files', function () {
       .onSecondCall()
       .resolves(okResponse)
 
-      return cy.readFile('foo.json').then(() => expect(retries).to.eq(1))
+      cy.readFile('foo.json').then(() => expect(retries).to.eq(1))
     })
 
     it('retries assertions until they pass', () => {
@@ -87,15 +77,15 @@ describe('src/cy/commands/files', function () {
         contents: 'quux',
       })
 
-      return cy.readFile('foo.json').should('eq', 'quux').then(() => expect(retries).to.eq(1))
+      cy.readFile('foo.json').should('eq', 'quux').then(() => expect(retries).to.eq(1))
     })
 
     it('really works', () => cy.readFile('cypress.json').its('baseUrl').should('eq', 'http://localhost:3500'))
 
     it('works when contents are supposed to be null', () => cy.readFile('does-not-exist').should('be.null'))
 
-    describe('.log', function () {
-      beforeEach(function () {
+    describe('.log', () => {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -107,28 +97,28 @@ describe('src/cy/commands/files', function () {
         return null
       })
 
-      it('can turn off logging', function () {
+      it('can turn off logging', () => {
         Cypress.backend.resolves(okResponse)
 
-        return cy.readFile('foo.json', { log: false }).then(function () {
+        cy.readFile('foo.json', { log: false }).then(() => {
           const logs = _.filter(this.logs, (log) => log.get('name') === 'readFile')
 
-          return expect(logs.length).to.eq(0)
+          expect(logs.length).to.eq(0)
         })
       })
 
-      return it('logs immediately before resolving', function () {
+      it('logs immediately before resolving', () => {
         Cypress.backend.resolves(okResponse)
 
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'readFile') {
             expect(log.get('state')).to.eq('pending')
 
-            return expect(log.get('message')).to.eq('foo.json')
+            expect(log.get('message')).to.eq('foo.json')
           }
         })
 
-        return cy.readFile('foo.json').then(() => {
+        cy.readFile('foo.json').then(() => {
           if (!this.lastLog) {
             throw new Error('failed to log before resolving')
           }
@@ -136,8 +126,8 @@ describe('src/cy/commands/files', function () {
       })
     })
 
-    return describe('errors', function () {
-      beforeEach(function () {
+    describe('errors', () => {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 50)
 
         this.logs = []
@@ -165,10 +155,10 @@ describe('src/cy/commands/files', function () {
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          return done()
+          done()
         })
 
-        return cy.readFile()
+        cy.readFile()
       })
 
       it('throws when file argument is not a string', function (done) {
@@ -183,10 +173,10 @@ describe('src/cy/commands/files', function () {
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          return done()
+          done()
         })
 
-        return cy.readFile(2)
+        cy.readFile(2)
       })
 
       it('throws when file argument is an empty string', function (done) {
@@ -201,10 +191,10 @@ describe('src/cy/commands/files', function () {
           expect(err.message).to.eq('`cy.readFile()` must be passed a non-empty string as its 1st argument. You passed: ``.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          return done()
+          done()
         })
 
-        return cy.readFile('')
+        cy.readFile('')
       })
 
       it('throws when there is an error reading the file', function (done) {
@@ -236,10 +226,10 @@ The following error occurred:
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          return done()
+          done()
         })
 
-        return cy.readFile('foo')
+        cy.readFile('foo')
       })
 
       it('has implicit existence assertion and throws a specific error when file does not exist', function (done) {
@@ -267,10 +257,10 @@ The following error occurred:
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          return done()
+          done()
         })
 
-        return cy.readFile('foo.json')
+        cy.readFile('foo.json')
       })
 
       it('throws a specific error when file exists when it shouldn\'t', function (done) {
@@ -292,13 +282,13 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/readfile')
 
-          return done()
+          done()
         })
 
-        return cy.readFile('foo.json').should('not.exist')
+        cy.readFile('foo.json').should('not.exist')
       })
 
-      return it('passes through assertion error when not about existence', function (done) {
+      it('passes through assertion error when not about existence', function (done) {
         Cypress.backend.resolves({
           contents: 'foo',
         })
@@ -313,20 +303,20 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('Timed out retrying: expected \'foo\' to equal \'contents\'')
 
-          return done()
+          done()
         })
 
-        return cy.readFile('foo.json').should('equal', 'contents')
+        cy.readFile('foo.json').should('equal', 'contents')
       })
     })
   })
 
-  return describe('#writeFile', function () {
+  describe('#writeFile', () => {
     it('triggers \'write:file\' with the right options', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.writeFile('foo.txt', 'contents').then(() => {
-        return expect(Cypress.backend).to.be.calledWith(
+      cy.writeFile('foo.txt', 'contents').then(() => {
+        expect(Cypress.backend).to.be.calledWith(
           'write:file',
           'foo.txt',
           'contents',
@@ -341,8 +331,8 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
     it('can take encoding as third argument', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.writeFile('foo.txt', 'contents', 'ascii').then(() => {
-        return expect(Cypress.backend).to.be.calledWith(
+      cy.writeFile('foo.txt', 'contents', 'ascii').then(() => {
+        expect(Cypress.backend).to.be.calledWith(
           'write:file',
           'foo.txt',
           'contents',
@@ -357,8 +347,8 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
     it('can take encoding as part of options', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.writeFile('foo.txt', 'contents', { encoding: 'ascii' }).then(() => {
-        return expect(Cypress.backend).to.be.calledWith(
+      cy.writeFile('foo.txt', 'contents', { encoding: 'ascii' }).then(() => {
+        expect(Cypress.backend).to.be.calledWith(
           'write:file',
           'foo.txt',
           'contents',
@@ -373,29 +363,29 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
     it('yields null', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.writeFile('foo.txt', 'contents').then((subject) => expect(subject).to.not.exist)
+      cy.writeFile('foo.txt', 'contents').then((subject) => expect(subject).to.not.exist)
     })
 
     it('can write a string', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.writeFile('foo.txt', 'contents')
+      cy.writeFile('foo.txt', 'contents')
     })
 
     it('can write an array as json', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.writeFile('foo.json', [])
+      cy.writeFile('foo.json', [])
     })
 
     it('can write an object as json', () => {
       Cypress.backend.resolves(okResponse)
 
-      return cy.writeFile('foo.json', {})
+      cy.writeFile('foo.json', {})
     })
 
     it('writes the file to the filesystem, overwriting existing file', () => {
-      return cy
+      cy
       .writeFile('cypress/fixtures/foo.txt', '')
       .writeFile('cypress/fixtures/foo.txt', 'bar')
       .readFile('cypress/fixtures/foo.txt').should('equal', 'bar')
@@ -406,8 +396,8 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
       it('sends a flag if specified', () => {
         Cypress.backend.resolves(okResponse)
 
-        return cy.writeFile('foo.txt', 'contents', { flag: 'a+' }).then(() => {
-          return expect(Cypress.backend).to.be.calledWith(
+        cy.writeFile('foo.txt', 'contents', { flag: 'a+' }).then(() => {
+          expect(Cypress.backend).to.be.calledWith(
             'write:file',
             'foo.txt',
             'contents',
@@ -419,8 +409,8 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
         })
       })
 
-      return it('appends content to existing file if specified', () => {
-        return cy
+      it('appends content to existing file if specified', () => {
+        cy
         .writeFile('cypress/fixtures/foo.txt', 'foo')
         .writeFile('cypress/fixtures/foo.txt', 'bar', { flag: 'a+' })
         .readFile('cypress/fixtures/foo.txt').should('equal', 'foobar')
@@ -428,8 +418,8 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
       })
     })
 
-    describe('.log', function () {
-      beforeEach(function () {
+    describe('.log', () => {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -441,28 +431,28 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
         return null
       })
 
-      it('can turn off logging', function () {
+      it('can turn off logging', () => {
         Cypress.backend.resolves(okResponse)
 
-        return cy.writeFile('foo.txt', 'contents', { log: false }).then(function () {
+        cy.writeFile('foo.txt', 'contents', { log: false }).then(() => {
           const logs = _.filter(this.logs, (log) => log.get('name') === 'writeFile')
 
-          return expect(logs.length).to.eq(0)
+          expect(logs.length).to.eq(0)
         })
       })
 
-      return it('logs immediately before resolving', function () {
+      it('logs immediately before resolving', () => {
         Cypress.backend.resolves(okResponse)
 
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'writeFile') {
             expect(log.get('state')).to.eq('pending')
 
-            return expect(log.get('message')).to.eq('foo.txt', 'contents')
+            expect(log.get('message')).to.eq('foo.txt', 'contents')
           }
         })
 
-        return cy.writeFile('foo.txt', 'contents').then(() => {
+        cy.writeFile('foo.txt', 'contents').then(() => {
           if (!this.lastLog) {
             throw new Error('failed to log before resolving')
           }
@@ -470,8 +460,8 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
       })
     })
 
-    return describe('errors', function () {
-      beforeEach(function () {
+    describe('errors', () => {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 50)
 
         this.logs = []
@@ -499,10 +489,10 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `undefined`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
 
-          return done()
+          done()
         })
 
-        return cy.writeFile()
+        cy.writeFile()
       })
 
       it('throws when file name argument is not a string', function (done) {
@@ -517,10 +507,10 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string as its 1st argument. You passed: `2`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
 
-          return done()
+          done()
         })
 
-        return cy.writeFile(2)
+        cy.writeFile(2)
       })
 
       it('throws when contents argument is absent', function (done) {
@@ -534,10 +524,10 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `undefined`.')
 
-          return done()
+          done()
         })
 
-        return cy.writeFile('foo.txt')
+        cy.writeFile('foo.txt')
       })
 
       it('throws when contents argument is not a string, object, or array', function (done) {
@@ -551,13 +541,13 @@ Timed out retrying: \`cy.readFile(\"foo.json\")\` failed because the file exists
           expect(lastLog.get('state')).to.eq('failed')
           expect(err.message).to.eq('`cy.writeFile()` must be passed a non-empty string, an object, or an array as its 2nd argument. You passed: `2`.')
 
-          return done()
+          done()
         })
 
-        return cy.writeFile('foo.txt', 2)
+        cy.writeFile('foo.txt', 2)
       })
 
-      return it('throws when there is an error writing the file', function (done) {
+      it('throws when there is an error writing the file', function (done) {
         const err = new Error('WHOKNOWS: unable to write file')
 
         err.name = 'WHOKNOWS'
@@ -585,10 +575,10 @@ The following error occurred:
 
           expect(err.docsUrl).to.eq('https://on.cypress.io/writefile')
 
-          return done()
+          done()
         })
 
-        return cy.writeFile('foo.txt', 'contents')
+        cy.writeFile('foo.txt', 'contents')
       })
     })
   })

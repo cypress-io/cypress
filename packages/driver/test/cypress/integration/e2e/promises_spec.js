@@ -1,17 +1,10 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-describe('promises', function () {
-  beforeEach(function () {
+describe('promises', () => {
+  beforeEach(() => {
     this.warn = cy.spy(Cypress.Promise.prototype, '_warn')
   })
 
-  afterEach(function () {
-    return expect(this.warn).not.to.be.calledOnce
+  afterEach(() => {
+    expect(this.warn).not.to.be.calledOnce
   })
 
   it('warns when returning a promise and calling cypress commands', () => {
@@ -19,12 +12,12 @@ describe('promises', function () {
 
     const title = cy.state('runnable').fullTitle()
 
-    return Cypress.Promise.delay(10)
+    Cypress.Promise.delay(10)
     .then(() => {
       cy.wrap({})
       cy.wrap([])
 
-      return cy.wrap('lol')
+      cy.wrap('lol')
       .then(() => {
         const msg = top.console.warn.firstCall.args[0]
 
@@ -32,7 +25,7 @@ describe('promises', function () {
         expect(msg).to.include(title)
         expect(msg).to.include('https://on.cypress.io/returning-promise-and-commands-in-test')
 
-        return expect(top.console.warn).to.be.calledOnce
+        expect(top.console.warn).to.be.calledOnce
       })
     })
   })
@@ -46,7 +39,7 @@ describe('promises', function () {
       cy.wrap({})
       cy.wrap([])
 
-      return cy.wrap('lol')
+      cy.wrap('lol')
       .then(resolve)
     }).then(() => {
       const msg = top.console.warn.firstCall.args[0]
@@ -55,7 +48,7 @@ describe('promises', function () {
       expect(msg).to.include(title)
       expect(msg).to.include('https://on.cypress.io/returning-promise-and-commands-in-test')
 
-      return expect(top.console.warn).to.be.calledOnce
+      expect(top.console.warn).to.be.calledOnce
     })
   })
 
@@ -82,16 +75,16 @@ describe('promises', function () {
       expect(err.message).to.include('> `cy.wrap()`')
       expect(err.docsUrl).to.eq('https://on.cypress.io/returning-promise-and-commands-in-another-command')
 
-      return done()
+      done()
     })
 
     Cypress.Commands.add('foo', () => {
-      return Cypress.Promise
+      Cypress.Promise
       .delay(10)
       .then(() => cy.wrap({}))
     })
 
-    return cy.foo()
+    cy.foo()
   })
 
   it('throws when instantiating a promise from a custom command', function (done) {
@@ -116,25 +109,25 @@ describe('promises', function () {
       expect(err.message).to.include('> `cy.foo()`')
       expect(err.message).to.include('> `cy.wrap()`')
 
-      return done()
+      done()
     })
 
     Cypress.Commands.add('foo', () => new Cypress.Promise((resolve) => cy.wrap({}).then(resolve)))
 
-    return cy.foo()
+    cy.foo()
   })
 
   it('is okay to return promises from custom commands with no cy commands', () => {
     Cypress.Commands.add('foo', () => {
-      return Cypress.Promise
+      Cypress.Promise
       .delay(10)
     })
 
-    return cy.foo()
+    cy.foo()
   })
 
   it('can return a promise that throws on its own without warning', () => {
-    return Cypress.Promise
+    Cypress.Promise
     .delay(10)
     .then(() => cy.wrap({}).should('deep.eq', {})).then((obj) => {
       expect(obj).to.deep.eq({})
@@ -143,17 +136,17 @@ describe('promises', function () {
     }).catch(() => {})
   })
 
-  return it('can still fail cypress commands', (done) => {
+  it('can still fail cypress commands', (done) => {
     cy.on('fail', (err) => {
       expect(err.message).to.eq('foo')
 
-      return done()
+      done()
     })
 
     Cypress.Promise
     .delay(10)
     .then(() => {
-      return cy.wrap({}).then(() => {
+      cy.wrap({}).then(() => {
         throw new Error('foo')
       })
     })

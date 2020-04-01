@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const {
   _,
 } = Cypress
@@ -13,18 +6,18 @@ const {
 } = Cypress
 
 describe('src/cy/commands/task', () => {
-  return context('#task', function () {
+  context('#task', () => {
     beforeEach(() => {
       Cypress.config('taskTimeout', 2500)
 
-      return cy.stub(Cypress, 'backend').callThrough()
+      cy.stub(Cypress, 'backend').callThrough()
     })
 
     it('calls Cypress.backend(\'task\') with the right options', () => {
       Cypress.backend.resolves(null)
 
-      return cy.task('foo').then(() => {
-        return expect(Cypress.backend).to.be.calledWith('task', {
+      cy.task('foo').then(() => {
+        expect(Cypress.backend).to.be.calledWith('task', {
           task: 'foo',
           timeout: 2500,
           arg: undefined,
@@ -35,8 +28,8 @@ describe('src/cy/commands/task', () => {
     it('passes through arg', () => {
       Cypress.backend.resolves(null)
 
-      return cy.task('foo', { foo: 'foo' }).then(() => {
-        return expect(Cypress.backend).to.be.calledWith('task', {
+      cy.task('foo', { foo: 'foo' }).then(() => {
+        expect(Cypress.backend).to.be.calledWith('task', {
           task: 'foo',
           timeout: 2500,
           arg: {
@@ -48,8 +41,8 @@ describe('src/cy/commands/task', () => {
 
     it('really works', () => cy.task('return:arg', 'works').should('eq', 'works'))
 
-    describe('.log', function () {
-      beforeEach(function () {
+    describe('.log', () => {
+      beforeEach(() => {
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -64,23 +57,23 @@ describe('src/cy/commands/task', () => {
       })
 
       it('can turn off logging', () => {
-        return cy.task('foo', null, { log: false }).then(function () {
+        cy.task('foo', null, { log: false }).then(() => {
           const logs = _.filter(this.logs, (log) => log.get('name') === 'task')
 
-          return expect(logs.length).to.eq(0)
+          expect(logs.length).to.eq(0)
         })
       })
 
-      return it('logs immediately before resolving', function () {
+      it('logs immediately before resolving', () => {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'task') {
             expect(log.get('state')).to.eq('pending')
 
-            return expect(log.get('message')).to.eq('foo')
+            expect(log.get('message')).to.eq('foo')
           }
         })
 
-        return cy.task('foo').then(() => {
+        cy.task('foo').then(() => {
           if (!this.lastLog) {
             throw new Error('failed to log before resolving')
           }
@@ -94,30 +87,30 @@ describe('src/cy/commands/task', () => {
       it('defaults timeout to Cypress.config(taskTimeout)', () => {
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.task('foo').then(() => expect(timeout).to.be.calledWith(2500))
+        cy.task('foo').then(() => expect(timeout).to.be.calledWith(2500))
       })
 
       it('can override timeout', () => {
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
-        return cy.task('foo', null, { timeout: 1000 }).then(() => expect(timeout).to.be.calledWith(1000))
+        cy.task('foo', null, { timeout: 1000 }).then(() => expect(timeout).to.be.calledWith(1000))
       })
 
-      return it('clears the current timeout and restores after success', () => {
+      it('clears the current timeout and restores after success', () => {
         cy.timeout(100)
 
         const clearTimeout = cy.spy(cy, 'clearTimeout')
 
         cy.on('task', () => {
-          return expect(clearTimeout).to.be.calledOnce
+          expect(clearTimeout).to.be.calledOnce
         })
 
-        return cy.task('foo').then(() => expect(cy.timeout()).to.eq(100))
+        cy.task('foo').then(() => expect(cy.timeout()).to.eq(100))
       })
     })
 
-    return describe('errors', function () {
-      beforeEach(function () {
+    describe('errors', () => {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 50)
 
         this.logs = []
@@ -145,10 +138,10 @@ describe('src/cy/commands/task', () => {
           expect(err.message).to.eq('`cy.task()` must be passed a non-empty string as its 1st argument. You passed: ``.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/task')
 
-          return done()
+          done()
         })
 
-        return cy.task()
+        cy.task()
       })
 
       it('throws when task isn\'t a string', function (done) {
@@ -163,10 +156,10 @@ describe('src/cy/commands/task', () => {
           expect(err.message).to.eq('`cy.task()` must be passed a non-empty string as its 1st argument. You passed: `3`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/task')
 
-          return done()
+          done()
         })
 
-        return cy.task(3)
+        cy.task(3)
       })
 
       it('throws when task is an empty string', function (done) {
@@ -181,10 +174,10 @@ describe('src/cy/commands/task', () => {
           expect(err.message).to.eq('`cy.task()` must be passed a non-empty string as its 1st argument. You passed: ``.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/task')
 
-          return done()
+          done()
         })
 
-        return cy.task('')
+        cy.task('')
       })
 
       it('throws when the task errors', function (done) {
@@ -202,10 +195,10 @@ describe('src/cy/commands/task', () => {
           expect(err.message).to.include('`cy.task(\'foo\')` failed with the following error:')
           expect(err.message).to.include('Error: task failed')
 
-          return done()
+          done()
         })
 
-        return cy.task('foo')
+        cy.task('foo')
       })
 
       it('throws when task is not registered by plugin', function (done) {
@@ -220,10 +213,10 @@ describe('src/cy/commands/task', () => {
 
           expect(err.message).to.eq(`\`cy.task('bar')\` failed with the following error:\n\nThe task 'bar' was not handled in the plugins file. The following tasks are registered: return:arg, wait, create:long:file\n\nFix this in your plugins file here:\n${Cypress.config('pluginsFile')}\n\nhttps://on.cypress.io/api/task`)
 
-          return done()
+          done()
         })
 
-        return cy.task('bar')
+        cy.task('bar')
       })
 
       it('throws after timing out', function (done) {
@@ -240,10 +233,10 @@ describe('src/cy/commands/task', () => {
           expect(err.message).to.eq('`cy.task(\'foo\')` timed out after waiting `50ms`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/task')
 
-          return done()
+          done()
         })
 
-        return cy.task('foo', null, { timeout: 50 })
+        cy.task('foo', null, { timeout: 50 })
       })
 
       it('logs once on error', function (done) {
@@ -258,10 +251,10 @@ describe('src/cy/commands/task', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
 
-          return done()
+          done()
         })
 
-        return cy.task('foo')
+        cy.task('foo')
       })
 
       it('can timeout from the backend\'s response', (done) => {
@@ -275,21 +268,21 @@ describe('src/cy/commands/task', () => {
           expect(err.message).to.include('`cy.task(\'wait\')` timed out after waiting `100ms`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/task')
 
-          return done()
+          done()
         })
 
-        return cy.task('wait', null, { timeout: 100 })
+        cy.task('wait', null, { timeout: 100 })
       })
 
-      return it('can really time out', (done) => {
+      it('can really time out', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.task(\'wait\')` timed out after waiting `100ms`.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/task')
 
-          return done()
+          done()
         })
 
-        return cy.task('wait', null, { timeout: 100 })
+        cy.task('wait', null, { timeout: 100 })
       })
     })
   })

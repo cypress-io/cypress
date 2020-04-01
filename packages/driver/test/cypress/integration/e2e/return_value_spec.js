@@ -1,12 +1,5 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-describe('return values', function () {
-  beforeEach(function () {
+describe('return values', () => {
+  beforeEach(() => {
     this.logs = []
 
     cy.on('log:added', (attrs, log) => {
@@ -18,17 +11,17 @@ describe('return values', function () {
     return null
   })
 
-  it('can return undefined and invoke cy commands', function (done) {
-    cy.wrap(null).then(function () {
+  it('can return undefined and invoke cy commands', (done) => {
+    cy.wrap(null).then(() => {
       expect(this.logs.length).to.eq(1)
 
-      return done()
+      done()
     })
 
     return undefined
   })
 
-  it('can return cy and have done callback', (done) => cy.wrap({}).then(() => done()))
+  it('can cy and have done callback', (done) => cy.wrap({}).then(() => done()))
 
   it('throws when returning a non promise and invoking cy commands', (done) => {
     cy.on('fail', (err) => {
@@ -36,7 +29,7 @@ describe('return values', function () {
       expect(err.message).to.include('Cypress detected that you invoked one or more cy commands but returned a different value.')
       expect(err.docsUrl).to.eq('https://on.cypress.io/returning-value-and-commands-in-test')
 
-      return done()
+      done()
     })
 
     cy.wrap(null)
@@ -51,7 +44,7 @@ describe('return values', function () {
       expect(err.message).to.include('Cypress detected that you invoked one or more cy commands but returned a different value.')
       expect(err.docsUrl).to.eq('https://on.cypress.io/returning-value-and-commands-in-test')
 
-      return done()
+      done()
     })
 
     cy.wrap(null)
@@ -59,21 +52,21 @@ describe('return values', function () {
     return () => 'foo'
   })
 
-  it('can return undefined when invoking cy commands in custom command', function (done) {
-    Cypress.Commands.add('foo', function () {
-      cy.wrap(null).then(function () {
+  it('can return undefined when invoking cy commands in custom command', (done) => {
+    Cypress.Commands.add('foo', () => {
+      cy.wrap(null).then(() => {
         expect(this.logs.length).to.eq(1)
 
-        return done()
+        done()
       })
 
       return undefined
     })
 
-    return cy.foo()
+    cy.foo()
   })
 
-  it('throws when returning a non promise and invoking cy commands from a custom command', function (done) {
+  it('throws when returning a non promise and invoking cy commands from a custom command', (done) => {
     cy.on('fail', (err) => {
       const {
         lastLog,
@@ -87,7 +80,7 @@ describe('return values', function () {
       expect(err.message).to.include('Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.')
       expect(err.docsUrl).to.eq('https://on.cypress.io/returning-value-and-commands-in-custom-command')
 
-      return done()
+      done()
     })
 
     Cypress.Commands.add('foo', () => {
@@ -96,7 +89,7 @@ describe('return values', function () {
       return 'bar'
     })
 
-    return cy.foo()
+    cy.foo()
   })
 
   it('stringifies function return values', function (done) {
@@ -113,7 +106,7 @@ describe('return values', function () {
       expect(err.message).to.include('return "bar";')
       expect(err.message).to.include('Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.')
 
-      return done()
+      done()
     })
 
     Cypress.Commands.add('foo', () => {
@@ -122,10 +115,10 @@ describe('return values', function () {
       return () => 'bar'
     })
 
-    return cy.foo()
+    cy.foo()
   })
 
-  return describe('without invoking cy', () => {
+  describe('without invoking cy', () => {
     it('handles returning undefined', () => undefined)
 
     it('handles synchronously invoking and returning done callback', (done) => done())
@@ -142,7 +135,7 @@ describe('return values', function () {
       return 'foo'
     })
 
-    return it('handles asynchronously invoking done callback', (done) => {
+    it('handles asynchronously invoking done callback', (done) => {
       setTimeout(() => done())
 
       return 'foo'

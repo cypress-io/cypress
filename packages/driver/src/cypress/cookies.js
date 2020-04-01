@@ -1,21 +1,7 @@
-/* eslint-disable
-    brace-style,
-    no-console,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Cookies = require('js-cookie')
 
 const $errUtils = require('./error_utils')
-
-const reHttp = /^http/
 
 let isDebugging = false
 let isDebuggingVerbose = false
@@ -84,6 +70,7 @@ const $Cookies = function (namespace, domain) {
         args.push(cookie)
       }
 
+      // eslint-disable-next-line
       return console[m].apply(console, args)
     },
 
@@ -158,8 +145,8 @@ const $Cookies = function (namespace, domain) {
   return API
 }
 
-$Cookies.create = (namespace, domain) => // set the $Cookies function onto the Cypress instance
-{
+// set the $Cookies function onto the Cypress instance
+$Cookies.create = (namespace, domain) => {
   return $Cookies(namespace, domain)
 }
 

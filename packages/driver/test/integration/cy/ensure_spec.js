@@ -1,70 +1,61 @@
-/* eslint-disable
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { $, _ } = window.testUtils
 
-describe('$Cypress.Cy Ensure Extensions', function () {
+describe('$Cypress.Cy Ensure Extensions', () => {
+  // eslint-disable-next-line no-undef
   enterCommandTestingMode()
 
-  it('adds 4 methods', function () {
+  it('adds 4 methods', () => {
     return _.each(['Subject', 'Parent', 'Visibility', 'Dom'], (name) => {
-      return expect(this.cy[`ensure${name}`]).to.be.a('function')
+      expect(this.cy[`ensure${name}`]).to.be.a('function')
     })
   })
 
-  context('#ensureDom', function () {
-    beforeEach(function () {
+  context('#ensureDom', () => {
+    beforeEach(() => {
       return this.allowErrors()
     })
 
-    return it('stringifies node + references wiki', function () {
+    it('stringifies node + references wiki', () => {
       const button = $('<button>foo</button>')
 
       const fn = () => this.cy.ensureDom(button, 'foo')
 
-      return expect(fn).to.throw('cy.foo() failed because this element you are chaining off of has become detached or removed from the DOM:\n\n<button>foo</button>\n\nhttps://on.cypress.io/element-has-detached-from-dom')
+      expect(fn).to.throw('cy.foo() failed because this element you are chaining off of has become detached or removed from the DOM:\n\n<button>foo</button>\n\nhttps://on.cypress.io/element-has-detached-from-dom')
     })
   })
 
   context('#ensureElExistence', () => {
-    return it('always unbinds before:log if assertion fails', function () {
+    it('always unbinds before:log if assertion fails', () => {
       const fn = () => {
         return this.cy.ensureElExistence($())
       }
 
       expect(fn).to.throw('to exist in the DOM')
 
-      return expect(this.cy.state('onBeforeLog')).to.be.null
+      expect(this.cy.state('onBeforeLog')).to.be.null
     })
   })
 
-  context('#ensureElementIsNotAnimating', function () {
-    beforeEach(function () {
+  context('#ensureElementIsNotAnimating', () => {
+    beforeEach(() => {
       return this.allowErrors()
     })
 
-    it('returns early if waitForAnimations is false', function () {
+    it('returns early if waitForAnimations is false', () => {
       this.sandbox.stub(this.Cypress, 'config').withArgs('waitForAnimations').returns(false)
 
       const fn = () => this.cy.ensureElementIsNotAnimating()
 
-      return expect(fn).not.to.throw(Error)
+      expect(fn).not.to.throw(Error)
     })
 
-    it('throws without enough coords provided to calculate distance', function () {
+    it('throws without enough coords provided to calculate distance', () => {
       const fn = () => this.cy.ensureElementIsNotAnimating(null, [])
 
-      return expect(fn).to.throw('Not enough coord points provided to calculate distance')
+      expect(fn).to.throw('Not enough coord points provided to calculate distance')
     })
 
-    it('throws when element is animating', function () {
+    it('throws when element is animating', () => {
       this.cy.state('current', { get () {
         return 'foo'
       } })
@@ -74,58 +65,58 @@ describe('$Cypress.Cy Ensure Extensions', function () {
 
       const fn = () => this.cy.ensureElementIsNotAnimating($el, coords)
 
-      return expect(fn).to.throw('cy.foo() could not be issued because this element is currently animating:\n')
+      expect(fn).to.throw('cy.foo() could not be issued because this element is currently animating:\n')
     })
 
-    it('does not throw when threshold has been increased', function () {
+    it('does not throw when threshold has been increased', () => {
       this.sandbox.stub(this.Cypress, 'config').withArgs('animationDistanceThreshold').returns(100)
 
       const coords = [{ x: 10, y: 20 }, { x: 20, y: 30 }]
 
       const fn = () => this.cy.ensureElementIsNotAnimating(null, coords)
 
-      return expect(fn).not.to.throw
+      expect(fn).not.to.throw
     })
 
-    it('does not throw when threshold argument has been increased', function () {
+    it('does not throw when threshold argument has been increased', () => {
       const coords = [{ x: 10, y: 20 }, { x: 20, y: 30 }]
 
       const fn = () => this.cy.ensureElementIsNotAnimating(null, coords, 100)
 
-      return expect(fn).not.to.throw
+      expect(fn).not.to.throw
     })
 
-    return it('does not throw when distance is below threshold', function () {
+    it('does not throw when distance is below threshold', () => {
       const coords = [{ x: 10, y: 20 }, { x: 8, y: 18 }]
 
       const fn = () => {
         return this.cy.ensureElementIsNotAnimating(null, coords)
       }
 
-      return expect(fn).not.to.throw(Error)
+      expect(fn).not.to.throw(Error)
     })
   })
 
-  context('#ensureValidPosition', function () {
-    beforeEach(function () {
+  context('#ensureValidPosition', () => {
+    beforeEach(() => {
       return this.allowErrors()
     })
 
-    it('throws when invalid position', function () {
+    it('throws when invalid position', () => {
       const fn = () => this.cy.ensureValidPosition('foo')
 
-      return expect(fn).to.throw('Invalid position argument: \'foo\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
+      expect(fn).to.throw('Invalid position argument: \'foo\'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
     })
 
-    return it('does not throws when valid position', function () {
+    it('does not throws when valid position', () => {
       const fn = () => this.cy.ensureValidPosition('topRight')
 
-      return expect(fn).to.not.throw
+      expect(fn).to.not.throw
     })
   })
 
-  return context('#ensureScrollability', function () {
-    beforeEach(function () {
+  context('#ensureScrollability', () => {
+    beforeEach(() => {
       this.allowErrors()
 
       this.add = (el) => {
@@ -133,7 +124,7 @@ describe('$Cypress.Cy Ensure Extensions', function () {
       }
     })
 
-    it('defaults to current command if not specified', function () {
+    it('defaults to current command if not specified', () => {
       this.cy.$$('body').html('<div>foo</div>')
       const win = this.cy.state('window')
 
@@ -145,28 +136,28 @@ describe('$Cypress.Cy Ensure Extensions', function () {
 
       const fn = () => this.cy.ensureScrollability(win)
 
-      return expect(fn).to.throw('cy.currentCmd() failed because this element is not scrollable:\n\n<window>\n')
+      expect(fn).to.throw('cy.currentCmd() failed because this element is not scrollable:\n\n<window>\n')
     })
 
-    it('does not throw when window and body > window height', function () {
+    it('does not throw when window and body > window height', () => {
       const win = this.cy.state('window')
 
       const fn = () => this.cy.ensureScrollability(win, 'foo')
 
-      return expect(fn).not.to.throw(Error)
+      expect(fn).not.to.throw(Error)
     })
 
-    it('throws when window and body > window height', function () {
+    it('throws when window and body > window height', () => {
       this.cy.$$('body').html('<div>foo</div>')
 
       const win = this.cy.state('window')
 
       const fn = () => this.cy.ensureScrollability(win, 'foo')
 
-      return expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<window>\n')
+      expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<window>\n')
     })
 
-    it('throws when el is not scrollable', function () {
+    it('throws when el is not scrollable', () => {
       const noScroll = this.add(`\
 <div style="height: 100px; overflow: auto;">
   <div>No Scroll</div>
@@ -175,10 +166,10 @@ describe('$Cypress.Cy Ensure Extensions', function () {
 
       const fn = () => this.cy.ensureScrollability(noScroll, 'foo')
 
-      return expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<div style="height: 100px; overflow: auto;">...</div>\n')
+      expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<div style="height: 100px; overflow: auto;">...</div>\n')
     })
 
-    it('throws when el has no overflow', function () {
+    it('throws when el has no overflow', () => {
       const noOverflow = this.add(`\
 <div style="height: 100px; width: 100px; border: 1px solid green;">
   <div style="height: 150px;">
@@ -189,10 +180,10 @@ describe('$Cypress.Cy Ensure Extensions', function () {
 
       const fn = () => this.cy.ensureScrollability(noOverflow, 'foo')
 
-      return expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<div style="height: 100px; width: 100px; border: 1px solid green;">...</div>\n')
+      expect(fn).to.throw('cy.foo() failed because this element is not scrollable:\n\n<div style="height: 100px; width: 100px; border: 1px solid green;">...</div>\n')
     })
 
-    it('does not throw when vertically scrollable', function () {
+    it('does not throw when vertically scrollable', () => {
       const vertScrollable = this.add(`\
 <div style="height: 100px; width: 100px; overflow: auto;">
   <div style="height: 150px;">Vertical Scroll</div>
@@ -201,10 +192,10 @@ describe('$Cypress.Cy Ensure Extensions', function () {
 
       const fn = () => this.cy.ensureScrollability(vertScrollable, 'foo')
 
-      return expect(fn).not.to.throw(Error)
+      expect(fn).not.to.throw(Error)
     })
 
-    it('does not throw when horizontal scrollable', function () {
+    it('does not throw when horizontal scrollable', () => {
       const horizScrollable = this.add(`\
 <div style="height: 100px; width: 100px; overflow: auto; ">
   <div style="height: 150px;">Horizontal Scroll</div>
@@ -213,10 +204,10 @@ describe('$Cypress.Cy Ensure Extensions', function () {
 
       const fn = () => this.cy.ensureScrollability(horizScrollable, 'foo')
 
-      return expect(fn).not.to.throw(Error)
+      expect(fn).not.to.throw(Error)
     })
 
-    return it('does not throw when overflow scroll forced and content larger', function () {
+    it('does not throw when overflow scroll forced and content larger', () => {
       const forcedScroll = this.add(`\
 <div style="height: 100px; width: 100px; overflow: scroll; border: 1px solid yellow;">
   <div style="height: 300px; width: 300px;">Forced Scroll</div>
@@ -225,14 +216,7 @@ describe('$Cypress.Cy Ensure Extensions', function () {
 
       const fn = () => this.cy.ensureScrollability(forcedScroll, 'foo')
 
-      return expect(fn).not.to.throw(Error)
+      expect(fn).not.to.throw(Error)
     })
   })
 })
-
-// WE NEED TO ADD SPECS AROUND THE EXACT ERROR MESSAGE TEXT
-// SINCE WE ARE NOT ACTUALLY TESTING THE EXACT MESSAGE TEXT
-// IN OUR ACTIONS SPEC (BECAUSE THEY'RE TOO DAMN LONG)
-//
-// OR WE SHOULD JUST MOVE TO AN I18N ERROR SYSTEM AND ASSERT
-// ON A LOOKUP SYSTEM

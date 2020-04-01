@@ -15,22 +15,22 @@ const {
   _,
 } = Cypress
 
-describe('src/cy/commands/actions/trigger', function () {
+describe('src/cy/commands/actions/trigger', () => {
   before(() => {
-    return cy
+    cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
       this.body = win.document.body.outerHTML
     })
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     const doc = cy.state('document')
 
     return $(doc.body).empty().html(this.body)
   })
 
-  return context('#trigger', function () {
+  context('#trigger', () => {
     it('sends event', (done) => {
       const $btn = cy.$$('#button')
 
@@ -49,24 +49,24 @@ describe('src/cy/commands/actions/trigger', function () {
         expect(e.clientX).to.be.closeTo(fromElViewport.x, 1)
         expect(e.clientY).to.be.closeTo(fromElViewport.y, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#button').trigger('mouseover')
+      cy.get('#button').trigger('mouseover')
     })
 
     it('bubbles up event by default', (done) => {
-      return cy
+      cy
       .window()
       .then((win) => {
         $(win).one('mouseover', () => done())
 
-        return cy.get('#button').trigger('mouseover')
+        cy.get('#button').trigger('mouseover')
       })
     })
 
     it('does not bubble up event if specified', (done) => {
-      return cy
+      cy
       .window()
       .then((win) => {
         const $win = $(win)
@@ -76,10 +76,10 @@ describe('src/cy/commands/actions/trigger', function () {
             'bubbles', 'cancelable', 'isTrusted', 'type', 'clientX', 'clientY',
           ])
 
-          return done(new Error(`event should not have bubbled up to window listener: ${evt}`))
+          done(new Error(`event should not have bubbled up to window listener: ${evt}`))
         })
 
-        return cy
+        cy
         .get('#button')
         .trigger('keydown', {
           bubbles: false,
@@ -87,7 +87,7 @@ describe('src/cy/commands/actions/trigger', function () {
         .then(() => {
           $win.off('keydown')
 
-          return done()
+          done()
         })
       })
     })
@@ -108,10 +108,10 @@ describe('src/cy/commands/actions/trigger', function () {
         options = _.pick(options, 'clientX', 'clientY', 'pageX', 'pageY', 'foo')
         expect(eventOptions).to.eql(options)
 
-        return done()
+        done()
       })
 
-      return cy.get('button:first').trigger('mouseover', options)
+      cy.get('button:first').trigger('mouseover', options)
     })
 
     it('records correct clientX when el scrolled', (done) => {
@@ -125,10 +125,10 @@ describe('src/cy/commands/actions/trigger', function () {
         expect(win.scrollX).to.be.gt(0)
         expect(e.clientX).to.be.closeTo(fromElViewport.x, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#scrolledBtn').trigger('mouseover')
+      cy.get('#scrolledBtn').trigger('mouseover')
     })
 
     it('records correct clientY when el scrolled', (done) => {
@@ -142,10 +142,10 @@ describe('src/cy/commands/actions/trigger', function () {
         expect(win.scrollX).to.be.gt(0)
         expect(e.clientY).to.be.closeTo(fromElViewport.y, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#scrolledBtn').trigger('mouseover')
+      cy.get('#scrolledBtn').trigger('mouseover')
     })
 
     // NOTE: flaky about 50% of the time in Firefox...
@@ -163,16 +163,16 @@ describe('src/cy/commands/actions/trigger', function () {
         expect(e.pageX).to.be.closeTo(win.scrollX + e.clientX, 1)
         expect(e.pageY).to.be.closeTo(win.scrollY + e.clientY, 1)
 
-        return done()
+        done()
       })
 
-      return cy.get('#scrolledBtn').trigger('mouseover')
+      cy.get('#scrolledBtn').trigger('mouseover')
     })
 
     it('does not change the subject', () => {
       const $input = cy.$$('input:first')
 
-      return cy.get('input:first').trigger('keydown').then(($el) => expect($el.get(0)).to.eq($input.get(0)))
+      cy.get('input:first').trigger('keydown').then(($el) => expect($el.get(0)).to.eq($input.get(0)))
     })
 
     it('can trigger events on the window', () => {
@@ -182,7 +182,7 @@ describe('src/cy/commands/actions/trigger', function () {
 
       $(win).on('scroll', (e) => expected = true)
 
-      return cy
+      cy
       .window().trigger('scroll')
       .then(() => expect(expected).to.be.true)
     })
@@ -197,7 +197,7 @@ describe('src/cy/commands/actions/trigger', function () {
         expected = true
       })
 
-      return cy
+      cy
       .window().trigger('foo', {
         detail: { foo: 'bar' },
       })
@@ -211,11 +211,11 @@ describe('src/cy/commands/actions/trigger', function () {
 
       $(doc).on('dragover', () => expected = true)
 
-      return cy.document().trigger('dragover').then(() => expect(expected).to.be.true)
+      cy.document().trigger('dragover').then(() => expect(expected).to.be.true)
     })
 
     it('can handle window w/length > 1 as a subject', () => {
-      return cy.window().should('have.length.gt', 1)
+      cy.window().should('have.length.gt', 1)
       .trigger('click')
     })
 
@@ -229,7 +229,7 @@ describe('src/cy/commands/actions/trigger', function () {
 
         cy.on('scrolled', ($el, type) => scrolled.push(type))
 
-        return cy
+        cy
         .get('button:last').trigger('mouseover', { force: true })
         .then(() => expect(scrolled).to.be.empty)
       })
@@ -252,11 +252,11 @@ describe('src/cy/commands/actions/trigger', function () {
 
         $btn.on('tap', () => tapped = true)
 
-        return cy.get('#button-covered-in-span').trigger('tap', { force: true }).then(() => {
+        cy.get('#button-covered-in-span').trigger('tap', { force: true }).then(() => {
           expect(scrolled).to.be.empty
           expect(retried).to.be.false
 
-          return expect(tapped).to.be.true
+          expect(tapped).to.be.true
         })
       })
 
@@ -284,7 +284,7 @@ describe('src/cy/commands/actions/trigger', function () {
           retried = true
         }))
 
-        return cy.get('#button-covered-in-span').trigger('mousedown').then(() => {
+        cy.get('#button-covered-in-span').trigger('mousedown').then(() => {
           expect(retried).to.be.true
 
           // - element scrollIntoView
@@ -292,7 +292,7 @@ describe('src/cy/commands/actions/trigger', function () {
           // - element scrollIntoView (retry covered)
           // - element scrollIntoView (retry covered)
           // - window
-          return expect(scrolled).to.deep.eq(['element', 'element', 'element', 'element'])
+          expect(scrolled).to.deep.eq(['element', 'element', 'element', 'element'])
         })
       })
 
@@ -312,7 +312,7 @@ describe('src/cy/commands/actions/trigger', function () {
         $btn.on('mouseover', () => mouseovers += 1)
         $span.on('mouseover', () => mouseovers += 1)
 
-        return cy
+        cy
         .get('#div-covered-in-span').trigger('mouseover')
         .should(() => expect(mouseovers).to.eq(2))
       })
@@ -335,11 +335,11 @@ describe('src/cy/commands/actions/trigger', function () {
 
         cy.on('scrolled', ($el, type) => scrolled.push(type))
 
-        return cy.get('#button-covered-in-nav').trigger('mouseover').then(() => // - element scrollIntoView
+        cy.get('#button-covered-in-nav').trigger('mouseover').then(() => // - element scrollIntoView
         // - element scrollIntoView (retry animation coords)
         // - window
         {
-          return expect(scrolled).to.deep.eq(['element', 'element', 'window'])
+          expect(scrolled).to.deep.eq(['element', 'element', 'window'])
         })
       })
 
@@ -370,12 +370,12 @@ describe('src/cy/commands/actions/trigger', function () {
 
         cy.on('scrolled', ($el, type) => scrolled.push(type))
 
-        return cy.get('#button-covered-in-nav').trigger('mouseover').then(() => // - element scrollIntoView
+        cy.get('#button-covered-in-nav').trigger('mouseover').then(() => // - element scrollIntoView
         // - element scrollIntoView (retry animation coords)
         // - window (nav1)
         // - window (nav2)
         {
-          return expect(scrolled).to.deep.eq(['element', 'element', 'window', 'window'])
+          expect(scrolled).to.deep.eq(['element', 'element', 'window', 'window'])
         })
       })
 
@@ -425,12 +425,12 @@ describe('src/cy/commands/actions/trigger', function () {
 
         cy.on('scrolled', ($el, type) => scrolled.push(type))
 
-        return cy.get('#button-covered-in-nav').trigger('mouseover').then(() => // - element scrollIntoView
+        cy.get('#button-covered-in-nav').trigger('mouseover').then(() => // - element scrollIntoView
         // - element scrollIntoView (retry animation coords)
         // - window
         // - container
         {
-          return expect(scrolled).to.deep.eq(['element', 'element', 'window', 'container'])
+          expect(scrolled).to.deep.eq(['element', 'element', 'window', 'container'])
         })
       })
 
@@ -444,7 +444,7 @@ describe('src/cy/commands/actions/trigger', function () {
           retried = true
         }))
 
-        return cy.get('#button').trigger('mouseover').then(() => expect(retried).to.be.true)
+        cy.get('#button').trigger('mouseover').then(() => expect(retried).to.be.true)
       })
 
       it('waits until element is no longer disabled', () => {
@@ -460,10 +460,10 @@ describe('src/cy/commands/actions/trigger', function () {
           retried = true
         }))
 
-        return cy.get('#button').trigger('mouseover').then(() => {
+        cy.get('#button').trigger('mouseover').then(() => {
           expect(mouseovers).to.eq(1)
 
-          return expect(retried).to.be.true
+          expect(retried).to.be.true
         })
       })
 
@@ -476,13 +476,13 @@ describe('src/cy/commands/actions/trigger', function () {
         .throws(new Error('animating!'))
         .onThirdCall().returns()
 
-        return cy.get('button:first').trigger('mouseover').then(() => {
+        cy.get('button:first').trigger('mouseover').then(() => {
           // - retry animation coords
           // - retry animation
           // - retry animation
           expect(retries).to.eq(3)
 
-          return expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
+          expect(cy.ensureElementIsNotAnimating).to.be.calledThrice
         })
       })
 
@@ -490,13 +490,13 @@ describe('src/cy/commands/actions/trigger', function () {
         cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
         Cypress.config('waitForAnimations', false)
 
-        return cy.get('button:first').trigger('mouseover').then(() => expect(cy.ensureElementIsNotAnimating).not.to.be.called)
+        cy.get('button:first').trigger('mouseover').then(() => expect(cy.ensureElementIsNotAnimating).not.to.be.called)
       })
 
       it('does not throw when turning off waitForAnimations in options', () => {
         cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
 
-        return cy.get('button:first').trigger('tap', { waitForAnimations: false }).then(() => expect(cy.ensureElementIsNotAnimating).not.to.be.called)
+        cy.get('button:first').trigger('tap', { waitForAnimations: false }).then(() => expect(cy.ensureElementIsNotAnimating).not.to.be.called)
       })
 
       it('passes options.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
@@ -506,18 +506,18 @@ describe('src/cy/commands/actions/trigger', function () {
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
-        return cy.get('button:first').trigger('tap', { animationDistanceThreshold: 1000 }).then(() => {
+        cy.get('button:first').trigger('tap', { animationDistanceThreshold: 1000 }).then(() => {
           const {
             args,
           } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
-          return expect(args[2]).to.eq(1000)
+          expect(args[2]).to.eq(1000)
         })
       })
 
-      return it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
+      it('passes config.animationDistanceThreshold to cy.ensureElementIsNotAnimating', () => {
         const animationDistanceThreshold = Cypress.config('animationDistanceThreshold')
 
         const $btn = cy.$$('button:first')
@@ -526,20 +526,20 @@ describe('src/cy/commands/actions/trigger', function () {
 
         cy.spy(cy, 'ensureElementIsNotAnimating')
 
-        return cy.get('button:first').trigger('mouseover').then(() => {
+        cy.get('button:first').trigger('mouseover').then(() => {
           const {
             args,
           } = cy.ensureElementIsNotAnimating.firstCall
 
           expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
 
-          return expect(args[2]).to.eq(animationDistanceThreshold)
+          expect(args[2]).to.eq(animationDistanceThreshold)
         })
       })
     })
 
-    describe('assertion verification', function () {
-      beforeEach(function () {
+    describe('assertion verification', () => {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 100)
 
         cy.on('log:added', (attrs, log) => {
@@ -551,12 +551,12 @@ describe('src/cy/commands/actions/trigger', function () {
         return null
       })
 
-      return it('eventually passes the assertion', function () {
+      it('eventually passes the assertion', () => {
         const $btn = cy.$$('button:first')
 
         cy.on('command:retry', _.once(() => $btn.addClass('moused-over')))
 
-        return cy.get('button:first').trigger('mouseover').should('have.class', 'moused-over').then(function () {
+        cy.get('button:first').trigger('mouseover').should('have.class', 'moused-over').then(() => {
           const {
             lastLog,
           } = this
@@ -564,7 +564,7 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(lastLog.get('name')).to.eq('assert')
           expect(lastLog.get('state')).to.eq('passed')
 
-          return expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('ended')).to.be.true
         })
       })
     })
@@ -577,12 +577,12 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(e.clientX).to.equal(108)
           expect(e.clientY).to.equal(50)
 
-          return done()
+          done()
         }
 
         $button.one('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover')
+        cy.get('button:first').trigger('mouseover')
       })
 
       it('can trigger event on center', (done) => {
@@ -592,12 +592,12 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(e.clientX).to.equal(108)
           expect(e.clientY).to.equal(50)
 
-          return done()
+          done()
         }
 
         $button.on('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover', 'center')
+        cy.get('button:first').trigger('mouseover', 'center')
       })
 
       it('can trigger event on topLeft', (done) => {
@@ -607,12 +607,12 @@ describe('src/cy/commands/actions/trigger', function () {
           // NOTE: firefox leaves 1px on top of element on scroll, so add top offset
           expect(e.clientY).to.equal(0 + Math.ceil(e.target.getBoundingClientRect().top))
 
-          return done()
+          done()
         }
 
         $button.on('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover', 'topLeft')
+        cy.get('button:first').trigger('mouseover', 'topLeft')
       })
 
       it('can trigger event on topRight', (done) => {
@@ -622,12 +622,12 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(e.clientX).to.equal(207)
           expect(e.clientY).to.equal(0 + Math.ceil(e.target.getBoundingClientRect().top))
 
-          return done()
+          done()
         }
 
         $button.on('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover', 'topRight')
+        cy.get('button:first').trigger('mouseover', 'topRight')
       })
 
       it('can trigger event on bottomLeft', (done) => {
@@ -637,12 +637,12 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(e.clientX).to.equal(8)
           expect(e.clientY).to.equal(99)
 
-          return done()
+          done()
         }
 
         $button.on('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover', 'bottomLeft')
+        cy.get('button:first').trigger('mouseover', 'bottomLeft')
       })
 
       it('can trigger event on bottomRight', (done) => {
@@ -652,27 +652,27 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(e.clientX).to.equal(207)
           expect(e.clientY).to.equal(99)
 
-          return done()
+          done()
         }
 
         $button.on('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover', 'bottomRight')
+        cy.get('button:first').trigger('mouseover', 'bottomRight')
       })
 
-      return it('can pass options along with position', (done) => {
+      it('can pass options along with position', (done) => {
         const $button = cy.$$('<button />').css({ width: 200, height: 100 }).prependTo(cy.$$('body'))
 
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(207)
           expect(e.clientY).to.equal(99)
 
-          return done()
+          done()
         }
 
         $button.on('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover', 'bottomRight', { bubbles: false })
+        cy.get('button:first').trigger('mouseover', 'bottomRight', { bubbles: false })
       })
     })
 
@@ -684,32 +684,32 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(e.clientX).to.equal(83)
           expect(e.clientY).to.equal(78 + Math.ceil(e.target.getBoundingClientRect().top))
 
-          return done()
+          done()
         }
 
         $button.on('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover', 75, 78)
+        cy.get('button:first').trigger('mouseover', 75, 78)
       })
 
-      return it('can pass options along with x, y', (done) => {
+      it('can pass options along with x, y', (done) => {
         const $button = cy.$$('<button />').css({ width: 200, height: 100 }).prependTo(cy.$$('body'))
 
         const onMouseover = function (e) {
           expect(e.clientX).to.equal(83)
           expect(e.clientY).to.equal(78 + Math.ceil(e.target.getBoundingClientRect().top))
 
-          return done()
+          done()
         }
 
         $button.on('mouseover', onMouseover)
 
-        return cy.get('button:first').trigger('mouseover', 75, 78, { bubbles: false })
+        cy.get('button:first').trigger('mouseover', 75, 78, { bubbles: false })
       })
     })
 
-    describe('errors', function () {
-      beforeEach(function () {
+    describe('errors', () => {
+      beforeEach(() => {
         Cypress.config('defaultCommandTimeout', 100)
 
         this.logs = []
@@ -728,16 +728,16 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(err.message).to.eq('`cy.trigger()` can only be called on a single element. Your subject contained 15 elements.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').trigger('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: \'undefined\'.')
+        cy.get('button:first').trigger('`cy.trigger()` must be passed a non-empty string as its 1st argument. You passed: \'undefined\'.')
       })
 
       it('throws when not a dom subject', (done) => {
         cy.on('fail', () => done())
 
-        return cy.trigger('mouseover')
+        cy.trigger('mouseover')
       })
 
       it('throws when attempting to trigger multiple elements', (done) => {
@@ -747,10 +747,10 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(err.message).to.eq(`\`cy.trigger()\` can only be called on a single element. Your subject contained ${num} elements.`)
           expect(err.docsUrl).to.eq('https://on.cypress.io/trigger')
 
-          return done()
+          done()
         })
 
-        return cy.get('button').trigger('mouseover')
+        cy.get('button').trigger('mouseover')
       })
 
       it('throws when subject is not in the document', (done) => {
@@ -767,10 +767,10 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(mouseover).to.eq(1)
           expect(err.message).to.include('`cy.trigger()` failed because this element')
 
-          return done()
+          done()
         })
 
-        return cy.get(':checkbox:first').trigger('mouseover').trigger('mouseover')
+        cy.get(':checkbox:first').trigger('mouseover').trigger('mouseover')
       })
 
       it('logs once when not dom subject', function (done) {
@@ -782,10 +782,10 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(this.logs.length).to.eq(2)
           expect(lastLog.get('error')).to.eq(err)
 
-          return done()
+          done()
         })
 
-        return cy.wrap({}).trigger('mouseover')
+        cy.wrap({}).trigger('mouseover')
       })
 
       it('throws when the subject isnt visible', function (done) {
@@ -800,10 +800,10 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(lastLog.get('error')).to.eq(err)
           expect(err.message).to.include('`cy.trigger()` failed because this element is not visible')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').trigger('mouseover')
+        cy.get('button:first').trigger('mouseover')
       })
 
       it('throws when subject is disabled', function (done) {
@@ -814,10 +814,10 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(this.logs.length).eq(2)
           expect(err.message).to.include('`cy.trigger()` failed because this element is `disabled`:\n')
 
-          return done()
+          done()
         })
 
-        return cy.get('#button').trigger('mouseover')
+        cy.get('#button').trigger('mouseover')
       })
 
       it('throws when provided invalid position', function (done) {
@@ -825,10 +825,10 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(this.logs.length).to.eq(2)
           expect(err.message).to.eq('Invalid position argument: `foo`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').trigger('mouseover', 'foo')
+        cy.get('button:first').trigger('mouseover', 'foo')
       })
 
       it('throws when element animation exceeds timeout', (done) => {
@@ -844,10 +844,10 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(err.message).to.include('`cy.trigger()` could not be issued because this element is currently animating:\n')
           expect(err.docsUrl).to.eq('https://on.cypress.io/element-is-animating')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').trigger('tap')
+        cy.get('button:first').trigger('tap')
       })
 
       it('eventually fails the assertion', function (done) {
@@ -862,25 +862,25 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').trigger('mouseover').should('have.class', 'moused-over')
+        cy.get('button:first').trigger('mouseover').should('have.class', 'moused-over')
       })
 
-      return it('does not log an additional log on failure', function (done) {
+      it('does not log an additional log on failure', function (done) {
         cy.on('fail', () => {
           expect(this.logs.length).to.eq(3)
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').trigger('mouseover').should('have.class', 'moused-over')
+        cy.get('button:first').trigger('mouseover').should('have.class', 'moused-over')
       })
     })
 
-    return describe('.log', function () {
-      beforeEach(function () {
+    describe('.log', () => {
+      beforeEach(() => {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log
         })
@@ -896,11 +896,11 @@ describe('src/cy/commands/actions/trigger', function () {
             expect(log.get('state')).to.eq('pending')
             expect(log.get('$el').get(0)).to.eq(button.get(0))
 
-            return done()
+            done()
           }
         })
 
-        return cy.get('button:first').trigger('mouseover')
+        cy.get('button:first').trigger('mouseover')
       })
 
       it('snapshots before triggering', function (done) {
@@ -913,14 +913,14 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
           expect(lastLog.get('snapshots')[0].body).to.be.an('object')
 
-          return done()
+          done()
         })
 
-        return cy.get('button:first').trigger('mouseover')
+        cy.get('button:first').trigger('mouseover')
       })
 
       it('snapshots after triggering', () => {
-        return cy.get('button:first').trigger('mouseover').then(function ($button) {
+        cy.get('button:first').trigger('mouseover').then(function ($button) {
           const {
             lastLog,
           } = this
@@ -928,7 +928,7 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(lastLog.get('snapshots').length).to.eq(2)
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
 
-          return expect(lastLog.get('snapshots')[1].body).to.be.an('object')
+          expect(lastLog.get('snapshots')[1].body).to.be.an('object')
         })
       })
 
@@ -941,23 +941,23 @@ describe('src/cy/commands/actions/trigger', function () {
           }
         })
 
-        return cy.get('button:first').trigger('mouseover').then(() => expect(logs.length).to.eq(1))
+        cy.get('button:first').trigger('mouseover').then(() => expect(logs.length).to.eq(1))
       })
 
       it('passes in coords', () => {
-        return cy.get('button:first').trigger('mouseover').then(function ($btn) {
+        cy.get('button:first').trigger('mouseover').then(function ($btn) {
           const {
             lastLog,
           } = this
 
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
 
-          return expect(lastLog.get('coords')).to.deep.eq(fromElWindow, 'x', 'y')
+          expect(lastLog.get('coords')).to.deep.eq(fromElWindow, 'x', 'y')
         })
       })
 
-      return it('#consoleProps', function () {
-        return cy.get('button:first').trigger('mouseover').then(($button) => {
+      it('#consoleProps', () => {
+        cy.get('button:first').trigger('mouseover').then(($button) => {
           const consoleProps = this.lastLog.invoke('consoleProps')
           const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($button)
           const logCoords = this.lastLog.get('coords')
@@ -974,7 +974,7 @@ describe('src/cy/commands/actions/trigger', function () {
           expect(eventOptions.pageY).to.be.be.a('number')
           expect(eventOptions.screenX).to.be.be.a('number').and.eq(eventOptions.clientX)
 
-          return expect(eventOptions.screenY).to.be.be.a('number').and.eq(eventOptions.clientY)
+          expect(eventOptions.screenY).to.be.be.a('number').and.eq(eventOptions.clientY)
         })
       })
     })

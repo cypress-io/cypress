@@ -7,7 +7,7 @@ describe('src/cy/commands/actions/type - #type errors', () => {
   })
 
   describe('errors', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       Cypress.config('defaultCommandTimeout', 100)
 
       this.logs = []

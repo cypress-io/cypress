@@ -1,16 +1,3 @@
-/* eslint-disable
-    no-console,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _ = require('lodash')
 const fs = require('fs')
 const niv = require('npm-install-version')
 const auth = require('basic-auth')
@@ -19,9 +6,6 @@ const express = require('express')
 const http = require('http')
 const path = require('path')
 const Promise = require('bluebird')
-const coffee = require('@packages/coffee')
-
-const args = require('minimist')(process.argv.slice(2))
 
 // make sure we have both versions of react
 niv.install('react@16.0.0')
@@ -115,5 +99,6 @@ niv.install('react-dom@15.6.1');
 
   app.use(require('errorhandler')())
 
+  // eslint-disable-next-line no-console
   return server.listen(app.get('port'), () => console.log('Express server listening on port', app.get('port')))
 })

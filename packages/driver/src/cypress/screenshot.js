@@ -1,14 +1,3 @@
-/* eslint-disable
-    default-case,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 
 const $utils = require('./utils')
@@ -59,6 +48,7 @@ const normalizePadding = function (padding) {
         bottom = padding[2]
         left = padding[3]
         break
+      default: null
     }
   } else {
     top = (right = (bottom = (left = padding)))
@@ -115,7 +105,6 @@ const validateAndSetCallback = function (props, values, cmd, log, option) {
 }
 
 const validate = function (props, cmd, log) {
-  let blackout; let capture; let clip; let padding
   const values = {}
 
   if (!_.isPlainObject(props)) {
@@ -125,7 +114,7 @@ const validate = function (props, cmd, log) {
     })
   }
 
-  capture = props.capture
+  const capture = props.capture
 
   if (capture) {
     if (!(validCaptures.includes(capture))) {
@@ -142,7 +131,7 @@ const validate = function (props, cmd, log) {
   validateAndSetBoolean(props, values, cmd, log, 'disableTimersAndAnimations')
   validateAndSetBoolean(props, values, cmd, log, 'screenshotOnRunFailure')
 
-  blackout = props.blackout
+  const blackout = props.blackout
 
   if (blackout) {
     if (!_.isArray(blackout) || _.some(blackout, (selector) => !_.isString(selector))) {
@@ -155,7 +144,7 @@ const validate = function (props, cmd, log) {
     values.blackout = blackout
   }
 
-  clip = props.clip
+  const clip = props.clip
 
   if (clip) {
     if (
@@ -172,7 +161,7 @@ const validate = function (props, cmd, log) {
     values.clip = clip
   }
 
-  padding = props.padding
+  const padding = props.padding
 
   if (padding) {
     const isShorthandPadding = (value) => {

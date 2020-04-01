@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const {
   Promise,
 } = Cypress
@@ -15,7 +5,7 @@ const {
 let previousTestWasCanceled = false
 let calledAfterDoneEarly = false
 
-describe('canceling command queues', function () {
+describe('canceling command queues', () => {
   it('Cypress.stop()', (done) => {
     cy.stub(Cypress.runner, 'stop')
 
@@ -29,16 +19,16 @@ describe('canceling command queues', function () {
       .then(() => {
         expect(calledAfterStop).to.be.false
 
-        return done()
+        done()
       })
     })
 
-    return cy.wrap(null).then(() => {
+    cy.wrap(null).then(() => {
       Cypress.stop()
 
       return null
-    }).then(() => // should not be called
-    {
+    }).then(() => {
+      // should not be called
       return calledAfterStop = true
     })
   })
@@ -49,25 +39,25 @@ describe('canceling command queues', function () {
         cancel,
       } = cy.state('promise')
 
-      cy.state('promise').cancel = function () {
+      cy.state('promise').cancel = () => {
         previousTestWasCanceled = true
 
         return cancel.apply(this, arguments)
       }
 
-      return done()
+      done()
     })
 
-    return cy.wrap(null).then(() => calledAfterDoneEarly = true)
+    cy.wrap(null).then(() => calledAfterDoneEarly = true)
   })
 
   it('verifies the previous test worked', () => {
     expect(previousTestWasCanceled).to.be.true
 
-    return expect(calledAfterDoneEarly).to.be.false
+    expect(calledAfterDoneEarly).to.be.false
   })
 
-  return it('command failure', (done) => {
+  it('command failure', (done) => {
     // make sure there are no unhandled rejections
     Promise.onPossiblyUnhandledRejection(done)
 
@@ -80,11 +70,11 @@ describe('canceling command queues', function () {
         expect(cy.isStopped()).to.be.true // make sure we ran our cleanup routine
         expect(calledAfterFailure).to.be.false
 
-        return done()
+        done()
       })
     })
 
-    return cy.wrap(null).then(() => {
+    cy.wrap(null).then(() => {
       throw new Error('foo')
     }).then(() => calledAfterFailure = true)
   })

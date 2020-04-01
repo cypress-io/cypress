@@ -11,14 +11,14 @@
 const $ = Cypress.$.bind(Cypress)
 const $Snapshots = require('../../../../src/cy/snapshots')
 
-describe('driver/src/cy/snapshots', function () {
+describe('driver/src/cy/snapshots', () => {
   context('invalid snapshot html', () => {
     beforeEach(() => cy.visit('/fixtures/invalid_html.html'))
 
-    return it('can snapshot html with invalid attributes', () => {
+    it('can snapshot html with invalid attributes', () => {
       const { htmlAttrs } = cy.createSnapshot()
 
-      return expect(htmlAttrs).to.eql({
+      expect(htmlAttrs).to.eql({
         foo: 'bar',
       })
     })
@@ -27,20 +27,20 @@ describe('driver/src/cy/snapshots', function () {
   context('snapshot no html/doc', () => {
     beforeEach(() => cy.visit('/fixtures/no_html.html'))
 
-    return it('does not err on snapshot', () => {
+    it('does not err on snapshot', () => {
       const { htmlAttrs } = cy.createSnapshot()
 
       const doc = cy.state('document')
 
       doc.write('')
 
-      return expect(htmlAttrs).to.eql({})
+      expect(htmlAttrs).to.eql({})
     })
   })
 
-  return context('snapshot el', function () {
+  context('snapshot el', () => {
     before(() => {
-      return cy
+      cy
       .visit('/fixtures/generic.html')
       .then(function (win) {
         const h = $(win.document.head)
@@ -52,7 +52,7 @@ describe('driver/src/cy/snapshots', function () {
       })
     })
 
-    beforeEach(function () {
+    beforeEach(() => {
       const doc = cy.state('document')
 
       $(doc.head).empty().html(this.head)
@@ -61,31 +61,31 @@ describe('driver/src/cy/snapshots', function () {
       this.$el = $('<span id=\'snapshot\'>snapshot</span>').appendTo(cy.$$('body'))
     })
 
-    it('does not clone scripts', function () {
+    it('does not clone scripts', () => {
       $('<script type=\'text/javascript\' />').appendTo(cy.$$('body'))
 
       const { body } = cy.createSnapshot(null, this.$el)
 
-      return expect(body.find('script')).not.to.exist
+      expect(body.find('script')).not.to.exist
     })
 
-    it('does not clone css stylesheets', function () {
+    it('does not clone css stylesheets', () => {
       $('<link rel=\'stylesheet\' />').appendTo(cy.$$('body'))
 
       const { body } = cy.createSnapshot(null, this.$el)
 
-      return expect(body.find('link')).not.to.exist
+      expect(body.find('link')).not.to.exist
     })
 
-    it('does not clone style tags', function () {
+    it('does not clone style tags', () => {
       $('<style>.foo { color: blue }</style>').appendTo(cy.$$('body'))
 
       const { body } = cy.createSnapshot(null, this.$el)
 
-      return expect(body.find('style')).not.to.exist
+      expect(body.find('style')).not.to.exist
     })
 
-    it('preserves classes on the <html> tag', function () {
+    it('preserves classes on the <html> tag', () => {
       const $html = cy.$$('html')
 
       $html.addClass('foo bar')
@@ -94,29 +94,29 @@ describe('driver/src/cy/snapshots', function () {
 
       const { htmlAttrs } = cy.createSnapshot(null, this.$el)
 
-      return expect(htmlAttrs).to.eql({
+      expect(htmlAttrs).to.eql({
         class: 'foo bar',
         id: 'baz',
         style: 'margin: 10px;',
       })
     })
 
-    it('sets data-cypress-el attr', function () {
+    it('sets data-cypress-el attr', () => {
       const attr = cy.spy(this.$el, 'attr')
 
       cy.createSnapshot(null, this.$el)
 
-      return expect(attr).to.be.calledWith('data-cypress-el', true)
+      expect(attr).to.be.calledWith('data-cypress-el', true)
     })
 
-    it('removes data-cypress-el attr', function () {
+    it('removes data-cypress-el attr', () => {
       cy.createSnapshot(null, this.$el)
 
-      return expect(this.$el.attr('data-cypress-el')).to.be.undefined
+      expect(this.$el.attr('data-cypress-el')).to.be.undefined
     })
 
-    return context('iframes', function () {
-      it('replaces with placeholders that have src in content', function () {
+    context('iframes', () => {
+      it('replaces with placeholders that have src in content', () => {
         $('<iframe src=\'generic.html\' />').appendTo(cy.$$('body'))
 
         // NOTE: possibly switch to visual screenshot diffing in future
@@ -130,47 +130,47 @@ describe('driver/src/cy/snapshots', function () {
         expect(body.find('iframe').length).to.equal(1)
         expect(body.find('iframe')[0].src).to.include(';base64')
 
-        return expect(atob(body.find('iframe')[0].src.split(',')[1])).to.include('generic.html')
+        expect(atob(body.find('iframe')[0].src.split(',')[1])).to.include('generic.html')
       })
 
-      it('placeholders have same id', function () {
+      it('placeholders have same id', () => {
         $('<iframe id=\'foo-bar\' />').appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        return expect(body.find('iframe')[0].id).to.equal('foo-bar')
+        expect(body.find('iframe')[0].id).to.equal('foo-bar')
       })
 
-      it('placeholders have same classes', function () {
+      it('placeholders have same classes', () => {
         $('<iframe class=\'foo bar\' />').appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        return expect(body.find('iframe')[0].className).to.equal('foo bar')
+        expect(body.find('iframe')[0].className).to.equal('foo bar')
       })
 
-      it('placeholders have inline styles', function () {
+      it('placeholders have inline styles', () => {
         $('<iframe style=\'margin: 40px\' />').appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        return expect(body.find('iframe').css('margin')).to.equal('40px')
+        expect(body.find('iframe').css('margin')).to.equal('40px')
       })
 
-      it('placeholders have width set to outer width', function () {
+      it('placeholders have width set to outer width', () => {
         $('<iframe style=\'width: 40px; padding: 20px; border: solid 5px\' />').appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        return expect(body.find('iframe').css('width')).to.equal('90px')
+        expect(body.find('iframe').css('width')).to.equal('90px')
       })
 
-      return it('placeholders have height set to outer height', function () {
+      it('placeholders have height set to outer height', () => {
         $('<iframe style=\'height: 40px; padding: 10px; border: solid 5px\' />').appendTo(cy.$$('body'))
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        return expect(body.find('iframe').css('height')).to.equal('70px')
+        expect(body.find('iframe').css('height')).to.equal('70px')
       })
     })
   })

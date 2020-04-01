@@ -1,38 +1,20 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const {
   _,
 } = Cypress
 
-describe('uncaught errors', function () {
-  beforeEach(function () {
+describe('uncaught errors', () => {
+  beforeEach(() => {
     this.logs = []
-
     cy.on('log:added', (attrs, log) => {
       this.lastLog = log
-
-      return this.logs.push(log)
+      this.logs.push(log)
     })
-
-    return null
   })
 
-  it('logs visit failure once', function (done) {
+  it('logs visit failure once', (done) => {
     const r = cy.state('runnable')
 
     cy.on('fail', (err) => {
-      const {
-        lastLog,
-      } = this
-
       expect(this.logs.length).to.eq(1)
 
       // this runnable should not have a timer
@@ -41,13 +23,13 @@ describe('uncaught errors', function () {
       done()
 
       // and still not have a timer
-      return expect(r.timer).not.to.be.ok
+      expect(r.timer).not.to.be.ok
     })
 
     // when this beforeEach hook fails
     // it will skip invoking the test
     // but run the other suite
-    return cy.visit('/fixtures/visit_error.html')
+    cy.visit('/fixtures/visit_error.html')
   })
 
   it('can turn off uncaught exception handling via cy', () => {
@@ -68,7 +50,7 @@ describe('uncaught errors', function () {
       }
     })
 
-    return cy.visit('/fixtures/visit_error.html')
+    cy.visit('/fixtures/visit_error.html')
   })
 
   it('can turn off uncaught exception handling via Cypress', () => {
@@ -81,7 +63,7 @@ describe('uncaught errors', function () {
       return false
     })
 
-    return cy.visit('/fixtures/visit_error.html')
+    cy.visit('/fixtures/visit_error.html')
   })
 
   it('logs click error once', function (done) {
@@ -104,10 +86,10 @@ describe('uncaught errors', function () {
       expect(lastLog.get('name')).to.eq('click')
       expect(lastLog.get('error')).to.eq(err)
 
-      return done()
+      done()
     })
 
-    return cy
+    cy
     .visit('/fixtures/jquery.html')
     .window().then((win) => {
       return win.$('button:first').on('click', () => {
@@ -135,10 +117,10 @@ describe('uncaught errors', function () {
       expect(click.get('name')).to.eq('click')
       expect(click.get('error')).to.eq(err)
 
-      return done()
+      done()
     })
 
-    return cy
+    cy
     .visit('/fixtures/jquery.html')
     .window().then((win) => {
       return win.$('<a href=\'/fixtures/visit_error.html\'>visit</a>')
@@ -147,16 +129,16 @@ describe('uncaught errors', function () {
   })
 
   // https://github.com/cypress-io/cypress/issues/987
-  return it('global onerror', (done) => {
+  it('global onerror', (done) => {
     cy.once('uncaught:exception', (err) => {
       expect(err.stack).contain('foo is not defined')
       expect(err.stack).contain('one')
       expect(err.stack).contain('two')
       expect(err.stack).contain('three')
 
-      return done()
+      done()
     })
 
-    return cy.visit('/fixtures/global-error.html')
+    cy.visit('/fixtures/global-error.html')
   })
 })

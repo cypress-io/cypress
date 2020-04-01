@@ -13,31 +13,31 @@ const {
   _,
 } = Cypress
 
-describe('src/cy/commands/actions/hover', function () {
+describe('src/cy/commands/actions/hover', () => {
   before(() => {
-    return cy
+    cy
     .visit('/fixtures/dom.html')
     .then(function (win) {
       this.body = win.document.body.outerHTML
     })
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     const doc = cy.state('document')
 
     return $(doc.body).empty().html(this.body)
   })
 
-  return context('#hover', () => {
-    return it('throws when invoking', (done) => {
+  context('#hover', () => {
+    it('throws when invoking', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('`cy.hover()` is not currently implemented.')
         expect(err.docsUrl).to.eq('https://on.cypress.io/hover')
 
-        return done()
+        done()
       })
 
-      return cy.get('button').hover()
+      cy.get('button').hover()
     })
   })
 })

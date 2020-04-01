@@ -1,7 +1,7 @@
 // NOT patched jquery
 import $ from 'jquery'
 import _ from '../config/lodash'
-import $utils from '../cypress/utils.coffee'
+import $utils from '../cypress/utils' //.coffee'
 import * as $document from './document'
 import * as $jquery from './jquery'
 import * as $selection from './selection'

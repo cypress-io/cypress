@@ -21,7 +21,7 @@ describe('driver/src/cy/snapshots_css', () => {
 
     cy.viewport(400, 600)
     cy.visit('/fixtures/generic.html').then(() => {
-      return Cypress.Promise.all([
+      Cypress.Promise.all([
         addStyles('<link rel="stylesheet" href="/fixtures/generic_styles.css" />', 'head'),
         addStyles('<style>p { color: blue; }</style>', 'head'),
         addStyles('<link media="screen" rel="stylesheet" href="http://localhost:3501/fixtures/generic_styles.css" />', 'head'),

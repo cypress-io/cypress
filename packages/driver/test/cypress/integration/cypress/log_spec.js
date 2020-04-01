@@ -1,8 +1,8 @@
 const $Log = require('../../../../src/cypress/log')
 
-describe('src/cypress/log', function () {
-  context('#snapshot', function () {
-    beforeEach(function () {
+describe('src/cypress/log', () => {
+  context('#snapshot', () => {
+    beforeEach(() => {
       this.cy = {
         createSnapshot: cy.stub().returns({}),
       }
@@ -14,7 +14,7 @@ describe('src/cypress/log', function () {
       this.log = $Log.create(Cypress, this.cy, this.state, this.config)
     })
 
-    it('creates a snapshot and returns the log', function () {
+    it('creates a snapshot and returns the log', () => {
       const div = Cypress.$('<div />')
 
       const log = this.log({ '$el': div })
@@ -24,7 +24,7 @@ describe('src/cypress/log', function () {
       expect(result).to.equal(log)
     })
 
-    it('is no-op if not interactive', function () {
+    it('is no-op if not interactive', () => {
       this.config.withArgs('isInteractive').returns(false)
 
       const log = this.log()
@@ -34,7 +34,7 @@ describe('src/cypress/log', function () {
       expect(result).to.equal(log)
     })
 
-    it('is no-op if numTestsKeptInMemory is 0', function () {
+    it('is no-op if numTestsKeptInMemory is 0', () => {
       this.config.withArgs('numTestsKeptInMemory').returns(0)
 
       const log = this.log()

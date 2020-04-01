@@ -1,22 +1,5 @@
-/* eslint-disable
-    brace-style,
-    default-case,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-// _ = require("lodash")
-
 // adds a custom lightweight event bus
 // to the Cypress class
-
-// splice = (index) ->
-// @_events.splice(index, 1)
 
 const _ = require('lodash')
 const EE = require('eventemitter2')
@@ -44,11 +27,13 @@ module.exports = {
           const original = parent[fn]
 
           parent[fn] = function () {
+            // eslint-disable-next-line
             const ret1 = original.apply(parent, arguments)
 
             // dont let our child emits also log
             logEmit = false
 
+            // eslint-disable-next-line
             const ret2 = child[fn].apply(child, arguments)
 
             logEmit = true
@@ -63,10 +48,11 @@ module.exports = {
                 // array of results
                 return ret1.concat(ret2)
               case 'emitThen':
-                return Promise.join(ret1, ret2, (a, a2) => // array of results
-                {
+                // array of results
+                return Promise.join(ret1, ret2, (a, a2) => {
                   return a.concat(a2)
                 })
+              default: null
             }
           }
         })(fn)

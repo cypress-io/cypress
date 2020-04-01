@@ -1,37 +1,28 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-describe('Clicks Integration Tests', function () {
-  context('fixed-nav', function () {
+describe('Clicks Integration Tests', () => {
+  context('fixed-nav', () => {
+    // eslint-disable-next-line no-undef
     enterCommandTestingMode('fixed-nav')
 
-    return describe('fixed nav', () => {
-      return it('can click inputs under a fixed-position nav', function () {
+    describe('fixed nav', () => {
+      it('can click inputs under a fixed-position nav', () => {
         return this.cy.get('button').click()
       })
     })
   })
 
-  return context('dropdown', function () {
+  context('dropdown', () => {
+    // eslint-disable-next-line no-undef
     enterCommandTestingMode('dropdown', { replaceIframeContents: false })
 
-    return describe('animating dropdown with fixed background', () => // this tests a kendo drop down opening
+    // this tests a kendo drop down opening
     // as it opens the element from position returns the background element
     // which is fixed position
     // the fixed position element cannot be scrolled and thus an endless loop
     // is created
-    {
-      return it(
+    describe('animating dropdown with fixed background', () => {
+      it(
         'can click an animating element when the element behind it is fixed position and cannot be scrolled',
-        function () {
+        () => {
           this.cy.window().then((win) => {
             const k = win.$('#dropdown').getKendoDropDownList()
 
@@ -43,7 +34,7 @@ describe('Clicks Integration Tests', function () {
           .window().then((win) => {
             const k = win.$('#dropdown').getKendoDropDownList()
 
-            return expect(k.text()).to.eq('Strawberries')
+            expect(k.text()).to.eq('Strawberries')
           })
         },
       )

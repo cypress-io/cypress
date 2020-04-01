@@ -1,26 +1,12 @@
-/* eslint-disable
-    brace-style,
-    no-console,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:driver:retries')
 
-const $utils = require('../cypress/utils')
 const $errUtils = require('../cypress/error_utils')
 
 const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAssertions) => {
   return {
-    retry (fn, options, log) {
+    async retry (fn, options, log) {
     // remove the runnables timeout because we are now in retry
     // mode and should be handling timing out ourselves and dont
     // want to accidentally time out via mocha
@@ -55,6 +41,7 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
       // traces are correctly displayed
       if (debug.enabled && error && !$errUtils.CypressErrorRe.test(error.name)) {
         debug('retrying due to caught error...')
+        // eslint-disable-next-line no-console
         console.error(error)
       }
 
@@ -98,12 +85,12 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
         })
       }
 
-      const runnableHasChanged = () => // if we've changed runnables don't retry!
-      {
+      // if we've changed runnables don't retry!
+      const runnableHasChanged = () => {
         return options._runnable !== state('runnable')
       }
 
-      const ended = () => // we should NOT retry if
+      // we should NOT retry if
       // 1. our promise has been canceled
       // 2. or we have an error
       // 3. or if the runnables has changed
@@ -116,34 +103,32 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
       // bug in bluebird with not propagating cancelations
       // fast enough in a series of promises
       // https://github.com/petkaantonov/bluebird/issues/1424
-      {
+      const ended = () => {
         return state('canceled') || state('error') || runnableHasChanged()
       }
 
-      return Promise
+      await Promise
       .delay(interval)
-      .then(() => {
-        if (ended()) {
-          return
-        }
 
-        Cypress.action('cy:command:retry', options)
+      if (ended()) {
+        return
+      }
 
-        if (ended()) {
-          return
-        }
+      Cypress.action('cy:command:retry', options)
+      if (ended()) {
+        return
+      }
 
-        // if we are unstable then remove
-        // the start since we need to retry
-        // fresh once we become stable again!
-        if (state('isStable') === false) {
-          options._start = undefined
-        }
+      // if we are unstable then remove
+      // the start since we need to retry
+      // fresh once we become stable again!
+      if (state('isStable') === false) {
+        options._start = undefined
+      }
 
-        // invoke the passed in retry fn
-        // once we reach stability
-        return whenStable(fn)
-      })
+      // invoke the passed in retry fn
+      // once we reach stability
+      return whenStable(fn)
     },
   }
 }

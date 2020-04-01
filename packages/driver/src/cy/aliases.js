@@ -1,15 +1,3 @@
-/* eslint-disable
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 
 const $errUtils = require('../cypress/error_utils')
@@ -62,6 +50,7 @@ const create = function (state) {
     aliases[alias] = aliasObj
     state('aliases', aliases)
 
+    // eslint-disable-next-line
     const remoteSubject = cy.getRemotejQueryInstance(subject)
 
     ctx[alias] = remoteSubject != null ? remoteSubject : subject
@@ -84,7 +73,9 @@ const create = function (state) {
     }
 
     // slice off the '@'
-    if (!(alias = aliases[name.slice(1)])) {
+    let alias = aliases[name.slice(1)]
+
+    if (!alias) {
       aliasNotFoundFor(name, cmd, log)
     }
 
@@ -92,9 +83,9 @@ const create = function (state) {
   }
 
   const getAvailableAliases = function () {
-    let aliases
+    let aliases = state('aliases')
 
-    if (!(aliases = state('aliases'))) {
+    if (!aliases) {
       return []
     }
 

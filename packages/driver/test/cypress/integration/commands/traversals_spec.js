@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const $ = Cypress.$.bind(Cypress)
 const {
   _,
@@ -18,7 +8,7 @@ const {
 
 const helpers = require('../../support/helpers')
 
-describe('src/cy/commands/traversals', function () {
+describe('src/cy/commands/traversals', () => {
   beforeEach(() => cy.visit('/fixtures/dom.html'))
 
   const fns = [
@@ -47,11 +37,11 @@ describe('src/cy/commands/traversals', function () {
       name = fn
     }
 
-    return context(`#${name}`, function () {
+    context(`#${name}`, () => {
       it('proxies through to jquery and returns new subject', () => {
         const el = cy.$$('#list')[name](arg)
 
-        return cy.get('#list')[name](arg).then(($el) => expect($el).to.match(el))
+        cy.get('#list')[name](arg).then(($el) => expect($el).to.match(el))
       })
 
       describe('errors', () => {
@@ -61,68 +51,64 @@ describe('src/cy/commands/traversals', function () {
           cy.on('fail', (err) => {
             expect(err.message).to.include('You must provide a valid number to a `length` assertion. You passed: `asdf`')
 
-            return done()
+            done()
           })
 
-          return cy.get('#list')[name](arg).should('have.length', 'asdf')
+          cy.get('#list')[name](arg).should('have.length', 'asdf')
         })
 
         it('throws on too many elements after timing out waiting for length', (done) => {
           const el = cy.$$('#list')[name](arg)
 
-          const node = dom.stringify(cy.$$('#list'), 'short')
-
           cy.on('fail', (err) => {
             expect(err.message).to.include(`Too many elements found. Found '${el.length}', expected '${el.length - 1}'.`)
 
-            return done()
+            done()
           })
 
-          return cy.get('#list')[name](arg).should('have.length', el.length - 1)
+          cy.get('#list')[name](arg).should('have.length', el.length - 1)
         })
 
         it('throws on too few elements after timing out waiting for length', (done) => {
           const el = cy.$$('#list')[name](arg)
 
-          const node = dom.stringify(cy.$$('#list'), 'short')
-
           cy.on('fail', (err) => {
             expect(err.message).to.include(`Not enough elements found. Found '${el.length}', expected '${el.length + 1}'.`)
 
-            return done()
+            done()
           })
 
-          return cy.get('#list')[name](arg).should('have.length', el.length + 1)
+          cy.get('#list')[name](arg).should('have.length', el.length + 1)
         })
 
         it('without a dom element', (done) => {
           cy.on('fail', () => done())
 
-          return cy.noop({})[name](arg)
+          cy.noop({})[name](arg)
         })
 
         it('throws when subject is not in the document', (done) => {
           cy.on('command:end', () => {
-            return cy.$$('#list').remove()
+            cy.$$('#list').remove()
           })
 
           cy.on('fail', (err) => {
             expect(err.message).to.include(`\`cy.${name}()\` failed because this element`)
 
-            return done()
+            done()
           })
 
-          return cy.get('#list')[name](arg)
+          cy.get('#list')[name](arg)
         })
 
-        return it('returns no elements', (done) => {
+        it('returns no elements', (done) => {
           const errIncludes = (el, node) => {
             node = dom.stringify(cy.$$(node), 'short')
 
-            return cy.on('fail', (err) => {
+            cy.on('fail', (err) => {
               expect(err.message).to.include(`Expected to find element: \`${el}\`, but never found it. Queried from element: ${node}`)
 
-              return done()
+              done()
             })
           }
 
@@ -130,21 +116,23 @@ describe('src/cy/commands/traversals', function () {
             case 'not':
               errIncludes(':checkbox', ':checkbox')
 
-              return cy.get(':checkbox').not(':checkbox')
+              cy.get(':checkbox').not(':checkbox')
 
             // these cannot error
-            case 'first': case 'last': case 'parentsUntil': return done()
+            // eslint-disable-next-line no-fallthrough
+            case 'first': case 'last': case 'parentsUntil': done()
+              break
 
             default:
               errIncludes('.no-class-like-this-exists', 'div:first')
 
-              return cy.get('div:first')[name]('.no-class-like-this-exists')
+              cy.get('div:first')[name]('.no-class-like-this-exists')
           }
         })
       })
 
-      return describe('.log', function () {
-        beforeEach(function () {
+      describe('.log', () => {
+        beforeEach(() => {
           cy.on('log:added', (attrs, log) => {
             this.lastLog = log
           })
@@ -159,37 +147,37 @@ describe('src/cy/commands/traversals', function () {
                 state: 'pending',
               })
 
-              return done()
+              done()
             }
           })
 
-          return cy.get('#list')[name](arg)
+          cy.get('#list')[name](arg)
         })
 
         it('snapshots after finding element', () => {
-          return cy.get('#list')[name](arg).then(function () {
+          cy.get('#list')[name](arg).then(() => {
             const {
               lastLog,
             } = this
 
             expect(lastLog.get('snapshots').length).to.eq(1)
 
-            return expect(lastLog.get('snapshots')[0]).to.be.an('object')
+            expect(lastLog.get('snapshots')[0]).to.be.an('object')
           })
         })
 
         it('has the $el', () => {
-          return cy.get('#list')[name](arg).then(function ($el) {
+          cy.get('#list')[name](arg).then(function ($el) {
             const {
               lastLog,
             } = this
 
-            return expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
+            expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
           })
         })
 
         it('has a custom message', () => {
-          return cy.get('#list')[name](arg).then(function () {
+          cy.get('#list')[name](arg).then(() => {
             let message
 
             if (_.isUndefined(arg) || _.isFunction(arg)) {
@@ -202,12 +190,12 @@ describe('src/cy/commands/traversals', function () {
               lastLog,
             } = this
 
-            return expect(lastLog.get('message')).to.eq(message)
+            expect(lastLog.get('message')).to.eq(message)
           })
         })
 
         it('#consoleProps', () => {
-          return cy.get('#list')[name](arg).then(function ($el) {
+          cy.get('#list')[name](arg).then(function ($el) {
             const obj = { Command: name }
 
             if (_.isFunction(arg)) {
@@ -224,17 +212,17 @@ describe('src/cy/commands/traversals', function () {
               Elements: $el.length,
             })
 
-            return expect(this.lastLog.invoke('consoleProps')).to.deep.eq(obj)
+            expect(this.lastLog.invoke('consoleProps')).to.deep.eq(obj)
           })
         })
 
-        return it('can be turned off', () => {
-          return cy.get('#list')[name](arg, { log: false }).then(function () {
+        it('can be turned off', () => {
+          cy.get('#list')[name](arg, { log: false }).then(() => {
             const {
               lastLog,
             } = this
 
-            return expect(lastLog.get('name')).to.eq('get')
+            expect(lastLog.get('name')).to.eq('get')
           })
         })
       })
@@ -244,7 +232,7 @@ describe('src/cy/commands/traversals', function () {
   it('eventually resolves', () => {
     cy.on('command:retry', _.after(2, () => cy.$$('button:first').text('foo').addClass('bar')))
 
-    return cy.root().find('button:first').should('have.text', 'foo').and('have.class', 'bar')
+    cy.root().find('button:first').should('have.text', 'foo').and('have.class', 'bar')
   })
 
   it('retries until it finds', () => {
@@ -255,7 +243,7 @@ describe('src/cy/commands/traversals', function () {
 
     cy.on('command:retry', retry)
 
-    return cy.get('#list li:last').find('span').then(($span) => expect($span.get(0)).to.eq(span.get(0)))
+    cy.get('#list li:last').find('span').then(($span) => expect($span.get(0)).to.eq(span.get(0)))
   })
 
   it('retries until length equals n', () => {
@@ -269,23 +257,23 @@ describe('src/cy/commands/traversals', function () {
     }))
 
     // should resolving after removing 2 buttons
-    return cy.root().find('button').should('have.length', length).then(($buttons) => expect($buttons.length).to.eq(length))
+    cy.root().find('button').should('have.length', length).then(($buttons) => expect($buttons.length).to.eq(length))
   })
 
   it('should(\'not.exist\')', () => {
     cy.on('command:retry', _.after(3, () => {
-      return cy.$$('#nested-div').find('span').remove()
+      cy.$$('#nested-div').find('span').remove()
     }))
 
-    return cy.get('#nested-div').find('span').should('not.exist')
+    cy.get('#nested-div').find('span').should('not.exist')
   })
 
   it('should(\'exist\')', () => {
     cy.on('command:retry', _.after(3, () => {
-      return cy.$$('#nested-div').append($('<strong />'))
+      cy.$$('#nested-div').append($('<strong />'))
     }))
 
-    return cy.get('#nested-div').find('strong')
+    cy.get('#nested-div').find('strong')
   })
 
   // https://github.com/cypress-io/cypress/issues/38
@@ -296,7 +284,7 @@ describe('src/cy/commands/traversals', function () {
       return c.prop('checked', true)
     }))
 
-    return cy.get('#by-name').find(':checked').should('have.length', 2)
+    cy.get('#by-name').find(':checked').should('have.length', 2)
   })
 
   it('does not log using first w/options', () => {
@@ -308,15 +296,15 @@ describe('src/cy/commands/traversals', function () {
       }
     })
 
-    return cy.get('button').first({ log: false }).then(($button) => {
+    cy.get('button').first({ log: false }).then(($button) => {
       expect($button.length).to.eq(1)
 
-      return expect(logs.length).to.eq(1)
+      expect(logs.length).to.eq(1)
     })
   })
 
-  return describe('errors', function () {
-    beforeEach(function () {
+  describe('errors', () => {
+    beforeEach(() => {
       Cypress.config('defaultCommandTimeout', 100)
 
       this.logs = []
@@ -332,23 +320,23 @@ describe('src/cy/commands/traversals', function () {
       cy.on('fail', (err) => {
         expect(err.message).to.include('Expected to find element: `span`, but never found it. Queried from element: <li.item>')
 
-        return done()
+        done()
       })
 
-      return cy.get('#list li:last').find('span')
+      cy.get('#list li:last').find('span')
     })
 
     it('throws once when incorrect sizzle selector', function (done) {
       cy.on('fail', (err) => {
         expect(this.logs.length).to.eq(2)
 
-        return done()
+        done()
       })
 
-      return cy.get('div:first').find('.spinner\'')
+      cy.get('div:first').find('.spinner\'')
     })
 
-    return it('logs out $el when existing $el is found even on failure', function (done) {
+    it('logs out $el when existing $el is found even on failure', function (done) {
       const button = cy.$$('#button').hide()
 
       cy.on('fail', (err) => {
@@ -363,10 +351,10 @@ describe('src/cy/commands/traversals', function () {
         expect(consoleProps.Yielded).to.eq(button.get(0))
         expect(consoleProps.Elements).to.eq(button.length)
 
-        return done()
+        done()
       })
 
-      return cy.get('#dom').find('#button').should('be.visible')
+      cy.get('#dom').find('#button').should('be.visible')
     })
   })
 })

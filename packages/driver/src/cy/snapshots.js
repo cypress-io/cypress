@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 
@@ -24,7 +13,7 @@ const create = function ($$, state) {
   const getHtmlAttrs = function (htmlEl) {
     const tmpHtmlEl = document.createElement('html')
 
-    return _.transform(htmlEl != null ? htmlEl.attributes : undefined, (memo, attr) => {
+    return _.transform(htmlEl ? htmlEl.attributes : undefined, (memo, attr) => {
       if (!attr.specified) {
         return
       }
@@ -67,8 +56,6 @@ const create = function ($$, state) {
           return remove()
         }
       } catch (error) {
-        const e = error
-
         return remove()
       }
 

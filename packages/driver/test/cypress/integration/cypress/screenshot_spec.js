@@ -1,16 +1,4 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { Screenshot, $ } = Cypress
+const { Screenshot } = Cypress
 
 const DEFAULTS = {
   capture: 'fullPage',
@@ -21,8 +9,8 @@ const DEFAULTS = {
 }
 
 describe('src/cypress/screenshot', () => {
-  beforeEach(() => // reset state since this is a singleton
-  {
+  beforeEach(() => {
+    // reset state since this is a singleton
     return Screenshot.reset()
   })
 
@@ -30,26 +18,26 @@ describe('src/cypress/screenshot', () => {
     expect(Screenshot.getConfig()).to.deep.eq(DEFAULTS)
     expect(() => Screenshot.onBeforeScreenshot()).not.to.throw()
 
-    return expect(() => Screenshot.onAfterScreenshot()).not.to.throw()
+    expect(() => Screenshot.onAfterScreenshot()).not.to.throw()
   })
 
   context('.getConfig', () => {
-    return it('returns copy of config', () => {
+    it('returns copy of config', () => {
       const config = Screenshot.getConfig()
 
       config.blackout.push('.foo')
 
-      return expect(Screenshot.getConfig().blackout).to.deep.eq(DEFAULTS.blackout)
+      expect(Screenshot.getConfig().blackout).to.deep.eq(DEFAULTS.blackout)
     })
   })
 
-  return context('.defaults', () => {
+  context('.defaults', () => {
     it('is noop if not called with any valid properties', () => {
       Screenshot.defaults({})
       expect(Screenshot.getConfig()).to.deep.eq(DEFAULTS)
       expect(() => Screenshot.onBeforeScreenshot()).not.to.throw()
 
-      return expect(() => Screenshot.onAfterScreenshot()).not.to.throw()
+      expect(() => Screenshot.onAfterScreenshot()).not.to.throw()
     })
 
     it('sets capture if specified', () => {
@@ -57,7 +45,7 @@ describe('src/cypress/screenshot', () => {
         capture: 'runner',
       })
 
-      return expect(Screenshot.getConfig().capture).to.eql('runner')
+      expect(Screenshot.getConfig().capture).to.eql('runner')
     })
 
     it('sets scale if specified', () => {
@@ -65,7 +53,7 @@ describe('src/cypress/screenshot', () => {
         scale: true,
       })
 
-      return expect(Screenshot.getConfig().scale).to.equal(true)
+      expect(Screenshot.getConfig().scale).to.equal(true)
     })
 
     it('sets disableTimersAndAnimations if specified', () => {
@@ -73,7 +61,7 @@ describe('src/cypress/screenshot', () => {
         disableTimersAndAnimations: false,
       })
 
-      return expect(Screenshot.getConfig().disableTimersAndAnimations).to.equal(false)
+      expect(Screenshot.getConfig().disableTimersAndAnimations).to.equal(false)
     })
 
     it('sets screenshotOnRunFailure if specified', () => {
@@ -81,7 +69,7 @@ describe('src/cypress/screenshot', () => {
         screenshotOnRunFailure: false,
       })
 
-      return expect(Screenshot.getConfig().screenshotOnRunFailure).to.equal(false)
+      expect(Screenshot.getConfig().screenshotOnRunFailure).to.equal(false)
     })
 
     it('sets clip if specified', () => {
@@ -89,7 +77,7 @@ describe('src/cypress/screenshot', () => {
         clip: { width: 200, height: 100, x: 0, y: 0 },
       })
 
-      return expect(
+      expect(
         Screenshot.getConfig().clip,
       ).to.eql(
         { width: 200, height: 100, x: 0, y: 0 },
@@ -132,7 +120,7 @@ describe('src/cypress/screenshot', () => {
       Screenshot.defaults({ onBeforeScreenshot })
       Screenshot.onBeforeScreenshot()
 
-      return expect(onBeforeScreenshot).to.be.called
+      expect(onBeforeScreenshot).to.be.called
     })
 
     it('sets onAfterScreenshot if specified', () => {
@@ -141,10 +129,10 @@ describe('src/cypress/screenshot', () => {
       Screenshot.defaults({ onAfterScreenshot })
       Screenshot.onAfterScreenshot()
 
-      return expect(onAfterScreenshot).to.be.called
+      expect(onAfterScreenshot).to.be.called
     })
 
-    return describe('errors', () => {
+    describe('errors', () => {
       it('throws if not passed an object', () => {
         const fn = () => {
           return Screenshot.defaults()
@@ -154,7 +142,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` must be called with an object. You passed: ``')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.include('https://on.cypress.io/screenshot-api')
       })
@@ -168,7 +156,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `true`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.eq('https://on.cypress.io/screenshot-api')
       })
@@ -182,7 +170,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `foo`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.eq('https://on.cypress.io/screenshot-api')
       })
@@ -196,7 +184,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `scale` option must be a boolean. You passed: `foo`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.eq('https://on.cypress.io/screenshot-api')
       })
@@ -210,7 +198,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `disableTimersAndAnimations` option must be a boolean. You passed: `foo`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.eq('https://on.cypress.io/screenshot-api')
       })
@@ -224,7 +212,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `screenshotOnRunFailure` option must be a boolean. You passed: `foo`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.include('https://on.cypress.io/screenshot-api')
       })
@@ -238,7 +226,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `foo`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.include('https://on.cypress.io/screenshot-api')
       })
@@ -252,7 +240,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `blackout` option must be an array of strings. You passed: `true`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.include('https://on.cypress.io/screenshot-api')
       })
@@ -266,25 +254,25 @@ describe('src/cypress/screenshot', () => {
           return Screenshot.defaults({ padding: ['bad', 'bad', 'bad', 'bad'] })
         }).to.throw('`Cypress.Screenshot.defaults()` `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `bad, bad, bad, bad`')
 
-        return expect(() => {
+        expect(() => {
           return Screenshot.defaults({ padding: [20, 10, 20, 10, 50] })
         }).to.throw('`Cypress.Screenshot.defaults()` `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `20, 10, 20, 10, 50`')
       })
 
       it('throws if clip is lacking proper keys', () => {
-        return expect(() => {
+        expect(() => {
           return Screenshot.defaults({ clip: { x: 5 } })
         }).to.throw('`Cypress.Screenshot.defaults()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`')
       })
 
       it('throws if clip has extraneous keys', () => {
-        return expect(() => {
+        expect(() => {
           return Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
         }).to.throw('`Cypress.Screenshot.defaults()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`')
       })
 
       it('throws if clip has non-number values', () => {
-        return expect(() => {
+        expect(() => {
           return Screenshot.defaults({ clip: { width: 100, height: 100, x: 5, y: '5' } })
         }).to.throw('`Cypress.Screenshot.defaults()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `Object{4}`')
       })
@@ -299,12 +287,12 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `onBeforeScreenshot` option must be a function. You passed: `foo`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.include('https://on.cypress.io/screenshot-api')
       })
 
-      return it('throws if onAfterScreenshot is not a function', () => {
+      it('throws if onAfterScreenshot is not a function', () => {
         const fn = () => {
           return Screenshot.defaults({ onAfterScreenshot: 'foo' })
         }
@@ -314,7 +302,7 @@ describe('src/cypress/screenshot', () => {
         .with.property('message')
         .and.include('`Cypress.Screenshot.defaults()` `onAfterScreenshot` option must be a function. You passed: `foo`')
 
-        return expect(fn).to.throw()
+        expect(fn).to.throw()
         .with.property('docsUrl')
         .and.include('https://on.cypress.io/screenshot-api')
       })

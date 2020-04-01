@@ -194,7 +194,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('can force type when element is disabled', function () {
+    it('can force type when element is disabled', () => {
       cy.$$('input:text:first').prop('disabled', true)
       cy.get('input:text:first').type('foo', { force: true })
       .should('have.value', 'foo')
@@ -388,11 +388,11 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('tabindex', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       this.$div = cy.$$('#tabindex')
     })
 
-    it('receives keydown, keyup, keypress', function () {
+    it('receives keydown, keyup, keypress', () => {
       let keydown = false
       let keypress = false
       let keyup = false
@@ -417,7 +417,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('does not receive textInput', function () {
+    it('does not receive textInput', () => {
       let textInput = false
 
       this.$div.on('textInput', () => {
@@ -429,7 +429,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('does not receive input', function () {
+    it('does not receive input', () => {
       let input = false
 
       this.$div.on('input', () => {
@@ -441,7 +441,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('does not receive change event', function () {
+    it('does not receive change event', () => {
       const innerText = this.$div.text()
 
       let change = false
@@ -457,13 +457,13 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('does not change inner text', function () {
+    it('does not change inner text', () => {
       const innerText = this.$div.text()
 
       cy.get('#tabindex').type('foo{leftarrow}{del}{rightarrow}{enter}').should('have.text', innerText)
     })
 
-    it('receives focus', function () {
+    it('receives focus', () => {
       let focus = false
 
       this.$div.focus(() => {
@@ -475,7 +475,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('receives blur', function () {
+    it('receives blur', () => {
       let blur = false
 
       this.$div.blur(() => {
@@ -488,7 +488,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('receives keydown and keyup for other special characters and keypress for enter and regular characters', function () {
+    it('receives keydown and keyup for other special characters and keypress for enter and regular characters', () => {
       const keydowns = cy.stub()
       const keyups = cy.stub()
       const keypresses = cy.stub()
@@ -936,7 +936,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('overwrites text when selectAll in click handler', () => {
-      cy.$$('#input-without-value').val('0').click(function () {
+      cy.$$('#input-without-value').val('0').click(() => {
         $(this).select()
       })
     })
@@ -955,7 +955,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('overwrites text when selectAll in mouseup handler', () => {
-      cy.$$('#input-without-value').val('0').mouseup(function () {
+      cy.$$('#input-without-value').val('0').mouseup(() => {
         $(this).select()
       })
     })
@@ -1004,13 +1004,13 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('overwrites text when selectAll in mouseup handler', () => {
-      cy.$$('#input-without-value').val('0').mouseup(function () {
+      cy.$$('#input-without-value').val('0').mouseup(() => {
         $(this).select()
       })
     })
 
     it('responsive to keydown handler', () => {
-      cy.$$('#input-without-value').val('1234').keydown(function () {
+      cy.$$('#input-without-value').val('1234').keydown(() => {
         $(this).get(0).setSelectionRange(0, 0)
       })
 
@@ -1020,7 +1020,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('responsive to keyup handler', () => {
-      cy.$$('#input-without-value').val('1234').keyup(function () {
+      cy.$$('#input-without-value').val('1234').keyup(() => {
         $(this).get(0).setSelectionRange(0, 0)
       })
 
@@ -1030,7 +1030,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('responsive to input handler', () => {
-      cy.$$('#input-without-value').val('1234').keyup(function () {
+      cy.$$('#input-without-value').val('1234').keyup(() => {
         $(this).get(0).setSelectionRange(0, 0)
       })
 
@@ -1040,7 +1040,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('responsive to change handler', () => {
-      cy.$$('#input-without-value').val('1234').change(function () {
+      cy.$$('#input-without-value').val('1234').change(() => {
         $(this).get(0).setSelectionRange(0, 0)
       })
 
@@ -2101,17 +2101,17 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     describe('changing modifiers', () => {
-      beforeEach(function () {
+      beforeEach(() => {
         this.$input = cy.$$('input:text:first')
 
         cy.get('input:text:first').type('{command}{option}', { release: false })
       })
 
-      afterEach(function () {
+      afterEach(() => {
         this.$input.off('keydown')
       })
 
-      it('sends keydown event for new modifiers', function () {
+      it('sends keydown event for new modifiers', () => {
         const spy = cy.spy().as('keydown')
 
         this.$input.on('keydown', spy)
@@ -2121,7 +2121,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
-      it('does not send keydown event for already activated modifiers', function () {
+      it('does not send keydown event for already activated modifiers', () => {
         const spy = cy.spy().as('keydown')
 
         this.$input.on('keydown', spy)
@@ -2793,7 +2793,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('assertion verification', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       cy.on('log:added', (attrs, log) => {
         if (log.get('name') === 'assert') {
           this.lastLog = log
@@ -2804,14 +2804,14 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('eventually passes the assertion', () => {
-      cy.$$('input:first').keyup(function () {
+      cy.$$('input:first').keyup(() => {
         _.delay(() => {
           $(this).addClass('typed')
         }
         , 100)
       })
 
-      cy.get('input:first').type('f').should('have.class', 'typed').then(function () {
+      cy.get('input:first').type('f').should('have.class', 'typed').then(() => {
         const { lastLog } = this
 
         expect(lastLog.get('name')).to.eq('assert')
@@ -2823,7 +2823,7 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   describe('.log', () => {
-    beforeEach(function () {
+    beforeEach(() => {
       cy.on('log:added', (attrs, log) => {
         this.lastLog = log
       })
@@ -2840,7 +2840,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('logs message', () => {
-      cy.get(':text:first').type('foobar').then(function () {
+      cy.get(':text:first').type('foobar').then(() => {
         const { lastLog } = this
 
         expect(lastLog.get('message')).to.eq('foobar')
@@ -2848,7 +2848,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('logs delay arguments', () => {
-      cy.get(':text:first').type('foo', { delay: 20 }).then(function () {
+      cy.get(':text:first').type('foo', { delay: 20 }).then(() => {
         const { lastLog } = this
 
         expect(lastLog.get('message')).to.eq('foo, {delay: 20}')
@@ -2926,7 +2926,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo')
     })
 
-    it('snapshots before typing', function () {
+    it('snapshots before typing', () => {
       let expected = false
 
       cy.$$(':text:first').one('keydown', () => {
@@ -2945,7 +2945,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('snapshots after typing', () => {
-      cy.get(':text:first').type('foo').then(function () {
+      cy.get(':text:first').type('foo').then(() => {
         const { lastLog } = this
 
         expect(lastLog.get('snapshots').length).to.eq(2)
@@ -2956,7 +2956,7 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
 
     it('logs deltaOptions', () => {
-      cy.get(':text:first').type('foo', { force: true, timeout: 1000 }).then(function () {
+      cy.get(':text:first').type('foo', { force: true, timeout: 1000 }).then(() => {
         const { lastLog } = this
 
         expect(lastLog.get('message')).to.eq('foo, {force: true, timeout: 1000}')
