@@ -21,7 +21,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
-    "@benmalka/foxdriver": "0.3.0",
+    "@benmalka/foxdriver": "0.4.0",
     "@cypress/browserify-preprocessor": "2.1.4",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.1",
