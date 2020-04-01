@@ -35,3 +35,23 @@ exports['lib/tasks/cache .list some versions have never been opened 1'] = `
 │ 2.3.4   │ unknown      │
 └─────────┴──────────────┘
 `
+
+exports['cache list with silent log level'] = `
+┌─────────┬───────────┐
+│ version │ last used │
+├─────────┼───────────┤
+│ 1.2.3   │ unknown   │
+├─────────┼───────────┤
+│ 2.3.4   │ unknown   │
+└─────────┴───────────┘
+`
+
+exports['cache list with warn log level'] = `
+┌─────────┬───────────┐
+│ version │ last used │
+├─────────┼───────────┤
+│ 1.2.3   │ unknown   │
+├─────────┼───────────┤
+│ 2.3.4   │ unknown   │
+└─────────┴───────────┘
+`
