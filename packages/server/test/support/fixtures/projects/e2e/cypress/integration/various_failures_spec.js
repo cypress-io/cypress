@@ -685,6 +685,7 @@ context('cy.server', () => {
       })
       .route('/users')
       .visit('/xhr.html').get('#fetch').click()
+      .wait(10000)
     })
 
     verify(this, {
@@ -703,6 +704,7 @@ context('cy.server', () => {
       })
       .route('/users')
       .visit('/xhr.html').get('#fetch').click()
+      .wait(10000)
     })
 
     verify(this, {

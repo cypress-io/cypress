@@ -253,6 +253,7 @@ Cypress.Commands.add('failRouteOnResponseAssertion', () => {
     },
   })
   .visit('/xhr.html').get('#fetch').click()
+  .wait(10000)
 })
 
 Cypress.Commands.add('failRouteOnResponseException', () => {
@@ -263,6 +264,7 @@ Cypress.Commands.add('failRouteOnResponseException', () => {
     },
   })
   .visit('/xhr.html').get('#fetch').click()
+  .wait(10000)
 })
 
 Cypress.Commands.add('failServerOnAbortAssertion', () => {
