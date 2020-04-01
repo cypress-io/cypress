@@ -6,10 +6,17 @@ import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
+import { constants } from 'crypto'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
+const defaultSecureOptions = (
+  // @see https://github.com/cypress-io/cypress/issues/6771
+  constants.SSL_OP_LEGACY_SERVER_CONNECT |
+  // improve compatibility with buggy openssl implementations
+  constants.SSL_OP_ALL
+)
 
 type WithProxyOpts<RequestOptions> = RequestOptions & {
   proxy: string
@@ -262,6 +269,8 @@ class HttpsAgent extends https.Agent {
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
+    options.secureOptions = defaultSecureOptions | (options.secureOptions || 0)
+
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
 

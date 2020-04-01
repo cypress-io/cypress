@@ -16,6 +16,7 @@ import {
 } from '../../lib/agent'
 import { AsyncServer, Servers } from '../support/servers'
 import { allowDestroy } from '../../lib/allow-destroy'
+import { constants } from 'crypto'
 
 const expect = chai.expect
 
@@ -239,6 +240,32 @@ describe('lib/agent', function () {
           agent: <any> this.agent,
           proxy: null,
         })
+      })
+
+      it('#createConnection sets expected secureOptions', function () {
+        const opts: any = {}
+
+        this.agent.httpsAgent.createConnection(opts, (_err, sock) => {
+          sock.on('error', () => {}) // opts is not a valid request, errors are ok
+        })
+
+        expect(constants.SSL_OP_ALL & opts.secureOptions).to.be.ok
+        expect(constants.SSL_OP_LEGACY_SERVER_CONNECT & opts.secureOptions).to.be.ok
+        expect(constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION & opts.secureOptions).to.eq(0)
+      })
+
+      it('#createConnection preserves existing secureOptions', function () {
+        const opts: any = {
+          secureOptions: constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION,
+        }
+
+        this.agent.httpsAgent.createConnection(opts, (_err, sock) => {
+          sock.on('error', () => {}) // opts is not a valid request, errors are ok
+        })
+
+        expect(constants.SSL_OP_ALL & opts.secureOptions).to.be.ok
+        expect(constants.SSL_OP_LEGACY_SERVER_CONNECT & opts.secureOptions).to.be.ok
+        expect(constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION & opts.secureOptions).to.be.ok
       })
 
       it('#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY', function () {
