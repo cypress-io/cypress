@@ -1,80 +1,89 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash");
-const uniqueSelector = require("@cypress/unique-selector").default;
+const _ = require('lodash')
+const uniqueSelector = require('@cypress/unique-selector').default
 
-const $utils = require("./utils");
-const $errUtils = require("./error_utils");
+const $utils = require('./utils')
+const $errUtils = require('./error_utils')
 
-const SELECTOR_PRIORITIES = "data-cy data-test data-testid id class tag attributes nth-child".split(" ");
+const SELECTOR_PRIORITIES = 'data-cy data-test data-testid id class tag attributes nth-child'.split(' ')
 
-const reset = () => ({
-  onElement: null,
-  selectorPriority: SELECTOR_PRIORITIES
-});
+const reset = () => {
+  return {
+    onElement: null,
+    selectorPriority: SELECTOR_PRIORITIES,
+  }
+}
 
-let defaults = reset();
+let defaults = reset()
 
 module.exports = {
-  reset() {
-    //# for testing purposes
-    return defaults = reset();
+  reset () {
+    defaults = reset()
   },
 
-  getSelectorPriority() {
-    return defaults.selectorPriority;
+  getSelectorPriority () {
+    return defaults.selectorPriority
   },
 
-  getOnElement() {
-    return defaults.onElement;
+  getOnElement () {
+    return defaults.onElement
   },
 
-  getSelector($el) {
-    //# if we have a callback, and it returned truthy
-    let selector;
+  getSelector ($el) {
+    // if we have a callback, and it returned truthy
+    let selector
+
     if (defaults.onElement && (selector = defaults.onElement($el))) {
-      //# and it returned a string
+      // and it returned a string
       if (_.isString(selector)) {
-        //# use this!
-        return selector;
+        // use this!
+        return selector
       }
     }
 
-    //# else use uniqueSelector with the priorities
+    // else use uniqueSelector with the priorities
     return uniqueSelector($el.get(0), {
-      selectorTypes: defaults.selectorPriority
-    });
+      selectorTypes: defaults.selectorPriority,
+    })
   },
 
-  defaults(props) {
-    let onElement, priority;
+  defaults (props) {
+    let onElement; let priority
+
     if (!_.isPlainObject(props)) {
-      $errUtils.throwErrByPath("selector_playground.defaults_invalid_arg", {
-        args: { arg: $utils.stringify(props) }
-      });
+      $errUtils.throwErrByPath('selector_playground.defaults_invalid_arg', {
+        args: { arg: $utils.stringify(props) },
+      })
     }
 
-    if (priority = props.selectorPriority) {
+    priority = props.selectorPriority
+
+    if (priority) {
       if (!_.isArray(priority)) {
-        $errUtils.throwErrByPath("selector_playground.defaults_invalid_priority", {
-          args: { arg: $utils.stringify(priority) }
-        });
+        $errUtils.throwErrByPath('selector_playground.defaults_invalid_priority', {
+          args: { arg: $utils.stringify(priority) },
+        })
       }
 
-      defaults.selectorPriority = priority;
+      defaults.selectorPriority = priority
     }
 
-    if (onElement = props.onElement) {
+    onElement = props.onElement
+
+    if (onElement) {
       if (!_.isFunction(onElement)) {
-        $errUtils.throwErrByPath("selector_playground.defaults_invalid_on_element", {
-          args: { arg: $utils.stringify(onElement) }
-        });
+        $errUtils.throwErrByPath('selector_playground.defaults_invalid_on_element', {
+          args: { arg: $utils.stringify(onElement) },
+        })
       }
 
-      return defaults.onElement = onElement;
+      defaults.onElement = onElement
     }
-  }
-};
+  },
+}

@@ -1,3 +1,10 @@
+/* eslint-disable
+    brace-style,
+    no-self-assign,
+    prefer-rest-params,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
@@ -7,232 +14,256 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash");
-const Promise = require("bluebird");
+const _ = require('lodash')
+const Promise = require('bluebird')
 
-const $errUtils = require("../../cypress/error_utils");
+const $errUtils = require('../../cypress/error_utils')
 
 const getNumRequests = (state, alias) => {
-  let left;
-  const requests = (left = state("aliasRequests")) != null ? left : {};
-  const index = requests[alias] != null ? requests[alias] : (requests[alias] = 0);
+  const requests = state('aliasRequests') || {}
+  const index = requests[alias] != null ? requests[alias] : (requests[alias] = 0)
 
-  requests[alias] += 1;
+  requests[alias] += 1
 
-  state("aliasRequests", requests);
+  state('aliasRequests', requests)
 
-  return [index, _.ordinalize(requests[alias])];
-};
+  return [index, _.ordinalize(requests[alias])]
+}
 
-const throwErr = arg => $errUtils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}});
+const throwErr = (arg) => $errUtils.throwErrByPath('wait.invalid_1st_arg', { args: { arg } })
 
-module.exports = function(Commands, Cypress, cy, state, config) {
-  const waitFunction = () => $errUtils.throwErrByPath("wait.fn_deprecated");
+module.exports = function (Commands, Cypress, cy, state, config) {
+  const waitFunction = () => $errUtils.throwErrByPath('wait.fn_deprecated')
 
-  const waitNumber = function(subject, ms, options) {
-    //# increase the timeout by the delta
-    cy.timeout(ms, true, "wait");
+  const waitNumber = function (subject, ms, options) {
+    // increase the timeout by the delta
+    cy.timeout(ms, true, 'wait')
 
     if (options.log !== false) {
       options._log = Cypress.log({
-        consoleProps() { return {
-          "Waited For": `${ms}ms before continuing`,
-          "Yielded": subject
-        }; }
-      });
+        consoleProps () {
+          return {
+            'Waited For': `${ms}ms before continuing`,
+            'Yielded': subject,
+          }
+        },
+      })
     }
 
     return Promise
-    .delay(ms, "wait")
-    .return(subject);
-  };
+    .delay(ms, 'wait')
+    .return(subject)
+  }
 
-  const waitString = function(subject, str, options) {
-    let log;
+  const waitString = function (subject, str, options) {
+    let log
+
     if (options.log !== false) {
       log = (options._log = Cypress.log({
-        type: "parent",
-        aliasType: "route"
-      }));
+        type: 'parent',
+        aliasType: 'route',
+      }))
     }
 
-    var checkForXhr = function(alias, type, index, num, options) {
-      options.type = type;
+    const checkForXhr = function (alias, type, index, num, options) {
+      options.type = type
 
-      //# append .type to the alias
-      const xhr = cy.getIndexedXhrByAlias(alias + "." + type, index);
+      // append .type to the alias
+      const xhr = cy.getIndexedXhrByAlias(`${alias}.${type}`, index)
 
-      //# return our xhr object
-      if (xhr) { return Promise.resolve(xhr); }
+      // return our xhr object
+      if (xhr) {
+        return Promise.resolve(xhr)
+      }
 
-      options.error = $errUtils.errMsgByPath("wait.timed_out", {
+      options.error = $errUtils.errMsgByPath('wait.timed_out', {
         timeout: options.timeout,
         alias,
         num,
-        type
-      });
+        type,
+      })
 
-      const args = arguments;
+      const args = arguments
 
       return cy.retry(() => checkForXhr.apply(window, args)
-      , options);
-    };
+        , options)
+    }
 
-    const waitForXhr = function(str, options) {
-      //# we always want to strip everything after the last '.'
-      //# since we support alias property 'request'
-      let aliasObj, needle, str2;
-      if ((_.indexOf(str, ".") === -1) ||
-      (needle = str.slice(1), _.keys(cy.state("aliases")).includes(needle))) {
-        [str, str2] = [str, null];
+    const waitForXhr = function (str, options) {
+      // we always want to strip everything after the last '.'
+      // since we support alias property 'request'
+      let aliasObj; let needle; let str2
+
+      if ((_.indexOf(str, '.') === -1) ||
+      (needle = str.slice(1), _.keys(cy.state('aliases')).includes(needle))) {
+        [str, str2] = [str, null]
       } else {
         // potentially request, response or index
         const allParts = _.split(str, '.');
-        [str, str2] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)];
+
+        [str, str2] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
       }
 
-      if (!(aliasObj = cy.getAlias(str, "wait", log))) {
-        cy.aliasNotFoundFor(str, "wait", log);
+      if (!(aliasObj = cy.getAlias(str, 'wait', log))) {
+        cy.aliasNotFoundFor(str, 'wait', log)
       }
 
-      //# if this alias is for a route then poll
-      //# until we find the response xhr object
-      //# by its alias
-      const {alias, command} = aliasObj;
+      // if this alias is for a route then poll
+      // until we find the response xhr object
+      // by its alias
+      const { alias, command } = aliasObj
 
-      str = _.compact([alias, str2]).join(".");
+      str = _.compact([alias, str2]).join('.')
 
-      const type = cy.getXhrTypeByAlias(str);
+      const type = cy.getXhrTypeByAlias(str)
 
-      const [ index, num ] = getNumRequests(state, alias);
+      const [index, num] = getNumRequests(state, alias)
 
-      //# if we have a command then continue to
-      //# build up an array of referencesAlias
-      //# because wait can reference an array of aliases
+      // if we have a command then continue to
+      // build up an array of referencesAlias
+      // because wait can reference an array of aliases
       if (log) {
-        let left;
-        const referencesAlias = (left = log.get("referencesAlias")) != null ? left : [];
-        const aliases = [].concat(referencesAlias);
+        const referencesAlias = log.get('referencesAlias') || []
+        const aliases = [].concat(referencesAlias)
 
         if (str) {
           aliases.push({
             name: str,
             cardinal: index + 1,
-            ordinal: num
-          });
+            ordinal: num,
+          })
         }
 
-        log.set("referencesAlias", aliases);
+        log.set('referencesAlias', aliases)
       }
 
-      if (command.get("name") !== "route") {
-        $errUtils.throwErrByPath("wait.invalid_alias", {
+      if (command.get('name') !== 'route') {
+        $errUtils.throwErrByPath('wait.invalid_alias', {
           onFail: options._log,
-          args: { alias }
-        });
+          args: { alias },
+        })
       }
 
-      //# create shallow copy of each options object
-      //# but slice out the error since we may set
-      //# the error related to a previous xhr
+      // create shallow copy of each options object
+      // but slice out the error since we may set
+      // the error related to a previous xhr
       const {
-        timeout
-      } = options;
-      const requestTimeout = options.requestTimeout != null ? options.requestTimeout : timeout;
-      const responseTimeout = options.responseTimeout != null ? options.responseTimeout : timeout;
+        timeout,
+      } = options
+      const requestTimeout = options.requestTimeout != null ? options.requestTimeout : timeout
+      const responseTimeout = options.responseTimeout != null ? options.responseTimeout : timeout
 
-      const waitForRequest = function() {
-        options = _.omit(options, "_runnableTimeout");
-        options.timeout = requestTimeout != null ? requestTimeout : Cypress.config("requestTimeout");
-        return checkForXhr(alias, "request", index, num, options);
-      };
+      const waitForRequest = function () {
+        options = _.omit(options, '_runnableTimeout')
+        options.timeout = requestTimeout != null ? requestTimeout : Cypress.config('requestTimeout')
 
-      const waitForResponse = function() {
-        options = _.omit(options, "_runnableTimeout");
-        options.timeout = responseTimeout != null ? responseTimeout : Cypress.config("responseTimeout");
-        return checkForXhr(alias, "response", index, num, options);
-      };
-
-      //# if we were only waiting for the request
-      //# then resolve immediately do not wait for response
-      if (type === "request") {
-        return waitForRequest();
-      } else {
-        return waitForRequest().then(waitForResponse);
+        return checkForXhr(alias, 'request', index, num, options)
       }
-    };
+
+      const waitForResponse = function () {
+        options = _.omit(options, '_runnableTimeout')
+        options.timeout = responseTimeout != null ? responseTimeout : Cypress.config('responseTimeout')
+
+        return checkForXhr(alias, 'response', index, num, options)
+      }
+
+      // if we were only waiting for the request
+      // then resolve immediately do not wait for response
+      if (type === 'request') {
+        return waitForRequest()
+      }
+
+      return waitForRequest().then(waitForResponse)
+    }
 
     return Promise
-    .map([].concat(str), str => //# we may get back an xhr value instead
-    //# of a promise, so we have to wrap this
-    //# in another promise :-(
-    waitForXhr(str, _.omit(options, "error"))).then(function(responses) {
-      //# if we only asked to wait for one alias
-      //# then return that, else return the array of xhr responses
-      const ret = responses.length === 1 ? responses[0] : responses;
+    .map([].concat(str), (str) => // we may get back an xhr value instead
+    // of a promise, so we have to wrap this
+    // in another promise :-(
+    {
+      return waitForXhr(str, _.omit(options, 'error'))
+    }).then((responses) => {
+      // if we only asked to wait for one alias
+      // then return that, else return the array of xhr responses
+      const ret = responses.length === 1 ? responses[0] : responses
 
       if (log) {
-        log.set("consoleProps", () => ({
-          "Waited For": (_.map(log.get("referencesAlias"), 'name') || []).join(", "),
-          "Yielded": ret
-        }));
+        log.set('consoleProps', () => {
+          return {
+            'Waited For': (_.map(log.get('referencesAlias'), 'name') || []).join(', '),
+            'Yielded': ret,
+          }
+        })
 
-        log.snapshot().end();
+        log.snapshot().end()
       }
 
-      return ret;
-    });
-  };
+      return ret
+    })
+  }
 
-  return Commands.addAll({ prevSubject: "optional" }, {
-    wait(subject, msOrFnOrAlias, options = {}) {
-      //# check to ensure options is an object
-      //# if its a string the user most likely is trying
-      //# to wait on multiple aliases and forget to make this
-      //# an array
+  return Commands.addAll({ prevSubject: 'optional' }, {
+    wait (subject, msOrFnOrAlias, options = {}) {
+      // check to ensure options is an object
+      // if its a string the user most likely is trying
+      // to wait on multiple aliases and forget to make this
+      // an array
       if (_.isString(options)) {
-        $errUtils.throwErrByPath("wait.invalid_arguments");
+        $errUtils.throwErrByPath('wait.invalid_arguments')
       }
 
-      _.defaults(options, {log: true});
+      _.defaults(options, { log: true })
 
-      const args = [subject, msOrFnOrAlias, options];
+      const args = [subject, msOrFnOrAlias, options]
 
       try {
-        switch (false) {
-          case !_.isFinite(msOrFnOrAlias):
-            return waitNumber.apply(window, args);
-          case !_.isFunction(msOrFnOrAlias):
-            return waitFunction();
-          case !_.isString(msOrFnOrAlias):
-            return waitString.apply(window, args);
-          case !_.isArray(msOrFnOrAlias) || !!_.isEmpty(msOrFnOrAlias):
-            return waitString.apply(window, args);
-          default:
-            //# figure out why this error failed
-            var arg = (() => { switch (false) {
-              case !_.isNaN(msOrFnOrAlias):    return "NaN";
-              case msOrFnOrAlias !== Infinity: return "Infinity";
-              case !_.isSymbol(msOrFnOrAlias): return msOrFnOrAlias.toString();
-              default:
-                try {
-                  return JSON.stringify(msOrFnOrAlias);
-                } catch (error) {
-                  return "an invalid argument";
-                }
-            } })();
-
-            return throwErr(arg);
+        if (_.isFinite(msOrFnOrAlias)) {
+          return waitNumber.apply(window, args)
         }
+
+        if (_.isFunction(msOrFnOrAlias)) {
+          return waitFunction()
+        }
+
+        if (_.isString(msOrFnOrAlias)) {
+          return waitString.apply(window, args)
+        }
+
+        if (!(!_.isArray(msOrFnOrAlias) || !!_.isEmpty(msOrFnOrAlias))) {
+          return waitString.apply(window, args)
+        }
+
+        // figure out why this error failed
+        const arg = (() => {
+          if (_.isNaN(msOrFnOrAlias)) {
+            return 'NaN'
+          }
+
+          if (!(msOrFnOrAlias !== Infinity)) {
+            return 'Infinity'
+          }
+
+          if (_.isSymbol(msOrFnOrAlias)) {
+            return msOrFnOrAlias.toString()
+          }
+
+          try {
+            return JSON.stringify(msOrFnOrAlias)
+          } catch (error) {
+            return 'an invalid argument'
+          }
+        })()
+
+        return throwErr(arg)
       } catch (err) {
-        if (err.name === "CypressError") {
-          throw err;
+        if (err.name === 'CypressError') {
+          throw err
         } else {
-          //# whatever was passed in could not be parsed
-          //# by our switch case
-          return throwErr("an invalid argument");
+          // whatever was passed in could not be parsed
+          // by our switch case
+          return throwErr('an invalid argument')
         }
       }
-    }
-  });
-};
+    },
+  })
+}
