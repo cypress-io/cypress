@@ -3,6 +3,7 @@ Promise = require("bluebird")
 
 $utils = require("../../cypress/utils")
 $errUtils = require("../../cypress/error_utils")
+$stackUtils = require("../../cypress/stack_utils")
 $Server = require("../../cypress/server")
 $Location = require("../../cypress/location")
 
@@ -191,7 +192,7 @@ startXhrServer = (cy, state, config) ->
 
       err = $errUtils.errByPath("xhr.aborted")
       err.name = "AbortError"
-      err.stack = stack
+      err = $stackUtils.replaceStack(err, stack)
 
       if log = logs[xhr.id]
         log.snapshot("aborted").error(err)
