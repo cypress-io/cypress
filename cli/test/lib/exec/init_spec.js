@@ -28,7 +28,7 @@ describe('exec init', () => {
     })
 
     it('spawns with no-fixtures', () => {
-      return init.start({ noFixtures: true })
+      return init.start({ fixtures: false })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--init-project', '--no-fixtures'])
       })
@@ -42,7 +42,7 @@ describe('exec init', () => {
     })
 
     it('spawns with no-support', () => {
-      return init.start({ noSupport: true })
+      return init.start({ support: false })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--init-project', '--no-support'])
       })
@@ -56,7 +56,7 @@ describe('exec init', () => {
     })
 
     it('spawns with no-plugins', () => {
-      return init.start({ noPlugins: true })
+      return init.start({ plugins: false })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--init-project', '--no-plugins'])
       })
@@ -77,7 +77,7 @@ describe('exec init', () => {
     })
 
     it('spawns with no-video', () => {
-      return init.start({ noVideo: true })
+      return init.start({ video: false })
       .then(() => {
         expect(spawn.start).to.be.calledWith(['--init-project', '--no-video'])
       })

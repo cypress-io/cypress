@@ -15,7 +15,7 @@ module.exports = {
       args.push('--force')
     }
 
-    if (options.noFixtures) {
+    if (options.fixtures === false) {
       args.push('--no-fixtures')
     }
 
@@ -24,7 +24,7 @@ module.exports = {
       args.push(options.fixturesPath.trim())
     }
 
-    if (options.noSupport) {
+    if (options.support === false) {
       args.push('--no-support')
     }
 
@@ -33,7 +33,7 @@ module.exports = {
       args.push(options.supportPath.trim())
     }
 
-    if (options.noPlugins) {
+    if (options.plugins === false) {
       args.push('--no-plugins')
     }
 
@@ -47,7 +47,7 @@ module.exports = {
       args.push(options.integrationPath.trim())
     }
 
-    if (options.noVideo) {
+    if (options.video === false) {
       args.push('--no-video')
     }
 
