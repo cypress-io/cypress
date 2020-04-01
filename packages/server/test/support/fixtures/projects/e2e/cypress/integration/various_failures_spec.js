@@ -573,6 +573,7 @@ context('cy.route', () => {
         },
       })
       .visit('/xhr.html').get('#fetch').click()
+      .wait(10000)
     })
 
     verify(this, {
@@ -591,6 +592,7 @@ context('cy.route', () => {
         },
       })
       .visit('/xhr.html').get('#fetch').click()
+      .wait(10000)
     })
 
     verify(this, {
