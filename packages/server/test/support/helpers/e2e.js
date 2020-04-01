@@ -695,7 +695,7 @@ const e2e = {
           // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
 
-          ...(process.env.EXIT === 'false' ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+          ...(options.exit === false ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .value(),
       })
