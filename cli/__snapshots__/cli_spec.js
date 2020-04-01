@@ -428,3 +428,13 @@ exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] 
   -------
 
 `
+
+exports['cli version and binary version with npm log silent'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
+`
+
+exports['cli version and binary version with npm log warn'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
+`
