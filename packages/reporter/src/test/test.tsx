@@ -38,11 +38,7 @@ class Test extends Component<Props> {
   componentDidUpdate () {
     this._scrollIntoView()
 
-    const cb = this.props.model.callbackAfterUpdate
-
-    if (cb) {
-      cb()
-    }
+    this.props.model.callbackAfterUpdate()
   }
 
   _scrollIntoView () {

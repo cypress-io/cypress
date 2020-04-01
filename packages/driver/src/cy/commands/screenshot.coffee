@@ -6,6 +6,7 @@ Promise = require("bluebird")
 $Screenshot = require("../../cypress/screenshot")
 $dom = require("../../dom")
 $errUtils = require("../../cypress/error_utils")
+$utils = require("../../cypress/utils")
 
 getViewportHeight = (state) ->
   ## TODO this doesn't seem correct

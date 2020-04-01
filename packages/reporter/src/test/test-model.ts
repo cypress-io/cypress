@@ -44,7 +44,7 @@ export default class Test extends Runnable {
   // @observable _state?: TestState | null = null
   type = 'test'
 
-  callbackAfterUpdate: (() => void) | null = null
+  _callbackAfterUpdate: UpdateTestCallback | null = null
 
   @observable attempts: AttemptModel[] = []
   @observable _isOpen: Boolean | null = null
@@ -139,7 +139,7 @@ export default class Test extends Runnable {
     })
 
     if (props.isOpen != null && (this.isOpen !== props.isOpen)) {
-      this.setIsOpen(props.isOpen)
+      this.setIsOpen(props.isOpen, cb)
 
       return
     }
@@ -151,13 +151,17 @@ export default class Test extends Runnable {
 
   // this is called to sync up the command log UI for the sake of
   // screenshots, so we only ever need to open the last attempt
-  setIsOpen (isOpen: boolean, cb: Function) {
-    if (this.isOpen === isOpen) {
-      return this.lastAttempt.setIsOpen(isOpen, cb)
-    }
-
-    this.lastAttempt.setIsOpen(isOpen, cb)
+  setIsOpen (isOpen: boolean, cb: UpdateTestCallback) {
+    this.lastAttempt.toggleOpen(isOpen)
     this._isOpen = isOpen
+    this._callbackAfterUpdate = cb
+  }
+
+  callbackAfterUpdate () {
+    if (this._callbackAfterUpdate) {
+      this._callbackAfterUpdate()
+      this._callbackAfterUpdate = null
+    }
   }
 
   @action finish (props: UpdatableTestProps) {

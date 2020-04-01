@@ -35,6 +35,8 @@ const TestError = observer((props: Props) => {
 
   if (!err.displayMessage) return null
 
+  if (props.isTestError) return null
+
   return (
     <div className='runnable-err-wrapper'>
       <div className='runnable-err'>

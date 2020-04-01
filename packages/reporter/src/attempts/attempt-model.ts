@@ -129,7 +129,13 @@ export default class AttemptModel {
     }
   }
 
-  @action toggleOpen = () => {
+  @action toggleOpen = (isOpen?: boolean) => {
+    if (isOpen) {
+      this._isOpen = isOpen
+
+      return
+    }
+
     this._isOpen = !this.isOpen
   }
 
