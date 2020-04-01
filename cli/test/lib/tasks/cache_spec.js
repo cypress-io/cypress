@@ -11,6 +11,7 @@ const moment = require('moment')
 const stripAnsi = require('strip-ansi')
 const path = require('path')
 const termToHtml = require('term-to-html')
+const mockedEnv = require('mocked-env')
 
 const outputHtmlFolder = path.join(__dirname, '..', '..', 'html')
 
@@ -72,10 +73,37 @@ describe('lib/tasks/cache', () => {
   }
 
   describe('.path', () => {
+    let restoreEnv
+
+    afterEach(() => {
+      if (restoreEnv) {
+        restoreEnv()
+        restoreEnv = null
+      }
+    })
+
     it('lists path to cache', () => {
       cache.path()
       expect(this.stdout.toString()).to.eql('/.cache/Cypress\n')
       defaultSnapshot()
+    })
+
+    it('lists path to cache with silent npm loglevel', () => {
+      restoreEnv = mockedEnv({
+        npm_config_loglevel: 'silent',
+      })
+
+      cache.path()
+      expect(this.stdout.toString()).to.eql('/.cache/Cypress\n')
+    })
+
+    it('lists path to cache with silent npm warn', () => {
+      restoreEnv = mockedEnv({
+        npm_config_loglevel: 'warn',
+      })
+
+      cache.path()
+      expect(this.stdout.toString()).to.eql('/.cache/Cypress\n')
     })
   })
 

@@ -15,9 +15,8 @@ const colors = {
   values: chalk.green,
 }
 
-// TODO: rename this function
-const path = () => {
-  logger.log(state.getCacheDir())
+const logCachePath = () => {
+  logger.always(state.getCacheDir())
 
   return undefined
 }
@@ -84,7 +83,7 @@ const getCachedVersions = () => {
 }
 
 module.exports = {
-  path,
+  path: logCachePath,
   clear,
   list,
   getCachedVersions,
