@@ -286,7 +286,6 @@ const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
-    exit: process.env.EXIT === 'false' ? false : null,
     only: false,
     skip: false,
     browser: [],
@@ -473,6 +472,7 @@ const e2e = {
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
+      exit: process.env.EXIT === 'false' ? false : null,
       timeout: options.exit === false ? 3000000 : 120000,
       originalTitle: null,
       expectedExitCode: 0,
