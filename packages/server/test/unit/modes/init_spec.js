@@ -378,7 +378,7 @@ describe('/lib/modes/init', () => {
         const projRoot = '/home/user/src/cypress'
         const fixturesFolderDefault = `${projRoot}/${defaultValues['fixturesFolder']}`
 
-        it('generates at the default path when it is undefined', async () => {
+        it('generates folder at the default path when it is undefined', async () => {
           await scaffold.create(projRoot, { config: {} })
 
           expect(fs.ensureDir).to.be.calledWith(fixturesFolderDefault)
@@ -394,7 +394,7 @@ describe('/lib/modes/init', () => {
           expect(fs.ensureDir).to.not.be.calledWith('/home/user/given/fixtures')
         })
 
-        it('generates folders when the given path is the default path (relative)', async () => {
+        it('generates folder when the given path is the default path (relative)', async () => {
           await scaffold.create(projRoot, {
             config: {
               fixturesFolder: defaultValues['fixturesFolder'],
@@ -404,7 +404,7 @@ describe('/lib/modes/init', () => {
           expect(fs.ensureDir).to.be.calledWith(fixturesFolderDefault)
         })
 
-        it('generates folders when the given path is the default path (absolute)', async () => {
+        it('generates folder when the given path is the default path (absolute)', async () => {
           await scaffold.create(projRoot, {
             config: {
               fixturesFolder: `${projRoot}/${defaultValues['fixturesFolder']}`,
@@ -414,7 +414,7 @@ describe('/lib/modes/init', () => {
           expect(fs.ensureDir).to.be.calledWith(fixturesFolderDefault)
         })
 
-        it('does not generate when fixturesFolder is false', async () => {
+        it('does not generate folder when fixturesFolder is false', async () => {
           await scaffold.create(projRoot, { config: {
             fixturesFolder: false,
           } })
