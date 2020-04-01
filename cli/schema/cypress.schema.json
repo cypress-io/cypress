@@ -7,6 +7,11 @@
       "type": "string",
       "description": "Url used as prefix for cy.visit() or cy.request() command’s url. Example http://localhost:3030 or https://test.my-domain.com"
     },
+    "enableTestRetriesInOpenMode": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to retry failing tests the number of times set in 'numTestRetries' during 'cypress open'"
+    },
     "env": {
       "type": "object",
       "description": "Any values to be set as environment variables. See https://on.cypress.io/environment-variables",
@@ -26,6 +31,11 @@
       "type": "number",
       "default": 50,
       "description": "The number of tests for which snapshots and command data are kept in memory. Reduce this number if you are experiencing high memory consumption in your browser during a test run."
+    },
+    "numTestRetries": {
+      "type": "number",
+      "default": 0,
+      "description": "The number of times to retry a failing test during 'cypress run'"
     },
     "port": {
       "type": "number",
