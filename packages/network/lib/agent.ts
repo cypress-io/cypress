@@ -6,7 +6,7 @@ import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
-import { constants } from 'crypto'
+import constants from 'constants'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -28,6 +28,7 @@ type RequestOptionsWithProxy = WithProxyOpts<http.RequestOptions>
 
 type HttpsRequestOptions = https.RequestOptions & {
   minVersion?: 'TLSv1'
+  secureOptions?: number
 }
 
 type HttpsRequestOptionsWithProxy = WithProxyOpts<HttpsRequestOptions>
