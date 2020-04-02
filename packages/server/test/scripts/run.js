@@ -148,8 +148,8 @@ if (options.browser) {
   env.BROWSER = options.browser
 }
 
-if (options.exit != null) {
-  env.EXIT = options.exit
+if (options.exit === false) {
+  env.NO_EXIT = '1'
 }
 
 const cmd = `${commandAndArguments.command} ${

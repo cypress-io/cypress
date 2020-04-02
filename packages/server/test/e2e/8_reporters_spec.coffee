@@ -9,15 +9,13 @@ Fixtures = require("../support/helpers/fixtures")
 e2ePath  = Fixtures.projectPath("e2e")
 
 mochaAwesomes = [
-  "mochawesome@1.5.2"
-  "mochawesome@2.3.1"
-  "mochawesome@3.0.1"
+  "mochawesome-1.5.2"
+  "mochawesome-2.3.1"
+  "mochawesome-3.0.1"
 ]
 
 describe "e2e reporters", ->
-  e2e.setup({
-    npmInstall: mochaAwesomes
-  })
+  e2e.setup()
 
   it "reports error if cannot load reporter", ->
     e2e.exec(@, {
