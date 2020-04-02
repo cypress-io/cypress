@@ -1,14 +1,3 @@
-/* eslint-disable
-    default-case,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 
@@ -48,6 +37,7 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
         return $el.prop('checked')
       case 'uncheck':
         return !$el.prop('checked')
+      default: null
     }
   }
 
@@ -57,6 +47,7 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
         return $el.is(':checkbox,:radio')
       case 'uncheck':
         return $el.is(':checkbox')
+      default: null
     }
   }
 
@@ -100,6 +91,7 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
       // figure out the options which actually change the behavior of clicks
       const deltaOptions = $utils.filterOutOptions(options)
 
+      // eslint-disable-next-line no-undef
       options._log = Cypress.log({
         message: deltaOptions,
         $el,
@@ -117,6 +109,7 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
       if (isNoop($el)) {
         if (!options.force) {
           // still ensure visibility even if the command is noop
+          // eslint-disable-next-line no-undef
           cy.ensureVisibility($el, options._log)
         }
 
@@ -134,6 +127,7 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
     // if we didnt pass in any values or our
     // el's value is in the array then check it
     if (isElActionable) {
+      // eslint-disable-next-line no-undef
       return cy.now('click', $el, {
         $el,
         log: false,
@@ -164,6 +158,7 @@ const checkOrUncheck = function (type, subject, values = [], options = {}) {
     options.$el = options.$el.filter(matchingElements)
 
     return (verifyAssertions = () => {
+      // eslint-disable-next-line no-undef
       return cy.verifyUpcomingAssertions(options.$el, options, {
         onRetry: verifyAssertions,
       })

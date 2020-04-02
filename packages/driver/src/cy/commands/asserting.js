@@ -1,67 +1,12 @@
-/* eslint-disable
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
-const $ = require('jquery')
 const Promise = require('bluebird')
 
 const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
 
-const bRe = /(\*\*)(.+)(\*\*)/
-const bTagOpen = /\*\*/g
-const bTagClosed = /\*\*/g
 const reExistence = /exist/
 const reEventually = /^eventually/
 const reHaveLength = /length/
-
-const convertTags = function (str) {
-  // must first escape these characters
-  // since we will be inserting them
-  // as real html
-  str = _.escape(str)
-
-  // bail if matches werent found
-  if (!bRe.test(str)) {
-    return str
-  }
-
-  return str
-  .replace(bTagOpen, ': <strong>')
-  .replace(bTagClosed, '</strong>')
-  .split(' :').join(':')
-}
-
-const convertMessage = function ($row, message) {
-  message = convertTags(message)
-
-  return $row.find('[data-js=message]').html(message)
-}
-
-const convertRowFontSize = function ($row, message) {
-  const len = message.length
-
-  // bail if this isnt a huge message
-  if (len < 100) {
-    return
-  }
-
-  // else reduce the font-size down to 85%
-  // and reduce the line height
-  return $row.css({
-    fontSize: '85%',
-    lineHeight: '14px',
-  })
-}
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   const shouldFnWithCallback = function (subject, fn) {
@@ -104,8 +49,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
     // backup the original assertion subject
     const originalObj = exp._obj
-
-    const options = {}
 
     if (reEventually.test(chainers)) {
       err = $errUtils.cypressErrByPath('should.eventually_deprecated')

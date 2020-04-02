@@ -1,17 +1,3 @@
-/* eslint-disable
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 
@@ -29,8 +15,6 @@ const tryDecodeUri = function (uri) {
     return uri
   }
 }
-
-const getServer = () => server != null ? server : unavailableErr()
 
 const cancelPendingXhrs = function () {
   if (server) {
@@ -134,6 +118,7 @@ const startXhrServer = function (cy, state, config) {
         rl.set('numResponses', numResponses + 1)
       }
 
+      // eslint-disable-next-line no-undef
       logs[xhr.id] = (log = Cypress.log({
         message: '',
         name: 'xhr',

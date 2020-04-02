@@ -1,13 +1,3 @@
-/* eslint-disable
-    default-case,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const $ = require('jquery')
 const Promise = require('bluebird')
@@ -18,7 +8,6 @@ const ngPrefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-']
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   const findByNgBinding = function (binding, options) {
-    let resolveElements
     const selector = '.ng-binding'
 
     const {
@@ -47,6 +36,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       // else return null element
       return $(null)
     }
+
+    let resolveElements
 
     return (resolveElements = () => {
       return cy.now('get', selector, options).then(($elements) => {
@@ -118,6 +109,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return findByNgAttr('repeater', 'repeat*=', selector, options)
         case 'binding':
           return findByNgBinding(selector, options)
+        default: null
       }
     },
   })

@@ -1,19 +1,4 @@
-/* eslint-disable
-    brace-style,
-    no-self-assign,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS204: Change includes calls to have a more natural evaluation order
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-self-assign */
 const _ = require('lodash')
 const Promise = require('bluebird')
 
@@ -176,11 +161,11 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       return waitForRequest().then(waitForResponse)
     }
 
-    return Promise
-    .map([].concat(str), (str) => // we may get back an xhr value instead
+    // we may get back an xhr value instead
     // of a promise, so we have to wrap this
     // in another promise :-(
-    {
+    return Promise
+    .map([].concat(str), (str) => {
       return waitForXhr(str, _.omit(options, 'error'))
     }).then((responses) => {
       // if we only asked to wait for one alias

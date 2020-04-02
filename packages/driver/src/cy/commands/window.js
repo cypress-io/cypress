@@ -1,15 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 
@@ -49,12 +37,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     currentViewport = defaultViewport
   }
 
-  Cypress.on('test:before:run:async', () => // if we have viewportDefaults it means
+  // if we have viewportDefaults it means
   // something has changed the default and we
   // need to restore prior to running the next test
   // after which we simply null and wait for the
   // next viewport change
-  {
+  Cypress.on('test:before:run:async', () => {
     return setViewportAndSynchronize(defaultViewport.viewportWidth, defaultViewport.viewportHeight)
   })
 
@@ -197,7 +185,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           consoleProps () {
             const obj = {}
 
+            // eslint-disable-next-line no-undef
             if (preset) {
+              // eslint-disable-next-line no-undef
               obj.Preset = preset
             }
 

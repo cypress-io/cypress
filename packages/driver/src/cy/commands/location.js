@@ -1,19 +1,7 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 
 const $errUtils = require('../../cypress/error_utils')
-const $Location = require('../../cypress/location')
 
 module.exports = (Commands, Cypress, cy, state, config) => {
   return Commands.addAll({
@@ -79,15 +67,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       _.defaults(options, { log: true })
 
       const getLocation = () => {
-        let ret
         const location = cy.getRemoteLocation()
 
-        ret = _.isString(key) ?
-        // use existential here because we only want to throw
-        // on null or undefined values (and not empty strings)
-          location[key] != null ? location[key] : $errUtils.throwErrByPath('location.invalid_key', { args: { key } })
-          :
-          location
+        return _.isString(key)
+          ? (location[key] ? location[key] : $errUtils.throwErrByPath('location.invalid_key', { args: { key } }))
+          : location
       }
 
       if (options.log !== false) {

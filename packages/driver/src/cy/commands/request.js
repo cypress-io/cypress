@@ -1,15 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const whatIsCircular = require('@cypress/what-is-circular')
 const Promise = require('bluebird')
@@ -65,11 +53,7 @@ const needsFormSpecified = function (options = {}) {
   return (json !== true) && _.isObject(body) && hasFormUrlEncodedContentTypeHeader(headers)
 }
 
-module.exports = (Commands, Cypress, cy, state, config) => // Cypress.extend
-//   ## set defaults for all requests?
-//   requestDefaults: (options = {}) ->
-
-{
+module.exports = (Commands, Cypress, cy, state, config) => {
   return Commands.addAll({
   // allow our signature to be similar to cy.route
   // METHOD / URL / BODY

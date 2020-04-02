@@ -1,9 +1,5 @@
-/* eslint-disable
-    brace-style,
-    no-empty,
-    no-undef,
-    no-unused-vars,
-*/
+/* eslint-disable no-undef */
+/// <reference types="cypress" />
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 /*
@@ -17,7 +13,6 @@
  */
 const _ = require('lodash')
 const whatIsCircular = require('@cypress/what-is-circular')
-const moment = require('moment')
 const UrlParse = require('url-parse')
 const Promise = require('bluebird')
 
@@ -73,11 +68,11 @@ const timedOutWaitingForPageLoad = function (ms, log) {
   })
 }
 
-const bothUrlsMatchAndRemoteHasHash = (current, remote) => // the remote has a hash
+// the remote has a hash
 // or the last char of href
 // is a hash
 // both must have the same query params
-{
+const bothUrlsMatchAndRemoteHasHash = (current, remote) => {
   return (remote.hash || (remote.href.slice(-1) === '#')) &&
 
   // both must have the same origin
@@ -349,14 +344,14 @@ const stabilityChanged = function (Cypress, state, config, stable, event) {
   })
 }
 
-const normalizeTimeoutOptions = (options) => // there are really two timeout values - pageLoadTimeout
+// there are really two timeout values - pageLoadTimeout
 // and the underlying responseTimeout. for the purposes
 // of resolving resolving the url, we only care about
 // responseTimeout - since pageLoadTimeout is a driver
 // and browser concern. therefore we normalize the options
 // object and send 'responseTimeout' as options.timeout
 // for the backend.
-{
+const normalizeTimeoutOptions = (options) => {
   return _
   .chain(options)
   .pick(REQUEST_URL_OPTS)
@@ -366,17 +361,16 @@ const normalizeTimeoutOptions = (options) => // there are really two timeout val
 
 module.exports = function (Commands, Cypress, cy, state, config) {
   reset()
-
-  Cypress.on('test:before:run:async', () => // reset any state on the backend
-  {
+  // reset any state on the backend
+  Cypress.on('test:before:run:async', () => {
     return Cypress.backend('reset:server:state')
   })
 
   Cypress.on('test:before:run', reset)
 
-  Cypress.on('stability:changed', (bool, event) => // only send up page loading events when we're
+  // only send up page loading events when we're
   // not stable!
-  {
+  Cypress.on('stability:changed', (bool, event) => {
     return stabilityChanged(Cypress, state, config, bool, event)
   })
 
@@ -578,12 +572,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
             win.history.go(num)
 
-            const retWin = () => // need to set the attributes of 'go'
+            // need to set the attributes of 'go'
             // consoleProps here with win
 
             // make sure we resolve our go function
             // with the remove window (just like cy.visit)
-            {
+            const retWin = () => {
               return state('window')
             }
 
@@ -736,9 +730,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       const $autIframe = state('$autIframe')
       const runnable = state('runnable')
 
-      const changeIframeSrc = (url, event) => // when the remote iframe's load event fires
+      // when the remote iframe's load event fires
       // callback fn
-      {
+      const changeIframeSrc = (url, event) => {
         return new Promise((resolve) => {
         // if we're listening for hashchange
         // events then change the strategy
@@ -955,7 +949,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             return Promise.delay(1e9)
           })
         }).catch((err) => {
-          if (err.gotResponse) {} else if (err.invalidContentType) {
+          if (err.invalidContentType) {
             return visitFailedByErr(err, err.originalUrl, () => {
               const args = {
                 url: err.originalUrl,
@@ -983,19 +977,19 @@ module.exports = function (Commands, Cypress, cy, state, config) {
                 args,
               })
             })
-          } else {
-            return visitFailedByErr(err, url, () => {
-              return $errUtils.throwErrByPath('visit.loading_network_failed', {
-                onFail: options._log,
-                args: {
-                  url,
-                  error: err,
-                  stack: err.stack,
-                },
-                noStackTrace: true,
-              })
-            })
           }
+
+          return visitFailedByErr(err, url, () => {
+            return $errUtils.throwErrByPath('visit.loading_network_failed', {
+              onFail: options._log,
+              args: {
+                url,
+                error: err,
+                stack: err.stack,
+              },
+              noStackTrace: true,
+            })
+          })
         })
       }
 

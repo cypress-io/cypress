@@ -1,16 +1,4 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 const _ = require('lodash')
 const $ = require('jquery')
 const bytes = require('bytes')
@@ -20,8 +8,8 @@ const $Screenshot = require('../../cypress/screenshot')
 const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
 
-const getViewportHeight = (state) => // TODO this doesn't seem correct
-{
+// TODO this doesn't seem correct
+const getViewportHeight = (state) => {
   return Math.min(state('viewportHeight'), window.innerHeight)
 }
 
@@ -294,7 +282,7 @@ const takeScreenshot = function (Cypress, state, screenshotConfig, options = {})
     onAfterScreenshot,
   } = screenshotConfig
 
-  const { subject, runnable, name } = options
+  const { subject, runnable } = options
 
   const startTime = new Date()
 
