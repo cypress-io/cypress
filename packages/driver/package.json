@@ -7,7 +7,7 @@
     "cypress:open": "node ../../scripts/cypress open --project ./test",
     "cypress:run": "node ../../scripts/cypress run --project ./test",
     "postinstall": "patch-package",
-    "start": "$(yarn bin coffee) test/support/server.coffee"
+    "start": "node test/support/server.js"
   },
   "devDependencies": {
     "@cypress/bower-kendo-ui": "0.0.2",
