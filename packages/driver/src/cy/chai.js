@@ -1,5 +1,5 @@
 /* eslint-disable prefer-rest-params */
-// tests in driver/test/cypress/integration/commands/assertions_spec.coffee
+// tests in driver/test/cypress/integration/commands/assertions_spec.js
 
 const _ = require('lodash')
 const $ = require('jquery')
@@ -37,12 +37,6 @@ let getMessage = null
 let chaiUtils = null
 
 chai.use(sinonChai)
-
-const getType = function (val) {
-  const match = /\[object (.*)\]/.exec(Object.prototype.toString.call(val))
-
-  return match && match[1]
-}
 
 chai.use((chai, u) => {
   chaiUtils = u
@@ -89,10 +83,20 @@ chai.use((chai, u) => {
 
   const { inspect, setFormatValueHook } = chaiInspect.create(chai)
 
-  // prevent tunneling into Window objects (can throw cross-origin errors in firefox)
+  // prevent tunneling into Window objects (can throw cross-origin errors)
   setFormatValueHook((ctx, val) => {
-    if (val && (getType(val) === 'Window')) {
-      return '[window]'
+    // https://github.com/cypress-io/cypress/issues/5270
+    // When name attribute exists in <iframe>,
+    // Firefox returns [object Window] but Chrome returns [object Object]
+    // So, we try throwing an error and check the error message.
+    try {
+      val && val.document
+      val && val.inspect
+    } catch (e) {
+      if (e.stack.indexOf('cross-origin') !== -1 || // chrome
+      e.message.indexOf('cross-origin') !== -1) { // firefox
+        return `[window]`
+      }
     }
   })
 

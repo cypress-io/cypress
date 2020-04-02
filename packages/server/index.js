@@ -40,4 +40,17 @@ process.traceDeprecation = true
 
 require('./lib/util/suppress_unauthorized_warning').suppress()
 
-module.exports = require('./lib/cypress').start(process.argv)
+function launchOrFork () {
+  const nodeOptions = require('./lib/util/node_options')
+
+  if (nodeOptions.needsOptions()) {
+    // https://github.com/cypress-io/cypress/pull/5492
+    return nodeOptions.forkWithCorrectOptions()
+  }
+
+  nodeOptions.restoreOriginalOptions()
+
+  module.exports = require('./lib/cypress').start(process.argv)
+}
+
+launchOrFork()

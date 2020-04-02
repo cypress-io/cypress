@@ -1,8 +1,8 @@
 _          = require("lodash")
 os         = require("os")
 debug      = require("debug")("cypress:server:api")
-request    = require("request-promise")
-errors     = require("request-promise/errors")
+request    = require("@cypress/request-promise")
+errors     = require("@cypress/request-promise/errors")
 Promise    = require("bluebird")
 humanInterval = require("human-interval")
 agent      = require("@packages/network").agent

@@ -60,7 +60,8 @@ install:
   - print-env APPVEYOR
   # prints if we have sensitive variables that start with a prefix GH
   # which are used to trigger other projects
-  - has-env GH
+  # ignore errors - forked pull requests will NOT have these variables set
+  - has-env GH || true
   # clean cache to prevent install permission issues
   - yarn cache clean
   - yarn --frozen-lockfile || yarn --frozen-lockfile || yarn --frozen-lockfile

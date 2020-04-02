@@ -26,10 +26,17 @@ export default class MarkdownRenderer extends React.PureComponent {
   }
 
   render () {
+    let renderFn = md.render
+
+    if (this.props.noParagraphWrapper) {
+      // prevent markdown-it from wrapping the output in a <p> tag
+      renderFn = md.renderInline
+    }
+
     return (
       <span ref={(node) => this.node = node}
         dangerouslySetInnerHTML={{
-          __html: md.render(this.props.markdown),
+          __html: renderFn.call(md, this.props.markdown),
         }}>
       </span>
     )

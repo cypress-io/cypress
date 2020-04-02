@@ -94,6 +94,17 @@ module.exports = {
     const lengths = {}
 
     const writeVideoFrame = function (data) {
+      // when `data` is empty, it is sent as an empty object (`{}`)
+      // which can crash the process. this can happen if there are
+      // errors in the video capture process, which are handled later
+      // on, so just skip empty frames here.
+      // @see https://github.com/cypress-io/cypress/pull/6818
+      if (_.isEmpty(data)) {
+        debug('empty chunk received %o', data)
+
+        return
+      }
+
       // make sure we haven't ended
       // our stream yet because paint
       // events can linger beyond
@@ -195,6 +206,7 @@ module.exports = {
     return startCapturing()
     .then(({ cmd, startedVideoCapture }) => {
       return {
+        _pt: pt,
         cmd,
         endVideoCapture,
         writeVideoFrame,
