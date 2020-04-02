@@ -21,7 +21,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
-    "@benmalka/foxdriver": "0.3.0",
+    "@benmalka/foxdriver": "0.4.0",
     "@cypress/browserify-preprocessor": "2.1.4",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.1",
@@ -105,7 +105,7 @@
     "syntax-error": "1.4.0",
     "systeminformation": "4.21.1",
     "term-size": "2.1.0",
-    "tough-cookie": "3.0.1",
+    "tough-cookie": "salesforce/tough-cookie#2524513d49b7fab37639dfb7c6b87994c2bd7791",
     "trash": "5.2.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
@@ -116,13 +116,13 @@
     "winston": "2.4.4"
   },
   "devDependencies": {
-    "@babel/core": "7.8.7",
+    "@babel/core": "7.9.0",
     "@babel/plugin-proposal-class-properties": "7.8.3",
-    "@babel/plugin-proposal-object-rest-spread": "7.8.3",
-    "@babel/plugin-transform-runtime": "7.8.3",
-    "@babel/preset-env": "7.8.7",
-    "@babel/preset-react": "7.8.3",
-    "@babel/runtime": "7.8.7",
+    "@babel/plugin-proposal-object-rest-spread": "7.9.0",
+    "@babel/plugin-transform-runtime": "7.9.0",
+    "@babel/preset-env": "7.9.0",
+    "@babel/preset-react": "7.9.4",
+    "@babel/runtime": "7.9.2",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/json-schemas": "5.34.1",
     "@cypress/sinon-chai": "1.1.0",

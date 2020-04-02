@@ -718,7 +718,7 @@ describe('Settings', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
           cy.get('.experiment-status-sign')
           .should('have.class', 'enabled')
-          .and('have.text', 'ON')
+          .and('have.text', 'enabled')
 
           cy.percySnapshot()
         })
@@ -743,8 +743,8 @@ describe('Settings', () => {
         it('displays experiment', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
           cy.get('.experiment-status-sign')
-          .should('not.have.class', 'disabled')
-          .and('have.text', 'OFF')
+          .should('have.class', 'disabled')
+          .and('have.text', 'disabled')
 
           cy.percySnapshot()
         })

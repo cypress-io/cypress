@@ -73,7 +73,7 @@ context('lib/browsers/cdp_automation', () => {
       this.automation = CdpAutomation(this.sendDebuggerCommand)
 
       this.sendDebuggerCommand
-      .throws()
+      .throws(new Error('not stubbed'))
       .withArgs('Browser.getVersion')
       .resolves()
 
@@ -129,9 +129,9 @@ context('lib/browsers/cdp_automation', () => {
 
     describe('set:cookie', () => {
       beforeEach(function () {
-        this.sendDebuggerCommand.withArgs('Network.setCookie', { domain: '.google.com', name: 'session', value: 'key', path: '/', expires: undefined, sameSite: undefined })
+        this.sendDebuggerCommand.withArgs('Network.setCookie', { domain: '.google.com', name: 'session', value: 'key', path: '/' })
         .resolves({ success: true })
-        .withArgs('Network.setCookie', { domain: 'foo', path: '/bar', name: '', value: '', expires: undefined, sameSite: undefined })
+        .withArgs('Network.setCookie', { domain: 'foo', path: '/bar', name: '', value: '' })
         .rejects(new Error('some error'))
         .withArgs('Network.getAllCookies')
         .resolves({

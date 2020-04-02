@@ -272,13 +272,17 @@
       margin-left: auto;
     }
   }
-
-
+  .experiment-header {
+    display: flex;
+    align-items: center;
+  }
+  
   .experiment-status-sign {
-    margin-left: 10px;
+    margin-left: auto;
     color: #9d9ea9;
     line-height: 28px;
     font-weight: bold;
+    text-transform: uppercase;
 
     &.enabled {
       color: #1aae73;

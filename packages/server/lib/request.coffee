@@ -11,20 +11,29 @@ agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 streamBuffer = require("./util/stream_buffer").streamBuffer
 
-SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly']
+SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly', 'sameSite']
 NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND".split(" ")
 VERBOSE_REQUEST_OPTS = "followRedirect strictSSL".split(" ")
 HTTP_CLIENT_REQUEST_EVENTS = "abort connect continue information socket timeout upgrade".split(" ")
 TLS_VERSION_ERROR_RE =  /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
+SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 
-## sameSite from tough-cookie is slightly different from webextension API
-convertSameSiteToughToExtension = (str) =>
-  if str is "none"
-    return "no_restriction"
+convertSameSiteToughToExtension = (sameSite, setCookie) =>
+  ## tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
+  ## SameSite=None was not explicitly set
+  ## @see https://github.com/salesforce/tough-cookie/issues/191
+  isUnspecified = sameSite is "none" and !SAMESITE_NONE_RE.test(setCookie)
 
-  return str
+  if isUnspecified
+    ## not explicitly set, so fall back to the browser's default
+    return undefined
+
+  if sameSite is 'none'
+    return 'no_restriction'
+
+  return sameSite
 
 getOriginalHeaders = (req = {}) ->
   ## the request instance holds an instance
@@ -500,7 +509,7 @@ module.exports = (options = {}) ->
         if expiry <= 0
           return automationFn('clear:cookie', cookie)
 
-        cookie.sameSite = convertSameSiteToughToExtension(cookie.sameSite)
+        cookie.sameSite = convertSameSiteToughToExtension(cookie.sameSite, cyCookie)
 
         automationFn('set:cookie', cookie)
 

@@ -6,9 +6,10 @@ const browser = require('webextension-polyfill')
 const client = require('./client')
 const { getCookieUrl } = require('../lib/util')
 
-const COOKIE_PROPS = ['url', 'name', 'path', 'secure', 'domain', 'sameSite']
+const COOKIE_PROPS = ['url', 'name', 'path', 'secure', 'domain']
 const GET_ALL_PROPS = COOKIE_PROPS.concat(['session', 'storeId'])
-const SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate'])
+// https://developer.chrome.com/extensions/cookies#method-set
+const SET_PROPS = COOKIE_PROPS.concat(['value', 'httpOnly', 'expirationDate', 'sameSite'])
 
 const httpRe = /^http/
 

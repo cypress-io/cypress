@@ -95,6 +95,16 @@ onServer = (app) ->
 
     return res.type('html').end()
 
+  app.get "/samesite/:value", (req, res) ->
+    { value } = req.params
+    header = "ss#{value}=someval; Path=/; SameSite=#{value}"
+
+    if value is 'None'
+      header += '; Secure'
+
+    res.setHeader("Set-Cookie", header)
+    res.type('html').end()
+
 haveRoot = !process.env.USE_HIGH_PORTS && process.geteuid() == 0
 
 if not haveRoot
@@ -110,6 +120,16 @@ if haveRoot
 otherDomain = "quux.bar.net"
 otherUrl = "http://#{otherDomain}#{if haveRoot then '' else ":#{httpPort}"}"
 otherHttpsUrl = "https://#{otherDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
+
+chromiumSameSiteFeatures = '--enable-features=SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure'
+
+## SameSite is loosely enforced in some versions of FF/Electron/Chromium,
+## but all have options we can use to force it to be strict
+FORCED_SAMESITE_ENV = {
+  ELECTRON_EXTRA_LAUNCH_ARGS: chromiumSameSiteFeatures
+  CHROMIUM_EXTRA_LAUNCH_ARGS: chromiumSameSiteFeatures
+  FIREFOX_FORCE_STRICT_SAMESITE: 1
+}
 
 describe "e2e cookies", ->
   e2e.setup({
@@ -150,33 +170,45 @@ describe "e2e cookies", ->
       httpUrl = "http://#{baseDomain}#{if haveRoot then '' else ":#{httpPort}"}"
       httpsUrl = "https://#{baseDomain}#{if haveRoot then '' else ":#{httpsPort}"}"
 
+      ## once browsers are shipping with the options in FORCED_SAMESITE_ENV as default,
+      ## we can remove this extra test condition
       [
-        [httpUrl, false],
-        [httpsUrl, true]
+        [FORCED_SAMESITE_ENV, 'with forced SameSite']
+        [{}, 'without forced SameSite']
       ].forEach ([
-        baseUrl,
-        https
+        processEnv,
+        samesite
       ]) ->
-        e2e.it "passes with baseurl: #{baseUrl}", {
-          config: {
-            baseUrl
-            env: {
-              baseUrl
-              expectedDomain: baseDomain
-              https
-              httpUrl
-              httpsUrl
-              otherUrl
-              otherHttpsUrl
+        context samesite, ->
+          [
+            [httpUrl, false],
+            [httpsUrl, true]
+          ].forEach ([
+            baseUrl,
+            https
+          ]) ->
+            e2e.it "passes with baseurl: #{baseUrl}", {
+              config: {
+                experimentalGetCookiesSameSite: true
+                baseUrl
+                env: {
+                  baseUrl
+                  expectedDomain: baseDomain
+                  https
+                  httpUrl
+                  httpsUrl
+                  otherUrl
+                  otherHttpsUrl
+                }
+              }
+              processEnv: FORCED_SAMESITE_ENV
+              spec: "cookies_spec_baseurl.coffee"
+              snapshot: true
+              onRun: (exec) =>
+                exec({
+                  originalTitle: "e2e cookies with baseurl"
+                })
             }
-          }
-          spec: "cookies_spec_baseurl.coffee"
-          snapshot: true
-          onRun: (exec) =>
-            exec({
-              originalTitle: "e2e cookies with baseurl"
-            })
-        }
 
       e2e.it "passes with no baseurl", {
         config: {

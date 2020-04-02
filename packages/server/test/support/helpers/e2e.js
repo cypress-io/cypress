@@ -658,6 +658,7 @@ const e2e = {
 
           ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
+        .extend(options.processEnv)
         .value(),
       })
 
