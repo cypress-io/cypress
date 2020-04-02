@@ -56,6 +56,9 @@
     "webpack": "^4.18.1"
   },
   "peerDependencies": {
+    "@babel/core": "^7.0.1",
+    "@babel/preset-env": "^7.0.0",
+    "babel-loader": "^8.0.2",
     "webpack": "^4.18.1"
   },
   "files": [
@@ -75,11 +78,6 @@
     "cypress-preprocessor",
     "webpack"
   ],
-  "optionalDependencies": {
-    "@babel/core": "^7.0.1",
-    "@babel/preset-env": "^7.0.0",
-    "babel-loader": "^8.0.2"
-  },
   "release": {
     "verifyConditions": "condition-circle",
     "analyzeCommits": "simple-commit-message",
