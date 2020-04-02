@@ -13,8 +13,8 @@ const CRLF = '\r\n'
 const statusCodeRe = /^HTTP\/1.[01] (\d*)/
 const defaultSecureOptions = (
   // @see https://github.com/cypress-io/cypress/issues/6771
-  constants.SSL_OP_LEGACY_SERVER_CONNECT
-  // constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION |
+  // constants.SSL_OP_LEGACY_SERVER_CONNECT |
+  constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION
   // improve compatibility with buggy openssl implementations
   // constants.SSL_OP_ALL
 )
