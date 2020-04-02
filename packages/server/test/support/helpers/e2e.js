@@ -376,6 +376,7 @@ const e2e = {
 
   setup (options = {}) {
     before(async function () {
+      // remove legacy node_modules that may have been copied to projects/e2e
       await fs.remove(Fixtures.path(`projects/e2e/node_modules`))
     })
 
@@ -395,9 +396,9 @@ const e2e = {
         const servers = await Promise.map(optsServers, startServer)
 
         this.servers = servers
+      } else {
+        this.servers = null
       }
-
-      this.servers = null
 
       const s = options.settings
 
