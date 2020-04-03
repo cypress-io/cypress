@@ -236,7 +236,7 @@ describe "e2e spec_isolation", ->
       outputPath: outputPath
       snapshot: true
       expectedExitCode: 5
-      config: {numTestRetries: 1}
+      config: {retries: 1}
       # browser: 'chrome'
       # exit: false
     })

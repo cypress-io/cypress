@@ -336,15 +336,13 @@ const create = (specWindow, Cypress, reporter) => {
 
         const ret = suiteAddTest.apply(this, args)
 
-        if (Cypress.config('isTextTerminal') || Cypress.config('enableTestRetriesInOpenMode')) {
-          let retries = Cypress.config('numTestRetries')
+        let retries = Cypress.getTestRetries()
 
-          if (retries == null) {
-            retries = -1
-          }
-
-          test._retries = retries
+        if (retries == null) {
+          retries = -1
         }
+
+        test._retries = retries
 
         test.retries = function (...args) {
           if (args[0] !== undefined && args[0] > -1) {

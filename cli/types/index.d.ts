@@ -368,6 +368,12 @@ declare namespace Cypress {
      */
     getFirefoxGcInterval(): number | null | undefined
 
+  
+    /**
+     * @returns the number of test retries currently enabled for the run
+     */
+    getTestRetries(): number | null
+
     /**
      * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
      *
@@ -2456,6 +2462,14 @@ declare namespace Cypress {
      * @default false
      */
     experimentalGetCookiesSameSite: boolean
+
+    /**
+     * Number of times to retry a failed test.
+     * If a number is set, tests will retry in both runMode and openMode.
+     * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
+     * @default null
+     */
+    retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
   }
 
   interface PluginConfigOptions extends ConfigOptions {

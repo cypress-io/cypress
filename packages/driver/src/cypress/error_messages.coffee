@@ -802,7 +802,7 @@ module.exports = {
     }
     manually_set_retries_test: """Cannot set number of test retries at test run-time.
       use
-      > Cypress.config('numTestRetries', n)
+      > Cypress.config('retries', n)
       instead.
 
 
@@ -811,7 +811,7 @@ module.exports = {
     """
     manually_set_retries_suite: """Cannot set number of test retries directly on the mocha Suite.
       use
-      > Cypress.config('numTestRetries', n)
+      > Cypress.config('retries', n)
       instead.
 
 

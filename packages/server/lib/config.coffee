@@ -77,8 +77,7 @@ configKeys = toWords """
   waitForAnimations               resolvedNodeVersion
   nodeVersion                     resolvedNodePath
   firefoxGcInterval
-  numTestRetries
-  enableTestRetriesInOpenMode
+  retries
 """
 
 # Deprecated and retired public configuration properties
@@ -122,8 +121,7 @@ CONFIG_DEFAULTS = {
   defaultCommandTimeout:         4000
   requestTimeout:                5000
   responseTimeout:               30000
-  numTestRetries:                0
-  enableTestRetriesInOpenMode:   false
+  retries:                       null
   pageLoadTimeout:               60000
   execTimeout:                   60000
   taskTimeout:                   60000
@@ -184,8 +182,7 @@ validationRules = {
   reporter: v.isString
   requestTimeout: v.isNumber
   responseTimeout: v.isNumber
-  numTestRetries: v.isNumber
-  enableTestRetriesInOpenMode: v.isBoolean
+  retries: v.isValidRetriesConfig
   supportFile: v.isStringOrFalse
   taskTimeout: v.isNumber
   testFiles: v.isStringOrArrayOfStrings

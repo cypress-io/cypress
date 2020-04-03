@@ -163,6 +163,17 @@ class $Cypress {
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
     this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this.config)
+    this.getTestRetries = function () {
+      const testRetries = this.config('retries')
+
+      if (!testRetries) return null
+
+      if (_.isNumber(testRetries)) {
+        return testRetries
+      }
+
+      return testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+    }
 
     this.Cookies = $Cookies.create(config.namespace, d)
 
