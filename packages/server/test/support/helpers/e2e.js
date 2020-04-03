@@ -4,7 +4,6 @@ require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
-const niv = require('npm-install-version')
 const path = require('path')
 const http = require('http')
 const human = require('human-interval')
@@ -376,36 +375,21 @@ const e2e = {
   },
 
   setup (options = {}) {
-    let npmI
-
-    npmI = options.npmInstall
+    const npmI = options.npmInstall
 
     if (npmI) {
-      before(function () {
+      before(async function () {
         // npm install needs extra time
         this.timeout(human('2 minutes'))
 
-        return cp.execAsync('npm install', {
+        await cp.execAsync('npm install', {
           cwd: Fixtures.path('projects/e2e'),
           maxBuffer: 1024 * 1000,
         })
-        .then(() => {
-          if (_.isArray(npmI)) {
-            const copyToE2ENodeModules = (module) => {
-              return fs.copyAsync(
-                path.resolve('node_modules', module), Fixtures.path(`projects/e2e/node_modules/${module}`),
-              )
-            }
 
-            return Promise
-            .map(npmI, niv.install)
-            .then(() => Promise.map(npmI, copyToE2ENodeModules))
-          }
-          // symlinks mess up fs.copySync
-          // and bin files aren't necessary for these tests
-        }).then(() => {
-          return fs.removeAsync(Fixtures.path('projects/e2e/node_modules/.bin'))
-        })
+        // symlinks mess up fs.copySync
+        // and bin files aren't necessary for these tests
+        await fs.removeAsync(Fixtures.path('projects/e2e/node_modules/.bin'))
       })
 
       // now cleanup the node modules after because these add a lot
@@ -415,45 +399,37 @@ const e2e = {
       })
     }
 
-    beforeEach(function () {
+    beforeEach(async function () {
       // after installing node modules copying all of the fixtures
       // can take a long time (5-15 secs)
       this.timeout(human('2 minutes'))
-
       Fixtures.scaffold()
 
-      if (process.env.EXIT === 'false') {
+      if (process.env.NO_EXIT) {
         Fixtures.scaffoldWatch()
         process.env.CYPRESS_INTERNAL_E2E_TESTS
       }
 
       sinon.stub(process, 'exit')
 
-      return Promise.try(() => {
-        let servers
+      if (options.servers) {
+        const optsServers = [].concat(options.servers)
 
-        servers = options.servers
+        const servers = await Promise.map(optsServers, startServer)
 
-        if (servers) {
-          servers = [].concat(servers)
-
-          return Promise.map(servers, startServer)
-          .then((servers) => {
-            this.servers = servers
-          })
-        }
-
+        this.servers = servers
+      } else {
         this.servers = null
-      }).then(() => {
-        const s = options.settings
+      }
 
-        if (s) {
-          return settings.write(e2ePath, s)
-        }
-      })
+      const s = options.settings
+
+      if (s) {
+        await settings.write(e2ePath, s)
+      }
     })
 
-    return afterEach(function () {
+    afterEach(async function () {
       process.env = _.clone(env)
 
       this.timeout(human('2 minutes'))
@@ -463,7 +439,7 @@ const e2e = {
       const s = this.servers
 
       if (s) {
-        return Promise.map(s, stopServer)
+        await Promise.map(s, stopServer)
       }
     })
   },
@@ -472,7 +448,7 @@ const e2e = {
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
-      exit: process.env.EXIT === 'false' ? false : null,
+      noExit: process.env.NO_EXIT ? true : null,
       timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
@@ -480,8 +456,16 @@ const e2e = {
       normalizeStdoutAvailableBrowsers: true,
     })
 
-    if (options.exit === false) {
+    if (options.noExit) {
       options.timeout = 3000000
+    }
+
+    if (options.exit != null) {
+      throw new Error(`
+      passing { exit: false } to e2e options is no longer supported
+      Please pass the --no-exit flag to the test command instead
+      e.g. "yarn test test/e2e/1_async_timeouts_spec.coffee --no-exit"
+      `)
     }
 
     ctx.timeout(options.timeout)
@@ -571,8 +555,8 @@ const e2e = {
       args.push('--output-path', options.outputPath)
     }
 
-    if (options.exit === false) {
-      args.push('--exit', options.exit)
+    if (options.noExit) {
+      args.push('--no-exit')
     }
 
     if (options.inspectBrk) {
@@ -695,7 +679,7 @@ const e2e = {
           // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
 
-          ...(process.env.EXIT === 'false' ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
+          ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
         .value(),

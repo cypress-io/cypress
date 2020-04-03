@@ -13,6 +13,7 @@ const install = require(`${lib}/tasks/install`)
 const snapshot = require('../support/snapshot')
 const debug = require('debug')('test')
 const execa = require('execa-wrap')
+const mockedEnv = require('mocked-env')
 
 describe('cli', () => {
   require('mocha-banner').register()
@@ -131,6 +132,15 @@ describe('cli', () => {
   })
 
   context('cypress version', () => {
+    let restoreEnv
+
+    afterEach(() => {
+      if (restoreEnv) {
+        restoreEnv()
+        restoreEnv = null
+      }
+    })
+
     const binaryDir = '/binary/dir'
 
     beforeEach(() => {
@@ -158,6 +168,38 @@ describe('cli', () => {
       this.exec('version')
       process.exit.callsFake(() => {
         snapshot('cli version and binary version 2', logger.print())
+        done()
+      })
+    })
+
+    it('reports package and binary message with npm log silent', (done) => {
+      restoreEnv = mockedEnv({
+        npm_config_loglevel: 'silent',
+      })
+
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        // should not be empty!
+        snapshot('cli version and binary version with npm log silent', logger.print())
+        done()
+      })
+    })
+
+    it('reports package and binary message with npm log warn', (done) => {
+      restoreEnv = mockedEnv({
+        npm_config_loglevel: 'warn',
+      })
+
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        // should not be empty!
+        snapshot('cli version and binary version with npm log warn', logger.print())
         done()
       })
     })

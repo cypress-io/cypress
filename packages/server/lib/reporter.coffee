@@ -1,8 +1,8 @@
 _     = require("lodash")
 path  = require("path")
-## mocha-v* is used to allow us to have later versions of mocha specified in devDependencies
+## mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 ## and prevents accidently upgrading this one
-Mocha = require("mocha-v2")
+Mocha = require("mocha-2.4.5")
 debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
 

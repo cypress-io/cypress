@@ -8,5 +8,3 @@ describe "e2e async timeouts", ->
     snapshot: true
     expectedExitCode: 2
   }
-
-
