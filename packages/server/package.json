@@ -105,7 +105,7 @@
     "syntax-error": "1.4.0",
     "systeminformation": "4.21.1",
     "term-size": "2.1.0",
-    "tough-cookie": "salesforce/tough-cookie#2524513d49b7fab37639dfb7c6b87994c2bd7791",
+    "tough-cookie": "salesforce/tough-cookie#1147b87e50150c4684e4cdf894558a53a6b33b26",
     "trash": "5.2.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
