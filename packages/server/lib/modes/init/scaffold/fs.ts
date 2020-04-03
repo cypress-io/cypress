@@ -17,6 +17,7 @@ const generateFolders = async (projRoot: string, config: InitConfig) => {
   await integrationFolder(projRoot, config)
   await fixturesFolder(projRoot, config)
   await supportFile(projRoot, config)
+  await pluginsFile(projRoot, config)
 }
 
 const integrationFolder = async (projRoot: string, config: InitConfig) => {
@@ -105,5 +106,39 @@ const supportFile = async (projRoot: string, { typescript, config: { supportFile
   await fs.copy(
     join(scaffoldRoot, 'commands.js'),
     filename(defaultRoot, 'commands.js'),
+  )
+}
+
+const pluginsFile = async (projRoot: string, { typescript, config: { pluginsFile } }: InitConfig) => {
+  if (pluginsFile === false) {
+    return
+  }
+
+  const defaultPath = `${projRoot}/${defaultValues['pluginsFile']}`
+
+  if (pluginsFile) {
+    const pluginsFilePath = isAbsolute(pluginsFile)
+      ? pluginsFile
+      : `${projRoot}/${pluginsFile}`
+
+    if (pluginsFilePath !== defaultPath) {
+      return
+    }
+  }
+
+  const defaultRoot = dirname(defaultPath)
+  const scaffoldRoot = join(__dirname, '../../..', 'scaffold/plugins')
+
+  await fs.ensureDir(defaultRoot)
+
+  const filename = (root, name) => {
+    return typescript
+      ? join(root, name).replace('.js', '.ts')
+      : join(root, name)
+  }
+
+  await fs.copy(
+    join(scaffoldRoot, 'index.js'),
+    filename(defaultRoot, 'index.js'),
   )
 }
