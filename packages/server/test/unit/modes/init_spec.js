@@ -38,7 +38,7 @@ describe('/lib/modes/init', () => {
           it('throws when no-fixtures is true and fixtures-path is given', () => {
             expect(() => {
               scaffold.option.checkArgs({
-                noFixtures: true,
+                fixtures: false,
                 fixturesPath: 'great/tool' })
             }).to.throw('Conflicting Arguments')
           })
@@ -46,7 +46,7 @@ describe('/lib/modes/init', () => {
           it('throws when no-support is true and support-path is given', () => {
             expect(() => {
               scaffold.option.checkArgs({
-                noSupport: true,
+                support: false,
                 supportPath: 'awesome/day.js' })
             }).to.throw('Conflicting Arguments')
           })
@@ -54,7 +54,7 @@ describe('/lib/modes/init', () => {
           it('throws when no-plugins is true and plugins-path is given', () => {
             expect(() => {
               scaffold.option.checkArgs({
-                noPlugins: true,
+                plugins: false,
                 pluginsPath: 'my/plugin.js' })
             }).to.throw('Conflicting Arguments')
           })
@@ -131,7 +131,7 @@ describe('/lib/modes/init', () => {
         describe('config options', () => {
           it('noFixtures', () => {
             const option = scaffold.option.fromCommandArgs({
-              noFixtures: true,
+              fixtures: false,
             })
 
             expect(option).to.deep.eq({
@@ -165,7 +165,7 @@ describe('/lib/modes/init', () => {
 
           it('noSupport', () => {
             const option = scaffold.option.fromCommandArgs({
-              noSupport: true,
+              support: false,
             })
 
             expect(option).to.deep.eq({
@@ -199,7 +199,7 @@ describe('/lib/modes/init', () => {
 
           it('noPlugins', () => {
             const option = scaffold.option.fromCommandArgs({
-              noPlugins: true,
+              plugins: false,
             })
 
             expect(option).to.deep.eq({
@@ -255,7 +255,7 @@ describe('/lib/modes/init', () => {
 
           it('noVideo', () => {
             const option = scaffold.option.fromCommandArgs({
-              noVideo: true,
+              video: false,
             })
 
             expect(option).to.deep.eq({

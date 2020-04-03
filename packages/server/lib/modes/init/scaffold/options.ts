@@ -3,11 +3,11 @@ import { defaultValues } from './option_info'
 
 export const checkArgs = (args: Args) => {
   const {
-    noFixtures,
+    fixtures,
     fixturesPath,
-    noSupport,
+    support,
     supportPath,
-    noPlugins,
+    plugins,
     pluginsPath,
     integrationPath,
   } = args
@@ -28,15 +28,15 @@ export const checkArgs = (args: Args) => {
     throw new Error('Empty Path: Plugins file path should not be empty.')
   }
 
-  if (noFixtures && fixturesPath) {
+  if (fixtures === false && fixturesPath) {
     throw new Error('Conflicting Arguments: no-fixtures and fixtures-path cannot be defined together.')
   }
 
-  if (noSupport && supportPath) {
+  if (support === false && supportPath) {
     throw new Error('Conflicting Arguments: no-support and support-path cannot be defined together.')
   }
 
-  if (noPlugins && pluginsPath) {
+  if (plugins === false && pluginsPath) {
     throw new Error('Conflicting Arguments: no-plugins and plugins-path cannot be defined together.')
   }
 
@@ -85,7 +85,7 @@ export const fromCommandArgs = (args: Args) => {
     result.typescript = true
   }
 
-  if (args.noFixtures) {
+  if (args.fixtures === false) {
     result.config.fixturesFolder = false
   }
 
@@ -93,7 +93,7 @@ export const fromCommandArgs = (args: Args) => {
     result.config.fixturesFolder = args.fixturesPath
   }
 
-  if (args.noSupport) {
+  if (args.support === false) {
     result.config.supportFile = false
   }
 
@@ -105,7 +105,7 @@ export const fromCommandArgs = (args: Args) => {
     result.config.integrationFolder = args.integrationPath
   }
 
-  if (args.noPlugins) {
+  if (args.plugins === false) {
     result.config.pluginsFile = false
   }
 
@@ -113,7 +113,7 @@ export const fromCommandArgs = (args: Args) => {
     result.config.pluginsFile = args.pluginsPath
   }
 
-  if (args.noVideo) {
+  if (args.video === false) {
     result.config.video = false
   }
 

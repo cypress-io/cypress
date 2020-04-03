@@ -1,14 +1,14 @@
 export interface Args {
   cwd: string
   force?: boolean
-  noFixtures?: boolean
+  fixtures?: boolean
   fixturesPath?: string
-  noSupport?: boolean
+  support?: boolean
   supportPath?: string
-  noPlugins?: boolean
+  plugins?: boolean
   pluginsPath?: string
   integrationPath?: string
-  noVideo?: boolean
+  video?: boolean
   example?: boolean
   typescript?: boolean
 }
