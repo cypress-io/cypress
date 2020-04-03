@@ -375,13 +375,35 @@ const e2e = {
   },
 
   setup (options = {}) {
-    before(async function () {
-      // remove legacy node_modules that may have been copied to projects/e2e
-      await fs.remove(Fixtures.path(`projects/e2e/node_modules`))
-    })
+    const npmI = options.npmInstall
+
+    if (npmI) {
+      before(async function () {
+        // npm install needs extra time
+        this.timeout(human('2 minutes'))
+
+        await cp.execAsync('npm install', {
+          cwd: Fixtures.path('projects/e2e'),
+          maxBuffer: 1024 * 1000,
+        })
+
+        // symlinks mess up fs.copySync
+        // and bin files aren't necessary for these tests
+        await fs.removeAsync(Fixtures.path('projects/e2e/node_modules/.bin'))
+      })
+
+      // now cleanup the node modules after because these add a lot
+      // of copy time for the Fixtures scaffolding
+      after(() => {
+        return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
+      })
+    }
 
     beforeEach(async function () {
-      await Fixtures.scaffold()
+      // after installing node modules copying all of the fixtures
+      // can take a long time (5-15 secs)
+      this.timeout(human('2 minutes'))
+      Fixtures.scaffold()
 
       if (process.env.NO_EXIT) {
         Fixtures.scaffoldWatch()
@@ -412,7 +434,7 @@ const e2e = {
 
       this.timeout(human('2 minutes'))
 
-      await Fixtures.remove()
+      Fixtures.remove()
 
       const s = this.servers
 

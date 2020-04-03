@@ -22,7 +22,7 @@ module.exports = {
   ## copies all of the project fixtures
   ## to the tmpDir .projects in the root
   scaffold: ->
-    fs.copy projects, tmpDir
+    fs.copySync projects, tmpDir
 
   scaffoldWatch: ->
     watchdir = path.resolve(__dirname, '../fixtures/projects')
@@ -37,7 +37,7 @@ module.exports = {
   ## removes all of the project fixtures
   ## from the tmpDir .projects in the root
   remove: ->
-    fs.remove tmpDir
+    fs.removeSync tmpDir
 
   ## returns the path to project fixture
   ## in the tmpDir

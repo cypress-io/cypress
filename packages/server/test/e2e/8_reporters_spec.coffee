@@ -15,7 +15,7 @@ mochaAwesomes = [
 ]
 
 describe "e2e reporters", ->
-  e2e.setup()
+  e2e.setup({npmInstall: true})
 
   it "reports error if cannot load reporter", ->
     e2e.exec(@, {
