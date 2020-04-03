@@ -11,9 +11,11 @@ jobs:
 
     steps:
       - checkout
-      - run:
-          name: Yarn install
-          command: yarn install --frozen-lockfile
+      - node/with-cache:
+          steps:
+            - run:
+                name: Yarn install
+                command: yarn install --frozen-lockfile
       - run:
           name: Lint code
           command: npm run lint
