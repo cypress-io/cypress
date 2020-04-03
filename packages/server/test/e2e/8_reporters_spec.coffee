@@ -77,7 +77,7 @@ describe "e2e reporters", ->
           reporter: ma
         })
         .then ->
-          if ma is "mochawesome@1.5.2"
+          if ma is "mochawesome-1.5.2"
             fs.readFileAsync(path.join(e2ePath, "mochawesome-reports", "mochawesome.html"), "utf8")
             .then (xml) ->
               expect(xml).to.include("<h3 class=\"suite-title\">simple passing spec</h3>")
@@ -96,7 +96,7 @@ describe "e2e reporters", ->
           reporter: ma
         })
         .then ->
-          if ma is "mochawesome@1.5.2"
+          if ma is "mochawesome-1.5.2"
             fs.readFileAsync(path.join(e2ePath, "mochawesome-reports", "mochawesome.html"), "utf8")
             .then (xml) ->
               expect(xml).to.include("<h3 class=\"suite-title\">simple failing hook spec</h3>")
