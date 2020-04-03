@@ -13,6 +13,7 @@ SPEC_URL_PREFIX = "/__cypress/tests?p"
 
 module.exports = {
   handleFiles: (req, res, config) ->
+    debug("handle files")
     specsUtil.find(config)
     .then (files) ->
       res.json({
@@ -44,6 +45,8 @@ module.exports = {
         }
 
   getSpecs: (spec, config) ->
+    debug("get specs %o", { spec })
+
     convertSpecPath = (spec) =>
       ## get the absolute path to this spec and
       ## get the browser url + cache buster
@@ -76,7 +79,9 @@ module.exports = {
 
   getTestUrl: (file) ->
     file += CacheBuster.get()
-    "#{SPEC_URL_PREFIX}=#{file}"
+    url = "#{SPEC_URL_PREFIX}=#{file}"
+    debug("test url for file %o", {file, url})
+    return url
 
   getTitle: (test) ->
     if test is "__all" then "All Tests" else test

@@ -112,7 +112,7 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "launch:browser"
       # is there a way to lint the arguments received?
-      debug("launching browser for spec %o", arg.spec)
+      debug("launching browser for '%s' spec: %o", arg.specType, arg.spec)
       # the "arg" should have objects for
       #   - browser
       #   - spec (with fields)

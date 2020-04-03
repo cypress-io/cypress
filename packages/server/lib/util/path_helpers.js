@@ -3,9 +3,21 @@ const fs = require('./fs')
 const debug = require('debug')('cypress:server:path_helpers')
 const _ = require('lodash')
 
+// When we load the spec iframe, we set its url to start with the type of the spec file
+// thus all integration tests are at "/integration/..."
+// and all component tests are at "/component/..."
+// After the spec type the url is the relative path to the spec from
+// the parent folder _of that spec type_.
+// Example:
+//    root/
+//      cypress/
+//        e2e/
+//          spec.js
+// Cypress config:
+//   integrationFolder: cypress/e2e
+// Serving spec.js at url: /integration/spec.js
 const isIntegrationTestRe = /^integration/
-// TODO THIS IS A HACK, WE MUST DETERMINE PATH TO LOAD BETTER
-const isComponentTestRe = /component/
+const isComponentTestRe = /^component/
 
 // require.resolve walks the symlinks, which can really change
 // the results. For example
@@ -45,6 +57,10 @@ const getRelativePathToSpec = (spec) => {
     case !isIntegrationTestRe.test(spec):
       // strip off the integration part
       return path.relative('integration', spec)
+
+    case !isComponentTestRe.test(spec):
+      return path.relative('component', spec)
+
     default:
       return spec
   }
@@ -90,9 +106,11 @@ module.exports = {
         // path.join(config.unitFolder, spec)
 
       case experimentalComponentTestingEnabled && !isComponentTestRe.test(spec):
-        resolved = path.join(config.parentTestsFolder, spec)
+        spec = getRelativePathToSpec(spec)
 
-        debug('resolved component path %s', resolved)
+        resolved = path.join(config.componentFolder, spec)
+
+        debug('resolved component spec path %o', { spec, componentFolder: config.componentFolder, resolved })
 
         return resolved
 
