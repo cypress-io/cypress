@@ -824,15 +824,17 @@ describe "src/cy/commands/xhr", ->
             .fail ->
               foo.bar()
 
-      it "causes errors caused by onreadystatechange callback function", (done) ->
+      ## FIXME
+      it.only "causes errors caused by onreadystatechange callback function", (done) ->
         e = new Error("onreadystatechange caused this error")
 
         cy.on "fail", (err) =>
+          debugger
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
           expect(lastLog.get("name")).to.eq("xhr")
-          expect(lastLog.get("error")).to.eq err
+          expect(err).to.eq(lastLog.get("error"))
           expect(err).to.eq(e)
           done()
 
@@ -933,6 +935,7 @@ describe "src/cy/commands/xhr", ->
 
           return null
 
+        ## FIXME
         it "provides specific #onFail", (done) ->
           cy.on "fail", (err) =>
             obj = {
@@ -950,7 +953,7 @@ describe "src/cy/commands/xhr", ->
             lastLog = @lastLog
 
             _.each obj, (value, key) =>
-              expect(lastLog.get(key)).deep.eq(value, "expected key: #{key} to eq value: #{value}")
+              expect(value).deep.eq(lastLog.get(key), "expected key: #{key} to eq value: #{value}")
 
             done()
 
@@ -960,6 +963,7 @@ describe "src/cy/commands/xhr", ->
             .window().then (win) ->
               win.$.get("/foo").done ->
                 throw new Error("specific ajax error")
+
   ## FIXME: I have no idea why this is skipped, this test is rly old
   context.skip "#server", ->
     beforeEach ->
@@ -1582,6 +1586,7 @@ describe "src/cy/commands/xhr", ->
 
         cy.route()
 
+      ## FIXME
       it "sets err on log when caused by the XHR response", (done) ->
         @route.restore()
 
@@ -1591,7 +1596,7 @@ describe "src/cy/commands/xhr", ->
           ## route + window + xhr log === 3
           expect(@logs.length).to.eq(3)
           expect(lastLog.get("name")).to.eq("xhr")
-          expect(lastLog.get("error")).to.eq err
+          expect(err).to.eq(lastLog.get("error"))
           done()
 
         cy
@@ -1599,6 +1604,7 @@ describe "src/cy/commands/xhr", ->
           .window().then (win) ->
             win.$.get("foo_bar").done ->
               foo.bar()
+
       ## FIXME: I have no idea why this is skipped, this test is rly old
       it.skip "explodes if response fixture signature errors", (done) ->
         @trigger = cy.stub(@Cypress, "trigger").withArgs("fixture").callsArgWithAsync(2, {__error: "some error"})

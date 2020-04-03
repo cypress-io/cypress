@@ -679,7 +679,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     const invocationStack = withInvocationStack && withInvocationStack.get('invocationStack')
 
     if (invocationStack && (
-      !$stackUtils.hasStack(err) || $errUtils.isCypressErr(err)
+      !$stackUtils.hasStack(err)
+      || $errUtils.isCypressErr(err)
+      || err.isDefaultAssertionErr
     )) {
       return invocationStack
     }

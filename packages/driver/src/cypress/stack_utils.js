@@ -161,7 +161,7 @@ const getSourceStack = (stack, projectRoot) => {
   }
 }
 
-const normalizeStack = (err) => {
+const normalizedStack = (err) => {
   // Firefox errors do not include the name/message in the stack, whereas
   // Chromium-based errors do, so we normalize them so that the stack
   // always includes the name/message
@@ -172,16 +172,16 @@ const normalizeStack = (err) => {
   const stackIncludesMsg = firstStackLine.includes(firstErrLine)
 
   if (!stackIncludesMsg) {
-    err.stack = `${errString}\n${errStack}`
+    return `${errString}\n${errStack}`
   }
 
-  return err
+  return errStack
 }
 
-const replaceStack = (err, newStack) => {
+const replacedStack = (err, newStack) => {
   // if err already lacks a stack or we've removed the stack
   // for some reason, keep it stackless
-  if (!err.stack) return err
+  if (!err.stack) return err.stack
 
   const errString = err.toString()
 
@@ -190,9 +190,7 @@ const replaceStack = (err, newStack) => {
     return line.indexOf('__getSpecFrameStack') > -1
   })
 
-  err.stack = [errString].concat(relevantStackLines).join('\n')
-
-  return err
+  return [errString].concat(relevantStackLines).join('\n')
 }
 
 const hasStack = (err) => {
@@ -207,6 +205,6 @@ module.exports = {
   getCodeFrame,
   getSourceStack,
   hasStack,
-  normalizeStack,
-  replaceStack,
+  normalizedStack,
+  replacedStack,
 }

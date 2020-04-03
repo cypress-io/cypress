@@ -206,6 +206,8 @@ const create = function (state, queue, retryFn) {
         err = e2
       }
 
+      err.isDefaultAssertionErr = isDefaultAssertionErr
+
       options.error = err
 
       if (err.retry === false) {

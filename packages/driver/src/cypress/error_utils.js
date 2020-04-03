@@ -43,7 +43,7 @@ const replaceMsgInStack = (err, newMsg) => {
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
-  err = $stackUtils.normalizeStack(err)
+  err.stack = $stackUtils.normalizedStack(err)
 
   const newMsg = cb(err.message, newErrMsg)
   const newStack = replaceMsgInStack(err, newMsg)
@@ -227,16 +227,21 @@ const createUncaughtException = (type, err) => {
     errMsg: err.message,
   })
 
-  uncaughtErr = mergeErrProps(uncaughtErr, {
-    name: `Uncaught ${err.name}`,
-    // $stackUtils.replaceStack won't replace stack if one isn't
-    // already present on error
-    stack: 'stack',
-  })
+  // err: reference, stack
 
-  uncaughtErr = $stackUtils.replaceStack(uncaughtErr, err.stack)
+  err = modifyErrMsg()
 
-  return $stackUtils.normalizeStack(uncaughtErr)
+  // uncaughtErr = mergeErrProps(uncaughtErr, {
+  //   name: `Uncaught ${err.name}`,
+  //   // $stackUtils.replaceStack won't replace stack if one isn't
+  //   // already present on error
+  //   stack: 'stack',
+  // })
+
+  // uncaughtErr.stack = $stackUtils.replacedStack(uncaughtErr, err.stack)
+  // uncaughtErr.stack = $stackUtils.normalizedStack(uncaughtErr)
+
+  return uncaughtErr
 }
 
 const enhanceStack = ({ err, invocationStack, projectRoot }) => {
@@ -244,6 +249,7 @@ const enhanceStack = ({ err, invocationStack, projectRoot }) => {
   // but the stack points to cypress internals. here we replace the internal
   // cypress stack with the invocation stack, which points to the user's code
   if (invocationStack) {
+    err.originalStack = err.stack
     err = $stackUtils.replaceStack(err, invocationStack)
   }
 
