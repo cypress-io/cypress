@@ -199,7 +199,7 @@ events = {
   "test":      mergeRunnable("test")
   ## we don't need to use this event, but we'll pass it along to reporters
   ## retry event only fired in mocha 6+
-  # "retry":     true
+  "retry":     true
   "test end":  mergeRunnable("test end")
   "hook":      safelyMergeRunnable
   "hook end":  safelyMergeRunnable

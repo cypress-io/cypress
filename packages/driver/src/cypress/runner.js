@@ -21,7 +21,7 @@ const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
 const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file final currentRetry retries'.split(' ')
 // const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
 
-// const debug = require('debug')('cypress:driver:runner')
+const debug = require('debug')('cypress:driver:runner')
 // ## initial payload
 // {
 //   suites: [
@@ -69,7 +69,7 @@ const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFrom
 // }
 
 const fire = function (event, runnable, Cypress) {
-  // debug('fire: %o', { event })
+  debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
   }
@@ -377,7 +377,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         if (test.final !== false) {
           test.final = true
           if (test.state === 'passed') {
-            Cypress.action('runner:pass', wrap(test))
+            // Cypress.action('runner:pass', wrap(test))
           }
 
           Cypress.action('runner:test:end', wrap(test))
@@ -495,9 +495,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests = {}
-
-  const obj = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId)
-  // const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId)
+  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -506,11 +504,19 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   }
 
   if (setTests) {
+    let i = 0
+
+    const testsArr = _.map(tests, (test) => {
+      test.order = i += 1
+
+      return test
+    })
+
     // same pattern here
-    setTests(_.values(tests))
+    setTests(testsArr)
   }
 
-  return obj
+  return normalizedSuite
 }
 
 const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTestId) => {
@@ -528,18 +534,6 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
 
     // if we have a runnable in the initial state
     // then merge in existing properties into the runnable
-    const formatTest = (test) => {
-      if (test) {
-        _.each(RUNNABLE_LOGS, (type) => {
-          return _.each(test[type], onLogsById)
-        })
-      }
-
-      // reduce this runnable down to its props
-      // and collections
-      return wrapAll(test)
-    }
-
     const i = initialTests[runnable.id]
 
     let prevAttempts
@@ -548,7 +542,17 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
       prevAttempts = []
 
       if (i.prevAttempts) {
-        prevAttempts = _.map(i.prevAttempts, formatTest)
+        prevAttempts = _.map(i.prevAttempts, (test) => {
+          if (test) {
+            _.each(RUNNABLE_LOGS, (type) => {
+              return _.each(test[type], onLogsById)
+            })
+          }
+
+          // reduce this runnable down to its props
+          // and collections
+          return wrapAll(test)
+        })
       }
 
       _.each(RUNNABLE_LOGS, (type) => {
@@ -624,9 +628,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
         return (suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)
       })
 
-      normalizedSuite.suites = _.map(suite.suites, (childSuite) => {
-        return normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getTestId)
-      })
+      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getTestId))
     }
 
     return suite.tests.length || suite.suites.length
@@ -777,16 +779,15 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
    * Mocha retry event is only fired in Mocha version 6+
    * https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
    */
-  // _runner.on('retry', (test, err) => {
+  _runner.on('retry', (test, err) => {
+    test.err = $errUtils.wrapErr(err)
 
-  //   test.err = $errUtils.wrapErr(err)
+    return Cypress.action('runner:retry', wrap(test), test.err)
+  })
 
-  //   return Cypress.action('runner:retry', wrap(test), test.err)
-  // })
-
-  // _runner.on('pass', (test) => {
-  //   return Cypress.action('runner:pass', wrap(test))
-  // })
+  _runner.on('pass', (test) => {
+    return Cypress.action('runner:pass', wrap(test))
+  })
 
   // if a test is pending mocha will only
   // emit the pending event instead of the test
