@@ -23250,7 +23250,7 @@ toposort@^1.0.0:
   resolved "https://registry.yarnpkg.com/toposort/-/toposort-1.0.7.tgz#2e68442d9f64ec720b8cc89e6443ac6caa950029"
   integrity sha1-LmhELZ9k7HILjMieZEOsbKqVACk=
 
-tough-cookie@>=0.12.0, tough-cookie@salesforce/tough-cookie#2524513d49b7fab37639dfb7c6b87994c2bd7791:
+tough-cookie@4.0.0, tough-cookie@>=0.12.0:
   version "4.0.0"
   resolved "https://codeload.github.com/salesforce/tough-cookie/tar.gz/2524513d49b7fab37639dfb7c6b87994c2bd7791"
   dependencies:
