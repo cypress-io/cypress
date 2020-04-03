@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Network Fixture</title>
+</head>
+<body>
+<p>
+    We are currently <span id="network-status"></span>.
+</p>
+<script>
+window.addEventListener('offline', function () { document.getElementById('network-status').innerText = 'offline' })
+window.addEventListener('online', function () {document.getElementById('network-status').innerText = 'online' })
+document.getElementById('network-status').innerText = window.navigator.onLine ? 'online' : 'offline'
+</script>
+</body>
+</html>
