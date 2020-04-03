@@ -1,45 +1,14 @@
-/* eslint prefer-rest-params: "off", no-console: "off", arrow-body-style: "off"*/
-
 const { _ } = Cypress
 const helpers = require('../support/helpers')
-
-const snapshotPlugin = require('../plugins/snapshot/command')
 
 const snapshots = require('../support/eventSnapshots').EventSnapshots
 
 const sinon = require('sinon')
 
-snapshotPlugin.registerInCypress()
-const { stringifyShort } = snapshotPlugin
-/**
- * @type {sinon.SinonMatch}
- */
-const match = Cypress.sinon.match
-
-// const { defer } = helpers
-
 const backupCy = window.cy
 const backupCypress = window.Cypress
 
 backupCy.__original__ = true
-
-/**
-   * @type {sinon.SinonStub}
-   */
-let allStubs
-/**
-   * @type {sinon.SinonStub}
-   */
-let mochaStubs
-/**
-   * @type {sinon.SinonStub}
-   */
-let setRunnablesStub
-
-const snapshotEvents = (name) => {
-  expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, name.setRunnables)
-  expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, name.mocha)
-}
 
 const simpleSingleTest = {
   suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
@@ -49,202 +18,7 @@ const threeTestsWithHooks = {
   suites: { 'suite 1': { hooks: ['before', 'beforeEach', 'afterEach', 'after'], tests: ['test 1', 'test 2', 'test 3'] } },
 }
 
-const enableStubSnapshots = false
-// const enableStubSnapshots = true
-
-const eventCleanseMap = {
-  snapshots: stringifyShort,
-  parent: stringifyShort,
-  tests: stringifyShort,
-  commands: stringifyShort,
-  err: stringifyShort,
-  body: '[body]',
-  wallClockStartedAt: match.date,
-  lifecycle: match.number,
-  fnDuration: match.number,
-  duration: match.number,
-  afterFnDuration: match.number,
-  wallClockDuration: match.number,
-  stack: match.string,
-  message: '[error message]',
-}
-
-const mochaEventCleanseMap = {
-  ...eventCleanseMap,
-  start: match.date,
-  end: match.date,
-}
-
-const setRunnablesCleanseMap = { ...eventCleanseMap, tests: _.identity }
-
-let autCypress
-
-let onBeforeRun
-
-const createCypress = (mochaTests, opts = {}) => {
-  _.defaults(opts, {
-    state: {},
-    config: {},
-  })
-
-  return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
-  .then({ timeout: 60000 }, (win) => {
-    win.channel.destroy()
-
-    allStubs = cy.stub().snapshot(enableStubSnapshots)
-    mochaStubs = cy.stub().snapshot(enableStubSnapshots)
-    setRunnablesStub = cy.stub().snapshot(enableStubSnapshots)
-
-    return new Promise((resolve) => {
-      const runCypress = () => {
-        autCypress.run.restore()
-
-        const emit = autCypress.emit
-        const emitMap = autCypress.emitMap
-        const emitThen = autCypress.emitThen
-
-        cy.stub(autCypress, 'automation').snapshot(enableStubSnapshots)
-        .callThrough()
-        .withArgs('clear:cookies')
-        .resolves({
-          foo: 'bar',
-        })
-        .withArgs('take:screenshot')
-        .resolves({
-          path: '/path/to/screenshot',
-          size: 12,
-          dimensions: { width: 20, height: 20 },
-          multipart: false,
-          pixelRatio: 1,
-          takenAt: new Date().toISOString(),
-          name: 'name',
-          blackout: ['.foo'],
-          duration: 100,
-        })
-
-        cy.stub(autCypress, 'emit').snapshot(enableStubSnapshots).log(false)
-        .callsFake(function () {
-          const noLog = _.includes([
-            'navigation:changed',
-            'stability:changed',
-            'window:load',
-            'url:changed',
-            'log:added',
-            'page:loading',
-            'window:unload',
-            'newListener',
-          ], arguments[0])
-          const noCall = _.includes(['window:before:unload', 'mocha'], arguments[0])
-          const isMocha = _.includes(['mocha'], arguments[0])
-
-          if (isMocha) {
-            mochaStubs.apply(this, arguments)
-          }
-
-          noLog || allStubs.apply(this, ['emit'].concat([].slice.call(arguments)))
-
-          return noCall || emit.apply(this, arguments)
-        })
-
-        cy.stub(autCypress, 'emitMap').snapshot(enableStubSnapshots).log(false)
-        .callsFake(function () {
-          allStubs.apply(this, ['emitMap'].concat([].slice.call(arguments)))
-
-          return emitMap.apply(this, arguments)
-        })
-
-        cy.stub(autCypress, 'emitThen').snapshot(enableStubSnapshots).log(false)
-        .callsFake(function () {
-          allStubs.apply(this, ['emitThen'].concat([].slice.call(arguments)))
-
-          return emitThen.apply(this, arguments)
-        })
-
-        spyOn(autCypress.mocha.getRunner(), 'fail', (...args) => {
-          Cypress.log({
-            name: 'Runner Fail',
-            message: `${args[1]}`,
-            state: 'failed',
-            consoleProps: () => {
-              return {
-                Error: args[1],
-              }
-            },
-          })
-        })
-
-        cy.spy(cy.state('window').console, 'log').as('console_log')
-        cy.spy(cy.state('window').console, 'error').as('console_error')
-
-        onBeforeRun && onBeforeRun()
-        autCypress.run(resolve)
-      }
-
-      cy.spy(win.reporterBus, 'emit').snapshot(enableStubSnapshots).as('reporterBus')
-      cy.spy(win.localBus, 'emit').snapshot(enableStubSnapshots).as('localBus')
-
-      cy.stub(win.channel, 'emit').snapshot(enableStubSnapshots)
-      .withArgs('watch:test:file')
-      .callsFake(() => {
-        autCypress = win.Cypress
-
-        cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).callsFake((specWindow) => {
-          autCypress.onSpecWindow.restore()
-
-          autCypress.onSpecWindow(specWindow)
-
-          helpers.generateMochaTestsForWin(specWindow, mochaTests)
-
-          specWindow.before = () => {}
-          specWindow.beforeEach = () => {}
-          specWindow.afterEach = () => {}
-          specWindow.after = () => {}
-          specWindow.describe = () => {}
-        })
-
-        cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).callsFake(runCypress)
-      })
-      .withArgs('is:automation:client:connected')
-      .yieldsAsync(true)
-
-      .withArgs('get:existing:run:state')
-      .callsFake((evt, cb) => {
-        cb(opts.state)
-      })
-
-      .withArgs('backend:request', 'reset:server:state')
-      .yieldsAsync({})
-
-      .withArgs('backend:request', 'resolve:url')
-      .yieldsAsync({ response: {
-        isOkStatusCode: true,
-        isHtml: true,
-        url: 'http://localhost:3500/fixtures/generic.html',
-      } })
-
-      .withArgs('set:runnables')
-      .callsFake((...args) => {
-        setRunnablesStub(...args)
-        _.last(args)()
-      })
-
-      // .withArgs('preserve:run:state')
-      // .callsFake()
-
-      .withArgs('automation:request')
-      .yieldsAsync({ response: {} })
-
-      const c = _.extend({}, Cypress.config(), { isTextTerminal: true }, opts.config)
-
-      c.state = {}
-      // c.state = opts.state
-
-      cy.stub(win.channel, 'on').snapshot(enableStubSnapshots)
-
-      win.Runner.start(win.document.getElementById('app'), window.btoa(JSON.stringify(c)))
-    })
-  })
-}
+const { visit, snapshotEvents, onInitialized, getAutCypress } = helpers.createCypress()
 
 describe('src/cypress/runner', () => {
   describe('isolated test runner', () => {
@@ -255,12 +29,12 @@ describe('src/cypress/runner', () => {
 
     describe('test events', function () {
       it('simple 1 test', () => {
-        createCypress(simpleSingleTest)
+        visit(simpleSingleTest)
         .then(shouldHaveTestResults(1, 0))
       })
 
       it('simple 3 tests', function () {
-        createCypress({
+        visit({
           suites: {
             'suite 1': { tests: ['test 1', 'test 2', 'test 3'] },
           },
@@ -269,7 +43,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('simple fail', function () {
-        createCypress({
+        visit({
           suites: {
             'suite 1': {
               tests: [
@@ -289,7 +63,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('pass fail pass fail', () => {
-        createCypress({
+        visit({
           suites: {
             'suite 1': {
               tests: [
@@ -315,7 +89,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('fail pass', function () {
-        createCypress({
+        visit({
           suites: {
             'suite 1': {
               tests: [
@@ -332,7 +106,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('no tests', function () {
-        createCypress({})
+        visit({})
         .then(shouldHaveTestResults(0, 0))
 
         cy.contains('No tests found in your file').should('be.visible')
@@ -340,7 +114,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('ends test before nested suite', function () {
-        createCypress({
+        visit({
           suites: {
             'suite 1': { tests: ['test 1', 'test 2'],
               suites: {
@@ -354,21 +128,17 @@ describe('src/cypress/runner', () => {
       })
 
       it('simple fail, catch cy.on(fail)', () => {
-        createCypress({
+        visit({
           suites: {
             'suite 1': {
               tests: [
                 {
                   name: 'test 1',
                   fn: () => {
-                    console.log('test ran')
                     cy.on('fail', () => {
-                      console.log('on:fail')
-
                       return false
                     })
 
-                    console.log('added handler')
                     expect(false).ok
                     throw new Error('error in test')
                   },
@@ -383,7 +153,7 @@ describe('src/cypress/runner', () => {
 
       describe('hook failures', () => {
         it('fail in [before]', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: [
@@ -406,7 +176,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('fail in [beforeEach]', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: [
@@ -426,7 +196,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('fail in [afterEach]', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: [
@@ -446,7 +216,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('fail in [after]', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: [
@@ -461,6 +231,7 @@ describe('src/cypress/runner', () => {
           })
           .then(shouldHaveTestResults(1, 1))
           .then(() => {
+            expect('foo').contain('f')
             cy.get('.runnable-err:visible').invoke('text').should('contain', 'Because this error occurred during a after all hook')
           })
           .then(() => {
@@ -471,7 +242,7 @@ describe('src/cypress/runner', () => {
 
       describe('test failures w/ hooks', () => {
         it('fail with [before]', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: ['before'],
@@ -489,7 +260,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('fail with [after]', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: [{ type: 'after' }],
@@ -501,7 +272,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('fail with all hooks', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: ['before', 'beforeEach', 'afterEach', 'after'],
@@ -515,7 +286,7 @@ describe('src/cypress/runner', () => {
 
       describe('mocha grep', () => {
         it('fail with [only]', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: ['before', 'beforeEach', 'afterEach', 'after'],
@@ -534,7 +305,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('pass with [only]', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 hooks: ['before', 'beforeEach', 'afterEach', 'after'],
@@ -557,7 +328,7 @@ describe('src/cypress/runner', () => {
     describe('save/reload state', () => {
       describe('serialize / load from state', () => {
         const serializeState = () => {
-          return getRunState(autCypress)
+          return getRunState(getAutCypress())
         }
 
         const loadStateFromSnapshot = (cypressConfig, name) => {
@@ -599,7 +370,7 @@ describe('src/cypress/runner', () => {
           ]
 
           it('serialize state', () => {
-            createCypress(...cypressConfig)
+            visit(...cypressConfig)
             .then(shouldHaveTestResults(4, 0))
             .then(() => {
               expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - hooks')
@@ -609,7 +380,7 @@ describe('src/cypress/runner', () => {
           it('load state', () => {
             loadStateFromSnapshot(cypressConfig, 'serialize state - hooks')
 
-            createCypress(...cypressConfig)
+            visit(...cypressConfig)
             .then(shouldHaveTestResults(4, 0))
             .then(() => {
               expect(stub1).to.calledOnce
@@ -648,12 +419,12 @@ describe('src/cypress/runner', () => {
           },
         }
 
-        createCypress(mochaTests)
+        visit(mochaTests)
         .then(shouldHaveTestResults(1, 3))
         .then(() => {
           cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
           cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError: beforeEach').scrollIntoView().should('be.visible').then((v) => console.log(v.text()))
+          cy.contains('.runnable-err', 'AssertionError: beforeEach').scrollIntoView().should('be.visible')
 
           cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
 
@@ -672,7 +443,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('async timeout spec', () => {
-        createCypress({
+        visit({
           suites: {
             'async': {
               tests: [
@@ -694,7 +465,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('mocha suite:end fire before test:pass event', () => {
-        createCypress({
+        visit({
           suites: {
             'suite 1': {
               suites: {
@@ -704,7 +475,7 @@ describe('src/cypress/runner', () => {
               },
             },
           },
-        }).then(() => {
+        }).then(({ mochaStubs }) => {
           const getOrderFired = (eventProps) => {
             const event = _.find(mochaStubs.args, eventProps)
 
@@ -722,15 +493,15 @@ describe('src/cypress/runner', () => {
         let onAfterScreenshotListener
 
         beforeEach(() => {
-          onBeforeRun = () => {
+          onInitialized((autCypress) => {
             autCypress.Screenshot.onAfterScreenshot = cy.stub()
             onAfterScreenshotListener = cy.stub()
             autCypress.on('after:screenshot', onAfterScreenshotListener)
-          }
+          })
         })
 
         it('screenshot after failed test', () => {
-          createCypress({
+          visit({
             suites: {
               'suite 1': {
                 tests: [
@@ -745,7 +516,7 @@ describe('src/cypress/runner', () => {
               },
             },
           })
-          .then(() => {
+          .then(({ autCypress }) => {
           // sent to server
             expect(autCypress.automation.withArgs('take:screenshot').args).to.matchSnapshot(cleanseRunStateMap)
 
@@ -765,14 +536,14 @@ describe('src/cypress/runner', () => {
 
     describe('mocha events', () => {
       it('simple single test', () => {
-        createCypress(simpleSingleTest)
+        visit(simpleSingleTest)
         .then(() => {
           snapshotEvents(snapshots.SIMPLE_SINGLE_TEST)
         })
       })
 
       it('simple three tests', () => {
-        createCypress(threeTestsWithHooks)
+        visit(threeTestsWithHooks)
         .then(() => {
           snapshotEvents(snapshots.THREE_TESTS_WITH_HOOKS)
         })
@@ -811,24 +582,12 @@ const cleanseRunStateMap = {
   'err.stack': '[err stack]',
 }
 
-const shouldHaveTestResults = (passed, failed) => {
-  return (exitCode) => {
-    expect(exitCode, 'resolve with failure count').eq(exitCode)
-    passed = passed || '--'
-    failed = failed || '--'
-    cy.get('header .passed .num').should('have.text', `${passed}`)
-    cy.get('header .failed .num').should('have.text', `${failed}`)
-  }
-}
-
-const spyOn = (obj, prop, fn) => {
-  const _fn = obj[prop]
-
-  obj[prop] = function () {
-    fn.apply(this, arguments)
-
-    const ret = _fn.apply(this, arguments)
-
-    return ret
+const shouldHaveTestResults = (expPassed, expFailed) => {
+  return ({ failed }) => {
+    expect(failed, 'resolve with failure count').eq(failed)
+    expPassed = expPassed || '--'
+    expFailed = expFailed || '--'
+    cy.get('header .passed .num').should('have.text', `${expPassed}`)
+    cy.get('header .failed .num').should('have.text', `${expFailed}`)
   }
 }

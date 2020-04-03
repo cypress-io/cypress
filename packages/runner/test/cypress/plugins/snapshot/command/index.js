@@ -87,7 +87,7 @@ const registerInCypress = () => {
             }, { log: false })
           }
 
-          throwErr(e, `**snapshot failed match**: ${exactSpecName}`, exp, ctx)
+          throwErr(e, `**snapshot failed to match**: ${exactSpecName}`, exp, ctx)
         }
       })
     })
