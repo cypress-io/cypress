@@ -12,7 +12,10 @@ const {
 
 const analyzeCommits = wrapStep(
   'analyzeCommits',
-  compose(logPluginVersion('analyzeCommits'), withOnlyPackageCommits)
+  compose(logPluginVersion('analyzeCommits'), withOnlyPackageCommits),
+  {
+    wrapperName: 'semantic-release-monorepo',
+  }
 );
 
 const generateNotes = wrapStep(
@@ -21,7 +24,10 @@ const generateNotes = wrapStep(
     logPluginVersion('generateNotes'),
     withOnlyPackageCommits,
     withOptionsTransforms([mapNextReleaseVersion(versionToGitTag)])
-  )
+  ),
+  {
+    wrapperName: 'semantic-release-monorepo',
+  }
 );
 
 module.exports = {
