@@ -329,6 +329,10 @@ Cypress.Commands.add('failServerOnResponseException', () => {
   .wait(10000)
 })
 
+Cypress.Commands.add('failReadFileExistence', () => {
+  cy.readFile('does-not-exist', { timeout: 0 })
+})
+
 Cypress.Commands.add('failEventHandlerAssertion', () => {
   cy.on('window:load', () => {
     expect(true).to.be.false

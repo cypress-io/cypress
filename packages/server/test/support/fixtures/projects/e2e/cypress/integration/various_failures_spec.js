@@ -715,6 +715,19 @@ context('cy.server', () => {
   })
 })
 
+context('cy.readFile', function () {
+  describe('existence failure', function () {
+    fail(this, () => {
+      cy.readFile('does-not-exist', { timeout: 0 })
+    })
+
+    verify(this, {
+      column: 10,
+      message: 'failed because the file does not exist',
+    })
+  })
+})
+
 context('event handlers', () => {
   describe('event assertion failure', function () {
     fail(this, () => {

@@ -583,6 +583,20 @@ context('cy.server', () => {
   })
 })
 
+context('cy.readFile', function () {
+  describe('existence failure', function () {
+    fail(this, () => {
+      cy.failReadFileExistence()
+    })
+
+    verify(this, {
+      column: 6,
+      codeFrameText: 'failReadFileExistence',
+      message: 'failed because the file does not exist',
+    })
+  })
+})
+
 context('event handlers', () => {
   describe('event assertion failure', function () {
     fail(this, () => {
