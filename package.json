@@ -103,7 +103,7 @@
     "@types/mocha": "5.2.7",
     "@types/node": "12.12.21",
     "@types/ramda": "0.25.47",
-    "@types/react": "16.9.25",
+    "@types/react": "^16.9.27",
     "@types/react-dom": "16.9.4",
     "@types/request-promise": "4.1.45",
     "@types/sinon-chai": "3.2.3",
