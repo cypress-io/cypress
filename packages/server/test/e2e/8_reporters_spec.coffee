@@ -15,7 +15,7 @@ mochaAwesomes = [
 ]
 
 describe "e2e reporters", ->
-  e2e.setup({npmInstall: true})
+  e2e.setup()
 
   it "reports error if cannot load reporter", ->
     e2e.exec(@, {
@@ -74,7 +74,8 @@ describe "e2e reporters", ->
         e2e.exec(@, {
           spec: "simple_passing_spec.coffee"
           snapshot: true
-          reporter: ma
+          ## cypress supports passing module name, relative path, or absolute path
+          reporter: require.resolve(ma)
         })
         .then ->
           if ma is "mochawesome-1.5.2"
@@ -93,7 +94,7 @@ describe "e2e reporters", ->
           spec: "simple_failing_hook_spec.coffee"
           snapshot: true
           expectedExitCode: 3
-          reporter: ma
+          reporter: require.resolve(ma)
         })
         .then ->
           if ma is "mochawesome-1.5.2"
