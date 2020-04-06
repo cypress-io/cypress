@@ -1,35 +1,23 @@
 version: 2.1
-
 orbs:
-  node: circleci/node@1.1
-  cypress: cypress-io/cypress@1.19.1
-
-jobs:
+  cypress: cypress-io/cypress@1
+workflows:
   build:
-    executor:
-      name: node/default
-      tag: '12'
-
-    steps:
-      - checkout
-      - node/with-cache:
-          steps:
+    jobs:
+      - cypress/run:
+          executor: cypress/base-12-14-0
+          yarn: true
+          command: npm test
+          post-steps:
             - run:
-                name: Yarn install
-                command: yarn install --frozen-lockfile
-      - run:
-          name: Lint code
-          command: npm run lint
-      - run:
-          name: Cypress Verfiy
-          command: $(npm bin)/cypress verify
-      - run:
-          name: Run tests
-          command: npm test
-      - run: yarn add -D webpack@latest webpack-cli@latest
-      - run:
-          name: Run tests w/ webpack@latest
-          command: npm test
-      - run:
-          name: Semantic release
-          command: npm run semantic-release || true
+                name: Lint code 🧹
+                command: npm run lint
+            - run:
+                name: Install latest webpack 📦
+                command: yarn add -D webpack@latest webpack-cli@latest
+            - run:
+                name: Run tests w/ webpack@latest 🧪
+                command: npm test
+            - run:
+                name: Semantic release 🚀
+                command: npm run semantic-release
