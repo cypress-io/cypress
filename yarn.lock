@@ -13132,10 +13132,18 @@ http-proxy-agent@^2.1.0:
     agent-base "4"
     debug "3.1.0"
 
-http-proxy@1.18.0, http-proxy@^1.17.0:
+http-proxy@^1.17.0:
   version "1.18.0"
   resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.18.0.tgz#dbe55f63e75a347db7f3d99974f2692a314a6a3a"
   integrity sha512-84I2iJM/n1d4Hdgc6y2+qY5mDaz2PUVjlg9znE9byl+q0uC3DeByqBGReQu5tpLK0TAqTIXScRUV+dg7+bUPpQ==
+  dependencies:
+    eventemitter3 "^4.0.0"
+    follow-redirects "^1.0.0"
+    requires-port "^1.0.0"
+
+http-proxy@cypress-io/node-http-proxy#9322b4b69b34f13a6f3874e660a35df3305179c6:
+  version "1.18.0"
+  resolved "https://codeload.github.com/cypress-io/node-http-proxy/tar.gz/9322b4b69b34f13a6f3874e660a35df3305179c6"
   dependencies:
     eventemitter3 "^4.0.0"
     follow-redirects "^1.0.0"
