@@ -27,6 +27,8 @@ packages/server/lib/scaffold/support/index.js
 packages/server/lib/scaffold/support/commands.js
 packages/server/test/support/fixtures/projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
 
+**/.projects
+**/*.d.ts
 **/package-lock.json
 **/tsconfig.json
 **/.vscode
