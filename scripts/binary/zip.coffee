@@ -89,13 +89,13 @@ linuxZipAction = (parentFolder, dest, relativeSource) ->
   .catch onError
 
 # src is built folder with packed Cypress application
-# like /root/app/build/linux-unpacked
+# like /root/app/build/linux-unpacked or build/win-unpacked
 # and we want to always have /root/app/build/Cypress
 renameFolder = (src) ->
   parentFolder = path.dirname(src)
   folderName = path.basename(src)
   if folderName is "Cypress"
-    console.log("nothing to rename, folder ends with Cypress")
+    console.log('nothing to rename, folder "%s" ends with Cypress', src)
     return Promise.resolve(src)
 
   renamed = path.join(parentFolder, "Cypress")
@@ -121,7 +121,7 @@ linuxZip = (src, dest) ->
     linuxZipAction(parentFolder, dest, relativeSource)
 
 # resolves with zipped filename
-windowsZip = (src, dest) ->
+windowsZipAction = (src, dest) ->
   # use 7Zip to zip
   # http://www.7-zip.org/
   # zips entire source directory including top level folder name
@@ -147,6 +147,11 @@ windowsZip = (src, dest) ->
   .then R.always(dest)
   .then R.tap(checkZipSize)
   .catch onError
+
+windowsZip = (src, dest) ->
+  renameFolder(src)
+  .then (renamedSource) ->
+    windowsZipAction(renamedSource, dest)
 
 zippers = {
   linux: linuxZip

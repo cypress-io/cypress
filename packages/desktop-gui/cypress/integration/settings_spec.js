@@ -687,9 +687,7 @@ describe('Settings', () => {
         // do not overwrite the shared object reference -
         // because it is used by the app's code.
         this.win.experimental.names.experimentalCoolFeature = 'Cool Feature'
-        this.win.experimental.summaries.experimentalCoolFeature = `
-          Enables super cool feature from Cypress where you can see the cool feature
-        `
+        this.win.experimental.summaries.experimentalCoolFeature = 'Enables super cool feature from Cypress where you can see the cool feature'
       })
 
       const hasLearnMoreLink = () => {
@@ -720,7 +718,7 @@ describe('Settings', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
           cy.get('.experiment-status-sign')
           .should('have.class', 'enabled')
-          .and('have.text', 'ON')
+          .and('have.text', 'enabled')
 
           cy.percySnapshot()
         })
@@ -745,8 +743,8 @@ describe('Settings', () => {
         it('displays experiment', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
           cy.get('.experiment-status-sign')
-          .should('not.have.class', 'disabled')
-          .and('have.text', 'OFF')
+          .should('have.class', 'disabled')
+          .and('have.text', 'disabled')
 
           cy.percySnapshot()
         })
