@@ -334,7 +334,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
   this.incomingResStream.pipe(concatStream((body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
     const decodedBody = iconv.decode(body, nodeCharset)
-    const injectedBody = rewriter.html(decodedBody, this.getRemoteState().domainName, this.res.wantsInjection, this.res.wantsSecurityRemoved, isHtml(this.incomingRes))
+    const injectedBody = rewriter.html(decodedBody, this.getRemoteState().domainName, this.res.wantsInjection, this.res.wantsSecurityRemoved, isHtml(this.incomingRes), this.config.experimentalSourceRewriting)
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
     const pt = new PassThrough
@@ -355,7 +355,11 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   debug('removing JS framebusting code')
 
   this.incomingResStream.setEncoding('utf8')
-  this.incomingResStream = this.incomingResStream.pipe(rewriter.security({ isHtml: isHtml(this.incomingRes) })).on('error', this.onError)
+  this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
+    isHtml: isHtml(this.incomingRes),
+    useSourceRewriting: this.config.experimentalSourceRewriting,
+  })).on('error', this.onError)
+
   this.next()
 }
 

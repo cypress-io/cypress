@@ -51,6 +51,7 @@ interface StringValues {
   ```
 */
 const _summaries: StringValues = {
+  experimentalSourceRewriting: 'Enables improved JS/HTML rewriting. This may fix issues caused by the naive JS/HTML replacement algorithm.',
   experimentalGetCookiesSameSite: 'Adds `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.',
 }
 
@@ -65,6 +66,7 @@ const _summaries: StringValues = {
   ```
 */
 const _names: StringValues = {
+  experimentalSourceRewriting: 'Improved source rewriting',
   experimentalGetCookiesSameSite: 'Set `sameSite` property when retrieving cookies',
 }
 

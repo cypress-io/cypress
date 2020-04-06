@@ -94,7 +94,7 @@ systemConfigKeys = toWords """
 # Know experimental flags / values
 # each should start with "experimental" and be camel cased
 # example: experimentalComponentTesting
-experimentalConfigKeys = ['experimentalGetCookiesSameSite']
+experimentalConfigKeys = ['experimentalGetCookiesSameSite', 'experimentalSourceRewriting']
 
 CONFIG_DEFAULTS = {
   port:                          null
@@ -155,6 +155,7 @@ CONFIG_DEFAULTS = {
   # example for component testing with subkeys
   # experimentalComponentTesting: { componentFolder: 'cypress/component' }
   experimentalGetCookiesSameSite: false
+  experimentalSourceRewriting: false
 }
 
 validationRules = {
@@ -196,6 +197,7 @@ validationRules = {
   firefoxGcInterval: v.isValidFirefoxGcInterval
   # experimental flag validation below
   experimentalGetCookiesSameSite: v.isBoolean
+  experimentalSourceRewriting: v.isBoolean
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->

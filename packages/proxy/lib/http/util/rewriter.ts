@@ -1,12 +1,17 @@
 import * as inject from './inject'
-import { strip, stripStream } from './security'
+import * as jsRewriter from './js-rewriter'
+import * as regexRewriter from './regex-rewriter'
 
 const doctypeRe = /(<\!doctype.*?>)/i
 const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
 
-export function html (html: string, domainName: string, wantsInjection, wantsSecurityRemoved, isHtml) {
+function getRewriter (useSourceRewriting: boolean) {
+  return useSourceRewriting ? jsRewriter : regexRewriter
+}
+
+export function html (html: string, domainName: string, wantsInjection, wantsSecurityRemoved, isHtml, useSourceRewriting) {
   const replace = (re, str) => {
     return html.replace(re, str)
   }
@@ -25,7 +30,7 @@ export function html (html: string, domainName: string, wantsInjection, wantsSec
   // strip clickjacking and framebusting
   // from the HTML if we've been told to
   if (wantsSecurityRemoved) {
-    html = strip(html, { isHtml })
+    html = getRewriter(useSourceRewriting).strip(html, { isHtml })
   }
 
   switch (false) {
@@ -47,4 +52,6 @@ export function html (html: string, domainName: string, wantsInjection, wantsSec
   }
 }
 
-export const security = stripStream
+export function security (opts) {
+  return getRewriter(opts.useSourceRewriting).stripStream(opts)
+}

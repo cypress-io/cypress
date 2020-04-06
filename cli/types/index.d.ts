@@ -2464,6 +2464,12 @@ declare namespace Cypress {
      * @default false
      */
     experimentalGetCookiesSameSite: boolean
+    /**
+     * Enables improved JS/HTML rewriting. This may fix issues caused by the naive JS/HTML replacement
+     * algorithm.
+     * @default false
+     */
+    experimentalSourceRewriting: boolean
   }
 
   interface PluginConfigOptions extends ConfigOptions {

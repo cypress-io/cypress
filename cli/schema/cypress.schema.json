@@ -215,6 +215,11 @@
       "type": "boolean",
       "default": false,
       "description": "If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0."
+    },
+    "experimentalSourceRewriting": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables improved JS/HTML rewriting. This may fix issues caused by the naive JS/HTML replacement algorithm."
     }
   }
 }

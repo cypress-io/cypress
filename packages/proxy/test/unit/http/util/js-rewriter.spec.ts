@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import fse from 'fs-extra'
 import Promise from 'bluebird'
 import rp from '@cypress/request-promise'
-import * as security from '../../../../lib/http/util/security'
+import * as jsRewriter from '../../../../lib/http/util/js-rewriter'
 
 const original = `\
 <html>
@@ -140,7 +140,7 @@ function match (varName, prop) {
   return `window.top.Cypress.resolveWindowReference(window, ${varName}, '${prop}')`
 }
 
-describe('http/util/security', () => {
+describe('http/util/js-rewriter', () => {
   context('.strip', () => {
     context('injects Cypress window property resolver', () => {
       [
@@ -201,7 +201,7 @@ describe('http/util/security', () => {
         }
 
         it(`${string} => ${expected}`, () => {
-          const actual = security.strip(string)
+          const actual = jsRewriter.strip(string)
 
           expect(actual).to.eq(expected)
         })
@@ -209,7 +209,7 @@ describe('http/util/security', () => {
     })
 
     it('replaces obstructive code', () => {
-      expect(security.strip(original, { isHtml: true })).to.eq(expected)
+      expect(jsRewriter.strip(original, { isHtml: true })).to.eq(expected)
     })
 
     it('replaces jira window getter', () => {
@@ -245,17 +245,17 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 }\
 `
 
-      expect(security.strip(jira)).to.eq(`\
+      expect(jsRewriter.strip(jira)).to.eq(`\
 for (; !function (n) {
   return n === ${match('n', 'parent')};
 }(n);) {}\
 `)
 
-      expect(security.strip(jira2)).to.eq(`\
+      expect(jsRewriter.strip(jira2)).to.eq(`\
 (function(n){for(;!function(l){return l===${match('l', 'parent')};}(l)&&function(l){try{if(void 0==${match('l', 'location')}.href)return!1}catch(l){return!1}return!0}(${match('l', 'parent')});)l=${match('l', 'parent')};return l})\
 `)
 
-      expect(security.strip(jira3)).to.eq(`\
+      expect(jsRewriter.strip(jira3)).to.eq(`\
 function satisfiesSameOrigin(w) {
     try {
         // Accessing location.href from a window on another origin will throw an exception.
@@ -355,14 +355,14 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(${match('parentOf', 'pa
           .readFile(pathToLib, 'utf8')
           .catch(downloadFile)
           .then((libCode) => {
-            const stripped = security.strip(libCode)
+            const stripped = jsRewriter.strip(libCode)
 
             expect(() => eval(stripped), 'is valid JS').to.not.throw
 
             return new Promise((resolve, reject) => {
               fse.createReadStream(pathToLib, { encoding: 'utf8' })
               .on('error', reject)
-              .pipe(security.stripStream())
+              .pipe(jsRewriter.stripStream())
               .on('error', reject)
               .pipe(concatStream({ encoding: 'string' }, resolve))
               .on('error', reject)
