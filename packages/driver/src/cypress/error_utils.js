@@ -229,6 +229,7 @@ const createUncaughtException = (type, err) => {
 
   mergeErrProps(err, {
     name: `Uncaught ${err.name}`,
+    docsUrl: uncaughtErr.docsUrl,
   })
 
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
