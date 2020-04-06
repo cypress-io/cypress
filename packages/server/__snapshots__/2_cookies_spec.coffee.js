@@ -33,6 +33,7 @@ exports['e2e cookies with baseurl'] = `
       ✓ can set and clear cookie
       in a cy.visit
         ✓ can successfully send cookies as a Cookie header
+        ✓ ignores invalid set-cookie headers that contain control chars
         with Domain = superdomain
           ✓ is set properly with no redirects
           ✓ is set properly with redirects
@@ -48,6 +49,7 @@ exports['e2e cookies with baseurl'] = `
           ✓ can set cookies on lots of redirects, ending with same domain
       in a cy.request
         ✓ can successfully send cookies as a Cookie header
+        ✓ ignores invalid set-cookie headers that contain control chars
         with Domain = superdomain
           ✓ is set properly with no redirects
           ✓ is set properly with redirects
@@ -63,14 +65,14 @@ exports['e2e cookies with baseurl'] = `
           ✓ can set cookies on lots of redirects, ending with same domain
 
 
-  30 passing
+  32 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        30                                                                               │
-  │ Passing:      30                                                                               │
+  │ Tests:        32                                                                               │
+  │ Passing:      32                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -94,81 +96,9 @@ exports['e2e cookies with baseurl'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec_baseurl.coffee              XX:XX       30       30        -        -        - │
+  │ ✔  cookies_spec_baseurl.coffee              XX:XX       32       32        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       30       30        -        -        -  
-
-
-`
-
-exports['e2e cookies with no baseurl'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (cookies_spec_no_baseurl.coffee)                                           │
-  │ Searched:   cypress/integration/cookies_spec_no_baseurl.coffee                                 │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  cookies_spec_no_baseurl.coffee                                                  (1 of 1)
-
-
-  cookies
-    with whitelist
-      ✓ can get all cookies
-      ✓ resets cookies between tests correctly
-      ✓ should be only two left now
-      ✓ handles undefined cookies
-    without whitelist
-      ✓ sends cookies to localhost:2121
-      ✓ handles expired cookies secure
-      ✓ issue: #224 sets expired cookies between redirects
-      ✓ issue: #1321 failing to set or parse cookie
-      ✓ issue: #2724 does not fail on invalid cookies
-
-
-  9 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        9                                                                                │
-  │ Passing:      9                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     cookies_spec_no_baseurl.coffee                                                   │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/cookies_spec_no_baseurl.coffee.     (X second)
-                          mp4                                                                       
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec_no_baseurl.coffee           XX:XX        9        9        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        9        -        -        -  
+    ✔  All specs passed!                        XX:XX       32       32        -        -        -  
 
 
 `
