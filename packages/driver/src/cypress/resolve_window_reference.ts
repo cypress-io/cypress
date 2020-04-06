@@ -3,7 +3,7 @@ import $Cypress from '../..'
 
 // TODO: fix this so that it's an override for entire `driver` package
 interface State {
-  (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): Optional<JQuery<HTMLIFrameElement>>
+  (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
 }
 
 export function resolveWindowReference (this: typeof $Cypress, currentWindow: Window, accessedObject: Window | any, accessedProp: string, value?: any) {

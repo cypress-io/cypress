@@ -1,7 +1,7 @@
 const cypressFrame = {
   name: 'cypressFrame',
-  parent: null,
-  top: null,
+  parent: null as unknown,
+  top: null as unknown,
 }
 
 cypressFrame.parent = cypressFrame.top = cypressFrame
