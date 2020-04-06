@@ -21,19 +21,19 @@ describe('e2e error ui', function () {
     onServer,
   })
 
-  it('displays correct UI for errors', function () {
-    return e2e.exec(this, {
-      spec: 'various_failures_spec.js',
-      expectedExitCode: expectedFailures,
-    })
-    .then(verifyPassedAndFailedAreSame)
+  e2e.it('displays correct UI for errors', {
+    spec: 'various_failures_spec.js',
+    expectedExitCode: expectedFailures,
+    onRun (exec) {
+      return exec().then(verifyPassedAndFailedAreSame)
+    },
   })
 
-  it('displays correct UI for errors in custom commands', function () {
-    return e2e.exec(this, {
-      spec: 'various_failures_custom_commands_spec.js',
-      expectedExitCode: expectedFailures,
-    })
-    .then(verifyPassedAndFailedAreSame)
+  e2e.it('displays correct UI for errors in custom commands', {
+    spec: 'various_failures_custom_commands_spec.js',
+    expectedExitCode: expectedFailures,
+    onRun (exec) {
+      return exec().then(verifyPassedAndFailedAreSame)
+    },
   })
 })
