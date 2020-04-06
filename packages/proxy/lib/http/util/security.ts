@@ -25,10 +25,16 @@ const utf8Stream = require('utf8-stream')
 const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
   const b = n.builders
 
+  // use `globalThis` instead of `window`, `self`... to lower chances of scope conflict
+  // users can technically override even this, but it would be very rude
+  // "[globalThis] provides a way for polyfills/shims, build tools, and portable code to have a reliable non-eval means to access the global..."
+  // @see https://github.com/tc39/proposal-global/blob/master/NAMING.md
+  const globalIdentifier = b.identifier('globalThis')
+
   function match (accessedObject, prop: string, maybeVal?: any) {
     const args = [
       // window
-      b.identifier('window'),
+      globalIdentifier,
       // accessedObject
       accessedObject,
       // 'prop'
@@ -44,7 +50,7 @@ const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
       b.memberExpression(
         b.memberExpression(
           b.memberExpression(
-            b.identifier('window'),
+            globalIdentifier,
             b.identifier('top'),
           ),
           b.identifier('Cypress'),
@@ -62,12 +68,12 @@ const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
         '===',
         b.identifier(prop),
         b.memberExpression(
-          b.identifier('window'),
+          globalIdentifier,
           b.stringLiteral(prop),
           true,
         ),
       ),
-      match(b.identifier('window'), prop),
+      match(globalIdentifier, prop),
       b.identifier(prop),
     )
   }
