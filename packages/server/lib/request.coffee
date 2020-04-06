@@ -489,6 +489,10 @@ module.exports = (options = {}) ->
 
         debug('parsing cookie %o', { cyCookie, toughCookie: cookie })
 
+        if not cookie
+          debug('tough-cookie failed to parse, ignoring')
+          return
+
         cookie.name = cookie.key
 
         if not cookie.domain
@@ -504,14 +508,18 @@ module.exports = (options = {}) ->
         if isFinite(expiry)
           cookie.expiry = expiry / 1000
 
-        cookie = _.pick(cookie, SERIALIZABLE_COOKIE_PROPS)
-
-        if expiry <= 0
-          return automationFn('clear:cookie', cookie)
-
         cookie.sameSite = convertSameSiteToughToExtension(cookie.sameSite, cyCookie)
 
-        automationFn('set:cookie', cookie)
+        cookie = _.pick(cookie, SERIALIZABLE_COOKIE_PROPS)
+
+        automationCmd = 'set:cookie'
+
+        if expiry <= 0
+          automationCmd = 'clear:cookie'
+
+        automationFn(automationCmd, cookie)
+        .catch (err) ->
+          debug('automation failed clearing cookie %o', { automationCmd, cookie, err })
 
     sendStream: (headers, automationFn, options = {}) ->
       _.defaults options, {
