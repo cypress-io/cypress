@@ -192,7 +192,7 @@ startXhrServer = (cy, state, config) ->
 
       err = $errUtils.errByPath("xhr.aborted")
       err.name = "AbortError"
-      err = $stackUtils.replaceStack(err, stack)
+      err.stack = $stackUtils.replacedStack(err, stack)
 
       if log = logs[xhr.id]
         log.snapshot("aborted").error(err)

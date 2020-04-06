@@ -701,7 +701,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       /* eslint-enable no-console */
     }
 
-    err = $stackUtils.normalizeStack(err)
+    err.stack = $stackUtils.normalizedStack(err)
 
     err = $errUtils.enhanceStack({
       err,
@@ -747,9 +747,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     try {
       // collect all of the callbacks for 'fail'
       rets = Cypress.action('cy:fail', err, state('runnable'))
-    } catch (err2) {
+    } catch (cyFailErr) {
       // and if any of these throw synchronously immediately error
-      return finish($stackUtils.normalizeStack(err2))
+      cyFailErr.stack = $stackUtils.normalizedStack(cyFailErr)
+
+      return finish(cyFailErr)
     }
 
     // bail if we had callbacks attached

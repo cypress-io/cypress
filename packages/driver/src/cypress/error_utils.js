@@ -227,21 +227,13 @@ const createUncaughtException = (type, err) => {
     errMsg: err.message,
   })
 
-  // err: reference, stack
+  mergeErrProps(err, {
+    name: `Uncaught ${err.name}`,
+  })
 
-  err = modifyErrMsg()
+  modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
-  // uncaughtErr = mergeErrProps(uncaughtErr, {
-  //   name: `Uncaught ${err.name}`,
-  //   // $stackUtils.replaceStack won't replace stack if one isn't
-  //   // already present on error
-  //   stack: 'stack',
-  // })
-
-  // uncaughtErr.stack = $stackUtils.replacedStack(uncaughtErr, err.stack)
-  // uncaughtErr.stack = $stackUtils.normalizedStack(uncaughtErr)
-
-  return uncaughtErr
+  return err
 }
 
 const enhanceStack = ({ err, invocationStack, projectRoot }) => {
@@ -250,7 +242,7 @@ const enhanceStack = ({ err, invocationStack, projectRoot }) => {
   // cypress stack with the invocation stack, which points to the user's code
   if (invocationStack) {
     err.originalStack = err.stack
-    err = $stackUtils.replaceStack(err, invocationStack)
+    err.stack = $stackUtils.replacedStack(err, invocationStack)
   }
 
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)

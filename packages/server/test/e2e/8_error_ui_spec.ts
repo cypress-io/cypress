@@ -25,8 +25,6 @@ describe('e2e reporters', function () {
     return e2e.exec(this, {
       spec: 'various_failures_spec.js',
       expectedExitCode: expectedFailures,
-      browser: 'chrome',
-      exit: false,
     })
     .then(verifyPassedAndFailedAreSame)
   })

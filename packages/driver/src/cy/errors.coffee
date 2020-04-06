@@ -47,8 +47,6 @@ create = (state, config, log) ->
 
     uncaughtErr = $errUtils.createUncaughtException(type, err)
 
-    # uncaughtErr.originalError = err
-
     current = state("current")
 
     uncaughtErr.onFail = ->

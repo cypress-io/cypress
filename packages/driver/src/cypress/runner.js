@@ -732,7 +732,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     let hookName
     const isHook = runnable.type === 'hook'
 
-    $stackUtils.normalizeStack(err)
+    err.stack = $stackUtils.normalizedStack(err)
 
     if (isHook) {
       const parentTitle = runnable.parent.title

@@ -824,8 +824,7 @@ describe "src/cy/commands/xhr", ->
             .fail ->
               foo.bar()
 
-      ## FIXME
-      it.only "causes errors caused by onreadystatechange callback function", (done) ->
+      it "causes errors caused by onreadystatechange callback function", (done) ->
         e = new Error("onreadystatechange caused this error")
 
         cy.on "fail", (err) =>
@@ -935,7 +934,6 @@ describe "src/cy/commands/xhr", ->
 
           return null
 
-        ## FIXME
         it "provides specific #onFail", (done) ->
           cy.on "fail", (err) =>
             obj = {
@@ -1586,7 +1584,6 @@ describe "src/cy/commands/xhr", ->
 
         cy.route()
 
-      ## FIXME
       it "sets err on log when caused by the XHR response", (done) ->
         @route.restore()
 

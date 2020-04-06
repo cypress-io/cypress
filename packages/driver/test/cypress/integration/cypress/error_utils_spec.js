@@ -355,37 +355,56 @@ describe('driver/src/cypress/error_utils', () => {
   })
 
   context('.enhanceStack', () => {
-    const err = {}
     const invocationStack = 'the stack'
     const sourceStack = {
       sourceMapped: 'source mapped stack',
       parsed: [],
     }
     const codeFrame = {}
-    let result
+    let err
 
     beforeEach(() => {
-      cy.stub($stackUtils, 'replaceStack').returns({ stack: 'new stack' })
+      cy.stub($stackUtils, 'replacedStack').returns('new stack')
       cy.stub($stackUtils, 'getSourceStack').returns(sourceStack)
       cy.stub($stackUtils, 'getCodeFrame').returns(codeFrame)
 
-      result = $errUtils.enhanceStack({ err, invocationStack })
+      err = { stack: 'original stack' }
     })
 
     it('combines error message and stack', () => {
+      const result = $errUtils.enhanceStack({ err, invocationStack })
+
       expect(result.stack).to.equal('new stack')
     })
 
     it('attaches source mapped stack', () => {
+      const result = $errUtils.enhanceStack({ err, invocationStack })
+
       expect(result.sourceMappedStack).to.equal(sourceStack.sourceMapped)
     })
 
     it('attaches parsed stack', () => {
+      const result = $errUtils.enhanceStack({ err, invocationStack })
+
       expect(result.parsedStack).to.equal(sourceStack.parsed)
     })
 
     it('attaches code frame', () => {
+      const result = $errUtils.enhanceStack({ err, invocationStack })
+
       expect(result.codeFrame).to.equal(codeFrame)
+    })
+
+    it('adds originalStack when stack is replaced by invocation stack', () => {
+      const result = $errUtils.enhanceStack({ err, invocationStack })
+
+      expect(result.originalStack).to.equal('original stack')
+    })
+
+    it('does not add originalStack there is no invocation stack', () => {
+      const result = $errUtils.enhanceStack({ err })
+
+      expect(result.originalStack).to.be.undefined
     })
   })
 
@@ -405,6 +424,47 @@ describe('driver/src/cypress/error_utils', () => {
       expect(newErr.message).to.equal('new message')
       expect(newErr.stack).to.include('Error: new message\n')
       expect(newErr.stack).not.to.include('\nError')
+    })
+  })
+
+  context('.createUncaughtException', () => {
+    let err
+
+    beforeEach(() => {
+      err = new Error('original message')
+      err.stack = 'original message\n\nat foo (path/to/file:1:1)'
+    })
+
+    it('mutates the error passed in and returns it', () => {
+      const result = $errUtils.createUncaughtException('spec', err)
+
+      expect(result).to.equal(err)
+    })
+
+    it('prepends Uncaught to error name', () => {
+      const result = $errUtils.createUncaughtException('spec', err)
+
+      expect(result.name).to.equal('Uncaught Error')
+    })
+
+    it('replaces message with wrapper message for spec error', () => {
+      const result = $errUtils.createUncaughtException('spec', err)
+
+      expect(result.message).to.include('The following error originated from your test code, not from Cypress')
+      expect(result.message).to.include('> original message')
+    })
+
+    it('replaces message with wrapper message for app error', () => {
+      const result = $errUtils.createUncaughtException('app', err)
+
+      expect(result.message).to.include('The following error originated from your application code, not from Cypress')
+      expect(result.message).to.include('> original message')
+    })
+
+    it('retains the stack of the original error', () => {
+      const result = $errUtils.createUncaughtException('spec', err)
+
+      expect(result.stack).to.include('at foo (path/to/file:1:1)')
     })
   })
 })
