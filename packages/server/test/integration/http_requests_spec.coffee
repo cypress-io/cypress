@@ -34,6 +34,7 @@ fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
+simple_tsify  = require("#{root}test/support/helpers/simple_tsify")
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -72,6 +73,9 @@ browserifyFileTs = (filePath) ->
   streamToPromise(
     browserify(filePath)
     .transform(coffeeify)
+    .transform(simple_tsify, {
+      typescript: require('typescript'),
+    })
     .bundle()
   )
 
@@ -408,7 +412,7 @@ describe "Routes", ->
 
             body = res.body
 
-            expect(body.integration).to.have.length(8)
+            expect(body.integration).to.have.length(6)
 
             ## remove the absolute path key
             body.integration = _.map body.integration, (obj) ->
@@ -460,7 +464,7 @@ describe "Routes", ->
 
             body = res.body
 
-            expect(body.integration).to.have.length(5)
+            expect(body.integration).to.have.length(3)
 
             ## remove the absolute path key
             body.integration = _.map body.integration, (obj) ->
