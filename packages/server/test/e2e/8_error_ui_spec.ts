@@ -15,7 +15,7 @@ const verifyPassedAndFailedAreSame = function ({ stdout }) {
   expect(passes.length, 'number of passes should equal the number of failures').to.equal(expectedFailures)
 }
 
-describe('e2e reporters', function () {
+describe('e2e error ui', function () {
   e2e.setup({
     port: 1919,
     onServer,
