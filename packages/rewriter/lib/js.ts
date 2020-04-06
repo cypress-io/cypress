@@ -19,11 +19,7 @@ export function rewriteJs (js: string, rewriteNodeFnsCb: RewriteNodeFn) {
       quote: 'single',
     }).code
   } catch (err) {
-    debug('got an error rewriting JS, returning unmodified %o', { err, js })
-
-    if (process.env.CYPRESS_ENV !== 'production') {
-      throw err // TODO: remove?
-    }
+    debug('got an error rewriting JS, returning unmodified %o', { err, js: js.slice(0, 500) })
 
     return js
   }
