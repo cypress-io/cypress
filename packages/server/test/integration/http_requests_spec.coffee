@@ -1022,7 +1022,7 @@ describe "Routes", ->
         .get("/gzip")
         .matchHeader("accept-encoding", "gzip")
         .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
-          "Content-Type": "application/javascript"
+          "Content-Type": "text/html"
           "Content-Encoding": "gzip"
         })
 
@@ -1053,6 +1053,7 @@ describe "Routes", ->
             js += chunk
             res.write(chunk)
 
+          ## note - this is unintentionally invalid JS, just try executing it anywhere
           write("function ")
           _.times 100, =>
             write("😡😈".repeat(10))
