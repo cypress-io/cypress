@@ -91,6 +91,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  AssertionError: expected true to be false
       [stack trace lines]
 
 
@@ -179,6 +180,13 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
+  CypressError: Cannot call \`cy.viewport()\` outside a running test.
+  
+  This usually happens when you accidentally write commands outside an \`it(...)\` test.
+  
+  If that is the case, just move these commands inside an \`it(...)\` test.
+  
+  Check your test file for errors.
       [stack trace lines]
 
 
