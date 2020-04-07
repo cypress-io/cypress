@@ -32,3 +32,9 @@ describe "e2e stdout", ->
       snapshot: true
       spec: "nested-1/nested-2/nested-3/*"
     })
+
+  e2e.it("displays assertion errors", {
+    spec: "stdout_assertion_errors_spec.js"
+    snapshot: true
+    expectedExitCode: 4
+  })

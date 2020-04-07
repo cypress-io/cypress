@@ -159,8 +159,6 @@ describe('src/cy/commands/actions/type - #clear', {
           this.lastLog = log
         }
       })
-
-      null
     })
 
     it('eventually passes the assertion', () => {
@@ -204,8 +202,6 @@ describe('src/cy/commands/actions/type - #clear', {
 
         this.logs.push(log)
       })
-
-      null
     })
 
     it('throws when not a dom subject', (done) => {
@@ -227,7 +223,7 @@ describe('src/cy/commands/actions/type - #clear', {
 
       cy.on('fail', (err) => {
         expect(cleared).to.be.calledOnce
-        expect(err.message).to.include('cy.clear() failed because this element')
+        expect(err.message).to.include('`cy.clear()` failed because this element')
 
         done()
       })
@@ -241,10 +237,11 @@ describe('src/cy/commands/actions/type - #clear', {
 
         expect(this.logs.length).to.eq(3)
         expect(lastLog.get('error')).to.eq(err)
-        expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
+        expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
-        expect(err.message).to.include('<form id="checkboxes">...</form>')
+        expect(err.message).to.include('`<form id="checkboxes">...</form>`')
         expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+        expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
         done()
       })
@@ -254,10 +251,11 @@ describe('src/cy/commands/actions/type - #clear', {
 
     it('throws if any subject isnt a :text', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
+        expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
-        expect(err.message).to.include('<div id="dom">...</div>')
+        expect(err.message).to.include('`<div id="dom">...</div>`')
         expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+        expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
         done()
       })
@@ -267,10 +265,11 @@ describe('src/cy/commands/actions/type - #clear', {
 
     it('throws on an input radio', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
+        expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
-        expect(err.message).to.include('<input type="radio" name="gender" value="male">')
+        expect(err.message).to.include('`<input type="radio" name="gender" value="male">`')
         expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+        expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
         done()
       })
 
@@ -279,10 +278,11 @@ describe('src/cy/commands/actions/type - #clear', {
 
     it('throws on an input checkbox', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.include('cy.clear() failed because it requires a valid clearable element.')
+        expect(err.message).to.include('`cy.clear()` failed because it requires a valid clearable element.')
         expect(err.message).to.include('The element cleared was:')
-        expect(err.message).to.include('<input type="checkbox" name="colors" value="blue">')
+        expect(err.message).to.include('`<input type="checkbox" name="colors" value="blue">`')
         expect(err.message).to.include(`A clearable element matches one of the following selectors:`)
+        expect(err.docsUrl).to.equal('https://on.cypress.io/clear')
 
         done()
       })
@@ -294,7 +294,7 @@ describe('src/cy/commands/actions/type - #clear', {
       cy.$$('input:text:first').show().hide()
 
       cy.on('fail', (err) => {
-        expect(err.message).to.include('cy.clear() failed because this element is not visible')
+        expect(err.message).to.include('`cy.clear()` failed because this element is not visible')
 
         done()
       })
@@ -308,7 +308,7 @@ describe('src/cy/commands/actions/type - #clear', {
       cy.on('fail', (err) => {
         // get + type logs
         expect(this.logs.length).eq(2)
-        expect(err.message).to.include('cy.clear() failed because this element is disabled:\n')
+        expect(err.message).to.include('`cy.clear()` failed because this element is `disabled`:\n')
 
         done()
       })
@@ -348,7 +348,7 @@ describe('src/cy/commands/actions/type - #clear', {
 
       cy.on('fail', (err) => {
         expect(this.logs.length).to.eq(2)
-        expect(err.message).to.include('cy.clear() failed because this element')
+        expect(err.message).to.include('`cy.clear()` failed because this element')
         expect(err.message).to.include('is being covered by another element')
 
         done()

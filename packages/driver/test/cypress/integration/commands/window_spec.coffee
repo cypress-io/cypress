@@ -396,7 +396,7 @@ describe "src/cy/commands/window", ->
           @lastLog = log
 
           if log.get("name") is "get"
-            throw new Error("cy.get() should not have logged out.")
+            throw new Error("`cy.get()` should not have logged out.")
 
         return null
 
@@ -621,10 +621,11 @@ describe "src/cy/commands/window", ->
 
         return null
 
-      it "throws with passed invalid preset", (done) ->
+      it "throws when passed invalid preset", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.match /^cy.viewport\(\) could not find a preset for: 'foo'. Available presets are: /
+          expect(err.message).to.match /^`cy.viewport\(\)` could not find a preset for: `foo`. Available presets are: /
+          expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
         cy.viewport("foo")
@@ -632,7 +633,8 @@ describe "src/cy/commands/window", ->
       it "throws when passed a string as height", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() can only accept a string preset or a width and height as numbers."
+          expect(err.message).to.eq "`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
         cy.viewport(800, "600")
@@ -640,7 +642,8 @@ describe "src/cy/commands/window", ->
       it "throws when passed negative numbers", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() width and height must be at least 0px."
+          expect(err.message).to.eq "`cy.viewport()` `width` and `height` must be at least 0px."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
         cy.viewport(800, -600)
@@ -654,7 +657,8 @@ describe "src/cy/commands/window", ->
       it "throws when passed an empty string as width", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() cannot be passed an empty string."
+          expect(err.message).to.eq "`cy.viewport()` cannot be passed an empty string."
+          expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
         cy.viewport("")
@@ -662,7 +666,8 @@ describe "src/cy/commands/window", ->
       it "throws when passed an invalid orientation on a preset", (done) ->
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.eq "cy.viewport() can only accept 'landscape' or 'portrait' as valid orientations. Your orientation was: 'foobar'"
+          expect(err.message).to.eq "`cy.viewport()` can only accept `landscape` or `portrait` as valid orientations. Your orientation was: `foobar`"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
           done()
 
         cy.viewport("iphone-4", "foobar")
@@ -676,7 +681,8 @@ describe "src/cy/commands/window", ->
 
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(1)
-            expect(err.message).to.eq "cy.viewport() can only accept a string preset or a width and height as numbers."
+            expect(err.message).to.eq "`cy.viewport()` can only accept a string preset or a `width` and `height` as numbers."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/viewport")
             done()
 
           cy.viewport(val)

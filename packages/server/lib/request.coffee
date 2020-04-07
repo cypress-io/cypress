@@ -1,6 +1,6 @@
 _          = require("lodash")
-r          = require("request")
-rp         = require("request-promise")
+r          = require("@cypress/request")
+rp         = require("@cypress/request-promise")
 url        = require("url")
 tough      = require("tough-cookie")
 debug      = require("debug")("cypress:server:request")
@@ -11,12 +11,29 @@ agent      = require("@packages/network").agent
 statusCode = require("./util/status_code")
 streamBuffer = require("./util/stream_buffer").streamBuffer
 
-SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly']
+SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly', 'sameSite']
 NETWORK_ERRORS = "ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND".split(" ")
 VERBOSE_REQUEST_OPTS = "followRedirect strictSSL".split(" ")
 HTTP_CLIENT_REQUEST_EVENTS = "abort connect continue information socket timeout upgrade".split(" ")
+TLS_VERSION_ERROR_RE =  /TLSV1_ALERT_PROTOCOL_VERSION|UNSUPPORTED_PROTOCOL/
+SAMESITE_NONE_RE = /; +samesite=(?:'none'|"none"|none)/i
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
+convertSameSiteToughToExtension = (sameSite, setCookie) =>
+  ## tough-cookie@4.0.0 uses 'none' as a default, so run this regex to detect if
+  ## SameSite=None was not explicitly set
+  ## @see https://github.com/salesforce/tough-cookie/issues/191
+  isUnspecified = sameSite is "none" and !SAMESITE_NONE_RE.test(setCookie)
+
+  if isUnspecified
+    ## not explicitly set, so fall back to the browser's default
+    return undefined
+
+  if sameSite is 'none'
+    return 'no_restriction'
+
+  return sameSite
 
 getOriginalHeaders = (req = {}) ->
   ## the request instance holds an instance
@@ -81,7 +98,15 @@ maybeRetryOnNetworkFailure = (err, options = {}) ->
 
   debug("received an error making http request %o", merge(opts, { err }))
 
-  if not isRetriableError(err, retryOnNetworkFailure)
+  isTlsVersionError = TLS_VERSION_ERROR_RE.test(err.message)
+
+  if isTlsVersionError
+    ## because doing every connection via TLSv1 can lead to slowdowns, we set it only on failure
+    ## https://github.com/cypress-io/cypress/pull/6705
+    debug('detected TLS version error, setting min version to TLSv1')
+    opts.minVersion = 'TLSv1'
+
+  if not isTlsVersionError and not isRetriableError(err, retryOnNetworkFailure)
     return onElse()
 
   ## else see if we have more delays left...
@@ -367,9 +392,9 @@ module.exports = (options = {}) ->
   rp = rp.defaults(defaults)
 
   return {
-    r: require("request")
+    r: require("@cypress/request")
 
-    rp: require("request-promise")
+    rp: require("@cypress/request-promise")
 
     getDelayForRetry
 
@@ -483,6 +508,9 @@ module.exports = (options = {}) ->
 
         if expiry <= 0
           return automationFn('clear:cookie', cookie)
+
+        cookie.sameSite = convertSameSiteToughToExtension(cookie.sameSite, cyCookie)
+
         automationFn('set:cookie', cookie)
 
     sendStream: (headers, automationFn, options = {}) ->

@@ -873,7 +873,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain(`has CSS 'pointer-events: none'`)
+          expect(err.message).to.contain('has CSS `pointer-events: none`')
           expect(err.message).to.not.contain('inherited from')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -899,7 +899,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain(`has CSS 'pointer-events: none', inherited from this element:`)
+          expect(err.message).to.contain('has CSS `pointer-events: none`, inherited from this element:')
           expect(err.message).to.contain('<div id="ptrNone"')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -951,7 +951,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain('has CSS \'pointer-events: none\'')
+          expect(err.message).to.contain('has CSS `pointer-events: none`')
           expect(err.message).to.not.contain('inherited from')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -977,7 +977,7 @@ describe('src/cy/commands/actions/click', () => {
         const onError = cy.stub().callsFake((err) => {
           const { lastLog } = this
 
-          expect(err.message).to.contain('has CSS \'pointer-events: none\', inherited from this element:')
+          expect(err.message).to.contain('has CSS `pointer-events: none`, inherited from this element:')
           expect(err.message).to.contain('<div id="ptrNone"')
           const consoleProps = lastLog.invoke('consoleProps')
 
@@ -1885,8 +1885,8 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when attempting to click multiple elements', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('cy.click() can only be called on a single element. Your subject contained 4 elements. Pass { multiple: true } if you want to serially click each element.')
-
+          expect(err.message).to.eq(`\`cy.click()\` can only be called on a single element. Your subject contained 4 elements. Pass \`{ multiple: true }\` if you want to serially click each element.`)
+          expect(err.docsUrl).to.eq('https://on.cypress.io/click')
           done()
         })
 
@@ -1905,7 +1905,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           expect(clicked).to.eq(1)
-          expect(err.message).to.include('cy.click() failed because this element is detached from the DOM')
+          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
 
           done()
         })
@@ -1915,7 +1915,7 @@ describe('src/cy/commands/actions/click', () => {
 
       it('throws when subject is detached during actionability', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.click() failed because this element is detached from the DOM')
+          expect(err.message).to.include('`cy.click()` failed because this element is detached from the DOM')
 
           done()
         })
@@ -1959,7 +1959,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(logsArr).to.have.length(4)
           expect(lastLog.get('error')).to.eq(err)
-          expect(err.message).to.include('cy.click() failed because this element is not visible')
+          expect(err.message).to.include('`cy.click()` failed because this element is not visible')
 
           done()
         })
@@ -1973,7 +1973,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.on('fail', (err) => {
           // get + click logs
           expect(this.logs.length).eq(2)
-          expect(err.message).to.include('cy.click() failed because this element is disabled:\n')
+          expect(err.message).to.include('`cy.click()` failed because this element is `disabled`:\n')
 
           done()
         })
@@ -1998,8 +1998,9 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
           expect(lastLog.get('snapshots')[1]).to.be.an('object')
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
-          expect(err.message).to.include('cy.click() failed because this element')
+          expect(err.message).to.include('`cy.click()` failed because this element')
           expect(err.message).to.include('is being covered by another element')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/element-cannot-be-interacted-with')
 
           const clickLog = this.logs[1]
 
@@ -2033,8 +2034,9 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
           expect(lastLog.get('snapshots')[1]).to.be.an('object')
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
-          expect(err.message).to.include('cy.click() failed because this element')
+          expect(err.message).to.include('`cy.click()` failed because this element')
           expect(err.message).to.include('is being covered by another element')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/element-cannot-be-interacted-with')
 
           const console = lastLog.invoke('consoleProps')
 
@@ -2070,10 +2072,11 @@ describe('src/cy/commands/actions/click', () => {
           expect(lastLog.get('snapshots')[0].name).to.eq('before')
           expect(lastLog.get('snapshots')[1]).to.be.an('object')
           expect(lastLog.get('snapshots')[1].name).to.eq('after')
-          expect(err.message).to.include('cy.click() failed because this element is not visible:')
+          expect(err.message).to.include('`cy.click()` failed because this element is not visible:')
           expect(err.message).to.include('>button ...</button>')
-          expect(err.message).to.include(`'<button#button-covered-in-span>' is not visible because it has CSS property: 'position: fixed' and its being covered`)
+          expect(err.message).to.include('`<button#button-covered-in-span>` is not visible because it has CSS property: `position: fixed` and it\'s being covered')
           expect(err.message).to.include('>span on...</span>')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/element-cannot-be-interacted-with')
 
           const console = lastLog.invoke('consoleProps')
 
@@ -2094,8 +2097,9 @@ describe('src/cy/commands/actions/click', () => {
         cy.stub(Cypress.dom, 'getElementAtPointFromViewport').returns(null)
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.click() failed because the center of this element is hidden from view:')
+          expect(err.message).to.include('`cy.click()` failed because the center of this element is hidden from view:')
           expect(err.message).to.include('<li>quux</li>')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/element-cannot-be-interacted-with')
 
           done()
         })
@@ -2106,7 +2110,8 @@ describe('src/cy/commands/actions/click', () => {
       it('throws when attempting to click a <select> element', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('cy.click() cannot be called on a <select> element. Use cy.select() command instead to change the value.')
+          expect(err.message).to.eq('`cy.click()` cannot be called on a `<select>` element. Use `cy.select()` command instead to change the value.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/select')
 
           done()
         })
@@ -2117,7 +2122,7 @@ describe('src/cy/commands/actions/click', () => {
       it('throws when provided invalid position', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq(`Invalid position argument: 'foo'. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.`)
+          expect(err.message).to.eq('Invalid position argument: `foo`. Position may only be topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight.')
 
           done()
         })
@@ -2137,7 +2142,8 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           expect(clicks).to.eq(0)
-          expect(err.message).to.include('cy.click() could not be issued because this element is currently animating:\n')
+          expect(err.message).to.include('`cy.click()` could not be issued because this element is currently animating:\n')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/element-is-animating')
 
           done()
         })
@@ -3028,7 +3034,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           expect(dblclicked).to.eq(1)
-          expect(err.message).to.include('cy.dblclick() failed because this element')
+          expect(err.message).to.include('`cy.dblclick()` failed because this element')
 
           done()
         })
@@ -3060,7 +3066,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(logs).to.have.length(4)
           expect(lastLog.get('error')).to.eq(err)
-          expect(err.message).to.include('cy.dblclick() failed because this element is not visible')
+          expect(err.message).to.include('`cy.dblclick()` failed because this element is not visible')
 
           done()
         })
@@ -3466,7 +3472,7 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('fail', (err) => {
           expect(rightclicked).to.eq(1)
-          expect(err.message).to.include('cy.rightclick() failed because this element')
+          expect(err.message).to.include('`cy.rightclick()` failed because this element')
 
           done()
         })
@@ -3496,7 +3502,7 @@ describe('src/cy/commands/actions/click', () => {
 
           expect(this.logs.length).to.eq(4)
           expect(lastLog.get('error')).to.eq(err)
-          expect(err.message).to.include('cy.rightclick() failed because this element is not visible')
+          expect(err.message).to.include('`cy.rightclick()` failed because this element is not visible')
 
           done()
         })
@@ -3764,7 +3770,6 @@ describe('mouse state', () => {
             bubbles: true,
             button: 0,
             buttons: 0,
-            cancelBubble: false,
             cancelable: true,
             composed: true,
             ctrlKey: false,
@@ -3789,6 +3794,8 @@ describe('mouse state', () => {
             view: cy.state('window'),
             // which: 0,
           })
+
+          e.target.removeEventListener('mouseout', mouseout)
         }).as('mouseout')
         const mouseleave = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3822,6 +3829,8 @@ describe('mouse state', () => {
             view: cy.state('window'),
             // which: 0,
           })
+
+          e.target.removeEventListener('mouseleave', mouseleave)
         }).as('mouseleave')
         const pointerout = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3855,6 +3864,8 @@ describe('mouse state', () => {
             view: cy.state('window'),
             // which: 0,
           })
+
+          e.target.removeEventListener('pointerout', pointerout)
         }).as('pointerout')
         const pointerleave = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3888,6 +3899,8 @@ describe('mouse state', () => {
             view: cy.state('window'),
             // which: 0,
           })
+
+          e.target.removeEventListener('pointerleave', pointerleave)
         }).as('pointerleave')
         const mouseover = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3921,6 +3934,8 @@ describe('mouse state', () => {
             view: cy.state('window'),
             // which: 0,
           })
+
+          e.target.removeEventListener('mouseover', mouseover)
         }).as('mouseover')
         const mouseenter = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3954,6 +3969,8 @@ describe('mouse state', () => {
             view: cy.state('window'),
             // which: 0,
           })
+
+          e.target.removeEventListener('mouseenter', mouseenter)
         }).as('mouseenter')
         const pointerover = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -3987,6 +4004,8 @@ describe('mouse state', () => {
             view: cy.state('window'),
             // which: 0,
           })
+
+          e.target.removeEventListener('pointerover', pointerover)
         }).as('pointerover')
         const pointerenter = cy.stub().callsFake((e) => {
           expect(_.toPlainObject(e)).to.containSubset({
@@ -4020,6 +4039,8 @@ describe('mouse state', () => {
             view: cy.state('window'),
             // which: 0,
           })
+
+          e.target.removeEventListener('pointerenter', pointerenter)
         }).as('pointerenter')
 
         cy.get('div.item').eq(0)

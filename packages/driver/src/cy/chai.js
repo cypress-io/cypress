@@ -1,5 +1,5 @@
 /* eslint-disable prefer-rest-params */
-// tests in driver/test/cypress/integration/commands/assertions_spec.coffee
+// tests in driver/test/cypress/integration/commands/assertions_spec.js
 
 const _ = require('lodash')
 const $ = require('jquery')
@@ -38,27 +38,17 @@ let chaiUtils = null
 
 chai.use(sinonChai)
 
-const getType = function (val) {
-  const match = /\[object (.*)\]/.exec(Object.prototype.toString.call(val))
-
-  return match && match[1]
-}
-
 chai.use((chai, u) => {
   chaiUtils = u
 
   $chaiJquery(chai, chaiUtils, {
     onInvalid (method, obj) {
-      const err = $errUtils.cypressErr(
-        $errUtils.errMsgByPath(
-          'chai.invalid_jquery_obj', {
-            assertion: method,
-            subject: $utils.stringifyActual(obj),
-          },
-        ),
-      )
-
-      throw err
+      $errUtils.throwErrByPath('chai.invalid_jquery_obj', {
+        args: {
+          assertion: method,
+          subject: $utils.stringifyActual(obj),
+        },
+      })
     },
 
     onError (err, method, obj, negated) {
@@ -93,10 +83,20 @@ chai.use((chai, u) => {
 
   const { inspect, setFormatValueHook } = chaiInspect.create(chai)
 
-  // prevent tunneling into Window objects (can throw cross-origin errors in firefox)
+  // prevent tunneling into Window objects (can throw cross-origin errors)
   setFormatValueHook((ctx, val) => {
-    if (val && (getType(val) === 'Window')) {
-      return '[window]'
+    // https://github.com/cypress-io/cypress/issues/5270
+    // When name attribute exists in <iframe>,
+    // Firefox returns [object Window] but Chrome returns [object Object]
+    // So, we try throwing an error and check the error message.
+    try {
+      val && val.document
+      val && val.inspect
+    } catch (e) {
+      if (e.stack.indexOf('cross-origin') !== -1 || // chrome
+      e.message.indexOf('cross-origin') !== -1) { // firefox
+        return `[window]`
+      }
     }
   })
 
@@ -253,7 +253,7 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const err = $errUtils.cypressErr($errUtils.errMsgByPath('chai.match_invalid_argument', { regExp }))
+        const err = $errUtils.cypressErrByPath('chai.match_invalid_argument', { args: { regExp } })
 
         err.retry = false
         throw err
@@ -340,11 +340,11 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.displayMessage = getLongLengthMessage(obj.length, length)
+              e1.message = getLongLengthMessage(obj.length, length)
               throw e1
             }
 
-            const e2 = $errUtils.cypressErr($errUtils.errMsgByPath('chai.length_invalid_argument', { length }))
+            const e2 = $errUtils.cypressErrByPath('chai.length_invalid_argument', { args: { length } })
 
             e2.retry = false
             throw e2
@@ -397,10 +397,10 @@ chai.use((chai, u) => {
                 return `Expected ${node} not to exist in the DOM, but it was continuously found.`
               }
 
-              return `Expected to find element: '${obj.selector}', but never found it.`
+              return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.displayMessage = getLongExistsMessage(obj)
+            e1.message = getLongExistsMessage(obj)
             throw e1
           }
         }

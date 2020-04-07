@@ -2,15 +2,21 @@ exports['lib/request #sendPromise followRedirect gets + attaches the cookies at 
   "setCalls": [
     {
       "currentUrl": "http://localhost:1234/",
-      "setCookie": "one=1"
+      "setCookie": [
+        "one=1"
+      ]
     },
     {
       "currentUrl": "http://localhost:1234/second",
-      "setCookie": "two=2"
+      "setCookie": [
+        "two=2"
+      ]
     },
     {
       "currentUrl": "http://localhost:1234/third",
-      "setCookie": "three=3"
+      "setCookie": [
+        "three=3"
+      ]
     }
   ],
   "getCalls": [
@@ -30,11 +36,15 @@ exports['lib/request #sendStream gets + attaches the cookies at each redirect 1'
   "setCalls": [
     {
       "currentUrl": "http://localhost:1234/",
-      "setCookie": "one=1"
+      "setCookie": [
+        "one=1"
+      ]
     },
     {
       "currentUrl": "http://localhost:1234/second",
-      "setCookie": "two=2"
+      "setCookie": [
+        "two=2"
+      ]
     }
   ],
   "getCalls": [

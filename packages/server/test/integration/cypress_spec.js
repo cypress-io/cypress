@@ -45,7 +45,7 @@ const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
-const { formStatePath } = require(`${root}lib/util/saved_state`)
+const savedState = require(`${root}lib/saved_state`)
 
 const TYPICAL_BROWSERS = [
   {
@@ -961,7 +961,7 @@ describe('lib/cypress', () => {
       beforeEach(function () {
         return appData.remove()
         .then(() => {
-          return formStatePath(this.todosPath)
+          return savedState.formStatePath(this.todosPath)
         }).then((statePathStart) => {
           this.statePath = appData.projectsPath(statePathStart)
         })

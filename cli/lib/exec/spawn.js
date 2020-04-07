@@ -109,7 +109,7 @@ module.exports = {
         }
 
         const { onStderrData, electronLogging } = overrides
-        const envOverrides = util.getEnvOverrides()
+        const envOverrides = util.getEnvOverrides(options)
         const electronArgs = _.clone(args)
         const node11WindowsFix = isPlatform('win32')
 

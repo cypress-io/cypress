@@ -38,7 +38,7 @@ describe "src/cy/commands/waiting", {
       describe "errors thrown", ->
         it "is deprecated", (done) ->
           cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait(fn) has been deprecated. Instead just change this command to be cy.should(fn)."
+            expect(err.message).to.eq "`cy.wait(fn)` has been deprecated. Change this command to be `cy.should(fn)`."
             done()
 
           cy.get("body").wait ($body) ->
@@ -192,7 +192,8 @@ describe "src/cy/commands/waiting", {
 
         it "throws when alias doesnt match a route", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() only accepts aliases for routes.\nThe alias: 'b' did not match a route."
+            expect(err.message).to.include "`cy.wait()` only accepts aliases for routes.\nThe alias: `b` did not match a route."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/wait")
             done()
 
           cy.get("body").as("b").wait("@b")
@@ -201,19 +202,18 @@ describe "src/cy/commands/waiting", {
           requestTimeout: 100
         }, (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'fetch'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `fetch`. No request ever occurred."
             done()
 
-          cy
-            .server()
-            .route("GET", /.*/, {}).as("fetch")
-            .wait("@fetch")
+          cy.server()
+          cy.route("GET", /.*/, {}).as("fetch")
+          cy.wait("@fetch")
 
         it "throws when alias is never requested", {
           requestTimeout: 100
         }, (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'foo'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `foo`. No request ever occurred."
             done()
 
           cy
@@ -223,7 +223,7 @@ describe "src/cy/commands/waiting", {
 
         it "throws when alias is missing '@' but matches an available alias", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "Invalid alias: 'getAny'.\nYou forgot the '@'. It should be written as: '@getAny'."
+            expect(err.message).to.eq "Invalid alias: `getAny`.\nYou forgot the `@`. It should be written as: `@getAny`."
             done()
 
           cy
@@ -233,7 +233,7 @@ describe "src/cy/commands/waiting", {
 
         it "throws when 2nd alias doesnt match any registered alias", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.wait() could not find a registered alias for: '@bar'.\nAvailable aliases are: 'foo'."
+            expect(err.message).to.eq "`cy.wait()` could not find a registered alias for: `@bar`.\nAvailable aliases are: `foo`."
             done()
 
           cy
@@ -246,7 +246,7 @@ describe "src/cy/commands/waiting", {
 
         it "throws when 2nd alias is missing '@' but matches an available alias", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "Invalid alias: 'bar'.\nYou forgot the '@'. It should be written as: '@bar'."
+            expect(err.message).to.eq "Invalid alias: `bar`.\nYou forgot the `@`. It should be written as: `@bar`."
             done()
 
           cy
@@ -260,7 +260,8 @@ describe "src/cy/commands/waiting", {
 
         it "throws when 2nd alias isnt a route alias", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() only accepts aliases for routes.\nThe alias: 'bar' did not match a route."
+            expect(err.message).to.include "`cy.wait()` only accepts aliases for routes.\nThe alias: `bar` did not match a route."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/wait")
             done()
 
           cy
@@ -276,7 +277,7 @@ describe "src/cy/commands/waiting", {
           requestTimeout: 1000
         }, (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 1000ms for the 1st request to the route: 'foo'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `1000ms` for the 1st request to the route: `foo`. No request ever occurred."
             done()
 
           cy.on "command:retry", (options) ->
@@ -294,7 +295,7 @@ describe "src/cy/commands/waiting", {
           requestTimeout: 100
         }, (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'bar'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `bar`. No request ever occurred."
             done()
 
           cy.on "command:retry", _.once =>
@@ -312,7 +313,7 @@ describe "src/cy/commands/waiting", {
           requestTimeout: 100
         }, (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'foo'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `foo`. No request ever occurred."
             done()
 
           cy.on "command:retry", _.once =>
@@ -332,7 +333,7 @@ describe "src/cy/commands/waiting", {
           Promise.onPossiblyUnhandledRejection(done)
 
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "Invalid alias: 'bar'.\nYou forgot the '@'. It should be written as: '@bar'."
+            expect(err.message).to.eq "Invalid alias: `bar`.\nYou forgot the `@`. It should be written as: `@bar`."
             done()
 
           cy
@@ -347,7 +348,8 @@ describe "src/cy/commands/waiting", {
           Promise.onPossiblyUnhandledRejection(done)
 
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.wait() only accepts aliases for routes.\nThe alias: 'bar' did not match a route."
+            expect(err.message).to.eq "`cy.wait()` only accepts aliases for routes.\nThe alias: `bar` did not match a route."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/wait")
             done()
 
           cy
@@ -382,7 +384,7 @@ describe "src/cy/commands/waiting", {
           response = 0
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 3rd request to the route: 'get.users'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `200ms` for the 3rd request to the route: `get.users`. No request ever occurred."
             done()
 
           cy.on "command:retry", =>
@@ -404,7 +406,7 @@ describe "src/cy/commands/waiting", {
           response = 0
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 2nd request to the route: 'getUsers'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `200ms` for the 2nd request to the route: `getUsers`. No request ever occurred."
             done()
 
           ## dont send the 2nd response
@@ -426,7 +428,7 @@ describe "src/cy/commands/waiting", {
           request = 0
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 2nd request to the route: 'getUsers'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `200ms` for the 2nd request to the route: `getUsers`. No request ever occurred."
             done()
 
           ## dont send the 2nd request
@@ -445,7 +447,7 @@ describe "src/cy/commands/waiting", {
           responseTimeout: 100
         }, (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st response to the route: 'response'. No response ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `100ms` for the 1st response to the route: `response`. No response ever occurred."
             done()
 
           cy
@@ -460,7 +462,7 @@ describe "src/cy/commands/waiting", {
           responseTimeout: 200
         }, (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 2nd response to the route: 'response'. No response ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `200ms` for the 2nd response to the route: `response`. No response ever occurred."
             done()
 
           cy
@@ -476,7 +478,7 @@ describe "src/cy/commands/waiting", {
           responseTimeout: 200
         }, (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 1st response to the route: 'bar'. No response ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `200ms` for the 1st response to the route: `bar`. No response ever occurred."
             done()
 
           cy
@@ -498,7 +500,7 @@ describe "src/cy/commands/waiting", {
             null
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 200ms for the 2nd request to the route: 'getUsers'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `200ms` for the 2nd request to the route: `getUsers`. No request ever occurred."
             done()
 
           cy
@@ -519,7 +521,7 @@ describe "src/cy/commands/waiting", {
             _.defer => win.$.get("/timeout?ms=2002")
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 500ms for the 1st request to the route: 'get.three'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `500ms` for the 1st request to the route: `get.three`. No request ever occurred."
             done()
 
           cy.server()
@@ -540,7 +542,7 @@ describe "src/cy/commands/waiting", {
               options._runnableTimeout = 0
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.wait() timed out waiting 1000ms for the 1st response to the route: 'getThree'. No response ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `1000ms` for the 1st response to the route: `getThree`. No response ever occurred."
             done()
 
           cy
@@ -558,7 +560,8 @@ describe "src/cy/commands/waiting", {
 
         it "throws when passed multiple string arguments", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq "cy.wait() was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
+            expect(err.message).to.eq "`cy.wait()` was passed invalid arguments. You cannot pass multiple strings. If you're trying to wait for multiple routes, use an array."
+            expect(err.docsUrl).to.eq("https://on.cypress.io/wait")
             done()
 
           cy.wait("@foo", "@bar")
@@ -610,8 +613,7 @@ describe "src/cy/commands/waiting", {
             expect(xhr.url).to.include "/users?num=3"
             expect(xhr.responseBody).to.deep.eq resp
 
-      ## TODO: fixme failing in CI sometimes
-      ## https://circleci.com/gh/cypress-io/cypress/5655
+      ## FIXME: failing in CI sometimes https://circleci.com/gh/cypress-io/cypress/5655
       it.skip "waits for the 4th request before resolving", ->
         resp = {foo: "foo"}
         response = 0
@@ -638,56 +640,26 @@ describe "src/cy/commands/waiting", {
       null
 
     describe "errors", ->
-      describe "invalid 1st argument", {
-        defaultCommandTimeout: 50
-      }, ->
-        it "is NaN", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: NaN"
-            done()
-          cy.get("body").wait(0/0)
+      describe "invalid 1st argument", ->
+        beforeEach ->
+          Cypress.config("defaultCommandTimeout", 50)
 
-        it "Infinity", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: Infinity"
-            done()
-          cy.get("body").wait(Infinity)
-
-        it "is empty array", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: []"
-            done()
-          cy.get("body").wait([])
-
-        it "is null", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: null"
-            done()
-          cy.get("body").wait(null)
-
-        it "is undefined", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: undefined"
-            done()
-          cy.get("body").wait(undefined)
-
-        it "is bool", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: true"
-            done()
-          cy.get("body").wait(true)
-
-        it "is Object", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: {}"
-            done()
-          cy.get("body").wait({})
-
-        it "is Symbol", (done) ->
-          cy.on "fail", (err) =>
-            expect(err.message).to.eq "cy.wait() only accepts a number, an alias of a route, or an array of aliases of routes. You passed: #{Symbol.iterator.toString()}"
-            done()
-          cy.get("body").wait(Symbol.iterator)
+        _.each [
+            { type: 'NaN', val: 0/0, errVal: 'NaN' },
+            { type: 'Infinity', val: Infinity, errVal: 'Infinity' },
+            { type: 'Array', val: [] },
+            { type: 'null', val: null },
+            { type: 'undefined', val: undefined },
+            { type: 'Boolean', val: true },
+            { type: 'Object', val: {} },
+            { type: 'Symbol', val: Symbol.iterator, errVal: "Symbol(Symbol.iterator)" }
+          ], (attrs) =>
+          it "throws when 1st arg is #{attrs.type}", (done) =>
+            cy.on "fail", (err) =>
+              expect(err.message).to.eq "`cy.wait()` only accepts a number, an alias of a route, or an array of aliases of routes. You passed: `#{attrs.errVal || JSON.stringify(attrs.val)}`"
+              expect(err.docsUrl).to.eq("https://on.cypress.io/wait")
+              done()
+            cy.get("body").wait(attrs.val)
 
     describe ".log", ->
       beforeEach ->
@@ -789,15 +761,14 @@ describe "src/cy/commands/waiting", {
           cy.on "command:retry", ->
             numRetries += 1
 
-          cy
-            .server()
-            .route(/foo/, {}).as("getFoo")
-            .noop({}).wait("@getFoo")
+          cy.server()
+          cy.route(/foo/, {}).as("getFoo")
+          cy.noop({}).wait("@getFoo")
 
         it "only logs once", (done) ->
           cy.on "fail", (err) =>
             expect(@logs.length).to.eq(1)
-            expect(err.message).to.eq("cy.wait() could not find a registered alias for: \'@foo\'.\nYou have not aliased anything yet.")
+            expect(err.message).to.eq("`cy.wait()` could not find a registered alias for: `@foo`.\nYou have not aliased anything yet.")
             done()
 
           cy.wait("@foo")
@@ -809,7 +780,7 @@ describe "src/cy/commands/waiting", {
             lastLog = @lastLog
 
             expect(lastLog.get("error")).to.eq err
-            expect(err.message).to.include "cy.wait() timed out waiting 100ms for the 1st request to the route: 'getBar'. No request ever occurred."
+            expect(err.message).to.include "`cy.wait()` timed out waiting `100ms` for the 1st request to the route: `getBar`. No request ever occurred."
             done()
 
           cy

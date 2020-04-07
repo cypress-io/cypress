@@ -13,6 +13,13 @@ namespace CypressMomentTests {
   Cypress.moment().startOf('week') // $ExpectType Moment
 }
 
+namespace CypressSinonTests {
+  Cypress.sinon // $ExpectType SinonApi
+  const stub = cy.stub()
+  stub(2, 'foo')
+  expect(stub).to.have.been.calledWith(Cypress.sinon.match.number, Cypress.sinon.match('foo'))
+}
+
 namespace CypressJqueryTests {
   Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>

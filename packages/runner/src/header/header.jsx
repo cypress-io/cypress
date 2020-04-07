@@ -28,6 +28,7 @@ export default class Header extends Component {
             title='Open Selector Playground'
             visible={selectorPlaygroundModel.isOpen ? false : null}
             wrapperClassName='selector-playground-toggle-tooltip-wrapper'
+            className='cy-tooltip'
           >
             <button
               aria-label='Open Selector Playground'

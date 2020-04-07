@@ -54,7 +54,7 @@ $Log.command = () => {
   return $errUtils.throwErrByPath('miscellaneous.command_log_renamed')
 }
 
-const throwDeprecatedCommandInterface = (key, method) => {
+const throwDeprecatedCommandInterface = (key = 'commandName', method) => {
   let signature = ''
 
   switch (method) {
@@ -330,8 +330,11 @@ class $Cypress {
 
       case 'runner:fail': {
         // mocha runner calculated a failure
-
         const err = args[0].err
+
+        if (err.type === 'existence' || $dom.isDom(err.actual) || $dom.isDom(err.expected)) {
+          err.showDiff = false
+        }
 
         if (err.actual) {
           err.actual = chai.util.inspect(err.actual)
@@ -508,7 +511,7 @@ class $Cypress {
           // attaching long stace traces
           // which otherwise make this err
           // unusably long
-          const err = $errUtils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.__stackCleaned__ = true
           err.backend = true
@@ -530,7 +533,7 @@ class $Cypress {
         const e = reply.error
 
         if (e) {
-          const err = $errUtils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.automation = true
 

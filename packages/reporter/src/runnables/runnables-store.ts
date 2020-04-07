@@ -26,6 +26,8 @@ interface Props {
 
 export type LogProps = AgentProps | CommandProps | RouteProps
 
+export type RunnableArray = Array<TestModel | SuiteModel>
+
 type Log = AgentModel | CommandModel | RouteModel
 
 export interface RootRunnable {
@@ -38,7 +40,7 @@ type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
 
 class RunnablesStore {
   @observable isReady = defaults.isReady
-  @observable runnables: Array<TestModel | SuiteModel> = []
+  @observable runnables: RunnableArray = []
   hasTests: boolean = false
   hasSingleTest: boolean = false
 

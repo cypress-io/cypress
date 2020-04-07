@@ -1,6 +1,6 @@
 import { action, computed, observable } from 'mobx'
 
-import Err from '../lib/err-model'
+import Err from '../errors/err-model'
 import Instrument, { InstrumentProps } from '../instruments/instrument-model'
 import { TimeoutID } from '../lib/types'
 
