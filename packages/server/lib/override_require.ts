@@ -4,7 +4,7 @@ export const overrideRequire = (requireOverride) => {
   const _load = Module._load
 
   Module._load = function (...args: any[]) {
-    let pkg = args
+    const pkg = args
 
     if (requireOverride) {
       const mockedDependency = requireOverride(pkg[0], _load)

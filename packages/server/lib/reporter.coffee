@@ -3,12 +3,12 @@ path  = require("path")
 ## mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 ## and prevents accidently upgrading this one
 ## TODO: look into upgrading this to version in driver
-Mocha = require("mocha-2.4.5")
-mochaReporters = require("mocha-2.4.5/lib/reporters")
+Mocha = require("mocha-4.1.0")
+mochaReporters = require("mocha-4.1.0/lib/reporters")
 
 debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
-{ overrideRequire } = require('./overrideRequire')
+{ overrideRequire } = require('./override_require')
 
 
 mochaErrMsgExtractionRe = /^([^:]+): expected/
@@ -122,7 +122,7 @@ mergeErr = (runnable, runnables, stats) ->
   ## "Timed out retrying: expected...", it thinks the error name is
   ## "Timed out retrying" and replaces the entire message with only that
   ##
-  ## Here's the code we're patching in the mocha version currently being used (2.4.5):
+  ## Here's the code we're patching in the mocha version currently being used (4.1.0):
   ## https://github.com/mochajs/mocha/blob/2a8594424c73ffeca41ef1668446372160528b4a/lib/reporters/base.js#L208
   if test.err and test.err.message
     message = new String(test.err.message)
