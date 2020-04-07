@@ -24,7 +24,7 @@ exports['e2e return value failing1 1'] = `
   0 passing
   3 failing
 
-  1)  errors when invoking commands and return a different value:
+  1) errors when invoking commands and return a different value:
      CypressError: Cypress detected that you invoked one or more cy commands but returned a different value.
 
 The return value was:
