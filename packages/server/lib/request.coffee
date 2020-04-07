@@ -519,7 +519,7 @@ module.exports = (options = {}) ->
 
         automationFn(automationCmd, cookie)
         .catch (err) ->
-          debug('automation failed clearing cookie %o', { automationCmd, cookie, err })
+          debug('automation threw an error during cookie change %o', { automationCmd, cyCookie, cookie, err })
 
     sendStream: (headers, automationFn, options = {}) ->
       _.defaults options, {
