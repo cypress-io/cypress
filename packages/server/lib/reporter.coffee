@@ -1,14 +1,31 @@
 _     = require("lodash")
 path  = require("path")
-Mocha = require("mocha")
+## mocha-* is used to allow us to have later versions of mocha specified in devDependencies
+## and prevents accidently upgrading this one
+## TODO: look into upgrading this to version in driver
+Mocha = require("mocha-2.4.5")
+mochaReporters = require("mocha-2.4.5/lib/reporters")
+
 debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
+{ overrideRequire } = require('./overrideRequire')
 
-mochaReporters = require("mocha/lib/reporters")
 
 mochaErrMsgExtractionRe = /^([^:]+): expected/
 
 STATS = "suites tests passes pending failures start end duration".split(" ")
+
+## version 4.1.0 is what we've historically ran our e2e tests against
+## there is no other reason it is specifically 4.1.0
+## TODO: look into upgrading to version in driver
+customReporterMocha = path.dirname(require.resolve('mocha-4.1.0'))
+
+## override calls to `require('mocha*')` when to always resolve with a mocha we control
+## otherwise mocha will be resolved from project's node_modules and might not work with our code
+overrideRequire((depPath, _load) ->
+  if depPath is 'mocha' or depPath.startsWith('mocha/')
+    return _load(depPath.replace('mocha', customReporterMocha))
+)
 
 if Mocha.Suite.prototype.titlePath
   throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
@@ -20,7 +37,7 @@ Mocha.Suite.prototype.titlePath = ->
     result = result.concat(@parent.titlePath())
 
   if !@root
-    result.push(@title);
+    result.push(@title)
 
   return result
 

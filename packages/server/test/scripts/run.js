@@ -110,11 +110,14 @@ commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
-  '--compilers ts:@packages/ts/register,coffee:@packages/coffee/register',
+  '-r @packages/ts/register',
+  '-r @packages/coffee/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
+  // restore mocha 2.x behavior to force end process after spec run
+  '--exit',
 )
 
 const env = _.clone(process.env)

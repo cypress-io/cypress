@@ -4,7 +4,6 @@ require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
-const niv = require('npm-install-version')
 const path = require('path')
 const http = require('http')
 const human = require('human-interval')
@@ -377,79 +376,39 @@ const e2e = {
   },
 
   setup (options = {}) {
-    let npmI
+    // cleanup old node_modules that may have been around from legacy tests
+    before(() => {
+      return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
+    })
 
-    npmI = options.npmInstall
-
-    if (npmI) {
-      before(function () {
-        // npm install needs extra time
-        this.timeout(human('2 minutes'))
-
-        return cp.execAsync('npm install', {
-          cwd: Fixtures.path('projects/e2e'),
-          maxBuffer: 1024 * 1000,
-        })
-        .then(() => {
-          if (_.isArray(npmI)) {
-            const copyToE2ENodeModules = (module) => {
-              return fs.copyAsync(
-                path.resolve('node_modules', module), Fixtures.path(`projects/e2e/node_modules/${module}`),
-              )
-            }
-
-            return Promise
-            .map(npmI, niv.install)
-            .then(() => Promise.map(npmI, copyToE2ENodeModules))
-          }
-          // symlinks mess up fs.copySync
-          // and bin files aren't necessary for these tests
-        }).then(() => {
-          return fs.removeAsync(Fixtures.path('projects/e2e/node_modules/.bin'))
-        })
-      })
-
-      // now cleanup the node modules after because these add a lot
-      // of copy time for the Fixtures scaffolding
-      after(() => {
-        return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
-      })
-    }
-
-    beforeEach(function () {
+    beforeEach(async function () {
       // after installing node modules copying all of the fixtures
       // can take a long time (5-15 secs)
       this.timeout(human('2 minutes'))
+      Fixtures.scaffold()
 
       Fixtures.scaffold()
 
       sinon.stub(process, 'exit')
 
-      return Promise.try(() => {
-        let servers
+      if (options.servers) {
+        const optsServers = [].concat(options.servers)
 
-        servers = options.servers
+        const servers = await Promise.map(optsServers, startServer)
 
-        if (servers) {
-          servers = [].concat(servers)
-
-          return Promise.map(servers, startServer)
-          .then((servers) => {
-            this.servers = servers
-          })
-        }
-
+        this.servers = servers
+      } else {
         this.servers = null
-      }).then(() => {
-        const s = options.settings
+      }
 
-        if (s) {
-          return settings.write(e2ePath, s)
-        }
-      })
+      const s = options.settings
+
+      if (s) {
+        await settings.write(e2ePath, s)
+      }
     })
 
-    return afterEach(function () {
+    afterEach(async function () {
       process.env = _.clone(env)
 
       this.timeout(human('2 minutes'))
@@ -459,7 +418,7 @@ const e2e = {
       const s = this.servers
 
       if (s) {
-        return Promise.map(s, stopServer)
+        await Promise.map(s, stopServer)
       }
     })
   },
