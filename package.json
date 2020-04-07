@@ -60,7 +60,8 @@
     "webpack": "^4.18.1"
   },
   "files": [
-    "*.js"
+    "*.js",
+    "*.d.ts"
   ],
   "types": "index.d.ts",
   "license": "MIT",
