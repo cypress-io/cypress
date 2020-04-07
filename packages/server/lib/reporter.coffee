@@ -3,8 +3,9 @@ path  = require("path")
 ## mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 ## and prevents accidently upgrading this one
 ## TODO: look into upgrading this to version in driver
-Mocha = require("mocha-4.1.0")
-mochaReporters = require("mocha-4.1.0/lib/reporters")
+Mocha = require("mocha-7.1.0")
+mochaReporters = require("mocha-7.1.0/lib/reporters")
+mochaCreateStatsCollector = require("mocha-7.1.0/lib/stats-collector")
 
 debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
@@ -15,16 +16,13 @@ mochaErrMsgExtractionRe = /^([^:]+): expected/
 
 STATS = "suites tests passes pending failures start end duration".split(" ")
 
-## version 4.1.0 is what we've historically ran our e2e tests against
-## there is no other reason it is specifically 4.1.0
-## TODO: look into upgrading to version in driver
-customReporterMocha = path.dirname(require.resolve('mocha-4.1.0'))
 
 ## override calls to `require('mocha*')` when to always resolve with a mocha we control
 ## otherwise mocha will be resolved from project's node_modules and might not work with our code
+customReporterMochaPath = path.dirname(require.resolve('mocha-7.1.0'))
 overrideRequire((depPath, _load) ->
   if depPath is 'mocha' or depPath.startsWith('mocha/')
-    return _load(depPath.replace('mocha', customReporterMocha))
+    return _load(depPath.replace('mocha', customReporterMochaPath))
 )
 
 # if Mocha.Suite.prototype.titlePath
@@ -122,7 +120,7 @@ mergeErr = (runnable, runnables, stats) ->
   ## "Timed out retrying: expected...", it thinks the error name is
   ## "Timed out retrying" and replaces the entire message with only that
   ##
-  ## Here's the code we're patching in the mocha version currently being used (4.1.0):
+  ## Here's the code we're patching in the mocha version currently being used (7.1.0):
   ## https://github.com/mochajs/mocha/blob/2a8594424c73ffeca41ef1668446372160528b4a/lib/reporters/base.js#L208
   if test.err and test.err.message
     message = new String(test.err.message)
@@ -177,13 +175,15 @@ class Reporter
 
   setRunnables: (rootRunnable = {}) ->
     ## manage stats ourselves
-    @stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
     @runnables = {}
     rootRunnable = @_createRunnable(rootRunnable, "suite")
     reporter = Reporter.loadReporter(@reporterName, @projectRoot)
     @mocha = new Mocha({reporter: reporter})
     @mocha.suite = rootRunnable
     @runner = new Mocha.Runner(rootRunnable)
+    mochaCreateStatsCollector(@runner)
+    @stats = @runner.stats
+    
     @reporter = new @mocha._reporter(@runner, {
       reporterOptions: @reporterOptions
     })
