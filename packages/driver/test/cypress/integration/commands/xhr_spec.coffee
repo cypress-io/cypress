@@ -2171,3 +2171,27 @@ describe "src/cy/commands/xhr", ->
       #       win.$.get("/foo")
       #       null
       #     .respond()
+
+  context "options immutability", ->
+    it "does not mutate options for cy.server()", ->
+      options = { enable: false }
+      
+      cy
+      .server(options)
+      .window().then ->
+        expect(options).to.deep.eq({ enable: false })
+    
+    it "does not mutate options for cy.route()", ->
+      options = {
+        url: /foo/
+        respond: false
+      }
+
+      cy
+      .server()
+      .route(options)
+      .window().then ->
+        expect(options).to.deep.eq({
+          url: /foo/
+          respond: false
+        })

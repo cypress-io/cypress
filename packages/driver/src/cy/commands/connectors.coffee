@@ -38,15 +38,16 @@ module.exports = (Commands, Cypress, cy, state, config) ->
   ## thens can return more "thenables" which are not resolved
   ## until they're 'really' resolved, so naturally this API
   ## supports nesting promises
-  thenFn = (subject, options, fn) ->
+  thenFn = (subject, userOptions, fn) ->
     ctx = @
 
-    if _.isFunction(options)
-      fn = options
-      options = {}
+    if _.isFunction(userOptions)
+      fn = userOptions
+      userOptions = {}
 
-    _.defaults options,
+    options = _.defaults({}, userOptions, {
       timeout: cy.timeout()
+    })
 
     ## clear the timeout since we are handling
     ## it ourselves
@@ -139,27 +140,26 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       }
     .finally(cleanup)
 
-  invokeItsFn = (subject, str, options, args...) ->
-    return invokeBaseFn(options or { log: true }, subject, str, args...)
+  invokeItsFn = (subject, str, userOptions, args...) ->
+    return invokeBaseFn(userOptions or { log: true }, subject, str, args...)
 
-  invokeFn = (subject, optionsOrStr, args...) ->
-    optionsPassed = _.isObject(optionsOrStr) and !_.isFunction(optionsOrStr)
-    options = null
+  invokeFn = (subject, userOptionsOrStr, args...) ->
+    userOptionsPassed = _.isObject(userOptionsOrStr) and !_.isFunction(userOptionsOrStr)
+    userOptions = null
     str = null
 
-    if not optionsPassed
-      str = optionsOrStr
-      options = { log: true }
+    if not userOptionsPassed
+      str = userOptionsOrStr
+      userOptions = { log: true }
     else
-      options = optionsOrStr
+      userOptions = userOptionsOrStr
       if args.length > 0
         str = args[0]
         args = args.slice(1)
 
-    return invokeBaseFn(options, subject, str, args...)
+    return invokeBaseFn(userOptions, subject, str, args...)
 
-  invokeBaseFn = (options, subject, str, args...) ->
-
+  invokeBaseFn = (userOptions, subject, str, args...) ->
     ## name could be invoke or its!
     name = state("current").get("name")
 
@@ -178,6 +178,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     message = getMessage()
 
     traversalErr = null
+
+    ## copy userOptions because _log is added below.
+    options = _.extend({}, userOptions)
 
     if options.log
       options._log = Cypress.log
@@ -199,7 +202,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         args: { cmd: name, identifier: if isCmdIts then "property" else "function" }
       })
 
-    if not _.isObject(options) or _.isFunction(options)
+    if not _.isObject(userOptions) or _.isFunction(userOptions)
       $errUtils.throwErrByPath("invoke_its.invalid_options_arg", {
         onFail: options._log
         args: { cmd: name }
@@ -402,11 +405,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       thenFn(subject, options, fn)
 
     each: (subject, options, fn) ->
+      userOptions = options
       ctx = @
 
       if _.isUndefined(fn)
-        fn = options
-        options = {}
+        fn = userOptions
+        userOptions = {}
 
       if not _.isFunction(fn)
         $errUtils.throwErrByPath("each.invalid_argument")
@@ -460,7 +464,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
           return ret
 
-        thenFn(el, options, callback, state)
+        thenFn(el, userOptions, callback, state)
 
       ## generate a real array since bluebird is finicky and
       ## doesnt want an 'array-like' structure like jquery instances

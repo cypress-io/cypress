@@ -278,14 +278,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({
     server: (options) ->
-      if arguments.length is 0
-        options = {}
+      userOptions = options
 
-      if not _.isObject(options)
+      if arguments.length is 0
+        userOptions = {}
+
+      if not _.isObject(userOptions)
         $errUtils.throwErrByPath("server.invalid_argument")
 
-      _.defaults options,
+      options = _.defaults({}, userOptions, {
         enable: true ## set enable to false to turn off stubbing
+      })
 
       ## if we disable the server later make sure
       ## we cannot add cy.routes to it
