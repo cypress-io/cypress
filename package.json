@@ -7,7 +7,7 @@
     "ban": "ban",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
+    "lint": "eslint --ext .js,.jsx,.json .",
     "lint-fix": "yarn lint --fix",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
@@ -27,6 +27,8 @@
     "@babel/core": "^7.0.1",
     "@babel/preset-env": "^7.0.0",
     "@cypress/eslint-plugin-dev": "5.0.0",
+    "@typescript-eslint/eslint-plugin": "2.27.0",
+    "@typescript-eslint/parser": "2.27.0",
     "babel-loader": "^8.0.2",
     "ban-sensitive-files": "1.9.0",
     "chai": "4.1.2",
@@ -60,6 +62,7 @@
   "files": [
     "*.js"
   ],
+  "types": "index.d.ts",
   "license": "MIT",
   "repository": {
     "type": "git",
