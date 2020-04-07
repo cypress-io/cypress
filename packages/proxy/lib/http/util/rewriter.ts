@@ -1,5 +1,5 @@
 import * as inject from './inject'
-import * as jsRewriter from './js-rewriter'
+import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
 
 const doctypeRe = /(<\!doctype.*?>)/i
@@ -7,25 +7,29 @@ const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
 
+type WantsInjection = 'full' | 'partial' | false
+
 function getRewriter (useSourceRewriting: boolean) {
-  return useSourceRewriting ? jsRewriter : regexRewriter
+  return useSourceRewriting ? astRewriter : regexRewriter
 }
 
-export function html (html: string, domainName: string, wantsInjection, wantsSecurityRemoved, isHtml, useSourceRewriting) {
+function getHtmlToInject (domainName: string, wantsInjection: WantsInjection) {
+  switch (wantsInjection) {
+    case 'full':
+      return inject.full(domainName)
+    case 'partial':
+      return inject.partial(domainName)
+    default:
+      return
+  }
+}
+
+export function html (html: string, domainName: string, wantsInjection: WantsInjection, wantsSecurityRemoved, isHtml, useSourceRewriting) {
   const replace = (re, str) => {
     return html.replace(re, str)
   }
 
-  const htmlToInject = (() => {
-    switch (wantsInjection) {
-      case 'full':
-        return inject.full(domainName)
-      case 'partial':
-        return inject.partial(domainName)
-      default:
-        return
-    }
-  })()
+  const htmlToInject = getHtmlToInject(domainName, wantsInjection)
 
   // strip clickjacking and framebusting
   // from the HTML if we've been told to
@@ -33,6 +37,11 @@ export function html (html: string, domainName: string, wantsInjection, wantsSec
     html = getRewriter(useSourceRewriting).strip(html, { isHtml })
   }
 
+  if (!htmlToInject) {
+    return html
+  }
+
+  // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way
   switch (false) {
     case !headRe.test(html):
       return replace(headRe, `$1 ${htmlToInject}`)

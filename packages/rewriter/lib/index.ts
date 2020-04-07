@@ -1,3 +1,3 @@
-export { HtmlJsRewriter, rewriteHtmlJs } from './html'
+export { HtmlJsRewriter, RewriteHtmlNodeFn, rewriteHtmlJs } from './html'
 
 export { rewriteJs, RewriteNodeFn } from './js'
