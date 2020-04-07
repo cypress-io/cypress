@@ -32,7 +32,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  ReferenceError: foo is not defined
       [stack trace lines]
 
 
@@ -115,7 +114,6 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  ReferenceError: foo is not defined
       [stack trace lines]
 
 
@@ -210,11 +208,6 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-  Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
-  
-    > foo is not defined
-  
-  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
 
   2) foo fails with setTimeout and done:
@@ -331,11 +324,6 @@ This behavior is configurable, and you can choose to turn this off by listening 
 https://on.cypress.io/uncaught-exception-from-application
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`foo\`
-  Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
-  
-    > foo is not defined
-  
-  When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
 
 

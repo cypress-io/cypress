@@ -26,30 +26,60 @@ const mergeErrProps = (origErr, ...newProps) => {
   return _.extend(origErr, ...newProps)
 }
 
-const replaceMsgInStack = (err, newMsg) => {
-  const { message, name, stack } = err
+const stackWithReplacedProps = (err, props) => {
+  const {
+    message: originalMessage,
+    name: originalName,
+    stack: originalStack,
+  } = err
 
-  if (!stack) return stack
+  const {
+    message: newMessage,
+    name: newName,
+  } = props
 
-  if (message) {
-    // reset stack by replacing the original message with the new one
-    return stack.replace(message, newMsg)
+  // if stack doesn't already exist, leave it as is
+  if (!originalStack) return originalStack
+
+  let stack
+
+  if (newMessage) {
+    stack = originalStack.replace(originalMessage, newMessage)
+  }
+
+  if (newName) {
+    stack = originalStack.replace(originalName, newName)
+  }
+
+  if (originalMessage) {
+    return stack
   }
 
   // if message is undefined or an empty string, the error (in Chrome at least)
   // is 'Error\n\n<stack>' and it results in wrongly prepending the
   // new message, looking like '<newMsg>Error\n\n<stack>'
-  return stack.replace(name, `${name}: ${newMsg}`)
+  const message = newMessage || err.message
+  const name = newName || err.name
+
+  return originalStack.replace(originalName, `${name}: ${message}`)
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
+  // TODO: can we remove this?
   err.stack = $stackUtils.normalizedStack(err)
 
-  const newMsg = cb(err.message, newErrMsg)
-  const newStack = replaceMsgInStack(err, newMsg)
+  const newMessage = cb(err.message, newErrMsg)
+  const newStack = stackWithReplacedProps(err, { message: newMessage })
 
-  err.message = newMsg
+  err.message = newMessage
   err.stack = newStack
+
+  return err
+}
+
+const modifyErrName = (err, name) => {
+  err.stack = stackWithReplacedProps(err, { name })
+  err.name = name
 
   return err
 }
@@ -227,12 +257,10 @@ const createUncaughtException = (type, err) => {
     errMsg: err.message,
   })
 
-  mergeErrProps(err, {
-    name: `Uncaught ${err.name}`,
-    docsUrl: uncaughtErr.docsUrl,
-  })
-
+  modifyErrName(err, `Uncaught ${err.name}`)
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
+
+  err.docsUrl = uncaughtErr.docsUrl
 
   return err
 }

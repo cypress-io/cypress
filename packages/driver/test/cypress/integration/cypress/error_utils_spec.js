@@ -432,7 +432,7 @@ describe('driver/src/cypress/error_utils', () => {
 
     beforeEach(() => {
       err = new Error('original message')
-      err.stack = 'original message\n\nat foo (path/to/file:1:1)'
+      err.stack = 'Error: original message\n\nat foo (path/to/file:1:1)'
     })
 
     it('mutates the error passed in and returns it', () => {
@@ -459,6 +459,12 @@ describe('driver/src/cypress/error_utils', () => {
 
       expect(result.message).to.include('The following error originated from your application code, not from Cypress')
       expect(result.message).to.include('> original message')
+    })
+
+    it('replaces original name and message in stack', () => {
+      const result = $errUtils.createUncaughtException('spec', err)
+
+      expect(result.stack).not.to.include('Error: original message')
     })
 
     it('retains the stack of the original error', () => {
