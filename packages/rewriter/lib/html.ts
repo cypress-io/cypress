@@ -51,24 +51,20 @@ export function rewriteHtml (html: string, rewriteTokenFn: RewriteHtmlNodeFn): s
   .join('')
 }
 
-function _htmlJsRewriteFn (rewriteJsFn: js.RewriteNodeFn, rewriteHtmlFn?: RewriteHtmlNodeFn) {
+function _htmlJsRewriteFn () {
   return function (token) {
     if (token.type === 'token:script-tag-content') {
-      return js.rewriteJs(token.content, rewriteJsFn)
-    }
-
-    if (rewriteHtmlFn) {
-      return rewriteHtmlFn(token)
+      return js.rewriteJs(token.content)
     }
 
     return token.content
   }
 }
 
-export function rewriteHtmlJs (html: string, rewriteJsFn: js.RewriteNodeFn, rewriteHtmlFn?: RewriteHtmlNodeFn): string {
-  return rewriteHtml(html, _htmlJsRewriteFn(rewriteJsFn, rewriteHtmlFn))
+export function rewriteHtmlJs (html: string): string {
+  return rewriteHtml(html, _htmlJsRewriteFn())
 }
 
-export function HtmlJsRewriter (rewriteJsFn: js.RewriteNodeFn, rewriteHtmlFn?: RewriteHtmlNodeFn): stream.Transform {
-  return HtmlRewriter(_htmlJsRewriteFn(rewriteJsFn, rewriteHtmlFn))
+export function HtmlJsRewriter (): stream.Transform {
+  return HtmlRewriter(_htmlJsRewriteFn())
 }
