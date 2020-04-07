@@ -27,22 +27,22 @@ overrideRequire((depPath, _load) ->
     return _load(depPath.replace('mocha', customReporterMocha))
 )
 
-if Mocha.Suite.prototype.titlePath
-  throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
+# if Mocha.Suite.prototype.titlePath
+#   throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
 
-Mocha.Suite.prototype.titlePath = ->
-  result = []
+# Mocha.Suite.prototype.titlePath = ->
+#   result = []
 
-  if @parent
-    result = result.concat(@parent.titlePath())
+#   if @parent
+#     result = result.concat(@parent.titlePath())
 
-  if !@root
-    result.push(@title)
+#   if !@root
+#     result.push(@title)
 
-  return result
+#   return result
 
-Mocha.Runnable.prototype.titlePath = ->
-  @parent.titlePath().concat([@title])
+# Mocha.Runnable.prototype.titlePath = ->
+#   @parent.titlePath().concat([@title])
 
 getParentTitle = (runnable, titles) ->
   if not titles
