@@ -323,7 +323,8 @@ exports['e2e requests prints long http props on fail 1'] = `
   0 passing
   1 failing
 
-  1) when status code isnt 2xx or 3xx fails:
+  1) when status code isnt 2xx or 3xx
+       fails:
      CypressError: \`cy.request()\` failed on:
 
 http://localhost:2294/myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong
