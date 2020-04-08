@@ -78,46 +78,41 @@ module.exports = {
 
     const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
 
-    let resolved
+    // if our file is an integration test
+    // then figure out the absolute path
+    // to it
+    if (isIntegrationTestRe.test(spec)) {
+      spec = getRelativePathToSpec(spec)
 
-    switch (false) {
-      // if our file is an integration test
-      // then figure out the absolute path
-      // to it
-      case !isIntegrationTestRe.test(spec):
-        spec = getRelativePathToSpec(spec)
+      // now simply join this with our integrationFolder
+      // which makes it an absolute path
+      const resolved = path.join(config.integrationFolder, spec)
 
-        // now simply join this with our integrationFolder
-        // which makes it an absolute path
-        resolved = path.join(config.integrationFolder, spec)
+      debug('resolved path %s', resolved)
 
-        debug('resolved path %s', resolved)
-
-        return resolved
-
-        // // commented out until we implement unit testing
-        // when isUnitTestRe.test(spec)
-
-        // // strip off the unit part
-        // spec = path.relative("unit", spec)
-
-        // // now simply resolve this with our unitFolder
-        // // which makes it an absolute path
-        // path.join(config.unitFolder, spec)
-
-      case experimentalComponentTestingEnabled && !isComponentTestRe.test(spec):
-        spec = getRelativePathToSpec(spec)
-
-        resolved = path.join(config.componentFolder, spec)
-
-        debug('resolved component spec path %o', { spec, componentFolder: config.componentFolder, resolved })
-
-        return resolved
-
-      default:
-        debug('returning default path %s', spec)
-
-        return spec
+      return resolved
     }
+
+    if (experimentalComponentTestingEnabled && isComponentTestRe.test(spec)) {
+      spec = getRelativePathToSpec(spec)
+
+      const resolved = path.join(config.componentFolder, spec)
+
+      debug('resolved component spec path %o', { spec, componentFolder: config.componentFolder, resolved })
+
+      return resolved
+    }
+
+    // when isUnitTestRe.test(spec)
+
+    // // strip off the unit part
+    // spec = path.relative("unit", spec)
+
+    // // now simply resolve this with our unitFolder
+    // // which makes it an absolute path
+    // path.join(config.unitFolder, spec)
+    debug('returning default path %s', spec)
+
+    return spec
   },
 }
