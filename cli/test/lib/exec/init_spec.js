@@ -103,5 +103,19 @@ describe('exec init', () => {
         expect(spawn.start).to.be.calledWith(['--init-project', '--typescript'])
       })
     })
+
+    it('spawns with no-eslint', () => {
+      return init.start({ eslint: false })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--init-project', '--no-eslint'])
+      })
+    })
+
+    it('spawns with chai-friendly', () => {
+      return init.start({ chaiFriendly: true })
+      .then(() => {
+        expect(spawn.start).to.be.calledWith(['--init-project', '--chai-friendly'])
+      })
+    })
   })
 })

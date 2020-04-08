@@ -59,6 +59,14 @@ module.exports = {
       args.push('--typescript')
     }
 
+    if (options.eslint === false) {
+      args.push('--no-eslint')
+    }
+
+    if (options.chaiFriendly) {
+      args.push('--chai-friendly')
+    }
+
     debug('init cypress from options %j', options)
     debug('command line arguments %j', args)
 
