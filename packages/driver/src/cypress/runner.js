@@ -815,9 +815,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
     // else  do the same thing as mocha here
     err = $errUtils.appendErrMsg(err, append())
 
-    // remove this error's stack since it gives no valuable context
-    err.stack = ''
-
     const throwErr = function () {
       throw err
     }
