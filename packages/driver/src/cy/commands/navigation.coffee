@@ -386,20 +386,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.clearTimeout("reload")
 
       cleanup = null
-      options = null
+      options = _.defaults({}, userOptions, {
+        log: true
+        timeout: config("pageLoadTimeout")
+      })
 
       reload = ->
         new Promise (resolve, reject) ->
           forceReload ?= false
-          userOptions     ?= {}
+          userOptions ?= {}
 
           if not _.isObject(userOptions)
             throwArgsErr()
-
-          options = _.defaults {}, userOptions, {
-            log: true
-            timeout: config("pageLoadTimeout")
-          }
 
           if not _.isBoolean(forceReload)
             throwArgsErr()
