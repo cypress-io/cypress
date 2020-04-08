@@ -11,6 +11,8 @@ export interface Args {
   video?: boolean
   example?: boolean
   typescript?: boolean
+  eslint?: boolean
+  chaiFriendly?: boolean
 }
 
 export interface Config {
@@ -25,4 +27,6 @@ export interface InitConfig {
   config: Config
   example?: boolean
   typescript?: boolean
+  eslint?: boolean
+  chaiFriendly?: boolean
 }

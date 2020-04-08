@@ -85,6 +85,14 @@ export const fromCommandArgs = (args: Args) => {
     result.typescript = true
   }
 
+  if (result.eslint !== undefined) {
+    result.eslint = args.eslint
+  }
+
+  if (args.chaiFriendly) {
+    result.chaiFriendly = true
+  }
+
   if (args.fixtures === false) {
     result.config.fixturesFolder = false
   }
