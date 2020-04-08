@@ -173,7 +173,7 @@ class Reporter
     @projectRoot = projectRoot
     @reporterOptions = reporterOptions
 
-  setRunnables: (rootRunnable = {}) ->
+  setRunnables: (rootRunnable = {title: ''}) ->
     ## manage stats ourselves
     @stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
     @runnables = {}
