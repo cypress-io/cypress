@@ -2,21 +2,60 @@ const _ = require('lodash')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
 
-const isBrowser = function (config, obj = '') {
-  if (_.isString(obj)) {
-    const name = obj.toLowerCase()
-    const currentName = config.browser.name.toLowerCase()
+const _isBrowser = function (browser, matcher, errPrefix) {
+  let isMatch
+  let exclusive = false
 
-    return name === currentName
+  const matchWithExclusion = (objValue, srcValue) => {
+    if (srcValue.startsWith('!')) {
+      exclusive = true
+
+      return objValue !== srcValue.slice(1)
+    }
+
+    return objValue === srcValue
   }
 
-  if (_.isObject(obj)) {
-    return _.isMatch(config.browser, obj)
+  if (_.isString(matcher)) {
+    const name = matcher.toLowerCase()
+    const currentName = browser.name.toLowerCase()
+
+    isMatch = matchWithExclusion(currentName, name)
+  } else if (_.isObject(matcher)) {
+    isMatch = _.isMatchWith(browser, matcher, matchWithExclusion)
+  } else {
+    $errUtils.throwErrByPath('browser.invalid_arg', {
+      args: { prefix: errPrefix, obj: $utils.stringify(matcher) },
+    })
   }
 
-  $errUtils.throwErrByPath('browser.invalid_arg', {
-    args: { method: 'isBrowser', obj: $utils.stringify(obj) },
-  })
+  return {
+    isMatch,
+    exclusive,
+  }
+}
+
+const isBrowser = function (config, obj = '', errPrefix = '`Cypress.isBrowser()`') {
+  if (!_.isArray(obj)) obj = [obj]
+
+  const result = obj.map((matcher) => _isBrowser(config.browser, matcher, errPrefix))
+  .reduce((a, b) => {
+    if (a === null) return b
+
+    if (a.exclusive && b.exclusive) {
+      return {
+        isMatch: a.isMatch && b.isMatch,
+        exclusive: true,
+      }
+    }
+
+    return {
+      isMatch: a.isMatch || b.isMatch,
+      exclusive: b.exclusive,
+    }
+  }, null)
+
+  return !!result && result.isMatch
 }
 
 module.exports = (config) => {

@@ -22,7 +22,26 @@ describe "src/cypress/browser", ->
     it "is case-insensitive", ->
       expect(@commands().isBrowser("Chrome")).to.be.true
 
-    it "throws if arg is not a string or object", ->
+
+    it 'can match with exclusives', ->
+      expect(@commands().isBrowser(['!firefox'])).to.be.true
+      expect(@commands().isBrowser({ family: 'chromium', name: '!firefox' })).to.be.true
+
+      expect(@commands().isBrowser({ family: '!chromium' })).to.be.false
+      expect(@commands().isBrowser({ family: 'chromium', name: '!chrome' })).to.be.false
+
+    it "can accept an array of matchers", ->
+      expect(@commands().isBrowser(['firefox', 'chrome'])).to.be.true
+      expect(@commands().isBrowser(['chrome', '!firefox'])).to.be.true
+      expect(@commands().isBrowser([{ family: '!chromium' }, '!firefox', 'chrome'])).to.be.true
+
+      expect(@commands().isBrowser([{ family: '!chromium' }, '!firefox'])).to.be.false
+      expect(@commands().isBrowser(['!chrome', '!firefox'])).to.be.false
+      expect(@commands().isBrowser(['!chrome', '!firefox'])).to.be.false
+      expect(@commands().isBrowser(['!firefox', '!chrome'])).to.be.false
+      expect(@commands().isBrowser([])).to.be.false
+
+    it "throws if arg is not a string, object, or non-empty array", ->
       expect =>
         @commands().isBrowser(true)
       .to.throw("`Cypress.isBrowser()` must be passed the name of a browser or an object to filter with. You passed: `true`")

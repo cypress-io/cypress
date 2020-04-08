@@ -21,6 +21,8 @@ delete window.Mocha
 function overloadMochaFnForConfig (fnName, specWindow) {
   const _fn = specWindow[fnName]
 
+  const fnType = fnName === 'it' ? 'Test' : 'Suite'
+
   function overrideFn (fn) {
     specWindow[fnName] = fn()
     specWindow[fnName]['only'] = fn('only')
@@ -34,18 +36,6 @@ function overloadMochaFnForConfig (fnName, specWindow) {
        */
       const Cypress = specWindow.Cypress
 
-      function shouldRunBrowser (browserlist, browser) {
-        if (browserlist === null) {
-          return true
-        }
-
-        if (!_.isArray(browserlist)) {
-          browserlist = [browserlist]
-        }
-
-        return _.some(browserlist, Cypress.isBrowser)
-      }
-
       const origFn = subFn ? _fn[subFn] : _fn
 
       if (args.length > 2 && _.isObject(args[1])) {
@@ -55,7 +45,9 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
         const mochaArgs = [args[0], args[2]]
 
-        if (!shouldRunBrowser(opts.browser)) {
+        const configMatchesBrowser = Cypress.isBrowser(opts.browser, `${fnType} config value \`{ browser }\``)
+
+        if (!configMatchesBrowser) {
           mochaArgs[0] = `[browser skip (${opts.browser})]${mochaArgs[0]}`
 
           if (subFn === 'only') {
