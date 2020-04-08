@@ -250,6 +250,12 @@ describe('per-test config', () => {
       })
     })
   })
+
+  describe('emtpy config', {}, () => {
+    it('empty config in test', {}, () => {
+      expect(true).ok
+    })
+  })
 })
 
 function hasOnly (test) {

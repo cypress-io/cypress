@@ -45,7 +45,7 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
         const mochaArgs = [args[0], args[2]]
 
-        const configMatchesBrowser = Cypress.isBrowser(opts.browser, `${fnType} config value \`{ browser }\``)
+        const configMatchesBrowser = opts.browser == null || Cypress.isBrowser(opts.browser, `${fnType} config value \`{ browser }\``)
 
         if (!configMatchesBrowser) {
           mochaArgs[0] = `[browser skip (${opts.browser})]${mochaArgs[0]}`
