@@ -24,7 +24,7 @@ function getHtmlToInject (domainName: string, wantsInjection: WantsInjection) {
   }
 }
 
-export function html (html: string, domainName: string, wantsInjection: WantsInjection, wantsSecurityRemoved, isHtml, useSourceRewriting) {
+export async function html (html: string, domainName: string, wantsInjection: WantsInjection, wantsSecurityRemoved, isHtml, useSourceRewriting) {
   const replace = (re, str) => {
     return html.replace(re, str)
   }
@@ -34,7 +34,7 @@ export function html (html: string, domainName: string, wantsInjection: WantsInj
   // strip clickjacking and framebusting
   // from the HTML if we've been told to
   if (wantsSecurityRemoved) {
-    html = getRewriter(useSourceRewriting).strip(html, { isHtml })
+    html = await Promise.resolve(getRewriter(useSourceRewriting).strip(html, { isHtml }))
   }
 
   if (!htmlToInject) {

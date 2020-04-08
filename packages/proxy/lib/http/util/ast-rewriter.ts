@@ -1,4 +1,4 @@
-import { HtmlJsRewriter, rewriteHtmlJs, rewriteJs } from '@packages/rewriter'
+import { HtmlJsRewriter, rewriteHtmlJsAsync, rewriteJsAsync } from '@packages/rewriter'
 import duplexify from 'duplexify'
 import concatStream from 'concat-stream'
 import stream from 'stream'
@@ -10,19 +10,19 @@ type SecurityOpts = {
   isHtml?: boolean
 }
 
-export const strip = (source, opts: SecurityOpts = {}) => {
+export const strip = async (source, opts: SecurityOpts = {}) => {
   if (opts.isHtml) {
-    return rewriteHtmlJs(source)
+    return rewriteHtmlJsAsync(source) // threaded
   }
 
-  return rewriteJs(source)
+  return rewriteJsAsync(source) // threaded
 }
 
 export const stripStream = (opts: SecurityOpts = {}) => {
   if (opts.isHtml) {
     return pumpify(
       utf8Stream(),
-      HtmlJsRewriter(),
+      HtmlJsRewriter(), // non-threaded
     )
   }
 
@@ -31,8 +31,8 @@ export const stripStream = (opts: SecurityOpts = {}) => {
   return duplexify(
     pumpify(
       utf8Stream(),
-      concatStream((body) => {
-        pt.write(rewriteJs(body.toString()))
+      concatStream(async (body) => {
+        pt.write(await strip(body.toString()))
         pt.end()
       }),
     ),

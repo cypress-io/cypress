@@ -331,10 +331,10 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
   debug('injecting into HTML')
 
-  this.incomingResStream.pipe(concatStream((body) => {
+  this.incomingResStream.pipe(concatStream(async (body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
     const decodedBody = iconv.decode(body, nodeCharset)
-    const injectedBody = rewriter.html(decodedBody, this.getRemoteState().domainName, this.res.wantsInjection, this.res.wantsSecurityRemoved, isHtml(this.incomingRes), this.config.experimentalSourceRewriting)
+    const injectedBody = await rewriter.html(decodedBody, this.getRemoteState().domainName, this.res.wantsInjection, this.res.wantsSecurityRemoved, isHtml(this.incomingRes), this.config.experimentalSourceRewriting)
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
     const pt = new PassThrough

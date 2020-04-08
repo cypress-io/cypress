@@ -6,15 +6,24 @@ import { RewriteRequest, RewriteResponse } from './types'
 
 const debug = Debug('cypress:rewriter:threads')
 
+const _debugWorker = !debug.enabled ? _.noop : (worker: WorkerInfo) => {
+  return _.pick(worker, 'isBusy', 'id')
+}
+
+const _debugOpts = !debug.enabled ? _.noop : (opts: RewriteOpts) => {
+  return { ..._.pick(opts, 'isHtml'), source: _.truncate(opts.source, { length: 500 }) }
+}
+
 const WORKER_PATH = process.env.CYPRESS_INTERNAL_ENV === 'production' ?
   path.join(__dirname, 'worker.js')
   : path.join(__dirname, 'worker-shim.js')
 
-const MAX_WORKER_THREADS = 4
+const MAX_WORKER_THREADS = 16
 
 type DeferredPromise<T> = { p: Promise<T>, resolve: () => {}, reject: () => {} }
 
 type WorkerInfo = {
+  id: string
   thread: Worker
   isBusy: boolean
 }
@@ -24,11 +33,14 @@ type QueuedRewrite = {
   opts: RewriteOpts
 }
 
+type RewriteOpts = Pick<RewriteRequest, 'source' | 'isHtml'>
+
 const workers: WorkerInfo[] = []
 const queued: QueuedRewrite[] = []
 
 function createWorker () {
   const worker = {
+    id: _.uniqueId(),
     isBusy: false,
     thread: new Worker(WORKER_PATH)
     .on('exit', () => {
@@ -42,6 +54,8 @@ function createWorker () {
 }
 
 async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<string> {
+  debug('sending rewrite to worker %o', { worker: _debugWorker(worker), opts: _debugOpts(opts) })
+
   if (worker.isBusy) {
     throw new Error('worker is already busy')
   }
@@ -65,6 +79,8 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
     worker.thread.once('exit', onExit)
     worker.thread.once('error', reject)
     port2.on('message', ({ error, code }: RewriteResponse) => {
+      debug('received response from worker %o', { error, code: _.truncate(code, { length: 500 }), worker: _debugWorker(worker), opts: _debugOpts(opts) })
+
       worker.thread.removeListener('exit', onExit)
       worker.thread.removeListener('error', reject)
 
@@ -91,14 +107,12 @@ function maybeRunNextInQueue () {
     return
   }
 
-  debug('running next rewrite in queue')
+  debug('running next rewrite in queue', { opts: _debugOpts() })
 
   queueRewriting(next.opts)
   .then(next.deferred.resolve)
   .catch(next.deferred.reject)
 }
-
-type RewriteOpts = Pick<RewriteRequest, 'source' | 'isHtml'>
 
 export function queueRewriting (opts: RewriteOpts): Promise<string> {
   // if a worker is free now, use it
@@ -119,7 +133,7 @@ export function queueRewriting (opts: RewriteOpts): Promise<string> {
   }
 
   // otherwise enqueue
-  debug('enqueuing source for rewriting')
+  debug('enqueuing source for rewriting %o', { opts: _debugOpts(opts), prevQueueLength: queued.length })
   const deferred = getDeferredPromise()
 
   queued.push({ opts, deferred })
