@@ -18,6 +18,23 @@ const mergeErrProps = (origErr, ...newProps) => {
   return _.extend(origErr, ...newProps)
 }
 
+const replaceNameInStack = (err, newName) => {
+  const { name, stack } = err
+
+  if (!stack) return stack
+
+  return stack.replace(name, newName)
+}
+
+const modifyErrName = (err, newName) => {
+  const newStack = replaceNameInStack(err, newName)
+
+  err.name = newName
+  err.stack = newStack
+
+  return err
+}
+
 const replaceMsgInStack = (err, newMsg) => {
   const { message, name, stack } = err
 
@@ -294,6 +311,7 @@ module.exports = {
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,
+  modifyErrName,
   normalizeErrorStack,
   normalizeMsgNewLines,
   processErr,
