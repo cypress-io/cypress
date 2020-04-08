@@ -490,6 +490,8 @@ module.exports = (options = {}) ->
         debug('parsing cookie %o', { cyCookie, toughCookie: cookie })
 
         if not cookie
+          ## ignore invalid cookies (same as browser behavior)
+          ## https://github.com/cypress-io/cypress/issues/6890
           debug('tough-cookie failed to parse, ignoring')
           return
 
