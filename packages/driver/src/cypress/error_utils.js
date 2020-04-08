@@ -51,6 +51,18 @@ const replaceMsgInStack = (err, newMsg) => {
   return stack.replace(name, `${name}: ${newMsg}`)
 }
 
+const replacedStack = (err, newStackErr) => {
+  // if err already lacks a stack or we've removed the stack
+  // for some reason, keep it stackless
+  if (!err.stack) return err.stack
+
+  const errString = err.toString()
+  const newStackErrString = newStackErr.toString()
+  const stackLines = newStackErr.stack.replace(newStackErrString, '')
+
+  return `${errString}${stackLines}`
+}
+
 const modifyErrMsg = (err, newErrMsg, cb) => {
   err = normalizeErrorStack(err)
 
@@ -314,6 +326,7 @@ module.exports = {
   modifyErrName,
   normalizeErrorStack,
   normalizeMsgNewLines,
+  replacedStack,
   processErr,
   throwErr,
   throwErrByPath,

@@ -391,4 +391,27 @@ describe('driver/src/cypress/error_utils', () => {
       expect(result.stack).to.include('New Name: message')
     })
   })
+
+  context('.replacedStack', () => {
+    it('returns original stack if it is falsey', () => {
+      const err = new Error('message')
+
+      err.stack = ''
+      const stack = $errUtils.replacedStack(err)
+
+      expect(stack).to.equal('')
+    })
+
+    it('replaces stack in error with new stack', () => {
+      const err = new Error('message')
+      const newStackErr = new Error('different')
+
+      newStackErr.stack = 'new stack'
+      const stack = $errUtils.replacedStack(err, newStackErr)
+
+      expect(stack).to.include('message')
+      expect(stack).to.include('new stack')
+      expect(stack).not.to.include('different')
+    })
+  })
 })
