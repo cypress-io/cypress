@@ -2,6 +2,7 @@ import duplexify from 'duplexify'
 import hyntax from 'hyntax'
 import * as js from './js'
 import stream from 'stream'
+import { queueRewriting } from './threads'
 
 type Token = hyntax.Tokenizer.Token<hyntax.Tokenizer.TokenTypes.AnyTokenType>
 export type RewriteHtmlNodeFn = (token: Token) => string
@@ -54,6 +55,7 @@ export function rewriteHtml (html: string, rewriteTokenFn: RewriteHtmlNodeFn): s
 function _htmlJsRewriteFn () {
   return function (token) {
     if (token.type === 'token:script-tag-content') {
+      // TODO: need to ensure it's type="text/javascript"
       return js.rewriteJs(token.content)
     }
 
@@ -63,6 +65,13 @@ function _htmlJsRewriteFn () {
 
 export function rewriteHtmlJs (html: string): string {
   return rewriteHtml(html, _htmlJsRewriteFn())
+}
+
+export function rewriteHtmlJsAsync (html: string): Promise<string> {
+  return queueRewriting({
+    source: html,
+    isHtml: true,
+  })
 }
 
 export function HtmlJsRewriter (): stream.Transform {

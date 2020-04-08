@@ -1,35 +1,22 @@
-import debugModule from 'debug'
 import * as astTypes from 'ast-types'
-import * as recast from 'recast'
+import Debug from 'debug'
 import { rewriteJsFnsCb } from './js-rules'
+import * as recast from 'recast'
+import { queueRewriting } from './threads'
+
+const debug = Debug('cypress:rewriter:js')
 
 export type RewriteNodeFn = (js: string, n: typeof astTypes) => astTypes.Visitor
 
-const debug = debugModule('cypress:rewriter:js')
-
-export function rewriteJs (js: string) {
-  const rewriteJsFns = rewriteJsFnsCb(js, astTypes)
-
-  try {
-    const ast = recast.parse(js)
-
-    astTypes.visit(ast, rewriteJsFns)
-
-    return recast.print(ast, {
-      // will only affect reprinted quotes
-      quote: 'single',
-    }).code
-  } catch (err) {
-    debug('got an error rewriting JS, returning unmodified %o', { err, js: js.slice(0, 500) })
-
-    return js
-  }
+export function rewriteJsAsync (js: string): Promise<string> {
+  return queueRewriting({
+    source: js,
+  })
 }
 
-export function rewriteJsAsync (js: string) {
-  const rewriteJsFns = rewriteJsFnsCb(js, astTypes)
-
+export function rewriteJs (js: string): string {
   try {
+    const rewriteJsFns = rewriteJsFnsCb(js, astTypes)
     const ast = recast.parse(js)
 
     astTypes.visit(ast, rewriteJsFns)
@@ -39,7 +26,7 @@ export function rewriteJsAsync (js: string) {
       quote: 'single',
     }).code
   } catch (err) {
-    debug('got an error rewriting JS, returning unmodified %o', { err, js: js.slice(0, 500) })
+    debug('error while parsing JS %o', { err, js: js.slice(0, 500) })
 
     return js
   }
