@@ -1,6 +1,6 @@
 {
+  "baseUrl": "http://localhost:5005",
   "projectId": "ypt4pf",
-  "pluginsFile": false,
   "viewportWidth": 800,
-  "viewportHeight": 550
+  "viewportHeight": 850
 }

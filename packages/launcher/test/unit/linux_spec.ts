@@ -7,26 +7,26 @@ import { log } from '../log'
 import { detect } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
-import execa from 'execa'
+import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 
 describe('linux browser detection', () => {
-  let stdout: SinonStub
+  let execa: SinonStub
 
   beforeEach(() => {
-    stdout = sinon.stub(execa, 'stdout')
+    execa = sinon.stub(utils, 'execa')
 
-    stdout.withArgs('test-browser', ['--version'])
-    .resolves('test-browser v100.1.2.3')
+    execa.withArgs('test-browser', ['--version'])
+    .resolves({ stdout: 'test-browser v100.1.2.3' })
 
-    stdout.withArgs('foo-browser', ['--version'])
-    .resolves('foo-browser v100.1.2.3')
+    execa.withArgs('foo-browser', ['--version'])
+    .resolves({ stdout: 'foo-browser v100.1.2.3' })
 
-    stdout.withArgs('foo-bar-browser', ['--version'])
-    .resolves('foo-browser v100.1.2.3')
+    execa.withArgs('foo-bar-browser', ['--version'])
+    .resolves({ stdout: 'foo-browser v100.1.2.3' })
 
-    stdout.withArgs('/foo/bar/browser', ['--version'])
-    .resolves('foo-browser v9001.1.2.3')
+    execa.withArgs('/foo/bar/browser', ['--version'])
+    .resolves({ stdout: 'foo-browser v9001.1.2.3' })
   })
 
   it('detects browser by running --version', () => {
@@ -45,8 +45,13 @@ describe('linux browser detection', () => {
 
   // https://github.com/cypress-io/cypress/issues/6669
   it('detects browser if the --version stdout is multiline', () => {
-    stdout.withArgs('multiline-foo', ['--version'])
-    .resolves('Running without a11y support!\nfoo-browser v9001.1.2.3')
+    execa.withArgs('multiline-foo', ['--version'])
+    .resolves({
+      stdout: `
+        Running without a11y support!
+        foo-browser v9001.1.2.3
+      `,
+    })
 
     const goal = _.defaults({ binary: 'multiline-foo' }, _.find(goalBrowsers, { name: 'foo-browser' }))
     const checkBrowser = (browser) => {
@@ -119,7 +124,7 @@ describe('linux browser detection', () => {
 
   context('#getVersionString', () => {
     it('runs the command with `--version` and returns trimmed output', async () => {
-      stdout.withArgs('foo', ['--version']).resolves('  bar  ')
+      execa.withArgs('foo', ['--version']).resolves({ stdout: '  bar  ' })
 
       expect(await linuxHelper.getVersionString('foo')).to.eq('bar')
     })
@@ -127,7 +132,7 @@ describe('linux browser detection', () => {
     it('rejects with errors', async () => {
       const err = new Error()
 
-      stdout.withArgs('foo', ['--version']).rejects(err)
+      execa.withArgs('foo', ['--version']).rejects(err)
 
       await expect(linuxHelper.getVersionString('foo')).to.be.rejectedWith(err)
     })

@@ -4,6 +4,9 @@ import cypress from 'cypress'
 
 cypress.run // $ExpectType (options?: Partial<CypressRunOptions> | undefined) => Promise<CypressRunResult>
 cypress.open // $ExpectType (options?: Partial<CypressOpenOptions> | undefined) => Promise<void>
+cypress.run({
+  tag: 'production,nightly'
+})
 cypress.run({}).then(results => {
   results // $ExpectType CypressRunResult
 })

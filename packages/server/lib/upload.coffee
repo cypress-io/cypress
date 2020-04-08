@@ -1,5 +1,5 @@
-r       = require("request")
-rp      = require("request-promise")
+r       = require("@cypress/request")
+rp      = require("@cypress/request-promise")
 Promise = require("bluebird")
 fs      = require("./util/fs")
 

@@ -11,7 +11,9 @@ newLineRe = /\n/g
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
     select: (subject, valueOrText, options = {}) ->
-      _.defaults options,
+      userOptions = options
+
+      options = _.defaults {}, userOptions,
         $el: subject
         log: true
         force: false

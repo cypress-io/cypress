@@ -5,7 +5,7 @@ const $utils = require('../../cypress/utils')
 const $errUtils = require('../../cypress/error_utils')
 const $Location = require('../../cypress/location')
 
-const COOKIE_PROPS = 'name value path secure httpOnly expiry domain'.split(' ')
+const COOKIE_PROPS = 'name value path secure httpOnly expiry domain sameSite'.split(' ')
 
 const commandNameRe = /(:)(\w)/
 
@@ -33,7 +33,37 @@ const mergeDefaults = function (obj) {
   return merge(obj)
 }
 
+// from https://developer.chrome.com/extensions/cookies#type-SameSiteStatus
+// note that `unspecified` is purposely omitted - Firefox and Chrome set
+// different defaults, and Firefox lacks support for `unspecified`, so
+// `undefined` is used in lieu of `unspecified`
+// @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
+const VALID_SAMESITE_VALUES = ['no_restriction', 'lax', 'strict']
+
+const normalizeSameSite = (sameSite) => {
+  if (_.isUndefined(sameSite)) {
+    return sameSite
+  }
+
+  if (_.isString(sameSite)) {
+    sameSite = sameSite.toLowerCase()
+  }
+
+  if (sameSite === 'none') {
+    // "None" is the value sent in the header for `no_restriction`, so allow it here for convenience
+    sameSite = 'no_restriction'
+  }
+
+  return sameSite
+}
+
 module.exports = function (Commands, Cypress, cy, state, config) {
+  const maybeStripSameSiteProp = (cookie) => {
+    if (cookie && !Cypress.config('experimentalGetCookiesSameSite')) {
+      delete cookie.sameSite
+    }
+  }
+
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
       return Cypress.automation(event, mergeDefaults(obj))
@@ -92,7 +122,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       $errUtils.throwErrByPath('cookies.backend_error', {
         args: {
           action,
-          command,
+          cmd: command,
           browserDisplayName: Cypress.browser.displayName,
           errMessage: err.message,
           errStack: err.stack,
@@ -111,7 +141,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
   return Commands.addAll({
     getCookie (name, options = {}) {
-      _.defaults(options, {
+      const userOptions = options
+
+      options = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -119,7 +151,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: name,
-          displayName: 'get cookie',
           consoleProps () {
             let c
             const obj = {}
@@ -146,6 +177,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
       .then((resp) => {
+        maybeStripSameSiteProp(resp)
+
         options.cookie = resp
 
         return resp
@@ -154,7 +187,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     },
 
     getCookies (options = {}) {
-      _.defaults(options, {
+      const userOptions = options
+
+      options = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -162,7 +197,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: '',
-          displayName: 'get cookies',
           consoleProps () {
             let c
             const obj = {}
@@ -181,6 +215,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, options.timeout)
       .then((resp) => {
+        if (Array.isArray(resp)) {
+          resp.forEach(maybeStripSameSiteProp)
+        }
+
         options.cookies = resp
 
         return resp
@@ -188,10 +226,10 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       .catch(handleBackendError('getCookies', 'reading cookies from', options._log))
     },
 
-    setCookie (name, value, userOptions = {}) {
-      const options = _.clone(userOptions)
+    setCookie (name, value, options = {}) {
+      const userOptions = options
 
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         name,
         value,
         path: '/',
@@ -207,7 +245,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: [name, value],
-          displayName: 'set cookie',
           consoleProps () {
             let c
             const obj = {}
@@ -225,12 +262,37 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       const onFail = options._log
 
+      cookie.sameSite = normalizeSameSite(cookie.sameSite)
+
+      if (!_.isUndefined(cookie.sameSite) && !VALID_SAMESITE_VALUES.includes(cookie.sameSite)) {
+        $errUtils.throwErrByPath('setCookie.invalid_samesite', {
+          onFail,
+          args: {
+            value: options.sameSite, // for clarity, throw the error with the user's unnormalized option
+            validValues: VALID_SAMESITE_VALUES,
+          },
+        })
+      }
+
+      // cookies with SameSite=None must also set Secure
+      // @see https://web.dev/samesite-cookies-explained/#changes-to-the-default-behavior-without-samesite
+      if (cookie.sameSite === 'no_restriction' && cookie.secure !== true) {
+        $errUtils.throwErrByPath('setCookie.secure_not_set_with_samesite_none', {
+          onFail,
+          args: {
+            value: options.sameSite, // for clarity, throw the error with the user's unnormalized option
+          },
+        })
+      }
+
       if (!_.isString(name) || !_.isString(value)) {
         $errUtils.throwErrByPath('setCookie.invalid_arguments', { onFail })
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
       .then((resp) => {
+        maybeStripSameSiteProp(resp)
+
         options.cookie = resp
 
         return resp
@@ -238,7 +300,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     },
 
     clearCookie (name, options = {}) {
-      _.defaults(options, {
+      const userOptions = options
+
+      options = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -246,7 +310,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: name,
-          displayName: 'clear cookie',
           consoleProps () {
             let c
             const obj = {}
@@ -284,7 +347,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     },
 
     clearCookies (options = {}) {
-      _.defaults(options, {
+      const userOptions = options
+
+      options = _.defaults({}, userOptions, {
         log: true,
         timeout: config('responseTimeout'),
       })
@@ -292,7 +357,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: '',
-          displayName: 'clear cookies',
           consoleProps () {
             let c
             const obj = {}

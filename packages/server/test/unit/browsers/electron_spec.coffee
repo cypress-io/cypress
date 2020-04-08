@@ -54,7 +54,7 @@ describe "lib/browsers/electron", ->
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
 
-      savedState()
+      savedState.create()
       .then (state) =>
         la(check.fn(state.get), "state is missing .get to stub", state)
         sinon.stub(state, "get").resolves(@state)

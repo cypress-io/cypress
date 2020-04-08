@@ -35,13 +35,16 @@ describe "uncaught errors", ->
     r = cy.state("runnable")
 
     cy.on "uncaught:exception", (err, runnable) ->
-      expect(err.name).to.eq("Uncaught ReferenceError")
-      expect(err.message).to.include("foo is not defined")
-      expect(err.message).to.include("This error originated from your application code, not from Cypress.")
-      expect(err.message).to.include("https://on.cypress.io/uncaught-exception-from-application")
-      expect(runnable is r).to.be.true
-
-      return false
+      try
+        expect(err.name).to.eq("Uncaught ReferenceError")
+        expect(err.message).to.include("foo is not defined")
+        expect(err.message).to.include("This error originated from your application code, not from Cypress.")
+        expect(err.message).to.not.include("https://on.cypress.io/uncaught-exception-from-application")
+        expect(err.docsUrl).to.eq("https://on.cypress.io/uncaught-exception-from-application")
+        expect(runnable is r).to.be.true
+        return false
+      catch err2
+        return true
 
     cy.visit("/fixtures/visit_error.html")
 

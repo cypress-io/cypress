@@ -147,7 +147,6 @@ class Socket {
 
     _.defaults(options, {
       socketId: null,
-      onIncomingXhr () {},
       onResetServerState () {},
       onSetRunnables () {},
       onMocha () {},
@@ -375,8 +374,6 @@ class Socket {
               return firefoxUtil.log()
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
-            case 'incoming:xhr':
-              return options.onIncomingXhr(args[0], args[1])
             case 'get:fixture':
               return fixture.get(config.fixturesFolder, args[0], args[1])
             case 'read:file':

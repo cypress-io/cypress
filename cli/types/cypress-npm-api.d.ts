@@ -238,6 +238,10 @@ declare module 'cypress' {
      */
     group: string
     /**
+     * Tag string for the recorded run, like "production,nightly"
+     */
+    tag: string
+    /**
      * Display the browser instead of running headlessly
      */
     headed: boolean

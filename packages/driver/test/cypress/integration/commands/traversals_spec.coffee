@@ -38,7 +38,7 @@ describe "src/cy/commands/traversals", ->
 
         it "throws when options.length isnt a number", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.include "You must provide a valid number to a length assertion. You passed: 'asdf'"
+            expect(err.message).to.include "You must provide a valid number to a `length` assertion. You passed: `asdf`"
             done()
 
           cy.get("#list")[name](arg).should("have.length", "asdf")
@@ -74,7 +74,7 @@ describe "src/cy/commands/traversals", ->
             cy.$$("#list").remove()
 
           cy.on "fail", (err) ->
-            expect(err.message).to.include "cy.#{name}() failed because this element"
+            expect(err.message).to.include "`cy.#{name}()` failed because this element"
             done()
 
           cy.get("#list")[name](arg)
@@ -84,7 +84,7 @@ describe "src/cy/commands/traversals", ->
             node = dom.stringify cy.$$(node), "short"
 
             cy.on "fail", (err) ->
-              expect(err.message).to.include "Expected to find element: '#{el}', but never found it. Queried from element: #{node}"
+              expect(err.message).to.include "Expected to find element: `#{el}`, but never found it. Queried from element: #{node}"
               done()
 
           switch name
@@ -239,7 +239,7 @@ describe "src/cy/commands/traversals", ->
 
     it "errors after timing out not finding element", (done) ->
       cy.on "fail", (err) ->
-        expect(err.message).to.include "Expected to find element: 'span', but never found it. Queried from element: <li.item>"
+        expect(err.message).to.include "Expected to find element: `span`, but never found it. Queried from element: <li.item>"
         done()
 
       cy.get("#list li:last").find("span")

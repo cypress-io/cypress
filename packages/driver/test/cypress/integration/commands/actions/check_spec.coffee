@@ -75,7 +75,7 @@ describe "src/cy/commands/actions/check", ->
         done("should not fire change event")
 
       cy.get(checkbox).check()
-    
+
     ## readonly should only be limited to inputs, not checkboxes
     it "can check readonly checkboxes", ->
       cy.get('#readonly-checkbox').check().then ($checkbox) ->
@@ -234,14 +234,15 @@ describe "src/cy/commands/actions/check", ->
 
         cy.on "fail", (err) ->
           expect(checked).to.eq 1
-          expect(err.message).to.include "cy.check() failed because this element"
+          expect(err.message).to.include "`cy.check()` failed because this element"
           done()
 
         cy.get(":checkbox:first").check().check()
 
       it "throws when subject isnt a checkbox or radio", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.check() can only be called on :checkbox and :radio. Your subject contains a: <form id=\"by-id\">...</form>"
+          expect(err.message).to.include "`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<form id=\"by-id\">...</form>`"
+          expect(err.docsUrl).to.include("https://on.cypress.io/check")
           done()
 
         ## this will find multiple forms
@@ -249,7 +250,8 @@ describe "src/cy/commands/actions/check", ->
 
       it "throws when any member of the subject isnt a checkbox or radio", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.check() can only be called on :checkbox and :radio. Your subject contains a: <textarea id=\"comments\"></textarea>"
+          expect(err.message).to.include "`cy.check()` can only be called on `:checkbox` and `:radio`. Your subject contains a: `<textarea id=\"comments\"></textarea>`"
+          expect(err.docsUrl).to.include("https://on.cypress.io/check")
           done()
 
         ## find a textare which should blow up
@@ -264,7 +266,7 @@ describe "src/cy/commands/actions/check", ->
 
           expect(@logs.length).to.eq(chk.length + 1)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.check() failed because this element is not visible"
+          expect(err.message).to.include "`cy.check()` failed because this element is not visible"
           done()
 
         cy.get(":checkbox:first").check()
@@ -275,7 +277,7 @@ describe "src/cy/commands/actions/check", ->
         cy.on "fail", (err) =>
           ## get + type logs
           expect(@logs.length).eq(2)
-          expect(err.message).to.include("cy.check() failed because this element is disabled:\n")
+          expect(err.message).to.include("`cy.check()` failed because this element is `disabled`:\n")
           done()
 
         cy.get(":checkbox:first").check()
@@ -289,7 +291,7 @@ describe "src/cy/commands/actions/check", ->
 
           expect(@logs.length).to.eq(chk.length + 1)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.check() failed because this element is not visible"
+          expect(err.message).to.include "`cy.check()` failed because this element is not visible"
           done()
 
         cy.get(":checkbox").check()
@@ -302,7 +304,7 @@ describe "src/cy/commands/actions/check", ->
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy.check()
+        `cy.check()`
 
       it "throws when input cannot be clicked", (done) ->
         checkbox  = $("<input type='checkbox' />").attr("id", "checkbox-covered-in-span").prependTo($("body"))
@@ -310,7 +312,7 @@ describe "src/cy/commands/actions/check", ->
 
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.include "cy.check() failed because this element"
+          expect(err.message).to.include "`cy.check()` failed because this element"
           expect(err.message).to.include "is being covered by another element"
           done()
 
@@ -652,7 +654,8 @@ describe "src/cy/commands/actions/check", ->
         cy.get(":radio").uncheck()
 
         cy.on "fail", (err) ->
-          expect(err.message).to.include "cy.uncheck() can only be called on :checkbox."
+          expect(err.message).to.include "`cy.uncheck()` can only be called on `:checkbox`."
+          expect(err.docsUrl).to.include("https://on.cypress.io/uncheck")
           done()
 
       it "throws if not a checkbox", (done) ->
@@ -670,7 +673,7 @@ describe "src/cy/commands/actions/check", ->
           len  = (chk.length * 2) + 6
           expect(@logs.length).to.eq(len)
           expect(lastLog.get("error")).to.eq(err)
-          expect(err.message).to.include "cy.uncheck() failed because this element is not visible"
+          expect(err.message).to.include "`cy.uncheck()` failed because this element is not visible"
           done()
 
         cy
@@ -685,7 +688,7 @@ describe "src/cy/commands/actions/check", ->
           expect(lastLog.get("error")).to.eq(err)
           done()
 
-        cy.uncheck()
+        `cy.uncheck()`
 
       it "throws when subject is not in the document", (done) ->
         unchecked = 0
@@ -698,7 +701,7 @@ describe "src/cy/commands/actions/check", ->
 
         cy.on "fail", (err) ->
           expect(unchecked).to.eq 1
-          expect(err.message).to.include "cy.uncheck() failed because this element"
+          expect(err.message).to.include "`cy.uncheck()` failed because this element"
           done()
 
         cy.get(":checkbox:first").uncheck().uncheck()
@@ -709,7 +712,7 @@ describe "src/cy/commands/actions/check", ->
 
         cy.on "fail", (err) =>
           expect(@logs.length).to.eq(2)
-          expect(err.message).to.include "cy.uncheck() failed because this element"
+          expect(err.message).to.include "`cy.uncheck()` failed because this element"
           expect(err.message).to.include "is being covered by another element"
           done()
 
@@ -721,7 +724,7 @@ describe "src/cy/commands/actions/check", ->
         cy.on "fail", (err) =>
           ## get + type logs
           expect(@logs.length).eq(2)
-          expect(err.message).to.include("cy.uncheck() failed because this element is disabled:\n")
+          expect(err.message).to.include("`cy.uncheck()` failed because this element is `disabled`:\n")
           done()
 
         cy.get(":checkbox:first").uncheck()

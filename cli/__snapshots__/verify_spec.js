@@ -103,7 +103,6 @@ Cypress Version: 1.2.3
 `
 
 exports['fails verifying Cypress 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
 
   ✖  Verifying Cypress can run /cache/Cypress/1.2.3/Cypress.app
 STRIPPED
@@ -309,7 +308,6 @@ Opening Cypress...
 `
 
 exports['verification with executable 1'] = `
-It looks like this is your first time using Cypress: 1.2.3
 
   ✔  Verified Cypress! /cache/Cypress/1.2.3/Cypress.app
 

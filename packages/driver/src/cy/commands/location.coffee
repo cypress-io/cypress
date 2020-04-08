@@ -7,11 +7,13 @@ $Location = require("../../cypress/location")
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     url: (options = {}) ->
-      _.defaults options, {log: true}
+      userOptions = options
+      options = _.defaults({}, userOptions, { log: true })
 
       if options.log isnt false
-        options._log = Cypress.log
+        options._log = Cypress.log({
           message: ""
+        })
 
       getHref = =>
         cy.getRemoteLocation("href")
@@ -23,11 +25,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
 
     hash: (options = {}) ->
-      _.defaults options, {log: true}
+      userOptions = options
+      options = _.defaults({}, userOptions, { log: true })
 
       if options.log isnt false
-        options._log = Cypress.log
+        options._log = Cypress.log({
           message: ""
+        })
 
       getHash = =>
         cy.getRemoteLocation("hash")
@@ -39,14 +43,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
 
     location: (key, options) ->
+      userOptions = options
       ## normalize arguments allowing key + options to be undefined
       ## key can represent the options
-      if _.isObject(key) and _.isUndefined(options)
-        options = key
+      if _.isObject(key) and _.isUndefined(userOptions)
+        userOptions = key
 
-      options ?= {}
+      userOptions ?= {}
 
-      _.defaults options, {log: true}
+      options = _.defaults({}, userOptions, { log: true })
 
       getLocation = =>
         location = cy.getRemoteLocation()
@@ -60,8 +65,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           location
 
       if options.log isnt false
-        options._log = Cypress.log
+        options._log = Cypress.log({
           message: key ? ""
+        })
 
       do resolveLocation = =>
         Promise.try(getLocation).then (ret) =>

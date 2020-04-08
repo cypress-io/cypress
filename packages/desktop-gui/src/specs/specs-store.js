@@ -92,10 +92,10 @@ export class SpecsStore {
     return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
   }
 
-  getSpecsFilterId ({ id = '<no-id>', path = '' }) {
+  getSpecsFilterId ({ id, path = '' }) {
     const shortenedPath = path.replace(/.*cypress/, 'cypress')
 
-    return `specsFilter-${id}-${shortenedPath}`
+    return `specsFilter-${id || '<no-id>'}-${shortenedPath}`
   }
 
   specHasFolders (specOrFolder) {
