@@ -7,6 +7,7 @@ export type RewriteRequest = {
 }
 
 export type RewriteResponse = {
+  threadMs: number
   code?: string
   error?: Error
 }

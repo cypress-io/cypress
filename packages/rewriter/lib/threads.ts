@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import Debug from 'debug'
 import * as path from 'path'
+import os from 'os'
 import { MessageChannel, Worker } from 'worker_threads'
 import { RewriteRequest, RewriteResponse } from './types'
 
@@ -14,16 +15,20 @@ const _debugOpts = !debug.enabled ? _.noop : (opts: RewriteOpts) => {
   return { ..._.pick(opts, 'isHtml'), source: _.truncate(opts.source, { length: 500 }) }
 }
 
-const WORKER_PATH = process.env.CYPRESS_INTERNAL_ENV === 'production' ?
-  path.join(__dirname, 'worker.js')
-  : path.join(__dirname, 'worker-shim.js')
+// in production, it is preferable to use the transpiled version of `worker.ts`
+// because it does not require importing @packages/ts like development does.
+// this has a huge performance impact, bringing the `responsiveMs` for threads
+// from ~1s to about ~300ms on my system
+const WORKER_FILENAME = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'worker.js' : 'worker-shim.js'
 
-const MAX_WORKER_THREADS = 16
+const WORKER_PATH = path.join(__dirname, WORKER_FILENAME)
+
+const MAX_WORKER_THREADS = os.cpus().length
 
 type DeferredPromise<T> = { p: Promise<T>, resolve: () => {}, reject: () => {} }
 
 type WorkerInfo = {
-  id: string
+  id: number
   thread: Worker
   isBusy: boolean
 }
@@ -38,13 +43,28 @@ type RewriteOpts = Pick<RewriteRequest, 'source' | 'isHtml'>
 const workers: WorkerInfo[] = []
 const queued: QueuedRewrite[] = []
 
+let _idCounter = 0
+
 function createWorker () {
+  const startedAt = Date.now()
+  let onlineMs: number
+
   const worker = {
-    id: _.uniqueId(),
+    id: _idCounter++,
     isBusy: false,
     thread: new Worker(WORKER_PATH)
-    .on('exit', () => {
+    .on('exit', (exitCode) => {
+      debug('worker exited %o', { exitCode, worker: _debugWorker(worker) })
       _.remove(workers, worker)
+    })
+    .on('online', () => {
+      onlineMs = Date.now() - startedAt
+    })
+    .on('message', () => {
+      debug('received initial ready message from worker %o', {
+        onlineMs, // time for JS to start executing
+        responsiveMs: Date.now() - startedAt, // time for worker to be ready for commands
+        worker: _debugWorker(worker) })
     }),
   }
 
@@ -54,6 +74,8 @@ function createWorker () {
 }
 
 async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<string> {
+  const startedAt = Date.now()
+
   debug('sending rewrite to worker %o', { worker: _debugWorker(worker), opts: _debugOpts(opts) })
 
   if (worker.isBusy) {
@@ -61,6 +83,11 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
   }
 
   worker.isBusy = true
+
+  if (!getFreeWorker() && workers.length < MAX_WORKER_THREADS) {
+    // create a worker in anticipation of another rewrite coming in
+    createWorker()
+  }
 
   const { port1, port2 } = new MessageChannel()
 
@@ -78,17 +105,27 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
 
     worker.thread.once('exit', onExit)
     worker.thread.once('error', reject)
-    port2.on('message', ({ error, code }: RewriteResponse) => {
-      debug('received response from worker %o', { error, code: _.truncate(code, { length: 500 }), worker: _debugWorker(worker), opts: _debugOpts(opts) })
+    port2.on('message', (res: RewriteResponse) => {
+      const totalMs = Date.now() - startedAt
+
+      debug('received response from worker %o', {
+        error: res.error,
+        sourceLength: opts.source.length,
+        code: debug.enabled && _.truncate(res.code, { length: 500 }),
+        totalMs: Date.now() - startedAt,
+        threadMs: res.threadMs,
+        overHeadMs: totalMs - res.threadMs,
+        worker: _debugWorker(worker), opts: _debugOpts(opts),
+      })
 
       worker.thread.removeListener('exit', onExit)
       worker.thread.removeListener('error', reject)
 
-      if (error) {
-        return reject(error)
+      if (res.error) {
+        return reject(res.error)
       }
 
-      return resolve(code)
+      return resolve(res.code)
     })
   })
   .finally(() => {
@@ -114,9 +151,13 @@ function maybeRunNextInQueue () {
   .catch(next.deferred.reject)
 }
 
+function getFreeWorker (): WorkerInfo | undefined {
+  return _.find(workers, { isBusy: false })
+}
+
 export function queueRewriting (opts: RewriteOpts): Promise<string> {
   // if a worker is free now, use it
-  const freeWorker = _.find(workers, { isBusy: false })
+  const freeWorker = getFreeWorker()
 
   if (freeWorker) {
     debug('sending source to free worker')

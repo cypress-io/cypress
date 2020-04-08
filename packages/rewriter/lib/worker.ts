@@ -1,6 +1,5 @@
-/**
- * This is a worker thread for purposes of rewriting only.
- */
+// this is designed to run as its own thread, managed by `threads.ts`
+
 import { parentPort, isMainThread } from 'worker_threads'
 
 if (isMainThread) {
@@ -11,20 +10,27 @@ import { rewriteJs } from './js'
 import { rewriteHtmlJs } from './html'
 import { RewriteRequest, RewriteResponse } from './types'
 
-parentPort!.on('message', (msg: RewriteRequest) => {
+parentPort!.on('message', (req: RewriteRequest) => {
+  const startedAt = Date.now()
+
   function _reply (res: RewriteResponse) {
-    msg.port.postMessage(res)
+    req.port.postMessage(res)
+    req.port.close()
   }
 
-  const rewriteFn = msg.isHtml ? rewriteHtmlJs : rewriteJs
+  function _getThreadMs () {
+    return Date.now() - startedAt
+  }
+
+  const rewriteFn = req.isHtml ? rewriteHtmlJs : rewriteJs
 
   try {
-    const code = rewriteFn(msg.source)
+    const code = rewriteFn(req.source)
 
-    _reply({ code })
+    _reply({ code, threadMs: _getThreadMs() })
   } catch (error) {
-    _reply({ error })
+    _reply({ error, threadMs: _getThreadMs() })
   }
-
-  msg.port.close()
 })
+
+parentPort!.postMessage(true)
