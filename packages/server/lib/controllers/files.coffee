@@ -1,4 +1,5 @@
 _           = require("lodash")
+R           = require("ramda")
 path        = require("path")
 Promise     = require("bluebird")
 cwd         = require("../cwd")
@@ -59,6 +60,12 @@ module.exports = {
       ## grab all of the specs if this is ci
       if spec is "__all"
         specsUtil.find(config)
+        .then R.tap (specs) ->
+          debug("found __all specs %o", specs)
+        .filter (spec) ->
+          spec.specType == "integration"
+        .then R.tap (specs) ->
+          debug("filtered __all specs to only have integration %o", specs)
         .map (spec) ->
           ## grab the name of each
           spec.absolute

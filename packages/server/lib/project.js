@@ -482,7 +482,7 @@ class Project extends EE {
   getSpecUrl (absoluteSpecPath, specType) {
     return this.getConfig()
     .then((cfg) => {
-      // if we dont have a absoluteSpecPath or its __all
+      // if we don't have a absoluteSpecPath or its __all
       if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
         const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
 
