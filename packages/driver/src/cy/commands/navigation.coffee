@@ -367,17 +367,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       switch args.length
         when 0
           forceReload = false
-          options     = {}
+          userOptions     = {}
 
         when 1
           if _.isObject(args[0])
-            options = args[0]
+            userOptions = args[0]
           else
             forceReload = args[0]
 
         when 2
           forceReload = args[0]
-          options     = args[1]
+          userOptions = args[1]
 
         else
           throwArgsErr()
@@ -386,13 +386,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.clearTimeout("reload")
 
       cleanup = null
+      options = null
 
       reload = ->
         new Promise (resolve, reject) ->
           forceReload ?= false
-          options     ?= {}
+          userOptions     ?= {}
 
-          _.defaults options, {
+          if not _.isObject(userOptions)
+            throwArgsErr()
+
+          options = _.defaults {}, userOptions, {
             log: true
             timeout: config("pageLoadTimeout")
           }
@@ -400,11 +404,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           if not _.isBoolean(forceReload)
             throwArgsErr()
 
-          if not _.isObject(options)
-            throwArgsErr()
-
           if options.log
-            options._log = Cypress.log()
+            options._log = Cypress.log({
+            })
 
             options._log.snapshot("before", {next: "after"})
 
@@ -429,13 +431,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return null
 
     go: (numberOrString, options = {}) ->
-      _.defaults options, {
+      userOptions = options
+      options = _.defaults {}, userOptions, {
         log: true
         timeout: config("pageLoadTimeout")
       }
 
       if options.log
-        options._log = Cypress.log()
+        options._log = Cypress.log({
+        })
 
       win = state("window")
 
@@ -520,21 +524,25 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     visit: (url, options = {}) ->
       if options.url and url
         $errUtils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: options.url, url: url }})
+      userOptions = options
 
-      if _.isObject(url) and _.isEqual(options, {})
+      if userOptions.url and url
+        $utils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: userOptions.url, url: url }})
+
+      if _.isObject(url) and _.isEqual(userOptions, {})
         ## options specified as only argument
-        options = url
-        url = options.url
+        userOptions = url
+        url = userOptions.url
 
       if not _.isString(url)
         $errUtils.throwErrByPath("visit.invalid_1st_arg")
 
       consoleProps = {}
 
-      if not _.isEmpty(options)
-        consoleProps["Options"] = _.pick(options, VISIT_OPTS)
+      if not _.isEmpty(userOptions)
+        consoleProps["Options"] = _.pick(userOptions, VISIT_OPTS)
 
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         auth: null
         failOnStatusCode: true
         retryOnNetworkFailure: true

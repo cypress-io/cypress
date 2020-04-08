@@ -175,12 +175,6 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
-      it "displays name 'get cookies'", ->
-          cy.getCookies().then ->
-            lastLog = @lastLog
-
-            expect(lastLog.get("displayName")).to.eq("get cookies")
-
       it "#consoleProps", ->
         cy.getCookies().then (cookies) ->
           expect(cookies).to.deep.eq([{name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false}])
@@ -338,12 +332,6 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
-      it "displays name 'get cookie'", ->
-        cy.getCookie("foo").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("displayName")).to.eq("get cookie")
-
       it "#consoleProps", ->
         cy.getCookie("foo").then (cookie) ->
           expect(cookie).to.deep.eq({name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false})
@@ -371,7 +359,7 @@ describe "src/cy/commands/cookies", ->
       }).then ->
         expect(Cypress.automation).to.be.calledWith(
           "set:cookie",
-          { domain: "localhost", name: "foo", value: "bar", path: "/", secure: false, httpOnly: false, expiry: 12345 }
+          { domain: "localhost", name: "foo", value: "bar", path: "/", secure: false, httpOnly: false, expiry: 12345, sameSite: undefined }
         )
 
     it "can change options", ->
@@ -384,7 +372,7 @@ describe "src/cy/commands/cookies", ->
       }).then ->
         expect(Cypress.automation).to.be.calledWith(
           "set:cookie",
-          { domain: "brian.dev.local", name: "foo", value: "bar", path: "/foo", secure: true, httpOnly: true, expiry: 987 }
+          { domain: "brian.dev.local", name: "foo", value: "bar", path: "/foo", secure: true, httpOnly: true, expiry: 987, sameSite: undefined }
         )
 
     it "does not mutate options", ->
@@ -393,6 +381,33 @@ describe "src/cy/commands/cookies", ->
 
       cy.setCookie("foo", "bar", {}).then ->
         expect(options).deep.eq({})
+
+    it "can set cookies with sameSite", ->
+      Cypress.automation.restore()
+      Cypress.utils.addTwentyYears.restore()
+
+      Cypress.sinon.stub(Cypress, 'config').callThrough()
+      .withArgs('experimentalGetCookiesSameSite').returns(true)
+
+      cy.setCookie('one', 'bar', { sameSite: 'none', secure: true })
+      cy.getCookie('one').should('include', { sameSite: 'no_restriction' })
+
+      cy.setCookie('two', 'bar', { sameSite: 'no_restriction', secure: true })
+      cy.getCookie('two').should('include', { sameSite: 'no_restriction' })
+
+      cy.setCookie('three', 'bar', { sameSite: 'Lax' })
+      cy.getCookie('three').should('include', { sameSite: 'lax' })
+
+      cy.setCookie('four', 'bar', { sameSite: 'Strict' })
+      cy.getCookie('four').should('include', { sameSite: 'strict' })
+
+      cy.setCookie('five', 'bar')
+
+      ## @see https://bugzilla.mozilla.org/show_bug.cgi?id=1624668
+      if Cypress.isBrowser('firefox')
+        cy.getCookie('five').should('include', { sameSite: 'no_restriction' })
+      else
+        cy.getCookie('five').should('not.have.property', 'sameSite')
 
     describe "timeout", ->
       it "sets timeout to Cypress.config(responseTimeout)", ->
@@ -497,6 +512,39 @@ describe "src/cy/commands/cookies", ->
 
         cy.setCookie("foo", 123)
 
+      it "when an invalid samesite prop is supplied", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error").message).to.eq """
+          If a `sameSite` value is supplied to `cy.setCookie()`, it must be a string from the following list:
+            > no_restriction, lax, strict
+          You passed:
+            > bad
+          """
+          expect(lastLog.get("error").docsUrl).to.eq "https://on.cypress.io/setcookie"
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.setCookie('foo', 'bar', { sameSite: 'bad' })
+
+      it "when samesite=none is supplied and secure is not set", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error").message).to.eq """
+          Only cookies with the `secure` flag set to `true` can use `sameSite: 'None'`.
+
+          Pass `secure: true` to `cy.setCookie()` to set a cookie with `sameSite: 'None'`.
+          """
+          expect(lastLog.get("error").docsUrl).to.eq "https://on.cypress.io/setcookie"
+          expect(lastLog.get("error")).to.eq(err)
+          done()
+
+        cy.setCookie('foo', 'bar', { sameSite: 'None' })
+
       context "when setting an invalid cookie", ->
         it "throws an error if the backend responds with an error", (done) ->
           err = new Error("backend could not set cookie")
@@ -520,7 +568,7 @@ describe "src/cy/commands/cookies", ->
 
         Cypress.automation
         .withArgs("set:cookie", {
-          domain: "localhost", name: "foo", value: "bar", path: "/", secure: false, httpOnly: false, expiry: 12345
+          domain: "localhost", name: "foo", value: "bar", path: "/", secure: false, httpOnly: false, expiry: 12345, sameSite: undefined
         })
         .resolves({
           name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false
@@ -543,12 +591,6 @@ describe "src/cy/commands/cookies", ->
 
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
-
-          it "displays name 'set cookie'", ->
-        cy.setCookie("foo", "bar").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("displayName")).to.eq("set cookie")
 
       it "#consoleProps", ->
         cy.setCookie("foo", "bar").then (cookie) ->
@@ -689,12 +731,6 @@ describe "src/cy/commands/cookies", ->
 
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
-
-          it "displays name 'clear cookie'", ->
-        cy.clearCookie("foo").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("displayName")).to.eq("clear cookie")
 
       it "#consoleProps", ->
         cy.clearCookie("foo").then (cookie) ->
@@ -930,12 +966,6 @@ describe "src/cy/commands/cookies", ->
 
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
-
-          it "displays name 'get cookies'", ->
-        cy.clearCookies().then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("displayName")).to.eq("clear cookies")
 
       it "#consoleProps", ->
         cy.clearCookies().then (cookies) ->

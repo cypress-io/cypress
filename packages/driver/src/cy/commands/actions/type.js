@@ -14,12 +14,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
   function type (subject, chars, options = {}) {
+    const userOptions = options
     let updateTable
 
-    options = _.clone(options)
     // allow the el we're typing into to be
     // changed by options -- used by cy.clear()
-    _.defaults(options, {
+    options = _.defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -457,7 +457,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   }
 
   function clear (subject, options = {}) {
-    _.defaults(options, {
+    const userOptions = options
+
+    options = _.defaults({}, userOptions, {
       log: true,
       force: false,
     })

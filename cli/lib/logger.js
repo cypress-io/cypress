@@ -26,6 +26,11 @@ const log = (...messages) => {
   console.log(...messages) // eslint-disable-line no-console
 }
 
+const always = (...messages) => {
+  logs.push(messages.join(' '))
+  console.log(...messages) // eslint-disable-line no-console
+}
+
 // splits long text into lines and calls log()
 // on each one to allow easy unit testing for specific message
 const logLines = (text) => {
@@ -46,6 +51,7 @@ module.exports = {
   log,
   warn,
   error,
+  always,
   logLines,
   print,
   reset,

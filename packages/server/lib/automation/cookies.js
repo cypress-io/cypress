@@ -1,11 +1,11 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 const extension = require('@packages/extension')
-const debug = require('debug')('cypress:server:cookies')
+const debug = require('debug')('cypress:server:automation:cookies')
 
 // match the w3c webdriver spec on return cookies
 // https://w3c.github.io/webdriver/webdriver-spec.html#cookies
-const COOKIE_PROPERTIES = 'name value path domain secure httpOnly expiry hostOnly'.split(' ')
+const COOKIE_PROPERTIES = 'name value path domain secure httpOnly expiry hostOnly sameSite'.split(' ')
 
 const normalizeCookies = (cookies) => {
   return _.map(cookies, normalizeCookieProps)
@@ -16,13 +16,7 @@ const normalizeCookieProps = function (props) {
     return props
   }
 
-  // pick off only these specific cookie properties
-  // only if they are defined
-  const cookie = _.chain(props)
-  .pick(COOKIE_PROPERTIES)
-  .omitBy(_.isUndefined)
-  .omitBy(_.isNull)
-  .value()
+  const cookie = _.pick(props, COOKIE_PROPERTIES)
 
   if (props.expiry != null) {
     // when sending cookie props we need to convert

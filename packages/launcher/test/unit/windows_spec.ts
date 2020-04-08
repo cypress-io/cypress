@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { expect } from 'chai'
 import * as windowsHelper from '../../lib/windows'
 import { normalize } from 'path'
-import execa from 'execa'
+import { utils } from '../../lib/utils'
 import sinon, { SinonStub } from 'sinon'
 import { browsers } from '../../lib/browsers'
 import Bluebird from 'bluebird'
@@ -13,9 +13,9 @@ import snapshot from 'snap-shot-it'
 function stubBrowser (path: string, version: string) {
   path = normalize(path.replace(/\\/g, '\\\\'))
 
-  ;(execa.stdout as SinonStub)
+  ;(utils.execa as unknown as SinonStub)
   .withArgs('wmic', ['datafile', 'where', `name="${path}"`, 'get', 'Version', '/value'])
-  .resolves(`Version=${version}`)
+  .resolves({ stdout: `Version=${version}` })
 
   ;(fse.pathExists as SinonStub)
   .withArgs(path)
@@ -28,7 +28,7 @@ describe('windows browser detection', () => {
   beforeEach(() => {
     sinon.stub(fse, 'pathExists').resolves(false)
     sinon.stub(os, 'homedir').returns(HOMEDIR)
-    sinon.stub(execa, 'stdout').resolves('')
+    sinon.stub(utils, 'execa').resolves({ stdout: '' })
   })
 
   it('detects browsers as expected', async () => {
@@ -75,7 +75,7 @@ describe('windows browser detection', () => {
     it('rejects with errors', async () => {
       const err = new Error()
 
-      ;(execa.stdout as SinonStub)
+      ;(utils.execa as unknown as SinonStub)
       .withArgs('wmic', ['datafile', 'where', 'name="foo"', 'get', 'Version', '/value'])
       .rejects(err)
 

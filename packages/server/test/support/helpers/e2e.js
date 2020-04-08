@@ -686,6 +686,7 @@ const e2e = {
           // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
         })
+        .extend(options.processEnv)
         .value(),
       })
 

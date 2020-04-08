@@ -51,7 +51,8 @@ interface StringValues {
   ```
 */
 const _summaries: StringValues = {
-  experimentalComponentTesting: 'Framework-specific component testing',
+  experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs',
+  experimentalGetCookiesSameSite: 'Adds `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.',
 }
 
 /**
@@ -66,6 +67,7 @@ const _summaries: StringValues = {
 */
 const _names: StringValues = {
   experimentalComponentTesting: 'Component Testing',
+  experimentalGetCookiesSameSite: 'Set `sameSite` property when retrieving cookies',
 }
 
 /**

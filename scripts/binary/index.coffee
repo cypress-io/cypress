@@ -152,6 +152,7 @@ deploy = {
     askMissingOptions(['platform'])(options)
     .then (options) ->
       zipDir = meta.zipDir(options.platform)
+      console.log("directory to zip %s", zipDir)
       options.zip = path.resolve(zippedFilename(options.platform))
       zip.ditto(zipDir, options.zip)
 

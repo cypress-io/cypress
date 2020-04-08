@@ -15,7 +15,7 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "debug": "4.1.1",
-    "execa": "1.0.0",
+    "execa": "4.0.0",
     "fs-extra": "8.1.0",
     "lodash": "4.17.15",
     "plist": "2.1.0",

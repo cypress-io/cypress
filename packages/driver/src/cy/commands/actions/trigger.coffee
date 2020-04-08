@@ -19,10 +19,10 @@ dispatch = (target, eventName, options) ->
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: ["element", "window", "document"] }, {
-    trigger: (subject, eventName, positionOrX, y, options = {}) ->
-      {options, position, x, y} = $actionability.getPositionFromArguments(positionOrX, y, options)
+    trigger: (subject, eventName, positionOrX, y, userOptions = {}) ->
+      {options: userOptions, position, x, y} = $actionability.getPositionFromArguments(positionOrX, y, userOptions)
 
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         log: true
         $el: subject
         bubbles: true
