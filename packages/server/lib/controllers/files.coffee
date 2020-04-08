@@ -58,14 +58,19 @@ module.exports = {
 
     getSpecsHelper = =>
       ## grab all of the specs if this is ci
+      experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+
       if spec is "__all"
         specsUtil.find(config)
         .then R.tap (specs) ->
           debug("found __all specs %o", specs)
         .filter (spec) ->
-          spec.specType == "integration"
+          if experimentalComponentTestingEnabled
+            return spec.specType == "integration"
+          else
+            return true
         .then R.tap (specs) ->
-          debug("filtered __all specs to only have integration %o", specs)
+          debug("filtered __all specs %o", specs)
         .map (spec) ->
           ## grab the name of each
           spec.absolute
