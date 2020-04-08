@@ -1,4 +1,5 @@
 import { RewriteNodeFn } from './js'
+import { MemberExpressionKind } from 'ast-types/gen/kinds'
 
 // need to inject a ternary to determine if `prop === window.prop` (has not been redefined in a closure), now we're having fun
 // const closureDetectionTern = (prop) => {
@@ -130,8 +131,16 @@ export const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
         this.traverse(path)
       }
 
-      if (node.left.type !== 'MemberExpression' || node.operator !== '=') {
+      if (node.left.type !== 'MemberExpression') {
         return finish()
+      }
+
+      if (node.operator !== '=') {
+        // in the case of +=, -=, |=, etc., assume they're not doing something like
+        // `window.top += 4` since that would be invalid anyways, just continue down the RHS
+        this.traverse(path.get('right'))
+
+        return
       }
 
       const propBeingSet = getReplaceablePropOfMemberExpression(node.left)
@@ -140,7 +149,7 @@ export const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
         return finish()
       }
 
-      const objBeingSetOn = node.left.object
+      const objBeingSetOn = (node.left as MemberExpressionKind).object
 
       path.replace(match(objBeingSetOn, propBeingSet, node.right))
 
