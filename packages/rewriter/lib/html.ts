@@ -1,79 +1,27 @@
-import duplexify from 'duplexify'
-import hyntax from 'hyntax'
-import * as js from './js'
+import RewritingStream from 'parse5-html-rewriting-stream'
+import * as htmlRules from './html-rules'
 import stream from 'stream'
-import { queueRewriting } from './threads'
 
-type Token = hyntax.Tokenizer.Token<hyntax.Tokenizer.TokenTypes.AnyTokenType>
-export type RewriteHtmlNodeFn = (token: Token) => string
+// the HTML rewriter passes inline JS to the JS rewriter, hence
+// the lack of basic `rewriteHtml` or `HtmlRewriter` exports here
 
-function Spacing () {
-  let lastEndPosition = 0
+export function HtmlJsRewriter (): stream.Transform {
+  const rewriter = new RewritingStream()
 
-  return (token: Token) => {
-    let out = ''
-
-    if (token.startPosition > lastEndPosition + 1) {
-      out = ' '.repeat(token.startPosition - lastEndPosition - 1)
-    }
-
-    lastEndPosition = token.endPosition
-
-    return out
-  }
-}
-
-// input: raw HTML
-// output: rewritten HTML
-export function HtmlRewriter (rewriteTokenFn: RewriteHtmlNodeFn): stream.Transform {
-  const htmlTokenizer = new hyntax.StreamTokenizer()
-  const output = new stream.PassThrough()
-  const spacing = Spacing()
-
-  htmlTokenizer.on('data', (tokens: Token[]) => {
-    tokens.forEach((token) => {
-      output.write(spacing(token) + rewriteTokenFn(token))
-    })
-  })
-
-  const rewriter = duplexify(htmlTokenizer, output)
+  htmlRules.install(rewriter)
 
   return rewriter
 }
 
-export function rewriteHtml (html: string, rewriteTokenFn: RewriteHtmlNodeFn): string {
-  const spacing = Spacing()
-
-  return hyntax.tokenize(html)
-  .tokens
-  .map((token) => {
-    return spacing(token) + rewriteTokenFn(token)
-  })
-  .join('')
-}
-
-function _htmlJsRewriteFn () {
-  return function (token) {
-    if (token.type === 'token:script-tag-content') {
-      // TODO: need to ensure it's type="text/javascript"
-      return js.rewriteJs(token.content)
-    }
-
-    return token.content
-  }
-}
-
 export function rewriteHtmlJs (html: string): string {
-  return rewriteHtml(html, _htmlJsRewriteFn())
-}
+  let out = ''
+  const rewriter = HtmlJsRewriter()
 
-export function rewriteHtmlJsAsync (html: string): Promise<string> {
-  return queueRewriting({
-    source: html,
-    isHtml: true,
+  rewriter.on('data', (chunk) => {
+    out += chunk
   })
-}
 
-export function HtmlJsRewriter (): stream.Transform {
-  return HtmlRewriter(_htmlJsRewriteFn())
+  rewriter.write(html)
+
+  return out
 }
