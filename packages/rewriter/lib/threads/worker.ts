@@ -1,4 +1,6 @@
 // this is designed to run as its own thread, managed by `threads.ts`
+// WARNING: take care to not over-import modules here - the upfront
+// mem/CPU cost is paid up to threads.MAX_WORKER_THREADS times
 
 import { parentPort, isMainThread } from 'worker_threads'
 
@@ -6,8 +8,8 @@ if (isMainThread) {
   throw new Error(`${__filename} should only be run as a worker thread`)
 }
 
-import { rewriteJs } from './js'
-import { rewriteHtmlJs } from './html'
+import { rewriteJs } from '../js'
+import { rewriteHtmlJs } from '../html'
 import { RewriteRequest, RewriteResponse } from './types'
 
 parentPort!.on('message', (req: RewriteRequest) => {

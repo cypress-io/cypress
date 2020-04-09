@@ -2,17 +2,10 @@ import * as astTypes from 'ast-types'
 import Debug from 'debug'
 import { rewriteJsFnsCb } from './js-rules'
 import * as recast from 'recast'
-import { queueRewriting } from './threads'
 
 const debug = Debug('cypress:rewriter:js')
 
 export type RewriteNodeFn = (js: string, n: typeof astTypes) => astTypes.Visitor
-
-export function rewriteJsAsync (js: string): Promise<string> {
-  return queueRewriting({
-    source: js,
-  })
-}
 
 export function rewriteJs (js: string): string {
   try {

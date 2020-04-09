@@ -1,3 +1,3 @@
-export { HtmlJsRewriter, rewriteHtmlJsAsync } from './html'
+export { HtmlJsRewriter } from './html'
 
-export { rewriteJsAsync } from './js'
+export { rewriteJsAsync, rewriteHtmlJsAsync } from './async-rewriters'
