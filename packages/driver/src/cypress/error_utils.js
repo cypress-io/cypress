@@ -60,6 +60,10 @@ const replacedStack = (err, newStackErr) => {
   const newStackErrString = newStackErr.toString()
   const stackLines = newStackErr.stack.replace(newStackErrString, '')
 
+  // sometimes the new stack doesn't include any lines, so just stick
+  // with the original stack
+  if (!stackLines) return err.stack
+
   return `${errString}${stackLines}`
 }
 

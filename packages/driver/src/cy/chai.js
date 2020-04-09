@@ -340,7 +340,10 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.message = getLongLengthMessage(obj.length, length)
+              const newMessage = getLongLengthMessage(obj.length, length)
+
+              $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
               throw e1
             }
 
@@ -400,7 +403,10 @@ chai.use((chai, u) => {
               return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.message = getLongExistsMessage(obj)
+            const newMessage = getLongExistsMessage(obj)
+
+            $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
             throw e1
           }
         }
