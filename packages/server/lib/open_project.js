@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
+const pluralize = require('pluralize')
 const Project = require('./project')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
@@ -29,6 +30,8 @@ const moduleFactory = () => {
 
   return {
     specsWatcher: null,
+
+    componentSpecsWatcher: null,
 
     reset: tryToCall('reset'),
 
@@ -171,21 +174,39 @@ const moduleFactory = () => {
       250, { leading: true })
 
       const createSpecsWatcher = (cfg) => {
-        if (this.specsWatcher) {
-          return
+        // TODO I keep repeating this to get the resolved value
+        // probably better to have a single function that does this
+        const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
+
+        debug('createSpecWatch component testing enabled', experimentalComponentTestingEnabled)
+
+        if (!this.specsWatcher) {
+          debug('watching integration test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
+
+          this.specsWatcher = chokidar.watch(cfg.testFiles, {
+            cwd: cfg.integrationFolder,
+            ignored: cfg.ignoreTestFiles,
+            ignoreInitial: true,
+          })
+
+          this.specsWatcher.on('add', checkForSpecUpdates)
+
+          this.specsWatcher.on('unlink', checkForSpecUpdates)
         }
 
-        debug('watch test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
+        if (experimentalComponentTestingEnabled && !this.componentSpecsWatcher) {
+          debug('watching component test files: %s in %s', cfg.testFiles, cfg.componentFolder)
 
-        this.specsWatcher = chokidar.watch(cfg.testFiles, {
-          cwd: cfg.integrationFolder,
-          ignored: cfg.ignoreTestFiles,
-          ignoreInitial: true,
-        })
+          this.componentSpecsWatcher = chokidar.watch(cfg.testFiles, {
+            cwd: cfg.componentFolder,
+            ignored: cfg.ignoreTestFiles,
+            ignoreInitial: true,
+          })
 
-        this.specsWatcher.on('add', checkForSpecUpdates)
+          this.componentSpecsWatcher.on('add', checkForSpecUpdates)
 
-        return this.specsWatcher.on('unlink', checkForSpecUpdates)
+          this.componentSpecsWatcher.on('unlink', checkForSpecUpdates)
+        }
       }
 
       const get = () => {
@@ -200,10 +221,9 @@ const moduleFactory = () => {
             if (debug.enabled) {
               const names = _.map(specs, 'name')
 
-              // TODO use pluralize to form good debug message
               debug(
-                'found \'%d\' specs using spec pattern \'%s\': %o',
-                names.length,
+                'found %s using spec pattern \'%s\': %o',
+                pluralize('spec', names.length, true),
                 cfg.testFiles,
                 names,
               )
@@ -226,6 +246,11 @@ const moduleFactory = () => {
       if (this.specsWatcher) {
         this.specsWatcher.close()
         this.specsWatcher = null
+      }
+
+      if (this.componentSpecsWatcher) {
+        this.componentSpecsWatcher.close()
+        this.componentSpecsWatcher = null
       }
     },
 

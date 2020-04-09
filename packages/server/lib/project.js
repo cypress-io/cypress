@@ -819,6 +819,7 @@ class Project extends EE {
       // file path from projectRoot
       // ie: **/* turns into /Users/bmann/dev/project/**/*
       specPattern = path.resolve(projectRoot, specPattern)
+      debug('full spec pattern "%s"', specPattern)
     }
 
     return new Project(projectRoot)
