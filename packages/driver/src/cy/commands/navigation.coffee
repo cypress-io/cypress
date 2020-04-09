@@ -367,7 +367,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       switch args.length
         when 0
           forceReload = false
-          userOptions     = {}
+          userOptions = {}
 
         when 1
           if _.isObject(args[0])
@@ -403,8 +403,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             throwArgsErr()
 
           if options.log
-            options._log = Cypress.log({
-            })
+            options._log = Cypress.log({})
 
             options._log.snapshot("before", {next: "after"})
 
