@@ -105,7 +105,24 @@ export const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
     visitIdentifier (path) {
       const { node } = path
 
-      if (path.parentPath.node.type === 'LabeledStatement' && path.parentPath.node.label === node) {
+      if (path.parentPath && [
+        'LabeledStatement', // like `top: foo();`
+        'Property', // like `{ top: 'foo' }`
+        'FunctionDeclaration', // like `function top()`
+        'RestElement', // like (...top)
+        'ArrowFunctionExpression', // like `(top, ...parent) => { }`
+        'ArrowExpression',
+        'FunctionExpression', // like `(function top())`
+      ].includes(path.parentPath.node.type)) {
+        // some Identifiers do not refer to a scoped variable, skip those
+        return false
+      }
+
+      if (
+        path.parentPath && path.parentPath.node.type === 'VariableDeclarator'
+        && path.parentPath.node.id === node
+      ) {
+        // like `var top = 'foo'`
         return false
       }
 

@@ -63,8 +63,31 @@ describe('lib/js', function () {
             'a = "b"; window.top',
             `a = "b"; ${match('window', 'top')}`,
           ],
-          // test that top/parent are ignored as LabeledStatement labels
-          ['{ top: "foo", parent: "bar" }'],
+          // test that top/parent are ignored when used as non-variable Identifiers
+          ['({ top: "foo", parent: "bar" })'],
+          ['top: "foo"; parent: "bar";'],
+          ['break top; break parent;'],
+          ['continue top; continue parent;'],
+          [
+            'function top() { window.top }; function parent(...top) { window.top }',
+            `function top() { ${match('window', 'top')} }; function parent(...top) { ${match('window', 'top')} }`,
+          ],
+          [
+            '(top, ...parent) => { window.top }',
+            `(top, ...parent) => { ${match('window', 'top')} }`,
+          ],
+          [
+            '(function top() { window.top }); (function parent(...top) { window.top })',
+            `(function top() { ${match('window', 'top')} }); (function parent(...top) { ${match('window', 'top')} })`,
+          ],
+          [ // TODO: implement window proxy for destructuring
+            'const { top, parent } = window',
+            'const { top, parent } = (window === globalThis ? globalThis.top.Cypress.getWindowProxy(globalThis) : window)',
+          ],
+          [
+            'const top = top; const parent = parent;',
+            `const top = (top === globalThis['top'] ? ${match('globalThis', 'top')} : top); const parent = (parent === globalThis['parent'] ? ${match('globalThis', 'parent')} : parent);`,
+          ],
         ]
         // .slice(0, 1)
         .forEach(([string, expected]) => {
