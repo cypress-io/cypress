@@ -65,6 +65,21 @@ describe "lib/util/specs", ->
           }
         ])
 
+    it "finds integration tests if component testing is disabled", ->
+      config.get(FixturesHelper.projectPath("component-tests"))
+      .then (cfg) ->
+        expect(cfg.resolved.experimentalComponentTesting.value).to.be.true
+        cfg.resolved.experimentalComponentTesting.value = false
+        specsUtil.find(cfg)
+      .then R.project(['relative', 'specType'])
+      .then (files) ->
+        expect(files).to.deep.equal([
+          {
+            relative: 'cypress/integration/integration-spec.js',
+            specType: 'integration'
+          }
+        ])
+
     it "returns files matching config.testFiles", ->
       config.get(FixturesHelper.projectPath("various-file-types"))
       .then (cfg) ->
