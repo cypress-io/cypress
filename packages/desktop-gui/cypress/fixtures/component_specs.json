@@ -1,0 +1,25 @@
+{
+  "integration": [
+    {
+      "name": "app_spec.coffee",
+      "relative": "cypress/integration/app_spec.coffee"
+    }
+  ],
+  "component": [
+    {
+      "name": "src/components/Foo.spec.js",
+      "relative": "src/components/Foo.spec.js",
+      "specType": "component"
+    },
+    {
+      "name": "src/Bar.spec.js",
+      "relative": "src/components/Bar.spec.js",
+      "specType": "component"
+    },
+    {
+      "name": "Navigation.spec.js",
+      "relative": "src/Navigation.spec.js",
+      "specType": "component"
+    }
+  ]
+}

@@ -215,7 +215,6 @@ const moduleFactory = () => {
           createSpecsWatcher(cfg)
 
           return specsUtil.find(cfg)
-          // TODO: put back 'integration' property on the specs
           .then((specs = []) => {
             // TODO merge logic with "run.js"
             if (debug.enabled) {
@@ -229,6 +228,20 @@ const moduleFactory = () => {
               )
             }
 
+            const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
+
+            if (experimentalComponentTestingEnabled) {
+              // separate specs into integration and component lists
+              // note: _.remove modifies the array in place and returns removed elements
+              const component = _.remove(specs, { specType: 'component' })
+
+              return {
+                integration: specs,
+                component,
+              }
+            }
+
+            // assumes all specs are integration specs
             return {
               integration: specs,
             }
