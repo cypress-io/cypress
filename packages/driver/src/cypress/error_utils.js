@@ -57,14 +57,14 @@ const replacedStack = (err, newStackErr) => {
   if (!err.stack) return err.stack
 
   const errString = err.toString()
-  const newStackErrString = newStackErr.toString()
-  const stackLines = newStackErr.stack.replace(newStackErrString, '')
+  const newStackErrStringRe = new RegExp(`${newStackErr.toString()}\n?`)
+  const stackLines = newStackErr.stack.replace(newStackErrStringRe, '')
 
   // sometimes the new stack doesn't include any lines, so just stick
   // with the original stack
   if (!stackLines) return err.stack
 
-  return `${errString}${stackLines}`
+  return `${errString}\n${stackLines}`
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {

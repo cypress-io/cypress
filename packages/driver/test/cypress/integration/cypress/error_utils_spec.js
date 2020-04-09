@@ -409,9 +409,7 @@ describe('driver/src/cypress/error_utils', () => {
       newStackErr.stack = 'new stack'
       const stack = $errUtils.replacedStack(err, newStackErr)
 
-      expect(stack).to.include('message')
-      expect(stack).to.include('new stack')
-      expect(stack).not.to.include('different')
+      expect(stack).to.equal('Error: message\nnew stack')
     })
   })
 })
