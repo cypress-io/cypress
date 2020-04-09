@@ -105,6 +105,17 @@ onServer = (app) ->
     res.setHeader("Set-Cookie", header)
     res.type('html').end()
 
+  app.get "/invalidControlCharCookie", (req, res) ->
+    ## `http` lib throws an error if we use .setHeader to set this
+    res.connection.end("""
+    HTTP/1.1 200 OK
+    Content-Type: text/html
+    Set-Cookie: ___utmvaFvuoaRv=TkE\u0001sCvZ; path=/; Max-Age=900
+    Set-Cookie: _valid=true; path=/; Max-Age=900
+
+    foo
+    """)
+
 haveRoot = !process.env.USE_HIGH_PORTS && process.geteuid() == 0
 
 if not haveRoot
