@@ -58,18 +58,20 @@ export const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
 
   // (PROP === window['PROP'] ? MATCH : PROP)
   function closureDetectionTern (prop) {
-    return b.conditionalExpression(
-      b.binaryExpression(
-        '===',
-        b.identifier(prop),
-        b.memberExpression(
-          globalIdentifier,
-          b.stringLiteral(prop),
-          true,
+    return b.parenthesizedExpression(
+      b.conditionalExpression(
+        b.binaryExpression(
+          '===',
+          b.identifier(prop),
+          b.memberExpression(
+            globalIdentifier,
+            b.stringLiteral(prop),
+            true,
+          ),
         ),
+        match(globalIdentifier, prop),
+        b.identifier(prop),
       ),
-      match(globalIdentifier, prop),
-      b.identifier(prop),
     )
   }
 
@@ -93,36 +95,27 @@ export const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
       const prop = getReplaceablePropOfMemberExpression(node)
 
       if (!prop) {
-        this.traverse(path)
-
-        return
+        return this.traverse(path)
       }
 
       path.replace(match(path.get('object').node, prop))
 
       return false
     },
-    visitBinaryExpression (path) {
+    visitIdentifier (path) {
       const { node } = path
 
-      // is it a direct `top` or `parent` reference in a conditional?
-      // (top|parent) != .*
-      if (node.left.type === 'Identifier' && ['parent', 'top'].includes(node.left.name)) {
-        path.get('left').replace(closureDetectionTern(node.left.name))
+      if (path.parentPath.node.type === 'LabeledStatement' && path.parentPath.node.label === node) {
+        return false
+      }
+
+      if (['parent', 'top'].includes(node.name)) {
+        path.replace(closureDetectionTern(node.name))
 
         return false
       }
 
-      // .* != (top|parent)
-      if (node.right.type === 'Identifier' && ['parent', 'top'].includes(node.right.name)) {
-        path.get('right').replace(closureDetectionTern(node.right.name))
-
-        return false
-      }
-
-      this.traverse(path)
-
-      return
+      return this.traverse(path)
     },
     visitAssignmentExpression (path) {
       const { node } = path
@@ -138,9 +131,7 @@ export const rewriteJsFnsCb: RewriteNodeFn = (_js, n) => {
       if (node.operator !== '=') {
         // in the case of +=, -=, |=, etc., assume they're not doing something like
         // `window.top += 4` since that would be invalid anyways, just continue down the RHS
-        this.traverse(path.get('right'))
-
-        return
+        return this.traverse(path.get('right'))
       }
 
       const propBeingSet = getReplaceablePropOfMemberExpression(node.left)
