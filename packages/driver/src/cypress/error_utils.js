@@ -51,14 +51,19 @@ const replaceMsgInStack = (err, newMsg) => {
   return stack.replace(name, `${name}: ${newMsg}`)
 }
 
+const newLineAtBeginningRe = /^\n+/
+
 const replacedStack = (err, newStackErr) => {
   // if err already lacks a stack or we've removed the stack
   // for some reason, keep it stackless
   if (!err.stack) return err.stack
 
   const errString = err.toString()
-  const newStackErrStringRe = new RegExp(`${newStackErr.toString()}\n?`)
-  const stackLines = newStackErr.stack.replace(newStackErrStringRe, '')
+
+  const newStackErrString = newStackErr.toString()
+  const stackLines = newStackErr.stack
+  .replace(newStackErrString, '')
+  .replace(newLineAtBeginningRe, '')
 
   // sometimes the new stack doesn't include any lines, so just stick
   // with the original stack
