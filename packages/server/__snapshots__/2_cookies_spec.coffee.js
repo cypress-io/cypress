@@ -33,6 +33,7 @@ exports['e2e cookies with baseurl'] = `
       ✓ can set and clear cookie
       in a cy.visit
         ✓ can successfully send cookies as a Cookie header
+        ✓ ignores invalid set-cookie headers that contain control chars
         with Domain = superdomain
           ✓ is set properly with no redirects
           ✓ is set properly with redirects
@@ -48,6 +49,7 @@ exports['e2e cookies with baseurl'] = `
           ✓ can set cookies on lots of redirects, ending with same domain
       in a cy.request
         ✓ can successfully send cookies as a Cookie header
+        ✓ ignores invalid set-cookie headers that contain control chars
         with Domain = superdomain
           ✓ is set properly with no redirects
           ✓ is set properly with redirects
@@ -63,14 +65,14 @@ exports['e2e cookies with baseurl'] = `
           ✓ can set cookies on lots of redirects, ending with same domain
 
 
-  30 passing
+  32 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        30                                                                               │
-  │ Passing:      30                                                                               │
+  │ Tests:        32                                                                               │
+  │ Passing:      32                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -94,9 +96,9 @@ exports['e2e cookies with baseurl'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  cookies_spec_baseurl.coffee              XX:XX       30       30        -        -        - │
+  │ ✔  cookies_spec_baseurl.coffee              XX:XX       32       32        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       30       30        -        -        -  
+    ✔  All specs passed!                        XX:XX       32       32        -        -        -  
 
 
 `
