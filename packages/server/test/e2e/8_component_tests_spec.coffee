@@ -1,6 +1,7 @@
 e2e = require("../support/helpers/e2e")
 Fixtures = require("../support/helpers/fixtures")
 
+# TODO GB write the tests for component tests feature
 describe "e2e component tests", ->
   e2e.setup()
 

@@ -2,5 +2,5 @@
   "pluginsFile": false,
   "supportFile": false,
   "experimentalComponentTesting": true,
-  "componentTests": "cypress/component-tests"
+  "componentFolder": "cypress/component-tests"
 }
