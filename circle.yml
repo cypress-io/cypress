@@ -644,7 +644,8 @@ jobs:
           # will use PERCY_TOKEN environment variable if available
           command: |
             CYPRESS_KONFIG_ENV=production \
-            yarn lerna exec --scope @packages/desktop-gui "yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js"
+            yarn lerna exec --scope @packages/desktop-gui \
+            "yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js"
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
