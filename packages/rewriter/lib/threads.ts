@@ -12,7 +12,7 @@ const _debugWorker = !debug.enabled ? _.noop : (worker: WorkerInfo) => {
 }
 
 const _debugOpts = !debug.enabled ? _.noop : (opts: RewriteOpts) => {
-  return { ..._.pick(opts, 'isHtml'), source: _.truncate(opts.source, { length: 500 }) }
+  return { ..._.pick(opts, 'isHtml'), sourceLength: opts.source.length }
 }
 
 // in production, it is preferable to use the transpiled version of `worker.ts`
@@ -110,12 +110,11 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
 
       debug('received response from worker %o', {
         error: res.error,
-        sourceLength: opts.source.length,
-        code: debug.enabled && _.truncate(res.code, { length: 500 }),
         totalMs: Date.now() - startedAt,
-        threadMs: res.threadMs,
-        overHeadMs: totalMs - res.threadMs,
-        worker: _debugWorker(worker), opts: _debugOpts(opts),
+        threadMs: res.threadMs, // time taken to run rewriting in thread
+        overheadMs: totalMs - res.threadMs, // time not accounted for by `threadMs`
+        worker: _debugWorker(worker),
+        opts: _debugOpts(opts),
       })
 
       worker.thread.removeListener('exit', onExit)
