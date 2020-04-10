@@ -36,7 +36,7 @@ describe "src/cy/commands/screenshot", ->
       ## backup this property so we set it back to whatever
       ## is correct based on what mode we're currently in
       isTextTerminal = Cypress.config("isTextTerminal")
-    
+
       Cypress.config("isTextTerminal", false)
 
       cy.spy(Cypress, "action").log(false)
@@ -676,77 +676,117 @@ describe "src/cy/commands/screenshot", ->
             @lastLog = log
             @logs.push(log)
 
-        @assertErrorMessage = (message, done) =>
+        @assertErrorMessage = (message, done) ->
           cy.on "fail", (err) =>
-            expect(@lastLog.get("error").message).to.eq(message)
+            lastErr = @lastLog.get("error")
+            expect(lastErr.message).to.eq(message)
             done()
 
         return null
 
       it "throws if capture is not a string", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: true", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `true`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+
+          done()
+
         cy.screenshot({ capture: true })
 
       it "throws if capture is not a valid option", (done) ->
-        @assertErrorMessage("cy.screenshot() 'capture' option must be one of the following: 'fullPage', 'viewport', or 'runner'. You passed: foo", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `capture` option must be one of the following: `fullPage`, `viewport`, or `runner`. You passed: `foo`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+
+          done()
+
         cy.screenshot({ capture: "foo" })
 
       it "throws if scale is not a boolean", (done) ->
-        @assertErrorMessage("cy.screenshot() 'scale' option must be a boolean. You passed: foo", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `scale` option must be a boolean. You passed: `foo`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+
+          done()
+
         cy.screenshot({ scale: "foo" })
 
       it "throws if disableTimersAndAnimations is not a boolean", (done) ->
-        @assertErrorMessage("cy.screenshot() 'disableTimersAndAnimations' option must be a boolean. You passed: foo", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `disableTimersAndAnimations` option must be a boolean. You passed: `foo`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+
+          done()
+
         cy.screenshot({ disableTimersAndAnimations: "foo" })
 
       it "throws if blackout is not an array", (done) ->
-        @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: foo", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `blackout` option must be an array of strings. You passed: `foo`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          done()
+
         cy.screenshot({ blackout: "foo" })
 
       it "throws if blackout is not an array of strings", (done) ->
-        @assertErrorMessage("cy.screenshot() 'blackout' option must be an array of strings. You passed: true", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` `blackout` option must be an array of strings. You passed: `true`")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          done()
+
         cy.screenshot({ blackout: [true] })
 
       it "throws if there is a 0px tall element height", (done) ->
-        @assertErrorMessage("cy.screenshot() only works with a screenshot area with a height greater than zero.", done)
+        @assertErrorMessage("`cy.screenshot()` only works with a screenshot area with a height greater than zero.", done)
         cy.visit("/fixtures/screenshots.html")
         cy.get('.empty-element').screenshot()
 
       it "throws if padding is not a number", (done) ->
-        @assertErrorMessage("cy.screenshot() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: 50px", done)
+        @assertErrorMessage("`cy.screenshot()` `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `50px`", done)
         cy.screenshot({ padding: '50px' })
 
       it "throws if padding is not an array of numbers", (done) ->
-        @assertErrorMessage("cy.screenshot() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: bad, bad, bad, bad", done)
+        @assertErrorMessage("`cy.screenshot()` `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `bad, bad, bad, bad`", done)
         cy.screenshot({ padding: ['bad', 'bad', 'bad', 'bad'] })
 
       it "throws if padding is not an array with a length between 1 and 4", (done) ->
-        @assertErrorMessage("cy.screenshot() 'padding' option must be either a number or an array of numbers with a maximum length of 4. You passed: 20, 10, 20, 10, 50", done)
+        @assertErrorMessage("`cy.screenshot()` `padding` option must be either a number or an array of numbers with a maximum length of 4. You passed: `20, 10, 20, 10, 50`", done)
         cy.screenshot({ padding: [20, 10, 20, 10, 50] })
 
       it "throws if padding is a large negative number that causes a 0px tall element height", (done) ->
-        @assertErrorMessage("cy.screenshot() only works with a screenshot area with a height greater than zero.", done)
+        @assertErrorMessage("`cy.screenshot()` only works with a screenshot area with a height greater than zero.", done)
         cy.visit("/fixtures/screenshots.html")
         cy.get('.tall-element').screenshot({ padding: -161 })
 
       it "throws if clip is not an object", (done) ->
-        @assertErrorMessage("cy.screenshot() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: true", done)
+        @assertErrorMessage("`cy.screenshot()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `true`", done)
         cy.screenshot({ clip: true })
 
       it "throws if clip is lacking proper keys", (done) ->
-        @assertErrorMessage("cy.screenshot() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: {x: 5}", done)
+        @assertErrorMessage("`cy.screenshot()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `{x: 5}`", done)
         cy.screenshot({ clip: { x: 5 } })
 
       it "throws if clip has extraneous keys", (done) ->
-        @assertErrorMessage("cy.screenshot() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: Object{5}", done)
+        @assertErrorMessage("`cy.screenshot()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `Object{5}`", done)
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: 5, foo: 10 } })
 
       it "throws if clip has non-number values", (done) ->
-        @assertErrorMessage("cy.screenshot() 'clip' option must be an object with the keys { width, height, x, y } and number values. You passed: Object{4}", done)
+        @assertErrorMessage("`cy.screenshot()` `clip` option must be an object with the keys `{ width, height, x, y }` and number values. You passed: `Object{4}`", done)
         cy.screenshot({ clip: { width: 100, height: 100, x: 5, y: "5" } })
 
       it "throws if element capture with multiple elements", (done) ->
-        @assertErrorMessage("cy.screenshot() only works for a single element. You attempted to screenshot 4 elements.", done)
+        cy.on "fail", (err) =>
+          lastErr = @lastLog.get("error")
+          expect(lastErr.message).to.eq("`cy.screenshot()` only works for a single element. You attempted to screenshot 4 elements.")
+          expect(lastErr.docsUrl).to.eq("https://on.cypress.io/screenshot")
+          done()
+
         cy.visit("/fixtures/screenshots.html")
         cy.get(".multiple").screenshot()
 
@@ -780,7 +820,8 @@ describe "src/cy/commands/screenshot", ->
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("name")).to.eq("screenshot")
           expect(lastLog.get("message")).to.eq("foo")
-          expect(err.message).to.eq("cy.screenshot() timed out waiting '50ms' to complete.")
+          expect(err.message).to.eq("`cy.screenshot()` timed out waiting `50ms` to complete.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/screenshot")
           done()
 
         cy.screenshot("foo", {timeout: 50})

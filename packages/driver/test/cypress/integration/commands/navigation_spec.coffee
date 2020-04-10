@@ -120,21 +120,24 @@ describe "src/cy/commands/navigation", ->
 
       it "throws passing more than 2 args", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
+          expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(1, 2, 3)
 
       it "throws passing 2 invalid arguments", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
+          expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(true, 1)
 
       it "throws passing 1 invalid argument", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.reload() can only accept a boolean or options as its arguments.")
+          expect(err.message).to.eq("`cy.reload()` can only accept a boolean or `options` as its arguments.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/reload")
           done()
 
         cy.reload(1)
@@ -167,7 +170,7 @@ describe "src/cy/commands/navigation", ->
             cy.on "fail", (err) ->
               expected = true
 
-              expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
+              expect(err.message).to.include "Your page did not fire its `load` event within `1ms`."
 
           .reload({timeout: 1})
 
@@ -306,21 +309,26 @@ describe "src/cy/commands/navigation", ->
       _.each [null, undefined, NaN, Infinity, {}, [], ->{}], (val) =>
         it "throws on: '#{val}'", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.eq("cy.go() accepts only a string or number argument")
+            expect(err.message).to.eq("`cy.go()` accepts only a string or number argument")
+            expect(err.docsUrl).to.eq("https://on.cypress.io/go")
             done()
 
           cy.go(val)
 
       it "throws on invalid string", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.go() accepts either 'forward' or 'back'. You passed: 'foo'")
+          expect(err.message).to.eq("`cy.go()` accepts either `forward` or `back`. You passed: `foo`")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/go")
+
           done()
 
         cy.go("foo")
 
       it "throws on zero", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq("cy.go() cannot accept '0'. The number must be greater or less than '0'.")
+          expect(err.message).to.eq("`cy.go()` cannot accept `0`. The number must be greater or less than `0`.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/go")
+
           done()
 
         cy.go(0)
@@ -345,7 +353,7 @@ describe "src/cy/commands/navigation", ->
             cy.on "fail", (err) ->
               expected = true
 
-              expect(err.message).to.include "Your page did not fire its 'load' event within '1ms'."
+              expect(err.message).to.include "Your page did not fire its `load` event within `1ms`."
 
             cy.go("back", {timeout: 1})
 
@@ -543,7 +551,7 @@ describe "src/cy/commands/navigation", ->
       Cypress.config("baseUrl", "")
 
       cy.on "fail", (err) ->
-        expect(err.message).to.contain("cy.visit() failed because the 'file://...' protocol is not supported by Cypress.")
+        expect(err.message).to.contain("`cy.visit()` failed because the 'file://...' protocol is not supported by Cypress.")
         done()
 
       cy.visit("file:///cypress/fixtures/generic.html")
@@ -1007,7 +1015,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
-          expect(err.message).to.include "Your page did not fire its 'load' event within '20ms'."
+          expect(err.message).to.include "Your page did not fire its `load` event within `20ms`."
           expect(lastLog.get("error")).to.eq(err)
           done()
 
@@ -1033,14 +1041,16 @@ describe "src/cy/commands/navigation", ->
 
       it "throws when url isnt a string", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.eq "cy.visit() must be called with a URL or an options object containing a URL as its 1st argument"
+          expect(err.message).to.eq "`cy.visit()` must be called with a `url` or an `options` object containing a `url` as its 1st argument"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit()
 
       it "throws when url is specified twice", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.visit() must be called with only one URL. You specified two URLs"
+          expect(err.message).to.contain "`cy.visit()` must be called with only one `url`. You specified two urls"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit("http://foobarbaz", {
@@ -1049,7 +1059,8 @@ describe "src/cy/commands/navigation", ->
 
       it "throws when method is unsupported", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.visit() was called with an invalid method: 'FOO'"
+          expect(err.message).to.contain "`cy.visit()` was called with an invalid method: `FOO`"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit({
@@ -1059,7 +1070,8 @@ describe "src/cy/commands/navigation", ->
 
       it "throws when headers is not an object", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.visit() requires the 'headers' option to be an object"
+          expect(err.message).to.contain "`cy.visit()` requires the `headers` option to be an object"
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
           done()
 
         cy.visit({
@@ -1076,7 +1088,7 @@ describe "src/cy/commands/navigation", ->
 
         it "throws when qs is #{str}", (done) ->
           cy.on "fail", (err) ->
-            expect(err.message).to.contain "cy.visit() requires the 'qs' option to be an object, but received: '#{str}'"
+            expect(err.message).to.contain "`cy.visit()` requires the `qs` option to be an object, but received: `#{str}`"
             done()
 
           cy.visit({
@@ -1086,7 +1098,7 @@ describe "src/cy/commands/navigation", ->
 
       it "throws when failOnStatusCode is false and retryOnStatusCodeFailure is true", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.contain "cy.visit() was invoked with { failOnStatusCode: false, retryOnStatusCodeFailure: true }."
+          expect(err.message).to.contain "These options are incompatible with each other."
           done()
 
         cy.visit({
@@ -1099,9 +1111,10 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("`cy.visit()` failed because you are attempting to visit a URL that is of a different origin.")
           expect(err.message).to.include("The new URL is considered a different origin because the following parts of the URL are different:")
           expect(err.message).to.include("> port")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cannot-visit-different-origin-domain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1113,9 +1126,10 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("`cy.visit()` failed because you are attempting to visit a URL that is of a different origin.")
           expect(err.message).to.include("The new URL is considered a different origin because the following parts of the URL are different:")
           expect(err.message).to.include("> protocol")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cannot-visit-different-origin-domain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1127,9 +1141,10 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("`cy.visit()` failed because you are attempting to visit a URL that is of a different origin.")
           expect(err.message).to.include("The new URL is considered a different origin because the following parts of the URL are different:")
           expect(err.message).to.include("> superdomain")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cannot-visit-different-origin-domain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1163,7 +1178,8 @@ describe "src/cy/commands/navigation", ->
         cy.on "fail", (err) =>
           lastLog = @lastLog
 
-          expect(err.message).to.include("cy.visit() failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.message).to.include("`cy.visit()` failed because you are attempting to visit a URL that is of a different origin.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cannot-visit-different-origin-domain")
           expect(@logs.length).to.eq(2)
           expect(lastLog.get("error")).to.eq(err)
           done()
@@ -1198,7 +1214,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("""
-            cy.visit() failed trying to load:
+            `cy.visit()` failed trying to load:
 
             http://localhost:3500/foo.html
 
@@ -1250,7 +1266,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("""
-            cy.visit() failed trying to load:
+            `cy.visit()` failed trying to load:
 
             /foo.html
 
@@ -1297,7 +1313,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("""
-            cy.visit() failed trying to load:
+            `cy.visit()` failed trying to load:
 
             /bar
 
@@ -1345,7 +1361,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("""
-            cy.visit() failed trying to load:
+            `cy.visit()` failed trying to load:
 
             https://google.com/foo
 
@@ -1353,9 +1369,9 @@ describe "src/cy/commands/navigation", ->
 
               > 500: Server Error
 
-            This was considered a failure because the status code was not '2xx'.
+            This was considered a failure because the status code was not `2xx`.
 
-            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+            If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
           """)
           expect(emit).to.be.calledWithMatch("visit:failed", obj)
           expect(@logs.length).to.eq(1)
@@ -1392,7 +1408,7 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("""
-            cy.visit() failed trying to load:
+            `cy.visit()` failed trying to load:
 
             https://google.com/foo
 
@@ -1400,14 +1416,14 @@ describe "src/cy/commands/navigation", ->
 
               > 401: Unauthorized
 
-            This was considered a failure because the status code was not '2xx'.
+            This was considered a failure because the status code was not `2xx`.
 
             This http request was redirected '2' times to:
 
               - 302: https://google.com/bar/
               - 301: https://gmail.com/
 
-            If you do not want status codes to cause failures pass the option: 'failOnStatusCode: false'
+            If you do not want status codes to cause failures pass the option: `failOnStatusCode: false`
           """)
           expect(emit).to.be.calledWithMatch("visit:failed", obj)
           expect(@logs.length).to.eq(1)
@@ -1430,19 +1446,19 @@ describe "src/cy/commands/navigation", ->
             lastLog = @lastLog
 
             expect(err.message).to.include("""
-              cy.visit() failed trying to load:
+              `cy.visit()` failed trying to load:
 
               http://localhost:3500/#{pathName}
 
-              The content-type of the response we received from your web server was:
+              The `content-type` of the response we received from your web server was:
 
-                > #{contentType}
+                > `#{contentType}`
 
-              This was considered a failure because responses must have content-type: 'text/html'
+              This was considered a failure because responses must have `content-type: 'text/html'`
 
-              However, you can likely use cy.request() instead of cy.visit().
+              However, you can likely use `cy.request()` instead of `cy.visit()`.
 
-              cy.request() will automatically get and set cookies and enable you to parse responses.
+              `cy.request()` will automatically get and set cookies and enable you to parse responses.
             """)
             expect(@logs.length).to.eq(1)
             expect(lastLog.get("error")).to.eq(err)
@@ -1475,19 +1491,19 @@ describe "src/cy/commands/navigation", ->
           lastLog = @lastLog
 
           expect(err.message).to.include("""
-            cy.visit() failed trying to load:
+            `cy.visit()` failed trying to load:
 
             https://google.com/foo
 
-            The content-type of the response we received from this local file was:
+            The `content-type` of the response we received from this local file was:
 
-              > application/json
+              > `application/json`
 
-            This was considered a failure because responses must have content-type: 'text/html'
+            This was considered a failure because responses must have `content-type: 'text/html'`
 
-            However, you can likely use cy.request() instead of cy.visit().
+            However, you can likely use `cy.request()` instead of `cy.visit()`.
 
-            cy.request() will automatically get and set cookies and enable you to parse responses.
+            `cy.request()` will automatically get and set cookies and enable you to parse responses.
           """)
           expect(emit).to.be.calledWithMatch("visit:failed", obj)
           expect(@logs.length).to.eq(1)
@@ -1517,10 +1533,11 @@ describe "src/cy/commands/navigation", ->
           expect(lastLog.get("error")).to.eq(err)
           expect(lastLog.get("state")).to.eq("failed")
           expect(err.message).to.eq """
-          The `body` parameter supplied to cy.visit() contained a circular reference at the path "bar.baz.quux".
+          The `body` parameter supplied to `cy.visit()` contained a circular reference at the path "bar.baz.quux".
 
           `body` can only be a string or an object with no circular references.
           """
+          expect(err.docsUrl).to.eq("https://on.cypress.io/visit")
 
           done()
 
@@ -1626,7 +1643,7 @@ describe "src/cy/commands/navigation", ->
 
           ## visit, window, page loading
           expect(@logs.length).to.eq(3)
-          expect(err.message).to.include "Your page did not fire its 'load' event within '50ms'."
+          expect(err.message).to.include "Your page did not fire its `load` event within `50ms`."
           expect(lastLog.get("name")).to.eq("page load")
           expect(lastLog.get("error")).to.eq(err)
 
@@ -1716,6 +1733,7 @@ describe "src/cy/commands/navigation", ->
 
           expect(@logs.length).to.eq(2)
           expect(err.message).to.include("Cypress detected a cross origin error happened on page load")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/cross-origin-violation")
           expect(lastLog.get("name")).to.eq("page load")
           expect(lastLog.get("state")).to.eq("failed")
           expect(lastLog.get("error")).to.eq(err)

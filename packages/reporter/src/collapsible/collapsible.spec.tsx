@@ -49,15 +49,15 @@ describe('<Collapsible />', () => {
   it('opens when clicking header', () => {
     const component = shallow(<Collapsible />)
 
-    component.find('.collapsible-header').simulate('click')
+    component.find('.collapsible-header').simulate('click', { stopPropagation () {} })
     expect(component).to.have.className('is-open')
   })
 
   it('closes when clicking header twice', () => {
     const component = shallow(<Collapsible />)
 
-    component.find('.collapsible-header').simulate('click')
-    component.find('.collapsible-header').simulate('click')
+    component.find('.collapsible-header').simulate('click', { stopPropagation () {} })
+    component.find('.collapsible-header').simulate('click', { stopPropagation () {} })
     expect(component).not.to.have.className('is-open')
   })
 })

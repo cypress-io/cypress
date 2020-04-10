@@ -32,3 +32,4 @@ packages/server/test/support/fixtures/projects/e2e/cypress/integration/stdout_ex
 **/.vscode
 **/.history
 **/.cy
+**/.git

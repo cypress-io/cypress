@@ -1,8 +1,8 @@
 import { log } from '../log'
-import { partial, trim, tap } from 'ramda'
+import { partial, trim, tap, prop } from 'ramda'
 import { FoundBrowser, Browser } from '../types'
 import { notInstalledErr } from '../errors'
-import execa from 'execa'
+import { utils } from '../utils'
 
 function getLinuxBrowser (
   name: string,
@@ -17,9 +17,10 @@ function getLinuxBrowser (
     }
 
     log(
-      'Could not extract version from %s using regex %s',
-      stdout,
-      versionRegex,
+      'Could not extract version from stdout using regex: %o', {
+        stdout,
+        versionRegex,
+      },
     )
 
     throw notInstalledErr(binary)
@@ -50,10 +51,10 @@ function getLinuxBrowser (
 export function getVersionString (path: string) {
   log('finding version string using command "%s --version"', path)
 
-  return execa
-  .stdout(path, ['--version'])
+  return utils.execa(path, ['--version'])
+  .then(prop('stdout'))
   .then(trim)
-  .then(tap(partial(log, ['stdout: %s'])))
+  .then(tap(partial(log, ['stdout: "%s"'])))
 }
 
 export function detect (browser: Browser) {

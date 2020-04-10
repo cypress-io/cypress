@@ -32,17 +32,18 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ type: "utility" }, {
     clock: (subject, now, methods, options = {}) ->
+      userOptions = options
       ctx = @
 
       if clock
         return clock
 
       if _.isObject(now)
-        options = now
+        userOptions = now
         now = undefined
 
       if _.isObject(methods) and !_.isArray(methods)
-        options = methods
+        userOptions = methods
         methods = undefined
 
       if now? and !_.isNumber(now)
@@ -51,7 +52,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if methods? and not (_.isArray(methods) and _.every(methods, _.isString))
         $errUtils.throwErrByPath("clock.invalid_2nd_arg", {args: {arg: JSON.stringify(methods)}})
 
-      _.defaults options, {
+      options = _.defaults {}, userOptions, {
         log: true
       }
 

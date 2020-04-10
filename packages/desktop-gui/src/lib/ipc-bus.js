@@ -10,6 +10,16 @@ const addMsg = (id, event, fn) => {
   }
 }
 
+const nullifyUnserializableValues = (obj) => {
+  // nullify values that cannot be cloned
+  // https://github.com/cypress-io/cypress/issues/6750
+  return _.cloneDeepWith(obj, (val) => {
+    if (_.isFunction(val) || _.isElement(val)) {
+      return null
+    }
+  })
+}
+
 const removeMsgsByEvent = (event) => {
   msgs = _.omitBy(msgs, (msg) => {
     return msg.event === event
@@ -95,6 +105,8 @@ const ipcBus = (...args) => {
       })
     }
   }
+
+  args = nullifyUnserializableValues(args)
 
   // pass in request, id, and remaining args
   ipc.send(...['request', id].concat(args))

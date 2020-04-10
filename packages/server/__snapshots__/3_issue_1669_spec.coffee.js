@@ -27,7 +27,7 @@ exports['e2e issue 1669 passes 1'] = `
   1) issue-1669 undefined err.stack in beforeEach hook "before each" hook for "cy.setCookie should fail with correct error":
      Error: some error, without stack
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'issue-1669 undefined err.st...'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`issue-1669 undefined err.st...\`
   
 
 

@@ -21,12 +21,21 @@ chromePolicyCheck = require("../util/chrome_policy_check")
 browsers    = require("../browsers")
 konfig      = require("../konfig")
 
+nullifyUnserializableValues = (obj) =>
+  ## nullify values that cannot be cloned
+  ## https://github.com/cypress-io/cypress/issues/6750
+  _.cloneDeepWith obj, (val) =>
+    if _.isFunction(val)
+      return null
+
 handleEvent = (options, bus, event, id, type, arg) ->
   debug("got request for event: %s, %o", type, arg)
 
-  sendResponse = (data = {}) ->
+  sendResponse = (originalData = {}) ->
     try
-      debug("sending ipc data %o", {type: type, data: data})
+      data = nullifyUnserializableValues(originalData)
+
+      debug("sending ipc data %o", { type, data, originalData })
       event.sender.send("response", data)
 
   sendErr = (err) ->
@@ -318,7 +327,9 @@ handleEvent = (options, bus, event, id, type, arg) ->
       throw new Error("No ipc event registered for: '#{type}'")
 
 module.exports = {
-  handleEvent: handleEvent
+  nullifyUnserializableValues
+
+  handleEvent
 
   stop: ->
     ipc.removeAllListeners()

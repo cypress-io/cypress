@@ -31,7 +31,7 @@
           padding: 1px 6px;
 
         }
-      
+
 
         button,
         select { /* 1 */
@@ -51,7 +51,7 @@
           padding: 0;
           margin: 8px;
         }
-        
+
         :focus {
           background-color: red;
         }
@@ -101,12 +101,17 @@
           display: block
         }
 
-        .content-box {
-          box-sizing: content-box
+        #contenteditable {
+          min-height: 20px;
+          min-width: 200px;
         }
-        
+
+        .content-box {
+          box-sizing: content-box;
+        }
+
         #button {
-          width: 60px
+          width: 60px;
         }
 
       </style>
@@ -583,7 +588,7 @@
 
         this is some text that will <span class="wrapped" style="color:rgb(0, 0, 192)">wrap to a newline</span>
         and cause the click to miss
-        
+
       </p>
       </div>
 

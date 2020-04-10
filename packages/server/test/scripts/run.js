@@ -87,7 +87,7 @@ if (isGteNode12()) {
   // max HTTP header size 8kb -> 1mb
   // https://github.com/cypress-io/cypress/issues/76
   commandAndArguments.args.push(
-    `--max-http-header-size=${1024 * 1024}`,
+    `--max-http-header-size=${1024 * 1024} --http-parser=legacy`,
   )
 }
 

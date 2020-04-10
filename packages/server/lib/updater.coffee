@@ -1,7 +1,7 @@
 _              = require("lodash")
 debug          = require("debug")("cypress:server:updater")
 semver         = require("semver")
-request        = require("request")
+request        = require("@cypress/request")
 NwUpdater      = require("node-webkit-updater")
 pkg            = require("@packages/root")
 agent          = require("@packages/network").agent
