@@ -62,6 +62,17 @@ class ViewStore {
     return this._isView(C.PROJECT_SETTINGS)
   }
 
+  @action showProjectNextSteps (project) {
+    this.currentView = {
+      name: C.PROJECT_NEXT_STEPS,
+      project,
+    }
+  }
+
+  isProjectNextSteps = () => {
+    return this._isView(C.PROJECT_NEXT_STEPS)
+  }
+
   _isView (name) {
     return this.currentView.name === name
   }

@@ -14,6 +14,7 @@ import OnBoarding from './onboarding'
 import ProjectNav from '../project-nav/project-nav'
 import RunsList from '../runs/runs-list'
 import SpecsList from '../specs/specs-list'
+import NextSteps from '../next-steps/next-steps'
 import ErrorMessage from './error-message'
 import WarningMessage from './warning-message'
 
@@ -70,6 +71,8 @@ class Project extends Component {
         return <RunsList project={this.props.project} />
       case C.PROJECT_SETTINGS:
         return <Settings project={this.props.project} app={this.props.app}/>
+      case C.PROJECT_NEXT_STEPS:
+        return <NextSteps project={this.props.project} app={this.props.app} />
       default:
         return <SpecsList project={this.props.project} />
     }

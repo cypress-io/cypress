@@ -28,6 +28,12 @@ export default class ProjectNav extends Component {
               Settings
             </Link>
           </li>
+          <li>
+            <Link to={routes.nextSteps(project)}>
+              <i className='fas fa-cloud-sun'></i>{' '}
+              Setup CI
+            </Link>
+          </li>
         </ul>
         <div className='spacer' />
         <Browsers project={project} />

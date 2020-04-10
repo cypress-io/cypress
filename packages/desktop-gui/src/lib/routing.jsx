@@ -37,6 +37,11 @@ const routes = {
     navigate: viewStore.showProjectSettings.bind(viewStore, project),
     isActive: viewStore.isProjectSettings,
   }),
+
+  nextSteps: (project) => ({
+    navigate: viewStore.showProjectNextSteps.bind(viewStore, project),
+    isActive: viewStore.isProjectNextSteps,
+  }),
 }
 
 export {
