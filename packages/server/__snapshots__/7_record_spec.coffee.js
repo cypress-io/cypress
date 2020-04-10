@@ -177,7 +177,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
@@ -1061,7 +1061,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
