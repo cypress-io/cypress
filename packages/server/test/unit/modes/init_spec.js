@@ -5,6 +5,8 @@ const scaffold = require(`${root}../lib/modes/init/scaffold`)
 const cypressEx = require('@packages/example')
 const { join, basename, dirname } = require('path')
 const { defaultValues } = require(`${root}../lib/modes/init/scaffold/option_info`)
+const spawn = require(`${root}../lib/modes/init/scaffold/fs/spawn`)
+const log = require(`${root}../lib/modes/init/scaffold/fs/log`)
 
 describe('/lib/modes/init', () => {
   describe('scaffold', () => {
@@ -12,6 +14,10 @@ describe('/lib/modes/init', () => {
       sinon.stub(fs, 'writeFile').resolves()
       sinon.stub(fs, 'ensureDir').resolves()
       sinon.stub(fs, 'copy').resolves()
+      sinon.stub(spawn, 'spawn').resolves()
+      sinon.stub(log, 'log').resolves()
+      sinon.stub(log, 'warn').resolves()
+      sinon.stub(fs, 'access').resolves(false)
     })
 
     describe('options', () => {
@@ -70,8 +76,7 @@ describe('/lib/modes/init', () => {
               fixturesPath: defaultValues['fixturesFolder'],
             })
 
-            // eslint-disable-next-line no-console
-            expect(console.warn).to.have.been.calledWith(`Fixtures folder path, '${defaultValues['fixturesFolder']}', is the default value. It'll be ignored.`)
+            expect(log.warn).to.have.been.calledWith(`Fixtures folder path, '${defaultValues['fixturesFolder']}', is the default value. It'll be ignored.`)
           })
 
           it('warns when support-path is the default value', () => {
@@ -79,8 +84,7 @@ describe('/lib/modes/init', () => {
               supportPath: defaultValues['supportFile'],
             })
 
-            // eslint-disable-next-line no-console
-            expect(console.warn).to.have.been.calledWith(`Support file path, '${defaultValues['supportFile']}', is the default value. It'll be ignored.`)
+            expect(log.warn).to.have.been.calledWith(`Support file path, '${defaultValues['supportFile']}', is the default value. It'll be ignored.`)
           })
 
           it('warns when integration-path is the default value', () => {
@@ -88,8 +92,7 @@ describe('/lib/modes/init', () => {
               integrationPath: defaultValues['integrationFolder'],
             })
 
-            // eslint-disable-next-line no-console
-            expect(console.warn).to.have.been.calledWith(`Integration folder path, '${defaultValues['integrationFolder']}', is the default value. It'll be ignored.`)
+            expect(log.warn).to.have.been.calledWith(`Integration folder path, '${defaultValues['integrationFolder']}', is the default value. It'll be ignored.`)
           })
 
           it('warns when plugins-path is the default value', () => {
@@ -97,8 +100,7 @@ describe('/lib/modes/init', () => {
               pluginsPath: defaultValues['pluginsFile'],
             })
 
-            // eslint-disable-next-line no-console
-            expect(console.warn).to.have.been.calledWith(`Plugins file path, '${defaultValues['pluginsFile']}', is the default value. It'll be ignored.`)
+            expect(log.warn).to.have.been.calledWith(`Plugins file path, '${defaultValues['pluginsFile']}', is the default value. It'll be ignored.`)
           })
         })
 
@@ -291,9 +293,9 @@ describe('/lib/modes/init', () => {
     })
 
     describe('create', () => {
-      it('generates cypress.json with empty object', async () => {
-        const projRoot = '/home/user/src/cypress'
+      const projRoot = '/home/user/src/cypress'
 
+      it('generates cypress.json with empty object', async () => {
         await scaffold.create(projRoot, { config: {} })
 
         expect(fs.writeFile).to.be.calledWith(`${projRoot}/cypress.json`, '{}')
@@ -301,16 +303,12 @@ describe('/lib/modes/init', () => {
 
       describe('integration folder', () => {
         it('generates at the default path when it is undefined', async () => {
-          const projRoot = '/home/user/src/cypress'
-
           await scaffold.create(projRoot, { config: {} })
 
           expect(fs.ensureDir).to.be.calledWith(`${projRoot}/${defaultValues['integrationFolder']}`)
         })
 
         it('generates at the given path', async () => {
-          const projRoot = '/home/user/src/cypress'
-
           await scaffold.create(projRoot, {
             config: {
               integrationFolder: '/home/user/given/cypress',
@@ -321,8 +319,6 @@ describe('/lib/modes/init', () => {
         })
 
         it('examples are not generated without example option', async () => {
-          const projRoot = '/home/user/src/cypress'
-
           await scaffold.create(projRoot, {
             config: {
               integrationFolder: '/home/user/int',
@@ -333,8 +329,6 @@ describe('/lib/modes/init', () => {
         })
 
         it('examples are generated with example option', async () => {
-          const projRoot = '/home/user/src/cypress'
-
           await scaffold.create(projRoot, {
             config: {
               integrationFolder: '/home/user/int',
@@ -352,8 +346,6 @@ describe('/lib/modes/init', () => {
         })
 
         it('examples are generated in ts files with example and typescript options', async () => {
-          const projRoot = '/home/user/src/cypress'
-
           await scaffold.create(projRoot, {
             config: {
               integrationFolder: '/home/user/int',
@@ -375,7 +367,6 @@ describe('/lib/modes/init', () => {
       })
 
       describe('fixtures folder', () => {
-        const projRoot = '/home/user/src/cypress'
         const fixturesFolderDefault = `${projRoot}/${defaultValues['fixturesFolder']}`
 
         it('generates folder at the default path when it is undefined', async () => {
@@ -476,7 +467,6 @@ describe('/lib/modes/init', () => {
       })
 
       describe('support file', () => {
-        const projRoot = '/home/user/src/cypress'
         const supportFileDefault = `${projRoot}/${defaultValues['supportFile']}`
         const supportFileDefaultDir = dirname(`${projRoot}/${defaultValues['supportFile']}`)
 
@@ -575,7 +565,6 @@ describe('/lib/modes/init', () => {
       })
 
       describe('plugins file', () => {
-        const projRoot = '/home/user/src/cypress'
         const pluginsFileDefault = `${projRoot}/${defaultValues['pluginsFile']}`
         const pluginsFileDefaultDir = dirname(`${projRoot}/${defaultValues['pluginsFile']}`)
 
@@ -645,6 +634,70 @@ describe('/lib/modes/init', () => {
             join(__dirname, '../../..', 'lib/scaffold/plugins/index.js'),
             join(pluginsFileDefaultDir, 'index.ts'),
           )
+        })
+      })
+
+      describe('install packages', () => {
+        it('no install', async () => {
+          await scaffold.create(projRoot, {
+            config: {},
+            eslint: false,
+          })
+
+          expect(log.log).to.be.calledWith('Nothing to install.')
+          expect(spawn.spawn).to.not.be.calledWith('npm', ['i', '-D', 'eslint', 'eslint-plugin-cypress'])
+        })
+
+        it('installs eslint', async () => {
+          await scaffold.create(projRoot, {
+            config: {},
+            eslint: true,
+          })
+
+          expect(spawn.spawn).to.be.calledWith('npm', ['i', '-D', 'eslint', 'eslint-plugin-cypress'])
+        })
+
+        it('installs typescript', async () => {
+          await scaffold.create(projRoot, {
+            config: {},
+            eslint: false,
+            typescript: true,
+          })
+
+          expect(spawn.spawn).to.be.calledWith('npm', ['i', '-D', 'typescript'])
+        })
+
+        it('installs eslint-plugin-chai-friendly', async () => {
+          await scaffold.create(projRoot, {
+            config: {},
+            eslint: true,
+            chaiFriendly: true,
+          })
+
+          expect(spawn.spawn).to.be.calledWith('npm', ['i', '-D', 'eslint', 'eslint-plugin-cypress', 'eslint-plugin-chai-friendly'])
+        })
+
+        it('installs all', async () => {
+          await scaffold.create(projRoot, {
+            config: {},
+            typescript: true,
+            eslint: true,
+            chaiFriendly: true,
+          })
+
+          expect(spawn.spawn).to.be.calledWith('npm', ['i', '-D', 'typescript', 'eslint', 'eslint-plugin-cypress', 'eslint-plugin-chai-friendly'])
+        })
+
+        it('installs with yarn', async () => {
+          fs.access.restore()
+          sinon.stub(fs, 'access').resolves(true)
+
+          await scaffold.create(projRoot, {
+            config: {},
+            eslint: true,
+          })
+
+          expect(spawn.spawn).to.be.calledWith('yarn', ['add', '--dev', 'eslint', 'eslint-plugin-cypress'])
         })
       })
     })

@@ -1,6 +1,6 @@
 import { spawn as nodeSpawn, SpawnOptions } from 'child_process'
 
-export default (command: string, args?: readonly string[], options?: SpawnOptions) => {
+export const spawn = (command: string, args?: readonly string[], options?: SpawnOptions) => {
   return new Promise((resolve, reject) => {
     const proc = nodeSpawn(command, args, options)
 

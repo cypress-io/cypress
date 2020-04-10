@@ -58,7 +58,7 @@ const fixturesFolder = async (projRoot: string, { example, config: { fixturesFol
 
   if (example) {
     await fs.copy(
-      join(__dirname, '../../../', 'scaffold/fixtures/example.json'),
+      join(__dirname, '../../../../', 'scaffold/fixtures/example.json'),
       join(defaultPath, 'example.json'),
     )
   }
@@ -82,7 +82,7 @@ const supportFile = async (projRoot: string, { typescript, config: { supportFile
   }
 
   const defaultRoot = dirname(defaultPath)
-  const scaffoldRoot = join(__dirname, '../../..', 'scaffold/support')
+  const scaffoldRoot = join(__dirname, '../../../..', 'scaffold/support')
 
   await fs.ensureDir(defaultRoot)
 
@@ -121,7 +121,7 @@ const pluginsFile = async (projRoot: string, { typescript, config: { pluginsFile
   }
 
   const defaultRoot = dirname(defaultPath)
-  const scaffoldRoot = join(__dirname, '../../..', 'scaffold/plugins')
+  const scaffoldRoot = join(__dirname, '../../../..', 'scaffold/plugins')
 
   await fs.ensureDir(defaultRoot)
 

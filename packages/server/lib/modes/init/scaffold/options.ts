@@ -1,5 +1,6 @@
 import { Args, InitConfig } from '../types'
 import { defaultValues } from './option_info'
+import { warn } from './fs/log'
 
 export const checkArgs = (args: Args) => {
   const {
@@ -130,9 +131,4 @@ export const fromCommandArgs = (args: Args) => {
 
 export const fromPrompts = (args) => {
   throw new Error('Not implemented yet')
-}
-
-const warn = (message: string) => {
-  // eslint-disable-next-line no-console
-  console.warn(message)
 }
