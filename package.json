@@ -11,7 +11,7 @@
     "lint-fix": "yarn lint --fix",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
-    "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
+    "size": "npm pack --dry",
     "pretest": "npm run lint",
     "test": "npm run test-unit && npm run test-e2e",
     "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
