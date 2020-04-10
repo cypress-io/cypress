@@ -28,6 +28,8 @@ Mocha.Runnable.prototype.titlePath = ->
   @parent.titlePath().concat([@title])
 
 getParentTitle = (runnable, titles) ->
+  if runnable.originalTitle
+    runnable.title = runnable.originalTitle
   if not titles
     titles = [runnable.title]
 

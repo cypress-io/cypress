@@ -48,8 +48,10 @@ function overloadMochaFnForConfig (fnName, specWindow) {
         const configMatchesBrowser = opts.browser == null || Cypress.isBrowser(opts.browser, `${fnType} config value \`{ browser }\``)
 
         if (!configMatchesBrowser) {
-          mochaArgs[0] = `[browser skip (${opts.browser})]${mochaArgs[0]}`
+          // TODO: this would mess up the dashboard since it would be registered as a new test
+          mochaArgs[0] = `${mochaArgs[0]} (skipped due to browser)`
 
+          // TODO: weird edge case where you have an .only but also skipped the test due to the browser
           if (subFn === 'only') {
             mochaArgs[1] = function () {
               this.skip()
