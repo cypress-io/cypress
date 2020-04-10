@@ -58,6 +58,7 @@ createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
   suite.file = obj.file
+  suite.root = !!obj.root
   return suite
 
 createRunnable = (obj, parent) ->
@@ -288,6 +289,7 @@ class Reporter
 
     suites = _
     .chain(@runnables)
+    .each((v) => console.log(v.root, v.title))
     .filter({root: false}) ## don't include root suite
     .value()
 
