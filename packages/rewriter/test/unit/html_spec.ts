@@ -105,7 +105,7 @@ const expected = `\
       if (self === (top === globalThis['top'] ? globalThis.top.Cypress.resolveWindowReference(globalThis, globalThis, 'top') : top)) return
       if (globalThis.top.Cypress.resolveWindowReference(globalThis, top, 'location')!=globalThis.top.Cypress.resolveWindowReference(globalThis, self, 'location')&&(globalThis.top.Cypress.resolveWindowReference(globalThis, top, 'location').href=globalThis.top.Cypress.resolveWindowReference(globalThis, self, 'location').href)) run()
       if (globalThis.top.Cypress.resolveWindowReference(globalThis, top, 'location') != globalThis.top.Cypress.resolveWindowReference(globalThis, self, 'location')) run()
-      if (globalThis.top.Cypress.resolveWindowReference(globalThis, top, 'location') != location) run()
+      if (globalThis.top.Cypress.resolveWindowReference(globalThis, top, 'location') != (location === globalThis['location'] ? globalThis.top.Cypress.resolveWindowReference(globalThis, globalThis, 'location') : location)) run()
       if (globalThis.top.Cypress.resolveWindowReference(globalThis, self, 'location') != globalThis.top.Cypress.resolveWindowReference(globalThis, top, 'location')) run()
       if (globalThis.top.Cypress.resolveWindowReference(globalThis, parent, 'frames').length > 0) run()
       if (window != (top === globalThis['top'] ? globalThis.top.Cypress.resolveWindowReference(globalThis, globalThis, 'top') : top)) run()
@@ -133,6 +133,7 @@ const expected = `\
 
 describe('lib/html', function () {
   context('.rewriteHtmlJs', function () {
+    // https://github.com/cypress-io/cypress/issues/2393
     it('strips SRI', function () {
       expect(rewriteHtmlJs('<script type="text/javascript" integrity="foo" src="bar">'))
       .to.eq('<script type="text/javascript" cypress:stripped-integrity="foo" src="bar">')

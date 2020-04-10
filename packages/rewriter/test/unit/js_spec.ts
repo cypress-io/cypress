@@ -44,15 +44,18 @@ describe('lib/js', function () {
             'if (top.location != self.location) run()',
             `if (${match('top', 'location')} != ${match('self', 'location')}) run()`,
           ],
-          // fun construct found in Apple's analytics code
           [
             'n = (c = n).parent',
             `n = ${match('c = n', 'parent')}`,
           ],
-          // more apple goodness - `e` is an element
           [
             'e.top = "0"',
             `globalThis.top.Cypress.resolveWindowReference(globalThis, e, 'top', "0")`,
+          ],
+          ['e.top += 0'],
+          [
+            'e.bottom += e.top',
+            `e.bottom += ${match('e', 'top')}`,
           ],
           [
             'if (a = (e.top = "0")) { }',
@@ -63,7 +66,6 @@ describe('lib/js', function () {
             'a = "b"; window.top',
             `a = "b"; ${match('window', 'top')}`,
           ],
-          // test that top/parent are ignored when used as non-variable Identifiers
           ['({ top: "foo", parent: "bar" })'],
           ['top: "foo"; parent: "bar";'],
           ['break top; break parent;'],
@@ -80,16 +82,14 @@ describe('lib/js', function () {
             '(function top() { window.top }); (function parent(...top) { window.top })',
             `(function top() { ${match('window', 'top')} }); (function parent(...top) { ${match('window', 'top')} })`,
           ],
-          [ // TODO: implement window proxy for destructuring
-            'const { top, parent } = window',
-            'const { top, parent } = (window === globalThis ? globalThis.top.Cypress.getWindowProxy(globalThis) : window)',
-          ],
           [
             'const top = top; const parent = parent;',
             `const top = (top === globalThis['top'] ? ${match('globalThis', 'top')} : top); const parent = (parent === globalThis['parent'] ? ${match('globalThis', 'parent')} : parent);`,
           ],
+          [
+            'top += 4',
+          ],
         ]
-        // .slice(0, 1)
         .forEach(([string, expected]) => {
           if (!expected) {
             expected = string
@@ -169,7 +169,6 @@ describe('lib/js', function () {
   `)
       })
 
-      // TODO: needs to be updated
       describe('libs', () => {
         const cdnUrl = 'https://cdnjs.cloudflare.com/ajax/libs'
 
@@ -191,9 +190,6 @@ describe('lib/js', function () {
           require: `${cdnUrl}/require.js/2.3.5/require.js`,
           rxjs: `${cdnUrl}/rxjs/5.5.6/Rx.js`,
           bluebird: `${cdnUrl}/bluebird/3.5.1/bluebird.js`,
-          // NOTE: fontawesome/normalize are css, new rewriter won't intercept CSS
-          // fontawesome: `${cdnUrl}/font-awesome/4.7.0/css/font-awesome.css`,
-          // normalize: `${cdnUrl}/normalize/8.0.0/normalize.css`,
         }
 
         libs = _
@@ -249,19 +245,6 @@ describe('lib/js', function () {
               const stripped = rewriteJs(libCode)
 
               expect(() => eval(stripped), 'is valid JS').to.not.throw
-
-              // skip for now, no streaming equivalent anyways
-              // return new Bluebird((resolve, reject) => {
-              //   fse.createReadStream(pathToLib, { encoding: 'utf8' })
-              //   .on('error', reject)
-              //   .pipe(rewriteJsStream())
-              //   .on('error', reject)
-              //   .pipe(concatStream({ encoding: 'string' }, resolve))
-              //   .on('error', reject)
-              // })
-              // .then((streamStripped) => {
-              //   expect(streamStripped, 'streamed version matches nonstreamed version').to.eq(stripped)
-              // })
             })
           })
         })
