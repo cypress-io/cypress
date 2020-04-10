@@ -86,7 +86,7 @@ export const fromCommandArgs = (args: Args) => {
     result.typescript = true
   }
 
-  if (result.eslint !== undefined) {
+  if (args.eslint === false) {
     result.eslint = args.eslint
   }
 

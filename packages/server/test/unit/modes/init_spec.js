@@ -7,6 +7,7 @@ const { join, basename, dirname } = require('path')
 const { defaultValues } = require(`${root}../lib/modes/init/scaffold/option_info`)
 const spawn = require(`${root}../lib/modes/init/scaffold/fs/spawn`)
 const log = require(`${root}../lib/modes/init/scaffold/fs/log`)
+const install = require(`${root}../lib/modes/init/scaffold/fs/install`)
 
 describe('/lib/modes/init', () => {
   describe('scaffold', () => {
@@ -17,7 +18,7 @@ describe('/lib/modes/init', () => {
       sinon.stub(spawn, 'spawn').resolves()
       sinon.stub(log, 'log').resolves()
       sinon.stub(log, 'warn').resolves()
-      sinon.stub(fs, 'access').resolves(false)
+      sinon.stub(install, 'isYarn').resolves(false)
     })
 
     describe('options', () => {
@@ -651,7 +652,6 @@ describe('/lib/modes/init', () => {
         it('installs eslint', async () => {
           await scaffold.create(projRoot, {
             config: {},
-            eslint: true,
           })
 
           expect(spawn.spawn).to.be.calledWith('npm', ['i', '-D', 'eslint', 'eslint-plugin-cypress'])
@@ -670,7 +670,6 @@ describe('/lib/modes/init', () => {
         it('installs eslint-plugin-chai-friendly', async () => {
           await scaffold.create(projRoot, {
             config: {},
-            eslint: true,
             chaiFriendly: true,
           })
 
@@ -681,7 +680,6 @@ describe('/lib/modes/init', () => {
           await scaffold.create(projRoot, {
             config: {},
             typescript: true,
-            eslint: true,
             chaiFriendly: true,
           })
 
@@ -689,12 +687,11 @@ describe('/lib/modes/init', () => {
         })
 
         it('installs with yarn', async () => {
-          fs.access.restore()
-          sinon.stub(fs, 'access').resolves(true)
+          install.isYarn.restore()
+          sinon.stub(install, 'isYarn').resolves(true)
 
           await scaffold.create(projRoot, {
             config: {},
-            eslint: true,
           })
 
           expect(spawn.spawn).to.be.calledWith('yarn', ['add', '--dev', 'eslint', 'eslint-plugin-cypress'])
