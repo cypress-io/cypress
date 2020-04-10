@@ -207,7 +207,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
       // start nudging
       return scrollContainers(
-        getAllScrollables([], $el)
+        getAllScrollables([], $el),
       )
     }
   }
@@ -251,7 +251,7 @@ const ensureNotAnimating = function (cy, $el, coordsHistory, animationDistanceTh
   // if we dont have at least 2 points
   // then automatically retry
   if (coordsHistory.length < 2) {
-    throw $errUtils.cypressErr('coordsHistory must be at least 2 sets of coords')
+    $errUtils.throwErrByPath('dom.animation_coords_history_invalid')
   }
 
   // verify that our element is not currently animating
@@ -314,6 +314,8 @@ const verify = function (cy, $el, options, callbacks) {
 
         // scroll the element into view
         $el.get(0).scrollIntoView()
+
+        debug('scrollIntoView:', $el[0])
 
         if (onScroll) {
           onScroll($el, 'element')

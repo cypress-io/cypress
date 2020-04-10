@@ -4,9 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "tsc --project .",
-    "build-js": "tsc --project .",
-    "build-prod": "yarn build",
+    "build-prod": "tsc --project .",
     "clean": "node scripts/clean.js || true",
     "clean-deps": "rm -rf node_modules",
     "clean-js": "yarn clean",
@@ -17,7 +15,7 @@
   "dependencies": {
     "bluebird": "3.5.3",
     "debug": "4.1.1",
-    "execa": "1.0.0",
+    "execa": "4.0.0",
     "fs-extra": "8.1.0",
     "lodash": "4.17.15",
     "plist": "2.1.0",

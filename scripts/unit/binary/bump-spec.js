@@ -24,7 +24,7 @@ describe('bump', () => {
       la(
         R.equals(filtered, projects),
         'should have kept all projects',
-        filtered
+        filtered,
       )
     })
 
@@ -34,7 +34,7 @@ describe('bump', () => {
       la(
         projects.length,
         'there should be at least a few projects in the list of projects',
-        projects
+        projects,
       )
 
       const filter = bump.getFilterByProvider('circle', 'darwin')

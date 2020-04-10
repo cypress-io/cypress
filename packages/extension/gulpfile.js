@@ -77,8 +77,8 @@ const build = gulp.series(
     manifest,
     background,
     html,
-    css
-  )
+    css,
+  ),
 )
 
 const watchBuild = () => {

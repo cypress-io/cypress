@@ -201,7 +201,7 @@ describe('<Command />', () => {
           appState={appState}
           runnablesStore={runnablesStore}
           aliasesWithDuplicates={null}
-        />
+        />,
       )
 
       component.find('FlashOnClick').simulate('click')

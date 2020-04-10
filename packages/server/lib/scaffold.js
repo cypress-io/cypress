@@ -56,7 +56,7 @@ const filesSizesAreSame = (files, index) => {
     Promise.all(_.map(files, getFileSize)),
     Promise.all(_.map(files, (file) => {
       return getFileSize(getIndexedExample(file, index))
-    }))
+    })),
   )
   .spread((fileSizes, originalFileSizes) => {
     return _.every(fileSizes, (size, i) => {
@@ -166,7 +166,7 @@ module.exports = {
 
       return Promise.join(
         this._copy('support/commands.js', folder, config),
-        this._copy('support/index.js', folder, config)
+        this._copy('support/index.js', folder, config),
       )
     })
   },

@@ -74,6 +74,20 @@ describe "lib/browsers/chrome", ->
         # we load the browser with blank page first
         expect(utils.launch).to.be.calledWith("chrome", "about:blank", args)
 
+    it "sets default window size in headless mode", ->
+      chrome._writeExtension.restore()
+
+      pathToTheme = extension.getPathToTheme()
+
+      chrome.open({ isHeadless: true, isHeaded: false }, "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.include.members([
+          "--headless"
+          "--window-size=1280,720"
+        ])
+
     it "does not load extension in headless mode", ->
       chrome._writeExtension.restore()
 

@@ -1,5 +1,5 @@
 /* eslint-disable prefer-rest-params */
-// tests in driver/test/cypress/integration/commands/assertions_spec.coffee
+// tests in driver/test/cypress/integration/commands/assertions_spec.js
 
 const _ = require('lodash')
 const $ = require('jquery')
@@ -38,27 +38,17 @@ let chaiUtils = null
 
 chai.use(sinonChai)
 
-const getType = function (val) {
-  const match = /\[object (.*)\]/.exec(Object.prototype.toString.call(val))
-
-  return match && match[1]
-}
-
 chai.use((chai, u) => {
   chaiUtils = u
 
   $chaiJquery(chai, chaiUtils, {
     onInvalid (method, obj) {
-      const err = $errUtils.cypressErr(
-        $errUtils.errMsgByPath(
-          'chai.invalid_jquery_obj', {
-            assertion: method,
-            subject: $utils.stringifyActual(obj),
-          }
-        )
-      )
-
-      throw err
+      $errUtils.throwErrByPath('chai.invalid_jquery_obj', {
+        args: {
+          assertion: method,
+          subject: $utils.stringifyActual(obj),
+        },
+      })
     },
 
     onError (err, method, obj, negated) {
@@ -93,10 +83,20 @@ chai.use((chai, u) => {
 
   const { inspect, setFormatValueHook } = chaiInspect.create(chai)
 
-  // prevent tunneling into Window objects (can throw cross-origin errors in firefox)
+  // prevent tunneling into Window objects (can throw cross-origin errors)
   setFormatValueHook((ctx, val) => {
-    if (val && (getType(val) === 'Window')) {
-      return '[window]'
+    // https://github.com/cypress-io/cypress/issues/5270
+    // When name attribute exists in <iframe>,
+    // Firefox returns [object Window] but Chrome returns [object Object]
+    // So, we try throwing an error and check the error message.
+    try {
+      val && val.document
+      val && val.inspect
+    } catch (e) {
+      if (e.stack.indexOf('cross-origin') !== -1 || // chrome
+      e.message.indexOf('cross-origin') !== -1) { // firefox
+        return `[window]`
+      }
     }
   })
 
@@ -198,8 +198,8 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideChaiAsserts = function (assertFn) {
-    chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
+  const overrideChaiAsserts = function (specWindow, assertFn) {
+    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, assertFn)
 
     const _origGetmessage = function (obj, args) {
       const negate = chaiUtils.flag(obj, 'negate')
@@ -253,7 +253,7 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const err = $errUtils.cypressErr($errUtils.errMsgByPath('chai.match_invalid_argument', { regExp }))
+        const err = $errUtils.cypressErrByPath('chai.match_invalid_argument', { args: { regExp } })
 
         err.retry = false
         throw err
@@ -282,7 +282,7 @@ chai.use((chai, u) => {
           obj.is(selector) || !!obj.find(selector).length,
           'expected #{this} to contain #{exp}',
           'expected #{this} not to contain #{exp}',
-          text
+          text,
         )
       })
     }
@@ -324,7 +324,7 @@ chai.use((chai, u) => {
               `expected '${node}' to have a length of \#{exp} but got \#{act}`,
               `expected '${node}' to not have a length of \#{act}`,
               length,
-              obj.length
+              obj.length,
             )
           } catch (e1) {
             e1.node = node
@@ -340,11 +340,14 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.displayMessage = getLongLengthMessage(obj.length, length)
+              const newMessage = getLongLengthMessage(obj.length, length)
+
+              $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
               throw e1
             }
 
-            const e2 = $errUtils.cypressErr($errUtils.errMsgByPath('chai.length_invalid_argument', { length }))
+            const e2 = $errUtils.cypressErrByPath('chai.length_invalid_argument', { args: { length } })
 
             e2.retry = false
             throw e2
@@ -384,7 +387,7 @@ chai.use((chai, u) => {
               'expected \#{act} to exist in the DOM',
               'expected \#{act} not to exist in the DOM',
               node,
-              node
+              node,
             )
           } catch (e1) {
             e1.node = node
@@ -397,10 +400,13 @@ chai.use((chai, u) => {
                 return `Expected ${node} not to exist in the DOM, but it was continuously found.`
               }
 
-              return `Expected to find element: '${obj.selector}', but never found it.`
+              return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.displayMessage = getLongExistsMessage(obj)
+            const newMessage = getLongExistsMessage(obj)
+
+            $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
             throw e1
           }
         }
@@ -408,7 +414,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const createPatchedAssert = (assertFn) => {
+  const createPatchedAssert = (specWindow, assertFn) => {
     return (function (...args) {
       let err
       const passed = chaiUtils.test(this, args)
@@ -430,9 +436,19 @@ chai.use((chai, u) => {
 
       assertFn(passed, message, value, actual, expected, err)
 
-      if (err) {
-        throw err
-      }
+      if (!err) return
+
+      // stack from chai AssertionError instances are useless, because
+      // the chai code is served from `top`, which binds to `top`'s Error
+      // but assertions fail inside the spec window and then err.stack
+      // will not include the frames from the spec window (a different window)
+      // for security purposes. therefore, we instantiate a new error on
+      // the spec window to get a better stack
+      const betterStackErr = new specWindow.Error(err.message)
+
+      err.stack = $errUtils.replacedStack(err, betterStackErr)
+
+      throw err
     })
   }
 
@@ -483,7 +499,7 @@ chai.use((chai, u) => {
 
     overrideChaiInspect()
     overrideChaiObjDisplay()
-    overrideChaiAsserts(assertFn)
+    overrideChaiAsserts(specWindow, assertFn)
 
     return setSpecWindowGlobals(specWindow)
   }

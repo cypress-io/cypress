@@ -223,7 +223,10 @@ App.propTypes = {
   config: PropTypes.shape({
     browsers: PropTypes.arrayOf(PropTypes.shape({
       name: PropTypes.string.isRequired,
-      majorVersion: PropTypes.string.isRequired,
+      majorVersion: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.number,
+      ]),
       version: PropTypes.string.isRequired,
     })).isRequired,
     integrationFolder: PropTypes.string.isRequired,

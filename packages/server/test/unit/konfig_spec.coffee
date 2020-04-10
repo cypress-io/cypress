@@ -2,10 +2,10 @@ require("../spec_helper")
 
 describe "lib/konfig", ->
   beforeEach ->
-    @env = process.env["CYPRESS_ENV"]
+    @env = process.env["CYPRESS_INTERNAL_ENV"]
 
     @setup = (env) =>
-      process.env["CYPRESS_ENV"] = env
+      process.env["CYPRESS_INTERNAL_ENV"] = env
 
       @konfig = require("#{root}lib/konfig")
 
@@ -13,7 +13,7 @@ describe "lib/konfig", ->
         expect(@konfig(key)).to.eq(val)
 
   afterEach ->
-    process.env["CYPRESS_ENV"] = @env
+    process.env["CYPRESS_INTERNAL_ENV"] = @env
 
     delete require.cache[require.resolve("#{root}lib/konfig")]
 

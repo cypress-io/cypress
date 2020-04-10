@@ -16,9 +16,13 @@ const automationElementId = '__cypress-string'
 
 @observer
 class Container extends Component {
-  componentWillMount () {
-    this.randomString = `${Math.random()}`
+  constructor (...args) {
+    super(...args)
 
+    this.randomString = `${Math.random()}`
+  }
+
+  componentDidMount () {
     this.props.eventManager.addGlobalListeners(this.props.state, {
       element: automationElementId,
       string: this.randomString,

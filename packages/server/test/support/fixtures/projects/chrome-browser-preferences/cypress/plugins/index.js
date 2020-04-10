@@ -36,7 +36,7 @@ module.exports = (on, config) => {
           expect(defaultPrefs.foo).to.eq('bar')
           expect(defaultSecure.bar).to.eq('baz')
           expect(localState.baz).to.eq('quux')
-        }
+        },
       )
       .thenReturn(null)
     },

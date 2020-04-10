@@ -67,7 +67,7 @@ describe('packages', () => {
             }),
           },
         },
-      }
+      },
     )
 
     const res = await packages.getPackagesWithScript('build')

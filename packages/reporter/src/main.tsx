@@ -56,23 +56,6 @@ class Reporter extends Component<ReporterProps> {
     statsStore,
   }
 
-  componentWillMount () {
-    const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
-
-    action('set:scrolling', () => {
-      appState.setAutoScrolling(autoScrollingEnabled)
-    })()
-
-    this.props.events.init({
-      appState,
-      runnablesStore,
-      scroller,
-      statsStore,
-    })
-
-    this.props.events.listen(runner)
-  }
-
   render () {
     const { appState } = this.props
 
@@ -94,9 +77,25 @@ class Reporter extends Component<ReporterProps> {
   }
 
   componentDidMount () {
+    const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
+
+    action('set:scrolling', () => {
+      appState.setAutoScrolling(autoScrollingEnabled)
+    })()
+
+    this.props.events.init({
+      appState,
+      runnablesStore,
+      scroller,
+      statsStore,
+    })
+
+    this.props.events.listen(runner)
+
     shortcuts.start()
     EQ.init()
   }
+
   componentWillUnmount () {
     shortcuts.stop()
   }

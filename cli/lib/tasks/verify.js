@@ -55,7 +55,7 @@ const runSmokeTest = (binaryDir, options) => {
         debug('error timedOut is true')
 
         return throwFormErrorText(
-          errors.smokeTestFailure(smokeTestCommand, true)
+          errors.smokeTestFailure(smokeTestCommand, true),
         )(errMessage)
       }
 
@@ -90,7 +90,7 @@ const runSmokeTest = (binaryDir, options) => {
     if (options.dev) {
       executable = 'node'
       args.unshift(
-        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js')
+        path.resolve(__dirname, '..', '..', '..', 'scripts', 'start.js'),
       )
     }
 
@@ -168,9 +168,12 @@ const runSmokeTest = (binaryDir, options) => {
 function testBinary (version, binaryDir, options) {
   debug('running binary verification check', version)
 
-  logger.log(stripIndent`
-  It looks like this is your first time using Cypress: ${chalk.cyan(version)}
-  `)
+  // if running from 'cypress verify', don't print this message
+  if (!options.force) {
+    logger.log(stripIndent`
+    It looks like this is your first time using Cypress: ${chalk.cyan(version)}
+    `)
+  }
 
   logger.log()
 
@@ -208,9 +211,9 @@ function testBinary (version, binaryDir, options) {
             task,
             util.titleize(
               chalk.green('Verified Cypress!'),
-              chalk.gray(binaryDir)
+              chalk.gray(binaryDir),
             ),
-            rendererOptions.renderer
+            rendererOptions.renderer,
           )
         })
       },

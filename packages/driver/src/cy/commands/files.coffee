@@ -2,17 +2,21 @@ _ = require("lodash")
 Promise = require("bluebird")
 
 $errUtils = require("../../cypress/error_utils")
+$errMessages = require("../../cypress/error_messages")
 
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     readFile: (file, encoding, options = {}) ->
+      userOptions = options
+
       if _.isObject(encoding)
-        options = encoding
+        userOptions = encoding
         encoding = null
 
-      _.defaults options,
+      options = _.defaults({}, userOptions, {
         encoding: encoding ? "utf8"
         log: true
+      })
 
       consoleProps = {}
 
@@ -50,27 +54,33 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             onFail: (err) ->
               return unless err.type is "existence"
 
-              if contents?
+              { message, docsUrl } = if contents?
                 ## file exists but it shouldn't
-                err.displayMessage = $errUtils.errMsgByPath("files.existent", {
+                $errUtils.errObjByPath($errMessages, "files.existent", {
                   file, filePath
                 })
               else
                 ## file doesn't exist but it should
-                err.displayMessage = $errUtils.errMsgByPath("files.nonexistent", {
+                $errUtils.errObjByPath($errMessages, "files.nonexistent", {
                   file, filePath
                 })
+
+              err.message = message
+              err.docsUrl = docsUrl
+
             onRetry: verifyAssertions
           })
 
     writeFile: (fileName, contents, encoding, options = {}) ->
+      userOptions = options
+
       if _.isObject(encoding)
-        options = encoding
+        userOptions = encoding
         encoding = null
 
-      _.defaults options,
+      options = _.defaults {}, userOptions,
         encoding: encoding ? "utf8"
-        flag: options.flag ? "w"
+        flag: userOptions.flag ? "w"
         log: true
 
       consoleProps = {}

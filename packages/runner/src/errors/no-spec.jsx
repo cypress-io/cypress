@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import eventManager from '../lib/event-manager'
 
 class NoSpec extends Component {
-  componentWillMount () {
+  componentDidMount () {
     window.addEventListener('hashchange', this._onHashChange)
   }
 

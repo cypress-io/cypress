@@ -40,24 +40,10 @@ createCLIExecutable = (command) ->
 yarn = createCLIExecutable('yarn')
 npx = createCLIExecutable('npx')
 
-runAllBuildJs = _.partial(npx, ["lerna", "run", "build-js", "--ignore", "cli"])
+runAllBuild = _.partial(npx, ["lerna", "run", "build-prod", "--ignore", "cli"])
 
 # removes transpiled JS files in the original package folders
 runAllCleanJs = _.partial(npx, ["lerna", "run", "clean-js", "--ignore", "cli"])
-
-# builds all the packages except for cli
-runAllBuild = (args...) ->
-  getPackagesWithScript('build')
-  .then (pkgNameArr) ->
-    pkgs = pkgNameArr
-      .map((pkgName) ->
-        "@packages/#{pkgName}"
-      )
-      .join(',')
-    npx(
-      ["lerna", "run", "build-prod", "--scope", "\"{#{pkgs}}\"", "--ignore", "cli"]
-      args...
-    )
 
 ## @returns string[] with names of packages, e.g. ['runner', 'driver', 'server']
 getPackagesWithScript = (scriptName) ->
@@ -120,7 +106,7 @@ forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)
   console.log("in %s", packagePath)
   la(check.unemptyString(packageToInstall), "missing package to install")
-  yarn(["install", "--force", "--ignore-engines", packageToInstall], packagePath)
+  yarn(["install", "--force", packageToInstall], packagePath)
 
 removeDevDependencies = (packageFolder) ->
   packagePath = pathToPackageJson(packageFolder)
@@ -155,7 +141,7 @@ npmInstallAll = (pathToPackages) ->
 
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
-    npmInstall = _.partial(yarn, ["install", "--production", "--silent", "--ignore-engines"])
+    npmInstall = _.partial(yarn, ["install", "--production"])
 
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
@@ -226,8 +212,6 @@ symlinkAll = (pathToDistPackages, pathTo) ->
 
 module.exports = {
   runAllBuild
-
-  runAllBuildJs
 
   copyAllToDist
 

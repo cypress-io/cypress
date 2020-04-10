@@ -100,7 +100,7 @@ describe('exec run', function () {
       return run.start({ configFile: false })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--run-project', process.cwd(), '--config-file', false]
+          ['--run-project', process.cwd(), '--config-file', false],
         )
       })
     })
@@ -109,7 +109,7 @@ describe('exec run', function () {
       return run.start({ configFile: 'special-cypress.json' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--run-project', process.cwd(), '--config-file', 'special-cypress.json']
+          ['--run-project', process.cwd(), '--config-file', 'special-cypress.json'],
         )
       })
     })

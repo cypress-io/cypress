@@ -42,7 +42,7 @@ describe('exec open', function () {
       return open.start({ env: 'host=http://localhost:1337,name=brian' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--env', 'host=http://localhost:1337,name=brian']
+          ['--env', 'host=http://localhost:1337,name=brian'],
         )
       })
     })
@@ -51,7 +51,7 @@ describe('exec open', function () {
       return open.start({ config: 'watchForFileChanges=false,baseUrl=localhost' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--config', 'watchForFileChanges=false,baseUrl=localhost']
+          ['--config', 'watchForFileChanges=false,baseUrl=localhost'],
         )
       })
     })
@@ -60,7 +60,7 @@ describe('exec open', function () {
       return open.start({ configFile: false })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--config-file', false]
+          ['--config-file', false],
         )
       })
     })
@@ -69,7 +69,7 @@ describe('exec open', function () {
       return open.start({ configFile: 'special-cypress.json' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--config-file', 'special-cypress.json']
+          ['--config-file', 'special-cypress.json'],
         )
       })
     })
@@ -80,7 +80,7 @@ describe('exec open', function () {
       return open.start()
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--project', process.cwd()]
+          ['--project', process.cwd()],
         )
       })
     })
@@ -91,7 +91,7 @@ describe('exec open', function () {
       return open.start({ global: true })
       .then(() => {
         expect(spawn.start).not.to.be.calledWith(
-          ['--project', process.cwd()]
+          ['--project', process.cwd()],
         )
       })
     })
@@ -102,7 +102,7 @@ describe('exec open', function () {
       return open.start({ project: '/path/to/project' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--project', '/path/to/project']
+          ['--project', '/path/to/project'],
         )
       })
     })
@@ -111,7 +111,7 @@ describe('exec open', function () {
       return open.start({ project: '/path/to/project' })
       .then(() => {
         expect(spawn.start).to.be.calledWith(
-          ['--project', '/path/to/project']
+          ['--project', '/path/to/project'],
         )
       })
     })

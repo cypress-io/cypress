@@ -32,7 +32,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
@@ -114,7 +114,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
@@ -277,7 +277,7 @@ This error originated from your test code, not from Cypress.
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
-Because this error occurred during a 'before all' hook we are skipping the remaining tests in the current suite: 'foo'
+Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`foo\`
       [stack trace lines]
 
 

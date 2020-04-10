@@ -113,7 +113,7 @@ const create = function (state, queue, retryFn) {
 
       return cmd.get('fn').originalFn.apply(
         state('ctx'),
-        [subject].concat(cmd.get('args'))
+        [subject].concat(cmd.get('args')),
       )
     })
   }

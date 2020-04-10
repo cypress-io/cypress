@@ -1,8 +1,8 @@
 require("../spec_helper")
 
 _             = require("lodash")
-r             = require("request")
-rp            = require("request-promise")
+r             = require("@cypress/request")
+rp            = require("@cypress/request-promise")
 compression   = require("compression")
 dns           = require("dns")
 express       = require("express")
@@ -356,7 +356,7 @@ describe "Routes", ->
 
               body = res.body
 
-              expect(body.integration).to.have.length(3)
+              expect(body.integration).to.have.length(4)
 
               ## remove the absolute path key
               body.integration = _.map body.integration, (obj) ->
@@ -364,6 +364,10 @@ describe "Routes", ->
 
               expect(res.body).to.deep.eq({
                 integration: [
+                  {
+                    "name": "sub/a&b%c.js"
+                    "relative": "tests/sub/a&b%c.js"
+                  }
                   {
                     name: "sub/sub_test.coffee"
                     relative: "tests/sub/sub_test.coffee"
@@ -688,23 +692,6 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.deep.eq({test: "We’ll"})
-
-      context "deferred", ->
-        it "closes connection if no stub is received before a reset", ->
-          p = @rp({
-            url: "http://localhost:2020/__cypress/xhrs/users/1"
-            json: true
-            headers: {
-              "x-cypress-id": "foo1"
-              "x-cypress-responsedeferred": true
-            }
-          })
-
-          setTimeout =>
-            @server._xhrServer.reset()
-          , 100
-
-          expect(p).to.be.rejectedWith('Error: socket hang up')
 
       context "fixture", ->
         beforeEach ->
@@ -1564,14 +1551,14 @@ describe "Routes", ->
             "__cypress.initial=true; Domain=localhost; Path=/"
           ]
 
-      it "ignores invalid cookies", ->
+      it "passes invalid cookies", ->
         nock(@server._remoteOrigin)
         .get("/invalid")
         .reply 200, "OK", {
           "set-cookie": [
             "foo=bar; Path=/"
-             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900" ## this is okay
-             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900" ## should ignore this
+             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
+             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900"
            ]
         }
 
@@ -1581,6 +1568,7 @@ describe "Routes", ->
           expect(res.headers["set-cookie"]).to.deep.eq [
             "foo=bar; Path=/"
              "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
+             "___utmvbXluIZsM=bZM    XtQOGalF: VtR; path=/; Max-Age=900"
           ]
 
       it "forwards other headers from incoming responses", ->

@@ -8,7 +8,7 @@ const renderComponent = ({ onClick = (() => {}) }): ShallowWrapper<any, {}, Flas
   return shallow(
     <FlashOnClick message='Some message' onClick={onClick}>
       <div className='content' />
-    </FlashOnClick>
+    </FlashOnClick>,
   )
 }
 

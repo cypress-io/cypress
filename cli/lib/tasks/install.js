@@ -50,7 +50,7 @@ const displayCompletionMsg = () => {
   logger.log()
   logger.log(
     'You can now open Cypress by running:',
-    chalk.cyan(path.join('node_modules', '.bin', 'cypress'), 'open')
+    chalk.cyan(path.join('node_modules', '.bin', 'cypress'), 'open'),
   )
 
   logger.log()
@@ -88,7 +88,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
           util.setTaskTitle(
             task,
             util.titleize(chalk.green('Downloaded Cypress')),
-            rendererOptions.renderer
+            rendererOptions.renderer,
           )
         })
       },
@@ -115,7 +115,7 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
           util.setTaskTitle(
             task,
             util.titleize(chalk.green('Finished Installation'), chalk.gray(installDir)),
-            rendererOptions.renderer
+            rendererOptions.renderer,
           )
         })
       },
@@ -160,7 +160,7 @@ const start = (options = {}) => {
       debug('environment variable CYPRESS_INSTALL_BINARY = 0, skipping install')
       logger.log(
         stripIndent`
-        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`
+        ${chalk.yellow('Note:')} Skipping binary installation: Environment variable CYPRESS_INSTALL_BINARY = 0.`,
       )
 
       logger.log()
@@ -184,7 +184,7 @@ const start = (options = {}) => {
         ${chalk.yellow('Note:')} Overriding Cypress cache directory to: ${chalk.cyan(envCache)}
 
               Previous installs of Cypress may not be found.
-      `
+      `,
     )
 
     logger.log()
@@ -254,7 +254,7 @@ const start = (options = {}) => {
             Instead we will install version: ${chalk.green(needVersion)}
 
             These versions may not work properly together.
-        `)
+        `),
       )
 
       logger.log()
@@ -337,7 +337,7 @@ const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
         util.setTaskTitle(
           task,
           util.titleize(chalk.green('Unzipped Cypress')),
-          rendererOptions.renderer
+          rendererOptions.renderer,
         )
       })
     },
@@ -355,7 +355,7 @@ const progessify = (task, title) => {
     util.setTaskTitle(
       task,
       util.titleize(title, percentComplete, remaining),
-      getRendererOptions().renderer
+      getRendererOptions().renderer,
     )
   }
 }

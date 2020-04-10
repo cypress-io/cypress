@@ -145,6 +145,6 @@ bump
   getStatusAndMessage,
   cliOptions.provider,
   shortNpmVersion,
-  platform
+  platform,
 )
 .catch(onError)

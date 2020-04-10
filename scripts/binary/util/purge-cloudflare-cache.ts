@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import check from 'check-more-types'
 import la from 'lazy-ass'
-import rp from 'request-promise'
+import rp from '@cypress/request-promise'
 
 function hasCloudflareEnvironmentVars () {
   return _.chain([process.env.CF_TOKEN, process.env.CF_ZONEID])
@@ -13,7 +13,7 @@ function hasCloudflareEnvironmentVars () {
 export function purgeCloudflareCache (url) {
   la(
     hasCloudflareEnvironmentVars(),
-    'Cannot purge Cloudflare cache without credentials. Ensure that the CF_TOKEN and CF_ZONEID environment variables are set.'
+    'Cannot purge Cloudflare cache without credentials. Ensure that the CF_TOKEN and CF_ZONEID environment variables are set.',
   )
 
   la(check.webUrl(url), 'Missing url to purge from Cloudflare.')

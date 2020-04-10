@@ -47,7 +47,7 @@ describe('upload', () => {
       la(
         folder === 'desktop/3.3.0/darwin-x64/',
         'wrong upload desktop folder',
-        folder
+        folder,
       )
     })
   })

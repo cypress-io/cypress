@@ -77,7 +77,7 @@ Fix the error in your code and re-run your tests.
   1) record fails "before each" hook for "fails 1":
      Error: foo
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`record fails\`
       [stack trace lines]
 
 
@@ -177,7 +177,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
@@ -1001,7 +1001,7 @@ Fix the error in your code and re-run your tests.
   1) record fails "before each" hook for "fails 1":
      Error: foo
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`record fails\`
       [stack trace lines]
 
 
@@ -1061,7 +1061,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 

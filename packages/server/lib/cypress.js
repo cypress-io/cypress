@@ -188,6 +188,11 @@ module.exports = {
         }).then(exit0)
         .catch(exitErr)
 
+      case 'info':
+        return require('./modes/info')(options)
+        .then(exit0)
+        .catch(exitErr)
+
       case 'smokeTest':
         return this.runElectron(mode, options)
         .then((pong) => {

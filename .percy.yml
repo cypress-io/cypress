@@ -1,0 +1,12 @@
+# https://docs.percy.io/v1/docs/configuration
+version: 1
+snapshot:
+  widths: [1280]
+  min-height: 1024
+agent:
+  asset-discovery:
+    # let Percy wait for network to fetch static resources
+    # like images and fonts to avoid missing icons
+    network-idle-timeout: 250 # ms
+    # assets that don't change could be cached
+    cache-responses: true

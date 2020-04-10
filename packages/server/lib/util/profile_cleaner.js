@@ -17,7 +17,7 @@ const isCypressProcess = (process) => {
 
 const getPidFromFolder = (folder, pidPrefix) => {
   return _.toNumber(
-    path.basename(folder).replace(pidPrefix, '')
+    path.basename(folder).replace(pidPrefix, ''),
   )
 }
 

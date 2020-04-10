@@ -14,7 +14,7 @@ globAsync('packages/server/__snapshots__/*')
     return str
     .replace(
       contentBetweenBackticksRe,
-      '`\n$1\n`'
+      '`\n$1\n`',
     )
     .split('`\n\n\n').join('`\n\n')
     .split('\n\n\n\n`').join('\n\n\n`')

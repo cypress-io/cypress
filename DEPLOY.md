@@ -122,7 +122,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 3. Publish the new NPM package under the dev tag. The unique link to the package file `cypress.tgz`
     is the one already tested above. You can publish to the NPM registry straight from the URL:
     ```shell
-    yarn publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
+    npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
     ```
 4. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). Example output:
     ```shell
@@ -137,7 +137,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 7. Update and publish the changelog and any release-specific documentation changes in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
 8. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
-    yarn dist-tag add cypress@X.Y.Z
+    npm dist-tag add cypress@X.Y.Z
     ```
 8. Run `binary-release` to update the download server's manifest, set the next CI version, and create an empty version commit:
     ```shell

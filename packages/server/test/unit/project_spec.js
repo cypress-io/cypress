@@ -68,12 +68,12 @@ describe('lib/project', () => {
       sinon.stub(this.project, 'determineIsNewProject').withArgs(integrationFolder).resolves(false)
       this.project.cfg = { integrationFolder }
 
-      return savedState(this.project.projectRoot)
+      return savedState.create(this.project.projectRoot)
       .then((state) => state.remove())
     })
 
     afterEach(function () {
-      return savedState(this.project.projectRoot)
+      return savedState.create(this.project.projectRoot)
       .then((state) => state.remove())
     })
 
@@ -112,7 +112,7 @@ describe('lib/project', () => {
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
-      return savedState(this.todosPath)
+      return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
@@ -146,7 +146,7 @@ describe('lib/project', () => {
     })
 
     it('sets cfg.isNewProject to true when state.showedOnBoardingModal is true', function () {
-      return savedState(this.todosPath)
+      return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ showedOnBoardingModal: true })
 
@@ -695,6 +695,35 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
       return this.project.getSpecUrl(todosSpec)
       .then((str) => {
         expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/sub_test.coffee')
+      })
+    })
+
+    it('escapses %, &', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a&b%c.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%26b%25c.js')
+      })
+    })
+
+    // ? is invalid in Windows, but it can be tested here
+    // because it's a unit test and doesn't check the existence of files
+    it('escapes ?', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/sub/a?.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/sub/a%3F.spec.js')
+      })
+    })
+
+    it('escapes %, &, ? in the url dir', function () {
+      const todosSpec = path.join(this.todosPath, 'tests/s%&?ub/a.spec.js')
+
+      return this.project.getSpecUrl(todosSpec)
+      .then((str) => {
+        expect(str).to.eq('http://localhost:8888/__/#/tests/integration/s%25%26%3Fub/a.spec.js')
       })
     })
 

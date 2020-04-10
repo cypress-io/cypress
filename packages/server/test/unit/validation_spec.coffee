@@ -42,7 +42,7 @@ describe "lib/util/validation", ->
         # invalid browser, missing displayName
         {
           name: "No display name",
-          family: "electron"
+          family: "chromium"
         },
         {
           name: "bad family",

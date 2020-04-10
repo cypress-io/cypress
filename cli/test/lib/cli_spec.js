@@ -4,13 +4,16 @@ const os = require('os')
 const cli = require(`${lib}/cli`)
 const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
+const info = require(`${lib}/exec/info`)
 const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
 const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
 const snapshot = require('../support/snapshot')
+const debug = require('debug')('test')
 const execa = require('execa-wrap')
+const mockedEnv = require('mocked-env')
 
 describe('cli', () => {
   require('mocha-banner').register()
@@ -22,7 +25,11 @@ describe('cli', () => {
     // sinon.stub(util, 'exit')
     sinon.stub(util, 'logErrorExit1')
     this.exec = (args) => {
-      return cli.init(`node test ${args}`.split(' '))
+      const cliArgs = `node test ${args}`.split(' ')
+
+      debug('calling cli.init with: %o', cliArgs)
+
+      return cli.init(cliArgs)
     }
   })
 
@@ -73,7 +80,7 @@ describe('cli', () => {
     })
   })
 
-  context('CYPRESS_ENV', () => {
+  context('CYPRESS_INTERNAL_ENV', () => {
     /**
      * Replaces line "Platform: ..." with "Platform: xxx"
      * @param {string} s
@@ -98,13 +105,12 @@ describe('cli', () => {
       .join(os.eol)
     }
 
-    it('allows staging environment', () => {
+    it('allows and warns when staging environment', () => {
       const options = {
         env: {
-          CYPRESS_ENV: 'staging',
+          CYPRESS_INTERNAL_ENV: 'staging',
         },
-        // we are only interested in the exit code
-        filter: ['code', 'stderr'],
+        filter: ['code', 'stderr', 'stdout'],
       }
 
       return execa('bin/cypress', ['help'], options).then(snapshot)
@@ -113,7 +119,7 @@ describe('cli', () => {
     it('catches environment "foo"', () => {
       const options = {
         env: {
-          CYPRESS_ENV: 'foo',
+          CYPRESS_INTERNAL_ENV: 'foo',
         },
         // we are only interested in the exit code
         filter: ['code', 'stderr'],
@@ -126,6 +132,15 @@ describe('cli', () => {
   })
 
   context('cypress version', () => {
+    let restoreEnv
+
+    afterEach(() => {
+      if (restoreEnv) {
+        restoreEnv()
+        restoreEnv = null
+      }
+    })
+
     const binaryDir = '/binary/dir'
 
     beforeEach(() => {
@@ -153,6 +168,38 @@ describe('cli', () => {
       this.exec('version')
       process.exit.callsFake(() => {
         snapshot('cli version and binary version 2', logger.print())
+        done()
+      })
+    })
+
+    it('reports package and binary message with npm log silent', (done) => {
+      restoreEnv = mockedEnv({
+        npm_config_loglevel: 'silent',
+      })
+
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        // should not be empty!
+        snapshot('cli version and binary version with npm log silent', logger.print())
+        done()
+      })
+    })
+
+    it('reports package and binary message with npm log warn', (done) => {
+      restoreEnv = mockedEnv({
+        npm_config_loglevel: 'warn',
+      })
+
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        // should not be empty!
+        snapshot('cli version and binary version with npm log warn', logger.print())
         done()
       })
     })
@@ -447,6 +494,18 @@ describe('cli', () => {
         expect(e).to.eq(err)
         done()
       })
+    })
+  })
+
+  context('cypress info', () => {
+    beforeEach(() => {
+      sinon.stub(info, 'start').resolves(0)
+      sinon.stub(util, 'exit').withArgs(0)
+    })
+
+    it('calls info start', () => {
+      this.exec('info')
+      expect(info.start).to.have.been.calledWith()
     })
   })
 })

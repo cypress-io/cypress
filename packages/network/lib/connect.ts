@@ -71,7 +71,7 @@ function createSocket (opts: RetryingOptions, onConnect): net.Socket {
 
 export function createRetryingSocket (
   opts: RetryingOptions,
-  cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void
+  cb: (err?: Error, sock?: net.Socket, retry?: (err?: Error) => void) => void,
 ) {
   if (typeof opts.getDelayMsForRetry === 'undefined') {
     opts.getDelayMsForRetry = getDelayForRetry

@@ -495,11 +495,11 @@ describe('lib/screenshots', () => {
         return screenshots.save(
           { name: 'foo bar\\baz/my-screenshot', specName: 'foo.spec.js', testFailure: false },
           details,
-          this.config.screenshotsFolder
+          this.config.screenshotsFolder,
         )
         .then((result) => {
           const expectedPath = path.join(
-            this.config.screenshotsFolder, 'foo.spec.js', 'foo bar', 'baz', 'my-screenshot.png'
+            this.config.screenshotsFolder, 'foo.spec.js', 'foo bar', 'baz', 'my-screenshot.png',
           )
 
           const actualPath = path.normalize(result.path)
@@ -536,11 +536,11 @@ describe('lib/screenshots', () => {
       return screenshots.save(
         { name: 'with-buffer', specName: 'foo.spec.js', testFailure: false },
         details,
-        this.config.screenshotsFolder
+        this.config.screenshotsFolder,
       )
       .then((result) => {
         const expectedPath = path.join(
-          this.config.screenshotsFolder, 'foo.spec.js', 'with-buffer.png'
+          this.config.screenshotsFolder, 'foo.spec.js', 'with-buffer.png',
         )
 
         const actualPath = path.normalize(result.path)
@@ -585,7 +585,7 @@ describe('lib/screenshots', () => {
       }, 'png', 'path/to/screenshots')
       .then((p) => {
         expect(p).to.eq(
-          'path/to/screenshots/examples/user/list.js/quux/lorem.png'
+          'path/to/screenshots/examples/user/list.js/quux/lorem.png',
         )
       })
     })
@@ -599,7 +599,7 @@ describe('lib/screenshots', () => {
       }, 'png', 'path/to/screenshots')
       .then((p) => {
         expect(p).to.eq(
-          'path/to/screenshots/examples/user/list.js/bar -- baz (failed).png'
+          'path/to/screenshots/examples/user/list.js/bar -- baz (failed).png',
         )
       })
     })
@@ -613,7 +613,7 @@ describe('lib/screenshots', () => {
       }, 'png', 'path/to/screenshots')
       .then((p) => {
         expect(p).to.eq(
-          'path/to/screenshots/examples$/user/list.js/bar -- baz -- 語言 (failed).png'
+          'path/to/screenshots/examples$/user/list.js/bar -- baz -- 語言 (failed).png',
         )
       })
     })

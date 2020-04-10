@@ -30,7 +30,7 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
       'browser %s version %s major version %s',
       browser.name,
       browser.version,
-      browser.majorVersion
+      browser.majorVersion,
     )
 
     if (browser.majorVersion) {
@@ -62,7 +62,7 @@ function getHelper (platform?: NodeJS.Platform): PlatformHelper {
 
 function lookup (
   platform: NodeJS.Platform,
-  browser: Browser
+  browser: Browser,
 ): Promise<DetectedBrowser> {
   log('looking up %s on %s platform', browser.name, platform)
   const helper = getHelper(platform)
@@ -153,7 +153,7 @@ export const detect = (goalBrowsers?: Browser[]): Bluebird<FoundBrowser[]> => {
 
 export const detectByPath = (
   path: string,
-  goalBrowsers?: Browser[]
+  goalBrowsers?: Browser[],
 ): Promise<FoundBrowser> => {
   if (!goalBrowsers) {
     goalBrowsers = browsers

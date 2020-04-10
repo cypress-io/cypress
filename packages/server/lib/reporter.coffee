@@ -6,6 +6,8 @@ Promise = require("bluebird")
 
 mochaReporters = require("mocha/lib/reporters")
 
+mochaErrMsgExtractionRe = /^([^:]+): expected/
+
 STATS = "suites tests passes pending failures start end duration".split(" ")
 
 if Mocha.Suite.prototype.titlePath
@@ -97,6 +99,24 @@ mergeErr = (runnable, runnables, stats) ->
   ## in the case its a hook so that we emit the right 'fail'
   ## event for reporters
   test = _.extend({}, test, { title: runnable.title })
+
+  ## mocha tries to extract the error name using a regular expression
+  ## but when the error message includes a colon (:) like
+  ## "Timed out retrying: expected...", it thinks the error name is
+  ## "Timed out retrying" and replaces the entire message with only that
+  ##
+  ## Here's the code we're patching in the mocha version currently being used (2.4.5):
+  ## https://github.com/mochajs/mocha/blob/2a8594424c73ffeca41ef1668446372160528b4a/lib/reporters/base.js#L208
+  if test.err and test.err.message
+    message = new String(test.err.message)
+    originalMatch = message.match
+    message.match = (re) ->
+      if _.isEqual(re, mochaErrMsgExtractionRe)
+        return null
+
+      originalMatch.apply(@, arguments)
+
+    test.err.message = message
 
   [test, test.err]
 

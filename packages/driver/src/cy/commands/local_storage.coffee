@@ -30,17 +30,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       null
 
   Commands.addAll({
-    clearLocalStorage: (keys) ->
+    clearLocalStorage: (keys, options = {}) ->
+      if _.isPlainObject(keys)
+        options = keys
+        keys = null
+
+      _.defaults options, {log: true}
+      
       ## bail if we have keys and we're not a string and we're not a regexp
       if keys and not _.isString(keys) and not _.isRegExp(keys)
         $errUtils.throwErrByPath("clearLocalStorage.invalid_argument")
 
       remote = clearLocalStorage(state, keys)
 
-      Cypress.log
-        name: "clear ls"
-        snapshot: true
-        end: true
+      if options.log
+        Cypress.log
+          name: "clear ls"
+          snapshot: true
+          end: true
 
       ## return the remote local storage object
       return remote

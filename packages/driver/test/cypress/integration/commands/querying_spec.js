@@ -175,7 +175,7 @@ describe('src/cy/commands/querying', () => {
         button.get(0).blur()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Expected to find element: \'focused\', but never found it.')
+          expect(err.message).to.include('Expected to find element: `focused`, but never found it.')
 
           done()
         })
@@ -444,7 +444,8 @@ describe('src/cy/commands/querying', () => {
       _.each(['', [], {}, 1, null, undefined], (value) => {
         it(`throws if passed anything other than a function, such as: ${value}`, (done) => {
           cy.on('fail', (err) => {
-            expect(err.message).to.include('cy.within() must be called with a function.')
+            expect(err.message).to.include('`cy.within()` must be called with a function.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/within')
 
             done()
           })
@@ -459,7 +460,7 @@ describe('src/cy/commands/querying', () => {
         })
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('cy.within() failed because this element')
+          expect(err.message).to.include('`cy.within()` failed because this element')
 
           done()
         })
@@ -1362,7 +1363,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws after timing out not finding element', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Expected to find element: \'#missing-el\', but never found it.')
+          expect(err.message).to.include('Expected to find element: `#missing-el`, but never found it.')
 
           done()
         })
@@ -1372,7 +1373,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws after timing out not finding element when should exist', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Expected to find element: \'#missing-el\', but never found it.')
+          expect(err.message).to.include('Expected to find element: `#missing-el`, but never found it.')
 
           done()
         })
@@ -1382,7 +1383,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws existence error without running assertions', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Expected to find element: \'#missing-el\', but never found it.')
+          expect(err.message).to.include('Expected to find element: `#missing-el`, but never found it.')
 
           done()
         })
@@ -1394,7 +1395,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws after timing out after a .wait() alias reference', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('Expected to find element: \'getJsonButton\', but never found it.')
+          expect(err.message).to.include('Expected to find element: `getJsonButton`, but never found it.')
 
           done()
         })
@@ -1451,7 +1452,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('expected \'<button#button>\' to be \'visible\'')
+          expect(err.message).to.include('This element `<button#button>` is not visible because it has CSS property: `display: none`')
 
           done()
         })
@@ -1463,7 +1464,7 @@ describe('src/cy/commands/querying', () => {
         cy.$$('#button').hide()
 
         cy.on('fail', (err) => {
-          expect(err.message).to.include('element \'<button#button>\' is not visible because')
+          expect(err.message).to.include('element `<button#button>` is not visible because')
 
           done()
         })
@@ -1484,9 +1485,9 @@ describe('src/cy/commands/querying', () => {
         cy.get('foobar')
       })
 
-      it('throws when alias property is \'0\'', (done) => {
+      it('throws when alias property is `0`', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('\'0\' is not a valid alias property. Are you trying to ask for the first response? If so write @getUsers.1')
+          expect(err.message).to.include('`0` is not a valid alias property. Are you trying to ask for the first response? If so write `@getUsers.1`')
 
           done()
         })
@@ -1499,7 +1500,7 @@ describe('src/cy/commands/querying', () => {
 
       it('throws when alias property isnt just a digit', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('\'1b\' is not a valid alias property. Only \'numbers\' or \'all\' is permitted.')
+          expect(err.message).to.include('`1b` is not a valid alias property. Only `numbers` or `all` is permitted.')
 
           done()
         })
@@ -1510,9 +1511,9 @@ describe('src/cy/commands/querying', () => {
         .get('@getUsers.1b')
       })
 
-      it('throws when alias property isnt a digit or \'all\'', (done) => {
+      it('throws when alias property isnt a digit or `all`', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.include('\'all \' is not a valid alias property. Only \'numbers\' or \'all\' is permitted.')
+          expect(err.message).to.include('`all ` is not a valid alias property. Only `numbers` or `all` is permitted.')
 
           done()
         })
@@ -1835,7 +1836,7 @@ space
       it('finds el with new lines + spaces', () => {
         const btn = $(`\
 <button id="whitespace2">
-White       
+White
 space
 </button>\
 `).appendTo(cy.$$('body'))
@@ -1927,7 +1928,7 @@ space
 
       it('throws when content has "i" flag while matchCase: true', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('You passed a regular expression with the case-insensitive (i) flag and { matchCase: true } to cy.contains(). Those options conflict with each other, so please choose one or the other.')
+          expect(err.message).to.eq('You passed a regular expression with the case-insensitive (_i_) flag and `{ matchCase: true }` to `cy.contains()`. Those options conflict with each other, so please choose one or the other.')
 
           done()
         })
@@ -2170,7 +2171,8 @@ space
       _.each([undefined, null], (val) => {
         it(`throws when text is ${val}`, (done) => {
           cy.on('fail', (err) => {
-            expect(err.message).to.eq('cy.contains() can only accept a string, number or regular expression.')
+            expect(err.message).to.eq('`cy.contains()` can only accept a string, number or regular expression.')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 
             done()
           })
@@ -2181,7 +2183,8 @@ space
 
       it('throws on a blank string', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('cy.contains() cannot be passed an empty string.')
+          expect(err.message).to.eq('`cy.contains()` cannot be passed an empty string.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 
           done()
         })
@@ -2278,7 +2281,8 @@ space
       it('throws when assertion is have.length > 1', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
-          expect(err.message).to.eq('cy.contains() cannot be passed a length option because it will only ever return 1 element.')
+          expect(err.message).to.eq('`cy.contains()` cannot be passed a `length` option because it will only ever return 1 element.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/contains')
 
           done()
         })

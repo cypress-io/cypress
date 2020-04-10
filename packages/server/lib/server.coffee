@@ -33,7 +33,6 @@ logger       = require("./logger")
 Socket       = require("./socket")
 Request      = require("./request")
 fileServer   = require("./file_server")
-XhrServer    = require("./xhr_ws_server")
 templateEngine = require("./template_engine")
 
 DEFAULT_DOMAIN_NAME    = "localhost"
@@ -162,8 +161,9 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project, onWarning) ->
+  open: (config = {}, project, onError, onWarning) ->
     debug("server open")
+
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -176,7 +176,6 @@ class Server
       ## TODO: might not be needed anymore
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
-      @_xhrServer = XhrServer.create()
 
       getRemoteState = => @_getRemoteState()
 
@@ -186,7 +185,14 @@ class Server
 
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, @_xhrServer.getDeferredResponse, project, @_networkProxy)
+      @createRoutes({
+        app
+        config
+        getRemoteState
+        networkProxy: @_networkProxy
+        onError
+        project
+      })
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -733,10 +739,8 @@ class Server
   startWebsockets: (automation, config, options = {}) ->
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
-    options.onIncomingXhr = @_xhrServer.onIncomingXhr
 
     options.onResetServerState = =>
-      @_xhrServer.reset()
       @_networkProxy.reset()
 
     @_socket = new Socket(config)

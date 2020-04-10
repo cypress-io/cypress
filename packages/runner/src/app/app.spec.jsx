@@ -122,7 +122,7 @@ describe('<App />', () => {
     const component = shallowRender(
       <App {...createProps()}>
         <div className='some-child' />
-      </App>
+      </App>,
     )
 
     expect(component.find('.some-child')).to.exist

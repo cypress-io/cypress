@@ -13,6 +13,13 @@ namespace CypressMomentTests {
   Cypress.moment().startOf('week') // $ExpectType Moment
 }
 
+namespace CypressSinonTests {
+  Cypress.sinon // $ExpectType SinonApi
+  const stub = cy.stub()
+  stub(2, 'foo')
+  expect(stub).to.have.been.calledWith(Cypress.sinon.match.number, Cypress.sinon.match('foo'))
+}
+
 namespace CypressJqueryTests {
   Cypress.$ // $ExpectType JQueryStatic
   Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
@@ -105,15 +112,31 @@ namespace CypressItsTests {
   .then((s: string) => {
     s
   })
+  cy.wrap({baz: { quux: '2' }}).its('baz.quux') // $ExpectType Chainable<any>
 }
 
 namespace CypressInvokeTests {
   const returnsString = () => 'foo'
   const returnsNumber = () => 42
 
-  // unfortunately could not define more precise type
-  // in this case it should have been "number", but so far no luck
-  cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<any>
+  cy.wrap({ a: returnsString }).invoke('a') // $ExpectType Chainable<string>
+  cy.wrap({ b: returnsNumber }).invoke('b') // $ExpectType Chainable<number>
+  cy.wrap({ b: returnsNumber }).invoke({ log: true }, 'b') // $ExpectType Chainable<number>
+
+  // challenging to define a more precise return type than string | number here
+  cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<string | number>
+
+  // invoke through property path results in any
+  cy.wrap({ a: { fn: (x: number) => x * x }}).invoke('a.fn', 4) // $ExpectType Chainable<any>
+
+  // examples below are from previous attempt at typing `invoke`
+  // (see https://github.com/cypress-io/cypress/issues/4022)
+
+  // call methods on arbitrary objects with reasonable return types
+  cy.wrap({ fn: () => ({a: 1})}).invoke("fn") // $ExpectType Chainable<{ a: number; }>
+
+  // call methods on dom elements with reasonable return types
+  cy.get('.trigger-input-range').invoke('val', 25) // $ExpectType Chainable<string | number | string[] | undefined>
 }
 
 cy.wrap({ foo: ['bar', 'baz'] })
@@ -354,4 +377,81 @@ namespace CypressBrowserTests {
 
   Cypress.isBrowser({family: 'foo'}) // $ExpectError
   Cypress.isBrowser() // $ExpectError
+}
+
+namespace CypressDomTests {
+  const obj: any = {}
+  const el = {} as any as HTMLElement
+  const jel = {} as any as JQuery
+  const doc = {} as any as Document
+
+  Cypress.dom.wrap((x: number) => 'a') // $ExpectType JQuery<HTMLElement>
+  Cypress.dom.query('foo', el) // $ExpectType JQuery<HTMLElement>
+  Cypress.dom.unwrap(obj) // $ExpectType any
+  Cypress.dom.isDom(obj) // $ExpectType boolean
+  Cypress.dom.isType(el, 'foo') // $ExpectType boolean
+  Cypress.dom.isVisible(el) // $ExpectType boolean
+  Cypress.dom.isHidden(el) // $ExpectType boolean
+  Cypress.dom.isFocusable(el) // $ExpectType boolean
+  Cypress.dom.isTextLike(el) // $ExpectType boolean
+  Cypress.dom.isScrollable(el) // $ExpectType boolean
+  Cypress.dom.isFocused(el) // $ExpectType boolean
+  Cypress.dom.isDetached(el) // $ExpectType boolean
+  Cypress.dom.isAttached(el) // $ExpectType boolean
+  Cypress.dom.isSelector(el, 'foo') // $ExpectType boolean
+  Cypress.dom.isDescendent(el, el) // $ExpectType boolean
+  Cypress.dom.isElement(obj) // $ExpectType boolean
+  Cypress.dom.isDocument(obj) // $ExpectType boolean
+  Cypress.dom.isWindow(obj) // $ExpectType boolean
+  Cypress.dom.isJquery(obj) // $ExpectType boolean
+  Cypress.dom.isInputType(el, 'number') // $ExpectType boolean
+  Cypress.dom.stringify(el, 'foo') // $ExpectType string
+  Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
+  Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
+  Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectType HTMLElement
+  Cypress.dom.getWindowByElement(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getReasonIsHidden(el) // $ExpectType string
+  Cypress.dom.getFirstScrollableParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getFirstFixedOrStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getFirstStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getCoordsByPosition(1, 2) // $ExpectType number
+  Cypress.dom.getElementPositioning(el) // $ExpectType ElementPositioning
+  Cypress.dom.getElementAtPointFromViewport(doc, 1, 2) // $ExpectType Element | null
+  Cypress.dom.getElementCoordinatesByPosition(el, 'top') // $ExpectType ElementCoordinates
+  Cypress.dom.getElementCoordinatesByPositionRelativeToXY(el, 1, 2) // $ExpectType ElementPositioning
+
+  Cypress.dom.wrap() // $ExpectError
+  Cypress.dom.query(el, 'foo') // $ExpectError
+  Cypress.dom.unwrap() // $ExpectError
+  Cypress.dom.isDom() // $ExpectError
+  Cypress.dom.isType(el) // $ExpectError
+  Cypress.dom.isVisible('') // $ExpectError
+  Cypress.dom.isHidden('') // $ExpectError
+  Cypress.dom.isFocusable('') // $ExpectError
+  Cypress.dom.isTextLike('') // $ExpectError
+  Cypress.dom.isScrollable('') // $ExpectError
+  Cypress.dom.isFocused('') // $ExpectError
+  Cypress.dom.isDetached('') // $ExpectError
+  Cypress.dom.isAttached('') // $ExpectError
+  Cypress.dom.isSelector('', 'foo') // $ExpectError
+  Cypress.dom.isDescendent('', '') // $ExpectError
+  Cypress.dom.isElement() // $ExpectError
+  Cypress.dom.isDocument() // $ExpectError
+  Cypress.dom.isWindow() // $ExpectError
+  Cypress.dom.isJquery() // $ExpectError
+  Cypress.dom.isInputType('', 'number') // $ExpectError
+  Cypress.dom.stringify('', 'foo') // $ExpectError
+  Cypress.dom.getElements(el) // $ExpectError
+  Cypress.dom.getContainsSelector(el, 'bar') // $ExpectError
+  Cypress.dom.getFirstDeepestElement(el, 1) // $ExpectError
+  Cypress.dom.getWindowByElement('') // $ExpectError
+  Cypress.dom.getReasonIsHidden('') // $ExpectError
+  Cypress.dom.getFirstScrollableParent('') // $ExpectError
+  Cypress.dom.getFirstFixedOrStickyPositionParent('') // $ExpectError
+  Cypress.dom.getFirstStickyPositionParent('') // $ExpectError
+  Cypress.dom.getCoordsByPosition(1) // $ExpectError
+  Cypress.dom.getElementPositioning('') // $ExpectError
+  Cypress.dom.getElementAtPointFromViewport(el, 1, 2) // $ExpectError
+  Cypress.dom.getElementCoordinatesByPosition(doc, 'top') // $ExpectError
+  Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2) // $ExpectError
 }

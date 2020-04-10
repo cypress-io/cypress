@@ -69,14 +69,26 @@ bothUrlsMatchAndRemoteHasHash = (current, remote) ->
         ## both must have the same query params
         (current.search is remote.search)
 
-cannotVisit2ndDomain = (origin, previousDomainVisited, log) ->
-  $errUtils.throwErrByPath("visit.cannot_visit_2nd_domain", {
+cannotVisitDifferentOrigin = (origin, previousUrlVisited, remoteUrl, existingUrl, log) ->
+  differences = []
+
+  if remoteUrl.protocol isnt existingUrl.protocol
+    differences.push('protocol')
+  if remoteUrl.port isnt existingUrl.port
+    differences.push('port')
+  if remoteUrl.superDomain isnt existingUrl.superDomain
+    differences.push('superdomain')
+
+  errOpts = {
     onFail: log
     args: {
-      previousDomain: previousDomainVisited
-      attemptedDomain: origin
+      differences: differences.join(', ')
+      previousUrl: previousUrlVisited
+      attemptedUrl: origin
     }
-  })
+  }
+
+  $errUtils.throwErrByPath("visit.cannot_visit_different_origin", errOpts)
 
 specifyFileByRelativePath = (url, log) ->
   $errUtils.throwErrByPath("visit.specify_file_by_relative_path", {
@@ -282,6 +294,10 @@ normalizeTimeoutOptions = (options) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   reset()
 
+  Cypress.on "test:before:run:async", ->
+    ## reset any state on the backend
+    Cypress.backend('reset:server:state')
+
   Cypress.on("test:before:run", reset)
 
   Cypress.on "stability:changed", (bool, event) ->
@@ -351,17 +367,17 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       switch args.length
         when 0
           forceReload = false
-          options     = {}
+          userOptions = {}
 
         when 1
           if _.isObject(args[0])
-            options = args[0]
+            userOptions = args[0]
           else
             forceReload = args[0]
 
         when 2
           forceReload = args[0]
-          options     = args[1]
+          userOptions = args[1]
 
         else
           throwArgsErr()
@@ -370,25 +386,24 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       cy.clearTimeout("reload")
 
       cleanup = null
+      options = _.defaults({}, userOptions, {
+        log: true
+        timeout: config("pageLoadTimeout")
+      })
 
       reload = ->
         new Promise (resolve, reject) ->
           forceReload ?= false
-          options     ?= {}
+          userOptions ?= {}
 
-          _.defaults options, {
-            log: true
-            timeout: config("pageLoadTimeout")
-          }
+          if not _.isObject(userOptions)
+            throwArgsErr()
 
           if not _.isBoolean(forceReload)
             throwArgsErr()
 
-          if not _.isObject(options)
-            throwArgsErr()
-
           if options.log
-            options._log = Cypress.log()
+            options._log = Cypress.log({})
 
             options._log.snapshot("before", {next: "after"})
 
@@ -413,13 +428,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         return null
 
     go: (numberOrString, options = {}) ->
-      _.defaults options, {
+      userOptions = options
+      options = _.defaults {}, userOptions, {
         log: true
         timeout: config("pageLoadTimeout")
       }
 
       if options.log
-        options._log = Cypress.log()
+        options._log = Cypress.log({
+        })
 
       win = state("window")
 
@@ -504,21 +521,25 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     visit: (url, options = {}) ->
       if options.url and url
         $errUtils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: options.url, url: url }})
+      userOptions = options
 
-      if _.isObject(url) and _.isEqual(options, {})
+      if userOptions.url and url
+        $utils.throwErrByPath("visit.no_duplicate_url", { args: { optionsUrl: userOptions.url, url: url }})
+
+      if _.isObject(url) and _.isEqual(userOptions, {})
         ## options specified as only argument
-        options = url
-        url = options.url
+        userOptions = url
+        url = userOptions.url
 
       if not _.isString(url)
         $errUtils.throwErrByPath("visit.invalid_1st_arg")
 
       consoleProps = {}
 
-      if not _.isEmpty(options)
-        consoleProps["Options"] = _.pick(options, VISIT_OPTS)
+      if not _.isEmpty(userOptions)
+        consoleProps["Options"] = _.pick(userOptions, VISIT_OPTS)
 
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         auth: null
         failOnStatusCode: true
         retryOnNetworkFailure: true
@@ -651,7 +672,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         if previousDomainVisited and remote.originPolicy isnt existing.originPolicy
           ## if we've already visited a new superDomain
           ## then die else we'd be in a terrible endless loop
-          return cannotVisit2ndDomain(remote.origin, previousDomainVisited, options._log)
+          return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
 
         current = $Location.create(win.location.href)
 
@@ -719,10 +740,10 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             .then ->
               onLoad(resp)
           else
-            ## if we've already visited a new superDomain
+            ## if we've already visited a new origin
             ## then die else we'd be in a terrible endless loop
             if previousDomainVisited
-              return cannotVisit2ndDomain(remote.origin, previousDomainVisited, options._log)
+              return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
 
             ## tell our backend we're changing domains
             ## TODO: add in other things we want to preserve

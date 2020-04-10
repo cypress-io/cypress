@@ -82,8 +82,25 @@ const getAllFn = (...aliases) => {
   return Cypress.Promise.all(
     aliases[0].split(' ').map((alias) => {
       return cy.now('get', alias)
-    })
+    }),
   )
+}
+
+export const keyEvents = [
+  'keydown',
+  'keyup',
+  'keypress',
+  'input',
+  'textInput',
+]
+
+export const attachKeyListeners = attachListeners(keyEvents)
+
+// trim new lines at the end of innerText
+// due to changing browser versions implementing
+// this differently
+export const trimInnerText = ($el) => {
+  return _.trimEnd($el.get(0).innerText, '\n')
 }
 
 Cypress.Commands.add('getAll', getAllFn)

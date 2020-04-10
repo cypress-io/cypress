@@ -11,7 +11,7 @@ import path from 'path'
 import chalk from 'chalk'
 
 // Ensures node-sass/vendor has built node-sass binary.
-execa.sync('rebuild-node-sass', { cwd: path.join(__dirname, './node_modules/.bin'), stdio: 'inherit' })
+execa.sync('rebuild-node-sass', { cwd: path.join(require.resolve('node-sass'), '../../../', '.bin'), stdio: 'inherit' })
 
 const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)

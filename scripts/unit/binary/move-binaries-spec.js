@@ -140,7 +140,7 @@ describe('move-binaries', () => {
       .withArgs(
         `${latestMacBuild}cypress.zip`,
         'desktop/3.3.0/darwin-x64/cypress.zip',
-        aws.bucket
+        aws.bucket,
       )
       .resolves()
 
