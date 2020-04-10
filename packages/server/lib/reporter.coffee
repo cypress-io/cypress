@@ -289,7 +289,6 @@ class Reporter
 
     suites = _
     .chain(@runnables)
-    .each((v) => console.log(v.root, v.title))
     .filter({root: false}) ## don't include root suite
     .value()
 
