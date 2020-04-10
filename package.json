@@ -45,7 +45,6 @@
     "license-checker": "13.0.3",
     "mocha": "^7.1.0",
     "mockery": "2.1.0",
-    "nsp": "2.7.0",
     "prettier-eslint-cli": "4.4.0",
     "semantic-release": "17.0.4",
     "sinon": "^9.0.0",
