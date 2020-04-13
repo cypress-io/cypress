@@ -483,7 +483,15 @@ declare module 'cypress' {
 
   /**
      * If Cypress fails to run at all (for example, if there are no spec files to run),
-     * then it will return a CypressFailedRunResult
+     * then it will return a CypressFailedRunResult. Check the failures attribute.
+     * @example	
+      ```	
+      const result = await cypress.run()	
+      if (result.failures) {	
+        console.error(result.message)	
+        process.exit(result.failures)	
+      }	
+      ```
      *
   **/
   interface CypressFailedRunResult {
