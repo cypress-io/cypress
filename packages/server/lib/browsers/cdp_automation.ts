@@ -6,14 +6,17 @@ import debugModule from 'debug'
 
 const debugVerbose = debugModule('cypress-verbose:server:browsers:cdp_automation')
 
-export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly' | 'sameSite'>
+export type CyCookie = Pick<chrome.cookies.Cookie, 'name' | 'value' | 'expirationDate' | 'hostOnly' | 'domain' | 'path' | 'secure' | 'httpOnly'> & {
+  // use `undefined` instead of `unspecified`
+  sameSite?: 'no_restriction' | 'lax' | 'strict'
+}
 
-function convertSameSiteExtensionToCdp (str: chrome.cookies.SameSiteStatus): Optional<cdp.Network.CookieSameSite> {
-  return ({
+function convertSameSiteExtensionToCdp (str: CyCookie['sameSite']): cdp.Network.CookieSameSite | undefined {
+  return str ? ({
     'no_restriction': 'None',
     'lax': 'Lax',
     'strict': 'Strict',
-  })[str]
+  })[str] : str as any
 }
 
 function convertSameSiteCdpToExtension (str: cdp.Network.CookieSameSite): chrome.cookies.SameSiteStatus {
@@ -83,33 +86,37 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     // see MakeCookieFromProtocolValues for information on how this cookie data will be parsed
     // @see https://cs.chromium.org/chromium/src/content/browser/devtools/protocol/network_handler.cc?l=246&rcl=786a9194459684dc7a6fded9cabfc0c9b9b37174
 
-    _.defaults(cookie, {
-      name: '',
-      value: '',
+    const setCookieRequest: cdp.Network.SetCookieRequest = _({
+      domain: cookie.domain,
+      path: cookie.path,
+      secure: cookie.secure,
+      httpOnly: cookie.httpOnly,
+      sameSite: convertSameSiteExtensionToCdp(cookie.sameSite),
+      expires: cookie.expirationDate,
     })
-
-    // @ts-ignore
-    cookie.expires = cookie.expirationDate
-    // @ts-ignore
-    cookie.sameSite = convertSameSiteExtensionToCdp(cookie.sameSite)
+    // Network.setCookie will error on any undefined/null parameters
+    .omitBy(_.isNull)
+    .omitBy(_.isUndefined)
+    // set name and value at the end to get the correct typing
+    .extend({
+      name: cookie.name || '',
+      value: cookie.value || '',
+    })
+    .value()
 
     // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
     if (!cookie.hostOnly && cookie.domain[0] !== '.') {
-      let parsedDomain = cors.parseDomain(cookie.domain)
+      const parsedDomain = cors.parseDomain(cookie.domain)
 
       // normally, a non-hostOnly cookie should be prefixed with a .
       // so if it's not a top-level domain (localhost, ...) or IP address
       // prefix it with a . so it becomes a non-hostOnly cookie
       if (parsedDomain && parsedDomain.tld !== cookie.domain) {
-        cookie.domain = `.${cookie.domain}`
+        setCookieRequest.domain = `.${cookie.domain}`
       }
     }
 
-    // not used by Chrome
-    delete cookie.hostOnly
-    delete cookie.expirationDate
-
-    return cookie as any
+    return setCookieRequest
   }
 
   const getAllCookies = (filter: CyCookieFilter) => {

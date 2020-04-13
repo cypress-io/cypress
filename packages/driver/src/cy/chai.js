@@ -340,7 +340,10 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.message = getLongLengthMessage(obj.length, length)
+              const newMessage = getLongLengthMessage(obj.length, length)
+
+              $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
               throw e1
             }
 
@@ -400,7 +403,10 @@ chai.use((chai, u) => {
               return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.message = getLongExistsMessage(obj)
+            const newMessage = getLongExistsMessage(obj)
+
+            $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
             throw e1
           }
         }
@@ -430,6 +436,12 @@ chai.use((chai, u) => {
 
       assertFn(passed, message, value, actual, expected, err)
 
+      // stacks from chai AssertionError instances are useless, because
+      // the chai code is served from the 'top' iframe, which binds to top's
+      // Error, but assertions fail inside the spec iframe and then err.stack
+      // will not include the lines from the spec iframe (a different iframe)
+      // for security purposes. therefore, we instantiate a new error on
+      // the spec iframe to get a better stack
       if (err) {
         err = $errUtils.enhanceStack({
           err,

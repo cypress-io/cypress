@@ -6,14 +6,14 @@ $utils = require("../../../cypress/utils")
 $errUtils = require("../../../cypress/error_utils")
 $elements = require("../../../dom/elements")
 
-checkOrUncheck = (type, subject, values = [], options = {}) ->
+checkOrUncheck = (type, subject, values = [], userOptions = {}) ->
   ## we're not handling conversion of values to strings
   ## in case we've received numbers
 
   ## if we're not an array but we are an object
-  ## reassign options to values
+  ## reassign userOptions to values
   if not _.isArray(values) and _.isObject(values)
-    options = values
+    userOptions = values
     values = []
   else
     ## make sure we're an array of values
@@ -24,10 +24,11 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
   ## to new filtered subjects
   matchingElements = []
 
-  _.defaults options,
+  options = _.defaults {}, userOptions, {
     $el: subject
     log: true
     force: false
+  }
 
   isNoop = ($el) ->
     switch type
@@ -75,17 +76,17 @@ checkOrUncheck = (type, subject, values = [], options = {}) ->
     }
 
     if options.log and isElActionable
-
-      ## figure out the options which actually change the behavior of clicks
+      ## figure out the userOptions which actually change the behavior of clicks
       deltaOptions = $utils.filterOutOptions(options)
 
-      options._log = Cypress.log
+      options._log = Cypress.log {
         message: deltaOptions
         $el: $el
         consoleProps: ->
           _.extend consoleProps, {
             Options: deltaOptions
           }
+      }
 
       options._log.snapshot("before", {next: "after"})
 

@@ -15,9 +15,8 @@ const colors = {
   values: chalk.green,
 }
 
-// TODO: rename this function
-const path = () => {
-  logger.log(state.getCacheDir())
+const logCachePath = () => {
+  logger.always(state.getCacheDir())
 
   return undefined
 }
@@ -26,6 +25,10 @@ const clear = () => {
   return fs.removeAsync(state.getCacheDir())
 }
 
+/**
+ * Collects all cached versions, finds when each was used
+ * and prints a table with results to the terminal
+ */
 const list = () => {
   return getCachedVersions()
   .then((binaries) => {
@@ -40,7 +43,7 @@ const list = () => {
       return table.push([versionString, lastUsed])
     })
 
-    logger.log(table.toString())
+    logger.always(table.toString())
   })
 }
 
@@ -84,7 +87,7 @@ const getCachedVersions = () => {
 }
 
 module.exports = {
-  path,
+  path: logCachePath,
   clear,
   list,
   getCachedVersions,

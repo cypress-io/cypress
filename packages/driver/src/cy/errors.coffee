@@ -46,7 +46,6 @@ create = (state, config, log) ->
     err ?= createErrFromMsg()
 
     uncaughtErr = $errUtils.createUncaughtException(type, err)
-
     current = state("current")
 
     uncaughtErr.onFail = ->

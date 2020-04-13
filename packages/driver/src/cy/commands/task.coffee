@@ -8,9 +8,11 @@ $stackUtils = require("../../cypress/stack_utils")
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     task: (task, arg, options = {}) ->
-      _.defaults options,
+      userOptions = options
+      options = _.defaults({}, userOptions, {
         log: true
         timeout: Cypress.config("taskTimeout")
+      })
 
       if options.log
         consoleOutput = {
