@@ -16,7 +16,7 @@ class $Chainer {
     $Chainer.prototype[key] = function (...args) {
       const invocationStack = this.useInitialStack
         ? this.invocationStack
-        : this.specWindow.__getSpecFrameStack('chained command invocation stack')
+        : (new this.specWindow.Error('chained command invocation stack')).stack
 
       // call back the original function with our new args
       // pass args an as array and not a destructured invocation

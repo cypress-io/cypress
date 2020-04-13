@@ -13,14 +13,6 @@ describe('driver/src/cypress/stack_utils', () => {
       expect(stack).to.equal(`Error: ${message}\n${newStack}`)
     })
 
-    it('removes lines with __getSpecFrameStack', () => {
-      const err = new Error(message)
-      const newStack = 'at __getSpecFrameStack (path/to/file.js:1:1)\nat bar (path/to/file.js:2:2)'
-      const stack = $stackUtils.replacedStack(err, newStack)
-
-      expect(stack).to.equal(`Error: ${message}\nat bar (path/to/file.js:2:2)`)
-    })
-
     it('does not replace stack if error has no stack', () => {
       const err = new Error(message)
 

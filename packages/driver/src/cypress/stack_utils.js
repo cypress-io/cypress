@@ -184,13 +184,9 @@ const replacedStack = (err, newStack) => {
   if (!err.stack) return err.stack
 
   const errString = err.toString()
-
   const [__, stackLines] = splitStack(newStack) // eslint-disable-line no-unused-vars
-  const relevantStackLines = _.reject(stackLines, (line) => {
-    return line.indexOf('__getSpecFrameStack') > -1
-  })
 
-  return [errString].concat(relevantStackLines).join('\n')
+  return [errString].concat(stackLines).join('\n')
 }
 
 const hasStack = (err) => {

@@ -445,7 +445,7 @@ chai.use((chai, u) => {
       if (err) {
         err = $errUtils.enhanceStack({
           err,
-          invocationStack: specWindow.__getSpecFrameStack('assertion invocation stack'),
+          invocationStack: (new specWindow.Error('assertion invocation stack')).stack,
           projectRoot: config('projectRoot'),
         })
 

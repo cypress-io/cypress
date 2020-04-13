@@ -991,7 +991,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
-        const invocationStack = specWindow.__getSpecFrameStack('command invocation stack')
+        const invocationStack = (new specWindow.Error('command invocation stack')).stack
         let ret
 
         ensures.ensureRunnable(name)
