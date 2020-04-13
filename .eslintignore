@@ -1,4 +1,9 @@
 test/_test-output
 cypress/tests/e2e/compile-error.js
 test/fixtures
+examples/react-app/src
+examples/react-app/node_modules
+examples/react-app/build
+examples/react-app/package.json
+examples/react-app/cypress/integration/dynamic-import-spec.js
 *.ts

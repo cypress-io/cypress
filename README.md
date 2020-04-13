@@ -35,12 +35,16 @@ This plugin (and all Cypress plugins) run in Cypress's own version of Node. If y
 In your project's [plugins file](https://on.cypress.io/guides/tooling/plugins-guide.html):
 
 ```javascript
-const webpack = require('@cypress/webpack-preprocessor')
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 module.exports = (on) => {
-  on('file:preprocessor', webpack())
+  on('file:preprocessor', webpackPreprocessor())
 }
 ```
+
+## Examples
+
+- [React app](examples/react-app)
 
 ## Options
 

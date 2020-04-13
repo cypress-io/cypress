@@ -101,6 +101,9 @@ exports.runTest = async (options = {}) => {
     spec: opts.spec,
     browser: opts.browser,
     exit: opts.exit,
+    config: {
+      video: false,
+    },
   })
   .finally(() => {
     stdout = stdio.toString()

@@ -33,9 +33,7 @@ SyntaxError: /[cwd]/cypress/tests/e2e/compile-error.js: Unexpected token, expect
      |                            ^
   15 | })
   16 | 
-
  @ multi ./cypress/tests/e2e/compile-error.js main[0]
-
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -53,16 +51,10 @@ Fix the error in your code and re-run your tests.
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     e2e/compile-error.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /[cwd]/cypress/videos/e2e/compile-error.js.mp4                  (X second)
 
 
 ====================================================================================================
