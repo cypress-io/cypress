@@ -197,6 +197,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
       debug(`typescript doesn't exist. ts-node setup passed.`)
     }
 
+    // ensure typescript is only registered once
     tsRegistered = true
   }
 
