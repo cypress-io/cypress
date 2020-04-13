@@ -64,27 +64,6 @@ const stackWithReplacedProps = (err, props) => {
   return originalStack.replace(originalName, `${name}: ${message}`)
 }
 
-const newLineAtBeginningRe = /^\n+/
-
-const replacedStack = (err, newStackErr) => {
-  // if err already lacks a stack or we've removed the stack
-  // for some reason, keep it stackless
-  if (!err.stack) return err.stack
-
-  const errString = err.toString()
-
-  const newStackErrString = newStackErr.toString()
-  const stackLines = newStackErr.stack
-  .replace(newStackErrString, '')
-  .replace(newLineAtBeginningRe, '')
-
-  // sometimes the new stack doesn't include any lines, so just stick
-  // with the original stack
-  if (!stackLines) return err.stack
-
-  return `${errString}\n${stackLines}`
-}
-
 const modifyErrMsg = (err, newErrMsg, cb) => {
   // TODO: can we remove this?
   err.stack = $stackUtils.normalizedStack(err)
@@ -328,7 +307,6 @@ module.exports = {
   mergeErrProps,
   modifyErrMsg,
   normalizeMsgNewLines,
-  replacedStack,
   processErr,
   throwErr,
   throwErrByPath,
