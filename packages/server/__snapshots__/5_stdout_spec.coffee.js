@@ -136,11 +136,10 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-SyntaxError: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js: Unexpected token (1:1)
-
-> 1 | +>
-    |  ^
-  2 |  while parsing file: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
+/foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js:1
++ >
+  ^
+ParseError: Unexpected token
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

@@ -7,13 +7,16 @@ $errMessages = require("../../cypress/error_messages")
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     readFile: (file, encoding, options = {}) ->
+      userOptions = options
+
       if _.isObject(encoding)
-        options = encoding
+        userOptions = encoding
         encoding = null
 
-      _.defaults options,
+      options = _.defaults({}, userOptions, {
         encoding: encoding ? "utf8"
         log: true
+      })
 
       consoleProps = {}
 
@@ -69,13 +72,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
 
     writeFile: (fileName, contents, encoding, options = {}) ->
+      userOptions = options
+
       if _.isObject(encoding)
-        options = encoding
+        userOptions = encoding
         encoding = null
 
-      _.defaults options,
+      options = _.defaults {}, userOptions,
         encoding: encoding ? "utf8"
-        flag: options.flag ? "w"
+        flag: userOptions.flag ? "w"
         log: true
 
       consoleProps = {}
