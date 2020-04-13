@@ -1,9 +1,10 @@
-import { checkArgs, fromCommandArgs, fromPrompts } from './args'
+import { checkArgs, fromCommandArgs } from './args'
+import { fromInquiry } from './inquiry'
 
 export const option = {
   checkArgs,
   fromCommandArgs,
-  fromPrompts,
+  fromInquiry,
 }
 
 export { create } from './fs'

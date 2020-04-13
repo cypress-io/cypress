@@ -1,34 +1,24 @@
-import _ from 'lodash'
 import prompts from 'prompts'
 
 import { optionInfo } from './option_info'
-import fs from '../../../util/fs'
-import scaffold from './old_scaffold'
+import { Args, InitConfig } from '../types'
+import { log } from './fs/log'
 
-export interface Config {
-  projectRoot: string
-  fixturesFolder?: string | false
-  integrationFolder?: string
-  pluginsFile?: string | false
-  supportFile?: string | false
-  screenshotsFolder?: string
-  videosFolder?: string
-  video?: boolean
-}
-
-export const prompt = async (options: any) => {
+export const fromInquiry = async (projRoot: string, args: Args) => {
   const { customize } = await prompts({
     type: 'confirm',
     name: 'customize',
     message: 'Customize settings?',
   })
 
-  let config: any = {}
+  let init: Partial<InitConfig> = {}
 
   if (customize) {
     let obj = await configPrompts(optionInfo)
 
-    config = Object.assign({}, config, obj)
+    init.config = obj
+  } else {
+    init.config = {}
   }
 
   const { useTypeScript } = await prompts({
@@ -37,38 +27,42 @@ export const prompt = async (options: any) => {
     message: 'Use TypeScript?',
   })
 
+  init.typescript = useTypeScript
+
   const { generateExamples } = await prompts({
     type: 'confirm',
     name: 'generateExamples',
     message: 'Generate examples?',
   })
 
-  const eslintChoices = [
-    { title: 'Default', value: 'default' },
-    { title: 'No', value: 'no' },
-    { title: 'Chai friendly', value: 'chai-friendly' },
-  ]
+  init.example = generateExamples
 
   const { installEslint } = await prompts({
-    type: 'select',
+    type: 'confirm',
     name: 'installEslint',
     message: 'Install Eslint rules for Cypress?',
-    choices: eslintChoices,
   })
 
-  const configStr = JSON.stringify(config, null, 2)
+  init.eslint = installEslint
 
-  config.projectRoot = options.cwd
+  const { installChaiFriendly } = await prompts({
+    type: 'confirm',
+    name: 'installChaiFriendly',
+    message: 'Install chai friendly eslint plugin?',
+  })
 
-  const configPath = `${config.projectRoot}/cypress.json`
+  init.chaiFriendly = installChaiFriendly
+
+  const configStr = JSON.stringify(init.config, null, 2)
 
   log('')
   log('About to do these things:')
-  log(`* Write to ${configPath}`)
+  log(`* Write cypress.json at ${projRoot}`)
   log(configStr)
   log(`* Use TypeScript: ${useTypeScript ? 'yes' : 'no'}`)
   log(`* Generate Examples: ${generateExamples ? 'yes' : 'no'}`)
-  log(`* Install Eslint Rules for Cypress: ${_.find(eslintChoices, { value: installEslint })!.title}`)
+  log(`* Install Eslint Rules for Cypress: ${installEslint ? 'yes' : 'no'}`)
+  log(`* Install chai friendly eslint plugin: ${installChaiFriendly ? 'yes' : 'no'}`)
 
   const { proceed } = await prompts({
     type: 'confirm',
@@ -76,12 +70,11 @@ export const prompt = async (options: any) => {
     message: 'Is it OK?',
   })
 
-  if (proceed) {
-    await fs.writeFile(configPath, configStr)
-    log(`cypress.json generated at ${configPath}`)
-
-    await generateDirsAndFiles(config)
+  if (!proceed) {
+    process.exit(0)
   }
+
+  return init as InitConfig
 }
 
 const configPrompts = async (optionInfo) => {
@@ -193,19 +186,4 @@ const objectPrompt = async (option) => {
   }
 
   return null
-}
-
-const log = (text: string) => {
-  // eslint-disable-next-line no-console
-  console.log(text)
-}
-
-const generateDirsAndFiles = async (config: Config) => {
-  const { projectRoot: projectDir } = config
-
-  await scaffold.integration(projectDir, config)
-  await scaffold.fixture(projectDir, config)
-  await scaffold.support(projectDir, config)
-
-  log(`Cypress scaffolding finished`)
 }
