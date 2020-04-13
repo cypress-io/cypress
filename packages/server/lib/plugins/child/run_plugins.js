@@ -156,7 +156,7 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
-let registerTS = false
+let tsRegistered = false
 
 module.exports = (ipc, pluginsFile, projectRoot) => {
   debug('pluginsFile:', pluginsFile)
@@ -177,7 +177,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
     return false
   })
 
-  if (!registerTS) {
+  if (!tsRegistered) {
     try {
       const tsPath = resolve.sync('typescript', {
         basedir: this.projectRoot,
@@ -197,7 +197,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
       debug(`typescript doesn't exist. ts-node setup passed.`)
     }
 
-    registerTS = true
+    tsRegistered = true
   }
 
   try {
