@@ -770,7 +770,7 @@ context('uncaught errors', () => {
     verify(this, {
       message: [
         'The following error originated from your application code',
-        '{}.bar is not a function',
+        'qux is not defined',
       ],
       regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
       hasCodeFrame: false,
@@ -787,7 +787,7 @@ context('uncaught errors', () => {
     verify(this, {
       message: [
         'The following error originated from your application code',
-        '{}.bar is not a function',
+        'qax is not defined',
       ],
       regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
       hasCodeFrame: false,
