@@ -1154,19 +1154,22 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     onSpecWindowUncaughtException () {
       // create the special uncaught exception err
-      let runnable
       const err = errors.createUncaughtException('spec', arguments)
+      const runnable = state('runnable')
 
-      runnable = state('runnable')
+      if (!runnable) return err
 
-      if (runnable) {
+      try {
         fail(err)
+      } catch (failErr) {
+        const r = state('reject')
 
-        return
+        if (r) {
+          return r(err)
+        }
+
+        return failErr
       }
-
-      // else pass the error along
-      return err
     },
 
     onUncaughtException () {

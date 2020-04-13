@@ -195,19 +195,11 @@ exports['e2e uncaught errors / failing3'] = `
   3 failing
 
   1) foo fails with setTimeout:
-     Uncaught Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
-
-  > The following error originated from your test code, not from Cypress.
+     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-
-When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
-
-This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
-
-https://on.cypress.io/uncaught-exception-from-application
       [stack trace lines]
 
   2) foo fails with setTimeout and done:
@@ -309,19 +301,11 @@ exports['e2e uncaught errors / failing4'] = `
   1 failing
 
   1) foo "before all" hook for "does not run":
-     Uncaught Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
-
-  > The following error originated from your test code, not from Cypress.
+     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-
-When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
-
-This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
-
-https://on.cypress.io/uncaught-exception-from-application
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`foo\`
       [stack trace lines]
