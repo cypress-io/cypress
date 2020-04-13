@@ -28,8 +28,8 @@ describe "foo", ->
 
   it "passes with fail handler after failing with async app code error", (done) ->
     cy.on "fail", (err) ->
-      expect(err.message).to.include("bar is not a function")
-      expect(err.stack).to.include("bar is not a function")
+      expect(err.message).to.include("qax is not defined")
+      expect(err.stack).to.include("qax is not defined")
 
       setTimeout -> done()
 

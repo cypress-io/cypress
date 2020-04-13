@@ -211,9 +211,9 @@ When Cypress detects uncaught errors originating from your test code it will aut
       [stack trace lines]
 
   3) foo fails with async app code error:
-     Uncaught TypeError: The following error originated from your application code, not from Cypress.
+     Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
 
-  > {}.bar is not a function
+  > qax is not defined
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
