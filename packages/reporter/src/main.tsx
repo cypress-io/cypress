@@ -105,14 +105,14 @@ declare global {
   interface Window {
     Cypress: any
     state: AppState
-    render: ((props: ReporterProps) => void)
+    render: ((props: Partial<ReporterProps>) => void)
   }
 }
 
 if (window.Cypress) {
   window.state = appState
   window.render = (props) => {
-    render(<Reporter {...props} />, document.getElementById('app'))
+    render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
   }
 }
 
