@@ -76,7 +76,9 @@ const preprocessor = (options = {}) => {
     // we're provided a default output path that lives alongside Cypress's
     // app data files so we don't have to worry about where to put the bundled
     // file on disk
-    const outputPath = file.outputPath
+    const outputPath = path.extname(file.outputPath) === '.js'
+      ? file.outputPath
+      : `${file.outputPath}.js`
 
     // we need to set entry and output
     webpackOptions = Object.assign(webpackOptions, {

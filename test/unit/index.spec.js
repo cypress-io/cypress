@@ -132,6 +132,17 @@ describe('webpack preprocessor', function () {
         })
       })
 
+      it('adds .js extension to filename when the originating file had been no javascript file', function () {
+        this.file.outputPath = 'output/output.ts'
+
+        return this.run().then(() => {
+          expect(webpack.lastCall.args[0].output).to.eql({
+            path: 'output',
+            filename: 'output.ts.js',
+          })
+        })
+      })
+
       it('enables inline source maps', function () {
         return this.run().then(() => {
           expect(webpack.lastCall.args[0].devtool).to.equal('inline-source-map')
@@ -176,6 +187,14 @@ describe('webpack preprocessor', function () {
       it('resolves with the output path', function () {
         return this.run().then((outputPath) => {
           expect(outputPath).to.be.equal(this.file.outputPath)
+        })
+      })
+
+      it('adds .js extension and resolves with that output path when the originating file had been no javascript file', function () {
+        this.file.outputPath = 'output/output.ts'
+
+        return this.run().then((outputPath) => {
+          expect(outputPath).to.be.equal('output/output.ts.js')
         })
       })
 
