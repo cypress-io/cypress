@@ -20,27 +20,3 @@ describe "e2e browserify, babel, es2015", ->
       expectedExitCode: 1
       noTypeScript: true
     })
-
-describe "e2e typescript", ->
-  e2e.setup({npmInstall: true})
-
-  it "spec passes", ->
-    e2e.exec(@, {
-      spec: "browserify_typescript_passing_spec.ts"
-      snapshot: true
-    })
-
-  it "spec fails", ->
-    e2e.exec(@, {
-      spec: "browserify_typescript_failing_spec.ts"
-      snapshot: true
-      expectedExitCode: 1
-    })
-  
-  it "project passes", ->
-    projPath = Fixtures.projectPath("ts-proj")
-
-    e2e.exec(@, {
-      project: projPath
-      snapshot: true
-    })
