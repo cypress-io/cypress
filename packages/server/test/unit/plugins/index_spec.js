@@ -59,7 +59,7 @@ describe('lib/plugins/index', () => {
         expect(cp.fork).to.be.called
         expect(cp.fork.lastCall.args[0]).to.contain('plugins/child/index.js')
 
-        expect(cp.fork.lastCall.args[1]).to.eql(['--file', 'cypress-plugin'])
+        expect(cp.fork.lastCall.args[1]).to.eql(['--file', 'cypress-plugin', '--projectRoot', '/path/to/project/root'])
       })
     })
 

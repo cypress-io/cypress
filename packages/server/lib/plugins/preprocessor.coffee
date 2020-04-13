@@ -7,6 +7,7 @@ appData = require("../util/app_data")
 cwd = require("../cwd")
 plugins = require("../plugins")
 savedState = require("../saved_state")
+resolve = require('./resolve')
 
 errorMessage = (err = {}) ->
   (err.stack ? err.annotated ? err.message ? err.toString())
@@ -36,11 +37,15 @@ baseEmitter = new EE()
 fileObjects = {}
 fileProcessors = {}
 
-setDefaultPreprocessor = ->
+setDefaultPreprocessor = (config) ->
   debug("set default preprocessor")
 
   browserify = require("@cypress/browserify-preprocessor")
-  plugins.register("file:preprocessor", browserify())
+  tsPath = resolve.typescript(config)
+
+  plugins.register("file:preprocessor", browserify({
+    typescript: tsPath
+  }))
 
 plugins.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
