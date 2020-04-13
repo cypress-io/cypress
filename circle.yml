@@ -1,13 +1,29 @@
+# based on https://github.com/cypress-io/circleci-orb/blob/master/docs/recipes.md
 version: 2.1
 orbs:
   cypress: cypress-io/cypress@1
 workflows:
   build:
     jobs:
-      - cypress/run:
+      # first, run a single job to install dependencies and Cypress
+      # and perform a few more small steps like linting
+      - cypress/install:
+          name: Install
           executor: cypress/base-12-14-0
           yarn: true
+          post-steps:
+            - run:
+                name: Show info 📺
+                command: npx cypress info
+
+      - cypress/run:
+          name: Tests
+          requires:
+            - Install
+          executor: cypress/base-12-14-0
+          install-command: echo 'Nothing else to install in this job'
           command: npm test
+          no-workspace: true
           post-steps:
             - run:
                 name: Lint code 🧹
@@ -18,6 +34,29 @@ workflows:
             - run:
                 name: Run tests w/ webpack@latest 🧪
                 command: npm test
-            - run:
-                name: Semantic release 🚀
-                command: npm run semantic-release
+
+      - cypress/run:
+          name: Test React App
+          requires:
+            - Install
+          executor: cypress/base-12-14-0
+          install-command: echo 'Nothing else to install in this job'
+          timeout: '1m'
+          start: npm start
+          no-workspace: true
+          working_directory: examples/react-app
+
+      # wait for all jobs to finish and possible run NPM release
+      - cypress/run:
+          name: NPM release
+          requires:
+            - Install
+            - Tests
+            - Test React App
+          executor: cypress/base-12-14-0
+          # nothing to install - cypress/install job does it
+          # and nothing to pass to the next job
+          install-command: echo 'Nothing else to install in this job'
+          no-workspace: true
+          # instead of "cypress run" do NPM release 😁
+          command: npm run semantic-release

@@ -4,3 +4,4 @@ node_modules/
 _test-output
 cypress/videos
 cypress/screenshots
+examples/react-app/build/
