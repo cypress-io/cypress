@@ -8,5 +8,6 @@
   },
   "testFiles": "**/*-spec.{js,jsx}",
   "experimentalComponentTesting": true,
-  "componentFolder": "src"
+  "componentFolder": "src",
+  "nodeVersion": "system"
 }
