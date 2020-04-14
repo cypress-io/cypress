@@ -232,6 +232,7 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'content-length',
     'content-security-policy',
     'connection',
+    'feature-policy',
   ])
 
   this.res.set(headers)
