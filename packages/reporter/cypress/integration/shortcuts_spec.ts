@@ -1,14 +1,24 @@
-import sinon from 'sinon'
+/// <reference types="cypress" />
+
+import sinon, { SinonStub, SinonSpy } from 'sinon'
+import { EventEmitter } from 'events'
+
+type EventEmitterStub = EventEmitter & Stub
+
+interface Stub {
+  on: SinonStub
+  emit: SinonSpy
+}
 
 const runnerStub = () => {
   return {
     on: sinon.stub(),
     emit: sinon.spy(),
-  }
+  } as EventEmitterStub
 }
 
 describe('controls', function () {
-  let runner
+  let runner: EventEmitterStub
 
   beforeEach(function () {
     runner = runnerStub()

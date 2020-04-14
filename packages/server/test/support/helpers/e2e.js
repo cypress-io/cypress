@@ -685,6 +685,8 @@ const e2e = {
 
           // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
+          // Emulate no typescript environment
+          CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
         })
         .extend(options.processEnv)
         .value(),
