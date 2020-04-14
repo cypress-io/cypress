@@ -97,6 +97,8 @@ const configPrompts = async (args: Args) => {
 
   for (let i = 0; i < optionInfo.length; i++) {
     const option = optionInfo[i]
+
+    // Ask if the user wants to customize the config category.
     const { customizeCategory } = await prompts({
       type: 'confirm',
       name: 'customizeCategory',

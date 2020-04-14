@@ -2,6 +2,9 @@ import { Args, InitConfig } from '../types'
 import { defaultValues } from './option_info'
 import { warn } from './fs/log'
 
+/**
+ * Check if the argument values are valid
+ */
 export const checkArgs = (args: Args) => {
   const {
     fixtures,
@@ -73,6 +76,9 @@ export const checkArgs = (args: Args) => {
   })
 }
 
+/**
+ * Set config values from arguments.
+ */
 export const fromCommandArgs = (args: Args, result: InitConfig) => {
   if (args.example) {
     result.example = true
