@@ -135,3 +135,9 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
 export const isKnownExperiment = (experiment, key) => {
   return Object.keys(experimental.names).includes(key)
 }
+
+// exporting a single default object with methods
+// helps make it is to stub and to test
+export default {
+  getExperiments,
+}

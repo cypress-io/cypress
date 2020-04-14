@@ -3,13 +3,10 @@ import React from 'react'
 import Experiments from './experiments'
 import Collapse, { Panel } from 'rc-collapse'
 import { mount } from 'cypress-react-unit-test'
+import experiments from '@packages/server/lib/experiments'
 
 /* global cy */
 describe('Experiments', () => {
-  beforeEach(() => {
-    cy.fixture('config').as('config')
-  })
-
   const TestExperiments = ({ project }) => (
     <div className='settings-wrapper'>
       <Collapse>
@@ -21,17 +18,29 @@ describe('Experiments', () => {
   )
 
   it('loads', function () {
-    this.config.experimentalCoolFeature = true
-    this.config.resolved.experimentalCoolFeature = {
-      value: true,
-    }
+    cy.stub(experiments, 'getExperiments').returns({
+      testExperiment: {
+        key: 'testExperiment',
+        value: true,
+        enabled: true,
+        name: 'Text Experiment 1',
+        summary: 'Experiment `description` with **Markdown** support!',
+      },
+      testExperiment2: {
+        key: 'testExperiment2',
+        value: 4,
+        enabled: false,
+        name: 'another experiment',
+        summary: 'Even better 🎉 experiment',
+      },
+    })
 
-    const project = {
-      config: this.config,
-    }
+    const project = {}
 
     mount(<TestExperiments project={project} />, {
       cssFiles: 'dist/app.css',
     })
+
+    cy.get('.settings-experiments').click()
   })
 })
