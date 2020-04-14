@@ -13,8 +13,7 @@ describe('ProjectId', () => {
     configFile: false,
   }
 
-  // NOTE: could not get styles to load and apply yet
-  it.skip('has styles', () => {
+  it('opens and closes', () => {
     const TestProjectId = ({ project }) => (
       <div className='settings-wrapper'>
         <Collapse>
@@ -25,13 +24,22 @@ describe('ProjectId', () => {
       </div>
     )
 
-    mount(<TestProjectId project={project} />)
+    mount(<TestProjectId project={project} />, {
+      cssFiles: 'dist/app.css',
+    })
+
+    cy.get('[data-cy=project-id]').should('not.exist')
+    cy.contains('Project ID').click()
+    cy.get('[data-cy=project-id]').should('be.visible').wait(1000)
+    cy.contains('Project ID').click()
+    cy.get('[data-cy=project-id]').should('not.be.visible')
   })
 
-  // NOTE: https://github.com/cypress-io/cypress/issues/7012
-  it.skip('loads', () => {
+  it('calls load more', () => {
     cy.stub(ipc, 'externalOpen').as('externalOpen')
-    mount(<ProjectId project={project} />)
+    mount(<ProjectId project={project} />, {
+      cssFiles: 'dist/app.css',
+    })
 
     cy.contains('a', 'Learn more')
     .click()

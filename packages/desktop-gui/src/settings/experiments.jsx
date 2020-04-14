@@ -14,7 +14,7 @@ const Experiments = observer(({ project }) => {
   const experiments = getExperiments(project)
 
   return (
-    <div>
+    <div data-cy='experiments'>
       <a href='#' className='learn-more' data-cy='experiments' onClick={openHelp}>
         <i className='fas fa-info-circle'></i> Learn more
       </a>
