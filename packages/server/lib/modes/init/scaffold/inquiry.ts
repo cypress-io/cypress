@@ -1,10 +1,17 @@
 import prompts from 'prompts'
 
-import { optionInfo } from './option_info'
+import { optionInfo, defaultValues } from './option_info'
 import { Args, InitConfig } from '../types'
 import { log } from './fs/log'
 
-export const fromInquiry = async (projRoot: string, args: Args) => {
+/**
+ * Generate config object from user-provided option arguments.
+ * It doesn't ask questions when an option is given by the arguments.
+ *
+ * @param args option arguments passed by the user.
+ */
+export const fromInquiry = async (args: Args) => {
+  const projRoot = args.cwd
   const { customize } = await prompts({
     type: 'confirm',
     name: 'customize',
@@ -14,44 +21,52 @@ export const fromInquiry = async (projRoot: string, args: Args) => {
   let init: Partial<InitConfig> = {}
 
   if (customize) {
-    let obj = await configPrompts(optionInfo)
+    let obj = await configPrompts(args)
 
     init.config = obj
   } else {
     init.config = {}
   }
 
-  const { useTypeScript } = await prompts({
-    type: 'confirm',
-    name: 'useTypeScript',
-    message: 'Use TypeScript?',
-  })
+  if (args.typescript === undefined) {
+    const { useTypeScript } = await prompts({
+      type: 'confirm',
+      name: 'useTypeScript',
+      message: 'Use TypeScript?',
+    })
 
-  init.typescript = useTypeScript
+    init.typescript = useTypeScript
+  }
 
-  const { generateExamples } = await prompts({
-    type: 'confirm',
-    name: 'generateExamples',
-    message: 'Generate examples?',
-  })
+  if (args.example === undefined) {
+    const { generateExamples } = await prompts({
+      type: 'confirm',
+      name: 'generateExamples',
+      message: 'Generate examples?',
+    })
 
-  init.example = generateExamples
+    init.example = generateExamples
+  }
 
-  const { installEslint } = await prompts({
-    type: 'confirm',
-    name: 'installEslint',
-    message: 'Install Eslint rules for Cypress?',
-  })
+  if (args.eslint === undefined) {
+    const { installEslint } = await prompts({
+      type: 'confirm',
+      name: 'installEslint',
+      message: 'Install Eslint rules for Cypress?',
+    })
 
-  init.eslint = installEslint
+    init.eslint = installEslint
+  }
 
-  const { installChaiFriendly } = await prompts({
-    type: 'confirm',
-    name: 'installChaiFriendly',
-    message: 'Install chai friendly eslint plugin?',
-  })
+  if (args.chaiFriendly === undefined) {
+    const { installChaiFriendly } = await prompts({
+      type: 'confirm',
+      name: 'installChaiFriendly',
+      message: 'Install chai friendly eslint plugin?',
+    })
 
-  init.chaiFriendly = installChaiFriendly
+    init.chaiFriendly = installChaiFriendly
+  }
 
   const configStr = JSON.stringify(init.config, null, 2)
 
@@ -59,10 +74,10 @@ export const fromInquiry = async (projRoot: string, args: Args) => {
   log('About to do these things:')
   log(`* Write cypress.json at ${projRoot}`)
   log(configStr)
-  log(`* Use TypeScript: ${useTypeScript ? 'yes' : 'no'}`)
-  log(`* Generate Examples: ${generateExamples ? 'yes' : 'no'}`)
-  log(`* Install Eslint Rules for Cypress: ${installEslint ? 'yes' : 'no'}`)
-  log(`* Install chai friendly eslint plugin: ${installChaiFriendly ? 'yes' : 'no'}`)
+  log(`* Use TypeScript: ${init.typescript ? 'yes' : 'no'}`)
+  log(`* Generate Examples: ${init.example ? 'yes' : 'no'}`)
+  log(`* Install Eslint Rules for Cypress: ${init.eslint ? 'yes' : 'no'}`)
+  log(`* Install chai friendly eslint plugin: ${init.chaiFriendly ? 'yes' : 'no'}`)
 
   const { proceed } = await prompts({
     type: 'confirm',
@@ -77,7 +92,7 @@ export const fromInquiry = async (projRoot: string, args: Args) => {
   return init as InitConfig
 }
 
-const configPrompts = async (optionInfo) => {
+const configPrompts = async (args: Args) => {
   const config = {}
 
   for (let i = 0; i < optionInfo.length; i++) {
@@ -97,11 +112,23 @@ const configPrompts = async (optionInfo) => {
       for (let j = 0; j < option.options.length; j++) {
         const { name, type, default: defaultVal, description } = option.options[j]
 
+        if (skipPrompts(name, args)) {
+          continue
+        }
+
         if (type === 'text' || type === 'number') {
+          const defaultValue = () => {
+            if (defaultVal === null) {
+              return 'null'
+            }
+
+            return defaultVal as string | number | boolean
+          }
+
           const result = await prompts({
             type,
             name,
-            initial: defaultVal,
+            initial: defaultValue(),
             message: '', // required
             // @ts-ignore
             onRender ({ underline, reset }) {
@@ -126,6 +153,24 @@ const configPrompts = async (optionInfo) => {
   }
 
   return config
+}
+
+/**
+ * Skip prompts when the value is set by arguments.
+ */
+const skipPrompts = (name: string, args: Args) => {
+  return ((name === 'fixturesFolder') &&
+    ((args.fixtures === false) ||
+      (args.fixturesPath && args.fixturesPath !== defaultValues['fixturesFolder']))) ||
+    ((name === 'supportFile') &&
+      (args.support === false) ||
+        (args.supportPath && args.supportPath !== defaultValues['supportFile'])) ||
+    ((name === 'integrationFolder') &&
+      args.integrationPath && args.integrationPath !== defaultValues['integrationFolder']) ||
+    ((name === 'pluginsFile') &&
+      (args.plugins === false) ||
+        (args.pluginsPath && args.pluginsPath !== defaultValues['pluginsFile'])) ||
+    ((name === 'video') && args.video === false)
 }
 
 const objectPrompt = async (option) => {

@@ -73,11 +73,7 @@ export const checkArgs = (args: Args) => {
   })
 }
 
-export const fromCommandArgs = (args: Args) => {
-  const result: InitConfig = {
-    config: {},
-  }
-
+export const fromCommandArgs = (args: Args, result: InitConfig) => {
   if (args.example) {
     result.example = true
   }
@@ -127,8 +123,4 @@ export const fromCommandArgs = (args: Args) => {
   }
 
   return result
-}
-
-export const fromPrompts = (args) => {
-  throw new Error('Not implemented yet')
 }
