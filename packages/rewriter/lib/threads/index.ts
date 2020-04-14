@@ -8,7 +8,7 @@ import { RewriteRequest, RewriteResponse } from './types'
 const debug = Debug('cypress:rewriter:threads')
 
 const _debugWorker = !debug.enabled ? _.noop : (worker: WorkerInfo) => {
-  return _.pick(worker, 'isBusy', 'id')
+  return { ..._.pick(worker, 'isBusy', 'id'), freeWorkers: _.filter(workers, { isBusy: false }).length }
 }
 
 const _debugOpts = !debug.enabled ? _.noop : (opts: RewriteOpts) => {
@@ -23,7 +23,7 @@ const WORKER_FILENAME = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'wor
 
 const WORKER_PATH = path.join(__dirname, WORKER_FILENAME)
 
-const MAX_WORKER_THREADS = os.cpus().length
+const MAX_WORKER_THREADS = Math.max(8, os.cpus().length)
 
 type DeferredPromise<T> = { p: Promise<T>, resolve: () => {}, reject: () => {} }
 
