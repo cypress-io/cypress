@@ -1,301 +1,363 @@
-_ = require("lodash")
-$ = require("jquery")
-Promise = require("bluebird")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const $ = require("jquery");
+const Promise = require("bluebird");
 
-$dom = require("../../../dom")
-$utils = require("../../../cypress/utils")
-$errUtils = require("../../../cypress/error_utils")
+const $dom = require("../../../dom");
+const $utils = require("../../../cypress/utils");
+const $errUtils = require("../../../cypress/error_utils");
 
-findScrollableParent = ($el, win) ->
-  $parent = $el.parent()
+var findScrollableParent = function($el, win) {
+  const $parent = $el.parent();
 
-  ## if we're at the body, we just want to pass in
-  ## window into jQuery scrollTo
-  if $parent.is("body,html") or $dom.isDocument($parent)
-    return win
+  //# if we're at the body, we just want to pass in
+  //# window into jQuery scrollTo
+  if ($parent.is("body,html") || $dom.isDocument($parent)) {
+    return win;
+  }
 
-  return $parent if $dom.isScrollable($parent)
+  if ($dom.isScrollable($parent)) { return $parent; }
 
-  findScrollableParent($parent, win)
+  return findScrollableParent($parent, win);
+};
 
-isNaNOrInfinity = (item) ->
-  num = Number.parseFloat(item)
+const isNaNOrInfinity = function(item) {
+  const num = Number.parseFloat(item);
 
-  return _.isNaN(num) or !_.isFinite(num)
+  return _.isNaN(num) || !_.isFinite(num);
+};
 
-module.exports = (Commands, Cypress, cy, state, config) ->
+module.exports = function(Commands, Cypress, cy, state, config) {
   Commands.addAll({ prevSubject: "element" }, {
-    scrollIntoView: (subject, options = {}) ->
-      userOptions = options
+    scrollIntoView(subject, options = {}) {
+      let parentIsWin;
+      const userOptions = options;
 
-      if !_.isObject(userOptions)
-        $errUtils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: userOptions }})
+      if (!_.isObject(userOptions)) {
+        $errUtils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: userOptions }});
+      }
 
-      ## ensure the subject is not window itself
-      ## cause how are you gonna scroll the window into view...
-      if subject is state("window")
-        $errUtils.throwErrByPath("scrollIntoView.subject_is_window")
+      //# ensure the subject is not window itself
+      //# cause how are you gonna scroll the window into view...
+      if (subject === state("window")) {
+        $errUtils.throwErrByPath("scrollIntoView.subject_is_window");
+      }
 
-      ## throw if we're trying to scroll to multiple elements
-      if subject.length > 1
-        $errUtils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
+      //# throw if we're trying to scroll to multiple elements
+      if (subject.length > 1) {
+        $errUtils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }});
+      }
 
       options = _.defaults({}, userOptions, {
-        $el: subject
-        $parent: state("window")
-        log: true
-        duration: 0
-        easing: "swing"
+        $el: subject,
+        $parent: state("window"),
+        log: true,
+        duration: 0,
+        easing: "swing",
         axis: "xy"
-      })
+      });
 
-      ## figure out the options which actually change the behavior of clicks
-      deltaOptions = $utils.filterOutOptions(options)
+      //# figure out the options which actually change the behavior of clicks
+      let deltaOptions = $utils.filterOutOptions(options);
 
-      ## here we want to figure out what has to actually
-      ## be scrolled to get to this element, cause we need
-      ## to scrollTo passing in that element.
-      options.$parent = findScrollableParent(options.$el, state("window"))
+      //# here we want to figure out what has to actually
+      //# be scrolled to get to this element, cause we need
+      //# to scrollTo passing in that element.
+      options.$parent = findScrollableParent(options.$el, state("window"));
 
-      if options.$parent is state("window")
-        parentIsWin = true
-        ## jQuery scrollTo looks for the prop contentWindow
-        ## otherwise it'll use the wrong window to scroll :(
-        options.$parent.contentWindow = options.$parent
+      if (options.$parent === state("window")) {
+        parentIsWin = true;
+        //# jQuery scrollTo looks for the prop contentWindow
+        //# otherwise it'll use the wrong window to scroll :(
+        options.$parent.contentWindow = options.$parent;
+      }
 
-      ## if we cannot parse an integer out of duration
-      ## which could be 500 or "500", then it's NaN...throw
-      if isNaNOrInfinity(options.duration)
-        $errUtils.throwErrByPath("scrollIntoView.invalid_duration", {args: { duration: options.duration }})
+      //# if we cannot parse an integer out of duration
+      //# which could be 500 or "500", then it's NaN...throw
+      if (isNaNOrInfinity(options.duration)) {
+        $errUtils.throwErrByPath("scrollIntoView.invalid_duration", {args: { duration: options.duration }});
+      }
 
-      if !(options.easing is "swing" or options.easing is "linear")
-        $errUtils.throwErrByPath("scrollIntoView.invalid_easing", {args: { easing: options.easing }})
+      if (!((options.easing === "swing") || (options.easing === "linear"))) {
+        $errUtils.throwErrByPath("scrollIntoView.invalid_easing", {args: { easing: options.easing }});
+      }
 
-      if options.log
-        deltaOptions = $utils.filterOutOptions(options, {duration: 0, easing: 'swing', offset: {left: 0, top: 0}})
+      if (options.log) {
+        deltaOptions = $utils.filterOutOptions(options, {duration: 0, easing: 'swing', offset: {left: 0, top: 0}});
 
-        log = {
-          $el: options.$el
-          message: deltaOptions
-          consoleProps: ->
-            obj = {
-              ## merge into consoleProps without mutating it
-              "Applied To": $dom.getElements(options.$el)
+        const log = {
+          $el: options.$el,
+          message: deltaOptions,
+          consoleProps() {
+            const obj = {
+              //# merge into consoleProps without mutating it
+              "Applied To": $dom.getElements(options.$el),
               "Scrolled Element": $dom.getElements(options.$el)
+            };
+
+            return obj;
+          }
+        };
+
+        options._log = Cypress.log(log);
+      }
+
+      if (!parentIsWin) {
+        //# scroll the parent into view first
+        //# before attemp
+        options.$parent[0].scrollIntoView();
+      }
+
+      const scrollIntoView = () => new Promise((resolve, reject) => {
+        //# scroll our axes
+        return $(options.$parent).scrollTo(options.$el, {
+          axis:     options.axis,
+          easing:   options.easing,
+          duration: options.duration,
+          offset:   options.offset,
+          done(animation, jumpedToEnd) {
+            return resolve(options.$el);
+          },
+          fail(animation, jumpedToEnd) {
+            //# its Promise object is rejected
+            try {
+              return $errUtils.throwErrByPath("scrollTo.animation_failed");
+            } catch (err) {
+              return reject(err);
+            }
+          },
+          always() {
+            if (parentIsWin) {
+              return delete options.$parent.contentWindow;
+            }
+          }
+        });
+      });
+
+      return scrollIntoView()
+      .then(function($el) {
+        let verifyAssertions;
+        return (verifyAssertions = () => cy.verifyUpcomingAssertions($el, options, {
+          onRetry: verifyAssertions
+        }))();
+      });
+    }
+  });
+
+  return Commands.addAll({ prevSubject: ["optional", "element", "window"] }, {
+    scrollTo(subject, xOrPosition, yOrOptions, options = {}) {
+      let $container, isWin, x, y;
+      let userOptions = options;
+
+      //# check for undefined or null values
+      if ((xOrPosition == null)) {
+        $errUtils.throwErrByPath("scrollTo.invalid_target", {args: { x }});
+      }
+
+      switch (false) {
+        case !_.isObject(yOrOptions):
+          userOptions = yOrOptions;
+          break;
+        default:
+          y = yOrOptions;
+      }
+
+      let position = null;
+
+      //# we may be '50%' or 'bottomCenter'
+      if (_.isString(xOrPosition)) {
+        //# if there's a number in our string, then
+        //# don't check for positions and just set x
+        //# this will check for NaN, etc - we need to explicitly
+        //# include '0%' as a use case
+        if (Number.parseFloat(xOrPosition) || (Number.parseFloat(xOrPosition) === 0)) {
+          x = xOrPosition;
+        } else {
+          position = xOrPosition;
+          //# make sure it's one of the valid position strings
+          cy.ensureValidPosition(position);
+        }
+      } else {
+        x = xOrPosition;
+      }
+
+      switch (position) {
+        case 'topLeft':
+          x = 0;       // y = 0
+          break;
+        case 'top':
+          x = '50%';   // y = 0
+          break;
+        case 'topRight':
+          x = '100%';  // y = 0
+          break;
+        case 'left':
+          x = 0;
+          y = '50%';
+          break;
+        case 'center':
+          x = '50%';
+          y = '50%';
+          break;
+        case 'right':
+          x = '100%';
+          y = '50%';
+          break;
+        case 'bottomLeft':
+          x = 0;
+          y = '100%';
+          break;
+        case 'bottom':
+          x = '50%';
+          y = '100%';
+          break;
+        case 'bottomRight':
+          x = '100%';
+          y = '100%';
+          break;
+      }
+
+      if (y == null) { y = 0; }
+      if (x == null) { x = 0; }
+
+      //# if our subject is window let it fall through
+      if (subject && (!$dom.isWindow(subject))) {
+        //# if they passed something here, its a DOM element
+        $container = subject;
+      } else {
+        isWin = true;
+        //# if we don't have a subject, then we are a parent command
+        //# assume they want to scroll the entire window.
+        $container = state("window");
+
+        //# jQuery scrollTo looks for the prop contentWindow
+        //# otherwise it'll use the wrong window to scroll :(
+        $container.contentWindow = $container;
+      }
+
+      //# throw if we're trying to scroll multiple containers
+      if (!isWin && ($container.length > 1)) {
+        $errUtils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }});
+      }
+
+      options = _.defaults({}, userOptions, {
+        $el: $container,
+        log: true,
+        duration: 0,
+        easing: "swing",
+        axis: "xy",
+        x,
+        y
+      });
+
+      //# if we cannot parse an integer out of duration
+      //# which could be 500 or "500", then it's NaN...throw
+      if (isNaNOrInfinity(options.duration)) {
+        $errUtils.throwErrByPath("scrollTo.invalid_duration", {args: { duration: options.duration }});
+      }
+
+      if (!((options.easing === "swing") || (options.easing === "linear"))) {
+        $errUtils.throwErrByPath("scrollTo.invalid_easing", {args: { easing: options.easing }});
+      }
+
+      //# if we cannot parse an integer out of y or x
+      //# which could be 50 or "50px" or "50%" then
+      //# it's NaN/Infinity...throw
+      if (isNaNOrInfinity(options.y) || isNaNOrInfinity(options.x)) {
+        $errUtils.throwErrByPath("scrollTo.invalid_target", {args: { x, y }});
+      }
+
+      if (options.log) {
+        const deltaOptions = $utils.stringify(
+          $utils.filterOutOptions(options, {duration: 0, easing: 'swing'})
+        );
+
+        const messageArgs = [];
+        if (position) {
+          messageArgs.push(position);
+        } else {
+          messageArgs.push(x);
+          messageArgs.push(y);
+        }
+        if (deltaOptions) {
+          messageArgs.push(deltaOptions);
+        }
+
+        const log = {
+          message: messageArgs.join(", "),
+          consoleProps() {
+            //# merge into consoleProps without mutating it
+            const obj = {};
+
+            if (position) {
+              obj.Position = position;
+            } else {
+              obj.X = x;
+              obj.Y = y;
+            }
+            if (deltaOptions) {
+              obj.Options = deltaOptions;
             }
 
-            return obj
+            obj["Scrolled Element"] = $dom.getElements(options.$el);
+
+            return obj;
+          }
+        };
+
+        if (!isWin) { log.$el = options.$el; }
+
+        options._log = Cypress.log(log);
+      }
+
+      var ensureScrollability = function() {
+        try {
+          //# make sure our container can even be scrolled
+          return cy.ensureScrollability($container, "scrollTo");
+        } catch (err) {
+          options.error = err;
+          return cy.retry(ensureScrollability, options);
         }
+      };
 
-        options._log = Cypress.log(log)
+      const scrollTo = () => new Promise(function(resolve, reject) {
+        //# scroll our axis'
+        $(options.$el).scrollTo({left: x, top: y}, {
+          axis:     options.axis,
+          easing:   options.easing,
+          duration: options.duration,
+          done(animation, jumpedToEnd) {
+            return resolve(options.$el);
+          },
+          fail(animation, jumpedToEnd) {
+            //# its Promise object is rejected
+            try {
+              return $errUtils.throwErrByPath("scrollTo.animation_failed");
+            } catch (err) {
+              return reject(err);
+            }
+          }
+        });
 
-      if not parentIsWin
-        ## scroll the parent into view first
-        ## before attemp
-        options.$parent[0].scrollIntoView()
-
-      scrollIntoView = ->
-        new Promise (resolve, reject) =>
-          ## scroll our axes
-          $(options.$parent).scrollTo(options.$el, {
-            axis:     options.axis
-            easing:   options.easing
-            duration: options.duration
-            offset:   options.offset
-            done: (animation, jumpedToEnd) ->
-              resolve(options.$el)
-            fail: (animation, jumpedToEnd) ->
-              ## its Promise object is rejected
-              try
-                $errUtils.throwErrByPath("scrollTo.animation_failed")
-              catch err
-                reject(err)
-            always: ->
-              if parentIsWin
-                delete options.$parent.contentWindow
-          })
-
-      scrollIntoView()
-      .then ($el) ->
-        do verifyAssertions = ->
-          cy.verifyUpcomingAssertions($el, options, {
-            onRetry: verifyAssertions
-          })
-  })
-
-  Commands.addAll({ prevSubject: ["optional", "element", "window"] }, {
-    scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
-      userOptions = options
-
-      ## check for undefined or null values
-      if not xOrPosition?
-        $errUtils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
-
-      switch
-        when _.isObject(yOrOptions)
-          userOptions = yOrOptions
-        else
-          y = yOrOptions
-
-      position = null
-
-      ## we may be '50%' or 'bottomCenter'
-      if _.isString(xOrPosition)
-        ## if there's a number in our string, then
-        ## don't check for positions and just set x
-        ## this will check for NaN, etc - we need to explicitly
-        ## include '0%' as a use case
-        if (Number.parseFloat(xOrPosition) or Number.parseFloat(xOrPosition) is 0)
-          x = xOrPosition
-        else
-          position = xOrPosition
-          ## make sure it's one of the valid position strings
-          cy.ensureValidPosition(position)
-      else
-        x = xOrPosition
-
-      switch position
-        when 'topLeft'
-          x = 0       # y = 0
-        when 'top'
-          x = '50%'   # y = 0
-        when 'topRight'
-          x = '100%'  # y = 0
-        when 'left'
-          x = 0
-          y = '50%'
-        when 'center'
-          x = '50%'
-          y = '50%'
-        when 'right'
-          x = '100%'
-          y = '50%'
-        when 'bottomLeft'
-          x = 0
-          y = '100%'
-        when 'bottom'
-          x = '50%'
-          y = '100%'
-        when 'bottomRight'
-          x = '100%'
-          y = '100%'
-
-      y ?= 0
-      x ?= 0
-
-      ## if our subject is window let it fall through
-      if subject and (not $dom.isWindow(subject))
-        ## if they passed something here, its a DOM element
-        $container = subject
-      else
-        isWin = true
-        ## if we don't have a subject, then we are a parent command
-        ## assume they want to scroll the entire window.
-        $container = state("window")
-
-        ## jQuery scrollTo looks for the prop contentWindow
-        ## otherwise it'll use the wrong window to scroll :(
-        $container.contentWindow = $container
-
-      ## throw if we're trying to scroll multiple containers
-      if (!isWin && $container.length > 1)
-        $errUtils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
-
-      options = _.defaults({}, userOptions, {
-        $el: $container
-        log: true
-        duration: 0
-        easing: "swing"
-        axis: "xy"
-        x: x
-        y: y
-      })
-
-      ## if we cannot parse an integer out of duration
-      ## which could be 500 or "500", then it's NaN...throw
-      if isNaNOrInfinity(options.duration)
-        $errUtils.throwErrByPath("scrollTo.invalid_duration", {args: { duration: options.duration }})
-
-      if !(options.easing is "swing" or options.easing is "linear")
-        $errUtils.throwErrByPath("scrollTo.invalid_easing", {args: { easing: options.easing }})
-
-      ## if we cannot parse an integer out of y or x
-      ## which could be 50 or "50px" or "50%" then
-      ## it's NaN/Infinity...throw
-      if isNaNOrInfinity(options.y) or isNaNOrInfinity(options.x)
-        $errUtils.throwErrByPath("scrollTo.invalid_target", {args: { x, y }})
-
-      if options.log
-        deltaOptions = $utils.stringify(
-          $utils.filterOutOptions(options, {duration: 0, easing: 'swing'})
-        )
-
-        messageArgs = []
-        if position
-          messageArgs.push(position)
-        else
-          messageArgs.push(x)
-          messageArgs.push(y)
-        if deltaOptions
-          messageArgs.push(deltaOptions)
-
-        log = {
-          message: messageArgs.join(", "),
-          consoleProps: ->
-            ## merge into consoleProps without mutating it
-            obj = {}
-
-            if position
-              obj.Position = position
-            else
-              obj.X = x
-              obj.Y = y
-            if deltaOptions
-              obj.Options = deltaOptions
-
-            obj["Scrolled Element"] = $dom.getElements(options.$el)
-
-            return obj
+        if (isWin) {
+          return delete options.$el.contentWindow;
         }
+      });
 
-        if !isWin then log.$el = options.$el
-
-        options._log = Cypress.log(log)
-
-      ensureScrollability = ->
-        try
-          ## make sure our container can even be scrolled
-          cy.ensureScrollability($container, "scrollTo")
-        catch err
-          options.error = err
-          cy.retry(ensureScrollability, options)
-
-      scrollTo = ->
-        new Promise (resolve, reject) ->
-          ## scroll our axis'
-          $(options.$el).scrollTo({left: x, top: y}, {
-            axis:     options.axis
-            easing:   options.easing
-            duration: options.duration
-            done: (animation, jumpedToEnd) ->
-              resolve(options.$el)
-            fail: (animation, jumpedToEnd) ->
-              ## its Promise object is rejected
-              try
-                $errUtils.throwErrByPath("scrollTo.animation_failed")
-              catch err
-                reject(err)
-          })
-
-          if isWin
-            delete options.$el.contentWindow
-
-      Promise
+      return Promise
       .try(ensureScrollability)
       .then(scrollTo)
-      .then ($el) ->
-        do verifyAssertions = ->
-          cy.verifyUpcomingAssertions($el, options, {
-            onRetry: verifyAssertions
-          })
-  })
+      .then(function($el) {
+        let verifyAssertions;
+        return (verifyAssertions = () => cy.verifyUpcomingAssertions($el, options, {
+          onRetry: verifyAssertions
+        }))();
+      });
+    }
+  });
+};
