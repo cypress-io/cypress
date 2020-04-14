@@ -267,10 +267,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           onFail: options._log
           args: {
             error:   err.message
-            stack:   err.stack
             method:  requestOpts.method
             url:     requestOpts.url
           },
-          noStackTrace: true
+          errProps: {
+            originalErr: {
+              stackTitle: "From Node.js Internals"
+              stack: err.stack
+              removeMessage: false
+            }
+          }
         })
   })

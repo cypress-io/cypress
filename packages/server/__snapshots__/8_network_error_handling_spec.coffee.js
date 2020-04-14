@@ -380,13 +380,13 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: socket hang up
-    [stack trace lines]
-
       [stack trace lines]
+  
+  From Node.js Internals:
+  
+  Error: socket hang up
+      [stack trace lines]
+  
 
   2) network error handling cy.request() retries fails after retrying 5x:
      CypressError: \`cy.request()\` failed trying to load:
@@ -414,14 +414,14 @@ Common situations why this would fail:
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
 
-The stack trace for this error is:
-
-RequestError: Error: socket hang up
-    [stack trace lines]
-
-
 https://on.cypress.io/request
       [stack trace lines]
+  
+  From Node.js Internals:
+  
+  RequestError: Error: socket hang up
+      [stack trace lines]
+  
 
 
 

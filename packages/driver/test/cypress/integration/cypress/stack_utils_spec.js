@@ -184,6 +184,87 @@ ${'    '}at Context.<anonymous> (cypress/integration/features/source_map_spec.co
 `)
     })
 
-    it('returns empty object if there\'s no stack', () => expect($stackUtils.getSourceStack()).to.eql({}))
+    it('returns empty object if there\'s no stack', () => {
+      expect($stackUtils.getSourceStack()).to.eql({})
+    })
+  })
+
+  context('.stackWithOriginalAppended', () => {
+    let err
+    let originalErr
+
+    beforeEach(() => {
+      err = {
+        stack: 'error message\n  at theStack (path/to/file:1:1)',
+      }
+
+      originalErr = {
+        stackTitle: 'Stack Title',
+        stack: 'original message\n  at theOriginalStack (path/to/another:2:2)',
+      }
+    })
+
+    it('appends originalErr stackTitle and stack', () => {
+      const result = $stackUtils.stackWithOriginalAppended(err, originalErr)
+
+      expect(result).to.equal(`\
+error message
+  at theStack (path/to/file:1:1)
+Stack Title:
+  at theOriginalStack (path/to/another:2:2)`)
+    })
+
+    it('returns err.stack if no originalErr', () => {
+      const result = $stackUtils.stackWithOriginalAppended(err)
+
+      expect(result).to.equal(err.stack)
+    })
+
+    it('returns err.stack if no originalErr.stack', () => {
+      originalErr.stack = ''
+
+      const result = $stackUtils.stackWithOriginalAppended(err, originalErr)
+
+      expect(result).to.equal(err.stack)
+    })
+
+    it('removes original stack message by default', () => {
+      const result = $stackUtils.stackWithOriginalAppended(err, originalErr)
+
+      expect(result).not.to.include('original message')
+    })
+
+    it('throws if no stackTitle property is provided', () => {
+      originalErr.stackTitle = undefined
+
+      const fn = () => $stackUtils.stackWithOriginalAppended(err, originalErr)
+
+      expect(fn).to.throw('From $stackUtils.stackWithOriginalAppended: the original error needs to have a stackTitle property')
+    })
+
+    describe('when removeMessage is false', () => {
+      let result
+
+      beforeEach(() => {
+        originalErr.removeMessage = false
+
+        result = $stackUtils.stackWithOriginalAppended(err, originalErr)
+      })
+
+      it('does not remove original stack message if removeMessage is false', () => {
+        expect(result).to.include('original message')
+      })
+
+      it('adds extra new lines if removeMessage is false', () => {
+        expect(result).to.equal(`\
+error message
+  at theStack (path/to/file:1:1)
+
+Stack Title:
+
+original message
+  at theOriginalStack (path/to/another:2:2)`)
+      })
+    })
   })
 })

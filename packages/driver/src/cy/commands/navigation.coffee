@@ -819,9 +819,14 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   args: {
                     url:   url
                     error: err
-                    stack: err.stack
                   }
-                  noStackTrace: true
+                  errProps: {
+                    originalErr: {
+                      stackTitle: "From Node.js Internals"
+                      stack: err.stack
+                      removeMessage: false
+                    }
+                  }
                 })
 
       visit = ->

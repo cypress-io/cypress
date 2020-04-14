@@ -24,6 +24,32 @@ const splitStack = (stack) => {
   }, [[], []])
 }
 
+const getStackLines = (stack) => {
+  const [__, stackLines] = splitStack(stack) // eslint-disable-line no-unused-vars
+
+  return stackLines
+}
+
+const stackWithoutMessage = (stack) => {
+  return getStackLines(stack).join('\n')
+}
+
+const stackWithOriginalAppended = (err, originalErr) => {
+  if (!originalErr || !originalErr.stack) return err.stack
+
+  if (!originalErr.stackTitle) {
+    throw new Error('From $stackUtils.stackWithOriginalAppended: the original error needs to have a stackTitle property')
+  }
+
+  if (originalErr.removeMessage === false) {
+    return `${err.stack}\n\n${originalErr.stackTitle}:\n\n${originalErr.stack}`
+  }
+
+  const stack = stackWithoutMessage(originalErr.stack)
+
+  return `${err.stack}\n${originalErr.stackTitle}:\n${stack}`
+}
+
 const getLanguageFromExtension = (filePath) => {
   return (path.extname(filePath) || '').toLowerCase().replace('.', '') || null
 }
@@ -184,7 +210,7 @@ const replacedStack = (err, newStack) => {
   if (!err.stack) return err.stack
 
   const errString = err.toString()
-  const [__, stackLines] = splitStack(newStack) // eslint-disable-line no-unused-vars
+  const stackLines = getStackLines(newStack)
 
   return [errString].concat(stackLines).join('\n')
 }
@@ -192,9 +218,7 @@ const replacedStack = (err, newStack) => {
 const hasStack = (err) => {
   if (!err.stack) return false
 
-  const [__, stackLines] = splitStack(err.stack) // eslint-disable-line no-unused-vars
-
-  return !!stackLines.length
+  return !!getStackLines(err.stack).length
 }
 
 module.exports = {
@@ -203,4 +227,5 @@ module.exports = {
   hasStack,
   normalizedStack,
   replacedStack,
+  stackWithOriginalAppended,
 }

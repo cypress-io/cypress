@@ -214,8 +214,9 @@ module.exports = {
     backend_error: (obj) -> {
       message: """
       #{cmd('{{cmd}}')} had an unexpected error {{action}} {{browserDisplayName}}.
-      {{errMessage}}
-      {{errStack}}
+
+      > {{error}}
+
       """
       docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
     }
@@ -922,10 +923,6 @@ module.exports = {
           - you forgot to run / boot your web server
           - your web server isn't accessible
           - you have weird network configuration settings on your computer
-
-        The stack trace for this error is:
-
-        #{obj.stack}
         """
       docsUrl: "https://on.cypress.io/request"
     }
@@ -1170,14 +1167,6 @@ module.exports = {
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
-    backend_error: {
-      message: """
-        #{cmd('setCookie')} had an unexpected error setting the requested cookie in {{browserDisplayName}}.
-
-        {{errStack}}
-      """
-      docsUrl: "https://on.cypress.io/setcookie"
-    }
     invalid_arguments: {
       message: "#{cmd('setCookie')} must be passed two string arguments for `name` and `value`."
       docsUrl: "https://on.cypress.io/setcookie"
@@ -1576,10 +1565,6 @@ module.exports = {
         - you forgot to run / boot your web server
         - your web server isn't accessible
         - you have weird network configuration settings on your computer
-
-      The stack trace for this error is:
-
-      {{stack}}
     """
     loading_file_failed: (obj) ->
       """

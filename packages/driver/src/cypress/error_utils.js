@@ -116,10 +116,6 @@ const throwErr = (err, options = {}) => {
     err = cypressErr({ message: err })
   }
 
-  if (options.noStackTrace) {
-    err.stack = ''
-  }
-
   let { onFail, errProps } = options
 
   // assume onFail is a command if
@@ -270,8 +266,19 @@ const enhanceStack = ({ err, invocationStack, projectRoot }) => {
   // but the stack points to cypress internals. here we replace the internal
   // cypress stack with the invocation stack, which points to the user's code
   if (invocationStack) {
-    err.originalStack = err.stack
+    const originalStack = err.stack
+
     err.stack = $stackUtils.replacedStack(err, invocationStack)
+    err.stack = $stackUtils.stackWithOriginalAppended(err, {
+      stackTitle: 'From Cypress Internals',
+      stack: originalStack,
+    })
+  }
+
+  if (err.originalErr) {
+    err.stack = $stackUtils.stackWithOriginalAppended(err, err.originalErr)
+
+    delete err.originalErr
   }
 
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)

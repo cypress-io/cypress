@@ -84,18 +84,6 @@ describe('driver/src/cypress/error_utils', () => {
       })
     })
 
-    it('removes stack if noStackTrace: true', () => {
-      const fn = () => {
-        $errUtils.throwErr('Something unexpected', { noStackTrace: true })
-      }
-
-      expect(fn).to.throw().and.satisfy((err) => {
-        expect(err.stack).to.equal('')
-
-        return true
-      })
-    })
-
     it('attaches onFail to the error when it is a function', () => {
       const onFail = function () {}
       const fn = () => $errUtils.throwErr(new Error('foo'), { onFail })
@@ -368,13 +356,13 @@ describe('driver/src/cypress/error_utils', () => {
       cy.stub($stackUtils, 'getSourceStack').returns(sourceStack)
       cy.stub($stackUtils, 'getCodeFrame').returns(codeFrame)
 
-      err = { stack: 'original stack' }
+      err = { stack: 'original stack message\n  at originalStack (foo.js:1:1)' }
     })
 
     it('combines error message and stack', () => {
       const result = $errUtils.enhanceStack({ err, invocationStack })
 
-      expect(result.stack).to.equal('new stack')
+      expect(result.stack).to.include('new stack')
     })
 
     it('attaches source mapped stack', () => {
@@ -395,16 +383,32 @@ describe('driver/src/cypress/error_utils', () => {
       expect(result.codeFrame).to.equal(codeFrame)
     })
 
-    it('adds originalStack when stack is replaced by invocation stack', () => {
+    it('appends original stack when stack is replaced by invocation stack', () => {
       const result = $errUtils.enhanceStack({ err, invocationStack })
 
-      expect(result.originalStack).to.equal('original stack')
+      expect(result.stack).to.include('From Cypress Internals:')
+      expect(result.stack).to.include('  at originalStack (foo.js:1:1)')
     })
 
-    it('does not add originalStack there is no invocation stack', () => {
+    it('does not append original stack when there is no invocation stack', () => {
       const result = $errUtils.enhanceStack({ err })
 
-      expect(result.originalStack).to.be.undefined
+      expect(result.stack).not.to.include('From Cypress Internals')
+    })
+
+    it('appends original error stack and removes the property if present', () => {
+      const originalErr = {
+        stackTitle: 'From Internals',
+        stack: 'at internalStack1 (foo.js:1:1)\nat internalStack2 (bar.js:2:2)',
+      }
+
+      err.originalErr = originalErr
+
+      const result = $errUtils.enhanceStack({ err })
+
+      expect(result.stack).to.include(originalErr.stackTitle)
+      expect(result.stack).to.include(originalErr.stack)
+      expect(result.originalErr).to.be.undefined
     })
   })
 
