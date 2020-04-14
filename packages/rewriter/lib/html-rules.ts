@@ -2,7 +2,7 @@ import _ from 'lodash'
 import RewritingStream from 'parse5-html-rewriting-stream'
 import * as js from './js'
 
-export function install (rewriter: RewritingStream) {
+export function install (url: string, rewriter: RewritingStream) {
   let currentlyInsideJsScriptTag = false
 
   rewriter.on('startTag', (startTag, raw) => {
@@ -40,6 +40,6 @@ export function install (rewriter: RewritingStream) {
     }
 
     // rewrite inline JS in <script> tags
-    return rewriter.emitRaw(js.rewriteJs(raw))
+    return rewriter.emitRaw(js.rewriteJs(url, raw))
   })
 }

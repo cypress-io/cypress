@@ -5,17 +5,17 @@ import stream from 'stream'
 // the HTML rewriter passes inline JS to the JS rewriter, hence
 // the lack of basic `rewriteHtml` or `HtmlRewriter` exports here
 
-export function HtmlJsRewriter (): stream.Transform {
+export function HtmlJsRewriter (url: string): stream.Transform {
   const rewriter = new RewritingStream()
 
-  htmlRules.install(rewriter)
+  htmlRules.install(url, rewriter)
 
   return rewriter
 }
 
-export function rewriteHtmlJs (html: string): string {
+export function rewriteHtmlJs (url: string, html: string): string {
   let out = ''
-  const rewriter = HtmlJsRewriter()
+  const rewriter = HtmlJsRewriter(url)
 
   rewriter.on('data', (chunk) => {
     out += chunk

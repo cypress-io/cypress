@@ -27,7 +27,7 @@ parentPort!.on('message', (req: RewriteRequest) => {
   const rewriteFn = req.isHtml ? rewriteHtmlJs : rewriteJs
 
   try {
-    const code = rewriteFn(req.source)
+    const code = rewriteFn(req.url, req.source)
 
     _reply({ code, threadMs: _getThreadMs() })
   } catch (error) {

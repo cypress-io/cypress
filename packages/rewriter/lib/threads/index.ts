@@ -38,7 +38,7 @@ type QueuedRewrite = {
   opts: RewriteOpts
 }
 
-type RewriteOpts = Pick<RewriteRequest, 'source' | 'isHtml'>
+type RewriteOpts = Pick<RewriteRequest, 'url' | 'source' | 'isHtml'>
 
 const workers: WorkerInfo[] = []
 const queued: QueuedRewrite[] = []

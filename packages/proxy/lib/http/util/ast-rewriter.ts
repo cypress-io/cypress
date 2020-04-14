@@ -10,19 +10,19 @@ type SecurityOpts = {
   isHtml?: boolean
 }
 
-export const strip = async (source, opts: SecurityOpts = {}) => {
+export const strip = async (url, source, opts: SecurityOpts = {}) => {
   if (opts.isHtml) {
-    return rewriteHtmlJsAsync(source) // threaded
+    return rewriteHtmlJsAsync(url, source) // threaded
   }
 
-  return rewriteJsAsync(source) // threaded
+  return rewriteJsAsync(url, source) // threaded
 }
 
-export const stripStream = (opts: SecurityOpts = {}) => {
+export const stripStream = (url, opts: SecurityOpts = {}) => {
   if (opts.isHtml) {
     return pumpify(
       utf8Stream(),
-      HtmlJsRewriter(), // non-threaded
+      HtmlJsRewriter(url), // non-threaded
     )
   }
 
@@ -32,7 +32,7 @@ export const stripStream = (opts: SecurityOpts = {}) => {
     pumpify(
       utf8Stream(),
       concatStream(async (body) => {
-        pt.write(await strip(body.toString()))
+        pt.write(await strip(url, body.toString()))
         pt.end()
       }),
     ),
