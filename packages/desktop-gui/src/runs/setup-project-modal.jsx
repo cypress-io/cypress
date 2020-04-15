@@ -5,9 +5,8 @@ import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 import Loader from 'react-loader'
-import Select from 'react-select'
-import { gravatarUrl } from '../lib/utils'
 
+import OrgSelector from './org-selector'
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import orgsStore from '../organizations/organizations-store'
@@ -27,7 +26,7 @@ class SetupProject extends Component {
       error: null,
       projectName: this.props.project.displayName,
       public: null,
-      selectedOrg: {},
+      selectedOrgId: null,
       showNameMissingError: false,
       isSubmitting: false,
     }
@@ -155,7 +154,10 @@ class SetupProject extends Component {
             {
               orgsStore.isLoaded ?
                 this._hasOrgs() ?
-                  this._orgSelector() :
+                  <OrgSelector
+                    orgs={orgsStore.orgs}
+                    isLoaded={orgsStore.isLoaded}
+                    updateSelectedOrg={this._updateSelectedOrg}/> :
                   <div className='empty-select-orgs well'>
                     <p>You don't have any organizations yet.</p>
                     <p>Organizations can help you manage projects, including billing.</p>
@@ -179,48 +181,6 @@ class SetupProject extends Component {
 
   _hasOrgs () {
     return orgsStore.orgs.length
-  }
-
-  _orgSelectValue (options) {
-    if (!_.isEmpty(this.state.selectedOrg)) {
-      return this.state.selectedOrg
-    }
-
-    return this._hasDefaultOrg() ?
-      _.find(options, { default: true }) :
-      options[0]
-  }
-
-  _orgSelector () {
-    const options = _.map(orgsStore.orgs, (org) => {
-      return {
-        value: org.id,
-        default: org.default,
-        label: org.default ?
-          <div>
-            <img
-              className='user-avatar'
-              height='13'
-              width='13'
-              src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
-            />
-            Your personal organization
-          </div> : org.name,
-      }
-    })
-
-    return (
-      <div className={!this._hasOrgs() ? 'hidden' : ''}>
-        <Select
-          className='organizations-select'
-          classNamePrefix='organizations-select'
-          value={this._orgSelectValue(options)}
-          onChange={this._updateSelectedOrg}
-          isLoading={!orgsStore.isLoaded}
-          options={options}
-        />
-      </div>
-    )
   }
 
   _accessSelector () {
@@ -302,11 +262,11 @@ class SetupProject extends Component {
     )
   }
 
-  _updateSelectedOrg = (selectedOrg, action) => {
-    const orgIsNotSelected = _.isEmpty(selectedOrg)
+  _updateSelectedOrg = (selectedOrgId) => {
+    const orgIsNotSelected = _.isNull(selectedOrgId)
 
     this.setState({
-      selectedOrg,
+      selectedOrgId,
     })
 
     // deselect their choice for access
@@ -359,7 +319,7 @@ class SetupProject extends Component {
   _setupProject () {
     ipc.setupDashboardProject({
       projectName: this.state.projectName,
-      orgId: this.state.selectedOrg.value,
+      orgId: this.state.selectedOrgId,
       public: this.state.public,
     })
     .then((projectDetails) => {
