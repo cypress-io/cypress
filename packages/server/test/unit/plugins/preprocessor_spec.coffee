@@ -76,6 +76,19 @@ describe "lib/plugins/preprocessor", ->
       sinon.stub(plugins, "execute").returns(->)
       browserifyFn = ->
       browserify = sinon.stub().returns(browserifyFn)
+      ## mock default options
+      browserify.defaultOptions = {
+        browserifyOptions: {
+          extensions: [],
+          transform: [
+            [],
+            ['babelify', {
+              presets: [],
+              extensions: [],
+            }]
+          ]
+        }
+      }
       mockery.registerMock("@cypress/browserify-preprocessor", browserify)
       preprocessor.getFile(@filePath, @config)
       expect(plugins.register).to.be.calledWith("file:preprocessor", browserifyFn)

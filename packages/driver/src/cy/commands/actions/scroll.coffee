@@ -26,8 +26,10 @@ isNaNOrInfinity = (item) ->
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({ prevSubject: "element" }, {
     scrollIntoView: (subject, options = {}) ->
-      if !_.isObject(options)
-        $errUtils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: options }})
+      userOptions = options
+
+      if !_.isObject(userOptions)
+        $errUtils.throwErrByPath("scrollIntoView.invalid_argument", {args: { arg: userOptions }})
 
       ## ensure the subject is not window itself
       ## cause how are you gonna scroll the window into view...
@@ -38,7 +40,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if subject.length > 1
         $errUtils.throwErrByPath("scrollIntoView.multiple_elements", {args: { num: subject.length }})
 
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         $el: subject
         $parent: state("window")
         log: true
@@ -123,13 +125,15 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({ prevSubject: ["optional", "element", "window"] }, {
     scrollTo: (subject, xOrPosition, yOrOptions, options = {}) ->
+      userOptions = options
+
       ## check for undefined or null values
       if not xOrPosition?
         $errUtils.throwErrByPath "scrollTo.invalid_target", {args: { x }}
 
       switch
         when _.isObject(yOrOptions)
-          options = yOrOptions
+          userOptions = yOrOptions
         else
           y = yOrOptions
 
@@ -197,7 +201,7 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       if (!isWin && $container.length > 1)
         $errUtils.throwErrByPath("scrollTo.multiple_containers", {args: { num: $container.length }})
 
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         $el: $container
         log: true
         duration: 0

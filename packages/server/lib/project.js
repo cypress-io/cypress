@@ -6,6 +6,8 @@ const Promise = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
 const la = require('lazy-ass')
 const check = require('check-more-types')
+const tsnode = require('ts-node')
+const resolve = require('resolve')
 const scaffoldDebug = require('debug')('cypress:server:scaffold')
 const debug = require('debug')('cypress:server:project')
 const cwd = require('./cwd')
@@ -99,6 +101,23 @@ class Project extends EE {
 
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
+    }).then((cfg) => {
+      try {
+        const tsPath = resolve.sync('typescript', {
+          basedir: this.projectRoot,
+        })
+
+        debug('typescript path: %s', tsPath)
+
+        tsnode.register({
+          compiler: tsPath,
+          transpileOnly: true,
+        })
+      } catch (e) {
+        debug(`typescript doesn't exist. ts-node setup passed.`)
+      }
+
+      return cfg
     }).then((cfg) => {
       return this._initPlugins(cfg, options)
       .then((modifiedCfg) => {

@@ -1,4 +1,6 @@
-const { EventEmitter } = require('events')
+/// <reference types="cypress" />
+
+import { EventEmitter } from 'events'
 
 describe('controls', function () {
   beforeEach(function () {

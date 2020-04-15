@@ -175,12 +175,6 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
-      it "displays name 'get cookies'", ->
-          cy.getCookies().then ->
-            lastLog = @lastLog
-
-            expect(lastLog.get("displayName")).to.eq("get cookies")
-
       it "#consoleProps", ->
         cy.getCookies().then (cookies) ->
           expect(cookies).to.deep.eq([{name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false}])
@@ -337,12 +331,6 @@ describe "src/cy/commands/cookies", ->
 
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
-
-      it "displays name 'get cookie'", ->
-        cy.getCookie("foo").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("displayName")).to.eq("get cookie")
 
       it "#consoleProps", ->
         cy.getCookie("foo").then (cookie) ->
@@ -604,12 +592,6 @@ describe "src/cy/commands/cookies", ->
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
 
-          it "displays name 'set cookie'", ->
-        cy.setCookie("foo", "bar").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("displayName")).to.eq("set cookie")
-
       it "#consoleProps", ->
         cy.setCookie("foo", "bar").then (cookie) ->
           expect(cookie).to.deep.eq({name: "foo", value: "bar", domain: "localhost", path: "/", secure: true, httpOnly: false})
@@ -749,12 +731,6 @@ describe "src/cy/commands/cookies", ->
 
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
-
-          it "displays name 'clear cookie'", ->
-        cy.clearCookie("foo").then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("displayName")).to.eq("clear cookie")
 
       it "#consoleProps", ->
         cy.clearCookie("foo").then (cookie) ->
@@ -990,12 +966,6 @@ describe "src/cy/commands/cookies", ->
 
           expect(lastLog.get("snapshots").length).to.eq(1)
           expect(lastLog.get("snapshots")[0]).to.be.an("object")
-
-          it "displays name 'get cookies'", ->
-        cy.clearCookies().then ->
-          lastLog = @lastLog
-
-          expect(lastLog.get("displayName")).to.eq("clear cookies")
 
       it "#consoleProps", ->
         cy.clearCookies().then (cookies) ->
