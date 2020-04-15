@@ -1,238 +1,273 @@
-_ = require("lodash")
-sinon = require("sinon")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const sinon = require("sinon");
 
-Promise = require("bluebird")
+const Promise = require("bluebird");
 
-$utils = require("../../cypress/utils")
-$errUtils = require("../../cypress/error_utils")
+const $utils = require("../../cypress/utils");
+const $errUtils = require("../../cypress/error_utils");
 
-counts = null
+let counts = null;
 
-sinon.setFormatter($utils.stringifyArg.bind($utils))
+sinon.setFormatter($utils.stringifyArg.bind($utils));
 
-createSandbox = ->
-  sinon.createSandbox().usingPromise(Promise)
+const createSandbox = () => sinon.createSandbox().usingPromise(Promise);
 
-display = (name) ->
-  switch name
-    when "spy"  then "Spied Obj"
-    when "stub" then "Stubbed Obj"
+const display = function(name) {
+  switch (name) {
+    case "spy":  return "Spied Obj";
+    case "stub": return "Stubbed Obj";
+  }
+};
 
-formatArgs = (args) ->
-  _.map args, (arg) -> $utils.stringifyArg(arg)
+const formatArgs = args => _.map(args, arg => $utils.stringifyArg(arg));
 
-getMessage = (method, args) ->
-  method ?= "function"
-  args = if args.length > 3
+const getMessage = function(method, args) {
+  if (method == null) { method = "function"; }
+  args = args.length > 3 ?
     formatArgs(args.slice(0, 3)).concat("...")
-  else
-    formatArgs(args)
+  :
+    formatArgs(args);
 
-  "#{method}(#{args.join(', ')})"
+  return `${method}(${args.join(', ')})`;
+};
 
-onInvoke = (Cypress, obj, args) ->
-  agent = obj.agent
-  agentName = agent._cyName
+const onInvoke = function(Cypress, obj, args) {
+  let fake;
+  const {
+    agent
+  } = obj;
+  const agentName = agent._cyName;
 
-  ## bail if we've turned off logging this agent
-  return if agent._log is false
+  //# bail if we've turned off logging this agent
+  if (agent._log === false) { return; }
 
-  ## fakes are children of the agent created with `withArgs`
-  fakes = agent.matchingFakes(args)
+  //# fakes are children of the agent created with `withArgs`
+  const fakes = agent.matchingFakes(args);
 
-  agent._cyLog.set("callCount", agent.callCount)
-  for fake in fakes
-    fake._cyLog.set("callCount", fake.callCount)
-
-  logProps = {
-    name:     agentName
-    message:  obj.message
-    error:    obj.error
-    type:     "parent"
-    end:      true
-    snapshot: true
-    event:    true
-    consoleProps: ->
-      consoleObj = {}
-      consoleObj.Command = null
-      consoleObj.Error = null
-      consoleObj.Event = "#{agentName} called"
-
-      consoleObj[agent._cyType] = agent
-      consoleObj["Call #"] = agent.callCount
-      consoleObj.Alias = agent._cyAlias
-
-      consoleObj[display(obj.name)] = obj.obj
-      consoleObj.Arguments = obj.call.args
-      consoleObj.Context = obj.call.thisValue
-      consoleObj.Returned = obj.call.returnValue
-
-      if obj.error
-        consoleObj.Error = obj.error.stack
-
-      for fake in fakes
-        name = fake._cyName
-        count = fake._cyCount
-        consoleObj["Child #{fake._cyType} (#{count})"] = "---"
-        consoleObj["  #{count} #{fake._cyType}"] = fake
-        consoleObj["  #{count} call #"] = fake.callCount
-        consoleObj["  #{count} alias"] = fake._cyAlias
-        consoleObj["  #{count} matching arguments"] = fake.matchingArguments
-
-      consoleObj
+  agent._cyLog.set("callCount", agent.callCount);
+  for (fake of fakes) {
+    fake._cyLog.set("callCount", fake.callCount);
   }
 
-  aliases = _.compact([agent._cyAlias].concat(_.map(fakes, "_cyAlias")))
-  if aliases.length
-    logProps.alias = aliases
-    logProps.aliasType = "agent"
+  const logProps = {
+    name:     agentName,
+    message:  obj.message,
+    error:    obj.error,
+    type:     "parent",
+    end:      true,
+    snapshot: true,
+    event:    true,
+    consoleProps() {
+      const consoleObj = {};
+      consoleObj.Command = null;
+      consoleObj.Error = null;
+      consoleObj.Event = `${agentName} called`;
 
-  Cypress.log(logProps)
+      consoleObj[agent._cyType] = agent;
+      consoleObj["Call #"] = agent.callCount;
+      consoleObj.Alias = agent._cyAlias;
 
-onError = (err) ->
-  $errUtils.throwErr(err)
+      consoleObj[display(obj.name)] = obj.obj;
+      consoleObj.Arguments = obj.call.args;
+      consoleObj.Context = obj.call.thisValue;
+      consoleObj.Returned = obj.call.returnValue;
 
-## create a global sandbox
-## to be used through all the tests
-sandbox = createSandbox()
-
-reset = ->
-  counts = {
-    spy: 0
-    stub: 0
-    children: {}
-  }
-
-  sandbox.restore()
-
-  return null
-
-module.exports = (Commands, Cypress, cy, state, config) ->
-  ## reset initially on a new run because we could be
-  ## re-running from the UI or from a spec file change
-  reset()
-
-  resetAndSetSandbox = ->
-    reset()
-
-    ## attach the sandbox to state
-    state("sandbox", sandbox)
-
-  ## before each of our tests we always want
-  ## to reset the counts + the sandbox
-  Cypress.on("test:before:run", resetAndSetSandbox)
-
-  wrap = (ctx, type, agent, obj, method, count) ->
-    if not count
-      count = counts[type] += 1
-
-    name = "#{type}-#{count}"
-    if not agent.parent
-      counts.children[name] = 0
-
-    log = Cypress.log({
-      instrument: "agent"
-      name: name
-      type: name
-      functionName: method
-      count: count
-      callCount: 0
-    })
-
-    agent._cyCount = count
-    agent._cyLog = log
-    agent._cyName = name
-    agent._cyType = type
-
-    invoke = agent.invoke
-
-    agent.invoke = (func, thisValue, args) ->
-      error = null
-      returned = null
-
-      ## because our spy could potentially fail here
-      ## we need to wrap this in a try / catch
-      ## so we still emit the command that failed
-      ## and the user can easily find the error
-      try
-        returned = invoke.call(@, func, thisValue, args)
-      catch e
-        error = e
-
-      props = {
-        count:     count
-        name:      type
-        message:   getMessage(method, args)
-        obj:       obj
-        agent:     agent
-        call:      agent.lastCall
-        callCount: agent.callCount
-        error:     error
-        log:       log
+      if (obj.error) {
+        consoleObj.Error = obj.error.stack;
       }
 
-      onInvoke(Cypress, props, args)
+      for (fake of fakes) {
+        const name = fake._cyName;
+        const count = fake._cyCount;
+        consoleObj[`Child ${fake._cyType} (${count})`] = "---";
+        consoleObj[`  ${count} ${fake._cyType}`] = fake;
+        consoleObj[`  ${count} call #`] = fake.callCount;
+        consoleObj[`  ${count} alias`] = fake._cyAlias;
+        consoleObj[`  ${count} matching arguments`] = fake.matchingArguments;
+      }
 
-      ## if an error did exist then we need
-      ## to bubble it up
-      onError(error) if error
+      return consoleObj;
+    }
+  };
 
-      ## make sure we return the invoked return value
-      ## of the spy
-      return returned
+  const aliases = _.compact([agent._cyAlias].concat(_.map(fakes, "_cyAlias")));
+  if (aliases.length) {
+    logProps.alias = aliases;
+    logProps.aliasType = "agent";
+  }
 
-    ## enable not logging this agent
-    agent.log = (bool = true) ->
-      agent._log = bool
+  return Cypress.log(logProps);
+};
 
-      return agent
+const onError = err => $errUtils.throwErr(err);
 
-    agent.as = (alias) ->
-      cy.validateAlias(alias)
+//# create a global sandbox
+//# to be used through all the tests
+const sandbox = createSandbox();
+
+const reset = function() {
+  counts = {
+    spy: 0,
+    stub: 0,
+    children: {}
+  };
+
+  sandbox.restore();
+
+  return null;
+};
+
+module.exports = function(Commands, Cypress, cy, state, config) {
+  //# reset initially on a new run because we could be
+  //# re-running from the UI or from a spec file change
+  reset();
+
+  const resetAndSetSandbox = function() {
+    reset();
+
+    //# attach the sandbox to state
+    return state("sandbox", sandbox);
+  };
+
+  //# before each of our tests we always want
+  //# to reset the counts + the sandbox
+  Cypress.on("test:before:run", resetAndSetSandbox);
+
+  var wrap = function(ctx, type, agent, obj, method, count) {
+    if (!count) {
+      count = (counts[type] += 1);
+    }
+
+    const name = `${type}-${count}`;
+    if (!agent.parent) {
+      counts.children[name] = 0;
+    }
+
+    const log = Cypress.log({
+      instrument: "agent",
+      name,
+      type: name,
+      functionName: method,
+      count,
+      callCount: 0
+    });
+
+    agent._cyCount = count;
+    agent._cyLog = log;
+    agent._cyName = name;
+    agent._cyType = type;
+
+    const {
+      invoke
+    } = agent;
+
+    agent.invoke = function(func, thisValue, args) {
+      let error = null;
+      let returned = null;
+
+      //# because our spy could potentially fail here
+      //# we need to wrap this in a try / catch
+      //# so we still emit the command that failed
+      //# and the user can easily find the error
+      try {
+        returned = invoke.call(this, func, thisValue, args);
+      } catch (e) {
+        error = e;
+      }
+
+      const props = {
+        count,
+        name:      type,
+        message:   getMessage(method, args),
+        obj,
+        agent,
+        call:      agent.lastCall,
+        callCount: agent.callCount,
+        error,
+        log
+      };
+
+      onInvoke(Cypress, props, args);
+
+      //# if an error did exist then we need
+      //# to bubble it up
+      if (error) { onError(error); }
+
+      //# make sure we return the invoked return value
+      //# of the spy
+      return returned;
+    };
+
+    //# enable not logging this agent
+    agent.log = function(bool = true) {
+      agent._log = bool;
+
+      return agent;
+    };
+
+    agent.as = function(alias) {
+      cy.validateAlias(alias);
       cy.addAlias(ctx, {
-        subject: agent
-        command: log
-        alias: alias
-      })
-      agent._cyAlias = alias
+        subject: agent,
+        command: log,
+        alias
+      });
+      agent._cyAlias = alias;
       log.set({
-        alias: alias
+        alias,
         aliasType: "agent"
-      })
-      agent.named(alias)
-      agent
+      });
+      agent.named(alias);
+      return agent;
+    };
 
-    withArgs = agent.withArgs
-    agent.withArgs = ->
-      childCount = counts.children[name] += 1
-      wrap(ctx, type, withArgs.apply(@, arguments), obj, method, "#{count}.#{childCount}")
+    const {
+      withArgs
+    } = agent;
+    agent.withArgs = function() {
+      const childCount = (counts.children[name] += 1);
+      return wrap(ctx, type, withArgs.apply(this, arguments), obj, method, `${count}.${childCount}`);
+    };
 
-    return agent
+    return agent;
+  };
 
-  spy = (obj, method) ->
-    theSpy = sandbox.spy(obj, method)
-    wrap(@, "spy", theSpy, obj, method)
+  const spy = function(obj, method) {
+    const theSpy = sandbox.spy(obj, method);
+    return wrap(this, "spy", theSpy, obj, method);
+  };
 
-  stub = (obj, method, replacerFnOrValue) ->
-    theStub = sandbox.stub.call(sandbox, obj, method)
+  const stub = function(obj, method, replacerFnOrValue) {
+    let theStub = sandbox.stub.call(sandbox, obj, method);
 
-    ## sinon 2 changed the stub signature
-    ## this maintains the 3-argument signature so it's not breaking
-    if arguments.length is 3
-      if _.isFunction(replacerFnOrValue)
-        theStub = theStub.callsFake(replacerFnOrValue)
-      else
-        theStub = theStub.value(replacerFnOrValue)
+    //# sinon 2 changed the stub signature
+    //# this maintains the 3-argument signature so it's not breaking
+    if (arguments.length === 3) {
+      if (_.isFunction(replacerFnOrValue)) {
+        theStub = theStub.callsFake(replacerFnOrValue);
+      } else {
+        theStub = theStub.value(replacerFnOrValue);
+      }
+    }
 
-    wrap(@, "stub", theStub, obj, method)
+    return wrap(this, "stub", theStub, obj, method);
+  };
 
-  Commands.addAllSync({
-    spy: spy
+  return Commands.addAllSync({
+    spy,
 
-    stub: stub
+    stub,
 
-    agents: ->
-      $errUtils.warnByPath("agents.deprecated_warning")
+    agents() {
+      $errUtils.warnByPath("agents.deprecated_warning");
 
-      return {stub, spy}
-  })
+      return {stub, spy};
+    }
+  });
+};
