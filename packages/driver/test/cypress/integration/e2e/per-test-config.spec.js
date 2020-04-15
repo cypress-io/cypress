@@ -260,6 +260,18 @@ describe('per-test config', () => {
   specify('works with it & specify', { defaultCommandTimeout: 100 }, () => {
     expect(Cypress.config().defaultCommandTimeout).eq(100)
   })
+
+  describe('baseUrl', () => {
+    it('visit example', { baseUrl: 'http://localhost:3501' }, () => {
+      cy.visit('/fixtures/generic.html')
+      cy.url().should('eq', 'http://localhost:3501/fixtures/generic.html')
+    })
+
+    it('visit docs', { baseUrl: 'http://localhost:3500' }, () => {
+      cy.visit('/fixtures/generic.html')
+      cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
+    })
+  })
 })
 
 function hasOnly (test) {
