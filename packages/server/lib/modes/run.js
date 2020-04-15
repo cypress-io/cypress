@@ -1106,12 +1106,14 @@ module.exports = {
 
       const { tests, stats } = obj
 
+      const attempts = _.flatMap(tests, (test) => _.compact([test].concat(test.prevAttempts)))
+
       const hasFailingTests = _.get(stats, 'failures') > 0
 
       // if we have a video recording
       if (startedVideoCapture && tests && tests.length) {
         // always set the video timestamp on tests
-        obj.tests = Reporter.setVideoTimestamp(startedVideoCapture, tests)
+        Reporter.setVideoTimestamp(startedVideoCapture, attempts)
       }
 
       // we should upload the video if we upload on passes (by default)
@@ -1149,6 +1151,7 @@ module.exports = {
       screenshotId: random.id(),
       name: data.name || null,
       testId: data.testId,
+      testAttemptIndex: data.testAttemptIndex,
       takenAt: resp.takenAt,
       path: resp.path,
       height: resp.dimensions.height,

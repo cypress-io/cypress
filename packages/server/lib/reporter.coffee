@@ -7,7 +7,7 @@ debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
 
 mochaReporters = require("mocha/lib/reporters")
-
+mochaColor = mochaReporters.Base.color
 mochaErrMsgExtractionRe = /^([^:]+): expected/
 
 STATS = "suites tests passes pending failures start end duration".split(" ")
@@ -69,8 +69,21 @@ createRunnable = (obj, parent) ->
 
   return runnable
 
+mochaProps = {
+  'currentRetry': '_currentRetry'
+  'retries': '_retries'
+}
+
+toMochaProps = (testProps) ->
+  _.each(mochaProps, (val, key) ->
+    if testProps.hasOwnProperty(key)
+      testProps[val] = testProps[key]
+      delete testProps[key]
+  )
+
 mergeRunnable = (eventName) ->
   return (testProps, runnables) ->
+    toMochaProps(testProps)
     runnable = runnables[testProps.id]
 
     if (eventName is 'test:before:run')
@@ -87,11 +100,10 @@ mergeRunnable = (eventName) ->
         ## add prevAttempt array to newly created runnable
         testProps.prevAttempts = prevAttempts.concat([prevAttempt])
 
-      if (testProps._currentRetry < runnable._currentRetry)
-        runnable = runnable.prevAttempts[testProps._currentRetry]
-
 
     _.extend(runnable, testProps)
+
+
 
 safelyMergeRunnable = (hookProps, runnables) ->
   { hookId, title, hookName, body, type } = hookProps
@@ -233,6 +245,13 @@ class Reporter
     @mocha = new Mocha({reporter: reporter})
     @mocha.suite = rootRunnable
     @runner = new Mocha.Runner(rootRunnable)
+    if @reporterName is 'spec'
+      @runner.on('retry', (test) =>
+        runnable = @runnables[test.id]
+        padding = '  '.repeat(runnable.titlePath().length)
+        retryMessage = mochaColor('medium', "(Attempt #{test.currentRetry() + 1} of #{test.retries() + 1})")
+        console.log("#{padding}#{retryMessage} #{test.title}")
+      )
     @reporter = new @mocha._reporter(@runner, {
       reporterOptions: @reporterOptions
     })
@@ -261,6 +280,9 @@ class Reporter
   emit: (event, args...) ->
     pArgs = @parseArgs(event, args)
     if pArgs
+      if pArgs[1]?.id
+        ## make sure we emit mocha runnables so reporters can use instance methods e.g. test.retries()
+        pArgs[1] = @runnables[pArgs[1].id]
       @runner?.emit.apply(@runner, pArgs)
 
   parseArgs: (event, args) ->

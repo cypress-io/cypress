@@ -1,4 +1,7 @@
-before(function () {
+import _ from 'lodash'
+
+// we don't use a `before` here since that would show up in run results and cause confusion during test debugging
+const before = _.once(function () {
   if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {
     return Cypress.automation('remote:debugger:protocol', {
       command: 'Emulation.setDeviceMetricsOverride',
@@ -19,3 +22,5 @@ before(function () {
     })
   }
 })
+
+Cypress.on('test:before:run:async', before)

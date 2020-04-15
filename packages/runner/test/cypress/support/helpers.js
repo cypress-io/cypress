@@ -75,6 +75,14 @@ function createCypress () {
 
   snapshotPlugin.registerInCypress()
 
+  const backupCy = window.cy
+  const backupCypress = window.Cypress
+
+  beforeEach(() => {
+    window.cy = backupCy
+    window.Cypress = backupCypress
+  })
+
   let onInitializedListeners = []
 
   const onInitialized = function (fn) {

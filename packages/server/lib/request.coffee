@@ -98,7 +98,15 @@ maybeRetryOnNetworkFailure = (err, options = {}) ->
 
   debug("received an error making http request %o", merge(opts, { err }))
 
-  if not isRetriableError(err, retryOnNetworkFailure)
+  isTlsVersionError = TLS_VERSION_ERROR_RE.test(err.message)
+
+  if isTlsVersionError
+    ## because doing every connection via TLSv1 can lead to slowdowns, we set it only on failure
+    ## https://github.com/cypress-io/cypress/pull/6705
+    debug('detected TLS version error, setting min version to TLSv1')
+    opts.minVersion = 'TLSv1'
+
+  if not isTlsVersionError and not isRetriableError(err, retryOnNetworkFailure)
     return onElse()
 
   ## else see if we have more delays left...

@@ -24,6 +24,7 @@ export interface TestProps extends RunnableProps {
   prevAttempts: Array<AttemptModel>
   currentRetry: number
   retries?: number
+  final?: boolean
 }
 
 export interface UpdatableTestProps {
@@ -164,7 +165,7 @@ export default class Test extends Runnable {
     }
   }
 
-  @action finish (props: UpdatableTestProps) {
+  @action finish (props: TestProps) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
     this._withAttempt(props.currentRetry, (attempt: AttemptModel) => {
@@ -173,7 +174,9 @@ export default class Test extends Runnable {
   }
 
   getAttemptByIndex (attemptIndex: number) {
-    return this.attempts[attemptIndex]
+    if (attemptIndex >= this.attempts.length) return
+
+    return this.attempts[attemptIndex || 0]
   }
 
   commandMatchingErr () {

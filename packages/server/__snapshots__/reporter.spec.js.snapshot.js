@@ -1,4 +1,4 @@
-exports['fail in [afterEach] reporter results'] = {
+exports['fail in [afterEach] - reporter results'] = {
   "stats": {
     "suites": 1,
     "tests": 1,
@@ -14,7 +14,7 @@ exports['fail in [afterEach] reporter results'] = {
   "reporterStats": {
     "suites": 1,
     "tests": 1,
-    "passes": 1,
+    "passes": 0,
     "pending": 0,
     "failures": 1,
     "start": "match.date",
@@ -64,7 +64,7 @@ exports['fail in [afterEach] reporter results'] = {
   ]
 }
 
-exports['fail in [afterEach] runner emit'] = [
+exports['fail in [afterEach] - runner emit'] = [
   [
     "start",
     null
@@ -82,21 +82,17 @@ exports['fail in [afterEach] runner emit'] = [
     "{Test}"
   ],
   [
-    "pass",
+    "hook",
     "{Test}"
+  ],
+  [
+    "fail",
+    "{Test}",
+    "{Object 6}"
   ],
   [
     "test end",
     "{Test}"
-  ],
-  [
-    "hook",
-    "{Object 57}"
-  ],
-  [
-    "fail",
-    "{Object 57}",
-    "{Object 6}"
   ],
   [
     "test:after:run",
@@ -116,18 +112,17 @@ exports['fail in [afterEach] runner emit'] = [
   ]
 ]
 
-exports['fail in [afterEach] stdout'] = `
+exports['fail in [afterEach] - stdout'] = `
 
 
   suite 1
-    \u2713 test 1
-    1) "after each" hook for "test 1"
+    1) test 1
 
 
-  1 passing 
+  0 passing 
   1 failing
 
-  1) suite 1 "after each" hook for "test 1":
+  1) suite 1 test 1:
      
   
 
@@ -136,7 +131,7 @@ exports['fail in [afterEach] stdout'] = `
 
 `
 
-exports['fail in [beforeEach] reporter results'] = {
+exports['fail in [beforeEach] - reporter results'] = {
   "stats": {
     "suites": 1,
     "tests": 1,
@@ -151,7 +146,7 @@ exports['fail in [beforeEach] reporter results'] = {
   "reporter": "spec",
   "reporterStats": {
     "suites": 1,
-    "tests": 0,
+    "tests": 1,
     "passes": 0,
     "pending": 0,
     "failures": 1,
@@ -198,7 +193,7 @@ exports['fail in [beforeEach] reporter results'] = {
   ]
 }
 
-exports['fail in [beforeEach] runner emit'] = [
+exports['fail in [beforeEach] - runner emit'] = [
   [
     "start",
     null
@@ -217,12 +212,16 @@ exports['fail in [beforeEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 54}"
+    "{Test}"
   ],
   [
     "fail",
-    "{Object 54}",
+    "{Test}",
     "{Object 6}"
+  ],
+  [
+    "test end",
+    "{Test}"
   ],
   [
     "test:after:run",
@@ -242,17 +241,17 @@ exports['fail in [beforeEach] runner emit'] = [
   ]
 ]
 
-exports['fail in [beforeEach] stdout'] = `
+exports['fail in [beforeEach] - stdout'] = `
 
 
   suite 1
-    1) "before each" hook for "test 1"
+    1) test 1
 
 
   0 passing 
   1 failing
 
-  1) suite 1 "before each" hook for "test 1":
+  1) suite 1 test 1:
      
   
 
@@ -261,7 +260,147 @@ exports['fail in [beforeEach] stdout'] = `
 
 `
 
-exports['simple_single_test reporter results'] = {
+exports['retry before passing in test - reporter results'] = {
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 1,
+    "pending": 0,
+    "skipped": 0,
+    "failures": 0,
+    "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
+    "wallClockEndedAt": "1970-01-01T00:00:00.000Z",
+    "wallClockDuration": 0
+  },
+  "reporter": "spec",
+  "reporterStats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 1,
+    "pending": 0,
+    "failures": 0,
+    "start": "match.date",
+    "end": "match.date",
+    "duration": "match.number"
+  },
+  "hooks": [],
+  "tests": [
+    {
+      "testId": "r3",
+      "title": [
+        "suite 1",
+        "test 1"
+      ],
+      "state": "passed",
+      "body": "[body]",
+      "stack": null,
+      "error": null,
+      "timings": {
+        "lifecycle": 1,
+        "test": {
+          "fnDuration": 1,
+          "afterFnDuration": 1
+        }
+      },
+      "failedFromHookId": null,
+      "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
+      "wallClockDuration": 1,
+      "videoTimestamp": null,
+      "prevAttempts": [
+        {
+          "state": "failed",
+          "stack": null,
+          "error": null,
+          "timings": {
+            "lifecycle": 1,
+            "test": {
+              "fnDuration": 1,
+              "afterFnDuration": 1
+            }
+          },
+          "failedFromHookId": null,
+          "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
+          "wallClockDuration": "match.number",
+          "videoTimestamp": null
+        }
+      ]
+    }
+  ]
+}
+
+exports['retry before passing in test - runner emit'] = [
+  [
+    "start",
+    null
+  ],
+  [
+    "suite",
+    "{Suite}"
+  ],
+  [
+    "suite",
+    "{Suite}"
+  ],
+  [
+    "test",
+    "{Test}"
+  ],
+  [
+    "test:before:run",
+    "{Test}"
+  ],
+  [
+    "retry",
+    "{Test}"
+  ],
+  [
+    "test:after:run",
+    "{Test}"
+  ],
+  [
+    "test:before:run",
+    "{Test}"
+  ],
+  [
+    "pass",
+    "{Test}"
+  ],
+  [
+    "test end",
+    "{Test}"
+  ],
+  [
+    "test:after:run",
+    "{Test}"
+  ],
+  [
+    "suite end",
+    "{Suite}"
+  ],
+  [
+    "suite end",
+    "{Suite}"
+  ],
+  [
+    "end",
+    null
+  ]
+]
+
+exports['retry before passing in test - stdout'] = `
+
+
+  suite 1
+    (Attempt 1 of 2) test 1
+    \u2713 test 1
+
+
+  1 passing 
+
+
+`
+
+exports['simple_single_test - reporter results'] = {
   "stats": {
     "suites": 1,
     "tests": 1,
@@ -311,7 +450,7 @@ exports['simple_single_test reporter results'] = {
   ]
 }
 
-exports['simple_single_test runner emit'] = [
+exports['simple_single_test - runner emit'] = [
   [
     "start",
     null
@@ -354,7 +493,7 @@ exports['simple_single_test runner emit'] = [
   ]
 ]
 
-exports['simple_single_test stdout'] = `
+exports['simple_single_test - stdout'] = `
 
 
   suite 1

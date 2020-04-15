@@ -12,15 +12,26 @@ registerInMocha()
 
 const { match } = sinon
 
-const events = require('../../../runner/test/__snapshots__/runner.spec.js.snapshot')
+const events = [require('../../../runner/test/__snapshots__/runner.spec.js.snapshot'), require('../../../runner/test/__snapshots__/retries.spec.js.snapshot')]
+
 const { EventSnapshots } = require('../../../runner/test/cypress/support/eventSnapshots')
 
 let currentReporter
 let currentStubs
 
-/** @param {typeof EventSnapshots.FAIL_IN_AFTER} snapshotName */
+/** @param {keyof typeof EventSnapshots} snapshotName */
 const getSnapshot = (snapshotName) => {
-  return _.mapValues(snapshotName, (v) => parseSnapshot(events[v]))
+  const ret = _.mapValues(EventSnapshots[snapshotName], (v) => {
+    const snapfile = events.find((e) => e[v])
+
+    if (!snapfile) throw new Error(`failed to get snapshot: ${snapshotName}`)
+
+    const esnapshot = snapfile[v]
+
+    return parseSnapshot(esnapshot)
+  })
+
+  return ret
 }
 
 let stdoutStub
@@ -59,42 +70,58 @@ module.exports = {
   createReporter,
 }
 
-describe('reporter retries', () => {
-  const snapshot = (name) => {
-    if (!name) throw new Error('snapshot name cannot be empty')
+function snapshot (name) {
+  if (!name) throw new Error('snapshot name cannot be empty')
 
-    expect(currentStubs.runnerEmit.args).to.matchSnapshot(runnerEmitCleanseMap, `${name} runner emit`)
-    expect(currentReporter.results()).to.matchSnapshot({
-      'reporterStats.end': match.date,
-      'reporterStats.start': match.date,
-      'reporterStats.duration': match.number,
-    }, `${name} reporter results`)
+  expect(currentStubs.runnerEmit.args).to.matchSnapshot(runnerEmitCleanseMap, `${name} - runner emit`)
+  expect(currentReporter.results()).to.matchSnapshot({
+    'reporterStats.end': match.date,
+    'reporterStats.start': match.date,
+    'reporterStats.duration': match.number,
+    '^.tests.*.prevAttempts.*.wallClockDuration': match.number,
+  }, `${name} - reporter results`)
 
-    expect(stdoutStub.toString())
+  expect(stdoutStub.toString())
 
-    expect(stdoutStub.toString())
-    .matchSnapshot({ '^': (v) => v.replace(/\(\d+ms\)/g, '') }, `${name} stdout`)
-  }
+  expect(stdoutStub.toString())
+  .matchSnapshot({ '^': (v) => v.replace(/\(\d+ms\)/g, '') }, `${name} - stdout`)
+}
 
+describe('server/lib/reporter', () => {
   afterEach(() => {
     stdout.restore()
   })
 
   it('simple single test', () => {
-    createReporter(getSnapshot(EventSnapshots.SIMPLE_SINGLE_TEST))
+    createReporter(getSnapshot('SIMPLE_SINGLE_TEST'))
     snapshot('simple_single_test')
   })
 
   it('fail [afterEach]', () => {
-    createReporter(getSnapshot(EventSnapshots.FAIL_IN_AFTEREACH))
+    createReporter(getSnapshot('FAIL_IN_AFTEREACH'))
 
     snapshot('fail in [afterEach]')
   })
 
   it('fail [beforeEach]', () => {
-    createReporter(getSnapshot(EventSnapshots.FAIL_IN_BEFOREEACH))
+    createReporter(getSnapshot('FAIL_IN_BEFOREEACH'))
 
     snapshot('fail in [beforeEach]')
+  })
+
+  describe('retries', () => {
+    it('print attempt info in yellow', () => {
+      createReporter(getSnapshot('RETRY_PASS_IN_TEST'))
+
+      const results = currentReporter.results()
+
+      const prevAttempts = expect(results.tests).property('0').property('prevAttempts')
+
+      prevAttempts.is.an('array')
+      prevAttempts.property('0').not.property('title')
+
+      snapshot('retry before passing in test')
+    })
   })
 })
 

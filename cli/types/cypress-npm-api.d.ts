@@ -391,6 +391,7 @@ declare module 'cypress' {
     name: string
     testId: testId
     takenAt: dateTimeISO
+    testAttemptIndex: number
     /**
      * Absolute path to the saved image
      */

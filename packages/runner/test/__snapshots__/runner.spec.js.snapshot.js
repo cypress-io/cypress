@@ -14,7 +14,8 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -25,7 +26,8 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -37,7 +39,9 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "test 1",
       "body": "[body]",
       "type": "test",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -59,7 +63,10 @@ exports['FAIL_IN_AFTER.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -81,7 +88,10 @@ exports['FAIL_IN_AFTER.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -104,7 +114,10 @@ exports['FAIL_IN_AFTER.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -116,65 +129,9 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "test 2",
       "body": "[body]",
       "type": "test",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "pass",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -187,7 +144,9 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -203,7 +162,9 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -211,6 +172,41 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "hookName": "after all",
+      "err": "{Object 6}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -243,7 +239,10 @@ exports['FAIL_IN_AFTER.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -254,7 +253,8 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -265,7 +265,8 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -286,6 +287,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
       "root": true,
       "type": "suite",
       "file": "cypress/integration/runner.spec.js",
+      "retries": -1,
       "tests": [],
       "suites": [
         {
@@ -294,20 +296,25 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
           "root": false,
           "type": "suite",
           "file": null,
+          "retries": -1,
           "tests": [
             {
               "id": "r3",
               "title": "test 1",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             },
             {
               "id": "r4",
               "title": "test 2",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             }
           ],
           "suites": []
@@ -334,7 +341,8 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -345,7 +353,8 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -357,65 +366,9 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "test 1",
       "body": "[body]",
       "type": "test",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "pass",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -428,7 +381,9 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -444,7 +399,9 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -452,6 +409,41 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "after each",
+      "err": "{Object 6}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -484,7 +476,10 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -495,7 +490,8 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -506,7 +502,8 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -527,6 +524,7 @@ exports['FAIL_IN_AFTEREACH.setRunnables'] = [
       "root": true,
       "type": "suite",
       "file": "cypress/integration/runner.spec.js",
+      "retries": -1,
       "tests": [],
       "suites": [
         {
@@ -535,13 +533,16 @@ exports['FAIL_IN_AFTEREACH.setRunnables'] = [
           "root": false,
           "type": "suite",
           "file": null,
+          "retries": -1,
           "tests": [
             {
               "id": "r3",
               "title": "test 1",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             }
           ],
           "suites": []
@@ -568,7 +569,8 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -579,7 +581,8 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -592,7 +595,9 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -608,7 +613,9 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -616,6 +623,37 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "before all",
+      "err": "{Object 6}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -644,7 +682,10 @@ exports['FAIL_IN_BEFORE.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -655,7 +696,8 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -666,7 +708,8 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -687,6 +730,7 @@ exports['FAIL_IN_BEFORE.setRunnables'] = [
       "root": true,
       "type": "suite",
       "file": "cypress/integration/runner.spec.js",
+      "retries": -1,
       "tests": [],
       "suites": [
         {
@@ -695,13 +739,16 @@ exports['FAIL_IN_BEFORE.setRunnables'] = [
           "root": false,
           "type": "suite",
           "file": null,
+          "retries": -1,
           "tests": [
             {
               "id": "r3",
               "title": "test 1",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             }
           ],
           "suites": []
@@ -728,7 +775,8 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -739,7 +787,8 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -751,7 +800,9 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "test 1",
       "body": "[body]",
       "type": "test",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -764,7 +815,9 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -780,7 +833,9 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -788,6 +843,37 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "before each",
+      "err": "{Object 6}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -816,7 +902,10 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -827,7 +916,8 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -838,7 +928,8 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -859,6 +950,7 @@ exports['FAIL_IN_BEFOREEACH.setRunnables'] = [
       "root": true,
       "type": "suite",
       "file": "cypress/integration/runner.spec.js",
+      "retries": -1,
       "tests": [],
       "suites": [
         {
@@ -867,13 +959,16 @@ exports['FAIL_IN_BEFOREEACH.setRunnables'] = [
           "root": false,
           "type": "suite",
           "file": null,
+          "retries": -1,
           "tests": [
             {
               "id": "r3",
               "title": "test 1",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             }
           ],
           "suites": []
@@ -900,7 +995,8 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -911,7 +1007,8 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -924,7 +1021,9 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -938,7 +1037,9 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -985,7 +1086,9 @@ exports['FAIL_WITH_ONLY.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -998,7 +1101,9 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "hookId": "h2",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1012,7 +1117,9 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1062,7 +1169,9 @@ exports['FAIL_WITH_ONLY.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -1070,6 +1179,37 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "stack": "match.string",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1119,61 +1259,10 @@ exports['FAIL_WITH_ONLY.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1224,7 +1313,41 @@ exports['FAIL_WITH_ONLY.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1235,7 +1358,62 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r5",
+      "title": "test 2",
+      "err": "{Object 6}",
+      "state": "failed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "wallClockDuration": "match.number",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "after all": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1246,7 +1424,8 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1267,6 +1446,7 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
       "root": true,
       "type": "suite",
       "file": "cypress/integration/runner.spec.js",
+      "retries": -1,
       "tests": [],
       "suites": [
         {
@@ -1275,6 +1455,7 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
           "root": false,
           "type": "suite",
           "file": null,
+          "retries": -1,
           "tests": [
             {
               "id": "r5",
@@ -1282,6 +1463,8 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "file": null,
+              "currentRetry": 0,
+              "retries": -1,
               "order": 2
             }
           ],
@@ -1309,7 +1492,8 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1320,7 +1504,8 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -1333,7 +1518,9 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1347,7 +1534,9 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1394,7 +1583,9 @@ exports['PASS_WITH_ONLY.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1407,7 +1598,9 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "hookId": "h2",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1421,7 +1614,40 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1470,7 +1696,10 @@ exports['PASS_WITH_ONLY.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1519,61 +1748,10 @@ exports['PASS_WITH_ONLY.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1623,7 +1801,41 @@ exports['PASS_WITH_ONLY.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1634,7 +1846,114 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
+    {
+      "id": "r5",
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "wallClockDuration": "match.number",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "after all": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r5",
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "wallClockDuration": "match.number",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "after all": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1645,7 +1964,8 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1666,6 +1986,7 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
       "root": true,
       "type": "suite",
       "file": "cypress/integration/runner.spec.js",
+      "retries": -1,
       "tests": [],
       "suites": [
         {
@@ -1674,6 +1995,7 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
           "root": false,
           "type": "suite",
           "file": null,
+          "retries": -1,
           "tests": [
             {
               "id": "r5",
@@ -1681,6 +2003,8 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
               "body": "[body]",
               "type": "test",
               "file": null,
+              "currentRetry": 0,
+              "retries": -1,
               "order": 2
             }
           ],
@@ -1708,7 +2032,8 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1719,7 +2044,8 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -1731,7 +2057,9 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "test 1",
       "body": "[body]",
       "type": "test",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1753,7 +2081,10 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1775,7 +2106,10 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1798,7 +2132,10 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1809,7 +2146,8 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -1820,7 +2158,8 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1841,6 +2180,7 @@ exports['SIMPLE_SINGLE_TEST.setRunnables'] = [
       "root": true,
       "type": "suite",
       "file": "cypress/integration/runner.spec.js",
+      "retries": -1,
       "tests": [],
       "suites": [
         {
@@ -1849,13 +2189,16 @@ exports['SIMPLE_SINGLE_TEST.setRunnables'] = [
           "root": false,
           "type": "suite",
           "file": null,
+          "retries": -1,
           "tests": [
             {
               "id": "r3",
               "title": "test 1",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             }
           ],
           "suites": []
@@ -1882,7 +2225,8 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1893,7 +2237,8 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -1906,7 +2251,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1920,7 +2267,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1961,7 +2310,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1974,7 +2325,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "hookId": "h2",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1988,7 +2341,40 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2031,7 +2417,10 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2074,34 +2463,10 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2145,7 +2510,10 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2157,7 +2525,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "test 2",
       "body": "[body]",
       "type": "test",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2171,7 +2541,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2185,7 +2557,41 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r4",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r4",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2221,7 +2627,10 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2257,35 +2666,10 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r4",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r4",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2322,7 +2706,10 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2334,7 +2721,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "test 3",
       "body": "[body]",
       "type": "test",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2348,7 +2737,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2362,93 +2753,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "pass",
-    {
-      "id": "r5",
-      "order": 3,
-      "title": "test 3",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r5",
-      "order": 3,
-      "title": "test 3",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2462,7 +2769,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2476,7 +2785,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2489,7 +2800,9 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "hookId": "h4",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2503,7 +2816,101 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
+    {
+      "id": "r5",
+      "order": 3,
+      "title": "test 3",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "after all": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r5",
+      "order": 3,
+      "title": "test 3",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "after all": [
+          {
+            "hookId": "h4",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2547,7 +2954,10 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2558,7 +2968,8 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -2569,7 +2980,8 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js"
+      "file": "cypress/integration/runner.spec.js",
+      "retries": -1
     }
   ],
   [
@@ -2590,6 +3002,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
       "root": true,
       "type": "suite",
       "file": "cypress/integration/runner.spec.js",
+      "retries": -1,
       "tests": [],
       "suites": [
         {
@@ -2598,27 +3011,34 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
           "root": false,
           "type": "suite",
           "file": null,
+          "retries": -1,
           "tests": [
             {
               "id": "r3",
               "title": "test 1",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             },
             {
               "id": "r4",
               "title": "test 2",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             },
             {
               "id": "r5",
               "title": "test 3",
               "body": "[body]",
               "type": "test",
-              "file": null
+              "file": null,
+              "currentRetry": 0,
+              "retries": -1
             }
           ],
           "suites": []
@@ -3450,7 +3870,11 @@ exports['serialize state - hooks'] = {
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1,
+      "prevAttempts": []
     },
     "r5": {
       "id": "r5",
@@ -3469,7 +3893,11 @@ exports['serialize state - hooks'] = {
           "afterFnDuration": 1
         }
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1,
+      "prevAttempts": []
     }
   },
   "startTime": "1970-01-01T00:00:00.000Z",
@@ -3503,6 +3931,7 @@ exports['src/cypress/runner isolated test runner other specs screenshots screens
         "test 1"
       ],
       "testId": "r3",
+      "testAttemptIndex": 0,
       "simple": true,
       "testFailure": true,
       "capture": "runner",

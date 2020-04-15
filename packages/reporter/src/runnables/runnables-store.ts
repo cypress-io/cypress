@@ -161,7 +161,7 @@ class RunnablesStore {
     })
   }
 
-  runnableFinished (props: UpdatableTestProps) {
+  runnableFinished (props: TestProps) {
     this._withTest(props.id, (test) => {
       test.finish(props)
     })

@@ -100,9 +100,7 @@ const runnableAfterRunAsync = function (runnable, Cypress) {
   runnable.clearTimeout()
 
   return Promise.try(() => {
-    if (!fired('runner:runnable:after:run:async', runnable)) {
-      return fire('runner:runnable:after:run:async', runnable, Cypress)
-    }
+    return fire('runner:runnable:after:run:async', runnable, Cypress)
   })
 }
 
@@ -377,7 +375,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         if (test.final !== false) {
           test.final = true
           if (test.state === 'passed') {
-            // Cypress.action('runner:pass', wrap(test))
+            Cypress.action('runner:pass', wrap(test))
           }
 
           Cypress.action('runner:test:end', wrap(test))
@@ -781,13 +779,13 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
    */
   _runner.on('retry', (test, err) => {
     test.err = $errUtils.wrapErr(err)
-
-    return Cypress.action('runner:retry', wrap(test), test.err)
+    Cypress.action('runner:retry', wrap(test), test.err)
   })
 
-  _runner.on('pass', (test) => {
-    return Cypress.action('runner:pass', wrap(test))
-  })
+  // Ignore the 'pass' event since we emit our own
+  // _runner.on('pass', (test) => {
+  //   return Cypress.action('runner:pass', wrap(test))
+  // })
 
   // if a test is pending mocha will only
   // emit the pending event instead of the test
@@ -1078,6 +1076,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
         newTest._currentRetry = test._currentRetry + 1
 
         test.parent.testsQueue.unshift(newTest)
+
+        Cypress.action('runner:retry', wrap(test), test.err)
 
         return noFail()
       }

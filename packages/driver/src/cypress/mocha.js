@@ -1,4 +1,4 @@
-const $utils = require('./utils')
+const _ = require('lodash')
 const $errUtils = require('./error_utils')
 
 // in the browser mocha is coming back
@@ -121,7 +121,7 @@ const restoreSuiteRetries = () => {
 const patchSuiteRetries = () => {
   Suite.prototype.retries = function (...args) {
     if (args[0] != null && args[0] > -1) {
-      const err = $utils.cypressErr($utils.errMessageByPath('mocha.manually_set_retries_suite', {}))
+      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {})
 
       throw new Error(JSON.stringify({ name: err.name, message: err.message }))
     }
@@ -136,7 +136,7 @@ const restoreHookRetries = () => {
 const patchHookRetries = () => {
   Hook.prototype.retries = function (...args) {
     if (args[0] != null && args[0] > -1) {
-      const err = new Error($utils.errMessageByPath('mocha.manually_set_retries_test', {}))
+      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {})
 
       throw err
     }
@@ -147,15 +147,18 @@ const patchHookRetries = () => {
 
 // matching the current Runner.prototype.fail except
 // changing the logic for determing whether this is a valid err
-const overrideRunnerFail = (runner) => {
-  // backup the original
-  const { fail } = runner
+const patchRunnerFail = () => {
+  Runner.prototype.fail = function (runnable, err) {
+    const errMessage = _.get(err, 'message')
 
-  return runner.fail = function (runnable, err) {
+    if (errMessage && errMessage.indexOf('Resolution method is overspecified') > -1) {
+      err.message = $errUtils.errMsgByPath('mocha.overspecified', { error: err.stack })
+    }
+
     // if this isnt a correct error object then just bail
     // and call the original function
     if (Object.prototype.toString.call(err) !== '[object Error]') {
-      return fail.call(this, runnable, err)
+      return runnerFail.call(this, runnable, err)
     }
 
     // else replicate the normal mocha functionality
@@ -163,7 +166,7 @@ const overrideRunnerFail = (runner) => {
 
     runnable.state = 'failed'
 
-    return this.emit('fail', runnable, err)
+    this.emit('fail', runnable, err)
   }
 }
 
@@ -298,7 +301,7 @@ const restore = () => {
 }
 
 const override = (Cypress) => {
-  // patchRunnerFail()
+  patchRunnerFail()
   patchRunnableRun(Cypress)
   patchRunnableClearTimeout()
   patchRunnableResetTimeout()
@@ -318,7 +321,6 @@ const create = (specWindow, Cypress, reporter) => {
 
   const _runner = getRunner(_mocha)
 
-  overrideRunnerFail(_runner)
   overrideRunnerRunTests(_runner)
 
   _mocha.suite.file = Cypress.spec.relative
@@ -346,7 +348,7 @@ const create = (specWindow, Cypress, reporter) => {
 
         test.retries = function (...args) {
           if (args[0] !== undefined && args[0] > -1) {
-            const err = new Error($utils.cypressErr($utils.errMessageByPath('mocha.manually_set_retries_test', {})))
+            const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {})
 
             throw err
           }

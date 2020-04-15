@@ -18,6 +18,7 @@ export default class AttemptModel {
   @observable isActive: boolean|null = null
   @observable routes: RouteModel[] = []
   @observable _isOpen: boolean|null = null
+  @observable _isOpenWhenLast: boolean | null = null
   @observable _state: TestState|null = null
 
   testId: string
@@ -57,12 +58,16 @@ export default class AttemptModel {
   }
 
   @computed get isLast () {
-    return this === this.test.lastAttempt
+    return this.id === this.test.lastAttempt.id
   }
 
   @computed get isOpen () {
     if (this._isOpen === null) {
-      return this.isLongRunning || this.isLast
+      if (this._isOpenWhenLast === null) {
+        return this.isLongRunning || this.isLast
+      }
+
+      return this._isOpenWhenLast && this.isLast
     }
 
     return this._isOpen
@@ -71,15 +76,15 @@ export default class AttemptModel {
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
-        this._addCommand(props)
+        this._addCommand(props as CommandProps)
         break
       }
       case 'agent': {
-        this._addAgent(props)
+        this._addAgent(props as AgentProps)
         break
       }
       case 'route': {
-        this._addRoute(props)
+        this._addRoute(props as RouteProps)
         break
       }
       default: {
@@ -125,7 +130,7 @@ export default class AttemptModel {
     }
 
     if (props.isOpen != null) {
-      this._isOpen = props.isOpen
+      this._isOpenWhenLast = props.isOpen
     }
   }
 
@@ -161,12 +166,12 @@ export default class AttemptModel {
   //   this._isOpen = isOpen
   // }
 
-  callbackAfterUpdate () {
-    if (this._callbackAfterUpdate) {
-      this._callbackAfterUpdate()
-      this._callbackAfterUpdate = null
-    }
-  }
+  // callbackAfterUpdate () {
+  //   if (this._callbackAfterUpdate) {
+  //     this._callbackAfterUpdate()
+  //     this._callbackAfterUpdate = null
+  //   }
+  // }
 
   @action finish (props) {
     this.update(props)

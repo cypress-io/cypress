@@ -5,11 +5,6 @@ const snapshots = require('../support/eventSnapshots').EventSnapshots
 
 const sinon = require('sinon')
 
-const backupCy = window.cy
-const backupCypress = window.Cypress
-
-backupCy.__original__ = true
-
 const simpleSingleTest = {
   suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
 }
@@ -22,11 +17,6 @@ const { visit, snapshotEvents, onInitialized, getAutCypress } = helpers.createCy
 
 describe('src/cypress/runner', () => {
   describe('isolated test runner', () => {
-    beforeEach(() => {
-      window.cy = backupCy
-      window.Cypress = backupCypress
-    })
-
     describe('test events', function () {
       it('simple 1 test', () => {
         visit(simpleSingleTest)
@@ -123,7 +113,7 @@ describe('src/cypress/runner', () => {
                 },
               } },
           },
-        }, { config: { numTestRetries: 1 } })
+        }, {})
         .then(shouldHaveTestResults(3, 0))
       })
 
@@ -366,9 +356,10 @@ describe('src/cypress/runner', () => {
                   ],
                 },
               },
-            }, { config: { numTestRetries: 1 } },
+            }, {},
           ]
 
+          // TODO: make this one test with multiple visits
           it('serialize state', () => {
             visit(...cypressConfig)
             .then(shouldHaveTestResults(4, 0))
