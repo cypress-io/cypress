@@ -2,27 +2,24 @@ import { HtmlJsRewriter, rewriteHtmlJsAsync, rewriteJsAsync } from '@packages/re
 import duplexify from 'duplexify'
 import concatStream from 'concat-stream'
 import stream from 'stream'
+import { SecurityOpts } from './rewriter'
 
 const pumpify = require('pumpify')
 const utf8Stream = require('utf8-stream')
 
-type SecurityOpts = {
-  isHtml?: boolean
-}
-
-export const strip = async (url, source, opts: SecurityOpts = {}) => {
+export const strip = async (source: string, opts: SecurityOpts) => {
   if (opts.isHtml) {
-    return rewriteHtmlJsAsync(url, source) // threaded
+    return rewriteHtmlJsAsync(opts.url, source) // threaded
   }
 
-  return rewriteJsAsync(url, source) // threaded
+  return rewriteJsAsync(opts.url, source) // threaded
 }
 
-export const stripStream = (url, opts: SecurityOpts = {}) => {
+export const stripStream = (opts: SecurityOpts) => {
   if (opts.isHtml) {
     return pumpify(
       utf8Stream(),
-      HtmlJsRewriter(url), // non-threaded
+      HtmlJsRewriter(opts.url), // non-threaded
     )
   }
 
@@ -32,7 +29,7 @@ export const stripStream = (url, opts: SecurityOpts = {}) => {
     pumpify(
       utf8Stream(),
       concatStream(async (body) => {
-        pt.write(await strip(url, body.toString()))
+        pt.write(await strip(body.toString(), opts))
         pt.end()
       }),
     ),

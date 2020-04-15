@@ -334,7 +334,14 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
   this.incomingResStream.pipe(concatStream(async (body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
     const decodedBody = iconv.decode(body, nodeCharset)
-    const injectedBody = await rewriter.html(decodedBody, this.getRemoteState().domainName, this.res.wantsInjection, this.res.wantsSecurityRemoved, isHtml(this.incomingRes), this.config.experimentalSourceRewriting)
+    const injectedBody = await rewriter.html(decodedBody, {
+      domainName: this.getRemoteState().domainName,
+      wantsInjection: this.res.wantsInjection,
+      wantsSecurityRemoved: this.res.wantsSecurityRemoved,
+      isHtml: isHtml(this.incomingRes),
+      useAstSourceRewriting: this.config.experimentalSourceRewriting,
+      url: this.req.proxiedUrl,
+    })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
     const pt = new PassThrough
@@ -357,7 +364,8 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   this.incomingResStream.setEncoding('utf8')
   this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
     isHtml: isHtml(this.incomingRes),
-    useSourceRewriting: this.config.experimentalSourceRewriting,
+    useAstSourceRewriting: this.config.experimentalSourceRewriting,
+    url: this.req.proxiedUrl,
   })).on('error', this.onError)
 
   this.next()

@@ -2,6 +2,18 @@ import * as inject from './inject'
 import * as astRewriter from './ast-rewriter'
 import * as regexRewriter from './regex-rewriter'
 
+export type SecurityOpts = {
+  isHtml?: boolean
+  url: string
+  useAstSourceRewriting: boolean
+}
+
+export type InjectionOpts = {
+  domainName: string
+  wantsInjection: WantsInjection
+  wantsSecurityRemoved: any
+}
+
 const doctypeRe = /(<\!doctype.*?>)/i
 const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
@@ -9,11 +21,11 @@ const htmlRe = /(<html.*?>)/i
 
 type WantsInjection = 'full' | 'partial' | false
 
-function getRewriter (useSourceRewriting: boolean) {
-  return useSourceRewriting ? astRewriter : regexRewriter
+function getRewriter (useAstSourceRewriting: boolean) {
+  return useAstSourceRewriting ? astRewriter : regexRewriter
 }
 
-function getHtmlToInject (domainName: string, wantsInjection: WantsInjection) {
+function getHtmlToInject ({ domainName, wantsInjection }: InjectionOpts) {
   switch (wantsInjection) {
     case 'full':
       return inject.full(domainName)
@@ -24,17 +36,17 @@ function getHtmlToInject (domainName: string, wantsInjection: WantsInjection) {
   }
 }
 
-export async function html (html: string, domainName: string, wantsInjection: WantsInjection, wantsSecurityRemoved, isHtml, useSourceRewriting) {
+export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   const replace = (re, str) => {
     return html.replace(re, str)
   }
 
-  const htmlToInject = getHtmlToInject(domainName, wantsInjection)
+  const htmlToInject = getHtmlToInject(opts)
 
   // strip clickjacking and framebusting
   // from the HTML if we've been told to
-  if (wantsSecurityRemoved) {
-    html = await Promise.resolve(getRewriter(useSourceRewriting).strip(html, { isHtml }))
+  if (opts.wantsSecurityRemoved) {
+    html = await Promise.resolve(getRewriter(opts.useAstSourceRewriting).strip(html, opts))
   }
 
   if (!htmlToInject) {
@@ -61,6 +73,6 @@ export async function html (html: string, domainName: string, wantsInjection: Wa
   }
 }
 
-export function security (opts) {
-  return getRewriter(opts.useSourceRewriting).stripStream(opts)
+export function security (opts: SecurityOpts) {
+  return getRewriter(opts.useAstSourceRewriting).stripStream(opts)
 }
