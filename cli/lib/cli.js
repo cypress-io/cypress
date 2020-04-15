@@ -272,7 +272,6 @@ module.exports = {
     .description('Scaffold Cypress project')
     .option('-y, --yes', 'skip all questions')
     .option('-f, --force', 'alias of --yes')
-    .option('--config <config>', 'sets configuration values. separate multiple values with a comma. overrides default values.')
     .option('--no-fixtures', `don't generate fixtures folder`)
     .option('--fixtures-path <path>', `path to the fixtures folder`)
     .option('--no-support', `don't generate support file`)
