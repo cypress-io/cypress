@@ -24,19 +24,81 @@ describe('http/response-middleware', function () {
       'MaybeRemoveSecurity',
       'GzipBody',
       'SendResponseBodyToClient',
+      'MaybeStripDocumentDomainFeaturePolicy',
     ])
   })
 
-  describe('OmitProblematicHeaders', function () {
+  describe('MaybeStripDocumentDomainFeaturePolicy', function () {
+    const { MaybeStripDocumentDomainFeaturePolicy } = ResponseMiddleware
     let ctx
-    const { OmitProblematicHeaders } = ResponseMiddleware
-    const headers = {
-      pragma: 'no-cache',
-      'feature-policy': 'autoplay \'self\'; document-domain \'none\', camera \'none\'',
-      'referrer-policy': 'same-origin',
-    }
+    let featurePolicyDirectives: any
 
     beforeEach(function () {
+      featurePolicyDirectives = {
+        autoplay: '\'self\'',
+        camera: '*',
+        'document-domain': '\'none\'',
+      }
+    })
+
+    describe('when no feature-policy header is present', function () {
+      beforeEach(function () {
+        featurePolicyDirectives = {}
+        prepareContext()
+      })
+
+      it('doesn\'t do anything', function () {
+        return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
+        .then(() => {
+          expect(ctx.res.set).not.to.be.called
+        })
+      })
+    })
+
+    describe('when no document-domain directive is present', function () {
+      beforeEach(function () {
+        delete featurePolicyDirectives['document-domain']
+        prepareContext()
+      })
+
+      it('doesn\'t do anything', function () {
+        return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
+        .then(() => {
+          expect(ctx.res.set).not.to.be.called
+        })
+      })
+    })
+
+    describe('when both feature-policy header and document-domain directive are present', function () {
+      beforeEach(function () {
+        prepareContext()
+      })
+
+      it('removes the document-domain directive from the header', function () {
+        return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
+        .then(() => {
+          const [, featurePolicy] = ctx.res.set.args[0]
+          const directives = _.fromPairs(featurePolicy.split('; ').map((directive) => directive.split(' ')))
+
+          expect(directives['document-domain']).not.to.exist
+          expect(directives['autoplay']).to.exist
+          expect(directives['camera']).to.exist
+        })
+      })
+    })
+
+    function prepareContext () {
+      const headers = {
+        pragma: 'no-cache',
+        'referrer-policy': 'same-origin',
+      }
+
+      if (!_.isEmpty(featurePolicyDirectives)) {
+        headers['feature-policy'] = _.toPairs(featurePolicyDirectives).map(
+          (directive) => directive.join(' '),
+        ).join('; ')
+      }
+
       ctx = {
         res: {
           set: sinon.stub(),
@@ -45,15 +107,6 @@ describe('http/response-middleware', function () {
           headers,
         },
       }
-    })
-
-    it('removes the feature-policy header', function () {
-      return testMiddleware([OmitProblematicHeaders], ctx)
-      .then(() => {
-        const expectedHeaders = _.omit(headers, 'feature-policy')
-
-        expect(ctx.res.set).to.be.calledWith(expectedHeaders)
-      })
-    })
+    }
   })
 })

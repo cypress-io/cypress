@@ -225,6 +225,37 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   this.next()
 }
 
+// https://github.com/cypress-io/cypress/issues/6480
+const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
+  // "autoplay *; document-domain 'none'" => { autoplay: "*", "document-domain": "'none'" }
+  const parseFeaturePolicy = (policy: string): any => {
+    const pairs = policy.split('; ').map((directive) => directive.split(' '))
+
+    return _.fromPairs(pairs)
+  }
+
+  // { autoplay: "*", "document-domain": "'none'" } => "autoplay *; document-domain 'none'"
+  const stringifyFeaturePolicy = (policy: any): string => {
+    const pairs = _.toPairs(policy)
+
+    return pairs.map((directive) => directive.join(' ')).join('; ')
+  }
+
+  const { 'feature-policy': featurePolicy } = this.incomingRes.headers
+
+  if (featurePolicy) {
+    const directives = parseFeaturePolicy(<string>featurePolicy)
+
+    if (directives['document-domain']) {
+      delete directives['document-domain']
+
+      this.res.set('feature-policy', stringifyFeaturePolicy(directives))
+    }
+  }
+
+  this.next()
+}
+
 const OmitProblematicHeaders: ResponseMiddleware = function () {
   const headers = _.omit(this.incomingRes.headers, [
     'set-cookie',
@@ -232,7 +263,6 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'content-length',
     'content-security-policy',
     'connection',
-    'feature-policy',
   ])
 
   this.res.set(headers)
@@ -384,4 +414,5 @@ export default {
   MaybeRemoveSecurity,
   GzipBody,
   SendResponseBodyToClient,
+  MaybeStripDocumentDomainFeaturePolicy,
 }
