@@ -21,7 +21,7 @@ delete window.Mocha
 function overloadMochaFnForConfig (fnName, specWindow) {
   const _fn = specWindow[fnName]
 
-  const fnType = fnName === 'it' ? 'Test' : 'Suite'
+  const fnType = fnName === 'it' || fnName === 'specify' ? 'Test' : 'Suite'
 
   function overrideFn (fn) {
     specWindow[fnName] = fn()
@@ -49,7 +49,9 @@ function overloadMochaFnForConfig (fnName, specWindow) {
 
         if (!configMatchesBrowser) {
           // TODO: this would mess up the dashboard since it would be registered as a new test
-          mochaArgs[0] = `${mochaArgs[0]} (skipped due to browser)`
+          const originalTitle = mochaArgs[0]
+
+          mochaArgs[0] = `${originalTitle} (skipped due to browser)`
 
           // TODO: weird edge case where you have an .only but also skipped the test due to the browser
           if (subFn === 'only') {
@@ -57,10 +59,18 @@ function overloadMochaFnForConfig (fnName, specWindow) {
               this.skip()
             }
 
-            return origFn.apply(this, mochaArgs)
+            const ret = origFn.apply(this, mochaArgs)
+
+            ret.originalTitle = originalTitle
+
+            return ret
           }
 
-          return _fn['skip'].apply(this, mochaArgs)
+          const ret = _fn['skip'].apply(this, mochaArgs)
+
+          ret.originalTitle = originalTitle
+
+          return ret
         }
 
         const ret = origFn.apply(this, mochaArgs)
@@ -94,6 +104,7 @@ const ui = (specWindow, _mocha) => {
     // allow per-test-config/per-suite-config
     // by accepting 3 arguments to it/describe/context
     overloadMochaFnForConfig('it', specWindow)
+    overloadMochaFnForConfig('specify', specWindow)
     overloadMochaFnForConfig('describe', specWindow)
     overloadMochaFnForConfig('context', specWindow)
 

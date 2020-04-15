@@ -256,6 +256,10 @@ describe('per-test config', () => {
       expect(true).ok
     })
   })
+
+  specify('works with it & specify', { defaultCommandTimeout: 100 }, () => {
+    expect(Cypress.config().defaultCommandTimeout).eq(100)
+  })
 })
 
 function hasOnly (test) {

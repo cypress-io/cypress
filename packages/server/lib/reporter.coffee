@@ -28,6 +28,8 @@ Mocha.Runnable.prototype.titlePath = ->
   @parent.titlePath().concat([@title])
 
 getParentTitle = (runnable, titles) ->
+  ## if the browser/reporter changed the runnable title (for display purposes)
+  ## it will have .originalTitle which is the name of the test before title change
   if runnable.originalTitle
     runnable.title = runnable.originalTitle
   if not titles

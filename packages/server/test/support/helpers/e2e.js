@@ -730,3 +730,5 @@ const e2e = {
 }
 
 module.exports = e2e
+
+_.extend(e2e, { expect })
