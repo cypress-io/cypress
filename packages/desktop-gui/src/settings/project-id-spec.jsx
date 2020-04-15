@@ -25,7 +25,7 @@ describe('ProjectId', () => {
     )
 
     mount(<TestProjectId project={project} />, {
-      cssFiles: 'dist/app.css',
+      stylesheets: '/__root/dist/app.css',
     })
 
     cy.get('[data-cy=project-id]').should('not.exist')
@@ -38,7 +38,7 @@ describe('ProjectId', () => {
   it('calls load more', () => {
     cy.stub(ipc, 'externalOpen').as('externalOpen')
     mount(<ProjectId project={project} />, {
-      cssFiles: 'dist/app.css',
+      stylesheets: '/__root/dist/app.css',
     })
 
     cy.contains('a', 'Learn more')

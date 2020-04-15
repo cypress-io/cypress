@@ -38,7 +38,7 @@ describe('Experiments', () => {
     const project = {}
 
     mount(<TestExperiments project={project} />, {
-      cssFiles: 'dist/app.css',
+      stylesheets: '/__root/dist/app.css',
     })
 
     cy.get('.settings-experiments').click()

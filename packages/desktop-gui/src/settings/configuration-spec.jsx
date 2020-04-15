@@ -28,7 +28,7 @@ describe('Configuration', () => {
     )
 
     mount(<TestConfiguration />, {
-      cssFiles: 'dist/app.css',
+      stylesheets: '/__root/dist/app.css',
     })
 
     cy.contains('.key-value-pair-value', 'http://localhost:1234')

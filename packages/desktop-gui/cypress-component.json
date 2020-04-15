@@ -4,7 +4,8 @@
   "supportFile": "../../node_modules/cypress-react-unit-test/support",
   "pluginsFile": "../../node_modules/cypress-react-unit-test/plugins/load-webpack",
   "env": {
-    "webpackFilename": "webpack.config.ts"
+    "webpackFilename": "webpack.config.ts",
+    "coverage": false
   },
   "testFiles": "**/*-spec.{js,jsx}",
   "experimentalComponentTesting": true,
