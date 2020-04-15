@@ -44,7 +44,7 @@ describe "src/cypress/browser", ->
     it "throws if arg is not a string, object, or non-empty array", ->
       expect =>
         @commands().isBrowser(true)
-      .to.throw("`Cypress.isBrowser()` must be passed the name of a browser or an object to filter with. You passed: `true`")
+      .to.throw("`Cypress.isBrowser()` must be passed the name of a browser, an object to filter with, or an array of either. You passed: `true`")
 
     it "returns true if it's a match or a 'parent' browser", ->
       expect(@commands().isBrowser("chrome")).to.be.true

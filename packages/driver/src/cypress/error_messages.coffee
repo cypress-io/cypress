@@ -109,7 +109,7 @@ module.exports = {
     }
 
   browser:
-    invalid_arg: "{{prefix}} must be passed the name of a browser or an object to filter with. You passed: `{{obj}}`"
+    invalid_arg: "{{prefix}} must be passed the name of a browser, an object to filter with, or an array of either. You passed: `{{obj}}`"
 
   chai:
     length_invalid_argument: "You must provide a valid number to a `length` assertion. You passed: `{{length}}`"
