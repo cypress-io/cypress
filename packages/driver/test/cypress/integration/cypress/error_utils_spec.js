@@ -347,6 +347,10 @@ describe('driver/src/cypress/error_utils', () => {
     })
 
     it('removes internal stack lines from stack', () => {
+      // this features relies on Error.captureStackTrace, which some
+      // browsers don't have (e.g. Firefox)
+      if (!Error.captureStackTrace) return
+
       expect(fn).to.throw().and.satisfies((err) => {
         expect(err.stack).to.include('throwingFn')
         expect(err.stack).not.to.include('throwErrByPath')
