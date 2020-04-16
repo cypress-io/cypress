@@ -19,8 +19,6 @@ exports['e2e issue 1987 / can reload during spec run'] = `
 
   suite
     ✓ test
-
-  another suite
     ✓ causes domain navigation
 
 

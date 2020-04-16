@@ -7,7 +7,7 @@ describe('e2e issue 1987', () => {
       static: true,
     },
     {
-      port: 3535,
+      port: 4545,
       static: true,
     }],
   })
@@ -17,6 +17,5 @@ describe('e2e issue 1987', () => {
   e2e.it('can reload during spec run', {
     spec: 'issue_1987_spec.js',
     snapshot: true,
-    timeout: 30000,
   })
 })
