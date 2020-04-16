@@ -14,7 +14,7 @@ describe('linux browser detection', () => {
   let execa: SinonStub
 
   beforeEach(() => {
-    execa = sinon.stub(utils, 'execa')
+    execa = sinon.stub(utils, 'getOutput')
 
     execa.withArgs('test-browser', ['--version'])
     .resolves({ stdout: 'test-browser v100.1.2.3' })

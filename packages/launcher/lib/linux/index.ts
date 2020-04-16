@@ -51,7 +51,7 @@ function getLinuxBrowser (
 export function getVersionString (path: string) {
   log('finding version string using command "%s --version"', path)
 
-  return utils.execa(path, ['--version'])
+  return utils.getOutput(path, ['--version'])
   .then(prop('stdout'))
   .then(trim)
   .then(tap(partial(log, ['stdout: "%s"'])))
