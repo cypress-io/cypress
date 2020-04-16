@@ -60,6 +60,13 @@ describe('Project Nav', function () {
       cy.percySnapshot()
     })
 
+    it('displays "Tests" page when switching to a beta browser', () => {
+      cy.get('.browsers .dropdown-chosen').click()
+      cy.contains('.browsers', 'beta').first().click()
+      cy.get('.list-as-table').should('be.visible')
+      cy.percySnapshot()
+    })
+
     describe('runs page', function () {
       beforeEach(function () {
         cy.fixture('runs').as('runs')
