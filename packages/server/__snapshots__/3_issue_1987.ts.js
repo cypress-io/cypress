@@ -1,4 +1,4 @@
-exports['e2e issue 6619 / can reload during spec run'] = `
+exports['e2e issue 1987 / can reload during spec run'] = `
 
 ====================================================================================================
 
@@ -7,14 +7,14 @@ exports['e2e issue 6619 / can reload during spec run'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (issue_7021_spec.js)                                                       │
-  │ Searched:   cypress/integration/issue_7021_spec.js                                             │
+  │ Specs:      1 found (issue_1987_spec.js)                                                       │
+  │ Searched:   cypress/integration/issue_1987_spec.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  issue_7021_spec.js                                                              (1 of 1)
+  Running:  issue_1987_spec.js                                                              (1 of 1)
 
 
   suite
@@ -38,14 +38,14 @@ exports['e2e issue 6619 / can reload during spec run'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     issue_7021_spec.js                                                               │
+  │ Spec Ran:     issue_1987_spec.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_7021_spec.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_1987_spec.js.mp4              (X second)
 
 
 ====================================================================================================
@@ -55,7 +55,7 @@ exports['e2e issue 6619 / can reload during spec run'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  issue_7021_spec.js                       XX:XX        2        2        -        -        - │
+  │ ✔  issue_1987_spec.js                       XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 
