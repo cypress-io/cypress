@@ -17,6 +17,7 @@ const debug = require('debug')('cypress:support:e2e')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
 const fs = require(`${root}../lib/util/fs`)
+const coerce = require(`${root}../lib/util/coerce`)
 const allowDestroy = require(`${root}../lib/util/server_destroy`)
 const cypress = require(`${root}../lib/cypress`)
 const screenshots = require(`${root}../lib/screenshots`)
@@ -286,7 +287,7 @@ const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
-    exit: process.env.EXIT,
+    exit: coerce(process.env.EXIT),
     only: false,
     skip: false,
     browser: [],
@@ -465,10 +466,14 @@ const e2e = {
   },
 
   options (ctx, options = {}) {
+    const exit = options.exit != null ? options.exit : true
+
     _.defaults(options, {
+      exit,
       browser: 'electron',
+      headed: process.env.HEADED || false,
       project: e2ePath,
-      timeout: options.exit === false ? 3000000 : 120000,
+      timeout: exit === false ? 3000000 : 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
