@@ -118,12 +118,6 @@ Common situations why this would fail:
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
       [stack trace lines]
-  
-  From Node.js Internals:
-  
-  Error: connect ECONNREFUSED 127.0.0.1:16795
-      [stack trace lines]
-  
 
 
 
@@ -575,12 +569,6 @@ Common situations why this would fail:
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
       [stack trace lines]
-  
-  From Node.js Internals:
-  
-  Error: ESOCKETTIMEDOUT
-      [stack trace lines]
-  
 
   2) response timeouts result in an error handles no response errors when not initially visiting:
      CypressError: \`cy.visit()\` failed trying to load:
@@ -599,12 +587,6 @@ Common situations why this would fail:
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
       [stack trace lines]
-  
-  From Node.js Internals:
-  
-  Error: ESOCKETTIMEDOUT
-      [stack trace lines]
-  
 
   3) response timeouts result in an error fails after reducing the responseTimeout option:
      CypressError: \`cy.visit()\` failed trying to load:
@@ -623,12 +605,6 @@ Common situations why this would fail:
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
       [stack trace lines]
-  
-  From Node.js Internals:
-  
-  Error: ESOCKETTIMEDOUT
-      [stack trace lines]
-  
 
 
 

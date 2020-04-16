@@ -125,12 +125,6 @@ Common situations why this would fail:
 
 https://on.cypress.io/request
       [stack trace lines]
-  
-  From Node.js Internals:
-  
-  RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
-      [stack trace lines]
-  
 
 
 
