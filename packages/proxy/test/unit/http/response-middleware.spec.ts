@@ -14,6 +14,7 @@ describe('http/response-middleware', function () {
       'SetInjectionLevel',
       'OmitProblematicHeaders',
       'MaybePreventCaching',
+      'MaybeStripDocumentDomainFeaturePolicy',
       'CopyCookiesFromIncomingRes',
       'MaybeSendRedirectToClient',
       'CopyResponseStatusCode',
@@ -24,7 +25,6 @@ describe('http/response-middleware', function () {
       'MaybeRemoveSecurity',
       'GzipBody',
       'SendResponseBodyToClient',
-      'MaybeStripDocumentDomainFeaturePolicy',
     ])
   })
 

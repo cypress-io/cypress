@@ -109,6 +109,20 @@ function setInitialCookie (res: CypressResponse, remoteState: any, value) {
   return setCookie(res, '__cypress.initial', value, remoteState.domainName)
 }
 
+// "autoplay *; document-domain 'none'" => { autoplay: "*", "document-domain": "'none'" }
+const parseFeaturePolicy = (policy: string): any => {
+  const pairs = policy.split('; ').map((directive) => directive.split(' '))
+
+  return _.fromPairs(pairs)
+}
+
+// { autoplay: "*", "document-domain": "'none'" } => "autoplay *; document-domain 'none'"
+const stringifyFeaturePolicy = (policy: any): string => {
+  const pairs = _.toPairs(policy)
+
+  return pairs.map((directive) => directive.join(' ')).join('; ')
+}
+
 const LogResponse: ResponseMiddleware = function () {
   debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
@@ -227,20 +241,6 @@ const SetInjectionLevel: ResponseMiddleware = function () {
 
 // https://github.com/cypress-io/cypress/issues/6480
 const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
-  // "autoplay *; document-domain 'none'" => { autoplay: "*", "document-domain": "'none'" }
-  const parseFeaturePolicy = (policy: string): any => {
-    const pairs = policy.split('; ').map((directive) => directive.split(' '))
-
-    return _.fromPairs(pairs)
-  }
-
-  // { autoplay: "*", "document-domain": "'none'" } => "autoplay *; document-domain 'none'"
-  const stringifyFeaturePolicy = (policy: any): string => {
-    const pairs = _.toPairs(policy)
-
-    return pairs.map((directive) => directive.join(' ')).join('; ')
-  }
-
   const { 'feature-policy': featurePolicy } = this.incomingRes.headers
 
   if (featurePolicy) {
@@ -404,6 +404,7 @@ export default {
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,
+  MaybeStripDocumentDomainFeaturePolicy,
   CopyCookiesFromIncomingRes,
   MaybeSendRedirectToClient,
   CopyResponseStatusCode,
@@ -414,5 +415,4 @@ export default {
   MaybeRemoveSecurity,
   GzipBody,
   SendResponseBodyToClient,
-  MaybeStripDocumentDomainFeaturePolicy,
 }
