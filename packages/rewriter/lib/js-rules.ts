@@ -111,6 +111,8 @@ const getJsRules = (): Visitor<{}> => {
           || (
             [
               'LabeledStatement', // like `top: foo();`
+              'ContinueStatement', // like 'continue top'
+              'BreakStatement', // like 'break top'
               'Property', // like `{ top: 'foo' }`
               'FunctionDeclaration', // like `function top()`
               'RestElement', // like (...top)

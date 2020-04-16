@@ -3,11 +3,39 @@ import { expect } from 'chai'
 import { rewriteJs } from '../../lib/js'
 import fse from 'fs-extra'
 import Bluebird from 'bluebird'
+import * as sourceMaps from '../../lib/source-maps'
 import rp from '@cypress/request-promise'
 
 function match (varName, prop) {
   return `globalThis.top.Cypress.resolveWindowReference(globalThis, ${varName}, '${prop}')`
 }
+
+function parse (outJs: string) {
+  const smIndex = outJs.lastIndexOf('\n//# sourceMappingURL=')
+
+  return {
+    js: outJs.slice(0, smIndex),
+    map: sourceMaps.tryDecodeInline(outJs),
+  }
+}
+
+function testExpectedJs (string: string, expected: string) {
+  const actual = parse(rewriteJs(URL, string))
+
+  expect(actual.js).to.eq(expected)
+
+  expect(actual.map).to.deep.include({
+    file: 'foo.js (original).map',
+    sourceRoot: 'http://example.com/',
+  })
+
+  expect(actual.map.sources).to.deep.eq(['foo.js (original)'])
+  expect(actual.map.sourcesContent).to.deep.eq([string])
+
+  expect(actual.map).to.have.keys('version', 'sources', 'names', 'mappings', 'file', 'sourceRoot', 'sourcesContent')
+}
+
+const URL = 'http://example.com/foo.js'
 
 describe('lib/js', function () {
   context('.rewriteJs', function () {
@@ -68,8 +96,8 @@ describe('lib/js', function () {
           ],
           ['({ top: "foo", parent: "bar" })'],
           ['top: "foo"; parent: "bar";'],
-          ['break top; break parent;'],
-          ['continue top; continue parent;'],
+          ['top: break top'],
+          ['top: continue top;'],
           [
             'function top() { window.top }; function parent(...top) { window.top }',
             `function top() { ${match('window', 'top')} }; function parent(...top) { ${match('window', 'top')} }`,
@@ -96,9 +124,7 @@ describe('lib/js', function () {
           }
 
           it(`${string} => ${expected}`, () => {
-            const actual = rewriteJs(string)
-
-            expect(actual).to.eq(expected)
+            testExpectedJs(string, expected)
           })
         })
       })
@@ -136,17 +162,17 @@ describe('lib/js', function () {
   }\
   `
 
-        expect(rewriteJs(jira)).to.eq(`\
+        testExpectedJs(jira, `\
   for (; !function (n) {
     return n === ${match('n', 'parent')};
   }(n);) {}\
   `)
 
-        expect(rewriteJs(jira2)).to.eq(`\
+        testExpectedJs(jira2, `\
   (function(n){for(;!function(l){return l===${match('l', 'parent')};}(l)&&function(l){try{if(void 0==${match('l', 'location')}.href)return!1}catch(l){return!1}return!0}(${match('l', 'parent')});)l=${match('l', 'parent')};return l})\
   `)
 
-        expect(rewriteJs(jira3)).to.eq(`\
+        testExpectedJs(jira3, `\
   function satisfiesSameOrigin(w) {
       try {
           // Accessing location.href from a window on another origin will throw an exception.
@@ -242,7 +268,7 @@ describe('lib/js', function () {
             .readFile(pathToLib, 'utf8')
             .catch(downloadFile)
             .then((libCode) => {
-              const stripped = rewriteJs(libCode)
+              const stripped = rewriteJs(url, libCode)
 
               expect(() => eval(stripped), 'is valid JS').to.not.throw
             })

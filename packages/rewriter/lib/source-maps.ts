@@ -2,7 +2,7 @@ import { PrintResultType } from 'recast/lib/printer'
 import path from 'path'
 import url from 'url'
 
-const inlineSourceMapRe = /^\/\/ ?(?:#|@) sourceMappingURL=data:application\/json;base64,([^$]+)$/g
+const inlineSourceMapRe = /\n\/\/ ?(?:#|@) sourceMappingURL=data:application\/json;(?:charset=utf-8;)base64,([^$]+)\s*$/m
 
 const getDataUrl = (map: any) => {
   return `data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(map)).toString('base64')}`
@@ -13,16 +13,21 @@ export const tryDecodeInline = (js: string) => {
 
   if (matches) {
     try {
-      return JSON.parse(Buffer.from(matches![1], 'base64').toString())
+      const base64 = matches[1]
+
+      // theoretically we could capture the charset properly and use it in the toString call here
+      // but it is unlikely that non-utf-8 charsets will be encountered in the wild, and handling all
+      // possible charsets is complex
+      return JSON.parse(Buffer.from(base64, 'base64').toString())
     } catch {
       return
     }
   }
 }
 
-export const getPaths = (_url: string) => {
+export const getPaths = (urlStr: string) => {
   try {
-    const parsed = url.parse(_url, false)
+    const parsed = url.parse(urlStr, false)
 
     // if the sourceFileName is the same as the real filename, Chromium appends a weird "? [sm]" suffix to the filename
     // avoid this by appending some text to the filename

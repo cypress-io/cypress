@@ -8,6 +8,8 @@ export function install (url: string, rewriter: RewritingStream) {
 
   rewriter.on('startTag', (startTag, raw) => {
     if (startTag.tagName !== 'script') {
+      currentlyInsideJsScriptTag = false
+
       return rewriter.emitRaw(raw)
     }
 
@@ -15,6 +17,8 @@ export function install (url: string, rewriter: RewritingStream) {
 
     if (typeAttr && typeAttr.value !== 'text/javascript') {
       // we don't care about intercepting non-JS <script> tags
+      currentlyInsideJsScriptTag = false
+
       return rewriter.emitRaw(raw)
     }
 
