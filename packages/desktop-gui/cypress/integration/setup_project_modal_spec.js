@@ -245,6 +245,19 @@ describe('Set Up Project', function () {
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option').should('have.length', 1)
         })
+
+        it('sends values during submit', function () {
+          cy.get('.privacy-radio').find('input').first().check()
+          cy.get('.modal-body')
+          .contains('.btn', 'Set up project').click()
+          .then(() => {
+            expect(this.ipc.setupDashboardProject).to.be.calledWith({
+              projectName: 'my-kitchen-sink',
+              orgId: '000',
+              public: true,
+            })
+          })
+        })
       })
 
       context('polls for updates to organizations', function () {
