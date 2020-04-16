@@ -4,6 +4,7 @@ import * as js from './js'
 
 export function install (url: string, rewriter: RewritingStream) {
   let currentlyInsideJsScriptTag = false
+  let inlineJsIndex = 0
 
   rewriter.on('startTag', (startTag, raw) => {
     if (startTag.tagName !== 'script') {
@@ -34,12 +35,15 @@ export function install (url: string, rewriter: RewritingStream) {
     return rewriter.emitRaw(raw)
   })
 
-  rewriter.on('text', (_text, raw) => {
+  rewriter.on('text', (_textToken, raw) => {
     if (!currentlyInsideJsScriptTag) {
       return rewriter.emitRaw(raw)
     }
 
     // rewrite inline JS in <script> tags
-    return rewriter.emitRaw(js.rewriteJs(url, raw))
+    // create a unique filename per inline script
+    const fakeJsUrl = [url, inlineJsIndex++].join(':')
+
+    return rewriter.emitRaw(js.rewriteJs(fakeJsUrl, raw))
   })
 }
