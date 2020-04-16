@@ -143,7 +143,7 @@ const throwErrByPath = (errPath, options = {}) => {
 
   // gets rid of internal stack lines that just build the error
   if (Error.captureStackTrace) {
-    Error.captureStackTrace(this, throwErrByPath)
+    Error.captureStackTrace(err, throwErrByPath)
   }
 
   return throwErr(err, options)
