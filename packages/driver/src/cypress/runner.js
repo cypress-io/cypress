@@ -889,6 +889,16 @@ const create = function (specWindow, mocha, Cypress, cy) {
     return _testsById[id]
   }
 
+  function hasTestAlreadyRun (test) {
+    if (Cypress._RESUMED_AT_TEST) {
+      if (+test.id.slice(1) < +Cypress._RESUMED_AT_TEST.slice(1)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
@@ -960,6 +970,10 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
         default:
           break
+      }
+
+      if (hasTestAlreadyRun(test)) {
+        return args[0]()
       }
 
       // closure for calculating the actual
