@@ -100,7 +100,6 @@ describe('linux browser detection', () => {
       {
         name: 'foo-browser',
         versionRegex: /v(\S+)$/,
-        profile: true,
         binary: ['foo-browser', 'foo-bar-browser'],
       },
     ]

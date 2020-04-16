@@ -3,6 +3,7 @@ import { partial, trim, tap, prop } from 'ramda'
 import { FoundBrowser, Browser } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
+import Bluebird from 'bluebird'
 
 function getLinuxBrowser (
   name: string,
@@ -51,7 +52,7 @@ function getLinuxBrowser (
 export function getVersionString (path: string) {
   log('finding version string using command "%s --version"', path)
 
-  return utils.getOutput(path, ['--version'])
+  return Bluebird.resolve(utils.getOutput(path, ['--version']))
   .timeout(5000, `Timed out getting version for ${path}`)
   .then(prop('stdout'))
   .then(trim)
