@@ -421,35 +421,28 @@ describe('driver/src/cypress/error_utils', () => {
       expect(result.codeFrame).to.equal(codeFrame)
     })
 
-    // TODO: update appending implementation and properly test
-    it.skip('appends original stack when stack is replaced by invocation stack', () => {
+    it('appends original stack when stack is replaced by invocation stack and it is a cypress error', () => {
+      err.name = 'CypressError'
+
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
       expect(result.stack).to.include('From Cypress Internals:')
       expect(result.stack).to.include('  at originalStack (foo.js:1:1)')
     })
 
-    // TODO: update appending implementation and properly test
-    it.skip('does not append original stack when there is no invocation stack', () => {
+    it('appends original stack when stack is replaced by invocation stack and it is a chai validation error', () => {
+      err.message = 'Invalid Chai property'
+
+      const result = $errUtils.enhanceStack({ err, userInvocationStack })
+
+      expect(result.stack).to.include('From Cypress Internals:')
+      expect(result.stack).to.include('  at originalStack (foo.js:1:1)')
+    })
+
+    it('does not append original stack when there is no invocation stack', () => {
       const result = $errUtils.enhanceStack({ err })
 
       expect(result.stack).not.to.include('From Cypress Internals')
-    })
-
-    // TODO: update appending implementation and properly test
-    it.skip('appends original error stack and removes the property if present', () => {
-      const originalErr = {
-        stackTitle: 'From Internals',
-        stack: 'at internalStack1 (foo.js:1:1)\nat internalStack2 (bar.js:2:2)',
-      }
-
-      err.originalErr = originalErr
-
-      const result = $errUtils.enhanceStack({ err })
-
-      expect(result.stack).to.include(originalErr.stackTitle)
-      expect(result.stack).to.include(originalErr.stack)
-      expect(result.originalErr).to.be.undefined
     })
   })
 

@@ -267,16 +267,16 @@ const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
   // but the stack points to cypress internals. here we replace the internal
   // cypress stack with the invocation stack, which points to the user's code
   if (userInvocationStack) {
-    // const originalStack = err.stack
+    const originalStack = err.stack
 
     err.stack = $stackUtils.replacedStack(err, userInvocationStack)
 
-    // if (isCypressErr(err) || isChaiValidationErr(err)) {
-    //   err.stack = $stackUtils.stackWithOriginalAppended(err, {
-    //     stackTitle: 'From Cypress Internals',
-    //     stack: originalStack,
-    //   })
-    // }
+    if (isCypressErr(err) || isChaiValidationErr(err)) {
+      err.stack = $stackUtils.stackWithOriginalAppended(err, {
+        stackTitle: 'From Cypress Internals',
+        stack: originalStack,
+      })
+    }
   }
 
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)
