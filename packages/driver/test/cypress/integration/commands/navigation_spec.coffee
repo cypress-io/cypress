@@ -1229,8 +1229,6 @@ describe "src/cy/commands/navigation", ->
               - you forgot to run / boot your web server
               - your web server isn't accessible
               - you have weird network configuration settings on your computer
-
-            The stack trace for this error is:
           """)
           expect(err1.url).to.include("/foo.html")
           expect(emit).to.be.calledWith("visit:failed", err1)
