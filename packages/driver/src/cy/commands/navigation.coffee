@@ -633,7 +633,11 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
         ## the onLoad callback should only be skipped if specified
         if runOnLoadCallback isnt false
-          options.onLoad?.call(runnable.ctx, win)
+          try
+            options.onLoad?.call(runnable.ctx, win)
+          catch err
+            err.isOnLoadError = true
+            throw err
 
         if options._log
           options._log.set({
@@ -812,6 +816,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                   onFail: options._log
                   args: args
                 })
+            when err.isOnLoadError
+              delete err.isOnLoadError
+              throw err
             else
               visitFailedByErr err, url, ->
                 $errUtils.throwErrByPath("visit.loading_network_failed", {
