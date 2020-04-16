@@ -16,7 +16,7 @@ const appData = require('../util/app_data')
 const profileCleaner = require('../util/profile_cleaner')
 
 const PATH_TO_BROWSERS = appData.path('browsers')
-const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
+const legacyPathToProfiles = path.join(PATH_TO_BROWSERS, '*')
 
 const getAppDataPath = (browser) => {
   if (!browser || !browser.profilePath) {
@@ -95,9 +95,9 @@ const ensureCleanCache = async function (browser, isTextTerminal) {
 // we now store profiles inside the Cypress binary folder
 // so we need to remove the legacy root profiles that existed before
 function removeLegacyProfiles () {
-  return profileCleaner.removeRootProfile(pathToProfiles, [
-    path.join(pathToProfiles, 'run-*'),
-    path.join(pathToProfiles, 'interactive'),
+  return profileCleaner.removeRootProfile(legacyPathToProfiles, [
+    path.join(legacyPathToProfiles, 'run-*'),
+    path.join(legacyPathToProfiles, 'interactive'),
   ])
 }
 
