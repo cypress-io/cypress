@@ -9,6 +9,7 @@ const sinonChai = require('@cypress/sinon-chai')
 const $dom = require('../dom')
 const $utils = require('../cypress/utils')
 const $errUtils = require('../cypress/error_utils')
+const $stackUtils = require('../cypress/stack_utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 const chaiInspect = require('./chai/inspect')
 
@@ -198,8 +199,8 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideChaiAsserts = function (specWindow, config, assertFn) {
-    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, config, assertFn)
+  const overrideChaiAsserts = function (specWindow, state, assertFn) {
+    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, state, assertFn)
 
     const _origGetmessage = function (obj, args) {
       const negate = chaiUtils.flag(obj, 'negate')
@@ -414,7 +415,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const createPatchedAssert = (specWindow, config, assertFn) => {
+  const createPatchedAssert = (specWindow, state, assertFn) => {
     return (function (...args) {
       let err
       const passed = chaiUtils.test(this, args)
@@ -443,24 +444,27 @@ chai.use((chai, u) => {
       // for security purposes. therefore, we instantiate a new error on
       // the spec iframe to get a better stack
       if (err) {
-        err = $errUtils.enhanceStack({
-          err,
-          invocationStack: (new specWindow.Error('assertion invocation stack')).stack,
-          projectRoot: config('projectRoot'),
-        })
+        const userInvocationStack = (new specWindow.Error('assertion invocation stack')).stack
+
+        state('currentAssertionUserInvocationStack', $stackUtils.stackWithoutMessage(userInvocationStack))
 
         throw err
       }
     })
   }
 
-  const overrideExpect = () => {
+  const overrideExpect = (specWindow, state) => {
     // only override assertions for this specific
     // expect function instance so we do not affect
     // the outside world
     return (val, message) => {
       // make the assertion
-      return new chai.Assertion(val, message)
+      const assertion = new chai.Assertion(val, message)
+      const userInvocationStack = (new specWindow.Error('expect invocation stack')).stack
+
+      state('currentAssertionUserInvocationStack', $stackUtils.stackWithoutMessage(userInvocationStack))
+
+      return assertion
     }
   }
 
@@ -480,8 +484,8 @@ chai.use((chai, u) => {
     return fn
   }
 
-  const setSpecWindowGlobals = function (specWindow, assertFn) {
-    const expect = overrideExpect()
+  const setSpecWindowGlobals = function (specWindow, state) {
+    const expect = overrideExpect(specWindow, state)
     const assert = overrideAssert()
 
     specWindow.chai = chai
@@ -495,14 +499,14 @@ chai.use((chai, u) => {
     }
   }
 
-  const create = function (specWindow, config, assertFn) {
+  const create = function (specWindow, state, assertFn) {
     restoreAsserts()
 
     overrideChaiInspect()
     overrideChaiObjDisplay()
-    overrideChaiAsserts(specWindow, config, assertFn)
+    overrideChaiAsserts(specWindow, state, assertFn)
 
-    return setSpecWindowGlobals(specWindow)
+    return setSpecWindowGlobals(specWindow, state)
   }
 
   module.exports = {

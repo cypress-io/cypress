@@ -15,9 +15,20 @@ describe('assertion failure', function () {
 
   verify(this, {
     column: 3,
-    support: true,
     codeFrameText: 'add(\'failAssertion\'',
     message: 'expected true to be false',
+  })
+})
+
+describe('chai validation failure', function () {
+  fail(this, () => {
+    cy.chaiValidationError()
+  })
+
+  verify(this, {
+    column: 3,
+    codeFrameText: 'add(\'chaiValidationError\'',
+    message: 'Invalid Chai property: nope',
   })
 })
 
@@ -56,7 +67,7 @@ context('commands', function () {
     verify(this, {
       column: 6,
       codeFrameText: 'add(\'failCommand\'',
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
@@ -68,7 +79,7 @@ context('commands', function () {
     verify(this, {
       column: 17,
       codeFrameText: 'add(\'failChainedCommand\'',
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -106,7 +117,7 @@ context('cy.then', function () {
     verify(this, {
       column: 8,
       codeFrameText: 'add(\'failThenCommandFailure\'',
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -192,7 +203,7 @@ context('cy.should', function () {
     verify(this, {
       column: 6,
       codeFrameText: 'add(\'failCommandAfterShouldSuccess\'',
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -230,7 +241,7 @@ context('cy.each', function () {
     verify(this, {
       column: 8,
       codeFrameText: 'add(\'failEachCommandFailure\'',
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -268,7 +279,7 @@ context('cy.spread', function () {
     verify(this, {
       column: 8,
       codeFrameText: 'add(\'failSpreadCommandFailure\'',
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -306,7 +317,7 @@ context('cy.within', function () {
     verify(this, {
       column: 8,
       codeFrameText: 'add(\'failWithinCommandFailure\'',
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -344,7 +355,7 @@ context('cy.wrap', function () {
     verify(this, {
       column: 8,
       codeFrameText: 'add(\'failWrapCommandFailure\'',
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -432,7 +443,7 @@ context('cy.route', () => {
     verify(this, {
       column: 8,
       codeFrameText: 'failRouteCallbackCommandFailure',
-      message: 'Expected to find element: h1, but never found it',
+      message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 
@@ -632,7 +643,7 @@ context('uncaught errors', () => {
     verify(this, {
       message: [
         'The following error originated from your application code',
-        '{}.bar is not a function',
+        'qux is not defined',
       ],
       regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
       hasCodeFrame: false,
@@ -647,7 +658,7 @@ context('uncaught errors', () => {
     verify(this, {
       message: [
         'The following error originated from your application code',
-        '{}.bar is not a function',
+        'qax is not defined',
       ],
       regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
       hasCodeFrame: false,

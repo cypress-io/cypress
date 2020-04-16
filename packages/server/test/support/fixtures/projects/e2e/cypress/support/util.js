@@ -1,3 +1,5 @@
+const { _ } = Cypress
+
 let count = 1
 let shouldVerifyStackLineIsSpecFile = true
 
@@ -37,7 +39,7 @@ export const fail = (ctx, test) => {
 }
 
 export const verify = (ctx, options) => {
-  const { hasCodeFrame = true, column, codeFrameText, message } = options
+  const { hasCodeFrame = true, column, codeFrameText, message, stack } = options
   let { regex } = options
 
   // test only the column number because the line number is brittle
@@ -54,11 +56,9 @@ export const verify = (ctx, options) => {
     .contains(`FAIL - ${getTitle(ctx)}`)
     .closest('.runnable-wrapper')
     .within(() => {
-      Cypress._.each([].concat(message), (msg) => {
+      _.each([].concat(message), (msg) => {
         cy.get('.runnable-err-message')
         .should('include.text', msg)
-
-        cy.contains('View stack trace').click()
 
         // TODO: get this working. it currently fails in a bizarre way
         // displayed stack trace should not include message
@@ -70,6 +70,11 @@ export const verify = (ctx, options) => {
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
       .should('match', regex)
+
+      _.each([].concat(stack), (stackLine) => {
+        cy.get('.runnable-err-stack-trace')
+        .should('include.text', stackLine)
+      })
 
       if (!hasCodeFrame) return
 

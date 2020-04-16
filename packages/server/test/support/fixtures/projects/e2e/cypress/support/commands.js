@@ -4,16 +4,20 @@ Cypress.Commands.add('failAssertion', () => {
   expect(true).to.be.false
 })
 
+Cypress.Commands.add('chaiValidationError', () => {
+  expect(true).to.be.nope
+})
+
 Cypress.Commands.add('failException', () => {
   ({}).bar()
 })
 
 Cypress.Commands.add('failCommand', () => {
-  cy.get('h1')
+  cy.get('#does-not-exist')
 })
 
 Cypress.Commands.add('failChainedCommand', () => {
-  cy.get('div').find('h1', { timeout: 1 })
+  cy.get('div').find('#does-not-exist')
 })
 
 Cypress.Commands.add('failThenAssertion', () => {
@@ -36,7 +40,7 @@ Cypress.Commands.add('failThenException', () => {
 
 Cypress.Commands.add('failThenCommandFailure', () => {
   cy.wrap({}).then(() => {
-    cy.get('h1')
+    cy.get('#does-not-exist')
   })
 })
 
@@ -78,7 +82,7 @@ Cypress.Commands.add('failAfterMultipleShouldCallbacksAssertion', () => {
 
 Cypress.Commands.add('failCommandAfterShouldSuccess', () => {
   cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
-  cy.get('h1')
+  cy.get('#does-not-exist')
 })
 
 Cypress.Commands.add('failEachAssertion', () => {
@@ -95,7 +99,7 @@ Cypress.Commands.add('failEachException', () => {
 
 Cypress.Commands.add('failEachCommandFailure', () => {
   cy.wrap([1]).each(() => {
-    cy.get('h1')
+    cy.get('#does-not-exist')
   })
 })
 
@@ -113,7 +117,7 @@ Cypress.Commands.add('failSpreadException', () => {
 
 Cypress.Commands.add('failSpreadCommandFailure', () => {
   cy.wrap([1, 2, 3]).spread(() => {
-    cy.get('h1')
+    cy.get('#does-not-exist')
   })
 })
 
@@ -131,7 +135,7 @@ Cypress.Commands.add('failWithinException', () => {
 
 Cypress.Commands.add('failWithinCommandFailure', () => {
   cy.get('body').within(() => {
-    cy.get('h1')
+    cy.get('#does-not-exist')
   })
 })
 
@@ -149,7 +153,7 @@ Cypress.Commands.add('failWrapException', () => {
 
 Cypress.Commands.add('failWrapCommandFailure', () => {
   cy.wrap(() => {
-    cy.get('h1')
+    cy.get('#does-not-exist')
   }).then((fn) => fn())
 })
 
@@ -199,7 +203,7 @@ Cypress.Commands.add('failRouteCallbackException', () => {
 
 Cypress.Commands.add('failRouteCallbackCommandFailure', () => {
   cy.server().route(() => {
-    cy.get('h1')
+    cy.get('#does-not-exist')
 
     return '/foo'
   })

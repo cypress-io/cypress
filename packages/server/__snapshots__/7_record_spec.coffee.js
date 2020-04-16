@@ -168,7 +168,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your test code, not from Cypress.
 
   > instantly fails
 
@@ -1052,7 +1052,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught Error: The following error originated from your test code, not from Cypress.
+     Error: The following error originated from your test code, not from Cypress.
 
   > instantly fails
 

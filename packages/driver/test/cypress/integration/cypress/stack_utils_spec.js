@@ -267,4 +267,22 @@ original message
       })
     })
   })
+
+  context('.stackWithoutMessage', () => {
+    const stack = `\
+message 1
+message 2
+  at stack1 (foo.js:1:1)
+message 3
+  at stack2 (bar.js:2:2)`
+
+    it('returns stack with the foremost message lines', () => {
+      const result = $stackUtils.stackWithoutMessage(stack)
+
+      expect(result).to.equal(`\
+  at stack1 (foo.js:1:1)
+message 3
+  at stack2 (bar.js:2:2)`)
+    })
+  })
 })

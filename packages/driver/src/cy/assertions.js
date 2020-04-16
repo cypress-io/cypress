@@ -112,7 +112,7 @@ const create = function (state, queue, retryFn) {
       cmd.set('assertionIndex', 0)
 
       if (state('current') != null) {
-        state('current').set('currentAssertion', cmd)
+        state('current').set('currentAssertionCommand', cmd)
       }
 
       return cmd.get('fn').originalFn.apply(

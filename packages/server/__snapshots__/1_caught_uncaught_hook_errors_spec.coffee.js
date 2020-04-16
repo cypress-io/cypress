@@ -140,7 +140,7 @@ exports['e2e caught and uncaught hooks errors failing2 1'] = `
   1 failing
 
   1) s1b "before each" hook for "t2b":
-     Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > foo is not defined
 
@@ -224,7 +224,7 @@ exports['e2e caught and uncaught hooks errors failing3 1'] = `
   1 failing
 
   1)  "before each" hook for "t1c":
-     Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > foo is not defined
 
@@ -314,7 +314,7 @@ exports['e2e caught and uncaught hooks errors failing4 1'] = `
   1 failing
 
   1) uncaught hook error should continue to fire all mocha events s1 "before each" hook for "does not run":
-     Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > foo is not defined
 

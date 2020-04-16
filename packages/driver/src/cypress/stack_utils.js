@@ -215,17 +215,11 @@ const replacedStack = (err, newStack) => {
   return [errString].concat(stackLines).join('\n')
 }
 
-const hasStack = (err) => {
-  if (!err.stack) return false
-
-  return !!getStackLines(err.stack).length
-}
-
 module.exports = {
   getCodeFrame,
   getSourceStack,
-  hasStack,
   normalizedStack,
   replacedStack,
   stackWithOriginalAppended,
+  stackWithoutMessage,
 }

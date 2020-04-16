@@ -128,9 +128,9 @@ describe('driver/src/cypress/cy', () => {
       cy
       .get('input:first')
       .then(() => {
-        const invocationStack = cy.queue.find({ name: 'get' }).get('invocationStack')
+        const userInvocationStack = cy.queue.find({ name: 'get' }).get('userInvocationStack')
 
-        expect(invocationStack).to.include('cy_spec.js')
+        expect(userInvocationStack).to.include('cy_spec.js')
       })
     })
 
@@ -139,9 +139,9 @@ describe('driver/src/cypress/cy', () => {
       .get('div')
       .find('input')
       .then(() => {
-        const invocationStack = cy.queue.find({ name: 'find' }).get('invocationStack')
+        const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
 
-        expect(invocationStack).to.include('cy_spec.js')
+        expect(userInvocationStack).to.include('cy_spec.js')
       })
     })
   })
@@ -186,9 +186,9 @@ describe('driver/src/cypress/cy', () => {
         cy
         .getInput()
         .then(() => {
-          const invocationStack = cy.queue.find({ name: 'getInput' }).get('invocationStack')
+          const userInvocationStack = cy.queue.find({ name: 'getInput' }).get('userInvocationStack')
 
-          expect(invocationStack).to.include('cy_spec.js')
+          expect(userInvocationStack).to.include('cy_spec.js')
         })
       })
 
@@ -197,9 +197,9 @@ describe('driver/src/cypress/cy', () => {
         .get('div')
         .findInput()
         .then(() => {
-          const invocationStack = cy.queue.find({ name: 'findInput' }).get('invocationStack')
+          const userInvocationStack = cy.queue.find({ name: 'findInput' }).get('userInvocationStack')
 
-          expect(invocationStack).to.include('cy_spec.js')
+          expect(userInvocationStack).to.include('cy_spec.js')
         })
       })
     })

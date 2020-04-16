@@ -5,7 +5,7 @@ const $utils = require('./utils')
 const $stackUtils = require('./stack_utils')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
-const CypressErrorRe = /^(AssertionError|CypressError)$/
+const chaiValidationRe = /^Invalid Chai property/
 const twoOrMoreNewLinesRe = /\n{2,}/
 
 const wrapErr = (err) => {
@@ -14,12 +14,16 @@ const wrapErr = (err) => {
   return $utils.reduceProps(err, ERROR_PROPS)
 }
 
-const isCypressErr = (err = {}) => {
-  return err.name === 'CypressError'
+const isAssertionErr = (err = {}) => {
+  return err.name === 'AssertionError'
 }
 
-const isCypressOrAssertionErr = (err = {}) => {
-  return CypressErrorRe.test(err.name)
+const isChaiValidationErr = (err = {}) => {
+  return chaiValidationRe.test(err.message)
+}
+
+const isCypressErr = (err = {}) => {
+  return err.name === 'CypressError'
 }
 
 const mergeErrProps = (origErr, ...newProps) => {
@@ -73,13 +77,6 @@ const modifyErrMsg = (err, newErrMsg, cb) => {
 
   err.message = newMessage
   err.stack = newStack
-
-  return err
-}
-
-const modifyErrName = (err, name) => {
-  err.stack = stackWithReplacedProps(err, { name })
-  err.name = name
 
   return err
 }
@@ -143,6 +140,9 @@ const throwErr = (err, options = {}) => {
 
 const throwErrByPath = (errPath, options = {}) => {
   const err = errByPath(errPath, options.args)
+
+  // gets rid of internal stack lines that just build the error
+  Error.captureStackTrace(err, throwErrByPath)
 
   return throwErr(err, options)
 }
@@ -253,7 +253,6 @@ const createUncaughtException = (type, err) => {
     errMsg: err.message,
   })
 
-  modifyErrName(err, `Uncaught ${err.name}`)
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
   err.docsUrl = uncaughtErr.docsUrl
@@ -261,24 +260,21 @@ const createUncaughtException = (type, err) => {
   return err
 }
 
-const enhanceStack = ({ err, invocationStack, projectRoot }) => {
+const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
   // stacks from command failures and assertion failures have the right message
   // but the stack points to cypress internals. here we replace the internal
   // cypress stack with the invocation stack, which points to the user's code
-  if (invocationStack) {
-    const originalStack = err.stack
+  if (userInvocationStack) {
+    // const originalStack = err.stack
 
-    err.stack = $stackUtils.replacedStack(err, invocationStack)
-    err.stack = $stackUtils.stackWithOriginalAppended(err, {
-      stackTitle: 'From Cypress Internals',
-      stack: originalStack,
-    })
-  }
+    err.stack = $stackUtils.replacedStack(err, userInvocationStack)
 
-  if (err.originalErr) {
-    err.stack = $stackUtils.stackWithOriginalAppended(err, err.originalErr)
-
-    delete err.originalErr
+    // if (isCypressErr(err) || isChaiValidationErr(err)) {
+    //   err.stack = $stackUtils.stackWithOriginalAppended(err, {
+    //     stackTitle: 'From Cypress Internals',
+    //     stack: originalStack,
+    //   })
+    // }
   }
 
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)
@@ -308,8 +304,9 @@ module.exports = {
   cypressErrByPath,
   enhanceStack,
   errByPath,
+  isAssertionErr,
+  isChaiValidationErr,
   isCypressErr,
-  isCypressOrAssertionErr,
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,

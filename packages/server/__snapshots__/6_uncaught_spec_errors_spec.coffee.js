@@ -23,7 +23,7 @@ exports['e2e uncaught errors / failing1'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
 
@@ -105,7 +105,7 @@ exports['e2e uncaught errors / failing2'] = `
   1 failing
 
   1)  An uncaught error was detected outside of a test:
-     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
 
@@ -195,7 +195,7 @@ exports['e2e uncaught errors / failing3'] = `
   3 failing
 
   1) foo fails with setTimeout:
-     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
 
@@ -203,7 +203,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
       [stack trace lines]
 
   2) foo fails with setTimeout and done:
-     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
 
@@ -211,7 +211,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
       [stack trace lines]
 
   3) foo fails with async app code error:
-     Uncaught ReferenceError: The following error originated from your application code, not from Cypress.
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
   > qax is not defined
 
@@ -301,7 +301,7 @@ exports['e2e uncaught errors / failing4'] = `
   1 failing
 
   1) foo "before all" hook for "does not run":
-     Uncaught ReferenceError: The following error originated from your test code, not from Cypress.
+     ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
 

@@ -134,7 +134,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create()
 
-  const { expect } = $Chai.create(specWindow, config, assertions.assert)
+  const { expect } = $Chai.create(specWindow, state, assertions.assert)
 
   const xhrs = $Xhrs.create(state)
   const aliases = $Aliases.create(state)
@@ -674,16 +674,26 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const getInvocationStack = (err) => {
     const current = state('current')
-    const currentAssertion = current && current.get('currentAssertion')
-    const withInvocationStack = currentAssertion || current
-    const invocationStack = withInvocationStack && withInvocationStack.get('invocationStack')
+    const currentAssertionCommand = current && current.get('currentAssertionCommand')
+    const withInvocationStack = currentAssertionCommand || current
+    const commandInvocationStack = withInvocationStack && withInvocationStack.get('userInvocationStack')
+    // user assertion errors (expect().to, etc) get their invocation stack
+    // attached to the error thrown from chai
+    // command errors and command assertion errors (default assertion or cy.should)
+    // have the invocation stack attached to the current command
+    const userInvocationStack = (
+      state('currentAssertionUserInvocationStack') ||
+      commandInvocationStack
+    )
 
-    if (invocationStack && (
-      !$stackUtils.hasStack(err)
-      || $errUtils.isCypressErr(err)
-      || err.isDefaultAssertionErr
-    )) {
-      return invocationStack
+    if (!userInvocationStack) return
+
+    if (
+      $errUtils.isCypressErr(err)
+      || $errUtils.isAssertionErr(err)
+      || $errUtils.isChaiValidationErr(err)
+    ) {
+      return userInvocationStack
     }
   }
 
@@ -692,20 +702,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
-    // auto-log the error if it's unexpected, because it's likely a bug
-    // in Cypress itself
-    if (!$errUtils.isCypressOrAssertionErr(err)) {
-      /* eslint-disable no-console */
-      console.log('An unexpected error occurred:')
-      console.error(err)
-      /* eslint-enable no-console */
-    }
-
     err.stack = $stackUtils.normalizedStack(err)
 
     err = $errUtils.enhanceStack({
       err,
-      invocationStack: getInvocationStack(err),
+      userInvocationStack: getInvocationStack(err),
       projectRoot: config('projectRoot'),
     })
 
@@ -991,14 +992,17 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
-        const invocationStack = (new specWindow.Error('command invocation stack')).stack
+        const userInvocationStack = $stackUtils.stackWithoutMessage(
+          (new specWindow.Error('command invocation stack')).stack,
+        )
+
         let ret
 
         ensures.ensureRunnable(name)
 
         // this is the first call on cypress
         // so create a new chainer instance
-        const chain = $Chainer.create(name, invocationStack, specWindow, args)
+        const chain = $Chainer.create(name, userInvocationStack, specWindow, args)
 
         // store the chain so we can access it later
         state('chain', chain)
@@ -1039,7 +1043,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         return chain
       }
 
-      return cy.addChainer(name, (chainer, invocationStack, args) => {
+      return cy.addChainer(name, (chainer, userInvocationStack, args) => {
         const { firstCall, chainerId } = chainer
 
         // dont enqueue / inject any new commands if
@@ -1057,7 +1061,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           args,
           type,
           chainerId,
-          invocationStack,
+          userInvocationStack,
           fn: wrap(firstCall),
         })
 

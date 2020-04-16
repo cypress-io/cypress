@@ -30,6 +30,18 @@ describe('assertion failure', function () {
   })
 })
 
+describe('chai validation error', function () {
+  fail(this, () => {
+    expect(true).to.be.nope
+  })
+
+  verify(this, {
+    column: 5,
+    message: 'Invalid Chai property: nope',
+    stack: ['From Cypress Internals:', 'chai/utils/proxify.js'],
+  })
+})
+
 context('exceptions', function () {
   describe('in spec file', function () {
     fail(this, () => {
@@ -58,23 +70,23 @@ context('exceptions', function () {
 context('commands', function () {
   describe('failure', function () {
     fail(this, () => {
-      cy.get('h1')
+      cy.get('#does-not-exist')
     })
 
     verify(this, {
       column: 10,
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
   describe('chained failure', function () {
     fail(this, () => {
-      cy.get('div').find('h1', { timeout: 1 })
+      cy.get('div').find('#does-not-exist')
     })
 
     verify(this, {
       column: 21,
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -109,13 +121,13 @@ context('cy.then', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.wrap({}).then(() => {
-        cy.get('h1')
+        cy.get('#does-not-exist')
       })
     })
 
     verify(this, {
       column: 12,
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -210,12 +222,12 @@ context('cy.should', function () {
   describe('command after success', function () {
     fail(this, () => {
       cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
-      cy.get('h1')
+      cy.get('#does-not-exist')
     })
 
     verify(this, {
       column: 10,
-      message: 'Timed out retrying: Expected to find element: h1, but never found it',
+      message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -250,13 +262,13 @@ context('cy.each', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.wrap([1]).each(() => {
-        cy.get('h1')
+        cy.get('#does-not-exist')
       })
     })
 
     verify(this, {
       column: 12,
-      message: 'Expected to find element: h1, but never found it',
+      message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -291,13 +303,13 @@ context('cy.spread', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.wrap([1, 2, 3]).spread(() => {
-        cy.get('h1')
+        cy.get('#does-not-exist')
       })
     })
 
     verify(this, {
       column: 12,
-      message: 'Expected to find element: h1, but never found it',
+      message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -332,13 +344,13 @@ context('cy.within', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.get('body').within(() => {
-        cy.get('h1')
+        cy.get('#does-not-exist')
       })
     })
 
     verify(this, {
       column: 12,
-      message: 'Expected to find element: h1, but never found it',
+      message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -373,13 +385,13 @@ context('cy.wrap', function () {
   describe('command failure', function () {
     fail(this, () => {
       cy.wrap(() => {
-        cy.get('h1')
+        cy.get('#does-not-exist')
       }).then((fn) => fn())
     })
 
     verify(this, {
       column: 12,
-      message: 'Expected to find element: h1, but never found it',
+      message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 })
@@ -480,7 +492,7 @@ context('cy.route', () => {
   describe('command failure', function () {
     fail(this, () => {
       cy.server().route(() => {
-        cy.get('h1')
+        cy.get('#does-not-exist')
 
         return '/foo'
       })
@@ -488,7 +500,7 @@ context('cy.route', () => {
 
     verify(this, {
       column: 12,
-      message: 'Expected to find element: h1, but never found it',
+      message: 'Expected to find element: #does-not-exist, but never found it',
     })
   })
 
