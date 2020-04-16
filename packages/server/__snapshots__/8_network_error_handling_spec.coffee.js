@@ -381,12 +381,6 @@ Common situations why this would fail:
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
       [stack trace lines]
-  
-  From Node.js Internals:
-  
-  Error: socket hang up
-      [stack trace lines]
-  
 
   2) network error handling cy.request() retries fails after retrying 5x:
      CypressError: \`cy.request()\` failed trying to load:
@@ -416,12 +410,6 @@ Common situations why this would fail:
 
 https://on.cypress.io/request
       [stack trace lines]
-  
-  From Node.js Internals:
-  
-  RequestError: Error: socket hang up
-      [stack trace lines]
-  
 
 
 
