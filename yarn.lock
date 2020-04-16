@@ -8970,10 +8970,10 @@ cypress-example-kitchensink@1.9.1:
     npm-run-all "^4.1.2"
     serve "11.3.0"
 
-cypress-react-unit-test@3.0.0-cypress-mount-mode.15:
-  version "3.0.0-cypress-mount-mode.15"
-  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-3.0.0-cypress-mount-mode.15.tgz#451b80fef1e50daa6f1350b384f43ae02a2973d5"
-  integrity sha512-WEZq3y1C5Cg48qtCRO47/IDtvIkuCMXc4ZhUPxkB5X2m7dOq0oPiUnMS977qUouNi1fQ3+gJWkKNjooj/vzL9Q==
+cypress-react-unit-test@3.0.0-cypress-mount-mode.16:
+  version "3.0.0-cypress-mount-mode.16"
+  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-3.0.0-cypress-mount-mode.16.tgz#e6fa864ee96722f1e59207f4c1c2e0f503c24b36"
+  integrity sha512-BgFwSu34IMCxGrHYI7EkaTxTcXkEFD3ce/FrJc1ZX9zMlj4vbJ80HKjlrnN+b9oLb8yUGv9UxOLR9bn2velzBw==
   dependencies:
     "@cypress/code-coverage" "3.0.0"
     "@cypress/webpack-preprocessor" "4.1.3"
