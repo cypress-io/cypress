@@ -71,10 +71,12 @@ export const verify = (ctx, options) => {
       .invoke('text')
       .should('match', regex)
 
-      _.each([].concat(stack), (stackLine) => {
-        cy.get('.runnable-err-stack-trace')
-        .should('include.text', stackLine)
-      })
+      if (stack) {
+        _.each([].concat(stack), (stackLine) => {
+          cy.get('.runnable-err-stack-trace')
+          .should('include.text', stackLine)
+        })
+      }
 
       if (!hasCodeFrame) return
 
