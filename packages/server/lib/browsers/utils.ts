@@ -18,10 +18,22 @@ const profileCleaner = require('../util/profile_cleaner')
 const PATH_TO_BROWSERS = appData.path('browsers')
 const pathToProfiles = path.join(PATH_TO_BROWSERS, '*')
 
+const getAppDataPath = (browser) => {
+  if (!browser || !browser.profilePath) {
+    return PATH_TO_BROWSERS
+  }
+
+  return path.join(browser.profilePath, 'Cypress')
+}
+
+const getProfileWildcard = (browser) => {
+  return path.join(getAppDataPath(browser), '*')
+}
+
 const getBrowserPath = (browser) => {
   // TODO need to check if browser.name is an unempty string
   return path.join(
-    PATH_TO_BROWSERS,
+    getAppDataPath(browser),
     `${browser.name}-${browser.channel}`,
   )
 }
@@ -89,7 +101,7 @@ function removeLegacyProfiles () {
   ])
 }
 
-const removeOldProfiles = function () {
+const removeOldProfiles = function (browser) {
   // a profile is considered old if it was used
   // in a previous run for a PID that is either
   // no longer active, or isnt a cypress related process
@@ -97,7 +109,7 @@ const removeOldProfiles = function () {
 
   return Bluebird.all([
     removeLegacyProfiles(),
-    profileCleaner.removeInactiveByPid(pathToProfiles, 'run-'),
+    profileCleaner.removeInactiveByPid(getProfileWildcard(browser), 'run-'),
     profileCleaner.removeInactiveByPid(pathToPartitions, 'run-'),
   ])
 }

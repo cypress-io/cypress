@@ -8,6 +8,7 @@ import { detect } from '../../lib/detect'
 import { goalBrowsers } from '../fixtures'
 import { expect } from 'chai'
 import { utils } from '../../lib/utils'
+import os from 'os'
 import sinon, { SinonStub } from 'sinon'
 
 describe('linux browser detection', () => {
@@ -41,6 +42,30 @@ describe('linux browser detection', () => {
 
     // @ts-ignore
     return linuxHelper.detect(goal).then(checkBrowser)
+  })
+
+  // https://github.com/cypress-io/cypress/pull/7039
+  it('sets profilePath on snapcraft chromium', () => {
+    execa.withArgs('chromium', ['--version'])
+    .resolves({ stdout: 'Chromium 1.2.3 snap' })
+
+    sinon.stub(os, 'platform').returns('linux')
+    sinon.stub(os, 'homedir').returns('/home/foo')
+
+    const checkBrowser = ([browser]) => {
+      expect(browser).to.deep.equal({
+        channel: 'stable',
+        name: 'chromium',
+        family: 'chromium',
+        displayName: 'Chromium',
+        majorVersion: 1,
+        path: 'chromium',
+        profilePath: '/home/foo/.config/chromium',
+        version: '1.2.3',
+      })
+    }
+
+    return detect().then(checkBrowser)
   })
 
   // https://github.com/cypress-io/cypress/issues/6669

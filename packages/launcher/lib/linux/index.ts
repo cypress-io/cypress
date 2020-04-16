@@ -3,6 +3,8 @@ import { partial, trim, tap, prop } from 'ramda'
 import { FoundBrowser, Browser } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
+import os from 'os'
+import path from 'path'
 import Bluebird from 'bluebird'
 
 function getLinuxBrowser (
@@ -10,6 +12,11 @@ function getLinuxBrowser (
   binary: string,
   versionRegex: RegExp,
 ): Promise<FoundBrowser> {
+  const foundBrowser: any = {
+    name,
+    path: binary,
+  }
+
   const getVersion = (stdout: string) => {
     const m = versionRegex.exec(stdout)
 
@@ -37,14 +44,21 @@ function getLinuxBrowser (
     throw notInstalledErr(binary)
   }
 
+  const maybeSetSnapProfilePath = (versionString: string) => {
+    if (os.platform() === 'linux' && name === 'chromium' && versionString.endsWith('snap')) {
+      // when running as a snap, chromium can only write to one directory
+      // @see https://cs.chromium.org/chromium/src/chrome/installer/linux/snap/snapcraft.yaml.in?l=59-61&rcl=6fb05bb3738f37392dde9cd2783637f09d5aa3f4
+      foundBrowser.profilePath = path.join(os.homedir(), 'snap', 'chromium', 'current')
+    }
+  }
+
   return getVersionString(binary)
+  .tap(maybeSetSnapProfilePath)
   .then(getVersion)
-  .then((version: string) => {
-    return {
-      name,
-      version,
-      path: binary,
-    } as FoundBrowser
+  .then((version: string): FoundBrowser => {
+    foundBrowser.version = version
+
+    return foundBrowser
   })
   .catch(logAndThrowError)
 }
