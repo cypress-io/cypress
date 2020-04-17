@@ -5,6 +5,14 @@ import fse from 'fs-extra'
 import Bluebird from 'bluebird'
 import * as sourceMaps from '../../lib/source-maps'
 import rp from '@cypress/request-promise'
+import snapshot from 'snap-shot-it'
+import fs from 'fs'
+import nock from 'nock'
+
+const testSource = fs.readFileSync(`${__dirname}/../fixtures/test.js`).toString()
+const testSourceMap = fs.readFileSync(`${__dirname}/../fixtures/test.js.map`).toString()
+
+const URL = 'http://example.com/foo.js'
 
 function match (varName, prop) {
   return `globalThis.top.Cypress.resolveWindowReference(globalThis, ${varName}, '${prop}')`
@@ -34,8 +42,6 @@ function testExpectedJs (string: string, expected: string) {
 
   expect(actual.map).to.have.keys('version', 'sources', 'names', 'mappings', 'file', 'sourceRoot', 'sourcesContent')
 }
-
-const URL = 'http://example.com/foo.js'
 
 describe('lib/js', function () {
   context('.rewriteJs', function () {
@@ -273,6 +279,42 @@ describe('lib/js', function () {
               expect(() => eval(stripped), 'is valid JS').to.not.throw
             })
           })
+        })
+      })
+    })
+
+    context('source maps', function () {
+      it('generates as expected', function () {
+        snapshot(parse(rewriteJs(URL, 'window.top')).map)
+      })
+
+      it('composes with existing inline sourcemap', function () {
+        // replace existing sourceMappingURL with inline
+        const inlinedJs = sourceMaps.inlineFormatter({
+          code: testSource.replace('\n//# sourceMappingURL=test.js.map\n', ''),
+          map: JSON.parse(testSourceMap),
+        })
+
+        snapshot(parse(rewriteJs('test.js', inlinedJs)).map)
+      })
+
+      // TODO: implement serving extenal sourcemaps
+      context.skip('external sourcemaps', function () {
+        beforeEach(() => {
+          nock.disableNetConnect()
+        })
+
+        afterEach(() => {
+          nock.restore()
+          nock.enableNetConnect()
+        })
+
+        it('loads external sourcemaps', () => {
+          // const onComplete = () => {
+
+          // }
+
+          // snapshot(parse(rewriteJsWithExternalSourceMaps('http://foo.com/bar/test.js', inlinedJs, onComplete)))
         })
       })
     })

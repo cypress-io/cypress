@@ -2,10 +2,15 @@ import { PrintResultType } from 'recast/lib/printer'
 import path from 'path'
 import url from 'url'
 
-const inlineSourceMapRe = /\n\/\/ ?(?:#|@) sourceMappingURL=data:application\/json;(?:charset=utf-8;)base64,([^$]+)\s*$/m
+const sourceMapRe = /\n\/\/ ?(?:#|@) sourceMappingURL=([^\s]+)\s*$/
+const inlineSourceMapRe = /\n\/\/ ?(?:#|@) sourceMappingURL=data:application\/json;(?:charset=utf-8;)base64,([^\s]+)\s*$/
 
 const getDataUrl = (map: any) => {
   return `data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(map)).toString('base64')}`
+}
+
+const stripSourceMap = (js: string) => {
+  return js.replace(sourceMapRe, '')
 }
 
 export const tryDecodeInline = (js: string) => {
@@ -48,7 +53,7 @@ export const inlineFormatter = (printed: PrintResultType): string => {
   const map = printed.map
 
   return [
-    printed.code,
+    stripSourceMap(printed.code),
     `//# sourceMappingURL=${getDataUrl(map)}`,
   ].join('\n')
 }
