@@ -254,6 +254,7 @@ describe('Project Nav', function () {
 
         it('displays stop browser button', () => {
           cy.get('.close-browser').should('be.visible')
+          cy.percySnapshot()
         })
 
         it('sends the required parameters to launch a browser', function () {
