@@ -60,7 +60,7 @@ describe('linux browser detection', () => {
         displayName: 'Chromium',
         majorVersion: 1,
         path: 'chromium',
-        profilePath: '/home/foo/.config/chromium',
+        profilePath: '/home/foo/snap/chromium/current',
         version: '1.2.3',
       })
     }

@@ -46,8 +46,8 @@ function getLinuxBrowser (
 
   const maybeSetSnapProfilePath = (versionString: string) => {
     if (os.platform() === 'linux' && name === 'chromium' && versionString.endsWith('snap')) {
-      // when running as a snap, chromium can only write to one directory
-      // @see https://cs.chromium.org/chromium/src/chrome/installer/linux/snap/snapcraft.yaml.in?l=59-61&rcl=6fb05bb3738f37392dde9cd2783637f09d5aa3f4
+      // when running as a snap, chromium can only write to certain directories
+      // @see https://github.com/cypress-io/cypress/issues/7020
       foundBrowser.profilePath = path.join(os.homedir(), 'snap', 'chromium', 'current')
     }
   }
