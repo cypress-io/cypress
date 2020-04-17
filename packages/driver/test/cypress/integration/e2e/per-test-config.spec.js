@@ -1,6 +1,5 @@
 /// <reference path="../../../../../../cli/types/index.d.ts" />
 /* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
-// @ts-check
 describe('per-test config', () => {
   const testState = {
     ranFirefox: false,
@@ -262,8 +261,8 @@ describe('per-test config', () => {
   })
 
   describe('xit, xdescribe', () => {
-    it.skip('should be skipped', {}, () => {})
-    it.skip('should be skipped', {}, () => {})
+    xit('should be skipped', {}, () => {})
+    xspecify('should be skipped', {}, () => {})
     xdescribe('suite should be skipped', {}, () => {
       it('skipped')
     })

@@ -2463,7 +2463,7 @@ declare namespace Cypress {
     experimentalGetCookiesSameSite: boolean
   }
 
-  interface TestConfigOptions extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
+  interface TestOptions extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
     // retries?: number
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
@@ -4868,62 +4868,62 @@ declare const Cypress: Cypress.Cypress & EventEmitter
 declare namespace Mocha {
   interface TestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
          * as a thunk.
          */
-        (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
+        (title: string, config: Cypress.TestOptions, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
          * as a thunk.
          */
-        (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
+        (title: string, config: Cypress.TestOptions, fn?: AsyncFunc): Test
   }
   interface ExclusiveTestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
          * as a thunk.
          */
-        (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
+        (title: string, config: Cypress.TestOptions, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
          * as a thunk.
          */
-        (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
+        (title: string, config: Cypress.TestOptions, fn?: AsyncFunc): Test
   }
   interface PendingTestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
          * as a thunk.
          */
-        (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
+        (title: string, config: Cypress.TestOptions, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
          * as a thunk.
          */
-        (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
+        (title: string, config: Cypress.TestOptions, fn?: AsyncFunc): Test
   }
 
   interface SuiteFunction {
     /**
-     * Describe a "suite" with the given `title`, TestConfig, and callback `fn` containing
+     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
      * nested suites.
      */
-    (title: string, config: Cypress.TestConfigOptions, fn: (this: Suite) => void): Suite
+    (title: string, config: Cypress.TestOptions, fn: (this: Suite) => void): Suite
   }
 
   interface ExclusiveSuiteFunction {
     /**
-     * Describe a "suite" with the given `title`, TestConfig, and callback `fn` containing
+     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
      * nested suites. Indicates this suite should be executed exclusively.
      */
-    (title: string, config: Cypress.TestConfigOptions, fn: (this: Suite) => void): Suite;
+    (title: string, config: Cypress.TestOptions, fn: (this: Suite) => void): Suite;
   }
 
   interface PendingSuiteFunction {
-    (title: string,  config: Cypress.TestConfigOptions, fn: (this: Suite) => void): Suite | void;
+    (title: string,  config: Cypress.TestOptions, fn: (this: Suite) => void): Suite | void;
   }
 
 }
