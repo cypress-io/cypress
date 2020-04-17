@@ -85,9 +85,15 @@ copyAllToDist = (distDir) ->
       debug("for pkg %s have the following file masks %o", pkg, pkgFileMasks)
       globOptions = {
         cwd: pkg, # search in the package folder
-        absolute: true # and return absolute filepaths
+        absolute: false # and return relative file paths
       }
       globby(pkgFileMasks, globOptions)
+    # we find paths like "src/main.js" wrt "packages/foo"
+    # now we need to get the file path wrt current working directory
+    # like "packages/foo/src/main.js" so when we copy
+    # into the dist folder we get "<dist?/packages/foo/src/main.js"
+    .map (foundFileRelativeToPackageFolder) ->
+      path.join(pkg, foundFileRelativeToPackageFolder)
     .tap(debug)
     .map(copyRelativePathToDist, {concurrency: 1})
 
