@@ -180,7 +180,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
   if (!tsRegistered) {
     try {
       const tsPath = resolve.sync('typescript', {
-        basedir: this.projectRoot,
+        basedir: projectRoot,
       })
 
       debug('typescript path: %s', tsPath)
@@ -189,7 +189,8 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
         compiler: tsPath,
         transpileOnly: true,
         compilerOptions: {
-
+          // The transpiled code should always transpile export/import.
+          module: 'CommonJS',
           esModuleInterop: true,
         },
       })

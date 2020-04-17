@@ -190,7 +190,7 @@
     "term-to-html": "1.2.0",
     "terminal-banner": "1.1.0",
     "through": "2.3.8",
-    "ts-node": "8.3.0",
+    "ts-node": "8.8.2",
     "typescript": "3.7.4",
     "vinyl-paths": "2.1.0",
     "wait-on": "3.3.0"
