@@ -472,6 +472,15 @@ namespace CypressTestConfigTests {
     browser: {foo: 'bar'} // $ExpectError
   }, () => {})
 
+  it.skip('test', {}, ()=>{})
+  it.only('test', {}, ()=>{})
+  xit('test', {}, ()=>{})
+
+  specify('test', {}, ()=>{})
+  specify.only('test', {}, ()=>{})
+  specify.skip('test', {}, ()=>{})
+  xspecify('test', {}, ()=>{})
+
   // set config on a per-suite basis
   describe('suite', {
     browser: {family: 'firefox'},
@@ -483,4 +492,8 @@ namespace CypressTestConfigTests {
     baseUrl: 'www.example.com'
     foo: 'foo' // $ExpectError
   }, () => {})
+
+  describe.only('suite', {}, ()=>{})
+  describe.skip('suite', {}, ()=>{})
+  xdescribe('suite', {}, ()=>{})
 }

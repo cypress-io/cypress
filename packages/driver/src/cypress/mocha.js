@@ -27,6 +27,8 @@ function overloadMochaFnForConfig (fnName, specWindow) {
     specWindow[fnName] = fn()
     specWindow[fnName]['only'] = fn('only')
     specWindow[fnName]['skip'] = fn('skip')
+    // override xit, xdescribe, etc
+    if (specWindow[`x${fnName}`]) specWindow[`x${fnName}`] = specWindow[fnName]['skip']
   }
 
   overrideFn(function (subFn) {

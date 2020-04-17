@@ -4868,63 +4868,62 @@ declare const Cypress: Cypress.Cypress & EventEmitter
 declare namespace Mocha {
   interface TestFunction {
         /**
-         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
          * as a thunk.
-         *
-         * - _Only available when invoked via the mocha CLI._
          */
         (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
          * as a thunk.
-         *
-         * - _Only available when invoked via the mocha CLI._
          */
         (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
   }
   interface ExclusiveTestFunction {
         /**
-         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
          * as a thunk.
-         *
-         * - _Only available when invoked via the mocha CLI._
          */
         (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
          * as a thunk.
-         *
-         * - _Only available when invoked via the mocha CLI._
          */
         (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
   }
   interface PendingTestFunction {
         /**
-         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
          * as a thunk.
-         *
-         * - _Only available when invoked via the mocha CLI._
          */
         (title: string, config: Cypress.TestConfigOptions, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title` and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestConfig, and callback `fn` acting
          * as a thunk.
-         *
-         * - _Only available when invoked via the mocha CLI._
          */
         (title: string, config: Cypress.TestConfigOptions, fn?: AsyncFunc): Test
   }
 
   interface SuiteFunction {
     /**
-     * [bdd, tdd] Describe a "suite" with the given `title` and callback `fn` containing
+     * Describe a "suite" with the given `title`, TestConfig, and callback `fn` containing
      * nested suites.
-     *
-     * - _Only available when invoked via the mocha CLI._
      */
     (title: string, config: Cypress.TestConfigOptions, fn: (this: Suite) => void): Suite
   }
+
+  interface ExclusiveSuiteFunction {
+    /**
+     * Describe a "suite" with the given `title`, TestConfig, and callback `fn` containing
+     * nested suites. Indicates this suite should be executed exclusively.
+     */
+    (title: string, config: Cypress.TestConfigOptions, fn: (this: Suite) => void): Suite;
+  }
+
+  interface PendingSuiteFunction {
+    (title: string,  config: Cypress.TestConfigOptions, fn: (this: Suite) => void): Suite | void;
+  }
+
 }

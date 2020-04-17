@@ -1,14 +1,13 @@
 /// <reference path="../../../../../../cli/types/index.d.ts" />
 /* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
 // @ts-check
-
-const testState = {
-  ranFirefox: false,
-  ranChrome: false,
-  ranChromium: false,
-}
-
 describe('per-test config', () => {
+  const testState = {
+    ranFirefox: false,
+    ranChrome: false,
+    ranChromium: false,
+  }
+
   after(function () {
     if (hasOnly(this.currentTest)) return
 
@@ -45,6 +44,7 @@ describe('per-test config', () => {
       FOO_VALUE: 'foo',
     },
   }, () => {
+    cy.visit('/fixtures/generic.html')
     expect(Cypress.config().defaultCommandTimeout).eq(200)
     expect(Cypress.config('defaultCommandTimeout')).eq(200)
     expect(Cypress.env('FOO_VALUE')).eq('foo')
@@ -261,16 +261,40 @@ describe('per-test config', () => {
     expect(Cypress.config().defaultCommandTimeout).eq(100)
   })
 
-  describe('baseUrl', () => {
-    it('visit example', { baseUrl: 'http://localhost:3501' }, () => {
-      cy.visit('/fixtures/generic.html')
-      cy.url().should('eq', 'http://localhost:3501/fixtures/generic.html')
+  describe('xit, xdescribe', () => {
+    it.skip('should be skipped', {}, () => {})
+    it.skip('should be skipped', {}, () => {})
+    xdescribe('suite should be skipped', {}, () => {
+      it('skipped')
     })
 
-    it('visit docs', { baseUrl: 'http://localhost:3500' }, () => {
-      cy.visit('/fixtures/generic.html')
-      cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
+    xcontext('suite should be skipped', {}, () => {
+      it('skipped')
     })
+
+    describe('non-skipped test', () => {
+      it('foo', () => {})
+    })
+
+    after(function () {
+      expect(this.currentTest?.parent?.parent?.tests).length(2)
+      expect(this.currentTest?.parent?.parent?.tests[0]).property('state', 'pending')
+      expect(this.currentTest?.parent?.parent?.tests[1]).property('state', 'pending')
+      expect(this.currentTest?.parent?.parent?.suites[0].tests[0]).property('state', 'pending')
+      expect(this.currentTest?.parent?.parent?.suites[1].tests[0]).property('state', 'pending')
+    })
+  })
+})
+
+describe('per-test-config baseUrl', () => {
+  it('visit example', { baseUrl: 'http://localhost:3501' }, () => {
+    cy.visit('/fixtures/generic.html')
+    cy.url().should('eq', 'http://localhost:3501/fixtures/generic.html')
+  })
+
+  it('visit docs', { baseUrl: 'http://localhost:3500' }, () => {
+    cy.visit('/fixtures/generic.html')
+    cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
   })
 })
 
