@@ -8997,10 +8997,10 @@ cypress-example-kitchensink@1.9.1:
     npm-run-all "^4.1.2"
     serve "11.3.0"
 
-cypress-react-unit-test@3.0.0-cypress-mount-mode.18:
-  version "3.0.0-cypress-mount-mode.18"
-  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-3.0.0-cypress-mount-mode.18.tgz#d49d45a18bb955dd5e137f7db0e104b37936454f"
-  integrity sha512-ih0AI7zEQPCv+StyC98t2xY+GfAHr2pI1+0Qrp2wBv2L/LM7qoAFNmGIpT4l62NeepHURD5OF1Gsu51T7Q/RHw==
+cypress-react-unit-test@3.0.0-cypress-mount-mode.19:
+  version "3.0.0-cypress-mount-mode.19"
+  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-3.0.0-cypress-mount-mode.19.tgz#519b6ddcc786f9b3a120288b3103decf35070d32"
+  integrity sha512-NGZyxOHnC04JQFqhlgk1N+o+WsgnVVzkkxYH5zV9pAaQ6k1zwTS6PD+yF8ajlPmc2bdj9QYGs3dy4Gj462RcKw==
   dependencies:
     "@cypress/code-coverage" "3.0.0"
     "@cypress/webpack-preprocessor" "4.1.3"
@@ -13033,6 +13033,12 @@ has-ansi@^2.0.0:
   integrity sha1-NPUEnOHs3ysGSa8+8k5F7TVBbZE=
   dependencies:
     ansi-regex "^2.0.0"
+
+has-binary2@cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92:
+  version "1.0.2"
+  resolved "https://codeload.github.com/cypress-io/has-binary/tar.gz/8580a33df21e8b36a43f57872a82c60829636a92"
+  dependencies:
+    isarray "2.0.1"
 
 has-binary2@~1.0.2:
   version "1.0.3"
