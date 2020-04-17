@@ -38,16 +38,21 @@
       i {
         font-size: 11px;
         color: #555;
+        margin-right: 5px;
       }
     }
 
     > li {
+      display: flex;
+
       > div,
       > a {
-        font-size: 13px;
+        align-items: center;
         color: #444;
-        padding: 1px 20px 0 20px;
-        line-height: 40px;
+        display: flex;
+        font-size: 13px;
+        justify-content: center;
+        padding: 0 20px;
       }
 
       > a  {
@@ -178,20 +183,27 @@
   }
 
   .dropdown-chosen {
-    border-radius: 4px;
+    background: #f6f6f6;
     border: 1px solid #c7c7c7;
-    line-height: 28px !important;
-    background-color: #f6f6f6;
+    border-radius: 4px;
+    display: flex;
+    height: 34px;
+    justify-content: center;
 
     img {
+      margin-right: 5px;
       position: relative;
-      top: -1px;
+      top: 1px;
     }
 
     &.disabled,
     &:active {
       background-color: #dedede;
     }
+  }
+
+  .dropdown-toggle {
+    margin-left: 4px;
   }
 
   .fa-check-circle, .fa-sync-alt {
