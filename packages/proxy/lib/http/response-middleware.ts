@@ -249,7 +249,13 @@ const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
     if (directives['document-domain']) {
       delete directives['document-domain']
 
-      this.res.set('feature-policy', stringifyFeaturePolicy(directives))
+      const policy = stringifyFeaturePolicy(directives)
+
+      if (policy) {
+        this.res.set('feature-policy', policy)
+      } else {
+        this.res.removeHeader('feature-policy')
+      }
     }
   }
 

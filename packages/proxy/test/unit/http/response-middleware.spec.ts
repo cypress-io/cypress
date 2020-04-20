@@ -70,19 +70,35 @@ describe('http/response-middleware', function () {
     })
 
     describe('when both feature-policy header and document-domain directive are present', function () {
-      beforeEach(function () {
-        prepareContext()
+      describe('when there are also other directives', function () {
+        beforeEach(function () {
+          prepareContext()
+        })
+
+        it('removes the document-domain directive from the header and keeps the rest', function () {
+          return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
+          .then(() => {
+            const [, featurePolicy] = ctx.res.set.args[0]
+            const directives = _.fromPairs(featurePolicy.split('; ').map((directive) => directive.split(' ')))
+
+            expect(directives['document-domain']).not.to.exist
+            expect(directives['autoplay']).to.exist
+            expect(directives['camera']).to.exist
+          })
+        })
       })
 
-      it('removes the document-domain directive from the header', function () {
-        return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
-        .then(() => {
-          const [, featurePolicy] = ctx.res.set.args[0]
-          const directives = _.fromPairs(featurePolicy.split('; ').map((directive) => directive.split(' ')))
+      describe('when it is the only directive', function () {
+        beforeEach(function () {
+          featurePolicyDirectives = _.pick(featurePolicyDirectives, 'document-domain')
+          prepareContext()
+        })
 
-          expect(directives['document-domain']).not.to.exist
-          expect(directives['autoplay']).to.exist
-          expect(directives['camera']).to.exist
+        it('removes the whole header', function () {
+          return testMiddleware([MaybeStripDocumentDomainFeaturePolicy], ctx)
+          .then(() => {
+            expect(ctx.res.removeHeader).to.be.calledWith('feature-policy')
+          })
         })
       })
     })
@@ -102,6 +118,7 @@ describe('http/response-middleware', function () {
       ctx = {
         res: {
           set: sinon.stub(),
+          removeHeader: sinon.stub(),
         },
         incomingRes: {
           headers,
