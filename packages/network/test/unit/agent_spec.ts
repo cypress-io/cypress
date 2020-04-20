@@ -242,30 +242,50 @@ describe('lib/agent', function () {
         })
       })
 
-      it('#createConnection sets expected secureOptions', function () {
-        const opts: any = {}
+      context('#createConnection secureOptions', function () {
+        it('sets no secureOptions by default', function () {
+          const opts: any = {}
 
-        this.agent.httpsAgent.createConnection(opts, (_err, sock) => {
-          sock.on('error', () => {}) // opts is not a valid request, errors are ok
+          this.agent.httpsAgent.createConnection(opts, (_err, sock) => {
+            sock.on('error', () => {}) // opts is not a valid request, errors are ok
+          })
+
+          expect(opts.secureOptions).to.eq(0)
         })
 
-        expect(constants.SSL_OP_ALL & opts.secureOptions).to.be.ok
-        expect(constants.SSL_OP_LEGACY_SERVER_CONNECT & opts.secureOptions).to.be.ok
-        expect(constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION & opts.secureOptions).to.eq(0)
-      })
+        it('preserves existing secureOptions', function () {
+          const opts: any = {
+            secureOptions: constants.SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER,
+          }
 
-      it('#createConnection preserves existing secureOptions', function () {
-        const opts: any = {
-          secureOptions: constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION,
-        }
+          this.agent.httpsAgent.createConnection(opts, (_err, sock) => {
+            sock.on('error', () => {}) // opts is not a valid request, errors are ok
+          })
 
-        this.agent.httpsAgent.createConnection(opts, (_err, sock) => {
-          sock.on('error', () => {}) // opts is not a valid request, errors are ok
+          expect(opts.secureOptions).to.eq(constants.SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER)
         })
 
-        expect(constants.SSL_OP_ALL & opts.secureOptions).to.be.ok
-        expect(constants.SSL_OP_LEGACY_SERVER_CONNECT & opts.secureOptions).to.be.ok
-        expect(constants.SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION & opts.secureOptions).to.be.ok
+        context('with CYPRESS_SSL_LEGACY_SERVER_CONNECT', function () {
+          beforeEach(() => {
+            process.env.CYPRESS_SSL_LEGACY_SERVER_CONNECT = '1'
+          })
+
+          afterEach(() => {
+            delete process.env.CYPRESS_SSL_LEGACY_SERVER_CONNECT
+          })
+
+          it('sets SSL_OP_LEGACY_SERVER_CONNECT', function () {
+            const opts: any = {
+              secureOptions: constants.SSL_OP_ALL,
+            }
+
+            this.agent.httpsAgent.createConnection(opts, (_err, sock) => {
+              sock.on('error', () => {}) // opts is not a valid request, errors are ok
+            })
+
+            expect(opts.secureOptions).to.eq(constants.SSL_OP_LEGACY_SERVER_CONNECT | constants.SSL_OP_ALL)
+          })
+        })
       })
 
       it('#createUpstreamProxyConnection does not go to proxy if domain in NO_PROXY', function () {
