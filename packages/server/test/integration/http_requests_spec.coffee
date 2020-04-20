@@ -560,7 +560,7 @@ describe "Routes", ->
           .then (file) ->
             expect(removeSourceMapContents(res.body)).to.equal(file.toString())
             expect(res.body).to.include("React.createElement(")
-      
+
       it "serves error javascript file when the file is missing", ->
         @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
         .then (res) ->
@@ -1698,6 +1698,26 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers).not.to.have.property("content-security-policy")
+
+      it "omits document-domain from Feature-Policy header", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "OK", {
+          "Content-Type": "text/html"
+          "Feature-Policy": "camera *; document-domain 'none'; autoplay 'self'"
+        }
+
+        @rp({
+          url: "http://localhost:8080/bar"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['feature-policy']).to.include("camera *")
+          expect(res.headers['feature-policy']).to.include("autoplay 'self'")
+          expect(res.headers['feature-policy']).not.to.include("document-domain 'none'")
 
       it "does not modify host origin header", ->
         @setup("http://foobar.com")
