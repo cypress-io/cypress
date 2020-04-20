@@ -38,16 +38,23 @@
       i {
         font-size: 11px;
         color: #555;
+        margin-right: 5px;
+        position: relative;
+        top: -1px;
       }
     }
 
     > li {
+      display: flex;
+
       > div,
       > a {
-        font-size: 13px;
+        align-items: center;
         color: #444;
-        padding: 1px 20px 0 20px;
-        line-height: 40px;
+        display: flex;
+        font-size: 13px;
+        justify-content: center;
+        padding: 13px 20px;
       }
 
       > a  {
@@ -78,6 +85,9 @@
   }
 
   .browsers.nav {
+    align-items: center;
+    display: flex;
+
     i {
       font-size: 13px;
 
@@ -178,14 +188,17 @@
   }
 
   .dropdown-chosen {
-    border-radius: 4px;
+    align-items: center;
+    background: #f6f6f6;
     border: 1px solid #c7c7c7;
-    line-height: 28px !important;
-    background-color: #f6f6f6;
+    border-radius: 4px;
+    display: flex;
+    height: 34px;
+    padding: 0 7px;
+    justify-content: center;
 
     img {
-      position: relative;
-      top: -1px;
+      margin-right: 5px;
     }
 
     &.disabled,
@@ -194,8 +207,12 @@
     }
   }
 
+  .dropdown-toggle {
+    margin-left: 4px;
+  }
+
   .fa-check-circle, .fa-sync-alt {
-    margin-right: 3px;
+    margin-right: 5px;
   }
 
   .browser-icon {
@@ -254,10 +271,9 @@
 
 .close-browser {
   .btn {
-    margin-top: 5px;
-    line-height: 28px;
-    padding: 0 9px 0 7px;
+    padding: 6px 9px;
     font-size: 13px;
+
     i {
       margin-right: 3px;
     }

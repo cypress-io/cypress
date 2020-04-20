@@ -88,7 +88,7 @@ exports['e2e task handles undefined return and includes stack trace in error 1']
   1)  throws when task returns undefined:
      CypressError: \`cy.task('returns:undefined')\` failed with the following error:
 
-The task 'returns:undefined' returned undefined. You must return a promise, a value, or null to indicate that the task was handled.
+The task 'returns:undefined' returned undefined. You must return a value, null, or a promise that resolves to a value or null to indicate that the task was handled.
 
 The task handler was:
 

@@ -6,11 +6,13 @@ $errUtils = require("../../cypress/error_utils")
 module.exports = (Commands, Cypress, cy, state, config) ->
   Commands.addAll({
     exec: (cmd, options = {}) ->
-      _.defaults options,
+      userOptions = options
+      options = _.defaults({}, userOptions, {
         log: true
         timeout: Cypress.config("execTimeout")
         failOnNonZeroExit: true
         env: {}
+      })
 
       if options.log
         consoleOutput = {}

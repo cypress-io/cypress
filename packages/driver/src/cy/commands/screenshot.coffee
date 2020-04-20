@@ -332,7 +332,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
     })
 
   Commands.addAll({ prevSubject: ["optional", "element", "window", "document"] }, {
-    screenshot: (subject, name, userOptions = {}) ->
+    screenshot: (subject, name, options = {}) ->
+      userOptions = options
+
       if _.isObject(name)
         userOptions = name
         name = null
