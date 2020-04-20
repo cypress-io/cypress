@@ -173,6 +173,20 @@ describe('test errors', function () {
         line: 8,
         column: 11,
         whitespace: '    ',
+      }, {
+        relativeFile: 'cypress://../driver/src/cypress/runner.js',
+        absoluteFile: 'cypress://../driver/src/cypress/runner.js',
+        function: 'callFn',
+        line: 9,
+        column: 12,
+        whitespace: '    ',
+      }, {
+        relativeFile: 'http://localhost:12345/__cypress/runner/cypress_runner.js',
+        absoluteFile: 'http://localhost:12345/__cypress/runner/cypress_runner.js',
+        function: 'throwErr',
+        line: 10,
+        column: 13,
+        whitespace: '    ',
       }],
       docsUrl: 'https://on.cypress.io/type',
       codeFrame: {
@@ -251,12 +265,11 @@ describe('test errors', function () {
     })
 
     it('pairs down stack line whitespace', function () {
-      this.setError(this.commandErr)
       cy.contains('View stack trace').click()
 
       cy.get('.runnable-err-stack-trace').within(() => {
         cy.get('.err-stack-line')
-        .should('have.length', 4)
+        .should('have.length', 6)
         .first().should('have.text', 'at foo.bar (my/app.js:2:7)')
 
         cy.get('.err-stack-line')
@@ -267,12 +280,13 @@ describe('test errors', function () {
 
         cy.get('.err-stack-line')
         .eq(3).should('have.text', '  at bar.baz (my/app.js:8:11)')
+
+        cy.get('.err-stack-line')
+        .eq(4).should('have.text', '  at callFn (cypress://../driver/src/cypress/runner.js:9:12)')
       })
     })
 
     it('does not include message in stack trace', function () {
-      this.setError(this.commandErr)
-
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
@@ -281,16 +295,25 @@ describe('test errors', function () {
     })
 
     it('turns files into links', function () {
-      this.setError(this.commandErr)
+      cy.contains('View stack trace').click()
 
       cy.get('.runnable-err-stack-trace .runnable-err-file-path')
       .should('have.length', 3)
       .first()
       .should('have.text', 'my/app.js:2:7')
 
-      cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace .runnable-err-file-path').eq(1)
       .should('have.text', 'cypress/integration/foo_spec.js:5:2')
+    })
+
+    it('does not turn cypress:// files into links', function () {
+      cy.contains('View stack trace').click()
+      cy.contains('cypress://').find('a').should('not.exist')
+    })
+
+    it('does not turn cypress_runner.js files into links', function () {
+      cy.contains('View stack trace').click()
+      cy.contains('cypress_runner.js').find('a').should('not.exist')
     })
 
     it('does not collapse test when clicking', () => {

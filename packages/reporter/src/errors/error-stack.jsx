@@ -3,6 +3,8 @@ import React from 'react'
 
 import ErrorFilePath from './error-file-path'
 
+const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
+
 const ErrorStack = ({ err }) => {
   if (!err.parsedStack) return err.stack
 
@@ -39,7 +41,11 @@ const ErrorStack = ({ err }) => {
       return makeLine(key, [whitespace, stackLine.message])
     }
 
-    const { relativeFile, function: fn } = stackLine
+    const { relativeFile, function: fn, line, column } = stackLine
+
+    if (cypressLineRegex.test(relativeFile)) {
+      return makeLine(key, [whitespace, `at ${fn} (${relativeFile}:${line}:${column})`])
+    }
 
     const link = (
       <ErrorFilePath
