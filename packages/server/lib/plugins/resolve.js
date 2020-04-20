@@ -15,7 +15,7 @@ module.exports = {
 
     try {
       return resolve.sync('typescript', {
-        baseDir: config.projectRoot,
+        basedir: config.projectRoot,
       })
     } catch (e) {
       return null
