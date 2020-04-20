@@ -16,10 +16,12 @@ debug('starting the CLI in dev mode with args %o', {
   args,
 })
 
-const exit = ({ code }) => {
-  process.exit(code)
-}
-
 execa(pathToCli, args, { stdio: 'inherit' })
-.then(exit)
-.catch(exit)
+.then(({ code }) => {
+  debug('exiting normally %o', { code })
+  process.exit(code)
+})
+.catch((err) => {
+  debug('exiting due to error %o', { err })
+  process.exit(err.exitCode || 1)
+})
