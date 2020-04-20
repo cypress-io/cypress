@@ -540,7 +540,7 @@ const create = (state, keyboard, focused, Cypress) => {
         }
 
         // Only send click event if mousedown element is not detached.
-        if ($elements.isDetachedEl(mouseDownPhase.targetEl)) {
+        if ($elements.isDetachedEl(mouseDownPhase.targetEl) || $elements.isDetached(mouseUpPhase.targetEl)) {
           return { skipClickEventReason: 'element was detached' }
         }
 
