@@ -619,8 +619,8 @@ const createAndOpenProject = function (socketId, options) {
   })
 }
 
-const removeOldProfiles = () => {
-  return browserUtils.removeOldProfiles()
+const removeOldProfiles = (browser) => {
+  return browserUtils.removeOldProfiles(browser)
   .catch((err) => {
     // dont make removing old browsers profiles break the build
     return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
@@ -1368,10 +1368,9 @@ module.exports = {
         // speed the initial booting time
         return Promise.all([
           system.info(),
-          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers),
+          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
           this.findSpecs(config, specPattern),
           trashAssets(config),
-          removeOldProfiles(),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
         // return only what is return to the specPattern
