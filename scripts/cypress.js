@@ -16,18 +16,14 @@ debug('starting the CLI in dev mode with args %o', {
   args,
 })
 
-execa(pathToCli, args, { stdio: 'inherit' })
-.then(({ code }) => {
+const exit = ({ exitCode }) => {
   if (typeof code !== 'number') {
-    // eslint-disable-next-line no-console
-    console.error(`missing exit code from execa (code: ${code})`)
-    process.exit(1)
+    throw new Error(`missing exit code from execa (received ${exitCode})`)
   }
 
-  debug('exiting normally %o', { code })
-  process.exit(code)
-})
-.catch((err) => {
-  debug('exiting due to error %o', { err })
-  process.exit(err.exitCode || 1)
-})
+  process.exit(exitCode)
+}
+
+execa(pathToCli, args, { stdio: 'inherit' })
+.then(exit)
+.catch(exit)
