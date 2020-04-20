@@ -2,12 +2,11 @@ import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
-import Loader from 'react-loader'
-import Select from 'react-select'
-import { gravatarUrl } from '../lib/utils'
 
+import OrgSelector from './org-selector'
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import orgsStore from '../organizations/organizations-store'
@@ -27,13 +26,21 @@ class SetupProject extends Component {
       error: null,
       projectName: this.props.project.displayName,
       public: null,
-      selectedOrg: {},
+      selectedOrgId: null,
       showNameMissingError: false,
       isSubmitting: false,
     }
   }
 
   componentDidMount () {
+    // this ensures that when orgsStore.orgs updates from polling, we
+    // re-evaluate the selected org id
+    this._disposeAutorun = autorun(() => {
+      this.setState({
+        selectedOrgId: this._getSelectedOrgId(),
+      })
+    })
+
     this._handlePolling()
   }
 
@@ -42,6 +49,7 @@ class SetupProject extends Component {
   }
 
   componentWillUnmount () {
+    this._disposeAutorun()
     this._stopPolling()
   }
 
@@ -146,31 +154,19 @@ class SetupProject extends Component {
           <a
             href='#'
             className='btn btn-link manage-orgs-btn pull-right'
-            onClick={this._manageOrgs}>
+            onClick={this._openManageOrgs}>
             Manage organizations
           </a>
         </div>
         <div className='owner-parts'>
           <div className='select-orgs'>
-            {
-              orgsStore.isLoaded ?
-                this._hasOrgs() ?
-                  this._orgSelector() :
-                  <div className='empty-select-orgs well'>
-                    <p>You don't have any organizations yet.</p>
-                    <p>Organizations can help you manage projects, including billing.</p>
-                    <p>
-                      <a
-                        href='#'
-                        className='btn btn-link'
-                        onClick={this._manageOrgs}>
-                        <i className='fas fa-plus'></i>{' '}
-                          Create organization
-                      </a>
-                    </p>
-                  </div>
-                : <Loader color='#888' scale={0.5} />
-            }
+            <OrgSelector
+              orgs={orgsStore.orgs}
+              isLoaded={orgsStore.isLoaded}
+              selectedOrgId={this.state.selectedOrgId}
+              onUpdateSelectedOrgId={this._updateSelectedOrgId}
+              onCreateOrganization={this._openManageOrgs}
+            />
           </div>
         </div>
       </div>
@@ -179,48 +175,6 @@ class SetupProject extends Component {
 
   _hasOrgs () {
     return orgsStore.orgs.length
-  }
-
-  _orgSelectValue (options) {
-    if (!_.isEmpty(this.state.selectedOrg)) {
-      return this.state.selectedOrg
-    }
-
-    return this._hasDefaultOrg() ?
-      _.find(options, { default: true }) :
-      options[0]
-  }
-
-  _orgSelector () {
-    const options = _.map(orgsStore.orgs, (org) => {
-      return {
-        value: org.id,
-        default: org.default,
-        label: org.default ?
-          <div>
-            <img
-              className='user-avatar'
-              height='13'
-              width='13'
-              src={`${gravatarUrl(authStore.user && authStore.user.email)}`}
-            />
-            Your personal organization
-          </div> : org.name,
-      }
-    })
-
-    return (
-      <div className={!this._hasOrgs() ? 'hidden' : ''}>
-        <Select
-          className='organizations-select'
-          classNamePrefix='organizations-select'
-          value={this._orgSelectValue(options)}
-          onChange={this._updateSelectedOrg}
-          isLoading={!orgsStore.isLoaded}
-          options={options}
-        />
-      </div>
-    )
   }
 
   _accessSelector () {
@@ -280,7 +234,7 @@ class SetupProject extends Component {
     ipc.externalOpen('https://on.cypress.io/what-is-project-access')
   }
 
-  _manageOrgs = (e) => {
+  _openManageOrgs = (e) => {
     e.preventDefault()
     ipc.externalOpen('https://on.cypress.io/dashboard/organizations')
   }
@@ -302,11 +256,31 @@ class SetupProject extends Component {
     )
   }
 
-  _updateSelectedOrg = (selectedOrg, action) => {
-    const orgIsNotSelected = _.isEmpty(selectedOrg)
+  _getSelectedOrgId () {
+    const orgs = orgsStore.orgs
+
+    if (!orgs.length) {
+      return null
+    }
+
+    if (this.state.selectedOrgId) {
+      return this.state.selectedOrgId
+    }
+
+    const defaultOrg = _.find(orgs, { default: true })
+
+    if (defaultOrg) {
+      return defaultOrg.id
+    }
+
+    return orgs[0].id
+  }
+
+  _updateSelectedOrgId = (selectedOrgId) => {
+    const orgIsNotSelected = _.isNull(selectedOrgId)
 
     this.setState({
-      selectedOrg,
+      selectedOrgId,
     })
 
     // deselect their choice for access
@@ -359,7 +333,7 @@ class SetupProject extends Component {
   _setupProject () {
     ipc.setupDashboardProject({
       projectName: this.state.projectName,
-      orgId: this.state.selectedOrg.value,
+      orgId: this.state.selectedOrgId,
       public: this.state.public,
     })
     .then((projectDetails) => {

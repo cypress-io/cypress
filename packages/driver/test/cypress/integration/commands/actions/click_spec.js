@@ -501,6 +501,41 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('span', 'focus click mouseup').each(shouldNotBeCalled)
     })
 
+    // https://github.com/cypress-io/cypress/issues/6923
+    it('no click when mouseUpPhase targetEl is detached', () => {
+      const btn = cy.$$('button:first')
+      const span1 = $('<span>foooo</span>')
+      const span2 = $('<span>baaaar</span>')
+
+      attachFocusListeners({ btn, span1, span2 })
+      attachMouseClickListeners({ btn, span1, span2 })
+      attachMouseHoverListeners({ btn, span1, span2 })
+
+      btn.html('')
+      btn.append(span1)
+
+      const onEvent = cy.stub().callsFake(() => {
+        span1.hide()
+        btn.append(span2)
+      })
+
+      btn.on('mousedown', onEvent)
+      btn.on('mouseup', () => {
+        span2.remove()
+      })
+
+      // uncomment to manually test
+      // cy.wrap(onEvent).should('be.called')
+      cy.get('button:first').click()
+
+      cy.getAll('btn', 'mouseenter mousedown mouseup focus').each(shouldBeCalled)
+      cy.getAll('btn', 'click').each(shouldNotBeCalled)
+      cy.getAll('span1', 'mouseover mouseenter mousedown').each(shouldBeCalled)
+      cy.getAll('span1', 'focus click mouseup').each(shouldNotBeCalled)
+      cy.getAll('span2', 'mouseup mouseover mouseenter').each(shouldBeCalled)
+      cy.getAll('span2', 'focus click mousedown').each(shouldNotBeCalled)
+    })
+
     it('no click when new element at coords is not ancestor', () => {
       const btn = cy.$$('button:first')
       const span1 = $('<span>foooo</span>')

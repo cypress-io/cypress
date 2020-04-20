@@ -12,7 +12,6 @@ export const browsers: Browser[] = [
     channel: 'stable',
     displayName: 'Chrome',
     versionRegex: /Google Chrome (\S+)/m,
-    profile: true,
     binary: ['google-chrome', 'chrome', 'google-chrome-stable'],
   },
   {
@@ -22,7 +21,6 @@ export const browsers: Browser[] = [
     channel: 'stable',
     displayName: 'Chromium',
     versionRegex: /Chromium (\S+)/m,
-    profile: true,
     binary: ['chromium-browser', 'chromium'],
   },
   {
@@ -31,7 +29,6 @@ export const browsers: Browser[] = [
     channel: 'canary',
     displayName: 'Canary',
     versionRegex: /Google Chrome Canary (\S+)/m,
-    profile: true,
     binary: 'google-chrome-canary',
   },
   {
@@ -42,7 +39,6 @@ export const browsers: Browser[] = [
     info: firefoxInfo,
     // Mozilla Firefox 70.0.1
     versionRegex: /^Mozilla Firefox ([^\sab]+)$/m,
-    profile: true,
     binary: 'firefox',
   },
   {
@@ -53,7 +49,6 @@ export const browsers: Browser[] = [
     info: firefoxInfo,
     // Mozilla Firefox 73.0b12
     versionRegex: /^Mozilla Firefox (\S+b\S*)$/m,
-    profile: true,
     // ubuntu PPAs install it as firefox
     binary: ['firefox-developer-edition', 'firefox'],
   },
@@ -65,7 +60,6 @@ export const browsers: Browser[] = [
     info: firefoxInfo,
     // Mozilla Firefox 74.0a1
     versionRegex: /^Mozilla Firefox (\S+a\S*)$/m,
-    profile: true,
     // ubuntu PPAs install it as firefox-trunk
     binary: ['firefox-nightly', 'firefox-trunk'],
   },
@@ -75,7 +69,6 @@ export const browsers: Browser[] = [
     channel: 'stable',
     displayName: 'Edge',
     versionRegex: /Microsoft Edge (\S+)/m,
-    profile: true,
     binary: 'edge',
   },
   {
@@ -84,7 +77,6 @@ export const browsers: Browser[] = [
     channel: 'canary',
     displayName: 'Edge Canary',
     versionRegex: /Microsoft Edge Canary (\S+)/m,
-    profile: true,
     binary: 'edge-canary',
   },
   {
@@ -93,7 +85,6 @@ export const browsers: Browser[] = [
     channel: 'beta',
     displayName: 'Edge Beta',
     versionRegex: /Microsoft Edge Beta (\S+)/m,
-    profile: true,
     binary: 'edge-beta',
   },
   {
@@ -102,7 +93,6 @@ export const browsers: Browser[] = [
     channel: 'dev',
     displayName: 'Edge Dev',
     versionRegex: /Microsoft Edge Dev (\S+)/m,
-    profile: true,
     binary: 'edge-dev',
   },
 ]

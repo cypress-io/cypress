@@ -5,7 +5,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "stable",
     "displayName": "Chrome",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "google-chrome",
       "chrome",
@@ -26,7 +25,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "stable",
     "displayName": "Chromium",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "chromium-browser",
       "chromium"
@@ -46,7 +44,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "canary",
     "displayName": "Canary",
     "versionRegex": {},
-    "profile": true,
     "binary": "google-chrome-canary",
     "path": "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
     "version": "someVersion",
@@ -64,7 +61,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "displayName": "Firefox",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": "firefox",
     "path": "/Applications/Firefox.app/Contents/MacOS/firefox-bin",
     "version": "someVersion",
@@ -82,7 +78,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "displayName": "Firefox Developer Edition",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "firefox-developer-edition",
       "firefox"
@@ -103,7 +98,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "displayName": "Firefox Nightly",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "firefox-nightly",
       "firefox-trunk"
@@ -123,7 +117,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "stable",
     "displayName": "Edge",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge",
     "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
     "version": "someVersion",
@@ -140,7 +133,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "canary",
     "displayName": "Edge Canary",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-canary",
     "path": "/Applications/Microsoft Edge Canary.app/Contents/MacOS/Microsoft Edge Canary",
     "version": "someVersion",
@@ -157,7 +149,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "beta",
     "displayName": "Edge Beta",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-beta",
     "path": "/Applications/Microsoft Edge Beta.app/Contents/MacOS/Microsoft Edge Beta",
     "version": "someVersion",
@@ -174,7 +165,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "dev",
     "displayName": "Edge Dev",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-dev",
     "path": "/Applications/Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev",
     "version": "someVersion",

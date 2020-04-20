@@ -53,7 +53,7 @@ describe('browser detection', () => {
     let execa: SinonStub
 
     beforeEach(() => {
-      execa = sinon.stub(utils, 'execa')
+      execa = sinon.stub(utils, 'getOutput')
 
       execa.withArgs('/Applications/My Shiny New Browser.app', ['--version'])
       .resolves({ stdout: 'foo-browser v100.1.2.3' })
