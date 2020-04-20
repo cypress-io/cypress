@@ -6,7 +6,6 @@ import net from 'net'
 import { getProxyForUrl } from 'proxy-from-env'
 import url from 'url'
 import { createRetryingSocket, getAddress } from './connect'
-import constants from 'constants'
 
 const debug = debugModule('cypress:network:agent')
 const CRLF = '\r\n'
@@ -28,15 +27,6 @@ type HttpsRequestOptionsWithProxy = WithProxyOpts<HttpsRequestOptions>
 
 type FamilyCache = {
   [host: string]: 4 | 6
-}
-
-function getSecureOptions (): number {
-  if (process.env.CYPRESS_SSL_LEGACY_SERVER_CONNECT) {
-    // @see https://github.com/cypress-io/cypress/issues/6771
-    return constants.SSL_OP_LEGACY_SERVER_CONNECT
-  }
-
-  return 0
 }
 
 export function buildConnectReqHead (hostname: string, port: string, proxy: url.Url) {
@@ -273,7 +263,7 @@ class HttpsAgent extends https.Agent {
   }
 
   createConnection (options: HttpsRequestOptions, cb: http.SocketCallback) {
-    options.secureOptions = getSecureOptions() | (options.secureOptions || 0)
+    options.secureOptions = 0
 
     if (process.env.HTTPS_PROXY) {
       const proxy = getProxyForUrl(options.href)
