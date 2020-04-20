@@ -2,22 +2,25 @@
 // https://on.cypress.io/module-api
 import cypress from 'cypress'
 
-cypress.run // $ExpectType (options?: Partial<CypressRunOptions> | undefined) => Promise<CypressRunResult>
+cypress.run // $ExpectType (options?: Partial<CypressRunOptions> | undefined) => Promise<CypressRunResult | CypressFailedRunResult>
 cypress.open // $ExpectType (options?: Partial<CypressOpenOptions> | undefined) => Promise<void>
 cypress.run({
   tag: 'production,nightly'
 })
 cypress.run({}).then(results => {
-  results // $ExpectType CypressRunResult
+  results // $ExpectType CypressRunResult | CypressFailedRunResult
 })
 cypress.run().then(results => {
-  results // $ExpectType CypressRunResult
-  results.failures // $ExpectType number | undefined
-  results.message // $ExpectType string | undefined
-  results.runUrl // $ExpectType string | undefined
+  results // $ExpectType CypressRunResult | CypressFailedRunResult
+  if ('runs' in results) { // results is CypressRunResult
+    results.runUrl // $ExpectType string | undefined
+  } else {
+    results.failures // $ExpectType number
+    results.message // $ExpectType string
+  }
 })
 cypress.open() // $ExpectType Promise<void>
-cypress.run() // $ExpectType Promise<CypressRunResult>
+cypress.run() // $ExpectType Promise<CypressRunResult | CypressFailedRunResult>
 
 cypress.open({
   configFile: false

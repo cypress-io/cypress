@@ -109,6 +109,20 @@ function setInitialCookie (res: CypressResponse, remoteState: any, value) {
   return setCookie(res, '__cypress.initial', value, remoteState.domainName)
 }
 
+// "autoplay *; document-domain 'none'" => { autoplay: "*", "document-domain": "'none'" }
+const parseFeaturePolicy = (policy: string): any => {
+  const pairs = policy.split('; ').map((directive) => directive.split(' '))
+
+  return _.fromPairs(pairs)
+}
+
+// { autoplay: "*", "document-domain": "'none'" } => "autoplay *; document-domain 'none'"
+const stringifyFeaturePolicy = (policy: any): string => {
+  const pairs = _.toPairs(policy)
+
+  return pairs.map((directive) => directive.join(' ')).join('; ')
+}
+
 const LogResponse: ResponseMiddleware = function () {
   debug('received response %o', {
     req: _.pick(this.req, 'method', 'proxiedUrl', 'headers'),
@@ -221,6 +235,29 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   )
 
   debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
+
+  this.next()
+}
+
+// https://github.com/cypress-io/cypress/issues/6480
+const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
+  const { 'feature-policy': featurePolicy } = this.incomingRes.headers
+
+  if (featurePolicy) {
+    const directives = parseFeaturePolicy(<string>featurePolicy)
+
+    if (directives['document-domain']) {
+      delete directives['document-domain']
+
+      const policy = stringifyFeaturePolicy(directives)
+
+      if (policy) {
+        this.res.set('feature-policy', policy)
+      } else {
+        this.res.removeHeader('feature-policy')
+      }
+    }
+  }
 
   this.next()
 }
@@ -373,6 +410,7 @@ export default {
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,
+  MaybeStripDocumentDomainFeaturePolicy,
   CopyCookiesFromIncomingRes,
   MaybeSendRedirectToClient,
   CopyResponseStatusCode,

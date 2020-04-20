@@ -53,14 +53,14 @@ create = (state, config, log) ->
 
     uncaughtErrObj = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
 
-    err.name = "Uncaught " + err.name
-
     uncaughtErrProps = $errUtils.modifyErrMsg(err, uncaughtErrObj.message, (msg1, msg2) ->
       return "#{msg1}\n\n#{msg2}"
     )
     _.defaults(uncaughtErrProps, uncaughtErrObj)
 
     uncaughtErr = $errUtils.mergeErrProps(err, uncaughtErrProps)
+
+    $errUtils.modifyErrName(err, "Uncaught #{err.name}")
 
     uncaughtErr.onFail = ->
       if l = current and current.getLastLog()

@@ -3,12 +3,20 @@ import { partial, trim, tap, prop } from 'ramda'
 import { FoundBrowser, Browser } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
+import os from 'os'
+import path from 'path'
+import Bluebird from 'bluebird'
 
 function getLinuxBrowser (
   name: string,
   binary: string,
   versionRegex: RegExp,
 ): Promise<FoundBrowser> {
+  const foundBrowser: any = {
+    name,
+    path: binary,
+  }
+
   const getVersion = (stdout: string) => {
     const m = versionRegex.exec(stdout)
 
@@ -36,14 +44,21 @@ function getLinuxBrowser (
     throw notInstalledErr(binary)
   }
 
+  const maybeSetSnapProfilePath = (versionString: string) => {
+    if (os.platform() === 'linux' && name === 'chromium' && versionString.endsWith('snap')) {
+      // when running as a snap, chromium can only write to certain directories
+      // @see https://github.com/cypress-io/cypress/issues/7020
+      foundBrowser.profilePath = path.join(os.homedir(), 'snap', 'chromium', 'current')
+    }
+  }
+
   return getVersionString(binary)
+  .tap(maybeSetSnapProfilePath)
   .then(getVersion)
-  .then((version: string) => {
-    return {
-      name,
-      version,
-      path: binary,
-    } as FoundBrowser
+  .then((version: string): FoundBrowser => {
+    foundBrowser.version = version
+
+    return foundBrowser
   })
   .catch(logAndThrowError)
 }
@@ -51,7 +66,8 @@ function getLinuxBrowser (
 export function getVersionString (path: string) {
   log('finding version string using command "%s --version"', path)
 
-  return utils.execa(path, ['--version'])
+  return Bluebird.resolve(utils.getOutput(path, ['--version']))
+  .timeout(5000, `Timed out getting version for ${path}`)
   .then(prop('stdout'))
   .then(trim)
   .then(tap(partial(log, ['stdout: "%s"'])))
