@@ -265,6 +265,7 @@ describe('lib/agent', function () {
           expect(opts.secureOptions).to.eq(constants.SSL_OP_MICROSOFT_BIG_SSLV3_BUFFER)
         })
 
+        // @see https://github.com/cypress-io/cypress/issues/6771
         context('with CYPRESS_SSL_LEGACY_SERVER_CONNECT', function () {
           beforeEach(() => {
             process.env.CYPRESS_SSL_LEGACY_SERVER_CONNECT = '1'
