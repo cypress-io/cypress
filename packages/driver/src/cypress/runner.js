@@ -889,6 +889,16 @@ const create = function (specWindow, mocha, Cypress, cy) {
     return _testsById[id]
   }
 
+  function hasTestAlreadyRun (test) {
+    if (Cypress._RESUMED_AT_TEST) {
+      if (+test.id.slice(1) < +Cypress._RESUMED_AT_TEST.slice(1)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
@@ -962,6 +972,27 @@ const create = function (specWindow, mocha, Cypress, cy) {
           break
       }
 
+      // if this isnt a hook, then the name is 'test'
+      const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+
+      // extract out the next(fn) which mocha uses to
+      // move to the next runnable - this will be our async seam
+      const _next = args[0]
+
+      if (hasTestAlreadyRun(test)) {
+        // NOTE: this is a hack to work around another cypress bug
+        // where the currentTest of a global after hook
+        // can be the wrong test after top navigation occurs
+        // (no open issue since it isn't user-facing for the most part)
+
+        // A failing after hook will also not show up as a failing test in open mode
+        // (only a visual bug - does not affect run mode)
+        // https://github.com/cypress-io/cypress/issues/2296
+        if (!(hookName === 'after all' && runnable.parent.root)) {
+          return _next()
+        }
+      }
+
       // closure for calculating the actual
       // runtime of a runnables fn exection duration
       // and also the run of the runnable:after:run:async event
@@ -986,9 +1017,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
         test.wallClockStartedAt = wallClockStartedAt
       }
 
-      // if this isnt a hook, then the name is 'test'
-      const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
-
       // if we haven't yet fired this event for this test
       // that means that we need to reset the previous state
       // of cy - since we now have a new 'test' and all of the
@@ -996,10 +1024,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
-
-      // extract out the next(fn) which mocha uses to
-      // move to the next runnable - this will be our async seam
-      const _next = args[0]
 
       const next = function (err) {
         // now set the duration of the after runnable run async event
