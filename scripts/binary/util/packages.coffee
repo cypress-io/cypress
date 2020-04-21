@@ -4,8 +4,6 @@ cp = require("child_process")
 path = require("path")
 # we wrap glob to handle EMFILE error
 glob = require("glob")
-# but globby supports multiple wildcard search patterns 👏
-globby = require("globby")
 Promise = require("bluebird")
 retry = require("bluebird-retry")
 la = require("lazy-ass")
@@ -16,6 +14,7 @@ os = require("os")
 prettyMs = require("pretty-ms")
 pluralize = require('pluralize')
 debug = require("debug")("cypress:binary")
+externalUtils = require("./3rd-party")
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -87,7 +86,7 @@ copyAllToDist = (distDir) ->
         cwd: pkg, # search in the package folder
         absolute: false # and return relative file paths
       }
-      globby(pkgFileMasks, globOptions)
+      externalUtils.globby(pkgFileMasks, globOptions)
     # we find paths like "src/main.js" wrt "packages/foo"
     # now we need to get the file path wrt current working directory
     # like "packages/foo/src/main.js" so when we copy
@@ -115,7 +114,7 @@ copyAllToDist = (distDir) ->
     glob("./packages/*")
     .map(copyPackage, {concurrency: 1})
   .then ->
-    console.log("Finished Copying", new Date() - started)
+    console.log("Finished Copying %dms", new Date() - started)
 
 forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)

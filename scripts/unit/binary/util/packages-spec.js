@@ -1,3 +1,4 @@
+/* global sinon */
 const os = require('os')
 const _ = require('lodash')
 const path = require('path')
@@ -5,6 +6,7 @@ const proxyquire = require('proxyquire')
 const mockfs = require('mock-fs')
 const _snapshot = require('snap-shot-it')
 const chai = require('chai')
+const debug = require('debug')('test')
 
 chai.use(require('chai-as-promised'))
 
@@ -13,6 +15,7 @@ const { expect } = chai
 const packages = require('../../../binary/util/packages')
 const { transformRequires } = require('../../../binary/util/transform-requires')
 const { testPackageStaticAssets } = require('../../../binary/util/testStaticAssets')
+const externalUtils = require('../../../binary/util/3rd-party')
 
 global.beforeEach(() => {
   mockfs.restore()
@@ -36,7 +39,19 @@ describe('packages', () => {
       },
     })
 
-    await packages.copyAllToDist(os.tmpdir())
+    sinon.stub(externalUtils, 'globby')
+    .withArgs(['package.json', 'lib', 'src/main.js'])
+    .resolves([
+      'package.json',
+      'lib/foo.js',
+      'src/main.js',
+    ])
+
+    const destinationFolder = os.tmpdir()
+
+    debug('destination folder %s', destinationFolder)
+
+    await packages.copyAllToDist(destinationFolder)
 
     const files = getFs()
 
