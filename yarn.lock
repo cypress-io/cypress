@@ -3734,6 +3734,11 @@
   resolved "https://registry.yarnpkg.com/@types/parsimmon/-/parsimmon-1.10.1.tgz#d46015ad91128fce06a1a688ab39a2516507f740"
   integrity sha512-MoF2IC9oGSgArJwlxdst4XsvWuoYfNUWtBw0kpnCi6K05kV+Ecl7siEeJ40tgCbI9uqEMGQL/NlPMRv6KVkY5Q==
 
+"@types/prismjs@1.16.0":
+  version "1.16.0"
+  resolved "https://registry.yarnpkg.com/@types/prismjs/-/prismjs-1.16.0.tgz#4328c9f65698e59f4feade8f4e5d928c748fd643"
+  integrity sha512-mEyuziLrfDCQ4juQP1k706BUU/c8OGn/ZFl69AXXY6dStHClKX4P+N8+rhqpul1vRDA2VOygzMRSJJZHyDEOfw==
+
 "@types/prop-types@*":
   version "15.7.3"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.3.tgz#2ab0d5da2e5815f94b0b9d4b95d1e5f243ab2ca7"
@@ -22067,7 +22072,7 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#unpatched-has-bin
     circular-json "0.5.9"
     component-emitter "1.2.1"
     debug "~4.1.0"
-    has-binary2 "~1.0.2"
+    has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
 
 socket.io-client@2.3.0:
   version "2.3.0"

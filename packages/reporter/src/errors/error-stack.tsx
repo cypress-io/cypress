@@ -1,17 +1,25 @@
 import _ from 'lodash'
-import React from 'react'
+import { observer } from 'mobx-react'
+import React, { ReactElement } from 'react'
 
 import ErrorFilePath from './error-file-path'
+import Err from './err-model'
 
 const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
 
-const ErrorStack = ({ err }) => {
-  if (!err.parsedStack) return err.stack
+interface Props {
+  err: Err,
+}
+
+type StringOrElement = string | ReactElement
+
+const ErrorStack = observer(({ err }: Props) => {
+  if (!err.parsedStack) return <>err.stack</>
 
   // only display stack lines beyond the original message, since it's already
   // displayed above this
   let foundFirstStackLine = false
-  const stackLines = _.filter(err.parsedStack, ({ message }, index) => {
+  const stackLines = _.filter(err.parsedStack, ({ message }) => {
     if (foundFirstStackLine) return true
 
     if (message != null) return false
@@ -26,13 +34,14 @@ const ErrorStack = ({ err }) => {
   const whitespaceLengths = _.map(stackLines, ({ whitespace }) => whitespace ? whitespace.length : 0)
   const commonWhitespaceLength = Math.min(...whitespaceLengths)
 
-  const makeLine = (key, content) => {
+  const makeLine = (key: string, content: StringOrElement[]) => {
     return (
       <div className='err-stack-line' key={key}>{content}</div>
     )
   }
 
-  return _.map(stackLines, (stackLine, index) => {
+  const lines = _.map(stackLines, (stackLine, index) => {
+    const { relativeFile, function: fn, line, column } = stackLine
     const key = `${relativeFile}${index}`
 
     const whitespace = stackLine.whitespace.slice(commonWhitespaceLength)
@@ -41,21 +50,18 @@ const ErrorStack = ({ err }) => {
       return makeLine(key, [whitespace, stackLine.message])
     }
 
-    const { relativeFile, function: fn, line, column } = stackLine
-
-    if (cypressLineRegex.test(relativeFile)) {
+    if (cypressLineRegex.test(relativeFile || '')) {
       return makeLine(key, [whitespace, `at ${fn} (${relativeFile}:${line}:${column})`])
     }
 
     const link = (
-      <ErrorFilePath
-        key={key}
-        fileDetails={stackLine}
-      />
+      <ErrorFilePath key={key} fileDetails={stackLine} />
     )
 
     return makeLine(key, [whitespace, `at ${fn} (`, link, ')'])
   })
-}
+
+  return <>{lines}</>
+})
 
 export default ErrorStack

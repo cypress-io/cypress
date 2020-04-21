@@ -2,12 +2,17 @@ import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Prism from 'prismjs'
 
+import { CodeFrame } from './err-model'
 import ErrorFilePath from './error-file-path'
 
+interface Props {
+  codeFrame: CodeFrame
+}
+
 @observer
-class ErrorCodeFrame extends Component {
+class ErrorCodeFrame extends Component<Props> {
   componentDidMount () {
-    Prism.highlightAllUnder(this.refs.codeFrame)
+    Prism.highlightAllUnder(this.refs.codeFrame as ParentNode)
   }
 
   render () {
