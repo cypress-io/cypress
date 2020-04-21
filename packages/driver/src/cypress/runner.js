@@ -789,6 +789,10 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
   })
 }
 
+function getOrderFromId (id) {
+  return +id.slice(1)
+}
+
 const create = function (specWindow, mocha, Cypress, cy) {
   let _id = 0
   let _hookId = 0
@@ -903,9 +907,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   function hasTestAlreadyRun (test) {
     if (Cypress._RESUMED_AT_TEST) {
-      if (+test.id.slice(1) < +Cypress._RESUMED_AT_TEST.slice(1)) {
-        return true
-      }
+      return getOrderFromId(test) < getOrderFromId(Cypress._RESUMED_AT_TEST)
     }
 
     return false
@@ -992,14 +994,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
       const _next = args[0]
 
       if (hasTestAlreadyRun(test)) {
-        // NOTE: this is a hack to work around another cypress bug
-        // where the currentTest of a global after hook
-        // can be the wrong test after top navigation occurs
-        // (no open issue since it isn't user-facing for the most part)
-
-        // A failing after hook will also not show up as a failing test in open mode
-        // (only a visual bug - does not affect run mode)
-        // https://github.com/cypress-io/cypress/issues/2296
         return _next()
       }
 
