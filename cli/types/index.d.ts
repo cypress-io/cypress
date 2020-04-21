@@ -12,7 +12,7 @@
 /// <reference types="sinon" />
 /// <reference types="sinon-chai" />
 /// <reference types="mocha" />
-/// <reference types="jquery" />
+/// <reference path="./jquery3/index.d.ts" />
 /// <reference types="chai" />
 /// <reference types="chai-jquery" />
 /// <reference types="bluebird" />
@@ -178,7 +178,7 @@ declare namespace Cypress {
      * @example
      *    Cypress.$('p')
      */
-    $: JQueryStatic
+    $: JQueryStatic3
     /**
      * Cypress automatically includes a Blob library and exposes it as Cypress.Blob.
      *
@@ -418,8 +418,8 @@ declare namespace Cypress {
       /**
        * Returns a jQuery object obtained by wrapping an object in jQuery.
        */
-      wrap(wrappingElement_function: JQuery.Selector | JQuery.htmlString | Element | JQuery | ((index: number) => string | JQuery)): JQuery
-      query(selector: JQuery.Selector, context?: Element | JQuery): JQuery
+      wrap(wrappingElement_function: JQuery3.Selector | JQuery3.htmlString | Element | JQuery3 | ((index: number) => string | JQuery3)): JQuery3
+      query(selector: JQuery3.Selector, context?: Element | JQuery3): JQuery3
       /**
        * Returns an array of raw elements pulled out from a jQuery object.
        */
@@ -428,41 +428,41 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a DOM object.
        */
       isDom(obj: any): boolean
-      isType(element: JQuery | HTMLElement , type: string): boolean
+      isType(element: JQuery3 | HTMLElement , type: string): boolean
       /**
        * Returns a boolean indicating whether an element is visible.
        */
-      isVisible(element: JQuery | HTMLElement): boolean
+      isVisible(element: JQuery3 | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element is hidden.
        */
-      isHidden(element: JQuery | HTMLElement): boolean
+      isHidden(element: JQuery3 | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element can receive focus.
        */
-      isFocusable(element: JQuery | HTMLElement): boolean
-      isTextLike(element: JQuery | HTMLElement): boolean
+      isFocusable(element: JQuery3 | HTMLElement): boolean
+      isTextLike(element: JQuery3 | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element is scrollable.
        */
-      isScrollable(element: Window | JQuery | HTMLElement): boolean
+      isScrollable(element: Window | JQuery3 | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element currently has focus.
        */
-      isFocused(element: JQuery | HTMLElement): boolean
+      isFocused(element: JQuery3 | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element is detached from the DOM.
        */
-      isDetached(element: JQuery | HTMLElement): boolean
+      isDetached(element: JQuery3 | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether an element is attached to the DOM.
        */
-      isAttached(element: JQuery | HTMLElement | Window | Document): boolean
-      isSelector(element: JQuery | HTMLElement, selector: JQuery.Selector): boolean
+      isAttached(element: JQuery3 | HTMLElement | Window | Document): boolean
+      isSelector(element: JQuery3 | HTMLElement, selector: JQuery3.Selector): boolean
       /**
        * Returns a boolean indicating whether an element is a descendent of another element.
        */
-      isDescendent(element1: JQuery | HTMLElement, element2: JQuery | HTMLElement): boolean
+      isDescendent(element1: JQuery3 | HTMLElement, element2: JQuery3 | HTMLElement): boolean
       /**
        * Returns a boolean indicating whether object is undefined or html, body, or document.
        */
@@ -483,21 +483,21 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a jQuery object.
        */
       isJquery(obj: any): boolean
-      isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
-      stringify(element: JQuery | HTMLElement, form: string): string
-      getElements(element: JQuery): JQuery | HTMLElement[]
-      getContainsSelector(text: string, filter?: string): JQuery.Selector
+      isInputType(element: JQuery3 | HTMLElement, type: string | string[]): boolean
+      stringify(element: JQuery3 | HTMLElement, form: string): string
+      getElements(element: JQuery3): JQuery3 | HTMLElement[]
+      getContainsSelector(text: string, filter?: string): JQuery3.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
-      getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getReasonIsHidden(element: JQuery | HTMLElement): string
-      getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
+      getWindowByElement(element: JQuery3 | HTMLElement): JQuery3 | HTMLElement
+      getReasonIsHidden(element: JQuery3 | HTMLElement): string
+      getFirstScrollableParent(element: JQuery3 | HTMLElement): JQuery3 | HTMLElement
+      getFirstFixedOrStickyPositionParent(element: JQuery3 | HTMLElement): JQuery3 | HTMLElement
+      getFirstStickyPositionParent(element: JQuery3 | HTMLElement): JQuery3 | HTMLElement
       getCoordsByPosition(left: number, top: number, xPosition?: string, yPosition?: string): number
-      getElementPositioning(element: JQuery | HTMLElement): ElementPositioning
+      getElementPositioning(element: JQuery3 | HTMLElement): ElementPositioning
       getElementAtPointFromViewport(doc: Document, x: number, y: number): Element | null
-      getElementCoordinatesByPosition(element: JQuery | HTMLElement, position: string): ElementCoordinates
-      getElementCoordinatesByPositionRelativeToXY(element: JQuery | HTMLElement, x: number, y: number): ElementPositioning
+      getElementCoordinatesByPosition(element: JQuery3 | HTMLElement, position: string): ElementCoordinates
+      getElementCoordinatesByPositionRelativeToXY(element: JQuery3 | HTMLElement, x: number, y: number): ElementPositioning
     }
 
     /**
@@ -602,9 +602,9 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/children
      */
-    children<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
-    children<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
-    children<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    children<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
+    children<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
+    children<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Clear the value of an `input` or `textarea`.
@@ -785,8 +785,8 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/closest
      */
-    closest<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
-    closest<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    closest<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
+    closest<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get the DOM element containing the text.
@@ -815,7 +815,7 @@ declare namespace Cypress {
      *    // Yield el in .nav containing 'About'
      *    cy.get('.nav').contains('About')
      */
-    contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery<E>>
+    contains<E extends Node = HTMLElement>(content: string | number | RegExp): Chainable<JQuery3<E>>
     /**
      * Get the DOM element with name "selector" containing the text or regular expression.
      *
@@ -824,7 +824,7 @@ declare namespace Cypress {
      *    // yields <ul>...</ul>
      *    cy.contains('ul', 'apples')
      */
-    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    contains<K extends keyof HTMLElementTagNameMap>(selector: K, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get the DOM element using CSS "selector" containing the text or regular expression.
      *
@@ -833,7 +833,7 @@ declare namespace Cypress {
      *    // yields <... class="foo">... apples ...</...>
      *    cy.contains('.foo', 'apples')
      */
-    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery<E>>
+    contains<E extends Node = HTMLElement>(selector: string, text: string | number | RegExp, options?: Partial<Loggable & Timeoutable & CaseMatchable>): Chainable<JQuery3<E>>
 
     /**
      * Double-click a DOM element.
@@ -919,7 +919,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/each
      */
-    each<E extends Node = HTMLElement>(fn: (element: JQuery<E>, index: number, $list: E[]) => void): Chainable<JQuery<E>> // Can't properly infer type without breaking down Chainable
+    each<E extends Node = HTMLElement>(fn: (element: JQuery3<E>, index: number, $list: E[]) => void): Chainable<JQuery3<E>> // Can't properly infer type without breaking down Chainable
     each(fn: (item: any, index: number, $list: any[]) => void): Chainable<Subject>
 
     /**
@@ -939,7 +939,7 @@ declare namespace Cypress {
      *    cy.get('ul>li').eq('4')     // Yield fifth 'li' in 'ul'
      *    cy.get('li').eq(-2) // Yields second from last 'li' element
      */
-    eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    eq<E extends Node = HTMLElement>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Execute a system command.
@@ -952,19 +952,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/filter
      */
-    filter<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>> // automatically returns the correct HTMLElement type
+    filter<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>> // automatically returns the correct HTMLElement type
     /**
      * Get the DOM elements that match a specific selector. Opposite of `.not()`
      *
      * @see https://on.cypress.io/filter
      */
-    filter<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    filter<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get the DOM elements that match a specific selector. Opposite of `.not()`
      *
      * @see https://on.cypress.io/filter
      */
-    filter<E extends Node = HTMLElement>(fn: (index: number, element: E) => boolean, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    filter<E extends Node = HTMLElement>(fn: (index: number, element: E) => boolean, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get the descendent DOM elements of a specific selector.
@@ -973,7 +973,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('.article').find('footer') // Yield 'footer' within '.article'
      */
-    find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Finds the descendent DOM elements with the given selector.
      *
@@ -982,7 +982,7 @@ declare namespace Cypress {
      *    // Find the li’s within the nav
      *    cy.get('.left-nav>.nav').find('>li')
      */
-    find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get the first DOM element within a set of DOM elements.
@@ -1027,7 +1027,7 @@ declare namespace Cypress {
      *    // Make an assertion on the focused element
      *    cy.focused().should('have.attr', 'name', 'username')
      */
-    focused(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery>
+    focused(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3>
 
     /**
      * Get one or more DOM elements by node name: input, button, etc.
@@ -1036,7 +1036,7 @@ declare namespace Cypress {
      *    cy.get('input').should('be.disabled')
      *    cy.get('button').should('be.visible')
      */
-    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get one or more DOM elements by selector.
      * The querying behavior of this command matches exactly how $(…) works in jQuery.
@@ -1046,7 +1046,7 @@ declare namespace Cypress {
      *    cy.get('ul li:first').should('have.class', 'active')
      *    cy.get('.dropdown-menu').click()
      */
-    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<E>>
+    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery3<E>>
     /**
      * Get one or more DOM elements by alias.
      * @see https://on.cypress.io/get#Alias
@@ -1144,7 +1144,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/last
      */
-    last<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    last<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get the global `window.location` object of the page that is currently active.
@@ -1178,7 +1178,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/next
      */
-    next<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    next<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get the immediately following sibling of each DOM element within a set of DOM elements.
      *
@@ -1186,7 +1186,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('nav a:first').next()
      */
-    next<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    next<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get the immediately following sibling of each DOM element within a set of DOM elements that match selector
      *
@@ -1194,52 +1194,52 @@ declare namespace Cypress {
      * @example
      *    cy.get('nav a:first').next('.menu-item)
      */
-    next<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    next<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements.
      *
      * @see https://on.cypress.io/nextall
      */
-    nextAll<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    nextAll<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements.
      *
      * @see https://on.cypress.io/nextall
      */
-    nextAll<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextAll<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements.
      *
      * @see https://on.cypress.io/nextall
      */
-    nextAll<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextAll<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    nextUntil<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends HTMLElement = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get all following siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/nextuntil
      */
-    nextUntil<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    nextUntil<E extends HTMLElement = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Filter DOM element(s) from a set of DOM elements. Opposite of `.filter()`
      *
      * @see https://on.cypress.io/not
      */
-    not(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery>
+    not(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3>
 
     /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
@@ -1264,57 +1264,57 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/parent
      */
-    parent<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    parent<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get the parent DOM element of a set of DOM elements.
      *
      * @see https://on.cypress.io/parent
      */
-    parent<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parent<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get the parent DOM element of a set of DOM elements.
      *
      * @see https://on.cypress.io/parent
      */
-    parent<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parent<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get the parent DOM elements of a set of DOM elements.
      *
      * @see https://on.cypress.io/parents
      */
-    parents<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    parents<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get the parent DOM elements of a set of DOM elements.
      *
      * @see https://on.cypress.io/parents
      */
-    parents<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parents<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get the parent DOM elements of a set of DOM elements.
      *
      * @see https://on.cypress.io/parents
      */
-    parents<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parents<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/parentsuntil
      */
-    parentsUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    parentsUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/parentsuntil
      */
-    parentsUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parentsUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get all ancestors of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      *
      * @see https://on.cypress.io/parentsuntil
      */
-    parentsUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    parentsUntil<E extends Node = HTMLElement>(element: E | JQuery3<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Stop cy commands from running and allow interaction with the application under test. You can then "resume" running all commands or choose to step through the "next" commands from the Command Log.
@@ -1331,7 +1331,7 @@ declare namespace Cypress {
      *    cy.get('nav').prev('a') // Yield previous 'a'
      * @see https://on.cypress.io/prev
      */
-    prev<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    prev<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get the immediately preceding sibling of each element in a set of the elements.
      *
@@ -1339,7 +1339,7 @@ declare namespace Cypress {
      *    cy.get('li').prev() // Yield previous 'li'
      * @see https://on.cypress.io/prev
      */
-    prev<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prev<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get the immediately preceding sibling of each element in a set of the elements that match selector.
      *
@@ -1347,7 +1347,7 @@ declare namespace Cypress {
      *    cy.get('nav').prev('.menu-item') // Yield previous '.menu-item'
      * @see https://on.cypress.io/prev
      */
-    prev<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prev<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements.
@@ -1355,21 +1355,21 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/prevall
      */
-    prevAll<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    prevAll<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements.
      * > The querying behavior of this command matches exactly how [.prevAll()](http://api.jquery.com/prevAll) works in jQuery.
      *
      * @see https://on.cypress.io/prevall
      */
-    prevAll<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prevAll<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements.
      * > The querying behavior of this command matches exactly how [.prevAll()](http://api.jquery.com/prevAll) works in jQuery.
      *
      * @see https://on.cypress.io/prevall
      */
-    prevAll<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prevAll<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
@@ -1377,21 +1377,21 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/prevall
      */
-    prevUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    prevUntil<K extends keyof HTMLElementTagNameMap>(selector: K, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
      * @see https://on.cypress.io/prevall
      */
-    prevUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prevUntil<E extends Node = HTMLElement>(selector: string, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get all previous siblings of each DOM element in a set of matched DOM elements up to, but not including, the element provided.
      * > The querying behavior of this command matches exactly how [.prevUntil()](http://api.jquery.com/prevUntil) works in jQuery.
      *
      * @see https://on.cypress.io/prevall
      */
-    prevUntil<E extends Node = HTMLElement>(element: E | JQuery<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    prevUntil<E extends Node = HTMLElement>(element: E | JQuery3<E>, filter?: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Read a file and yield its contents.
@@ -1464,7 +1464,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/root
      */
-    root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
+    root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery3<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
      * Use `cy.route()` to manage the behavior of network requests.
@@ -1612,7 +1612,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('td').siblings('a') // Yield all link siblings of "td"
      */
-    siblings<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    siblings<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<HTMLElementTagNameMap[K]>>
     /**
      * Get all sibling DOM elements.
      *
@@ -1620,7 +1620,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('td').siblings() // Yield all siblings of "td"
      */
-    siblings<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    siblings<E extends Node = HTMLElement>(options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Get all sibling DOM elements that match given selector.
      *
@@ -1629,7 +1629,7 @@ declare namespace Cypress {
      *    // Yield all elements with class "foo" that are siblings of "td"
      *    cy.get('td').siblings('.foo')
      */
-    siblings<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    siblings<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
 
     /**
      * Returns a new spy function.
@@ -2064,7 +2064,7 @@ declare namespace Cypress {
     })
     ```
      */
-    wrap<E extends Node = HTMLElement>(element: E | JQuery<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    wrap<E extends Node = HTMLElement>(element: E | JQuery3<E>, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery3<E>>
     /**
      * Yield the element passed into `.wrap()` to the next command in the Cypress chain.
      *
@@ -2125,7 +2125,7 @@ declare namespace Cypress {
      * @example
      *    cy.$$('p')
      */
-    $$<TElement extends Element = HTMLElement>(selector: JQuery.Selector, context?: Element | Document | JQuery): JQuery<TElement>
+    $$<TElement extends Element = HTMLElement>(selector: JQuery3.Selector, context?: Element | Document | JQuery3): JQuery3<TElement>
   }
 
   interface SinonSpyAgent<A extends sinon.SinonSpy> {
@@ -2192,7 +2192,7 @@ declare namespace Cypress {
      *
      * @default depends on context, null if outside of within wrapper
      */
-    withinSubject: JQuery | HTMLElement | null
+    withinSubject: JQuery3 | HTMLElement | null
   }
 
   /**
@@ -4629,7 +4629,7 @@ declare namespace Cypress {
      * Fires whenever **Cypress** is scrolling your application. This event is fired when Cypress is {% url 'waiting for and calculating actionability' interacting-with-elements %}. It will scroll to 'uncover' elements currently being covered. This event is extremely useful to debug why Cypress may think an element is not interactive.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'scrolled', fn: ($el: JQuery) => void): void
+    (action: 'scrolled', fn: ($el: JQuery3) => void): void
     /**
      * Fires when a cy command is first invoked and enqueued to be run later. Useful for debugging purposes if you're confused about the order in which commands will execute.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -4743,8 +4743,8 @@ declare namespace Cypress {
   }
 
   interface LogConfig {
-    /** The JQuery element for the command. This will highlight the command in the main window when debugging */
-    $el: JQuery
+    /** The JQuery3 element for the command. This will highlight the command in the main window when debugging */
+    $el: JQuery3
     /** Allows the name of the command to be overwritten */
     name: string
     /** Override *name* for display purposes only */
