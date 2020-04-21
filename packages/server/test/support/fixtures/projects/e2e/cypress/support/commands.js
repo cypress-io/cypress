@@ -4,10 +4,6 @@ Cypress.Commands.add('failAssertion', () => {
   expect(true).to.be.false
 })
 
-Cypress.Commands.add('chaiValidationError', () => {
-  expect(true).to.be.nope
-})
-
 Cypress.Commands.add('failException', () => {
   ({}).bar()
 })
@@ -335,6 +331,14 @@ Cypress.Commands.add('failServerOnResponseException', () => {
 
 Cypress.Commands.add('failReadFileExistence', () => {
   cy.readFile('does-not-exist', { timeout: 0 })
+})
+
+Cypress.Commands.add('chaiValidationError', () => {
+  expect(true).to.be.nope
+})
+
+Cypress.Commands.add('cypressValidationError', () => {
+  cy.viewport()
 })
 
 Cypress.Commands.add('failEventHandlerAssertion', () => {

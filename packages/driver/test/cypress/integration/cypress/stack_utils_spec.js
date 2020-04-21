@@ -189,99 +189,102 @@ ${'    '}at Context.<anonymous> (cypress/integration/features/source_map_spec.co
     })
   })
 
-  context('.stackWithOriginalAppended', () => {
+  context('.stackWithUserInvocationStackAppended', () => {
     let err
-    let originalErr
+    let userInvocationStack
 
     beforeEach(() => {
-      err = {
-        stack: 'error message\n  at theStack (path/to/file:1:1)',
-      }
-
-      originalErr = {
-        stackTitle: 'Stack Title',
-        stack: 'original message\n  at theOriginalStack (path/to/another:2:2)',
-      }
-    })
-
-    it('appends originalErr stackTitle and stack', () => {
-      const result = $stackUtils.stackWithOriginalAppended(err, originalErr)
-
-      expect(result).to.equal(`\
-error message
-  at theStack (path/to/file:1:1)
-Stack Title:
-  at theOriginalStack (path/to/another:2:2)`)
-    })
-
-    it('returns err.stack if no originalErr', () => {
-      const result = $stackUtils.stackWithOriginalAppended(err)
-
-      expect(result).to.equal(err.stack)
-    })
-
-    it('returns err.stack if no originalErr.stack', () => {
-      originalErr.stack = ''
-
-      const result = $stackUtils.stackWithOriginalAppended(err, originalErr)
-
-      expect(result).to.equal(err.stack)
-    })
-
-    it('removes original stack message by default', () => {
-      const result = $stackUtils.stackWithOriginalAppended(err, originalErr)
-
-      expect(result).not.to.include('original message')
-    })
-
-    it('throws if no stackTitle property is provided', () => {
-      originalErr.stackTitle = undefined
-
-      const fn = () => $stackUtils.stackWithOriginalAppended(err, originalErr)
-
-      expect(fn).to.throw('From $stackUtils.stackWithOriginalAppended: the original error needs to have a stackTitle property')
-    })
-
-    describe('when removeMessage is false', () => {
-      let result
-
-      beforeEach(() => {
-        originalErr.removeMessage = false
-
-        result = $stackUtils.stackWithOriginalAppended(err, originalErr)
-      })
-
-      it('does not remove original stack message if removeMessage is false', () => {
-        expect(result).to.include('original message')
-      })
-
-      it('adds extra new lines if removeMessage is false', () => {
-        expect(result).to.equal(`\
-error message
-  at theStack (path/to/file:1:1)
-
-Stack Title:
-
+      err = new Error(`\
 original message
-  at theOriginalStack (path/to/another:2:2)`)
-      })
+original message line 2
+original message line 3`)
+
+      err.stack = `\
+Error: original message
+original message line 2
+original message line 3
+  at originalStack1 (path/to/file:1:1)
+  at originalStack2 (path/to/file:1:1)
+  at __stackReplacementMarker (path/to/another:2:2)
+  at originalStack4 (path/to/file:1:1)
+  at originalStack5 (path/to/file:1:1)`
+
+      userInvocationStack = `\
+user invocation message
+user invocation message line 2
+user invocation message line 3
+  at userStack1 (path/to/another:2:2)
+  at userStack2 (path/to/another:2:2)`
+    })
+
+    it('appends replaces the user invocation wrapper and all lines below it with the user invocation stack', () => {
+      const { stack } = $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
+
+      expect(stack).to.equal(`\
+Error: original message
+original message line 2
+original message line 3
+  at originalStack1 (path/to/file:1:1)
+  at originalStack2 (path/to/file:1:1)
+From Your Spec Code:
+  at userStack1 (path/to/another:2:2)
+  at userStack2 (path/to/another:2:2)`)
+    })
+
+    it('returns the index of where the user invocation is in the stack', () => {
+      const { index } = $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
+
+      expect(index).to.equal(6)
+    })
+
+    it('appends at end when there is no stack replacement marker in the stack', () => {
+      err.stack = err.stack.replace('  at __stackReplacementMarker (path/to/another:2:2)\n', '')
+
+      const { stack } = $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
+
+      expect(stack).to.equal(`\
+Error: original message
+original message line 2
+original message line 3
+  at originalStack1 (path/to/file:1:1)
+  at originalStack2 (path/to/file:1:1)
+  at originalStack4 (path/to/file:1:1)
+  at originalStack5 (path/to/file:1:1)
+From Your Spec Code:
+  at userStack1 (path/to/another:2:2)
+  at userStack2 (path/to/another:2:2)`)
     })
   })
 
   context('.stackWithoutMessage', () => {
-    const stack = `\
+    it('returns stack with the foremost message lines', () => {
+      const stack = `\
 message 1
 message 2
   at stack1 (foo.js:1:1)
 message 3
   at stack2 (bar.js:2:2)`
-
-    it('returns stack with the foremost message lines', () => {
       const result = $stackUtils.stackWithoutMessage(stack)
 
       expect(result).to.equal(`\
   at stack1 (foo.js:1:1)
 message 3
+  at stack2 (bar.js:2:2)`)
+    })
+  })
+
+  context('.normalizedUserInvocationStack', () => {
+    it('removes message and cy[name] lines', () => {
+      const stack = `\
+message 1
+message 2
+  at addCommand/cy[name]@cypress:///cy.js:0:0
+  at stack1 (foo.js:1:1)
+  at stack2 (bar.js:2:2)`
+      const result = $stackUtils.normalizedUserInvocationStack(stack)
+
+      expect(result).to.equal(`\
+  at stack1 (foo.js:1:1)
   at stack2 (bar.js:2:2)`)
     })
   })

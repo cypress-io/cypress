@@ -444,9 +444,11 @@ chai.use((chai, u) => {
       // for security purposes. therefore, we instantiate a new error on
       // the spec iframe to get a better stack
       if (err) {
-        const userInvocationStack = (new specWindow.Error('assertion invocation stack')).stack
+        const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
+          (new specWindow.Error('assertion invocation stack')).stack,
+        )
 
-        state('currentAssertionUserInvocationStack', $stackUtils.stackWithoutMessage(userInvocationStack))
+        state('currentAssertionUserInvocationStack', userInvocationStack)
 
         throw err
       }
@@ -458,13 +460,14 @@ chai.use((chai, u) => {
     // expect function instance so we do not affect
     // the outside world
     return (val, message) => {
+      const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
+        (new specWindow.Error('expect invocation stack')).stack,
+      )
+
+      state('currentAssertionUserInvocationStack', userInvocationStack)
+
       // make the assertion
-      const assertion = new chai.Assertion(val, message)
-      const userInvocationStack = (new specWindow.Error('expect invocation stack')).stack
-
-      state('currentAssertionUserInvocationStack', $stackUtils.stackWithoutMessage(userInvocationStack))
-
-      return assertion
+      return new chai.Assertion(val, message)
     }
   }
 

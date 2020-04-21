@@ -20,18 +20,6 @@ describe('assertion failure', function () {
   })
 })
 
-describe('chai validation failure', function () {
-  fail(this, () => {
-    cy.chaiValidationError()
-  })
-
-  verify(this, {
-    column: 3,
-    codeFrameText: 'add(\'chaiValidationError\'',
-    message: 'Invalid Chai property: nope',
-  })
-})
-
 context('exceptions', function () {
   describe('in commands file', function () {
     fail(this, () => {
@@ -410,7 +398,7 @@ context('cy.visit', function () {
   })
 })
 
-context('cy.route', () => {
+context('cy.route', function () {
   describe('callback assertion failure', function () {
     fail(this, () => {
       cy.failRouteCallbackAssertion()
@@ -520,7 +508,7 @@ context('cy.route', () => {
   })
 })
 
-context('cy.server', () => {
+context('cy.server', function () {
   describe('onAbort assertion failure', function (done) {
     fail(this, () => {
       cy.failServerOnAbortAssertion()
@@ -608,7 +596,35 @@ context('cy.readFile', function () {
   })
 })
 
-context('event handlers', () => {
+context('validation errors', function () {
+  describe('from cypress', function () {
+    fail(this, () => {
+      cy.cypressValidationError()
+    })
+
+    verify(this, {
+      column: 6,
+      codeFrameText: 'add(\'cypressValidationError\'',
+      message: 'can only accept a string preset or',
+      stack: ['throwErrBadArgs', 'From Your Spec Code:'],
+    })
+  })
+
+  describe('from chai', function () {
+    fail(this, () => {
+      cy.chaiValidationError()
+    })
+
+    verify(this, {
+      column: 3,
+      codeFrameText: 'add(\'chaiValidationError\'',
+      message: 'Invalid Chai property: nope',
+      stack: ['proxyGetter', 'From Your Spec Code:'],
+    })
+  })
+})
+
+context('event handlers', function () {
   describe('event assertion failure', function () {
     fail(this, () => {
       cy.failEventHandlerAssertion()

@@ -78,6 +78,9 @@ export const verify = (ctx, options) => {
         })
       }
 
+      cy.get('.runnable-err-stack-trace')
+      .should('not.include.text', '__stackReplacementMarker')
+
       if (!hasCodeFrame) return
 
       cy

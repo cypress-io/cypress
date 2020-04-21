@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const $stackUtils = require('./stack_utils')
 
 class $Chainer {
   constructor (userInvocationStack, specWindow) {
@@ -16,7 +17,9 @@ class $Chainer {
     $Chainer.prototype[key] = function (...args) {
       const userInvocationStack = this.useInitialStack
         ? this.userInvocationStack
-        : (new this.specWindow.Error('chained command invocation stack')).stack
+        : $stackUtils.normalizedUserInvocationStack(
+          (new this.specWindow.Error('command invocation stack')).stack,
+        )
 
       // call back the original function with our new args
       // pass args an as array and not a destructured invocation

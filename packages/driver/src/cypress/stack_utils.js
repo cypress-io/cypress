@@ -25,7 +25,7 @@ const splitStack = (stack) => {
 }
 
 const getStackLines = (stack) => {
-  const [__, stackLines] = splitStack(stack) // eslint-disable-line no-unused-vars
+  const [, stackLines] = splitStack(stack)
 
   return stackLines
 }
@@ -34,20 +34,28 @@ const stackWithoutMessage = (stack) => {
   return getStackLines(stack).join('\n')
 }
 
-const stackWithOriginalAppended = (err, originalErr) => {
-  if (!originalErr || !originalErr.stack) return err.stack
+const stackWithUserInvocationStackAppended = (err, userInvocationStack) => {
+  const [messageLines, stackLines] = splitStack(err.stack)
+  const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
 
-  if (!originalErr.stackTitle) {
-    throw new Error('From $stackUtils.stackWithOriginalAppended: the original error needs to have a stackTitle property')
+  let commandCallIndex = _.findIndex(stackLines, (line) => {
+    return line.includes('__stackReplacementMarker')
+  })
+
+  if (commandCallIndex < 0) {
+    commandCallIndex = stackLines.length
   }
 
-  if (originalErr.removeMessage === false) {
-    return `${err.stack}\n\n${originalErr.stackTitle}:\n\n${originalErr.stack}`
+  stackLines.splice(commandCallIndex, stackLines.length, 'From Your Spec Code:')
+  stackLines.push(userInvocationStackWithoutMessage)
+
+  // the commandCallIndex is based off the stack without the message,
+  // but the full stack includes the message + 'From Your Spec Code:',
+  // so we adjust it
+  return {
+    stack: messageLines.concat(stackLines).join('\n'),
+    index: commandCallIndex + messageLines.length + 1,
   }
-
-  const stack = stackWithoutMessage(originalErr.stack)
-
-  return `${err.stack}\n${originalErr.stackTitle}:\n${stack}`
 }
 
 const getLanguageFromExtension = (filePath) => {
@@ -71,23 +79,29 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
   }
 }
 
-const getCodeFrame = (err) => {
+const getCodeFrameStackLine = (err, stackIndex) => {
+  // if a specific index is not specified, use the first line with a file in it
+  if (stackIndex == null) return _.find(err.parsedStack, (line) => !!line.fileUrl)
+
+  return err.parsedStack[stackIndex]
+}
+
+const getCodeFrame = (err, stackIndex) => {
   if (err.codeFrame) return err.codeFrame
 
-  const firstStackLine = _.find(err.parsedStack, (line) => !!line.fileUrl)
+  const stackLine = getCodeFrameStackLine(err, stackIndex)
 
-  if (!firstStackLine) return
+  if (!stackLine) return
 
-  const { fileUrl, relativeFile } = firstStackLine
+  const { fileUrl, relativeFile } = stackLine
 
-  return getCodeFrameFromSource($sourceMapUtils.getSourceContents(fileUrl, relativeFile), firstStackLine)
+  return getCodeFrameFromSource($sourceMapUtils.getSourceContents(fileUrl, relativeFile), stackLine)
 }
 
 const getWhitespace = (line) => {
   if (!line) return ''
 
-  // eslint-disable-next-line no-unused-vars
-  const [__, whitespace] = line.match(whitespaceRegex) || []
+  const [, whitespace] = line.match(whitespaceRegex) || []
 
   return whitespace || ''
 }
@@ -99,10 +113,6 @@ const getSourceDetails = (generatedDetails) => {
 
   const { line, column, file } = sourceDetails
   let fn = generatedDetails.function
-
-  if (fn === 'Context.eval') {
-    fn = 'Test.run'
-  }
 
   return {
     line,
@@ -204,6 +214,15 @@ const normalizedStack = (err) => {
   return errStack
 }
 
+const normalizedUserInvocationStack = (userInvocationStack, fnName) => {
+  // Firefox user invocation stack includes a line at the top that looks like
+  // addCommand/cy[name]@cypress:///../driver/src/cypress/cy.js:936:77,
+  // whereas Chromium browsers have the user's line first
+  const stackLines = getStackLines(userInvocationStack)
+
+  return _.reject(stackLines, (line) => line.includes('cy[name]')).join('\n')
+}
+
 const replacedStack = (err, newStack) => {
   // if err already lacks a stack or we've removed the stack
   // for some reason, keep it stackless
@@ -219,7 +238,8 @@ module.exports = {
   getCodeFrame,
   getSourceStack,
   normalizedStack,
+  normalizedUserInvocationStack,
   replacedStack,
-  stackWithOriginalAppended,
+  stackWithUserInvocationStackAppended,
   stackWithoutMessage,
 }

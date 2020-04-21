@@ -381,7 +381,7 @@ describe('driver/src/cypress/error_utils', () => {
   })
 
   context('.enhanceStack', () => {
-    const userInvocationStack = 'the stack'
+    const userInvocationStack = '  at userInvoked (app.js:1:1)'
     const sourceStack = {
       sourceMapped: 'source mapped stack',
       parsed: [],
@@ -390,17 +390,18 @@ describe('driver/src/cypress/error_utils', () => {
     let err
 
     beforeEach(() => {
-      cy.stub($stackUtils, 'replacedStack').returns('new stack')
+      cy.stub($stackUtils, 'replacedStack').returns('replaced stack')
+      cy.stub($stackUtils, 'stackWithUserInvocationStackAppended').returns({ stack: 'appended stack' })
       cy.stub($stackUtils, 'getSourceStack').returns(sourceStack)
       cy.stub($stackUtils, 'getCodeFrame').returns(codeFrame)
 
-      err = { stack: 'original stack message\n  at originalStack (foo.js:1:1)' }
+      err = { stack: 'Error: original stack message\n at originalStack (foo.js:1:1)' }
     })
 
-    it('combines error message and stack', () => {
+    it('replaces stack with user invocation stack', () => {
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
-      expect(result.stack).to.include('new stack')
+      expect(result.stack).to.equal('replaced stack')
     })
 
     it('attaches source mapped stack', () => {
@@ -421,28 +422,26 @@ describe('driver/src/cypress/error_utils', () => {
       expect(result.codeFrame).to.equal(codeFrame)
     })
 
-    it('appends original stack when stack is replaced by invocation stack and it is a cypress error', () => {
+    it('appends user invocation stack when it is a cypress error', () => {
       err.name = 'CypressError'
 
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
-      expect(result.stack).to.include('From Cypress Internals:')
-      expect(result.stack).to.include('  at originalStack (foo.js:1:1)')
+      expect(result.stack).to.equal('appended stack')
     })
 
-    it('appends original stack when stack is replaced by invocation stack and it is a chai validation error', () => {
+    it('appends user invocation stack when it is a chai validation error', () => {
       err.message = 'Invalid Chai property'
 
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
-      expect(result.stack).to.include('From Cypress Internals:')
-      expect(result.stack).to.include('  at originalStack (foo.js:1:1)')
+      expect(result.stack).to.equal('appended stack')
     })
 
-    it('does not append original stack when there is no invocation stack', () => {
+    it('does not replaced or append stack when there is no invocation stack', () => {
       const result = $errUtils.enhanceStack({ err })
 
-      expect(result.stack).not.to.include('From Cypress Internals')
+      expect(result.stack).to.equal(err.stack)
     })
   })
 

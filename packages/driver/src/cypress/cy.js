@@ -61,6 +61,10 @@ const setRemoteIframeProps = ($autIframe, state) => {
   return state('$autIframe', $autIframe)
 }
 
+function __stackReplacementMarker (fn, ctx, args) {
+  return fn.apply(ctx, args)
+}
+
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
 let curCy = null
@@ -346,7 +350,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       // run the command's fn with runnable's context
       try {
-        ret = command.get('fn').apply(state('ctx'), args)
+        ret = __stackReplacementMarker(command.get('fn'), state('ctx'), args)
       } catch (err) {
         throw err
       } finally {
@@ -992,7 +996,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
-        const userInvocationStack = $stackUtils.stackWithoutMessage(
+        const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
           (new specWindow.Error('command invocation stack')).stack,
         )
 
@@ -1281,7 +1285,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
             state('done', done)
           }
 
-          let ret = fn.apply(this, arguments)
+          let ret = __stackReplacementMarker(fn, this, arguments)
 
           // if we returned a value from fn
           // and enqueued some new commands

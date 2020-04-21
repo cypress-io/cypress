@@ -30,18 +30,6 @@ describe('assertion failure', function () {
   })
 })
 
-describe('chai validation error', function () {
-  fail(this, () => {
-    expect(true).to.be.nope
-  })
-
-  verify(this, {
-    column: 5,
-    message: 'Invalid Chai property: nope',
-    stack: ['From Cypress Internals:', 'chai/utils/proxify.js'],
-  })
-})
-
 context('exceptions', function () {
   describe('in spec file', function () {
     fail(this, () => {
@@ -740,7 +728,33 @@ context('cy.readFile', function () {
   })
 })
 
-context('event handlers', () => {
+context('validation errors', function () {
+  describe('from cypress', function () {
+    fail(this, () => {
+      cy.viewport()
+    })
+
+    verify(this, {
+      column: 10,
+      message: 'can only accept a string preset or',
+      stack: ['throwErrBadArgs', 'From Your Spec Code:'],
+    })
+  })
+
+  describe('from chai', function () {
+    fail(this, () => {
+      expect(true).to.be.nope
+    })
+
+    verify(this, {
+      column: 7,
+      message: 'Invalid Chai property: nope',
+      stack: ['proxyGetter', 'From Your Spec Code:'],
+    })
+  })
+})
+
+context('event handlers', function () {
   describe('event assertion failure', function () {
     fail(this, () => {
       cy.on('window:load', () => {

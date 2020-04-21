@@ -5,7 +5,6 @@ const $utils = require('./utils')
 const $stackUtils = require('./stack_utils')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
-const chaiValidationRe = /^Invalid Chai property/
 const twoOrMoreNewLinesRe = /\n{2,}/
 
 const wrapErr = (err) => {
@@ -19,7 +18,7 @@ const isAssertionErr = (err = {}) => {
 }
 
 const isChaiValidationErr = (err = {}) => {
-  return chaiValidationRe.test(err.message)
+  return _.startsWith(err.message, 'Invalid Chai property')
 }
 
 const isCypressErr = (err = {}) => {
@@ -262,28 +261,27 @@ const createUncaughtException = (type, err) => {
   return err
 }
 
-const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
-  // stacks from command failures and assertion failures have the right message
-  // but the stack points to cypress internals. here we replace the internal
-  // cypress stack with the invocation stack, which points to the user's code
-  if (userInvocationStack) {
-    const originalStack = err.stack
+// stacks from command failures and assertion failures have the right message
+// but the stack points to cypress internals. here we replace the internal
+// cypress stack with the invocation stack, which points to the user's code
+const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
+  if (!userInvocationStack) return { stack: err.stack }
 
-    err.stack = $stackUtils.replacedStack(err, userInvocationStack)
-
-    if (isCypressErr(err) || isChaiValidationErr(err)) {
-      err.stack = $stackUtils.stackWithOriginalAppended(err, {
-        stackTitle: 'From Cypress Internals',
-        stack: originalStack,
-      })
-    }
+  if (isCypressErr(err) || isChaiValidationErr(err)) {
+    return $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
   }
 
-  const { sourceMapped, parsed } = $stackUtils.getSourceStack(err.stack, projectRoot)
+  return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
+}
 
+const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
+  const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
+  const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
+
+  err.stack = stack
   err.sourceMappedStack = sourceMapped
   err.parsedStack = parsed
-  err.codeFrame = $stackUtils.getCodeFrame(err)
+  err.codeFrame = $stackUtils.getCodeFrame(err, index)
 
   return err
 }
