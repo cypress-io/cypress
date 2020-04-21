@@ -251,6 +251,18 @@ const getTestFromHook = function (hook, suite, getTestById) {
     return test
   }
 
+  if (hook.hookName === 'after all') {
+    const siblings = getAllSiblingTests(suite, getTestById)
+
+    return _.last(siblings)
+  }
+
+  if (hook.hookName === 'before all') {
+    const siblings = getAllSiblingTests(suite, getTestById)
+
+    return _.first(siblings)
+  }
+
   // if we have a hook id then attempt
   // to find the test by its id
   if (hook != null ? hook.id : undefined) {
@@ -394,7 +406,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
           //    the last test that will run
           if (
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
-              (isRootSuite(this.suite.parent) && lastTestThatWillRunInSuite(t, siblings)) ||
+              (isRootSuite(this.suite.parent) && !this.suite.parent._afterAll.length && lastTestThatWillRunInSuite(t, siblings)) ||
               (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
           ) {
             changeFnToRunAfterHooks()
@@ -577,7 +589,7 @@ const hookFailed = function (hook, err, hookName, getTestById, getTest) {
   // finds the test by returning the first test from
   // the parent or looping through the suites until
   // it finds the first test
-  const test = getTest() || getTestFromHook(hook, hook.parent, getTestById)
+  const test = getTestFromHook(hook, hook.parent, getTestById)
 
   test.err = err
   test.state = 'failed'
@@ -642,7 +654,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // if there is a nested suite with a before, then
     // currentTest will refer to the previous test run
     // and not our current
-    if ((hook.hookName === 'before all') && hook.ctx.currentTest) {
+    if ((hook.hookName === 'before all' || hook.hookName === 'after all') && hook.ctx.currentTest) {
       delete hook.ctx.currentTest
     }
 
@@ -650,7 +662,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // hooks do not have their own id, their
     // commands need to grouped with the test
     // and we can only associate them by this id
-    const test = getTest() || getTestFromHook(hook, hook.parent, getTestById)
+    const test = getTestFromHook(hook, hook.parent, getTestById)
 
     hook.id = test.id
     hook.ctx.currentTest = test
@@ -961,7 +973,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
       switch (runnable.type) {
         case 'hook':
-          test = getTest() || getTestFromHook(runnable, runnable.parent, getTestById)
+          test = getTestFromHook(runnable, runnable.parent, getTestById)
           break
 
         case 'test':
@@ -988,9 +1000,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
         // A failing after hook will also not show up as a failing test in open mode
         // (only a visual bug - does not affect run mode)
         // https://github.com/cypress-io/cypress/issues/2296
-        if (!(hookName === 'after all' && runnable.parent.root)) {
-          return _next()
-        }
+        return _next()
       }
 
       // closure for calculating the actual

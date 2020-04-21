@@ -83,19 +83,24 @@ exports['e2e issue 1987 / can run proper amount of hooks'] = `
   suite 1
     ✓ test 1
     ✓ test 2
+    ✓ test 3
+    ✓ test 4
 
   suite 2
     ✓ s2t1
 
+  suite 3
+    ✓ s3t1
 
-  3 passing
+
+  6 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        6                                                                                │
+  │ Passing:      6                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -119,9 +124,9 @@ exports['e2e issue 1987 / can run proper amount of hooks'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  afterhooks.spec.js                       XX:XX        3        3        -        -        - │
+  │ ✔  afterhooks.spec.js                       XX:XX        6        6        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
 
 `
