@@ -99,6 +99,7 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
     'type',
     'version',
     'path',
+    'profilePath',
     'custom',
     'warning',
     'info',

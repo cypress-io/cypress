@@ -16,8 +16,12 @@ debug('starting the CLI in dev mode with args %o', {
   args,
 })
 
-const exit = ({ code }) => {
-  process.exit(code)
+const exit = ({ exitCode }) => {
+  if (typeof code !== 'number') {
+    throw new Error(`missing exit code from execa (received ${exitCode})`)
+  }
+
+  process.exit(exitCode)
 }
 
 execa(pathToCli, args, { stdio: 'inherit' })
