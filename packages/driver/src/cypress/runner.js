@@ -907,7 +907,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   function hasTestAlreadyRun (test) {
     if (Cypress._RESUMED_AT_TEST) {
-      return getOrderFromId(test) < getOrderFromId(Cypress._RESUMED_AT_TEST)
+      return getOrderFromId(test.id) < getOrderFromId(Cypress._RESUMED_AT_TEST)
     }
 
     return false
