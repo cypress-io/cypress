@@ -1,13 +1,3 @@
-/* eslint-disable
-    default-case,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const _ = require('lodash')
@@ -60,8 +50,7 @@ describe('lib/request', () => {
   beforeEach(function () {
     this.fn = sinon.stub()
     this.fn.withArgs('set:cookie').resolves({})
-
-    return this.fn.withArgs('get:cookies').resolves([])
+    this.fn.withArgs('get:cookies').resolves([])
   })
 
   it('is defined', () => {
@@ -229,10 +218,12 @@ describe('lib/request', () => {
             return res.write('foo\n')
           case '/econnreset':
             return req.socket.destroy()
+          default:
+            break
         }
       })
 
-      return this.srv.listen(9988, done)
+      this.srv.listen(9988, done)
     })
 
     afterEach(function () {
@@ -251,14 +242,14 @@ describe('lib/request', () => {
         let retries = 0
 
         stream.on('retry', () => {
-          return retries++
+          retries++
         })
 
         const p = Bluebird.fromCallback((cb) => {
-          return stream.on('error', cb)
+          stream.on('error', cb)
         })
 
-        expect(p).to.be.rejected
+        return expect(p).to.be.rejected
         .then((err) => {
           expect(err.code).to.eq('ESOCKETTIMEDOUT')
 
@@ -278,14 +269,14 @@ describe('lib/request', () => {
         let retries = 0
 
         stream.on('retry', () => {
-          return retries++
+          retries++
         })
 
         const p = Bluebird.fromCallback((cb) => {
-          return stream.on('error', cb)
+          stream.on('error', cb)
         })
 
-        expect(p).to.be.rejected
+        return expect(p).to.be.rejected
         .then((err) => {
           expect(err.code).to.eq('ECONNRESET')
 
@@ -307,14 +298,14 @@ describe('lib/request', () => {
         let retries = 0
 
         stream.on('retry', () => {
-          return retries++
+          retries++
         })
 
         const p = Bluebird.fromCallback((cb) => {
-          return stream.on('error', cb)
+          stream.on('error', cb)
         })
 
-        expect(p).to.be.rejected
+        return expect(p).to.be.rejected
         .then((err) => {
           expect(err.code).to.eq('ENOTFOUND')
 
@@ -737,7 +728,7 @@ describe('lib/request', () => {
 
     context('followRedirect', () => {
       beforeEach(function () {
-        return this.fn.resolves()
+        this.fn.resolves()
       })
 
       it('by default follow redirects', function () {
@@ -879,7 +870,7 @@ describe('lib/request', () => {
 
     context('form=true', () => {
       beforeEach(() => {
-        return nock('http://localhost:8080')
+        nock('http://localhost:8080')
         .matchHeader('Content-Type', 'application/x-www-form-urlencoded')
         .post('/login', 'foo=bar&baz=quux')
         .reply(200, '<html></html>')
@@ -955,10 +946,10 @@ describe('lib/request', () => {
         this.srv = http.createServer((req, res) => {
           res.writeHead(200)
 
-          return res.end()
+          res.end()
         })
 
-        return this.srv.listen(9988, done)
+        this.srv.listen(9988, done)
       })
 
       afterEach(function () {
@@ -1034,7 +1025,7 @@ describe('lib/request', () => {
           return new Promise((resolve, reject) => {
             req.on('response', resolve)
 
-            return req.on('error', reject)
+            req.on('error', reject)
           })
         })
       })

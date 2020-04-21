@@ -1,15 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 let r = require('@cypress/request')
 let rp = require('@cypress/request-promise')
@@ -19,13 +7,9 @@ const debug = require('debug')('cypress:server:request')
 const Promise = require('bluebird')
 const stream = require('stream')
 const duplexify = require('duplexify')
-const {
-  agent,
-} = require('@packages/network')
+const { agent } = require('@packages/network')
 const statusCode = require('./util/status_code')
-const {
-  streamBuffer,
-} = require('./util/stream_buffer')
+const { streamBuffer } = require('./util/stream_buffer')
 
 const SERIALIZABLE_COOKIE_PROPS = ['name', 'value', 'domain', 'expiry', 'path', 'secure', 'hostOnly', 'httpOnly', 'sameSite']
 const NETWORK_ERRORS = 'ECONNREFUSED ECONNRESET EPIPE EHOSTUNREACH EAI_AGAIN ENOTFOUND'.split(' ')
@@ -54,12 +38,12 @@ const convertSameSiteToughToExtension = (sameSite, setCookie) => {
   return sameSite
 }
 
-const getOriginalHeaders = (req = {}) => // the request instance holds an instance
-// of the original ClientRequest
-// as the 'req' property which holds the
-// original headers else fall back to
-// the normal req.headers
-{
+const getOriginalHeaders = (req = {}) => {
+  // the request instance holds an instance
+  // of the original ClientRequest
+  // as the 'req' property which holds the
+  // original headers else fall back to
+  // the normal req.headers
   return _.get(req, 'req.headers', req.headers)
 }
 
@@ -95,9 +79,9 @@ const getDelayForRetry = function (options = {}) {
   return onNext(delay, attempt)
 }
 
-const hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) => // everything must be true in order to
-// retry a status code failure
-{
+const hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) => {
+  // everything must be true in order to
+  // retry a status code failure
   return _.every([
     retryOnStatusCodeFailure,
     !statusCode.isOk(res.statusCode),
@@ -221,8 +205,8 @@ const createRetryingRequestPromise = function (opts) {
   }
 
   return rp(opts)
-  .catch((err) => // rp wraps network errors in a RequestError, so might need to unwrap it to check
-  {
+  .catch((err) => {
+    // rp wraps network errors in a RequestError, so might need to unwrap it to check
     return maybeRetryOnNetworkFailure(err.error || err, {
       opts,
       retryIntervals,
@@ -233,8 +217,8 @@ const createRetryingRequestPromise = function (opts) {
         throw err
       },
     })
-  }).then((res) => // ok, no net error, but what about a bad status code?
-  {
+  }).then((res) => {
+    // ok, no net error, but what about a bad status code?
     return maybeRetryOnStatusCodeFailure(res, {
       opts,
       requestId,
@@ -249,7 +233,7 @@ const createRetryingRequestPromise = function (opts) {
 
 const pipeEvent = (source, destination, event) => {
   return source.on(event, (...args) => {
-    return destination.emit(event, ...args)
+    destination.emit(event, ...args)
   })
 }
 
@@ -279,7 +263,7 @@ const createRetryingRequestStream = function (opts = {}) {
   const emitError = function (err) {
     retryStream.emit('error', err)
 
-    return cleanup()
+    cleanup()
   }
 
   const tryStartStream = function () {
@@ -311,7 +295,7 @@ const createRetryingRequestStream = function (opts = {}) {
       debug('aborting', { requestId })
       retryStream.aborted = true
 
-      return reqStream.abort()
+      reqStream.abort()
     }
 
     const onPiped = function (src) {
@@ -323,7 +307,7 @@ const createRetryingRequestStream = function (opts = {}) {
       // the request lib expects this 'pipe' event in
       // order to copy the request headers onto the
       // outgoing message - so we manually pipe it here
-      return src.pipe(reqStream)
+      src.pipe(reqStream)
     }
 
     // when this passthrough stream is being piped into
@@ -356,13 +340,13 @@ const createRetryingRequestStream = function (opts = {}) {
       })
     })
 
-    reqStream.once('request', (req) => // remove the pipe listener since once the request has
-    // been made, we cannot pipe into the reqStream anymore
-    {
-      return retryStream.removeListener('pipe', onPiped)
+    reqStream.once('request', (req) => {
+      // remove the pipe listener since once the request has
+      // been made, we cannot pipe into the reqStream anymore
+      retryStream.removeListener('pipe', onPiped)
     })
 
-    return reqStream.once('response', (incomingRes) => {
+    reqStream.once('response', (incomingRes) => {
       didReceiveResponse = true
 
       // ok, no net error, but what about a bad status code?
@@ -484,11 +468,9 @@ module.exports = function (options = {}) {
     contentTypeIsJson (response) {
       // TODO: use https://github.com/jshttp/type-is for this
       // https://github.com/cypress-io/cypress/pull/5166
-      return __guard__(__guard__(response != null ? response.headers : undefined, (x1) => {
-        return x1['content-type']
-      }), (x) => {
-        return x.split(';', 2)[0].endsWith('json')
-      })
+      if (response && response.headers && response.headers['content-type']) {
+        return response.headers['content-type'].split(';', 2)[0].endsWith('json')
+      }
     },
 
     parseJsonBody (body) {
@@ -653,7 +635,7 @@ module.exports = function (options = {}) {
         // first set the received cookies on the browser
         // and then grab the cookies for the new url
         return self.setCookiesOnBrowser(incomingRes, currentUrl, automationFn)
-        .then((cookies) => {
+        .then(() => {
           return self.setRequestCookieHeader(this, newUrl, automationFn)
         }).then(() => {
           currentUrl = newUrl
@@ -794,8 +776,4 @@ module.exports = function (options = {}) {
     },
 
   }
-}
-
-function __guard__ (value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined
 }
