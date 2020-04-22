@@ -24,7 +24,7 @@ exports['e2e return value failing1 1'] = `
   0 passing
   3 failing
 
-  1)  errors when invoking commands and return a different value:
+  1) errors when invoking commands and return a different value:
      CypressError: Cypress detected that you invoked one or more cy commands but returned a different value.
 
 The return value was:
@@ -40,7 +40,7 @@ In previous versions of Cypress we automatically detected this and forced the cy
 https://on.cypress.io/returning-value-and-commands-in-test
       [stack trace lines]
 
-  2)  errors when invoking commands in custom command and returning different value:
+  2) errors when invoking commands in custom command and returning different value:
      CypressError: Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.
 
 The custom command was:
@@ -60,7 +60,7 @@ In previous versions of Cypress we automatically detected this and forced the cy
 https://on.cypress.io/returning-value-and-commands-in-custom-command
       [stack trace lines]
 
-  3)  errors when not invoking commands, invoking done callback, and returning a promise:
+  3) errors when not invoking commands, invoking done callback, and returning a promise:
      Error: Cypress detected that you returned a promise in a test, but also invoked a done callback. Return a promise -or- invoke a done callback, not both.
 
 Original mocha error:

@@ -3184,6 +3184,7 @@ describe "Routes", ->
             ## abort when we get the
             ## response headers
             .on "response", abort
+        return
 
     context "event source / server sent events / SSE", ->
       onRequest = null

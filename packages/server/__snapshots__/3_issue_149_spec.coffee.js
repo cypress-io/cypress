@@ -23,7 +23,7 @@ exports['e2e issue 149 failing 1'] = `
   1 passing
   1 failing
 
-  1)  fails:
+  1) fails:
      Error: this should fail here
       [stack trace lines]
 

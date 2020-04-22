@@ -5,7 +5,7 @@ root       = path.join(__dirname, "..", "..", "..")
 projects   = path.join(root, "test", "support", "fixtures", "projects")
 tmpDir     = path.join(root, ".projects")
 
-module.exports =
+module.exports = {
   ## copies all of the project fixtures
   ## to the tmpDir .projects in the root
   scaffold: ->
@@ -29,3 +29,4 @@ module.exports =
 
   path: (fixture) ->
     path.join(root, "test", "support", "fixtures", fixture)
+}

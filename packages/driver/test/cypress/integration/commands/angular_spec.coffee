@@ -17,7 +17,7 @@ describe "src/cy/commands/angular", ->
 
       describe "errors", ->
         beforeEach ->
-          Cypress.config("defaultCommandTimeout", 50)
+          Cypress.config("defaultCommandTimeout", 100)
 
           @angular = cy.state("window").angular
 
@@ -94,7 +94,7 @@ describe "src/cy/commands/angular", ->
 
       describe "errors", ->
         beforeEach ->
-          Cypress.config("defaultCommandTimeout", 50)
+          Cypress.config("defaultCommandTimeout", 100)
 
           @angular = cy.state("window").angular
 
@@ -208,7 +208,7 @@ describe "src/cy/commands/angular", ->
 
       describe "errors", ->
         beforeEach ->
-          Cypress.config("defaultCommandTimeout", 50)
+          Cypress.config("defaultCommandTimeout", 100)
 
           @angular = cy.state("window").angular
 
