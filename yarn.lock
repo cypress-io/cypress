@@ -13205,7 +13205,16 @@ http-proxy-agent@^2.1.0:
     agent-base "4"
     debug "3.1.0"
 
-http-proxy@^1.17.0, http-proxy@cypress-io/node-http-proxy#9322b4b69b34f13a6f3874e660a35df3305179c6:
+http-proxy@^1.17.0:
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.18.0.tgz#dbe55f63e75a347db7f3d99974f2692a314a6a3a"
+  integrity sha512-84I2iJM/n1d4Hdgc6y2+qY5mDaz2PUVjlg9znE9byl+q0uC3DeByqBGReQu5tpLK0TAqTIXScRUV+dg7+bUPpQ==
+  dependencies:
+    eventemitter3 "^4.0.0"
+    follow-redirects "^1.0.0"
+    requires-port "^1.0.0"
+
+http-proxy@cypress-io/node-http-proxy#9322b4b69b34f13a6f3874e660a35df3305179c6:
   version "1.18.0"
   resolved "https://codeload.github.com/cypress-io/node-http-proxy/tar.gz/9322b4b69b34f13a6f3874e660a35df3305179c6"
   dependencies:
@@ -21968,11 +21977,10 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#unpatched-has-bin
   version "3.1.2-patch1"
   resolved "https://codeload.github.com/cypress-io/socket.io-circular-parser/tar.gz/e274585ec04d1840fd1211dd3061d6dba2160475"
   dependencies:
-    circular-json "^0.4.0"
+    circular-json "0.5.9"
     component-emitter "1.2.1"
-    debug "~2.6.4"
-    has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
-    isarray "2.0.1"
+    debug "~4.1.0"
+    has-binary2 "~1.0.2"
 
 socket.io-client@2.3.0:
   version "2.3.0"
