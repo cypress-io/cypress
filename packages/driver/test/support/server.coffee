@@ -1,6 +1,5 @@
 _         = require("lodash")
 fs        = require("fs")
-niv       = require("npm-install-version")
 auth      = require("basic-auth")
 bodyParser = require("body-parser")
 express   = require("express")
@@ -10,12 +9,6 @@ Promise   = require("bluebird")
 coffee    = require("@packages/coffee")
 
 args = require("minimist")(process.argv.slice(2))
-
-## make sure we have both versions of react
-niv.install("react@16.0.0")
-niv.install("react-dom@16.0.0")
-niv.install("react@15.6.1")
-niv.install("react-dom@15.6.1")
 
 [3500, 3501].forEach (port) ->
   app = express()
