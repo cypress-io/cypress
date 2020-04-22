@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - try-new-electron-sign
+        - investigate-spec-on-mac
 
 defaults: &defaults
   parallelism: 1
