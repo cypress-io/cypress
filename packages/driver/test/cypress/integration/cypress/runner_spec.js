@@ -1,6 +1,10 @@
+const { _ } = Cypress
+
 const pending = []
+const testAfterRunEvents = []
 
 Cypress.on('test:after:run', (test) => {
+  testAfterRunEvents.push(test)
   if (test.state === 'pending') {
     return pending.push(test)
   }
@@ -40,4 +44,18 @@ describe('async timeouts', () => {
     cy.wait(200)
     cy.then(() => done())
   })
+})
+
+// NOTE: this test must remain the last test in the spec
+// so we can test the root after hook
+describe('fires test:after:run after root after hook', () => {
+  it('test 1', () => {
+  })
+
+  it('test 2', () => {
+  })
+})
+
+after(() => {
+  expect(_.last(testAfterRunEvents).title, 'test:after:run for test 2 should not have fired yet').eq('test 1')
 })
