@@ -1,11 +1,21 @@
 /// <reference types="cypress" />
-// import Settings from './settings'
+// prevents "regeneratorRuntime is not defined" error
+import 'regenerator-runtime/runtime'
+import React from 'react'
+import { mount } from 'cypress-react-unit-test'
+import Settings from './settings'
 
-// NOTE: cannot import Configuration - regeneratorRuntime undefined error
-describe.skip('Settings', () => {
+/* global cy */
+describe('Settings', () => {
   it('loads', () => {
-    // mount(<Settings />, {
-    //   cssFiles: 'dist/app.css',
-    // })
+    const project = {
+      resolvedNodeVersion: '99.0.0',
+    }
+
+    mount(<Settings project={project} />, {
+      stylesheets: '/__root/dist/app.css',
+    })
+
+    cy.contains('.settings-node', project.resolvedNodeVersion).should('be.visible')
   })
 })
