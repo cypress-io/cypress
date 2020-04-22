@@ -363,12 +363,10 @@ class Reporter
         ## with the found reporter
         throw err
 
-      p = path.resolve(reporterName)
-
       ## try npm. if this fails, we're out of options, so let it throw
-      debug("trying to require local reporter with path:", p)
+      debug("trying to require local reporter directly:", reporterName)
 
-      return require(p)
+      return require(reporterName)
 
   @getSearchPathsForReporter = (reporterName, projectRoot) ->
     _.uniq([
