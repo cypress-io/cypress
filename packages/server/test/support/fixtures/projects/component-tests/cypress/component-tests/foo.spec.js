@@ -1,5 +1,5 @@
 describe('component', () => {
-  it('works', () => {
-    expect(true).to.be.true
+  it('has spec with window same as app window', () => {
+    cy.window().should('equal', window)
   })
 })

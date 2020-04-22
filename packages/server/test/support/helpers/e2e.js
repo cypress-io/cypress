@@ -590,7 +590,9 @@ const e2e = {
     ```
    */
   exec (ctx, options = {}) {
+    debug('e2e exec options %o', options)
     options = this.options(ctx, options)
+    debug('processed options %o', options)
     let args = this.args(options)
 
     args = ['index.js'].concat(args)
