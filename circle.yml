@@ -112,8 +112,7 @@ commands:
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
-      - verify-mocha-results:
-          expectedResultCount: 1
+      - verify-mocha-results
 
   run-e2e-tests:
     parameters:
@@ -610,7 +609,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
       - verify-mocha-results:
-          expectedResultCount: 1
+          expectedResultCount: 10
 
   desktop-gui-visual-tests:
     <<: *defaults
@@ -634,8 +633,7 @@ jobs:
           working_directory: packages/desktop-gui
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
-      - verify-mocha-results:
-          expectedResultCount: 1
+      - verify-mocha-results
 
 
   "reporter-integration-tests":
