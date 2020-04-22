@@ -375,29 +375,10 @@ const e2e = {
   },
 
   setup (options = {}) {
-    const npmI = options.npmInstall
-
-    if (npmI) {
-      before(async function () {
-        // npm install needs extra time
-        this.timeout(human('2 minutes'))
-
-        await cp.execAsync('npm install', {
-          cwd: Fixtures.path('projects/e2e'),
-          maxBuffer: 1024 * 1000,
-        })
-
-        // symlinks mess up fs.copySync
-        // and bin files aren't necessary for these tests
-        await fs.removeAsync(Fixtures.path('projects/e2e/node_modules/.bin'))
-      })
-
-      // now cleanup the node modules after because these add a lot
-      // of copy time for the Fixtures scaffolding
-      after(() => {
-        return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
-      })
-    }
+    // cleanup old node_modules that may have been around from legacy tests
+    before(() => {
+      return fs.removeAsync(Fixtures.path('projects/e2e/node_modules'))
+    })
 
     beforeEach(async function () {
       // after installing node modules copying all of the fixtures
@@ -448,12 +429,12 @@ const e2e = {
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
-      noExit: process.env.NO_EXIT ? true : null,
       timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
+      noExit: process.env.NO_EXIT,
     })
 
     if (options.noExit) {
@@ -684,8 +665,12 @@ const e2e = {
 
           // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
+
           // Emulate no typescript environment
           CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
+
+          // force file watching for use with --no-exit
+          ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
         .value(),

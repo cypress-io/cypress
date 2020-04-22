@@ -610,9 +610,18 @@ class Project extends EE {
   }
 
   createCiProject (projectDetails) {
+    debug('create CI project with projectDetails %o', projectDetails)
+
     return user.ensureAuthToken()
     .then((authToken) => {
-      return commitInfo.getRemoteOrigin(this.projectRoot)
+      const remoteOrigin = commitInfo.getRemoteOrigin(this.projectRoot)
+
+      debug('found remote origin at projectRoot %o', {
+        remoteOrigin,
+        projectRoot: this.projectRoot,
+      })
+
+      return remoteOrigin
       .then((remoteOrigin) => {
         return api.createProject(projectDetails, remoteOrigin, authToken)
       })

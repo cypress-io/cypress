@@ -1,11 +1,4 @@
 {
   "name": "e2e",
-  "version": "0.0.0",
-  "devDependencies": {
-    "mocha": "^4.1.0",
-    "mochawesome-1.5.2": "npm:mochawesome@1.5.2",
-    "mochawesome-2.3.1": "npm:mochawesome@2.3.1",
-    "mochawesome-3.0.1": "npm:mochawesome@3.0.1",
-    "react": "15.4.0"
-  }
+  "version": "0.0.0"
 }
