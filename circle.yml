@@ -106,7 +106,7 @@ commands:
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
-            working_directory: packages/driver
+          working_directory: packages/driver
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
