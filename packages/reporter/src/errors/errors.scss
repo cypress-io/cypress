@@ -178,6 +178,11 @@
 
     .err-stack-line {
       white-space: pre;
+
+      // ensure empty lines still take up vertical space
+      &:empty:before {
+        content: ' ';
+      }
     }
   }
 

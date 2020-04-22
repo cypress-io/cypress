@@ -40,6 +40,7 @@ const ErrorStack = observer(({ err }: Props) => {
     )
   }
 
+  let stopLinking = false
   const lines = _.map(stackLines, (stackLine, index) => {
     const { relativeFile, function: fn, line, column } = stackLine
     const key = `${relativeFile}${index}`
@@ -47,10 +48,16 @@ const ErrorStack = observer(({ err }: Props) => {
     const whitespace = stackLine.whitespace.slice(commonWhitespaceLength)
 
     if (stackLine.message != null) {
+      // we append some errors with 'node internals', which we don't want to link
+      // so stop linking anything after 'From Node.js Internals'
+      if (stackLine.message.includes('From Node')) {
+        stopLinking = true
+      }
+
       return makeLine(key, [whitespace, stackLine.message])
     }
 
-    if (cypressLineRegex.test(relativeFile || '')) {
+    if (cypressLineRegex.test(relativeFile || '') || stopLinking) {
       return makeLine(key, [whitespace, `at ${fn} (${relativeFile}:${line}:${column})`])
     }
 

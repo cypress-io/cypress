@@ -187,6 +187,23 @@ describe('test errors', function () {
         line: 10,
         column: 13,
         whitespace: '    ',
+      }, {
+        message: 'From Node.js Internals:',
+        whitespace: '  ',
+      }, {
+        relativeFile: 'events.js',
+        absoluteFile: 'events.js',
+        function: 'emit',
+        line: 11,
+        column: 14,
+        whitespace: '    ',
+      }, {
+        relativeFile: 'some/node/internals.js',
+        absoluteFile: '/user/path/to/node/some/node/internals.js',
+        function: 'writeFile',
+        line: 12,
+        column: 15,
+        whitespace: '    ',
       }],
       docsUrl: 'https://on.cypress.io/type',
       codeFrame: {
@@ -269,7 +286,7 @@ describe('test errors', function () {
 
       cy.get('.runnable-err-stack-trace').within(() => {
         cy.get('.err-stack-line')
-        .should('have.length', 6)
+        .should('have.length', 9)
         .first().should('have.text', 'at foo.bar (my/app.js:2:7)')
 
         cy.get('.err-stack-line')
@@ -314,6 +331,12 @@ describe('test errors', function () {
     it('does not turn cypress_runner.js files into links', function () {
       cy.contains('View stack trace').click()
       cy.contains('cypress_runner.js').find('a').should('not.exist')
+    })
+
+    it('does not turn anything after "From Node.js Internals" into links', function () {
+      cy.contains('View stack trace').click()
+      cy.contains('events.js').find('a').should('not.exist')
+      cy.contains('node/internals.js').find('a').should('not.exist')
     })
 
     it('does not collapse test when clicking', () => {

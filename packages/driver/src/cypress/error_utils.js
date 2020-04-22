@@ -264,7 +264,7 @@ const createUncaughtException = (type, err) => {
 // stacks from command failures and assertion failures have the right message
 // but the stack points to cypress internals. here we replace the internal
 // cypress stack with the invocation stack, which points to the user's code
-const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
+const stackAndCodeFrameIndex = (err, userInvocationStack) => {
   if (!userInvocationStack) return { stack: err.stack }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
@@ -274,8 +274,28 @@ const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
   return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
 }
 
+const stackWithContentAppended = (err, stack) => {
+  const appendToStack = err.appendToStack
+
+  if (!appendToStack || !appendToStack.content) return stack
+
+  delete err.appendToStack
+
+  const content = $utils.indent(appendToStack.content, 2)
+
+  return `${stack}\n\n${appendToStack.title}:\n${content}`
+}
+
+const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
+  let { stack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
+
+  stack = stackWithContentAppended(err, stack)
+
+  return { stack, index }
+}
+
 const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
-  const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
+  let { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
   err.stack = stack

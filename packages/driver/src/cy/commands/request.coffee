@@ -271,10 +271,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
             url:     requestOpts.url
           },
           errProps: {
-            originalErr: {
-              stackTitle: "From Node.js Internals"
-              stack: err.stack
-              removeMessage: false
+            appendToStack: {
+              title: "From Node.js Internals"
+              content: err.stack
             }
           }
         })

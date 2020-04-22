@@ -828,10 +828,9 @@ module.exports = (Commands, Cypress, cy, state, config) ->
                     error: err
                   }
                   errProps: {
-                    originalErr: {
-                      stackTitle: "From Node.js Internals"
-                      stack: err.stack
-                      removeMessage: false
+                    appendToStack: {
+                      title: "From Node.js Internals"
+                      content: err.stack
                     }
                   }
                 })

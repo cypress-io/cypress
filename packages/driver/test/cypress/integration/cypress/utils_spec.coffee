@@ -127,3 +127,9 @@ describe "driver/src/cypress/utils", ->
       memoizedFn("input-1")
       ## cache for input-1 is cleared, so it calls the function again
       expect(fn.callCount).to.be.equal(4)
+
+  context ".indent", ->
+    it "indents each line by the given amount", ->
+      str = "line 1\n line 2\n  line 3\n   line 4\n    line 5"
+
+      expect($utils.indent(str, 3)).to.equal("   line 1\n    line 2\n     line 3\n      line 4\n       line 5")

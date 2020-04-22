@@ -252,4 +252,11 @@ module.exports = {
     memoized.cache = cacheInstance
 
     return memoized
+
+  indent: (str, indentAmount) ->
+    indentStr = _.repeat(" ", indentAmount)
+
+    str = str.replace(/\n/g, "\n#{indentStr}")
+
+    "#{indentStr}#{str}"
 }
