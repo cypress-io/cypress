@@ -3,17 +3,17 @@
 // tslint:disable:no-irregular-whitespace
 
 declare namespace JQuery3 {
-    type TypeOrArray<T> = T | T[];
-    type Node = Element | Text | Comment | DocumentFragment;
+    type TypeOrArray<T> = T | T[]
+    type Node = Element | Text | Comment | DocumentFragment
 
     /**
      * A string is designated htmlString in jQuery documentation when it is used to represent one or more DOM elements, typically to be created and inserted in the document. When passed as an argument of the jQuery() function, the string is identified as HTML if it starts with <tag ... >) and is parsed as such until the final > character. Prior to jQuery 1.9, a string was considered to be HTML if it contained <tag ... > anywhere within the string.
      */
-    type htmlString = string;
+    type htmlString = string
     /**
      * A selector is used in jQuery to select DOM elements from a DOM document. That document is, in most cases, the DOM document present in all browsers, but can also be an XML document received via Ajax.
      */
-    type Selector = string;
+    type Selector = string
 
     /**
      * The PlainObject type is a JavaScript object containing zero or more key-value pairs. The plain object is, in other words, an Object object. It is designated "plain" in jQuery documentation to distinguish it from other kinds of JavaScript objects: for example, null, user-defined arrays, and host objects such as document, all of which have a typeof value of "object."
@@ -61,15 +61,15 @@ declare namespace JQuery3 {
     }
 
     namespace Ajax {
-        type SuccessTextStatus = 'success' | 'notmodified' | 'nocontent';
-        type ErrorTextStatus = 'timeout' | 'error' | 'abort' | 'parsererror';
-        type TextStatus = SuccessTextStatus | ErrorTextStatus;
+        type SuccessTextStatus = 'success' | 'notmodified' | 'nocontent'
+        type ErrorTextStatus = 'timeout' | 'error' | 'abort' | 'parsererror'
+        type TextStatus = SuccessTextStatus | ErrorTextStatus
 
-        type SuccessCallback<TContext> = (this: TContext, data: any, textStatus: SuccessTextStatus, jqXHR: jqXHR) => void;
+        type SuccessCallback<TContext> = (this: TContext, data: any, textStatus: SuccessTextStatus, jqXHR: jqXHR) => void
 
-        type ErrorCallback<TContext> = (this: TContext, jqXHR: jqXHR, textStatus: ErrorTextStatus, errorThrown: string) => void;
+        type ErrorCallback<TContext> = (this: TContext, jqXHR: jqXHR, textStatus: ErrorTextStatus, errorThrown: string) => void
 
-        type CompleteCallback<TContext> = (this: TContext, jqXHR: jqXHR, textStatus: TextStatus) => void;
+        type CompleteCallback<TContext> = (this: TContext, jqXHR: jqXHR, textStatus: TextStatus) => void
 
         /**
          * @see \`{@link https://api.jquery.com/jquery.ajax/#jQuery-ajax-settings }\`
@@ -648,7 +648,7 @@ declare namespace JQuery3 {
         } & {
             // Status codes not listed require type annotations when defining the callback
             [index: number]: SuccessCallback<TContext> | ErrorCallback<TContext>
-        };
+        }
 
         // #endregion
 
@@ -664,7 +664,7 @@ declare namespace JQuery3 {
     }
 
     namespace Transport {
-        type SuccessCallback = (status: number, statusText: Ajax.TextStatus, responses?: PlainObject, headers?: string) => void;
+        type SuccessCallback = (status: number, statusText: Ajax.TextStatus, responses?: PlainObject, headers?: string) => void
     }
 
     /**
@@ -1128,7 +1128,7 @@ callbacks.fire( "world" );
         Partial<_CSSHook<TElement>> & (
             Pick<_CSSHook<TElement>, 'get'> |
             Pick<_CSSHook<TElement>, 'set'>
-        );
+        )
 
     interface _CSSHook<TElement> {
         get(elem: TElement, computed: any, extra: any): any
@@ -3456,11 +3456,11 @@ $.get( "test.php" )
     }
 
     namespace Deferred {
-        type CallbackBase<T, U, V, R> = (t: T, u: U, v: V, ...r: R[]) => void;
+        type CallbackBase<T, U, V, R> = (t: T, u: U, v: V, ...r: R[]) => void
 
         interface Callback3<T, U, V> extends CallbackBase<T, U, V, never> { }
 
-        type Callback<T> = (...args: T[]) => void;
+        type Callback<T> = (...args: T[]) => void
 
         /**
          * @deprecated ​ Deprecated. Use \`{@link Callback }\`.
@@ -3488,7 +3488,7 @@ $.get( "test.php" )
     // region Effects
     // #region Effects
 
-    type Duration = number | 'fast' | 'slow';
+    type Duration = number | 'fast' | 'slow'
 
     /**
      * @see \`{@link https://api.jquery.com/animate/#animate-properties-options }\`
@@ -3657,7 +3657,7 @@ $.get( "test.php" )
      * @see \`{@link https://gist.github.com/gnarf/54829d408993526fe475#tweeners }\`
      * @since 1.8
      */
-    type Tweener<TElement> = (this: Animation<TElement>, propName: string, finalValue: number) => Tween<TElement>;
+    type Tweener<TElement> = (this: Animation<TElement>, propName: string, finalValue: number) => Tween<TElement>
 
     /**
      * @see \`{@link https://gist.github.com/gnarf/54829d408993526fe475#tweens }\`
@@ -3778,7 +3778,7 @@ jQuery.Tween.propHooks[ property ] = {
         set(tween: Tween<TElement>): void
     } | {
         [key: string]: never
-    };
+    }
 
     /**
      * @see \`{@link https://gist.github.com/gnarf/54829d408993526fe475#tween-hooks }\`
@@ -3793,7 +3793,7 @@ jQuery.Tween.propHooks[ property ] = {
     // region Easing
     // #region Easing
 
-    type EasingMethod = (percent: number) => number;
+    type EasingMethod = (percent: number) => number
 
     interface Easings {
         [name: string]: EasingMethod
@@ -3926,7 +3926,7 @@ $( "input" ).click(function() {
      *
      * `jQuery.fx.step` functions are being replaced by `jQuery.Tween.propHooks` and may eventually be removed, but are still supported via the default tween propHook.
      */
-    type AnimationHook<TElement> = (fx: Tween<TElement>) => void;
+    type AnimationHook<TElement> = (fx: Tween<TElement>) => void
 
     interface TickFunction<TElement> {
         anim: Animation<TElement>
@@ -3941,9 +3941,9 @@ $( "input" ).click(function() {
     // #region Queue
 
     // TODO: Is the first element always a string or is that specific to the 'fx' queue?
-    type Queue<TElement> = { 0: string } & Array<QueueFunction<TElement>>;
+    type Queue<TElement> = { 0: string } & Array<QueueFunction<TElement>>
 
-    type QueueFunction<TElement> = (this: TElement, next: () => void) => void;
+    type QueueFunction<TElement> = (this: TElement, next: () => void) => void
 
     // #endregion
 
@@ -3968,7 +3968,7 @@ $( "input" ).click(function() {
         complete(this: TElement): void
     } | {
         [key: string]: never
-    };
+    }
 
     // #endregion
 
@@ -4711,7 +4711,7 @@ $( "button" ).click(function( event ) {
 ```
          */
         namespace?: string
-        originalEvent?: _Event
+        originalEvent?: JQuery3Event
         /**
          * The last value returned by an event handler that was triggered by this event, unless the value was undefined.
          * @see \`{@link https://api.jquery.com/event.result/ }\`
@@ -4984,7 +4984,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         metaKey: undefined
         shiftKey: undefined
 
-        originalEvent?: _Event
+        originalEvent?: JQuery3Event
     }
 
     interface ChangeEvent<
@@ -5054,7 +5054,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         detail: number
         view: Window
 
-        originalEvent?: _UIEvent
+        originalEvent?: JQuery3UIEvent
     }
 
     // region MouseEvent
@@ -5284,7 +5284,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         metaKey: boolean
         shiftKey: boolean
 
-        originalEvent?: _MouseEvent
+        originalEvent?: JQuery3MouseEvent
     }
 
     interface ClickEvent<
@@ -5466,7 +5466,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         TCurrentTarget = any,
         TTarget = any
     > extends UIEventBase<TDelegateTarget, TData, TCurrentTarget, TTarget> {
-        originalEvent?: _DragEvent
+        originalEvent?: JQuery3DragEvent
     }
 
     interface DragEvent<
@@ -5772,7 +5772,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         metaKey: boolean
         shiftKey: boolean
 
-        originalEvent?: _KeyboardEvent
+        originalEvent?: JQuery3KeyboardEvent
     }
 
     interface KeyDownEvent<
@@ -6031,7 +6031,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         metaKey: boolean
         shiftKey: boolean
 
-        originalEvent?: _TouchEvent
+        originalEvent?: JQuery3TouchEvent
     }
 
     interface TouchCancelEvent<
@@ -6299,7 +6299,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         metaKey: undefined
         shiftKey: undefined
 
-        originalEvent?: _FocusEvent
+        originalEvent?: JQuery3FocusEvent
     }
 
     interface BlurEvent<
@@ -6406,12 +6406,12 @@ $( "#checkMetaKey" ).click(function( event ) {
     }
 
     // Extra parameters can be passed from trigger()
-    type EventHandlerBase<TContext, T> = (this: TContext, t: T, ...args: any[]) => any;
+    type EventHandlerBase<TContext, T> = (this: TContext, t: T, ...args: any[]) => any
 
     type EventHandler<
         TCurrentTarget,
         TData = undefined
-    > = EventHandlerBase<TCurrentTarget, TriggeredEvent<TCurrentTarget, TData>>;
+    > = EventHandlerBase<TCurrentTarget, TriggeredEvent<TCurrentTarget, TData>>
 
     type TypeEventHandler<
         TDelegateTarget,
@@ -6419,7 +6419,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         TCurrentTarget,
         TTarget,
         TType extends keyof TypeToTriggeredEventMap<TDelegateTarget, TData, TCurrentTarget, TTarget>
-    > = EventHandlerBase<TCurrentTarget, TypeToTriggeredEventMap<TDelegateTarget, TData, TCurrentTarget, TTarget>[TType]>;
+    > = EventHandlerBase<TCurrentTarget, TypeToTriggeredEventMap<TDelegateTarget, TData, TCurrentTarget, TTarget>[TType]>
 
     interface TypeEventHandlers<
         TDelegateTarget,
@@ -6445,7 +6445,7 @@ $( "#checkMetaKey" ).click(function( event ) {
             TypeEventHandler<TDelegateTarget, TData, TCurrentTarget, TTarget, TType> |
             false |
             object;
-    };
+    }
 
     // region Event extensions
     // #region Event extensions
@@ -6544,7 +6544,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         postDispatch(this: TTarget, event: Event): void
     } | {
         [key: string]: never
-    };
+    }
 
     interface SpecialEventHooks {
         [event: string]: SpecialEventHook<EventTarget, any>
@@ -6604,7 +6604,7 @@ $( "#checkMetaKey" ).click(function( event ) {
     type CoordinatesPartial =
         Pick<Coordinates, 'left'> |
         Pick<Coordinates, 'top'> |
-        { [key: string]: never };
+        { [key: string]: never }
 
     // #endregion
 
@@ -6618,7 +6618,7 @@ $( "#checkMetaKey" ).click(function( event ) {
         set(elem: TElement, value: any): any
     } | {
         [key: string]: never
-    };
+    }
 
     interface ValHooks {
         // Set to HTMLElement to minimize breaks but should probably be Element.
@@ -6627,19 +6627,19 @@ $( "#checkMetaKey" ).click(function( event ) {
 
     // #endregion
 
-    type _Falsy = false | null | undefined | 0 | '' | typeof document.all;
+    type _Falsy = false | null | undefined | 0 | '' | typeof document.all
 }
 
 // declare const jQuery: JQueryStatic3;
 // declare const $: JQueryStatic3;
 
-type _Event = Event;
-type _UIEvent = UIEvent;
-type _MouseEvent = MouseEvent;
-type _DragEvent = DragEvent;
-type _KeyboardEvent = KeyboardEvent;
-type _TouchEvent = TouchEvent;
-type _FocusEvent = FocusEvent;
+type JQuery3Event = Event
+type JQuery3UIEvent = UIEvent
+type JQuery3MouseEvent = MouseEvent
+type JQuery3DragEvent = DragEvent
+type JQuery3KeyboardEvent = KeyboardEvent
+type JQuery3TouchEvent = TouchEvent
+type JQuery3FocusEvent = FocusEvent
 
 // region ES5 compatibility
 // #region ES5 compatibility

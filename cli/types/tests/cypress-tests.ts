@@ -21,9 +21,9 @@ namespace CypressSinonTests {
 }
 
 namespace CypressJqueryTests {
-  Cypress.$ // $ExpectType JQueryStatic
-  Cypress.$('selector') // $ExpectType JQuery<HTMLElement>
-  Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
+  Cypress.$ // $ExpectType JQueryStatic3
+  Cypress.$('selector') // $ExpectType JQuery3<HTMLElement>
+  Cypress.$('selector').click() // $ExpectType JQuery3<HTMLElement>
 }
 
 namespace CypressConfigTests {
@@ -90,7 +90,7 @@ namespace CypressLogsTest {
 
   log.get() // $ExpectType LogConfig
   log.get('name') // $ExpectType string
-  log.get('$el') // $ExpectType JQuery<HTMLElement>
+  log.get('$el') // $ExpectType JQuery3<HTMLElement>
 }
 
 namespace CypressLocalStorageTest {
@@ -157,7 +157,7 @@ cy.wrap({ foo: ['bar', 'baz'] })
 
 cy.get('.someSelector')
   .each(($el, index, list) => {
-    $el // $ExpectType JQuery<HTMLElement>
+    $el // $ExpectType JQuery3<HTMLElement>
     index // $ExpectType number
     list // $ExpectType HTMLElement[]
   })
@@ -250,16 +250,16 @@ cy.wrap('foo').then(subject => {
 })
 
 cy.get('body').within(body => {
-  body // $ExpectType JQuery<HTMLBodyElement>
+  body // $ExpectType JQuery3<HTMLBodyElement>
 })
 
 cy.get('body').within({ log: false }, body => {
-  body // $ExpectType JQuery<HTMLBodyElement>
+  body // $ExpectType JQuery3<HTMLBodyElement>
 })
 
 cy.get('body').within(() => {
   cy.get('body', { withinSubject: null }).then(body => {
-    body // $ExpectType JQuery<HTMLBodyElement>
+    body // $ExpectType JQuery3<HTMLBodyElement>
   })
 })
 
@@ -382,11 +382,11 @@ namespace CypressBrowserTests {
 namespace CypressDomTests {
   const obj: any = {}
   const el = {} as any as HTMLElement
-  const jel = {} as any as JQuery
+  const jel = {} as any as JQuery3
   const doc = {} as any as Document
 
-  Cypress.dom.wrap((x: number) => 'a') // $ExpectType JQuery<HTMLElement>
-  Cypress.dom.query('foo', el) // $ExpectType JQuery<HTMLElement>
+  Cypress.dom.wrap((x: number) => 'a') // $ExpectType JQuery3<HTMLElement>
+  Cypress.dom.query('foo', el) // $ExpectType JQuery3<HTMLElement>
   Cypress.dom.unwrap(obj) // $ExpectType any
   Cypress.dom.isDom(obj) // $ExpectType boolean
   Cypress.dom.isType(el, 'foo') // $ExpectType boolean
@@ -406,14 +406,14 @@ namespace CypressDomTests {
   Cypress.dom.isJquery(obj) // $ExpectType boolean
   Cypress.dom.isInputType(el, 'number') // $ExpectType boolean
   Cypress.dom.stringify(el, 'foo') // $ExpectType string
-  Cypress.dom.getElements(jel) // $ExpectType JQuery<HTMLElement> | HTMLElement[]
+  Cypress.dom.getElements(jel) // $ExpectType JQuery3<HTMLElement> | HTMLElement[]
   Cypress.dom.getContainsSelector('foo', 'bar') // $ExpectType string
   Cypress.dom.getFirstDeepestElement([el], 1) // $ExpectType HTMLElement
-  Cypress.dom.getWindowByElement(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getWindowByElement(el) // $ExpectType HTMLElement | JQuery3<HTMLElement>
   Cypress.dom.getReasonIsHidden(el) // $ExpectType string
-  Cypress.dom.getFirstScrollableParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
-  Cypress.dom.getFirstFixedOrStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
-  Cypress.dom.getFirstStickyPositionParent(el) // $ExpectType HTMLElement | JQuery<HTMLElement>
+  Cypress.dom.getFirstScrollableParent(el) // $ExpectType HTMLElement | JQuery3<HTMLElement>
+  Cypress.dom.getFirstFixedOrStickyPositionParent(el) // $ExpectType HTMLElement | JQuery3<HTMLElement>
+  Cypress.dom.getFirstStickyPositionParent(el) // $ExpectType HTMLElement | JQuery3<HTMLElement>
   Cypress.dom.getCoordsByPosition(1, 2) // $ExpectType number
   Cypress.dom.getElementPositioning(el) // $ExpectType ElementPositioning
   Cypress.dom.getElementAtPointFromViewport(doc, 1, 2) // $ExpectType Element | null

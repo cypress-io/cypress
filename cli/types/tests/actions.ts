@@ -41,7 +41,7 @@ Cypress.on('viewport:changed', (viewport) => {
 })
 
 Cypress.on('scrolled', ($el) => {
-  $el // $ExpectType JQuery<HTMLElement>
+  $el // $ExpectType JQuery3<HTMLElement>
 })
 
 Cypress.on('command:enqueued', (command) => {

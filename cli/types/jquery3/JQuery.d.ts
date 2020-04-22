@@ -25,7 +25,7 @@ if ( b.jquery ) { // Truthy, since it's a string
 alert( "You are running jQuery version: " + $.fn.jquery );
 ```
      */
-    jquery: string;
+    jquery: string
     /**
      * The number of elements in the jQuery object.
      * @see \`{@link https://api.jquery.com/length/ }\`
@@ -73,7 +73,7 @@ $( document.body )
 </html>
 ```
      */
-    length: number;
+    length: number
     /**
      * Create a new jQuery object with elements added to the set of matched elements.
      * @param selector A string representing a selector expression to find additional elements to add to the set of matched elements.
@@ -82,7 +82,7 @@ $( document.body )
      * @see \`{@link https://api.jquery.com/add/ }\`
      * @since 1.4
      */
-    add(selector: JQuery3.Selector, context: Element): this;
+    add(selector: JQuery3.Selector, context: Element): this
     // TODO: The return type should reflect newly selected types.
     /**
      * Create a new jQuery object with elements added to the set of matched elements.
@@ -227,7 +227,7 @@ collection.css( "background", "yellow" );
 </html>
 ```
      */
-    add(selector_elements_html_selection: JQuery3.Selector | JQuery3.TypeOrArray<Element> | JQuery3.htmlString | JQuery3 | JQuery3.Node): this;
+    add(selector_elements_html_selection: JQuery3.Selector | JQuery3.TypeOrArray<Element> | JQuery3.htmlString | JQuery3 | JQuery3.Node): this
     /**
      * Add the previous set of elements on the stack to the current set, optionally filtered by a selector.
      * @param selector A string containing a selector expression to match the current set of elements against.
@@ -292,7 +292,7 @@ $( "div.after-addback" ).find( "p" ).addBack().addClass( "background" );
 </html>
 ```
      */
-    addBack(selector?: JQuery3.Selector): this;
+    addBack(selector?: JQuery3.Selector): this
     /**
      * Adds the specified class(es) to each element in the set of matched elements.
      * @param className_function _&#x40;param_ `className_function`
@@ -418,7 +418,7 @@ $( "div" ).addClass(function( index, currentClass ) {
 </html>
 ```
      */
-    addClass(className_function: JQuery3.TypeOrArray<string> | ((this: TElement, index: number, currentClassName: string) => string)): this;
+    addClass(className_function: JQuery3.TypeOrArray<string> | ((this: TElement, index: number, currentClassName: string) => string)): this
     /**
      * Insert content, specified by the parameter, after each element in the set of matched elements.
      * @param contents One or more additional DOM elements, text nodes, arrays of elements and text nodes, HTML strings, or
@@ -502,7 +502,7 @@ $( "p" ).after( $( "b" ) );
 </html>
 ```
      */
-    after(...contents: Array<JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>>): this;
+    after(...contents: Array<JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>>): this
     /**
      * Insert content, specified by the parameter, after each element in the set of matched elements.
      * @param function_functionｰhtml _&#x40;param_ `function_functionｰhtml`
@@ -518,7 +518,7 @@ $( "p" ).after( $( "b" ) );
      * @since 1.4
      * @since 1.10
      */
-    after(function_functionｰhtml: (this: TElement, index: number, html: string) => JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>): this;
+    after(function_functionｰhtml: (this: TElement, index: number, html: string) => JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>): this
     /**
      * Register a handler to be called when Ajax requests complete. This is an AjaxEvent.
      * @param handler The function to be invoked.
@@ -534,7 +534,7 @@ $( document ).ajaxComplete(function( event, request, settings ) {
     ajaxComplete(handler: (this: Document,
                            event: JQuery3.TriggeredEvent<Document, undefined, Document, Document>,
                            jqXHR: JQuery3.jqXHR,
-                           ajaxOptions: JQuery3.AjaxSettings) => void | false): this;
+                           ajaxOptions: JQuery3.AjaxSettings) => void | false): this
     /**
      * Register a handler to be called when Ajax requests complete with an error. This is an Ajax Event.
      * @param handler The function to be invoked.
@@ -551,7 +551,7 @@ $( document ).ajaxError(function( event, request, settings ) {
                         event: JQuery3.TriggeredEvent<Document, undefined, Document, Document>,
                         jqXHR: JQuery3.jqXHR,
                         ajaxSettings: JQuery3.AjaxSettings,
-                        thrownError: string) => void | false): this;
+                        thrownError: string) => void | false): this
     /**
      * Attach a function to be executed before an Ajax request is sent. This is an Ajax Event.
      * @param handler The function to be invoked.
@@ -567,7 +567,7 @@ $( document ).ajaxSend(function( event, request, settings ) {
     ajaxSend(handler: (this: Document,
                        event: JQuery3.TriggeredEvent<Document, undefined, Document, Document>,
                        jqXHR: JQuery3.jqXHR,
-                       ajaxOptions: JQuery3.AjaxSettings) => void | false): this;
+                       ajaxOptions: JQuery3.AjaxSettings) => void | false): this
     /**
      * Register a handler to be called when the first Ajax request begins. This is an Ajax Event.
      * @param handler The function to be invoked.
@@ -580,7 +580,7 @@ $( document ).ajaxStart(function() {
 });
 ```
      */
-    ajaxStart(handler: (this: Document) => void | false): this;
+    ajaxStart(handler: (this: Document) => void | false): this
     /**
      * Register a handler to be called when all Ajax requests have completed. This is an Ajax Event.
      * @param handler The function to be invoked.
@@ -593,7 +593,7 @@ $( document ).ajaxStop(function() {
 });
 ```
      */
-    ajaxStop(handler: (this: Document) => void | false): this;
+    ajaxStop(handler: (this: Document) => void | false): this
     /**
      * Attach a function to be executed whenever an Ajax request completes successfully. This is an Ajax Event.
      * @param handler The function to be invoked.
@@ -610,7 +610,7 @@ $( document ).ajaxSuccess(function( event, request, settings ) {
                           event: JQuery3.TriggeredEvent<Document, undefined, Document, Document>,
                           jqXHR: JQuery3.jqXHR,
                           ajaxOptions: JQuery3.AjaxSettings,
-                          data: JQuery3.PlainObject) => void | false): this;
+                          data: JQuery3.PlainObject) => void | false): this
     /**
      * Perform a custom animation of a set of CSS properties.
      * @param properties An object of CSS properties and values that the animation will move toward.
@@ -639,7 +639,7 @@ $( "p" ).animate({
     animate(properties: JQuery3.PlainObject,
             duration: JQuery3.Duration,
             easing: string,
-            complete?: (this: TElement) => void): this;
+            complete?: (this: TElement) => void): this
     /**
      * Perform a custom animation of a set of CSS properties.
      * @param properties An object of CSS properties and values that the animation will move toward.
@@ -743,7 +743,7 @@ $( "p" ).animate({
      */
     animate(properties: JQuery3.PlainObject,
             duration_easing: JQuery3.Duration | string,
-            complete?: (this: TElement) => void): this;
+            complete?: (this: TElement) => void): this
     /**
      * Perform a custom animation of a set of CSS properties.
      * @param properties An object of CSS properties and values that the animation will move toward.
@@ -895,7 +895,7 @@ $( "p" ).animate({
 ```
      */
     animate(properties: JQuery3.PlainObject,
-            options: JQuery3.EffectsOptions<TElement>): this;
+            options: JQuery3.EffectsOptions<TElement>): this
     /**
      * Perform a custom animation of a set of CSS properties.
      * @param properties An object of CSS properties and values that the animation will move toward.
@@ -904,7 +904,7 @@ $( "p" ).animate({
      * @since 1.0
      */
     animate(properties: JQuery3.PlainObject,
-            complete?: (this: TElement) => void): this;
+            complete?: (this: TElement) => void): this
     /**
      * Insert content, specified by the parameter, to the end of each element in the set of matched elements.
      * @param contents One or more additional DOM elements, text nodes, arrays of elements and text nodes, HTML strings, or
@@ -988,7 +988,7 @@ $( "p" ).append( $( "strong" ) );
 </html>
 ```
      */
-    append(...contents: Array<JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>>): this;
+    append(...contents: Array<JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>>): this
     /**
      * Insert content, specified by the parameter, to the end of each element in the set of matched elements.
      * @param funсtion A function that returns an HTML string, DOM element(s), text node(s), or jQuery object to insert at
@@ -998,7 +998,7 @@ $( "p" ).append( $( "strong" ) );
      * @see \`{@link https://api.jquery.com/append/ }\`
      * @since 1.4
      */
-    append(funсtion: (this: TElement, index: number, html: string) => JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>): this;
+    append(funсtion: (this: TElement, index: number, html: string) => JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>): this
     /**
      * Insert every element in the set of matched elements to the end of the target.
      * @param target A selector, element, HTML string, array of elements, or jQuery object; the matched set of elements
@@ -1033,7 +1033,7 @@ $( "span" ).appendTo( "#foo" );
 </html>
 ```
      */
-    appendTo(target: JQuery3.Selector | JQuery3.htmlString | JQuery3.TypeOrArray<Element | DocumentFragment> | JQuery3): this;
+    appendTo(target: JQuery3.Selector | JQuery3.htmlString | JQuery3.TypeOrArray<Element | DocumentFragment> | JQuery3): this
     /**
      * Set one or more attributes for the set of matched elements.
      * @param attributeName The name of the attribute to set.
@@ -1108,7 +1108,7 @@ $( "img" ).attr( "src", function() {
 ```
      */
     attr(attributeName: string,
-         value_function: string | number | null | ((this: TElement, index: number, attr: string) => string | number | void | undefined)): this;
+         value_function: string | number | null | ((this: TElement, index: number, attr: string) => string | number | void | undefined)): this
     /**
      * Set one or more attributes for the set of matched elements.
      * @param attributes An object of attribute-value pairs to set.
@@ -1153,7 +1153,7 @@ $( "div" ).text( $( "img" ).attr( "alt" ) );
 </html>
 ```
      */
-    attr(attributes: JQuery3.PlainObject): this;
+    attr(attributes: JQuery3.PlainObject): this
     /**
      * Get the value of an attribute for the first element in the set of matched elements.
      * @param attributeName The name of the attribute to get.
@@ -1229,7 +1229,7 @@ $( "div" ).text( title );
 </html>
 ```
      */
-    attr(attributeName: string): string | undefined;
+    attr(attributeName: string): string | undefined
     /**
      * Insert content, specified by the parameter, before each element in the set of matched elements.
      * @param contents One or more additional DOM elements, text nodes, arrays of elements and text nodes, HTML strings, or
@@ -1312,7 +1312,7 @@ $( "p" ).before( $( "b" ) );
 </html>
 ```
      */
-    before(...contents: Array<JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>>): this;
+    before(...contents: Array<JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>>): this
     /**
      * Insert content, specified by the parameter, before each element in the set of matched elements.
      * @param function_functionｰhtml _&#x40;param_ `function_functionｰhtml`
@@ -1328,7 +1328,7 @@ $( "p" ).before( $( "b" ) );
      * @since 1.4
      * @since 1.10
      */
-    before(function_functionｰhtml: (this: TElement, index: number, html: string) => JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>): this;
+    before(function_functionｰhtml: (this: TElement, index: number, html: string) => JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>): this
     // [bind() overloads] https://github.com/jquery/api.jquery.com/issues/1048
     /**
      * Attach a handler to an event for the elements.
@@ -1349,7 +1349,7 @@ $( "p" ).before( $( "b" ) );
         eventType: TType,
         eventData: TData,
         handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, TType>
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements.
      * @param eventType A string containing one or more DOM event types, such as "click" or "submit," or custom event names.
@@ -1482,7 +1482,7 @@ $( "button" ).click(function() {
                                false |
                                null |
                                undefined
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements.
      * @param events An object containing one or more DOM event types and functions to execute for them.
@@ -1508,7 +1508,7 @@ $( "div.test" ).bind({
 });
 ```
      */
-    bind(events: JQuery3.TypeEventHandlers<TElement, undefined, TElement, TElement>): this;
+    bind(events: JQuery3.TypeEventHandlers<TElement, undefined, TElement, TElement>): this
     /**
      * Bind an event handler to the "blur" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -1522,7 +1522,7 @@ $( "div.test" ).bind({
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     blur<TData>(eventData: TData,
-                handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'blur'>): this;
+                handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'blur'>): this
     /**
      * Bind an event handler to the "blur" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -1539,7 +1539,7 @@ $( "p" ).blur();
 ```
      */
     blur(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'blur'> |
-                   false): this;
+                   false): this
     /**
      * Bind an event handler to the "change" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -1553,7 +1553,7 @@ $( "p" ).blur();
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     change<TData>(eventData: TData,
-                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'change'>): this;
+                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'change'>): this
     /**
      * Bind an event handler to the "change" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -1613,7 +1613,7 @@ $( "input[type='text']" ).change(function() {
 ```
      */
     change(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'change'> |
-                     false): this;
+                     false): this
     /**
      * Get the children of each element in the set of matched elements, optionally filtered by a selector.
      * @param selector A string containing a selector expression to match elements against.
@@ -1780,7 +1780,7 @@ $( "div" ).children( ".selected" ).css( "color", "blue" );
 </html>
 ```
      */
-    children(selector?: JQuery3.Selector): this;
+    children(selector?: JQuery3.Selector): this
     /**
      * Remove from the queue all items that have not yet been run.
      * @param queueName A string containing the name of the queue. Defaults to fx, the standard effects queue.
@@ -1852,7 +1852,7 @@ $( "#stop" ).click(function() {
 </html>
 ```
      */
-    clearQueue(queueName?: string): this;
+    clearQueue(queueName?: string): this
     /**
      * Bind an event handler to the "click" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -1866,7 +1866,7 @@ $( "#stop" ).click(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     click<TData>(eventData: TData,
-                 handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'click'>): this;
+                 handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'click'>): this
     /**
      * Bind an event handler to the "click" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -1917,7 +1917,7 @@ $( "p" ).click();
 ```
      */
     click(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'click'> |
-                    false): this;
+                    false): this
     /**
      * Create a deep copy of the set of matched elements.
      * @param withDataAndEvents A Boolean indicating whether event handlers and data should be copied along with the elements. The
@@ -1949,7 +1949,7 @@ $( "b" ).clone().prependTo( "p" );
 </html>
 ```
      */
-    clone(withDataAndEvents?: boolean, deepWithDataAndEvents?: boolean): this;
+    clone(withDataAndEvents?: boolean, deepWithDataAndEvents?: boolean): this
     /**
      * For each element in the set, get the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree.
      * @param selector A string containing a selector expression to match elements against.
@@ -1957,7 +1957,7 @@ $( "b" ).clone().prependTo( "p" );
      * @see \`{@link https://api.jquery.com/closest/ }\`
      * @since 1.4
      */
-    closest(selector: JQuery3.Selector, context: Element): this;
+    closest(selector: JQuery3.Selector, context: Element): this
     /**
      * For each element in the set, get the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree.
      * @param selector_selection_element _&#x40;param_ `selector_selection_element`
@@ -2040,7 +2040,7 @@ $( document ).on( "click", function( event ) {
 </html>
 ```
      */
-    closest(selector_selection_element: JQuery3.Selector | Element | JQuery3): this;
+    closest(selector_selection_element: JQuery3.Selector | Element | JQuery3): this
     /**
      * Get the children of each element in the set of matched elements, including text and comment nodes.
      * @see \`{@link https://api.jquery.com/contents/ }\`
@@ -2091,7 +2091,7 @@ $( "#frameDemo" ).contents().find( "a" ).css( "background-color", "#BADA55" );
 </html>
 ```
      */
-    contents(): JQuery3<TElement | Text | Comment | Document>;
+    contents(): JQuery3<TElement | Text | Comment | Document>
     /**
      * Bind an event handler to the "contextmenu" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -2105,7 +2105,7 @@ $( "#frameDemo" ).contents().find( "a" ).css( "background-color", "#BADA55" );
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     contextmenu<TData>(eventData: TData,
-                       handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'contextmenu'>): this;
+                       handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'contextmenu'>): this
     /**
      * Bind an event handler to the "contextmenu" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -2160,7 +2160,7 @@ div.contextmenu(function() {
 ```
      */
     contextmenu(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'contextmenu'> |
-                          false): this;
+                          false): this
     /**
      * Set one or more CSS properties for the set of matched elements.
      * @param propertyName A CSS property name.
@@ -2273,7 +2273,7 @@ $( "span" ).on( "click", function() {
 ```
      */
     css(propertyName: string,
-        value_function: string | number | ((this: TElement, index: number, value: string) => string | number | void | undefined)): this;
+        value_function: string | number | ((this: TElement, index: number, value: string) => string | number | void | undefined)): this
     /**
      * Set one or more CSS properties for the set of matched elements.
      * @param properties An object of property-value pairs to set.
@@ -2356,7 +2356,7 @@ $( "div" ).on( "click", function() {
 </html>
 ```
      */
-    css(properties: JQuery3.PlainObject<string | number | ((this: TElement, index: number, value: string) => string | number | void | undefined)>): this;
+    css(properties: JQuery3.PlainObject<string | number | ((this: TElement, index: number, value: string) => string | number | void | undefined)>): this
     /**
      * Get the computed style properties for the first element in the set of matched elements.
      * @param propertyName A CSS property.
@@ -2399,7 +2399,7 @@ $( "div" ).click(function() {
 </html>
 ```
      */
-    css(propertyName: string): string;
+    css(propertyName: string): string
     /**
      * Get the computed style properties for the first element in the set of matched elements.
      * @param propertyNames An array of one or more CSS properties.
@@ -2468,7 +2468,7 @@ $( "div" ).click(function() {
 </html>
 ```
      */
-    css(propertyNames: string[]): JQuery3.PlainObject<string>;
+    css(propertyNames: string[]): JQuery3.PlainObject<string>
     /**
      * Store arbitrary data associated with the matched elements.
      * @param key A string naming the piece of data to set.
@@ -2511,14 +2511,14 @@ $( "span:last" ).text( $( "div" ).data( "test" ).last );
 </html>
 ```
      */
-    data(key: string, value: string | number | boolean | symbol | object | null): this;
+    data(key: string, value: string | number | boolean | symbol | object | null): this
     /**
      * Store arbitrary data associated with the matched elements.
      * @param obj An object of key-value pairs of data to update.
      * @see \`{@link https://api.jquery.com/data/ }\`
      * @since 1.4.3
      */
-    data(obj: JQuery3.PlainObject): this;
+    data(obj: JQuery3.PlainObject): this
     /**
      * Return the value at the named data store for the first element in the jQuery collection, as set by data(name, value) or by an HTML5 data-* attribute.
      * @param key Name of the data stored.
@@ -2530,7 +2530,7 @@ $( "span:last" ).text( $( "div" ).data( "test" ).last );
     // `unified-signatures` is disabled so that behavior when passing `undefined` to `value` can be documented. Unifying the signatures
     // results in potential confusion for users from an unexpected parameter.
     // tslint:disable-next-line:unified-signatures
-    data(key: string, value: undefined): any;
+    data(key: string, value: undefined): any
     /**
      * Return the value at the named data store for the first element in the jQuery collection, as set by data(name, value) or by an HTML5 data-* attribute.
      * @param key Name of the data stored.
@@ -2601,13 +2601,13 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    data(key: string): any;
+    data(key: string): any
     /**
      * Return the value at the named data store for the first element in the jQuery collection, as set by data(name, value) or by an HTML5 data-* attribute.
      * @see \`{@link https://api.jquery.com/data/ }\`
      * @since 1.4
      */
-    data(): JQuery3.PlainObject;
+    data(): JQuery3.PlainObject
     /**
      * Bind an event handler to the "dblclick" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -2621,7 +2621,7 @@ $( "button" ).click(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     dblclick<TData>(eventData: TData,
-                    handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'dblclick'>): this;
+                    handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'dblclick'>): this
     /**
      * Bind an event handler to the "dblclick" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -2676,7 +2676,7 @@ divdbl.dblclick(function() {
 ```
      */
     dblclick(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'dblclick'> |
-                       false): this;
+                       false): this
     /**
      * Set a timer to delay execution of subsequent items in the queue.
      * @param duration An integer indicating the number of milliseconds to delay execution of the next item in the queue.
@@ -2725,7 +2725,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    delay(duration: JQuery3.Duration, queueName?: string): this;
+    delay(duration: JQuery3.Duration, queueName?: string): this
     /**
      * Attach a handler to one or more events for all elements that match the selector, now or in the future, based on a specific set of root elements.
      * @param selector A selector to filter the elements that trigger the event.
@@ -2747,7 +2747,7 @@ $( "button" ).click(function() {
         eventType: TType,
         eventData: TData,
         handler: JQuery3.TypeEventHandler<TElement, TData, any, any, TType>
-    ): this;
+    ): this
     /**
      * Attach a handler to one or more events for all elements that match the selector, now or in the future, based on a specific set of root elements.
      * @param selector A selector to filter the elements that trigger the event.
@@ -2864,7 +2864,7 @@ $( "button" ).click(function() {
         eventType: TType,
         handler: JQuery3.TypeEventHandler<TElement, undefined, any, any, TType> |
                  false
-    ): this;
+    ): this
     /**
      * Attach a handler to one or more events for all elements that match the selector, now or in the future, based on a specific set of root elements.
      * @param selector A selector to filter the elements that trigger the event.
@@ -2879,7 +2879,7 @@ $( "button" ).click(function() {
      */
     delegate(selector: JQuery3.Selector,
              events: JQuery3.TypeEventHandlers<TElement, undefined, any, any>
-    ): this;
+    ): this
     /**
      * Execute the next function on the queue for the matched elements.
      * @param queueName A string containing the name of the queue. Defaults to fx, the standard effects queue.
@@ -2929,7 +2929,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    dequeue(queueName?: string): this;
+    dequeue(queueName?: string): this
     /**
      * Remove the set of matched elements from the DOM.
      * @param selector A selector expression that filters the set of matched elements to be removed.
@@ -2979,7 +2979,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    detach(selector?: JQuery3.Selector): this;
+    detach(selector?: JQuery3.Selector): this
     /**
      * Iterate over a jQuery object, executing a function for each matched element.
      * @param funсtion A function to execute for each matched element.
@@ -3119,7 +3119,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    each(funсtion: (this: TElement, index: number, element: TElement) => void | false): this;
+    each(funсtion: (this: TElement, index: number, element: TElement) => void | false): this
     /**
      * Remove all child nodes of the set of matched elements from the DOM.
      * @see \`{@link https://api.jquery.com/empty/ }\`
@@ -3156,7 +3156,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    empty(): this;
+    empty(): this
     /**
      * End the most recent filtering operation in the current chain and return the set of matched elements to its previous state.
      * @see \`{@link https://api.jquery.com/end/ }\`
@@ -3216,7 +3216,7 @@ jQuery.fn.showTags = function( n ) {
   .get()
   .join( ", " );
   $( "b:eq( " + n + " )" ).text( tags );
-  return this;
+  return this
 };
 ​
 $( "p" )
@@ -3262,7 +3262,7 @@ $( "p" )
 </html>
 ```
      */
-    end(): this;
+    end(): this
     /**
      * Reduce the set of matched elements to the one at the specified index.
      * @param index An integer indicating the 0-based position of the element.
@@ -3308,7 +3308,7 @@ $( "body" ).find( "div" ).eq( 2 ).addClass( "blue" );
 </html>
 ```
      */
-    eq(index: number): this;
+    eq(index: number): this
     /**
      * Merge the contents of an object onto the jQuery prototype to provide new jQuery instance methods.
      * @param obj An object to merge onto the jQuery prototype.
@@ -3356,7 +3356,7 @@ $( "input[type='checkbox']" ).check();
 </html>
 ```
      */
-    extend(obj: object): this;
+    extend(obj: object): this
     /**
      * Display the matched elements by fading them to opaque.
      * @param duration A string or number determining how long the animation will run.
@@ -3365,7 +3365,7 @@ $( "input[type='checkbox']" ).check();
      * @see \`{@link https://api.jquery.com/fadeIn/ }\`
      * @since 1.4.3
      */
-    fadeIn(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this;
+    fadeIn(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this
     /**
      * Display the matched elements by fading them to opaque.
      * @param duration_easing _&#x40;param_ `duration_easing`
@@ -3431,7 +3431,7 @@ $( "a" ).click(function() {
 </html>
 ```
      */
-    fadeIn(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this;
+    fadeIn(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this
     /**
      * Display the matched elements by fading them to opaque.
      * @param duration_easing_complete_options _&#x40;param_ `duration_easing_complete_options`
@@ -3491,7 +3491,7 @@ $( document.body ).click(function() {
 </html>
 ```
      */
-    fadeIn(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this;
+    fadeIn(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this
     /**
      * Hide the matched elements by fading them to transparent.
      * @param duration A string or number determining how long the animation will run.
@@ -3552,7 +3552,7 @@ $( "#btn2" ).click(function() {
 </html>
 ```
      */
-    fadeOut(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this;
+    fadeOut(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this
     /**
      * Hide the matched elements by fading them to transparent.
      * @param duration_easing _&#x40;param_ `duration_easing`
@@ -3612,7 +3612,7 @@ $( "span" ).hover(function() {
 </html>
 ```
      */
-    fadeOut(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this;
+    fadeOut(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this
     /**
      * Hide the matched elements by fading them to transparent.
      * @param duration_easing_complete_options _&#x40;param_ `duration_easing_complete_options`
@@ -3656,7 +3656,7 @@ $( "p" ).click(function() {
 </html>
 ```
      */
-    fadeOut(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this;
+    fadeOut(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this
     /**
      * Adjust the opacity of the matched elements.
      * @param duration A string or number determining how long the animation will run.
@@ -3666,7 +3666,7 @@ $( "p" ).click(function() {
      * @see \`{@link https://api.jquery.com/fadeTo/ }\`
      * @since 1.4.3
      */
-    fadeTo(duration: JQuery3.Duration, opacity: number, easing: string, complete?: (this: TElement) => void): this;
+    fadeTo(duration: JQuery3.Duration, opacity: number, easing: string, complete?: (this: TElement) => void): this
     /**
      * Adjust the opacity of the matched elements.
      * @param duration A string or number determining how long the animation will run.
@@ -3823,7 +3823,7 @@ $( "div" )
 </html>
 ```
      */
-    fadeTo(duration: JQuery3.Duration, opacity: number, complete?: (this: TElement) => void): this;
+    fadeTo(duration: JQuery3.Duration, opacity: number, complete?: (this: TElement) => void): this
     /**
      * Display or hide the matched elements by animating their opacity.
      * @param duration A string or number determining how long the animation will run.
@@ -3863,7 +3863,7 @@ $( "button:last" ).click(function() {
 </html>
 ```
      */
-    fadeToggle(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this;
+    fadeToggle(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this
     /**
      * Display or hide the matched elements by animating their opacity.
      * @param duration_easing _&#x40;param_ `duration_easing`
@@ -3906,7 +3906,7 @@ $( "button:last" ).click(function() {
 </html>
 ```
      */
-    fadeToggle(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this;
+    fadeToggle(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this
     /**
      * Display or hide the matched elements by animating their opacity.
      * @param duration_easing_complete_options _&#x40;param_ `duration_easing_complete_options`
@@ -3919,7 +3919,7 @@ $( "button:last" ).click(function() {
      * @since 1.0
      * @since 1.4.3
      */
-    fadeToggle(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this;
+    fadeToggle(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this
     /**
      * Reduce the set of matched elements to those that match the selector or pass the function's test.
      * @param selector_elements_selection_function _&#x40;param_ `selector_elements_selection_function`
@@ -4021,7 +4021,7 @@ $( "div" ).filter( $( "#unique" ) );
         JQuery3.TypeOrArray<Element> |
         JQuery3 |
         ((this: TElement, index: number, element: TElement) => boolean)
-    ): this;
+    ): this
     /**
      * Get the descendants of each element in the current set of matched elements, filtered by a selector, jQuery object, or element.
      * @param selector_element _&#x40;param_ `selector_element`
@@ -4133,7 +4133,7 @@ $( "p" )
 </html>
 ```
      */
-    find(selector_element: JQuery3.Selector | Element | JQuery3): this;
+    find(selector_element: JQuery3.Selector | Element | JQuery3): this
     /**
      * Stop the currently-running animation, remove all queued animations, and complete all animations for the matched elements.
      * @param queue The name of the queue in which to stop animations.
@@ -4250,7 +4250,7 @@ $( "#go" ).on( "click", function() {
 </html>
 ```
      */
-    finish(queue?: string): this;
+    finish(queue?: string): this
     /**
      * Reduce the set of matched elements to the first in the set.
      * @see \`{@link https://api.jquery.com/first/ }\`
@@ -4285,7 +4285,7 @@ $( "p span" ).first().addClass( "highlight" );
 </html>
 ```
      */
-    first(): this;
+    first(): this
     /**
      * Bind an event handler to the "focus" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -4299,7 +4299,7 @@ $( "p span" ).first().addClass( "highlight" );
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     focus<TData>(eventData: TData,
-                 handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'focus'>): this;
+                 handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'focus'>): this
     /**
      * Bind an event handler to the "focus" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -4352,7 +4352,7 @@ $( document ).ready(function() {
 ```
      */
     focus(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'focus'> |
-                    false): this;
+                    false): this
     /**
      * Bind an event handler to the "focusin" event.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -4366,7 +4366,7 @@ $( document ).ready(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     focusin<TData>(eventData: TData,
-                   handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'focusin'>): this;
+                   handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'focusin'>): this
     /**
      * Bind an event handler to the "focusin" event.
      * @param handler A function to execute each time the event is triggered.
@@ -4407,7 +4407,7 @@ $( "p" ).focusin(function() {
 ```
      */
     focusin(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'focusin'> |
-                      false): this;
+                      false): this
     /**
      * Bind an event handler to the "focusout" JavaScript event.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -4421,7 +4421,7 @@ $( "p" ).focusin(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     focusout<TData>(eventData: TData,
-                    handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'focusout'>): this;
+                    handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'focusout'>): this
     /**
      * Bind an event handler to the "focusout" JavaScript event.
      * @param handler A function to execute each time the event is triggered.
@@ -4483,7 +4483,7 @@ $( "p" )
 ```
      */
     focusout(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'focusout'> |
-                       false): this;
+                       false): this
     /**
      * Retrieve one of the elements matched by the jQuery object.
      * @param index A zero-based integer indicating which element to retrieve.
@@ -4524,7 +4524,7 @@ $( "*", document.body ).click(function( event ) {
 </html>
 ```
      */
-    get(index: number): TElement;
+    get(index: number): TElement
     /**
      * Retrieve the elements matched by the jQuery object.
      * @see \`{@link https://api.jquery.com/get/ }\`
@@ -4566,7 +4566,7 @@ display( $( "div" ).get().reverse() );
 </html>
 ```
      */
-    get(): TElement[];
+    get(): TElement[]
     /**
      * Reduce the set of matched elements to those that have a descendant that matches the selector or DOM element.
      * @param selector_contained _&#x40;param_ `selector_contained`
@@ -4604,7 +4604,7 @@ $( "ul" ).has( "li" ).addClass( "full" );
 </html>
 ```
      */
-    has(selector_contained: string | Element): this;
+    has(selector_contained: string | Element): this
     /**
      * Determine whether any of the matched elements are assigned the given class.
      * @param className The class name to search for.
@@ -4646,7 +4646,7 @@ $( "#result3" ).append( $( "p" ).hasClass( "selected" ).toString() ) ;
 </html>
 ```
      */
-    hasClass(className: string): boolean;
+    hasClass(className: string): boolean
     /**
      * Set the CSS height of every matched element.
      * @param value_function _&#x40;param_ `value_function`
@@ -4698,7 +4698,7 @@ $( "div" ).one( "click", function() {
 </html>
 ```
      */
-    height(value_function: string | number | ((this: TElement, index: number, height: number) => string | number)): this;
+    height(value_function: string | number | ((this: TElement, index: number, height: number) => string | number)): this
     /**
      * Get the current computed height for the first element in the set of matched elements.
      * @see \`{@link https://api.jquery.com/height/ }\`
@@ -4759,7 +4759,7 @@ $( "#getw" ).click(function() {
 </html>
 ```
      */
-    height(): number | undefined;
+    height(): number | undefined
     /**
      * Hide the matched elements.
      * @param duration A string or number determining how long the animation will run.
@@ -4768,7 +4768,7 @@ $( "#getw" ).click(function() {
      * @see \`{@link https://api.jquery.com/hide/ }\`
      * @since 1.4.3
      */
-    hide(duration: JQuery3.Duration, easing: string, complete: (this: TElement) => void): this;
+    hide(duration: JQuery3.Duration, easing: string, complete: (this: TElement) => void): this
     /**
      * Hide the matched elements.
      * @param duration A string or number determining how long the animation will run.
@@ -4857,7 +4857,7 @@ $( "div" ).click(function() {
 </html>
 ```
      */
-    hide(duration: JQuery3.Duration, easing_complete: string | ((this: TElement) => void)): this;
+    hide(duration: JQuery3.Duration, easing_complete: string | ((this: TElement) => void)): this
     /**
      * Hide the matched elements.
      * @param duration_complete_options _&#x40;param_ `duration_complete_options`
@@ -4924,7 +4924,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    hide(duration_complete_options?: JQuery3.Duration | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this;
+    hide(duration_complete_options?: JQuery3.Duration | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this
     /**
      * Bind two handlers to the matched elements, to be executed when the mouse pointer enters and leaves the elements.
      * @param handlerIn A function to execute when the mouse pointer enters the element.
@@ -5002,7 +5002,7 @@ $( "td" ).off( "mouseenter mouseleave" );
     hover(handlerIn: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mouseenter'> |
                      false,
           handlerOut: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mouseleave'> |
-                      false): this;
+                      false): this
     /**
      * Bind a single handler to the matched elements, to be executed when the mouse pointer enters or leaves the elements.
      * @param handlerInOut A function to execute when the mouse pointer enters or leaves the element.
@@ -5069,7 +5069,7 @@ $( "li" )
 ```
      */
     hover(handlerInOut: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mouseenter' | 'mouseleave'> |
-                        false): this;
+                        false): this
     /**
      * Set the HTML contents of each element in the set of matched elements.
      * @param htmlString_function _&#x40;param_ `htmlString_function`
@@ -5144,7 +5144,7 @@ $( "div b" )
      */
     html(htmlString_function: JQuery3.htmlString |
                               JQuery3.Node |
-                              ((this: TElement, index: number, oldhtml: JQuery3.htmlString) => JQuery3.htmlString | JQuery3.Node)): this;
+                              ((this: TElement, index: number, oldhtml: JQuery3.htmlString) => JQuery3.htmlString | JQuery3.Node)): this
     /**
      * Get the HTML contents of the first element in the set of matched elements.
      * @see \`{@link https://api.jquery.com/html/ }\`
@@ -5195,7 +5195,7 @@ $( "p" ).click(function() {
 </html>
 ```
      */
-    html(): string;
+    html(): string
     /**
      * Search for a given element from among the matched elements.
      * @param selector_element _&#x40;param_ `selector_element`
@@ -5401,7 +5401,7 @@ $( "div" ).html( "Index: " + foobar );
 </html>
 ```
      */
-    index(selector_element?: JQuery3.Selector | Element | JQuery3): number;
+    index(selector_element?: JQuery3.Selector | Element | JQuery3): number
     /**
      * Set the CSS inner height of each element in the set of matched elements.
      * @param value_function _&#x40;param_ `value_function`
@@ -5457,7 +5457,7 @@ $( "div" ).one( "click", function() {
 </html>
 ```
      */
-    innerHeight(value_function: string | number | ((this: TElement, index: number, height: number) => string | number)): this;
+    innerHeight(value_function: string | number | ((this: TElement, index: number, height: number) => string | number)): this
     /**
      * Get the current computed height for the first element in the set of matched elements, including padding but not border.
      * @see \`{@link https://api.jquery.com/innerHeight/ }\`
@@ -5492,7 +5492,7 @@ $( "p:last" ).text( "innerHeight:" + p.innerHeight() );
 </html>
 ```
      */
-    innerHeight(): number | undefined;
+    innerHeight(): number | undefined
     /**
      * Set the CSS inner width of each element in the set of matched elements.
      * @param value_function _&#x40;param_ `value_function`
@@ -5548,7 +5548,7 @@ modWidth -= 8;
 </html>
 ```
      */
-    innerWidth(value_function: string | number | ((this: TElement, index: number, width: number) => string | number)): this;
+    innerWidth(value_function: string | number | ((this: TElement, index: number, width: number) => string | number)): this
     /**
      * Get the current computed inner width for the first element in the set of matched elements, including padding but not border.
      * @see \`{@link https://api.jquery.com/innerWidth/ }\`
@@ -5583,7 +5583,7 @@ $( "p:last" ).text( "innerWidth:" + p.innerWidth() );
 </html>
 ```
      */
-    innerWidth(): number | undefined;
+    innerWidth(): number | undefined
     /**
      * Insert every element in the set of matched elements after the target.
      * @param target A selector, element, array of elements, HTML string, or jQuery object; the matched set of elements
@@ -5617,7 +5617,7 @@ $( "p" ).insertAfter( "#foo" );
 </html>
 ```
      */
-    insertAfter(target: JQuery3.Selector | JQuery3.htmlString | JQuery3.TypeOrArray<Node> | JQuery3<Node>): this;
+    insertAfter(target: JQuery3.Selector | JQuery3.htmlString | JQuery3.TypeOrArray<Node> | JQuery3<Node>): this
     /**
      * Insert every element in the set of matched elements before the target.
      * @param target A selector, element, array of elements, HTML string, or jQuery object; the matched set of elements
@@ -5651,7 +5651,7 @@ $( "p" ).insertBefore( "#foo" );
 </html>
 ```
      */
-    insertBefore(target: JQuery3.Selector | JQuery3.htmlString | JQuery3.TypeOrArray<Node> | JQuery3<Node>): this;
+    insertBefore(target: JQuery3.Selector | JQuery3.htmlString | JQuery3.TypeOrArray<Node> | JQuery3<Node>): this
     /**
      * Check the current matched set of elements against a selector, element, or jQuery object and return true if at least one of these elements matches the given arguments.
      * @param selector_function_selection_elements _&#x40;param_ `selector_function_selection_elements`
@@ -5871,7 +5871,7 @@ $( "li" ).click(function() {
 </html>
 ```
      */
-    is(selector_function_selection_elements: JQuery3.Selector | JQuery3.TypeOrArray<Element> | JQuery3 | ((this: TElement, index: number, element: TElement) => boolean)): boolean;
+    is(selector_function_selection_elements: JQuery3.Selector | JQuery3.TypeOrArray<Element> | JQuery3 | ((this: TElement, index: number, element: TElement) => boolean)): boolean
     /**
      * Bind an event handler to the "keydown" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -5885,7 +5885,7 @@ $( "li" ).click(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     keydown<TData>(eventData: TData,
-                   handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'keydown'>): this;
+                   handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'keydown'>): this
     /**
      * Bind an event handler to the "keydown" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -5958,7 +5958,7 @@ $( "#other" ).click(function() {
 ```
      */
     keydown(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'keydown'> |
-                      false): this;
+                      false): this
     /**
      * Bind an event handler to the "keypress" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -5972,7 +5972,7 @@ $( "#other" ).click(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     keypress<TData>(eventData: TData,
-                    handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'keypress'>): this;
+                    handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'keypress'>): this
     /**
      * Bind an event handler to the "keypress" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6045,7 +6045,7 @@ $( "#other" ).click(function() {
 ```
      */
     keypress(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'keypress'> |
-                       false): this;
+                       false): this
     /**
      * Bind an event handler to the "keyup" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -6059,7 +6059,7 @@ $( "#other" ).click(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     keyup<TData>(eventData: TData,
-                 handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'keyup'>): this;
+                 handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'keyup'>): this
     /**
      * Bind an event handler to the "keyup" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6133,7 +6133,7 @@ $( "#other").click(function() {
 ```
      */
     keyup(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'keyup'> |
-                    false): this;
+                    false): this
     /**
      * Reduce the set of matched elements to the final one in the set.
      * @see \`{@link https://api.jquery.com/last/ }\`
@@ -6164,7 +6164,7 @@ $( "p span" ).last().addClass( "highlight" );
 </html>
 ```
      */
-    last(): this;
+    last(): this
     /**
      * Load data from the server and place the returned HTML into the matched element.
      * @param url A string containing the URL to which the request is sent.
@@ -6181,7 +6181,7 @@ $( "#feeds" ).load( "feeds.php", { limit: 25 }, function() {
      */
     load(url: string,
          data: string | JQuery3.PlainObject,
-         complete: (this: TElement, responseText: string, textStatus: JQuery3.Ajax.TextStatus, jqXHR: JQuery3.jqXHR) => void): this;
+         complete: (this: TElement, responseText: string, textStatus: JQuery3.Ajax.TextStatus, jqXHR: JQuery3.jqXHR) => void): this
     /**
      * Load data from the server and place the returned HTML into the matched element.
      * @param url A string containing the URL to which the request is sent.
@@ -6262,7 +6262,7 @@ $( "#objectID" ).load( "test.php", { "choices[]": [ "Jon", "Susan" ] } );
 ```
      */
     load(url: string,
-         complete_data?: ((this: TElement, responseText: string, textStatus: JQuery3.Ajax.TextStatus, jqXHR: JQuery3.jqXHR) => void) | string | JQuery3.PlainObject): this;
+         complete_data?: ((this: TElement, responseText: string, textStatus: JQuery3.Ajax.TextStatus, jqXHR: JQuery3.jqXHR) => void) | string | JQuery3.PlainObject): this
     /**
      * Pass each element in the current matched set through a function, producing a new jQuery object containing the return values.
      * @param callback A function object that will be invoked for each element in the current set.
@@ -6408,7 +6408,7 @@ $( "input" ).click(function() {
 </html>
 ```
      */
-    map<TReturn>(callback: (this: TElement, index: number, domElement: TElement) => JQuery3.TypeOrArray<TReturn> | null | undefined): JQuery3<TReturn>;
+    map<TReturn>(callback: (this: TElement, index: number, domElement: TElement) => JQuery3.TypeOrArray<TReturn> | null | undefined): JQuery3<TReturn>
     /**
      * Bind an event handler to the "mousedown" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -6422,7 +6422,7 @@ $( "input" ).click(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     mousedown<TData>(eventData: TData,
-                     handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mousedown'>): this;
+                     handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mousedown'>): this
     /**
      * Bind an event handler to the "mousedown" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6461,7 +6461,7 @@ $( "p" )
 ```
      */
     mousedown(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mousedown'> |
-                        false): this;
+                        false): this
     /**
      * Bind an event handler to be fired when the mouse enters an element, or trigger that handler on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -6475,7 +6475,7 @@ $( "p" )
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     mouseenter<TData>(eventData: TData,
-                      handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseenter'>): this;
+                      handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseenter'>): this
     /**
      * Bind an event handler to be fired when the mouse enters an element, or trigger that handler on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6557,7 +6557,7 @@ $( "div.enterleave" )
 ```
      */
     mouseenter(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mouseenter'> |
-                         false): this;
+                         false): this
     /**
      * Bind an event handler to be fired when the mouse leaves an element, or trigger that handler on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -6571,7 +6571,7 @@ $( "div.enterleave" )
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     mouseleave<TData>(eventData: TData,
-                      handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseleave'>): this;
+                      handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseleave'>): this
     /**
      * Bind an event handler to be fired when the mouse leaves an element, or trigger that handler on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6651,7 +6651,7 @@ $( "div.enterleave" )
 ```
      */
     mouseleave(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mouseleave'> |
-                         false): this;
+                         false): this
     /**
      * Bind an event handler to the "mousemove" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -6665,7 +6665,7 @@ $( "div.enterleave" )
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     mousemove<TData>(eventData: TData,
-                     handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mousemove'>): this;
+                     handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mousemove'>): this
     /**
      * Bind an event handler to the "mousemove" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6730,7 +6730,7 @@ $( "div" ).mousemove(function( event ) {
 ```
      */
     mousemove(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mousemove'> |
-                        false): this;
+                        false): this
     /**
      * Bind an event handler to the "mouseout" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -6744,7 +6744,7 @@ $( "div" ).mousemove(function( event ) {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     mouseout<TData>(eventData: TData,
-                    handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseout'>): this;
+                    handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseout'>): this
     /**
      * Bind an event handler to the "mouseout" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6826,7 +6826,7 @@ $( "div.enterleave" )
 ```
      */
     mouseout(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mouseout'> |
-                       false): this;
+                       false): this
     /**
      * Bind an event handler to the "mouseover" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -6840,7 +6840,7 @@ $( "div.enterleave" )
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     mouseover<TData>(eventData: TData,
-                     handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseover'>): this;
+                     handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseover'>): this
     /**
      * Bind an event handler to the "mouseover" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6922,7 +6922,7 @@ $( "div.enterleave" )
 ```
      */
     mouseover(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mouseover'> |
-                        false): this;
+                        false): this
     /**
      * Bind an event handler to the "mouseup" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -6936,7 +6936,7 @@ $( "div.enterleave" )
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     mouseup<TData>(eventData: TData,
-                   handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseup'>): this;
+                   handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'mouseup'>): this
     /**
      * Bind an event handler to the "mouseup" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -6975,7 +6975,7 @@ $( "p" )
 ```
      */
     mouseup(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'mouseup'> |
-                      false): this;
+                      false): this
     /**
      * Get the immediately following sibling of each element in the set of matched elements. If a selector is provided, it retrieves the next sibling only if it matches that selector.
      * @param selector A string containing a selector expression to match elements against.
@@ -7035,7 +7035,7 @@ $( "p" ).next( ".selected" ).css( "background", "yellow" );
 </html>
 ```
      */
-    next(selector?: JQuery3.Selector): this;
+    next(selector?: JQuery3.Selector): this
     /**
      * Get all following siblings of each element in the set of matched elements, optionally filtered by a selector.
      * @param selector A string containing a selector expression to match elements against.
@@ -7116,7 +7116,7 @@ $( ":nth-child(1)" ).nextAll( "p" ).addClass( "after" );
 </html>
 ```
      */
-    nextAll(selector?: string): this;
+    nextAll(selector?: string): this
     /**
      * Get all following siblings of each element up to but not including the element matched by the selector, DOM node, or jQuery object passed.
      * @param selector_element _&#x40;param_ `selector_element`
@@ -7167,7 +7167,7 @@ $( "#term-1" )
 </html>
 ```
      */
-    nextUntil(selector_element?: JQuery3.Selector | Element | JQuery3, filter?: JQuery3.Selector): this;
+    nextUntil(selector_element?: JQuery3.Selector | Element | JQuery3, filter?: JQuery3.Selector): this
     /**
      * Remove elements from the set of matched elements.
      * @param selector_function_selection _&#x40;param_ `selector_function_selection`
@@ -7239,7 +7239,7 @@ $( "p" ).not( "#selected" );
 $( "p" ).not( $( "div p.selected" ) );
 ```
      */
-    not(selector_function_selection: JQuery3.Selector | JQuery3.TypeOrArray<Element> | JQuery3 | ((this: TElement, index: number, element: TElement) => boolean)): this;
+    not(selector_function_selection: JQuery3.Selector | JQuery3.TypeOrArray<Element> | JQuery3 | ((this: TElement, index: number, element: TElement) => boolean)): this
     /**
      * Remove an event handler.
      * @param events One or more space-separated event types and optional namespaces, or just namespaces, such as
@@ -7312,7 +7312,7 @@ $( "body" ).off( "click", "p", foo );
         selector: JQuery3.Selector,
         handler: JQuery3.TypeEventHandler<TElement, any, any, any, TType> |
                  false
-    ): this;
+    ): this
     /**
      * Remove an event handler.
      * @param events One or more space-separated event types and optional namespaces, or just namespaces, such as
@@ -7347,7 +7347,7 @@ $( "form" ).off( ".validator" );
         selector_handler?: JQuery3.Selector |
                            JQuery3.TypeEventHandler<TElement, any, any, any, TType> |
                            false
-    ): this;
+    ): this
     /**
      * Remove an event handler.
      * @param events An object where the string keys represent one or more space-separated event types and optional
@@ -7357,7 +7357,7 @@ $( "form" ).off( ".validator" );
      * @since 1.7
      */
     off(events: JQuery3.TypeEventHandlers<TElement, any, any, any>,
-        selector?: JQuery3.Selector): this;
+        selector?: JQuery3.Selector): this
     /**
      * Remove an event handler.
      * @param event A jQuery.Event object.
@@ -7368,7 +7368,7 @@ $( "form" ).off( ".validator" );
 $( "p" ).off();
 ```
      */
-    off(event?: JQuery3.TriggeredEvent<TElement>): this;
+    off(event?: JQuery3.TriggeredEvent<TElement>): this
     /**
      * Set the current coordinates of every element in the set of matched elements, relative to the document.
      * @param coordinates_function _&#x40;param_ `coordinates_function`
@@ -7406,7 +7406,7 @@ $( "p:last" ).offset({ top: 10, left: 30 });
 </html>
 ```
      */
-    offset(coordinates_function: JQuery3.CoordinatesPartial | ((this: TElement, index: number, coords: JQuery3.Coordinates) => JQuery3.CoordinatesPartial)): this;
+    offset(coordinates_function: JQuery3.CoordinatesPartial | ((this: TElement, index: number, coords: JQuery3.Coordinates) => JQuery3.CoordinatesPartial)): this
     /**
      * Get the current coordinates of the first element in the set of matched elements, relative to the document.
      * @see \`{@link https://api.jquery.com/offset/ }\`
@@ -7490,7 +7490,7 @@ $( "*", document.body ).click(function( event ) {
 </html>
 ```
      */
-    offset(): JQuery3.Coordinates | undefined;
+    offset(): JQuery3.Coordinates | undefined
     /**
      * Get the closest ancestor element that is positioned.
      * @see \`{@link https://api.jquery.com/offsetParent/ }\`
@@ -7530,7 +7530,7 @@ $( "*", document.body ).click(function( event ) {
 </html>
 ```
      */
-    offsetParent(): this;
+    offsetParent(): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -7547,7 +7547,7 @@ $( "*", document.body ).click(function( event ) {
         selector: JQuery3.Selector,
         data: TData,
         handler: JQuery3.TypeEventHandler<TElement, TData, any, any, TType>
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -7564,7 +7564,7 @@ $( "*", document.body ).click(function( event ) {
         selector: null | undefined,
         data: TData,
         handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, TType>
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -7579,7 +7579,7 @@ $( "*", document.body ).click(function( event ) {
     on(events: string,
        selector: JQuery3.Selector | null | undefined,
        data: any,
-       handler: ((event: JQueryEventObject) => void)): this;
+       handler: ((event: JQueryEventObject) => void)): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -7645,7 +7645,7 @@ $( "body" ).on( "click", "a", function( event ) {
         selector: JQuery3.Selector,
         handler: JQuery3.TypeEventHandler<TElement, undefined, any, any, TType> |
                  false
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -7666,7 +7666,7 @@ $( "p" ).on( "click", { foo: "bar" }, myHandler );
         events: TType,
         data: TData,
         handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, TType>
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -7739,7 +7739,7 @@ $( "p" ).on( "click", { foo: "bar" }, myHandler );
      */
     on(events: string,
        selector_data: any,
-       handler: ((event: JQueryEventObject) => void)): this;
+       handler: ((event: JQueryEventObject) => void)): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -7835,7 +7835,7 @@ $( "#cart" ).on( "mouseenter mouseleave", function( event ) {
         events: TType,
         handler: JQuery3.TypeEventHandler<TElement, undefined, TElement, TElement, TType> |
                  false
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -7928,7 +7928,7 @@ $( "#cart" ).on( "mouseenter mouseleave", function( event ) {
 ```
      */
     on(events: string,
-       handler: ((event: JQueryEventObject) => void)): this;
+       handler: ((event: JQueryEventObject) => void)): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -7943,7 +7943,7 @@ $( "#cart" ).on( "mouseenter mouseleave", function( event ) {
         events: JQuery3.TypeEventHandlers<TElement, TData, any, any>,
         selector: JQuery3.Selector,
         data: TData
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -7958,7 +7958,7 @@ $( "#cart" ).on( "mouseenter mouseleave", function( event ) {
         events: JQuery3.TypeEventHandlers<TElement, TData, TElement, TElement>,
         selector: null | undefined,
         data: TData
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -7970,7 +7970,7 @@ $( "#cart" ).on( "mouseenter mouseleave", function( event ) {
      */
     on(events: JQuery3.TypeEventHandlers<TElement, undefined, any, any>,
        selector: JQuery3.Selector
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -7982,7 +7982,7 @@ $( "#cart" ).on( "mouseenter mouseleave", function( event ) {
     on<TData>(
         events: JQuery3.TypeEventHandlers<TElement, TData, TElement, TElement>,
         data: TData
-    ): this;
+    ): this
     /**
      * Attach an event handler function for one or more events to the selected elements.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -8031,7 +8031,7 @@ $( "div.test" ).on({
 </html>
 ```
      */
-    on(events: JQuery3.TypeEventHandlers<TElement, undefined, TElement, TElement>): this;
+    on(events: JQuery3.TypeEventHandlers<TElement, undefined, TElement, TElement>): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -8048,7 +8048,7 @@ $( "div.test" ).on({
         selector: JQuery3.Selector,
         data: TData,
         handler: JQuery3.TypeEventHandler<TElement, TData, any, any, TType>
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -8065,7 +8065,7 @@ $( "div.test" ).on({
         selector: null | undefined,
         data: TData,
         handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, TType>
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -8081,7 +8081,7 @@ $( "div.test" ).on({
         selector: JQuery3.Selector,
         handler: JQuery3.TypeEventHandler<TElement, undefined, any, any, TType> |
                  false
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -8095,7 +8095,7 @@ $( "div.test" ).on({
         events: TType,
         data: TData,
         handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, TType>
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events One or more space-separated event types and optional namespaces, such as "click" or "keydown.myPlugin".
@@ -8188,7 +8188,7 @@ $(".target").one("click mouseenter", function() {
         events: TType,
         handler: JQuery3.TypeEventHandler<TElement, undefined, TElement, TElement, TType>|
                  false
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -8203,7 +8203,7 @@ $(".target").one("click mouseenter", function() {
         events: JQuery3.TypeEventHandlers<TElement, TData, any, any>,
         selector: JQuery3.Selector,
         data: TData
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -8218,7 +8218,7 @@ $(".target").one("click mouseenter", function() {
         events: JQuery3.TypeEventHandlers<TElement, TData, TElement, TElement>,
         selector: null | undefined,
         data: TData
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -8229,7 +8229,7 @@ $(".target").one("click mouseenter", function() {
      * @since 1.7
      */
     one(events: JQuery3.TypeEventHandlers<TElement, undefined, any, any>,
-        selector: JQuery3.Selector): this;
+        selector: JQuery3.Selector): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -8241,7 +8241,7 @@ $(".target").one("click mouseenter", function() {
     one<TData>(
         events: JQuery3.TypeEventHandlers<TElement, TData, TElement, TElement>,
         data: TData
-    ): this;
+    ): this
     /**
      * Attach a handler to an event for the elements. The handler is executed at most once per element per event type.
      * @param events An object in which the string keys represent one or more space-separated event types and optional
@@ -8249,7 +8249,7 @@ $(".target").one("click mouseenter", function() {
      * @see \`{@link https://api.jquery.com/one/ }\`
      * @since 1.7
      */
-    one(events: JQuery3.TypeEventHandlers<TElement, undefined, TElement, TElement>): this;
+    one(events: JQuery3.TypeEventHandlers<TElement, undefined, TElement, TElement>): this
     /**
      * Set the CSS outer height of each element in the set of matched elements.
      * @param value_function _&#x40;param_ `value_function`
@@ -8306,7 +8306,7 @@ $( "div" ).one( "click", function() {
 ```
      */
     outerHeight(value_function: string | number | ((this: TElement, index: number, height: number) => string | number),
-                includeMargin?: boolean): this;
+                includeMargin?: boolean): this
     /**
      * Get the current computed outer height (including padding, border, and optionally margin) for the first element in the set of matched elements.
      * @param includeMargin A Boolean indicating whether to include the element's margin in the calculation.
@@ -8343,7 +8343,7 @@ $( "p:last" ).text(
 </html>
 ```
      */
-    outerHeight(includeMargin?: boolean): number | undefined;
+    outerHeight(includeMargin?: boolean): number | undefined
     /**
      * Set the CSS outer width of each element in the set of matched elements.
      * @param value_function _&#x40;param_ `value_function`
@@ -8400,7 +8400,7 @@ $( "div" ).one( "click", function() {
 ```
      */
     outerWidth(value_function: string | number | ((this: TElement, index: number, width: number) => string | number),
-               includeMargin?: boolean): this;
+               includeMargin?: boolean): this
     /**
      * Get the current computed outer width (including padding, border, and optionally margin) for the first element in the set of matched elements.
      * @param includeMargin A Boolean indicating whether to include the element's margin in the calculation.
@@ -8437,7 +8437,7 @@ $( "p:last" ).text(
 </html>
 ```
      */
-    outerWidth(includeMargin?: boolean): number | undefined;
+    outerWidth(includeMargin?: boolean): number | undefined
     /**
      * Get the parent of each element in the current set of matched elements, optionally filtered by a selector.
      * @param selector A string containing a selector expression to match elements against.
@@ -8512,7 +8512,7 @@ $( "p" ).parent( ".selected" ).css( "background", "yellow" );
 </html>
 ```
      */
-    parent(selector?: JQuery3.Selector): this;
+    parent(selector?: JQuery3.Selector): this
     /**
      * Get the ancestors of each element in the current set of matched elements, optionally filtered by a selector.
      * @param selector A string containing a selector expression to match elements against.
@@ -8624,7 +8624,7 @@ $( "span" ).click(function() {
 </html>
 ```
      */
-    parents(selector?: JQuery3.Selector): this;
+    parents(selector?: JQuery3.Selector): this
     /**
      * Get the ancestors of each element in the current set of matched elements, up to but not including the element matched by the selector, DOM node, or jQuery object.
      * @param selector_element _&#x40;param_ `selector_element`
@@ -8678,7 +8678,7 @@ $( "li.item-2" )
 </html>
 ```
      */
-    parentsUntil(selector_element?: JQuery3.Selector | Element | JQuery3, filter?: JQuery3.Selector): this;
+    parentsUntil(selector_element?: JQuery3.Selector | Element | JQuery3, filter?: JQuery3.Selector): this
     /**
      * Get the current coordinates of the first element in the set of matched elements, relative to the offset parent.
      * @see \`{@link https://api.jquery.com/position/ }\`
@@ -8717,7 +8717,7 @@ $( "p:last" ).text( "left: " + position.left + ", top: " + position.top );
 </html>
 ```
      */
-    position(): JQuery3.Coordinates;
+    position(): JQuery3.Coordinates
     /**
      * Insert content, specified by the parameter, to the beginning of each element in the set of matched elements.
      * @param contents One or more additional DOM elements, text nodes, arrays of elements and text nodes, HTML strings, or
@@ -8802,7 +8802,7 @@ $( "p" ).prepend( $( "b" ) );
 </html>
 ```
      */
-    prepend(...contents: Array<JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>>): this;
+    prepend(...contents: Array<JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>>): this
     /**
      * Insert content, specified by the parameter, to the beginning of each element in the set of matched elements.
      * @param funсtion A function that returns an HTML string, DOM element(s), text node(s), or jQuery object to insert at
@@ -8812,7 +8812,7 @@ $( "p" ).prepend( $( "b" ) );
      * @see \`{@link https://api.jquery.com/prepend/ }\`
      * @since 1.4
      */
-    prepend(funсtion: (this: TElement, index: number, html: string) => JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>): this;
+    prepend(funсtion: (this: TElement, index: number, html: string) => JQuery3.htmlString | JQuery3.TypeOrArray<JQuery3.Node | JQuery3<JQuery3.Node>>): this
     /**
      * Insert every element in the set of matched elements to the beginning of the target.
      * @param target A selector, element, HTML string, array of elements, or jQuery object; the matched set of elements
@@ -8846,7 +8846,7 @@ $( "span" ).prependTo( "#foo" );
 </html>
 ```
      */
-    prependTo(target: JQuery3.Selector | JQuery3.htmlString | JQuery3.TypeOrArray<Element | DocumentFragment> | JQuery3): this;
+    prependTo(target: JQuery3.Selector | JQuery3.htmlString | JQuery3.TypeOrArray<Element | DocumentFragment> | JQuery3): this
     /**
      * Get the immediately preceding sibling of each element in the set of matched elements. If a selector is provided, it retrieves the previous sibling only if it matches that selector.
      * @param selector A string containing a selector expression to match elements against.
@@ -8926,7 +8926,7 @@ $( "p" ).prev( ".selected" ).css( "background", "yellow" );
 </html>
 ```
      */
-    prev(selector?: JQuery3.Selector): this;
+    prev(selector?: JQuery3.Selector): this
     /**
      * Get all preceding siblings of each element in the set of matched elements, optionally filtered by a selector.
      * @param selector A string containing a selector expression to match elements against.
@@ -8969,7 +8969,7 @@ $( "div:last" ).prevAll().addClass( "before" );
 </html>
 ```
      */
-    prevAll(selector?: JQuery3.Selector): this;
+    prevAll(selector?: JQuery3.Selector): this
     /**
      * Get all preceding siblings of each element up to but not including the element matched by the selector, DOM node, or jQuery object.
      * @param selector_element _&#x40;param_ `selector_element`
@@ -9021,7 +9021,7 @@ $( "#term-3" ).prevUntil( term1, "dd" )
 </html>
 ```
      */
-    prevUntil(selector_element?: JQuery3.Selector | Element | JQuery3, filter?: JQuery3.Selector): this;
+    prevUntil(selector_element?: JQuery3.Selector | Element | JQuery3, filter?: JQuery3.Selector): this
     /**
      * Return a Promise object to observe when all actions of a certain type bound to the collection, queued or not, have finished.
      * @param type The type of queue that needs to be observed.
@@ -9029,14 +9029,14 @@ $( "#term-3" ).prevUntil( term1, "dd" )
      * @see \`{@link https://api.jquery.com/promise/ }\`
      * @since 1.6
      */
-    promise<T extends object>(type: string, target: T): T & JQuery3.Promise<this>;
+    promise<T extends object>(type: string, target: T): T & JQuery3.Promise<this>
     /**
      * Return a Promise object to observe when all actions of a certain type bound to the collection, queued or not, have finished.
      * @param target Object onto which the promise methods have to be attached
      * @see \`{@link https://api.jquery.com/promise/ }\`
      * @since 1.6
      */
-    promise<T extends object>(target: T): T & JQuery3.Promise<this>;
+    promise<T extends object>(target: T): T & JQuery3.Promise<this>
     /**
      * Return a Promise object to observe when all actions of a certain type bound to the collection, queued or not, have finished.
      * @param type The type of queue that needs to be observed.
@@ -9142,7 +9142,7 @@ $( "button" ).on( "click", function() {
 </html>
 ```
      */
-    promise(type?: string): JQuery3.Promise<this>;
+    promise(type?: string): JQuery3.Promise<this>
     /**
      * Set one or more properties for the set of matched elements.
      * @param propertyName The name of the property to set.
@@ -9155,7 +9155,7 @@ $( "button" ).on( "click", function() {
      * @since 1.6
      */
     prop(propertyName: string,
-         value_function: string | number | boolean | symbol | object | null | undefined | ((this: TElement, index: number, oldPropertyValue: any) => any)): this;
+         value_function: string | number | boolean | symbol | object | null | undefined | ((this: TElement, index: number, oldPropertyValue: any) => any)): this
     /**
      * Set one or more properties for the set of matched elements.
      * @param properties An object of property-value pairs to set.
@@ -9196,7 +9196,7 @@ $( "input[type='checkbox']" ).prop({
 </html>
 ```
      */
-    prop(properties: JQuery3.PlainObject): this;
+    prop(properties: JQuery3.PlainObject): this
     /**
      * Get the value of a property for the first element in the set of matched elements.
      * @param propertyName The name of the property to get.
@@ -9239,7 +9239,7 @@ $( "input" ).change(function() {
 </html>
 ```
      */
-    prop(propertyName: string): any;
+    prop(propertyName: string): any
     /**
      * Add a collection of DOM elements onto the jQuery stack.
      * @param elements An array of elements to push onto the stack and make into a new jQuery object.
@@ -9248,7 +9248,7 @@ $( "input" ).change(function() {
      * @see \`{@link https://api.jquery.com/pushStack/ }\`
      * @since 1.3
      */
-    pushStack(elements: ArrayLike<Element>, name: string, args: any[]): this;
+    pushStack(elements: ArrayLike<Element>, name: string, args: any[]): this
     /**
      * Add a collection of DOM elements onto the jQuery stack.
      * @param elements An array of elements to push onto the stack and make into a new jQuery object.
@@ -9262,7 +9262,7 @@ jQuery([])
   .end();
 ```
      */
-    pushStack(elements: ArrayLike<Element>): this;
+    pushStack(elements: ArrayLike<Element>): this
     /**
      * Manipulate the queue of functions to be executed, once for each matched element.
      * @param queueName A string containing the name of the queue. Defaults to fx, the standard effects queue.
@@ -9325,7 +9325,7 @@ $( "#stop" ).click(function() {
 </html>
 ```
      */
-    queue(queueName: string, newQueue: JQuery3.TypeOrArray<JQuery3.QueueFunction<TElement>>): this;
+    queue(queueName: string, newQueue: JQuery3.TypeOrArray<JQuery3.QueueFunction<TElement>>): this
     /**
      * Manipulate the queue of functions to be executed, once for each matched element.
      * @param newQueue The new function to add to the queue, with a function to call that will dequeue the next item.
@@ -9381,7 +9381,7 @@ $( document.body ).click(function() {
 </html>
 ```
      */
-    queue(newQueue: JQuery3.TypeOrArray<JQuery3.QueueFunction<TElement>>): this;
+    queue(newQueue: JQuery3.TypeOrArray<JQuery3.QueueFunction<TElement>>): this
     /**
      * Show the queue of functions to be executed on the matched elements.
      * @param queueName A string containing the name of the queue. Defaults to fx, the standard effects queue.
@@ -9448,7 +9448,7 @@ showIt();
 </html>
 ```
      */
-    queue(queueName?: string): JQuery3.Queue<Node>;
+    queue(queueName?: string): JQuery3.Queue<Node>
     /**
      * Specify a function to execute when the DOM is fully loaded.
      * @param handler A function to execute after the DOM is ready.
@@ -9484,7 +9484,7 @@ showIt();
 </html>
 ```
      */
-    ready(handler: ($: JQueryStatic3) => void): this;
+    ready(handler: ($: JQueryStatic3) => void): this
     /**
      * Remove the set of matched elements from the DOM.
      * @param selector A selector expression that filters the set of matched elements to be removed.
@@ -9553,7 +9553,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    remove(selector?: string): this;
+    remove(selector?: string): this
     /**
      * Remove an attribute from each element in the set of matched elements.
      * @param attributeName An attribute to remove; as of version 1.7, it can be a space-separated list of attributes.
@@ -9595,7 +9595,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    removeAttr(attributeName: string): this;
+    removeAttr(attributeName: string): this
     /**
      * Remove a single class, multiple classes, or all classes from each element in the set of matched elements.
      * @param className_function _&#x40;param_ `className_function`
@@ -9725,7 +9725,7 @@ $( "p:eq(1)" ).removeClass();
 </html>
 ```
      */
-    removeClass(className_function?: JQuery3.TypeOrArray<string> | ((this: TElement, index: number, className: string) => string)): this;
+    removeClass(className_function?: JQuery3.TypeOrArray<string> | ((this: TElement, index: number, className: string) => string)): this
     /**
      * Remove a previously-stored piece of data.
      * @param name A string naming the piece of data to delete.
@@ -9772,7 +9772,7 @@ $( "span:eq(3)" ).text( "" + $( "div" ).data( "test2" ) );
 </html>
 ```
      */
-    removeData(name?: JQuery3.TypeOrArray<string>): this;
+    removeData(name?: JQuery3.TypeOrArray<string>): this
     /**
      * Remove a property for the set of matched elements.
      * @param propertyName The name of the property to remove.
@@ -9813,7 +9813,7 @@ para
 </html>
 ```
      */
-    removeProp(propertyName: string): this;
+    removeProp(propertyName: string): this
     /**
      * Replace each target element with the set of matched elements.
      * @param target A selector string, jQuery object, DOM element, or array of elements indicating which element(s) to replace.
@@ -9842,7 +9842,7 @@ $( "<b>Paragraph. </b>" ).replaceAll( "p" );
 </html>
 ```
      */
-    replaceAll(target: JQuery3.Selector | JQuery3 | JQuery3.TypeOrArray<Element>): this;
+    replaceAll(target: JQuery3.Selector | JQuery3 | JQuery3.TypeOrArray<Element>): this
     /**
      * Replace each element in the set of matched elements with the provided new content and return the set of elements that was removed.
      * @param newContent_function _&#x40;param_ `newContent_function`
@@ -10000,7 +10000,7 @@ $( "button" ).on( "click", function() {
                                      ((this: TElement, index: number, oldhtml: JQuery3.htmlString) => JQuery3.htmlString |
                                                                                                      JQuery3<JQuery3.Node> |
                                                                                                      JQuery3.TypeOrArray<Element> |
-                                                                                                     JQuery3.Node)): this;
+                                                                                                     JQuery3.Node)): this
     /**
      * Bind an event handler to the "resize" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -10014,7 +10014,7 @@ $( "button" ).on( "click", function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     resize<TData>(eventData: TData,
-                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'resize'>): this;
+                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'resize'>): this
     /**
      * Bind an event handler to the "resize" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -10033,7 +10033,7 @@ $( window ).resize(function() {
 ```
      */
     resize(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'resize'> |
-                     false): this;
+                     false): this
     /**
      * Bind an event handler to the "scroll" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -10047,7 +10047,7 @@ $( window ).resize(function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     scroll<TData>(eventData: TData,
-                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'scroll'>): this;
+                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'scroll'>): this
     /**
      * Bind an event handler to the "scroll" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -10098,7 +10098,7 @@ $( window ).scroll(function() {
 ```
      */
     scroll(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'scroll'> |
-                     false): this;
+                     false): this
     /**
      * Set the current horizontal position of the scroll bar for each of the set of matched elements.
      * @param value An integer indicating the new position to set the scroll bar to.
@@ -10144,7 +10144,7 @@ $( "div.demo" ).scrollLeft( 300 );
 </html>
 ```
      */
-    scrollLeft(value: number): this;
+    scrollLeft(value: number): this
     /**
      * Get the current horizontal position of the scroll bar for the first element in the set of matched elements.
      * @see \`{@link https://api.jquery.com/scrollLeft/ }\`
@@ -10178,7 +10178,7 @@ $( "p:last" ).text( "scrollLeft:" + p.scrollLeft() );
 </html>
 ```
      */
-    scrollLeft(): number | undefined;
+    scrollLeft(): number | undefined
     /**
      * Set the current vertical position of the scroll bar for each of the set of matched elements.
      * @param value A number indicating the new position to set the scroll bar to.
@@ -10224,7 +10224,7 @@ $( "div.demo" ).scrollTop( 300 );
 </html>
 ```
      */
-    scrollTop(value: number): this;
+    scrollTop(value: number): this
     /**
      * Get the current vertical position of the scroll bar for the first element in the set of matched elements or set the vertical position of the scroll bar for every matched element.
      * @see \`{@link https://api.jquery.com/scrollTop/ }\`
@@ -10258,7 +10258,7 @@ $( "p:last" ).text( "scrollTop:" + p.scrollTop() );
 </html>
 ```
      */
-    scrollTop(): number | undefined;
+    scrollTop(): number | undefined
     /**
      * Bind an event handler to the "select" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -10272,7 +10272,7 @@ $( "p:last" ).text( "scrollTop:" + p.scrollTop() );
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     select<TData>(eventData: TData,
-                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'select'>): this;
+                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'select'>): this
     /**
      * Bind an event handler to the "select" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -10322,7 +10322,7 @@ $( "input" ).select();
 ```
      */
     select(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'select'> |
-                     false): this;
+                     false): this
     /**
      * Encode a set of form elements as a string for submission.
      * @see \`{@link https://api.jquery.com/serialize/ }\`
@@ -10396,7 +10396,7 @@ $( "input" ).select();
 </html>
 ```
      */
-    serialize(): string;
+    serialize(): string
     /**
      * Encode a set of form elements as an array of names and values.
      * @see \`{@link https://api.jquery.com/serializeArray/ }\`
@@ -10467,7 +10467,7 @@ $( "input" ).select();
 </html>
 ```
      */
-    serializeArray(): JQuery3.NameValuePair[];
+    serializeArray(): JQuery3.NameValuePair[]
     /**
      * Display the matched elements.
      * @param duration A string or number determining how long the animation will run.
@@ -10476,7 +10476,7 @@ $( "input" ).select();
      * @see \`{@link https://api.jquery.com/show/ }\`
      * @since 1.4.3
      */
-    show(duration: JQuery3.Duration, easing: string, complete: (this: TElement) => void): this;
+    show(duration: JQuery3.Duration, easing: string, complete: (this: TElement) => void): this
     /**
      * Display the matched elements.
      * @param duration A string or number determining how long the animation will run.
@@ -10586,7 +10586,7 @@ $( "form" ).submit(function( event ) {
 </html>
 ```
      */
-    show(duration: JQuery3.Duration, easing_complete: string | ((this: TElement) => void)): this;
+    show(duration: JQuery3.Duration, easing_complete: string | ((this: TElement) => void)): this
     /**
      * Display the matched elements.
      * @param duration_complete_options _&#x40;param_ `duration_complete_options`
@@ -10625,7 +10625,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    show(duration_complete_options?: JQuery3.Duration | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this;
+    show(duration_complete_options?: JQuery3.Duration | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this
     /**
      * Get the siblings of each element in the set of matched elements, optionally filtered by a selector.
      * @param selector A string containing a selector expression to match elements against.
@@ -10715,7 +10715,7 @@ $( "p" ).siblings( ".selected" ).css( "background", "yellow" );
 </html>
 ```
      */
-    siblings(selector?: JQuery3.Selector): this;
+    siblings(selector?: JQuery3.Selector): this
     /**
      * Reduce the set of matched elements to a subset specified by a range of indices.
      * @param start An integer indicating the 0-based position at which the elements begin to be selected. If negative,
@@ -10810,7 +10810,7 @@ $( "p" ).slice( 1 ).wrapInner( "<b></b>" );
 $( "p" ).slice( -1 ).wrapInner( "<b></b>" );
 ```
      */
-    slice(start: number, end?: number): this;
+    slice(start: number, end?: number): this
     /**
      * Display the matched elements with a sliding motion.
      * @param duration A string or number determining how long the animation will run.
@@ -10819,7 +10819,7 @@ $( "p" ).slice( -1 ).wrapInner( "<b></b>" );
      * @see \`{@link https://api.jquery.com/slideDown/ }\`
      * @since 1.4.3
      */
-    slideDown(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this;
+    slideDown(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this
     /**
      * Display the matched elements with a sliding motion.
      * @param duration_easing _&#x40;param_ `duration_easing`
@@ -10886,7 +10886,7 @@ $( "div" ).click(function() {
 </html>
 ```
      */
-    slideDown(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this;
+    slideDown(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this
     /**
      * Display the matched elements with a sliding motion.
      * @param duration_easing_complete_options _&#x40;param_ `duration_easing_complete_options`
@@ -10938,7 +10938,7 @@ $( document.body ).click(function () {
 </html>
 ```
      */
-    slideDown(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this;
+    slideDown(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this
     /**
      * Display or hide the matched elements with a sliding motion.
      * @param duration A string or number determining how long the animation will run.
@@ -10947,7 +10947,7 @@ $( document.body ).click(function () {
      * @see \`{@link https://api.jquery.com/slideToggle/ }\`
      * @since 1.4.3
      */
-    slideToggle(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this;
+    slideToggle(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this
     /**
      * Display or hide the matched elements with a sliding motion.
      * @param duration_easing _&#x40;param_ `duration_easing`
@@ -11017,7 +11017,7 @@ $( "#aa" ).click(function() {
 </html>
 ```
      */
-    slideToggle(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this;
+    slideToggle(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this
     /**
      * Display or hide the matched elements with a sliding motion.
      * @param duration_easing_complete_options _&#x40;param_ `duration_easing_complete_options`
@@ -11062,7 +11062,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    slideToggle(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this;
+    slideToggle(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this
     /**
      * Hide the matched elements with a sliding motion.
      * @param duration A string or number determining how long the animation will run.
@@ -11071,7 +11071,7 @@ $( "button" ).click(function() {
      * @see \`{@link https://api.jquery.com/slideUp/ }\`
      * @since 1.4.3
      */
-    slideUp(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this;
+    slideUp(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this
     /**
      * Hide the matched elements with a sliding motion.
      * @param duration_easing _&#x40;param_ `duration_easing`
@@ -11127,7 +11127,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    slideUp(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this;
+    slideUp(duration_easing: JQuery3.Duration | string, complete: (this: TElement) => void): this
     /**
      * Hide the matched elements with a sliding motion.
      * @param duration_easing_complete_options _&#x40;param_ `duration_easing_complete_options`
@@ -11180,7 +11180,7 @@ $( document.body ).click(function() {
 </html>
 ```
      */
-    slideUp(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this;
+    slideUp(duration_easing_complete_options?: JQuery3.Duration | string | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement>): this
     /**
      * Stop the currently-running animation on the matched elements.
      * @param queue The name of the queue in which to stop animations.
@@ -11189,7 +11189,7 @@ $( document.body ).click(function() {
      * @see \`{@link https://api.jquery.com/stop/ }\`
      * @since 1.7
      */
-    stop(queue: string, clearQueue?: boolean, jumpToEnd?: boolean): this;
+    stop(queue: string, clearQueue?: boolean, jumpToEnd?: boolean): this
     /**
      * Stop the currently-running animation on the matched elements.
      * @param clearQueue A Boolean indicating whether to remove queued animation as well. Defaults to false.
@@ -11279,7 +11279,7 @@ $( "#toggle" ).on( "click", function() {
 </html>
 ```
      */
-    stop(clearQueue?: boolean, jumpToEnd?: boolean): this;
+    stop(clearQueue?: boolean, jumpToEnd?: boolean): this
     /**
      * Bind an event handler to the "submit" JavaScript event, or trigger that event on an element.
      * @param eventData An object containing data that will be passed to the event handler.
@@ -11293,7 +11293,7 @@ $( "#toggle" ).on( "click", function() {
      * **Solution**: Instead of `.click(fn)` use `.on("click", fn)`. Instead of `.click()` use `.trigger("click")`.
      */
     submit<TData>(eventData: TData,
-                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'submit'>): this;
+                  handler: JQuery3.TypeEventHandler<TElement, TData, TElement, TElement, 'submit'>): this
     /**
      * Bind an event handler to the "submit" JavaScript event, or trigger that event on an element.
      * @param handler A function to execute each time the event is triggered.
@@ -11363,7 +11363,7 @@ $( "form:first" ).submit();
 ```
      */
     submit(handler?: JQuery3.TypeEventHandler<TElement, null, TElement, TElement, 'submit'> |
-                     false): this;
+                     false): this
     /**
      * Set the content of each element in the set of matched elements to the specified text.
      * @param text_function _&#x40;param_ `text_function`
@@ -11402,7 +11402,7 @@ $( "p" ).text( "<b>Some</b> new text." );
 </html>
 ```
      */
-    text(text_function: string | number | boolean | ((this: TElement, index: number, text: string) => string | number | boolean)): this;
+    text(text_function: string | number | boolean | ((this: TElement, index: number, text: string) => string | number | boolean)): this
     /**
      * Get the combined text contents of each element in the set of matched elements, including their descendants.
      * @see \`{@link https://api.jquery.com/text/ }\`
@@ -11439,7 +11439,7 @@ $( "p:last" ).html( str );
 </html>
 ```
      */
-    text(): string;
+    text(): string
     /**
      * Retrieve all the elements contained in the jQuery set, as an array.
      * @see \`{@link https://api.jquery.com/toArray/ }\`
@@ -11481,7 +11481,7 @@ disp( $( "div" ).toArray().reverse() );
 </html>
 ```
      */
-    toArray(): TElement[];
+    toArray(): TElement[]
     /**
      * Display or hide the matched elements.
      * @param duration A string or number determining how long the animation will run.
@@ -11490,7 +11490,7 @@ disp( $( "div" ).toArray().reverse() );
      * @see \`{@link https://api.jquery.com/toggle/ }\`
      * @since 1.4.3
      */
-    toggle(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this;
+    toggle(duration: JQuery3.Duration, easing: string, complete?: (this: TElement) => void): this
     /**
      * Display or hide the matched elements.
      * @param duration A string or number determining how long the animation will run.
@@ -11498,7 +11498,7 @@ disp( $( "div" ).toArray().reverse() );
      * @see \`{@link https://api.jquery.com/toggle/ }\`
      * @since 1.0
      */
-    toggle(duration: JQuery3.Duration, complete: (this: TElement) => void): this;
+    toggle(duration: JQuery3.Duration, complete: (this: TElement) => void): this
     /**
      * Display or hide the matched elements.
      * @param duration_complete_options_display _&#x40;param_ `duration_complete_options_display`
@@ -11591,7 +11591,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    toggle(duration_complete_options_display?: JQuery3.Duration | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement> | boolean): this;
+    toggle(duration_complete_options_display?: JQuery3.Duration | ((this: TElement) => void) | JQuery3.EffectsOptions<TElement> | boolean): this
     /**
      * Add or remove one or more classes from each element in the set of matched elements, depending on either the class's presence or the value of the state argument.
      * @param className_function _&#x40;param_ `className_function`
@@ -11764,7 +11764,7 @@ $( "a" ).on( "click", function( event ) {
 ```
      */
     toggleClass<TState extends boolean>(className_function: JQuery3.TypeOrArray<string> | ((this: TElement, index: number, className: string, state: TState) => string),
-                                        state?: TState): this;
+                                        state?: TState): this
     /**
      * Add or remove one or more classes from each element in the set of matched elements, depending on either the class's presence or the value of the state argument.
      * @param state A boolean value to determine whether the class should be added or removed.
@@ -11776,7 +11776,7 @@ $( "a" ).on( "click", function( event ) {
      *
      * **Solution**: If this functionality is still needed, save the current full `.attr( "class" )` value in a data item and restore it when required.
      */
-    toggleClass(state?: boolean): this;
+    toggleClass(state?: boolean): this
     /**
      * Execute all handlers and behaviors attached to the matched elements for the given event type.
      * @param eventType_event _&#x40;param_ `eventType_event`
@@ -11871,7 +11871,7 @@ $( "body" ).trigger({
 });
 ```
      */
-    trigger(eventType_event: string | JQuery3.Event, extraParameters?: any[] | JQuery3.PlainObject | string | number | boolean): this;
+    trigger(eventType_event: string | JQuery3.Event, extraParameters?: any[] | JQuery3.PlainObject | string | number | boolean): this
     /**
      * Execute all handlers attached to an element for an event.
      * @param eventType_event _&#x40;param_ `eventType_event`
@@ -11914,7 +11914,7 @@ $( "input" ).focus(function() {
 </html>
 ```
      */
-    triggerHandler(eventType_event: string | JQuery3.Event, extraParameters?: any[] | JQuery3.PlainObject | string | number | boolean): any;
+    triggerHandler(eventType_event: string | JQuery3.Event, extraParameters?: any[] | JQuery3.PlainObject | string | number | boolean): any
     /**
      * Remove a previously-attached event handler from the elements.
      * @param event A string containing one or more DOM event types, such as "click" or "submit," or custom event names.
@@ -11986,7 +11986,7 @@ $( "p" ).unbind( "click", foo ); // ... foo will no longer be called.
         event: TType,
         handler: JQuery3.TypeEventHandler<TElement, any, TElement, TElement, TType> |
                  false
-    ): this;
+    ): this
     /**
      * Remove a previously-attached event handler from the elements.
      * @param event A string containing one or more DOM event types, such as "click" or "submit," or custom event names.
@@ -12007,7 +12007,7 @@ $( "p" ).unbind();
 $( "p" ).unbind( "click" );
 ```
      */
-    unbind(event?: string | JQuery3.TriggeredEvent<TElement>): this;
+    unbind(event?: string | JQuery3.TriggeredEvent<TElement>): this
     /**
      * Remove a handler from the event for all elements which match the current selector, based upon a specific set of root elements.
      * @param selector A selector which will be used to filter the event results.
@@ -12082,7 +12082,7 @@ $( "body" ).undelegate( "p", "click", foo );
         eventType: TType,
         handler: JQuery3.TypeEventHandler<TElement, any, any, any, TType> |
                  false
-    ): this;
+    ): this
     /**
      * Remove a handler from the event for all elements which match the current selector, based upon a specific set of root elements.
      * @param selector A selector which will be used to filter the event results.
@@ -12101,7 +12101,7 @@ $( "body" ).undelegate( "p", "click", foo );
      */
     undelegate(selector: JQuery3.Selector,
                eventType_events: string |
-                                 JQuery3.TypeEventHandlers<TElement, any, any, any>): this;
+                                 JQuery3.TypeEventHandlers<TElement, any, any, any>): this
     /**
      * Remove a handler from the event for all elements which match the current selector, based upon a specific set of root elements.
      * @param namespace A selector which will be used to filter the event results.
@@ -12136,7 +12136,7 @@ $( "form" ).delegate( "input[type='text'] ", "keypress.whatever", foo );
 $( "form" ).undelegate( ".whatever" );
 ```
      */
-    undelegate(namespace?: string): this;
+    undelegate(namespace?: string): this
     /**
      * Remove the parents of the set of matched elements from the DOM, leaving the matched elements in their place.
      * @param selector A selector to check the parent element against. If an element's parent does not match the selector,
@@ -12182,7 +12182,7 @@ $( "button" ).click(function() {
 </html>
 ```
      */
-    unwrap(selector?: string): this;
+    unwrap(selector?: string): this
     /**
      * Set the value of each element in the set of matched elements.
      * @param value_function _&#x40;param_ `value_function`
@@ -12300,7 +12300,7 @@ $( "input").val([ "check1", "check2", "radio1" ]);
 </html>
 ```
      */
-    val(value_function: string | number | string[] | ((this: TElement, index: number, value: string) => string)): this;
+    val(value_function: string | number | string[] | ((this: TElement, index: number, value: string) => string)): this
     /**
      * Get the current value of the first element in the set of matched elements.
      * @see \`{@link https://api.jquery.com/val/ }\`
@@ -12388,7 +12388,7 @@ $( "input" )
 </html>
 ```
      */
-    val(): string | number | string[] | undefined;
+    val(): string | number | string[] | undefined
     /**
      * Set the CSS width of each element in the set of matched elements.
      * @param value_function _&#x40;param_ `value_function`
@@ -12443,7 +12443,7 @@ $( "div" ).one( "click", function() {
 </html>
 ```
      */
-    width(value_function: string | number | ((this: TElement, index: number, value: number) => string | number)): this;
+    width(value_function: string | number | ((this: TElement, index: number, value: number) => string | number)): this
     /**
      * Get the current computed width for the first element in the set of matched elements.
      * @see \`{@link https://api.jquery.com/width/ }\`
@@ -12503,7 +12503,7 @@ $("#getw").click(function() {
 </html>
 ```
      */
-    width(): number | undefined;
+    width(): number | undefined
     /**
      * Wrap an HTML structure around each element in the set of matched elements.
      * @param wrappingElement_function _&#x40;param_ `wrappingElement_function`
@@ -12655,7 +12655,7 @@ $( "p" ).wrap( $( ".doublediv" ) );
 </html>
 ```
      */
-    wrap(wrappingElement_function: JQuery3.Selector | JQuery3.htmlString | Element | JQuery3 | ((this: TElement, index: number) => string | JQuery3)): this;
+    wrap(wrappingElement_function: JQuery3.Selector | JQuery3.htmlString | Element | JQuery3 | ((this: TElement, index: number) => string | JQuery3)): this
     /**
      * Wrap an HTML structure around all elements in the set of matched elements.
      * @param wrappingElement_function _&#x40;param_ `wrappingElement_function`
@@ -12806,7 +12806,7 @@ $( "p" ).wrapAll( $( ".doublediv" ) );
 </html>
 ```
      */
-    wrapAll(wrappingElement_function: JQuery3.Selector | JQuery3.htmlString | Element | JQuery3 | ((this: TElement) => string | JQuery3)): this;
+    wrapAll(wrappingElement_function: JQuery3.Selector | JQuery3.htmlString | Element | JQuery3 | ((this: TElement) => string | JQuery3)): this
     /**
      * Wrap an HTML structure around the content of each element in the set of matched elements.
      * @param wrappingElement_function _&#x40;param_ `wrappingElement_function`
@@ -12936,7 +12936,7 @@ $( "p" ).wrapInner( $( "<span class='red'></span>" ) );
 </html>
 ```
      */
-    wrapInner(wrappingElement_function: JQuery3.Selector | JQuery3.htmlString | Element | JQuery3 | ((this: TElement, index: number) => string | JQuery3 | Element)): this;
+    wrapInner(wrappingElement_function: JQuery3.Selector | JQuery3.htmlString | Element | JQuery3 | ((this: TElement, index: number) => string | JQuery3 | Element)): this
 
-    [n: number]: TElement;
+    [n: number]: TElement
 }
