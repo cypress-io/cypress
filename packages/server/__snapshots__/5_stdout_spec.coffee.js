@@ -30,11 +30,14 @@ exports['e2e stdout displays errors from failures 1'] = `
   2 passing
   3 failing
 
-  1) stdout_failing_spec fails:
+  1) stdout_failing_spec
+       fails:
      Error: foo
       [stack trace lines]
 
-  2) stdout_failing_spec failing hook "before each" hook for "is failing":
+  2) stdout_failing_spec
+       failing hook
+         "before each" hook for "is failing":
      CypressError: \`cy.visit()\` failed trying to load:
 
 /does-not-exist.html
@@ -50,7 +53,9 @@ The internal Cypress web server responded with:
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`failing hook\`
       [stack trace lines]
 
-  3) stdout_failing_spec passing hook is failing:
+  3) stdout_failing_spec
+       passing hook
+         is failing:
      CypressError: \`cy.visit()\` failed trying to load:
 
 /does-not-exist.html
@@ -136,11 +141,10 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-SyntaxError: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js: Unexpected token (1:1)
-
-> 1 | +>
-    |  ^
-  2 |  while parsing file: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
+/foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js:1
++ >
+  ^
+ParseError: Unexpected token
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -437,7 +441,8 @@ exports['e2e stdout / displays assertion errors'] = `
   0 passing
   4 failing
 
-  1) assertion errors fails with assertion diff, no retries:
+  1) assertion errors
+       fails with assertion diff, no retries:
 
       AssertionError: expected [] to deeply equal [ 1, 2, 3 ]
       + expected - actual
@@ -447,9 +452,10 @@ exports['e2e stdout / displays assertion errors'] = `
       
       [stack trace lines]
 
-  2) assertion errors fails with assertion diff, with retries:
+  2) assertion errors
+       fails with assertion diff, with retries:
 
-      AssertionError: Timed out retrying: expected [] to deeply equal [ 1, 2, 3 ]
+      Timed out retrying
       + expected - actual
 
       -[]
@@ -457,11 +463,13 @@ exports['e2e stdout / displays assertion errors'] = `
       
       [stack trace lines]
 
-  3) assertion errors fails with dom assertion without diff, with retries:
+  3) assertion errors
+       fails with dom assertion without diff, with retries:
      AssertionError: expected '<body>' to have class 'foo'
       [stack trace lines]
 
-  4) assertion errors fails with dom assertion without diff, with retries:
+  4) assertion errors
+       fails with dom assertion without diff, with retries:
      AssertionError: Timed out retrying: expected '<body>' to have class 'foo'
       [stack trace lines]
 

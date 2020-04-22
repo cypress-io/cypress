@@ -24,7 +24,7 @@ if (options['glob-in-dir']) {
   if (run[0]) {
     run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
   } else {
-    run = [options['glob-in-dir']]
+    run = [path.join(options['glob-in-dir'], '**')]
   }
 }
 
@@ -110,11 +110,14 @@ commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
-  '--compilers ts:@packages/ts/register,coffee:@packages/coffee/register',
+  '-r @packages/ts/register',
+  '-r @packages/coffee/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
+  // restore mocha 2.x behavior to force end process after spec run
+  '--exit',
 )
 
 const env = _.clone(process.env)

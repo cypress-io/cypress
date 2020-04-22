@@ -286,7 +286,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   3 passing
   1 failing
 
-  1)  failure screenshot - rename:
+  1) failure screenshot - rename:
      Error: test error
       [stack trace lines]
 
@@ -367,7 +367,6 @@ The following error was thrown by a plugin. We stopped running your tests becaus
  Error: Async error from plugins file
     [stack trace lines]
 
-
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -417,6 +416,4 @@ The following are valid events:
 - after:screenshot
 
     [stack trace lines]
-
-
 `

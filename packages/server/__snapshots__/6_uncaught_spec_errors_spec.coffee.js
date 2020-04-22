@@ -22,7 +22,7 @@ exports['e2e uncaught errors / failing1'] = `
   0 passing
   1 failing
 
-  1)  An uncaught error was detected outside of a test:
+  1) An uncaught error was detected outside of a test:
      ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
@@ -104,7 +104,7 @@ exports['e2e uncaught errors / failing2'] = `
   0 passing
   1 failing
 
-  1)  An uncaught error was detected outside of a test:
+  1) An uncaught error was detected outside of a test:
      ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
@@ -194,7 +194,8 @@ exports['e2e uncaught errors / failing3'] = `
   1 pending
   3 failing
 
-  1) foo fails with setTimeout:
+  1) foo
+       fails with setTimeout:
      ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
@@ -202,7 +203,8 @@ exports['e2e uncaught errors / failing3'] = `
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
 
-  2) foo fails with setTimeout and done:
+  2) foo
+       fails with setTimeout and done:
      ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
@@ -210,7 +212,8 @@ When Cypress detects uncaught errors originating from your test code it will aut
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       [stack trace lines]
 
-  3) foo fails with async app code error:
+  3) foo
+       fails with async app code error:
      ReferenceError: The following error originated from your application code, not from Cypress.
 
   > qax is not defined
@@ -300,7 +303,8 @@ exports['e2e uncaught errors / failing4'] = `
   1 passing
   1 failing
 
-  1) foo "before all" hook for "does not run":
+  1) foo
+       "before all" hook for "does not run":
      ReferenceError: The following error originated from your test code, not from Cypress.
 
   > foo is not defined
@@ -388,19 +392,23 @@ exports['e2e uncaught errors / failing5'] = `
   4 passing
   4 failing
 
-  1) foo baz fails:
+  1) foo
+       baz fails:
      ReferenceError: foo is not defined
       [stack trace lines]
 
-  2) foo bar fails:
+  2) foo
+       bar fails:
      ReferenceError: foo is not defined
       [stack trace lines]
 
-  3) foo quux fails:
+  3) foo
+       quux fails:
      ReferenceError: foo is not defined
       [stack trace lines]
 
-  4) foo quux2 fails:
+  4) foo
+       quux2 fails:
      ReferenceError: foo is not defined
       [stack trace lines]
 

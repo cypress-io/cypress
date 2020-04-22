@@ -66,7 +66,7 @@ const init = (config, options) => {
     registeredEvents = {}
 
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
-    const childArguments = ['--file', config.pluginsFile]
+    const childArguments = ['--file', config.pluginsFile, '--projectRoot', options.projectRoot]
     const childOptions = {
       stdio: 'inherit',
     }
