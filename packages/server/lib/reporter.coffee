@@ -3,46 +3,44 @@ path  = require("path")
 ## mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 ## and prevents accidently upgrading this one
 ## TODO: look into upgrading this to version in driver
-Mocha = require("mocha-2.4.5")
-mochaReporters = require("mocha-2.4.5/lib/reporters")
+Mocha = require("mocha-7.0.1")
+mochaReporters = require("mocha-7.0.1/lib/reporters")
+mochaCreateStatsCollector = require("mocha-7.0.1/lib/stats-collector")
 
 debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
-{overrideRequire} = require('./overrideRequire')
+{ overrideRequire } = require('./override_require')
 
 
 mochaErrMsgExtractionRe = /^([^:]+): expected/
 
 STATS = "suites tests passes pending failures start end duration".split(" ")
 
-## version 4.1.0 is what we've historically ran our e2e tests against
-## there is no other reason it is specifically 4.1.0
-## TODO: look into upgrading to version in driver
-customReporterMocha = path.dirname(require.resolve('mocha-4.1.0'))
 
 ## override calls to `require('mocha*')` when to always resolve with a mocha we control
 ## otherwise mocha will be resolved from project's node_modules and might not work with our code
+customReporterMochaPath = path.dirname(require.resolve('mocha-7.0.1'))
 overrideRequire((depPath, _load) ->
   if depPath is 'mocha' or depPath.startsWith('mocha/')
-    return _load(depPath.replace('mocha', customReporterMocha))
+    return _load(depPath.replace('mocha', customReporterMochaPath))
 )
 
-if Mocha.Suite.prototype.titlePath
-  throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
+# if Mocha.Suite.prototype.titlePath
+#   throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
 
-Mocha.Suite.prototype.titlePath = ->
-  result = []
+# Mocha.Suite.prototype.titlePath = ->
+#   result = []
 
-  if @parent
-    result = result.concat(@parent.titlePath())
+#   if @parent
+#     result = result.concat(@parent.titlePath())
 
-  if !@root
-    result.push(@title)
+#   if !@root
+#     result.push(@title)
 
-  return result
+#   return result
 
-Mocha.Runnable.prototype.titlePath = ->
-  @parent.titlePath().concat([@title])
+# Mocha.Runnable.prototype.titlePath = ->
+#   @parent.titlePath().concat([@title])
 
 getParentTitle = (runnable, titles) ->
   if not titles
@@ -60,6 +58,7 @@ createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
   suite.file = obj.file
+  suite.root = !!obj.root
   return suite
 
 createRunnable = (obj, parent) ->
@@ -122,7 +121,7 @@ mergeErr = (runnable, runnables, stats) ->
   ## "Timed out retrying: expected...", it thinks the error name is
   ## "Timed out retrying" and replaces the entire message with only that
   ##
-  ## Here's the code we're patching in the mocha version currently being used (2.4.5):
+  ## Here's the code we're patching in the mocha version currently being used (7.0.1):
   ## https://github.com/mochajs/mocha/blob/2a8594424c73ffeca41ef1668446372160528b4a/lib/reporters/base.js#L208
   if test.err and test.err.message
     message = new String(test.err.message)
@@ -175,7 +174,7 @@ class Reporter
     @projectRoot = projectRoot
     @reporterOptions = reporterOptions
 
-  setRunnables: (rootRunnable = {}) ->
+  setRunnables: (rootRunnable = {title: ''}) ->
     ## manage stats ourselves
     @stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
     @runnables = {}
@@ -184,6 +183,8 @@ class Reporter
     @mocha = new Mocha({reporter: reporter})
     @mocha.suite = rootRunnable
     @runner = new Mocha.Runner(rootRunnable)
+    mochaCreateStatsCollector(@runner)
+    
     @reporter = new @mocha._reporter(@runner, {
       reporterOptions: @reporterOptions
     })

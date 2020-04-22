@@ -24,7 +24,7 @@ if (options['glob-in-dir']) {
   if (run[0]) {
     run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
   } else {
-    run = [options['glob-in-dir']]
+    run = [path.join(options['glob-in-dir'], '**')]
   }
 }
 

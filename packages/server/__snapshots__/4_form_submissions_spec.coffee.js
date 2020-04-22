@@ -164,7 +164,8 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
   0 passing
   1 failing
 
-  1) form submission fails fails without an explicit wait when an element is immediately found:
+  1) form submission fails
+       fails without an explicit wait when an element is immediately found:
      AssertionError: expected '<form>' to contain 'form success!'
       [stack trace lines]
 
