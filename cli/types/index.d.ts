@@ -4919,11 +4919,10 @@ declare namespace Mocha {
      * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
      * nested suites. Indicates this suite should be executed exclusively.
      */
-    (title: string, config: Cypress.TestOptions, fn: (this: Suite) => void): Suite;
+    (title: string, config: Cypress.TestOptions, fn: (this: Suite) => void): Suite
   }
 
   interface PendingSuiteFunction {
-    (title: string,  config: Cypress.TestOptions, fn: (this: Suite) => void): Suite | void;
+    (title: string,  config: Cypress.TestOptions, fn: (this: Suite) => void): Suite | void
   }
-
 }
