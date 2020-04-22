@@ -96,15 +96,17 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/driver start
+          command: yarn start
           background: true
+          working_directory: packages/driver
       - run:
           command: yarn wait-on http://localhost:3500
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>"
+            yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+          working_directory: packages/driver
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
