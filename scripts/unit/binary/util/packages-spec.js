@@ -81,10 +81,12 @@ describe('packages', () => {
 })
 
 describe('transformRequires', () => {
-  const itOnLinux = os.platform() === 'linux' ? it : it.skip
+  it('can find and replace symlink requires', async () => {
+    // these tests really refuse to work on Mac, so for now run it only on Linux
+    if (os.platform() !== 'linux') {
+      return this.skip()
+    }
 
-  // these tests really refuse to work on Mac, so for now run it only on Linux
-  itOnLinux('can find and replace symlink requires', async () => {
     const buildRoot = 'build/linux/Cypress/resources/app'
 
     mockfs({
@@ -119,7 +121,11 @@ describe('transformRequires', () => {
     snapshot(files)
   })
 
-  itOnLinux('can find and replace symlink requires on win32', async () => {
+  it('can find and replace symlink requires on win32', async () => {
+    if (os.platform() !== 'linux') {
+      return this.skip()
+    }
+
     const { transformRequires } = proxyquire('../../../binary/util/transform-requires', { path: path.win32 })
     const buildRoot = 'build/linux/Cypress/resources/app'
 
