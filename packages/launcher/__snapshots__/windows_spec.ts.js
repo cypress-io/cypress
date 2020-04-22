@@ -5,7 +5,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "stable",
     "displayName": "Chrome",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "google-chrome",
       "chrome",
@@ -26,7 +25,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "stable",
     "displayName": "Chromium",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "chromium-browser",
       "chromium"
@@ -46,7 +44,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "canary",
     "displayName": "Canary",
     "versionRegex": {},
-    "profile": true,
     "binary": "google-chrome-canary",
     "path": "C:/Users/flotwig/AppData/Local/Google/Chrome SxS/Application/chrome.exe",
     "version": "3.4.5",
@@ -64,7 +61,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "displayName": "Firefox",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": "firefox",
     "path": "C:/Program Files/Mozilla Firefox/firefox.exe",
     "version": "72",
@@ -82,7 +78,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "displayName": "Firefox Developer Edition",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "firefox-developer-edition",
       "firefox"
@@ -103,7 +98,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "displayName": "Firefox Nightly",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "firefox-nightly",
       "firefox-trunk"
@@ -123,7 +117,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "stable",
     "displayName": "Edge",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge",
     "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
     "version": "11",
@@ -140,7 +133,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "canary",
     "displayName": "Edge Canary",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-canary",
     "path": "C:/Users/flotwig/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe",
     "version": "14",
@@ -157,7 +149,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "beta",
     "displayName": "Edge Beta",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-beta",
     "path": "C:/Program Files (x86)/Microsoft/Edge Beta/Application/msedge.exe",
     "version": "12",
@@ -174,7 +165,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "dev",
     "displayName": "Edge Dev",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-dev",
     "path": "C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe",
     "version": "13",

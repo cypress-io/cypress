@@ -367,7 +367,6 @@ The following error was thrown by a plugin. We stopped running your tests becaus
  Error: Async error from plugins file
     [stack trace lines]
 
-
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -417,6 +416,4 @@ The following are valid events:
 - after:screenshot
 
     [stack trace lines]
-
-
 `

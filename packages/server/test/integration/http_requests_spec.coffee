@@ -27,11 +27,14 @@ Project       = require("#{root}lib/project")
 Watchers      = require("#{root}lib/watchers")
 errors        = require("#{root}lib/errors")
 files         = require("#{root}lib/controllers/files")
+pluginsModule = require("#{root}lib/plugins")
 preprocessor  = require("#{root}lib/plugins/preprocessor")
+resolve       = require("#{root}lib/plugins/resolve")
 fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
+simple_tsify  = require("#{root}test/support/helpers/simple_tsify")
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -66,6 +69,16 @@ browserifyFile = (filePath) ->
     .bundle()
   )
 
+browserifyFileTs = (filePath) ->
+  streamToPromise(
+    browserify(filePath)
+    .transform(coffeeify)
+    .transform(simple_tsify, {
+      typescript: require('typescript'),
+    })
+    .bundle()
+  )
+
 describe "Routes", ->
   require("mocha-banner").register()
 
@@ -74,6 +87,7 @@ describe "Routes", ->
 
     sinon.stub(CacheBuster, "get").returns("-123")
     sinon.stub(Server.prototype, "reset")
+    sinon.stub(pluginsModule, "has").returns(false)
 
     nock.enableNetConnect()
 
@@ -474,9 +488,55 @@ describe "Routes", ->
             })
 
   context "GET /__cypress/tests", ->
-    describe "ids", ->
+    describe "ids with typescript", ->
       beforeEach ->
         Fixtures.scaffold("ids")
+
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+        })
+
+      checkTranspilation = (body, file) ->
+        b = removeSourceMapContents(body).replace(/\n/g, '')
+        f = file.toString().replace(/\n/g, '')
+
+        expect(b).to.equal f
+
+      it "processes foo.coffee spec", ->
+        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
+          .then (file) ->
+            checkTranspilation(res.body, file)
+
+      it "processes dom.jsx spec", ->
+        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/baz.js"))
+          .then (file) ->
+            checkTranspilation(res.body, file)
+            expect(res.body).to.include("React.createElement(")
+
+      it "serves error javascript file when the file is missing", ->
+        @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include('Cypress.action("spec:script:error", {')
+          expect(res.body).to.include("Cannot find module")
+
+    describe "ids without typescript", ->
+      beforeEach ->
+        Fixtures.scaffold("ids")
+
+        ## remove cached options
+        delete require.cache[require.resolve("@cypress/browserify-preprocessor")]
+        sinon.stub(resolve, 'typescript').callsFake(->
+          return null
+        )
 
         @setup({
           projectRoot: Fixtures.projectPath("ids")
@@ -540,7 +600,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          browserifyFile(Fixtures.path("projects/no-server/my-tests/test1.js"))
+          browserifyFileTs(Fixtures.path("projects/no-server/my-tests/test1.js"))
           .then (file) ->
             expect(removeSourceMapContents(res.body)).to.equal(file.toString())
 
@@ -549,7 +609,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          browserifyFile(Fixtures.path("projects/no-server/helpers/includes.js"))
+          browserifyFileTs(Fixtures.path("projects/no-server/helpers/includes.js"))
           .then (file) ->
             expect(removeSourceMapContents(res.body)).to.equal(file.toString())
 
@@ -1638,6 +1698,26 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers).not.to.have.property("content-security-policy")
+
+      it "omits document-domain from Feature-Policy header", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "OK", {
+          "Content-Type": "text/html"
+          "Feature-Policy": "camera *; document-domain 'none'; autoplay 'self'"
+        }
+
+        @rp({
+          url: "http://localhost:8080/bar"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['feature-policy']).to.include("camera *")
+          expect(res.headers['feature-policy']).to.include("autoplay 'self'")
+          expect(res.headers['feature-policy']).not.to.include("document-domain 'none'")
 
       it "does not modify host origin header", ->
         @setup("http://foobar.com")

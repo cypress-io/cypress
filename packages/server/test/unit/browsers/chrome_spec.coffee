@@ -105,6 +105,31 @@ describe "lib/browsers/chrome", ->
           "--disk-cache-dir=/profile/dir/CypressCache"
         ])
 
+    it "uses a custom profilePath if supplied", ->
+      chrome._writeExtension.restore()
+      utils.getProfileDir.restore()
+
+      profilePath = '/home/foo/snap/chromium/current'
+      fullPath = "#{profilePath}/Cypress/chromium-stable/interactive"
+
+      @readJson.withArgs("#{fullPath}/Default/Preferences").rejects({ code: 'ENOENT' })
+      @readJson.withArgs("#{fullPath}/Default/Secure Preferences").rejects({ code: 'ENOENT' })
+      @readJson.withArgs("#{fullPath}/Local State").rejects({ code: 'ENOENT' })
+
+      chrome.open({
+        isHeadless: true,
+        isHeaded: false,
+        profilePath,
+        name: 'chromium',
+        channel: 'stable'
+      }, "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.include.members([
+          "--user-data-dir=#{fullPath}"
+        ])
+
     it "DEPRECATED: normalizes --load-extension if provided in plugin", ->
       plugins.register 'before:browser:launch', (browser, config) ->
         return Promise.resolve(["--foo=bar", "--load-extension=/foo/bar/baz.js"])

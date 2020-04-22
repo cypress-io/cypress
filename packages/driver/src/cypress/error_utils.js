@@ -18,6 +18,23 @@ const mergeErrProps = (origErr, ...newProps) => {
   return _.extend(origErr, ...newProps)
 }
 
+const replaceNameInStack = (err, newName) => {
+  const { name, stack } = err
+
+  if (!stack) return stack
+
+  return stack.replace(name, newName)
+}
+
+const modifyErrName = (err, newName) => {
+  const newStack = replaceNameInStack(err, newName)
+
+  err.name = newName
+  err.stack = newStack
+
+  return err
+}
+
 const replaceMsgInStack = (err, newMsg) => {
   const { message, name, stack } = err
 
@@ -32,6 +49,27 @@ const replaceMsgInStack = (err, newMsg) => {
   // is 'Error\n\n<stack>' and it results in wrongly prepending the
   // new message, looking like '<newMsg>Error\n\n<stack>'
   return stack.replace(name, `${name}: ${newMsg}`)
+}
+
+const newLineAtBeginningRe = /^\n+/
+
+const replacedStack = (err, newStackErr) => {
+  // if err already lacks a stack or we've removed the stack
+  // for some reason, keep it stackless
+  if (!err.stack) return err.stack
+
+  const errString = err.toString()
+
+  const newStackErrString = newStackErr.toString()
+  const stackLines = newStackErr.stack
+  .replace(newStackErrString, '')
+  .replace(newLineAtBeginningRe, '')
+
+  // sometimes the new stack doesn't include any lines, so just stick
+  // with the original stack
+  if (!stackLines) return err.stack
+
+  return `${errString}\n${stackLines}`
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
@@ -294,8 +332,10 @@ module.exports = {
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,
+  modifyErrName,
   normalizeErrorStack,
   normalizeMsgNewLines,
+  replacedStack,
   processErr,
   throwErr,
   throwErrByPath,
