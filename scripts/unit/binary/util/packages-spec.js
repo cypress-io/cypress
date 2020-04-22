@@ -81,7 +81,7 @@ describe('packages', () => {
 })
 
 describe('transformRequires', () => {
-  it('can find and replace symlink requires', async () => {
+  it('can find and replace symlink requires', async function () {
     // these tests really refuse to work on Mac, so for now run it only on Linux
     if (os.platform() !== 'linux') {
       return this.skip()
@@ -121,7 +121,7 @@ describe('transformRequires', () => {
     snapshot(files)
   })
 
-  it('can find and replace symlink requires on win32', async () => {
+  it('can find and replace symlink requires on win32', async function () {
     if (os.platform() !== 'linux') {
       return this.skip()
     }
