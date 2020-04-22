@@ -96,7 +96,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/driver "yarn start"
+          command: yarn workspace @packages/driver start
           background: true
       - run:
           command: yarn wait-on http://localhost:3500
