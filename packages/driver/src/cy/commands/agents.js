@@ -63,7 +63,7 @@ const onInvoke = function (Cypress, obj, args) {
     error: obj.error,
     type: 'parent',
     end: true,
-    snapshot: true,
+    snapshot: !agent._noSnapshot,
     event: true,
     consoleProps () {
       const consoleObj = {}
@@ -214,6 +214,13 @@ module.exports = function (Commands, Cypress, cy, state) {
     // enable not logging this agent
     agent.log = (bool = true) => {
       agent._log = bool
+
+      return agent
+    }
+
+    // disable DOM snapshots during log for this agent
+    agent.snapshot = (bool = true) => {
+      agent._noSnapshot = !bool
 
       return agent
     }
