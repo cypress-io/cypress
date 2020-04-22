@@ -347,15 +347,13 @@ class Reporter
     ## that is local (./custom-reporter.js)
     ## or one installed by the user through npm
     try
-      p = path.resolve(projectRoot, reporterName)
-
       ## try local
-      debug("trying to require local reporter with path:", p)
+      debug("trying to require local reporter with path:", reporterName)
 
       ## using path.resolve() here so we can just pass an
       ## absolute path as the reporterName which avoids
       ## joining projectRoot unnecessarily
-      return require(p)
+      return require(reporterName)
     catch err
       if err.code isnt "MODULE_NOT_FOUND"
         ## bail early if the error wasn't MODULE_NOT_FOUND
