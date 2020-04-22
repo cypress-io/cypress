@@ -56,6 +56,7 @@ describe('fires test:after:run after root after hook', () => {
   })
 })
 
+// https://github.com/cypress-io/cypress/issues/2296
 after(() => {
   expect(_.last(testAfterRunEvents).title, 'test:after:run for test 2 should not have fired yet').eq('test 1')
 })
