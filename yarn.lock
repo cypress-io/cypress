@@ -3432,7 +3432,7 @@
     "@types/chai" "*"
     "@types/jquery" "*"
 
-"@types/chai@*":
+"@types/chai@*", "@types/chai@4.2.11":
   version "4.2.11"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.11.tgz#d3614d6c5f500142358e6ed24e1bf16657536c50"
   integrity sha512-t7uW6eFafjO+qJ3BIV2gGUyZs27egcNRkUdalkud+Qa3+kg//f129iuOFivHDXQ+vnU3fDXuwgv0cqMCbcE8sw==
@@ -3817,17 +3817,12 @@
     "@types/chai" "*"
     "@types/sinon" "*"
 
-"@types/sinon@*":
+"@types/sinon@*", "@types/sinon@9.0.0":
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-9.0.0.tgz#5b70a360f55645dd64f205defd2a31b749a59799"
   integrity sha512-v2TkYHkts4VXshMkcmot/H+ERZ2SevKa10saGaJPGCJ8vh3lKrC4u663zYEeRZxep+VbG6YRDtQ6gVqw9dYzPA==
   dependencies:
     "@types/sinonjs__fake-timers" "*"
-
-"@types/sinon@7.5.1":
-  version "7.5.1"
-  resolved "https://registry.yarnpkg.com/@types/sinon/-/sinon-7.5.1.tgz#d27b81af0d1cfe1f9b24eebe7a24f74ae40f5b7c"
-  integrity sha512-EZQUP3hSZQyTQRfiLqelC9NMWd1kqLcmQE0dMiklxBkgi84T+cHOhnKpgk4NnOWpGX863yE6+IaGnOXUNFqDnQ==
 
 "@types/sinonjs__fake-timers@*":
   version "6.0.1"
@@ -12754,6 +12749,12 @@ has-ansi@^2.0.0:
   integrity sha1-NPUEnOHs3ysGSa8+8k5F7TVBbZE=
   dependencies:
     ansi-regex "^2.0.0"
+
+has-binary2@cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92:
+  version "1.0.2"
+  resolved "https://codeload.github.com/cypress-io/has-binary/tar.gz/8580a33df21e8b36a43f57872a82c60829636a92"
+  dependencies:
+    isarray "2.0.1"
 
 has-binary2@~1.0.2:
   version "1.0.3"
@@ -21692,7 +21693,7 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#unpatched-has-bin
     circular-json "0.5.9"
     component-emitter "1.2.1"
     debug "~4.1.0"
-    has-binary2 "~1.0.2"
+    has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
 
 socket.io-client@2.3.0:
   version "2.3.0"
