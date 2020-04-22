@@ -429,12 +429,12 @@ const e2e = {
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
-      noExit: process.env.NO_EXIT ? true : null,
       timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
+      noExit: process.env.NO_EXIT,
     })
 
     if (options.noExit) {
@@ -663,6 +663,7 @@ const e2e = {
           // Emulate no typescript environment
           CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
 
+          // force file watching for use with --no-exit
           ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
