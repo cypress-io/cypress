@@ -3,7 +3,7 @@
   "projectId": "ypt4pf",
   "viewportWidth": 800,
   "viewportHeight": 850,
-  "reporter": "cypress-multi-reporters",
+  "reporter": "../../node_modules/cypress-multi-reporters/index.js",
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
   }

@@ -129,10 +129,10 @@ commands:
           at: ~/
       - run:
           command: yarn lerna exec --scope @packages/server "yarn test ./test/e2e/<< parameters.chunk >>*spec* --browser << parameters.browser >>"
-      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
+      - verify-mocha-results
 
   store-npm-logs:
     description: Saves any NPM debug logs as artifacts in case there is a problem
@@ -330,14 +330,14 @@ jobs:
       - run: yarn lerna run build-prod --stream
       # run unit tests from each individual package
       - run: yarn test
-      - verify-mocha-results:
-          expectedResultCount: 6
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
       - store_artifacts:
           path: cli/test/html
       - store-npm-logs
+      - verify-mocha-results:
+          expectedResultCount: 6
 
   lint-types:
     <<: *defaults
@@ -361,11 +361,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: yarn test-unit --scope @packages/server
-      - verify-mocha-results:
-          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
+      - verify-mocha-results:
+          expectedResultCount: 1
 
   "server-integration-tests":
     <<: *defaults
@@ -374,11 +374,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: yarn test-integration --scope @packages/server
-      - verify-mocha-results:
-          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store-npm-logs
+      - verify-mocha-results:
+          expectedResultCount: 1
 
   "server-performance-tests":
       <<: *defaults
@@ -387,13 +387,13 @@ jobs:
           at: ~/
       - run:
           command: yarn lerna exec --scope @packages/server "yarn test-performance"
-      - verify-mocha-results:
-          expectedResultCount: 1
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
+      - verify-mocha-results:
+          expectedResultCount: 1
 
   "server-e2e-tests-chrome-1":
     <<: *defaults
@@ -591,7 +591,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/desktop-gui build-prod
+          command: yarn build-prod
+          working_directory: packages/desktop-gui
       - run:
           name: Desktop GUI server
           command: yarn start
@@ -601,12 +602,15 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/desktop-gui "yarn cypress:run --record --parallel --group 2x-desktop-gui"
+            yarn cypress:run --record --parallel --group 2x-desktop-gui
+          working_directory: packages/desktop-gui
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
       - store-npm-logs
+      - verify-mocha-results:
+          expectedResultCount: 1
 
   desktop-gui-visual-tests:
     <<: *defaults
@@ -615,7 +619,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/desktop-gui "yarn build-prod"
+          command: yarn build-prod
+          working_directory: packages/desktop-gui
       - run:
           name: Desktop GUI server
           command: yarn start
@@ -625,9 +630,13 @@ jobs:
           # will use PERCY_TOKEN environment variable if available
           command: |
             CYPRESS_KONFIG_ENV=production \
-            yarn lerna exec --scope @packages/desktop-gui "yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js"
+            yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js
+          working_directory: packages/desktop-gui
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
+      - verify-mocha-results:
+          expectedResultCount: 1
+
 
   "reporter-integration-tests":
     <<: *defaults
@@ -635,12 +644,14 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command:  yarn workspace @packages/reporter build-for-tests
+          command: yarn build-for-tests
+          working_directory: packages/reporter
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec  --scope @packages/reporter "yarn cypress:run --record --parallel --group reporter"
+            yarn cypress:run --record --parallel --group reporter
+          working_directory: packages/reporter
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -653,12 +664,14 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/ui-components build-for-tests
+          command: yarn build-for-tests
+          working_directory: packages/ui-components
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/ui-components "yarn cypress:run --record --parallel --group ui-components"
+            yarn cypress:run --record --parallel --group ui-components
+          working_directory: packages/ui-components
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1057,7 +1070,6 @@ jobs:
           browser: firefox
           command: "npm run cypress:run"
           wait-on: "http://localhost:2222"
-
 
   "test-binary-against-realworld-firefox":
     <<: *defaults

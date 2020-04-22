@@ -49,11 +49,5 @@
   "files": [
     "dist",
     "lib"
-  ],
-  "workspaces": {
-    "nohoist": [
-      "cypress-multi-reporters",
-      "cypress-multi-reporters/**"
-    ]
-  }
+  ]
 }
