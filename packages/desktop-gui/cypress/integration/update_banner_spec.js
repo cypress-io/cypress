@@ -115,7 +115,8 @@ describe('Update Banner', function () {
     it('modal has info about updating package.json', function () {
       cy.get('.modal').contains(`npm install --save-dev cypress@${NEW_VERSION}`)
 
-      cy.get('.modal').contains(`yarn add cypress@${NEW_VERSION}`)
+      cy.get('.modal').contains(`yarn upgrade cypress@${NEW_VERSION}`)
+      cy.percySnapshot()
     })
 
     it('links to \'open\' doc on click of open command', function () {
