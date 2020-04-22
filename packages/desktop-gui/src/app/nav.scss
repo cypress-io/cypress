@@ -39,6 +39,8 @@
         font-size: 11px;
         color: #555;
         margin-right: 5px;
+        position: relative;
+        top: -1px;
       }
     }
 
@@ -52,7 +54,7 @@
         display: flex;
         font-size: 13px;
         justify-content: center;
-        padding: 0 20px;
+        padding: 13px 20px;
       }
 
       > a  {
@@ -83,6 +85,9 @@
   }
 
   .browsers.nav {
+    align-items: center;
+    display: flex;
+
     i {
       font-size: 13px;
 
@@ -183,17 +188,17 @@
   }
 
   .dropdown-chosen {
+    align-items: center;
     background: #f6f6f6;
     border: 1px solid #c7c7c7;
     border-radius: 4px;
     display: flex;
     height: 34px;
+    padding: 0 7px;
     justify-content: center;
 
     img {
       margin-right: 5px;
-      position: relative;
-      top: 1px;
     }
 
     &.disabled,
@@ -207,7 +212,7 @@
   }
 
   .fa-check-circle, .fa-sync-alt {
-    margin-right: 3px;
+    margin-right: 5px;
   }
 
   .browser-icon {
@@ -266,10 +271,9 @@
 
 .close-browser {
   .btn {
-    margin-top: 5px;
-    line-height: 28px;
-    padding: 0 9px 0 7px;
+    padding: 6px 9px;
     font-size: 13px;
+
     i {
       margin-right: 3px;
     }

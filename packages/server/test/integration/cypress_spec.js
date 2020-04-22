@@ -1559,7 +1559,7 @@ describe('lib/cypress', () => {
         osVersion: 'v1',
       })
 
-      sinon.stub(browsers, 'ensureAndGetByNameOrPath').returns({
+      sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves({
         version: '59.1.2.3',
         displayName: 'Electron',
       })
