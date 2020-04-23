@@ -3,7 +3,6 @@
   "projectId": "ypt4pf",
   "viewportWidth": 800,
   "viewportHeight": 850,
-  "pluginsFile": "../../node_modules/cypress-react-unit-test/plugins/load-webpack",
   "env": {
     "webpackFilename": "webpack.config.ts",
     "coverage": false
