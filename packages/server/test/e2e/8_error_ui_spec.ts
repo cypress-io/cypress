@@ -24,6 +24,7 @@ describe('e2e error ui', function () {
   e2e.it('displays correct UI for errors', {
     spec: 'various_failures_spec.js',
     expectedExitCode: expectedFailures,
+    noTypeScript: true,
     onRun (exec) {
       return exec().then(verifyPassedAndFailedAreSame)
     },
@@ -32,6 +33,7 @@ describe('e2e error ui', function () {
   e2e.it('displays correct UI for errors in custom commands', {
     spec: 'various_failures_custom_commands_spec.js',
     expectedExitCode: expectedFailures,
+    noTypeScript: true,
     onRun (exec) {
       return exec().then(verifyPassedAndFailedAreSame)
     },
