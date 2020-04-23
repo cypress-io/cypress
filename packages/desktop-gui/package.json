@@ -41,7 +41,7 @@
     "react-dom": "16.12.0",
     "react-inspector": "4.0.0",
     "react-loader": "2.4.7",
-    "react-select": "3.0.8",
+    "react-select": "3.1.0",
     "webpack": "4.35.3",
     "webpack-cli": "3.3.2"
   },

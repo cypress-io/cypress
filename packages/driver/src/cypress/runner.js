@@ -268,6 +268,18 @@ const getTestFromHook = function (hook, suite, getTestById) {
     return test
   }
 
+  if (hook.hookName === 'after all') {
+    const siblings = getAllSiblingTests(suite, getTestById)
+
+    return _.last(siblings)
+  }
+
+  if (hook.hookName === 'before all') {
+    const siblings = getAllSiblingTests(suite, getTestById)
+
+    return _.first(siblings)
+  }
+
   // if we have a hook id then attempt
   // to find the test by its id
   let found
@@ -435,7 +447,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
           //    the last test that will run
           if (
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
-              (isRootSuite(this.suite.parent) && lastTestThatWillRunInSuite(t, siblings)) ||
+              (isRootSuite(this.suite.parent) && !this.suite.parent._afterAll.length && lastTestThatWillRunInSuite(t, siblings)) ||
               (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
           ) {
             changeFnToRunAfterHooks()
@@ -651,7 +663,7 @@ const hookFailed = function (hook, err, getTestById, getTest, Cypress) {
   // finds the test by returning the first test from
   // the parent or looping through the suites until
   // it finds the first test
-  const test = getTest() || getTestFromHook(hook, hook.parent, getTestById)
+  const test = getTestFromHook(hook, hook.parent, getTestById)
 
   setHookFailureProps(test, hook, err)
 
@@ -726,7 +738,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // if there is a nested suite with a before, then
     // currentTest will refer to the previous test run
     // and not our current
-    if ((hook.hookName === 'before all') && hook.ctx.currentTest) {
+    if ((hook.hookName === 'before all' || hook.hookName === 'after all') && hook.ctx.currentTest) {
       delete hook.ctx.currentTest
     }
 
@@ -734,7 +746,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // hooks do not have their own id, their
     // commands need to grouped with the test
     // and we can only associate them by this id
-    const test = getTest() || getTestFromHook(hook, hook.parent, getTestById)
+    const test = getTestFromHook(hook, hook.parent, getTestById)
 
     hook.id = test.id
     hook.ctx.currentTest = test
@@ -871,6 +883,10 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       return hookFailed(runnable, runnable.err, getTestById, getTest, Cypress)
     }
   })
+}
+
+function getOrderFromId (id) {
+  return +id.slice(1)
 }
 
 const create = function (specWindow, mocha, Cypress, cy) {
@@ -1016,6 +1032,14 @@ const create = function (specWindow, mocha, Cypress, cy) {
     _testsById[id] = runnable
   }
 
+  function hasTestAlreadyRun (test) {
+    if (Cypress._RESUMED_AT_TEST) {
+      return getOrderFromId(test.id) < getOrderFromId(Cypress._RESUMED_AT_TEST)
+    }
+
+    return false
+  }
+
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   const replacePreviousAttemptWith = (test) => {
@@ -1094,7 +1118,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     switch (runnable.type) {
       case 'hook':
-        test = getTest() || getTestFromHook(runnable, runnable.parent, getTestById)
+        test = getTestFromHook(runnable, runnable.parent, getTestById)
         test._next = args[0]
         break
 
@@ -1104,6 +1128,17 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
       default:
         break
+    }
+
+    // if this isnt a hook, then the name is 'test'
+    const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+
+    // extract out the next(fn) which mocha uses to
+    // move to the next runnable - this will be our async seam
+    const _next = args[0]
+
+    if (hasTestAlreadyRun(test)) {
+      return _next()
     }
 
     // first time seeing a retried test
@@ -1137,9 +1172,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
       test.wallClockStartedAt = wallClockStartedAt
     }
 
-    // if this isnt a hook, then the name is 'test'
-    const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
-
     // if we haven't yet fired this event for this test
     // that means that we need to reset the previous state
     // of cy - since we now have a new 'test' and all of the
@@ -1150,10 +1182,6 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     const isHook = runnable.type === 'hook'
     const isAfterAllHook = isHook && runnable.hookName.match(/after all/)
-
-    // extract out the next(fn) which mocha uses to
-    // move to the next runnable - this will be our async seam
-    const _next = args[0]
 
     if (isAfterAllHook) {
       if (test.state !== 'failed') {
