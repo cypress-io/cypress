@@ -265,7 +265,7 @@ class Reporter
       @runner.on('retry', (test) =>
         runnable = @runnables[test.id]
         padding = '  '.repeat(runnable.titlePath().length)
-        retryMessage = mochaColor('medium', "(Attempt #{test.currentRetry() + 1} of #{test.retries() + 1})")
+        retryMessage = mochaColor('medium', "(Attempt #{test.currentRetry + 1} of #{test.retries + 1})")
         console.log("#{padding}#{retryMessage} #{test.title}")
       )
     
@@ -297,9 +297,10 @@ class Reporter
   emit: (event, args...) ->
     pArgs = @parseArgs(event, args)
     if pArgs
-      if pArgs[1]?.id
-        ## make sure we emit mocha runnables so reporters can use instance methods e.g. test.retries()
-        pArgs[1] = @runnables[pArgs[1].id]
+      ## NOTE: this was to make sure we emit mocha runnables so reporters can use instance methods e.g. test.retries()
+      ## however since we alter test.title this caused stdout changes.
+      # if pArgs[1]?.id
+      #   pArgs[1] = @runnables[pArgs[1].id]
       @runner?.emit.apply(@runner, pArgs)
 
   parseArgs: (event, args) ->
