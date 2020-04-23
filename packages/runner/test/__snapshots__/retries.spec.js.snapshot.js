@@ -47,6 +47,21 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
     "hook end",
     {
       "id": "r3",
@@ -384,6 +399,20 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 1,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
     "hook end",
     {
       "id": "r3",
@@ -669,6 +698,21 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "file": null,
       "currentRetry": 0,
       "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 2
     }
   ],
   [
@@ -961,6 +1005,21 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "file": null,
       "currentRetry": 0,
       "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r5",
+      "order": 3,
+      "title": "test 3",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 2
     }
   ],
   [
@@ -1317,6 +1376,21 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r7",
+      "order": 4,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
     "hook",
     {
       "id": "r7",
@@ -1472,6 +1546,20 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r7",
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 1,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
     "hook",
     {
       "id": "r7",
@@ -1622,6 +1710,20 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "file": null,
       "final": false,
       "currentRetry": 1,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r7",
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 2,
       "retries": 2
     }
   ],
@@ -1835,6 +1937,21 @@ exports['RETRY_PASS_IN_AFTEREACH.mocha'] = [
       "title": "test 1",
       "body": "[body]",
       "type": "test",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r9",
+      "order": 5,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
       "file": null,
       "currentRetry": 0,
       "retries": 2
@@ -2149,6 +2266,21 @@ exports['RETRY_PASS_IN_BEFOREEACH.mocha'] = [
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 1
+    }
+  ],
+  [
+    "mocha",
     "hook end",
     {
       "id": "r3",
@@ -2442,6 +2574,20 @@ exports['RETRY_PASS_IN_BEFOREEACH.mocha'] = [
       "file": null,
       "currentRetry": 0,
       "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 1,
+      "retries": 1
     }
   ],
   [
@@ -3150,6 +3296,21 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
     "hook end",
     {
       "id": "r3",
@@ -3440,6 +3601,21 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
     "hook end",
     {
       "id": "r4",
@@ -3592,6 +3768,20 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r4",
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 1,
+      "retries": 2
+    }
+  ],
+  [
+    "mocha",
     "hook end",
     {
       "id": "r4",
@@ -3738,6 +3928,20 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
       "file": null,
       "currentRetry": 0,
       "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r4",
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 2,
+      "retries": 2
     }
   ],
   [
@@ -3931,6 +4135,21 @@ exports['THREE_TESTS_WITH_RETRY.mocha'] = [
       "file": null,
       "currentRetry": 0,
       "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r5",
+      "order": 3,
+      "title": "test 3",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": 2
     }
   ],
   [

@@ -46,7 +46,7 @@ export const withMutableReporterState = (fn) => {
 
   const currentTestLog = findReactInstance(cy.$$('.runnable-active', top.document)[0])
 
-  currentTestLog.props.model.isOpen = true
+  currentTestLog.props.model._isOpen = true
 
   return Cypress.Promise.try(fn)
   .then(() => {

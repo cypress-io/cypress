@@ -375,7 +375,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n        return cy.wait(100);\n    }"
         },
         {
           "hookId": "h2",
@@ -642,34 +642,40 @@ exports['e2e spec_isolation / failing with retries enabled'] = `
   simple failing hook spec
     beforeEach hooks
       (Attempt 1 of 2) never gets here
-      1) never gets here
+      1) "before each" hook for "never gets here"
     pending
       - is pending
     afterEach hooks
       (Attempt 1 of 2) runs this
-      2) runs this
+      2) "after each" hook for "runs this"
     after hooks
       ✓ runs this
-      3) fails on this
+      3) "after all" hook for "fails on this"
 
 
   1 passing
   1 pending
   3 failing
 
-  1) simple failing hook spec beforeEach hooks never gets here:
+  1) simple failing hook spec
+       beforeEach hooks
+         "before each" hook for "never gets here":
      Error: fail1
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`beforeEach hooks\`
       [stack trace lines]
 
-  2) simple failing hook spec afterEach hooks runs this:
+  2) simple failing hook spec
+       afterEach hooks
+         "after each" hook for "runs this":
      Error: fail2
 
 Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`afterEach hooks\`
       [stack trace lines]
 
-  3) simple failing hook spec after hooks fails on this:
+  3) simple failing hook spec
+       after hooks
+         "after all" hook for "fails on this":
      Error: fail3
 
 Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`after hooks\`
@@ -773,7 +779,7 @@ exports['failing with retries enabled'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail1\");\n    }"
+          "body": "function () {\n            throw new Error(\"fail1\");\n        }"
         },
         {
           "hookId": "h2",
@@ -781,7 +787,7 @@ exports['failing with retries enabled'] = {
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail2\");\n    }"
+          "body": "function () {\n            throw new Error(\"fail2\");\n        }"
         },
         {
           "hookId": "h3",
@@ -789,7 +795,7 @@ exports['failing with retries enabled'] = {
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail3\");\n    }"
+          "body": "function () {\n            throw new Error(\"fail3\");\n        }"
         }
       ],
       "tests": [
@@ -801,7 +807,7 @@ exports['failing with retries enabled'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n    [stack trace lines]",
           "error": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
           "timings": {
@@ -869,7 +875,7 @@ exports['failing with retries enabled'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n    [stack trace lines]",
           "error": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
           "timings": {
@@ -924,7 +930,7 @@ exports['failing with retries enabled'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": null,
           "error": null,
           "timings": null,
@@ -941,7 +947,7 @@ exports['failing with retries enabled'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": null,
           "error": null,
           "timings": {
@@ -964,7 +970,7 @@ exports['failing with retries enabled'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks\n    [stack trace lines]",
           "error": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks",
           "timings": {

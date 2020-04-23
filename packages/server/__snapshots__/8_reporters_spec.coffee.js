@@ -685,7 +685,7 @@ Learn more at https://on.cypress.io/reporters
 
 `
 
-exports['e2e reporters mochawesome fails with npm custom reporter 1'] = `
+exports['e2e reporters supports teamcity reporter and reporter options 1'] = `
 
 ====================================================================================================
 
@@ -694,8 +694,8 @@ exports['e2e reporters mochawesome fails with npm custom reporter 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_failing_hook_spec.coffee)                                          │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.coffee                                │
+  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
+  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
