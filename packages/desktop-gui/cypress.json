@@ -11,5 +11,9 @@
   "nodeVersion": "system",
   "testFiles": "**/*_spec.{js,jsx}",
   "experimentalComponentTesting": true,
-  "componentFolder": "src"
+  "componentFolder": "src",
+  "reporter": "../../node_modules/cypress-multi-reporters/index.js",
+  "reporterOptions": {
+    "configFile": "../../mocha-reporter-config.json"
+  }
 }

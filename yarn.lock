@@ -9004,6 +9004,14 @@ cypress-example-kitchensink@1.9.1:
     npm-run-all "^4.1.2"
     serve "11.3.0"
 
+cypress-multi-reporters@1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/cypress-multi-reporters/-/cypress-multi-reporters-1.2.4.tgz#bf6c95f39f9d2ce210d83e096f452a306bcd49fc"
+  integrity sha512-JTsF02I2KH1HM+cUEKeJih8EtjFv6jWVrYlRlJAnomwE5UqRQ3M7cAuw+zqBfNSTIvhOzNHtN3LyxomfhycuAQ==
+  dependencies:
+    debug "^4.1.1"
+    lodash "^4.17.11"
+
 cypress-react-unit-test@3.0.0-cypress-mount-mode.19:
   version "3.0.0-cypress-mount-mode.19"
   resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-3.0.0-cypress-mount-mode.19.tgz#519b6ddcc786f9b3a120288b3103decf35070d32"
