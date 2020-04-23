@@ -98,13 +98,13 @@ Check your Developer Tools Console for the actual error - it should be printed t
 
 It's possible to enable debugging these scripts by adding the \`crossorigin\` attribute and setting a CORS header.
 
-https://on.cypress.io/cross-origin-script-error
-
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
+
+https://on.cypress.io/cross-origin-script-error
       [stack trace lines]
 
 

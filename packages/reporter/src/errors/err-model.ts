@@ -33,7 +33,7 @@ export interface ErrProps {
   stack: string
   sourceMappedStack: string
   parsedStack: ParsedStackLine[]
-  docsUrl: string
+  docsUrl: string | string[]
   templateType: string
   codeFrame: CodeFrame
 }
@@ -44,7 +44,7 @@ export default class Err {
   @observable stack = ''
   @observable sourceMappedStack = ''
   @observable.ref parsedStack = [] as ParsedStackLine[]
-  @observable docsUrl = ''
+  @observable docsUrl = '' as string | string[]
   @observable templateType = ''
   // @ts-ignore
   @observable.ref codeFrame: CodeFrame

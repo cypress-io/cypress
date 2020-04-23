@@ -246,7 +246,7 @@ const createUncaughtException = (type, err) => {
 
   modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
 
-  err.docsUrl = uncaughtErr.docsUrl
+  err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
 
   return err
 }
@@ -299,12 +299,16 @@ const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
 // all errors flow through this function before they're finally thrown
 // or used to reject promises
 const processErr = (errObj = {}, config) => {
-  if (config('isInteractive') || !errObj.docsUrl) {
+  let docsUrl = errObj.docsUrl
+
+  if (config('isInteractive') || !docsUrl) {
     return errObj
   }
 
+  docsUrl = _(docsUrl).castArray().compact().join('\n\n')
+
   // append the docs url when not interactive so it appears in the stdout
-  return appendErrMsg(errObj, errObj.docsUrl)
+  return appendErrMsg(errObj, docsUrl)
 }
 
 module.exports = {

@@ -34,16 +34,18 @@ create = (state, config, log) ->
     ## reset the msg on a cross origin script error
     ## since no details are accessible
     if crossOriginScriptRe.test(msg)
-      msg = $errUtils.errByPath("uncaught.cross_origin_script").message
+      { message, docsUrl } = $errUtils.errByPath("uncaught.cross_origin_script")
 
     createErrFromMsg = ->
       $errUtils.errByPath("uncaught.error", {
-        msg, source, lineno
+        message, source, lineno
       })
 
     ## if we have the 5th argument it means we're in a modern
     ## browser making this super simple to work with
     err ?= createErrFromMsg()
+
+    err.docsUrl = docsUrl
 
     uncaughtErr = $errUtils.createUncaughtException(type, err)
     current = state("current")
