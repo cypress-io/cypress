@@ -388,8 +388,6 @@ const e2e = {
       this.timeout(human('2 minutes'))
       Fixtures.scaffold()
 
-      Fixtures.scaffold()
-
       sinon.stub(process, 'exit')
 
       if (options.servers) {
