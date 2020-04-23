@@ -66,10 +66,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
 
   Commands.addAll({
     title: (options = {}) ->
-      _.defaults options, {log: true}
+      userOptions = options
+      options = _.defaults({}, userOptions, {log: true})
 
       if options.log
-        options._log = Cypress.log()
+        options._log = Cypress.log({
+        })
 
       do resolveTitle = =>
         doc = state("document")
@@ -81,10 +83,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
         })
 
     window: (options = {}) ->
-      _.defaults options, {log: true}
+      userOptions = options
+      options = _.defaults({}, userOptions, {log: true})
 
       if options.log
-        options._log = Cypress.log()
+        options._log = Cypress.log({
+        })
 
       getWindow = =>
         window = state("window")
@@ -108,10 +112,12 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
 
     document: (options = {}) ->
-      _.defaults options, {log: true}
+      userOptions = options
+      options = _.defaults({}, userOptions, {log: true})
 
       if options.log
-        options._log = Cypress.log()
+        options._log = Cypress.log({
+        })
 
       getDocument = =>
         win = state("window")
@@ -136,19 +142,22 @@ module.exports = (Commands, Cypress, cy, state, config) ->
           })
 
     viewport: (presetOrWidth, heightOrOrientation, options = {}) ->
+      userOptions = options
+
       if _.isObject(heightOrOrientation)
         options = heightOrOrientation
 
-      _.defaults options, {log: true}
+      options = _.defaults({}, userOptions, { log: true })
 
       if options.log
-        options._log = Cypress.log
+        options._log = Cypress.log({
           consoleProps: ->
             obj = {}
             obj.Preset = preset if preset
             obj.Width  = width
             obj.Height = height
             obj
+        })
 
       throwErrBadArgs = =>
         $errUtils.throwErrByPath "viewport.bad_args", { onFail: options._log }

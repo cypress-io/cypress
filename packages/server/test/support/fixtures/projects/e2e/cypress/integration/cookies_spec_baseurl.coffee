@@ -195,6 +195,18 @@ describe "cookies", ->
               c: 's:PtCc3lNiuqN0AtR9ffgKUnUsDzR5n_4B.qzFDJDvqx8PZNvmOkmcexDs7fRJLOel56Z8Ii6PL+Fo'
             })
 
+        ## https://github.com/cypress-io/cypress/issues/6890
+        it "ignores invalid set-cookie headers that contain control chars", ->
+          cy[cmd]("/invalidControlCharCookie")
+
+          cy.request("/requestCookies")
+          .then (res) ->
+            return res.body
+          .then (cookies) ->
+            expect(cookies).to.deep.eq({
+              _valid: 'true'
+            })
+
         context "with Domain = superdomain", ->
           requestCookiesUrl = "#{Cypress.config('baseUrl')}/requestCookies"
           setDomainCookieUrl = "#{Cypress.config('baseUrl')}/setDomainCookie?domain=#{setCookieDomain}"

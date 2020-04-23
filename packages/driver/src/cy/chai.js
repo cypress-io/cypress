@@ -198,8 +198,8 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideChaiAsserts = function (assertFn) {
-    chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
+  const overrideChaiAsserts = function (specWindow, assertFn) {
+    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, assertFn)
 
     const _origGetmessage = function (obj, args) {
       const negate = chaiUtils.flag(obj, 'negate')
@@ -340,7 +340,10 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.message = getLongLengthMessage(obj.length, length)
+              const newMessage = getLongLengthMessage(obj.length, length)
+
+              $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
               throw e1
             }
 
@@ -400,7 +403,10 @@ chai.use((chai, u) => {
               return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.message = getLongExistsMessage(obj)
+            const newMessage = getLongExistsMessage(obj)
+
+            $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
             throw e1
           }
         }
@@ -408,7 +414,7 @@ chai.use((chai, u) => {
     })
   }
 
-  const createPatchedAssert = (assertFn) => {
+  const createPatchedAssert = (specWindow, assertFn) => {
     return (function (...args) {
       let err
       const passed = chaiUtils.test(this, args)
@@ -430,9 +436,19 @@ chai.use((chai, u) => {
 
       assertFn(passed, message, value, actual, expected, err)
 
-      if (err) {
-        throw err
-      }
+      if (!err) return
+
+      // stack from chai AssertionError instances are useless, because
+      // the chai code is served from `top`, which binds to `top`'s Error
+      // but assertions fail inside the spec window and then err.stack
+      // will not include the frames from the spec window (a different window)
+      // for security purposes. therefore, we instantiate a new error on
+      // the spec window to get a better stack
+      const betterStackErr = new specWindow.Error(err.message)
+
+      err.stack = $errUtils.replacedStack(err, betterStackErr)
+
+      throw err
     })
   }
 
@@ -483,7 +499,7 @@ chai.use((chai, u) => {
 
     overrideChaiInspect()
     overrideChaiObjDisplay()
-    overrideChaiAsserts(assertFn)
+    overrideChaiAsserts(specWindow, assertFn)
 
     return setSpecWindowGlobals(specWindow)
   }

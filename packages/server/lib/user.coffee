@@ -47,6 +47,7 @@ module.exports = {
     @get().then (user) ->
       ## return authToken if we have one
       if user and at = user.authToken
+        debug("found authToken %s", at)
         return at
       else
         ## else throw the not logged in error

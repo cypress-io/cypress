@@ -33,7 +33,7 @@ module.exports = {
         debug("result is undefined")
         return plugins.execute("_get:task:body", options.task).then (body) ->
           handler = if body then "\n\nThe task handler was:\n\n#{body}" else ""
-          throwKnownError("The task '#{options.task}' returned undefined. You must return a promise, a value, or null to indicate that the task was handled.#{handler}#{fileAndDocsUrl}")
+          throwKnownError("The task '#{options.task}' returned undefined. You must return a value, null, or a promise that resolves to a value or null to indicate that the task was handled.#{handler}#{fileAndDocsUrl}")
 
       debug("result is:", result)
       return result

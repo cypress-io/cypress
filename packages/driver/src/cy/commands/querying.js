@@ -7,13 +7,16 @@ const $errUtils = require('../../cypress/error_utils')
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({
     focused (options = {}) {
-      _.defaults(options, {
+      const userOptions = options
+
+      options = _.defaults({}, userOptions, {
         verify: true,
         log: true,
       })
 
       if (options.log) {
-        options._log = Cypress.log()
+        options._log = Cypress.log({
+        })
       }
 
       const log = ($el) => {
@@ -66,15 +69,16 @@ module.exports = (Commands, Cypress, cy) => {
     },
 
     get (selector, options = {}) {
+      const userOptions = options
       const ctx = this
 
-      if ((options === null) || _.isArray(options) || !_.isPlainObject(options)) {
+      if ((userOptions === null) || _.isArray(userOptions) || !_.isPlainObject(userOptions)) {
         return $errUtils.throwErrByPath('get.invalid_options', {
-          args: { options },
+          args: { options: userOptions },
         })
       }
 
-      _.defaults(options, {
+      options = _.defaults({}, userOptions, {
         retry: true,
         withinSubject: cy.state('withinSubject'),
         log: true,
@@ -341,10 +345,14 @@ module.exports = (Commands, Cypress, cy) => {
     },
 
     root (options = {}) {
-      _.defaults(options, { log: true })
+      const userOptions = options
+
+      options = _.defaults({}, userOptions, { log: true })
 
       if (options.log !== false) {
-        options._log = Cypress.log({ message: '' })
+        options._log = Cypress.log({
+          message: '',
+        })
       }
 
       const log = ($el) => {
@@ -367,6 +375,8 @@ module.exports = (Commands, Cypress, cy) => {
 
   Commands.addAll({ prevSubject: ['optional', 'window', 'document', 'element'] }, {
     contains (subject, filter, text, options = {}) {
+      let userOptions = options
+
       // nuke our subject if its present but not an element.
       // in these cases its either window or document but
       // we dont care.
@@ -381,8 +391,8 @@ module.exports = (Commands, Cypress, cy) => {
         // .contains(filter, text)
         // Do nothing
       } else if (_.isObject(text)) {
-        // .contains(text, options)
-        options = text
+        // .contains(text, userOptions)
+        userOptions = text
         text = filter
         filter = ''
       } else if (_.isUndefined(text)) {
@@ -391,11 +401,11 @@ module.exports = (Commands, Cypress, cy) => {
         filter = ''
       }
 
-      if (options.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
+      if (userOptions.matchCase === true && _.isRegExp(text) && text.flags.includes('i')) {
         $errUtils.throwErrByPath('contains.regex_conflict')
       }
 
-      _.defaults(options, { log: true, matchCase: true })
+      options = _.defaults({}, userOptions, { log: true, matchCase: true })
 
       if (!(_.isString(text) || _.isFinite(text) || _.isRegExp(text))) {
         $errUtils.throwErrByPath('contains.invalid_argument')
@@ -470,7 +480,7 @@ module.exports = (Commands, Cypress, cy) => {
       const selector = $dom.getContainsSelector(text, filter, options)
 
       const resolveElements = () => {
-        const getOpts = _.extend(_.clone(options), {
+        const getOptions = _.extend({}, options, {
           // error: getErr(text, phrase)
           withinSubject: subject || cy.state('withinSubject') || cy.$$('body'),
           filter: true,
@@ -479,7 +489,7 @@ module.exports = (Commands, Cypress, cy) => {
           verify: false, // dont verify upcoming assertions, we do that ourselves
         })
 
-        return cy.now('get', selector, getOpts).then(($el) => {
+        return cy.now('get', selector, getOptions).then(($el) => {
           if ($el && $el.length) {
             $el = $dom.getFirstDeepestElement($el)
           }
@@ -513,14 +523,15 @@ module.exports = (Commands, Cypress, cy) => {
 
   Commands.addAll({ prevSubject: 'element' }, {
     within (subject, options, fn) {
+      let userOptions = options
       const ctx = this
 
       if (_.isUndefined(fn)) {
-        fn = options
-        options = {}
+        fn = userOptions
+        userOptions = {}
       }
 
-      _.defaults(options, { log: true })
+      options = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
         options._log = Cypress.log({
