@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - try-new-electron-sign
+        - investigate-spec-on-mac
 
 defaults: &defaults
   parallelism: 1
@@ -324,6 +324,17 @@ jobs:
       - run:
           command: yarn type-check --ignore-progress
       - store-npm-logs
+
+  build-system-unit-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure mocha runs
+      - run: yarn test-mocha
+      # test binary build code
+      - run: yarn test-scripts
 
   "server-unit-tests":
     <<: *defaults
@@ -1166,6 +1177,9 @@ linux-workflow: &linux-workflow
     - cli-visual-tests:
         requires:
           - build
+    - build-system-unit-tests:
+        requires:
+          - build
     - unit-tests:
         requires:
           - build
@@ -1403,7 +1417,14 @@ mac-workflow: &mac-workflow
         requires:
           - Mac build
 
-    # maybe run unit tests?
+    - build-system-unit-tests:
+        name: Mac build system unit tests
+        executor: mac
+        requires:
+          - Mac build
+        <<: *macBuildFilters
+
+    # maybe run all unit tests?
 
     - build-npm-package:
         name: Mac NPM package
