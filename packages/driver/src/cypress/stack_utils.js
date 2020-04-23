@@ -35,7 +35,8 @@ const stackWithoutMessage = (stack) => {
 }
 
 const stackWithUserInvocationStackAppended = (err, userInvocationStack) => {
-  const [messageLines, stackLines] = splitStack(err.stack)
+  const stack = _.trim(err.stack, '\n') // trim newlines from end
+  const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
 
   let commandCallIndex = _.findIndex(stackLines, (line) => {
@@ -127,7 +128,7 @@ const functionExtrasRegex = /(\/<|<\/<)$/
 const cleanFunctionName = (functionName) => {
   if (!_.isString(functionName)) return '<unknown>'
 
-  return functionName.replace(functionExtrasRegex, '')
+  return _.trim(functionName.replace(functionExtrasRegex, ''))
 }
 
 const parseLine = (line) => {
