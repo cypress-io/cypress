@@ -1,20 +1,25 @@
-import { PrintResultType } from 'recast/lib/printer'
 import path from 'path'
 import url from 'url'
 
 const sourceMapRe = /\n\/\/ ?(?:#|@) sourceMappingURL=([^\s]+)\s*$/
-const inlineSourceMapRe = /\n\/\/ ?(?:#|@) sourceMappingURL=data:application\/json;(?:charset=utf-8;)base64,([^\s]+)\s*$/
+const dataUrlRe = /^data:application\/json;(?:charset=utf-8;)base64,([^\s]+)\s*$/
 
-const getDataUrl = (map: any) => {
-  return `data:application/json;charset=utf-8;base64,${Buffer.from(JSON.stringify(map)).toString('base64')}`
+export const getMappingUrl = (js: string) => {
+  const matches = sourceMapRe.exec(js)
+
+  if (matches) {
+    return matches[1]
+  }
+
+  return undefined
 }
 
 const stripSourceMap = (js: string) => {
   return js.replace(sourceMapRe, '')
 }
 
-export const tryDecodeInline = (js: string) => {
-  const matches = inlineSourceMapRe.exec(js)
+export const tryDecodeInlineUrl = (url: string) => {
+  const matches = dataUrlRe.exec(url)
 
   if (matches) {
     try {
@@ -48,12 +53,9 @@ export const getPaths = (urlStr: string) => {
   }
 }
 
-// given source + transformed JS, return final formatted code with inlined sourcemap
-export const inlineFormatter = (printed: PrintResultType): string => {
-  const map = printed.map
-
+export const urlFormatter = (url: string, js: string): string => {
   return [
-    stripSourceMap(printed.code),
-    `//# sourceMappingURL=${getDataUrl(map)}`,
+    stripSourceMap(js),
+    `//# sourceMappingURL=${url}`,
   ].join('\n')
 }

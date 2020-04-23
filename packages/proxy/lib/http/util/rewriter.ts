@@ -6,6 +6,7 @@ export type SecurityOpts = {
   isHtml?: boolean
   url: string
   useAstSourceRewriting: boolean
+  deferSourceMapRewrite: (opts: any) => string
 }
 
 export type InjectionOpts = {

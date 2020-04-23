@@ -52,6 +52,10 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     xhrs.handle(req, res, config, next)
   })
 
+  app.get('/__cypress/source-maps/:id.map', (req, res) => {
+    networkProxy.handleSourceMapRequest(req, res)
+  })
+
   app.get('/__root/*', (req, res) => {
     const file = path.join(config.projectRoot, req.params[0])
 

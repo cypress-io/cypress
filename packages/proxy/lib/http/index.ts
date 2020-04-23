@@ -3,11 +3,12 @@ import debugModule from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { IncomingMessage } from 'http'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import { Readable } from 'stream'
 import { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
+import { DeferredSourceMapCache } from '@packages/rewriter'
 
 const debug = debugModule('cypress:proxy:http')
 
@@ -60,6 +61,7 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
 type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & Readonly<{
   buffers: HttpBuffers
   config: any
+  deferSourceMapRewrite: Http['deferSourceMapRewrite']
   getFileServerToken: () => string
   getRemoteState: () => any
   request: any
@@ -86,14 +88,14 @@ export function _runStage (type: HttpStages, ctx: any) {
     const middlewareName = _.keys(middlewares)[0]
 
     if (!middlewareName) {
-      return Promise.resolve()
+      return Bluebird.resolve()
     }
 
     const middleware = middlewares[middlewareName]
 
     ctx.middleware[type] = _.omit(middlewares, middlewareName)
 
-    return new Promise((resolve) => {
+    return new Bluebird((resolve) => {
       let ended = false
 
       function copyChangedCtx () {
@@ -173,6 +175,7 @@ export function _runStage (type: HttpStages, ctx: any) {
 
 export class Http {
   buffers: HttpBuffers
+  deferredSourceMapCache: DeferredSourceMapCache
   config: any
   getFileServerToken: () => string
   getRemoteState: () => any
@@ -187,6 +190,7 @@ export class Http {
     request: any
   }) {
     this.buffers = new HttpBuffers()
+    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
 
     this.config = opts.config
     this.getFileServerToken = opts.getFileServerToken
@@ -210,6 +214,7 @@ export class Http {
       res,
 
       buffers: this.buffers,
+      deferSourceMapRewrite: this.deferSourceMapRewrite,
       config: this.config,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
@@ -225,6 +230,24 @@ export class Http {
 
       return debug('warning: Request was not fulfilled with a response.')
     })
+  }
+
+  deferSourceMapRewrite = (opts) => {
+    return this.deferredSourceMapCache.defer(opts)
+  }
+
+  async handleSourceMapRequest (req, res) {
+    try {
+      const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
+
+      if (!sm) {
+        throw new Error('no sourcemap found')
+      }
+
+      res.json(sm)
+    } catch (err) {
+      res.status(500).json({ err })
+    }
   }
 
   reset () {

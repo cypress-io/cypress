@@ -341,6 +341,7 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
       isHtml: isHtml(this.incomingRes),
       useAstSourceRewriting: this.config.experimentalSourceRewriting,
       url: this.req.proxiedUrl,
+      deferSourceMapRewrite: this.deferSourceMapRewrite,
     })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
@@ -366,6 +367,7 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
     isHtml: isHtml(this.incomingRes),
     useAstSourceRewriting: this.config.experimentalSourceRewriting,
     url: this.req.proxiedUrl,
+    deferSourceMapRewrite: this.deferSourceMapRewrite,
   })).on('error', this.onError)
 
   this.next()

@@ -8,31 +8,58 @@ if (isMainThread) {
   throw new Error(`${__filename} should only be run as a worker thread`)
 }
 
-import { rewriteJs } from '../js'
+import { rewriteJs, rewriteJsSourceMap } from '../js'
 import { rewriteHtmlJs } from '../html'
 import { RewriteRequest, RewriteResponse } from './types'
+
+parentPort!.postMessage(true)
+
+let _idCounter = 0
 
 parentPort!.on('message', (req: RewriteRequest) => {
   const startedAt = Date.now()
 
+  function _deferSourceMapRewrite (deferredSourceMap) {
+    const uniqueId = [req.id, _idCounter++].join('.')
+
+    _reply({
+      threadMs: _getThreadMs(),
+      deferredSourceMap: {
+        uniqueId,
+        ...deferredSourceMap,
+      },
+    })
+
+    return uniqueId
+  }
+
   function _reply (res: RewriteResponse) {
     req.port.postMessage(res)
-    req.port.close()
   }
 
   function _getThreadMs () {
     return Date.now() - startedAt
   }
 
-  const rewriteFn = req.isHtml ? rewriteHtmlJs : rewriteJs
+  function _getOutput () {
+    if (req.isHtml) {
+      return rewriteHtmlJs(req.url, req.source, _deferSourceMapRewrite)
+    }
+
+    if (req.sourceMap) {
+      return rewriteJsSourceMap(req.url, req.source, req.inputSourceMap)
+    }
+
+    return rewriteJs(req.url, req.source, _deferSourceMapRewrite)
+  }
 
   try {
-    const code = rewriteFn(req.url, req.source)
+    const output = _getOutput()
 
-    _reply({ code, threadMs: _getThreadMs() })
+    _reply({ output, threadMs: _getThreadMs() })
   } catch (error) {
     _reply({ error, threadMs: _getThreadMs() })
   }
-})
 
-parentPort!.postMessage(true)
+  return req.port.close()
+})

@@ -2,7 +2,7 @@ import * as astTypes from 'ast-types'
 import Debug from 'debug'
 import { jsRules } from './js-rules'
 import * as recast from 'recast'
-import * as sourceMaps from './source-maps'
+import * as sourceMaps from './util/source-maps'
 
 const debug = Debug('cypress:rewriter:js')
 
@@ -11,7 +11,11 @@ const defaultPrintOpts: recast.Options = {
   quote: 'single',
 }
 
-export function rewriteJs (url: string, js: string): string {
+type OriginalSourceInfo = { url: string, js: string }
+
+export type DeferSourceMapRewriteFn = (sourceInfo: OriginalSourceInfo) => string
+
+export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any): any {
   try {
     const { sourceFileName, sourceMapName, sourceRoot } = sourceMaps.getPaths(url)
 
@@ -19,13 +23,34 @@ export function rewriteJs (url: string, js: string): string {
 
     astTypes.visit(ast, jsRules)
 
-    // this is synchronous, so we can only decode inline source maps
-    return sourceMaps.inlineFormatter(recast.print(ast, {
-      inputSourceMap: sourceMaps.tryDecodeInline(js),
+    return recast.print(ast, {
+      inputSourceMap,
       sourceMapName,
       sourceRoot,
       ...defaultPrintOpts,
-    }))
+    }).map
+  } catch (err) {
+    debug('error while parsing JS %o', { err, js: js.slice ? js.slice(0, 500) : js })
+
+    return { err }
+  }
+}
+
+export function rewriteJs (url: string, js: string, deferSourceMapRewrite: DeferSourceMapRewriteFn): string {
+  try {
+    const ast = recast.parse(js)
+
+    astTypes.visit(ast, jsRules)
+
+    const { code } = recast.print(ast, defaultPrintOpts)
+
+    // get an ID that can be used to lazy-generate the source map later
+    const sourceMapId = deferSourceMapRewrite({ url, js })
+
+    return sourceMaps.urlFormatter(
+      `/__cypress/source-maps/${sourceMapId}.map`,
+      code,
+    )
   } catch (err) {
     debug('error while parsing JS %o', { err, js: js.slice ? js.slice(0, 500) : js })
 

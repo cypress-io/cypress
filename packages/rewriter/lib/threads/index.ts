@@ -4,6 +4,7 @@ import * as path from 'path'
 import os from 'os'
 import { MessageChannel, Worker } from 'worker_threads'
 import { RewriteRequest, RewriteResponse } from './types'
+import { DeferSourceMapRewriteFn } from '../js'
 
 const debug = Debug('cypress:rewriter:threads')
 
@@ -38,19 +39,22 @@ type QueuedRewrite = {
   opts: RewriteOpts
 }
 
-type RewriteOpts = Pick<RewriteRequest, 'url' | 'source' | 'isHtml'>
+type RewriteOpts = Pick<RewriteRequest, 'url' | 'source' | 'isHtml' | 'sourceMap' | 'inputSourceMap'> & {
+  deferSourceMapRewrite?: DeferSourceMapRewriteFn
+}
 
 const workers: WorkerInfo[] = []
 const queued: QueuedRewrite[] = []
 
-let _idCounter = 0
+let _workerIdCounter = 0
+let _requestIdCounter = 0
 
 function createWorker () {
   const startedAt = Date.now()
   let onlineMs: number
 
   const worker = {
-    id: _idCounter++,
+    id: _workerIdCounter++,
     isBusy: false,
     thread: new Worker(WORKER_PATH)
     .on('exit', (exitCode) => {
@@ -64,7 +68,8 @@ function createWorker () {
       debug('received initial ready message from worker %o', {
         onlineMs, // time for JS to start executing
         responsiveMs: Date.now() - startedAt, // time for worker to be ready for commands
-        worker: _debugWorker(worker) })
+        worker: _debugWorker(worker),
+      })
     }),
   }
 
@@ -72,6 +77,9 @@ function createWorker () {
 
   return worker
 }
+
+// TODO: no need to run this if the user hasn't opted in to experimental AST rewriting
+_.times(_.round(4), createWorker)
 
 async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<string> {
   const startedAt = Date.now()
@@ -92,8 +100,9 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
   const { port1, port2 } = new MessageChannel()
 
   const req: RewriteRequest = {
+    id: _requestIdCounter++,
     port: port1,
-    ...opts,
+    ..._.omit(opts, 'deferSourceMapRewrite'),
   }
 
   worker.thread.postMessage(req, [req.port])
@@ -106,6 +115,10 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
     worker.thread.once('exit', onExit)
     worker.thread.once('error', reject)
     port2.on('message', (res: RewriteResponse) => {
+      if (res.deferredSourceMap) {
+        return opts.deferSourceMapRewrite!(res.deferredSourceMap)
+      }
+
       const totalMs = Date.now() - startedAt
 
       debug('received response from worker %o', {
@@ -124,7 +137,7 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
         return reject(res.error)
       }
 
-      return resolve(res.code)
+      return resolve(res.output)
     })
   })
   .finally(() => {

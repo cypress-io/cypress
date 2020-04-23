@@ -2,7 +2,7 @@ import _ from 'lodash'
 import RewritingStream from 'parse5-html-rewriting-stream'
 import * as js from './js'
 
-export function install (url: string, rewriter: RewritingStream) {
+export function install (url: string, rewriter: RewritingStream, deferSourceMapRewrite: js.DeferSourceMapRewriteFn) {
   let currentlyInsideJsScriptTag = false
   let inlineJsIndex = 0
 
@@ -48,6 +48,6 @@ export function install (url: string, rewriter: RewritingStream) {
     // create a unique filename per inline script
     const fakeJsUrl = [url, inlineJsIndex++].join(':')
 
-    return rewriter.emitRaw(js.rewriteJs(fakeJsUrl, raw))
+    return rewriter.emitRaw(js.rewriteJs(fakeJsUrl, raw, deferSourceMapRewrite))
   })
 }
