@@ -48,6 +48,8 @@ export function rewriteJs (url: string, js: string, deferSourceMapRewrite: Defer
     const sourceMapId = deferSourceMapRewrite({ url, js })
 
     return sourceMaps.urlFormatter(
+      // using a relative URL ensures that required cookies + other headers are sent along
+      // and can be reused if the user's sourcemap requires an HTTP request to be made
       `/__cypress/source-maps/${sourceMapId}.map`,
       code,
     )
