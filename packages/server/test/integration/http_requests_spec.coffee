@@ -504,7 +504,7 @@ describe "Routes", ->
         })
 
       checkTranspilation = (body, file) ->
-        b = removeSourceMapContents(body).replace(/\n/g, '')
+        b = removeSourceMap(body).replace(/\n/g, '')
         f = file.toString().replace(/\n/g, '')
 
         expect(b).to.equal f
