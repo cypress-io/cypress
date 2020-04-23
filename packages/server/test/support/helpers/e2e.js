@@ -285,7 +285,6 @@ const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
-    exit: process.env.EXIT,
     only: false,
     skip: false,
     browser: [],
@@ -387,7 +386,10 @@ const e2e = {
       this.timeout(human('2 minutes'))
       Fixtures.scaffold()
 
-      Fixtures.scaffold()
+      if (process.env.NO_EXIT) {
+        Fixtures.scaffoldWatch()
+        process.env.CYPRESS_INTERNAL_E2E_TESTS
+      }
 
       sinon.stub(process, 'exit')
 
@@ -427,12 +429,25 @@ const e2e = {
     _.defaults(options, {
       browser: 'electron',
       project: e2ePath,
-      timeout: options.exit === false ? 3000000 : 120000,
+      timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
+      noExit: process.env.NO_EXIT,
     })
+
+    if (options.noExit) {
+      options.timeout = 3000000
+    }
+
+    if (options.exit != null) {
+      throw new Error(`
+      passing { exit: false } to e2e options is no longer supported
+      Please pass the --no-exit flag to the test command instead
+      e.g. "yarn test test/e2e/1_async_timeouts_spec.coffee --no-exit"
+      `)
+    }
 
     ctx.timeout(options.timeout)
 
@@ -521,8 +536,8 @@ const e2e = {
       args.push('--output-path', options.outputPath)
     }
 
-    if (options.exit === false) {
-      args.push('--exit', options.exit)
+    if (options.noExit) {
+      args.push('--no-exit')
     }
 
     if (options.inspectBrk) {
@@ -644,8 +659,12 @@ const e2e = {
 
           // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
+
           // Emulate no typescript environment
           CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
+
+          // force file watching for use with --no-exit
+          ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
         .value(),

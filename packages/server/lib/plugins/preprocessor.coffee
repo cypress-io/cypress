@@ -73,7 +73,7 @@ module.exports = {
       ## in a text terminal aka cypress run
       ## TODO: rename this to config.isRunMode
       ## vs config.isInterativeMode
-      shouldWatch = not config.isTextTerminal
+      shouldWatch = not config.isTextTerminal || !!process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH
       
       baseFilePath = filePath
       .replace(config.projectRoot, "")
