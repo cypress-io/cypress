@@ -51,6 +51,6 @@
   "files": [
     "dist",
     "lib",
-    "!lib/**/*-spec.jsx"
+    "!lib/**/*_spec.jsx"
   ]
 }
