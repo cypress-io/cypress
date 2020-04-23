@@ -65,24 +65,24 @@ class Attempt extends Component<{model: AttemptModel}> {
     scroller,
   }
 
-  componentDidMount () {
-    this._scrollIntoView()
-    this.props.model.callbackAfterUpdate()
-  }
+  // componentDidMount () {
+  //   this._scrollIntoView()
+  //   this.props.model.callbackAfterUpdate()
+  // }
 
-  componentDidUpdate () {
-    this._scrollIntoView()
-    this.props.model.callbackAfterUpdate()
-  }
+  // componentDidUpdate () {
+  //   this._scrollIntoView()
+  //   this.props.model.callbackAfterUpdate()
+  // }
 
-  _scrollIntoView () {
-    const { appState, model, scroller } = this.props
-    const { isActive } = model
+  // _scrollIntoView () {
+  //   const { appState, model, scroller } = this.props
+  //   const { isActive } = model
 
-    if (appState.autoScrollingEnabled && appState.isRunning && isActive != null) {
-      scroller.scrollIntoView(this.refs.container)
-    }
-  }
+  //   if (appState.autoScrollingEnabled && appState.isRunning && isActive != null) {
+  //     scroller.scrollIntoView(this.refs.container)
+  //   }
+  // }
 
   render () {
     const { model } = this.props
