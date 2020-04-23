@@ -362,14 +362,6 @@ describe('driver/src/cypress/error_utils', () => {
     })
   })
 
-  context('.normalizeMsgNewLines', () => {
-    it('removes newlines in excess of 2 newlines', () => {
-      const normalizedMsg = $errUtils.normalizeMsgNewLines('one new line\ntwo new lines\n\nthree new lines\n\n\nend')
-
-      expect(normalizedMsg).to.eq('one new line\ntwo new lines\n\nthree new lines\n\nend')
-    })
-  })
-
   context('.throwErrByPath', () => {
     it('looks up error and throws it', () => {
       $errorMessages.__test_error = 'simple error message'

@@ -259,4 +259,17 @@ module.exports = {
     str = str.replace(/\n/g, "\n#{indentStr}")
 
     "#{indentStr}#{str}"
+
+  ## normalize more than {maxNewLines} new lines into
+  ## exactly {replacementNumLines} new lines
+  normalizeNewLines: (str, maxNewLines, replacementNumLines) ->
+    moreThanMaxNewLinesRe = new RegExp("\\n{#{maxNewLines},}")
+    replacementWithNumLines = replacementNumLines ? maxNewLines
+
+    _
+    .chain(str)
+    .split(moreThanMaxNewLinesRe)
+    .compact()
+    .join(_.repeat("\n", replacementWithNumLines))
+    .value()
 }

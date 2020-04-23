@@ -5,7 +5,6 @@ const $utils = require('./utils')
 const $stackUtils = require('./stack_utils')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
-const twoOrMoreNewLinesRe = /\n{2,}/
 
 const wrapErr = (err) => {
   if (!err) return
@@ -201,16 +200,6 @@ const cypressErrByPath = (errPath, options = {}) => {
   return cypressErr(errObj)
 }
 
-const normalizeMsgNewLines = (message) => {
-  // normalize more than 2 new lines into only exactly 2 new lines
-  return _
-  .chain(message)
-  .split(twoOrMoreNewLinesRe)
-  .compact()
-  .join('\n\n')
-  .value()
-}
-
 const replaceErrMsgTokens = (errMessage, args) => {
   if (!errMessage) return errMessage
 
@@ -220,7 +209,8 @@ const replaceErrMsgTokens = (errMessage, args) => {
     }, errMessage)
   }
 
-  return normalizeMsgNewLines(getMsg(args))
+  // replace more than 2 newlines with exactly 2 newlines
+  return $utils.normalizeNewLines(getMsg(args), 2)
 }
 
 const errByPath = (msgPath, args) => {
@@ -330,7 +320,6 @@ module.exports = {
   makeErrFromObj,
   mergeErrProps,
   modifyErrMsg,
-  normalizeMsgNewLines,
   processErr,
   throwErr,
   throwErrByPath,
