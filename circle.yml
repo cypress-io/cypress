@@ -659,15 +659,6 @@ jobs:
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
-  desktop-gui-component-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn lerna exec --scope @packages/desktop-gui "yarn cypress:components:run"
-
   "reporter-integration-tests":
     <<: *defaults
     steps:
@@ -1288,9 +1279,6 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - desktop-gui-visual-tests:
-        requires:
-          - build
-    - desktop-gui-component-tests:
         requires:
           - build
     - reporter-integration-tests:
