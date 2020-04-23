@@ -648,6 +648,7 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -668,6 +669,7 @@ jobs:
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
             yarn cypress:run --record --parallel --group ui-components
           working_directory: packages/ui-components
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
