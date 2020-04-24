@@ -21,8 +21,8 @@ namespace CypressJqueryTests {
 
 namespace CypressConfigTests {
   // getters
-  Cypress.config('baseUrl') // $ExpectType string | null
-  Cypress.config().baseUrl // $ExpectType string | null
+  Cypress.config('baseUrl') // $ExpectType string | null | undefined
+  Cypress.config().baseUrl // $ExpectType string | null | undefined
 
   // setters
   Cypress.config('baseUrl', '.') // $ExpectType void

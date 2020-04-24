@@ -44,6 +44,7 @@
     "lint-changed-fix": "yarn lint-changed --fix",
     "lint-coffee": "coffeelint scripts/**/*.coffee && lerna run lint-coffee --parallel --stream && yarn stop-only-all",
     "lint-fix": "yarn lint --fix",
+    "lint-types": "yarn lerna exec --scope cypress 'yarn dtslint'",
     "move-binaries": "node ./scripts/binary.js move-binaries",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",
