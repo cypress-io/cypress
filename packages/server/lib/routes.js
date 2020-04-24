@@ -60,7 +60,8 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     res.sendFile(file, { etag: false })
   })
 
-  app.get('/__bundled/*', (req, res) => {
+  // special fallback - serve dist'd (bundled/static) files from the project path folder
+  app.get('/__cypress/bundled/*', (req, res) => {
     const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
 
     debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
