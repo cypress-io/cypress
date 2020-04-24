@@ -1346,10 +1346,10 @@
   resolved "https://registry.yarnpkg.com/@cypress/bower-kendo-ui/-/bower-kendo-ui-0.0.2.tgz#62ea93d7f0653c0b91a7a4e5e9ede9d26d5990ea"
   integrity sha1-YuqT1/BlPAuRp6Tl6e3p0m1ZkOo=
 
-"@cypress/browserify-preprocessor@2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@cypress/browserify-preprocessor/-/browserify-preprocessor-2.2.1.tgz#0980c667f774f826a79819f56d50f1b385324080"
-  integrity sha512-97vJ1ulp6sIBJ00FJHAP8JDrJmBXV1UudNNs5r2LmXl5ESiVrPc/5wv5zfJuW2toOSOHa9IbJpwJj/4RbvRYXg==
+"@cypress/browserify-preprocessor@2.2.2":
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/@cypress/browserify-preprocessor/-/browserify-preprocessor-2.2.2.tgz#2db0067aea8bd6e98ac29bd331c05bad387608ba"
+  integrity sha512-uESobQlfv68GRKDokhBM5i47ZEwBBWS8zqFYFFBWVjv3KcXHpeReTXMPY/x1DljIO3RYRAxUsPJkh8vxhpRwNA==
   dependencies:
     "@babel/core" "7.4.5"
     "@babel/plugin-proposal-class-properties" "7.3.0"
@@ -21895,7 +21895,7 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#unpatched-has-bin
     circular-json "0.5.9"
     component-emitter "1.2.1"
     debug "~4.1.0"
-    has-binary2 "~1.0.2"
+    has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
 
 socket.io-client@2.3.0:
   version "2.3.0"

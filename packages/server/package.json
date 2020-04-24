@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@benmalka/foxdriver": "0.4.0",
-    "@cypress/browserify-preprocessor": "2.2.1",
+    "@cypress/browserify-preprocessor": "2.2.2",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.1",
     "@cypress/icons": "0.7.0",
