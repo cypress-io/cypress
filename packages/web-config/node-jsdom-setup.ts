@@ -1,6 +1,9 @@
 import mockRequire from 'mock-require'
 import { JSDOM } from 'jsdom'
 import * as ansiEscapes from 'ansi-escapes'
+import enzyme from 'enzyme'
+import EnzymeAdapter from 'enzyme-adapter-react-16'
+import ChaiEnzyme from 'chai-enzyme'
 
 declare global {
   module NodeJS {
@@ -10,12 +13,21 @@ declare global {
   }
 }
 
+interface RegisterDeps {
+  enzyme: typeof enzyme
+  EnzymeAdapter: typeof EnzymeAdapter
+  chaiEnzyme: typeof ChaiEnzyme
+  requireOverride: (...args: any[]) => any
+}
+
+type TimeoutID = number
+
 export const register = ({
   enzyme,
   EnzymeAdapter,
   chaiEnzyme,
   requireOverride,
-}) => {
+}: RegisterDeps) => {
   const jsdom = new JSDOM('<!doctype html><html><body></body></html>')
   const { window } = jsdom
 
@@ -24,28 +36,31 @@ export const register = ({
   // const chaiEnzyme = require('chai-enzyme')
 
   global.window = window
-  global.document = window.document
-  window.Selection = { prototype: { isCollapsed: {} } }
+  global.document = window.document;
+
+  // DOMWindow doesn't have Selection yet.
+  (window as any).Selection = { prototype: { isCollapsed: {} } }
+
   global.navigator = {
     userAgent: 'node.js',
   }
 
-  global.requestAnimationFrame = function (callback) {
+  global.requestAnimationFrame = function (callback: ((...args: any[]) => void)) {
     return setTimeout(callback, 0)
   }
 
-  global.cancelAnimationFrame = function (id) {
+  global.cancelAnimationFrame = function (id: TimeoutID) {
     clearTimeout(id)
   }
 
-  Object.keys(window.document.defaultView).forEach((property) => {
+  Object.keys(window.document.defaultView as Record<string, any>).forEach((property) => {
     if (
       property === 'localStorage' ||
     property === 'sessionStorage' ||
     typeof global[property] !== 'undefined'
     ) return
 
-    global[property] = window.document.defaultView[property]
+    global[property] = (window.document.defaultView as Record<string, any>)[property]
   })
 
   // enzyme, and therefore chai-enzyme, needs to be required after
@@ -63,7 +78,7 @@ export const register = ({
   const overrideRequire = () => {
     const _load = Module._load
 
-    Module._load = function (...args) {
+    Module._load = function (...args: any[]) {
       let browserPkg = args
 
       if (requireOverride) {
@@ -107,7 +122,7 @@ after(() => {
   process.stdout.write(ansiEscapes.cursorShow)
 })
 
-export const returnMockRequire = (name, modExport = {}) => {
+export const returnMockRequire = (name: string, modExport: object = {}) => {
   mockRequire(name, modExport)
 
   return require(name)

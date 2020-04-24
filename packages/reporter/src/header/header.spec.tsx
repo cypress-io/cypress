@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ReactElement } from 'react'
 import { shallow } from 'enzyme'
 import sinon, { SinonSpy } from 'sinon'
 
@@ -24,7 +24,7 @@ describe('<Header />', () => {
   it('renders a tooltip around focus tests button', () => {
     const title = shallow(<Header appState={appState} statsStore={statsStore} />)
     .find('Tooltip')
-    .prop('title')
+    .prop<ReactElement>('title')
 
     const component = shallow(title)
 

@@ -2,7 +2,7 @@ const ciProvider = require('../../../lib/util/ci_provider')
 const { commitInfo } = require('@cypress/commit-info')
 const pkg = require('../../../../../package.json')
 const Promise = require('bluebird')
-const rp = require('request-promise')
+const rp = require('@cypress/request-promise')
 const debug = require('debug')('cypress:performance')
 const R = require('ramda')
 

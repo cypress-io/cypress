@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 
 import AnError, { Error } from '../errors/an-error'
 import Runnable from './runnable-and-suite'
-import { RunnablesStore } from './runnables-store'
+import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
 
@@ -16,7 +16,11 @@ const noTestsError = (specPath: string) => ({
   message: 'We could not detect any tests in the above file. Write some tests and re-run.',
 })
 
-const RunnablesList = observer(({ runnables }) => (
+interface RunnablesListProps {
+  runnables: RunnableArray
+}
+
+const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   <div className='wrap'>
     <ul className='runnables'>
       {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}

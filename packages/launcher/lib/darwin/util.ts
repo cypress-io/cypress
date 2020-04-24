@@ -1,7 +1,7 @@
 import { log } from '../log'
 import { notInstalledErr } from '../errors'
 import { prop, tap } from 'ramda'
-import execa from 'execa'
+import { utils } from '../utils'
 import fs from 'fs-extra'
 import * as path from 'path'
 import * as plist from 'plist'
@@ -45,8 +45,8 @@ export function mdfind (id: string): Promise<string> {
     throw notInstalledErr(id)
   }
 
-  return execa
-  .stdout(cmd)
+  return utils.execa(cmd)
+  .then(prop('stdout'))
   .then(tap(logFound))
   .catch(failedToFind)
 }

@@ -71,7 +71,9 @@ create = (state, expect) ->
 
       if types.length > 1
         ## append a nice error message telling the user this
-        err = $errUtils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
+        errProps = $errUtils.appendErrMsg(err, "All #{types.length} subject validations failed on this subject.")
+
+        $errUtils.mergeErrProps(err, errProps)
 
       throw err
 
@@ -223,7 +225,7 @@ create = (state, expect) ->
     ## TODO: REFACTOR THIS TO CALL THE CHAI-OVERRIDES DIRECTLY
     ## OR GO THROUGH I18N
 
-    cy.ensureExistence($el)
+    ensureExistence($el)
 
   ensureElDoesNotHaveCSS = ($el, cssProperty, cssValue, onFail) ->
     cmd = state("current").get("name")

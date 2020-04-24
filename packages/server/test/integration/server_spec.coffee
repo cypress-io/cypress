@@ -2,7 +2,7 @@ require("../spec_helper")
 
 _             = require("lodash")
 http          = require("http")
-rp            = require("request-promise")
+rp            = require("@cypress/request-promise")
 Promise       = require("bluebird")
 evilDns       = require("evil-dns")
 httpsServer   = require("#{root}../https-proxy/test/helpers/https_server")

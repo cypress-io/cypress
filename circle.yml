@@ -8,6 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
+        - investigate-spec-on-mac
 
 defaults: &defaults
   parallelism: 1
@@ -42,7 +43,7 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.8.1-chrome80-ff72
+      - image: cypress/browsers:node12.13.0-chrome80-ff74
     environment:
       PLATFORM: linux
 
@@ -85,6 +86,34 @@ commands:
             else
               echo "**** Not updating Chrome. Running tests in '<< parameters.browser >>' ****"
             fi
+
+  run-driver-integration-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn start
+          background: true
+          working_directory: packages/driver
+      - run:
+          command: yarn wait-on http://localhost:3500
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+          working_directory: packages/driver
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
   run-e2e-tests:
     parameters:
       browser:
@@ -319,11 +348,21 @@ jobs:
           command: ls -la types
           working_directory: cli
       - run:
-          command: ls -la chai
-          working_directory: cli/types
-      - run:
           command: yarn lint-types
+      - run:
+          command: yarn type-check --ignore-progress
       - store-npm-logs
+
+  build-system-unit-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure mocha runs
+      - run: yarn test-mocha
+      # test binary build code
+      - run: yarn test-scripts
 
   "server-unit-tests":
     <<: *defaults
@@ -538,69 +577,22 @@ jobs:
     <<: *defaults
     parallelism: 5
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn lerna exec --scope @packages/driver "yarn start"
-          background: true
-      - run:
-          command: yarn wait-on http://localhost:3500
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-chrome --browser chrome"
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - run-driver-integration-tests:
+          browser: chrome
 
   # "driver-integration-tests-electron":
   #   <<: *defaults
   #   parallelism: 5
   #   steps:
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         command: npm start
-  #         background: true
-  #         working_directory: packages/driver
-  #     - run:
-  #         command: $(npm bin)/wait-on http://localhost:3500
-  #         working_directory: packages/driver
-  #     - run:
-  #         command: |
-  #           CYPRESS_KONFIG_ENV=production \
-  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-  #           npm run cypress:run --record --parallel --group 5x-driver-electron --browser electron
-  #         working_directory: packages/driver
-  #     - store_test_results:
-  #         path: /tmp/cypress
-  #     - store_artifacts:
-  #         path: /tmp/artifacts
-  #     - store-npm-logs
+  #     - run-driver-integration-tests:
+  #         browser: electron
 
   "driver-integration-tests-firefox":
     <<: *defaults
     parallelism: 5
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn workspace @packages/driver start
-          background: true
-      - run:
-          command: $(yarn bin)/wait-on http://localhost:3500
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-firefox --browser firefox"
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
+      - run-driver-integration-tests:
+          browser: firefox
 
   "desktop-gui-integration-tests-2x":
     <<: *defaults
@@ -609,16 +601,48 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/desktop-gui build-prod
+          command: yarn build-prod
+          working_directory: packages/desktop-gui
+      - run:
+          name: Desktop GUI server
+          command: yarn start
+          working_directory: packages/desktop-gui
+          background: true
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/desktop-gui "yarn cypress:run --record --parallel --group 2x-desktop-gui"
+            yarn cypress:run --record --parallel --group 2x-desktop-gui
+          working_directory: packages/desktop-gui
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
+      - store-npm-logs
+
+  desktop-gui-visual-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn build-prod
+          working_directory: packages/desktop-gui
+      - run:
+          name: Desktop GUI server
+          command: yarn start
+          working_directory: packages/desktop-gui
+          background: true
+      - run:
+          # will use PERCY_TOKEN environment variable if available
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js
+          working_directory: packages/desktop-gui
+      - verify-mocha-results
+      # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
   "reporter-integration-tests":
@@ -627,12 +651,15 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command:  yarn workspace @packages/reporter build-for-tests
+          command: yarn build-for-tests
+          working_directory: packages/reporter
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec  --scope @packages/reporter "yarn cypress:run --record --parallel --group reporter"
+            yarn cypress:run --record --parallel --group reporter
+          working_directory: packages/reporter
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -645,12 +672,15 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/ui-components build-for-tests
+          command: yarn build-for-tests
+          working_directory: packages/ui-components
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/ui-components "yarn cypress:run --record --parallel --group ui-components"
+            yarn cypress:run --record --parallel --group ui-components
+          working_directory: packages/ui-components
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -703,6 +733,11 @@ jobs:
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
+          # notarization on Mac can take a while
+          no_output_timeout: "30m"
+          # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
+          # won't be set and we will use default version, since we are not going to
+          # upload the dev binary build anywhere
           command: yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run: yarn binary-zip --platform $PLATFORM
       # Cypress binary file should be zipped to cypress.zip
@@ -1045,7 +1080,6 @@ jobs:
           command: "npm run cypress:run"
           wait-on: "http://localhost:2222"
 
-
   "test-binary-against-realworld-firefox":
     <<: *defaults
     steps:
@@ -1133,6 +1167,9 @@ linux-workflow: &linux-workflow
           - build
     # unit, integration and e2e tests
     - cli-visual-tests:
+        requires:
+          - build
+    - build-system-unit-tests:
         requires:
           - build
     - unit-tests:
@@ -1230,6 +1267,9 @@ linux-workflow: &linux-workflow
     #     requires:
     #       - build
     - desktop-gui-integration-tests-2x:
+        requires:
+          - build
+    - desktop-gui-visual-tests:
         requires:
           - build
     - reporter-integration-tests:
@@ -1369,32 +1409,33 @@ mac-workflow: &mac-workflow
         requires:
           - Mac build
 
-    # maybe run unit tests?
+    - build-system-unit-tests:
+        name: Mac build system unit tests
+        executor: mac
+        requires:
+          - Mac build
+        <<: *macBuildFilters
+
+    # maybe run all unit tests?
 
     - build-npm-package:
         name: Mac NPM package
         executor: mac
         requires:
           - Mac build
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
 
     - upload-npm-package:
         name: Mac NPM package upload
         context: test-runner:upload
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac NPM package
 
     - build-binary:
         name: Mac binary
-        context: org-global
+        context: test-runner:sign-mac-binary
         executor: mac
         <<: *macBuildFilters
         requires:
@@ -1404,10 +1445,7 @@ mac-workflow: &mac-workflow
         name: Mac binary upload
         executor: mac
         context: test-runner:upload
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac binary
 
@@ -1421,10 +1459,7 @@ mac-workflow: &mac-workflow
     - test-binary-against-kitchensink:
         name: Test Mac binary against kitchensink
         executor: mac
-        filters:
-          branches:
-            only:
-              - develop
+        <<: *macBuildFilters
         requires:
           - Mac NPM package
           - Mac binary
@@ -1444,6 +1479,7 @@ mac-workflow: &mac-workflow
     - post-pre-release-install-comment:
         context: test-runner:commit-status-checks
         name: Post Mac pre-release install comment
+        executor: mac
         filters:
           branches:
             only:

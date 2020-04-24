@@ -5,7 +5,6 @@ const fse = require('fs-extra')
 const os = require('os')
 const path = require('path')
 const _ = require('lodash')
-const { it, after, before, beforeEach, describe } = require('mocha')
 const { expect } = require('chai')
 const debug = require('debug')('test:proxy-performance')
 const DebuggingProxy = require('@cypress/debugging-proxy')
@@ -109,7 +108,7 @@ const average = (arr) => {
 }
 
 const percentile = (sortedArr, p) => {
-  const i = Math.floor(p / 100 * sortedArr.length - 1)
+  const i = Math.floor(p / 100 * (sortedArr.length - 1))
 
   return Math.round(sortedArr[i])
 }
@@ -166,6 +165,8 @@ const getResultsFromHar = (har) => {
   }
 
   results['Min'] = mins.total
+
+  expect(timings.total.length).to.be.at.least(1000)
 
   ;[1, 5, 25, 50, 75, 95, 99, 99.7].forEach((p) => {
     results[`${p}% <=`] = percentile(timings.total, p)
@@ -356,10 +357,9 @@ describe('Proxy Performance', function () {
   })
 
   URLS_UNDER_TEST.map((urlUnderTest) => {
-    const testCases = _.cloneDeep(TEST_CASES)
-
     describe(urlUnderTest, function () {
       let baseline
+      const testCases = _.cloneDeep(TEST_CASES)
 
       before(function () {
         // run baseline test
@@ -373,12 +373,20 @@ describe('Proxy Performance', function () {
 
       // slice(1) since first test is used as baseline above
       testCases.slice(1).map((testCase) => {
-        it(`${testCase.name} loads 1000 images, with 75% loading no more than 2x as slow as the slowest baseline request`, function () {
+        let multiplier = 3
+
+        if (testCase.httpsUpstreamProxy) {
+          // there is extra slowdown when the HTTPS upstream is used, so slightly increase the multiplier
+          // maybe from higher CPU utilization with debugging-proxy and HTTPS
+          multiplier *= 1.5
+        }
+
+        it(`${testCase.name} loads 1000 images less than ${multiplier}x as slowly as Chrome`, function () {
           debug('Current test: ', testCase.name)
 
           return runBrowserTest(urlUnderTest, testCase)
           .then((results) => {
-            expect(results['75% <=']).to.be.lessThan(baseline['Max'] * 2)
+            expect(results['Total']).to.be.lessThan(multiplier * baseline['Total'])
           })
         })
       })

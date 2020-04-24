@@ -2,6 +2,7 @@ require('../spec_helper')
 
 const path = require('path')
 const commitInfo = require('@cypress/commit-info')
+const tsnode = require('ts-node')
 const Fixtures = require('../support/helpers/fixtures')
 const api = require(`${root}lib/api`)
 const user = require(`${root}lib/user`)
@@ -68,12 +69,12 @@ describe('lib/project', () => {
       sinon.stub(this.project, 'determineIsNewProject').withArgs(integrationFolder).resolves(false)
       this.project.cfg = { integrationFolder }
 
-      return savedState(this.project.projectRoot)
+      return savedState.create(this.project.projectRoot)
       .then((state) => state.remove())
     })
 
     afterEach(function () {
-      return savedState(this.project.projectRoot)
+      return savedState.create(this.project.projectRoot)
       .then((state) => state.remove())
     })
 
@@ -112,7 +113,7 @@ describe('lib/project', () => {
     })
 
     it('calls config.get with projectRoot + options + saved state', function () {
-      return savedState(this.todosPath)
+      return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ reporterWidth: 225 })
 
@@ -146,7 +147,7 @@ describe('lib/project', () => {
     })
 
     it('sets cfg.isNewProject to true when state.showedOnBoardingModal is true', function () {
-      return savedState(this.todosPath)
+      return savedState.create(this.todosPath)
       .then((state) => {
         sinon.stub(state, 'get').resolves({ showedOnBoardingModal: true })
 
@@ -312,6 +313,54 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         ])
 
         expect(config).ok
+      })
+    })
+
+    describe('out-of-the-box typescript setup', () => {
+      const tsProjPath = Fixtures.projectPath('ts-installed')
+      // Root path is used because resolve finds server typescript path when we use a project under `suppert/projects` folder.
+      const rootPath = path.join(__dirname, '../../../../..')
+      const projTsPath = path.join(tsProjPath, 'node_modules/typescript/index.js')
+
+      let cfg
+
+      beforeEach(() => {
+        return config.get(tsProjPath, {})
+        .then((c) => {
+          cfg = c
+        })
+      })
+
+      const setupProject = (typescript, projectRoot) => {
+        const proj = new Project(projectRoot)
+
+        sinon.stub(proj, 'watchSettingsAndStartWebsockets').resolves()
+        sinon.stub(proj, 'checkSupportFile').resolves()
+        sinon.stub(proj, 'scaffold').resolves()
+        sinon.stub(proj, 'getConfig').resolves({ ...cfg, typescript })
+
+        const register = sinon.stub(tsnode, 'register')
+
+        return { proj, register }
+      }
+
+      it('ts installed', () => {
+        const { proj, register } = setupProject('default', tsProjPath)
+
+        return proj.open().then(() => {
+          expect(register).to.be.calledWith({
+            transpileOnly: true,
+            compiler: projTsPath,
+          })
+        })
+      })
+
+      it('ts not installed', () => {
+        const { proj, register } = setupProject('default', rootPath)
+
+        return proj.open().then(() => {
+          expect(register).not.called
+        })
       })
     })
   })
@@ -563,7 +612,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       plugins.init.rejects(error)
 
-      return this.project.watchPluginsFile(this.config, {
+      this.project.watchPluginsFile(this.config, {
         onError (err) {
           expect(err).to.eql(error)
 

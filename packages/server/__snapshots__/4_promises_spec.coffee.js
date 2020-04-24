@@ -23,11 +23,11 @@ exports['e2e promises / failing1'] = `
   0 passing
   2 failing
 
-  1)  catches regular promise errors:
+  1) catches regular promise errors:
      Error: bar
       [stack trace lines]
 
-  2)  catches promise errors and calls done with err even when async:
+  2) catches promise errors and calls done with err even when async:
      Error: foo
       [stack trace lines]
 

@@ -155,10 +155,9 @@ $max-nesting-level: 14;
         font-family: $font-sans;
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
 
         i {
-          display: none;
+          display: block;
           margin-right: 5px;
         }
 

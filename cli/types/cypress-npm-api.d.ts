@@ -238,6 +238,10 @@ declare module 'cypress' {
      */
     group: string
     /**
+     * Tag string for the recorded run, like "production,nightly"
+     */
+    tag: string
+    /**
      * Display the browser instead of running headlessly
      */
     headed: boolean
@@ -475,12 +479,11 @@ declare module 'cypress' {
     cypressVersion: string
     // TODO add resolved object to the configuration
     config: CypressConfiguration
-    /**
+  }
+
+  /**
      * If Cypress fails to run at all (for example, if there are no spec files to run),
-     * then it will set failures to 1 and will have actual error message in the
-     * property "message". Check this property before checking other properties.
-     *
-     * @type {number}
+     * then it will return a CypressFailedRunResult. Check the failures attribute.
      * @example
       ```
       const result = await cypress.run()
@@ -489,15 +492,11 @@ declare module 'cypress' {
         process.exit(result.failures)
       }
       ```
-     */
-    failures?: number
-    /**
-     * If returned result has "failures" set, then this property gives
-     * the error message.
      *
-     * @type {string}
-     */
-    message?: string
+  **/
+  interface CypressFailedRunResult {
+    failures: number
+    message: string
   }
 
   /**
@@ -524,7 +523,7 @@ declare module 'cypress' {
      })
      ```
      */
-    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult>,
+    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult | CypressFailedRunResult>,
     /**
      * Opens Cypress GUI. Resolves with void when the
      * GUI is closed.

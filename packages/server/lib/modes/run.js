@@ -29,6 +29,7 @@ const humanTime = require('../util/human_time')
 const electronApp = require('../util/electron-app')
 const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
+const experiments = require('../experiments')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
@@ -175,9 +176,16 @@ const displayRunStarting = function (options = {}) {
 
   console.log('')
 
+  const experimental = experiments.getExperimentsFromResolved(config.resolved)
+  const enabledExperiments = _.pickBy(experimental, _.property('enabled'))
+  const hasExperiments = !_.isEmpty(enabledExperiments)
+
   // if we show Node Version, then increase 1st column width
-  // to include wider 'Node Version:'
-  const colWidths = config.resolvedNodePath ? [16, 84] : [12, 88]
+  // to include wider 'Node Version:'.
+  // Without Node version, need to account for possible "Experiments" label
+  const colWidths = config.resolvedNodePath ? [16, 84] : (
+    hasExperiments ? [14, 86] : [12, 88]
+  )
 
   const table = terminal.table({
     colWidths,
@@ -217,15 +225,20 @@ const displayRunStarting = function (options = {}) {
     [gray('Searched:'), formatSpecPattern(specPattern)],
     [gray('Params:'), formatRecordParams(runUrl, parallel, group, tag)],
     [gray('Run URL:'), runUrl ? formatPath(runUrl, getWidth(table, 1)) : ''],
+    [gray('Experiments:'), hasExperiments ? experiments.formatExperiments(enabledExperiments) : ''],
   ])
   .filter(_.property(1))
   .value()
 
   table.push(...data)
 
-  console.log(table.toString())
+  const heading = table.toString()
 
-  return console.log('')
+  console.log(heading)
+
+  console.log('')
+
+  return heading
 }
 
 const displaySpecHeader = function (name, curr, total, estimated) {
@@ -606,8 +619,8 @@ const createAndOpenProject = function (socketId, options) {
   })
 }
 
-const removeOldProfiles = () => {
-  return browserUtils.removeOldProfiles()
+const removeOldProfiles = (browser) => {
+  return browserUtils.removeOldProfiles(browser)
   .catch((err) => {
     // dont make removing old browsers profiles break the build
     return errors.warning('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
@@ -706,6 +719,8 @@ module.exports = {
   getChromeProps,
 
   getElectronProps,
+
+  displayRunStarting,
 
   exitEarly (err) {
     debug('set early exit error: %s', err.stack)
@@ -1353,10 +1368,9 @@ module.exports = {
         // speed the initial booting time
         return Promise.all([
           system.info(),
-          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers),
+          browserUtils.ensureAndGetByNameOrPath(browserName, false, userBrowsers).tap(removeOldProfiles),
           this.findSpecs(config, specPattern),
           trashAssets(config),
-          removeOldProfiles(),
         ])
         .spread((sys = {}, browser = {}, specs = []) => {
         // return only what is return to the specPattern

@@ -7,6 +7,7 @@ export default class Browser {
   @observable channel
   @observable version
   @observable path
+  @observable profilePath
   @observable majorVersion
   @observable info
   @observable custom
@@ -20,6 +21,7 @@ export default class Browser {
     this.channel = browser.channel
     this.version = browser.version
     this.path = browser.path
+    this.profilePath = browser.profilePath
     this.majorVersion = browser.majorVersion
     this.info = browser.info
     this.custom = browser.custom

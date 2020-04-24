@@ -26,10 +26,13 @@ module.exports = (Commands, Cypress, cy, state, config) ->
       return null
 
     wrap: (arg, options = {}) ->
-      _.defaults(options, { log: true })
+      userOptions = options
+      options = _.defaults({}, userOptions, { log: true })
 
       if options.log isnt false
-        options._log = Cypress.log()
+        options._log = Cypress.log({
+          message: arg
+        })
 
         if $dom.isElement(arg)
           options._log.set({$el: arg})

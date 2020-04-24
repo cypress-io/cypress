@@ -6,6 +6,8 @@ const Promise = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
 const la = require('lazy-ass')
 const check = require('check-more-types')
+const tsnode = require('ts-node')
+const resolve = require('resolve')
 const scaffoldDebug = require('debug')('cypress:server:scaffold')
 const debug = require('debug')('cypress:server:project')
 const cwd = require('./cwd')
@@ -99,6 +101,23 @@ class Project extends EE {
 
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
+    }).then((cfg) => {
+      try {
+        const tsPath = resolve.sync('typescript', {
+          basedir: this.projectRoot,
+        })
+
+        debug('typescript path: %s', tsPath)
+
+        tsnode.register({
+          compiler: tsPath,
+          transpileOnly: true,
+        })
+      } catch (e) {
+        debug(`typescript doesn't exist. ts-node setup passed.`)
+      }
+
+      return cfg
     }).then((cfg) => {
       return this._initPlugins(cfg, options)
       .then((modifiedCfg) => {
@@ -414,6 +433,8 @@ class Project extends EE {
     }
 
     if (this.cfg) {
+      debug('project has config %o', this.cfg)
+
       return Promise.resolve(this.cfg)
     }
 
@@ -456,7 +477,7 @@ class Project extends EE {
 
     const newState = _.merge({}, this.cfg.state, stateChanges)
 
-    return savedState(this.projectRoot, this.cfg.isTextTerminal)
+    return savedState.create(this.projectRoot, this.cfg.isTextTerminal)
     .then((state) => state.set(newState))
     .then(() => {
       this.cfg.state = newState
@@ -468,7 +489,7 @@ class Project extends EE {
   _setSavedState (cfg) {
     debug('get saved state')
 
-    return savedState(this.projectRoot, cfg.isTextTerminal)
+    return savedState.create(this.projectRoot, cfg.isTextTerminal)
     .then((state) => state.get())
     .then((state) => {
       cfg.state = state
@@ -589,9 +610,18 @@ class Project extends EE {
   }
 
   createCiProject (projectDetails) {
+    debug('create CI project with projectDetails %o', projectDetails)
+
     return user.ensureAuthToken()
     .then((authToken) => {
-      return commitInfo.getRemoteOrigin(this.projectRoot)
+      const remoteOrigin = commitInfo.getRemoteOrigin(this.projectRoot)
+
+      debug('found remote origin at projectRoot %o', {
+        remoteOrigin,
+        projectRoot: this.projectRoot,
+      })
+
+      return remoteOrigin
       .then((remoteOrigin) => {
         return api.createProject(projectDetails, remoteOrigin, authToken)
       })

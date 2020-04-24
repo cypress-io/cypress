@@ -24,7 +24,7 @@ if (options['glob-in-dir']) {
   if (run[0]) {
     run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
   } else {
-    run = [options['glob-in-dir']]
+    run = [path.join(options['glob-in-dir'], '**')]
   }
 }
 
@@ -87,7 +87,7 @@ if (isGteNode12()) {
   // max HTTP header size 8kb -> 1mb
   // https://github.com/cypress-io/cypress/issues/76
   commandAndArguments.args.push(
-    `--max-http-header-size=${1024 * 1024}`,
+    `--max-http-header-size=${1024 * 1024} --http-parser=legacy`,
   )
 }
 
@@ -110,11 +110,14 @@ commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
-  '--compilers ts:@packages/ts/register,coffee:@packages/coffee/register',
+  '-r @packages/ts/register',
+  '-r @packages/coffee/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
+  // restore mocha 2.x behavior to force end process after spec run
+  '--exit',
 )
 
 const env = _.clone(process.env)
@@ -145,8 +148,8 @@ if (options.browser) {
   env.BROWSER = options.browser
 }
 
-if (options.exit != null) {
-  env.EXIT = options.exit
+if (options.exit === false) {
+  env.NO_EXIT = '1'
 }
 
 const cmd = `${commandAndArguments.command} ${
