@@ -39,7 +39,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n  if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+          "body": "function () {\n    if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {\n        return Cypress.automation('remote:debugger:protocol', {\n            command: 'Emulation.setDeviceMetricsOverride',\n            params: {\n                width: 1280,\n                height: 720,\n                deviceScaleFactor: 1,\n                mobile: false,\n                screenWidth: 1280,\n                screenHeight: 720,\n            },\n        })\n            .then(function () {\n            // can't tell expect() not to log, so manually throwing here\n            if (window.devicePixelRatio !== 1) {\n                throw new Error('Setting devicePixelRatio to 1 failed');\n            }\n        });\n    }\n}"
         },
         {
           "hookId": "h2",
@@ -47,7 +47,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail1\");\n    }"
+          "body": "function () {\n            throw new Error(\"fail1\");\n        }"
         },
         {
           "hookId": "h3",
@@ -55,7 +55,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail2\");\n    }"
+          "body": "function () {\n            throw new Error(\"fail2\");\n        }"
         },
         {
           "hookId": "h4",
@@ -63,7 +63,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail3\");\n    }"
+          "body": "function () {\n            throw new Error(\"fail3\");\n        }"
         }
       ],
       "tests": [
@@ -75,7 +75,7 @@ exports['e2e spec isolation fails'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n    [stack trace lines]",
           "error": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
           "timings": {
@@ -125,7 +125,7 @@ exports['e2e spec isolation fails'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n    [stack trace lines]",
           "error": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
           "timings": {
@@ -155,7 +155,7 @@ exports['e2e spec isolation fails'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": null,
           "error": null,
           "timings": null,
@@ -172,7 +172,7 @@ exports['e2e spec isolation fails'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": null,
           "error": null,
           "timings": {
@@ -195,7 +195,7 @@ exports['e2e spec isolation fails'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () { }",
           "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n    [stack trace lines]",
           "error": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
           "timings": {
@@ -286,7 +286,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n  if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+          "body": "function () {\n    if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {\n        return Cypress.automation('remote:debugger:protocol', {\n            command: 'Emulation.setDeviceMetricsOverride',\n            params: {\n                width: 1280,\n                height: 720,\n                deviceScaleFactor: 1,\n                mobile: false,\n                screenWidth: 1280,\n                screenHeight: 720,\n            },\n        })\n            .then(function () {\n            // can't tell expect() not to log, so manually throwing here\n            if (window.devicePixelRatio !== 1) {\n                throw new Error('Setting devicePixelRatio to 1 failed');\n            }\n        });\n    }\n}"
         }
       ],
       "tests": [
@@ -297,7 +297,7 @@ exports['e2e spec isolation fails'] = {
             "fails1"
           ],
           "state": "failed",
-          "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
+          "body": "function () {\n        return cy.wrap(true, {\n            timeout: 100\n        }).should(\"be.false\");\n    }",
           "stack": "AssertionError: Timed out retrying: expected true to be false\n    [stack trace lines]",
           "error": "Timed out retrying: expected true to be false",
           "timings": {
@@ -326,7 +326,7 @@ exports['e2e spec isolation fails'] = {
             "fails2"
           ],
           "state": "failed",
-          "body": "function() {\n    throw new Error(\"fails2\");\n  }",
+          "body": "function () {\n        throw new Error(\"fails2\");\n    }",
           "stack": "Error: fails2\n    [stack trace lines]",
           "error": "fails2",
           "timings": {
@@ -401,7 +401,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n  if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+          "body": "function () {\n    if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {\n        return Cypress.automation('remote:debugger:protocol', {\n            command: 'Emulation.setDeviceMetricsOverride',\n            params: {\n                width: 1280,\n                height: 720,\n                deviceScaleFactor: 1,\n                mobile: false,\n                screenWidth: 1280,\n                screenHeight: 720,\n            },\n        })\n            .then(function () {\n            // can't tell expect() not to log, so manually throwing here\n            if (window.devicePixelRatio !== 1) {\n                throw new Error('Setting devicePixelRatio to 1 failed');\n            }\n        });\n    }\n}"
         },
         {
           "hookId": "h2",
@@ -409,7 +409,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n        return cy.wait(100);\n    }"
         },
         {
           "hookId": "h3",
@@ -417,7 +417,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(200);\n  }"
+          "body": "function () {\n        return cy.wait(200);\n    }"
         },
         {
           "hookId": "h4",
@@ -425,7 +425,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(200);\n  }"
+          "body": "function () {\n        return cy.wait(200);\n    }"
         },
         {
           "hookId": "h5",
@@ -433,7 +433,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n        return cy.wait(100);\n    }"
         }
       ],
       "tests": [
@@ -444,7 +444,7 @@ exports['e2e spec isolation fails'] = {
             "t1"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t1\").should(\"eq\", \"t1\");\n  }",
+          "body": "function () {\n        return cy.wrap(\"t1\").should(\"eq\", \"t1\");\n    }",
           "stack": null,
           "error": null,
           "timings": {
@@ -492,7 +492,7 @@ exports['e2e spec isolation fails'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t2\").should(\"eq\", \"t2\");\n  }",
+          "body": "function () {\n        return cy.wrap(\"t2\").should(\"eq\", \"t2\");\n    }",
           "stack": null,
           "error": null,
           "timings": {
@@ -528,7 +528,7 @@ exports['e2e spec isolation fails'] = {
             "t3"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t3\").should(\"eq\", \"t3\");\n  }",
+          "body": "function () {\n        return cy.wrap(\"t3\").should(\"eq\", \"t3\");\n    }",
           "stack": null,
           "error": null,
           "timings": {
@@ -605,7 +605,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function () {\n  if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {\n    return Cypress.automation('remote:debugger:protocol', {\n      command: 'Emulation.setDeviceMetricsOverride',\n      params: {\n        width: 1280,\n        height: 720,\n        deviceScaleFactor: 1,\n        mobile: false,\n        screenWidth: 1280,\n        screenHeight: 720\n      }\n    }).then(function () {\n      // can't tell expect() not to log, so manually throwing here\n      if (window.devicePixelRatio !== 1) {\n        throw new Error('Setting devicePixelRatio to 1 failed');\n      }\n    });\n  }\n}"
+          "body": "function () {\n    if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {\n        return Cypress.automation('remote:debugger:protocol', {\n            command: 'Emulation.setDeviceMetricsOverride',\n            params: {\n                width: 1280,\n                height: 720,\n                deviceScaleFactor: 1,\n                mobile: false,\n                screenWidth: 1280,\n                screenHeight: 720,\n            },\n        })\n            .then(function () {\n            // can't tell expect() not to log, so manually throwing here\n            if (window.devicePixelRatio !== 1) {\n                throw new Error('Setting devicePixelRatio to 1 failed');\n            }\n        });\n    }\n}"
         },
         {
           "hookId": "h2",
@@ -613,7 +613,7 @@ exports['e2e spec isolation fails'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(1000);\n  }"
+          "body": "function () {\n        return cy.wait(1000);\n    }"
         }
       ],
       "tests": [
@@ -624,7 +624,7 @@ exports['e2e spec isolation fails'] = {
             "passes"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(true).should(\"be.true\");\n  }",
+          "body": "function () {\n        return cy.wrap(true).should(\"be.true\");\n    }",
           "stack": null,
           "error": null,
           "timings": {

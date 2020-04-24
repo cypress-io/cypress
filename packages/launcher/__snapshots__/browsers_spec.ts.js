@@ -5,7 +5,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "stable",
     "displayName": "Chrome",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "google-chrome",
       "chrome",
@@ -18,7 +17,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "stable",
     "displayName": "Chromium",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "chromium-browser",
       "chromium"
@@ -30,7 +28,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "canary",
     "displayName": "Canary",
     "versionRegex": {},
-    "profile": true,
     "binary": "google-chrome-canary"
   },
   {
@@ -40,7 +37,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "displayName": "Firefox",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": "firefox"
   },
   {
@@ -50,7 +46,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "displayName": "Firefox Developer Edition",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "firefox-developer-edition",
       "firefox"
@@ -63,7 +58,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "displayName": "Firefox Nightly",
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
-    "profile": true,
     "binary": [
       "firefox-nightly",
       "firefox-trunk"
@@ -75,7 +69,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "stable",
     "displayName": "Edge",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge"
   },
   {
@@ -84,7 +77,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "canary",
     "displayName": "Edge Canary",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-canary"
   },
   {
@@ -93,7 +85,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "beta",
     "displayName": "Edge Beta",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-beta"
   },
   {
@@ -102,7 +93,6 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "dev",
     "displayName": "Edge Dev",
     "versionRegex": {},
-    "profile": true,
     "binary": "edge-dev"
   }
 ]

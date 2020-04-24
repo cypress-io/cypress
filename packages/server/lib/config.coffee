@@ -322,7 +322,7 @@ module.exports = {
     delete config.envFile
 
     ## when headless
-    if config.isTextTerminal
+    if config.isTextTerminal && !process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH
       ## dont ever watch for file changes
       config.watchForFileChanges = false
 

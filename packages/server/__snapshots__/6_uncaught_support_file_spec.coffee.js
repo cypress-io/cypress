@@ -21,7 +21,7 @@ exports['e2e uncaught support file errors failing 1'] = `
   0 passing
   1 failing
 
-  1)  An uncaught error was detected outside of a test:
+  1) An uncaught error was detected outside of a test:
      Uncaught Error: bar
 
 This error originated from your test code, not from Cypress.
@@ -31,7 +31,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
