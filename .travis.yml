@@ -11,6 +11,7 @@ node_js:
 install:
   - npm install
 script:
+  - npm run build
   - npm run lint
   - npm run cy:run
 after_success:
