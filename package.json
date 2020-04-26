@@ -10,6 +10,7 @@
       "pre-commit": [
         "npm prune",
         "npm run deps",
+        "npm run build",
         "npm test",
         "git add src/*.js",
         "npm run ban"
@@ -28,9 +29,7 @@
     "node": ">=8"
   },
   "files": [
-    "src/*.js",
-    "preprocessor/*.js",
-    "!src/*-spec.js"
+    "dist/**/*"
   ],
   "homepage": "https://github.com/bahmutov/cypress-vue-unit-test#readme",
   "keywords": [
@@ -38,8 +37,7 @@
     "vue"
   ],
   "license": "MIT",
-  "main": "src/",
-  "private": false,
+  "main": "dist/index.js",
   "publishConfig": {
     "registry": "http://registry.npmjs.org/"
   },
@@ -48,6 +46,7 @@
     "url": "https://github.com/bahmutov/cypress-vue-unit-test.git"
   },
   "scripts": {
+    "build": "babel src --ignore src/*spec.js --out-dir dist && babel preprocessor --out-dir dist/preprocessor",
     "ban": "ban",
     "deps": "echo skip deps-ok && dependency-check --no-dev .",
     "issues": "git-issues",
@@ -76,6 +75,9 @@
     }
   },
   "devDependencies": {
+    "@babel/cli": "7.8.4",
+    "@babel/core": "7.9.0",
+    "@babel/preset-env": "7.9.5",
     "axios": "0.19.2",
     "ban-sensitive-files": "1.9.7",
     "css-loader": "3.4.2",
