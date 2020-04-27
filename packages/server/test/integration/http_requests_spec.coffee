@@ -46,6 +46,13 @@ removeWhitespace = (c) ->
   c = str.lines(c).join(" ")
   c
 
+trimString = (s) -> _.trim(s)
+nonEmpty = (s) -> !_.isEmpty(s)
+
+# removes leading whitespace and blank lines
+removeLeadingWhitespace = (text) ->
+  text.split("\n").map(trimString).filter(nonEmpty).join("\n")
+
 sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 removeSourceMapContents = (fileContents) ->
@@ -907,13 +914,13 @@ describe "Routes", ->
           expect(body).to.eq contents
 
       it "can send back all tests", ->
-        contents = removeWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
+        contents = removeLeadingWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
 
         @rp("http://localhost:2020/__cypress/iframes/__all")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = removeLeadingWhitespace(res.body)
           expect(body).to.eq contents
 
     describe "no-server", ->
@@ -3184,6 +3191,7 @@ describe "Routes", ->
             ## abort when we get the
             ## response headers
             .on "response", abort
+        return
 
     context "event source / server sent events / SSE", ->
       onRequest = null

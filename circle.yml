@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - try-new-electron-sign
+        - investigate-spec-on-mac
 
 defaults: &defaults
   parallelism: 1
@@ -86,6 +86,34 @@ commands:
             else
               echo "**** Not updating Chrome. Running tests in '<< parameters.browser >>' ****"
             fi
+
+  run-driver-integration-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn start
+          background: true
+          working_directory: packages/driver
+      - run:
+          command: yarn wait-on http://localhost:3500
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+          working_directory: packages/driver
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
   run-e2e-tests:
     parameters:
       browser:
@@ -325,6 +353,17 @@ jobs:
           command: yarn type-check --ignore-progress
       - store-npm-logs
 
+  build-system-unit-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure mocha runs
+      - run: yarn test-mocha
+      # test binary build code
+      - run: yarn test-scripts
+
   "server-unit-tests":
     <<: *defaults
     parallelism: 2
@@ -538,69 +577,22 @@ jobs:
     <<: *defaults
     parallelism: 5
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn lerna exec --scope @packages/driver "yarn start"
-          background: true
-      - run:
-          command: yarn wait-on http://localhost:3500
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-chrome --browser chrome"
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - run-driver-integration-tests:
+          browser: chrome
 
   # "driver-integration-tests-electron":
   #   <<: *defaults
   #   parallelism: 5
   #   steps:
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         command: npm start
-  #         background: true
-  #         working_directory: packages/driver
-  #     - run:
-  #         command: $(npm bin)/wait-on http://localhost:3500
-  #         working_directory: packages/driver
-  #     - run:
-  #         command: |
-  #           CYPRESS_KONFIG_ENV=production \
-  #           CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-  #           npm run cypress:run --record --parallel --group 5x-driver-electron --browser electron
-  #         working_directory: packages/driver
-  #     - store_test_results:
-  #         path: /tmp/cypress
-  #     - store_artifacts:
-  #         path: /tmp/artifacts
-  #     - store-npm-logs
+  #     - run-driver-integration-tests:
+  #         browser: electron
 
   "driver-integration-tests-firefox":
     <<: *defaults
     parallelism: 5
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn workspace @packages/driver start
-          background: true
-      - run:
-          command: $(yarn bin)/wait-on http://localhost:3500
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/driver "yarn cypress:run --record --parallel --group 5x-driver-firefox --browser firefox"
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
+      - run-driver-integration-tests:
+          browser: firefox
 
   "desktop-gui-integration-tests-2x":
     <<: *defaults
@@ -609,7 +601,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/desktop-gui build-prod
+          command: yarn build-prod
+          working_directory: packages/desktop-gui
       - run:
           name: Desktop GUI server
           command: yarn start
@@ -619,7 +612,9 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/desktop-gui "yarn cypress:run --record --parallel --group 2x-desktop-gui"
+            yarn cypress:run --record --parallel --group 2x-desktop-gui
+          working_directory: packages/desktop-gui
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -633,7 +628,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/desktop-gui "yarn build-prod"
+          command: yarn build-prod
+          working_directory: packages/desktop-gui
       - run:
           name: Desktop GUI server
           command: yarn start
@@ -643,7 +639,9 @@ jobs:
           # will use PERCY_TOKEN environment variable if available
           command: |
             CYPRESS_KONFIG_ENV=production \
-            yarn lerna exec --scope @packages/desktop-gui "yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js"
+            yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js
+          working_directory: packages/desktop-gui
+      - verify-mocha-results
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
@@ -653,12 +651,15 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command:  yarn workspace @packages/reporter build-for-tests
+          command: yarn build-for-tests
+          working_directory: packages/reporter
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec  --scope @packages/reporter "yarn cypress:run --record --parallel --group reporter"
+            yarn cypress:run --record --parallel --group reporter
+          working_directory: packages/reporter
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -671,12 +672,15 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/ui-components build-for-tests
+          command: yarn build-for-tests
+          working_directory: packages/ui-components
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn lerna exec --scope @packages/ui-components "yarn cypress:run --record --parallel --group ui-components"
+            yarn cypress:run --record --parallel --group ui-components
+          working_directory: packages/ui-components
+      - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -1076,7 +1080,6 @@ jobs:
           command: "npm run cypress:run"
           wait-on: "http://localhost:2222"
 
-
   "test-binary-against-realworld-firefox":
     <<: *defaults
     steps:
@@ -1164,6 +1167,9 @@ linux-workflow: &linux-workflow
           - build
     # unit, integration and e2e tests
     - cli-visual-tests:
+        requires:
+          - build
+    - build-system-unit-tests:
         requires:
           - build
     - unit-tests:
@@ -1403,7 +1409,14 @@ mac-workflow: &mac-workflow
         requires:
           - Mac build
 
-    # maybe run unit tests?
+    - build-system-unit-tests:
+        name: Mac build system unit tests
+        executor: mac
+        requires:
+          - Mac build
+        <<: *macBuildFilters
+
+    # maybe run all unit tests?
 
     - build-npm-package:
         name: Mac NPM package

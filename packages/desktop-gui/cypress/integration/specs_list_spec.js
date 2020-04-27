@@ -62,6 +62,33 @@ describe('Specs List', function () {
     })
   })
 
+  describe('integration and component specs', function () {
+    beforeEach(function () {
+      cy.fixture('component_specs').as('componentSpecs')
+    })
+
+    beforeEach(function () {
+      this.ipc.getSpecs.yields(null, this.componentSpecs)
+
+      this.openProject.resolve(this.config)
+    })
+
+    it('shows both types of specs', () => {
+      cy.get('.specs-list li.level-0').should('have.length', 2)
+      cy.contains('.folder.level-0', 'integration')
+      cy.contains('.folder.level-0', 'component')
+
+      // component specs should be visible
+      cy.get('.folder').eq(1).find('.file').should('be.visible')
+      cy.percySnapshot()
+
+      // let's check if the specs search works
+      cy.get('.filter').type('Nav')
+      cy.get('.file').should('have.length', 1)
+      cy.contains('.file', 'Navigation.spec.js').should('be.visible')
+    })
+  })
+
   describe('first time onboarding specs', function () {
     beforeEach(function () {
       this.config.isNewProject = true
@@ -161,7 +188,7 @@ describe('Specs List', function () {
 
       context('run all specs', function () {
         it('displays run all specs button', () => {
-          cy.contains('.all-tests', 'Run all specs')
+          cy.contains('.all-tests', 'Run all specs').should('have.attr', 'title')
         })
 
         it('has play icon', () => {

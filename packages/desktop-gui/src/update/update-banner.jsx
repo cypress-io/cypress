@@ -86,8 +86,7 @@ class UpdateBanner extends Component {
         <li>
           <span>If using npm, run <code>npm install --save-dev cypress@{appStore.newVersion}</code></span>
           <br/>
-          <span>If using yarn, run <code>yarn add cypress@{appStore.newVersion}</code></span>
-
+          <span>If using yarn, run <code>yarn upgrade cypress@{appStore.newVersion}</code></span>
         </li>
         <li>
           <span>Run <a href='#' onClick={this._openCyOpenDoc}><code>node_modules/.bin/cypress open</code></a> to open the new version.</span>

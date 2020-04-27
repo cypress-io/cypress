@@ -105,7 +105,7 @@ describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
-    this.timeout(8000)
+    this.timeout(5000)
 
     cache.__removeSync()
 
@@ -640,7 +640,7 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      return config.get(this.idsPath)
+      config.get(this.idsPath)
       .then((cfg) => {
         this.cfg = cfg
 
