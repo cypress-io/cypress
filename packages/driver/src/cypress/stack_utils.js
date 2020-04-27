@@ -6,7 +6,7 @@ const path = require('path')
 const $sourceMapUtils = require('./source_map_utils')
 const $utils = require('./utils')
 
-const whitespaceRegex = /^(\s*)\S*/
+const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
@@ -59,7 +59,10 @@ const stackWithContentAppended = (err, stack) => {
 
   delete err.appendToStack
 
-  const content = $utils.indent(appendToStack.content, 2)
+  // if the content is a stack trace, which is should be, then normalize the
+  // indentation, then indent it a little further than the rest of the stack
+  const normalizedContent = normalizeStackIndentation(appendToStack.content)
+  const content = $utils.indent(normalizedContent, 2)
 
   return `${stack}\n\n${appendToStack.title}:\n${content}`
 }
@@ -253,6 +256,21 @@ const getSourceStack = (stack, projectRoot) => {
   }
 }
 
+const normalizeStackIndentation = (stack) => {
+  const [messageLines, stackLines] = splitStack(stack)
+  const normalizedStackLines = _.map(stackLines, (line) => {
+    if (stackLineRegex.test(line)) {
+      // stack lines get indented 4 spaces
+      return line.replace(whitespaceRegex, '    ')
+    }
+
+    // message lines don't get indented at all
+    return line.replace(whitespaceRegex, '')
+  })
+
+  return unsplitStack(messageLines, normalizedStackLines)
+}
+
 const normalizedStack = (err) => {
   // Firefox errors do not include the name/message in the stack, whereas
   // Chromium-based errors do, so we normalize them so that the stack
@@ -267,19 +285,20 @@ const normalizedStack = (err) => {
     return `${errString}\n${errStack}`
   }
 
-  return errStack
+  return normalizeStackIndentation(errStack)
 }
 
-const normalizedUserInvocationStack = (userInvocationStack, fnName) => {
+const normalizedUserInvocationStack = (userInvocationStack) => {
   // Firefox user invocation stack includes a line at the top that looks like
   // addCommand/cy[name]@cypress:///../driver/src/cypress/cy.js:936:77 or
   // add/$Chainer.prototype[key] (cypress:///../driver/src/cypress/chainer.js:30:128)
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
-
-  return _.reject(stackLines, (line) => {
+  const winnowedStackLines = _.reject(stackLines, (line) => {
     return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
   }).join('\n')
+
+  return normalizeStackIndentation(winnowedStackLines)
 }
 
 const replacedStack = (err, newStack) => {

@@ -113,8 +113,8 @@ describe('driver/src/cypress/stack_utils', () => {
       })
 
       generatedStack = `Error: spec iframe stack
-${'    '}at foo.bar (http://localhost:1234/source_map_spec.js:12:4)
-${'    '}at Context.<anonymous> (http://localhost:1234/tests?p=cypress/integration/features/source_map_spec.js:6:4)\
+    at foo.bar (http://localhost:1234/source_map_spec.js:12:4)
+    at Context.<anonymous> (http://localhost:1234/tests?p=cypress/integration/features/source_map_spec.js:6:4)\
 `
     })
 
@@ -122,8 +122,8 @@ ${'    '}at Context.<anonymous> (http://localhost:1234/tests?p=cypress/integrati
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-${'    '}at foo.bar (some_other_file.ts:2:2)
-${'    '}at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:2)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
 
       expect(sourceStack.parsed).to.eql([
@@ -156,8 +156,8 @@ ${'    '}at Context.<anonymous> (cypress/integration/features/source_map_spec.co
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
-${'    '}at foo.bar (some_other_file.ts:2:2)
-${'    '}at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:2)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
     })
 
@@ -166,7 +166,7 @@ ${'    '}at Context.<anonymous> (cypress/integration/features/source_map_spec.co
       const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
 
       expect(sourceStack.sourceMapped).to.equal(`    at foo.bar (some_other_file.ts:2:2)
-${'    '}at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
     })
 
@@ -179,8 +179,8 @@ more
 lines
 
 Error: spec iframe stack
-${'    '}at foo.bar (some_other_file.ts:2:2)
-${'    '}at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
+    at foo.bar (some_other_file.ts:2:2)
+    at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
     })
 
@@ -203,18 +203,18 @@ original message line 3`)
 Error: original message
 original message line 2
 original message line 3
-  at originalStack1 (path/to/file:1:1)
-  at originalStack2 (path/to/file:1:1)
-  at __stackReplacementMarker (path/to/another:2:2)
-  at originalStack4 (path/to/file:1:1)
-  at originalStack5 (path/to/file:1:1)`
+    at originalStack1 (path/to/file:1:1)
+    at originalStack2 (path/to/file:1:1)
+    at __stackReplacementMarker (path/to/another:2:2)
+    at originalStack4 (path/to/file:1:1)
+    at originalStack5 (path/to/file:1:1)`
 
       userInvocationStack = `\
 user invocation message
 user invocation message line 2
 user invocation message line 3
-  at userStack1 (path/to/another:2:2)
-  at userStack2 (path/to/another:2:2)`
+    at userStack1 (path/to/another:2:2)
+    at userStack2 (path/to/another:2:2)`
     })
 
     it('appends replaces the user invocation wrapper and all lines below it with the user invocation stack', () => {
@@ -224,11 +224,11 @@ user invocation message line 3
 Error: original message
 original message line 2
 original message line 3
-  at originalStack1 (path/to/file:1:1)
-  at originalStack2 (path/to/file:1:1)
+    at originalStack1 (path/to/file:1:1)
+    at originalStack2 (path/to/file:1:1)
 From Your Spec Code:
-  at userStack1 (path/to/another:2:2)
-  at userStack2 (path/to/another:2:2)`)
+    at userStack1 (path/to/another:2:2)
+    at userStack2 (path/to/another:2:2)`)
     })
 
     it('returns the index of where the user invocation is in the stack', () => {
@@ -238,7 +238,7 @@ From Your Spec Code:
     })
 
     it('appends at end when there is no stack replacement marker in the stack', () => {
-      err.stack = err.stack.replace('  at __stackReplacementMarker (path/to/another:2:2)\n', '')
+      err.stack = err.stack.replace('    at __stackReplacementMarker (path/to/another:2:2)\n', '')
 
       const { stack } = $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
 
@@ -246,13 +246,13 @@ From Your Spec Code:
 Error: original message
 original message line 2
 original message line 3
-  at originalStack1 (path/to/file:1:1)
-  at originalStack2 (path/to/file:1:1)
-  at originalStack4 (path/to/file:1:1)
-  at originalStack5 (path/to/file:1:1)
+    at originalStack1 (path/to/file:1:1)
+    at originalStack2 (path/to/file:1:1)
+    at originalStack4 (path/to/file:1:1)
+    at originalStack5 (path/to/file:1:1)
 From Your Spec Code:
-  at userStack1 (path/to/another:2:2)
-  at userStack2 (path/to/another:2:2)`)
+    at userStack1 (path/to/another:2:2)
+    at userStack2 (path/to/another:2:2)`)
     })
   })
 
@@ -261,31 +261,31 @@ From Your Spec Code:
       const stack = `\
 message 1
 message 2
-  at stack1 (foo.js:1:1)
+    at stack1 (foo.js:1:1)
 message 3
-  at stack2 (bar.js:2:2)`
+    at stack2 (bar.js:2:2)`
       const result = $stackUtils.stackWithoutMessage(stack)
 
       expect(result).to.equal(`\
-  at stack1 (foo.js:1:1)
+    at stack1 (foo.js:1:1)
 message 3
-  at stack2 (bar.js:2:2)`)
+    at stack2 (bar.js:2:2)`)
     })
   })
 
   context('.normalizedUserInvocationStack', () => {
-    it('removes message and cy[name] lines', () => {
+    it('removes message and cy[name] lines and normalizes indentation', () => {
       const stack = `\
 message 1
 message 2
-  at addCommand/cy[name]@cypress:///cy.js:0:0
+    at addCommand/cy[name]@cypress:///cy.js:0:0
   at stack1 (foo.js:1:1)
-  at stack2 (bar.js:2:2)`
+   at stack2 (bar.js:2:2)`
       const result = $stackUtils.normalizedUserInvocationStack(stack)
 
       expect(result).to.equal(`\
-  at stack1 (foo.js:1:1)
-  at stack2 (bar.js:2:2)`)
+    at stack1 (foo.js:1:1)
+    at stack2 (bar.js:2:2)`)
     })
   })
 })
