@@ -1,64 +1,80 @@
-_ = require("lodash")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
 
-$dom = require("../../dom")
+const $dom = require("../../dom");
 
-traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ")
+const traversals = "find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings".split(" ");
 
-module.exports = (Commands, Cypress, cy, state, config) ->
-  _.each traversals, (traversal) ->
-    Commands.add traversal, { prevSubject: "element" }, (subject, arg1, arg2, options) ->
-      if _.isObject(arg1) and not _.isFunction(arg1)
-        options = arg1
+module.exports = (Commands, Cypress, cy, state, config) => _.each(traversals, traversal => Commands.add(traversal, { prevSubject: "element" }, function(subject, arg1, arg2, options) {
+  let getElements;
+  if (_.isObject(arg1) && !_.isFunction(arg1)) {
+    options = arg1;
+  }
 
-      if _.isObject(arg2) and not _.isFunction(arg2)
-        options = arg2
+  if (_.isObject(arg2) && !_.isFunction(arg2)) {
+    options = arg2;
+  }
 
-      userOptions = if options then options else {}
+  const userOptions = options ? options : {};
 
-      options = _.defaults({}, userOptions, {log: true})
+  options = _.defaults({}, userOptions, {log: true});
 
-      getSelector = ->
-        args = _.chain([arg1, arg2]).reject(_.isFunction).reject(_.isObject).value()
-        args = _.without(args, null, undefined)
-        args.join(", ")
+  const getSelector = function() {
+    let args = _.chain([arg1, arg2]).reject(_.isFunction).reject(_.isObject).value();
+    args = _.without(args, null, undefined);
+    return args.join(", ");
+  };
 
-      consoleProps = {
-        Selector: getSelector()
-        "Applied To": $dom.getElements(subject)
+  const consoleProps = {
+    Selector: getSelector(),
+    "Applied To": $dom.getElements(subject)
+  };
+
+  if (options.log !== false) {
+    options._log = Cypress.log({
+      message: getSelector(),
+      consoleProps() { return consoleProps; }
+    });
+  }
+
+  const setEl = function($el) {
+    if (options.log === false) { return; }
+
+    consoleProps.Yielded = $dom.getElements($el);
+    consoleProps.Elements = $el != null ? $el.length : undefined;
+
+    return options._log.set({$el});
+  };
+
+  return (getElements = function() {
+    //# catch sizzle errors here
+    let $el;
+    try {
+      $el = subject[traversal].call(subject, arg1, arg2);
+
+      //# normalize the selector since jQuery won't have it
+      //# or completely borks it
+      $el.selector = getSelector();
+    } catch (e) {
+      e.onFail = () => options._log.error(e);
+      throw e;
+    }
+
+    setEl($el);
+
+    return cy.verifyUpcomingAssertions($el, options, {
+      onRetry: getElements,
+      onFail(err) {
+        if (err.type === "existence") {
+          const node = $dom.stringify(subject, "short");
+          return err.message += ` Queried from element: ${node}`;
+        }
       }
-
-      if options.log isnt false
-        options._log = Cypress.log({
-          message: getSelector()
-          consoleProps: -> consoleProps
-        })
-
-      setEl = ($el) ->
-        return if options.log is false
-
-        consoleProps.Yielded = $dom.getElements($el)
-        consoleProps.Elements = $el?.length
-
-        options._log.set({$el: $el})
-
-      do getElements = ->
-        ## catch sizzle errors here
-        try
-          $el = subject[traversal].call(subject, arg1, arg2)
-
-          ## normalize the selector since jQuery won't have it
-          ## or completely borks it
-          $el.selector = getSelector()
-        catch e
-          e.onFail = -> options._log.error(e)
-          throw e
-
-        setEl($el)
-
-        cy.verifyUpcomingAssertions($el, options, {
-          onRetry: getElements
-          onFail: (err) ->
-            if err.type is "existence"
-              node = $dom.stringify(subject, "short")
-              err.message += " Queried from element: #{node}"
-            })
+        });
+  })();
+}));

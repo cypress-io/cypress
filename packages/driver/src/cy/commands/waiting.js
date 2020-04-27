@@ -1,207 +1,242 @@
-_ = require("lodash")
-Promise = require("bluebird")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS104: Avoid inline assignments
+ * DS204: Change includes calls to have a more natural evaluation order
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const Promise = require("bluebird");
 
-$errUtils = require("../../cypress/error_utils")
+const $errUtils = require("../../cypress/error_utils");
 
-getNumRequests = (state, alias) =>
-  requests = state("aliasRequests") ? {}
-  index = requests[alias] ?= 0
+const getNumRequests = (state, alias) => {
+  let left;
+  const requests = (left = state("aliasRequests")) != null ? left : {};
+  const index = requests[alias] != null ? requests[alias] : (requests[alias] = 0);
 
-  requests[alias] += 1
+  requests[alias] += 1;
 
-  state("aliasRequests", requests)
+  state("aliasRequests", requests);
 
-  [index, _.ordinalize(requests[alias])]
+  return [index, _.ordinalize(requests[alias])];
+};
 
-throwErr = (arg) ->
-  $errUtils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}})
+const throwErr = arg => $errUtils.throwErrByPath("wait.invalid_1st_arg", {args: {arg}});
 
-module.exports = (Commands, Cypress, cy, state, config) ->
-  waitFunction = ->
-    $errUtils.throwErrByPath("wait.fn_deprecated")
+module.exports = function(Commands, Cypress, cy, state, config) {
+  const waitFunction = () => $errUtils.throwErrByPath("wait.fn_deprecated");
 
-  userOptions = null
+  let userOptions = null;
 
-  waitNumber = (subject, ms, options) ->
-    ## increase the timeout by the delta
-    cy.timeout(ms, true, "wait")
+  const waitNumber = function(subject, ms, options) {
+    //# increase the timeout by the delta
+    cy.timeout(ms, true, "wait");
 
-    if options.log isnt false
+    if (options.log !== false) {
       options._log = Cypress.log({
-        consoleProps: -> {
-          "Waited For": "#{ms}ms before continuing"
+        consoleProps() { return {
+          "Waited For": `${ms}ms before continuing`,
           "Yielded": subject
-        }
-      })
+        }; }
+      });
+    }
 
-    Promise
+    return Promise
     .delay(ms, "wait")
-    .return(subject)
+    .return(subject);
+  };
 
-  waitString = (subject, str, options) ->
-    if options.log isnt false
-      log = options._log = Cypress.log({
-        type: "parent"
-        aliasType: "route"
+  const waitString = function(subject, str, options) {
+    let log;
+    if (options.log !== false) {
+      log = (options._log = Cypress.log({
+        type: "parent",
+        aliasType: "route",
         options: userOptions
-      })
+      }));
+    }
 
-    checkForXhr = (alias, type, index, num, options) ->
-      options.type = type
+    var checkForXhr = function(alias, type, index, num, options) {
+      options.type = type;
 
-      ## append .type to the alias
-      xhr = cy.getIndexedXhrByAlias(alias + "." + type, index)
+      //# append .type to the alias
+      const xhr = cy.getIndexedXhrByAlias(alias + "." + type, index);
 
-      ## return our xhr object
-      return Promise.resolve(xhr) if xhr
+      //# return our xhr object
+      if (xhr) { return Promise.resolve(xhr); }
 
       options.error = $errUtils.errMsgByPath("wait.timed_out", {
-        timeout: options.timeout
-        alias
-        num
+        timeout: options.timeout,
+        alias,
+        num,
         type
-      })
+      });
 
-      args = arguments
+      const args = arguments;
 
-      cy.retry ->
-        checkForXhr.apply(window, args)
-      , options
+      return cy.retry(() => checkForXhr.apply(window, args)
+      , options);
+    };
 
-    waitForXhr = (str, options) ->
-      ## we always want to strip everything after the last '.'
-      ## since we support alias property 'request'
-      if _.indexOf(str, ".") == -1 ||
-      str.slice(1) in _.keys(cy.state("aliases"))
-        [str, str2] = [str, null]
-      else
-        # potentially request, response or index
-        allParts = _.split(str, '.')
-        [str, str2] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)]
+    const waitForXhr = function(str, options) {
+      //# we always want to strip everything after the last '.'
+      //# since we support alias property 'request'
+      let aliasObj, needle, str2;
+      if ((_.indexOf(str, ".") === -1) ||
+      (needle = str.slice(1), _.keys(cy.state("aliases")).includes(needle))) {
+        [str, str2] = [str, null];
+      } else {
+        // potentially request, response or index
+        const allParts = _.split(str, '.');
+        [str, str2] = [_.join(_.dropRight(allParts, 1), '.'), _.last(allParts)];
+      }
 
-      if not aliasObj = cy.getAlias(str, "wait", log)
-        cy.aliasNotFoundFor(str, "wait", log)
+      if (!(aliasObj = cy.getAlias(str, "wait", log))) {
+        cy.aliasNotFoundFor(str, "wait", log);
+      }
 
-      ## if this alias is for a route then poll
-      ## until we find the response xhr object
-      ## by its alias
-      {alias, command} = aliasObj
+      //# if this alias is for a route then poll
+      //# until we find the response xhr object
+      //# by its alias
+      const {alias, command} = aliasObj;
 
-      str = _.compact([alias, str2]).join(".")
+      str = _.compact([alias, str2]).join(".");
 
-      type = cy.getXhrTypeByAlias(str)
+      const type = cy.getXhrTypeByAlias(str);
 
-      [ index, num ] = getNumRequests(state, alias)
+      const [ index, num ] = getNumRequests(state, alias);
 
-      ## if we have a command then continue to
-      ## build up an array of referencesAlias
-      ## because wait can reference an array of aliases
-      if log
-        referencesAlias = log.get("referencesAlias") ? []
-        aliases = [].concat(referencesAlias)
+      //# if we have a command then continue to
+      //# build up an array of referencesAlias
+      //# because wait can reference an array of aliases
+      if (log) {
+        let left;
+        const referencesAlias = (left = log.get("referencesAlias")) != null ? left : [];
+        const aliases = [].concat(referencesAlias);
 
-        if str
+        if (str) {
           aliases.push({
-            name: str
+            name: str,
             cardinal: index + 1,
             ordinal: num
-          })
-
-        log.set "referencesAlias", aliases
-
-      if command.get("name") isnt "route"
-        $errUtils.throwErrByPath("wait.invalid_alias", {
-          onFail: options._log
-          args: { alias }
-        })
-
-      ## create shallow copy of each options object
-      ## but slice out the error since we may set
-      ## the error related to a previous xhr
-      timeout = options.timeout
-      requestTimeout = options.requestTimeout ? timeout
-      responseTimeout = options.responseTimeout ? timeout
-
-      waitForRequest = ->
-        options = _.omit(options, "_runnableTimeout")
-        options.timeout = requestTimeout ? Cypress.config("requestTimeout")
-        checkForXhr(alias, "request", index, num, options)
-
-      waitForResponse = ->
-        options = _.omit(options, "_runnableTimeout")
-        options.timeout = responseTimeout ? Cypress.config("responseTimeout")
-        checkForXhr(alias, "response", index, num, options)
-
-      ## if we were only waiting for the request
-      ## then resolve immediately do not wait for response
-      if type is "request"
-        waitForRequest()
-      else
-        waitForRequest().then(waitForResponse)
-
-    Promise
-    .map [].concat(str), (str) ->
-      ## we may get back an xhr value instead
-      ## of a promise, so we have to wrap this
-      ## in another promise :-(
-      waitForXhr(str, _.omit(options, "error"))
-    .then (responses) ->
-      ## if we only asked to wait for one alias
-      ## then return that, else return the array of xhr responses
-      ret = if responses.length is 1 then responses[0] else responses
-
-      if log
-        log.set "consoleProps", -> {
-          "Waited For": (_.map(log.get("referencesAlias"), 'name') || []).join(", ")
-          "Yielded": ret
+          });
         }
 
-        log.snapshot().end()
+        log.set("referencesAlias", aliases);
+      }
 
-      return ret
+      if (command.get("name") !== "route") {
+        $errUtils.throwErrByPath("wait.invalid_alias", {
+          onFail: options._log,
+          args: { alias }
+        });
+      }
 
-  Commands.addAll({ prevSubject: "optional" }, {
-    wait: (subject, msOrFnOrAlias, options = {}) ->
-      userOptions = options
+      //# create shallow copy of each options object
+      //# but slice out the error since we may set
+      //# the error related to a previous xhr
+      const {
+        timeout
+      } = options;
+      const requestTimeout = options.requestTimeout != null ? options.requestTimeout : timeout;
+      const responseTimeout = options.responseTimeout != null ? options.responseTimeout : timeout;
 
-      ## check to ensure options is an object
-      ## if its a string the user most likely is trying
-      ## to wait on multiple aliases and forget to make this
-      ## an array
-      if _.isString(userOptions)
-        $errUtils.throwErrByPath("wait.invalid_arguments")
+      const waitForRequest = function() {
+        options = _.omit(options, "_runnableTimeout");
+        options.timeout = requestTimeout != null ? requestTimeout : Cypress.config("requestTimeout");
+        return checkForXhr(alias, "request", index, num, options);
+      };
 
-      options = _.defaults({}, userOptions, { log: true })
-      args = [subject, msOrFnOrAlias, options]
+      const waitForResponse = function() {
+        options = _.omit(options, "_runnableTimeout");
+        options.timeout = responseTimeout != null ? responseTimeout : Cypress.config("responseTimeout");
+        return checkForXhr(alias, "response", index, num, options);
+      };
 
-      try
-        switch
-          when _.isFinite(msOrFnOrAlias)
-            waitNumber.apply(window, args)
-          when _.isFunction(msOrFnOrAlias)
-            waitFunction()
-          when _.isString(msOrFnOrAlias)
-            waitString.apply(window, args)
-          when _.isArray(msOrFnOrAlias) and not _.isEmpty(msOrFnOrAlias)
-            waitString.apply(window, args)
-          else
-            ## figure out why this error failed
-            arg = switch
-              when _.isNaN(msOrFnOrAlias)    then "NaN"
-              when msOrFnOrAlias is Infinity then "Infinity"
-              when _.isSymbol(msOrFnOrAlias) then msOrFnOrAlias.toString()
-              else
-                try
-                  JSON.stringify(msOrFnOrAlias)
-                catch
-                  "an invalid argument"
+      //# if we were only waiting for the request
+      //# then resolve immediately do not wait for response
+      if (type === "request") {
+        return waitForRequest();
+      } else {
+        return waitForRequest().then(waitForResponse);
+      }
+    };
 
-            throwErr(arg)
-      catch err
-        if err.name is "CypressError"
-          throw err
-        else
-          ## whatever was passed in could not be parsed
-          ## by our switch case
-          throwErr("an invalid argument")
-  })
+    return Promise
+    .map([].concat(str), str => //# we may get back an xhr value instead
+    //# of a promise, so we have to wrap this
+    //# in another promise :-(
+    waitForXhr(str, _.omit(options, "error"))).then(function(responses) {
+      //# if we only asked to wait for one alias
+      //# then return that, else return the array of xhr responses
+      const ret = responses.length === 1 ? responses[0] : responses;
+
+      if (log) {
+        log.set("consoleProps", () => ({
+          "Waited For": (_.map(log.get("referencesAlias"), 'name') || []).join(", "),
+          "Yielded": ret
+        }));
+
+        log.snapshot().end();
+      }
+
+      return ret;
+    });
+  };
+
+  return Commands.addAll({ prevSubject: "optional" }, {
+    wait(subject, msOrFnOrAlias, options = {}) {
+      userOptions = options;
+
+      //# check to ensure options is an object
+      //# if its a string the user most likely is trying
+      //# to wait on multiple aliases and forget to make this
+      //# an array
+      if (_.isString(userOptions)) {
+        $errUtils.throwErrByPath("wait.invalid_arguments");
+      }
+
+      options = _.defaults({}, userOptions, { log: true });
+      const args = [subject, msOrFnOrAlias, options];
+
+      try {
+        switch (false) {
+          case !_.isFinite(msOrFnOrAlias):
+            return waitNumber.apply(window, args);
+          case !_.isFunction(msOrFnOrAlias):
+            return waitFunction();
+          case !_.isString(msOrFnOrAlias):
+            return waitString.apply(window, args);
+          case !_.isArray(msOrFnOrAlias) || !!_.isEmpty(msOrFnOrAlias):
+            return waitString.apply(window, args);
+          default:
+            //# figure out why this error failed
+            var arg = (() => { switch (false) {
+              case !_.isNaN(msOrFnOrAlias):    return "NaN";
+              case msOrFnOrAlias !== Infinity: return "Infinity";
+              case !_.isSymbol(msOrFnOrAlias): return msOrFnOrAlias.toString();
+              default:
+                try {
+                  return JSON.stringify(msOrFnOrAlias);
+                } catch (error) {
+                  return "an invalid argument";
+                }
+            } })();
+
+            return throwErr(arg);
+        }
+      } catch (err) {
+        if (err.name === "CypressError") {
+          throw err;
+        } else {
+          //# whatever was passed in could not be parsed
+          //# by our switch case
+          return throwErr("an invalid argument");
+        }
+      }
+    }
+  });
+};
