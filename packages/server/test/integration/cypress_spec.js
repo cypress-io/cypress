@@ -105,7 +105,7 @@ describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
-    this.timeout(8000)
+    this.timeout(5000)
 
     cache.__removeSync()
 
