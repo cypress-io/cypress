@@ -65,7 +65,7 @@ context('commands', function () {
     })
 
     verify(this, {
-      column: 17,
+      column: 18,
       codeFrameText: 'add(\'failChainedCommand\'',
       message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
