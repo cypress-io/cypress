@@ -498,12 +498,16 @@ class Project extends EE {
     })
   }
 
-  getSpecUrl (absoluteSpecPath) {
+  getSpecUrl (absoluteSpecPath, specType) {
     return this.getConfig()
     .then((cfg) => {
-      // if we dont have a absoluteSpecPath or its __all
+      // if we don't have a absoluteSpecPath or its __all
       if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
-        return this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+        const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+
+        debug('returning url to run all specs: %s', url)
+
+        return url
       }
 
       // TODO:
@@ -513,14 +517,17 @@ class Project extends EE {
       // the unit folder?
       // once we determine that we can then prefix it correctly
       // with either integration or unit
-      const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath)
+      const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath, specType)
+      const url = this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
 
-      return this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
+      debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
+
+      return url
     })
   }
 
   getPrefixedPathToSpec (cfg, pathToSpec, type = 'integration') {
-    const { integrationFolder, projectRoot } = cfg
+    const { integrationFolder, componentFolder, projectRoot } = cfg
 
     // for now hard code the 'type' as integration
     // but in the future accept something different here
@@ -532,10 +539,17 @@ class Project extends EE {
     // /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     //
     // becomes /integration/foo.coffee
-    return `/${path.join(type, path.relative(
-      integrationFolder,
+
+    const folderToUse = type === 'integration' ? integrationFolder : componentFolder
+
+    const url = `/${path.join(type, path.relative(
+      folderToUse,
       path.resolve(projectRoot, pathToSpec),
     ))}`
+
+    debug('prefixed path for spec %o', { pathToSpec, type, url })
+
+    return url
   }
 
   normalizeSpecUrl (browserUrl, specUrl) {
@@ -833,6 +847,7 @@ class Project extends EE {
       // file path from projectRoot
       // ie: **/* turns into /Users/bmann/dev/project/**/*
       specPattern = path.resolve(projectRoot, specPattern)
+      debug('full spec pattern "%s"', specPattern)
     }
 
     return new Project(projectRoot)

@@ -64,6 +64,7 @@ module.exports = {
   emitter: baseEmitter
 
   getFile: (filePath, config) ->
+    debug("getting file #{filePath}")
     filePath = path.resolve(config.projectRoot, filePath)
 
     debug("getFile #{filePath}")
@@ -73,8 +74,8 @@ module.exports = {
       ## in a text terminal aka cypress run
       ## TODO: rename this to config.isRunMode
       ## vs config.isInterativeMode
-      shouldWatch = not config.isTextTerminal || !!process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH
-      
+      shouldWatch = not config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
+
       baseFilePath = filePath
       .replace(config.projectRoot, "")
       .replace(config.integrationFolder, "")

@@ -3,6 +3,14 @@
   "projectId": "ypt4pf",
   "viewportWidth": 800,
   "viewportHeight": 850,
+  "env": {
+    "webpackFilename": "webpack.config.ts",
+    "coverage": false
+  },
+  "nodeVersion": "system",
+  "testFiles": "**/*_spec.{js,jsx}",
+  "experimentalComponentTesting": true,
+  "componentFolder": "src",
   "reporter": "../../node_modules/cypress-multi-reporters/index.js",
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"

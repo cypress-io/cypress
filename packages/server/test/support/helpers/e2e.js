@@ -114,6 +114,22 @@ const replaceUploadingResults = function (orig, ...rest) {
   return ret
 }
 
+/**
+ * Takes normalized runner STDOUT, finds the "Run Finished" line
+ * and returns everything AFTER that, which usually is just the
+ * test summary table.
+ * @param {string} stdout from the test run, probably normalized
+*/
+const leaveRunFinishedTable = (stdout) => {
+  const index = stdout.indexOf('  (Run Finished)')
+
+  if (index === -1) {
+    throw new Error('Cannot find Run Finished line')
+  }
+
+  return stdout.slice(index)
+}
+
 const normalizeStdout = function (str, options = {}) {
   const { normalizeStdoutAvailableBrowsers } = options
 
@@ -366,6 +382,8 @@ const e2e = {
 
   normalizeStdout,
 
+  leaveRunFinishedTable,
+
   it: localItFn,
 
   snapshot (...args) {
@@ -460,6 +478,7 @@ const e2e = {
           return spec
         }
 
+        // TODO would not work for component tests
         return path.join(options.project, 'cypress', 'integration', spec)
       })
 
@@ -569,8 +588,26 @@ const e2e = {
     })
   },
 
+  /**
+   * Executes a given project and optionally sanitizes and checks output.
+   * @example
+    ```
+      e2e.setup()
+      project = Fixtures.projectPath("component-tests")
+      e2e.exec(this, {
+        project,
+        config: {
+          video: false
+        }
+      })
+      .then (result) ->
+        console.log(e2e.normalizeStdout(result.stdout))
+    ```
+   */
   exec (ctx, options = {}) {
+    debug('e2e exec options %o', options)
     options = this.options(ctx, options)
+    debug('processed options %o', options)
     let args = this.args(options)
 
     args = ['index.js'].concat(args)

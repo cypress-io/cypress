@@ -52,6 +52,7 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     xhrs.handle(req, res, config, next)
   })
 
+  // special fallback - serve local files from the project's root folder
   app.get('/__root/*', (req, res) => {
     const file = path.join(config.projectRoot, req.params[0])
 
