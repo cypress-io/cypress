@@ -211,9 +211,17 @@ const cypressErrByPath = (errPath, options = {}) => {
 const replaceErrMsgTokens = (errMessage, args) => {
   if (!errMessage) return errMessage
 
+  const replace = (str, argValue, argKey) => {
+    return str.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
+  }
+
   const getMsg = function (args = {}) {
     return _.reduce(args, (message, argValue, argKey) => {
-      return message.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
+      if (_.isArray(message)) {
+        return _.map(message, (str) => replace(str, argValue, argKey))
+      }
+
+      return replace(message, argValue, argKey)
     }, errMessage)
   }
 

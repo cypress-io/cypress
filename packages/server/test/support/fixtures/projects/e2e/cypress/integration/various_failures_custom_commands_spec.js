@@ -141,7 +141,7 @@ context('cy.should', function () {
     })
 
     verify(this, {
-      column: 24,
+      column: 4,
       codeFrameText: 'add(\'failShouldAssertion\'',
       message: 'Timed out retrying: expected {} to have property \'foo\'',
     })

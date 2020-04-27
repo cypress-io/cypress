@@ -496,10 +496,15 @@ describe('driver/src/cypress/error_utils', () => {
       expect(result.stack).to.include('at foo (path/to/file:1:1)')
     })
 
-    it('adds docsUrl for app error', () => {
+    it('adds docsUrl for app error and original error', () => {
+      err.docsUrl = 'https://on.cypress.io/orginal-error-docs-url'
+
       const result = $errUtils.createUncaughtException('app', err)
 
-      expect(result.docsUrl).to.equal('https://on.cypress.io/uncaught-exception-from-application')
+      expect(result.docsUrl).to.eql([
+        'https://on.cypress.io/uncaught-exception-from-application',
+        'https://on.cypress.io/orginal-error-docs-url',
+      ])
     })
   })
 
