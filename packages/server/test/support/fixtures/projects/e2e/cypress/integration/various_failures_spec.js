@@ -18,14 +18,38 @@ import {
 
 setup({ verifyStackLineIsSpecFile: true })
 
-describe('assertion failure', function () {
-  fail(this, () => {
-    expect('actual').to.equal('expected')
+context('assertion failures', function () {
+  describe('with expect().<foo>', function () {
+    fail(this, () => {
+      expect('actual').to.equal('expected')
+    })
+
+    verify(this, {
+      column: 27,
+      message: `expected 'actual' to equal 'expected'`,
+    })
   })
 
-  verify(this, {
-    column: 25,
-    message: `expected 'actual' to equal 'expected'`,
+  describe('with assert()', function () {
+    fail(this, () => {
+      assert(false, 'should be true')
+    })
+
+    verify(this, {
+      column: '(7|14)', // different between chrome & firefox
+      message: 'should be true',
+    })
+  })
+
+  describe('with assert.<foo>()', function () {
+    fail(this, () => {
+      assert.equal('actual', 'expected')
+    })
+
+    verify(this, {
+      column: 14,
+      message: `expected 'actual' to equal 'expected'`,
+    })
   })
 })
 
@@ -756,7 +780,7 @@ context('validation errors', function () {
     })
   })
 
-  describe('from chai', function () {
+  describe('from chai expect', function () {
     fail(this, () => {
       expect(true).to.be.nope
     })
@@ -765,6 +789,17 @@ context('validation errors', function () {
       column: '(7|14)', // different between chrome & firefox
       message: 'Invalid Chai property: nope',
       stack: ['proxyGetter', 'From Your Spec Code:'],
+    })
+  })
+
+  describe('from chai assert', function () {
+    fail(this, () => {
+      assert.deepInclude()
+    })
+
+    verify(this, {
+      column: 14,
+      message: 'object tested must be an array',
     })
   })
 })

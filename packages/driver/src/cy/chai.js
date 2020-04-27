@@ -461,7 +461,12 @@ chai.use((chai, u) => {
 
       if (!err) return
 
-      captureUserInvocationStack(specWindow, state, chaiUtils.flag(this, 'ssfi'))
+      // when assert() is used instead of expect(), we override the method itself
+      // below in `overrideAssert` and prefer the user invocation stack
+      // that we capture there
+      if (!state('assertUsed')) {
+        captureUserInvocationStack(specWindow, state, chaiUtils.flag(this, 'ssfi'))
+      }
 
       throw err
     })
@@ -479,17 +484,21 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideAssert = function () {
+  const overrideAssert = function (specWindow, state) {
     const fn = (express, errmsg) => {
+      state('assertUsed', true)
+      captureUserInvocationStack(specWindow, state, fn)
+
       return chai.assert(express, errmsg)
     }
-
-    // TODO: need to do the same as overrideExpect
 
     const fns = _.functions(chai.assert)
 
     _.each(fns, (name) => {
-      return fn[name] = function () {
+      fn[name] = function () {
+        state('assertUsed', true)
+        captureUserInvocationStack(specWindow, state, overrideAssert)
+
         return chai.assert[name].apply(this, arguments)
       }
     })
@@ -499,7 +508,7 @@ chai.use((chai, u) => {
 
   const setSpecWindowGlobals = function (specWindow, state) {
     const expect = overrideExpect(specWindow, state)
-    const assert = overrideAssert()
+    const assert = overrideAssert(specWindow, state)
 
     specWindow.chai = chai
     specWindow.expect = expect

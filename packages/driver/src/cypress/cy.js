@@ -676,7 +676,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return state('index', queue.length)
   }
 
-  const getInvocationStack = (err) => {
+  const getUserInvocationStack = (err) => {
     const current = state('current')
     const currentAssertionCommand = current?.get('currentAssertionCommand')
     const withInvocationStack = currentAssertionCommand || current
@@ -720,7 +720,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     err = $errUtils.enhanceStack({
       err,
-      userInvocationStack: getInvocationStack(err),
+      userInvocationStack: getUserInvocationStack(err),
       projectRoot: config('projectRoot'),
     })
 

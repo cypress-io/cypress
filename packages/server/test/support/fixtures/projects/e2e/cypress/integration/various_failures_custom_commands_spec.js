@@ -8,15 +8,41 @@ import { setup, fail, verify, verifyInternalError } from '../support/util'
 
 setup({ verifyStackLineIsSpecFile: false })
 
-describe('assertion failure', function () {
-  fail(this, () => {
-    cy.failAssertion()
+context('assertion failures', function () {
+  describe('with expect().<foo>', function () {
+    fail(this, () => {
+      cy.failExpect()
+    })
+
+    verify(this, {
+      column: 23,
+      codeFrameText: 'add(\'failExpect\'',
+      message: `expected 'actual' to equal 'expected'`,
+    })
   })
 
-  verify(this, {
-    column: 23,
-    codeFrameText: 'add(\'failAssertion\'',
-    message: `expected 'actual' to equal 'expected'`,
+  describe('with assert()', function () {
+    fail(this, () => {
+      cy.failAssert()
+    })
+
+    verify(this, {
+      column: '(3|10)', // different between chrome & firefox
+      codeFrameText: 'add(\'failAssert\'',
+      message: 'should be true',
+    })
+  })
+
+  describe('with assert.<foo>()', function () {
+    fail(this, () => {
+      cy.failAssertMethod()
+    })
+
+    verify(this, {
+      column: 10,
+      codeFrameText: 'add(\'failAssertMethod\'',
+      message: `expected 'actual' to equal 'expected'`,
+    })
   })
 })
 
@@ -622,16 +648,28 @@ context('validation errors', function () {
     })
   })
 
-  describe('from chai', function () {
+  describe('from chai expect', function () {
     fail(this, () => {
-      cy.chaiValidationError()
+      cy.chaiExpectValidationError()
     })
 
     verify(this, {
       column: '(3|10)', // different between chrome & firefox
-      codeFrameText: 'add(\'chaiValidationError\'',
+      codeFrameText: 'add(\'chaiExpectValidationError\'',
       message: 'Invalid Chai property: nope',
       stack: ['proxyGetter', 'From Your Spec Code:'],
+    })
+  })
+
+  describe('from chai assert', function () {
+    fail(this, () => {
+      cy.chaiAssertValidationError()
+    })
+
+    verify(this, {
+      column: 10,
+      codeFrameText: 'add(\'chaiAssertValidationError\'',
+      message: 'object tested must be an array',
     })
   })
 })

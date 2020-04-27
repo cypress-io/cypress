@@ -1,7 +1,15 @@
 import { sendXhr, abortXhr } from './util'
 
-Cypress.Commands.add('failAssertion', () => {
+Cypress.Commands.add('failExpect', () => {
   expect('actual').to.equal('expected')
+})
+
+Cypress.Commands.add('failAssert', () => {
+  assert(false, 'should be true')
+})
+
+Cypress.Commands.add('failAssertMethod', () => {
+  assert.equal('actual', 'expected')
 })
 
 Cypress.Commands.add('failException', () => {
@@ -341,12 +349,16 @@ Cypress.Commands.add('failReadFileExistence', () => {
   cy.readFile('does-not-exist', { timeout: 0 })
 })
 
-Cypress.Commands.add('chaiValidationError', () => {
+Cypress.Commands.add('cypressValidationError', () => {
+  cy.viewport()
+})
+
+Cypress.Commands.add('chaiExpectValidationError', () => {
   expect(true).to.be.nope
 })
 
-Cypress.Commands.add('cypressValidationError', () => {
-  cy.viewport()
+Cypress.Commands.add('chaiAssertValidationError', () => {
+  assert.deepInclude()
 })
 
 Cypress.Commands.add('failEventHandlerAssertion', () => {
