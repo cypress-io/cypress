@@ -1,7 +1,7 @@
 import { sendXhr, abortXhr } from './util'
 
 Cypress.Commands.add('failAssertion', () => {
-  expect(true).to.be.false
+  expect('actual').to.equal('expected')
 })
 
 Cypress.Commands.add('failException', () => {
@@ -18,13 +18,13 @@ Cypress.Commands.add('failChainedCommand', () => {
 
 Cypress.Commands.add('failThenAssertion', () => {
   cy.wrap({}).then(() => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   })
 })
 
 Cypress.Commands.add('failShouldCallbackAssertion', () => {
   cy.wrap({}).should(() => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   })
 })
 
@@ -72,7 +72,7 @@ Cypress.Commands.add('failAfterMultipleShouldCallbacksAssertion', () => {
     expect(true).to.be.true
   })
   .should(() => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   })
 })
 
@@ -83,7 +83,7 @@ Cypress.Commands.add('failCommandAfterShouldSuccess', () => {
 
 Cypress.Commands.add('failEachAssertion', () => {
   cy.wrap([1]).each(() => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   })
 })
 
@@ -101,7 +101,7 @@ Cypress.Commands.add('failEachCommandFailure', () => {
 
 Cypress.Commands.add('failSpreadAssertion', () => {
   cy.wrap([1, 2, 3]).spread(() => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   })
 })
 
@@ -119,7 +119,7 @@ Cypress.Commands.add('failSpreadCommandFailure', () => {
 
 Cypress.Commands.add('failWithinAssertion', () => {
   cy.get('body').within(() => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   })
 })
 
@@ -137,7 +137,7 @@ Cypress.Commands.add('failWithinCommandFailure', () => {
 
 Cypress.Commands.add('failWrapAssertion', () => {
   cy.wrap(() => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   }).then((fn) => fn())
 })
 
@@ -156,7 +156,7 @@ Cypress.Commands.add('failWrapCommandFailure', () => {
 Cypress.Commands.add('failVisitBeforeLoadAssertion', () => {
   cy.visit('/index.html', {
     onBeforeLoad () {
-      expect(true).to.be.false
+      expect('actual').to.equal('expected')
     },
   })
 })
@@ -172,7 +172,7 @@ Cypress.Commands.add('failVisitBeforeLoadException', () => {
 Cypress.Commands.add('failVisitLoadAssertion', () => {
   cy.visit('/index.html', {
     onLoad () {
-      expect(true).to.be.false
+      expect('actual').to.equal('expected')
     },
   })
 })
@@ -187,7 +187,7 @@ Cypress.Commands.add('failVisitLoadException', () => {
 
 Cypress.Commands.add('failRouteCallbackAssertion', () => {
   cy.server().route(() => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   })
 })
 
@@ -209,7 +209,7 @@ Cypress.Commands.add('failRouteOnAbortAssertion', () => {
   cy.server().route({
     url: '/foo',
     onAbort () {
-      expect(true).to.be.false
+      expect('actual').to.equal('expected')
     },
   })
   .window().then(abortXhr)
@@ -229,7 +229,7 @@ Cypress.Commands.add('failRouteOnRequestAssertion', () => {
   cy.server().route({
     url: '/foo',
     onRequest () {
-      expect(true).to.be.false
+      expect('actual').to.equal('expected')
     },
   })
   .window().then(sendXhr)
@@ -249,7 +249,7 @@ Cypress.Commands.add('failRouteOnResponseAssertion', () => {
   cy.server().route({
     url: '/users',
     onResponse () {
-      expect(true).to.be.false
+      expect('actual').to.equal('expected')
     },
   })
   .visit('/xhr.html').get('#fetch').click()
@@ -270,7 +270,7 @@ Cypress.Commands.add('failRouteOnResponseException', () => {
 Cypress.Commands.add('failServerOnAbortAssertion', () => {
   cy.server({
     onAbort () {
-      expect(true).to.be.false
+      expect('actual').to.equal('expected')
     },
   })
   .route('/foo')
@@ -290,7 +290,7 @@ Cypress.Commands.add('failServerOnAbortException', () => {
 Cypress.Commands.add('failServerOnRequestAssertion', () => {
   cy.server({
     onRequest () {
-      expect(true).to.be.false
+      expect('actual').to.equal('expected')
     },
   })
   .route('/foo')
@@ -310,7 +310,7 @@ Cypress.Commands.add('failServerOnRequestException', () => {
 Cypress.Commands.add('failServerOnResponseAssertion', () => {
   cy.server({
     onResponse () {
-      expect(true).to.be.false
+      expect('actual').to.equal('expected')
     },
   })
   .route('/users')
@@ -343,7 +343,7 @@ Cypress.Commands.add('cypressValidationError', () => {
 
 Cypress.Commands.add('failEventHandlerAssertion', () => {
   cy.on('window:load', () => {
-    expect(true).to.be.false
+    expect('actual').to.equal('expected')
   })
 
   cy.visit('http://localhost:1919')

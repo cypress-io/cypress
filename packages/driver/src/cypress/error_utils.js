@@ -6,6 +6,14 @@ const $stackUtils = require('./stack_utils')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 
+if (!Error.captureStackTrace) {
+  Error.captureStackTrace = (err, fn) => {
+    const stack = (new Error()).stack
+
+    err.stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn.name)
+  }
+}
+
 const wrapErr = (err) => {
   if (!err) return
 
@@ -264,22 +272,11 @@ const stackAndCodeFrameIndex = (err, userInvocationStack) => {
   return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
 }
 
-const stackWithContentAppended = (err, stack) => {
-  const appendToStack = err.appendToStack
-
-  if (!appendToStack || !appendToStack.content) return stack
-
-  delete err.appendToStack
-
-  const content = $utils.indent(appendToStack.content, 2)
-
-  return `${stack}\n\n${appendToStack.title}:\n${content}`
-}
-
 const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
   let { stack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
 
-  stack = stackWithContentAppended(err, stack)
+  stack = $stackUtils.stackWithContentAppended(err, stack)
+  stack = $stackUtils.stackWithReplacementMarkerLineRemoved(stack)
 
   return { stack, index }
 }

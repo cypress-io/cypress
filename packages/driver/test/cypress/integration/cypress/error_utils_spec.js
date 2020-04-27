@@ -502,4 +502,32 @@ describe('driver/src/cypress/error_utils', () => {
       expect(result.docsUrl).to.equal('https://on.cypress.io/uncaught-exception-from-application')
     })
   })
+
+  context('Error.captureStackTrace', () => {
+    it('works - even where not natively support', () => {
+      function removeMe2 () {
+        const err = {}
+
+        Error.captureStackTrace(err, removeMeAndAbove)
+
+        return err
+      }
+      function removeMe1 () {
+        return removeMe2()
+      }
+      function removeMeAndAbove () {
+        return removeMe1()
+      }
+      function dontRemoveMe () {
+        return removeMeAndAbove()
+      }
+
+      const stack = dontRemoveMe().stack
+
+      expect(stack).to.include('dontRemoveMe')
+      expect(stack).not.to.include('removeMe1')
+      expect(stack).not.to.include('removeMe2')
+      expect(stack).not.to.include('removeMeAndAbove')
+    })
+  })
 })

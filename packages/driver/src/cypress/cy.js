@@ -678,17 +678,27 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const getInvocationStack = (err) => {
     const current = state('current')
-    const currentAssertionCommand = current && current.get('currentAssertionCommand')
+    const currentAssertionCommand = current?.get('currentAssertionCommand')
     const withInvocationStack = currentAssertionCommand || current
-    const commandInvocationStack = withInvocationStack && withInvocationStack.get('userInvocationStack')
     // user assertion errors (expect().to, etc) get their invocation stack
     // attached to the error thrown from chai
     // command errors and command assertion errors (default assertion or cy.should)
     // have the invocation stack attached to the current command
-    const userInvocationStack = (
-      state('currentAssertionUserInvocationStack') ||
-      commandInvocationStack
-    )
+    let userInvocationStack = state('currentAssertionUserInvocationStack')
+
+    // if there is no user invocation stack from an assertion or it is the default
+    // assertion, meaning it came from a command (e.g. cy.get), prefer the
+    // command's user invocation stack so the code frame points to the command.
+    // `should` callbacks are tricky because the `currentAssertionUserInvocationStack`
+    // points to the `cy.should`, but the error came from inside the callback,
+    // so we need to prefer that.
+    if (
+      !userInvocationStack
+      || err.isDefaultAssertionErr
+      || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
+    ) {
+      userInvocationStack = withInvocationStack?.get('userInvocationStack')
+    }
 
     if (!userInvocationStack) return
 

@@ -415,6 +415,28 @@ chai.use((chai, u) => {
     })
   }
 
+  const captureUserInvocationStack = (specWindow, state, ssfi) => {
+    let userInvocationStack
+
+    // we need a user invocation stack with the top line being the point where
+    // the error occurred for the sake of the code frame
+    // in chrome, stack lines from another frame don't appear in the
+    // error. specWindow.Error works for our purposes because it
+    // doesn't include anything extra (chai.Assertion error doesn't work
+    // because it doesn't have lines from the spec iframe)
+    // in firefox, specWindow.Error has too many extra lines at the
+    // beginning, but chai.AssertionError helps us winnow those down
+    if ($stackUtils.hasCrossFrameStacks(specWindow)) {
+      userInvocationStack = (new chai.AssertionError('uis', {}, ssfi)).stack
+    } else {
+      userInvocationStack = (new specWindow.Error()).stack
+    }
+
+    userInvocationStack = $stackUtils.normalizedUserInvocationStack(userInvocationStack)
+
+    state('currentAssertionUserInvocationStack', userInvocationStack)
+  }
+
   const createPatchedAssert = (specWindow, state, assertFn) => {
     return (function (...args) {
       let err
@@ -437,21 +459,11 @@ chai.use((chai, u) => {
 
       assertFn(passed, message, value, actual, expected, err)
 
-      // stacks from chai AssertionError instances are useless, because
-      // the chai code is served from the 'top' iframe, which binds to top's
-      // Error, but assertions fail inside the spec iframe and then err.stack
-      // will not include the lines from the spec iframe (a different iframe)
-      // for security purposes. therefore, we instantiate a new error on
-      // the spec iframe to get a better stack
-      if (err) {
-        const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
-          (new specWindow.Error('assertion invocation stack')).stack,
-        )
+      if (!err) return
 
-        state('currentAssertionUserInvocationStack', userInvocationStack)
+      captureUserInvocationStack(specWindow, state, chaiUtils.flag(this, 'ssfi'))
 
-        throw err
-      }
+      throw err
     })
   }
 
@@ -460,11 +472,7 @@ chai.use((chai, u) => {
     // expect function instance so we do not affect
     // the outside world
     return (val, message) => {
-      const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
-        (new specWindow.Error('expect invocation stack')).stack,
-      )
-
-      state('currentAssertionUserInvocationStack', userInvocationStack)
+      captureUserInvocationStack(specWindow, state, overrideExpect)
 
       // make the assertion
       return new chai.Assertion(val, message)
@@ -475,6 +483,8 @@ chai.use((chai, u) => {
     const fn = (express, errmsg) => {
       return chai.assert(express, errmsg)
     }
+
+    // TODO: need to do the same as overrideExpect
 
     const fns = _.functions(chai.assert)
 

@@ -20,13 +20,12 @@ setup({ verifyStackLineIsSpecFile: true })
 
 describe('assertion failure', function () {
   fail(this, () => {
-    expect(true).to.be.false
-    expect(false).to.be.false
+    expect('actual').to.equal('expected')
   })
 
   verify(this, {
-    column: 5,
-    message: 'expected true to be false',
+    column: 25,
+    message: `expected 'actual' to equal 'expected'`,
   })
 })
 
@@ -69,11 +68,11 @@ context('commands', function () {
 
   describe('chained failure', function () {
     fail(this, () => {
-      cy.get('div').find('#does-not-exist')
+      cy.get('body').find('#does-not-exist')
     })
 
     verify(this, {
-      column: 21,
+      column: 22,
       message: 'Timed out retrying: Expected to find element: #does-not-exist, but never found it',
     })
   })
@@ -83,13 +82,13 @@ context('cy.then', function () {
   describe('assertion failure', function () {
     fail(this, () => {
       cy.wrap({}).then(() => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       })
     })
 
     verify(this, {
-      column: 9,
-      message: 'expected true to be false',
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -124,13 +123,13 @@ context('cy.should', function () {
   describe('callback assertion failure', function () {
     fail(this, () => {
       cy.wrap({}).should(() => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       })
     })
 
     verify(this, {
-      column: 9,
-      message: 'expected true to be false',
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -196,14 +195,30 @@ context('cy.should', function () {
         expect(true).to.be.true
       })
       .should(() => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       })
     })
 
     verify(this, {
-      column: 9,
+      column: 29,
       codeFrameText: '.should(()=>',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
+    })
+  })
+
+  describe('after callback assertion failure', function () {
+    fail(this, () => {
+      cy.wrap({})
+      .should(() => {
+        expect(true).to.be.true
+      })
+      .should('have.property', 'foo')
+    })
+
+    verify(this, {
+      column: 8,
+      codeFrameText: '.should(\'have.property',
+      message: `expected {} to have property 'foo'`,
     })
   })
 
@@ -224,13 +239,13 @@ context('cy.each', function () {
   describe('assertion failure', function () {
     fail(this, () => {
       cy.wrap([1]).each(() => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       })
     })
 
     verify(this, {
-      column: 9,
-      message: 'expected true to be false',
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -243,7 +258,7 @@ context('cy.each', function () {
 
     verify(this, {
       column: 14,
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -265,13 +280,13 @@ context('cy.spread', function () {
   describe('assertion failure', function () {
     fail(this, () => {
       cy.wrap([1, 2, 3]).spread(() => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       })
     })
 
     verify(this, {
-      column: 9,
-      message: 'expected true to be false',
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -284,7 +299,7 @@ context('cy.spread', function () {
 
     verify(this, {
       column: 14,
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -306,13 +321,13 @@ context('cy.within', function () {
   describe('assertion failure', function () {
     fail(this, () => {
       cy.get('body').within(() => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       })
     })
 
     verify(this, {
-      column: 9,
-      message: 'expected true to be false',
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -325,7 +340,7 @@ context('cy.within', function () {
 
     verify(this, {
       column: 14,
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -347,13 +362,13 @@ context('cy.wrap', function () {
   describe('assertion failure', function () {
     fail(this, () => {
       cy.wrap(() => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       }).then((fn) => fn())
     })
 
     verify(this, {
-      column: 9,
-      message: 'expected true to be false',
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -366,7 +381,7 @@ context('cy.wrap', function () {
 
     verify(this, {
       column: 14,
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -389,15 +404,15 @@ context('cy.visit', () => {
     fail(this, () => {
       cy.visit('/index.html', {
         onBeforeLoad () {
-          expect(true).to.be.false
+          expect('actual').to.equal('expected')
         },
       })
     })
 
     verify(this, {
-      column: 11,
+      column: 31,
       codeFrameText: 'onBeforeLoad',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -413,7 +428,7 @@ context('cy.visit', () => {
     verify(this, {
       column: 16,
       codeFrameText: 'onBeforeLoad',
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -421,15 +436,15 @@ context('cy.visit', () => {
     fail(this, () => {
       cy.visit('/index.html', {
         onLoad () {
-          expect(true).to.be.false
+          expect('actual').to.equal('expected')
         },
       })
     })
 
     verify(this, {
-      column: 11,
+      column: 31,
       codeFrameText: 'onLoad',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -445,7 +460,7 @@ context('cy.visit', () => {
     verify(this, {
       column: 16,
       codeFrameText: 'onLoad',
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 })
@@ -454,13 +469,13 @@ context('cy.route', () => {
   describe('callback assertion failure', function () {
     fail(this, () => {
       cy.server().route(() => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       })
     })
 
     verify(this, {
-      column: 9,
-      message: 'expected true to be false',
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -473,7 +488,7 @@ context('cy.route', () => {
 
     verify(this, {
       column: 14,
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -497,16 +512,16 @@ context('cy.route', () => {
       cy.server().route({
         url: '/foo',
         onAbort () {
-          expect(true).to.be.false
+          expect('actual').to.equal('expected')
         },
       })
       .window().then(abortXhr)
     })
 
     verify(this, {
-      column: 11,
+      column: 31,
       codeFrameText: 'onAbort',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -524,7 +539,7 @@ context('cy.route', () => {
     verify(this, {
       column: 16,
       codeFrameText: 'onAbort',
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -533,16 +548,16 @@ context('cy.route', () => {
       cy.server().route({
         url: '/foo',
         onRequest () {
-          expect(true).to.be.false
+          expect('actual').to.equal('expected')
         },
       })
       .window().then(sendXhr)
     })
 
     verify(this, {
-      column: 11,
+      column: 31,
       codeFrameText: 'onRequest',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -560,7 +575,7 @@ context('cy.route', () => {
     verify(this, {
       column: 16,
       codeFrameText: 'onRequest',
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -569,7 +584,7 @@ context('cy.route', () => {
       cy.server().route({
         url: '/users',
         onResponse () {
-          expect(true).to.be.false
+          expect('actual').to.equal('expected')
         },
       })
       .visit('/xhr.html').get('#fetch').click()
@@ -577,9 +592,9 @@ context('cy.route', () => {
     })
 
     verify(this, {
-      column: 11,
+      column: 31,
       codeFrameText: 'onResponse',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -598,7 +613,7 @@ context('cy.route', () => {
     verify(this, {
       column: 16,
       codeFrameText: 'onResponse',
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 })
@@ -608,7 +623,7 @@ context('cy.server', () => {
     fail(this, () => {
       cy.server({
         onAbort () {
-          expect(true).to.be.false
+          expect('actual').to.equal('expected')
         },
       })
       .route('/foo')
@@ -616,9 +631,9 @@ context('cy.server', () => {
     })
 
     verify(this, {
-      column: 11,
+      column: 31,
       codeFrameText: 'onAbort',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -636,7 +651,7 @@ context('cy.server', () => {
     verify(this, {
       column: 16,
       codeFrameText: 'onAbort',
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -644,7 +659,7 @@ context('cy.server', () => {
     fail(this, () => {
       cy.server({
         onRequest () {
-          expect(true).to.be.false
+          expect('actual').to.equal('expected')
         },
       })
       .route('/foo')
@@ -652,9 +667,9 @@ context('cy.server', () => {
     })
 
     verify(this, {
-      column: 11,
+      column: 31,
       codeFrameText: 'onRequest',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -672,7 +687,7 @@ context('cy.server', () => {
     verify(this, {
       column: 16,
       codeFrameText: 'onRequest',
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 
@@ -680,7 +695,7 @@ context('cy.server', () => {
     fail(this, () => {
       cy.server({
         onResponse () {
-          expect(true).to.be.false
+          expect('actual').to.equal('expected')
         },
       })
       .route('/users')
@@ -689,9 +704,9 @@ context('cy.server', () => {
     })
 
     verify(this, {
-      column: 11,
+      column: 31,
       codeFrameText: 'onResponse',
-      message: 'expected true to be false',
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -710,7 +725,7 @@ context('cy.server', () => {
     verify(this, {
       column: 16,
       codeFrameText: 'onResponse',
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 })
@@ -747,7 +762,7 @@ context('validation errors', function () {
     })
 
     verify(this, {
-      column: 7,
+      column: '(7|14)', // different between chrome & firefox
       message: 'Invalid Chai property: nope',
       stack: ['proxyGetter', 'From Your Spec Code:'],
     })
@@ -758,15 +773,15 @@ context('event handlers', function () {
   describe('event assertion failure', function () {
     fail(this, () => {
       cy.on('window:load', () => {
-        expect(true).to.be.false
+        expect('actual').to.equal('expected')
       })
 
       cy.visit('http://localhost:1919')
     })
 
     verify(this, {
-      column: 9,
-      message: 'expected true to be false',
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
     })
   })
 
@@ -781,7 +796,7 @@ context('event handlers', function () {
 
     verify(this, {
       column: 14,
-      message: '{}.bar is not a function',
+      message: 'bar is not a function',
     })
   })
 })
@@ -832,7 +847,7 @@ context('uncaught errors', () => {
     verify(this, {
       column: 14,
       message: [
-        '{}.bar is not a function',
+        'bar is not a function',
         'The following error originated from your test code',
       ],
     })
@@ -848,7 +863,7 @@ context('uncaught errors', () => {
     verify(this, {
       column: 14,
       message: [
-        '{}.bar is not a function',
+        'bar is not a function',
         'The following error originated from your test code',
       ],
       codeFrameText: 'fail(this,(done)=>',

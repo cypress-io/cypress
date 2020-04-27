@@ -4,9 +4,11 @@ const errorStackParser = require('error-stack-parser')
 const path = require('path')
 
 const $sourceMapUtils = require('./source_map_utils')
+const $utils = require('./utils')
 
 const whitespaceRegex = /^(\s*)\S*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
+const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
 // returns tuple of [message, stack]
 const splitStack = (stack) => {
@@ -24,6 +26,10 @@ const splitStack = (stack) => {
   }, [[], []])
 }
 
+const unsplitStack = (messageLines, stackLines) => {
+  return _.castArray(messageLines).concat(stackLines).join('\n')
+}
+
 const getStackLines = (stack) => {
   const [, stackLines] = splitStack(stack)
 
@@ -34,13 +40,62 @@ const stackWithoutMessage = (stack) => {
   return getStackLines(stack).join('\n')
 }
 
+const hasCrossFrameStacks = (specWindow) => {
+  // get rid of the top lines since they naturally have different line:column
+  const normalize = (stack) => {
+    return stack.replace(/^.*\n/, '')
+  }
+
+  const topStack = normalize((new Error()).stack)
+  const specStack = normalize((new specWindow.Error()).stack)
+
+  return topStack === specStack
+}
+
+const stackWithContentAppended = (err, stack) => {
+  const appendToStack = err.appendToStack
+
+  if (!appendToStack || !appendToStack.content) return stack
+
+  delete err.appendToStack
+
+  const content = $utils.indent(appendToStack.content, 2)
+
+  return `${stack}\n\n${appendToStack.title}:\n${content}`
+}
+
+const stackWithLinesRemoved = (stack, cb) => {
+  const [messageLines, stackLines] = splitStack(stack)
+  const remainingStackLines = cb(stackLines)
+
+  return unsplitStack(messageLines, remainingStackLines)
+}
+
+const stackWithLinesDroppedFromMarker = (stack, marker) => {
+  return stackWithLinesRemoved(stack, (lines) => {
+    // drop lines above the marker
+    const withAboveMarkerRemoved = _.dropWhile(lines, (line) => {
+      return !_.includes(line, marker)
+    })
+
+    // remove the first line because it includes the marker
+    return withAboveMarkerRemoved.slice(1)
+  })
+}
+
+const stackWithReplacementMarkerLineRemoved = (stack) => {
+  return stackWithLinesRemoved(stack, (lines) => {
+    return _.reject(lines, (line) => _.includes(line, STACK_REPLACEMENT_MARKER))
+  })
+}
+
 const stackWithUserInvocationStackAppended = (err, userInvocationStack) => {
   const stack = _.trim(err.stack, '\n') // trim newlines from end
   const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
 
   let commandCallIndex = _.findIndex(stackLines, (line) => {
-    return line.includes('__stackReplacementMarker')
+    return line.includes(STACK_REPLACEMENT_MARKER)
   })
 
   if (commandCallIndex < 0) {
@@ -54,7 +109,7 @@ const stackWithUserInvocationStackAppended = (err, userInvocationStack) => {
   // but the full stack includes the message + 'From Your Spec Code:',
   // so we adjust it
   return {
-    stack: messageLines.concat(stackLines).join('\n'),
+    stack: unsplitStack(messageLines, stackLines),
     index: commandCallIndex + messageLines.length + 1,
   }
 }
@@ -217,11 +272,14 @@ const normalizedStack = (err) => {
 
 const normalizedUserInvocationStack = (userInvocationStack, fnName) => {
   // Firefox user invocation stack includes a line at the top that looks like
-  // addCommand/cy[name]@cypress:///../driver/src/cypress/cy.js:936:77,
+  // addCommand/cy[name]@cypress:///../driver/src/cypress/cy.js:936:77 or
+  // add/$Chainer.prototype[key] (cypress:///../driver/src/cypress/chainer.js:30:128)
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
 
-  return _.reject(stackLines, (line) => line.includes('cy[name]')).join('\n')
+  return _.reject(stackLines, (line) => {
+    return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
+  }).join('\n')
 }
 
 const replacedStack = (err, newStack) => {
@@ -232,15 +290,20 @@ const replacedStack = (err, newStack) => {
   const errString = err.toString()
   const stackLines = getStackLines(newStack)
 
-  return [errString].concat(stackLines).join('\n')
+  return unsplitStack(errString, stackLines)
 }
 
 module.exports = {
   getCodeFrame,
   getSourceStack,
+  getStackLines,
+  hasCrossFrameStacks,
   normalizedStack,
   normalizedUserInvocationStack,
   replacedStack,
-  stackWithUserInvocationStackAppended,
+  stackWithContentAppended,
+  stackWithLinesDroppedFromMarker,
   stackWithoutMessage,
+  stackWithReplacementMarkerLineRemoved,
+  stackWithUserInvocationStackAppended,
 }
