@@ -176,7 +176,7 @@
     "multiparty": "4.2.1",
     "nock": "12.0.2",
     "proxyquire": "2.1.0",
-    "react": "15.6.2",
+    "react": "16.12.0",
     "repl.history": "0.1.4",
     "sinon": "5.1.1",
     "snap-shot-it": "7.9.2",

@@ -70,7 +70,14 @@ const runSpec = (project, spec, browser) => {
   const launchBrowser = () => {
     project.browserOpening()
 
-    ipc.launchBrowser({ browser, spec: spec.file }, (err, data = {}) => {
+    const launchOptions = {
+      browser,
+      spec: spec.file,
+      specType: spec.specType,
+      relative: spec.relative,
+    }
+
+    ipc.launchBrowser(launchOptions, (err, data = {}) => {
       if (err) {
         return project.setError(err)
       }

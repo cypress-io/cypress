@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:routes')
 
+const AppData = require('./util/app_data')
 const CacheBuster = require('./util/cache_buster')
 const spec = require('./controllers/spec')
 const reporter = require('./controllers/reporter')
@@ -52,8 +53,18 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     xhrs.handle(req, res, config, next)
   })
 
+  // special fallback - serve local files from the project's root folder
   app.get('/__root/*', (req, res) => {
     const file = path.join(config.projectRoot, req.params[0])
+
+    res.sendFile(file, { etag: false })
+  })
+
+  // special fallback - serve dist'd (bundled/static) files from the project path folder
+  app.get('/__cypress/bundled/*', (req, res) => {
+    const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
+
+    debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
 
     res.sendFile(file, { etag: false })
   })

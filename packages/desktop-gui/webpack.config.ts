@@ -26,7 +26,7 @@ config.plugins = [
 config.resolve = {
   ...config.resolve,
   alias: {
-    'lodash': require.resolve('lodash'),
+    'lodash$': require.resolve('lodash'),
     'react': require.resolve('react'),
     'react-dom': require.resolve('react-dom'),
   },

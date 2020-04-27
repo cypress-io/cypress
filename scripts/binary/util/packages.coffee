@@ -2,6 +2,7 @@ _ = require("lodash")
 fs = require("fs-extra")
 cp = require("child_process")
 path = require("path")
+# we wrap glob to handle EMFILE error
 glob = require("glob")
 Promise = require("bluebird")
 retry = require("bluebird-retry")
@@ -12,6 +13,8 @@ R = require("ramda")
 os = require("os")
 prettyMs = require("pretty-ms")
 pluralize = require('pluralize')
+debug = require("debug")("cypress:binary")
+externalUtils = require("./3rd-party")
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -70,17 +73,28 @@ copyAllToDist = (distDir) ->
     ## and any specified in package.json files
     Promise.resolve(fs.readJsonAsync(pathToPackageJson(pkg)))
     .then (json) ->
-      ## grab all the files
+      ## grab all the files that match "files" wildcards
+      ## but without all negated files ("!src/**/*.spec.js" for example)
       ## and default included paths
       ## and convert to relative paths
-      Promise.resolve(
-        DEFAULT_PATHS
+      DEFAULT_PATHS
         .concat(json.files or [])
         .concat(json.main or [])
-        .map (file) ->
-          path.join(pkg, file)
-      )
-      .map(copyRelativePathToDist, {concurrency: 1})
+    .then (pkgFileMasks) ->
+      debug("for pkg %s have the following file masks %o", pkg, pkgFileMasks)
+      globOptions = {
+        cwd: pkg, # search in the package folder
+        absolute: false # and return relative file paths
+      }
+      externalUtils.globby(pkgFileMasks, globOptions)
+    # we find paths like "src/main.js" wrt "packages/foo"
+    # now we need to get the file path wrt current working directory
+    # like "packages/foo/src/main.js" so when we copy
+    # into the dist folder we get "<dist?/packages/foo/src/main.js"
+    .map (foundFileRelativeToPackageFolder) ->
+      path.join(pkg, foundFileRelativeToPackageFolder)
+    .tap(debug)
+    .map(copyRelativePathToDist, {concurrency: 1})
 
         ## fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
         ## 1/1  41688
@@ -100,7 +114,7 @@ copyAllToDist = (distDir) ->
     glob("./packages/*")
     .map(copyPackage, {concurrency: 1})
   .then ->
-    console.log("Finished Copying", new Date() - started)
+    console.log("Finished Copying %dms", new Date() - started)
 
 forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)
