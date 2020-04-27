@@ -13,7 +13,7 @@ Cypress.Commands.add('failCommand', () => {
 })
 
 Cypress.Commands.add('failChainedCommand', () => {
-  cy.get('div').find('#does-not-exist')
+  cy.get('body').find('#does-not-exist')
 })
 
 Cypress.Commands.add('failThenAssertion', () => {
