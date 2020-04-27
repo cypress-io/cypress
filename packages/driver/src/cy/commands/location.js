@@ -1,101 +1,100 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _ = require("lodash");
-const Promise = require("bluebird");
+const _ = require('lodash')
+const Promise = require('bluebird')
 
-const $errUtils = require("../../cypress/error_utils");
-const $Location = require("../../cypress/location");
+const $errUtils = require('../../cypress/error_utils')
 
-module.exports = (Commands, Cypress, cy, state, config) => Commands.addAll({
-  url(options = {}) {
-    let resolveHref;
-    const userOptions = options;
-    options = _.defaults({}, userOptions, { log: true });
+module.exports = (Commands, Cypress, cy) => {
+  Commands.addAll({
+    url (options = {}) {
+      const userOptions = options
 
-    if (options.log !== false) {
-      options._log = Cypress.log({
-        message: ""
-      });
-    }
+      options = _.defaults({}, userOptions, { log: true })
 
-    const getHref = () => {
-      return cy.getRemoteLocation("href");
-    };
+      if (options.log !== false) {
+        options._log = Cypress.log({
+          message: '',
+        })
+      }
 
-    return (resolveHref = () => {
-      return Promise.try(getHref).then(href => {
-        return cy.verifyUpcomingAssertions(href, options, {
-          onRetry: resolveHref
-        });
-      });
-    })();
-  },
+      const getHref = () => {
+        return cy.getRemoteLocation('href')
+      }
 
-  hash(options = {}) {
-    let resolveHash;
-    const userOptions = options;
-    options = _.defaults({}, userOptions, { log: true });
+      const resolveHref = () => {
+        return Promise.try(getHref).then((href) => {
+          return cy.verifyUpcomingAssertions(href, options, {
+            onRetry: resolveHref,
+          })
+        })
+      }
 
-    if (options.log !== false) {
-      options._log = Cypress.log({
-        message: ""
-      });
-    }
+      return resolveHref()
+    },
 
-    const getHash = () => {
-      return cy.getRemoteLocation("hash");
-    };
+    hash (options = {}) {
+      const userOptions = options
 
-    return (resolveHash = () => {
-      return Promise.try(getHash).then(hash => {
-        return cy.verifyUpcomingAssertions(hash, options, {
-          onRetry: resolveHash
-        });
-      });
-    })();
-  },
+      options = _.defaults({}, userOptions, { log: true })
 
-  location(key, options) {
-    let resolveLocation;
-    let userOptions = options;
-    //# normalize arguments allowing key + options to be undefined
-    //# key can represent the options
-    if (_.isObject(key) && _.isUndefined(userOptions)) {
-      userOptions = key;
-    }
+      if (options.log !== false) {
+        options._log = Cypress.log({
+          message: '',
+        })
+      }
 
-    if (userOptions == null) { userOptions = {}; }
+      const getHash = () => {
+        return cy.getRemoteLocation('hash')
+      }
 
-    options = _.defaults({}, userOptions, { log: true });
+      const resolveHash = () => {
+        return Promise.try(getHash).then((hash) => {
+          return cy.verifyUpcomingAssertions(hash, options, {
+            onRetry: resolveHash,
+          })
+        })
+      }
 
-    const getLocation = () => {
-      let ret;
-      const location = cy.getRemoteLocation();
+      return resolveHash()
+    },
 
-      return ret = _.isString(key) ?
-        //# use existential here because we only want to throw
-        //# on null or undefined values (and not empty strings)
-        location[key] != null ? location[key] : $errUtils.throwErrByPath("location.invalid_key", { args: { key } })
-      :
-        location;
-    };
+    location (key, options) {
+      let userOptions = options
 
-    if (options.log !== false) {
-      options._log = Cypress.log({
-        message: key != null ? key : ""
-      });
-    }
+      // normalize arguments allowing key + options to be undefined
+      // key can represent the options
+      if (_.isObject(key) && _.isUndefined(userOptions)) {
+        userOptions = key
+      }
 
-    return (resolveLocation = () => {
-      return Promise.try(getLocation).then(ret => {
-        return cy.verifyUpcomingAssertions(ret, options, {
-          onRetry: resolveLocation
-        });
-      });
-    })();
-  }
-});
+      userOptions = userOptions || {}
+
+      options = _.defaults({}, userOptions, { log: true })
+
+      const getLocation = () => {
+        const location = cy.getRemoteLocation()
+
+        return _.isString(key)
+          // use existential here because we only want to throw
+          // on null or undefined values (and not empty strings)
+          ? location[key] ?? $errUtils.throwErrByPath('location.invalid_key', { args: { key } })
+          : location
+      }
+
+      if (options.log !== false) {
+        options._log = Cypress.log({
+          message: key != null ? key : '',
+        })
+      }
+
+      const resolveLocation = () => {
+        return Promise.try(getLocation).then((ret) => {
+          return cy.verifyUpcomingAssertions(ret, options, {
+            onRetry: resolveLocation,
+          })
+        })
+      }
+
+      return resolveLocation()
+    },
+  })
+}
