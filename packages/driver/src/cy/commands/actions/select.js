@@ -73,10 +73,10 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       const getOptions = () => {
-        // throw if <select> is disabled
         let notAllUniqueValues
 
-        if (options.$el.prop('disabled')) {
+        // throw if <select> is disabled
+        if (!options.force && options.$el.prop('disabled')) {
           node = $dom.stringify(options.$el)
           $errUtils.throwErrByPath('select.disabled', { args: { node } })
         }
@@ -140,8 +140,12 @@ module.exports = (Commands, Cypress, cy) => {
           })
         }
 
+        const optionsAreDisabled = _.some(optionEls, ($el) => {
+          return $el.prop('disabled')
+        })
+
         _.each(optionEls, ($el) => {
-          if ($el.prop('disabled')) {
+          if (!options.force && $el.prop('disabled')) {
             node = $dom.stringify($el)
 
             $errUtils.throwErrByPath('select.option_disabled', {
@@ -150,7 +154,21 @@ module.exports = (Commands, Cypress, cy) => {
           }
         })
 
-        return { values, optionEls, optionsObjects, notAllUniqueValues }
+        // const optgroupsAreDisabled = _.some(optionEls, ($el) => {
+        //   return $el.parent('optgroup').prop('disabled')
+        // })
+
+        _.each(optionEls, ($el) => {
+          if (!options.force && $el.parent('optgroup').prop('disabled')) {
+            node = $dom.stringify($el)
+
+            $errUtils.throwErrByPath('select.optgroup_disabled', {
+              args: { node },
+            })
+          }
+        })
+
+        return { values, optionEls, optionsObjects, notAllUniqueValues, optionsAreDisabled }
       }
 
       const retryOptions = () => {
@@ -166,7 +184,7 @@ module.exports = (Commands, Cypress, cy) => {
       return Promise
       .try(retryOptions)
       .then((obj = {}) => {
-        const { values, optionEls, optionsObjects, notAllUniqueValues } = obj
+        const { values, optionEls, optionsObjects, notAllUniqueValues, optionsAreDisabled } = obj
 
         // preserve the selected values
         consoleProps.Selected = values
@@ -202,6 +220,17 @@ module.exports = (Commands, Cypress, cy) => {
               interval: options.interval,
             })
           }).then(() => {
+            let disabledOptions = []
+
+            if (optionsAreDisabled) {
+              _.each(optionEls, ($el) => {
+                if ($el.prop('disabled')) {
+                  disabledOptions.push($el)
+                  $el.prop('disabled', false)
+                }
+              })
+            }
+
             // reset the selects value after we've
             // fired all the proper click events
             // for the options
@@ -246,7 +275,15 @@ module.exports = (Commands, Cypress, cy) => {
 
             change.initEvent('change', true, false)
 
-            return options.$el.get(0).dispatchEvent(change)
+            options.$el.get(0).dispatchEvent(change)
+
+            if (disabledOptions.length) {
+              _.each(disabledOptions, ($el) => {
+                $el.prop('disabled', true)
+              })
+            }
+
+            return undefined
           })
         }).then(() => {
           const verifyAssertions = () => {

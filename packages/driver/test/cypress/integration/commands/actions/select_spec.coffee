@@ -117,6 +117,37 @@ describe "src/cy/commands/actions/select", ->
 
       cy.get("#select-maps").select("de_dust2", {force: true})
 
+    it "can forcibly click when select is disabled", () ->
+        cy.get("select[name=disabled]").should(($select) -> 
+          ## default select value
+          expect($select.val()).to.eq("foo")
+        )
+
+        cy.get("select[name=disabled]")
+        .select("bar", { force: true }).should(($select) -> 
+          expect($select.val()).to.eq("bar")
+        )
+
+    it "can forcibly click when optgroup is disabled", () ->
+      cy.get("select[name=optgroup-disabled]").should(($select) -> 
+          ## default select value
+          expect($select.val()).to.eq("foo")
+        )
+      cy.get("select[name=optgroup-disabled]")
+      .select("bar", { force: true }).should(($select) -> 
+          expect($select.val()).to.eq("bar")
+        )
+
+    it "can forcibly click when option is disabled", () ->
+      cy.get("select[name=opt-disabled]").should(($select) -> 
+          ## default select value
+          expect($select.val()).to.eq("foo")
+        )
+      cy.get("select[name=opt-disabled]")
+      .select("bar", { force: true }).should(($select) -> 
+          expect($select.val()).to.eq("bar")
+        )
+
     it "retries until <option> can be selected", ->
       option = cy.$$("<option>foo</option>")
 
@@ -132,6 +163,14 @@ describe "src/cy/commands/actions/select", ->
         select.prop("disabled", false)
 
       cy.get("select[name=disabled]").select("foo")
+
+    it "retries until <optgroup> is no longer disabled", ->
+      select = cy.$$("select[name=optgroup-disabled]")
+
+      cy.on "command:retry", _.once =>
+        select.find("optgroup").prop("disabled", false)
+
+      cy.get("select[name=optgroup-disabled]").select("bar")
 
     it "retries until <options> are no longer disabled", ->
       select = cy.$$("select[name=opt-disabled]")
@@ -283,6 +322,14 @@ describe "src/cy/commands/actions/select", ->
           done()
 
         cy.get("select[name=disabled]").select("foo")
+
+      it "throws when optgroup is disabled", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include("`cy.select()` failed because this `<option>` you are trying to select is within an `<optgroup>` that is currently disabled:")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/select")
+          done()
+
+        cy.get("select[name=optgroup-disabled]").select("bar")
 
       it "throws when options are disabled", (done) ->
         cy.on "fail", (err) ->
