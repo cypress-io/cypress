@@ -76,6 +76,14 @@ Cypress.Commands.add('failAfterMultipleShouldCallbacksAssertion', () => {
   })
 })
 
+Cypress.Commands.add('failAfterCallbackSuccessAssertion', () => {
+  cy.wrap({})
+  .should(() => {
+    expect(true).to.be.true
+  })
+  .should('have.property', 'foo')
+})
+
 Cypress.Commands.add('failCommandAfterShouldSuccess', () => {
   cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
   cy.get('#does-not-exist')

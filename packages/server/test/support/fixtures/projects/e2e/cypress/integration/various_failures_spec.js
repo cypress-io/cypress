@@ -206,7 +206,7 @@ context('cy.should', function () {
     })
   })
 
-  describe('after callback assertion failure', function () {
+  describe('after callback success assertion failure', function () {
     fail(this, () => {
       cy.wrap({})
       .should(() => {
@@ -222,7 +222,7 @@ context('cy.should', function () {
     })
   })
 
-  describe('command after success', function () {
+  describe('command failure after success', function () {
     fail(this, () => {
       cy.wrap({ foo: 'foo' }).should('have.property', 'foo')
       cy.get('#does-not-exist')

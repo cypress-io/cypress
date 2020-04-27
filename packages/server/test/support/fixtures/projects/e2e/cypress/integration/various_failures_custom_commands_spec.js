@@ -183,6 +183,18 @@ context('cy.should', function () {
     })
   })
 
+  describe('after callback success assertion failure', function () {
+    fail(this, () => {
+      cy.failAfterCallbackSuccessAssertion()
+    })
+
+    verify(this, {
+      column: 4,
+      codeFrameText: '.should(\'have.property\',\'foo\')',
+      message: `expected {} to have property 'foo'`,
+    })
+  })
+
   describe('command failure after success', function () {
     fail(this, () => {
       cy.failCommandAfterShouldSuccess()
