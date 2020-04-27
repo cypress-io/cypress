@@ -68,6 +68,8 @@ copyAllToDist = (distDir) ->
       fs.copyAsync(relative, dest)
 
   copyPackage = (pkg) ->
+    console.log('** copy package: %s **', pkg)
+
     ## copies the package to dist
     ## including the default paths
     ## and any specified in package.json files
@@ -85,6 +87,7 @@ copyAllToDist = (distDir) ->
       globOptions = {
         cwd: pkg, # search in the package folder
         absolute: false # and return relative file paths
+        followSymbolicLinks: false # do not follow symlinks
       }
       externalUtils.globby(pkgFileMasks, globOptions)
     # we find paths like "src/main.js" wrt "packages/foo"
@@ -115,6 +118,7 @@ copyAllToDist = (distDir) ->
     .map(copyPackage, {concurrency: 1})
   .then ->
     console.log("Finished Copying %dms", new Date() - started)
+    console.log("")
 
 forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)
