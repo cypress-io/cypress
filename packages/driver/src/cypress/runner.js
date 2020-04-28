@@ -8,7 +8,6 @@ const Pending = require('mocha/lib/pending')
 const $Log = require('./log')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
-const $stackUtils = require('./stack_utils')
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -731,8 +730,6 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
   return _runner.on('fail', (runnable, err) => {
     let hookName
     const isHook = runnable.type === 'hook'
-
-    err.stack = $stackUtils.normalizedStack(err)
 
     if (isHook) {
       const parentTitle = runnable.parent.title

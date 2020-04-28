@@ -75,9 +75,6 @@ const stackWithReplacedProps = (err, props) => {
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
-  // TODO: can we remove this?
-  err.stack = $stackUtils.normalizedStack(err)
-
   const newMessage = cb(err.message, newErrMsg)
   const newStack = stackWithReplacedProps(err, { message: newMessage })
 
