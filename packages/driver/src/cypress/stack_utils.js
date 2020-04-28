@@ -277,6 +277,11 @@ const normalizedStack = (err) => {
   // always includes the name/message
   const errString = err.toString()
   const errStack = err.stack || ''
+
+  // the stack has already been normalized and normalizing the indentation
+  // again could mess up the whitespace
+  if (errStack.includes(errString)) return err.stack
+
   const firstErrLine = errString.slice(0, errString.indexOf('\n'))
   const firstStackLine = errStack.slice(0, errStack.indexOf('\n'))
   const stackIncludesMsg = firstStackLine.includes(firstErrLine)
