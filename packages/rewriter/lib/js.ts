@@ -13,6 +13,7 @@ const defaultPrintOpts: recast.Options = {
 
 type OriginalSourceInfo = { url: string, js: string }
 
+// a function that, given source info, returns an id that can be used to build the sourcemap later
 export type DeferSourceMapRewriteFn = (sourceInfo: OriginalSourceInfo) => string
 
 export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any): any {
@@ -36,23 +37,33 @@ export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any
   }
 }
 
-export function rewriteJs (url: string, js: string, deferSourceMapRewrite: DeferSourceMapRewriteFn): string {
+export function _rewriteJsUnsafe (url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
+  const ast = recast.parse(js)
+
+  astTypes.visit(ast, jsRules)
+
+  const { code } = recast.print(ast, defaultPrintOpts)
+
+  if (!deferSourceMapRewrite) {
+    // no sourcemaps
+    return sourceMaps.stripMappingUrl(code)
+  }
+
+  // get an ID that can be used to lazy-generate the source map later
+  const sourceMapId = deferSourceMapRewrite({ url, js })
+
+  return sourceMaps.urlFormatter(
+    // using a relative URL ensures that required cookies + other headers are sent along
+    // and can be reused if the user's sourcemap requires an HTTP request to be made
+    `/__cypress/source-maps/${sourceMapId}.map`,
+    code,
+  )
+}
+
+export function rewriteJs (url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
   try {
-    const ast = recast.parse(js)
-
-    astTypes.visit(ast, jsRules)
-
-    const { code } = recast.print(ast, defaultPrintOpts)
-
-    // get an ID that can be used to lazy-generate the source map later
-    const sourceMapId = deferSourceMapRewrite({ url, js })
-
-    return sourceMaps.urlFormatter(
-      // using a relative URL ensures that required cookies + other headers are sent along
-      // and can be reused if the user's sourcemap requires an HTTP request to be made
-      `/__cypress/source-maps/${sourceMapId}.map`,
-      code,
-    )
+    // rewriting can throw on invalid JS or if there are bugs in the js-rules, so always wrap it
+    return _rewriteJsUnsafe(url, js, deferSourceMapRewrite)
   } catch (err) {
     debug('error while parsing JS %o', { err, js: js.slice ? js.slice(0, 500) : js })
 

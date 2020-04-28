@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import { expect } from 'chai'
-import { rewriteJs } from '../../lib/js'
+import { _rewriteJsUnsafe } from '../../lib/js'
 import fse from 'fs-extra'
 import Bluebird from 'bluebird'
-import * as sourceMaps from '../../lib/source-maps'
+import * as sourceMaps from '../../lib/util/source-maps'
 import rp from '@cypress/request-promise'
 import snapshot from 'snap-shot-it'
 import fs from 'fs'
@@ -18,29 +18,11 @@ function match (varName, prop) {
   return `globalThis.top.Cypress.resolveWindowReference(globalThis, ${varName}, '${prop}')`
 }
 
-function parse (outJs: string) {
-  const smIndex = outJs.lastIndexOf('\n//# sourceMappingURL=')
-
-  return {
-    js: outJs.slice(0, smIndex),
-    map: sourceMaps.tryDecodeInline(outJs),
-  }
-}
-
 function testExpectedJs (string: string, expected: string) {
-  const actual = parse(rewriteJs(URL, string))
+  // use _rewriteJsUnsafe so exceptions can cause the test to fail
+  const actual = _rewriteJsUnsafe(URL, string)
 
-  expect(actual.js).to.eq(expected)
-
-  expect(actual.map).to.deep.include({
-    file: 'foo.js (original).map',
-    sourceRoot: 'http://example.com/',
-  })
-
-  expect(actual.map.sources).to.deep.eq(['foo.js (original)'])
-  expect(actual.map.sourcesContent).to.deep.eq([string])
-
-  expect(actual.map).to.have.keys('version', 'sources', 'names', 'mappings', 'file', 'sourceRoot', 'sourcesContent')
+  expect(actual).to.eq(expected)
 }
 
 describe('lib/js', function () {
@@ -254,8 +236,7 @@ describe('lib/js', function () {
 
         _.each(libs, (url, lib) => {
           it(`does not corrupt code from '${lib}'`, function () {
-            // nock.enableNetConnect()
-
+            // may have to download and rewrite large files
             this.timeout(20000)
 
             const pathToLib = `/tmp/${lib}`
@@ -274,7 +255,7 @@ describe('lib/js', function () {
             .readFile(pathToLib, 'utf8')
             .catch(downloadFile)
             .then((libCode) => {
-              const stripped = rewriteJs(url, libCode)
+              const stripped = _rewriteJsUnsafe(url, libCode)
 
               expect(() => eval(stripped), 'is valid JS').to.not.throw
             })
@@ -284,18 +265,34 @@ describe('lib/js', function () {
     })
 
     context('source maps', function () {
-      it('generates as expected', function () {
-        snapshot(parse(rewriteJs(URL, 'window.top')).map)
+      it('emits sourceInfo as expected', function (done) {
+        _rewriteJsUnsafe(URL, 'window.top', (sourceInfo) => {
+          snapshot(sourceInfo)
+          done()
+
+          return ''
+        })
       })
 
-      it('composes with existing inline sourcemap', function () {
+      it('emits info about existing inline sourcemap', function (done) {
         // replace existing sourceMappingURL with inline
-        const inlinedJs = sourceMaps.inlineFormatter({
-          code: testSource.replace('\n//# sourceMappingURL=test.js.map\n', ''),
-          map: JSON.parse(testSourceMap),
-        })
+        const inlinedJs = sourceMaps.urlFormatter(`data:application/json;base64,${Buffer.from(testSourceMap).toString('base64')}`, testSource)
 
-        snapshot(parse(rewriteJs('test.js', inlinedJs)).map)
+        _rewriteJsUnsafe(URL, inlinedJs, (sourceInfo) => {
+          snapshot(sourceInfo)
+          done()
+
+          return ''
+        })
+      })
+
+      it('emits info about existing external sourcemap', function (done) {
+        _rewriteJsUnsafe(URL, testSource, (sourceInfo) => {
+          snapshot(sourceInfo)
+          done()
+
+          return ''
+        })
       })
 
       // TODO: implement serving extenal sourcemaps
@@ -307,14 +304,6 @@ describe('lib/js', function () {
         afterEach(() => {
           nock.restore()
           nock.enableNetConnect()
-        })
-
-        it('loads external sourcemaps', () => {
-          // const onComplete = () => {
-
-          // }
-
-          // snapshot(parse(rewriteJsWithExternalSourceMaps('http://foo.com/bar/test.js', inlinedJs, onComplete)))
         })
       })
     })

@@ -2,7 +2,7 @@ import _ from 'lodash'
 import RewritingStream from 'parse5-html-rewriting-stream'
 import * as js from './js'
 
-export function install (url: string, rewriter: RewritingStream, deferSourceMapRewrite: js.DeferSourceMapRewriteFn) {
+export function install (url: string, rewriter: RewritingStream, deferSourceMapRewrite?: js.DeferSourceMapRewriteFn) {
   let currentlyInsideJsScriptTag = false
   let inlineJsIndex = 0
 
@@ -15,7 +15,7 @@ export function install (url: string, rewriter: RewritingStream, deferSourceMapR
 
     const typeAttr = _.find(startTag.attrs, { name: 'type' })
 
-    if (typeAttr && typeAttr.value !== 'text/javascript') {
+    if (typeAttr && typeAttr.value !== 'text/javascript' && typeAttr.value !== 'module') {
       // we don't care about intercepting non-JS <script> tags
       currentlyInsideJsScriptTag = false
 
@@ -24,6 +24,8 @@ export function install (url: string, rewriter: RewritingStream, deferSourceMapR
 
     currentlyInsideJsScriptTag = true
 
+    // rename subresource integrity attr since cypress's rewriting will invalidate SRI hashes
+    // @see https://github.com/cypress-io/cypress/issues/2393
     const sriAttr = _.find(startTag.attrs, { name: 'integrity' })
 
     if (sriAttr) {

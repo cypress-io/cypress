@@ -14,7 +14,7 @@ export const getMappingUrl = (js: string) => {
   return undefined
 }
 
-const stripSourceMap = (js: string) => {
+export const stripMappingUrl = (js: string) => {
   return js.replace(sourceMapRe, '')
 }
 
@@ -55,7 +55,7 @@ export const getPaths = (urlStr: string) => {
 
 export const urlFormatter = (url: string, js: string): string => {
   return [
-    stripSourceMap(js),
+    stripMappingUrl(js),
     `//# sourceMappingURL=${url}`,
   ].join('\n')
 }
