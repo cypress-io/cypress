@@ -1,8 +1,8 @@
-const { $, _ } = Cypress
+const { $, _, Promise } = Cypress
 
 export const getCommandLogWithText = (text) => {
   return cy
-  .$$(`.runnable-active .command-wrapper:contains(${text}):visible`, top.document)
+  .$$(`.runnable-active .command-wrapper:contains(${text})`, top.document)
   .parentsUntil('li')
   .last()
   .parent()
@@ -22,7 +22,7 @@ export const findReactInstance = function (dom) {
 export const clickCommandLog = (sel) => {
   return cy.wait(10)
   .then(() => {
-    withMutableReporterState(() => {
+    return withMutableReporterState(() => {
       const commandLogEl = getCommandLogWithText(sel)
 
       const reactCommandInstance = findReactInstance(commandLogEl[0])
@@ -33,10 +33,12 @@ export const clickCommandLog = (sel) => {
 
       reactCommandInstance.props.appState.isRunning = false
 
-      $(commandLogEl).find('.command-wrapper').click()
+      $(commandLogEl).find('.command-wrapper')
+      .click()
+      .get(0).scrollIntoView()
 
       // make sure command was pinned, otherwise throw a better error message
-      expect(cy.$$('.command-pin:visible', top.document).length, 'command should be pinned').ok
+      expect(cy.$$('.runnable-active .command-pin', top.document).length, 'command should be pinned').ok
     })
   })
 }
@@ -48,7 +50,7 @@ export const withMutableReporterState = (fn) => {
 
   currentTestLog.props.model._isOpen = true
 
-  return Cypress.Promise.try(fn)
+  return Promise.try(fn)
   .then(() => {
     top.Runner.configureMobx({ enforceActions: 'always' })
   })
@@ -79,7 +81,7 @@ const getAllFn = (...aliases) => {
     return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
   }
 
-  return Cypress.Promise.all(
+  return Promise.all(
     aliases[0].split(' ').map((alias) => {
       return cy.now('get', alias)
     }),

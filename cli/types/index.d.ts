@@ -367,7 +367,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     getFirefoxGcInterval(): number | null | undefined
-
   
     /**
      * @returns the number of test retries currently enabled for the run

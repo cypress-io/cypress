@@ -260,13 +260,15 @@ const getAllSiblingTests = function (suite, getTestById) {
   return tests
 }
 
-const getTestFromHook = function (hook, suite, getTestById) {
+const getTestFromHook = function (hook, getTestById) {
   // if theres already a currentTest use that
   const test = hook != null ? hook.ctx.currentTest : undefined
 
   if (test) {
     return test
   }
+
+  const suite = hook.parent
 
   if (hook.hookName === 'after all') {
     const siblings = getAllSiblingTests(suite, getTestById)
@@ -279,39 +281,6 @@ const getTestFromHook = function (hook, suite, getTestById) {
 
     return _.first(siblings)
   }
-
-  // if we have a hook id then attempt
-  // to find the test by its id
-  let found
-
-  if (hook != null ? hook.id : undefined) {
-    found = onFirstTest(suite, (test) => {
-      return hook.id === test.id
-    })
-
-    if (found) {
-      return found
-    }
-  }
-
-  // returns us the very first test
-  // which is in our filtered tests array
-  // based on walking down the current suite
-  // iterating through each test until it matches
-  found = onFirstTest(suite, (test) => {
-    return getTestById(test.id)
-  })
-
-  if (found) {
-    return found
-  }
-
-  // have one last final fallback where
-  // we just return true on the very first
-  // test (used in testing)
-  return onFirstTest(suite, () => {
-    return true
-  })
 }
 
 // we have to see if this is the last suite amongst
@@ -614,7 +583,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
       normalizedSuite.tests = _.map(suite._onlyTests, (test) => {
         const normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById, getTestId)
 
-        push(normalizedTest)
+        push(test)
 
         return normalizedTest
       })
@@ -663,7 +632,7 @@ const hookFailed = function (hook, err, getTestById, getTest, Cypress) {
   // finds the test by returning the first test from
   // the parent or looping through the suites until
   // it finds the first test
-  const test = getTestFromHook(hook, hook.parent, getTestById)
+  const test = getTestFromHook(hook, getTestById)
 
   setHookFailureProps(test, hook, err)
 
@@ -746,7 +715,8 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // hooks do not have their own id, their
     // commands need to grouped with the test
     // and we can only associate them by this id
-    const test = getTestFromHook(hook, hook.parent, getTestById)
+
+    const test = getTestFromHook(hook, getTestById)
 
     hook.id = test.id
     hook.ctx.currentTest = test
@@ -843,7 +813,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       const parentTitle = runnable.parent.title
 
       hookName = getHookName(runnable)
-      const test = getTestFromHook(runnable)
+      const test = getTestFromHook(runnable, getTestById)
 
       // append a friendly message to the error indicating
       // we're skipping the remaining tests in this suite
@@ -1059,7 +1029,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
     const r = runnable
     const isHook = r.type === 'hook'
     const isTest = r.type === 'test'
-    const test = getTest() || getTestFromHook(runnable, runnable.parent, getTestById)
+    const test = getTest() || getTestFromHook(runnable, getTestById)
     const isBeforeEachHook = isHook && !!r.hookName.match(/before each/)
     const isAfterEachHook = isHook && !!r.hookName.match(/after each/)
     const retryAbleRunnable = isTest || isBeforeEachHook || isAfterEachHook
@@ -1118,7 +1088,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     switch (runnable.type) {
       case 'hook':
-        test = getTestFromHook(runnable, runnable.parent, getTestById)
+        test = getTestFromHook(runnable, getTestById)
         test._next = args[0]
         break
 

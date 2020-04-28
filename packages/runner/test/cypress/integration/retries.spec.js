@@ -49,7 +49,7 @@ describe('src/cypress/runner', () => {
                   ],
                 },
               },
-            }, { config: { retries: 1, isTextTerminal: false, enableTestRetriesInOpenMode: true } })
+            }, { config: { retries: 1, isTextTerminal: false } })
             .then(shouldHaveTestResults(2, 1))
           })
 
@@ -223,13 +223,13 @@ describe('src/cypress/runner', () => {
                 tests: [{ name: 'test 1' }],
               },
             },
-          }, { config: { retries: 1, isTextTerminal: false, enableTestRetriesInOpenMode: true } })
+          }, { config: { retries: 1 } })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             // cy.contains('Attempt 1').click()
             cy.contains('Although you have test retries')
             cy.get('.runnable-err-print').click()
-            cy.get('@console_log').its('lastCall').should('be.calledWithMatch', 'Error')
+            cy.get('@console_error').its('lastCall').should('be.calledWithMatch', 'Error')
           })
         })
 
@@ -248,12 +248,12 @@ describe('src/cypress/runner', () => {
                 tests: [{ name: 'test 1' }],
               },
             },
-          }, { config: { retries: 1, isTextTerminal: false, enableTestRetriesInOpenMode: true } })
+          }, { config: { retries: 1, isTextTerminal: false } })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             cy.contains('Although you have test retries')
             cy.get('.runnable-err-print').click()
-            cy.get('@console_log').its('lastCall').should('be.calledWithMatch', 'Error')
+            cy.get('@console_error').its('lastCall').should('be.calledWithMatch', 'Error')
           })
         })
 
