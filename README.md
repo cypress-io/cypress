@@ -204,6 +204,15 @@ You can use any [Visual Testing plugin](https://on.cypress.io/plugins#visual-tes
 
 See [docs/development.md](./docs/development.md)
 
+## Migration guide
+
+### From v3 to v4
+
+The old v3 `master` branch is available as branch [v3](https://github.com/bahmutov/cypress-react-unit-test/tree/v3)
+
+- the `cy.mount` is now simply `import { mount } from 'cypress-react-unit-test'`
+- the support file is simply `require('cypress-react-unit-test/support')`
+
 ## Related tools
 
 Same feature for unit testing components from other frameworks using Cypress
