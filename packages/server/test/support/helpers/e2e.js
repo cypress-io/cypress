@@ -51,11 +51,17 @@ const endingNewlineRe = /\n$/
 // 'at' will be present in chrome stack trace lines
 const replaceStackTraceLines = (str) => {
   return str.replace(stackTraceLinesRe, (match, ...parts) => {
-    const pre = parts[0]
     const isFirefoxStack = parts[1] === '@'
+    let pre = parts[0]
     let post = parts[4]
 
     if (isFirefoxStack) {
+      if (pre === '\n') {
+        pre = '\n    '
+      } else {
+        pre += pre.slice(1).repeat(2)
+      }
+
       post = post.replace(endingNewlineRe, '')
     }
 
