@@ -24,6 +24,7 @@
     "babel-loader": "8.1.0",
     "browser-logos": "github:alrra/browser-logos",
     "classnames": "2.2.6",
+    "cypress-multi-reporters": "1.2.4",
     "file-loader": "4.3.0",
     "lodash": "4.17.15",
     "prop-types": "15.7.2",

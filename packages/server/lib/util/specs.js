@@ -1,13 +1,24 @@
 const _ = require('lodash')
+const R = require('ramda')
 const la = require('lazy-ass')
 const path = require('path')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:specs')
 const minimatch = require('minimatch')
 const Promise = require('bluebird')
+const pluralize = require('pluralize')
 const glob = require('./glob')
+const Table = require('cli-table3')
 
 const MINIMATCH_OPTIONS = { dot: true, matchBase: true }
+
+/**
+ * Enums to help keep track of what types of spec files we find.
+ * By default, every spec file is assumed to be integration.
+*/
+const SPEC_TYPES = {
+  INTEGRATION: 'integration',
+}
 
 const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
   return _.map(specPattern, (p) => {
@@ -16,18 +27,19 @@ const getPatternRelativeToProjectRoot = (specPattern, projectRoot) => {
 }
 
 /**
- * Finds all spec files that pass the config.
+ * Finds all spec files that pass the config for given type. Note that "searchOptions" is
+ * a subset of the project's "config" object
  */
-const find = function findSpecs (config, specPattern) {
+function findSpecsOfType (searchOptions, specPattern) {
   let fixturesFolderPath
 
   la(check.maybe.strings(specPattern), 'invalid spec pattern', specPattern)
 
-  const integrationFolderPath = config.integrationFolder
+  const searchFolderPath = searchOptions.searchFolder
 
   debug(
     'looking for test specs in the folder:',
-    integrationFolderPath,
+    searchFolderPath,
   )
 
   if (specPattern) {
@@ -41,22 +53,22 @@ const find = function findSpecs (config, specPattern) {
   // coded. the rest is simply whatever is in
   // the javascripts array
 
-  if (config.fixturesFolder) {
+  if (searchOptions.fixturesFolder) {
     fixturesFolderPath = path.join(
-      config.fixturesFolder,
+      searchOptions.fixturesFolder,
       '**',
       '*',
     )
   }
 
-  const supportFilePath = config.supportFile || []
+  const supportFilePath = searchOptions.supportFile || []
 
   // map all of the javascripts to the project root
   // TODO: think about moving this into config
   // and mapping each of the javascripts into an
   // absolute path
-  const javascriptsPaths = _.map(config.javascripts, (js) => {
-    return path.join(config.projectRoot, js)
+  const javascriptsPaths = _.map(searchOptions.javascripts, (js) => {
+    return path.join(searchOptions.projectRoot, js)
   })
 
   // ignore fixtures + javascripts
@@ -64,7 +76,7 @@ const find = function findSpecs (config, specPattern) {
     sort: true,
     absolute: true,
     nodir: true,
-    cwd: integrationFolderPath,
+    cwd: searchFolderPath,
     ignore: _.compact(_.flatten([
       javascriptsPaths,
       supportFilePath,
@@ -72,17 +84,18 @@ const find = function findSpecs (config, specPattern) {
     ])),
   }
 
+  // example of resolved paths in the returned spec object
   // filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
   // integrationFolderPath             = /Users/bmann/Dev/my-project/cypress/integration
-  // relativePathFromIntegrationFolder = foo.coffee
+  // relativePathFromSearchFolder      = foo.coffee
   // relativePathFromProjectRoot       = cypress/integration/foo.coffee
 
-  const relativePathFromIntegrationFolder = (file) => {
-    return path.relative(integrationFolderPath, file)
+  const relativePathFromSearchFolder = (file) => {
+    return path.relative(searchFolderPath, file)
   }
 
   const relativePathFromProjectRoot = (file) => {
-    return path.relative(config.projectRoot, file)
+    return path.relative(searchOptions.projectRoot, file)
   }
 
   const setNameParts = (file) => {
@@ -93,13 +106,13 @@ const find = function findSpecs (config, specPattern) {
     }
 
     return {
-      name: relativePathFromIntegrationFolder(file),
+      name: relativePathFromSearchFolder(file),
       relative: relativePathFromProjectRoot(file),
       absolute: file,
     }
   }
 
-  const ignorePatterns = [].concat(config.ignoreTestFiles)
+  const ignorePatterns = [].concat(searchOptions.ignoreTestFiles)
 
   // a function which returns true if the file does NOT match
   // all of our ignored patterns
@@ -132,11 +145,11 @@ const find = function findSpecs (config, specPattern) {
   }
 
   // grab all the files
-  debug('globbing test files "%s"', config.testFiles)
+  debug('globbing test files "%s"', searchOptions.testFiles)
   debug('glob options %o', options)
 
   // ensure we handle either a single string or a list of strings the same way
-  const testFilesPatterns = [].concat(config.testFiles)
+  const testFilesPatterns = [].concat(searchOptions.testFiles)
 
   /**
    * Finds matching files for the given pattern, filters out specs to be ignored.
@@ -151,15 +164,93 @@ const find = function findSpecs (config, specPattern) {
     .filter(matchesSpecPattern)
     .map(setNameParts)
     .tap((files) => {
-      return debug('found %d spec files: %o', files.length, files)
+      return debug('found %s: %o', pluralize('spec file', files.length, true), files)
     })
   }
 
   return Promise.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
 }
 
+/**
+ * First, finds all integration specs, then finds all component specs.
+ * Resolves with an array of objects. Each object has a "testType" property
+ * with one of TEST_TYPES values.
+ */
+const find = (config, specPattern) => {
+  const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
+
+  const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+
+  debug('experimentalComponentTesting %o', experimentalComponentTestingEnabled)
+  if (experimentalComponentTestingEnabled) {
+    debug('component folder %o', config.componentFolder)
+    // component tests are new beasts, and they change how we mount the
+    // code into the test frame.
+    SPEC_TYPES.COMPONENT = 'component'
+  }
+
+  /**
+   * Sets "testType: integration|component" on each object in a list
+  */
+  const setTestType = (testType) => R.map(R.set(R.lensProp('specType'), testType))
+
+  const findIntegrationSpecs = () => {
+    const searchOptions = _.pick(config, commonSearchOptions)
+
+    // ? should we always use config.resolved instead of config?
+    searchOptions.searchFolder = config.integrationFolder
+
+    return findSpecsOfType(searchOptions, specPattern)
+    .then(setTestType(SPEC_TYPES.INTEGRATION))
+  }
+
+  const findComponentSpecs = () => {
+    if (!experimentalComponentTestingEnabled) {
+      return []
+    }
+
+    // ? should we always use config.resolved instead of config?
+    if (!config.componentFolder) {
+      return []
+    }
+
+    const searchOptions = _.pick(config, commonSearchOptions)
+
+    searchOptions.searchFolder = config.componentFolder
+
+    return findSpecsOfType(searchOptions, specPattern)
+    .then(setTestType(SPEC_TYPES.COMPONENT))
+  }
+
+  const printFoundSpecs = (foundSpecs) => {
+    const table = new Table({
+      head: ['relative', 'specType'],
+    })
+
+    foundSpecs.forEach((spec) => {
+      table.push([spec.relative, spec.specType])
+    })
+
+    /* eslint-disable no-console */
+    console.log(table.toString())
+  }
+
+  return Promise.all([
+    findIntegrationSpecs(),
+    findComponentSpecs(),
+  ])
+  .spread(R.concat)
+  .tap((foundSpecs) => {
+    if (debug.enabled) {
+      printFoundSpecs(foundSpecs)
+    }
+  })
+}
+
 module.exports = {
   find,
 
   getPatternRelativeToProjectRoot,
+
+  TEST_TYPES: SPEC_TYPES,
 }

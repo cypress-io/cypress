@@ -36,11 +36,11 @@ describe "lib/util/trash", ->
         expectDirectoriesExist(basePath)
         fs.rmdirSync(basePath)
 
-    it "doesn't fail if directory is non-existent", (done) ->
-      trash.folder('bar').then ->
-        done()
-      .catch ->
+    it "doesn't fail if directory is non-existent", () ->
+      trash.folder('bar')
+      .tapCatch ->
         throw new Error('should not have errored')
+      
 
     it "completely removes directory on Linux", ->
       sinon.stub(os, "platform").returns("linux")

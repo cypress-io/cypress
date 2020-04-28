@@ -205,7 +205,7 @@ class File {
       return lockFile.lockAsync(this._lockFilePath, { wait: LOCK_TIMEOUT })
     })
     .finally(() => {
-      return debug('gettin lock succeeded or failed for %s', this.path)
+      return debug('getting lock succeeded or failed for %s', this.path)
     })
   }
 

@@ -1,8 +1,4 @@
 {
   "name": "e2e",
-  "version": "0.0.0",
-  "devDependencies": {
-    "mocha": "^4.1.0",
-    "react": "15.4.0"
-  }
+  "version": "0.0.0"
 }
