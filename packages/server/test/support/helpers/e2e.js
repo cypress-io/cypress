@@ -62,7 +62,7 @@ const replaceStackTraceLines = (str) => {
         pre += pre.slice(1).repeat(2)
       }
 
-      post = post.replace(endingNewlineRe, '')
+      post = post.slice(1).replace(endingNewlineRe, '')
     }
 
     return `${pre}[stack trace lines]${post}`
