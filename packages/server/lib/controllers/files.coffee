@@ -1,4 +1,5 @@
 _           = require("lodash")
+R           = require("ramda")
 path        = require("path")
 Promise     = require("bluebird")
 cwd         = require("../cwd")
@@ -6,12 +7,14 @@ glob        = require("../util/glob")
 specsUtil   = require("../util/specs")
 pathHelpers = require("../util/path_helpers")
 CacheBuster = require("../util/cache_buster")
+debug       = require("debug")("cypress:server:controllers")
 { escapeFilenameInUrl } = require('../util/escape_filename')
 
 SPEC_URL_PREFIX = "/__cypress/tests?p"
 
 module.exports = {
   handleFiles: (req, res, config) ->
+    debug("handle files")
     specsUtil.find(config)
     .then (files) ->
       res.json({
@@ -20,16 +23,19 @@ module.exports = {
 
   handleIframe: (req, res, config, getRemoteState) ->
     test = req.params[0]
+    debug("handle iframe %o", { test })
 
     iframePath = cwd("lib", "html", "iframe.html")
 
     @getSpecs(test, config)
     .then (specs) =>
-      specs = specs.map((fileName) =>
+      escapeSpecFilename = (fileName) =>
         fileName = fileName.replace(SPEC_URL_PREFIX, "__CYPRESS_SPEC_URL_PREFIX__")
 
         return escapeFilenameInUrl(fileName).replace("__CYPRESS_SPEC_URL_PREFIX__", SPEC_URL_PREFIX)
-      )
+
+      specs = specs.map(escapeSpecFilename)
+      debug("escaped spec filenames %o", specs)
 
       @getJavascripts(config)
       .then (js) =>
@@ -42,17 +48,31 @@ module.exports = {
         }
 
   getSpecs: (spec, config) ->
+    debug("get specs %o", { spec })
+
     convertSpecPath = (spec) =>
       ## get the absolute path to this spec and
       ## get the browser url + cache buster
-      spec = pathHelpers.getAbsolutePathToSpec(spec, config)
+      convertedSpec = pathHelpers.getAbsolutePathToSpec(spec, config)
+      debug("converted %s to %s", spec, convertedSpec)
 
-      @prepareForBrowser(spec, config.projectRoot)
+      @prepareForBrowser(convertedSpec, config.projectRoot)
 
-    getSpecs = =>
+    getSpecsHelper = =>
       ## grab all of the specs if this is ci
+      experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+
       if spec is "__all"
         specsUtil.find(config)
+        .then R.tap (specs) ->
+          debug("found __all specs %o", specs)
+        .filter (spec) ->
+          if experimentalComponentTestingEnabled
+            return spec.specType == "integration"
+          else
+            return true
+        .then R.tap (specs) ->
+          debug("filtered __all specs %o", specs)
         .map (spec) ->
           ## grab the name of each
           spec.absolute
@@ -63,16 +83,19 @@ module.exports = {
 
     Promise
     .try =>
-      getSpecs()
+      getSpecsHelper()
 
   prepareForBrowser: (filePath, projectRoot) ->
-    filePath = path.relative(projectRoot, filePath)
+    relativeFilePath = path.relative(projectRoot, filePath)
+    debug("from file path %s got relative path %s to project root", filePath, relativeFilePath)
 
-    @getTestUrl(filePath)
+    @getTestUrl(relativeFilePath)
 
   getTestUrl: (file) ->
     file += CacheBuster.get()
-    "#{SPEC_URL_PREFIX}=#{file}"
+    url = "#{SPEC_URL_PREFIX}=#{file}"
+    debug("test url for file %o", {file, url})
+    return url
 
   getTitle: (test) ->
     if test is "__all" then "All Tests" else test

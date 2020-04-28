@@ -13,7 +13,7 @@ const ProjectId = observer(({ project }) => {
   if (!project.id) return null
 
   return (
-    <div>
+    <div data-cy="project-id">
       <a href='#' className='learn-more' onClick={openProjectIdHelp}>
         <i className='fas fa-info-circle'></i>{' '}
         Learn more
