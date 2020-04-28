@@ -1,37 +1,46 @@
-const webpack = require('@cypress/webpack-preprocessor')
+const path = require('path')
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+const babelConfig = require('../../babel.config.js')
+// const { initPlugin } = require('cypress-plugin-snapshots/plugin')
+
+// should we just reuse root webpack config?
 const webpackOptions = {
-  // https://webpack.js.org/configuration/node/
-  // avoid winston logger problem
-  // https://github.com/percy/percy-cypress/issues/58
-  node: {
-    fs: 'empty'
+  resolve: {
+    alias: {
+      react: path.resolve('./node_modules/react'),
+    },
   },
   module: {
     rules: [
       {
-        test: /\.(js|jsx|mjs)$/,
+        test: /\.(js|jsx|mjs|ts|tsx)$/,
         loader: 'babel-loader',
-        options: {
-          presets: ['@babel/preset-env', '@babel/preset-react'],
-          plugins: ['@babel/plugin-proposal-class-properties']
-        }
+        options: babelConfig,
       },
       {
         test: /\.css$/,
         exclude: [/node_modules/],
-        use: ['style-loader', 'css-loader']
-      }
-    ]
-  }
+        use: ['style-loader', 'css-loader'],
+      },
+      {
+        // some of our examples import SVG
+        test: /\.svg$/,
+        loader: 'svg-url-loader',
+      },
+    ],
+  },
 }
 
 const options = {
   // send in the options from your webpack.config.js, so it works the same
   // as your app's code
   webpackOptions,
-  watchOptions: {}
+  watchOptions: {},
 }
 
-module.exports = on => {
-  on('file:preprocessor', webpack(options))
+module.exports = (on, config) => {
+  on('file:preprocessor', webpackPreprocessor(options))
+
+  // initPlugin(on, config)
+  return config
 }

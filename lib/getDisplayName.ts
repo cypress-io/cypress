@@ -1,6 +1,6 @@
 /// <reference path="./index.d.ts" />
 
-const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap();
+const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap()
 
 /**
  * Gets the display name of the component when possible.
@@ -8,14 +8,17 @@ const cachedDisplayNames: WeakMap<JSX, string> = new WeakMap();
  * @param fallbackName {string} The alias, or fallback name to use when the name cannot be derived.
  * @link https://github.com/facebook/react-devtools/blob/master/backend/getDisplayName.js
  */
-export default function getDisplayName(type: JSX, fallbackName: string = 'Unknown'): string {
+export default function getDisplayName(
+  type: JSX,
+  fallbackName: string = 'Unknown',
+): string {
   const nameFromCache = cachedDisplayNames.get(type)
 
   if (nameFromCache != null) {
     return nameFromCache
   }
 
-  let displayName: string
+  let displayName: string | null = null
 
   // The displayName property is not guaranteed to be a string.
   // It's only safe to use for our purposes if it's a string.

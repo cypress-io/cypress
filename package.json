@@ -3,23 +3,37 @@
   "version": "0.0.0-development",
   "description": "Unit test React components using Cypress",
   "main": "dist",
-  "module": "lib",
+  "no-module-for-now": "lib",
+  "types": "lib",
   "scripts": {
     "test": "cypress run",
     "percy:test": "percy exec -- cypress run",
-    "build": "webpack -d",
+    "build": "npm run transpile",
     "cy:open": "cypress open",
     "transpile": "tsc",
     "watch": "tsc -w",
     "pretest": "npm run lint && npm run transpile",
     "lint": "standard --verbose --fix *.js src cypress/integration",
-    "semantic-release": "semantic-action pre && npm run transpile && npm publish && semantic-action post"
+    "semantic-release": "semantic-release",
+    "format": "prettier --write '*.js', 'src/*.jsx' 'cypress/**/*.js' 'cypress/**/*.jsx' 'lib/*.ts'"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "files": [
     "dist",
-    "lib"
+    "lib",
+    "support",
+    "plugins"
   ],
-  "types": "lib",
   "keywords": [
     "react",
     "cypress",
@@ -28,26 +42,48 @@
     "testing"
   ],
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "7.4.5",
     "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/plugin-syntax-dynamic-import": "7.8.3",
+    "@babel/plugin-transform-modules-commonjs": "7.7.5",
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
-    "@cypress/webpack-preprocessor": "1.1.3",
+    "@babel/preset-typescript": "7.9.0",
+    "@emotion/core": "10.0.22",
+    "@material-ui/core": "4.9.5",
+    "@material-ui/icons": "4.5.1",
+    "@material-ui/lab": "4.0.0-alpha.39",
     "@percy/cypress": "1.0.9",
+    "@testing-library/cypress": "5",
     "@types/node": "9.6.49",
+    "@types/react": "16.9.16",
+    "@types/react-dom": "16.9.4",
     "axios": "0.18.1",
     "babel-loader": "8.0.6",
+    "babel-plugin-module-resolver": "4.0.0",
+    "common-tags": "1.8.0",
     "css-loader": "2.1.1",
-    "cypress": "3.4.1",
-    "github-post-release": "1.13.1",
-    "react": "16.8.6",
-    "react-dom": "16.8.6",
-    "semantic-action": "1.1.6",
-    "standard": "12.0.1",
+    "cypress": "4.5.0",
+    "cypress-plugin-snapshots": "1.2.9",
+    "husky": "3.1.0",
+    "lint-staged": "9.5.0",
+    "lodash": "4.17.15",
+    "prettier": "1.19.1",
+    "pretty": "2.0.0",
+    "prop-types": "15.7.2",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-google-maps": "9.4.5",
+    "react-router": "6.0.0-alpha.1",
+    "react-router-dom": "6.0.0-alpha.1",
+    "semantic-release": "^17.0.4",
+    "standard": "14.3.3",
     "style-loader": "0.23.1",
-    "typescript": "3.5.1",
+    "styled-components": "5.0.0",
+    "svg-url-loader": "3.0.3",
+    "typescript": "3.7.3",
     "webpack": "4.33.0",
     "webpack-cli": "3.3.9"
   },
@@ -62,8 +98,21 @@
     "type": "git",
     "url": "https://github.com/bahmutov/cypress-react-unit-test.git"
   },
+  "dependencies": {
+    "@cypress/code-coverage": "3.0.0",
+    "@cypress/webpack-preprocessor": "4.1.3",
+    "babel-plugin-istanbul": "6.0.0",
+    "debug": "4.1.1",
+    "find-webpack": "1.6.1",
+    "mime-types": "2.1.26"
+  },
   "release": {
-    "analyzeCommits": "simple-commit-message",
-    "generateNotes": "github-post-release"
+    "branches": [
+      "master",
+      {
+        "name": "feature/cypress-mount-mode",
+        "prerelease": "cypress-mount-mode"
+      }
+    ]
   }
 }
