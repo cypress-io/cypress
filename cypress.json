@@ -1,13 +1,18 @@
 {
-  "viewportWidth": 300,
-  "viewportHeight": 100,
+  "viewportWidth": 400,
+  "viewportHeight": 400,
   "video": false,
   "projectId": "z9dxah",
-  "ignoreTestFiles": "*.css",
+  "testFiles": "**/*spec.{js,jsx,ts,tsx}",
   "env": {
     "cypress-react-unit-test": {
       "react": "node_modules/react/umd/react.development.js",
       "react-dom": "node_modules/react-dom/umd/react-dom.development.js"
     }
-  }
+  },
+  "ignoreTestFiles": [
+    "**/__snapshots__/*",
+    "**/__image_snapshots__/*"
+  ],
+  "experimentalComponentTesting": true
 }

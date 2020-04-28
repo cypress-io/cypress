@@ -1,97 +1,33 @@
-/// <reference path="./index.d.ts" />
+import * as React from 'react'
+import ReactDOM, { unmountComponentAtNode } from 'react-dom'
+import getDisplayName from './getDisplayName'
+import { injectStylesBeforeElement } from './utils'
 
-import getDisplayName from './getDisplayName';
+const rootId = 'cypress-root'
 
-// having weak reference to styles prevents garbage collection
-// and "losing" styles when the next test starts
-const stylesCache = new Map()
-
-const setXMLHttpRequest = w => {
-  // by grabbing the XMLHttpRequest from app's iframe
-  // and putting it here - in the test iframe
-  // we suddenly get spying and stubbing 😁
+function checkMountModeEnabled() {
   // @ts-ignore
-  window.XMLHttpRequest = w.XMLHttpRequest
-  return w
+  if (Cypress.spec.specType !== 'component') {
+    throw new Error(
+      `In order to use mount or unmount functions please place the spec in component folder`,
+    )
+  }
 }
 
-const setAlert = w => {
-  window.alert = w.alert
-  return w
+/**
+ * Inject custom style text or CSS file or 3rd party style resources
+ */
+const injectStyles = (options: MountOptions) => () => {
+  const document = cy.state('document')
+  const el = document.getElementById(rootId)
+  return injectStylesBeforeElement(options, document, el)
 }
-
-/** Initialize an empty document w/ ReactDOM and DOM events.
-    @function   cy.injectReactDOM
-**/
-Cypress.Commands.add('injectReactDOM', () => {
-  return cy.log('Injecting ReactDOM for Unit Testing').then(() => {
-    // Generate inline script tags for UMD modules
-    const scripts = Cypress.modules
-      .map(module => `<script>${module.source}</script>`)
-      .join('')
-    // include React and ReactDOM to force DOM to register all DOM event listeners
-    // otherwise the component will NOT be able to dispatch any events
-    // when it runs the second time
-    // https://github.com/bahmutov/cypress-react-unit-test/issues/3
-
-    var html = `
-    <head>
-      <meta charset="utf-8">
-    </head>
-    <body>
-      <div id="cypress-jsdom"></div>
-      ${scripts}
-    </body>`
-
-    const document = cy.state('document')
-    document.write(html)
-    document.close()
-  })
-})
-
-Cypress.stylesCache = stylesCache
-
-/** Caches styles from previously compiled components for reuse
-    @function   cy.copyComponentStyles
-    @param      {Object}  component
-**/
-Cypress.Commands.add('copyComponentStyles', component => {
-  // need to find same component when component is recompiled
-  // by the JSX preprocessor. Thus have to use something else,
-  // like component name
-  const parentDocument = window.parent.document
-  // @ts-ignore
-  const specDocument = parentDocument.querySelector('iframe.spec-iframe').contentDocument
-  // @ts-ignore
-  const appDocument = parentDocument.querySelector('iframe.aut-iframe').contentDocument
-
-  const hash = component.type.name
-  let styles = specDocument.querySelectorAll('head style')
-  if (styles.length) {
-    cy.log(`injected ${styles.length} style(s)`)
-    Cypress.stylesCache.set(hash, styles)
-  } else {
-    cy.log('No styles injected for this component, checking cache')
-    if (Cypress.stylesCache.has(hash)) {
-      styles = Cypress.stylesCache.get(hash)
-    } else {
-      styles = null
-    }
-  }
-  if (!styles) {
-    return
-  }
-  const head = appDocument.querySelector('head')
-  styles.forEach(function (style) {
-    head.appendChild(style)
-  })
-})
 
 /**
  * Mount a React component in a blank document; register it as an alias
  * To access: use an alias or original component reference
  *  @function   cy.mount
- *  @param      {Object}  jsx - component to mount
+ *  @param      {React.ReactElement}  jsx - component to mount
  *  @param      {string}  [Component] - alias to use later
  *  @example
  ```
@@ -100,110 +36,82 @@ Cypress.Commands.add('copyComponentStyles', component => {
  cy.mount(<Hello />, 'Hello')
  // using default alias
  cy.get('@Component')
- // using specified alias
- cy.get('@Hello').its('state').should(...)
  // using original component
  cy.get(Hello)
  ```
  **/
-export const mount = (jsx, alias) => {
+export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
+  checkMountModeEnabled()
+
   // Get the display name property via the component constructor
-  const displayname = getDisplayName(jsx.type, alias)
+  // @ts-ignore FIXME
+  const displayname = getDisplayName(jsx.type, options.alias)
+  let logInstance: Cypress.Log
 
-  let cmd
-
-  cy.injectReactDOM()
-    .window({ log: false })
+  return cy
     .then(() => {
-      cmd = Cypress.log({
-        name: 'mount',
-        // @ts-ignore
-        message: [`ReactDOM.render(<${displayname} ... />)`],
-        consoleProps () {
-          return {
-            props: jsx.props
-          }
-        }
-      })
+      if (options.log !== false) {
+        logInstance = Cypress.log({
+          name: 'mount',
+          message: [`ReactDOM.render(<${displayname} ... />)`],
+        })
+      }
     })
-    .then(setXMLHttpRequest)
-    .then(setAlert)
-    .then(win => {
-      const { ReactDOM } = win
+    .then(injectStyles(options))
+    .then(() => {
       const document = cy.state('document')
-      const component = ReactDOM.render(
-        jsx,
-        document.getElementById('cypress-jsdom')
+      const reactDomToUse = options.ReactDom || ReactDOM
+
+      const el = document.getElementById(rootId)
+
+      const key =
+        // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests
+        (Cypress?.mocha?.getRunner()?.test?.title || '') + Math.random()
+      const props = {
+        key,
+      }
+
+      const CypressTestComponent = reactDomToUse.render(
+        React.createElement(React.Fragment, props, jsx),
+        el,
       )
-      cy.wrap(component, { log: false }).as(alias || displayname)
-    })
-  cy.copyComponentStyles(jsx)
-    .then(() => {
-      cmd.snapshot().end()
+
+      const logConsoleProps = {
+        props: jsx.props,
+      }
+      if (logInstance) {
+        logInstance.set('consoleProps', () => logConsoleProps)
+
+        if (el.children.length) {
+          logInstance.set('$el', el.children.item(0))
+        }
+      }
+
+      return cy
+        .wrap(CypressTestComponent, { log: false })
+        .as(options.alias || displayname)
+        .then(() => {
+          if (logInstance) {
+            logInstance.snapshot('mounted')
+            logInstance.end()
+          }
+
+          return undefined
+        })
     })
 }
 
-Cypress.Commands.add('mount', mount)
+/**
+ * Removes any mounted component
+ */
+export const unmount = () => {
+  checkMountModeEnabled()
 
-/** Get one or more DOM elements by selector or alias.
-    Features extended support for JSX and React.Component
-    @function   cy.get
-    @param      {string|object|function}  selector
-    @param      {object}                  options
-    @example    cy.get('@Component')
-    @example    cy.get(<Component />)
-    @example    cy.get(Component)
-**/
-Cypress.Commands.overwrite('get', (originalFn, selector, options) => {
-  switch (typeof selector) {
-    case 'object':
-      // If attempting to use JSX as a selector, reference the displayname
-      if (
-        selector.$$typeof &&
-        selector.$$typeof.toString().startsWith('Symbol(react')
-      ) {
-        const displayname = selector.type.prototype.constructor.name
-        return originalFn(`@${displayname}`, options)
-      }
-    case 'function':
-      // If attempting to use the component name without JSX (testing in .js/.ts files)
-      // const displayname = selector.prototype.constructor.name
-      const displayname = getDisplayName(selector);
-      return originalFn(`@${displayname}`, options)
-    default:
-      return originalFn(selector, options)
-  }
-})
-
-/*
-Before All
-- Load and cache UMD modules specified in fixtures/modules.json
-  These scripts are inlined in the document during unit tests
-  modules.json should be an array, which implicitly sets the loading order
-  Format: [{name, type, location}, ...]
-*/
-before(() => {
-  const settings = Cypress.env('cypress-react-unit-test') || {}
-
-  const moduleNames = [
-    {
-      name: 'react',
-      type: 'file',
-      location: settings.react || 'node_modules/react/umd/react.development.js'
-    },
-    {
-      name: 'react-dom',
-      type: 'file',
-      location: settings['react-dom'] || 'node_modules/react-dom/umd/react-dom.development.js'
-    }
-  ]
-
-  Cypress.modules = []
-  cy.log('Initializing UMD module cache').then(() => {
-    for (const module of moduleNames) {
-      let { name, type, location } = module
-      cy.readFile(location, {log:false})
-        .then(source => Cypress.modules.push({ name, type, location, source }))
-    }
+  cy.log('unmounting...')
+  const selector = '#' + rootId
+  return cy.get(selector, { log: false }).then($el => {
+    unmountComponentAtNode($el[0])
   })
-})
+}
+
+export default mount
