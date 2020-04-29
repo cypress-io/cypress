@@ -472,14 +472,14 @@ namespace CypressTestConfigTests {
     browser: {foo: 'bar'} // $ExpectError
   }, () => {})
 
-  it.skip('test', {}, ()=>{})
-  it.only('test', {}, ()=>{})
-  xit('test', {}, ()=>{})
+  it.skip('test', {}, () => {})
+  it.only('test', {}, () => {})
+  xit('test', {}, () => {})
 
-  specify('test', {}, ()=>{})
-  specify.only('test', {}, ()=>{})
-  specify.skip('test', {}, ()=>{})
-  xspecify('test', {}, ()=>{})
+  specify('test', {}, () => {})
+  specify.only('test', {}, () => {})
+  specify.skip('test', {}, () => {})
+  xspecify('test', {}, () => {})
 
   // set config on a per-suite basis
   describe('suite', {
@@ -493,7 +493,7 @@ namespace CypressTestConfigTests {
     foo: 'foo' // $ExpectError
   }, () => {})
 
-  describe.only('suite', {}, ()=>{})
-  describe.skip('suite', {}, ()=>{})
-  xdescribe('suite', {}, ()=>{})
+  describe.only('suite', {}, () => {})
+  describe.skip('suite', {}, () => {})
+  xdescribe('suite', {}, () => {})
 }

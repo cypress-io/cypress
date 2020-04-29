@@ -18,6 +18,13 @@ const runnableResetTimeout = Runnable.prototype.resetTimeout
 delete window.mocha
 delete window.Mocha
 
+function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn) {
+  const ret = fn.apply(ctx, mochaArgs)
+
+  ret.originalTitle = originalTitle
+
+  return ret
+}
 function overloadMochaFnForConfig (fnName, specWindow) {
   const _fn = specWindow[fnName]
 
@@ -61,18 +68,10 @@ function overloadMochaFnForConfig (fnName, specWindow) {
               this.skip()
             }
 
-            const ret = origFn.apply(this, mochaArgs)
-
-            ret.originalTitle = originalTitle
-
-            return ret
+            return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, origFn)
           }
 
-          const ret = _fn['skip'].apply(this, mochaArgs)
-
-          ret.originalTitle = originalTitle
-
-          return ret
+          return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, _fn['skip'])
         }
 
         const ret = origFn.apply(this, mochaArgs)

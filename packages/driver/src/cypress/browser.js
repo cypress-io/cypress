@@ -36,11 +36,12 @@ const _isBrowser = function (browser, matcher, errPrefix) {
 }
 
 const isBrowser = function (config, obj = '', errPrefix = '`Cypress.isBrowser()`') {
-  if (!_.isArray(obj)) obj = [obj]
-
-  const result = obj.map((matcher) => _isBrowser(config.browser, matcher, errPrefix))
+  return _
+  .chain(obj)
+  .concat([])
+  .map((matcher) => _isBrowser(config.browser, matcher, errPrefix))
   .reduce((a, b) => {
-    if (a === null) return b
+    if (!a) return b
 
     if (a.exclusive && b.exclusive) {
       return {
@@ -54,8 +55,30 @@ const isBrowser = function (config, obj = '', errPrefix = '`Cypress.isBrowser()`
       exclusive: b.exclusive,
     }
   }, null)
+  .thru((result) => {
+    return Boolean(result) && result.isMatch
+  })
+  .value()
 
-  return !!result && result.isMatch
+  // ;[].concat(obj)
+  // .map((matcher) => _isBrowser(config.browser, matcher, errPrefix))
+  // .reduce((a, b) => {
+  //   if (!a) return b
+
+  //   if (a.exclusive && b.exclusive) {
+  //     return {
+  //       isMatch: a.isMatch && b.isMatch,
+  //       exclusive: true,
+  //     }
+  //   }
+
+  //   return {
+  //     isMatch: a.isMatch || b.isMatch,
+  //     exclusive: b.exclusive,
+  //   }
+  // }, null)
+
+  // return Boolean(result) && result.isMatch
 }
 
 module.exports = (config) => {
