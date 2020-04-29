@@ -106,6 +106,8 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 1. Make sure you have the correct permissions set up before proceeding:
     - An AWS account with permission to create AWS access keys for the Cypress CDN.
     - Permissions for your npm account to publish the `cypress` package.
+    - Permissions to modify environment variables for `cypress` on CircleCI and AppVeyor.
+    - Permissions to update releases in ZenHub.
 2. Make sure that you have the correct environment variables set up before proceeding:
     - Cypress AWS access key and secret in `aws_credentials_json`, which looks like this:
         ```text
@@ -128,17 +130,17 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     ```shell
     yarn move-binaries --sha <commit sha> --version <new target version>
     ```
-4. Publish the new NPM package under the dev tag.
+4. Publish the new NPM package under the `dev` tag, using your personal NPM account.
     - To find the link to the package file `cypress.tgz`:
         1. In GitHub, go to the latest commit (the one whose sha you used in the last step).
             ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
         2. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz` link.
             ![cdn-tgz-link](https://user-images.githubusercontent.com/1157043/80608736-3791e800-8a05-11ea-8d75-e4f80128e857.png)
     - Publish to the NPM registry straight from the URL:
-    ```shell
-    npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
-    ```
-5. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). Example output:
+        ```shell
+        npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
+        ```
+5. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). `latest` should still point to the previous version. Example output:
     ```shell
     dist-tags:
     dev: 3.4.0     latest: 3.3.2
@@ -159,10 +161,11 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     ```shell
     npm dist-tag add cypress@X.Y.Z
     ```
-9. Run `binary-release` to update the download server's manifest, set the next CI version, and create an empty version commit:
+9. Run `binary-release` to update the [download server's manifest](https://download.cypress.io/desktop.json) and set the next CI version:
     ```shell
-    yarn run binary-release --version X.Y.Z --commit
+    yarn run binary-release --version X.Y.Z
     ```
+    > Note: Currently, there is an [issue setting the next CI version](https://github.com/cypress-io/cypress/issues/7176) that will cause this command to fail after setting the download manifest. You will need to manually update NEXT_DEV_VERSION by logging in to CircleCI and AppVeyor.
 10. If needed, push out any updated changes to the links manifest to [`on.cypress.io`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on).
 11. If needed, deploy the updated [`cypress-example-kitchensink`][cypress-example-kitchensink] to `example.cypress.io` by following [these instructions under "Deployment"](./packages/example/README.md).
 12. Update the releases in [ZenHub](https://app.zenhub.com/workspaces/test-runner-5c3ea3baeb1e75374f7b0708/reports/release):
