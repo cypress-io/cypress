@@ -102,6 +102,7 @@ Spec | Description
 [unmount](cypress/component/basic/unmount) | Verifies the component's behavior when it is unmounted from the DOM
 [use-lodash-fp](cypress/component/basic/use-lodash-fp) | Imports and tests methods from `lodash/fp` dependency
 [document-spec](cypress/component/basic/document) | Checks `document` dimensions from the component
+[styled-components](cypress/component/basic/styled-components) | Test components that use [styled-components](https://www.styled-components.com/)
 <!-- prettier-ignore-end -->
 
 plus a few smaller sanity specs in [cypress/component/basic](cypress/component/basic) folder.
