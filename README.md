@@ -52,7 +52,7 @@ require('cypress-react-unit-test/support')
 
 2. Tell Cypress how your React application is transpiled or bundled (using Webpack), so Cypress can load your components. See [Recipes](./docs/recipes.md)
 
-3. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For exampled to have them located in `src` folder use:
+3. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For example, to have them located in `src` folder use:
 
 ```json
 {
