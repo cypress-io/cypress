@@ -49,19 +49,22 @@ describe('Project Nav', function () {
       cy.get('.navbar-default')
     })
 
-    it('displays \'Tests\' nav as active', () => {
+    it('displays "Tests" nav as active', () => {
       cy.get('.navbar-default').contains('a', 'Tests')
       .should('have.class', 'active')
     })
 
-    describe('when project loads', function () {
-      beforeEach(() => {
-        cy.wait(600)
-      })
+    it('displays "Tests" page when project loads', () => {
+      cy.contains('integration')
+      cy.get('.list-as-table').should('be.visible')
+      cy.percySnapshot()
+    })
 
-      it('displays \'Tests\' page', () => {
-        cy.contains('integration')
-      })
+    it('displays "Tests" page when switching to a beta browser', () => {
+      cy.get('.browsers .dropdown-chosen').click()
+      cy.contains('.browsers', 'beta').first().click()
+      cy.get('.list-as-table').should('be.visible')
+      cy.percySnapshot()
     })
 
     describe('runs page', function () {
@@ -251,13 +254,14 @@ describe('Project Nav', function () {
 
         it('displays stop browser button', () => {
           cy.get('.close-browser').should('be.visible')
+          cy.percySnapshot()
         })
 
         it('sends the required parameters to launch a browser', function () {
           const browserArg = this.ipc.launchBrowser.getCall(0).args[0].browser
 
           expect(browserArg).to.have.keys([
-            'family', 'name', 'path', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning', 'channel',
+            'family', 'name', 'path', 'profilePath', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning', 'channel',
           ])
 
           expect(browserArg.path).to.include('/')

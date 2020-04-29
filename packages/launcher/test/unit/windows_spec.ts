@@ -28,7 +28,7 @@ describe('windows browser detection', () => {
   beforeEach(() => {
     sinon.stub(fse, 'pathExists').resolves(false)
     sinon.stub(os, 'homedir').returns(HOMEDIR)
-    sinon.stub(utils, 'execa').resolves({ stdout: '' })
+    sinon.stub(utils, 'execa').rejects()
   })
 
   it('detects browsers as expected', async () => {

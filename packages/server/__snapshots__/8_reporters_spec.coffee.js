@@ -130,7 +130,7 @@ finished!
 
 `
 
-exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome passes with mochawesome-1.5.2 npm custom reporter 1'] = `
 
 ====================================================================================================
 
@@ -197,7 +197,7 @@ exports['e2e reporters mochawesome passes with mochawesome@1.5.2 npm custom repo
 
 `
 
-exports['e2e reporters mochawesome fails with mochawesome@1.5.2 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome fails with mochawesome-1.5.2 npm custom reporter 1'] = `
 
 ====================================================================================================
 
@@ -314,7 +314,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
 `
 
-exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome passes with mochawesome-2.3.1 npm custom reporter 1'] = `
 
 ====================================================================================================
 
@@ -379,7 +379,7 @@ exports['e2e reporters mochawesome passes with mochawesome@2.3.1 npm custom repo
 
 `
 
-exports['e2e reporters mochawesome fails with mochawesome@2.3.1 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome fails with mochawesome-2.3.1 npm custom reporter 1'] = `
 
 ====================================================================================================
 
@@ -494,7 +494,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
 `
 
-exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome passes with mochawesome-3.0.1 npm custom reporter 1'] = `
 
 ====================================================================================================
 
@@ -559,7 +559,7 @@ exports['e2e reporters mochawesome passes with mochawesome@3.0.1 npm custom repo
 
 `
 
-exports['e2e reporters mochawesome fails with mochawesome@3.0.1 npm custom reporter 1'] = `
+exports['e2e reporters mochawesome fails with mochawesome-3.0.1 npm custom reporter 1'] = `
 
 ====================================================================================================
 

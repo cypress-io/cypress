@@ -1,10 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:saved_state')
-const md5 = require('md5')
 const path = require('path')
 const Promise = require('bluebird')
-const sanitize = require('sanitize-filename')
-
 const appData = require('./util/app_data')
 const cwd = require('./cwd')
 const FileUtil = require('./util/file')
@@ -28,21 +25,6 @@ reporterWidth
 showedOnBoardingModal
 preferredOpener
 `.trim().split(/\s+/)
-
-const toHashName = function (projectRoot) {
-  if (!projectRoot) {
-    throw new Error('Missing project path')
-  }
-
-  if (!path.isAbsolute(projectRoot)) {
-    throw new Error(`Expected project absolute path, not just a name ${projectRoot}`)
-  }
-
-  const name = sanitize(path.basename(projectRoot))
-  const hash = md5(projectRoot)
-
-  return `${name}-${hash}`
-}
 
 const formStatePath = (projectRoot) => {
   return Promise.try(() => {
@@ -73,7 +55,7 @@ const formStatePath = (projectRoot) => {
     if (projectRoot) {
       debug(`state path for project ${projectRoot}`)
 
-      return path.join(toHashName(projectRoot), fileName)
+      return path.join(appData.toHashName(projectRoot), fileName)
     }
 
     debug('state path for global mode')
@@ -139,5 +121,4 @@ const create = (projectRoot, isTextTerminal) => {
 module.exports = {
   create,
   formStatePath,
-  toHashName,
 }

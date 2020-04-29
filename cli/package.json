@@ -68,10 +68,10 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
+    "@babel/cli": "7.8.4",
+    "@babel/preset-env": "7.9.5",
     "@cypress/sinon-chai": "1.1.0",
     "@packages/root": "*",
-    "babel-cli": "6.26.0",
-    "babel-preset-es2015": "6.24.1",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",
     "chai-string": "1.5.0",

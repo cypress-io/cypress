@@ -21,16 +21,17 @@ exports['e2e typescript spec passes 1'] = `
     ✓ foo coffee
     ✓ bar babel
     ✓ dom jsx
+    ✓ issue 7098
 
 
-  3 passing
+  4 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -55,10 +56,10 @@ exports['e2e typescript spec passes 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  browserify_typescript_passing_spec.      XX:XX        3        3        -        -        - │
+  │ ✔  browserify_typescript_passing_spec.      XX:XX        4        4        -        -        - │
   │    ts                                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `

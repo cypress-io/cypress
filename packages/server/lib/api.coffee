@@ -288,6 +288,12 @@ module.exports = {
   )
 
   createProject: (projectDetails, remoteOrigin, authToken) ->
+    debug("create project with args %o", {
+      projectDetails,
+      remoteOrigin,
+      authToken,
+    })
+
     rp.post({
       url: routes.projects()
       json: true

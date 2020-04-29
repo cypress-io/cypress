@@ -8,6 +8,8 @@ const log = require('debug')('cypress:server:appdata')
 const pkg = require('@packages/root')
 const fs = require('../util/fs')
 const cwd = require('../cwd')
+const md5 = require('md5')
+const sanitize = require('sanitize-filename')
 
 const PRODUCT_NAME = pkg.productName || pkg.name
 const OS_DATA_PATH = ospath.data()
@@ -30,7 +32,28 @@ const isProduction = () => {
   return process.env.CYPRESS_INTERNAL_ENV === 'production'
 }
 
+const toHashName = (projectRoot) => {
+  if (!projectRoot) {
+    throw new Error('Missing project path')
+  }
+
+  if (!path.isAbsolute(projectRoot)) {
+    throw new Error(`Expected project absolute path, not just a name ${projectRoot}`)
+  }
+
+  const name = sanitize(path.basename(projectRoot))
+  const hash = md5(projectRoot)
+
+  return `${name}-${hash}`
+}
+
 module.exports = {
+  toHashName,
+
+  getBundledFilePath (projectRoot, filePath) {
+    return this.projectsPath(toHashName(projectRoot), 'bundles', filePath)
+  },
+
   ensure () {
     const ensure = () => {
       return this.removeSymlink()

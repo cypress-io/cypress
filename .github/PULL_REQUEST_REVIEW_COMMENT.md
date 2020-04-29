@@ -4,7 +4,7 @@
 -->
 Thanks for the contribution! Below are some guidelines Cypress uses when doing PR reviews.
 
-- Please write \`[WIP]\` in the title of your Pull Request if your PR is not ready for review - someone will review your PR as soon as the \`[WIP]\` is removed.
+- Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
 - Please familiarize yourself with the PR Review Checklist and feel free to make updates on your PR based on these guidelines.
 
 ## PR Review Checklist

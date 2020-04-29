@@ -6,8 +6,7 @@ Promise = require("bluebird")
 appData = require("../util/app_data")
 cwd = require("../cwd")
 plugins = require("../plugins")
-savedState = require("../saved_state")
-resolve = require('./resolve')
+resolve = require("./resolve")
 
 errorMessage = (err = {}) ->
   (err.stack ? err.annotated ? err.message ? err.toString())
@@ -29,9 +28,6 @@ clientSideError = (err) ->
     })
   }())
   """
-
-getOutputPath = (config, filePath) ->
-  appData.projectsPath(savedState.toHashName(config.projectRoot), "bundles", filePath)
 
 baseEmitter = new EE()
 fileObjects = {}
@@ -64,6 +60,7 @@ module.exports = {
   emitter: baseEmitter
 
   getFile: (filePath, config) ->
+    debug("getting file #{filePath}")
     filePath = path.resolve(config.projectRoot, filePath)
 
     debug("getFile #{filePath}")
@@ -73,8 +70,8 @@ module.exports = {
       ## in a text terminal aka cypress run
       ## TODO: rename this to config.isRunMode
       ## vs config.isInterativeMode
-      shouldWatch = not config.isTextTerminal
-      
+      shouldWatch = not config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
+
       baseFilePath = filePath
       .replace(config.projectRoot, "")
       .replace(config.integrationFolder, "")
@@ -82,7 +79,7 @@ module.exports = {
       fileObject = fileObjects[filePath] = _.extend(new EE(), {
         filePath,
         shouldWatch,
-        outputPath: getOutputPath(config, baseFilePath)
+        outputPath: appData.getBundledFilePath(config.projectRoot, baseFilePath)
       })
 
       fileObject.on "rerun", ->

@@ -85,7 +85,6 @@ onServer = (app) ->
     res.connection.end()
 
 describe "e2e visit", ->
-  require("mocha-banner").register()
 
   context "low response timeout", ->
     e2e.setup({

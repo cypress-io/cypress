@@ -101,7 +101,8 @@ exports['e2e visit / low response timeout / fails when network connection immedi
   0 passing
   1 failing
 
-  1) when network connection cannot be established fails:
+  1) when network connection cannot be established
+       fails:
      CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:16795/
@@ -197,7 +198,8 @@ exports['e2e visit / low response timeout / fails when server responds with 500'
   0 passing
   1 failing
 
-  1) when server response is 500 fails:
+  1) when server response is 500
+       fails:
      CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/fail
@@ -283,7 +285,8 @@ exports['e2e visit / low response timeout / fails when file server responds with
   0 passing
   1 failing
 
-  1) when file server response is 404 fails:
+  1) when file server response is 404
+       fails:
      CypressError: \`cy.visit()\` failed trying to load:
 
 /static/does-not-exist.html
@@ -369,7 +372,8 @@ exports['e2e visit / low response timeout / fails when content type isnt html'] 
   0 passing
   1 failing
 
-  1) when content type is plain/text fails:
+  1) when content type is plain/text
+       fails:
      CypressError: \`cy.visit()\` failed trying to load:
 
 /static/hello.txt
@@ -458,7 +462,8 @@ exports['e2e visit / normal response timeouts / fails when visit times out'] = `
   0 passing
   2 failing
 
-  1) when visit times out fails timeout exceeds pageLoadTimeout:
+  1) when visit times out
+       fails timeout exceeds pageLoadTimeout:
      CypressError: Timed out after waiting \`1000ms\` for your remote page to load.
 
 Your page did not fire its \`load\` event within \`1000ms\`.
@@ -470,7 +475,8 @@ Browsers will not fire the \`load\` event until all stylesheets and scripts are 
 When this \`load\` event occurs, Cypress will continue running commands.
       [stack trace lines]
 
-  2) when visit times out fails timeout exceeds timeout option:
+  2) when visit times out
+       fails timeout exceeds timeout option:
      CypressError: Timed out after waiting \`500ms\` for your remote page to load.
 
 Your page did not fire its \`load\` event within \`500ms\`.
@@ -558,7 +564,8 @@ exports['e2e visit / low responseTimeout, normal pageLoadTimeout / fails when re
   0 passing
   3 failing
 
-  1) response timeouts result in an error handles no response errors on the initial visit:
+  1) response timeouts result in an error
+       handles no response errors on the initial visit:
      CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/response_never_finishes
@@ -582,7 +589,8 @@ Error: ESOCKETTIMEDOUT
 
   
 
-  2) response timeouts result in an error handles no response errors when not initially visiting:
+  2) response timeouts result in an error
+       handles no response errors when not initially visiting:
      CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/response_never_finishes
@@ -606,7 +614,8 @@ Error: ESOCKETTIMEDOUT
 
   
 
-  3) response timeouts result in an error fails after reducing the responseTimeout option:
+  3) response timeouts result in an error
+       fails after reducing the responseTimeout option:
      CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:3434/timeout?ms=1000

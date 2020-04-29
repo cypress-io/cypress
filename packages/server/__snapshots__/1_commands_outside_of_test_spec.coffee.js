@@ -81,7 +81,7 @@ exports['e2e commands outside of test / fails on failing assertions'] = `
   0 passing
   1 failing
 
-  1)  An uncaught error was detected outside of a test:
+  1) An uncaught error was detected outside of a test:
      Uncaught AssertionError: expected true to be false
 
 This error originated from your test code, not from Cypress.
@@ -163,7 +163,7 @@ exports['e2e commands outside of test / fails on cy commands'] = `
   0 passing
   1 failing
 
-  1)  An uncaught error was detected outside of a test:
+  1) An uncaught error was detected outside of a test:
      Uncaught CypressError: Cannot call \`cy.viewport()\` outside a running test.
 
 This usually happens when you accidentally write commands outside an \`it(...)\` test.

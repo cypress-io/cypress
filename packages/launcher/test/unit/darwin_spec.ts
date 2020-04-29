@@ -24,7 +24,7 @@ function generatePlist (key, value) {
 }
 
 function stubBrowser (findAppParams: darwinUtil.FindAppParams) {
-  (utils.execa as unknown as SinonStub)
+  (utils.getOutput as unknown as SinonStub)
   .withArgs(`mdfind 'kMDItemCFBundleIdentifier=="${findAppParams.appId}"' | head -1`)
   .resolves({ stdout: `/Applications/${findAppParams.appName}` })
 
@@ -36,7 +36,7 @@ function stubBrowser (findAppParams: darwinUtil.FindAppParams) {
 describe('darwin browser detection', () => {
   beforeEach(() => {
     sinon.stub(fse, 'readFile').rejects({ code: 'ENOENT' })
-    sinon.stub(utils, 'execa').resolves({ stdout: '' })
+    sinon.stub(utils, 'getOutput').resolves({ stdout: '' })
   })
 
   it('detects browsers as expected', async () => {

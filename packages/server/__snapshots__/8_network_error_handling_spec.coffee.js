@@ -364,7 +364,9 @@ exports['e2e network error handling Cypress tests run as expected 1'] = `
   7 passing
   2 failing
 
-  1) network error handling cy.visit() retries fails after retrying 5x:
+  1) network error handling
+       cy.visit() retries
+         fails after retrying 5x:
      CypressError: \`cy.visit()\` failed trying to load:
 
 http://localhost:13370/immediate-reset?visit
@@ -388,7 +390,9 @@ Error: socket hang up
 
   
 
-  2) network error handling cy.request() retries fails after retrying 5x:
+  2) network error handling
+       cy.request() retries
+         fails after retrying 5x:
      CypressError: \`cy.request()\` failed trying to load:
 
 http://localhost:13370/immediate-reset?request

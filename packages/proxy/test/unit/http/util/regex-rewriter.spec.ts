@@ -15,6 +15,11 @@ const original = `\
     parent1
     grandparent
     grandparents
+    myself
+    mywindow
+    selfVar
+    fooparent
+    windowFile
     topFoo
     topFoo.window
     topFoo.window != topFoo
@@ -33,7 +38,8 @@ const original = `\
     foo("parent")
     foo("top")
 
-    const parent = () => { bar: 'bar' }
+    const parent = () => { bar: 'bar', framesStyle: 'foo' }
+    const loadStop = { locationExists = true }
 
     parent.bar
 
@@ -43,11 +49,16 @@ const original = `\
       if (self !== top) run()
       if (self!==top) run()
       if (self === top) return
+      if (myself !== top) runs()
+      if (mywindow !== top) runs()
       if (top.location!=self.location&&(top.location.href=self.location.href)) run()
       if (top.location != self.location) run()
       if (top.location != location) run()
       if (self.location != top.location) run()
+      if (loadStop.locationExists) run()
+      if (!top.locationExists) run()
       if (parent.frames.length > 0) run()
+      if (parent.framesStyle) run()
       if (window != top) run()
       if (window.top !== window.self) run()
       if (window.top!==window.self) run()
@@ -60,12 +71,17 @@ const original = `\
       if (parent && parent != self) run()
       if (parent && window != parent) run()
       if (parent && self != parent) run()
+      if (myself != parent) run()
       if (parent && parent.frames && parent.frames.length > 0) run()
       if ((self.parent && !(self.parent === self)) && (self.parent.frames.length != 0)) run()
       if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
       if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
       if (top===self) return
       if (top==self) return
+      if (loadStop===selfVar) return
+      if (fooparent===selfVar) return
+      if (loadStop===windowFile) return
+      if (fooparent===windowFile) return
     </script>
   </body>
 </html>\
@@ -80,6 +96,11 @@ const expected = `\
     parent1
     grandparent
     grandparents
+    myself
+    mywindow
+    selfVar
+    fooparent
+    windowFile
     topFoo
     topFoo.window
     topFoo.window != topFoo
@@ -98,7 +119,8 @@ const expected = `\
     foo("parent")
     foo("top")
 
-    const parent = () => { bar: 'bar' }
+    const parent = () => { bar: 'bar', framesStyle: 'foo' }
+    const loadStop = { locationExists = true }
 
     parent.bar
 
@@ -108,11 +130,16 @@ const expected = `\
       if (self !== self) run()
       if (self!==self) run()
       if (self === self) return
+      if (myself !== top) runs()
+      if (mywindow !== top) runs()
       if (self.location!=self.location&&(self.location.href=self.location.href)) run()
       if (self.location != self.location) run()
       if (self.location != location) run()
       if (self.location != self.location) run()
+      if (loadStop.locationExists) run()
+      if (!top.locationExists) run()
       if (self.frames.length > 0) run()
+      if (parent.framesStyle) run()
       if (window != self) run()
       if (window.self !== window.self) run()
       if (window.self!==window.self) run()
@@ -125,12 +152,17 @@ const expected = `\
       if (parent && self != self) run()
       if (parent && window != self) run()
       if (parent && self != self) run()
+      if (myself != parent) run()
       if (parent && self.frames && self.frames.length > 0) run()
       if ((self.parent && !(self.self === self)) && (self.self.frames.length != 0)) run()
       if (parent !== null && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
       if (null !== parent && parent.tag !== 'HostComponent' && parent.tag !== 'HostRoot') { }
       if (self===self) return
       if (self==self) return
+      if (loadStop===selfVar) return
+      if (fooparent===selfVar) return
+      if (loadStop===windowFile) return
+      if (fooparent===windowFile) return
     </script>
   </body>
 </html>\
