@@ -8,7 +8,8 @@ const debug = Debug('cypress:rewriter:deferred-source-map-cache')
 export type DeferredSourceMapRequest = {
   uniqueId: string
   url: string
-  js: string
+  js?: string
+  sourceMap?: any
 }
 
 /**
@@ -36,12 +37,20 @@ export class DeferredSourceMapCache {
     debug('caching request %o', request)
 
     if (this._getRequestById(request.uniqueId)) {
-      throw new Error(`Deferred sourcemap key "${request.uniqueId}" is not unique. This should never happen.`)
+      // prevent duplicate uniqueIds from ever existing
+      throw new Error(`Deferred sourcemap key "${request.uniqueId}" is not unique`)
     }
+
+    // remove existing requests for this URL since they will not be loaded again
+    this._removeRequestsByUrl(request.url)
 
     this.requests.push(request)
 
     return request.uniqueId
+  }
+
+  _removeRequestsByUrl (url: string) {
+    _.remove(this.requests, { url })
   }
 
   _getRequestById (uniqueId: string) {
@@ -55,29 +64,45 @@ export class DeferredSourceMapCache {
       return
     }
 
+    if (request.sourceMap) {
+      return request.sourceMap
+    }
+
+    if (!request.js) {
+      throw new Error('Missing JS for source map rewrite')
+    }
+
     const sourceMapUrl = sourceMaps.getMappingUrl(request.js)
 
     let inputSourceMap
 
     if (sourceMapUrl) {
+      // try to decode it as a base64 string
       inputSourceMap = sourceMaps.tryDecodeInlineUrl(sourceMapUrl)
 
       if (!inputSourceMap) {
+        // try to load it from the web
+        const req = {
+          url: request.url,
+          headers,
+          timeout: 5000,
+        }
+
         try {
-          const { body } = await this.requestLib({
-            url: request.url,
-            headers,
-          }, true)
+          const { body } = await this.requestLib(req, true)
 
           inputSourceMap = body
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error(error)
+          debug('got an error loading user-provided sourcemap, serving proxy-generated sourcemap only %o', { url: request.url, headers, error })
         }
       }
     }
 
-    // TODO: swap out the cached js for the genned source map
-    return rewriteJsSourceMapAsync(request.url, request.js, inputSourceMap)
+    // cache the sourceMap so we don't need to regenerate it
+    request.sourceMap = await rewriteJsSourceMapAsync(request.url, request.js, inputSourceMap)
+    delete request.js // won't need this again
+
+    return request.sourceMap
   }
 }
