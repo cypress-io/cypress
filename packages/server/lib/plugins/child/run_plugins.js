@@ -189,7 +189,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
         compiler: tsPath,
         transpileOnly: true,
         compilerOptions: {
-
+          module: 'CommonJS',
           esModuleInterop: true,
         },
       })

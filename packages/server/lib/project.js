@@ -112,6 +112,10 @@ class Project extends EE {
         tsnode.register({
           compiler: tsPath,
           transpileOnly: true,
+          compilerOptions: {
+            module: 'CommonJS',
+            esModuleInterop: true,
+          },
         })
       } catch (e) {
         debug(`typescript doesn't exist. ts-node setup passed.`)
