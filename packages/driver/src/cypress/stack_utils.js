@@ -92,7 +92,7 @@ const stackWithReplacementMarkerLineRemoved = (stack) => {
   })
 }
 
-const stackWithUserInvocationStackAppended = (err, userInvocationStack) => {
+const stackWithUserInvocationStackSpliced = (err, userInvocationStack) => {
   const stack = _.trim(err.stack, '\n') // trim newlines from end
   const [messageLines, stackLines] = splitStack(stack)
   const userInvocationStackWithoutMessage = stackWithoutMessage(userInvocationStack)
@@ -329,5 +329,5 @@ module.exports = {
   stackWithLinesDroppedFromMarker,
   stackWithoutMessage,
   stackWithReplacementMarkerLineRemoved,
-  stackWithUserInvocationStackAppended,
+  stackWithUserInvocationStackSpliced,
 }

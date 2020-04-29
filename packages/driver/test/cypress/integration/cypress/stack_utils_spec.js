@@ -189,7 +189,7 @@ Error: spec iframe stack
     })
   })
 
-  context('.stackWithUserInvocationStackAppended', () => {
+  context('.stackWithUserInvocationStackSpliced', () => {
     let err
     let userInvocationStack
 
@@ -218,7 +218,7 @@ user invocation message line 3
     })
 
     it('appends replaces the user invocation wrapper and all lines below it with the user invocation stack', () => {
-      const { stack } = $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
+      const { stack } = $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
 
       expect(stack).to.equal(`\
 Error: original message
@@ -232,7 +232,7 @@ From Your Spec Code:
     })
 
     it('returns the index of where the user invocation is in the stack', () => {
-      const { index } = $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
+      const { index } = $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
 
       expect(index).to.equal(6)
     })
@@ -240,7 +240,7 @@ From Your Spec Code:
     it('appends at end when there is no stack replacement marker in the stack', () => {
       err.stack = err.stack.replace('    at __stackReplacementMarker (path/to/another:2:2)\n', '')
 
-      const { stack } = $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
+      const { stack } = $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
 
       expect(stack).to.equal(`\
 Error: original message

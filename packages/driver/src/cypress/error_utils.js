@@ -273,7 +273,7 @@ const stackAndCodeFrameIndex = (err, userInvocationStack) => {
   if (!userInvocationStack) return { stack: err.stack }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
-    return $stackUtils.stackWithUserInvocationStackAppended(err, userInvocationStack)
+    return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
   }
 
   return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
@@ -289,7 +289,7 @@ const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
 }
 
 const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
-  let { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
+  const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
   const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
   err.stack = stack
