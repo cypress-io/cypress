@@ -243,12 +243,10 @@ const getAllSiblingTests = function (suite, getTestById) {
 
 const getTestFromHook = function (hook, suite, getTestById) {
   // if theres already a currentTest use that
-  let found; let test
+  const ctxTest = hook.ctx.currentTest
 
-  test = hook != null ? hook.ctx.currentTest : undefined
-
-  if (test) {
-    return test
+  if (ctxTest) {
+    return ctxTest
   }
 
   if (hook.hookName === 'after all') {
@@ -263,36 +261,7 @@ const getTestFromHook = function (hook, suite, getTestById) {
     return _.first(siblings)
   }
 
-  // if we have a hook id then attempt
-  // to find the test by its id
-  if (hook != null ? hook.id : undefined) {
-    found = onFirstTest(suite, (test) => {
-      return hook.id === test.id
-    })
-
-    if (found) {
-      return found
-    }
-  }
-
-  // returns us the very first test
-  // which is in our filtered tests array
-  // based on walking down the current suite
-  // iterating through each test until it matches
-  found = onFirstTest(suite, (test) => {
-    return getTestById(test.id)
-  })
-
-  if (found) {
-    return found
-  }
-
-  // have one last final fallback where
-  // we just return true on the very first
-  // test (used in testing)
-  return onFirstTest(suite, (test) => {
-    return true
-  })
+  throw new Error('failed to get test from hook')
 }
 
 // we have to see if this is the last suite amongst
@@ -467,6 +436,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId)
 
   if (setTestsById) {
+    console.log('settestsbyid', tests)
     // use callback here to hand back
     // the optimized tests
     setTestsById(tests)
@@ -664,6 +634,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // and we can only associate them by this id
     const test = getTestFromHook(hook, hook.parent, getTestById)
 
+    console.log('got from hook', hook.hookName, test)
     hook.id = test.id
     hook.ctx.currentTest = test
 
