@@ -103,43 +103,63 @@ Once the `develop` branch for all test projects are reliably passing with the ne
 In the following instructions, "X.Y.Z" is used to denote the version of Cypress being published.
 
 0. Make sure that if there is a new [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink/releases) version, the corresponding dependency in [`packages/example`](./packages/example) has been updated to that new version.
-1. Make sure that you have the correct environment variables set up before proceeding.
-    - You'll need Cypress AWS access keys in `aws_credentials_json`, which looks like this:
+1. Make sure you have the correct permissions set up before proceeding:
+    - An AWS account with permission to create AWS access keys for the Cypress CDN.
+    - Permissions for your npm account to publish the `cypress` package.
+2. Make sure that you have the correct environment variables set up before proceeding:
+    - Cypress AWS access key and secret in `aws_credentials_json`, which looks like this:
         ```text
         aws_credentials_json={"bucket":"cdn.cypress.io","folder":"desktop","key":"...","secret":"..."}
         ```
-    - You'll need a [GitHub token](https://github.com/settings/tokens), a [CircleCI token](https://circleci.com/account/api),
+    - A [GitHub token](https://github.com/settings/tokens), a [CircleCI token](https://circleci.com/account/api),
       and a `cypress-io` account-specific [AppVeyor token](https://ci.appveyor.com/api-keys) in `ci_json`:
         ```text
         ci_json={"githubToken":"...","circleToken":"...","appVeyorToken":"..."}
         ```
+    - You'll also need to put the GitHub token under its own variable and get a [ZenHub API token](https://app.zenhub.com/dashboard/tokens) for the `release-automations` step.
+        ```text
+        GITHUB_TOKEN="..."
+        ZENHUB_API_TOKEN="..."
+        ```
+    - The `cypress-bot` GitHub app credentials are also needed. Ask another team member who has done a deploy for those.
     - Tip: Use [as-a](https://github.com/bahmutov/as-a) to manage environment variables for different situations.
-2. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder
+3. Use the `move-binaries` script to move the binaries for `<commit sha>` from `beta` to the `desktop` folder
     for `<new target version>`
     ```shell
     yarn move-binaries --sha <commit sha> --version <new target version>
     ```
-3. Publish the new NPM package under the dev tag. The unique link to the package file `cypress.tgz`
-    is the one already tested above. You can publish to the NPM registry straight from the URL:
+4. Publish the new NPM package under the dev tag.
+    - To find the link to the package file `cypress.tgz`:
+        1. In GitHub, go to the latest commit (the one whose sha you used in the last step).
+            ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
+        2. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz` link.
+            ![cdn-tgz-link](https://user-images.githubusercontent.com/1157043/80608736-3791e800-8a05-11ea-8d75-e4f80128e857.png)
+    - Publish to the NPM registry straight from the URL:
     ```shell
     npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
     ```
-4. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). Example output:
+5. Double-check that the new version has been published under the `dev` tag using `npm info cypress` or [available-versions](https://github.com/bahmutov/available-versions). Example output:
     ```shell
     dist-tags:
     dev: 3.4.0     latest: 3.3.2
     ```
-5. Test `cypress@X.Y.Z` again to make sure everything is working. You can trigger test projects from the command line (if you have the appropriate permissions)
-    ```
-    node scripts/test-other-projects.js --npm cypress@X.Y.Z --binary X.Y.Z
-    ```
-6. Test the new version of Cypress against the Cypress dashboard repo.
+6. Test `cypress@X.Y.Z` to make sure everything is working.
+    - Install the new version: `npm install -g cypress@X.Y.Z`
+    - Run a quick, manual smoke test:
+        - `cypress open`
+        - Go into a project, run a quick test, make sure things look right
+    - Optionally, do more thorough tests:
+        - Trigger test projects from the command line (if you have the appropriate permissions)
+        ```
+        node scripts/test-other-projects.js --npm cypress@X.Y.Z --binary X.Y.Z
+        ```
+        - Test the new version of Cypress against the Cypress dashboard repo.
 7. Update and publish the changelog and any release-specific documentation changes in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
 8. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
     npm dist-tag add cypress@X.Y.Z
     ```
-8. Run `binary-release` to update the download server's manifest, set the next CI version, and create an empty version commit:
+9. Run `binary-release` to update the download server's manifest, set the next CI version, and create an empty version commit:
     ```shell
     yarn run binary-release --version X.Y.Z --commit
     ```
@@ -155,11 +175,11 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
 16. Inside of [cypress-io/release-automations][release-automations]:
     - Publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases`:
         ```shell
-        cd set-releases && npm run release-log -- --version X.Y.Z
+        cd packages/set-releases && npm run release-log -- --version X.Y.Z
         ```
     - Add a comment to each GH issue that has been resolved with the new published version using package `issues-in-release`:
         ```shell
-        cd issues-in-release && npm run do:comment -- --release X.Y.Z
+        cd packages/issues-in-release && npm run do:comment -- --release X.Y.Z
         ```
 17. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
 18. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
