@@ -101,6 +101,7 @@ Spec | Description
 [typescript](cypress/component/basic/typescript) | A spec written in TypeScript
 [unmount](cypress/component/basic/unmount) | Verifies the component's behavior when it is unmounted from the DOM
 [use-lodash-fp](cypress/component/basic/use-lodash-fp) | Imports and tests methods from `lodash/fp` dependency
+[document-spec](cypress/component/basic/document) | Checks `document` dimensions from the component
 <!-- prettier-ignore-end -->
 
 plus a few smaller sanity specs in [cypress/component/basic](cypress/component/basic) folder.
