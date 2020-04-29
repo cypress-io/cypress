@@ -1,10 +1,10 @@
-import Message from '../../components/Message.vue'
-const mountVue = require('../..')
+import Message from './Message.vue'
+import {mount} from 'cypress-vue-unit-test'
 
 // test example from
 // https://github.com/alexjoverm/vue-testing-series/blob/lesson-1/test/Message.test.js
 
-const createCmp = propsData => mountVue(Message, { propsData })()
+const createCmp = propsData => mount(Message, { propsData })
 
 /* eslint-env mocha */
 describe('Message', () => {

@@ -1,4 +1,4 @@
-const mountVue = require('../..')
+import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Handling User Input', () => {
@@ -20,7 +20,7 @@ describe('Handling User Input', () => {
     }
   }
 
-  beforeEach(mountVue({ template, data, methods }))
+  beforeEach(mountCallback({ template, data, methods }))
 
   it('reverses text', () => {
     cy.contains('Hello Vue')

@@ -1,5 +1,5 @@
-import MessageList from '../../components/MessageList.vue'
-const mountVue = require('../..')
+import MessageList from './MessageList.vue'
+import {mountCallback} from 'cypress-vue-unit-test'
 
 // common utils for MessageList
 const getItems = () => cy.get('ul li')
@@ -25,7 +25,7 @@ describe('Global components', () => {
   const extensions = {
     components
   }
-  beforeEach(mountVue({ template, data }, { extensions }))
+  beforeEach(mountCallback({ template, data }, { extensions }))
 
   it('registers global component', () => {
     cy

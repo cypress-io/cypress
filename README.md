@@ -1,7 +1,5 @@
 # cypress-vue-unit-test
 
-> A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner
-
 [![NPM][npm-icon] ][npm-url]
 
 [![Build status][ci-image] ][ci-url]
@@ -10,163 +8,106 @@
 [![js-standard-style][standard-image]][standard-url]
 [![renovate-app badge][renovate-badge]][renovate-app]
 
+> A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
+
 ## TLDR
 
-* What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your Vue components with zero effort.
+- What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your Vue components with zero effort.
 
-* How is this different from [vue-test-utils](https://vue-test-utils.vuejs.org/en/)? It is similar in functionality BUT runs the component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/).
+![Example component test](images/dynamic.gif)
 
-## Table of Contents
+- How is this different from [vue-test-utils](https://vue-test-utils.vuejs.org/en/)? Vue Test Utils uses Node, requires stubbing browser APIs, and requires users to await Vue's internal event loop. Cypress Vue Unit Test runs each component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/).
 
-[Install](#install)
-
-[Vue CLI 3](#vue-cli)
-
-[Use](#use)
-- [Options](#options)
-- [Global Vue Extensions](#global-vue-extensions)
-- [The Intro Example](#intro-example)
-- [The List Example](#list-example)
-- [Handling User Input](#handling-user-input)
-- [Component Example](#component-example)
-- [Spying Example](#spying-example)
-- [XHR Spying and Stubbing](#xhr-spying-stubbing)
-- [Spying On `window.alert`](#spying-window-alert)
-- [Tests](cypress/integration/counter-vuex-spec.js) for a component that [uses Vuex data store](components/Counter.vue)
-- [Tests](cypress/integration/router-spec.js) for a component that [uses vue-router](components/PizzaShop)
-- [translated-message-spec.js](cypress/integration/translated-message-spec.js) shows how to test [TranslatedMessage.vue](components/TranslatedMessage.vue) component that uses [Vue-i18n](http://kazupon.github.io/vue-i18n/en/)
-
-[Bundling](#bundling)
-- [Short Way](#short-way)
-- [Manual](#manual)
-
-[Development](#development)
-
-[FAQ](#faq)
-
-[Related info](#related)
-
-[Other frameworks](#other)
-
-[Contributors](#contributors)
-
-<a name="install"/>
+- If you like using `@testing-library/vue`, you can use `@testing-library/cypress` for the same `findBy`, `queryBy` commands, see one of the examples in the list below
 
 ## Install
 
-Requires [Node](https://nodejs.org/en/) version 6 or above and Cypress (peer dependency)
+Requires [Node](https://nodejs.org/en/) version 8 or above. Only supporting webpack-based projects. Installation via Vue CLI recommended. Manual webpack configuration is possible and documented [here]().
+
+### Vue CLI Installation
+> Vue CLI v3+
+
+*Recommended*: One step install to existing projects with Vue CLI
 
 ```sh
-npm install --save-dev cypress cypress-vue-unit-test
+vue add cypress-experimental
 ```
 
-<a name="vue-cli"/>
+### Manual Installation
+> *Not Recommended*: All of this is done automatically with Vue CLI
+ 
+1. Install `cypress` and `cypress-vue-unit-test`
 
-## Vue CLI 3
+```sh
+npm install -D cypress cypress-vue-unit-test
+```
 
-1. Create a new project with `vue create <project-name>` and select Cypress for E2E testing OR add the Cypress plugin to an existing Vue project with `vue add @vue/cli-plugin-e2e-cypress`
-1. Install this package with `npm install --save-dev cypress-vue-unit-test`
-1. Enable the import of Vue files by uncommenting the "webpack import" and the "file:processor event" lines in tests/e2e/plugins/index.js. The file should then look like this:
+2. Include this plugin `cypress/plugin/index.js`
 
 ```js
-// tests/e2e/plugins/index.js
+// default webpack file preprocessor is good for simple cases
+// Required to temporarily patch async components, chunking, and inline image loading
+import { onFileDefaultPreprocessor } from 'cypress-vue-unit-test/dist/preprocessor/webpack'
 
-// webpack import
-const webpack = require('@cypress/webpack-preprocessor')
-
-module.exports = (on, config) => {
-  // file:processor event
-  on(
-    'file:preprocessor',
-    webpack({
-      webpackOptions: require('@vue/cli-service/webpack.config'),
-      watchOptions: {}
-    })
-  )
-
-  return Object.assign({}, config, {
-    fixturesFolder: 'tests/e2e/fixtures',
-    integrationFolder: 'tests/e2e/specs',
-    screenshotsFolder: 'tests/e2e/screenshots',
-    videosFolder: 'tests/e2e/videos',
-    supportFile: 'tests/e2e/support/index.js'
-  })
+module.exports = on => {
+  on('file:preprocessor', onFileDefaultPreprocessor)
 }
 ```
 
-<a name="use"/>
-
-## Use
-
-Before each test, inject your component to test
+3. Include the support file `cypress/support/index.js`
 
 ```js
-const mountVue = require('cypress-vue-unit-test')
-describe('My Vue', () => {
-  beforeEach(mountVue(/* my Vue code */, /* options */))
-  it('renders', () => {
-    // Any Cypress command
-    // Cypress.vue is the mounted component reference
+import 'cypress-vue-unit-test/dist/support'
+```
+
+4. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For exampled to have them located in `src` folder use:
+
+```json
+{
+  "experimentalComponentTesting": true,
+  "componentFolder": "src"
+}
+```
+
+## Usage and Examples
+
+```js
+// components/HelloWorld.spec.js
+import { mount } from 'cypress-vue-unit-test'
+import { HelloWorld } from './HelloWorld.vue'
+describe('HelloWorld component', () => {
+  it('works', () => {
+    mount(HelloWorld)
+    // now use standard Cypress commands
+    cy.contains('Hello World!').should('be.visible')
   })
+})
+```
+
+### Options
+
+You can pass additional styles, css files and external stylesheets to load, see [docs/styles.md](./docs/styles.md) for full list.
+
+```js
+import Todo from './Todo.vue'
+const todo = {
+  id: '123',
+  title: 'Write more tests',
+}
+
+mount(Todo, {
+  propsData: { todo },
+  stylesheets: [
+    'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
+  ],
 })
 ```
 
 See examples below for details.
 
-<a name="options"/>
-
-### Options
-
-See [cypress/integration/options-spec.js](cypress/integration/options-spec.js)
-for examples of options.
-
-* `mountId` - specify root Vue app mount element ID. Defaults to `app`.
-
-```js
-const options = {
-  mountId: 'rootApp'  // div#rootApp
-}
-beforeEach(mountVue(/* my Vue code */, options))
-```
-
-* `base` - specify `<base href=...>` path. Useful to get static assets work,
-but might prevent relative HTTP references from working (like path to Vue.js
-from `../../node_modules/vue/dist/vue.js` for example)
-
-```js
-const options = {
-  base: '/'
-}
-beforeEach(mountVue(/* my Vue code */, options))
-```
-
-* `html` - custom test HTML to inject instead of default one. Good
-place to load additional libraries, polyfills and styles.
-
-```js
-const polyfill = '../node_modules/mypolyfill/dist/polyfill.js'
-const options = {
-  html: `<div id="app"></div><script src="${polyfill}"></script>`
-}
-beforeEach(mountVue(/* my Vue code */, options))
-```
-
-* `vue` **[DEPRECATED]** - path or URL to the Vue library to load. By default, will
-try to load `../node_modules/vue/dist/vue.js`, but you can pass your
-own path or URL.
-
-```js
-const options = {
-  vue: 'https://unpkg.com/vue'
-}
-beforeEach(mountVue(/* my Vue code */, options))
-```
-> #### Deprecation Warning
-> `vue` option has been deprecated. `node_modules/vue/dist/vue` is always used.
-
 <a name="global-vue-extensions"/>
 
-### Global Vue extensions
+### Global Vue Options
 
 You can pass extensions (global components, mixins, modules to use)
 when mounting Vue component. Use `{ extensions: { ... }}` object inside
@@ -194,7 +135,7 @@ const components = {
 const extensions = {
   components
 }
-beforeEach(mountVue({ template, data }, { extensions }))
+beforeEach(mountCallback({ template, data }, { extensions }))
 ```
 
 See [Vue component docs](https://vuejs.org/v2/api/#Vue-component),
@@ -208,7 +149,7 @@ const use = [MyPlugin]
 const extensions = {
   use
 }
-beforeEach(mountVue({}, { extensions }))
+beforeEach(mountCallback({}, { extensions }))
 ```
 
 See [Vue plugin docs](https://vuejs.org/v2/guide/plugins.html)
@@ -228,7 +169,7 @@ const mixin = [MyMixin]
 const extensions = {
   mixin
 }
-beforeEach(mountVue({}, { extensions }))
+beforeEach(mountCallback({}, { extensions }))
 
 it('calls mixin "created" method', () => {
   expect(MyMixin.created).to.have.been.calledOnce
@@ -249,7 +190,7 @@ const filters = {
 const extensions = {
   filters
 }
-beforeEach(mountVue({}, { extensions }))
+beforeEach(mountCallback({}, { extensions }))
 ```
 
 See [Vue global filters docs](https://vuejs.org/v2/api/#Vue-filter)
@@ -286,9 +227,8 @@ Let's test it in [Cypress.io][cypress.io] (for the current version see
 [cypress/integration/spec.js](cypress/integration/spec.js)).
 
 ```js
-const mountVue = require('cypress-vue-unit-test')
+import { mountCallback } from 'cypress-vue-unit-test'
 
-/* eslint-env mocha */
 describe('Declarative rendering', () => {
   // Vue code from https://vuejs.org/v2/guide/#Declarative-Rendering
   const template = `
@@ -302,7 +242,7 @@ describe('Declarative rendering', () => {
   }
 
   // that's all you need to do
-  beforeEach(mountVue({ template, data }))
+  beforeEach(mountCallback({ template, data }))
 
   it('shows hello', () => {
     cy.contains('Hello Vue!')
@@ -354,9 +294,8 @@ var app4 = new Vue({
 Let's test it. Simple.
 
 ```js
-const mountVue = require('cypress-vue-unit-test')
+import { mountCallback } from 'cypress-vue-unit-test'
 
-/* eslint-env mocha */
 describe('Declarative rendering', () => {
   // List example from https://vuejs.org/v2/guide/#Declarative-Rendering
   const template = `
@@ -375,7 +314,7 @@ describe('Declarative rendering', () => {
     ]
   }
 
-  beforeEach(mountVue({ template, data }))
+  beforeEach(mountCallback({ template, data }))
 
   it('shows 3 items', () => {
     cy.get('li').should('have.length', 3)
@@ -419,9 +358,8 @@ var app5 = new Vue({
 We can write the test the same way
 
 ```js
-const mountVue = require('cypress-vue-unit-test')
+import { mountCallback } from 'cypress-vue-unit-test'
 
-/* eslint-env mocha */
 describe('Handling User Input', () => {
   // Example from https://vuejs.org/v2/guide/#Handling-User-Input
   const template = `
@@ -441,7 +379,7 @@ describe('Handling User Input', () => {
     }
   }
 
-  beforeEach(mountVue({ template, data, methods }))
+  beforeEach(mountCallback({ template, data, methods }))
 
   it('reverses text', () => {
     cy.contains('Hello Vue')
@@ -495,7 +433,7 @@ to have multiple components? No problem!
 
 ```js
 import Hello from '../../components/Hello.vue'
-const mountVue = require('cypress-vue-unit-test')
+import { mountCallback } from 'cypress-vue-unit-test'
 describe('Several components', () => {
   const template = `
     <div>
@@ -507,7 +445,7 @@ describe('Several components', () => {
   const components = {
     hello: Hello
   }
-  beforeEach(mountVue({ template, components }))
+  beforeEach(mountCallback({ template, components }))
 
   it('greets the world 3 times', () => {
     cy.get('p').should('have.length', 3)
@@ -557,11 +495,10 @@ Simple - let us spy on the event, [spying and stubbing is built into Cypress](ht
 
 ```js
 import ButtonCounter from '../../components/ButtonCounter.vue'
-const mountVue = require('cypress-vue-unit-test')
+import { mountCallback } from 'cypress-vue-unit-test'
 
-/* eslint-env mocha */
 describe('ButtonCounter', () => {
-  beforeEach(mountVue(ButtonCounter))
+  beforeEach(mountCallback(ButtonCounter))
 
   it('starts with zero', () => {
     cy.contains('button', '0')
@@ -597,14 +534,14 @@ The mount function automatically wraps XMLHttpRequest giving you an ability to i
 ```js
 // component use axios to get list of users
 created() {
-  axios.get(`http://jsonplaceholder.typicode.com/users?_limit=3`)
+  axios.get(`https://jsonplaceholder.cypress.io/users?_limit=3`)
   .then(response => {
     // JSON responses are automatically parsed.
     this.users = response.data
   })
 }
 // test can observe, return mock data, delay and a lot more
-beforeEach(mountVue(AjaxList))
+beforeEach(mountCallback(AjaxList))
 it('can inspect real data in XHR', () => {
   cy.server()
   cy.route('/users?_limit=3').as('users')
@@ -625,6 +562,31 @@ it('can display mock XHR response', () => {
 
 Calls to `window.alert` are automatically recorded, but do not show up. Instead you can spy on them, see [AlertMessage.vue](components/AlertMessage.vue) and its test [cypress/integration/alert-spec.js](cypress/integration/alert-spec.js)
 
+
+## Comparison
+
+<!-- prettier-ignore-start -->
+Feature | Vue Test Utils or @testing-library/vue | Cypress + `cypress-vue-unit-test`
+--- | --- | ---
+Test runs in real browser | ❌ | ✅
+Uses full mount | ❌ | ✅
+Test speed | 🏎 | as fast as the app works in the browser
+Test can use additional plugins | maybe | use any [Cypress plugin](https://on.cypress.io/plugins)
+Test can interact with component | synthetic limited API | use any [Cypress command](https://on.cypress.io/api)
+Test can be debugged | via terminal and Node debugger | use browser DevTools
+Built-in time traveling debugger | ❌ | Cypress time traveling debugger
+Re-run tests on file or test change | ✅ | ✅
+Test output on CI | terminal | terminal, screenshots, videos
+Tests can be run in parallel | ✅ | ✅ via [parallelization](https://on.cypress.io/parallelization)
+Test against interface | if using `@testing-library/vue` | ✅ and can use `@testing-library/cypress`
+Spying and mocking | Jest mocks | Sinon library
+Code coverage | ✅ | ✅
+<!-- prettier-ignore-end -->
+
+## Known problems
+
+See issues labeled [v2](https://github.com/bahmutov/cypress-vue-unit-test/labels/v2)
+
 <a name="bundling"/>
 
 ## Bundling
@@ -635,6 +597,7 @@ How do we load this Vue file into the testing code? Using webpack preprocessor. 
 
 ### Short way
 
+#### For Webpack Users
 Your project probably already has `webpack.config.js` setup to transpile
 `.vue` files. To load these files in the Cypress tests, grab the webpack
 processor included in this module, and load it from the `cypress/plugins/index.js`
@@ -696,11 +659,10 @@ And write a test
 
 ```js
 import Hello from '../../components/Hello.vue'
-const mountVue = require('cypress-vue-unit-test')
+import { mountCallback } from 'cypress-vue-unit-test'
 
-/* eslint-env mocha */
 describe('Hello.vue', () => {
-  beforeEach(mountVue(Hello))
+  beforeEach(mountCallback(Hello))
 
   it('shows hello', () => {
     cy.contains('Hello World!')

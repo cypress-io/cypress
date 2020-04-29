@@ -1,9 +1,9 @@
-import Hello from '../../components/Hello.vue'
-const mountVue = require('../..')
+import Hello from './Hello.vue'
+import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Hello.vue', () => {
-  beforeEach(mountVue(Hello))
+  beforeEach(mountCallback(Hello))
 
   it('shows hello', () => {
     cy.contains('Hello World!')
@@ -21,7 +21,7 @@ describe('Several components', () => {
   const components = {
     hello: Hello
   }
-  beforeEach(mountVue({ template, components }))
+  beforeEach(mountCallback({ template, components }))
 
   it('greets the world 3 times', () => {
     cy.get('p').should('have.length', 3)

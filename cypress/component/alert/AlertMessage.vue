@@ -1,5 +1,5 @@
 <template>
-    <button @click="handleClick">Alert me</button>
+  <button @click="handleClick">Alert me</button>
 </template>
 
 <script>

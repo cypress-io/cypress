@@ -1,8 +1,8 @@
 // testing i18n component
 // http://kazupon.github.io/vue-i18n
-import TranslatedMessage from '../../components/TranslatedMessage.vue'
+import TranslatedMessage from './TranslatedMessage.vue'
 import VueI18n from 'vue-i18n'
-import mountVue from '../..'
+import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('VueI18n', () => {
@@ -16,7 +16,7 @@ describe('VueI18n', () => {
 
   const template = '<translated-message />'
 
-  beforeEach(mountVue({template}, {extensions}))
+  beforeEach(mountCallback({template}, {extensions}))
 
   it('shows English, Japanese and Russian greeting', () => {
     cy.viewport(400, 200)

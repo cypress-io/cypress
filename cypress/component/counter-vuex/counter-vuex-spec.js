@@ -1,9 +1,9 @@
 // testing Vuex component
 // https://github.com/vuejs/vuex/tree/dev/examples/counter
-import Counter from '../../components/Counter.vue'
-import store from '../../components/store'
+import Counter from './Counter.vue'
+import store from './store'
 import Vuex from 'vuex'
-import mountVue from '../..'
+import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Vuex Counter', () => {
@@ -24,7 +24,7 @@ describe('Vuex Counter', () => {
   const setCount = value => Cypress.vue.$store.commit('set', value)
 
   // initialize a fresh Vue app before each test
-  beforeEach(mountVue({template, store}, {extensions}))
+  beforeEach(mountCallback({template, store}, {extensions}))
 
   it('starts with zero', () => {
     cy.contains('0 times')

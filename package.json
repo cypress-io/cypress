@@ -64,15 +64,13 @@
     "cy:run": "cypress run"
   },
   "release": {
-    "analyzeCommits": {
-      "preset": "angular",
-      "releaseRules": [
-        {
-          "type": "break",
-          "release": "major"
-        }
-      ]
-    }
+    "branches": [
+      "master",
+      {
+        "name": "feature/cypress-mount-mode",
+        "prerelease": "cypress-mount-mode"
+      }
+    ]
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
@@ -81,7 +79,7 @@
     "axios": "0.19.2",
     "ban-sensitive-files": "1.9.7",
     "css-loader": "3.4.2",
-    "cypress": "4.2.0",
+    "cypress": "4.5.0",
     "dependency-check": "3.4.1",
     "deps-ok": "1.4.1",
     "git-issues": "1.3.1",
@@ -89,14 +87,14 @@
     "mocha": "7.1.1",
     "pre-git": "3.17.1",
     "prettier-standard": "8.0.1",
-    "semantic-release": "15.14.0",
-    "simple-commit-message": "4.0.13",
+    "semantic-release": "17.0.4",
     "standard": "12.0.1",
-    "vue": "2.6.10",
+    "tailwindcss": "1.1.4",
     "vue-i18n": "7.8.1",
     "vue-loader": "14.2.4",
     "vue-router": "3.0.5",
-    "vue-template-compiler": "2.6.10",
+    "vue-template-compiler": "2.6.11",
+    "vue": "2.6.11",
     "vuex": "3.1.1",
     "webpack": "4.42.0"
   },
@@ -108,12 +106,13 @@
     ]
   },
   "peerDependencies": {
-    "vue": "2",
-    "cypress": "*"
+    "vue": "2.x",
+    "cypress": ">=4.5.0"
   },
   "dependencies": {
     "@cypress/webpack-preprocessor": "4.1.3",
+    "@kazupon/vue-i18n-loader": "0.5.0",
     "common-tags": "1.8.0",
-    "@kazupon/vue-i18n-loader": "0.5.0"
+    "find-webpack": "1.3.0"
   }
 }

@@ -1,7 +1,7 @@
-import PizzaShop from '../../components/PizzaShop'
-import router from '../../components/PizzaShop/router'
+import PizzaShop from './PizzaShop'
+import router from './PizzaShop/router'
 import VueRouter from 'vue-router'
-import mountVue from '../..'
+import {mountCallback} from 'cypress-vue-unit-test'
 
 describe('Vue Router - Pizza Shop', () => {
 
@@ -17,7 +17,7 @@ describe('Vue Router - Pizza Shop', () => {
   const template = '<router-view />'
 
   // initialize a fresh Vue app before each test
-  beforeEach(mountVue({ template, router }, { extensions }))
+  beforeEach(mountCallback({ template, router }, { extensions }))
 
   it('go to order page', () => {
     cy.get('button.order').click()

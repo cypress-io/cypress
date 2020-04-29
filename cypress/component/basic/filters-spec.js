@@ -1,6 +1,5 @@
-const mountVue = require('../..')
+import {mountCallback} from 'cypress-vue-unit-test'
 
-/* eslint-env mocha */
 describe('Global filters', () => {
   const filters = {
     reverse: s =>
@@ -16,10 +15,11 @@ describe('Global filters', () => {
   const extensions = {
     filters
   }
-  beforeEach(mountVue({template}, { extensions }))
+  beforeEach(mountCallback({template}, { extensions }))
 
   it('registers global filter', () => {
-    cy.window().its('Vue')
+    cy.wrap(window.Vue)
+    // cy.window().its('Vue')
       .invoke('filter', 'reverse')
       .should('equal', filters.reverse)
   })

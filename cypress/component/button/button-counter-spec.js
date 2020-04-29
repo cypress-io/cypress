@@ -1,9 +1,9 @@
-import ButtonCounter from '../../components/ButtonCounter.vue'
-const mountVue = require('../..')
+import ButtonCounter from './ButtonCounter.vue'
+import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('ButtonCounter', () => {
-  beforeEach(mountVue(ButtonCounter))
+  beforeEach(mountCallback(ButtonCounter))
 
   it('starts with zero', () => {
     cy.contains('button', '0')

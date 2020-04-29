@@ -1,5 +1,5 @@
-import { MyPlugin } from '../../components/MyPlugin'
-const mountVue = require('../..')
+import { MyPlugin } from './MyPlugin'
+import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Custom plugin MyPlugin', () => {
@@ -9,7 +9,7 @@ describe('Custom plugin MyPlugin', () => {
   const extensions = {
     use
   }
-  beforeEach(mountVue({}, { extensions }))
+  beforeEach(mountCallback({}, { extensions }))
 
   it('registers global method on Vue instance', () => {
     cy.window().its('Vue').its('aPluginMethod').should('be.a', 'function')

@@ -1,4 +1,4 @@
-const mountVue = require('../..')
+import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Declarative rendering', () => {
@@ -19,7 +19,7 @@ describe('Declarative rendering', () => {
     ]
   }
 
-  beforeEach(mountVue({ template, data }))
+  beforeEach(mountCallback({ template, data }))
 
   it('shows 3 items', () => {
     cy.get('li').should('have.length', 3)

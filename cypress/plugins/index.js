@@ -1,6 +1,7 @@
 // default webpack file preprocessor is good for simple cases
 const { onFileDefaultPreprocessor } = require('../../preprocessor/webpack')
 
+
 module.exports = on => {
   on('file:preprocessor', onFileDefaultPreprocessor)
 }

@@ -1,12 +1,12 @@
-import MessageList from '../../components/MessageList.vue'
-const mountVue = require('../..')
+import MessageList from './MessageList.vue'
+import {mountCallback} from 'cypress-vue-unit-test'
 
 // common utils for MessageList
 const getItems = () => cy.get('ul li')
 
 /* eslint-env mocha */
 describe('MessageList', () => {
-  beforeEach(mountVue(MessageList))
+  beforeEach(mountCallback(MessageList))
 
   it('shows no messages', () => {
     getItems().should('not.exist')
@@ -35,7 +35,7 @@ describe('MessageList with props', () => {
     MessageList
   }
 
-  beforeEach(mountVue({ template, data, components }))
+  beforeEach(mountCallback({ template, data, components }))
 
   it('shows two items at the start', () => {
     getItems().should('have.length', 2)
@@ -55,7 +55,7 @@ describe('MessageList under message-list name', () => {
     'message-list': MessageList
   }
 
-  beforeEach(mountVue({ template, data, components }))
+  beforeEach(mountCallback({ template, data, components }))
 
   it('starts with two items', () => {
     expect(Cypress.vue.messages).to.deep.equal(['uno', 'dos'])

@@ -1,46 +1,18 @@
 /// <reference types="cypress" />
 
-const Vue = require('vue/dist/vue')
+const Vue = require('vue').default
 const { stripIndent } = require('common-tags')
 
 // mountVue options
-const defaultOptions = ['html', 'vue', 'base', 'mountId', 'extensions']
+const defaultOptions = ['vue', 'extensions', 'style', 'stylesheets']
 
-// default mount point element ID for root Vue instance
-const defaultMountId = 'app'
-
-const parentDocument = window.parent.document
-const projectName = Cypress.config('projectName')
-const appIframeId = `Your App: '${projectName}'`
-const appIframe = parentDocument.getElementById(appIframeId)
-
-// having weak reference to styles prevents garbage collection
-// and "losing" styles when the next test starts
-const stylesCache = new Map()
-
-const copyStyles = component => {
-  let styles
-  if (stylesCache.has(component)) {
-    styles = stylesCache.get(component)
-  } else {
-    styles = document.querySelectorAll('head style')
-    if (styles.length) {
-      console.log('injected %d styles', styles.length)
-      stylesCache.set(component, styles)
-    } else {
-      console.log('No styles injected for this component')
-      styles = null
-    }
+function checkMountModeEnabled () {
+  // @ts-ignore
+  if (Cypress.spec.specType !== 'component') {
+    throw new Error(
+      `In order to use mount or unmount functions please place the spec in component folder`
+    )
   }
-
-  if (!styles) {
-    return
-  }
-
-  const head = appIframe.contentDocument.querySelector('head')
-  styles.forEach(style => {
-    head.appendChild(style)
-  })
 }
 
 const deleteConstructor = comp => delete comp._Ctor
@@ -50,22 +22,6 @@ const deleteCachedConstructors = component => {
     return
   }
   Cypress._.values(component.components).forEach(deleteConstructor)
-}
-
-const getPageHTML = options => {
-  return (
-    options.html ||
-    stripIndent`
-    <html>
-      <head>
-        ${options.base ? `<base href="${options.base}" />` : ''}
-      </head>
-      <body>
-        <div id="${options.mountId || defaultMountId}"></div>
-      </body>
-    </html>
-  `
-  )
 }
 
 const registerGlobalComponents = (Vue, options) => {
@@ -108,10 +64,6 @@ const installMixins = (Vue, options) => {
   }
 }
 
-const isOptionName = name => defaultOptions.includes(name)
-
-const isOptions = object => Object.keys(object).every(isOptionName)
-
 const isConstructor = object => object && object._compiled
 
 const hasStore = ({ store }) => store && store._vm
@@ -143,30 +95,11 @@ const resetStoreVM = (Vue, { store }) => {
   return store
 }
 
-function setXMLHttpRequest (w) {
-  // by grabbing the XMLHttpRequest from app's iframe
-  // and putting it here - in the test iframe
-  // we suddenly get spying and stubbing 😁
-  window.XMLHttpRequest = w.XMLHttpRequest
-  return w
-}
+const mountVue = (component, optionsOrProps = {}) => {
+  checkMountModeEnabled()
 
-function setAlert (w) {
-  window.alert = w.alert
-  return w
-}
-
-// the double function allows mounting a component quickly
-// beforeEach(mountVue(component, options))
-const mountVue = (component, optionsOrProps = {}) => () => {
-  let options = {}
-  let props = {}
-
-  if (isOptions(optionsOrProps)) {
-    options = optionsOrProps
-  } else {
-    props = optionsOrProps
-  }
+  const options = Cypress._.pick(optionsOrProps, defaultOptions)
+  const props = Cypress._.omit(optionsOrProps, defaultOptions)
 
   // display deprecation warnings
   if (options.vue) {
@@ -176,50 +109,73 @@ const mountVue = (component, optionsOrProps = {}) => () => {
       Please remove it from your 'mountVue' options.`)
   }
 
-  // insert base app template
-  const doc = appIframe.contentDocument
-  doc.write(getPageHTML(options))
-  doc.close()
-
-  // get root Vue mount element
-  const mountId = options.mountId || defaultMountId
-  const el = doc.getElementById(mountId)
-
   // set global Vue instance:
   // 1. convenience for debugging in DevTools
   // 2. some libraries might check for this global
-  appIframe.contentWindow.Vue = Vue
+  // appIframe.contentWindow.Vue = Vue
 
   // refresh inner Vue instance of Vuex store
   if (hasStore(component)) {
     component.store = resetStoreVM(Vue, component)
   }
 
-  // setup Vue instance
-  installFilters(Vue, options)
-  installMixins(Vue, options)
-  installPlugins(Vue, options)
-  registerGlobalComponents(Vue, options)
-  deleteCachedConstructors(component)
+  return cy.window({ log: false }).then(win => {
+    win.Vue = Vue
 
-  // create root Vue component
-  // and make it accessible via Cypress.vue
-  if (isConstructor(component)) {
-    const Cmp = Vue.extend(component)
-    Cypress.vue = new Cmp(props).$mount(el)
-    copyStyles(Cmp)
-  } else {
-    Cypress.vue = new Vue(component).$mount(el)
-    copyStyles(component)
-  }
+    const document = cy.state('document')
+    let el = document.getElementById('cypress-jsdom')
 
-  return cy
-    .window({ log: false })
-    .then(setXMLHttpRequest)
-    .then(setAlert)
-    .then(() => {
-      return cy.wrap(Cypress.vue)
-    })
+    // If the target div doesn't exist, create it
+    if (!el) {
+      const div = document.createElement('div')
+      div.id = 'cypress-jsdom'
+      document.body.appendChild(div)
+      el = div
+    }
+
+    if (typeof options.stylesheets === 'string') {
+      options.stylesheets = [options.stylesheets]
+    }
+    if (Array.isArray(options.stylesheets)) {
+      console.log('adding stylesheets')
+      options.stylesheets.forEach(href => {
+        const link = document.createElement('link')
+        link.type = 'text/css'
+        link.rel = 'stylesheet'
+        link.href = href
+        el.append(link)
+      })
+    }
+
+    if (options.style) {
+      const style = document.createElement('style')
+      style.appendChild(document.createTextNode(options.style))
+      el.append(style)
+    }
+
+    const componentNode = document.createElement('div')
+    el.append(componentNode)
+
+    // setup Vue instance
+    installFilters(Vue, options)
+    installMixins(Vue, options)
+    installPlugins(Vue, options)
+    registerGlobalComponents(Vue, options)
+    deleteCachedConstructors(component)
+
+    // create root Vue component
+    // and make it accessible via Cypress.vue
+    if (isConstructor(component)) {
+      const Cmp = Vue.extend(component)
+      Cypress.vue = new Cmp(props).$mount(componentNode)
+    } else {
+      Cypress.vue = new Vue(component).$mount(componentNode)
+    }
+  })
 }
 
-module.exports = mountVue
+// the double function allows mounting a component quickly
+// beforeEach(mountVue(component, options))
+const mountCallback = (...args) => () => mountVue(...args)
+
+module.exports = { mount: mountVue, mountCallback }

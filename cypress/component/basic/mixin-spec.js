@@ -1,4 +1,4 @@
-const mountVue = require('../..')
+import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Global mixin', () => {
@@ -13,7 +13,7 @@ describe('Global mixin', () => {
   const extensions = {
     mixin
   }
-  beforeEach(mountVue({}, { extensions }))
+  beforeEach(mountCallback({}, { extensions }))
 
   it('calls mixin "created" method', () => {
     expect(MyMixin.created).to.have.been.calledOnce
