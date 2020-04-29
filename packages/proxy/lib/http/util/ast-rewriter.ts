@@ -1,6 +1,6 @@
 import { HtmlJsRewriter, rewriteHtmlJsAsync, rewriteJsAsync } from '@packages/rewriter'
 import duplexify from 'duplexify'
-import concatStream from 'concat-stream'
+import { concatStream } from '@packages/network'
 import stream from 'stream'
 import { SecurityOpts } from './rewriter'
 
