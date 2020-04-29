@@ -226,6 +226,10 @@ let options = {
   indentChar: ' ',
   newLineChar: '\n',
   wrap: function wrap (type, text) {
+    if (this.Cypress) {
+      text = `**${text}**`
+    }
+
     return typeColors[type](text)
   },
 }
@@ -290,11 +294,11 @@ function keyChanged (key, text) {
 }
 
 function keyRemoved (key, variable) {
-  return options.wrap('removed', `**- ${key}: ${printVar(variable)}**`) + options.newLineChar
+  return options.wrap('removed', `- ${key}: ${printVar(variable)}`) + options.newLineChar
 }
 
 function keyAdded (key, variable) {
-  return options.wrap('added', `**+ ${key}: ${printVar(variable)}**`) + options.newLineChar
+  return options.wrap('added', `+ ${key}: ${printVar(variable)}`) + options.newLineChar
 }
 
 function parseMatcher (obj, match) {
@@ -442,7 +446,12 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       let actObj = _.extend({}, act)
       let key
 
-      keys.sort()
+      if (_.isArray(exp)) {
+        keys.sort((a, b) => +a - +b)
+      } else {
+        keys.sort()
+      }
+
       for (let i = 0; i < keys.length; i++) {
         key = keys[i]
         const isUndef = exp[key] === undefined
@@ -523,7 +532,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       act = printVar(act)
 
       if (exp !== act) {
-        text = options.wrap('modified', `**${exp} ⮕ ${act}**`)
+        text = options.wrap('modified', `${exp} ${typeColors['normal']('⮕')} ${act}`)
         changed = true
       }
     }
