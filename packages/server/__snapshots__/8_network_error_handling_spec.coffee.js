@@ -386,7 +386,7 @@ Common situations why this would fail:
   
   From Node.js Internals:
     Error: socket hang up
-        [stack trace lines]
+      [stack trace lines]
     
 
   2) network error handling
@@ -422,7 +422,7 @@ https://on.cypress.io/request
   
   From Node.js Internals:
     RequestError: Error: socket hang up
-        [stack trace lines]
+      [stack trace lines]
     
 
 

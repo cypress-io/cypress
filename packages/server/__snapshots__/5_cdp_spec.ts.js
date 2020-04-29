@@ -39,7 +39,7 @@ The CDP port requested was 7777.
 Error details:
 
 Error: connect ECONNREFUSED 127.0.0.1:7777
-    [stack trace lines]
+      [stack trace lines]
 
 
 `
@@ -64,12 +64,12 @@ exports['e2e cdp / handles disconnections as expected'] = `
 
 
   e2e remote debugging disconnect
-    ✓ reconnects as expected
+    1) reconnects as expected
 
 There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
 Error: connect ECONNREFUSED 127.0.0.1:7777
-    [stack trace lines]
+      [stack trace lines]
 
 
   (Results)
@@ -80,11 +80,17 @@ Error: connect ECONNREFUSED 127.0.0.1:7777
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     spec.ts                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/spec.ts/e2e remote debugging disconnect -- reco     (1280x720)
+     nnects as expected (failed).png                                                                
 
 
   (Video)

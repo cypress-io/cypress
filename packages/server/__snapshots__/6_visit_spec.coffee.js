@@ -122,7 +122,7 @@ Common situations why this would fail:
   
   From Node.js Internals:
     Error: connect ECONNREFUSED 127.0.0.1:16795
-        [stack trace lines]
+      [stack trace lines]
     
 
 
@@ -584,7 +584,7 @@ Common situations why this would fail:
   
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
-        [stack trace lines]
+      [stack trace lines]
     
 
   2) response timeouts result in an error
@@ -608,7 +608,7 @@ Common situations why this would fail:
   
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
-        [stack trace lines]
+      [stack trace lines]
     
 
   3) response timeouts result in an error
@@ -632,7 +632,7 @@ Common situations why this would fail:
   
   From Node.js Internals:
     Error: ESOCKETTIMEDOUT
-        [stack trace lines]
+      [stack trace lines]
     
 
 
