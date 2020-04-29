@@ -2213,6 +2213,7 @@ declare namespace Cypress {
   }
 
   interface State {
+    (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
   }
 
   /**

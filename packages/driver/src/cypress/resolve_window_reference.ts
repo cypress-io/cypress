@@ -1,15 +1,18 @@
 import _ from 'lodash'
 import $Cypress from '../..'
 
-// TODO: fix this so that it's an override for entire `driver` package
-interface State {
-  (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
-}
-
+/**
+ * Fix property reads and writes that could potentially help the AUT to break out of its iframe.
+ *
+ * @param currentWindow the value of `globalThis` from the scope of the window reference in question
+ * @param accessedObject a reference to the object being accessed
+ * @param accessedProp the property name being accessed (Symbol/number properties are not intercepted)
+ * @param value the right-hand side of an assignment operation (accessedObject.accessedProp = value)
+ */
 export function resolveWindowReference (this: typeof $Cypress, currentWindow: Window, accessedObject: Window | any, accessedProp: string, value?: any) {
-  const Cypress = this // TODO: don't do this terrible thing
+  const Cypress = this
   const { dom } = Cypress
-  const state = Cypress.state as State
+  const state = Cypress.state
   const actualValue = accessedObject[accessedProp]
 
   const isValPassed = arguments.length === 4
@@ -17,7 +20,7 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
   const $autIframe = state('$autIframe')
 
   if (!$autIframe) {
-    // TODO: warning?
+    // missing AUT iframe, resolve the property access normally
     if (isValPassed) {
       return (accessedObject[accessedProp] = value)
     }
@@ -28,7 +31,7 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
   const contentWindow = $autIframe.prop('contentWindow')
 
   if (accessedObject === currentWindow.top && ['frames', 'location'].includes(accessedProp)) {
-    // doing a property access to `top`
+    // doing a property access on topmost window
     if (isValPassed) {
       return (contentWindow[accessedProp] = value)
     }
@@ -48,34 +51,16 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
     return actualValue
   }
 
-  // actualValue is a reference to a Window
+  // actualValue is a reference to a Window object
   if (accessedProp === 'top') {
-    if (isValPassed) {
-      // TODO: will Cypress blow up?
-      // TODO: this should really be changing value (RHS), not the LHS, maybe
-      $autIframe.prop('contentWindow', value)
-
-      return value
-    }
-
+    // note: `isValPassed` is not considered here because `window.top` is readonly
     return contentWindow
   }
 
   if (accessedProp === 'parent') {
+    // note: `isValPassed` is not considered here because `window.parent` is readonly
     if (actualValue === currentWindow.top) {
-      if (isValPassed) {
-        // TODO: will Cypress blow up?
-        $autIframe.prop('contentWindow', value)
-
-        return value
-      }
-
       return contentWindow
-    }
-
-    // else, return the actual parent
-    if (isValPassed) {
-      return (accessedObject[accessedProp] = value)
     }
 
     return actualValue
