@@ -52,15 +52,13 @@ const whiteSpaceBetweenNewlines = /\n\s+\n/
 const replaceStackTraceLines = (str) => {
   return str.replace(stackTraceLinesRe, (match, ...parts) => {
     const isFirefoxStack = parts[1] === '@'
-    let pre = parts[0]
     let post = parts[4]
 
     if (isFirefoxStack) {
-      pre = '\n      '
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
 
-    return `${pre}[stack trace lines]${post}`
+    return `\n      [stack trace lines]${post}`
   })
 }
 
