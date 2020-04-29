@@ -6,19 +6,11 @@ and publish the NPM module `cypress` if you are a member of the `cypress` NPM or
 > :information_source: See the [publishing](#publishing) section for how to build, test and publish a
 new official version of the binary and `cypress` NPM package.
 
-## Set next version on CIs
-
-We build the NPM package and binary on all major platforms (Linux, Mac, Windows) on different CI
-providers. In order to set the version while building we have to set the environment variable
-with the new version on each CI provider *before starting the build*.
-
-Use script command `yarn set-next-ci-version` to do this.
-
-## Building
+## Building Locally
 
 ### Building the NPM package
 
-> :warning: Note: The steps in this section are automated in CI, and you should not generally need to do them yourself.
+> :warning: Note: The steps in this section are automated in CI, and you should not need to do them yourself when publishing.
 
 Building a new NPM package is very quick.
 
@@ -31,49 +23,15 @@ The steps above:
 - Transpile the code into ES5 to be compatible with the common Node versions
 - Put the result into the [`cli/build`](./cli/build) folder.
 
-You could publish from there, but first you need to build and upload the binary with the *same version*;
-this guarantees that when users do `npm i cypress@<x.y.z>` they can download the binary
-with the same version `x.y.z` from Cypress's CDN service.
-
 ### Building the binary
 
-> :warning: Note: The steps in this section are automated in CI, and you should not generally need to do them yourself.
+> :warning: Note: The steps in this section are automated in CI, and you should not need to do them yourself when publishing.
 
-First, you need to build, zip and upload the application binary to the Cypress server.
+The NPM package requires a corresponding binary of the same version. In production, it will try to retrieve the binary from the Cypress CDN if it is not cached locally.
 
-You can use a single command to do all tasks at once:
+You can build the Cypress binary locally by running `yarn binary-build`. You can use Docker to build a Linux binary by running `yarn binary-build-linux`.
 
-```shell
-yarn binary-deploy
-```
-
-Or you can specify each command separately:
-
-```shell
-yarn binary-build
-yarn binary-zip
-yarn binary-upload
-```
-
-You can pass options to each command to avoid answering questions, for example
-
-```shell
-yarn binary-deploy --platform darwin --version 0.20.0
-yarn binary-upload --platform darwin --version 0.20.0 --zip cypress.zip
-```
-
-If something goes wrong, see the debug messages using the `DEBUG=cypress:binary ...` environment
-variable.
-
-Because we had many problems reliably zipping the built binary, for now we need to build both the Mac and Linux binary from Mac (Linux binary is built using a Docker container), then zip it **from Mac**, then upload it.
-
-### Building Linux binary in Docker
-
-If you are using a Mac you can build the linux binary if you have docker installed.
-
-```shell
-yarn binary-build-linux
-```
+`yarn binary-zip` can be used to zip the built binary together.
 
 ## Publishing
 
