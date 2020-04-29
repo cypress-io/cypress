@@ -7,12 +7,6 @@ module.exports = {
   handle (spec, req, res, config, next, onError) {
     debug('request for %o', { spec })
 
-    res.set({
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-    })
-
     res.type('js')
 
     return preprocessor
@@ -21,7 +15,11 @@ module.exports = {
       debug('sending spec %o', { filePath })
       const sendFile = Promise.promisify(res.sendFile.bind(res))
 
-      return sendFile(filePath)
+      return sendFile(filePath, {
+        // keeps 'Last-Modified' response header from being included
+        // since it is ignored anyway because we're using etags
+        lastModified: false,
+      })
     }).catch({ code: 'ECONNABORTED' }, (err) => {
       // https://github.com/cypress-io/cypress/issues/1877
       // now that we are properly catching errors from
