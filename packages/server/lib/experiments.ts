@@ -51,6 +51,7 @@ interface StringValues {
   ```
 */
 const _summaries: StringValues = {
+  experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs',
   experimentalGetCookiesSameSite: 'Adds `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.',
 }
 
@@ -65,6 +66,7 @@ const _summaries: StringValues = {
   ```
 */
 const _names: StringValues = {
+  experimentalComponentTesting: 'Component Testing',
   experimentalGetCookiesSameSite: 'Set `sameSite` property when retrieving cookies',
 }
 
@@ -132,4 +134,10 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
 // @ts-ignore
 export const isKnownExperiment = (experiment, key) => {
   return Object.keys(experimental.names).includes(key)
+}
+
+// exporting a single default object with methods
+// helps make it is to stub and to test
+export default {
+  getExperiments,
 }

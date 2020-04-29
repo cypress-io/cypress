@@ -16,7 +16,6 @@ const debug = require('debug')('cypress:support:e2e')
 const httpsProxy = require('@packages/https-proxy')
 const Fixtures = require('./fixtures')
 const fs = require(`${root}../lib/util/fs`)
-const coerce = require(`${root}../lib/util/coerce`)
 const allowDestroy = require(`${root}../lib/util/server_destroy`)
 const cypress = require(`${root}../lib/cypress`)
 const screenshots = require(`${root}../lib/screenshots`)
@@ -107,6 +106,22 @@ const replaceUploadingResults = function (orig, ...rest) {
   const ret = match[0] + results + match[3]
 
   return ret
+}
+
+/**
+ * Takes normalized runner STDOUT, finds the "Run Finished" line
+ * and returns everything AFTER that, which usually is just the
+ * test summary table.
+ * @param {string} stdout from the test run, probably normalized
+*/
+const leaveRunFinishedTable = (stdout) => {
+  const index = stdout.indexOf('  (Run Finished)')
+
+  if (index === -1) {
+    throw new Error('Cannot find Run Finished line')
+  }
+
+  return stdout.slice(index)
 }
 
 const normalizeStdout = function (str, options = {}) {
@@ -280,7 +295,6 @@ const localItFn = function (title, opts = {}) {
   opts.browser = normalizeToArray(opts.browser)
 
   const DEFAULT_OPTIONS = {
-    exit: coerce(process.env.EXIT),
     only: false,
     skip: false,
     browser: [],
@@ -362,6 +376,8 @@ const e2e = {
 
   normalizeStdout,
 
+  leaveRunFinishedTable,
+
   it: localItFn,
 
   snapshot (...args) {
@@ -381,6 +397,11 @@ const e2e = {
       // can take a long time (5-15 secs)
       this.timeout(human('2 minutes'))
       Fixtures.scaffold()
+
+      if (process.env.NO_EXIT) {
+        Fixtures.scaffoldWatch()
+        process.env.CYPRESS_INTERNAL_E2E_TESTS
+      }
 
       sinon.stub(process, 'exit')
 
@@ -424,12 +445,21 @@ const e2e = {
       browser: 'electron',
       headed: process.env.HEADED || false,
       project: e2ePath,
-      timeout: exit === false ? 3000000 : 120000,
+      timeout: options.noExit ? 3000000 : 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
+      noExit: process.env.NO_EXIT,
     })
+
+    if (options.exit != null) {
+      throw new Error(`
+      passing { exit: false } to e2e options is no longer supported
+      Please pass the --no-exit flag to the test command instead
+      e.g. "yarn test test/e2e/1_async_timeouts_spec.coffee --no-exit"
+      `)
+    }
 
     ctx.timeout(options.timeout)
 
@@ -442,6 +472,7 @@ const e2e = {
           return spec
         }
 
+        // TODO would not work for component tests
         return path.join(options.project, 'cypress', 'integration', spec)
       })
 
@@ -518,8 +549,8 @@ const e2e = {
       args.push('--output-path', options.outputPath)
     }
 
-    if (options.exit === false) {
-      args.push('--exit', options.exit)
+    if (options.noExit) {
+      args.push('--no-exit')
     }
 
     if (options.inspectBrk) {
@@ -551,8 +582,26 @@ const e2e = {
     })
   },
 
+  /**
+   * Executes a given project and optionally sanitizes and checks output.
+   * @example
+    ```
+      e2e.setup()
+      project = Fixtures.projectPath("component-tests")
+      e2e.exec(this, {
+        project,
+        config: {
+          video: false
+        }
+      })
+      .then (result) ->
+        console.log(e2e.normalizeStdout(result.stdout))
+    ```
+   */
   exec (ctx, options = {}) {
+    debug('e2e exec options %o', options)
     options = this.options(ctx, options)
+    debug('processed options %o', options)
     let args = this.args(options)
 
     args = ['index.js'].concat(args)
@@ -641,8 +690,12 @@ const e2e = {
 
           // don't fail our own tests running from forked PR's
           CYPRESS_INTERNAL_E2E_TESTS: '1',
+
           // Emulate no typescript environment
           CYPRESS_INTERNAL_NO_TYPESCRIPT: options.noTypeScript ? '1' : '0',
+
+          // force file watching for use with --no-exit
+          ...(options.noExit ? { CYPRESS_INTERNAL_FORCE_FILEWATCH: '1' } : {}),
         })
         .extend(options.processEnv)
         .value(),

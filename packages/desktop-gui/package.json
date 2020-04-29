@@ -17,7 +17,7 @@
   "devDependencies": {
     "@babel/polyfill": "7.8.7",
     "@cypress/icons": "0.7.0",
-    "@cypress/json-schemas": "5.34.1",
+    "@cypress/json-schemas": "5.34.2",
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@packages/web-config": "*",
@@ -25,6 +25,8 @@
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
     "cross-env": "6.0.3",
+    "cypress-multi-reporters": "1.2.4",
+    "cypress-react-unit-test": "3.0.0-cypress-mount-mode.19",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "gravatar": "1.8.0",
     "human-interval": "0.1.6",
@@ -41,12 +43,13 @@
     "react-dom": "16.12.0",
     "react-inspector": "4.0.0",
     "react-loader": "2.4.7",
-    "react-select": "3.0.8",
+    "react-select": "3.1.0",
     "webpack": "4.35.3",
     "webpack-cli": "3.3.2"
   },
   "files": [
     "dist",
-    "lib"
+    "lib",
+    "!lib/**/*_spec.jsx"
   ]
 }

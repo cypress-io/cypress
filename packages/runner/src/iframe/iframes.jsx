@@ -109,6 +109,12 @@ export default class Iframes extends Component {
     this.props.eventManager.initialize($autIframe, config)
   }
 
+  _loadSpecInIframe (iframe, specSrc) {
+    return new Promise((resolve) => {
+      iframe.prop('src', specSrc).one('load', resolve)
+    })
+  }
+
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specPath) {
@@ -118,14 +124,21 @@ export default class Iframes extends Component {
 
     this.autIframe.showBlankContents()
 
+    // specs with type "component" can only arrive if the server has "componentTesting" experiment on
+    if (this.props.config.spec.specType === 'component') {
+      // In mount mode we need to render something right from spec file
+      // So load application tests to the aut frame
+      return this._loadSpecInIframe($autIframe, specSrc)
+      .then(() => $autIframe)
+    }
+
     const $specIframe = $('<iframe />', {
       id: `Your Spec: '${specSrc}'`,
       class: 'spec-iframe',
     }).appendTo($container)
 
-    $specIframe.prop('src', specSrc)
-
-    return $autIframe
+    return this._loadSpecInIframe($specIframe, specSrc)
+    .then(() => $autIframe)
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {

@@ -152,8 +152,8 @@ if (options.headed) {
   env.HEADED = true
 }
 
-if (options.exit != null) {
-  env.EXIT = options.exit
+if (options.exit === false) {
+  env.NO_EXIT = '1'
 }
 
 const cmd = `${commandAndArguments.command} ${

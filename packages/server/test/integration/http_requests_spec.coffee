@@ -58,6 +58,18 @@ removeWhitespace = (c) ->
 cleanResponseBody = (body) ->
   replaceAbsolutePaths(removeWhitespace(body))
 
+trimString = (s) -> _.trim(s)
+nonEmpty = (s) -> !_.isEmpty(s)
+
+# removes leading whitespace and blank lines
+removeLeadingWhitespace = (text) ->
+  text.split("\n").map(trimString).filter(nonEmpty).join("\n")
+
+sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
+
+removeSourceMapContents = (fileContents) ->
+  fileContents.replace(sourceMapRegex, ";")
+
 browserifyFile = (filePath) ->
   streamToPromise(
     browserify({
@@ -918,13 +930,13 @@ describe "Routes", ->
           expect(body).to.eq contents
 
       it "can send back all tests", ->
-        contents = removeWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
+        contents = removeLeadingWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
 
         @rp("http://localhost:2020/__cypress/iframes/__all")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = cleanResponseBody(res.body)
+          body = removeLeadingWhitespace(res.body)
           expect(body).to.eq contents
 
     describe "no-server", ->

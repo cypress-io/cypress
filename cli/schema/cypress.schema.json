@@ -103,6 +103,19 @@
       "default": "cypress/integration",
       "description": "Path to folder containing integration test files"
     },
+    "experimentalComponentTesting": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enabled experimental component testing, see https://github.com/cypress-io/cypress/issues/5922"
+    },
+    "componentFolder": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "default": false,
+      "description": "Path to folder containing component test files (Pass false to disable)"
+    },
     "pluginsFile": {
       "type": [
         "string",
