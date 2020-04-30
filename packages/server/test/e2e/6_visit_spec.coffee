@@ -110,6 +110,7 @@ describe "e2e visit", ->
             serv.destroy()
     }
 
+    e2e.it "passes with experimentalSourceRewriting", {
       spec: "source_rewriting_spec.js"
       config: {
         experimentalSourceRewriting: true
