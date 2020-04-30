@@ -383,7 +383,7 @@ describe('driver/src/cypress/error_utils', () => {
 
     beforeEach(() => {
       cy.stub($stackUtils, 'replacedStack').returns('replaced stack')
-      cy.stub($stackUtils, 'stackWithUserInvocationStackAppended').returns({ stack: 'appended stack' })
+      cy.stub($stackUtils, 'stackWithUserInvocationStackSpliced').returns({ stack: 'spliced stack' })
       cy.stub($stackUtils, 'getSourceStack').returns(sourceStack)
       cy.stub($stackUtils, 'getCodeFrame').returns(codeFrame)
 
@@ -419,7 +419,7 @@ describe('driver/src/cypress/error_utils', () => {
 
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
-      expect(result.stack).to.equal('appended stack')
+      expect(result.stack).to.equal('spliced stack')
     })
 
     it('appends user invocation stack when it is a chai validation error', () => {
@@ -427,7 +427,7 @@ describe('driver/src/cypress/error_utils', () => {
 
       const result = $errUtils.enhanceStack({ err, userInvocationStack })
 
-      expect(result.stack).to.equal('appended stack')
+      expect(result.stack).to.equal('spliced stack')
     })
 
     it('does not replaced or append stack when there is no invocation stack', () => {
