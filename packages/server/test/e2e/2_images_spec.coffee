@@ -14,4 +14,5 @@ describe "e2e images", ->
   e2e.it "passes", {
     spec: "images_spec.coffee"
     snapshot: true
+    config: {video: false}
   }
