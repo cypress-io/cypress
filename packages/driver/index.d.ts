@@ -1,4 +1,4 @@
-/// <reference path="../../cli/types/index.d.ts" />
+/// <reference path="../../cli/types/Cypress.d.ts" />
 /// <reference path="../ts/index.d.ts" />
 export const $Cypress: Cypress.Cypress
 
