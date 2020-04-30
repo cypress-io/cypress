@@ -18,7 +18,7 @@ If you are using Create-React-App v3 or `react-scripts`, and want to reuse the b
 ```js
 // cypress/plugins/index.js
 module.exports = (on, config) => {
-  require('cypress-react-unit-test/plugins/cra-v3')(on, config)
+  require('cypress-react-unit-test/plugins/react-scripts')(on, config)
   // IMPORTANT to return the config object
   // with the any changed environment variables
   return config
@@ -26,6 +26,8 @@ module.exports = (on, config) => {
 ```
 
 See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/try-cra-with-unit-test)
+
+**Tip:** `plugins/react-scripts` is just loading `plugins/cra-v3`.
 
 ## Your webpack config
 
