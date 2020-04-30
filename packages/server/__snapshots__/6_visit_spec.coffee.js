@@ -762,16 +762,15 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:      1.2.3                                                                            │
   │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        2 found (source_rewriting_spec.js, visit_spec.coffee)                            │
-  │ Searched:     cypress/integration/source_rewriting_spec.js, cypress/integration/visit_spec.cof │
-  │               fee                                                                              │
+  │ Specs:        1 found (source_rewriting_spec.js)                                               │
+  │ Searched:     cypress/integration/source_rewriting_spec.js                                     │
   │ Experiments:  experimentalSourceRewriting=true                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  source_rewriting_spec.js                                                        (1 of 2)
+  Running:  source_rewriting_spec.js                                                        (1 of 1)
 
 
   source rewriting spec
@@ -813,55 +812,6 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/source_rewriting_spec.js.mp4        (X second)
 
 
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  visit_spec.coffee                                                               (2 of 2)
-
-
-  visits
-    ✓ scrolls automatically to div with id=foo
-    ✓ can load an http page with a huge amount of elements without timing out
-    ✓ can load a local file with a huge amount of elements without timing out
-    ✓ can load a website which uses invalid HTTP header chars
-    ✓ can load a site via TLSv1
-    issue #225: hash urls
-      ✓ can visit a hash url and loads
-      ✓ can visit the same hash url and loads
-      ✓ can visit a different hash url and loads
-    issue #230: User Agent headers
-      ✓ submits user agent on cy.visit
-      ✓ submits user agent on page load
-      ✓ submits user agent on cy.request
-    issue #255: url with like two domain
-      ✓ passes
-    issue #309: request accept header not set
-      ✓ sets accept header to text/html,*/*
-
-
-  13 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        13                                                                               │
-  │ Passing:      13                                                                               │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     visit_spec.coffee                                                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_spec.coffee.mp4               (X second)
-
-
 ====================================================================================================
 
   (Run Finished)
@@ -870,10 +820,8 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✔  source_rewriting_spec.js                 XX:XX        9        7        -        2        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✖  visit_spec.coffee                        XX:XX       13       13        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       22       20        -        2        -  
+    ✔  All specs passed!                        XX:XX        9        7        -        2        -  
 
 
 `
