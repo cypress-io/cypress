@@ -34,7 +34,7 @@ Code coverage | ✅ | ✅
 
 ## Known problems
 
-See issues labeled [v2](https://github.com/bahmutov/cypress-react-unit-test/labels/v2)
+See issues labeled [v4](https://github.com/bahmutov/cypress-react-unit-test/labels/v4)
 
 ## Install
 
