@@ -2734,13 +2734,13 @@ declare namespace Cypress {
      *
      * @default true
      */
-    bubbles?: boolean
+    bubbles: boolean
     /**
      * Whether the event is cancelable
      *
      * @default true
      */
-    cancelable?: boolean
+    cancelable: boolean
   }
 
   /** Options to change the default behavior of .writeFile */
