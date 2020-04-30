@@ -4,22 +4,27 @@
 //                 Mike Woudenberg <https://github.com/mikewoudenberg>
 //                 Robbert van Markus <https://github.com/rvanmarkus>
 //                 Nicholas Boll <https://github.com/nicholasboll>
-// TypeScript Version: 3.0
+// TypeScript Version: 2.9
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference types="blob-util" />
-/// <reference types="lodash" />
-/// <reference types="sinon" />
-/// <reference types="sinon-chai" />
-/// <reference types="mocha" />
-/// <reference types="jquery" />
-/// <reference types="chai" />
-/// <reference types="chai-jquery" />
-/// <reference types="bluebird" />
+/// <reference path="./cy-blob-util.d.ts" />
+/// <reference path="./cy-bluebird.d.ts" />
+/// <reference path="./cy-moment.d.ts" />
+/// <reference path="./cy-minimatch.d.ts" />
+/// <reference path="./cy-chai.d.ts" />
+/// <reference path="./lodash/index.d.ts" />
+/// <reference path="./sinon/index.d.ts" />
+/// <reference path="./sinon-chai/index.d.ts" />
+/// <reference path="./mocha/index.d.ts" />
+/// <reference path="./jquery/index.d.ts" />
+/// <reference path="./chai-jquery/index.d.ts" />
 
 // jQuery includes dependency "sizzle" that provides types
 // so we include it too in "node_modules/sizzle".
 // This way jQuery can load it using 'reference types="sizzle"' directive
+
+// "moment" types are with "node_modules/moment"
+/// <reference types="moment" />
 
 // load ambient declaration for "cypress" NPM module
 // hmm, how to load it better?
@@ -27,28 +32,18 @@
 
 // Cypress, cy, Log inherits EventEmitter.
 type EventEmitter2 = import("eventemitter2").EventEmitter2
-type Bluebird<R> = import("bluebird")<R>
 
 type Nullable<T> = T | null
 
 interface EventEmitter extends EventEmitter2 {
   proxyTo: (cy: Cypress.cy) => null
   emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
-  emitThen: (eventName: string, args: any[]) => Bluebird<any>
+  emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
 }
 
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
 declare const assert: Chai.AssertStatic
-
-// Cypress extension of chai
-declare namespace Chai {
-  interface Include {
-    html(html: string): Assertion
-    text(text: string): Assertion
-    value(text: string): Assertion
-  }
-}
 
 declare namespace Cypress {
   type FileContents = string | any[] | object
@@ -187,13 +182,13 @@ declare namespace Cypress {
      * @example
      *    Cypress.Blob.method()
      */
-    Blob: typeof import('blob-util')
+    Blob: BlobUtil.BlobUtilStatic
     /**
      * Cypress automatically includes minimatch and exposes it as Cypress.minimatch.
      *
      * @see https://on.cypress.io/minimatch
      */
-    minimatch: typeof import('minimatch')
+    minimatch: typeof Minimatch.minimatch
     /**
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
@@ -202,7 +197,7 @@ declare namespace Cypress {
      * @example
      *    const todaysDate = Cypress.moment().format("MMM DD, YYYY")
      */
-    moment: typeof import('moment')
+    moment: Moment.MomentStatic
     /**
      * Cypress automatically includes Bluebird and exposes it as Cypress.Promise.
      *
@@ -211,7 +206,7 @@ declare namespace Cypress {
      * @example
      *   new Cypress.Promise((resolve, reject) => { ... })
      */
-    Promise: typeof import('bluebird')
+    Promise: Bluebird.BluebirdStatic
     /**
      * Cypress includes Sinon.js library used in `cy.spy` and `cy.stub`.
      *
