@@ -23,26 +23,17 @@ module.exports = {
 
   handleIframe: (req, res, config, getRemoteState) ->
     test = req.params[0]
-    debug("handle iframe %o", { test })
-
     iframePath = cwd("lib", "html", "iframe.html")
+
+    debug("handle iframe %o", { test })
 
     @getSpecs(test, config)
     .then (specs) =>
-      escapeSpecFilename = (fileName) =>
-        fileName = fileName.replace(SPEC_URL_PREFIX, "__CYPRESS_SPEC_URL_PREFIX__")
-
-        return escapeFilenameInUrl(fileName).replace("__CYPRESS_SPEC_URL_PREFIX__", SPEC_URL_PREFIX)
-
-      specs = specs.map(escapeSpecFilename)
-      debug("escaped spec filenames %o", specs)
-
       @getJavascripts(config)
       .then (js) =>
         res.render iframePath, {
-          title:        @getTitle(test)
-          domain:       getRemoteState().domainName
-          # stylesheets:  @getStylesheets(config)
+          title: @getTitle(test)
+          domain: getRemoteState().domainName
           scripts:  JSON.stringify(js.concat(specs))
         }
 
