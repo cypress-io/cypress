@@ -1,7 +1,6 @@
 import { MessagePort } from 'worker_threads'
 
 export type RewriteRequest = {
-  id: number
   /**
    * used for resolving references in sourcemaps
    */

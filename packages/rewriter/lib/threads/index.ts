@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import Bluebird from 'bluebird'
 import Debug from 'debug'
 import * as path from 'path'
 import os from 'os'
@@ -46,40 +47,76 @@ type RewriteOpts = Pick<RewriteRequest, 'url' | 'source' | 'isHtml' | 'sourceMap
 const workers: WorkerInfo[] = []
 const queued: QueuedRewrite[] = []
 
-let _workerIdCounter = 0
-let _requestIdCounter = 0
+let originalProcessExit
+
+// HACK: electron can SIGABRT if exiting while worker_threads are active, so overwrite process.exit
+// to ensure that all worker threads are killed *before* exiting.
+// @see https://github.com/electron/electron/issues/23366
+function wrapProcessExit () {
+  if (originalProcessExit) {
+    return
+  }
+
+  originalProcessExit = process.exit
+
+  // note - process.exit is normally synchronous, so this could potentially cause strange behavior
+  // @ts-ignore
+  process.exit = _.once(async (...args) => {
+    terminateAllWorkers()
+    .finally(() => {
+      originalProcessExit.call(process, ...args)
+    })
+  })
+}
 
 function createWorker () {
   const startedAt = Date.now()
   let onlineMs: number
 
+  const thread = new Worker(WORKER_PATH)
+  .on('exit', (exitCode) => {
+    debug('worker exited %o', { exitCode, worker: _debugWorker(worker) })
+    _.remove(workers, worker)
+  })
+  .on('online', () => {
+    onlineMs = Date.now() - startedAt
+  })
+  .on('message', () => {
+    debug('received initial ready message from worker %o', {
+      onlineMs, // time for JS to start executing
+      responsiveMs: Date.now() - startedAt, // time for worker to be ready for commands
+      worker: _debugWorker(worker),
+    })
+  })
+
   const worker = {
-    id: _workerIdCounter++,
+    id: thread.threadId,
     isBusy: false,
-    thread: new Worker(WORKER_PATH)
-    .on('exit', (exitCode) => {
-      debug('worker exited %o', { exitCode, worker: _debugWorker(worker) })
-      _.remove(workers, worker)
-    })
-    .on('online', () => {
-      onlineMs = Date.now() - startedAt
-    })
-    .on('message', () => {
-      debug('received initial ready message from worker %o', {
-        onlineMs, // time for JS to start executing
-        responsiveMs: Date.now() - startedAt, // time for worker to be ready for commands
-        worker: _debugWorker(worker),
-      })
-    }),
+    thread,
   }
 
   workers.push(worker)
 
+  wrapProcessExit()
+
   return worker
 }
 
-// TODO: no need to run this if the user hasn't opted in to experimental AST rewriting
-_.times(_.round(4), createWorker)
+export function createInitialWorkers () {
+  // since workers take a little bit of time to start up (due to loading Node and `require`s),
+  // performance can be gained by letting them start before user tests run
+  if (workers.length > 0) {
+    return
+  }
+
+  _.times(4, createWorker)
+}
+
+export function terminateAllWorkers () {
+  return Bluebird.all([
+    workers.map((worker) => worker.thread.terminate()),
+  ])
+}
 
 async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<string> {
   const startedAt = Date.now()
@@ -100,7 +137,6 @@ async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<stri
   const { port1, port2 } = new MessageChannel()
 
   const req: RewriteRequest = {
-    id: _requestIdCounter++,
     port: port1,
     ..._.omit(opts, 'deferSourceMapRewrite'),
   }

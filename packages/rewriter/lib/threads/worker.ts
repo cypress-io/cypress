@@ -2,7 +2,7 @@
 // WARNING: take care to not over-import modules here - the upfront
 // mem/CPU cost is paid up to threads.MAX_WORKER_THREADS times
 
-import { parentPort, isMainThread } from 'worker_threads'
+import { parentPort, isMainThread, threadId } from 'worker_threads'
 
 if (isMainThread) {
   throw new Error(`${__filename} should only be run as a worker thread`)
@@ -20,7 +20,7 @@ parentPort!.on('message', (req: RewriteRequest) => {
   const startedAt = Date.now()
 
   function _deferSourceMapRewrite (deferredSourceMap) {
-    const uniqueId = [req.id, _idCounter++].join('.')
+    const uniqueId = [threadId, _idCounter++].join('.')
 
     _reply({
       threadMs: _getThreadMs(),
