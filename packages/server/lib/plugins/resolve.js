@@ -27,7 +27,7 @@ module.exports = {
 
       return resolved
     } catch (e) {
-      debug('could not resolve typescript, %s', e.message)
+      debug('could not resolve typescript, error: %s', e.message)
 
       return null
     }
