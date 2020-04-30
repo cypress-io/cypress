@@ -61,10 +61,6 @@ cleanResponseBody = (body) ->
 trimString = (s) -> _.trim(s)
 nonEmpty = (s) -> !_.isEmpty(s)
 
-# removes leading whitespace and blank lines
-removeLeadingWhitespace = (text) ->
-  text.split("\n").map(trimString).filter(nonEmpty).join("\n")
-
 sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 removeSourceMapContents = (fileContents) ->
@@ -920,7 +916,7 @@ describe "Routes", ->
         })
 
       it "renders iframe with variables passed in", ->
-        contents = removeWhitespace Fixtures.get("server/expected_todos_iframe.html")
+        contents = removeWhitespace(Fixtures.get("server/expected_todos_iframe.html"))
 
         @rp("http://localhost:2020/__cypress/iframes/integration/test2.coffee")
         .then (res) ->
@@ -930,13 +926,13 @@ describe "Routes", ->
           expect(body).to.eq contents
 
       it "can send back all tests", ->
-        contents = removeLeadingWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
+        contents = removeWhitespace(Fixtures.get("server/expected_todos_all_tests_iframe.html"))
 
         @rp("http://localhost:2020/__cypress/iframes/__all")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeLeadingWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "no-server", ->
