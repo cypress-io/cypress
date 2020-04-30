@@ -1,4 +1,4 @@
-exports['e2e issue 1987 / can reload during spec run'] = `
+exports['e2e runnable execution / cannot navigate in before hook and test'] = `
 
 ====================================================================================================
 
@@ -17,27 +17,62 @@ exports['e2e issue 1987 / can reload during spec run'] = `
   Running:  beforehook-and-test-navigation.js                                               (1 of 1)
 
 
+  initial domain change
+    ✓ test
+
   suite
     ✓ test
-    ✓ causes domain navigation
+    1) causes domain navigation
 
 
   2 passing
+  1 failing
+
+  1) suite
+       causes domain navigation:
+     CypressError: \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.
+
+The new URL is considered a different origin because the following parts of the URL are different:
+
+  > port
+
+You may only \`cy.visit()\` same-origin URLs within a single test.
+
+The previous URL you visited was:
+
+  > 'http://localhost:4545'
+
+You're attempting to visit this URL:
+
+  > 'http://localhost:5656'
+
+You may need to restructure some of your test code to avoid this problem.
+
+https://on.cypress.io/cannot-visit-different-origin-domain
+      [stack trace lines]
+
+
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        2                                                                                │
+  │ Tests:        3                                                                                │
   │ Passing:      2                                                                                │
-  │ Failing:      0                                                                                │
+  │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     beforehook-and-test-navigation.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/beforehook-and-test-navigation.js/suite -- caus     (1280x720)
+     es domain navigation (failed).png                                                              
 
 
   (Video)
@@ -54,14 +89,14 @@ exports['e2e issue 1987 / can reload during spec run'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  beforehook-and-test-navigation.js        XX:XX        2        2        -        -        - │
+  │ ✖  beforehook-and-test-navigation.js        XX:XX        3        2        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        2        2        -        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        3        2        1        -        -  
 
 
 `
 
-exports['e2e issue 1987 / can run proper amount of hooks'] = `
+exports['e2e runnable execution / runnables run correct number of times with navigation'] = `
 
 ====================================================================================================
 
@@ -70,51 +105,52 @@ exports['e2e issue 1987 / can run proper amount of hooks'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (afterhooks.spec.js)                                                       │
-  │ Searched:   cypress/integration/afterhooks.spec.js                                             │
+  │ Specs:      1 found (runnable-run-count.spec.js)                                               │
+  │ Searched:   cypress/integration/runnable-run-count.spec.js                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  afterhooks.spec.js                                                              (1 of 1)
+  Running:  runnable-run-count.spec.js                                                      (1 of 1)
 
 
-  suite 1
-    ✓ test 1
-    ✓ test 2
-    ✓ test 3
-    ✓ test 4
+  suite 1.0
+    ✓ test 1.0.1
+    ✓ test 1.0.2
+    ✓ test 1.0.3
 
-  suite 2
-    ✓ s2t1
+  suite 1.1
+    ✓ test 1.1.1
+    ✓ test 1.1.2
 
-  suite 3
-    ✓ s3t1
+  suite 1.2
+    ✓ test 1.2.1
+    ✓ test 1.2.2
 
 
-  6 passing
+  7 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        6                                                                                │
-  │ Passing:      6                                                                                │
+  │ Tests:        7                                                                                │
+  │ Passing:      7                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     afterhooks.spec.js                                                               │
+  │ Spec Ran:     runnable-run-count.spec.js                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/afterhooks.spec.js.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/runnable-run-count.spec.js.mp4      (X second)
 
 
 ====================================================================================================
@@ -124,9 +160,9 @@ exports['e2e issue 1987 / can run proper amount of hooks'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  afterhooks.spec.js                       XX:XX        6        6        -        -        - │
+  │ ✔  runnable-run-count.spec.js               XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        6        6        -        -        -  
+    ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 
 
 `
