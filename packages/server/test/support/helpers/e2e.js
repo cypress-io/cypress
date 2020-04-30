@@ -438,10 +438,7 @@ const e2e = {
   },
 
   options (ctx, options = {}) {
-    const exit = options.exit != null ? options.exit : true
-
     _.defaults(options, {
-      exit,
       browser: 'electron',
       headed: process.env.HEADED || false,
       project: e2ePath,
