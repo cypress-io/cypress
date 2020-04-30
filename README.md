@@ -152,6 +152,7 @@ Repo | Description
 [storybook-code-coverage](https://github.com/bahmutov/storybook-code-coverage) | Example app where we get 100% code coverage easily with a single integration spec and a few component specs, replacing [several tools](https://dev.to/penx/combining-storybook-cypress-and-jest-code-coverage-4pa5)
 [react-loading-skeleton](https://github.com/bahmutov/react-loading-skeleton) | One to one Storybook tests for React skeleton components. Uses local `.babelrc` settings without Webpack config
 [test-swr](https://github.com/bahmutov/test-swr) | Component test for [Zeit SWR](https://github.com/zeit/swr) hooks for remote data fetching
+[emoji-search](https://github.com/bahmutov/emoji-search) | Quick component test for a fork of emoji-search
 <!-- prettier-ignore-end -->
 
 To find more examples, see GitHub topic [cypress-react-unit-test-example](https://github.com/topics/cypress-react-unit-test-example)
