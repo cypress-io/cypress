@@ -31,11 +31,13 @@ See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/t
 
 ## Your webpack config
 
-If you have your own webpack config, you can use included plugins file to load it.
+If you have your own webpack config, you can use included plugins file to load it. You can pass the webpack config file name (with respect to the root folder where `cypress.json` file sits) via plugins file or via an `env` variable in `cypress.json`
 
 ```js
 // cypress/plugins/index.js
 module.exports = (on, config) => {
+  // from the root of the project (folder with cypress.json file)
+  config.env.webpackFilename = 'webpack.config.js'
   require('cypress-react-unit-test/plugins/load-webpack')(on, config)
   // IMPORTANT to return the config object
   // with the any changed environment variables
@@ -43,16 +45,7 @@ module.exports = (on, config) => {
 }
 ```
 
-Pass the name of the config file via `env` variable in the `cypress.json` file
-
-```json
-{
-  "experimentalComponentTesting": true,
-  "env": {
-    "webpackFilename": "demo/config/webpack.dev.js"
-  }
-}
-```
+See example in [bahmutov/Jscrambler-Webpack-React](https://github.com/bahmutov/Jscrambler-Webpack-React).
 
 ## Your `.babelrc` file
 
