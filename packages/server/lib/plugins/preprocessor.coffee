@@ -33,15 +33,20 @@ baseEmitter = new EE()
 fileObjects = {}
 fileProcessors = {}
 
+createBrowserifyPreprocessor = (options) ->
+  debug("creating browserify preprocessor with options %o", options)
+  browserify = require("@cypress/browserify-preprocessor")
+  browserify(options)
+
 setDefaultPreprocessor = (config) ->
   debug("set default preprocessor")
 
-  browserify = require("@cypress/browserify-preprocessor")
   tsPath = resolve.typescript(config)
 
-  plugins.register("file:preprocessor", browserify({
+  options = {
     typescript: tsPath
-  }))
+  }
+  plugins.register("file:preprocessor", API.createBrowserifyPreprocessor(options))
 
 plugins.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
@@ -52,10 +57,15 @@ plugins.registerHandler (ipc) ->
     debug("base emitter plugin close event")
     ipc.send("preprocessor:close", filePath)
 
-module.exports = {
+# for simpler stubbing from unit tests
+API = {
   errorMessage
 
   clientSideError
+
+  setDefaultPreprocessor
+
+  createBrowserifyPreprocessor
 
   emitter: baseEmitter
 
@@ -125,3 +135,5 @@ module.exports = {
     baseEmitter.emit("close")
     baseEmitter.removeAllListeners()
 }
+
+module.exports = API
