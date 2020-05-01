@@ -27,4 +27,13 @@ describe('e2e typescript', function () {
       snapshot: true,
     })
   })
+
+  it('handles tsconfig with module other than commonjs', function () {
+    const projPath = Fixtures.projectPath('ts-proj-with-own-tsconfig')
+
+    return e2e.exec(this, {
+      project: projPath,
+      // snapshot: true,
+    })
+  })
 })

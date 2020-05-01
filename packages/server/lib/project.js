@@ -31,6 +31,7 @@ const keys = require('./util/keys')
 const settings = require('./util/settings')
 const specsUtil = require('./util/specs')
 const { escapeFilenameInUrl } = require('./util/escape_filename')
+const tsNodeOptions = require('./util/ts-node-options')
 
 const localCwd = cwd()
 
@@ -107,14 +108,7 @@ class Project extends EE {
           basedir: this.projectRoot,
         })
 
-        const tsOptions = {
-          compiler: tsPath,
-          transpileOnly: true,
-          compilerOptions: {
-            module: 'CommonJS',
-            esModuleInterop: true,
-          },
-        }
+        const tsOptions = tsNodeOptions.getTsNodeOptions(tsPath)
 
         debug('typescript path: %s', tsPath)
         debug('registering project TS with options %o', tsOptions)

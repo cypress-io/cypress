@@ -12,6 +12,7 @@ const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
+const tsNodeOptions = require('../../util/ts-node-options')
 
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
@@ -187,14 +188,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
         basedir: projectRoot,
       })
 
-      const tsOptions = {
-        compiler: tsPath,
-        transpileOnly: true,
-        compilerOptions: {
-          module: 'CommonJS',
-          esModuleInterop: true,
-        },
-      }
+      const tsOptions = tsNodeOptions.getTsNodeOptions(tsPath)
 
       debug('typescript path: %s', tsPath)
       debug('registering plugins TS with options %o', tsOptions)
