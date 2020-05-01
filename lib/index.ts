@@ -64,6 +64,16 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 
       const el = document.getElementById(rootId)
 
+      if (!el) {
+        throw new Error(
+          [
+            '[cypress-react-unit-test] 🔥 Hmm, cannot find root element to mount the component.',
+            'Did you forget to include the support file?',
+            'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
+          ].join(' '),
+        )
+      }
+
       const key =
         // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests
         (Cypress?.mocha?.getRunner()?.test?.title || '') + Math.random()
