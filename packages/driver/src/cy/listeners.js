@@ -1,86 +1,104 @@
-$ = require("jquery")
-_ = require("lodash")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $ = require("jquery");
+const _ = require("lodash");
 
-HISTORY_ATTRS = "pushState replaceState".split(" ")
+const HISTORY_ATTRS = "pushState replaceState".split(" ");
 
-events = []
-listenersAdded = null
+let events = [];
+let listenersAdded = null;
 
-removeAllListeners = ->
-  listenersAdded = false
+const removeAllListeners = function() {
+  listenersAdded = false;
 
-  for event in events
-    [win, event, cb] = event
+  for (let event of events) {
+    let cb, win;
+    [win, event, cb] = event;
 
-    win.removeEventListener(event, cb)
+    win.removeEventListener(event, cb);
+  }
 
-  ## reset all the events
-  events = []
+  //# reset all the events
+  events = [];
 
-  return null
+  return null;
+};
 
-addListener = (win, event, cb) ->
-  events.push([win, event, cb])
+const addListener = function(win, event, cb) {
+  events.push([win, event, cb]);
 
-  win.addEventListener(event, cb)
+  return win.addEventListener(event, cb);
+};
 
-eventHasReturnValue = (e) ->
-  val = e.returnValue
+const eventHasReturnValue = function(e) {
+  const val = e.returnValue;
 
-  ## return false if val is an empty string
-  ## of if its undinefed
-  return false if val is "" or _.isUndefined(val)
+  //# return false if val is an empty string
+  //# of if its undinefed
+  if ((val === "") || _.isUndefined(val)) { return false; }
 
-  ## else return true
-  return true
+  //# else return true
+  return true;
+};
 
 module.exports = {
-  bindTo: (contentWindow, callbacks = {}) ->
-    return if listenersAdded
+  bindTo(contentWindow, callbacks = {}) {
+    if (listenersAdded) { return; }
 
-    removeAllListeners()
+    removeAllListeners();
 
-    listenersAdded = true
+    listenersAdded = true;
 
-    ## set onerror global handler
-    contentWindow.onerror = callbacks.onError
+    //# set onerror global handler
+    contentWindow.onerror = callbacks.onError;
 
-    addListener contentWindow, "beforeunload", (e) ->
-      ## bail if we've canceled this event (from another source)
-      ## or we've set a returnValue on the original event
-      return if e.defaultPrevented or eventHasReturnValue(e)
+    addListener(contentWindow, "beforeunload", function(e) {
+      //# bail if we've canceled this event (from another source)
+      //# or we've set a returnValue on the original event
+      if (e.defaultPrevented || eventHasReturnValue(e)) { return; }
 
-      callbacks.onBeforeUnload(e)
+      return callbacks.onBeforeUnload(e);
+    });
 
-    addListener contentWindow, "unload", (e) ->
-      ## when we unload we need to remove all of the event listeners
-      removeAllListeners()
+    addListener(contentWindow, "unload", function(e) {
+      //# when we unload we need to remove all of the event listeners
+      removeAllListeners();
 
-      ## else we know to proceed onwards!
-      callbacks.onUnload(e)
+      //# else we know to proceed onwards!
+      return callbacks.onUnload(e);
+    });
 
-    addListener contentWindow, "hashchange", (e) ->
-      callbacks.onNavigation("hashchange", e)
+    addListener(contentWindow, "hashchange", e => callbacks.onNavigation("hashchange", e));
 
-    for attr in HISTORY_ATTRS
-      do (attr) ->
-        return if not (orig = contentWindow.history?[attr])
+    for (let attr of HISTORY_ATTRS) {
+      (function(attr) {
+        let orig;
+        if (!(orig = contentWindow.history != null ? contentWindow.history[attr] : undefined)) { return; }
 
-        contentWindow.history[attr] = (args...) ->
-          orig.apply(@, args)
+        return contentWindow.history[attr] = function(...args) {
+          orig.apply(this, args);
 
-          callbacks.onNavigation(attr, args)
+          return callbacks.onNavigation(attr, args);
+        };
+      })(attr);
+    }
 
-    addListener contentWindow, "submit", (e) ->
-      ## if we've prevented the default submit action
-      ## without stopping propagation, we will still
-      ## receive this event even though the form
-      ## did not submit
-      return if e.defaultPrevented
+    addListener(contentWindow, "submit", function(e) {
+      //# if we've prevented the default submit action
+      //# without stopping propagation, we will still
+      //# receive this event even though the form
+      //# did not submit
+      if (e.defaultPrevented) { return; }
 
-      ## else we know to proceed onwards!
-      callbacks.onSubmit(e)
+      //# else we know to proceed onwards!
+      return callbacks.onSubmit(e);
+    });
 
-    contentWindow.alert = callbacks.onAlert
-    contentWindow.confirm = callbacks.onConfirm
-}
+    contentWindow.alert = callbacks.onAlert;
+    return contentWindow.confirm = callbacks.onConfirm;
+  }
+};
