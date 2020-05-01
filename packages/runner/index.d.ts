@@ -3,4 +3,6 @@
 /// <reference path="../../cli/types/cy-moment.d.ts" />
 /// <reference path="../../cli/types/cy-minimatch.d.ts" />
 
-type Nullable<T> = T | null
+/// <reference path="../../cli/types/cypress.d.ts" />
+/// <reference path="../../cli/types/cypress-global-vars.d.ts" />
+/// <reference path="../../cli/types/cypress-type-helpers.d.ts" />

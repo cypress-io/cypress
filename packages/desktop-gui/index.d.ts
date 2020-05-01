@@ -5,5 +5,4 @@
 
 /// <reference path="../../cli/types/cypress.d.ts" />
 /// <reference path="../../cli/types/cypress-global-vars.d.ts" />
-
-type Nullable<T> = T | null
+/// <reference path="../../cli/types/cypress-type-helpers.d.ts" />

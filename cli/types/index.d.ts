@@ -33,8 +33,4 @@
 /// <reference path="./cypress.d.ts" />
 /// <reference path="./cypress-global-vars.d.ts" />
 /// <reference path="./cypress-type-helpers.d.ts" />
-
-
-// Cypress adds chai expect and assert to global
-declare const expect: Chai.ExpectStatic
-declare const assert: Chai.AssertStatic
+/// <reference path="./cypress-expect.d.ts" />
