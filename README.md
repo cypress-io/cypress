@@ -115,7 +115,6 @@ Spec | Description
 [use-lodash-fp](cypress/component/basic/use-lodash-fp) | Imports and tests methods from `lodash/fp` dependency
 [document-spec](cypress/component/basic/document) | Checks `document` dimensions from the component
 [styled-components](cypress/component/basic/styled-components) | Test components that use [styled-components](https://www.styled-components.com/)
-[test-custom-error-boundary](https://github.com/bahmutov/test-custom-error-boundary) | Play with a component that implements error boundary
 <!-- prettier-ignore-end -->
 
 plus a few smaller sanity specs in [cypress/component/basic](cypress/component/basic) folder.
@@ -166,6 +165,8 @@ Repo | Description
 [react-loading-skeleton](https://github.com/bahmutov/react-loading-skeleton) | One to one Storybook tests for React skeleton components. Uses local `.babelrc` settings without Webpack config
 [test-swr](https://github.com/bahmutov/test-swr) | Component test for [Zeit SWR](https://github.com/zeit/swr) hooks for remote data fetching
 [emoji-search](https://github.com/bahmutov/emoji-search) | Quick component test for a fork of emoji-search
+[test-custom-error-boundary](https://github.com/bahmutov/test-custom-error-boundary) | Play with a component that implements error boundary
+[Jscrambler-Webpack-React](https://github.com/bahmutov/Jscrambler-Webpack-React) | Example project with its own Webpack config file
 <!-- prettier-ignore-end -->
 
 To find more examples, see GitHub topic [cypress-react-unit-test-example](https://github.com/topics/cypress-react-unit-test-example)
