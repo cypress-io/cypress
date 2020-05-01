@@ -1,6 +1,8 @@
 const e2e = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
 
+const snapshot = require('snap-shot-it')
+
 describe('e2e typescript', function () {
   e2e.setup({ npmInstall: true })
 
@@ -33,7 +35,13 @@ describe('e2e typescript', function () {
 
     return e2e.exec(this, {
       project: projPath,
-      // snapshot: true,
+      config: {
+        video: false,
+      },
+    }).then((result) => {
+      const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout))
+
+      snapshot('typescript with tsconfig run', runSummary)
     })
   })
 })
