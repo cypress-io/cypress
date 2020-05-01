@@ -160,6 +160,10 @@ let tsRegistered = false
 
 module.exports = (ipc, pluginsFile, projectRoot) => {
   debug('pluginsFile:', pluginsFile)
+  debug('project root:', projectRoot)
+  if (!projectRoot) {
+    throw new Error('Unexpected: projectRoot should be a string')
+  }
 
   process.on('uncaughtException', (err) => {
     debug('uncaught exception:', util.serializeError(err))
@@ -180,21 +184,25 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
   if (!tsRegistered) {
     try {
       const tsPath = resolve.sync('typescript', {
-        basedir: this.projectRoot,
+        basedir: projectRoot,
       })
 
-      debug('typescript path: %s', tsPath)
-
-      tsnode.register({
+      const tsOptions = {
         compiler: tsPath,
         transpileOnly: true,
         compilerOptions: {
           module: 'CommonJS',
           esModuleInterop: true,
         },
-      })
+      }
+
+      debug('typescript path: %s', tsPath)
+      debug('registering plugins TS with options %o', tsOptions)
+
+      tsnode.register(tsOptions)
     } catch (e) {
-      debug(`typescript doesn't exist. ts-node setup passed.`)
+      debug('typescript doesn\'t exist. ts-node setup failed.')
+      debug('error message: %s', e.message)
     }
 
     // ensure typescript is only registered once

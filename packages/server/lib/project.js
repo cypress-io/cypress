@@ -107,18 +107,22 @@ class Project extends EE {
           basedir: this.projectRoot,
         })
 
-        debug('typescript path: %s', tsPath)
-
-        tsnode.register({
+        const tsOptions = {
           compiler: tsPath,
           transpileOnly: true,
           compilerOptions: {
             module: 'CommonJS',
             esModuleInterop: true,
           },
-        })
+        }
+
+        debug('typescript path: %s', tsPath)
+        debug('registering project TS with options %o', tsOptions)
+
+        tsnode.register(tsOptions)
       } catch (e) {
-        debug(`typescript doesn't exist. ts-node setup passed.`)
+        debug(`typescript doesn't exist. ts-node setup failed.`)
+        debug('error message %s', e.message)
       }
 
       return cfg
