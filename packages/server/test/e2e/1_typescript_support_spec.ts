@@ -28,6 +28,7 @@ describe('e2e typescript', function () {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/7005
   it('project passes if tsconfig.json module is not CommonJS', function () {
     const projPath = Fixtures.projectPath('ts-not-commonjs')
 
