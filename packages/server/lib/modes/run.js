@@ -31,7 +31,7 @@ const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
 
-const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
+const DELAY_TO_LET_VIDEO_FINISH_MS = 200
 
 const color = (val, c) => {
   return chalk[c](val)
@@ -806,96 +806,94 @@ module.exports = {
     console.log('')
   },
 
-  postProcessRecording (end, name, cname, videoCompression, shouldUploadVideo) {
+  postProcessRecording (name, cname, videoCompression, shouldUploadVideo) {
     debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
     // then begin processing the file
-    return end()
-    .then(() => {
-      // dont process anything if videoCompress is off
-      // or we've been told not to upload the video
-      if (videoCompression === false || shouldUploadVideo === false) {
-        return
-      }
 
-      console.log('')
+    // dont process anything if videoCompress is off
+    // or we've been told not to upload the video
+    if (videoCompression === false || shouldUploadVideo === false) {
+      return
+    }
 
-      terminal.header('Video', {
-        color: ['cyan'],
-      })
+    console.log('')
 
-      console.log('')
-
-      const table = terminal.table({
-        colWidths: [3, 21, 76],
-        colAligns: ['left', 'left', 'left'],
-        type: 'noBorder',
-        style: {
-          'padding-right': 0,
-        },
-        chars: {
-          'left': ' ',
-          'right': '',
-        },
-      })
-
-      table.push([
-        gray('-'),
-        gray('Started processing:'),
-        chalk.cyan(`Compressing to ${videoCompression} CRF`),
-      ])
-
-      console.log(table.toString())
-
-      const started = Date.now()
-      let progress = Date.now()
-      const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
-
-      const onProgress = function (float) {
-        if (float === 1) {
-          const finished = Date.now() - started
-          const dur = `(${humanTime.long(finished)})`
-
-          const table = terminal.table({
-            colWidths: [3, 21, 61, 15],
-            colAligns: ['left', 'left', 'left', 'right'],
-            type: 'noBorder',
-            style: {
-              'padding-right': 0,
-            },
-            chars: {
-              'left': ' ',
-              'right': '',
-            },
-          })
-
-          table.push([
-            gray('-'),
-            gray('Finished processing:'),
-            `${formatPath(name, getWidth(table, 2), 'cyan')}`,
-            gray(dur),
-          ])
-
-          console.log(table.toString())
-
-          console.log('')
-        }
-
-        if (Date.now() - progress > throttle) {
-          // bump up the progress so we dont
-          // continuously get notifications
-          progress += throttle
-          const percentage = `${Math.ceil(float * 100)}%`
-
-          console.log('    Compression progress: ', chalk.cyan(percentage))
-        }
-      }
-
-      // bar.tickTotal(float)
-
-      return videoCapture.process(name, cname, videoCompression, onProgress)
+    terminal.header('Video', {
+      color: ['cyan'],
     })
+
+    console.log('')
+
+    const table = terminal.table({
+      colWidths: [3, 21, 76],
+      colAligns: ['left', 'left', 'left'],
+      type: 'noBorder',
+      style: {
+        'padding-right': 0,
+      },
+      chars: {
+        'left': ' ',
+        'right': '',
+      },
+    })
+
+    table.push([
+      gray('-'),
+      gray('Started processing:'),
+      chalk.cyan(`Compressing to ${videoCompression} CRF`),
+    ])
+
+    console.log(table.toString())
+
+    const started = Date.now()
+    let progress = Date.now()
+    const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
+
+    const onProgress = function (float) {
+      if (float === 1) {
+        const finished = Date.now() - started
+        const dur = `(${humanTime.long(finished)})`
+
+        const table = terminal.table({
+          colWidths: [3, 21, 61, 15],
+          colAligns: ['left', 'left', 'left', 'right'],
+          type: 'noBorder',
+          style: {
+            'padding-right': 0,
+          },
+          chars: {
+            'left': ' ',
+            'right': '',
+          },
+        })
+
+        table.push([
+          gray('-'),
+          gray('Finished processing:'),
+          `${formatPath(name, getWidth(table, 2), 'cyan')}`,
+          gray(dur),
+        ])
+
+        console.log(table.toString())
+
+        console.log('')
+      }
+
+      if (Date.now() - progress > throttle) {
+        // bump up the progress so we dont
+        // continuously get notifications
+        progress += throttle
+        const percentage = `${Math.ceil(float * 100)}%`
+
+        console.log('    Compression progress: ', chalk.cyan(percentage))
+      }
+    }
+
+    // bar.tickTotal(float)
+
+    return videoCapture.process(name, cname, videoCompression, onProgress)
     .catch((err) => {
       // log that post processing was attempted
       // but failed and dont let this change the run exit code
@@ -1074,7 +1072,7 @@ module.exports = {
 
     return this.listenForProjectEnd(project, exit)
     .delay(delay)
-    .then((obj) => {
+    .then(async (obj) => {
       _.defaults(obj, {
         error: null,
         hooks: null,
@@ -1122,6 +1120,10 @@ module.exports = {
 
       debug('attempting to close the browser')
 
+      if (endVideoCapture) {
+        await endVideoCapture()
+      }
+
       // always close the browser now as opposed to letting
       // it exit naturally with the parent process due to
       // electron bug in windows
@@ -1130,7 +1132,6 @@ module.exports = {
       .then(() => {
         if (endVideoCapture) {
           return this.postProcessRecording(
-            endVideoCapture,
             videoName,
             compressedVideoName,
             videoCompression,

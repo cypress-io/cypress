@@ -4,6 +4,31 @@ import path from 'path'
 import fse from 'fs-extra'
 import os from 'os'
 
+// const END_OF_FILE_ERROR = 'ffmpeg exited with code 1: pipe:0: End of file\n'
+
+async function startSpiedVideoCapture (filename) {
+  const props = await videoCapture.start(filename)
+
+  const END_OF_FILE_ERROR = `ffmpeg exited with code 1: Output #0, mp4, to '${filename}':
+Output file #0 does not contain any stream\n`
+
+  sinon.spy(props._pt, 'write') //.returns(true)
+
+  function writeVideoFrameAsBuffer (data) {
+    const buf = Buffer.from(data)
+
+    props.writeVideoFrame(buf)
+
+    return buf
+  }
+
+  return {
+    ...props,
+    writeVideoFrameAsBuffer,
+    END_OF_FILE_ERROR,
+  }
+}
+
 describe('Video Capture', () => {
   context('#start', () => {
     let tmpFilename
@@ -12,30 +37,55 @@ describe('Video Capture', () => {
       tmpFilename = path.join(fse.mkdtempSync(path.join(os.tmpdir(), 'cy-video-')), 'video.mp4')
     })
 
-    it('does not write anything on empty chunk', () => {
-      return videoCapture.start(tmpFilename)
-      .then(({ _pt, writeVideoFrame, endVideoCapture }) => {
-        sinon.stub(_pt, 'write')
+    it('writes video frames to passthru stream', async () => {
+      const { _pt, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
 
-        writeVideoFrame({})
+      const [buf] = [
+        writeVideoFrameAsBuffer('foo'),
+        writeVideoFrameAsBuffer('foobar'),
+      ]
 
-        expect(_pt.write).to.not.be.called
+      expect(_pt.write).calledWith(buf)
 
-        return endVideoCapture().catchReturn(null)
-      })
+      await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)
     })
 
-    it('writes video frames to passthru stream', () => {
-      return videoCapture.start(tmpFilename)
-      .then(({ _pt, writeVideoFrame, endVideoCapture }) => {
-        sinon.stub(_pt, 'write')
+    it('does not write anything on empty chunk', async () => {
+      const { _pt, writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
 
-        writeVideoFrame('foo')
+      const [, buf2] = [
+        writeVideoFrameAsBuffer('foo'),
+        writeVideoFrameAsBuffer('foobar'),
+        writeVideoFrameAsBuffer(''),
+      ]
 
-        expect(_pt.write).to.be.calledWith('foo')
+      expect(_pt.write.lastCall).calledWith(buf2)
 
-        return endVideoCapture().catchReturn(null)
-      })
+      await expect(endVideoCapture()).rejectedWith(END_OF_FILE_ERROR)
+    })
+
+    it('will eventually timeout on single frame write', async () => {
+      videoCapture.WAIT_FOR_MORE_FRAMES_TIMEOUT = 1
+
+      const { writeVideoFrameAsBuffer, endVideoCapture } = await startSpiedVideoCapture(tmpFilename)
+
+      writeVideoFrameAsBuffer('foo')
+
+      await expect(endVideoCapture()).be.rejectedWith('operation timed out')
+    })
+
+    it('waits for at least 2 stream writes before ending', async () => {
+      videoCapture.WAIT_FOR_MORE_FRAMES_TIMEOUT = 2000
+
+      const { writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
+
+      writeVideoFrameAsBuffer('foo')
+
+      const endVideoCaptureResult = endVideoCapture()
+
+      writeVideoFrameAsBuffer('foobar')
+
+      await expect(endVideoCaptureResult).rejectedWith(END_OF_FILE_ERROR)
     })
   })
 })
