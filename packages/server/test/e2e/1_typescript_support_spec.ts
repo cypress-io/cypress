@@ -27,4 +27,13 @@ describe('e2e typescript', function () {
       snapshot: true,
     })
   })
+
+  it('project passes if tsconfig.json module is not CommonJS', function () {
+    const projPath = Fixtures.projectPath('ts-not-commonjs')
+
+    return e2e.exec(this, {
+      project: projPath,
+      snapshot: true,
+    })
+  })
 })
