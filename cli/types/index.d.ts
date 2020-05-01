@@ -32,8 +32,8 @@
 
 /// <reference path="./cypress.d.ts" />
 /// <reference path="./cypress-global-vars.d.ts" />
+/// <reference path="./cypress-type-helpers.d.ts" />
 
-type Nullable<T> = T | null
 
 // Cypress adds chai expect and assert to global
 declare const expect: Chai.ExpectStatic
