@@ -85,7 +85,7 @@
     "style-loader": "0.23.1",
     "styled-components": "5.0.0",
     "svg-url-loader": "3.0.3",
-    "typescript": "3.7.3",
+    "typescript": "3.8.3",
     "webpack": "4.33.0",
     "webpack-cli": "3.3.9"
   },
