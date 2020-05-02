@@ -80,7 +80,7 @@
     "react-google-maps": "9.4.5",
     "react-router": "6.0.0-alpha.1",
     "react-router-dom": "6.0.0-alpha.1",
-    "semantic-release": "17.0.4",
+    "semantic-release": "17.0.7",
     "standard": "14.3.3",
     "style-loader": "0.23.1",
     "styled-components": "5.0.0",
