@@ -195,7 +195,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
 
       tsnode.register(tsOptions)
     } catch (e) {
-      debug('typescript doesn\'t exist. ts-node setup failed.')
+      debug(`typescript doesn't exist. ts-node setup failed.`)
       debug('error message: %s', e.message)
     }
 
