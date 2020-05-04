@@ -896,8 +896,6 @@ module.exports = {
       }
     }
 
-    // bar.tickTotal(float)
-
     return videoCapture.process(name, cname, videoCompression, onProgress)
   },
 
