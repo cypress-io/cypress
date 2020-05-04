@@ -20,7 +20,7 @@ class ErrorCodeFrame extends Component<Props> {
 
     // since we pull out 2 lines above the highlighted code, it will always
     // be the 3rd line unless it's at the top of the file (lines 1 or 2)
-    const highlightLine = line < 3 ? line : 3
+    const highlightLine = Math.min(line, 3)
 
     return (
       <div className='test-err-code-frame'>

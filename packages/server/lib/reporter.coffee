@@ -112,14 +112,6 @@ mergeErr = (runnable, runnables, stats) ->
   ## event for reporters
   test = _.extend({}, test, { title: runnable.title })
 
-  ## mocha tries to extract the error name using a regular expression
-  ## but when the error message includes a colon (:) like
-  ## "Timed out retrying: expected...", it thinks the error name is
-  ## "Timed out retrying" and replaces the entire message with only that
-  ##
-  ## Here's the code we're patching in the mocha version currently being used (7.0.1):
-  ## https://github.com/mochajs/mocha/blob/2a8594424c73ffeca41ef1668446372160528b4a/lib/reporters/base.js#L208
-
   [test, test.err]
 
 setDate = (obj, runnables, stats) ->

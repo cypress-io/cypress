@@ -828,7 +828,6 @@ describe "src/cy/commands/xhr", ->
         e = new Error("onreadystatechange caused this error")
 
         cy.on "fail", (err) =>
-          debugger
           lastLog = @lastLog
 
           expect(@logs.length).to.eq(1)
@@ -2178,12 +2177,12 @@ describe "src/cy/commands/xhr", ->
   context "options immutability", ->
     it "does not mutate options for cy.server()", ->
       options = { enable: false }
-      
+
       cy
       .server(options)
       .window().then ->
         expect(options).to.deep.eq({ enable: false })
-    
+
     it "does not mutate options for cy.route()", ->
       options = {
         url: /foo/

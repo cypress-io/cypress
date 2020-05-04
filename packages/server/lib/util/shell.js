@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const Promise = require('bluebird')
 const execa = require('execa')
 const R = require('ramda')
@@ -97,14 +98,10 @@ const getShell = function (shell) {
 
 const commandExists = (command) => {
   return Promise.resolve(commandExistsModule(command))
-  .then(() => true)
-  .catch((err) => {
-    // commandExists rejects with no error if command does not exist
-    if (!err) return false
-
-    // otherwise, it's a legitimate error
-    throw err
-  })
+  .return(true)
+  // commandExists rejects with no error if command does not exist
+  // otherwise, it's a legitimate error
+  .catchReturn(_.isNil, false)
 }
 
 // for testing
