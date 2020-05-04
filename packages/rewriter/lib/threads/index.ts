@@ -25,7 +25,11 @@ const WORKER_FILENAME = process.env.CYPRESS_INTERNAL_ENV === 'production' ? 'wor
 
 const WORKER_PATH = path.join(__dirname, WORKER_FILENAME)
 
-const MAX_WORKER_THREADS = Math.max(8, os.cpus().length)
+// spawn up to `os.cpus().length` threads (default to 4 if this call fails)
+const MAX_WORKER_THREADS = _.get(os.cpus(), 'length') || 4
+
+// spawn up to 4 threads at startup
+const INITIAL_WORKER_THREADS = Math.min(MAX_WORKER_THREADS, 4)
 
 type DeferredPromise<T> = { p: Promise<T>, resolve: () => {}, reject: () => {} }
 
@@ -109,7 +113,7 @@ export function createInitialWorkers () {
     return
   }
 
-  _.times(4, createWorker)
+  _.times(INITIAL_WORKER_THREADS, createWorker)
 }
 
 export function terminateAllWorkers () {
