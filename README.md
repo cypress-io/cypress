@@ -64,6 +64,8 @@ module.exports = (on, config) => {
 
 See [Recipes](./docs/recipes.md) for more examples.
 
+**⚠️ Note:** when using `react-scripts` you must place component specs in the `src` folder too, otherwise they won't be transpiled correctly.
+
 3. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For example, to have them located in `src` folder use:
 
 ```json
