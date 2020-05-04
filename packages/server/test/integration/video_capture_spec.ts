@@ -10,7 +10,7 @@ async function startSpiedVideoCapture (filename) {
   const END_OF_FILE_ERROR = `ffmpeg exited with code 1: Output #0, mp4, to '${filename}':
 Output file #0 does not contain any stream\n`
 
-  sinon.spy(props._pt, 'write') //.returns(true)
+  sinon.spy(props._pt, 'write')
 
   function writeVideoFrameAsBuffer (data) {
     const buf = Buffer.from(data)
@@ -63,19 +63,15 @@ describe('Video Capture', () => {
     })
 
     it('will eventually timeout on single frame write', async () => {
-      videoCapture.WAIT_FOR_MORE_FRAMES_TIMEOUT = 1
-
       const { writeVideoFrameAsBuffer, endVideoCapture } = await startSpiedVideoCapture(tmpFilename)
 
       writeVideoFrameAsBuffer('foo')
 
-      await expect(endVideoCapture()).be.rejectedWith('operation timed out')
+      await expect(endVideoCapture(1)).be.rejectedWith('operation timed out')
     })
 
     // https://github.com/cypress-io/cypress/issues/6408
     it('waits for at least 2 stream writes before ending', async () => {
-      videoCapture.WAIT_FOR_MORE_FRAMES_TIMEOUT = 2000
-
       const { writeVideoFrameAsBuffer, endVideoCapture, END_OF_FILE_ERROR } = await startSpiedVideoCapture(tmpFilename)
 
       writeVideoFrameAsBuffer('foo')

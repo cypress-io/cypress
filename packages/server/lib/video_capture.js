@@ -27,7 +27,6 @@ const deferredPromise = function () {
 }
 
 module.exports = {
-  WAIT_FOR_MORE_FRAMES_TIMEOUT: 3000,
   getMsFromDuration (duration) {
     return utils.timemarkToSeconds(duration) * 1000
   },
@@ -66,26 +65,24 @@ module.exports = {
     const ended = deferredPromise()
     let done = false
     let wantsWrite = true
-    let written = 0
-    let skipped = 0
+    let skippedChunksCount = 0
+    let writtenChunksCount = 0
 
     _.defaults(options, {
       onError () {},
     })
 
-    const endVideoCapture = function () {
-      debugFrames('frames written:', written)
+    const endVideoCapture = function (waitForMoreChunksTimeout = 3000) {
+      debugFrames('frames written:', writtenChunksCount)
 
       // in some cases (webm) ffmpeg will crash if fewer than 2 buffers are
       // written to the stream, so we don't end capture until we get at least 2
-      if (written < 2) {
-        debugFrames(module.exports.WAIT_FOR_MORE_FRAMES_TIMEOUT)
-
+      if (writtenChunksCount < 2) {
         return new Promise((resolve) => {
           pt.once('data', resolve)
         })
         .then(endVideoCapture)
-        .timeout(module.exports.WAIT_FOR_MORE_FRAMES_TIMEOUT)
+        .timeout(waitForMoreChunksTimeout)
       }
 
       done = true
@@ -108,7 +105,7 @@ module.exports = {
         return
       }
 
-      // when `data` is empty, it is sent as an empty object (`{}`)
+      // when `data` is empty, it is sent as an empty Buffer (`<Buffer >`)
       // which can crash the process. this can happen if there are
       // errors in the video capture process, which are handled later
       // on, so just skip empty frames here.
@@ -120,13 +117,14 @@ module.exports = {
       }
 
       if (lengths[data.length]) {
+        // this prevents multiple chunks of webm metadata from being written to the stream
+        // which would crash ffmpeg
         debugFrames('duplicate length frame received:', data.length)
 
         return
       }
 
-      // we have written at least 1 byte
-      written++
+      writtenChunksCount++
 
       debugFrames('writing video frame')
       lengths[data.length] = true
@@ -140,9 +138,9 @@ module.exports = {
           })
         }
       } else {
-        skipped += 1
+        skippedChunksCount += 1
 
-        return debugFrames('skipping video frame %o', { skipped })
+        return debugFrames('skipping video frame %o', { skipped: skippedChunksCount })
       }
     }
 
@@ -168,8 +166,7 @@ module.exports = {
         }).on('error', (err, stdout, stderr) => {
           debug('capture errored: %o', { error: err.message, stdout, stderr })
 
-          // if we're supposed log errors then
-          // bubble them up
+          // bubble errors up
           options.onError(err, stdout, stderr)
 
           // reject the ended promise
