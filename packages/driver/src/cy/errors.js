@@ -1,113 +1,118 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _ = require("lodash");
-const $dom = require("../dom");
-const $errUtils = require("../cypress/error_utils");
-const $errorMessages = require('../cypress/error_messages');
+const _ = require('lodash')
+const $dom = require('../dom')
+const $errUtils = require('../cypress/error_utils')
+const $errorMessages = require('../cypress/error_messages')
 
-const crossOriginScriptRe = /^script error/i;
+const crossOriginScriptRe = /^script error/i
 
-const create = function(state, config, log) {
-  const commandErr = function(err) {
-    const current = state("current");
+const create = (state, config, log) => {
+  const commandErr = (err) => {
+    const current = state('current')
 
     return log({
       end: true,
       snapshot: true,
       error: err,
-      consoleProps() {
-        let prev;
-        const obj = {};
-        //# if type isnt parent then we know its dual or child
-        //# and we can add Applied To if there is a prev command
-        //# and it is a parent
-        if ((current.get("type") !== "parent") && (prev = current.get("prev"))) {
-          const ret = $dom.isElement(prev.get("subject")) ?
-            $dom.getElements(prev.get("subject"))
-          :
-            prev.get("subject");
+      consoleProps () {
+        const obj = {}
+        const prev = current.get('prev')
 
-          obj["Applied To"] = ret;
-          return obj;
+        // if type isnt parent then we know its dual or child
+        // and we can add Applied To if there is a prev command
+        // and it is a parent
+        if (current.get('type') !== 'parent' && prev) {
+          const ret = $dom.isElement(prev.get('subject')) ?
+            $dom.getElements(prev.get('subject'))
+            :
+            prev.get('subject')
+
+          obj['Applied To'] = ret
+
+          return obj
         }
-      }
-    });
-  };
+      },
+    })
+  }
 
-  const createUncaughtException = function(type, args) {
-    let [msg, source, lineno, colno, err] = args;
+  const createUncaughtException = (type, args) => {
+    // @ts-ignore
+    let [msg, source, lineno, colno, err] = args // eslint-disable-line no-unused-vars
 
-    const current = state("current");
+    const current = state('current')
 
-    //# reset the msg on a cross origin script error
-    //# since no details are accessible
+    // reset the msg on a cross origin script error
+    // since no details are accessible
     if (crossOriginScriptRe.test(msg)) {
-      msg = $errUtils.errMsgByPath("uncaught.cross_origin_script");
+      msg = $errUtils.errMsgByPath('uncaught.cross_origin_script')
     }
 
-    const createErrFromMsg = () => new Error($errUtils.errMsgByPath("uncaught.error", {
-      msg, source, lineno
-    }));
+    const createErrFromMsg = () => {
+      return new Error($errUtils.errMsgByPath('uncaught.error', {
+        msg, source, lineno,
+      }))
+    }
 
-    //# if we have the 5th argument it means we're in a super
-    //# modern browser making this super simple to work with.
-    if (err == null) { err = createErrFromMsg(); }
+    // if we have the 5th argument it means we're in a super
+    // modern browser making this super simple to work with.
+    err = err ?? createErrFromMsg()
 
-    const uncaughtErrLookup = (() => { switch (type) {
-      case "app": return "uncaught.fromApp";
-      case "spec": return "uncaught.fromSpec";
-    } })();
+    let uncaughtErrLookup = ''
 
-    const uncaughtErrObj = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup);
+    if (type === 'app') {
+      uncaughtErrLookup = 'uncaught.fromApp'
+    } else if (type === 'spec') {
+      uncaughtErrLookup = 'uncaught.fromSpec'
+    }
 
-    const uncaughtErrProps = $errUtils.modifyErrMsg(err, uncaughtErrObj.message, (msg1, msg2) => `${msg1}\n\n${msg2}`);
-    _.defaults(uncaughtErrProps, uncaughtErrObj);
+    const uncaughtErrObj = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
 
-    const uncaughtErr = $errUtils.mergeErrProps(err, uncaughtErrProps);
+    const uncaughtErrProps = $errUtils.modifyErrMsg(err, uncaughtErrObj.message, (msg1, msg2) => {
+      return `${msg1}\n\n${msg2}`
+    })
 
-    $errUtils.modifyErrName(err, `Uncaught ${err.name}`);
+    _.defaults(uncaughtErrProps, uncaughtErrObj)
 
-    uncaughtErr.onFail = function() {
-      let l;
-      if (l = current && current.getLastLog()) {
-        return l.error(uncaughtErr);
+    const uncaughtErr = $errUtils.mergeErrProps(err, uncaughtErrProps)
+
+    $errUtils.modifyErrName(err, `Uncaught ${err.name}`)
+
+    uncaughtErr.onFail = () => {
+      const l = current && current.getLastLog()
+
+      if (l) {
+        return l.error(uncaughtErr)
       }
-    };
-
-    //# normalize error message for firefox
-    $errUtils.normalizeErrorStack(uncaughtErr);
-
-    return uncaughtErr;
-  };
-
-  const commandRunningFailed = function(err) {
-    //# allow for our own custom onFail function
-    if (err.onFail) {
-      err.onFail(err);
-
-      //# clean up this onFail callback
-      //# after its been called
-      return delete err.onFail;
-    } else {
-      return commandErr(err);
     }
-  };
+
+    // normalize error message for firefox
+    $errUtils.normalizeErrorStack(uncaughtErr)
+
+    return uncaughtErr
+  }
+
+  const commandRunningFailed = (err) => {
+    // allow for our own custom onFail function
+    if (err.onFail) {
+      err.onFail(err)
+
+      // clean up this onFail callback
+      // after its been called
+      delete err.onFail
+    } else {
+      commandErr(err)
+    }
+  }
 
   return {
-    //# submit a generic command error
+    // submit a generic command error
     commandErr,
 
     commandRunningFailed,
 
-    createUncaughtException
-  };
-};
+    createUncaughtException,
+  }
+}
 
 module.exports = {
-  create
-};
+  create,
+}
