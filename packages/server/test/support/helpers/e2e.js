@@ -57,7 +57,7 @@ const replaceStackTraceLines = (str) => {
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
 
-    return `\n      [stack trace lines]${post}`
+    return `\n    [stack trace lines]${post}`
   })
 }
 

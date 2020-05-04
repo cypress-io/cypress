@@ -32,7 +32,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      [stack trace lines]
+    [stack trace lines]
 
 
 
@@ -114,7 +114,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-      [stack trace lines]
+    [stack trace lines]
 
 
 
@@ -201,7 +201,7 @@ exports['e2e uncaught errors / failing3'] = `
   > foo is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-      [stack trace lines]
+    [stack trace lines]
 
   2) foo
        fails with setTimeout and done:
@@ -210,7 +210,7 @@ When Cypress detects uncaught errors originating from your test code it will aut
   > foo is not defined
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
-      [stack trace lines]
+    [stack trace lines]
 
   3) foo
        fails with async app code error:
@@ -223,7 +223,7 @@ When Cypress detects uncaught errors originating from your application it will a
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
-      [stack trace lines]
+    [stack trace lines]
 
 
 
@@ -312,7 +312,7 @@ exports['e2e uncaught errors / failing4'] = `
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`foo\`
-      [stack trace lines]
+    [stack trace lines]
 
 
 
@@ -395,22 +395,22 @@ exports['e2e uncaught errors / failing5'] = `
   1) foo
        baz fails:
      ReferenceError: foo is not defined
-      [stack trace lines]
+    [stack trace lines]
 
   2) foo
        bar fails:
      ReferenceError: foo is not defined
-      [stack trace lines]
+    [stack trace lines]
 
   3) foo
        quux fails:
      ReferenceError: foo is not defined
-      [stack trace lines]
+    [stack trace lines]
 
   4) foo
        quux2 fails:
      ReferenceError: foo is not defined
-      [stack trace lines]
+    [stack trace lines]
 
 
 
