@@ -222,6 +222,18 @@ If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the
 
 You can use any [Visual Testing plugin](https://on.cypress.io/plugins#visual-testing) from these component tests. This repo uses [Percy.io](https://percy.io) visual diffing service as a GitHub pull request check.
 
+## Common problems
+
+### Node Sass
+
+When using Node Sass styles, tell Cypress to use [the system NodeJS](https://on.cypress.io/configuration#Node-version) rather than its bundled version. In `cypress.json` set option:
+
+```json
+{
+  "nodeVersion": "system"
+}
+```
+
 ## Development
 
 See [docs/development.md](./docs/development.md)
