@@ -1,7 +1,9 @@
-import { Visitor, namedTypes, builders } from 'ast-types'
+import {
+  Visitor,
+  namedTypes as n,
+  builders as b,
+} from 'ast-types'
 import { ExpressionKind } from 'ast-types/gen/kinds'
-
-const b = builders
 
 // use `globalThis` instead of `window`, `self`... to lower chances of scope conflict
 // users can technically override even this, but it would be very rude
@@ -49,6 +51,7 @@ function resolveWindowReference (accessedObject: ExpressionKind, prop: string, m
  */
 function closureDetectionTernary (identifierName: string) {
   // (identifierName === globalThis['identifierName'] ? MATCH : PROP)
+
   return b.parenthesizedExpression(
     b.conditionalExpression(
       b.binaryExpression(
@@ -70,15 +73,17 @@ function closureDetectionTernary (identifierName: string) {
  * Given an Identifier or a Literal, return a property name that should use `resolveWindowReference`.
  * @param node
  */
-function getReplaceablePropOfMemberExpression (node: namedTypes.MemberExpression) {
+function getReplaceablePropOfMemberExpression (node: n.MemberExpression) {
+  const { property } = node
+
   // something.(top|parent)
-  if (node.property.type === 'Identifier' && ['parent', 'top', 'location', 'frames'].includes(node.property.name)) {
-    return node.property.name
+  if (n.Identifier.check(property) && ['parent', 'top', 'location', 'frames'].includes(property.name)) {
+    return property.name
   }
 
   // something['(top|parent)']
-  if (node.property.type === 'Literal' && ['parent', 'top', 'location', 'frames'].includes(String(node.property.value))) {
-    return String(node.property.value)
+  if (n.Literal.check(property) && ['parent', 'top', 'location', 'frames'].includes(String(property.value))) {
+    return String(property.value)
   }
 
   // NOTE: cases where a variable is used for the prop will not be replaced
@@ -119,9 +124,9 @@ export const jsRules: Visitor<{}> = {
       // some Identifiers do not refer to a scoped variable, depending on how they're used
       if (
         // like `var top = 'foo'`
-        (parentNode.type === 'VariableDeclarator' && parentNode.id === node)
+        (n.VariableDeclarator.check(parentNode) && parentNode.id === node)
         // like top = 'foo'
-        || (parentNode.type === 'AssignmentExpression' && parentNode.left === node)
+        || (n.AssignmentExpression.check(parentNode) && parentNode.left === node)
         || (
           [
             'LabeledStatement', // like `top: foo();`
@@ -155,7 +160,7 @@ export const jsRules: Visitor<{}> = {
       this.traverse(path)
     }
 
-    if (node.left.type !== 'MemberExpression') {
+    if (!n.MemberExpression.check(node.left)) {
       return finish()
     }
 
@@ -173,7 +178,7 @@ export const jsRules: Visitor<{}> = {
       return false
     }
 
-    const objBeingSetOn = (node.left as namedTypes.MemberExpression).object
+    const objBeingSetOn = node.left.object
 
     path.replace(resolveWindowReference(objBeingSetOn, propBeingSet, node.right))
 
