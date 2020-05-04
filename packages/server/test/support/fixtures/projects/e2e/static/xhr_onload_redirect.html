@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <button>click me</button>
+  <script type="text/javascript">
+    const x = new XMLHttpRequest()
+    x.open('GET', '/cypress.json')
+    x.onload = () => {
+      // TODO: without a semicolon, this will merge with line 16 and result in console.log()() not a function
+      location.href = 'index.html';
+      console.log(location);
+    }
+    x.send()
+  </script>
+</body>
+</html>
