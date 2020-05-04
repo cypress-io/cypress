@@ -74,6 +74,7 @@ describe('Video Capture', () => {
       await expect(endVideoCapture()).be.rejectedWith('operation timed out')
     })
 
+    // https://github.com/cypress-io/cypress/issues/6408
     it('waits for at least 2 stream writes before ending', async () => {
       videoCapture.WAIT_FOR_MORE_FRAMES_TIMEOUT = 2000
 

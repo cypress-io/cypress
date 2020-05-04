@@ -65,9 +65,8 @@ module.exports = {
     const pt = stream.PassThrough()
     const ended = deferredPromise()
     let done = false
-    let written = 0
-    let logErrors = true
     let wantsWrite = true
+    let written = 0
     let skipped = 0
 
     _.defaults(options, {
@@ -77,6 +76,8 @@ module.exports = {
     const endVideoCapture = function () {
       debugFrames('frames written:', written)
 
+      // in some cases (webm) ffmpeg will crash if fewer than 2 buffers are
+      // written to the stream, so we don't end capture until we get at least 2
       if (written < 2) {
         debugFrames(module.exports.WAIT_FOR_MORE_FRAMES_TIMEOUT)
 
@@ -161,22 +162,20 @@ module.exports = {
             startedVideoCapture: new Date,
           })
         }).on('codecData', (data) => {
-          return debugFrames('capture codec data: %o', data)
+          return debug('capture codec data: %o', data)
         }).on('stderr', (stderr) => {
           return debug('capture stderr log %o', { message: stderr })
         }).on('error', (err, stdout, stderr) => {
-          debugFrames('capture errored: %o', { error: err.message, stdout, stderr })
+          debug('capture errored: %o', { error: err.message, stdout, stderr })
 
           // if we're supposed log errors then
           // bubble them up
-          if (logErrors) {
-            options.onError(err, stdout, stderr)
-          }
+          options.onError(err, stdout, stderr)
 
           // reject the ended promise
           return ended.reject(err)
         }).on('end', () => {
-          debugFrames('capture ended')
+          debug('capture ended')
 
           return ended.resolve()
         })

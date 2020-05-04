@@ -806,7 +806,7 @@ module.exports = {
     console.log('')
   },
 
-  postProcessRecording (name, cname, videoCompression, shouldUploadVideo) {
+  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo) {
     debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
@@ -1127,21 +1127,19 @@ module.exports = {
       // always close the browser now as opposed to letting
       // it exit naturally with the parent process due to
       // electron bug in windows
-      return openProject
-      .closeBrowser()
-      .then(() => {
-        if (endVideoCapture) {
-          return this.postProcessRecording(
-            videoName,
-            compressedVideoName,
-            videoCompression,
-            suv,
-          ).then(finish)
-          // TODO: add a catch here
-        }
+      await openProject.closeBrowser()
 
-        return finish()
-      })
+      if (endVideoCapture) {
+        await this.postProcessRecording(
+          videoName,
+          compressedVideoName,
+          videoCompression,
+          suv,
+        )
+        // TODO: add a catch here
+      }
+
+      return finish()
     })
   },
 
