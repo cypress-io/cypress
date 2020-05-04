@@ -31,6 +31,7 @@ const keys = require('./util/keys')
 const settings = require('./util/settings')
 const specsUtil = require('./util/specs')
 const { escapeFilenameInUrl } = require('./util/escape_filename')
+const tsNodeOptions = require('./util/ts-node-options')
 
 const localCwd = cwd()
 
@@ -107,14 +108,15 @@ class Project extends EE {
           basedir: this.projectRoot,
         })
 
-        debug('typescript path: %s', tsPath)
+        const tsOptions = tsNodeOptions.getTsNodeOptions(tsPath)
 
-        tsnode.register({
-          compiler: tsPath,
-          transpileOnly: true,
-        })
+        debug('typescript path: %s', tsPath)
+        debug('registering project TS with options %o', tsOptions)
+
+        tsnode.register(tsOptions)
       } catch (e) {
-        debug(`typescript doesn't exist. ts-node setup passed.`)
+        debug(`typescript doesn't exist. ts-node setup failed.`)
+        debug('error message %s', e.message)
       }
 
       return cfg
