@@ -1,5 +1,14 @@
-<script type="text/javascript">
-chrome.devtools.inspectedWindow.onResourceAdded.addListener(() => {
-  chrome.devtools.inspectedWindow.eval('window.theExtensionLoaded = true')
-})
+<script>
+  function addProperty () {
+    chrome.devtools.inspectedWindow.onResourceAdded.addListener(() => {
+      chrome.devtools.inspectedWindow.eval('window.theExtensionLoaded = true')
+    })
+  }
+
+  // sometimes chrome.devtools is undefined, most likely bug in chromium :|
+  if (chrome.devtools.inspectedWindow) {
+    addProperty()
+  } else {
+    setTimeout(addProperty, 1000)
+  }
 </script>
