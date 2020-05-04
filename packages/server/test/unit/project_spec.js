@@ -351,6 +351,10 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
           expect(register).to.be.calledWith({
             transpileOnly: true,
             compiler: projTsPath,
+            compilerOptions: {
+              module: 'CommonJS',
+              esModuleInterop: true,
+            },
           })
         })
       })
