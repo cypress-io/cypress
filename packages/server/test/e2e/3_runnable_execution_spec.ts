@@ -1,7 +1,7 @@
 const e2e = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
 
-describe('e2e issue 1987', () => {
+describe('e2e runnable execution', () => {
   e2e.setup({
     servers: [{
       port: 3434,
@@ -10,20 +10,26 @@ describe('e2e issue 1987', () => {
     {
       port: 4545,
       static: true,
+    },
+    {
+      port: 5656,
+      static: true,
     }],
   })
 
+  // navigation in before and in test body doesn't cause infinite loop
+  // but throws correct error
   // https://github.com/cypress-io/cypress/issues/1987
-  // before/after hooks should not be rerun on top navigation
-  e2e.it('can reload during spec run', {
+  e2e.it('cannot navigate in before hook and test', {
     project: Fixtures.projectPath('hooks-after-rerun'),
     spec: 'beforehook-and-test-navigation.js',
     snapshot: true,
+    expectedExitCode: 1,
   })
 
-  e2e.it('can run proper amount of hooks', {
+  e2e.it('runnables run correct number of times with navigation', {
     project: Fixtures.projectPath('hooks-after-rerun'),
-    spec: 'afterhooks.spec.js',
+    spec: 'runnable-run-count.spec.js',
     snapshot: true,
   })
 })
