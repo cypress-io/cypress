@@ -4,8 +4,6 @@ import path from 'path'
 import fse from 'fs-extra'
 import os from 'os'
 
-// const END_OF_FILE_ERROR = 'ffmpeg exited with code 1: pipe:0: End of file\n'
-
 async function startSpiedVideoCapture (filename) {
   const props = await videoCapture.start(filename)
 

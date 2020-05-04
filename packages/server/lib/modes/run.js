@@ -31,7 +31,7 @@ const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
 
-const DELAY_TO_LET_VIDEO_FINISH_MS = 200
+const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
 const color = (val, c) => {
   return chalk[c](val)
@@ -701,6 +701,12 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
   })
 })
 
+const warnVideoRecordingFailed = (err) => {
+  // log that post processing was attempted
+  // but failed and dont let this change the run exit code
+  errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+}
+
 module.exports = {
   collectTestResults,
 
@@ -811,7 +817,6 @@ module.exports = {
 
     // once this ended promises resolves
     // then begin processing the file
-
     // dont process anything if videoCompress is off
     // or we've been told not to upload the video
     if (videoCompression === false || shouldUploadVideo === false) {
@@ -894,11 +899,6 @@ module.exports = {
     // bar.tickTotal(float)
 
     return videoCapture.process(name, cname, videoCompression, onProgress)
-    .catch((err) => {
-      // log that post processing was attempted
-      // but failed and dont let this change the run exit code
-      errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
-    })
   },
 
   launchBrowser (options = {}) {
@@ -1118,25 +1118,28 @@ module.exports = {
 
       obj.shouldUploadVideo = suv
 
-      debug('attempting to close the browser')
+      let videoCaptureFailed = false
 
       if (endVideoCapture) {
         await endVideoCapture()
+        .tapCatch(() => videoCaptureFailed = true)
+        .catch(warnVideoRecordingFailed)
       }
 
       // always close the browser now as opposed to letting
       // it exit naturally with the parent process due to
       // electron bug in windows
+      debug('attempting to close the browser')
       await openProject.closeBrowser()
 
-      if (endVideoCapture) {
+      if (endVideoCapture && !videoCaptureFailed) {
         await this.postProcessRecording(
           videoName,
           compressedVideoName,
           videoCompression,
           suv,
         )
-        // TODO: add a catch here
+        .catch(warnVideoRecordingFailed)
       }
 
       return finish()
