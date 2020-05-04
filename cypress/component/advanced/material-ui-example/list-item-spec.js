@@ -6,12 +6,11 @@ import { ListItemText } from '@material-ui/core'
 import SimpleList from './list-demo'
 
 it('renders a list item', () => {
-  const Demo = () => (
+  mount(
     <ListItem>
       <ListItemText primary={'my example list item'} />
-    </ListItem>
+    </ListItem>,
   )
-  mount(<Demo />)
   cy.contains('my example list item')
 })
 
