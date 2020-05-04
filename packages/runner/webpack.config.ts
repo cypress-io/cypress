@@ -6,8 +6,14 @@ import webpack from 'webpack'
 const commonConfig = getCommonConfig()
 
 // @ts-ignore
-commonConfig.module.rules[1].use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
-  'languages': ['javascript'],
+const babelLoader = _.find(commonConfig.module.rules, (rule) => {
+  // @ts-ignore
+  return _.includes(rule.use.loader, 'babel-loader')
+})
+
+// @ts-ignore
+babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
+  'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
   'plugins': ['line-numbers', 'line-highlight'],
   'theme': 'default',
   'css': false,
