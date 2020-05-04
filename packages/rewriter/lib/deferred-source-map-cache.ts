@@ -84,6 +84,9 @@ export class DeferredSourceMapCache {
         // try to load it from the web
         const req = {
           url: request.url,
+          // TODO: this assumes that the sourcemap is on the same base domain, so it's safe to send the same headers
+          // the browser sent for this sourcemap request - but if sourcemap is on a different domain, this will not
+          // be true. need to use browser's cookiejar instead.
           headers,
           timeout: 5000,
         }
