@@ -49,7 +49,9 @@ export default function getDisplayName(
     }
   }
 
-  cachedDisplayNames.set(type, displayName)
+  try {
+    cachedDisplayNames.set(type, displayName)
+  } catch (e) {}
 
   return displayName
 }

@@ -45,7 +45,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
-  const displayname = getDisplayName(jsx.type, options.alias)
+  const displayName = getDisplayName(jsx.type, options.alias)
   let logInstance: Cypress.Log
 
   return cy
@@ -53,7 +53,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       if (options.log !== false) {
         logInstance = Cypress.log({
           name: 'mount',
-          message: [`ReactDOM.render(<${displayname} ... />)`],
+          message: [`ReactDOM.render(<${displayName} ... />)`],
         })
       }
     })
@@ -99,7 +99,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 
       return cy
         .wrap(CypressTestComponent, { log: false })
-        .as(options.alias || displayname)
+        .as(options.alias || displayName)
         .then(() => {
           if (logInstance) {
             logInstance.snapshot('mounted')
