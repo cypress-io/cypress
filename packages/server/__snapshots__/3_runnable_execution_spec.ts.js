@@ -62,17 +62,11 @@ https://on.cypress.io/cannot-visit-different-origin-domain
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
+  │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     beforehook-and-test-navigation.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/beforehook-and-test-navigation.js/suite -- caus     (1280x720)
-     es domain navigation (failed).png                                                              
 
 
   (Video)
