@@ -51,7 +51,7 @@ module.exports = (on) => {
 Pass in options as the second argument to `webpack`:
 
 ```javascript
-const webpack = require('@cypress/webpack-preprocessor')
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 module.exports = (on) => {
   const options = {
@@ -61,7 +61,7 @@ module.exports = (on) => {
     watchOptions: {},
   }
 
-  on('file:preprocessor', webpack(options))
+  on('file:preprocessor', webpackPreprocessor(options))
 }
 ```
 
@@ -91,6 +91,19 @@ Object of webpack options. Just `require` in the options from your `webpack.conf
 ```
 
 Source maps are always enabled unless explicitly disabled by specifying `devtool: false`.
+
+### use babelrc
+
+If you have a `.babelrc` file and would like to use it, then you must delete `options.presets` from the default Webpack options
+
+```js
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+const defaults = webpackPreprocessor.defaultOptions
+module.exports = (on) => {
+  delete defaults.webpackOptions.module.rules[0].use[0].options.presets
+  on('file:preprocessor', webpackPreprocessor(defaults))
+}
+```
 
 ### watchOptions
 

@@ -46,6 +46,16 @@ workflows:
           no-workspace: true
           working_directory: examples/react-app
 
+      - cypress/run:
+          name: Test babelrc
+          requires:
+            - Install
+          executor: cypress/base-12-14-0
+          install-command: echo 'Nothing else to install in this job'
+          timeout: '1m'
+          no-workspace: true
+          working_directory: examples/use-babelrc
+
       # wait for all jobs to finish and possible run NPM release
       - cypress/run:
           name: NPM release
@@ -53,6 +63,7 @@ workflows:
             - Install
             - Tests
             - Test React App
+            - Test babelrc
           executor: cypress/base-12-14-0
           # nothing to install - cypress/install job does it
           # and nothing to pass to the next job
