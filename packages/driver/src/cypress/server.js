@@ -1,14 +1,7 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const capitalize = require('underscore.string/capitalize')
 const minimatch = require('minimatch')
 
-const $utils = require('./utils')
 const $errUtils = require('./error_utils')
 const $XHR = require('./xml_http_request')
 
@@ -18,7 +11,7 @@ const props = 'onreadystatechange onload onerror'.split(' ')
 
 let restoreFn = null
 
-const setHeader = function (xhr, key, val, transformer) {
+const setHeader = (xhr, key, val, transformer) => {
   if (val != null) {
     if (transformer) {
       val = transformer(val)
@@ -30,44 +23,50 @@ const setHeader = function (xhr, key, val, transformer) {
   }
 }
 
-const normalize = function (val) {
-  val = val.replace(needsDashRe, (match) => `${match[0]}-${match[1]}`)
+const normalize = (val) => {
+  val = val.replace(needsDashRe, (match) => {
+    return `${match[0]}-${match[1]}`
+  })
 
   return val.toLowerCase()
 }
 
-const nope = () => null
-
-const responseTypeIsTextOrEmptyString = (responseType) => (responseType === '') || (responseType === 'text')
-
-//# when the browser naturally cancels/aborts
-//# an XHR because the window is unloading
-//# on chrome < 71
-const isAbortedThroughUnload = (xhr) => {
-  return (xhr.canceled !== true) &&
-  (xhr.readyState === 4) &&
-    (xhr.status === 0) &&
-      //# responseText may be undefined on some responseTypes
-      //# https://github.com/cypress-io/cypress/issues/3008
-      //# TODO: How do we want to handle other responseTypes?
-      (responseTypeIsTextOrEmptyString(xhr.responseType)) &&
-        (xhr.responseText === '')
+const nope = () => {
+  return null
 }
 
-const warnOnStubDeprecation = function (obj, type) {
+const responseTypeIsTextOrEmptyString = (responseType) => {
+  return responseType === '' || responseType === 'text'
+}
+
+// when the browser naturally cancels/aborts
+// an XHR because the window is unloading
+// on chrome < 71
+const isAbortedThroughUnload = (xhr) => {
+  return xhr.canceled !== true &&
+  xhr.readyState === 4 &&
+  xhr.status === 0 &&
+  // responseText may be undefined on some responseTypes
+  // https://github.com/cypress-io/cypress/issues/3008
+  // TODO: How do we want to handle other responseTypes?
+  responseTypeIsTextOrEmptyString(xhr.responseType) &&
+  xhr.responseText === ''
+}
+
+const warnOnStubDeprecation = (obj, type) => {
   if (_.has(obj, 'stub')) {
     return $errUtils.warnByPath('server.stub_deprecated', { args: { type } })
   }
 }
 
-const warnOnForce404Default = function (obj) {
+const warnOnForce404Default = (obj) => {
   if (obj.force404 === false) {
     return $errUtils.warnByPath('server.force404_deprecated')
   }
 }
 
-const whitelist = (xhr) => //# whitelist if we're GET + looks like we're fetching regular resources
-{
+const whitelist = (xhr) => {
+  // whitelist if we're GET + looks like we're fetching regular resources
   return xhr.method === 'GET' && regularResourcesRe.test(xhr.url)
 }
 
@@ -81,14 +80,14 @@ const serverDefaults = {
   enable: true,
   autoRespond: true,
   waitOnResponses: Infinity,
-  force404: false, //# to force 404's for non-stubbed routes
+  force404: false, // to force 404's for non-stubbed routes
   onAnyAbort: undefined,
   onAnyRequest: undefined,
   onAnyResponse: undefined,
   urlMatchingOptions: { matchBase: true },
   stripOrigin: _.identity,
   getUrlOptions: _.identity,
-  whitelist, //# function whether to allow a request to go out (css/js/html/templates) etc
+  whitelist, // function whether to allow a request to go out (css/js/html/templates) etc
   onOpen () {},
   onSend () {},
   onXhrAbort () {},
@@ -99,15 +98,15 @@ const serverDefaults = {
   onNetworkError () {},
 }
 
-const restore = function () {
+const restore = () => {
   if (restoreFn) {
     restoreFn()
 
-    return restoreFn = null
+    restoreFn = null
   }
 }
 
-const getStack = function () {
+const getStack = () => {
   const err = new Error
 
   return err.stack.split('\n').slice(3).join('\n')
@@ -123,33 +122,32 @@ const get404Route = () => {
   }
 }
 
-const transformHeaders = function (headers) {
-  //# normalize camel-cased headers key
-  headers = _.reduce(headers, function (memo, value, key) {
+const transformHeaders = (headers) => {
+  // normalize camel-cased headers key
+  headers = _.reduce(headers, (memo, value, key) => {
     memo[normalize(key)] = value
 
     return memo
-  }
-  , {})
+  }, {})
 
   return JSON.stringify(headers)
 }
 
-const normalizeStubUrl = function (xhrUrl, url) {
+const normalizeStubUrl = (xhrUrl, url) => {
   if (!xhrUrl) {
     $errUtils.warnByPath('server.xhrurl_not_set')
   }
 
-  //# always ensure this is an absolute-relative url
-  //# and remove any double slashes
+  // always ensure this is an absolute-relative url
+  // and remove any double slashes
   xhrUrl = _.compact(xhrUrl.split('/')).join('/')
   url = _.trimStart(url, '/')
 
   return [`/${xhrUrl}`, url].join('/')
 }
 
-const getFullyQualifiedUrl = function (contentWindow, url) {
-  //# the href getter will always resolve a full path
+const getFullyQualifiedUrl = (contentWindow, url) => {
+  // the href getter will always resolve a full path
   const a = contentWindow.document.createElement('a')
 
   a.href = url
@@ -157,29 +155,28 @@ const getFullyQualifiedUrl = function (contentWindow, url) {
   return a.href
 }
 
-//# override the defaults for all
-//# servers
-const defaults = (obj = {}) => //# merge obj into defaults
-{
+// override the defaults for all servers
+const defaults = (obj = {}) => {
+  // merge obj into defaults
   return _.extend(serverDefaults, obj)
 }
 
-const create = function (options = {}) {
-  let server
-
+const create = (options = {}) => {
   options = _.defaults(options, serverDefaults)
 
   const xhrs = {}
   const proxies = {}
   const routes = []
 
-  //# always start disabled
-  //# so we dont handle stubs
+  // always start disabled
+  // so we dont handle stubs
   let hasEnabledStubs = false
 
-  const enableStubs = (bool = true) => hasEnabledStubs = bool
+  const enableStubs = (bool = true) => {
+    return hasEnabledStubs = bool
+  }
 
-  return server = {
+  const server = {
     options,
 
     restore,
@@ -195,8 +192,8 @@ const create = function (options = {}) {
     getFullyQualifiedUrl,
 
     getOptions () {
-      //# clone the options to prevent
-      //# accidental mutations
+      // clone the options to prevent
+      // accidental mutations
       return _.clone(options)
     },
 
@@ -215,8 +212,8 @@ const create = function (options = {}) {
     applyStubProperties (xhr, route) {
       const responser = _.isObject(route.response) ? JSON.stringify : null
 
-      //# add header properties for the xhr's id
-      //# and the testId
+      // add header properties for the xhr's id
+      // and the testId
       setHeader(xhr, 'id', xhr.id)
       // setHeader(xhr, "testId", options.testId)
 
@@ -231,12 +228,12 @@ const create = function (options = {}) {
     route (attrs = {}) {
       warnOnStubDeprecation(attrs, 'route')
 
-      //# merge attrs with the server's defaults
-      //# so we preserve the state of the attrs
-      //# at the time they're created since we
-      //# can create another server later
+      // merge attrs with the server's defaults
+      // so we preserve the state of the attrs
+      // at the time they're created since we
+      // can create another server later
 
-      //# dont mutate the original attrs
+      // dont mutate the original attrs
       const route = _.defaults(
         {},
         attrs,
@@ -249,30 +246,28 @@ const create = function (options = {}) {
     },
 
     getRouteForXhr (xhr) {
-      //# return the 404 stub if we dont have any stubs
-      //# but we are stubbed - meaning we havent added any routes
-      //# but have started the server
-      //# and this request shouldnt be whitelisted
-      if (!routes.length &&
-        hasEnabledStubs &&
-          (options.force404 !== false) &&
-            !server.isWhitelisted(xhr)) {
+      // return the 404 stub if we dont have any stubs
+      // but we are stubbed - meaning we havent added any routes
+      // but have started the server
+      // and this request shouldnt be whitelisted
+      if (!routes.length && hasEnabledStubs &&
+          options.force404 !== false && !server.isWhitelisted(xhr)) {
         return get404Route()
       }
 
-      //# bail if we've attached no stubs
+      // bail if we've attached no stubs
       if (!routes.length) {
         return nope()
       }
 
-      //# bail if this xhr matches our whitelist
+      // bail if this xhr matches our whitelist
       if (server.isWhitelisted(xhr)) {
         return nope()
       }
 
-      //# loop in reverse to get
-      //# the first matching stub
-      //# thats been most recently added
+      // loop in reverse to get
+      // the first matching stub
+      // thats been most recently added
       for (let i = routes.length - 1; i >= 0; i--) {
         const route = routes[i]
 
@@ -281,40 +276,40 @@ const create = function (options = {}) {
         }
       }
 
-      //# else if no stub matched
-      //# send 404 if we're allowed to
+      // else if no stub matched
+      // send 404 if we're allowed to
       if (options.force404) {
         return get404Route()
       }
 
-      //# else return null
+      // else return null
       return nope()
     },
 
     methodsMatch (routeMethod, xhrMethod) {
-      //# normalize both methods by uppercasing them
+      // normalize both methods by uppercasing them
       return routeMethod.toUpperCase() === xhrMethod.toUpperCase()
     },
 
     urlsMatch (routePattern, fullyQualifiedUrl) {
       const match = (str, pattern) => {
-        //# be nice to our users and prepend
-        //# pattern with "/" if it doesnt have one
-        //# and str does
-        if ((pattern[0] !== '/') && (str[0] === '/')) {
+        // be nice to our users and prepend
+        // pattern with "/" if it doesnt have one
+        // and str does
+        if (pattern[0] !== '/' && str[0] === '/') {
           pattern = `/${pattern}`
         }
 
         return minimatch(str, pattern, options.urlMatchingOptions)
       }
 
-      const testRe = (url1, url2) => routePattern.test(url1) || routePattern.test(url2)
+      const testRe = (url1, url2) => {
+        return routePattern.test(url1) || routePattern.test(url2)
+      }
 
       const testStr = (url1, url2) => {
-        return (routePattern === url1) ||
-        (routePattern === url2) ||
-          match(url1, routePattern) ||
-            match(url2, routePattern)
+        return (routePattern === url1) || (routePattern === url2) ||
+          match(url1, routePattern) || match(url2, routePattern)
       }
 
       if (_.isRegExp(routePattern)) {
@@ -329,13 +324,14 @@ const create = function (options = {}) {
     },
 
     add (xhr, attrs = {}) {
-      let id
+      const id = _.uniqueId('xhr')
 
       _.extend(xhr, attrs)
-      xhr.id = (id = _.uniqueId('xhr'))
+      xhr.id = id
       xhrs[id] = xhr
+      proxies[id] = $XHR.create(xhr)
 
-      return proxies[id] = $XHR.create(xhr)
+      return proxies[id]
     },
 
     getProxyFor (xhr) {
@@ -345,16 +341,16 @@ const create = function (options = {}) {
     abortXhr (xhr) {
       const proxy = server.getProxyFor(xhr)
 
-      //# if the XHR leaks into the next test
-      //# after we've reset our internal server
-      //# then this may be undefined
+      // if the XHR leaks into the next test
+      // after we've reset our internal server
+      // then this may be undefined
       if (!proxy) {
         return
       }
 
-      //# return if we're already aborted which
-      //# can happen if the browser already canceled
-      //# this xhr but we called abort later
+      // return if we're already aborted which
+      // can happen if the browser already canceled
+      // this xhr but we called abort later
       if (xhr.aborted) {
         return
       }
@@ -370,8 +366,8 @@ const create = function (options = {}) {
       if (_.isFunction(options.onAnyAbort)) {
         const route = server.getRouteForXhr(xhr)
 
-        //# call the onAnyAbort function
-        //# after we've called options.onSend
+        // call the onAnyAbort function
+        // after we've called options.onSend
         return options.onAnyAbort(route, proxy)
       }
     },
@@ -379,9 +375,9 @@ const create = function (options = {}) {
     cancelXhr (xhr) {
       const proxy = server.getProxyFor(xhr)
 
-      //# if the XHR leaks into the next test
-      //# after we've reset our internal server
-      //# then this may be undefined
+      // if the XHR leaks into the next test
+      // after we've reset our internal server
+      // then this may be undefined
       if (!proxy) {
         return
       }
@@ -396,9 +392,9 @@ const create = function (options = {}) {
     },
 
     cancelPendingXhrs () {
-      //# cancel any outstanding xhr's
-      //# which aren't already complete
-      //# or already canceled
+      // cancel any outstanding xhr's
+      // which aren't already complete
+      // or already canceled
       return _
       .chain(xhrs)
       .reject({ readyState: 4 })
@@ -411,7 +407,7 @@ const create = function (options = {}) {
       warnOnStubDeprecation(obj, 'server')
       warnOnForce404Default(obj)
 
-      //# handle enable=true|false
+      // handle enable=true|false
       if (obj.enable != null) {
         enableStubs(obj.enable)
       }
@@ -423,69 +419,63 @@ const create = function (options = {}) {
       restore()
 
       const XHR = contentWindow.XMLHttpRequest
-      const {
-        send,
-      } = XHR.prototype
-      const {
-        open,
-      } = XHR.prototype
-      const {
-        abort,
-      } = XHR.prototype
+      const { send, open, abort } = XHR.prototype
       const srh = XHR.prototype.setRequestHeader
 
-      restoreFn = () => //# restore the property back on the window
-      {
+      restoreFn = () => {
+        // restore the property back on the window
         return _.each(
           { send, open, abort, setRequestHeader: srh },
-          (value, key) => XHR.prototype[key] = value,
+          (value, key) => {
+            return XHR.prototype[key] = value
+          },
         )
       }
 
-      XHR.prototype.setRequestHeader = function () {
-        //# if the XHR leaks into the next test
-        //# after we've reset our internal server
-        //# then this may be undefined
-        let proxy
+      XHR.prototype.setRequestHeader = function (...args) {
+        // if the XHR leaks into the next test
+        // after we've reset our internal server
+        // then this may be undefined
+        const proxy = server.getProxyFor(this)
 
-        if (proxy = server.getProxyFor(this)) {
-          proxy._setRequestHeader.apply(proxy, arguments)
+        if (proxy) {
+          proxy._setRequestHeader.apply(proxy, args)
         }
 
-        return srh.apply(this, arguments)
+        return srh.apply(this, args)
       }
 
-      XHR.prototype.abort = function () {
-        //# if we already have a readyState of 4
-        //# then do not get the abort stack or
-        //# set the aborted property or call onXhrAbort
-        //# to test this just use a regular XHR
+      XHR.prototype.abort = function (...args) {
+        // if we already have a readyState of 4
+        // then do not get the abort stack or
+        // set the aborted property or call onXhrAbort
+        // to test this just use a regular XHR
         if (this.readyState !== 4) {
           server.abortXhr(this)
         }
 
-        return abort.apply(this, arguments)
+        return abort.apply(this, args)
       }
 
       XHR.prototype.open = function (method, url, async = true, username, password) {
-        //# get the fully qualified url that normally the browser
-        //# would be sending this request to
+        // get the fully qualified url that normally the browser
+        // would be sending this request to
 
-        //# FQDN:               http://www.google.com/responses/users.json
-        //# relative:           partials/phones-list.html
-        //# absolute-relative:  /app/partials/phones-list.html
+        // FQDN:               http://www.google.com/responses/users.json
+        // relative:           partials/phones-list.html
+        // absolute-relative:  /app/partials/phones-list.html
         const fullyQualifiedUrl = getFullyQualifiedUrl(contentWindow, url)
 
-        //# decode the entire url.display to make
-        //# it easier to do assertions
+        // decode the entire url.display to make
+        // it easier to do assertions
         const proxy = server.add(this, {
           method,
           url: decodeURIComponent(fullyQualifiedUrl),
         })
 
-        //# if this XHR matches a stubbed route then shift
-        //# its url to the stubbed url and set the request
-        //# headers for the response
+        // if this XHR matches a stubbed route then shift
+        // its url to the stubbed url and set the request
+        // headers for the response
         const route = server.getRouteForXhr(this)
 
         if (server.shouldApplyStub(route)) {
@@ -498,42 +488,42 @@ const create = function (options = {}) {
         const fns = {}
         const overrides = {}
 
-        const bailIfRecursive = function (fn) {
+        const bailIfRecursive = (fn) => {
           let isCalled = false
 
-          return function () {
+          return (...args) => {
             if (isCalled) {
               return
             }
 
             isCalled = true
             try {
-              return fn.apply(window, arguments)
+              return fn.apply(window, args)
             } finally {
               isCalled = false
             }
           }
         }
 
-        const onLoadFn = function () {
-          let err
-
+        const onLoadFn = function (...args) {
           proxy._setDuration(timeStart)
           proxy._setStatus()
           proxy._setResponseHeaders()
           proxy._setResponseBody()
 
-          if (err = proxy._getFixtureError()) {
+          let err = proxy._getFixtureError()
+
+          if (err) {
             return options.onFixtureError(proxy, err)
           }
 
-          //# catch synchronous errors caused
-          //# by the onload function
+          // catch synchronous errors caused
+          // by the onload function
           try {
-            let ol
+            const ol = fns.onload
 
-            if (_.isFunction(ol = fns.onload)) {
-              ol.apply(xhr, arguments)
+            if (_.isFunction(ol)) {
+              ol.apply(xhr, args)
             }
 
             options.onLoad(proxy, route)
@@ -547,14 +537,14 @@ const create = function (options = {}) {
           }
         }
 
-        const onErrorFn = function () {
-          //# its possible our real onerror handler
-          //# throws so we need to catch those errors too
+        const onErrorFn = function (...args) {
+          // its possible our real onerror handler
+          // throws so we need to catch those errors too
           try {
-            let oe
+            const oe = fns.onerror
 
-            if (_.isFunction(oe = fns.onerror)) {
-              oe.apply(xhr, arguments)
+            if (_.isFunction(oe)) {
+              oe.apply(xhr, args)
             }
 
             return options.onNetworkError(proxy)
@@ -563,61 +553,61 @@ const create = function (options = {}) {
           }
         }
 
-        const onReadyStateFn = function () {
-          //# catch synchronous errors caused
-          //# by the onreadystatechange function
+        const onReadyStateFn = function (...args) {
+          // catch synchronous errors caused
+          // by the onreadystatechange function
           try {
-            let orst
+            const orst = fns.onreadystatechange
 
             if (isAbortedThroughUnload(xhr)) {
               server.abortXhr(xhr)
             }
 
-            if (_.isFunction(orst = fns.onreadystatechange)) {
-              return orst.apply(xhr, arguments)
+            if (_.isFunction(orst)) {
+              return orst.apply(xhr, args)
             }
           } catch (err) {
-            //# its failed stop sending the callack
+            // its failed stop sending the callack
             xhr.onreadystatechange = null
 
             return options.onError(proxy, err)
           }
         }
 
-        //# bail if eventhandlers have already been called to prevent
-        //# infinite recursion
+        // bail if eventhandlers have already been called to prevent
+        // infinite recursion
         overrides.onload = bailIfRecursive(onLoadFn)
         overrides.onerror = bailIfRecursive(onErrorFn)
         overrides.onreadystatechange = bailIfRecursive(onReadyStateFn)
 
-        props.forEach(function (prop) {
-          //# if we currently have one of these properties then
-          //# back them up!
-          let fn
+        props.forEach((prop) => {
+          // if we currently have one of these properties then
+          // back them up!
+          const fn = xhr[prop]
 
-          if (fn = xhr[prop]) {
+          if (fn) {
             fns[prop] = fn
           }
 
-          //# set the override now
+          // set the override now
           xhr[prop] = overrides[prop]
 
-          //# and in the future if this is redefined
-          //# then just back it up
+          // and in the future if this is redefined
+          // then just back it up
           return Object.defineProperty(xhr, prop, {
             get () {
               const bak = fns[prop]
 
               if (_.isFunction(bak)) {
-                return function () {
-                  return bak.apply(xhr, arguments)
+                return (...args) => {
+                  return bak.apply(xhr, args)
                 }
               }
 
               return overrides[prop]
             },
             set (fn) {
-              return fns[prop] = fn
+              fns[prop] = fn
             },
             configurable: true,
           })
@@ -625,46 +615,49 @@ const create = function (options = {}) {
 
         options.onOpen(method, url, async, username, password)
 
-        //# change absolute url's to relative ones
-        //# if they match our baseUrl / visited URL
+        // change absolute url's to relative ones
+        // if they match our baseUrl / visited URL
         return open.call(this, method, url, async, username, password)
       }
 
-      return XHR.prototype.send = function (requestBody) {
-        //# if there is an existing route for this
-        //# XHR then add those properties into it
-        //# only if route isnt explicitly false
-        //# and the server is enabled
+      XHR.prototype.send = function (requestBody) {
+        // if there is an existing route for this
+        // XHR then add those properties into it
+        // only if route isnt explicitly false
+        // and the server is enabled
         const route = server.getRouteForXhr(this)
 
         if (server.shouldApplyStub(route)) {
           server.applyStubProperties(this, route)
         }
 
-        //# capture where this xhr came from
+        // capture where this xhr came from
         const sendStack = server.getStack()
 
-        //# get the proxy xhr
+        // get the proxy xhr
         const proxy = server.getProxyFor(this)
 
         proxy._setRequestBody(requestBody)
 
-        //# log this out now since it's being sent officially
-        //# unless its been whitelisted
+        // log this out now since it's being sent officially
+        // unless its been whitelisted
         if (!server.isWhitelisted(this)) {
           options.onSend(proxy, sendStack, route)
         }
 
         if (_.isFunction(options.onAnyRequest)) {
-          //# call the onAnyRequest function
-          //# after we've called options.onSend
+          // call the onAnyRequest function
+          // after we've called options.onSend
           options.onAnyRequest(route, proxy)
         }
 
+        // eslint-disable-next-line prefer-rest-params
         return send.apply(this, arguments)
       }
     },
   }
+
+  return server
 }
 
 module.exports = {

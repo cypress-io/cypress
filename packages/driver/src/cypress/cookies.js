@@ -1,141 +1,157 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _ = require("lodash");
-const Cookies = require("js-cookie");
+const _ = require('lodash')
+const Cookies = require('js-cookie')
 
-const $errUtils = require("./error_utils");
+const $errUtils = require('./error_utils')
 
-const reHttp = /^http/;
+let isDebugging = false
+let isDebuggingVerbose = false
 
-let isDebugging = false;
-let isDebuggingVerbose = false;
-
-const preserved = {};
+const preserved = {}
 
 const defaults = {
-  whitelist: null
-};
+  whitelist: null,
+}
 
-const $Cookies = function(namespace, domain) {
-  const isNamespaced = name => _.startsWith(name, namespace);
+const $Cookies = (namespace, domain) => {
+  const isNamespaced = (name) => {
+    return _.startsWith(name, namespace)
+  }
 
-  const isWhitelisted = function(cookie) {
-    let w;
-    if (w = defaults.whitelist) {
-      switch (false) {
-        case !_.isString(w):
-          return cookie.name === w;
-        case !_.isArray(w):
-          return w.includes(cookie.name);
-        case !_.isFunction(w):
-          return w(cookie);
-        case !_.isRegExp(w):
-          return w.test(cookie.name);
-        default:
-          return false;
+  const isWhitelisted = (cookie) => {
+    const w = defaults.whitelist
+
+    if (w) {
+      if (_.isString(w)) {
+        return cookie.name === w
       }
-    }
-  };
 
-  const removePreserved = function(name) {
-    if (preserved[name]) {
-      return delete preserved[name];
+      if (_.isArray(w)) {
+        return w.includes(cookie.name)
+      }
+
+      if (_.isFunction(w)) {
+        return w(cookie)
+      }
+
+      if (_.isRegExp(w)) {
+        return w.test(cookie.name)
+      }
+
+      return false
     }
-  };
+  }
+
+  const removePreserved = (name) => {
+    if (preserved[name]) {
+      return delete preserved[name]
+    }
+  }
 
   const API = {
-    debug(bool = true, options = {}) {
+    debug (bool = true, options = {}) {
       _.defaults(options, {
-        verbose: true
-      });
+        verbose: true,
+      })
 
-      isDebugging = bool;
-      return isDebuggingVerbose = bool && options.verbose;
+      isDebugging = bool
+      isDebuggingVerbose = bool && options.verbose
     },
 
-    log(message, cookie, removed) {
-      if (!isDebugging) { return; }
-
-      const m = removed ? "warn" : "info";
-
-      const args = [_.truncate(message, { length: 50 })];
-
-      if (isDebuggingVerbose) {
-        args.push(cookie);
+    log (message, cookie, removed) {
+      if (!isDebugging) {
+        return
       }
 
-      return console[m].apply(console, args);
+      const m = removed ? 'warn' : 'info'
+
+      const args = [_.truncate(message, { length: 50 })]
+
+      if (isDebuggingVerbose) {
+        args.push(cookie)
+      }
+
+      // eslint-disable-next-line no-console
+      return console[m].apply(console, args)
     },
 
-    getClearableCookies(cookies = []) {
-      return _.filter(cookies, cookie => !isWhitelisted(cookie) && !removePreserved(cookie.name));
+    getClearableCookies (cookies = []) {
+      return _.filter(cookies, (cookie) => {
+        return !isWhitelisted(cookie) && !removePreserved(cookie.name)
+      })
     },
 
-    _set(name, value, options = {}) {
-      //# dont set anything if we've been
-      //# told to unload
-      if (this.getCy("unload") === "true") { return; }
+    _set (name, value, options = {}) {
+      // dont set anything if we've been
+      // told to unload
+      if (this.getCy('unload') === 'true') {
+        return
+      }
 
       _.defaults(options, {
-        path: "/"
-      });
+        path: '/',
+      })
 
-      return Cookies.set(name, value, options);
+      return Cookies.set(name, value, options)
     },
 
-    _get(name) {
-      return Cookies.get(name);
+    _get (name) {
+      return Cookies.get(name)
     },
 
-    setCy(name, value, options = {}) {
+    setCy (name, value, options = {}) {
       _.defaults(options, {
-        domain
-      });
+        domain,
+      })
 
-      return this._set(`${namespace}.${name}`, value, options);
+      return this._set(`${namespace}.${name}`, value, options)
     },
 
-    getCy(name) {
-      return this._get(`${namespace}.${name}`);
+    getCy (name) {
+      return this._get(`${namespace}.${name}`)
     },
 
-    preserveOnce(...keys) {
-      return _.each(keys, key => preserved[key] = true);
+    preserveOnce (...keys) {
+      return _.each(keys, (key) => {
+        return preserved[key] = true
+      })
     },
 
-    clearCypressCookies() {
-      return _.each(Cookies.get(), function(value, key) {
+    clearCypressCookies () {
+      return _.each(Cookies.get(), (value, key) => {
         if (isNamespaced(key)) {
           return Cookies.remove(key, {
-            path: "/",
-            domain
-          });
+            path: '/',
+            domain,
+          })
         }
-      });
+      })
     },
 
-    setInitial() {
-      return this.setCy("initial", true);
+    setInitial () {
+      return this.setCy('initial', true)
     },
 
-    defaults(obj = {}) {
-      //# merge obj into defaults
-      return _.extend(defaults, obj);
+    defaults (obj = {}) {
+      // merge obj into defaults
+      return _.extend(defaults, obj)
+    },
+
+  }
+
+  _.each(['get', 'set', 'remove', 'getAllCookies', 'clearCookies'], (method) => {
+    return API[method] = () => {
+      return $errUtils.throwErrByPath('cookies.removed_method', {
+        args: { method },
+      })
     }
+  })
 
-  };
+  return API
+}
 
-  _.each(["get", "set", "remove", "getAllCookies", "clearCookies"], method => API[method] = () => $errUtils.throwErrByPath("cookies.removed_method", {
-    args: { method }
-  }));
+$Cookies.create = (namespace, domain) => {
+  // set the $Cookies function onto the Cypress instance
+  return $Cookies(namespace, domain)
+}
 
-  return API;
-};
-
-$Cookies.create = (namespace, domain) => //# set the $Cookies function onto the Cypress instance
-$Cookies(namespace, domain);
-
-module.exports = $Cookies;
+module.exports = $Cookies

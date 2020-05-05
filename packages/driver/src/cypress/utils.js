@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const $ = require('jquery')
 const _ = require('lodash')
 const capitalize = require('underscore.string/capitalize')
 const methods = require('methods')
@@ -46,21 +40,25 @@ const USER_FRIENDLY_TYPE_DETECTORS = _.map([
   [_.isDate, 'date'],
   [_.isObject, 'object'],
   [_.stubTrue, 'unknown'],
-], ([fn, type]) => [fn, _.constant(type)])
+], ([fn, type]) => {
+  return [fn, _.constant(type)]
+})
 
 module.exports = {
   warning (msg) {
+    // eslint-disable-next-line no-console
     return console.warn(`Cypress Warning: ${msg}`)
   },
 
   log (...msgs) {
+    // eslint-disable-next-line no-console
     return console.log(...msgs)
   },
 
   unwrapFirst (val) {
-    //# this method returns the first item in an array
-    //# and if its still a jquery object, then we return
-    //# the first() jquery element
+    // this method returns the first item in an array
+    // and if its still a jquery object, then we return
+    // the first() jquery element
     const item = [].concat(val)[0]
 
     if ($jquery.isJquery(item)) {
@@ -89,19 +87,18 @@ module.exports = {
       return null
     }
 
-    return _.reduce(props, function (memo, prop) {
-      if (_.has(obj, prop) || (obj[prop] !== undefined)) {
+    return _.reduce(props, (memo, prop) => {
+      if (_.has(obj, prop) || obj[prop] !== undefined) {
         memo[prop] = obj[prop]
       }
 
       return memo
-    }
-    , {})
+    }, {})
   },
 
   normalizeObjWithLength (obj) {
-    //# lodash shits the bed if our object has a 'length'
-    //# property so we have to normalize that
+    // lodash shits the bed if our object has a 'length'
+    // property so we have to normalize that
     if (_.has(obj, 'length')) {
       obj.Length = obj.length
       delete obj.length
@@ -110,19 +107,19 @@ module.exports = {
     return obj
   },
 
-  //# return a new object if the obj
-  //# contains the properties of filter
-  //# and the values are different
+  // return a new object if the obj
+  // contains the properties of filter
+  // and the values are different
   filterOutOptions (obj, filter = {}) {
     _.defaults(filter, defaultOptions)
 
     this.normalizeObjWithLength(filter)
 
-    const whereFilterHasSameKeyButDifferentValue = function (value, key) {
+    const whereFilterHasSameKeyButDifferentValue = (value, key) => {
       const upperKey = capitalize(key)
 
       return (_.has(filter, key) || _.has(filter, upperKey)) &&
-        (filter[key] !== value)
+        filter[key] !== value
     }
 
     obj = _.pickBy(obj, whereFilterHasSameKeyButDifferentValue)
@@ -141,8 +138,7 @@ module.exports = {
       memo.push(`${`${key}`.toLowerCase()}: ${this.stringifyActual(value)}`)
 
       return memo
-    }
-    , [])
+    }, [])
 
     return `{${str.join(', ')}}`
   },
@@ -150,51 +146,56 @@ module.exports = {
   stringifyActual (value) {
     const $dom = require('../dom')
 
-    switch (false) {
-      case !$dom.isDom(value):
-        return $dom.stringify(value, 'short')
-
-      case !_.isFunction(value):
-        return 'function(){}'
-
-      case !_.isArray(value):
-        var len = value.length
-
-        if (len > 3) {
-          return `Array[${len}]`
-        }
-
-        return `[${_.map(value, _.bind(this.stringifyActual, this)).join(', ')}]`
-
-      case !_.isRegExp(value):
-        return value.toString()
-
-      case !_.isObject(value):
-        len = _.keys(value).length
-        if (len > 2) {
-          return `Object{${len}}`
-        }
-
-        return this.stringifyActualObj(value)
-
-      case !_.isSymbol(value):
-        return 'Symbol'
-
-      case !_.isUndefined(value):
-        return undefined
-
-      default:
-        return `${value}`
+    if ($dom.isDom(value)) {
+      return $dom.stringify(value, 'short')
     }
+
+    if (_.isFunction(value)) {
+      return 'function(){}'
+    }
+
+    if (_.isArray(value)) {
+      const len = value.length
+
+      if (len > 3) {
+        return `Array[${len}]`
+      }
+
+      return `[${_.map(value, _.bind(this.stringifyActual, this)).join(', ')}]`
+    }
+
+    if (_.isRegExp(value)) {
+      return value.toString()
+    }
+
+    if (_.isObject(value)) {
+      const len = _.keys(value).length
+
+      if (len > 2) {
+        return `Object{${len}}`
+      }
+
+      return this.stringifyActualObj(value)
+    }
+
+    if (_.isSymbol(value)) {
+      return 'Symbol'
+    }
+
+    if (_.isUndefined(value)) {
+      return undefined
+    }
+
+    return `${value}`
   },
 
-  //# give us some user-friendly "types"
+  // give us some user-friendly "types"
   stringifyFriendlyTypeof: _.cond(USER_FRIENDLY_TYPE_DETECTORS),
 
   stringify (values) {
-    //# if we already have an array
-    //# then nest it again so that
-    //# its formatted properly
+    // if we already have an array
+    // then nest it again so that
+    // its formatted properly
     values = [].concat(values)
 
     return _
@@ -206,16 +207,19 @@ module.exports = {
   },
 
   stringifyArg (arg) {
-    switch (false) {
-      case !_.isString(arg) && !_.isNumber(arg) && !_.isBoolean(arg):
-        return JSON.stringify(arg)
-      case !_.isNull(arg):
-        return 'null'
-      case !_.isUndefined(arg):
-        return 'undefined'
-      default:
-        return this.stringifyActual(arg)
+    if (_.isString(arg) || _.isNumber(arg) || _.isBoolean(arg)) {
+      return JSON.stringify(arg)
     }
+
+    if (_.isNull(arg)) {
+      return 'null'
+    }
+
+    if (_.isUndefined(arg)) {
+      return 'undefined'
+    }
+
+    return this.stringifyActual(arg)
   },
 
   plural (obj, plural, singular) {
@@ -242,15 +246,15 @@ module.exports = {
   },
 
   escapeQuotes (text) {
-    //# convert to str and escape any single
-    //# or double quotes
+    // convert to str and escape any single
+    // or double quotes
     return (`${text}`).replace(quotesRe, '\\$1')
   },
 
   normalizeNumber (num) {
     const parsed = Number(num)
 
-    //# return num if this isNaN else return parsed
+    // return num if this isNaN else return parsed
     if (_.isNaN(parsed)) {
       return num
     }
@@ -271,11 +275,8 @@ module.exports = {
   },
 
   locHref (url, win) {
-    return win.location.href = url
+    win.location.href = url
   },
-
-  // locReplace: (win, url) ->
-  //   win.location.replace(url)
 
   locToString (win) {
     return win.location.toString()
@@ -297,11 +298,9 @@ module.exports = {
   },
 
   memoize (func, cacheInstance = new Map()) {
-    var memoized = function (...args) {
+    const memoized = function (...args) {
       const key = args[0]
-      const {
-        cache,
-      } = memoized
+      const { cache } = memoized
 
       if (cache.has(key)) {
         return cache.get(key)
@@ -317,5 +316,26 @@ module.exports = {
     memoized.cache = cacheInstance
 
     return memoized
+  },
+
+  indent (str, indentAmount) {
+    const indentStr = _.repeat(' ', indentAmount)
+
+    str = str.replace(/\n/g, `\n${indentStr}`)
+
+    return `${indentStr}${str}`
+  },
+
+  // normalize more than {maxNewLines} new lines into
+  // exactly {replacementNumLines} new lines
+  normalizeNewLines (str, maxNewLines, replacementNumLines) {
+    const moreThanMaxNewLinesRe = new RegExp(`\\n{${maxNewLines},}`)
+    const replacementWithNumLines = replacementNumLines ?? maxNewLines
+
+    return _.chain(str)
+    .split(moreThanMaxNewLinesRe)
+    .compact()
+    .join(_.repeat('\n', replacementWithNumLines))
+    .value()
   },
 }

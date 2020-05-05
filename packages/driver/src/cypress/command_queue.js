@@ -1,111 +1,117 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _        = require("lodash");
-const utils    = require("./utils");
-const $Command = require("./command");
+const _ = require('lodash')
+const utils = require('./utils')
+const $Command = require('./command')
 
 class $CommandQueue {
-  constructor(cmds = []) {
-    this.commands = cmds;
+  constructor (cmds = []) {
+    this.commands = cmds
   }
 
-  logs(filters) {
-    let logs = _.flatten(this.invokeMap("get", "logs"));
+  logs (filters) {
+    let logs = _.flatten(this.invokeMap('get', 'logs'))
 
     if (filters) {
-      const matchesFilters = _.matches(filters);
+      const matchesFilters = _.matches(filters)
 
-      logs = _.filter(logs, log => matchesFilters(log.get()));
+      logs = _.filter(logs, (log) => {
+        return matchesFilters(log.get())
+      })
     }
 
-    return logs;
+    return logs
   }
 
-  add(obj) {
+  add (obj) {
     if (utils.isInstanceOf(obj, $Command)) {
-      return obj;
-    } else {
-      return $Command.create(obj);
+      return obj
     }
+
+    return $Command.create(obj)
   }
 
-  get() {
-    return this.commands;
+  get () {
+    return this.commands
   }
 
-  names() {
-    return this.invokeMap("get", "name");
+  names () {
+    return this.invokeMap('get', 'name')
   }
 
-  splice(start, end, obj) {
-    const cmd = this.add(obj);
-    this.commands.splice(start, end, cmd);
+  splice (start, end, obj) {
+    const cmd = this.add(obj)
 
-    const prev = this.at(start - 1);
-    const next = this.at(start + 1);
+    this.commands.splice(start, end, cmd)
+
+    const prev = this.at(start - 1)
+    const next = this.at(start + 1)
 
     if (prev) {
-      prev.set("next", cmd);
-      cmd.set("prev", prev);
+      prev.set('next', cmd)
+      cmd.set('prev', prev)
     }
 
     if (next) {
-      next.set("prev", cmd);
-      cmd.set("next", next);
+      next.set('prev', cmd)
+      cmd.set('next', next)
     }
 
-    return cmd;
+    return cmd
   }
 
-  slice() {
-    const cmds = this.commands.slice.apply(this.commands, arguments);
-    return $CommandQueue.create(cmds);
+  slice (...args) {
+    const cmds = this.commands.slice.apply(this.commands, args)
+
+    return $CommandQueue.create(cmds)
   }
 
-  at(index) {
-    return this.commands[index];
+  at (index) {
+    return this.commands[index]
   }
 
-  _filterByAttrs(attrs, method) {
-    const matchesAttrs = _.matches(attrs);
+  _filterByAttrs (attrs, method) {
+    const matchesAttrs = _.matches(attrs)
 
-    return _[method](this.commands, command => matchesAttrs(command.attributes));
+    return _[method](this.commands, (command) => {
+      return matchesAttrs(command.attributes)
+    })
   }
 
-  filter(attrs) {
-    return this._filterByAttrs(attrs, "filter");
+  filter (attrs) {
+    return this._filterByAttrs(attrs, 'filter')
   }
 
-  find(attrs) {
-    return this._filterByAttrs(attrs, "find");
+  find (attrs) {
+    return this._filterByAttrs(attrs, 'find')
   }
 
-  toJSON() {
-    return this.invokeMap("toJSON");
+  toJSON () {
+    return this.invokeMap('toJSON')
   }
 
-  reset() {
-    this.commands.splice(0, this.commands.length);
+  reset () {
+    this.commands.splice(0, this.commands.length)
 
-    return this;
+    return this
   }
 
-  static create(cmds, options = {}) {
-    return new $CommandQueue(cmds);
+  static create (cmds) {
+    return new $CommandQueue(cmds)
   }
 }
 
-Object.defineProperty($CommandQueue.prototype, "length", {
-  get() { return this.commands.length; }
-});
+Object.defineProperty($CommandQueue.prototype, 'length', {
+  get () {
+    return this.commands.length
+  },
+})
 
-//# mixin lodash methods
-_.each(["invokeMap", "map", "first", "reduce", "reject", "last", "indexOf", "each"], method => $CommandQueue.prototype[method] = function(...args) {
-  args.unshift(this.commands);
-  return _[method].apply(_, args);
-});
+// mixin lodash methods
+_.each(['invokeMap', 'map', 'first', 'reduce', 'reject', 'last', 'indexOf', 'each'], (method) => {
+  return $CommandQueue.prototype[method] = function (...args) {
+    args.unshift(this.commands)
 
-module.exports = $CommandQueue;
+    return _[method].apply(_, args)
+  }
+})
+
+module.exports = $CommandQueue
