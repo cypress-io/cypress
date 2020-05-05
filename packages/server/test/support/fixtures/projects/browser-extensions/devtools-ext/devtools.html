@@ -6,7 +6,8 @@
   }
 
   // sometimes chrome.devtools is undefined, most likely bug in chromium :|
-  if (chrome.devtools.inspectedWindow) {
+  // this was causing flake in our e2e tests 
+  if (chrome.devtools) {
     addProperty()
   } else {
     setTimeout(addProperty, 1000)
