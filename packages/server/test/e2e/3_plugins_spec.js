@@ -29,17 +29,15 @@ describe('e2e plugins', function () {
     })
   })
 
-  // NOTE: skipping this test for now since it's flaky. the fix requires a
-  // deeper dive into the error handling of run mode, which will take time.
-  // better to skip this for now so it doesn't hang up other work
-  it.skip('fails when there is an async error at the root', function () {
-    return e2e.exec(this, {
-      spec: 'app_spec.js',
-      project: pluginsRootAsyncError,
-      sanitizeScreenshotDimensions: true,
-      snapshot: true,
-      expectedExitCode: 1,
-    })
+  e2e.it('fails when there is an async error at the root', {
+    browser: 'chrome',
+    spec: 'app_spec.js',
+    project: pluginsRootAsyncError,
+    snapshot: true,
+    expectedExitCode: 1,
+    config: {
+      video: false,
+    },
   })
 
   it('fails when there is an async error inside an event handler', function () {
