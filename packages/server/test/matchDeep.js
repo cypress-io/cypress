@@ -47,6 +47,8 @@ const registerInMocha = () => {
         }
       }
 
+      e.message = `Snapshot failed to match\n${e.message}`
+
       throw e
     }
   }

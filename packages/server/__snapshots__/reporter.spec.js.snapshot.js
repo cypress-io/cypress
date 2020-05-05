@@ -91,11 +91,11 @@ exports['fail in [afterEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 57}"
+    "{Object 60}"
   ],
   [
     "fail",
-    "{Object 57}",
+    "{Object 60}",
     "{Object 6}"
   ],
   [
@@ -127,7 +127,8 @@ exports['fail in [afterEach] stdout'] = `
   1 passing 
   1 failing
 
-  1) suite 1 "after each" hook for "test 1":
+  1) suite 1
+       "after each" hook for "test 1":
      
   
 
@@ -217,11 +218,11 @@ exports['fail in [beforeEach] runner emit'] = [
   ],
   [
     "hook",
-    "{Object 54}"
+    "{Object 57}"
   ],
   [
     "fail",
-    "{Object 54}",
+    "{Object 57}",
     "{Object 6}"
   ],
   [
@@ -252,7 +253,8 @@ exports['fail in [beforeEach] stdout'] = `
   0 passing 
   1 failing
 
-  1) suite 1 "before each" hook for "test 1":
+  1) suite 1
+       "before each" hook for "test 1":
      
   
 
