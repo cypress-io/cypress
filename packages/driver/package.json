@@ -40,7 +40,7 @@
     "errorhandler": "1.5.1",
     "eventemitter2": "4.1.2",
     "express": "4.16.4",
-    "jquery": "3.1.1",
+    "jquery": "3.5.0",
     "jquery.scrollto": "2.1.2",
     "js-cookie": "2.2.1",
     "jsdom": "14.1.0",
