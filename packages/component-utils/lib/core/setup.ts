@@ -4,6 +4,7 @@ import { getRoot, getDocument } from './util/dom'
 import { injectStylesBeforeElement } from './util/styles'
 
 function checkMountModeEnabled () {
+  // @ts-ignore
   if (Cypress.spec.specType !== 'component') {
     throw new Error(
       `In order to use mount or unmount functions please place the spec in component folder`,

@@ -41,13 +41,19 @@ export interface MountHook { (componentTestInstance: ComponentTestInstance): any
 
 interface MountHooks { setup: MountHook, mount: MountHook }
 
-export type MountOptions = MountHooks & StyleOptions & {
+declare global {
+  namespace CypressComponentUtils {
+    interface MountOptionExtensions {}
+  }
+}
+
+export interface MountOptions extends CypressComponentUtils.MountOptionExtensions, MountHooks, StyleOptions {
   mountModeEnabled: boolean
   rootId: string
 
   // Namespace the framework-specific options
-  react?: any
-  vue?: any
+  // react?: any
+  // vue?: any
 }
 
 export type Component = ReactElement | VueConstructor | HTMLElement | string | unknown

@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { MountOptions, DefaultMountOptions, ComponentTestInstance } from './options'
+import { MountOptions, DefaultMountOptions } from './options'
 import { setup as _setup } from './setup'
 import { mount as _mount } from './mount'
 import { key } from './util/test'
@@ -13,11 +13,13 @@ export {
   ComponentTestInstance,
 } from './options'
 
-/**  Mount Entry point */
-export async function mount (component: any, options: MountOptions = DefaultMountOptions) {
-  options = { options, ...DefaultMountOptions } as MountOptions
+type InjectableComponent<T> = T extends infer U ? U extends { mountComponent: infer C } ? C : any : any
 
-  const componentTestInstance: ComponentTestInstance = {
+/**  Mount Entry point */
+export function mount (component: InjectableComponent<MountOptions>, options: MountOptions = DefaultMountOptions) {
+  options = { ...options, ...DefaultMountOptions }
+
+  const componentTestInstance = {
     key: key(),
     options,
     component,
@@ -26,9 +28,31 @@ export async function mount (component: any, options: MountOptions = DefaultMoun
   return _setup(componentTestInstance) // Process options, add styles
   .then((cti) => options.setup(cti)) // DOM exists, target not appended
   .then((cti) => _mount(cti)) // rootEl is available after this point
-  .then((cti) => options.mount(cti)) // target appended, mount component
+  .then((cti) => {
+    if (cti) {
+      options.mount(cti) // target appended, mount component
+    }
+  })
 }
 
+
+// Other module
+declare global {
+  namespace CypressComponentUtils {
+    interface MountOptionExtensions {
+      mountComponent: React.ReactDOM
+      react: {
+        component: boolean
+      }
+    }
+  }
+}
+
+mount({}, {
+  react: {
+    component: true
+  }
+})
 
 /** Usage Scratchpad
  * This is how a framework adapter can "hook into" setup, mount, etc...
