@@ -1,107 +1,138 @@
-_ = require("lodash")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
 
-class $Command
-  constructor: (obj = {}) ->
-    @reset()
+class $Command {
+  constructor(obj = {}) {
+    this.reset();
 
-    @set(obj)
+    this.set(obj);
+  }
 
-  set: (key, val) ->
-    if _.isString(key)
-      obj = {}
-      obj[key] = val
-    else
-      obj = key
+  set(key, val) {
+    let obj;
+    if (_.isString(key)) {
+      obj = {};
+      obj[key] = val;
+    } else {
+      obj = key;
+    }
 
-    _.extend @attributes, obj
+    _.extend(this.attributes, obj);
 
-    return @
+    return this;
+  }
 
-  finishLogs: ->
-    ## finish each of the logs we have
-    _.invokeMap @get("logs"), "finish"
+  finishLogs() {
+    //# finish each of the logs we have
+    return _.invokeMap(this.get("logs"), "finish");
+  }
 
-  log: (log) ->
-    ## always set the chainerId of the log to ourselves
-    ## so it can be queried on later
-    log.set("chainerId", @get("chainerId"))
+  log(log) {
+    //# always set the chainerId of the log to ourselves
+    //# so it can be queried on later
+    log.set("chainerId", this.get("chainerId"));
 
-    @get("logs").push(log)
+    this.get("logs").push(log);
 
-    return @
+    return this;
+  }
 
-  getLastLog: ->
-    ## return the last non-event log
-    logs = @get("logs")
-    if logs.length
-      for log in logs by -1
-        if log.get("event") is false
-          return log
-    else
-      undefined
+  getLastLog() {
+    //# return the last non-event log
+    const logs = this.get("logs");
+    if (logs.length) {
+      for (let i = logs.length - 1; i >= 0; i--) {
+        const log = logs[i];
+        if (log.get("event") === false) {
+          return log;
+        }
+      }
+    } else {
+      return undefined;
+    }
+  }
 
-  hasPreviouslyLinkedCommand: ->
-    prev = @get("prev")
+  hasPreviouslyLinkedCommand() {
+    const prev = this.get("prev");
 
-    !!(prev and prev.get("chainerId") is @get("chainerId"))
+    return !!(prev && (prev.get("chainerId") === this.get("chainerId")));
+  }
 
-  is: (str) ->
-    @get("type") is str
+  is(str) {
+    return this.get("type") === str;
+  }
 
-  get: (attr) ->
-    @attributes[attr]
+  get(attr) {
+    return this.attributes[attr];
+  }
 
-  toJSON: ->
-    @attributes
+  toJSON() {
+    return this.attributes;
+  }
 
-  _removeNonPrimitives: (args) ->
-    ## if the obj has options and
-    ## log is false, set it to true
-    for arg, i in args by -1
-      if _.isObject(arg)
-        ## filter out any properties which arent primitives
-        ## to prevent accidental mutations
-        opts = _.omitBy(arg, _.isObject)
+  _removeNonPrimitives(args) {
+    //# if the obj has options and
+    //# log is false, set it to true
+    for (let i = args.length - 1; i >= 0; i--) {
+      const arg = args[i];
+      if (_.isObject(arg)) {
+        //# filter out any properties which arent primitives
+        //# to prevent accidental mutations
+        const opts = _.omitBy(arg, _.isObject);
 
-        ## force command to log
-        opts.log = true
+        //# force command to log
+        opts.log = true;
 
-        args[i] = opts
-        return
+        args[i] = opts;
+        return;
+      }
+    }
+  }
 
-  skip: ->
-    @set("skip", true)
+  skip() {
+    return this.set("skip", true);
+  }
 
-  stringify: ->
-    {name, args} = @attributes
+  stringify() {
+    let {name, args} = this.attributes;
 
-    args = _.reduce args, (memo, arg) ->
-      arg = if _.isString(arg) then _.truncate(arg, { length: 20 }) else "..."
-      memo.push(arg)
-      memo
-    , []
+    args = _.reduce(args, function(memo, arg) {
+      arg = _.isString(arg) ? _.truncate(arg, { length: 20 }) : "...";
+      memo.push(arg);
+      return memo;
+    }
+    , []);
 
-    args = args.join(", ")
+    args = args.join(", ");
 
-    "cy.#{name}('#{args}')"
+    return `cy.${name}('${args}')`;
+  }
 
-  clone: ->
-    @_removeNonPrimitives @get("args")
-    $Command.create _.clone(@attributes)
+  clone() {
+    this._removeNonPrimitives(this.get("args"));
+    return $Command.create(_.clone(this.attributes));
+  }
 
-  reset: ->
-    @attributes = {}
-    @attributes.logs = []
+  reset() {
+    this.attributes = {};
+    this.attributes.logs = [];
 
-    return @
+    return this;
+  }
 
-  @create = (obj) ->
-    new $Command(obj)
+  static create(obj) {
+    return new $Command(obj);
+  }
+}
 
-## mixin lodash methods
-_.each ["pick"], (method) ->
-  $Command.prototype[method] = (args...) ->
-    args.unshift(@attributes)
-    _[method].apply(_, args)
+//# mixin lodash methods
+_.each(["pick"], method => $Command.prototype[method] = function(...args) {
+  args.unshift(this.attributes);
+  return _[method].apply(_, args);
+});
 
-module.exports = $Command
+module.exports = $Command;
