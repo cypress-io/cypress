@@ -382,11 +382,11 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-    [stack trace lines]
+      [stack trace lines]
   
   From Node.js Internals:
     Error: socket hang up
-    [stack trace lines]
+      [stack trace lines]
     
 
   2) network error handling
@@ -418,11 +418,11 @@ Common situations why this would fail:
   - you have weird network configuration settings on your computer
 
 https://on.cypress.io/request
-    [stack trace lines]
+      [stack trace lines]
   
   From Node.js Internals:
     RequestError: Error: socket hang up
-    [stack trace lines]
+      [stack trace lines]
     
 
 
