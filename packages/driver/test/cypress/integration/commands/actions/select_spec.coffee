@@ -118,15 +118,13 @@ describe "src/cy/commands/actions/select", ->
       cy.get("#select-maps").select("de_dust2", {force: true})
 
     it "can forcibly click when select is disabled", () ->
-        cy.get("select[name=disabled]").should(($select) -> 
+        cy.get("select[name=disabled]")
           ## default select value
-          expect($select.val()).to.eq("foo")
-        )
+        .invoke("val").should("eq", "foo")
 
         cy.get("select[name=disabled]")
-        .select("bar", { force: true }).should(($select) -> 
-          expect($select.val()).to.eq("bar")
-        )
+        .select("bar", { force: true })
+        .invoke("val").should("eq", "bar")
 
     it "retries until <option> can be selected", ->
       option = cy.$$("<option>foo</option>")
@@ -143,6 +141,7 @@ describe "src/cy/commands/actions/select", ->
         select.prop("disabled", false)
 
       cy.get("select[name=disabled]").select("foo")
+        .invoke("val").should("eq", "foo")
 
     it "retries until <optgroup> is no longer disabled", ->
       select = cy.$$("select[name=optgroup-disabled]")
@@ -151,6 +150,7 @@ describe "src/cy/commands/actions/select", ->
         select.find("optgroup").prop("disabled", false)
 
       cy.get("select[name=optgroup-disabled]").select("bar")
+        .invoke("val").should("eq", "bar")
 
     it "retries until <options> are no longer disabled", ->
       select = cy.$$("select[name=opt-disabled]")
@@ -159,6 +159,7 @@ describe "src/cy/commands/actions/select", ->
         select.find("option").prop("disabled", false)
 
       cy.get("select[name=opt-disabled]").select("bar")
+        .invoke("val").should("eq", "bar")
 
     describe "assertion verification", ->
       beforeEach ->
