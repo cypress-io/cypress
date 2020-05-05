@@ -46,8 +46,7 @@ function inlineUrlLoadedAssets (options = {}) {
 function compileTemplate (options = {}) {
   options.resolve = options.resolve || {}
   options.resolve.alias = options.resolve.alias || {}
-  options.resolve.alias['vue$'] =
-    options.resolve.alias['vue$'] || 'vue/dist/vue.esm.js'
+  options.resolve.alias['vue$'] = 'vue/dist/vue.esm.js'
 }
 inlineUrlLoadedAssets(webpackOptions)
 preventChunking(webpackOptions)
