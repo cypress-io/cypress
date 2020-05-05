@@ -169,6 +169,7 @@ Repo | Description
 [emoji-search](https://github.com/bahmutov/emoji-search) | Quick component test for a fork of emoji-search
 [test-custom-error-boundary](https://github.com/bahmutov/test-custom-error-boundary) | Play with a component that implements error boundary
 [Jscrambler-Webpack-React](https://github.com/bahmutov/Jscrambler-Webpack-React) | Example project with its own Webpack config file
+[bahmutov/integration-tests](https://github.com/bahmutov/integration-tests) | Example based on blog post [React Integration Testing: Greater Coverage, Fewer Tests](https://css-tricks.com/react-integration-testing-greater-coverage-fewer-tests/)
 <!-- prettier-ignore-end -->
 
 To find more examples, see GitHub topic [cypress-react-unit-test-example](https://github.com/topics/cypress-react-unit-test-example)
