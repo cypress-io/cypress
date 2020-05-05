@@ -17,6 +17,9 @@ workflows:
             - run:
                 name: Linting code 🧹
                 command: npm run lint
+            - run:
+                name: Build folder 🏗
+                command: npm run build
 
       - cypress/run:
           name: Test
@@ -53,6 +56,7 @@ workflows:
           # into thinking this is NOT a pull request.
           # (under the hood the module env-ci is used to check if this is a PR)
           command: |
+            npm run build
             CIRCLE_PR_NUMBER= \
             CIRCLE_PULL_REQUEST= \
             CI_PULL_REQUEST= \
