@@ -128,26 +128,6 @@ describe "src/cy/commands/actions/select", ->
           expect($select.val()).to.eq("bar")
         )
 
-    it "can forcibly click when optgroup is disabled", () ->
-      cy.get("select[name=optgroup-disabled]").should(($select) -> 
-          ## default select value
-          expect($select.val()).to.eq("foo")
-        )
-      cy.get("select[name=optgroup-disabled]")
-      .select("bar", { force: true }).should(($select) -> 
-          expect($select.val()).to.eq("bar")
-        )
-
-    it "can forcibly click when option is disabled", () ->
-      cy.get("select[name=opt-disabled]").should(($select) -> 
-          ## default select value
-          expect($select.val()).to.eq("foo")
-        )
-      cy.get("select[name=opt-disabled]")
-      .select("bar", { force: true }).should(($select) -> 
-          expect($select.val()).to.eq("bar")
-        )
-
     it "retries until <option> can be selected", ->
       option = cy.$$("<option>foo</option>")
 
