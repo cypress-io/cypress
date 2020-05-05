@@ -575,6 +575,7 @@ jobs:
 
   "runner-integration-tests-chrome":
     <<: *defaults
+    parallelism: 2
     steps:
       - attach_workspace:
           at: ~/
@@ -596,6 +597,7 @@ jobs:
 
   "runner-integration-tests-firefox":
     <<: *defaults
+    parallelism: 2
     steps:
       - attach_workspace:
           at: ~/
