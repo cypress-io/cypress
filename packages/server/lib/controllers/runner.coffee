@@ -43,7 +43,9 @@ module.exports = {
     ## https://github.com/cypress-io/cypress/issues/4952
     base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
 
-    res.render(runner.getPathToIndex(), {
+    runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH or runner.getPathToIndex()
+
+    res.render(runnerPath, {
       base64Config
       projectName: config.projectName
     })

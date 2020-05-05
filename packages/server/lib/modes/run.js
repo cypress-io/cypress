@@ -995,7 +995,7 @@ module.exports = {
 
   waitForBrowserToConnect (options = {}) {
     const { project, socketId, timeout, onError } = options
-
+    const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
 
     const wait = () => {
@@ -1011,7 +1011,7 @@ module.exports = {
           debug('browser launched')
         }),
       )
-      .timeout(timeout || 60000)
+      .timeout(browserTimeout)
       .catch(Promise.TimeoutError, (err) => {
         attempts += 1
 
@@ -1329,7 +1329,7 @@ module.exports = {
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
-    options.onError = (err) => {
+    const onError = options.onError = (err) => {
       this.exitEarly(err)
     }
 
@@ -1394,6 +1394,7 @@ module.exports = {
               specPattern,
               socketId,
               parallel,
+              onError,
               browser,
               project,
               runUrl,
