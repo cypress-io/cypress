@@ -4,7 +4,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build-prod": "tsc --project .",
+    "build-prod": "tsc --noResolve --project .",
+    "watch": "tsc -w --project .",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn test-unit",
     "test-unit": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
@@ -12,7 +13,9 @@
   "dependencies": {},
   "devDependencies": {
     "@cypress/sinon-chai": "2.9.0",
-    "typescript": "3.5.3"
+    "typescript": "3.5.3",
+    "@types/react": "^16.9.34",
+    "vue": "^2.6.11"
   },
   "files": [
     "lib"

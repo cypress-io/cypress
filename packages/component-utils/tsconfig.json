@@ -6,6 +6,13 @@
     "lib/**/*.ts"
   ],
   "files": [
-    "./../ts/index.d.ts"
-  ]
+//    ""
+//    "./../ts/index.d.ts"
+  ],
+  "types": [ "cypress" ], /* Type declaration files to be included in compilation. */
+  "compilerOptions": {
+    "lib":[
+      "dom"
+    ]
+  }
 }
