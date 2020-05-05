@@ -1,4 +1,4 @@
-test/unit/*
+test/unit/* test/integration/*
 -r @packages/ts/register
 --timeout 10000
 --recursive

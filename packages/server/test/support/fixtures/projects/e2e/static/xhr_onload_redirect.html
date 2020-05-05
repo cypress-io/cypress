@@ -11,7 +11,6 @@
     const x = new XMLHttpRequest()
     x.open('GET', '/cypress.json')
     x.onload = () => {
-      // TODO: without a semicolon, this will merge with line 16 and result in console.log()() not a function
       location.href = 'index.html';
       console.log(location);
     }

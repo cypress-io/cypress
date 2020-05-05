@@ -44,32 +44,6 @@ function resolveWindowReference (accessedObject: ExpressionKind, prop: string, m
 }
 
 /**
- * If a potentially-dangerous identifier is recognized, it is possible that it has been
- * overridden in the local scope. This function generates a ternary that checks if
- * `identifierName === globalThis['identifierName']` is true before using `resolveWindowReference`.
- * @param prop
- */
-function closureDetectionTernary (identifierName: string) {
-  // (identifierName === globalThis['identifierName'] ? MATCH : PROP)
-
-  return b.parenthesizedExpression(
-    b.conditionalExpression(
-      b.binaryExpression(
-        '===',
-        b.identifier(identifierName),
-        b.memberExpression(
-          globalIdentifier,
-          b.stringLiteral(identifierName),
-          true,
-        ),
-      ),
-      resolveWindowReference(globalIdentifier, identifierName),
-      b.identifier(identifierName),
-    ),
-  )
-}
-
-/**
  * Given an Identifier or a Literal, return a property name that should use `resolveWindowReference`.
  * @param node
  */
@@ -114,7 +88,7 @@ export const jsRules: Visitor<{}> = {
 
     return false
   },
-  // replace lone identifiers like `top`, `parent`, with a closureDetectionTernary
+  // replace lone identifiers like `top`, `parent`, with resolveWindowReference
   visitIdentifier (path) {
     const { node } = path
 
@@ -145,8 +119,8 @@ export const jsRules: Visitor<{}> = {
       }
     }
 
-    if (['parent', 'top', 'location', 'frames'].includes(node.name)) {
-      path.replace(closureDetectionTernary(node.name))
+    if (['parent', 'top', 'location', 'frames'].includes(node.name) && !path.scope.declares(node.name)) {
+      path.replace(resolveWindowReference(globalIdentifier, node.name))
 
       return false
     }

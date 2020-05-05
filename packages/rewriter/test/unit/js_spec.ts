@@ -7,7 +7,6 @@ import * as sourceMaps from '../../lib/util/source-maps'
 import rp from '@cypress/request-promise'
 import snapshot from 'snap-shot-it'
 import fs from 'fs'
-import nock from 'nock'
 
 const testSource = fs.readFileSync(`${__dirname}/../fixtures/test.js`).toString()
 const testSourceMap = fs.readFileSync(`${__dirname}/../fixtures/test.js.map`).toString()
@@ -50,11 +49,11 @@ describe('lib/js', function () {
           ],
           [
             'if (top != self) run()',
-            `if ((top === globalThis['top'] ? ${match('globalThis', 'top')} : top) != self) run()`,
+            `if (${match('globalThis', 'top')} != self) run()`,
           ],
           [
             'if (window != top) run()',
-            `if (window != (top === globalThis['top'] ? ${match('globalThis', 'top')} : top)) run()`,
+            `if (window != ${match('globalThis', 'top')}) run()`,
           ],
           [
             'if (top.location != self.location) run()',
@@ -99,11 +98,20 @@ describe('lib/js', function () {
             `(function top() { ${match('window', 'top')} }); (function parent(...top) { ${match('window', 'top')} })`,
           ],
           [
-            'const top = top; const parent = parent;',
-            `const top = (top === globalThis['top'] ? ${match('globalThis', 'top')} : top); const parent = (parent === globalThis['parent'] ? ${match('globalThis', 'parent')} : parent);`,
+            'top += 4',
           ],
           [
-            'top += 4',
+            // test that arguments are not replaced
+            'function foo(location) { location.href = \'bar\' }',
+          ],
+          [
+            // test that global variables are replaced
+            'function foo(notLocation) { location.href = \'bar\' }',
+            `function foo(notLocation) { ${match('globalThis', 'location')}.href = \'bar\' }`,
+          ],
+          [
+            // test that scoped declarations are not replaced
+            'let location = "foo"; location.href = \'bar\'',
           ],
         ]
         .forEach(([string, expected]) => {
@@ -292,18 +300,6 @@ describe('lib/js', function () {
           done()
 
           return ''
-        })
-      })
-
-      // TODO: implement serving extenal sourcemaps
-      context.skip('external sourcemaps', function () {
-        beforeEach(() => {
-          nock.disableNetConnect()
-        })
-
-        afterEach(() => {
-          nock.restore()
-          nock.enableNetConnect()
         })
       })
     })

@@ -23,13 +23,14 @@
     if (self !== parent) run()
   })()
 
-  ;(function() {
-    const { top, parent, location } = window
+  // TODO: replace object pattern destructuring
+  // ;(function() {
+  //   const { top, parent, location } = window
 
-    if (location != top.location) run()
-    if (parent != top.parent) run()
-    if (top != globalThis.top) run()
-  })()
+  //   if (location != top.location) run()
+  //   if (parent != top.parent) run()
+  //   if (top != globalThis.top) run()
+  // })()
 
   if (top != self) run()
   if (top!=self) run()
