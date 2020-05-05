@@ -513,27 +513,22 @@ describe('polyfill programmatic blur events', () => {
 describe('intercept blur methods correctly', () => {
   beforeEach(() => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
-      // cy.$$('input:first').focus()
-      // cy.$$('body').focus()
       top.focus()
-      cy.state('document').onselectionchange = cy.stub()
-      .as('selectionchange')
-
-      let called = false
-
-      cy.get('@selectionchange').then((v) => {
-        v.callsFake(function () {
-          if (called) return
-
-          called = true
-          Cypress.log({ message: 'reset mock', state: 'passed' })
-          setImmediate(() => v.reset())
-        })
-      })
 
       cy.$$('input:first')[0].focus()
+      cy.document().then((doc) => {
+        // we need to wait for initial selectionchange event on input:first
+        // which sets up the state for the tests
+        // NOTE: initial selectionchange event does not fire in firefox
+        if (!Cypress.isBrowser({ family: 'firefox' })) {
+          return new Promise((resolve) => doc.onselectionchange = resolve)
+        }
+      })
 
-      cy.wait(10).get('@selectionchange').should('not.be.called')
+      cy.document().then((doc) => {
+        doc.onselectionchange = cy.stub()
+        .as('selectionchange')
+      })
     })
   })
 
