@@ -2458,6 +2458,8 @@ declare namespace Cypress {
     experimentalGetCookiesSameSite: boolean
   }
 
+  type UserConfigOptions = Partial<ConfigOptions>
+
   interface PluginConfigOptions extends ConfigOptions {
     /**
     * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
