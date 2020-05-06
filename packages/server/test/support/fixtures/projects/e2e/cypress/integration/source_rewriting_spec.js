@@ -16,9 +16,39 @@ describe('source rewriting spec', function () {
       cy.location('pathname').should('eq', '/static/index.html')
     })
 
-    it('can relative redirect in a settimeout', function () {
-      cy.visit('/static/settimeout_redirect.html')
-      cy.location('pathname').should('eq', '/static/index.html')
+    context('it can relative redirect in a settimeout', function () {
+      it('with location.href', function () {
+        cy.visit('/static/settimeout_redirect_href.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with location.replace()', function () {
+        cy.visit('/static/settimeout_redirect_replace.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with location.assign()', function () {
+        cy.visit('/static/settimeout_redirect_assign.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with location = ...', function () {
+        cy.visit('/static/settimeout_redirect_set_location.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with location.search', function () {
+        cy.visit('/static/settimeout_redirect_search.html')
+        cy.location().should('include', {
+          pathname: '/static/settimeout_redirect_search.html',
+          search: '?foo',
+        })
+      })
+
+      it('with location.pathname', function () {
+        cy.visit('/static/settimeout_redirect_pathname.html')
+        cy.location('pathname').should('eq', '/index.html')
+      })
     })
 
     it('can relative redirect in a onclick handler', function () {

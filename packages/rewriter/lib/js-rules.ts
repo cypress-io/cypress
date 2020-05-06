@@ -44,6 +44,28 @@ function resolveWindowReference (accessedObject: ExpressionKind, prop: string, m
 }
 
 /**
+ * Generate a CallExpression for Cypress.resolveLocationReference
+ * @param accessedObject object being accessed
+ * @param prop name of property being accessed
+ * @param maybeVal if an assignment is being made, this is the RHS of the assignment
+ */
+function resolveLocationReference () {
+  return b.callExpression(
+    b.memberExpression(
+      b.memberExpression(
+        b.memberExpression(
+          globalIdentifier,
+          b.identifier('top'),
+        ),
+        b.identifier('Cypress'),
+      ),
+      b.identifier('resolveLocationReference'),
+    ),
+    [globalIdentifier],
+  )
+}
+
+/**
  * Given an Identifier or a Literal, return a property name that should use `resolveWindowReference`.
  * @param node
  */
@@ -117,6 +139,12 @@ export const jsRules: Visitor<{}> = {
       ) {
         return false
       }
+    }
+
+    if (node.name === 'location') {
+      path.replace(resolveLocationReference())
+
+      return false
     }
 
     if (['parent', 'top', 'location', 'frames'].includes(node.name) && !path.scope.declares(node.name)) {

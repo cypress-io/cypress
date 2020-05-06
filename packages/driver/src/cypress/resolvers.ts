@@ -36,6 +36,10 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
       return (contentWindow[accessedProp] = value)
     }
 
+    if (accessedProp === 'location') {
+      return resolveLocationReference(contentWindow)
+    }
+
     return contentWindow[accessedProp]
   }
 
@@ -65,4 +69,62 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
 
     return actualValue
   }
+
+  throw new Error('unhandled')
+}
+
+/**
+ * Fix a bug that can cause `window.location.href = 'relative-url'` to resolve to the wrong URL.
+ */
+export function resolveLocationReference (currentWindow: Window) {
+  if (currentWindow.__cypressFakeLocation) {
+    return currentWindow.__cypressFakeLocation
+  }
+
+  function _resolveHref (href: string) {
+    const a = currentWindow.document.createElement('a')
+
+    a.href = href
+
+    // a.href will be resolved into the fully-qualified URL
+    return a.href
+  }
+
+  function assign (href: string) {
+    return currentWindow.location.href = _resolveHref(href)
+  }
+
+  function replace (href: string) {
+    return currentWindow.location.replace(_resolveHref(href))
+  }
+
+  const locationKeys = Object.keys(currentWindow.location)
+
+  const fakeLocation = _.reduce(locationKeys, (acc, cur) => {
+    // set a dummy value, the proxy will handle sets/gets
+    acc[cur] = null
+
+    return acc
+  }, {})
+
+  return currentWindow.__cypressFakeLocation = new Proxy(fakeLocation, {
+    get (target, prop, _receiver) {
+      if (prop === 'assign') {
+        return assign
+      }
+
+      if (prop === 'replace') {
+        return replace
+      }
+
+      return currentWindow.location[prop]
+    },
+    set (obj, prop, value) {
+      if (prop === 'href') {
+        return assign(value)
+      }
+
+      return currentWindow.location[prop] = value
+    },
+  })
 }
